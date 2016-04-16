@@ -4831,11 +4831,13 @@ out strError);
         //      strBindingID    要绑定的号码。格式如 email:xxxx 或 weixinid:xxxxx
         //      strStyle    风格。multiple/single。默认 single
         //                  multiple 表示允许多次绑定同一类型号码；sigle 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除
+        //                  如果包含 null_password，表示不用读者密码，strPassword 参数无效。但这个功能只能被工作人员使用
         //      strResultTypeList   结果类型数组 xml/html/text/calendar/advancexml/recpaths/summary
         //              其中calendar表示获得读者所关联的日历名；advancexml表示经过运算了的提供了丰富附加信息的xml，例如具有超期和停借期附加信息
         //              advancexml_borrow_bibliosummary/advancexml_overdue_bibliosummary/advancexml_history_bibliosummary
         //      results 返回操作成功后的读者记录
         // return:
+        //      -2  权限不够，操作被拒绝
         //      -1  出错
         //      0   因为条件不具备功能没有成功执行
         //      1   功能成功执行
@@ -4853,6 +4855,18 @@ out strError);
             strError = "";
             results = null;
 
+            if (sessioninfo.UserType == "reader")
+            {
+
+            }
+            else
+            {
+                // 工作人员如果权限足够，可以不输入读者密码。这一般用在解除绑定的时候，假如调用者能确认读者(已绑定号码的)身份。而绑定时候建议不要这样用，因为读者密码还没有验证过，其身份不明。除非工作人员经过验证证件确信就是这个读者。
+                // 但，一旦没有读者密码，在登录名命中多个账户的时候，就失去了一重选择的机会
+                if (StringUtil.IsInList("null_password", strStyle))
+                    strPassword = null;
+            }
+
             // 检查 strBindID 参数
             {
                 if (strBindingID.IndexOf(",") != -1)
@@ -4866,7 +4880,7 @@ out strError);
                 if (string.IsNullOrEmpty(strLeft)
                     || string.IsNullOrEmpty(strRight))
                 {
-                    strError = "strBindID 参数值 '"+strBindingID+"' 不合法。应为 xxxx:xxxx 形态";
+                    strError = "strBindID 参数值 '" + strBindingID + "' 不合法。应为 xxxx:xxxx 形态";
                     return -1;
                 }
             }
@@ -4926,7 +4940,7 @@ out strError);
 
             if (nRet == 0)
             {
-                strError = "帐户 '"+strQueryWord+"' 不存在或密码不正确";
+                strError = "帐户 '" + strQueryWord + "' 不存在或密码不正确";
                 return -1;
             }
 
@@ -4946,9 +4960,20 @@ out strError);
                 return -1;
             }
 
+            // 对读者身份的附加判断
+            if (sessioninfo.UserType == "reader")
+            {
+                string strBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+                if (sessioninfo.Account.Barcode != strBarcode)
+                {
+                    strError = "绑定号码的操作被拒绝。作为读者不能对其他读者的记录进行操作";
+                    return -2;
+                }
+            }
+
             bool bChanged = false;
 
-            bool bMultiple = strStyle == "multiple";
+            bool bMultiple = StringUtil.IsInList("multiple", strStyle); // 若 mutilple 和 single 都包含了，则 multiple 有压倒优势
 
             // 修改读者记录的 email 字段
             string strEmail = DomUtil.GetElementText(readerdom.DocumentElement, "email");
@@ -5078,7 +5103,7 @@ out strError);
                 // 查重
                 if (FindBindingString(strText, strBinding) != -1)
                     return strText;
-                return strText + "," + strBinding; 
+                return strText + "," + strBinding;
             }
         }
 

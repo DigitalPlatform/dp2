@@ -7722,9 +7722,21 @@ namespace dp2Library
 
             try
             {
+
+                // 权限字符串
+                if (sessioninfo.RightsOriginList.IsInList("bindpatron") == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "绑定号码的操作被拒绝。不具备 bindpatron 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+
                 string strError = "";
                 // 不需要登录
                 // return:
+                //      -2  权限不够，操作被拒绝
                 //      -1  出错
                 //      0   因为条件不具备功能没有成功执行
                 //      1   功能成功执行
@@ -7738,7 +7750,13 @@ namespace dp2Library
                     strResultTypeList,
                     out results,
                     out strError);
-                result.Value = nRet;
+                if (nRet == -2)
+                {
+                    result.Value = -1;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                }
+                else
+                    result.Value = nRet;
                 result.ErrorInfo = strError;
                 return result;
             }
