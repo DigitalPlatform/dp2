@@ -1077,7 +1077,7 @@ out strError);
 
                 if (info == null)
                 {
-                    strError = "ParsePath() (strPath='"+strPath+"') error, info == null";
+                    strError = "ParsePath() (strPath='" + strPath + "') error, info == null";
                     return -1;
                 }
 

@@ -16,6 +16,7 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        // 注: 和 GetStyleParam() 函数相似
         // parameters:
         //      strPrefix 前缀。例如 "getreaderinfo"
         //      strDelimiter    前缀和后面参数的分隔符号。例如 ":"

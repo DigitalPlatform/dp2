@@ -2749,7 +2749,7 @@ namespace dp2Library
         // rights:
         //      没有限制
         // return:
-        //      result.Value    -1 出错；>=0 结果集内记录的总数(注意，并不是本批返回的记录数)
+        //      result.Value    -1 出错；0 成功
         public LibraryServerResult GetBrowseRecords(
             string[] paths,
             string strBrowseInfoStyle,
@@ -7716,25 +7716,23 @@ namespace dp2Library
         {
             results = null;
 
-            LibraryServerResult result = this.PrepareEnvironment("BindingPatron", true);
+            LibraryServerResult result = this.PrepareEnvironment("BindingPatron", true, true, true);
             if (result.Value == -1)
                 return result;
 
             try
             {
-
                 // 权限字符串
                 if (sessioninfo.RightsOriginList.IsInList("bindpatron") == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "绑定号码的操作被拒绝。不具备 bindpatron 权限。";
+                    // result.ErrorInfo = "绑定号码的操作被拒绝。当前用户 '"+sessioninfo.UserID+"' 不具备 bindpatron 权限。";
+                    result.ErrorInfo = "绑定号码的操作被拒绝。当前用户不具备 bindpatron 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
 
-
                 string strError = "";
-                // 不需要登录
                 // return:
                 //      -2  权限不够，操作被拒绝
                 //      -1  出错
