@@ -3810,15 +3810,26 @@ out strError);
 
             {
                 if (readerdom != null)
+                {
                     DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+                    DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
+                }
                 if (string.IsNullOrEmpty(strXml) == false)
                 {
-                    nRet = RemovePassword(ref strXml, out strError);
-                    if (nRet == -1)
+                    XmlDocument temp = new XmlDocument();
+                    try
                     {
-                        strError = "从读者记录中去除 password 阶段出错: " + strError;
+                        temp.LoadXml(strXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "读者记录 XML 装入 DOM 时出错:" + ex.Message;
                         goto ERROR1;
                     }
+
+                    DomUtil.DeleteElement(temp.DocumentElement, "password");
+                    DomUtil.SetElementText(temp.DocumentElement, "libraryCode", strLibraryCode);
+                    strXml = temp.DocumentElement.OuterXml;
                 }
             }
 

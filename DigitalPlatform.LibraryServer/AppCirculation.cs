@@ -5897,7 +5897,8 @@ start_time_1,
         }
 
         // 从读者记录中删除 password 元素
-        static int RemovePassword(ref string strReaderXml, out string strError)
+        static int RemovePassword(ref string strReaderXml, 
+            out string strError)
         {
             strError = "";
             XmlDocument readerdom = new XmlDocument();
@@ -5912,6 +5913,7 @@ start_time_1,
             }
 
             DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+            strReaderXml = readerdom.DocumentElement.OuterXml;
             return 0;
         }
 
