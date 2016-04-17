@@ -1145,7 +1145,7 @@ out strError);
                     {
                         Result result = new Result();
                         result.Value = -1;
-                        result.ErrorCode = KernelApplication.Ret2ErrorCode(nRet);
+                        result.ErrorCode = KernelApplication.Ret2ErrorCode((int)lRet);
                         result.ErrorString = strError;
                         record.RecordBody.Result = result;
                         // return (int)lRet;
@@ -1187,7 +1187,7 @@ out strError);
                     {
                         Result result = new Result();
                         result.Value = -1;
-                        result.ErrorCode = KernelApplication.Ret2ErrorCode(nRet);
+                        result.ErrorCode = KernelApplication.Ret2ErrorCode((int)lRet);
                         result.ErrorString = strError;
                         record.RecordBody.Result = result;
                         // return (int)lRet;
