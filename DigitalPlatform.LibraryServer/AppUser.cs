@@ -48,7 +48,7 @@ namespace DigitalPlatform.LibraryServer
             // string[] segments = strAccessString.Split(new char[] {';'});
             List<string> segments = StringUtil.SplitString(strAccessString,
                 ";",
-                new string [] {"()"},
+                new string[] { "()" },
                 StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < segments.Count; i++)
             {
@@ -82,7 +82,7 @@ namespace DigitalPlatform.LibraryServer
                     new string[] { "()" },
                     StringSplitOptions.RemoveEmptyEntries);
 
-                for (int j = 0; j<sections.Count; j++)
+                for (int j = 0; j < sections.Count; j++)
                 {
                     string strOperList = "";
                     string strRightsList = "";
@@ -342,7 +342,6 @@ namespace DigitalPlatform.LibraryServer
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
-
                 // 查重
                 nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts/account[@name='" + strUserName + "']");
                 if (nodeAccount != null)
@@ -708,7 +707,7 @@ namespace DigitalPlatform.LibraryServer
                     string strPassword = Cryptography.Encrypt(userinfo.Password,
                         EncryptKey);
                     DomUtil.SetAttr(nodeAccount, "password", strPassword);
-#endif 
+#endif
                     string strHashed = "";
                     nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out strHashed, out strError);
                     if (nRet == -1)
@@ -988,7 +987,7 @@ namespace DigitalPlatform.LibraryServer
         {
             if (strAction == "new")
             {
-                return this.CreateUser(strLibraryCodeList, 
+                return this.CreateUser(strLibraryCodeList,
                     info.UserName,
                     strOperator,
                     info,
@@ -998,7 +997,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (strAction == "change")
             {
-                return this.ChangeUser(strLibraryCodeList, 
+                return this.ChangeUser(strLibraryCodeList,
                     info.UserName,
                     strOperator,
                     info,
@@ -1008,7 +1007,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (strAction == "resetpassword")
             {
-                return this.ResetUserPassword(strLibraryCodeList, 
+                return this.ResetUserPassword(strLibraryCodeList,
                     info.UserName,
                     strOperator,
                     info.Password,
@@ -1018,7 +1017,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (strAction == "delete")
             {
-                return this.DeleteUser(strLibraryCodeList, 
+                return this.DeleteUser(strLibraryCodeList,
                     info.UserName,
                     strOperator,
                     strClientAddress,

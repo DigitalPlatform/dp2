@@ -2749,7 +2749,7 @@ namespace dp2Library
         // rights:
         //      没有限制
         // return:
-        //      result.Value    -1 出错；>=0 结果集内记录的总数(注意，并不是本批返回的记录数)
+        //      result.Value    -1 出错；0 成功
         public LibraryServerResult GetBrowseRecords(
             string[] paths,
             string strBrowseInfoStyle,
@@ -7716,29 +7716,58 @@ namespace dp2Library
         {
             results = null;
 
-            LibraryServerResult result = this.PrepareEnvironment("BindingPatron", false);
+            LibraryServerResult result = this.PrepareEnvironment("BindingPatron", true, true, true);
             if (result.Value == -1)
                 return result;
 
-            string strError = "";
-            // 不需要登录
-            // return:
-            //      -1  出错
-            //      0   因为条件不具备功能没有成功执行
-            //      1   功能成功执行
-            int nRet = app.BindPatron(
-                sessioninfo,
-                strAction,
-                strQueryWord,
-                strPassword,
-                strBindingID,
-                strStyle,
-                strResultTypeList,
-                out results,
-                out strError);
-            result.Value = nRet;
-            result.ErrorInfo = strError;
-            return result;
+            try
+            {
+                // 权限字符串
+                if (sessioninfo.RightsOriginList.IsInList("bindpatron") == false)
+                {
+                    result.Value = -1;
+                    // result.ErrorInfo = "绑定号码的操作被拒绝。当前用户 '"+sessioninfo.UserID+"' 不具备 bindpatron 权限。";
+                    result.ErrorInfo = "绑定号码的操作被拒绝。当前用户不具备 bindpatron 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                string strError = "";
+                // return:
+                //      -2  权限不够，操作被拒绝
+                //      -1  出错
+                //      0   因为条件不具备功能没有成功执行
+                //      1   功能成功执行
+                int nRet = app.BindPatron(
+                    sessioninfo,
+                    strAction,
+                    strQueryWord,
+                    strPassword,
+                    strBindingID,
+                    strStyle,
+                    strResultTypeList,
+                    out results,
+                    out strError);
+                if (nRet == -2)
+                {
+                    result.Value = -1;
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                }
+                else
+                    result.Value = nRet;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library BindPatron() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
         }
 
         // 获得值列表
@@ -7860,6 +7889,9 @@ namespace dp2Library
                 }
                 else
                 {
+                    // 从 strStyle 里移走 supervisor，避免前端通过本 API 看到日志记录中读者记录的 password 元素
+                    StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
+
                     // return:
                     //      -1  error
                     //      0   file not found
@@ -7898,7 +7930,6 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
-
         }
 
         // 获得日志记录
@@ -7983,6 +8014,9 @@ namespace dp2Library
                         result.ErrorInfo = "访问日志尚未启用";
                         return result;
                     }
+
+                    // 从 strStyle 里移走 supervisor，避免前端通过本 API 看到日志记录中读者记录的 password 元素
+                    StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
 
                     OperLogInfo[] records = null;
                     nRet = app.AccessLogDatabase.GetOperLogs(
@@ -11273,7 +11307,7 @@ namespace dp2Library
                 if (StringUtil.IsInList("repairborrowinfo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "修复借还信息的操作被拒绝。不具备repairborrowinfo权限。";
+                    result.ErrorInfo = "修复借还信息的操作被拒绝。不具备 repairborrowinfo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

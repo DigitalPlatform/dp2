@@ -13,7 +13,6 @@ using System.Globalization;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
-//using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 
 namespace DigitalPlatform.OPAC.Web
@@ -427,7 +426,7 @@ namespace DigitalPlatform.OPAC.Web
             get
             {
                 OpacApplication app = (OpacApplication)this.Page.Application["app"];
-                bool bValue = true;
+                bool bValue = false;    // 2016/4/12 修改
                 XmlNode node = app.WebUiDom.DocumentElement.SelectSingleNode("loginControl");
                 if (node != null)
                 {
@@ -1473,7 +1472,7 @@ string strWrapperClass)
                     strError = this.GetString("Email地址不能为空");
                     goto ERROR1;
                 }
-                strUserName = "EM:" + email.Text;
+                strUserName = "EM:email:" + email.Text; // 2016/4/16 修改
             }
             else if (this.ActiveLoginColumn == LoginColumn.Telephone)
             {

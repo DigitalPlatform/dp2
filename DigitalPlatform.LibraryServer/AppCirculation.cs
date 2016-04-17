@@ -1219,6 +1219,7 @@ namespace DigitalPlatform.LibraryServer
 
 
                     // 校验读者证条码号参数是否和XML记录中完全一致
+#if NO
                     string strTempReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                         "barcode");
 
@@ -1229,10 +1230,26 @@ namespace DigitalPlatform.LibraryServer
                         strError = "借阅操作被拒绝。因读者证条码号参数 '" + strReaderBarcode + "' 和读者记录中<barcode>元素内的读者证条码号值 '" + strTempReaderBarcode + "' 不一致。";
                         goto ERROR1;
                     }
+#endif
+                    {
+                        // return:
+                        //      false   不匹配
+                        //      true    匹配
+                        bool bRet = CheckBarcode(readerdom,
+                strReaderBarcode,
+                "读者",
+                out strError);
+                        if (bRet == false)
+                        {
+                            strError = "借阅操作被拒绝。因" + strError + "。";
+                            goto ERROR1;
+                        }
+                    }
 
                     // 2007/1/2
                     // 校验册条码号参数是否和XML记录中完全一致
 
+#if NO
                     string strRefID = "";
                     string strHead = "@refID:";
                     // string strFrom = "册条码";
@@ -1258,6 +1275,22 @@ namespace DigitalPlatform.LibraryServer
                         {
                             // text-level: 内部错误
                             strError = "借阅操作被拒绝。因册条码号参数 '" + strItemBarcode + "' 和册记录中<barcode>元素内的册条码号值 '" + strTempItemBarcode + "' 不一致。";
+                            goto ERROR1;
+                        }
+                    }
+#endif
+                    {
+                        // return:
+                        //      false   不匹配
+                        //      true    匹配
+                        bool bRet = CheckBarcode(itemdom,
+                strItemBarcode,
+                "册",
+                out strError);
+                        if (bRet == false)
+                        {
+                            // text-level: 内部错误
+                            strError = "借阅操作被拒绝。因" + strError + "。";
                             goto ERROR1;
                         }
                     }
@@ -1671,9 +1704,12 @@ namespace DigitalPlatform.LibraryServer
                         "Borrow() 中写统计指标 耗时 ");
 
                     strOutputItemXml = itemdom.OuterXml;
-                    strOutputReaderXml = readerdom.OuterXml;
-                    strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
 
+                    // strOutputReaderXml 将用于构造读者记录返回格式
+                    DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+                    strOutputReaderXml = readerdom.OuterXml;
+
+                    strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
                 } // 册记录锁定范围结束
                 finally
                 {
@@ -2372,7 +2408,7 @@ start_time_1,
 
             // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
             // 2008/6/4
-            if (bVerifyReaderRecPath == true 
+            if (bVerifyReaderRecPath == true
                 && String.IsNullOrEmpty(strOutputReaderRecPath) == false)
             {
                 if (this.TestMode == true || sessioninfo.TestMode == true)
@@ -3078,7 +3114,6 @@ start_time_1,
                 }
             }
 
-
             // 2008/4/14
             string strBookState = DomUtil.GetElementText(itemdom.DocumentElement, "state");
             if (String.IsNullOrEmpty(strBookState) == false)
@@ -3102,7 +3137,6 @@ start_time_1,
                     strItemBarcodeParam);
                 return 0;
             }
-
 
             // 从想要借阅的册信息中，找到图书类型
             string strBookType = DomUtil.GetElementText(itemdom.DocumentElement, "bookType");
@@ -3188,7 +3222,6 @@ start_time_1,
                     strError = "馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 尚未定义 可借总册数 参数, 因此拒绝" + strOperName + "操作";
                     return -1;
                 }
-
 
                 // 然后看看总册数是否已经超过限制
                 int nMax = 0;
@@ -4628,7 +4661,15 @@ start_time_1,
                             goto ERROR1;
 
                         strOutputItemXml = itemdom.OuterXml;
+
                         strOutputReaderXml = strOldReaderXml;   // strReaderXml;
+                        nRet = RemovePassword(ref strOutputReaderXml, out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "从读者记录中去除 password 阶段出错: " + strError;
+                            goto ERROR1;
+                        }
+
                         strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
 
                         SetReturnInfo(ref return_info, itemdom);
@@ -4941,7 +4982,7 @@ start_time_1,
                             }
                         }
 
-                        DomUtil.SetElementText(domOperLog.DocumentElement, 
+                        DomUtil.SetElementText(domOperLog.DocumentElement,
                             "biblioRecPath", strBiblioRecPath);
                         goto WRITE_OPERLOG;
                     }
@@ -5320,7 +5361,11 @@ start_time_1,
 
                     if (itemdom != null)
                         strOutputItemXml = itemdom.OuterXml;
+
+                    // strOutputReaderXml 将用于构造读者记录返回格式
+                    DomUtil.DeleteElement(readerdom.DocumentElement, "password");
                     strOutputReaderXml = readerdom.OuterXml;
+
                     if (itemdom != null)
                     {
                         strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
@@ -5849,6 +5894,27 @@ start_time_1,
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 从读者记录中删除 password 元素
+        static int RemovePassword(ref string strReaderXml, 
+            out string strError)
+        {
+            strError = "";
+            XmlDocument readerdom = new XmlDocument();
+            try
+            {
+                readerdom.LoadXml(strReaderXml);
+            }
+            catch(Exception ex)
+            {
+                strError = "读者记录 XML 装入 DOM 时出错:" + ex.Message;
+                return -1;
+            }
+
+            DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+            strReaderXml = readerdom.DocumentElement.OuterXml;
+            return 0;
         }
 
         // 构造用于提示“读过”卷册的文字
@@ -11711,11 +11777,9 @@ out string strError)
 
                 for (; ; )
                 {
-
                     XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
                     if (nodes.Count == 0)
                         break;
-
 
                     // 找到第一个已启动事项
                     XmlNode node = null;
@@ -14453,8 +14517,6 @@ strBookPrice);    // 图书价格
                         strOverdueItemBarcodeList += strBarcode;
                         nOverCount++;
                     }
-
-
                 }
 
                 // 发现未归还的册中出现了超期情况
@@ -15837,8 +15899,6 @@ strBookPrice);    // 图书价格
                         nErrorCount++;
                     }
                 }
-
-
             }
             finally
             {
@@ -16228,12 +16288,28 @@ strBookPrice);    // 图书价格
                 }
 
                 // 校验读者证条码号参数是否和XML记录中完全一致
+#if NO
                 string strTempBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                     "barcode");
                 if (strReaderBarcode != strTempBarcode)
                 {
                     strError = "修复操作被拒绝。因读者证条码号参数 '" + strReaderBarcode + "' 和读者记录中<barcode>元素内的读者证条码号值 '" + strTempBarcode + "' 不一致。";
                     goto ERROR1;
+                }
+#endif
+                {
+                    // return:
+                    //      false   不匹配
+                    //      true    匹配
+                    bool bRet = CheckBarcode(readerdom,
+            strReaderBarcode,
+            "读者",
+            out strError);
+                    if (bRet == false)
+                    {
+                        strError = "修复操作被拒绝。因" + strError + "。";
+                        goto ERROR1;
+                    }
                 }
 
                 XmlNode nodeBorrow = readerdom.DocumentElement.SelectSingleNode("borrows/borrow[@barcode='" + strItemBarcode + "']");
@@ -16336,11 +16412,9 @@ strBookPrice);    // 图书价格
                             aDupPath = new string[aPath.Count];
                             aPath.CopyTo(aDupPath);
                             return result;
-
                         }
                         else
                         {
-
                             Debug.Assert(nRet == 1, "");
                             Debug.Assert(aPath.Count == 1, "");
 
@@ -16361,6 +16435,8 @@ strBookPrice);    // 图书价格
                         goto ERROR1;
                     }
 
+#if NO
+                    // TODO: 要实现 strItemBarcode 为 @refID:xxxxx 的情况。因为现在允许册记录没有册条码号了
                     // 校验册条码号参数是否和XML记录中完全一致
                     string strTempItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
                         "barcode");
@@ -16369,6 +16445,21 @@ strBookPrice);    // 图书价格
                         strError = "修复操作被拒绝。因册条码号参数 '" + strItemBarcode + "' 和册记录中<barcode>元素内的册条码号值 '" + strTempItemBarcode + "' 不一致。";
                         goto ERROR1;
                     }
+#endif
+                    {
+                        // return:
+                        //      false   不匹配
+                        //      true    匹配
+                        bool bRet = CheckBarcode(itemdom,
+                strItemBarcode,
+                "册",
+                out strError);
+                        if (bRet == false)
+                        {
+                            strError = "修复操作被拒绝。因" + strError + "。";
+                            goto ERROR1;
+                        }
+                    }
 
                     // 看看册记录中是否有指回读者记录的链
                     string strBorrower = DomUtil.GetElementText(itemdom.DocumentElement,
@@ -16376,7 +16467,7 @@ strBookPrice);    // 图书价格
                     if (strBorrower == strReaderBarcode)
                     {
                         strError = "修复操作被拒绝。您所请求要修复的链，本是一条完整正确的链。可直接进行普通还书操作。";
-                        goto ERROR1;
+                        goto CORRECT;
                     }
 
                 DELETE_CHAIN:
@@ -16481,6 +16572,11 @@ strBookPrice);    // 图书价格
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        CORRECT:
+            result.Value = -1;
+            result.ErrorInfo = strError;
+            result.ErrorCode = ErrorCode.NoError;   // 表示链条本来就没有错误
+            return result;
         }
 
         // 修复册记录一侧的借阅信息链条错误
@@ -16534,6 +16630,11 @@ strBookPrice);    // 图书价格
                 string strReaderXml = "";
                 string strOutputReaderRecPath = "";
                 byte[] reader_timestamp = null;
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   命中1条
+                //      >1  命中多于1条
                 nRet = this.GetReaderRecXml(
                     // sessioninfo.Channels,
                     channel,
@@ -16548,14 +16649,29 @@ strBookPrice);    // 图书价格
                     goto ERROR1;
                 }
 
-                string strLibraryCode = "";
-                // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
-                if (this.IsCurrentChangeableReaderPath(strOutputReaderRecPath,
-                    sessioninfo.LibraryCodeList,
-                    out strLibraryCode) == false)
+                if (nRet == 0)
                 {
-                    strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
+                    // 对应的读者记录不存在。就无法检查读者所在的馆代码了
+                }
+                else if (nRet > 1)
+                {
+                    strError = "证条码号为 '" + strReaderBarcode + "' 的读者记录存在 " + nRet + " 条。请先修复此问题，再重试修复册记录的链问题";
                     goto ERROR1;
+                }
+                else
+                {
+                    Debug.Assert(string.IsNullOrEmpty(strOutputReaderRecPath) == false, "");
+
+                    string strLibraryCode = "";
+
+                    // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                    if (this.IsCurrentChangeableReaderPath(strOutputReaderRecPath,
+                        sessioninfo.LibraryCodeList,
+                        out strLibraryCode) == false)
+                    {
+                        strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
+                        goto ERROR1;
+                    }
                 }
 
                 XmlDocument readerdom = null;
@@ -16577,13 +16693,26 @@ strBookPrice);    // 图书价格
                         goto ERROR1;
                     }
 
-
                     // 校验读者证条码号参数是否和XML记录中完全一致
+#if NO
                     string strTempBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                         "barcode");
                     if (strReaderBarcode != strTempBarcode)
                     {
                         strError = "修复操作被拒绝。因读者证条码号参数 '" + strReaderBarcode + "' 和读者记录中<barcode>元素内的读者证条码号值 '" + strTempBarcode + "' 不一致。";
+                        goto ERROR1;
+                    }
+#endif
+                    // return:
+                    //      false   不匹配
+                    //      true    匹配
+                    bool bRet = CheckBarcode(readerdom,
+            strReaderBarcode,
+            "读者",
+            out strError);
+                    if (bRet == false)
+                    {
+                        strError = "修复操作被拒绝。因" + strError + "。";
                         goto ERROR1;
                     }
                 }
@@ -16699,12 +16828,48 @@ strBookPrice);    // 图书价格
                         goto ERROR1;
                     }
 
+                    string strLibraryCode = "";
+                    // 检查一个册记录的馆藏地点是否符合馆代码列表要求
+                    // return:
+                    //      -1  检查过程出错
+                    //      0   符合要求
+                    //      1   不符合要求
+                    nRet = CheckItemLibraryCode(itemdom,
+                        sessioninfo,
+                        out strLibraryCode,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "检查分馆代码时出错: " + strError;
+                        goto ERROR1;
+                    }
+                    if (nRet == 1)
+                    {
+                        strError = "册记录 '" + strOutputItemRecPath + "' 不在当前用户管辖范围内";
+                        goto ERROR1;
+                    }
+
+#if NO
+                    // TODO: 要考虑 @refID:xxxx 形态。可以编写一个检查函数
                     // 校验册条码号参数是否和XML记录中完全一致
                     string strTempItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
                         "barcode");
                     if (strItemBarcode != strTempItemBarcode)
                     {
                         strError = "修复操作被拒绝。因册条码号参数 '" + strItemBarcode + "' 和册记录中<barcode>元素内的册条码号值 '" + strTempItemBarcode + "' 不一致。";
+                        goto ERROR1;
+                    }
+#endif
+                    // return:
+                    //      false   不匹配
+                    //      true    匹配
+                    bool bRet = CheckBarcode(itemdom,
+            strItemBarcode,
+            "册",
+            out strError);
+                    if (bRet == false)
+                    {
+                        strError = "修复操作被拒绝。因" + strError + "。";
                         goto ERROR1;
                     }
 
@@ -16714,7 +16879,7 @@ strBookPrice);    // 图书价格
                     if (String.IsNullOrEmpty(strBorrower) == true)
                     {
                         strError = "修复操作被拒绝。您所请求要修复的册记录中，本来就没有借阅信息，因此谈不上修复。";
-                        goto ERROR1;
+                        goto CORRECT;
                     }
 
                     if (strBorrower != strReaderBarcode)
@@ -16737,12 +16902,21 @@ strBookPrice);    // 图书价格
                     // DELETE_CHAIN:
 
                     // 移除册记录侧的链
-                    DomUtil.SetElementText(itemdom.DocumentElement,
-                        "borrower", "");
-                    DomUtil.SetElementText(itemdom.DocumentElement,
-                        "borrowDate", "");
-                    DomUtil.SetElementText(itemdom.DocumentElement,
-                        "borrowPeriod", "");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+                        "borrower");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+                        "borrowDate");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+                        "borrowPeriod");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+                        "borrowerReaderType");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+                        "borrowerRecPath");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+                        "returningDate");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+                        "operator");
+                    DomUtil.RemoveEmptyElements(itemdom.DocumentElement);
 
                     byte[] output_timestamp = null;
                     string strOutputPath = "";
@@ -16775,7 +16949,7 @@ strBookPrice);    // 图书价格
                     domOperLog.LoadXml("<root />");
                     DomUtil.SetElementText(domOperLog.DocumentElement,
     "libraryCode",
-    strLibraryCode);    // 读者所在的馆代码
+    strLibraryCode);    // 册所在的馆代码
                     DomUtil.SetElementText(domOperLog.DocumentElement, "operation", "repairBorrowInfo");
                     DomUtil.SetElementText(domOperLog.DocumentElement, "action", "repairitemside");
                     DomUtil.SetElementText(domOperLog.DocumentElement, "readerBarcode", strReaderBarcode);
@@ -16810,7 +16984,6 @@ strBookPrice);    // 图书价格
                     // 解册记录锁
                     this.EntityLocks.UnlockForWrite(strItemBarcode);
                 }
-
             }
             finally
             {
@@ -16826,6 +16999,53 @@ strBookPrice);    // 图书价格
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        CORRECT:
+            result.Value = -1;
+            result.ErrorInfo = strError;
+            result.ErrorCode = ErrorCode.NoError;   // 表示链条本来就没有错误
+            return result;
+        }
+
+        // 检查条码号参数和记录中的字段是否匹配
+        // parameters:
+        //      strRecordTypeCaption    记录类型。 册/读者
+        // return:
+        //      false   不匹配
+        //      true    匹配
+        static bool CheckBarcode(XmlDocument itemdom,
+            string strItemBarcode,
+            string strRecordTypeCaption,
+            out string strError)
+        {
+            strError = "";
+
+            string strRefID = "";
+            string strHead = "@refID:";
+            if (StringUtil.HasHead(strItemBarcode, strHead, true) == true)
+            {
+                // strFrom = "参考ID";
+                strRefID = strItemBarcode.Substring(strHead.Length);
+
+                string strTempRefID = DomUtil.GetElementText(itemdom.DocumentElement,
+"refID");
+                if (strRefID != strTempRefID)
+                {
+                    strError = "参考ID参数 '" + strRefID + "' 和" + strRecordTypeCaption + "记录中<refID>元素(参考ID)值 '" + strTempRefID + "' 不一致";
+                    return false;
+                }
+            }
+            else
+            {
+                string strTempItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
+"barcode");
+                if (strItemBarcode != strTempItemBarcode)
+                {
+                    strError = strRecordTypeCaption + "条码号参数 '" + strItemBarcode + "' 和" + strRecordTypeCaption + "记录中<barcode>元素内的条码号值 '" + strTempItemBarcode + "' 不一致";
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         // 入馆登记

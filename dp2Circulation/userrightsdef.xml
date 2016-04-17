@@ -373,6 +373,10 @@
     <comment lang='zh'>检查前端版本</comment>
     <comment lang='en'>Check Client Version</comment>
   </property>
+  <property name='bindpatron'>
+    <comment lang='zh'>为读者绑定号码</comment>
+    <comment lang='en'>Bind Number to Patron</comment>
+  </property>
   <property name='client_uimodifyorderrecord'>
     <comment lang='zh'>前端允许界面直接修改订购记录</comment>
     <comment lang='en'>Client UI Allow Modify Order Record</comment>

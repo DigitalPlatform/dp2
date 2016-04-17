@@ -1201,6 +1201,7 @@ namespace DigitalPlatform.LibraryServer
         //      lIndex  记录序号。从0开始计数。lIndex为-1时调用本函数，表示希望获得整个文件尺寸值，将返回在lHintNext中。
         //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
         //              目前的含义是记录起始位置。
+        //      strStyle    如果不包含 supervisor，则本函数会自动过滤掉日志记录中读者记录的 password 字段
         //      attachment  承载输出的附件部分的 Stream 对象。如果为 null，表示不输出附件部分
         // return:
         //      -1  error
@@ -1341,6 +1342,8 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     return -1;
 
+                // 后面会通过 strStyle 参数决定是否过滤读者记录的 password 元素
+
                 // 限制记录观察范围
                 if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                 {
@@ -1417,6 +1420,8 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        // parameters:
+        //      strStyle    如果不包含 supervisor，则需要过滤读者记录的 password 元素
         // return:
         //      -1  出错
         //      0   没有改变
@@ -1429,9 +1434,12 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
+            bool bSupervisor = StringUtil.IsInList("supervisor", strStyle);
+
             int nLevel = -1;
             // 先检测一次，可以提高某些情况下的运行速度
-            if (string.IsNullOrEmpty(strFilter) == true)
+            if (string.IsNullOrEmpty(strFilter) == true
+                && bSupervisor == true)
             {
                 // 获得详细级别
                 // return:
@@ -1461,6 +1469,12 @@ namespace DigitalPlatform.LibraryServer
             {
                 strXml = "";
                 return 1;
+            }
+
+            if (bSupervisor == false)
+            {
+                // 过滤日志记录中，读者记录的 password 元素
+                RemoveReaderPassword(ref dom);
             }
 
             if (nLevel == -1)
@@ -1510,6 +1524,8 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 检查和过滤日志XML记录
+        // parameters:
+        //      strStyle    如果不包含 supervisor，则需要过滤日志记录中读者记录的 password 元素
         // return:
         //      -1  出错
         //      0   不允许返回当前日志记录
@@ -1547,6 +1563,12 @@ namespace DigitalPlatform.LibraryServer
             {
                 if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     return 0;
+            }
+
+            if (StringUtil.IsInList("supervisor", strStyle) == false)
+            {
+                // 过滤日志记录中，读者记录的 password 元素
+                RemoveReaderPassword(ref dom);
             }
 
             // 2013/11/22
@@ -1634,6 +1656,7 @@ out strTargetLibraryCode);
         }
 
         // 对日志记录进行减小尺寸的操作
+        // 注：本函数不负责过滤读者记录中的 password 元素
         static void ResizeXml(string strOperation,
             int nLevel,
             ref XmlDocument dom)
@@ -1841,6 +1864,85 @@ out strTargetLibraryCode);
             }
         }
 
+        // 从日志记录中，删除读者记录的 password 元素
+        static void RemoveReaderPassword(ref XmlDocument dom)
+        {
+            // operation:borrow -- readerRecord
+            // operation:return -- readerRecord
+            // operation:changeReaderPassword -- readerRecord 注意 newPassword 元素里面有新密码的 hash 字符串
+            // operation:setReaderInfo -- record 和 oldRecord 元素
+            // operation:amerce -- readerRecord 和 oldReaderRecord 元素
+            // operation:devolveReaderInfo -- sourceReaderRecord 和 targetRecordRecord 元素
+            // operation:hire -- readerRecord
+            // operation:foregift -- readerRecord
+            // !TODO: operation:writeRes 要留意它是不是写入了读者库。如果是，则要防范泄露 password 元素内容
+            // operation:setUser -- account 和 oldAccount 元素里面的 password 元素; 根元素的 newPassword 元素
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+            if (strOperation == "borrow"
+    || strOperation == "return"
+    || strOperation == "hire"
+    || strOperation == "foregift")
+            {
+                RemoveReaderPassword(ref dom, "readerRecord");
+                return;
+            }
+            if (strOperation == "changeReaderPassword")
+            {
+                RemoveReaderPassword(ref dom, "readerRecord");
+                DomUtil.DeleteElement(dom.DocumentElement, "newPassword");
+                return;
+            }
+            if (strOperation == "setReaderInfo")
+            {
+                RemoveReaderPassword(ref dom, "record");
+                RemoveReaderPassword(ref dom, "oldRecord");
+                return;
+            }
+            if (strOperation == "amerce")
+            {
+                RemoveReaderPassword(ref dom, "readerRecord");
+                RemoveReaderPassword(ref dom, "oldReaderRecord");
+                return;
+            }
+            if (strOperation == "devolveReaderInfo")
+            {
+                RemoveReaderPassword(ref dom, "sourceReaderRecord");
+                RemoveReaderPassword(ref dom, "targetReaderRecord");
+                return;
+            }
+            if (strOperation == "setUser")
+            {
+                DomUtil.DeleteElement(dom.DocumentElement, "newPassword");
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes("account | oldAccount");
+                foreach(XmlElement account in nodes)
+                {
+                    account.RemoveAttribute("password");
+                }
+                return;
+            }
+        }
+
+        static void RemoveReaderPassword(ref XmlDocument dom, string strElementName)
+        {
+            string strReaderRecord = DomUtil.GetElementText(dom.DocumentElement, strElementName);
+            if (string.IsNullOrEmpty(strReaderRecord))
+                return;
+            XmlDocument reader_dom = new XmlDocument();
+            try
+            {
+                reader_dom.LoadXml(strReaderRecord);
+                XmlNode node = reader_dom.DocumentElement.SelectSingleNode("password");
+                if (node != null)
+                {
+                    node.ParentNode.RemoveChild(node);
+                    DomUtil.SetElementText(dom.DocumentElement, strElementName, reader_dom.DocumentElement.OuterXml);
+                }
+            }
+            catch
+            {
+            }
+        }
+
         static void RemoveReaderRecord(int nLevel,
             string strElementName,
             ref XmlDocument dom)
@@ -1849,8 +1951,8 @@ out strTargetLibraryCode);
                 return;
 
             {
-                string strReaderReacord = DomUtil.GetElementText(dom.DocumentElement, strElementName);
-                if (string.IsNullOrEmpty(strReaderReacord) == false)
+                string strReaderRecord = DomUtil.GetElementText(dom.DocumentElement, strElementName);
+                if (string.IsNullOrEmpty(strReaderRecord) == false)
                 {
                     if (nLevel == 2)
                     {
@@ -1862,7 +1964,7 @@ out strTargetLibraryCode);
                     XmlDocument reader_dom = new XmlDocument();
                     try
                     {
-                        reader_dom.LoadXml(strReaderReacord);
+                        reader_dom.LoadXml(strReaderRecord);
                         XmlNode node = reader_dom.DocumentElement.SelectSingleNode("borrowHistory");
                         if (node != null)
                             node.ParentNode.RemoveChild(node);
@@ -2161,6 +2263,7 @@ out strTargetLibraryCode);
 
         // parameters:
         //      nCount  本次希望获取的记录数。如果==-1，表示希望尽可能多地获取
+        //      strStyle    如果不包含 supervisor，则本函数会自动过滤掉日志记录中读者记录的 password 字段
         // return:
         //      -1  error
         //      0   file not found
@@ -2279,6 +2382,7 @@ out strTargetLibraryCode);
         //      lIndex  记录序号。从0开始计数。lIndex为-1时调用本函数，表示希望获得整个文件尺寸值，将返回在lHintNext中。
         //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
         //              目前的含义是记录起始位置。
+        //      strStyle    如果不包含 supervisor，则本函数会自动过滤掉日志记录中读者记录的 password 字段
         // return:
         //      -1  error
         //      0   file not found
@@ -2441,6 +2545,8 @@ out strTargetLibraryCode);
                 if (nRet == -1)
                     return -1;
 
+                // 后面会通过 strStyle 参数决定是否过滤读者记录的 password 元素
+
                 // 限制记录观察范围
                 if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                 {
@@ -2508,7 +2614,6 @@ out strTargetLibraryCode);
 
                 // END1:
                 lHintNext = cache_item.Stream.Position;
-
                 return 1;
             }
             finally

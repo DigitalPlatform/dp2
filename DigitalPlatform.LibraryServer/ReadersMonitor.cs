@@ -362,7 +362,7 @@ namespace DigitalPlatform.LibraryServer
             return def_node.GetAttribute("types");
         }
 
-        // 处理一条记录
+        // 处理一条读者记录
         int DoOneRecord(
             List<string> bodytypes,
             string strPath,
@@ -419,8 +419,6 @@ namespace DigitalPlatform.LibraryServer
 
             bool bChanged = false;
 
-
-
             // 每种 bodytype 做一次
             for (int i = 0; i < bodytypes.Count; i++)
             {
@@ -429,8 +427,26 @@ namespace DigitalPlatform.LibraryServer
                 string strReaderEmailAddress = "";
                 if (strBodyType == "email")
                 {
-                    strReaderEmailAddress = DomUtil.GetElementText(readerdom.DocumentElement,
+                    string strValue = DomUtil.GetElementText(readerdom.DocumentElement,
                         "email");
+#if NO
+                    // 注: email 元素内容，现在是存储 email 和微信号等多种绑定途径 2016/4/16
+                    // return:
+                    //      null    没有找到前缀
+                    //      ""      找到了前缀，并且值部分为空
+                    //      其他     返回值部分
+                    strReaderEmailAddress = StringUtil.GetParameterByPrefix(strReaderEmailAddress,
+            "email",
+            ":");
+                    // 读者记录中没有email地址，就无法进行email方式的通知了
+                    if (String.IsNullOrEmpty(strReaderEmailAddress) == true)
+                    {
+                        if (strValue.IndexOf(":") != -1)
+                            continue;
+                        strReaderEmailAddress = strValue;
+                    }
+#endif
+                    strReaderEmailAddress = LibraryApplication.GetEmailAddress(strValue);
                     // 读者记录中没有email地址，就无法进行email方式的通知了
                     if (String.IsNullOrEmpty(strReaderEmailAddress) == true)
                         continue;
@@ -1130,6 +1146,10 @@ namespace DigitalPlatform.LibraryServer
             {
                 index = 1;
             }
+            else if (strBodyType == "mq")
+            {
+                index = 2;
+            }
             else
             {
                 MessageInterface external_interface = app.GetMessageInterface(strBodyType);
@@ -1147,7 +1167,7 @@ namespace DigitalPlatform.LibraryServer
                     // return -1;
                     return null;
                 }
-                index += 2;
+                index += 3; // 原来是 2
             }
 
             string strResult = "";

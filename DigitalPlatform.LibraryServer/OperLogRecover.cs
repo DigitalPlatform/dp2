@@ -298,7 +298,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 this.AppendResultText("循环结束\r\n");
-                
+
                 this.App.WriteErrorLog("日志恢复 任务结束。");
 
                 return;
@@ -339,13 +339,12 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
-            this.AppendResultText("做文件 "+strFileName+"\r\n");
+            this.AppendResultText("做文件 " + strFileName + "\r\n");
 
             Debug.Assert(this.App != null, "");
             string strTempFileName = this.App.GetTempFileName("logrecover");    // Path.GetTempFileName();
             try
             {
-
                 long lIndex = 0;
                 long lHint = -1;
                 long lHintNext = -1;
@@ -366,7 +365,6 @@ namespace DigitalPlatform.LibraryServer
                     {
                         // Debug.Assert(!(lIndex == 182 && strFileName == "20071225.log"), "");
 
-
                         long lAttachmentLength = 0;
                         // 获得一个日志记录
                         // parameters:
@@ -383,7 +381,7 @@ namespace DigitalPlatform.LibraryServer
                             strFileName,
                             lIndex,
                             lHint,
-                            "", // level-0
+                            "supervisor", // level-0
                             "", // strFilter
                             out lHintNext,
                             out strXml,
@@ -617,7 +615,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 string strAction = DomUtil.GetElementText(dom.DocumentElement,
                         "action");
-                strError = "operation=" +strOperation + ";action=" + strAction + ": " + strError;
+                strError = "operation=" + strOperation + ";action=" + strAction + ": " + strError;
                 return -1;
             }
 

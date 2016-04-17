@@ -84,13 +84,15 @@ namespace dp2Circulation
             this.numericUpDown_charging_infoDlgOpacity = new System.Windows.Forms.NumericUpDown();
             this.checkBox_charging_force = new System.Windows.Forms.CheckBox();
             this.tabPage_quickCharging = new System.Windows.Forms.TabPage();
+            this.comboBox_quickCharging_displayFormat = new System.Windows.Forms.ComboBox();
+            this.comboBox_quickCharging_stateSpeak = new System.Windows.Forms.ComboBox();
+            this.label34 = new System.Windows.Forms.Label();
             this.comboBox_quickCharging_displayStyle = new System.Windows.Forms.ComboBox();
             this.label30 = new System.Windows.Forms.Label();
             this.checkBox_quickCharging_logOperTime = new System.Windows.Forms.CheckBox();
             this.checkBox_quickCharging_isbnBorrow = new System.Windows.Forms.CheckBox();
             this.groupBox_quickCharging_selectItemDialog = new System.Windows.Forms.GroupBox();
             this.checkBox_quickCharging_autoOperItemDialogSingleItem = new System.Windows.Forms.CheckBox();
-            this.comboBox_quickCharging_displayFormat = new System.Windows.Forms.ComboBox();
             this.label27 = new System.Windows.Forms.Label();
             this.checkBox_quickCharging_speakBookTitle = new System.Windows.Forms.CheckBox();
             this.checkBox_quickCharging_speakNameWhenLoadReaderRecord = new System.Windows.Forms.CheckBox();
@@ -881,12 +883,14 @@ namespace dp2Circulation
             // tabPage_quickCharging
             // 
             this.tabPage_quickCharging.AutoScroll = true;
+            this.tabPage_quickCharging.Controls.Add(this.comboBox_quickCharging_displayFormat);
+            this.tabPage_quickCharging.Controls.Add(this.comboBox_quickCharging_stateSpeak);
+            this.tabPage_quickCharging.Controls.Add(this.label34);
             this.tabPage_quickCharging.Controls.Add(this.comboBox_quickCharging_displayStyle);
             this.tabPage_quickCharging.Controls.Add(this.label30);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_logOperTime);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_isbnBorrow);
             this.tabPage_quickCharging.Controls.Add(this.groupBox_quickCharging_selectItemDialog);
-            this.tabPage_quickCharging.Controls.Add(this.comboBox_quickCharging_displayFormat);
             this.tabPage_quickCharging.Controls.Add(this.label27);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_speakBookTitle);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_speakNameWhenLoadReaderRecord);
@@ -899,72 +903,6 @@ namespace dp2Circulation
             this.tabPage_quickCharging.Text = "快捷出纳";
             this.tabPage_quickCharging.UseVisualStyleBackColor = true;
             // 
-            // comboBox_quickCharging_displayStyle
-            // 
-            this.comboBox_quickCharging_displayStyle.FormattingEnabled = true;
-            this.comboBox_quickCharging_displayStyle.Items.AddRange(new object[] {
-            "dark",
-            "light"});
-            this.comboBox_quickCharging_displayStyle.Location = new System.Drawing.Point(91, 38);
-            this.comboBox_quickCharging_displayStyle.Margin = new System.Windows.Forms.Padding(2);
-            this.comboBox_quickCharging_displayStyle.Name = "comboBox_quickCharging_displayStyle";
-            this.comboBox_quickCharging_displayStyle.Size = new System.Drawing.Size(148, 20);
-            this.comboBox_quickCharging_displayStyle.TabIndex = 23;
-            // 
-            // label30
-            // 
-            this.label30.AutoSize = true;
-            this.label30.Location = new System.Drawing.Point(10, 41);
-            this.label30.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label30.Name = "label30";
-            this.label30.Size = new System.Drawing.Size(77, 12);
-            this.label30.TabIndex = 22;
-            this.label30.Text = "显示风格(&S):";
-            // 
-            // checkBox_quickCharging_logOperTime
-            // 
-            this.checkBox_quickCharging_logOperTime.AutoSize = true;
-            this.checkBox_quickCharging_logOperTime.Location = new System.Drawing.Point(12, 305);
-            this.checkBox_quickCharging_logOperTime.Margin = new System.Windows.Forms.Padding(2);
-            this.checkBox_quickCharging_logOperTime.Name = "checkBox_quickCharging_logOperTime";
-            this.checkBox_quickCharging_logOperTime.Size = new System.Drawing.Size(162, 16);
-            this.checkBox_quickCharging_logOperTime.TabIndex = 21;
-            this.checkBox_quickCharging_logOperTime.Text = "在日志中记载操作耗时(&L)";
-            this.checkBox_quickCharging_logOperTime.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_quickCharging_isbnBorrow
-            // 
-            this.checkBox_quickCharging_isbnBorrow.AutoSize = true;
-            this.checkBox_quickCharging_isbnBorrow.Location = new System.Drawing.Point(12, 166);
-            this.checkBox_quickCharging_isbnBorrow.Margin = new System.Windows.Forms.Padding(2);
-            this.checkBox_quickCharging_isbnBorrow.Name = "checkBox_quickCharging_isbnBorrow";
-            this.checkBox_quickCharging_isbnBorrow.Size = new System.Drawing.Size(174, 16);
-            this.checkBox_quickCharging_isbnBorrow.TabIndex = 20;
-            this.checkBox_quickCharging_isbnBorrow.Text = "启用 ISBN 借书还书功能(&I)";
-            this.checkBox_quickCharging_isbnBorrow.UseVisualStyleBackColor = true;
-            this.checkBox_quickCharging_isbnBorrow.CheckedChanged += new System.EventHandler(this.checkBox_quickCharging_isbnBorrow_CheckedChanged);
-            // 
-            // groupBox_quickCharging_selectItemDialog
-            // 
-            this.groupBox_quickCharging_selectItemDialog.Controls.Add(this.checkBox_quickCharging_autoOperItemDialogSingleItem);
-            this.groupBox_quickCharging_selectItemDialog.Location = new System.Drawing.Point(12, 187);
-            this.groupBox_quickCharging_selectItemDialog.Name = "groupBox_quickCharging_selectItemDialog";
-            this.groupBox_quickCharging_selectItemDialog.Size = new System.Drawing.Size(252, 100);
-            this.groupBox_quickCharging_selectItemDialog.TabIndex = 20;
-            this.groupBox_quickCharging_selectItemDialog.TabStop = false;
-            this.groupBox_quickCharging_selectItemDialog.Text = " 选择册记录对话框 ";
-            // 
-            // checkBox_quickCharging_autoOperItemDialogSingleItem
-            // 
-            this.checkBox_quickCharging_autoOperItemDialogSingleItem.AutoSize = true;
-            this.checkBox_quickCharging_autoOperItemDialogSingleItem.Location = new System.Drawing.Point(15, 28);
-            this.checkBox_quickCharging_autoOperItemDialogSingleItem.Margin = new System.Windows.Forms.Padding(2);
-            this.checkBox_quickCharging_autoOperItemDialogSingleItem.Name = "checkBox_quickCharging_autoOperItemDialogSingleItem";
-            this.checkBox_quickCharging_autoOperItemDialogSingleItem.Size = new System.Drawing.Size(186, 16);
-            this.checkBox_quickCharging_autoOperItemDialogSingleItem.TabIndex = 19;
-            this.checkBox_quickCharging_autoOperItemDialogSingleItem.Text = "自动操作唯一可用的册记录(&A)";
-            this.checkBox_quickCharging_autoOperItemDialogSingleItem.UseVisualStyleBackColor = true;
-            // 
             // comboBox_quickCharging_displayFormat
             // 
             this.comboBox_quickCharging_displayFormat.FormattingEnabled = true;
@@ -975,7 +913,96 @@ namespace dp2Circulation
             this.comboBox_quickCharging_displayFormat.Margin = new System.Windows.Forms.Padding(2);
             this.comboBox_quickCharging_displayFormat.Name = "comboBox_quickCharging_displayFormat";
             this.comboBox_quickCharging_displayFormat.Size = new System.Drawing.Size(148, 20);
-            this.comboBox_quickCharging_displayFormat.TabIndex = 18;
+            this.comboBox_quickCharging_displayFormat.TabIndex = 1;
+            // 
+            // comboBox_quickCharging_stateSpeak
+            // 
+            this.comboBox_quickCharging_stateSpeak.FormattingEnabled = true;
+            this.comboBox_quickCharging_stateSpeak.Items.AddRange(new object[] {
+            "[不朗读]",
+            "状态",
+            "状态+内容"});
+            this.comboBox_quickCharging_stateSpeak.Location = new System.Drawing.Point(91, 155);
+            this.comboBox_quickCharging_stateSpeak.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_quickCharging_stateSpeak.Name = "comboBox_quickCharging_stateSpeak";
+            this.comboBox_quickCharging_stateSpeak.Size = new System.Drawing.Size(148, 20);
+            this.comboBox_quickCharging_stateSpeak.TabIndex = 9;
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(10, 158);
+            this.label34.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(77, 12);
+            this.label34.TabIndex = 8;
+            this.label34.Text = "朗读状态(&S):";
+            // 
+            // comboBox_quickCharging_displayStyle
+            // 
+            this.comboBox_quickCharging_displayStyle.FormattingEnabled = true;
+            this.comboBox_quickCharging_displayStyle.Items.AddRange(new object[] {
+            "dark",
+            "light"});
+            this.comboBox_quickCharging_displayStyle.Location = new System.Drawing.Point(91, 38);
+            this.comboBox_quickCharging_displayStyle.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_quickCharging_displayStyle.Name = "comboBox_quickCharging_displayStyle";
+            this.comboBox_quickCharging_displayStyle.Size = new System.Drawing.Size(148, 20);
+            this.comboBox_quickCharging_displayStyle.TabIndex = 3;
+            // 
+            // label30
+            // 
+            this.label30.AutoSize = true;
+            this.label30.Location = new System.Drawing.Point(10, 41);
+            this.label30.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label30.Name = "label30";
+            this.label30.Size = new System.Drawing.Size(77, 12);
+            this.label30.TabIndex = 2;
+            this.label30.Text = "显示风格(&S):";
+            // 
+            // checkBox_quickCharging_logOperTime
+            // 
+            this.checkBox_quickCharging_logOperTime.AutoSize = true;
+            this.checkBox_quickCharging_logOperTime.Location = new System.Drawing.Point(12, 336);
+            this.checkBox_quickCharging_logOperTime.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_quickCharging_logOperTime.Name = "checkBox_quickCharging_logOperTime";
+            this.checkBox_quickCharging_logOperTime.Size = new System.Drawing.Size(162, 16);
+            this.checkBox_quickCharging_logOperTime.TabIndex = 12;
+            this.checkBox_quickCharging_logOperTime.Text = "在日志中记载操作耗时(&L)";
+            this.checkBox_quickCharging_logOperTime.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_quickCharging_isbnBorrow
+            // 
+            this.checkBox_quickCharging_isbnBorrow.AutoSize = true;
+            this.checkBox_quickCharging_isbnBorrow.Location = new System.Drawing.Point(12, 197);
+            this.checkBox_quickCharging_isbnBorrow.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_quickCharging_isbnBorrow.Name = "checkBox_quickCharging_isbnBorrow";
+            this.checkBox_quickCharging_isbnBorrow.Size = new System.Drawing.Size(174, 16);
+            this.checkBox_quickCharging_isbnBorrow.TabIndex = 10;
+            this.checkBox_quickCharging_isbnBorrow.Text = "启用 ISBN 借书还书功能(&I)";
+            this.checkBox_quickCharging_isbnBorrow.UseVisualStyleBackColor = true;
+            this.checkBox_quickCharging_isbnBorrow.CheckedChanged += new System.EventHandler(this.checkBox_quickCharging_isbnBorrow_CheckedChanged);
+            // 
+            // groupBox_quickCharging_selectItemDialog
+            // 
+            this.groupBox_quickCharging_selectItemDialog.Controls.Add(this.checkBox_quickCharging_autoOperItemDialogSingleItem);
+            this.groupBox_quickCharging_selectItemDialog.Location = new System.Drawing.Point(12, 218);
+            this.groupBox_quickCharging_selectItemDialog.Name = "groupBox_quickCharging_selectItemDialog";
+            this.groupBox_quickCharging_selectItemDialog.Size = new System.Drawing.Size(252, 100);
+            this.groupBox_quickCharging_selectItemDialog.TabIndex = 11;
+            this.groupBox_quickCharging_selectItemDialog.TabStop = false;
+            this.groupBox_quickCharging_selectItemDialog.Text = " 选择册记录对话框 ";
+            // 
+            // checkBox_quickCharging_autoOperItemDialogSingleItem
+            // 
+            this.checkBox_quickCharging_autoOperItemDialogSingleItem.AutoSize = true;
+            this.checkBox_quickCharging_autoOperItemDialogSingleItem.Location = new System.Drawing.Point(15, 28);
+            this.checkBox_quickCharging_autoOperItemDialogSingleItem.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_quickCharging_autoOperItemDialogSingleItem.Name = "checkBox_quickCharging_autoOperItemDialogSingleItem";
+            this.checkBox_quickCharging_autoOperItemDialogSingleItem.Size = new System.Drawing.Size(186, 16);
+            this.checkBox_quickCharging_autoOperItemDialogSingleItem.TabIndex = 0;
+            this.checkBox_quickCharging_autoOperItemDialogSingleItem.Text = "自动操作唯一可用的册记录(&A)";
+            this.checkBox_quickCharging_autoOperItemDialogSingleItem.UseVisualStyleBackColor = true;
             // 
             // label27
             // 
@@ -984,7 +1011,7 @@ namespace dp2Circulation
             this.label27.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label27.Name = "label27";
             this.label27.Size = new System.Drawing.Size(77, 12);
-            this.label27.TabIndex = 17;
+            this.label27.TabIndex = 0;
             this.label27.Text = "显示格式(&D):";
             // 
             // checkBox_quickCharging_speakBookTitle
@@ -993,7 +1020,7 @@ namespace dp2Circulation
             this.checkBox_quickCharging_speakBookTitle.Location = new System.Drawing.Point(12, 134);
             this.checkBox_quickCharging_speakBookTitle.Name = "checkBox_quickCharging_speakBookTitle";
             this.checkBox_quickCharging_speakBookTitle.Size = new System.Drawing.Size(96, 16);
-            this.checkBox_quickCharging_speakBookTitle.TabIndex = 16;
+            this.checkBox_quickCharging_speakBookTitle.TabIndex = 7;
             this.checkBox_quickCharging_speakBookTitle.Text = "朗读书名 (&P)";
             this.checkBox_quickCharging_speakBookTitle.UseVisualStyleBackColor = true;
             // 
@@ -1003,7 +1030,7 @@ namespace dp2Circulation
             this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Location = new System.Drawing.Point(12, 112);
             this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Name = "checkBox_quickCharging_speakNameWhenLoadReaderRecord";
             this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Size = new System.Drawing.Size(252, 16);
-            this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.TabIndex = 15;
+            this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.TabIndex = 6;
             this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Text = "朗读读者姓名，当装载读者记录的时刻 (&S)";
             this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.UseVisualStyleBackColor = true;
             // 
@@ -1014,7 +1041,7 @@ namespace dp2Circulation
             this.checkBox_quickCharging_noBorrowHistory.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_quickCharging_noBorrowHistory.Name = "checkBox_quickCharging_noBorrowHistory";
             this.checkBox_quickCharging_noBorrowHistory.Size = new System.Drawing.Size(186, 16);
-            this.checkBox_quickCharging_noBorrowHistory.TabIndex = 13;
+            this.checkBox_quickCharging_noBorrowHistory.TabIndex = 5;
             this.checkBox_quickCharging_noBorrowHistory.Text = "读者信息中不显示借阅历史(&H)";
             this.checkBox_quickCharging_noBorrowHistory.UseVisualStyleBackColor = true;
             // 
@@ -2228,7 +2255,7 @@ namespace dp2Circulation
             this.groupBox7.Controls.Add(this.textBox_fingerprint_readerUrl);
             this.groupBox7.Location = new System.Drawing.Point(3, 14);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(467, 84);
+            this.groupBox7.Size = new System.Drawing.Size(416, 84);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2236,7 +2263,7 @@ namespace dp2Circulation
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(356, 47);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(305, 47);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(105, 23);
             this.button_fingerprint_setDefaultValue.TabIndex = 1;
@@ -2250,7 +2277,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(6, 20);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(455, 21);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(404, 21);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2659,7 +2686,6 @@ namespace dp2Circulation
         private System.Windows.Forms.CheckBox checkBox_quickCharging_speakNameWhenLoadReaderRecord;
         private System.Windows.Forms.CheckBox checkBox_quickCharging_speakBookTitle;
         private System.Windows.Forms.Label label26;
-        private System.Windows.Forms.ComboBox comboBox_quickCharging_displayFormat;
         private System.Windows.Forms.Label label27;
         private System.Windows.Forms.TabPage tabPage_labelPrint;
         private System.Windows.Forms.ComboBox comboBox_labelPrint_accessNoSource;
@@ -2689,5 +2715,8 @@ namespace dp2Circulation
         public System.Windows.Forms.TextBox textBox_message_userName;
         private System.Windows.Forms.Label label32;
         private System.Windows.Forms.Label label33;
+        private System.Windows.Forms.ComboBox comboBox_quickCharging_stateSpeak;
+        private System.Windows.Forms.Label label34;
+        private System.Windows.Forms.ComboBox comboBox_quickCharging_displayFormat;
     }
 }

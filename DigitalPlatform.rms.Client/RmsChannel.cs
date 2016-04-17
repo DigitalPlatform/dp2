@@ -366,7 +366,7 @@ namespace DigitalPlatform.rms.Client
                 }
                 if (String.IsNullOrEmpty(this.Url) == true)
                 {
-                    throw(new Exception("Url值此时应当不等于空"));
+                    throw (new Exception("Url值此时应当不等于空"));
                 }
                 Debug.Assert(this.Url != "", "Url值此时应当不等于空");
 
@@ -639,7 +639,7 @@ namespace DigitalPlatform.rms.Client
         static string GetExceptionMessage(Exception ex)
         {
             string strResult = ex.GetType().ToString() + ":" + ex.Message;
-            while(ex != null)
+            while (ex != null)
             {
                 if (ex.InnerException != null)
                     strResult += "\r\n" + ex.InnerException.GetType().ToString() + ": " + ex.InnerException.Message;
@@ -826,7 +826,7 @@ namespace DigitalPlatform.rms.Client
         {
             strError = "";
 
-            REDO:
+        REDO:
             Result result = null;
             try
             {
@@ -941,7 +941,7 @@ namespace DigitalPlatform.rms.Client
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginLogin(strUserName,
@@ -1049,7 +1049,7 @@ namespace DigitalPlatform.rms.Client
             }
 
 
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = null;
@@ -1182,7 +1182,7 @@ namespace DigitalPlatform.rms.Client
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
             REDOINITIAL:
@@ -1256,11 +1256,11 @@ namespace DigitalPlatform.rms.Client
             out string strError)
         {
             strError = "";
-            /*
-            int nOldTimeout = this.Timeout;
-            this.Timeout = 20 * 60 * 1000;  // 加大超时时间
-             * */
-            REDO:
+        /*
+        int nOldTimeout = this.Timeout;
+        this.Timeout = 20 * 60 * 1000;  // 加大超时时间
+         * */
+        REDO:
             try
             {
             REDO_REFRESH:
@@ -1339,7 +1339,7 @@ namespace DigitalPlatform.rms.Client
         {
             strError = "";
 
-            REDO:
+        REDO:
             try
             {
             REDOINITIAL:
@@ -1890,7 +1890,7 @@ namespace DigitalPlatform.rms.Client
         public int DoBatchTask(string strName,
             string strAction,
             TaskInfo info,
-            out TaskInfo [] results,
+            out TaskInfo[] results,
             out string strError)
         {
             results = null;
@@ -2279,7 +2279,7 @@ namespace DigitalPlatform.rms.Client
         //		0	not found
         //		>=1	命中记录条数
         public long DoSearchWithoutLoginDlg(
-            string strQueryXml,	
+            string strQueryXml,
             string strResultSetName,
             string strOutputStyle,
             out string strError)
@@ -2349,7 +2349,7 @@ namespace DigitalPlatform.rms.Client
             strError = "";
             searchresults = null;
 
-                REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginGetBrowse(
@@ -2373,7 +2373,7 @@ namespace DigitalPlatform.rms.Client
                 }
                 Record[] records = null;
                 Result result = this.ws.EndGetBrowse(
-                    out records,soapresult);
+                    out records, soapresult);
 
                 if (result.Value == -1)
                 {
@@ -2437,7 +2437,6 @@ namespace DigitalPlatform.rms.Client
                     return -1;
                 goto REDO;
             }
-
         }
 
         // 根据指定的记录路径获得浏览格式记录
@@ -2594,7 +2593,7 @@ namespace DigitalPlatform.rms.Client
                     }
                     Record[] records = null;
                     Result result = this.ws.EndGetRecords(
-                        out records,soapresult);
+                        out records, soapresult);
 
                     if (result.Value == -1)
                     {
@@ -2701,7 +2700,7 @@ namespace DigitalPlatform.rms.Client
                     }
                     RichRecord[] records = null;
                     Result result = this.ws.EndGetRichRecords(
-                        out records,soapresult);
+                        out records, soapresult);
 
                     if (result.Value == -1)
                     {
@@ -2836,7 +2835,7 @@ namespace DigitalPlatform.rms.Client
                         return -1;
                     }
                     Result result = this.ws.EndGetRecords(
-                        out records,soapresult);
+                        out records, soapresult);
 
                     if (result.Value == -1)
                     {
@@ -3016,7 +3015,7 @@ namespace DigitalPlatform.rms.Client
                     }
                 }
 
-REDO:
+            REDO:
                 try
                 {
                     IAsyncResult soapresult = this.ws.BeginGetRecords(
@@ -3042,7 +3041,7 @@ REDO:
                         return -1;
                     }
                     Result result = this.ws.EndGetRecords(
-                        out records,soapresult);
+                        out records, soapresult);
 
                     if (result.Value == -1)
                     {
@@ -3200,7 +3199,7 @@ REDO:
                         return -1;
                     }
                     Result result = this.ws.EndGetRecords(
-                        out records,soapresult);
+                        out records, soapresult);
 
                     if (result.Value == -1)
                     {
@@ -3287,8 +3286,8 @@ REDO:
                             nPerCount = 1;   // 修改为最小数量重做一次
                         else
                             return -1;
-                    } 
-                    
+                    }
+
                     goto REDO;
                 }
             }
@@ -3332,7 +3331,7 @@ REDO:
                 }
 
 
-                    REDO:
+            REDO:
                 try
                 {
                     IAsyncResult soapresult = this.ws.BeginGetRecords(
@@ -3358,7 +3357,7 @@ REDO:
                         return -1;
                     }
                     Result result = this.ws.EndGetRecords(
-                        out records,soapresult);
+                        out records, soapresult);
 
                     if (result.Value == -1)
                     {
@@ -3451,8 +3450,8 @@ REDO:
                             nPerCount = 1;   // 修改为最小数量重做一次
                         else
                             return -1;
-                    } 
-                    
+                    }
+
                     goto REDO;
                 }
             }
@@ -3498,7 +3497,7 @@ REDO:
                 }
 
 
-                    REDO:
+            REDO:
                 try
                 {
                     IAsyncResult soapresult = this.ws.BeginGetRecords(
@@ -3524,7 +3523,7 @@ REDO:
                         return -1;
                     }
                     Result result = this.ws.EndGetRecords(
-                        out records,soapresult);
+                        out records, soapresult);
 
                     if (result.Value == -1)
                     {
@@ -3859,7 +3858,7 @@ REDO:
                 }
 
 
-                    REDO:
+            REDO:
                 try
                 {
                     IAsyncResult soapresult = this.ws.BeginCreateKeys(
@@ -3886,7 +3885,7 @@ REDO:
                         return -1;
                     }
                     Result result = this.ws.EndCreateKeys(
-                        out keys,soapresult);
+                        out keys, soapresult);
 
                     if (result.Value == -1)
                     {
@@ -4019,7 +4018,7 @@ REDO:
                 }
 
 
-                    REDO:
+            REDO:
                 try
                 {
                     IAsyncResult soapresult = this.ws.BeginCreateKeys(
@@ -4046,7 +4045,7 @@ REDO:
                         return -1;
                     }
                     Result result = this.ws.EndCreateKeys(
-                        out keys,soapresult);
+                        out keys, soapresult);
 
                     if (result.Value == -1)
                     {
@@ -4219,7 +4218,7 @@ REDO:
                         return -1;
                     }
                     Result result = this.ws.EndDir(
-                        out items,soapresult);
+                        out items, soapresult);
 
                     if (result.Value == -1)
                     {
@@ -4332,7 +4331,7 @@ REDO:
                 }
                 Result result = this.ws.EndWriteRes(
                     out strOutputResPath,
-                    out baOutputTimestamp,soapresult);
+                    out baOutputTimestamp, soapresult);
 
                 this.ErrorInfo = result.ErrorString;	// 无论是否返回错误，都将result的ErrorString放到Channel中
 
@@ -4485,7 +4484,7 @@ REDO:
                     }
                     Result result = this.ws.EndWriteRes(
                         out strOutputPath,
-                        out output_timestamp/*baOutputTimeStamp*/,soapresult);
+                        out output_timestamp/*baOutputTimeStamp*/, soapresult);
 
                     this.ErrorInfo = result.ErrorString;	// 无论是否返回错误，都将result的ErrorString放到Channel中
                     strError = result.ErrorString;  // 2007/6/28 服务于 带有局部path的保存中返回值放在strError的情况
@@ -4556,7 +4555,7 @@ REDO:
         }
 
         // 包装后的版本
-                // 删除数据库记录
+        // 删除数据库记录
         public long DoDeleteRes(string strPath,
             byte[] timestamp,
             out byte[] output_timestamp,
@@ -4594,7 +4593,7 @@ REDO:
              * */
 
             // byte[] baOutputTimeStamp = null;
-            REDO:
+        REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginDeleteRes(strPath,
@@ -4617,7 +4616,7 @@ REDO:
                     return -1;
                 }
                 Result result = this.ws.EndDeleteRes(
-                    out output_timestamp,soapresult);
+                    out output_timestamp, soapresult);
 
                 if (result.Value == -1)
                 {
@@ -4715,7 +4714,7 @@ REDO:
                     return -1;
                 }
                 Result result = this.ws.EndRebuildResKeys(
-                    out strOutputResPath,soapresult);
+                    out strOutputResPath, soapresult);
 
                 if (result.Value == -1)
                 {
@@ -5023,7 +5022,7 @@ ref strNewStyle);	// 不要数据体和metadata
                     // out strID,
                     out strMetadata,
                     out strOutputResPath,
-                    out baOutputTimestamp,soapresult);
+                    out baOutputTimestamp, soapresult);
 
                 // 即便不是返回-1,也可能有错误码和错误信息字符串
                 ConvertErrorCode(result);
@@ -5155,7 +5154,7 @@ ref strNewStyle);	// 不要数据体和metadata
                         // out id,
                         out strMetaData,
                         out strOutputResPath,
-                        out baOutputTimeStamp,soapresult);
+                        out baOutputTimeStamp, soapresult);
 
                     // 即便不是返回-1,也可能有错误码和错误信息字符串
                     ConvertErrorCode(result);
@@ -5341,7 +5340,7 @@ ref strNewStyle);	// 不要数据体和metadata
         //		0	成功
         public long GetRes(string strPath,
             Stream fileTarget,
-			FlushOutput flushOutputMethod,
+            FlushOutput flushOutputMethod,
             DigitalPlatform.Stop stop,
             string strStyleParam,
             byte[] input_timestamp,
@@ -5411,7 +5410,7 @@ ref strNewStyle);	// 不要数据体和metadata
                     return -1;
                 }
 
-                REDO:
+            REDO:
                 try
                 {
 
@@ -5473,7 +5472,7 @@ ref strNewStyle);	// 不要数据体和metadata
                         // out id,
                         out strMetaData,
                         out strOutputPath,
-                        out timestamp,soapresult);
+                        out timestamp, soapresult);
 
                     // 即便不是返回-1,也可能有错误码和错误信息字符串
                     ConvertErrorCode(result);
@@ -5579,7 +5578,7 @@ ref strNewStyle);	// 不要数据体和metadata
                                 strError = "FlushOutputMethod()用户中断";
                                 return -1;
                             }
-                        } 
+                        }
                         lStart += baContent.Length;
                     }
 
@@ -5706,7 +5705,7 @@ ref strNewStyle);	// 不要数据体和metadata
                 }
                 Result result = this.ws.EndWriteRes(
                     out strOutputPath,
-                    out output_timestamp,soapresult);
+                    out output_timestamp, soapresult);
 
                 if (result.Value == -1)
                 {
@@ -5761,7 +5760,7 @@ ref strNewStyle);	// 不要数据体和metadata
 
             }
 
-        this.ClearRedoCount();
+            this.ClearRedoCount();
             return 0;
         }
 
@@ -5934,27 +5933,27 @@ ref strNewStyle);	// 不要数据体和metadata
 
         public int DoTest(string strText)
         {
-                IAsyncResult soapresult = this.ws.BeginDoTest(
-                    strText,
-                    null,
-                    null);
+            IAsyncResult soapresult = this.ws.BeginDoTest(
+                strText,
+                null,
+                null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
-                    if (bRet == true)
-                        break;
-                }
+            for (; ; )
+            {
+                DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
+                if (bRet == true)
+                    break;
+            }
 
-                try
-                {
-                    return this.ws.EndDoTest(soapresult);
-                }
-                catch //  (WebException ex)
-                {
-                    return -1;
-                }
+            try
+            {
+                return this.ws.EndDoTest(soapresult);
+            }
+            catch //  (WebException ex)
+            {
+                return -1;
+            }
 
 
         }

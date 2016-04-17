@@ -52,6 +52,28 @@ namespace dp2Circulation
             cell.Relayout();
         }
 
+        // parameters:
+        //      strSpeakStyle   状态/状态+内容
+        public string GetSpeakContent(DpRow row, string strSpeakStyle)
+        {
+            if (this.State == "finish" || this.State == "error")
+            {
+                string strText = "";
+                if (this.Color == "red")
+                    strText = "错误: ";
+                else if (this.Color == "yellow")
+                    strText = "提示: ";
+                else
+                    return "";
+                if (strSpeakStyle == "状态")
+                    return strText;
+                // 状态+内容
+                return strText + this.ErrorInfo;
+            }
+
+            return "";
+        }
+
         public void RefreshDisplay(DpRow row)
         {
             // 初始化列

@@ -27,6 +27,7 @@ using DigitalPlatform.CirculationClient;
 // using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.dp2.Statis;
 
 namespace dp2Circulation
 {
@@ -2097,6 +2098,12 @@ out strError);
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
+                subMenuItem = new MenuItem("到 Excel 文件 [" + nSelectedItemCount.ToString() + "] (&E)...");
+                subMenuItem.Click += new System.EventHandler(this.menu_exportExcelFile_Click);
+                if (nSelectedItemCount == 0)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
                 // ---
                 subMenuItem = new MenuItem("-");
                 menuItem.MenuItems.Add(subMenuItem);
@@ -2217,6 +2224,53 @@ out strError);
             contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
+        }
+
+        // 导出选择的行到 Excel 文件
+        void menu_exportExcelFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要导出的事项";
+                goto ERROR1;
+            }
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_records.SelectedItems)
+            {
+                items.Add(item);
+            }
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在导出选定的事项到 Excel 文件 ...");
+            stop.BeginLoop();
+
+            this.EnableControls(false);
+            try
+            {
+                int nRet = ClosedXmlUtil.ExportToExcel(
+                    stop,
+                    items,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                this.EnableControls(true);
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         void menu_printClaim_Click(object sender, EventArgs e)

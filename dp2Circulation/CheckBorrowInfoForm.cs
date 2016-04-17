@@ -121,19 +121,22 @@ namespace dp2Circulation
         private void button_beginCheckFromReader_Click(object sender, EventArgs e)
         {
             string strError = "";
+
+            bool bAutoRepair = Control.ModifierKeys == Keys.Control;
+
             List<string> barcodes = null;
             int nRet = SearchAllReaderBarcode(out barcodes,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            nRet = CheckAllReaderRecord(barcodes,
+            nRet = CheckReaderRecords(barcodes,
+                bAutoRepair,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             MessageBox.Show(this, "OK");
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -177,7 +180,7 @@ namespace dp2Circulation
                 stop.SetProgressRange(0, lCount);
 
                 Global.WriteHtml(this.webBrowser_resultInfo,
-    "共有 "+lHitCount.ToString()+" 条读者记录。\r\n");
+    "共有 " + lHitCount.ToString() + " 条读者记录。\r\n");
 
 
                 Record[] searchresults = null;
@@ -207,7 +210,7 @@ namespace dp2Circulation
 
                     if (lRet == 0)
                     {
-                        strError =  "未命中";
+                        strError = "未命中";
                         goto ERROR1;
                     }
 
@@ -228,7 +231,7 @@ namespace dp2Circulation
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    stop.SetMessage("共有条码 " + lHitCount .ToString()+ " 个。已获得条码 " + lStart.ToString() + " 个");
+                    stop.SetMessage("共有条码 " + lHitCount.ToString() + " 个。已获得条码 " + lStart.ToString() + " 个");
                     stop.SetProgressValue(lStart);
 
                     if (lStart >= lHitCount || lCount <= 0)
@@ -281,14 +284,20 @@ namespace dp2Circulation
             return -1;
         }
 
-        int CheckAllReaderRecord(List<string> barcodes,
+        // parameters:
+        //      bAutoRepair 是否同时自动修复
+        int CheckReaderRecords(List<string> barcodes,
+            bool bAutoRepair,
             out string strError)
         {
             strError = "";
             long lRet = 0;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行检查 ...");
+            if (bAutoRepair)
+                stop.Initial("正在进行检查和自动修复 ...");
+            else
+                stop.Initial("正在进行检查 ...");
             stop.BeginLoop();
 
             EnableControls(false);
@@ -297,10 +306,18 @@ namespace dp2Circulation
             try
             {
                 Global.WriteHtml(this.webBrowser_resultInfo,
-                    "正在进行检查...\r\n");
+    "\r\n" + DateTime.Now.ToString() + "\r\n");
+
+                if (bAutoRepair)
+                    Global.WriteHtml(this.webBrowser_resultInfo,
+                        "正在进行检查和自动修复...\r\n");
+                else
+                    Global.WriteHtml(this.webBrowser_resultInfo,
+                        "正在进行检查...\r\n");
 
                 stop.SetProgressRange(0, barcodes.Count);
                 int nCount = 0;
+                int nRepairedCount = 0;
                 for (int i = 0; i < barcodes.Count; i++)
                 {
                     Application.DoEvents();	// 出让界面控制权
@@ -314,7 +331,7 @@ namespace dp2Circulation
                     string strReaderBarcode = barcodes[i];
                     string strOutputReaderBarcode = "";
 
-                    stop.SetMessage("正在检查第 "+(i+1).ToString()+" 个读者记录，条码为 " + strReaderBarcode );
+                    stop.SetMessage("正在检查第 " + (i + 1).ToString() + " 个读者记录，条码为 " + strReaderBarcode);
                     stop.SetProgressValue(i);
 
                     int nStart = 0;
@@ -322,9 +339,9 @@ namespace dp2Circulation
                     int nProcessedBorrowItems = 0;
                     int nTotalBorrowItems = 0;
 
+                    bool bFoundError = false;
                     for (; ; )
                     {
-
                         lRet = Channel.RepairBorrowInfo(
                             stop,
                             "checkfromreader",
@@ -345,7 +362,6 @@ namespace dp2Circulation
                             strOffsComment = "(偏移量" + nStart.ToString() + "开始的" + nProcessedBorrowItems + "个借阅册)";
                         }
 
-
                         if (lRet == -1)
                         {
                             Global.WriteHtml(this.webBrowser_resultInfo,
@@ -355,6 +371,7 @@ namespace dp2Circulation
                         {
                             Global.WriteHtml(this.webBrowser_resultInfo,
                                 "检查读者记录 " + strReaderBarcode + " 时" + strOffsComment + "发现问题: " + strError + "\r\n");
+                            bFoundError = true;
                         }
 
                         if (nTotalBorrowItems > 0 && nProcessedBorrowItems == 0)
@@ -369,14 +386,20 @@ namespace dp2Circulation
                             break;
                     }
 
+                    string strReaderXml = "";
+                    string strReaderRecPath = "";
                     // 读者证条码号查重
-                    if (this.checkBox_checkReaderBarcodeDup.Checked == true)
+                    if (this.checkBox_checkReaderBarcodeDup.Checked == true
+                        || bFoundError)
                     {
+                        byte[] baTimestamp = null;
                         string[] results = null;
                         lRet = Channel.GetReaderInfo(stop,
                             strReaderBarcode,
                             "xml",
                             out results,
+                            out strReaderRecPath,
+                            out baTimestamp,
                             out strError);
                         if (lRet == -1)
                         {
@@ -388,15 +411,41 @@ namespace dp2Circulation
                             Global.WriteHtml(this.webBrowser_resultInfo,
                                 "读者证条码号 " + strReaderBarcode + " 有重复记录 " + lRet.ToString() + "条\r\n");
                         }
+                        if (lRet == 1)
+                        {
+                            strReaderXml = results[0];
+                        }
                     }
 
+                    if (bFoundError 
+                        && bAutoRepair
+                        && string.IsNullOrEmpty(strReaderXml) == false)
+                    {
+                        int nRet = RepairAllErrorFromReaderSide(strReaderRecPath,
+                            strReaderXml,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            Global.WriteHtml(this.webBrowser_resultInfo,
+                                "*** 修复读者记录 " + strReaderBarcode + " 内链条问题时出错: " + strError + "\r\n");
+                        }
+                        else
+                        {
+                            Global.WriteHtml(this.webBrowser_resultInfo,
+    "- 成功修复读者记录 " + strReaderBarcode + " 内链条问题\r\n");
+                            nRepairedCount++;
+                        }
+                    }
 
                     nCount++;
                 }
 
-                Global.WriteHtml(this.webBrowser_resultInfo,
-                    "检查结束。共检查读者记录 " + nCount.ToString() + " 条。\r\n");
-
+                if (bAutoRepair)
+                    Global.WriteHtml(this.webBrowser_resultInfo,
+                        "修复结束。共检查读者记录 " + nCount.ToString() + " 条，修复有问题的读者记录 " + nRepairedCount.ToString() + " 条。\r\n");
+                else
+                    Global.WriteHtml(this.webBrowser_resultInfo,
+    "检查结束。共检查读者记录 " + nCount.ToString() + " 条。\r\n");
 
             }
             finally
@@ -410,7 +459,6 @@ namespace dp2Circulation
             }
 
             return 0;
-
         ERROR1:
             return -1;
         }
@@ -456,19 +504,22 @@ namespace dp2Circulation
         private void button_beginCheckFromItem_Click(object sender, EventArgs e)
         {
             string strError = "";
+
+            bool bAutoRepair = Control.ModifierKeys == Keys.Control;
+
             List<string> barcodes = null;
             int nRet = SearchAllItemBarcode(out barcodes,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            nRet = CheckAllItemRecord(barcodes,
+            nRet = CheckItemRecords(barcodes,
+                bAutoRepair,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             MessageBox.Show(this, "OK");
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -583,7 +634,7 @@ namespace dp2Circulation
                 {
                     string strBarcode = barcodes[i];
 
-                    for (int j = i+1; j < barcodes.Count; j++)
+                    for (int j = i + 1; j < barcodes.Count; j++)
                     {
                         if (strBarcode == barcodes[j])
                         {
@@ -736,14 +787,19 @@ namespace dp2Circulation
             return -1;
         }
 
-        
-        int CheckAllItemRecord(List<string> barcodes,
+        // parameters:
+        //      bAutoRepair 是否同时自动修复
+        int CheckItemRecords(List<string> barcodes,
+            bool bAutoRepair,
             out string strError)
         {
             strError = "";
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行检查 ...");
+            if (bAutoRepair)
+                stop.Initial("正在进行检查和自动修复 ...");
+            else
+                stop.Initial("正在进行检查 ...");
             stop.BeginLoop();
 
             EnableControls(false);
@@ -752,11 +808,19 @@ namespace dp2Circulation
             try
             {
                 Global.WriteHtml(this.webBrowser_resultInfo,
-                    "正在进行检查...\r\n");
+"\r\n" + DateTime.Now.ToString() + "\r\n");
+
+                if (bAutoRepair)
+                    Global.WriteHtml(this.webBrowser_resultInfo,
+                        "正在进行检查和自动修复...\r\n");
+                else
+                    Global.WriteHtml(this.webBrowser_resultInfo,
+                        "正在进行检查...\r\n");
 
                 stop.SetProgressRange(0, barcodes.Count);
 
                 int nCount = 0;
+                int nRepairedCount = 0;
                 for (int i = 0; i < barcodes.Count; i++)
                 {
                     Application.DoEvents();	// 出让界面控制权
@@ -798,10 +862,9 @@ namespace dp2Circulation
                             Global.WriteHtml(this.webBrowser_resultInfo,
                                 "检查册记录 " + strItemBarcode + " 时发现册条码号命中重复记录 " + aDupPath.Length.ToString() + "个 -- " + StringUtil.MakePathList(aDupPath) + "。\r\n");
 
-
                             for (int j = 0; j < aDupPath.Length; j++)
                             {
-                                string strText = " 检查其中第 "+(j+1).ToString()+" 个，路径为 " + aDupPath[j] + ": ";
+                                string strText = " 检查其中第 " + (j + 1).ToString() + " 个，路径为 " + aDupPath[j] + ": ";
 
                                 string[] aDupPathTemp = null;
                                 // string strOutputReaderBarcode = "";
@@ -828,6 +891,24 @@ namespace dp2Circulation
 
                                     Global.WriteHtml(this.webBrowser_resultInfo,
                                         strText);
+
+                                    if (bAutoRepair)
+                                    {
+                                        int nRet = RepairErrorFromItemSide(strItemBarcode,
+                                    aDupPath[j],
+                                            out strError);
+                                        if (nRet == -1)
+                                        {
+                                            Global.WriteHtml(this.webBrowser_resultInfo,
+                                                "*** 修复册记录 " + strItemBarcode + " 内链条问题时出错: " + strError + "\r\n");
+                                        }
+                                        else
+                                        {
+                                            Global.WriteHtml(this.webBrowser_resultInfo,
+                    "- 成功修复册记录 " + strItemBarcode + " 内链条问题\r\n");
+                                            nRepairedCount++;
+                                        }
+                                    }
                                 }
 
                             } // end of for
@@ -848,6 +929,24 @@ namespace dp2Circulation
                         {
                             Global.WriteHtml(this.webBrowser_resultInfo,
                                 "检查册记录 " + strItemBarcode + " 时发现问题: " + strError + "\r\n");
+                            
+                            if (bAutoRepair)
+                            {
+                                int nRet = RepairErrorFromItemSide(strItemBarcode,
+                                    "",
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    Global.WriteHtml(this.webBrowser_resultInfo,
+                                        "*** 修复册记录 " + strItemBarcode + " 内链条问题时出错: " + strError + "\r\n");
+                                }
+                                else
+                                {
+                                    Global.WriteHtml(this.webBrowser_resultInfo,
+            "- 成功修复册记录 " + strItemBarcode + " 内链条问题\r\n");
+                                    nRepairedCount++;
+                                }
+                            }
                         }
                         continue;
                     } // end of return -1
@@ -859,40 +958,16 @@ namespace dp2Circulation
                     }
                     if (lRet == 1)
                     {
+                        Debug.Assert(false, "应该走不到这里");
                         Global.WriteHtml(this.webBrowser_resultInfo,
                             "检查册记录 " + strItemBarcode + " 时发现问题: " + strError + "\r\n");
                     }
-
-
-                    /*
-                    if (this.checkBox_checkItemBarcodeDup.Checked == true)
-                    {
-                        string[] paths = null;
-                        lRet = Channel.SearchItemDup(stop,
-                            strItemBarcode,
-                            100,
-                            out paths,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            Global.WriteHtml(this.webBrowser_resultInfo,
-                                "对册条码号 " + strItemBarcode + " 查重时出错: " + strError + "\r\n");
-                        }
-                        if (lRet > 1)
-                        {
-                            Global.WriteHtml(this.webBrowser_resultInfo,
-                                "册条码号 " + strItemBarcode + " 有重复记录 " + paths.Length.ToString() + "条\r\n");
-                        }
-                    }
-                     * */
 
                     nCount++;
                 }
 
                 Global.WriteHtml(this.webBrowser_resultInfo,
                     "检查结束。共检查册记录 " + nCount.ToString() + " 条。\r\n");
-
-
             }
             finally
             {
@@ -913,7 +988,9 @@ namespace dp2Circulation
         private void button_repairReaderSide_Click(object sender, EventArgs e)
         {
             string strError = "";
-            int nRet = RepairError(
+            int nRet = 0;
+
+            nRet = RepairError(
                 "repairreaderside",
                 this.textBox_readerBarcode.Text,
                 this.textBox_itemBarcode.Text,
@@ -926,6 +1003,198 @@ namespace dp2Circulation
         ERROR1:
             MessageBox.Show(this, strError);
 
+        }
+
+        // 从册侧出发，修复一个册记录和相关读者记录的链条错误
+        // return:
+        //      -1  错误。
+        //      0   没有必要修复
+        //      1   已经修复
+        int RepairErrorFromItemSide(string strItemBarcode,
+            string strConfirmItemRecPath,
+            out string strError)
+        {
+            strError = "";
+
+            // 获得册记录
+            string strBiblioRecPath = "";
+            string strItemRecPath = "";
+            byte[] item_timestamp = null;
+
+            string strItemXml = "";
+            string strBiblioText = "";
+
+            // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
+            long lRet = Channel.GetItemInfo(
+                stop,
+                strItemBarcode,
+                "xml",   // strResultType
+                out strItemXml,
+                out strItemRecPath,
+                out item_timestamp,
+                "",  // strBiblioType
+                out strBiblioText,
+                out strBiblioRecPath,
+                out strError);
+            if (lRet == -1)
+            {
+                // 改用 strConfirmItemRecPath 试一下
+                if (string.IsNullOrEmpty(strConfirmItemRecPath) == false)
+                {
+                    lRet = Channel.GetItemInfo(
+stop,
+"@path:" + strConfirmItemRecPath,
+"xml",   // strResultType
+out strItemXml,
+out strItemRecPath,
+out item_timestamp,
+"",  // strBiblioType
+out strBiblioText,
+out strBiblioRecPath,
+out strError);
+                    if (lRet == -1)
+                    {
+                        strError = "获取路径为 '" + strConfirmItemRecPath + "' 的册记录时出错:" + strError;
+                        return -1;
+                    }
+                }
+                strError = "获取册条码号为 '" + strItemBarcode + "' 的册记录时出错:" + strError;
+                return -1;
+            }
+
+            XmlDocument itemdom = new XmlDocument();
+            try
+            {
+                itemdom.LoadXml(strItemXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "册记录装入 XMLDOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+            if (string.IsNullOrEmpty(strItemBarcode))
+            {
+                strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "refID");
+                if (string.IsNullOrEmpty(strItemBarcode))
+                {
+                    strError = "册记录中既没有证条码号，也没有 参考 ID 字段内容，无法进行修复";
+                    return -1;
+                }
+                strItemBarcode = "@refID:" + strItemBarcode;
+            }
+
+            string strBorrower = DomUtil.GetElementText(itemdom.DocumentElement, "borrower");
+            if (string.IsNullOrEmpty(strBorrower) == true)
+            {
+                strError = "没有必要修复";
+                return 0;
+            }
+
+            string[] aDupPath = null;
+
+            string strOutputReaderBarcode = "";
+            int nProcessedBorrowItems = 0;
+            int nTotalBorrowItems = 0;
+            lRet = Channel.RepairBorrowInfo(
+                stop,
+                "repairitemside",
+                strBorrower,
+                strItemBarcode,
+                strConfirmItemRecPath,
+                0,
+                -1,
+                out nProcessedBorrowItems,   // 2008/10/27 
+                out nTotalBorrowItems,   // 2008/10/27 
+                out strOutputReaderBarcode,
+                out aDupPath,
+                out strError);
+            if (lRet == -1)
+            {
+                if (Channel.ErrorCode == ErrorCode.NoError)
+                    return 0;
+                return -1;
+            }
+            else
+                return 1;
+        }
+
+        // 从读者侧出发，修复一个读者记录中，所有册记录的链条错误
+        // return:
+        //      -1  错误。可能有部分册已经修复成功
+        //      其他  共修复多少个册事项
+        int RepairAllErrorFromReaderSide(string strReaderRecPath,
+            string strReaderXml,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument readerdom = new XmlDocument();
+            try
+            {
+                readerdom.LoadXml(strReaderXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "读者记录装入 XMLDOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+            if (string.IsNullOrEmpty(strReaderBarcode))
+            {
+                strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+                if (string.IsNullOrEmpty(strReaderBarcode))
+                {
+                    strError = "读者记录 '" + strReaderRecPath + "' 中既没有证条码号，也没有 参考 ID 字段内容，无法进行修复";
+                    return -1;
+                }
+                strReaderBarcode = "@refID:" + strReaderBarcode;
+            }
+
+            int nRepairedCount = 0;
+            List<string> errors = new List<string>();
+
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+            foreach (XmlElement borrow in nodes)
+            {
+                string strItemBarcode = borrow.GetAttribute("barcode");
+                string strConfirmItemRecPath = borrow.GetAttribute("recPath");
+
+                string[] aDupPath = null;
+
+                string strOutputReaderBarcode = "";
+                int nProcessedBorrowItems = 0;
+                int nTotalBorrowItems = 0;
+                long lRet = Channel.RepairBorrowInfo(
+                    stop,
+                    "repairreaderside",
+                    strReaderBarcode,
+                    strItemBarcode,
+                    strConfirmItemRecPath,
+                    0,
+                    -1,
+                    out nProcessedBorrowItems,   // 2008/10/27 
+                    out nTotalBorrowItems,   // 2008/10/27 
+                    out strOutputReaderBarcode,
+                    out aDupPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (Channel.ErrorCode != ErrorCode.NoError)
+                        errors.Add(strError);
+                }
+                else
+                    nRepairedCount++;
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return -1;
+            }
+            return nRepairedCount;
         }
 
         int RepairError(
@@ -948,70 +1217,70 @@ namespace dp2Circulation
 
             try
             {
-                    string strConfirmItemRecPath = "";
-                REDO:
-                    string[] aDupPath = null;
+                string strConfirmItemRecPath = "";
+            REDO:
+                string[] aDupPath = null;
 
-                    string strOutputReaderBarcode = "";
+                string strOutputReaderBarcode = "";
 
-                    long lRet = Channel.RepairBorrowInfo(
-                        stop,
-                        strAction,  // "repairreaderside",
-                        strReaderBarcode,
-                        strItemBarcode,
-                        strConfirmItemRecPath,
-                        0,
-                        -1,
-                        out nProcessedBorrowItems,   // 2008/10/27 
-                        out nTotalBorrowItems,   // 2008/10/27 
-                        out strOutputReaderBarcode,
-                        out aDupPath,
-                        out strError);
-                    if (lRet == -1)
+                long lRet = Channel.RepairBorrowInfo(
+                    stop,
+                    strAction,  // "repairreaderside",
+                    strReaderBarcode,
+                    strItemBarcode,
+                    strConfirmItemRecPath,
+                    0,
+                    -1,
+                    out nProcessedBorrowItems,   // 2008/10/27 
+                    out nTotalBorrowItems,   // 2008/10/27 
+                    out strOutputReaderBarcode,
+                    out aDupPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (Channel.ErrorCode == ErrorCode.ItemBarcodeDup)
                     {
-                        if (Channel.ErrorCode == ErrorCode.ItemBarcodeDup)
+                        // this.MainForm.PrepareSearch();
+                        LibraryChannel channel = this.MainForm.GetChannel();
+                        try
                         {
-                            // this.MainForm.PrepareSearch();
-                            LibraryChannel channel = this.MainForm.GetChannel();
-                            try
+                            ItemBarcodeDupDlg dupdlg = new ItemBarcodeDupDlg();
+                            MainForm.SetControlFont(dupdlg, this.Font, false);
+                            string strErrorNew = "";
+                            int nRet = dupdlg.Initial(
+                                this.MainForm,
+                                aDupPath,
+                                "因册条码号发生重复，修复操作被拒绝。\r\n\r\n可根据下面列出的详细信息，选择适当的册记录，重试操作。\r\n\r\n原始出错信息:\r\n" + strError,
+                                channel,    // this.MainForm.Channel,
+                                this.MainForm.Stop,
+                                out strErrorNew);
+                            if (nRet == -1)
                             {
-                                ItemBarcodeDupDlg dupdlg = new ItemBarcodeDupDlg();
-                                MainForm.SetControlFont(dupdlg, this.Font, false);
-                                string strErrorNew = "";
-                                int nRet = dupdlg.Initial(
-                                    this.MainForm,
-                                    aDupPath,
-                                    "因册条码号发生重复，修复操作被拒绝。\r\n\r\n可根据下面列出的详细信息，选择适当的册记录，重试操作。\r\n\r\n原始出错信息:\r\n" + strError,
-                                    channel,    // this.MainForm.Channel,
-                                    this.MainForm.Stop,
-                                    out strErrorNew);
-                                if (nRet == -1)
-                                {
-                                    // 初始化对话框失败
-                                    MessageBox.Show(this, strErrorNew);
-                                    goto ERROR1;
-                                }
-
-                                this.MainForm.AppInfo.LinkFormState(dupdlg, "CheckBorrowInfoForm_dupdlg_state");
-                                dupdlg.ShowDialog(this);
-                                this.MainForm.AppInfo.UnlinkFormState(dupdlg);
-
-                                if (dupdlg.DialogResult == DialogResult.Cancel)
-                                    goto ERROR1;
-
-                                strConfirmItemRecPath = dupdlg.SelectedRecPath;
-
-                                goto REDO;
+                                // 初始化对话框失败
+                                MessageBox.Show(this, strErrorNew);
+                                goto ERROR1;
                             }
-                            finally
-                            {
-                                this.MainForm.ReturnChannel(channel);
-                                // this.MainForm.EndSearch();
-                            }
+
+                            this.MainForm.AppInfo.LinkFormState(dupdlg, "CheckBorrowInfoForm_dupdlg_state");
+                            dupdlg.ShowDialog(this);
+                            this.MainForm.AppInfo.UnlinkFormState(dupdlg);
+
+                            if (dupdlg.DialogResult == DialogResult.Cancel)
+                                goto ERROR1;
+
+                            strConfirmItemRecPath = dupdlg.SelectedRecPath;
+
+                            goto REDO;
                         }
+                        finally
+                        {
+                            this.MainForm.ReturnChannel(channel);
+                            // this.MainForm.EndSearch();
+                        }
+                    }
 
-                        goto ERROR1;
-                    } // end of return -1
+                    goto ERROR1;
+                } // end of return -1
 
             }
             finally
@@ -1234,7 +1503,7 @@ namespace dp2Circulation
 
                     if (lRet == 0)
                     {
-                        strError = "书目数据 '"+strBiblioRecPath+"' 中没有价格信息";
+                        strError = "书目数据 '" + strBiblioRecPath + "' 中没有价格信息";
                         Global.WriteHtml(this.webBrowser_resultInfo,
                             "检查册记录 " + strItemBarcode + " 时警告(5): " + strError + "\r\n");
                         continue;
@@ -1435,7 +1704,7 @@ namespace dp2Circulation
             }
 
 
-            if (strPrefix.IndexOf("CNY") != -1 
+            if (strPrefix.IndexOf("CNY") != -1
                 || strPrefix.IndexOf("cny") != -1
                 || strPrefix.IndexOf("ＣＮＹ") != -1
                 || strPrefix.IndexOf("ｃｎｙ") != -1
@@ -1451,13 +1720,13 @@ namespace dp2Circulation
                 goto DONE;
             }
 
-            DONE:
-                // 人民币
-                if (bCNY == true)
-                    return "CNY" + strValue;
+        DONE:
+            // 人民币
+            if (bCNY == true)
+                return "CNY" + strValue;
 
             // 其他货币
-                return strPrefix + strValue + strPostfix;
+            return strPrefix + strValue + strPostfix;
 
         }
 
@@ -1480,75 +1749,64 @@ namespace dp2Circulation
             string strText = "";
             try
             {
-                    string strItemBarcode = this.textBox_single_itemBarcode.Text;
-                    string strOutputReaderBarcode = "";
+                string strItemBarcode = this.textBox_single_itemBarcode.Text;
+                string strOutputReaderBarcode = "";
 
-                    int nProcessedBorrowItems = 0;
-                    int nTotalBorrowItems = 0;
+                int nProcessedBorrowItems = 0;
+                int nTotalBorrowItems = 0;
 
-                    long lRet = Channel.RepairBorrowInfo(
-                        stop,
-                        "checkfromitem",
-                        "",
-                        strItemBarcode,
-                        "",
-                        0,
-                        -1,
-                        out nProcessedBorrowItems,   // 2008/10/27 
-                        out nTotalBorrowItems,   // 2008/10/27 
-                        out strOutputReaderBarcode,
-                        out aDupPath,
-                        out strError);
-                    if (lRet == -1 || lRet == 1)
+                long lRet = Channel.RepairBorrowInfo(
+                    stop,
+                    "checkfromitem",
+                    "",
+                    strItemBarcode,
+                    "",
+                    0,
+                    -1,
+                    out nProcessedBorrowItems,   // 2008/10/27 
+                    out nTotalBorrowItems,   // 2008/10/27 
+                    out strOutputReaderBarcode,
+                    out aDupPath,
+                    out strError);
+                if (lRet == -1 || lRet == 1)
+                {
+                    if (Channel.ErrorCode == ErrorCode.ItemBarcodeDup)
                     {
-                        if (Channel.ErrorCode == ErrorCode.ItemBarcodeDup)
+                        List<string> linkedPath = new List<string>();
+
+                        strText += "检查册记录 " + strItemBarcode + " 时发现册条码号命中重复记录 " + aDupPath.Length.ToString() + "个。检查其中\r\n";
+
+                        for (int j = 0; j < aDupPath.Length; j++)
                         {
-                            List<string> linkedPath = new List<string>();
+                            strText += " 第 " + (j + 1).ToString() + " 个，路径为 " + aDupPath[j] + " \r\n";
 
-                            strText += "检查册记录 " + strItemBarcode + " 时发现册条码号命中重复记录 " + aDupPath.Length.ToString() + "个。检查其中\r\n";
-
-                            for (int j = 0; j < aDupPath.Length; j++)
+                            string[] aDupPathTemp = null;
+                            long lRet_2 = Channel.RepairBorrowInfo(
+                                stop,
+                                "checkfromitem",
+                                "",
+                                strItemBarcode,
+                                aDupPath[j],
+                    0,
+                    -1,
+                    out nProcessedBorrowItems,   // 2008/10/27 
+                    out nTotalBorrowItems,   // 2008/10/27 
+                                out strOutputReaderBarcode,
+                                out aDupPathTemp,
+                                out strError);
+                            if (lRet_2 == -1)
                             {
-                                strText += " 第 " + (j + 1).ToString() + " 个，路径为 " + aDupPath[j] + " \r\n";
+                                goto ERROR1;
+                            }
+                            if (lRet_2 == 1)
+                            {
+                                strText += "  发现问题: " + strError + "\r\n";
+                            }
 
-                                string[] aDupPathTemp = null;
-                                long lRet_2 = Channel.RepairBorrowInfo(
-                                    stop,
-                                    "checkfromitem",
-                                    "",
-                                    strItemBarcode,
-                                    aDupPath[j],
-                        0,
-                        -1,
-                        out nProcessedBorrowItems,   // 2008/10/27 
-                        out nTotalBorrowItems,   // 2008/10/27 
-                                    out strOutputReaderBarcode,
-                                    out aDupPathTemp,
-                                    out strError);
-                                if (lRet_2 == -1)
-                                {
-                                    goto ERROR1;
-                                }
-                                if (lRet_2 == 1)
-                                {
-                                    strText += "  发现问题: " + strError + "\r\n";
-                                }
+                        } // end of for
 
-                            } // end of for
-
-                            goto END1;
-                        }
-
-                        if (lRet == -1)
-                        {
-                            strText += "检查册记录 " + strItemBarcode + " 时出错: " + strError + "\r\n";
-                        }
-                        if (lRet == 1)
-                        {
-                            strText += "检查册记录 " + strItemBarcode + " 时发现问题: " + strError + "\r\n";
-                        }
                         goto END1;
-                    } // end of return -1 or 1
+                    }
 
                     if (lRet == -1)
                     {
@@ -1558,31 +1816,42 @@ namespace dp2Circulation
                     {
                         strText += "检查册记录 " + strItemBarcode + " 时发现问题: " + strError + "\r\n";
                     }
+                    goto END1;
+                } // end of return -1 or 1
+
+                if (lRet == -1)
+                {
+                    strText += "检查册记录 " + strItemBarcode + " 时出错: " + strError + "\r\n";
+                }
+                if (lRet == 1)
+                {
+                    strText += "检查册记录 " + strItemBarcode + " 时发现问题: " + strError + "\r\n";
+                }
 
 
-                    if (string.IsNullOrEmpty(strItemBarcode) == false)
+                if (string.IsNullOrEmpty(strItemBarcode) == false)
+                {
+                    string[] paths = null;
+                    /*
+                    lRet = Channel.SearchItemDup(stop,
+                        strItemBarcode,
+                        100,
+                        out paths,
+                        out strError);
+                     * */
+                    lRet = SearchEntityBarcode(stop,
+                        strItemBarcode,
+                        out paths,
+                        out strError);
+                    if (lRet == -1)
                     {
-                        string[] paths = null;
-                        /*
-                        lRet = Channel.SearchItemDup(stop,
-                            strItemBarcode,
-                            100,
-                            out paths,
-                            out strError);
-                         * */
-                        lRet = SearchEntityBarcode(stop,
-                            strItemBarcode,
-                            out paths,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            strText += "对册条码号 " + strItemBarcode + " 查重时出错: " + strError + "\r\n";
-                        }
-                        if (lRet > 1)
-                        {
-                            strText += "册条码号 " + strItemBarcode + " 有重复记录 " + paths.Length.ToString() + "条\r\n";
-                        }
+                        strText += "对册条码号 " + strItemBarcode + " 查重时出错: " + strError + "\r\n";
                     }
+                    if (lRet > 1)
+                    {
+                        strText += "册条码号 " + strItemBarcode + " 有重复记录 " + paths.Length.ToString() + "条\r\n";
+                    }
+                }
 
 
             }
@@ -1595,7 +1864,7 @@ namespace dp2Circulation
                 stop.Initial("");
             }
 
-            END1:
+        END1:
             if (strText == "")
                 MessageBox.Show(this, "没有发现问题。");
             else
@@ -1669,6 +1938,8 @@ out strError);
             string strError = "";
             int nRet = 0;
 
+            bool bAutoRepair = Control.ModifierKeys == Keys.Control;
+
             if (this.textBox_single_readerBarcode.Text == "")
             {
                 strError = "尚未指定要检查的读者证条码号";
@@ -1678,7 +1949,8 @@ out strError);
             List<string> barcodes = new List<string>();
             barcodes.Add(this.textBox_single_readerBarcode.Text);
 
-            nRet = CheckAllReaderRecord(barcodes,
+            nRet = CheckReaderRecords(barcodes,
+                bAutoRepair,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;

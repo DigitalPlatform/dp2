@@ -29,7 +29,7 @@ namespace dp2Kernel
      * */
 
     [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple,
-        Namespace="http://dp2003.com/dp2kernel/")]
+        Namespace = "http://dp2003.com/dp2kernel/")]
     public class KernelService : IKernelService, IDisposable
     {
         KernelApplication app = null;
@@ -1381,8 +1381,7 @@ namespace dp2Kernel
         // result:
         //		Result对象,
         //		value == -1	出错
-        //			  >= 1	结果集的总数
-        //			  == 0	0条
+        //			  == 0	成功
         public Result GetBrowse(
             string[] paths,
             string strStyle,
@@ -1396,7 +1395,6 @@ namespace dp2Kernel
 
             try
             {
-
                 if (this.sessioninfo.UserName == "")
                 {
                     result.Value = -1;
@@ -2824,7 +2822,7 @@ namespace dp2Kernel
             string strName,
             string strAction,
             TaskInfo info,
-            out TaskInfo [] results)
+            out TaskInfo[] results)
         {
             string strError = "";
             results = null;
