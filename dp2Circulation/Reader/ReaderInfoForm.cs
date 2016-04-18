@@ -1823,7 +1823,7 @@ strNewDefault);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.Channel.LibraryCodeList,
+                    this.MainForm.FocusLibraryCode, // 是否可以根据读者库的馆代码？或者现在已经有了服务器校验功能，这里已经没有必要校验了? // this.Channel.LibraryCodeList,
                     this.readerEditControl1.Barcode,
                     out strError);
                 if (nRet == -1)
@@ -2292,7 +2292,7 @@ strSavedXml);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.Channel.LibraryCodeList,
+                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.readerEditControl1.Barcode,
                     out strError);
                 if (nRet == -1)
@@ -3292,7 +3292,7 @@ MessageBoxDefaultButton.Button2);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.Channel.LibraryCodeList,
+                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.readerEditControl1.Barcode,
                     out strError);
                 if (nRet == -1)
@@ -3628,7 +3628,7 @@ MessageBoxDefaultButton.Button2);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.Channel.LibraryCodeList,
+                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.readerEditControl1.Barcode,
                     out strError);
                 if (nRet == -1)

@@ -1350,7 +1350,7 @@ namespace dp2Circulation
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.Channel.LibraryCodeList,
+                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.textBox_readerBarcode.Text,
                     out strError);
                 if (nRet == -1)
@@ -1988,7 +1988,7 @@ dlg.UiState);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.Channel.LibraryCodeList,
+                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.textBox_itemBarcode.Text,
                     out strError);
                 if (nRet == -1)

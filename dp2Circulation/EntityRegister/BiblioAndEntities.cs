@@ -1825,6 +1825,7 @@ MessageBoxDefaultButton.Button2);
                     //      1   是合法的读者证条码号
                     //      2   是合法的册条码号
                     nRet = this.DoVerifyBarcode(
+                        Global.GetLibraryCode(StringUtil.GetPureLocation(edit.LocationString)),
                         edit.Barcode,
                         out strError);
                     if (nRet == -1)
@@ -1873,6 +1874,7 @@ MessageBoxDefaultButton.Button2);
         /// <summary>
         /// 形式校验条码号
         /// </summary>
+        /// <param name="strLibraryCode">馆代码</param>
         /// <param name="strBarcode">册条码号</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>
@@ -1882,7 +1884,9 @@ MessageBoxDefaultButton.Button2);
         /// <para>      1   是合法的读者证条码号</para>
         /// <para>      2   是合法的册条码号</para>
         /// </returns>
-        public int DoVerifyBarcode(string strBarcode,
+        public int DoVerifyBarcode(
+            string strLibraryCode,
+            string strBarcode,
             out string strError)
         {
             if (this.VerifyBarcode == null)
@@ -1893,6 +1897,7 @@ MessageBoxDefaultButton.Button2);
 
             VerifyBarcodeEventArgs e = new VerifyBarcodeEventArgs();
             e.Barcode = strBarcode;
+            e.LibraryCode = strLibraryCode;
             this.VerifyBarcode(this, e);
             strError = e.ErrorInfo;
             return e.Result;

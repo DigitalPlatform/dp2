@@ -73,6 +73,7 @@ namespace dp2Circulation
         /// <summary>
         /// 形式校验条码号
         /// </summary>
+        /// <param name="strLibraryCode">册所在的图书馆代码</param>
         /// <param name="strBarcode">册条码号</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>
@@ -82,7 +83,9 @@ namespace dp2Circulation
         /// <para>      1   是合法的读者证条码号</para>
         /// <para>      2   是合法的册条码号</para>
         /// </returns>
-        public int DoVerifyBarcode(string strBarcode,
+        public int DoVerifyBarcode(
+            string strLibraryCode,
+            string strBarcode,
             out string strError)
         {
             if (this.VerifyBarcode == null)
@@ -93,6 +96,7 @@ namespace dp2Circulation
 
             VerifyBarcodeEventArgs e = new VerifyBarcodeEventArgs();
             e.Barcode = strBarcode;
+            e.LibraryCode = strLibraryCode;
             this.VerifyBarcode(this, e);
             strError = e.ErrorInfo;
             return e.Result;
@@ -3618,6 +3622,10 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
     /// </summary>
     public class VerifyBarcodeEventArgs : EventArgs
     {
+        /// <summary>
+        /// 馆代码
+        /// </summary>
+        public string LibraryCode = "";
         /// <summary>
         /// 条码号
         /// </summary>
