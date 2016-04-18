@@ -4039,6 +4039,20 @@ out strError);
             return result;
         }
 
+        // 在字符串数组中指定下标位置设置一个元素值
+        static void SetResult(List<string> results_list,
+            int index,
+            string strValue)
+        {
+            while (results_list.Count <= index)
+            {
+                results_list.Add("");
+            }
+
+            results_list[index] = strValue;
+        }
+
+
         // 创建读者记录返回格式
         // 注：出于安全需要，readerdom 和 strXml 在调用前就应该把里面的 barcode 元素删除
         // parameters:
@@ -4056,7 +4070,7 @@ out strError);
             OperType operType,  // html 时需要
             string[] saBorrowedItemBarcode,
             string strCurrentItemBarcode,
-            ref string[] results,
+            ref string[] results_param,
             out string strError)
         {
             strError = "";
@@ -4064,16 +4078,18 @@ out strError);
 
             if (string.IsNullOrEmpty(strResultTypeList) == true)
             {
-                results = new string[0];
+                results_param = new string[0];
                 return 0;
             }
 
             string[] result_types = strResultTypeList.Split(new char[] { ',' });
-            results = new string[result_types.Length];
+            //results = new string[result_types.Length];
+            List<string> results_list = new List<string>();
 
-            for (int i = 0; i < result_types.Length; i++)
+            int i = 0;
+            foreach (string strResultType in result_types)
             {
-                string strResultType = result_types[i];
+                // string strResultType = result_types[i];
 
                 // 2008/4/3 
                 // if (String.Compare(strResultType, "calendar", true) == 0)
@@ -4113,7 +4129,8 @@ out strError);
                     if (calendar != null)
                         strCalendarName = calendar.Name;
 
-                    results[i] = strCalendarName;
+                    // results[i] = strCalendarName;
+                    SetResult(results_list, i, strCalendarName);
                 }
                 // else if (String.Compare(strResultType, "xml", true) == 0)
                 else if (IsResultType(strResultType, "xml") == true)
@@ -4129,20 +4146,28 @@ out strError);
                         strError = "获取 " + strResultType + " 格式的 XML 字符串时出错: " + strError;
                         goto ERROR1;
                     }
-                    results[i] = strResultXml;
+                    // results[i] = strResultXml;
+                    SetResult(results_list, i, strResultXml);
                 }
                 else if (String.Compare(strResultType, "timestamp", true) == 0)
                 {
                     // 2011/1/27
-                    results[i] = ByteArray.GetHexTimeStampString(baTimestamp);
+                    // results[i] = ByteArray.GetHexTimeStampString(baTimestamp);
+                    SetResult(results_list, i, ByteArray.GetHexTimeStampString(baTimestamp));
                 }
                 else if (String.Compare(strResultType, "recpaths", true) == 0)
                 {
                     // 2013/5/21
                     if (recpaths != null)
-                        results[i] = StringUtil.MakePathList(recpaths);
+                    {
+                        // results[i] = StringUtil.MakePathList(recpaths);
+                        SetResult(results_list, i, StringUtil.MakePathList(recpaths));
+                    }
                     else
-                        results[i] = strOutputPath;
+                    {
+                        // results[i] = strOutputPath;
+                        SetResult(results_list, i, strOutputPath);
+                    }
                 }
                 else if (String.Compare(strResultType, "advancexml_borrow_bibliosummary", true) == 0
                     || String.Compare(strResultType, "advancexml_overdue_bibliosummary", true) == 0
@@ -4178,12 +4203,14 @@ out strError);
                         if (nRet == -1)
                         {
                             strSummary = "读者 XML 装入 DOM 出错: " + strError;
-                            results[i] = strSummary;
-                            continue;
+                            // results[i] = strSummary;
+                            SetResult(results_list, i, strSummary);
+                            goto CONTINUE;
                         }
                     }
                     strSummary = DomUtil.GetElementText(readerdom.DocumentElement, "name");
-                    results[i] = strSummary;
+                    // results[i] = strSummary;
+                    SetResult(results_list, i, strSummary);
                 }
                 // else if (String.Compare(strResultType, "advancexml", true) == 0)
                 else if (IsResultType(strResultType, "advancexml") == true)
@@ -4202,7 +4229,8 @@ out strError);
                         strError = "GetAdvanceReaderXml()出错: " + strError;
                         goto ERROR1;
                     }
-                    results[i] = strOutputXml;
+                    // results[i] = strOutputXml;
+                    SetResult(results_list, i, strOutputXml);
                 }
                 // else if (String.Compare(strResultType, "html", true) == 0)
                 else if (IsResultType(strResultType, "html") == true)
@@ -4228,7 +4256,8 @@ out strError);
                         goto ERROR1;
                     }
                     // test strReaderRecord = "<html><body><p>test</p></body></html>";
-                    results[i] = strReaderRecord;
+                    // results[i] = strReaderRecord;
+                    SetResult(results_list, i, strReaderRecord);
                 }
                 // else if (String.Compare(strResultType, "text", true) == 0)
                 else if (IsResultType(strResultType, "text") == true)
@@ -4253,15 +4282,20 @@ out strError);
                         strError = "ConvertReaderXmlToHtml()出错(脚本程序为" + this.CfgDir + "\\readerxml2html.cs" + "): " + strError;
                         goto ERROR1;
                     }
-                    results[i] = strReaderRecord;
+                    // results[i] = strReaderRecord;
+                    SetResult(results_list, i, strReaderRecord);
                 }
                 else
                 {
                     strError = "未知的结果类型 '" + strResultType + "'";
                     goto ERROR1;
                 }
+
+            CONTINUE:
+                i++;
             }
 
+            results_param = results_list.ToArray();
             return 0;
         ERROR1:
             return -1;
