@@ -1993,7 +1993,7 @@ true);
         {
             string strError = "";
             e.Result = this.VerifyBarcode(
-                this.CurrentLibraryCodeList,
+                e.LibraryCode, // this.CurrentLibraryCodeList,
                 e.Barcode,
                 out strError);
             e.ErrorInfo = strError;
@@ -2202,7 +2202,7 @@ true);
         {
             string strError = "";
             e.Result = this.VerifyBarcode(
-                this.CurrentLibraryCodeList,
+                e.LibraryCode, // this.CurrentLibraryCodeList,
                 e.Barcode,
                 out strError);
             e.ErrorInfo = strError;
@@ -9767,7 +9767,7 @@ merge_dlg.UiState);
                     //      1   是合法的读者证条码号
                     //      2   是合法的册条码号
                     nRet = VerifyBarcode(
-                        this.CurrentLibraryCodeList,
+                        this.MainForm.FocusLibraryCode, // this.CurrentLibraryCodeList,
                         this.textBox_itemBarcode.Text,
                         out strError);
                     if (nRet == -1)

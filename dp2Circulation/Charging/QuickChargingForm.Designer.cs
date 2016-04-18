@@ -518,6 +518,7 @@
             this.toolStripDropDownButton_selectLibraryCode.Size = new System.Drawing.Size(69, 17);
             this.toolStripDropDownButton_selectLibraryCode.Text = "选择分馆";
             this.toolStripDropDownButton_selectLibraryCode.ToolTipText = "选择当前操作所针对的分馆";
+            this.toolStripDropDownButton_selectLibraryCode.Visible = false;
             // 
             // QuickChargingForm
             // 

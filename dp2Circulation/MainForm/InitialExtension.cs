@@ -2158,7 +2158,7 @@ AppInfo.GetString("config",
                     if (nRet == -1)
                         goto END1;
 
-                    // 只有在前一步没有错出的情况下才探测版本号
+                    // 只有在前一步没有出错的情况下才探测版本号
                     if (nRet == 0)
                     {
                         // 检查dp2Library版本号
@@ -2268,6 +2268,8 @@ AppInfo.GetString("config",
                     nRet = CheckServerClock(false, out strError);
                     if (nRet != 0)
                         MessageBox.Show(this, strError);
+
+                    this.BeginInvoke(new Action(FillLibraryCodeListMenu));
                 }
                 finally
                 {
@@ -4893,6 +4895,101 @@ Culture=neutral, PublicKeyToken=null
             }
 
             return 0;
+        }
+
+        string _focusLibraryCode = "";
+
+        // 当前操作所针对的分馆 代码
+        // 注: 全局用户可以操作任何分管，和总馆，通过此成员，可以明确它当前正在操作哪个分馆，这样可以明确 VerifyBarcode() 的 strLibraryCodeList 参数值
+        public string FocusLibraryCode
+        {
+            get
+            {
+                return _focusLibraryCode;
+            }
+            set
+            {
+                this._focusLibraryCode = value;
+                string strName = string.IsNullOrEmpty(value) == true ? "[总馆]" : value;
+                this.toolStripDropDownButton_selectLibraryCode.Text = "选择分馆 " + strName;
+            }
+        }
+
+        void FillLibraryCodeListMenu()
+        {
+            string strError = "";
+            List<string> all_library_codes = null;
+            int nRet = this.GetAllLibraryCodes(out all_library_codes, out strError);
+
+            List<string> library_codes = new List<string>();
+            if (Global.IsGlobalUser(_currentLibraryCodeList) == true)
+            {
+                library_codes = all_library_codes;
+                library_codes.Insert(0, "");
+            }
+            else
+                library_codes = StringUtil.SplitList(_currentLibraryCodeList);
+
+            this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Clear();
+            foreach (string library_code in library_codes)
+            {
+                string strName = library_code;
+                if (string.IsNullOrEmpty(strName) == true)
+                    strName = "[总馆]";
+                ToolStripItem item = new ToolStripMenuItem(strName);
+                item.Tag = library_code;
+                item.Click += item_Click;
+                this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Add(item);
+            }
+
+            // 默认选定第一项
+            if (this.toolStripDropDownButton_selectLibraryCode.DropDownItems.Count > 0)
+                item_Click(this.toolStripDropDownButton_selectLibraryCode.DropDownItems[0], new EventArgs());
+        }
+
+        void item_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem item = (ToolStripMenuItem)sender;
+            foreach (ToolStripMenuItem current in this.toolStripDropDownButton_selectLibraryCode.DropDownItems)
+            {
+                if (current != item && current.Checked == true)
+                    current.Checked = false;
+            }
+            item.Checked = true;
+            FocusLibraryCode = item.Tag as string;
+        }
+
+        // 获得全部可用的图书馆代码。注意，并不包含 "" (全局)
+        public int GetAllLibraryCodes(out List<string> library_codes,
+            out string strError)
+        {
+            strError = "";
+            library_codes = new List<string>();
+
+            LibraryChannel channel = this.GetChannel();
+            Stop.OnStop += new StopEventHandler(this.DoStop);
+            Stop.Initial("正在获得全部馆代码 ...");
+            Stop.BeginLoop();
+            try
+            {
+                string strValue = "";
+                long lRet = channel.GetSystemParameter(Stop,
+                    "system",
+                    "libraryCodes",
+                    out strValue,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+                library_codes = StringUtil.SplitList(strValue);
+                return 0;
+            }
+            finally
+            {
+                Stop.EndLoop();
+                Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+                this.ReturnChannel(channel);
+            }
         }
 
     }

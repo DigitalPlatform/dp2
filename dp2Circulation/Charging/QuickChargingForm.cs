@@ -161,9 +161,10 @@ namespace dp2Circulation
                 SetReaderHtmlString("(空)");
             }
 
-            this.BeginInvoke(new Action(FillLibraryCodeListMenu));
+            // this.BeginInvoke(new Action(FillLibraryCodeListMenu));
         }
 
+#if NO
         string _focusLibraryCode = "";
 
         // 当前操作所针对的分馆 代码
@@ -224,6 +225,8 @@ namespace dp2Circulation
             item.Checked = true;
             FocusLibraryCode = item.Tag as string;
         }
+
+#endif
 
         void m_webExternalHost_readerInfo_OutputDebugInfo(object sender, OutputDebugInfoEventArgs e)
         {
@@ -1555,7 +1558,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                     //      1   是合法的读者证条码号
                     //      2   是合法的册条码号
                     int nRet = VerifyBarcode(
-                        this.FocusLibraryCode,  // this.Channel.LibraryCodeList,
+                        this.MainForm.FocusLibraryCode,  // this.Channel.LibraryCodeList,
                         strText,
                         out strError);
                     if (nRet == -2)

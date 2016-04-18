@@ -1272,11 +1272,10 @@ MessageBoxDefaultButton.Button2);
         /// </summary>
         public void SaveReaderToTemplate()
         {
+            string strError = "";
             this.EnableControls(false);
-
             try
             {
-
                 // 获得路径行中已经有的读者库名
                 string strReaderDbName = Global.GetDbName(this.readerEditControl1.RecPath);
 
@@ -1294,13 +1293,9 @@ MessageBoxDefaultButton.Button2);
 
                 strReaderDbName = dlg.DbName;
 
-
                 // 下载模板配置文件
                 string strContent = "";
-                string strError = "";
-
                 byte[] baTimestamp = null;
-
                 // return:
                 //      -1  error
                 //      0   not found
@@ -1322,7 +1317,6 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -1)
                     goto ERROR1;
 
-
                 tempdlg.Text = "请选择要修改的模板记录";
                 tempdlg.CheckNameExist = false;	// 按OK按钮时不警告"名字不存在",这样允许新建一个模板
                 //tempdlg.ap = this.MainForm.applicationInfo;
@@ -1339,6 +1333,7 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -1)
                     goto ERROR1;
 
+#if NO
                 // 需要消除password/displayName元素内容
                 {
                     XmlDocument dom = new XmlDocument();
@@ -1351,13 +1346,18 @@ MessageBoxDefaultButton.Button2);
                         strError = "装载XML到DOM出错: " + ex.Message;
                         goto ERROR1;
                     }
-                    DomUtil.SetElementText(dom.DocumentElement,
-                        "password", "");
-                    DomUtil.SetElementText(dom.DocumentElement,
-                        "displayName", "");
+                    DomUtil.DeleteElement(dom.DocumentElement, "password");
+                    DomUtil.DeleteElement(dom.DocumentElement, "displayName");
+                    DomUtil.DeleteElement(dom.DocumentElement, "refID");
 
                     strNewXml = dom.OuterXml;
                 }
+#endif
+                nRet = ClearReserveFields(
+            ref strNewXml,
+            out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
                 // 修改配置文件内容
                 if (tempdlg.textBox_name.Text != "")
@@ -1387,14 +1387,13 @@ MessageBoxDefaultButton.Button2);
 
                 this.MainForm.StatusBarMessage = "修改模板成功。";
                 return;
-
-            ERROR1:
-                MessageBox.Show(this, strError);
             }
             finally
             {
                 this.EnableControls(true);
             }
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         // 装载读者记录模板
@@ -1824,7 +1823,7 @@ strNewDefault);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.Channel.LibraryCodeList,
+                    this.MainForm.FocusLibraryCode, // 是否可以根据读者库的馆代码？或者现在已经有了服务器校验功能，这里已经没有必要校验了? // this.Channel.LibraryCodeList,
                     this.readerEditControl1.Barcode,
                     out strError);
                 if (nRet == -1)
@@ -2244,21 +2243,15 @@ strSavedXml);
                 strError = "装载XML到DOM出错: " + ex.Message;
                 return -1;
             }
-            DomUtil.DeleteElement(dom.DocumentElement,
-                "password");
-            DomUtil.DeleteElement(dom.DocumentElement,
-                "displayName");
+            DomUtil.DeleteElement(dom.DocumentElement, "refID");
+            DomUtil.DeleteElement(dom.DocumentElement, "password");
+            DomUtil.DeleteElement(dom.DocumentElement, "displayName");
             // 2014/11/14
-            DomUtil.DeleteElement(dom.DocumentElement,
-                "fingerprint");
-            DomUtil.DeleteElement(dom.DocumentElement,
-                "hire");
-            DomUtil.DeleteElement(dom.DocumentElement,
-                "foregift");
-            DomUtil.DeleteElement(dom.DocumentElement,
-                "personalLibrary");
-            DomUtil.DeleteElement(dom.DocumentElement,
-                "friends");
+            DomUtil.DeleteElement(dom.DocumentElement, "fingerprint");
+            DomUtil.DeleteElement(dom.DocumentElement, "hire");
+            DomUtil.DeleteElement(dom.DocumentElement, "foregift");
+            DomUtil.DeleteElement(dom.DocumentElement, "personalLibrary");
+            DomUtil.DeleteElement(dom.DocumentElement, "friends");
 
 #if NO
             // 清除<dprms:file>元素
@@ -2299,7 +2292,7 @@ strSavedXml);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.Channel.LibraryCodeList,
+                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.readerEditControl1.Barcode,
                     out strError);
                 if (nRet == -1)
@@ -3299,7 +3292,7 @@ MessageBoxDefaultButton.Button2);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.Channel.LibraryCodeList,
+                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.readerEditControl1.Barcode,
                     out strError);
                 if (nRet == -1)
@@ -3635,7 +3628,7 @@ MessageBoxDefaultButton.Button2);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.Channel.LibraryCodeList,
+                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.readerEditControl1.Barcode,
                     out strError);
                 if (nRet == -1)

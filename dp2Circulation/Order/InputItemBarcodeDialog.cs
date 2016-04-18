@@ -7,12 +7,12 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using System.Threading;
 using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
@@ -180,6 +180,7 @@ string strText)
                     {
                         VerifyBarcodeEventArgs e = new VerifyBarcodeEventArgs();
                         e.Barcode = this.textBox_itemBarcode.Text;
+                        e.LibraryCode = Global.GetLibraryCode(StringUtil.GetPureLocation(book_item.BookItem.Location)); // 2016/4/18
                         this.VerifyBarcode(this, e);
                         // return:
                         //      -2  服务器没有配置校验方法，无法校验

@@ -129,7 +129,7 @@ namespace dp2Circulation
         {
             string strError = "";
             e.Result = this.VerifyBarcode(
-                this.Channel.LibraryCodeList,
+                e.LibraryCode, //this.Channel.LibraryCodeList,
                 e.Barcode,
                 out strError);
             e.ErrorInfo = strError;

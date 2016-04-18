@@ -221,6 +221,10 @@ namespace dp2Circulation
             strError = "";
             int nRet = 0;
 
+            // TODO: 将来这里要允许使用整个 location 字符串，而不仅仅是馆代码，来发起条码号校验
+            string strLocation = this.entityEditControl_editing.LocationString;
+            string strLibraryCode = Global.GetLibraryCode(StringUtil.GetPureLocation(strLocation));
+
             string strBarcode = this.entityEditControl_editing.Barcode;
 
             // 检查册条码号形式是否合法
@@ -236,6 +240,7 @@ namespace dp2Circulation
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = this.EntityControl.DoVerifyBarcode(
+                    strLibraryCode,
                     strBarcode,
                     out strError);
                 if (nRet == -1)
@@ -261,13 +266,12 @@ namespace dp2Circulation
             }
 
             // 馆藏地点字符串里面不能有星号
-            string strLocation = this.entityEditControl_editing.LocationString;
+            // string strLocation = this.entityEditControl_editing.LocationString;
             if (strLocation.IndexOf("*") != -1)
             {
                 strError = "馆藏地点字符串中不允许出现字符 '*'";
                 goto ERROR1;
             }
-
 
             // 价格字符串中不允许出现 @
             string strPrice = this.entityEditControl_editing.Price;

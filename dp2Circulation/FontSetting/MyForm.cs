@@ -385,6 +385,7 @@ namespace dp2Circulation
             }
         }
 
+        // 当前用户能管辖的一个或者多个馆代码
         public string CurrentLibraryCodeList
         {
             get
@@ -425,6 +426,7 @@ namespace dp2Circulation
             this.MainForm.Channel_AfterLogin(sender, e); // 2015/11/4 原来是 this
         }
 
+#if NO
         // 获得全部可用的图书馆代码。注意，并不包含 "" (全局)
         public int GetAllLibraryCodes(out List<string> library_codes,
             out string strError)
@@ -444,6 +446,7 @@ namespace dp2Circulation
 
             return 0;
         }
+#endif
 
         #endregion
 

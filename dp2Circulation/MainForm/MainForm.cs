@@ -3219,6 +3219,8 @@ Stack:
             this.toolButton_verifyReturn.Enabled = bEnable;
             this.toolButton_print.Enabled = bEnable;
             this.toolStripButton_loadBarcode.Enabled = bEnable;
+
+            this.toolStripDropDownButton_selectLibraryCode.Enabled = bEnable;
         }
 
         // 把caption名正规化。
@@ -4203,7 +4205,7 @@ Stack:
             //      1   是合法的读者证条码号
             //      2   是合法的册条码号
             int nRet = VerifyBarcode(
-                this._currentLibraryCodeList,    // this.Channel.LibraryCodeList,
+                this.FocusLibraryCode,  // this._currentLibraryCodeList,    // this.Channel.LibraryCodeList,
                 this.toolStripTextBox_barcode.Text,
                 out strError);
             if (nRet == -1)
@@ -8362,7 +8364,6 @@ Keys keyData)
             this.MessageHub.Connect();
             this.MessageHub.Login();
         }
-
 
     }
 

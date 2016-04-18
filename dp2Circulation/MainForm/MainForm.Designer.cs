@@ -139,6 +139,7 @@ namespace dp2Circulation
             this.MenuItem_printAccountBook = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_printBindingList = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_inventory = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_importExport = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator17 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_openTestSearch = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_window = new System.Windows.Forms.ToolStripMenuItem();
@@ -216,7 +217,7 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.MenuItem_importExport = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripDropDownButton_selectLibraryCode = new System.Windows.Forms.ToolStripDropDownButton();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -1042,6 +1043,13 @@ namespace dp2Circulation
             this.MenuItem_inventory.Text = "盘点(&V)";
             this.MenuItem_inventory.Click += new System.EventHandler(this.MenuItem_inventory_Click);
             // 
+            // MenuItem_importExport
+            // 
+            this.MenuItem_importExport.Name = "MenuItem_importExport";
+            this.MenuItem_importExport.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_importExport.Text = "导入导出(&I)";
+            this.MenuItem_importExport.Click += new System.EventHandler(this.MenuItem_importExport_Click);
+            // 
             // toolStripSeparator17
             // 
             this.toolStripSeparator17.Name = "toolStripSeparator17";
@@ -1299,6 +1307,7 @@ namespace dp2Circulation
             this.toolButton_stop,
             this.toolStripDropDownButton_stopAll,
             this.toolStripSeparator2,
+            this.toolStripDropDownButton_selectLibraryCode,
             this.toolStripLabel1,
             this.toolStripTextBox_barcode,
             this.toolStripButton_loadBarcode,
@@ -1515,7 +1524,7 @@ namespace dp2Circulation
             this.toolButton_readerManage.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_readerManage.Image")));
             this.toolButton_readerManage.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_readerManage.Name = "toolButton_readerManage";
-            this.toolButton_readerManage.Size = new System.Drawing.Size(37, 22);
+            this.toolButton_readerManage.Size = new System.Drawing.Size(37, 18);
             this.toolButton_readerManage.Text = "停借";
             this.toolButton_readerManage.Click += new System.EventHandler(this.toolButton_readerManage_Click);
             // 
@@ -1525,7 +1534,7 @@ namespace dp2Circulation
             this.toolButton_print.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_print.Image")));
             this.toolButton_print.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_print.Name = "toolButton_print";
-            this.toolButton_print.Size = new System.Drawing.Size(53, 22);
+            this.toolButton_print.Size = new System.Drawing.Size(53, 20);
             this.toolButton_print.Text = "打印";
             this.toolButton_print.Click += new System.EventHandler(this.toolButton_print_Click);
             // 
@@ -1746,12 +1755,15 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // MenuItem_importExport
+            // toolStripDropDownButton_selectLibraryCode
             // 
-            this.MenuItem_importExport.Name = "MenuItem_importExport";
-            this.MenuItem_importExport.Size = new System.Drawing.Size(152, 22);
-            this.MenuItem_importExport.Text = "导入导出(&I)";
-            this.MenuItem_importExport.Click += new System.EventHandler(this.MenuItem_importExport_Click);
+            this.toolStripDropDownButton_selectLibraryCode.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripDropDownButton_selectLibraryCode.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_selectLibraryCode.Image")));
+            this.toolStripDropDownButton_selectLibraryCode.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton_selectLibraryCode.Name = "toolStripDropDownButton_selectLibraryCode";
+            this.toolStripDropDownButton_selectLibraryCode.Size = new System.Drawing.Size(69, 22);
+            this.toolStripDropDownButton_selectLibraryCode.Text = "选择分馆";
+            this.toolStripDropDownButton_selectLibraryCode.ToolTipText = "选择当前操作所针对的分馆";
             // 
             // MainForm
             // 
@@ -1982,6 +1994,7 @@ namespace dp2Circulation
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_messageHub;
         private System.Windows.Forms.ToolStripButton toolStripButton_messageHub_relogin;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_importExport;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_selectLibraryCode;
     }
 }
 
