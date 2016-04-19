@@ -2616,6 +2616,12 @@ out strError);
                 goto ERROR1;
             }
              * */
+            bool bOnlyGetPath = StringUtil.IsInList("onlygetpath", strStyle);
+            bool bGetFirstXml = StringUtil.IsInList("getfirstxml", strStyle);
+
+            string strColumnStyle = "id,xml,timestamp";
+            if (bOnlyGetPath)
+                strColumnStyle = "id";
 
             List<EntityInfo> iteminfos = new List<EntityInfo>();
 
@@ -2628,6 +2634,7 @@ out strError);
 
             for (; ; )
             {
+#if NO
                 List<string> aPath = null;
                 lRet = channel.DoGetSearchResult(
                     this.DefaultResultsetName,
@@ -2645,38 +2652,84 @@ out strError);
                     strError = "aPath.Count == 0";
                     goto ERROR1;
                 }
-
-                bool bOnlyGetPath = StringUtil.IsInList("onlygetpath", strStyle);
-                bool bGetFirstXml = StringUtil.IsInList("getfirstxml", strStyle);
+#endif
+                Record[] searchresults = null;
+                lRet = channel.DoGetSearchResult(
+                    this.DefaultResultsetName,
+    nStart,
+    nPerCount,
+    strColumnStyle,
+    strLang,
+    null,
+    out searchresults,
+    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+                if (searchresults == null)
+                {
+                    strError = "searchresults == null";
+                    goto ERROR1;
+                }
+                if (searchresults.Length == 0)
+                {
+                    strError = "searchresults.Length == 0";
+                    goto ERROR1;
+                }
 
                 // 获得每条记录
-                for (int i = 0; i < aPath.Count; i++)
+                // for (int i = 0; i < aPath.Count; i++)
+                foreach (Record record in searchresults)
                 {
                     EntityInfo iteminfo = new EntityInfo();
+                    iteminfo.OldRecPath = record.Path;
+
                     if (bOnlyGetPath == true)
                     {
                         if (bGetFirstXml == false
-                            || i > 0)
+                            || iteminfos.Count > 0)
                         {
-                            iteminfo.OldRecPath = aPath[i];
+                            // iteminfo.OldRecPath = aPath[i];
                             goto CONTINUE;
                         }
                     }
+
                     string strMetaData = "";
                     string strXml = "";
                     byte[] timestamp = null;
                     string strOutputPath = "";
 
-                    lRet = channel.GetRes(aPath[i],
-                        out strXml,
-                        out strMetaData,
-                        out timestamp,
-                        out strOutputPath,
-                        out strError);
+                    if (bGetFirstXml && iteminfos.Count == 0
+    && !(record.RecordBody != null && string.IsNullOrEmpty(record.RecordBody.Xml) == false))
+                    {
+                        lRet = channel.GetRes(// aPath[i],
+                            record.Path,
+                            out strXml,
+                            out strMetaData,
+                            out timestamp,
+                            out strOutputPath,
+                            out strError);
+                    }
+                    else
+                    {
+                        lRet = 0;
+                        if (record.RecordBody != null)
+                        {
+                            strXml = record.RecordBody.Xml;
+                            timestamp = record.RecordBody.Timestamp;
+                            strOutputPath = record.Path;
+                        }
+                        else
+                        {
+                            strOutputPath = record.Path;
+                            iteminfo.ErrorCode = ErrorCodeValue.NotFound;
+                        }
+                    }
 
                     if (lRet == -1)
                     {
-                        iteminfo.OldRecPath = aPath[i];
+                        // iteminfo.OldRecPath = aPath[i];
+                        iteminfo.OldRecPath = record.Path;
+
                         iteminfo.ErrorCode = channel.OriginErrorCode;
                         iteminfo.ErrorInfo = channel.ErrorInfo;
 
@@ -2687,7 +2740,6 @@ out strError);
                         iteminfo.NewRecord = "";
                         iteminfo.NewTimestamp = null;
                         iteminfo.Action = "";
-
 
                         goto CONTINUE;
                     }
@@ -2705,7 +2757,8 @@ out strError);
                     iteminfos.Add(iteminfo);
                 }
 
-                nStart += aPath.Count;
+                // nStart += aPath.Count;
+                nStart += searchresults.Length;
                 if (nStart >= nResultCount)
                     break;
 
@@ -2715,26 +2768,26 @@ out strError);
                 // 修正nPerCount
                 if (iteminfos.Count + nPerCount > lCount)
                     nPerCount = (int)lCount - iteminfos.Count;
-
             }
 
             // 挂接到结果中
+#if NO
             items = new EntityInfo[iteminfos.Count];
             for (int i = 0; i < iteminfos.Count; i++)
             {
                 items[i] = iteminfos[i];
             }
+#endif
+            items = iteminfos.ToArray();
 
             result.Value = nResultCount;    // items.Length;
             return result;
-
         ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
         }
-
 
         // 对事项查重
         public LibraryServerResult SearchItemDup(

@@ -64,6 +64,8 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, this.MainForm.DefaultFont);
             }
 
+            // *** 服务器
+
             // serverurl
             this.textBox_server_dp2LibraryServerUrl.Text =
                 ap.GetString("config",
@@ -94,8 +96,9 @@ namespace dp2Circulation
                 "im_server_url",
                 "http://dp2003.com:8083/dp2MServer");
 
+            // *** 缺省账户
 
-            // default account
+            // 用户名
             this.textBox_defaultAccount_userName.Text =
                 ap.GetString(
                 "default_account",
@@ -124,7 +127,6 @@ namespace dp2Circulation
                 this.textBox_defaultAccount_password.Text = strPassword;
             }
 
-
             this.checkBox_defaultAccount_isReader.Checked =
                 ap.GetBoolean(
                 "default_account",
@@ -139,7 +141,6 @@ namespace dp2Circulation
                 "default_account",
                 "occur_per_start",
                 true);
-
 
             // *** charging
             this.checkBox_charging_force.Checked = ap.GetBoolean(
@@ -176,7 +177,6 @@ namespace dp2Circulation
                 "charging_form",
                 "green_infodlg_not_occur",
                 false);
-
 
             this.checkBox_charging_stopFillingWhenCloseInfoDlg.Checked =
     ap.GetBoolean(
@@ -348,7 +348,8 @@ false);
     "paste_pic_maxwidth",
     "-1");
 
-            // ui
+            // ui 外观
+
             // 停靠
             this.comboBox_ui_fixedPanelDock.Text = this.MainForm.panel_fixed.Dock.ToString();
 
@@ -367,13 +368,14 @@ false);
     "default_font",
     "");
 
+            // *** 入馆登记
             // passgate
-            // 入馆登记
             this.numericUpDown_passgate_maxListItemsCount.Value = ap.GetInt(
                 "passgate_form",
                 "max_list_items_count",
                 1000);
 
+            // 检索
             // search
             this.checkBox_search_useExistDetailWindow.Checked = ap.GetBoolean(
                 "all_search_form",
@@ -418,12 +420,11 @@ false);
                 "max_result_count",
                 -1);
 
-
             // 2008/11/21 
             this.checkBox_search_hideItemMatchStyleAndDbName.Checked = ap.GetBoolean(
                 "item_search_form",
                 "hide_matchstyle_and_dbname",
-                true);
+                false);
 
             // 2008/1/20 
             this.checkBox_search_itemPushFilling.Checked = ap.GetBoolean(
@@ -440,7 +441,7 @@ false);
             this.checkBox_search_hideOrderMatchStyleAndDbName.Checked = ap.GetBoolean(
                 "order_search_form",
                 "hide_matchstyle_and_dbname",
-                true);
+                false);
 
             this.checkBox_search_orderPushFilling.Checked = ap.GetBoolean(
                 "order_search_form",
@@ -472,7 +473,7 @@ false);
             this.checkBox_search_hideCommentMatchStyleAndDbName.Checked = ap.GetBoolean(
                 "comment_search_form",
                 "hide_matchstyle_and_dbname",
-                true);
+                false);
 
             this.checkBox_search_commentPushFilling.Checked = ap.GetBoolean(
                 "comment_search_form",
@@ -1025,7 +1026,6 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "item_search_form",
                 "hide_matchstyle_and_dbname",
                 this.checkBox_search_hideItemMatchStyleAndDbName.Checked);
-
 
             // 2008/1/20 
             ap.SetBoolean(

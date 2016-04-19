@@ -206,7 +206,7 @@ namespace dp2Circulation
                 bool bHideMatchStyle = this.MainForm.AppInfo.GetBoolean(
                     this.DbType + "_search_form",
                     "hide_matchstyle_and_dbname",
-                    true);
+                    false);
                 if (bHideMatchStyle == true)
                 {
                     this.label_matchStyle.Visible = false;

@@ -1557,6 +1557,11 @@ namespace DigitalPlatform.LibraryServer
     out strError);
                 if (lRet == -1)
                     goto ERROR1;
+                if (searchresults == null)
+                {
+                    strError = "searchresults == null";
+                    goto ERROR1;
+                }
 
                 // 获得每条记录
                 // for (int i = 0; i < aPath.Count; i++)
