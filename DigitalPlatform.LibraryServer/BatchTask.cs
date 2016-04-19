@@ -681,7 +681,14 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 // 2009/7/16 移动到这里
-                eventFinished.Set();
+                try
+                {
+                    eventFinished.Set();
+                }
+                catch(ObjectDisposedException)  // 2016/4/19
+                {
+
+                }
 
                 // 2009/7/16 新增
                 this.m_bClosed = true;

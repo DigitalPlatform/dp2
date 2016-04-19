@@ -1,7 +1,6 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
-
 using System.Xml;
 
 using DigitalPlatform.Xml;
@@ -9,14 +8,14 @@ using DigitalPlatform.Xml;
 namespace DigitalPlatform.Library
 {
     /// <summary>
-    /// ISBNºÅ·ÖÎöÆ÷£¬°ïÖú²åÈë'-'
+    /// ISBNå·åˆ†æå™¨ï¼Œå¸®åŠ©æ’å…¥'-'
     /// </summary>
     public class IsbnSplitter1
     {
         XmlDocument dom = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         /// <param name="strIsbnFileName"></param>
         public IsbnSplitter1(string strIsbnFileName)
@@ -48,9 +47,9 @@ namespace DigitalPlatform.Library
             return true;
         }
 
-        
+
         /// <summary>
-        ///  Ğ£ÑéISBNµÚÒ»²¿·ÖÊÇ·ñÕıÈ·
+        ///  æ ¡éªŒISBNç¬¬ä¸€éƒ¨åˆ†æ˜¯å¦æ­£ç¡®
         /// </summary>
         /// <param name="strFirstPart"></param>
         /// <param name="strError"></param>
@@ -62,14 +61,14 @@ namespace DigitalPlatform.Library
 
             if (IsNumber(strFirstPart) == false)
             {
-                strError = "ISBNµÚÒ»²¿·ÖÓ¦µ±Îª´¿Êı×Ö";
+                strError = "ISBNç¬¬ä¸€éƒ¨åˆ†åº”å½“ä¸ºçº¯æ•°å­—";
                 goto WRONG;
             }
 
 
             if (String.IsNullOrEmpty(strFirstPart) == true)
             {
-                strError = "ISBNµÚÒ»²¿·Ö×Ö·ûÊı²»ÄÜÎª0";
+                strError = "ISBNç¬¬ä¸€éƒ¨åˆ†å­—ç¬¦æ•°ä¸èƒ½ä¸º0";
                 goto WRONG;
             }
             if (strFirstPart.Length == 1)
@@ -78,7 +77,7 @@ namespace DigitalPlatform.Library
                     goto CORRECT;
                 else
                 {
-                    strError = "Èç¹ûISBNµÚÒ»²¿·Ö('" + strFirstPart + "')Îª1×Ö·û£¬ÆäÈ¡Öµ·¶Î§Ó¦µ±Îª 0-7";
+                    strError = "å¦‚æœISBNç¬¬ä¸€éƒ¨åˆ†('" + strFirstPart + "')ä¸º1å­—ç¬¦ï¼Œå…¶å–å€¼èŒƒå›´åº”å½“ä¸º 0-7";
                     goto WRONG;
                 }
             }
@@ -88,8 +87,8 @@ namespace DigitalPlatform.Library
                     goto CORRECT;
                 else
                 {
-                    strError = "Èç¹ûISBNµÚÒ»²¿·Ö('"
-                        + strFirstPart + "')Îª2×Ö·û£¬ÆäÈ¡Öµ·¶Î§Ó¦µ±Îª 80-94";
+                    strError = "å¦‚æœISBNç¬¬ä¸€éƒ¨åˆ†('"
+                        + strFirstPart + "')ä¸º2å­—ç¬¦ï¼Œå…¶å–å€¼èŒƒå›´åº”å½“ä¸º 80-94";
                     goto WRONG;
                 }
             }
@@ -100,7 +99,7 @@ namespace DigitalPlatform.Library
                     goto CORRECT;
                 else
                 {
-                    strError = "Èç¹ûISBNµÚÒ»²¿·Ö('" + strFirstPart + "')Îª3×Ö·û£¬ÆäÈ¡Öµ·¶Î§Ó¦µ±Îª 950-994";
+                    strError = "å¦‚æœISBNç¬¬ä¸€éƒ¨åˆ†('" + strFirstPart + "')ä¸º3å­—ç¬¦ï¼Œå…¶å–å€¼èŒƒå›´åº”å½“ä¸º 950-994";
                     goto WRONG;
                 }
             }
@@ -111,7 +110,7 @@ namespace DigitalPlatform.Library
                     goto CORRECT;
                 else
                 {
-                    strError = "Èç¹ûISBNµÚÒ»²¿·Ö('" + strFirstPart + "')Îª4×Ö·û£¬ÆäÈ¡Öµ·¶Î§Ó¦µ±Îª 9950-9989";
+                    strError = "å¦‚æœISBNç¬¬ä¸€éƒ¨åˆ†('" + strFirstPart + "')ä¸º4å­—ç¬¦ï¼Œå…¶å–å€¼èŒƒå›´åº”å½“ä¸º 9950-9989";
                     goto WRONG;
                 }
             }
@@ -122,12 +121,12 @@ namespace DigitalPlatform.Library
                     goto CORRECT;
                 else
                 {
-                    strError = "Èç¹ûISBNµÚÒ»²¿·Ö('" + strFirstPart + "')Îª5×Ö·û£¬ÆäÈ¡Öµ·¶Î§Ó¦µ±Îª 99900-99999";
+                    strError = "å¦‚æœISBNç¬¬ä¸€éƒ¨åˆ†('" + strFirstPart + "')ä¸º5å­—ç¬¦ï¼Œå…¶å–å€¼èŒƒå›´åº”å½“ä¸º 99900-99999";
                     goto WRONG;
                 }
             }
 
-            strError = "ISBNµÚÒ»²¿·Ö×Ö·ûÊı²»ÄÜ³¬¹ı5";
+            strError = "ISBNç¬¬ä¸€éƒ¨åˆ†å­—ç¬¦æ•°ä¸èƒ½è¶…è¿‡5";
         WRONG:
             return -1;
         CORRECT:
@@ -135,7 +134,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ¼ÆËã³öĞ£ÑéÎ»
+        /// è®¡ç®—å‡ºæ ¡éªŒä½
         /// </summary>
         /// <param name="strISBN"></param>
         /// <returns></returns>
@@ -147,7 +146,7 @@ namespace DigitalPlatform.Library
 
 
             if (strISBN.Length < 9)
-                throw new Exception("ÓÃÓÚ¼ÆËãĞ£ÑéÎ»µÄISBN³¤¶ÈÖÁÉÙÒªÔÚ9Î»Êı×ÖÒÔÉÏ(²»°üÀ¨ºá¸ÜÔÚÄÚ)");
+                throw new Exception("ç”¨äºè®¡ç®—æ ¡éªŒä½çš„ISBNé•¿åº¦è‡³å°‘è¦åœ¨9ä½æ•°å­—ä»¥ä¸Š(ä¸åŒ…æ‹¬æ¨ªæ åœ¨å†…)");
 
             int sum = 0;
             for (int i = 0; i < 9; i++)
@@ -163,7 +162,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ÔÚISBN×Ó·û´®ÖĞÊÊµ±µÄÎ»ÖÃ²åÈë'-'·ûºÅ
+        /// åœ¨ISBNå­ç¬¦ä¸²ä¸­é€‚å½“çš„ä½ç½®æ’å…¥'-'ç¬¦å·
         /// </summary>
         /// <param name="strISBN"></param>
         /// <param name="strTarget"></param>
@@ -184,14 +183,14 @@ namespace DigitalPlatform.Library
             strSource = strISBN;
             strSource = strSource.Trim();
 
-            // ÊÇ·ñÎªÌõÂëºÅ
+            // æ˜¯å¦ä¸ºæ¡ç å·
             if (strSource.Length == 13
                 && strSource.IndexOf("-") == -1
                 && strSource.Substring(0, 3) == "978")
             {
-                strSource = strSource.Substring(3, 9);  // ¶ªÆúÇ°ÈıÎ»£¬ºÍ×îºóÒ»Î»
+                strSource = strSource.Substring(3, 9);  // ä¸¢å¼ƒå‰ä¸‰ä½ï¼Œå’Œæœ€åä¸€ä½
 
-                // Ìí¼ÓĞ£ÑéÎ»
+                // æ·»åŠ æ ¡éªŒä½
                 char v = GetIsbnVerifyChar(strSource);
                 strSource += new string(v, 1);
             }
@@ -201,11 +200,11 @@ namespace DigitalPlatform.Library
 
             if (strSource.Length != 10)
             {
-                strError = "ISBNÖĞ(³ı'-'ÒÔÍâ)Ó¦Îª10Î»ÓĞĞ§×Ö·û(" + strSource + " " + Convert.ToString(strSource.Length) + ")";
+                strError = "ISBNä¸­(é™¤'-'ä»¥å¤–)åº”ä¸º10ä½æœ‰æ•ˆå­—ç¬¦(" + strSource + " " + Convert.ToString(strSource.Length) + ")";
                 return -1;
             }
 
-            // ¹Û²ìµÚÒ»²¿·Ö
+            // è§‚å¯Ÿç¬¬ä¸€éƒ¨åˆ†
             string strFirstPart = strSource.Substring(0, 1);
             if (InRange(strFirstPart, "0", "7") == true)
             {
@@ -241,7 +240,7 @@ namespace DigitalPlatform.Library
                 goto DOSECOND;
             }
 
-            strError = "µÚÒ»²¿·Ö¸ñÊ½´íÎó";    // ÊÇ·ñĞèÒª½âÊÍÒ»ÏÂ?
+            strError = "ç¬¬ä¸€éƒ¨åˆ†æ ¼å¼é”™è¯¯";    // æ˜¯å¦éœ€è¦è§£é‡Šä¸€ä¸‹?
             return -1;
 
         DOSECOND:
@@ -249,7 +248,7 @@ namespace DigitalPlatform.Library
             XmlNodeList nodes = this.dom.DocumentElement.SelectNodes("agency/group[@name='" + strFirstPart + "']/range");
             if (nodes.Count == 0)
             {
-                strError = "ISBNÊı¾İÖĞÃ»ÓĞÕÒµ½name='" + strFirstPart + "'µÄ<group>ÔªËØ ...";
+                strError = "ISBNæ•°æ®ä¸­æ²¡æœ‰æ‰¾åˆ°name='" + strFirstPart + "'çš„<group>å…ƒç´  ...";
                 return -1;
             }
 
@@ -266,7 +265,7 @@ namespace DigitalPlatform.Library
                 int nRet = strValue.IndexOf('-');
                 if (nRet == -1)
                 {
-                    strError = "Êı¾İ½Úµã " + node.OuterXml + "¸ñÊ½´íÎó, valueÖµÖĞÎŞ'-'";
+                    strError = "æ•°æ®èŠ‚ç‚¹ " + node.OuterXml + "æ ¼å¼é”™è¯¯, valueå€¼ä¸­æ— '-'";
                     return -1;
                 }
 
@@ -275,7 +274,7 @@ namespace DigitalPlatform.Library
 
                 if (strLeft.Length != strRight.Length)
                 {
-                    strError = "Êı¾İ½Úµã " + node.OuterXml + "¸ñÊ½´íÎó, valueÖµ'" + strValue + "'ÖĞÁ½¸öÊı×Ö¿í¶È²»µÈ¡£";
+                    strError = "æ•°æ®èŠ‚ç‚¹ " + node.OuterXml + "æ ¼å¼é”™è¯¯, valueå€¼'" + strValue + "'ä¸­ä¸¤ä¸ªæ•°å­—å®½åº¦ä¸ç­‰ã€‚";
                     return -1;
                 }
 
@@ -293,7 +292,7 @@ namespace DigitalPlatform.Library
 
             }
 
-            strError = "µÚ¶ş²¿·Ö¸ñÊ½´íÎó nFirstLen=[" + Convert.ToString(nFirstLen);
+            strError = "ç¬¬äºŒéƒ¨åˆ†æ ¼å¼é”™è¯¯ nFirstLen=[" + Convert.ToString(nFirstLen);
             return -1;
 
         FINISH:

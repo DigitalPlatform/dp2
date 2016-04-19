@@ -1513,12 +1513,20 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }*/
 
+            bool bOnlyGetPath = StringUtil.IsInList("onlygetpath", strStyle);
+            bool bGetFirstXml = StringUtil.IsInList("getfirstxml", strStyle);
+
+            string strColumnStyle = "id,xml,timestamp";
+            if (bOnlyGetPath)
+                strColumnStyle = "id";
+
             List<EntityInfo> entityinfos = new List<EntityInfo>();
 
             int nStart = (int)lStart;
             int nPerCount = Math.Min(MAXPERBATCH, (int)lCount); // 2009/6/7 changed
             for (; ; )
             {
+#if NO
                 List<string> aPath = null;
                 lRet = channel.DoGetSearchResult(
                     "entities",
@@ -1536,20 +1544,43 @@ namespace DigitalPlatform.LibraryServer
                     strError = "aPath.Count == 0";
                     goto ERROR1;
                 }
-
-                bool bOnlyGetPath = StringUtil.IsInList("onlygetpath", strStyle);
-                bool bGetFirstXml = StringUtil.IsInList("getfirstxml", strStyle);
+#endif
+                Record[] searchresults = null;
+                lRet = channel.DoGetSearchResult(
+    "entities",
+    nStart,
+    nPerCount,
+    strColumnStyle,
+    strLang,
+    null,
+    out searchresults,
+    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+                if (searchresults == null)
+                {
+                    strError = "searchresults == null";
+                    goto ERROR1;
+                }
+                if (searchresults.Length == 0)
+                {
+                    strError = "searchresults.Length == 0";
+                    goto ERROR1;
+                }
 
                 // 获得每条记录
-                for (int i = 0; i < aPath.Count; i++)
+                // for (int i = 0; i < aPath.Count; i++)
+                foreach (Record record in searchresults)
                 {
                     EntityInfo entityinfo = new EntityInfo();
+                    entityinfo.OldRecPath = record.Path;
+
                     if (bOnlyGetPath == true)
                     {
                         if (bGetFirstXml == false
-                            || i > 0)
+                            || entityinfos.Count > 0)
                         {
-                            entityinfo.OldRecPath = aPath[i];
+                            // entityinfo.OldRecPath = aPath[i];
                             goto CONTINUE;
                         }
                     }
@@ -1559,16 +1590,38 @@ namespace DigitalPlatform.LibraryServer
                     byte[] timestamp = null;
                     string strOutputPath = "";
 
-                    lRet = channel.GetRes(aPath[i],
-                        out strXml,
-                        out strMetaData,
-                        out timestamp,
-                        out strOutputPath,
-                        out strError);
+                    if (bGetFirstXml && entityinfos.Count == 0
+                        && !(record.RecordBody != null && string.IsNullOrEmpty(record.RecordBody.Xml) == false))
+                    {
+                        lRet = channel.GetRes(
+                            // aPath[i],
+                            record.Path,
+                            out strXml,
+                            out strMetaData,
+                            out timestamp,
+                            out strOutputPath,
+                            out strError);
+                    }
+                    else
+                    {
+                        lRet = 0;
+                        if (record.RecordBody != null)
+                        {
+                            strXml = record.RecordBody.Xml;
+                            timestamp = record.RecordBody.Timestamp;
+                            strOutputPath = record.Path;
+                        }
+                        else
+                        {
+                            strOutputPath = record.Path;
+                            entityinfo.ErrorCode = ErrorCodeValue.NotFound;
+                        }
+                    }
 
                     if (lRet == -1)
                     {
-                        entityinfo.OldRecPath = aPath[i];
+                        // entityinfo.OldRecPath = aPath[i];
+                        entityinfo.OldRecPath = record.Path;
                         entityinfo.ErrorCode = channel.OriginErrorCode;
                         entityinfo.ErrorInfo = channel.ErrorInfo;
 
@@ -1579,14 +1632,14 @@ namespace DigitalPlatform.LibraryServer
                         entityinfo.NewRecord = "";
                         entityinfo.NewTimestamp = null;
                         entityinfo.Action = "";
-
                         goto CONTINUE;
                     }
 
                     XmlDocument itemdom = null;
 
                     // 修改<borrower>
-                    if (sessioninfo.GlobalUser == false) // 分馆用户必须要过滤，因为要修改<borrower>
+                    if (sessioninfo.GlobalUser == false // 分馆用户必须要过滤，因为要修改<borrower>
+                        && string.IsNullOrEmpty(strXml) == false)
                     {
                         nRet = LibraryApplication.LoadToDom(strXml,
                             out itemdom,
@@ -1622,7 +1675,8 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 把实体记录按照OPAC要求进行加工，增补一些元素
-                    if (StringUtil.IsInList("opac", strStyle) == true)
+                    if (StringUtil.IsInList("opac", strStyle) == true
+                        && string.IsNullOrEmpty(strXml) == false)
                     {
                         if (itemdom == null)
                         {
@@ -1651,12 +1705,12 @@ namespace DigitalPlatform.LibraryServer
                     entityinfo.NewRecord = "";
                     entityinfo.NewTimestamp = null;
                     entityinfo.Action = "";
-
                 CONTINUE:
                     entityinfos.Add(entityinfo);
                 }
 
-                nStart += aPath.Count;
+                // nStart += aPath.Count;
+                nStart += searchresults.Length;
                 if (nStart >= nResultCount)
                     break;
                 if (entityinfos.Count >= lCount)
@@ -1668,12 +1722,14 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 挂接到结果中
+#if NO
             entities = new EntityInfo[entityinfos.Count];
             for (int i = 0; i < entityinfos.Count; i++)
             {
                 entities[i] = entityinfos[i];
             }
-
+#endif
+            entities = entityinfos.ToArray();
             result.Value = nResultCount;   // entities.Length;
             return result;
         ERROR1:

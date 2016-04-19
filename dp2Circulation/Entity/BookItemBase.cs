@@ -66,9 +66,7 @@ namespace dp2Circulation
             }
             else
                 this.RecordDom.LoadXml("<root />");
-
         }
-
 
         /// <summary>
         /// 时间戳

@@ -594,6 +594,8 @@ namespace DigitalPlatform.LibraryServer
                     break;  // ??
                 }
 
+                // TODO: 要判断 aPath.Count == 0 跳出循环。否则容易进入死循环
+
                 // 处理浏览结果
                 for (int i = 0; i < aPath.Count; i++)
                 {

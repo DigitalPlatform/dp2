@@ -3061,6 +3061,8 @@ true);
             }
 
             LibraryChannel channel = this.GetChannel();
+            // TimeSpan old_timeout = channel.Timeout;
+            // channel.Timeout = new TimeSpan(0, 1, 0);    // 保存大量册记录时可能会耗时长一点
 
             string strMessage = "正在装载书目记录 " + strBiblioRecPath + " " + strPrevNextStyle + " ...";
             Progress.OnStop += new StopEventHandler(this.DoStop);
@@ -3207,6 +3209,7 @@ true);
                             out strError);
                         if (nRet == -1)
                         {
+                            strError = "装载册记录时出错: " + strError;
                             if (channel.ErrorCode == ErrorCode.AccessDenied)
                             {
                                 // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
@@ -3245,6 +3248,7 @@ true);
                             out strError);
                         if (nRet == -1)
                         {
+                            strError = "装载期记录时出错: " + strError;
                             if (channel.ErrorCode == ErrorCode.AccessDenied)
                             {
                                 // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
@@ -3287,6 +3291,7 @@ true);
                             out strError);
                         if (nRet == -1)
                         {
+                            strError = "装载订购记录时出错: " + strError;
                             if (channel.ErrorCode == ErrorCode.AccessDenied)
                             {
                                 // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
@@ -3324,6 +3329,7 @@ true);
                             out strError);
                         if (nRet == -1)
                         {
+                            strError = "装载评注记录时出错: " + strError;
                             if (channel.ErrorCode == ErrorCode.AccessDenied)
                             {
                                 // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
@@ -3357,6 +3363,8 @@ true);
                             out strError);
                         if (nRet == -1)
                         {
+                            strError = "装载对象记录时出错: " + strError;
+
                             if (channel.ErrorCode == ErrorCode.AccessDenied)
                             {
                                 // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
@@ -3453,6 +3461,7 @@ true);
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
+                // channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 // this.m_nChannelInUse--;

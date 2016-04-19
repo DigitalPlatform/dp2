@@ -868,7 +868,6 @@ namespace dp2Circulation
 
                 info.RefID = bookitem.RefID; // 2008/2/17
 
-
                 string strXml = "";
                 nRet = bookitem.BuildRecord(
                     true,   // 要检查 Parent 成员
@@ -876,7 +875,6 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == -1)
                     return -1;
-
 
                 if (bookitem.ItemDisplayState == ItemDisplayState.New)
                 {

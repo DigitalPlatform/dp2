@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,75 +24,75 @@ using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Library
 {
-	/// <summary>
-	/// ÊÊÓÚ½øĞĞ²Ù×÷µÄ³ÉÌ×»·¾³
-	/// </summary>
-	public class SearchPanel
-	{
+    /// <summary>
+    /// é€‚äºè¿›è¡Œæ“ä½œçš„æˆå¥—ç¯å¢ƒ
+    /// </summary>
+    public class SearchPanel
+    {
         /// <summary>
-        /// ä¯ÀÀ¼ÇÂ¼µ½´ï
+        /// æµè§ˆè®°å½•åˆ°è¾¾
         /// </summary>
-		public event BrowseRecordEventHandler BrowseRecord = null;
+        public event BrowseRecordEventHandler BrowseRecord = null;
 
         /// <summary>
-        /// Ó¦ÓÃ³ÌĞòĞÅÏ¢
+        /// åº”ç”¨ç¨‹åºä¿¡æ¯
         /// </summary>
-		public ApplicationInfo ap = null;	// ÒıÓÃ
+        public ApplicationInfo ap = null;	// å¼•ç”¨
 
         /// <summary>
-        /// ÔÚapÖĞ±£´æ´°¿ÚÍâ¹Û×´Ì¬µÄ±êÌâ×Ö·û´®
+        /// åœ¨apä¸­ä¿å­˜çª—å£å¤–è§‚çŠ¶æ€çš„æ ‡é¢˜å­—ç¬¦ä¸²
         /// </summary>
-		public string ApCfgTitle = "";
+        public string ApCfgTitle = "";
 
         /// <summary>
-        /// Í£Ö¹¹ÜÀíÆ÷
+        /// åœæ­¢ç®¡ç†å™¨
         /// </summary>
-		public DigitalPlatform.StopManager	stopManager = new DigitalPlatform.StopManager();
+        public DigitalPlatform.StopManager stopManager = new DigitalPlatform.StopManager();
 
         /// <summary>
-        /// ÅäÖÃÎÄ¼ş»º´æ
+        /// é…ç½®æ–‡ä»¶ç¼“å­˜
         /// </summary>
-		public CfgCache cfgCache = null;	// ÒıÓÃ
+        public CfgCache cfgCache = null;	// å¼•ç”¨
 
         /// <summary>
-        /// ·şÎñÆ÷ĞÅÏ¢¼¯ºÏ
+        /// æœåŠ¡å™¨ä¿¡æ¯é›†åˆ
         /// </summary>
-		public ServerCollection Servers = null;	// ÒıÓÃ
+        public ServerCollection Servers = null;	// å¼•ç”¨
 
-        // TODO: ĞèÒªÔö¼Ó IDisposeable ½Ó¿Ú
+        // TODO: éœ€è¦å¢åŠ  IDisposeable æ¥å£
         /// <summary>
-        /// Í¨µÀ¼¯ºÏ
+        /// é€šé“é›†åˆ
         /// </summary>
-		public RmsChannelCollection Channels = new RmsChannelCollection();	// ÓµÓĞ
-
-        /// <summary>
-        /// ÓÃÓÚ¹ÜÀíÍ£Ö¹²Ù×÷µÄ¶ÔÏó
-        /// </summary>
-		DigitalPlatform.Stop stop = null;
+        public RmsChannelCollection Channels = new RmsChannelCollection();	// æ‹¥æœ‰
 
         /// <summary>
-        /// Í¨µÀ
+        /// ç”¨äºç®¡ç†åœæ­¢æ“ä½œçš„å¯¹è±¡
         /// </summary>
-		RmsChannel channel = null;
-
-		string m_strServerUrl = "";
+        DigitalPlatform.Stop stop = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// é€šé“
         /// </summary>
-		public SearchPanel()
-		{
-		}
+        RmsChannel channel = null;
+
+        string m_strServerUrl = "";
 
         /// <summary>
-        /// ³õÊ¼»¯
+        /// æ„é€ å‡½æ•°
         /// </summary>
-        /// <param name="servers">·şÎñÆ÷ĞÅÏ¢¼¯ºÏ</param>
-        /// <param name="cfgcache">ÅäÖÃÎÄ¼ş»º´æ</param>
-		public void Initial(ServerCollection servers,
-			CfgCache cfgcache)
-		{
-			this.Servers = servers;
+        public SearchPanel()
+        {
+        }
+
+        /// <summary>
+        /// åˆå§‹åŒ–
+        /// </summary>
+        /// <param name="servers">æœåŠ¡å™¨ä¿¡æ¯é›†åˆ</param>
+        /// <param name="cfgcache">é…ç½®æ–‡ä»¶ç¼“å­˜</param>
+        public void Initial(ServerCollection servers,
+            CfgCache cfgcache)
+        {
+            this.Servers = servers;
 
             /*
 			this.Channels.procAskAccountInfo = 
@@ -101,365 +101,361 @@ namespace DigitalPlatform.Library
             this.Channels.AskAccountInfo -= new AskAccountInfoEventHandle(this.Servers.OnAskAccountInfo);
             this.Channels.AskAccountInfo += new AskAccountInfoEventHandle(this.Servers.OnAskAccountInfo);
 
-			this.cfgCache = cfgcache;
-		}
+            this.cfgCache = cfgcache;
+        }
 
         /// <summary>
-        /// ³õÊ¼»¯Í£Ö¹¹ÜÀíÆ÷
+        /// åˆå§‹åŒ–åœæ­¢ç®¡ç†å™¨
         /// </summary>
-        /// <param name="buttonStop">Í£Ö¹°´Å¥</param>
-        /// <param name="labelMessage">ÏûÏ¢±êÇ©</param>
-		public void InitialStopManager(Button buttonStop,
-			Label labelMessage)
-		{
-			stopManager.Initial(buttonStop,
-				labelMessage,
+        /// <param name="buttonStop">åœæ­¢æŒ‰é’®</param>
+        /// <param name="labelMessage">æ¶ˆæ¯æ ‡ç­¾</param>
+        public void InitialStopManager(Button buttonStop,
+            Label labelMessage)
+        {
+            stopManager.Initial(buttonStop,
+                labelMessage,
                 null);
-			stop = new DigitalPlatform.Stop();
-            stop.Register(this.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
-		}
+            stop = new DigitalPlatform.Stop();
+            stop.Register(this.stopManager, true);	// å’Œå®¹å™¨å…³è”
+        }
 
         /// <summary>
-        /// ³õÊ¼»¯Í£Ö¹¹ÜÀíÆ÷
+        /// åˆå§‹åŒ–åœæ­¢ç®¡ç†å™¨
         /// </summary>
-        /// <param name="toolbarbuttonstop">¹¤¾ßÌõÉÏµÄÍ£Ö¹°´Å¥</param>
-        /// <param name="statusbar">×´Ì¬Ìõ</param>
-		public void InitialStopManager(ToolBarButton toolbarbuttonstop,
-			StatusBar statusbar)
-		{
-			stopManager.Initial(toolbarbuttonstop,
-				statusbar,
+        /// <param name="toolbarbuttonstop">å·¥å…·æ¡ä¸Šçš„åœæ­¢æŒ‰é’®</param>
+        /// <param name="statusbar">çŠ¶æ€æ¡</param>
+        public void InitialStopManager(ToolBarButton toolbarbuttonstop,
+            StatusBar statusbar)
+        {
+            stopManager.Initial(toolbarbuttonstop,
+                statusbar,
                 null);
-			stop = new DigitalPlatform.Stop();
-            stop.Register(this.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
-		}
+            stop = new DigitalPlatform.Stop();
+            stop.Register(this.stopManager, true);	// å’Œå®¹å™¨å…³è”
+        }
 
         /// <summary>
-        /// ºÍÍ£Ö¹¹ÜÀíÆ÷ÍÑÀë¹ØÁª
+        /// å’Œåœæ­¢ç®¡ç†å™¨è„±ç¦»å…³è”
         /// </summary>
-		public void FinishStopManager()
-		{
-			if (stop != null) // ÍÑÀë¹ØÁª
-			{
-				stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
-				stop = null;
-			}
-		}
+        public void FinishStopManager()
+        {
+            if (stop != null) // è„±ç¦»å…³è”
+            {
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
+                stop = null;
+            }
+        }
 
         /// <summary>
-        /// ´ÓapÖĞ×°ÔØForm×´Ì¬ĞÅÏ¢
+        /// ä»apä¸­è£…è½½FormçŠ¶æ€ä¿¡æ¯
         /// </summary>
-        /// <param name="form">Form¶ÔÏó</param>
-		public void LoadFormStates(Form form)
-		{
-			if (ap != null) 
-			{
-				if (ApCfgTitle != "" && ApCfgTitle != null) 
-				{
-					ap.SaveFormStates(form,
-						ApCfgTitle);
-				}
-				else 
-				{
-					Debug.Assert(true, "ÈôÒªÓÃap±£´æºÍ»Ö¸´´°¿ÚÍâ¹Û×´Ì¬£¬±ØĞëÏÈÉèÖÃApCfgTitle³ÉÔ±");
-				}
-			}
-		}
+        /// <param name="form">Formå¯¹è±¡</param>
+        public void LoadFormStates(Form form)
+        {
+            if (ap != null)
+            {
+                if (ApCfgTitle != "" && ApCfgTitle != null)
+                {
+                    ap.SaveFormStates(form,
+                        ApCfgTitle);
+                }
+                else
+                {
+                    Debug.Assert(true, "è‹¥è¦ç”¨apä¿å­˜å’Œæ¢å¤çª—å£å¤–è§‚çŠ¶æ€ï¼Œå¿…é¡»å…ˆè®¾ç½®ApCfgTitleæˆå‘˜");
+                }
+            }
+        }
 
         /// <summary>
-        /// ½«Form×´Ì¬ĞÅÏ¢±£´æµ½apÖĞ
+        /// å°†FormçŠ¶æ€ä¿¡æ¯ä¿å­˜åˆ°apä¸­
         /// </summary>
-        /// <param name="form">Form¶ÔÏó</param>
-		public void SaveFormStates(Form form)
-		{
-			if (ap != null) 
-			{
-				if (ApCfgTitle != "" && ApCfgTitle != null) 
-				{
-					ap.SaveFormStates(form,
-						ApCfgTitle);
-				}
-				else 
-				{
-					Debug.Assert(true, "ÈôÒªÓÃap±£´æºÍ»Ö¸´´°¿ÚÍâ¹Û×´Ì¬£¬±ØĞëÏÈÉèÖÃApCfgTitle³ÉÔ±");
-				}
+        /// <param name="form">Formå¯¹è±¡</param>
+        public void SaveFormStates(Form form)
+        {
+            if (ap != null)
+            {
+                if (ApCfgTitle != "" && ApCfgTitle != null)
+                {
+                    ap.SaveFormStates(form,
+                        ApCfgTitle);
+                }
+                else
+                {
+                    Debug.Assert(true, "è‹¥è¦ç”¨apä¿å­˜å’Œæ¢å¤çª—å£å¤–è§‚çŠ¶æ€ï¼Œå¿…é¡»å…ˆè®¾ç½®ApCfgTitleæˆå‘˜");
+                }
 
-			}
-		}
+            }
+        }
 
         /// <summary>
-        /// È±Ê¡·şÎñÆ÷URL
+        /// ç¼ºçœæœåŠ¡å™¨URL
         /// </summary>
-		public virtual string ServerUrl
-		{
-			get 
-			{
-				return m_strServerUrl;
-			}
-			set 
-			{
-				m_strServerUrl = value;
-			}
-		}
+        public virtual string ServerUrl
+        {
+            get
+            {
+                return m_strServerUrl;
+            }
+            set
+            {
+                m_strServerUrl = value;
+            }
+        }
 
         /// <summary>
-        /// »ñµÃÅäÖÃÎÄ¼ş
+        /// è·å¾—é…ç½®æ–‡ä»¶
         /// </summary>
-        /// <param name="strServerUrl">·şÎñÆ÷URL¡£Èç¹ûÎªnull£¬Ôò×Ô¶¯Ê¹ÓÃthis.ServerUrl</param>
-        /// <param name="strCfgFilePath">ÅäÖÃÎÄ¼ş´¿Â·¾¶£¬²»°üº¬ServerUrl²¿·Ö</param>
-        /// <param name="strContent">·µ»ØÅäÖÃÎÄ¼şÄÚÈİ</param>
-        /// <param name="strError">·µ»Ø´íÎóĞÅÏ¢</param>
-        /// <returns>-1³ö´í;0Ã»ÓĞÕÒµ½;1ÕÒµ½</returns>
-		public int GetCfgFile(
-			string strServerUrl,
-			string strCfgFilePath,
-			out string strContent,
-			out string strError)
-		{
-			strError = "";
-			strContent = "";
-
-			if (strServerUrl == "" || strServerUrl == null)
-			{
-				strServerUrl = this.ServerUrl;
-			}
-
-			if (strServerUrl == "")
-			{
-				strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷URL";
-				return -1;
-			}
-
-			RmsChannel channelSave = channel;
-
-			channel = Channels.GetChannel(strServerUrl);
-			if (channel == null)
-			{
-				strError = "get channel error";
-				return -1;
-			}
-
-			try 
-			{
-
-				this.BeginLoop("ÕıÔÚÏÂÔØÎÄ¼ş" + strCfgFilePath);
-
-				byte[] baTimeStamp = null;
-				string strMetaData;
-				string strOutputPath;
-
-				long lRet = channel.GetRes(
-					this.cfgCache,
-					strCfgFilePath,
-					out strContent,
-					out strMetaData,
-					out baTimeStamp,
-					out strOutputPath,
-					out strError);
-
-				this.EndLoop();
-
-
-
-				if (lRet == -1) 
-				{
-					if (channel.ErrorCode == ChannelErrorCode.NotFound)
-						return 0;	// not found
-					return -1;
-				}
-
-				return 1;	// found
-			}
-			finally 
-			{
-				this.channel = channelSave;
-			}
-		}
-
-        /// <summary>
-        /// µ±Í£Ö¹°´Å¥°´ÏÂÊ±´¥·¢µÄ¶¯×÷
-        /// </summary>
-		public void DoStopClick()
-		{
-			if (stopManager != null)
-				stopManager.DoStopActive();
-		}
-
-        /// <summary>
-        /// ÖÕÖ¹Í¨Ñ¶²Ù×÷
-        /// </summary>
-		public void DoStop(object sender, StopEventArgs e)
-		{
-			if (this.channel != null)
-				this.channel.Abort();
-		}
-
-		// 
-		// return:
-		//		-1	error
-		//		0	not found
-		//		1	found
-        /// <summary>
-        /// »ñµÃÅäÖÃÎÄ¼ş
-        /// </summary>
-        /// <param name="strServerUrl">·şÎñÆ÷URL¡£Èç¹ûÎªnull£¬Ôò×Ô¶¯Ê¹ÓÃthis.ServerUrl</param>
-        /// <param name="strCfgFilePath">ÅäÖÃÎÄ¼ş´¿Â·¾¶£¬²»°üº¬ServerUrl²¿·Ö</param>
-        /// <param name="dom">·µ»Ø×°ÔØÁËÅäÖÃÎÄ¼şÄÚÈİµÄXmlDocument¶ÔÏó</param>
-        /// <param name="strError"></param>
-        /// <returns>-1³ö´í;0Ã»ÓĞÕÒµ½;1ÕÒµ½</returns>
-		public int GetCfgFile(
-			string strServerUrl,
-			string strCfgFilePath,
-			out XmlDocument dom,
-			out string strError)
-		{
-			strError = "";
-			dom = null;
-
-			string strContent = "";
-
-			int nRet = GetCfgFile(
-				strServerUrl,
-				strCfgFilePath,
-				out strContent,
-				out strError);
-			if (nRet == -1)
-				return -1;
-			if (nRet == 0)
-				return 0;
-
-			dom = new XmlDocument();
-
-			try 
-			{
-				dom.LoadXml(strContent);
-			}
-			catch (Exception ex)
-			{
-				dom = null;
-				strError = "×°ÔØÅäÖÃÎÄ¼ş '"+strCfgFilePath+"' ÄÚÈİ½øÈëdomÊ§°Ü: " + ex.Message;
-				return -1;
-			}
-
-			return 1;
-		}
-
-        /// <summary>
-        /// ¿ªÊ¼¼ìË÷Ñ­»·
-        /// </summary>
-        /// <param name="strMessage">Ñ­»·ÆÚ¼äÒªÏÔÊ¾ÔÚ×´Ì¬ĞĞµÄÌáÊ¾ĞÅÏ¢</param>
-		public void BeginLoop(string strMessage)
-		{
-			if (stop != null)
-			{
-                stop.OnStop += new StopEventHandler(this.DoStop);
-				stop.Initial(strMessage);
-				stop.BeginLoop();
-			}
-		}
-
-        /// <summary>
-        /// ½áÊø¼ìË÷Ñ­»·
-        /// </summary>
-		public void EndLoop()
-		{
-			if (stop != null)
-			{
-				stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-				stop.Initial("");
-			}
-		}
-
-
-        /// <summary>
-        /// ¼ìË÷Ò»¸öÃüÖĞ½á¹û
-        /// </summary>
-        /// <param name="strServerUrl">·şÎñÆ÷URL</param>
-        /// <param name="strQueryXml">¼ìË÷Ê½XML</param>
-        /// <param name="strPath">·µ»ØµÄ¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strError">·µ»ØµÄ´íÎóĞÅÏ¢</param>
-        /// <returns>-1	Ò»°ã´íÎó;0	not found;1	found;>1	ÃüÖĞ¶àÓÚÒ»Ìõ</returns>
-		public int SearchOnePath(
+        /// <param name="strServerUrl">æœåŠ¡å™¨URLã€‚å¦‚æœä¸ºnullï¼Œåˆ™è‡ªåŠ¨ä½¿ç”¨this.ServerUrl</param>
+        /// <param name="strCfgFilePath">é…ç½®æ–‡ä»¶çº¯è·¯å¾„ï¼Œä¸åŒ…å«ServerUrléƒ¨åˆ†</param>
+        /// <param name="strContent">è¿”å›é…ç½®æ–‡ä»¶å†…å®¹</param>
+        /// <param name="strError">è¿”å›é”™è¯¯ä¿¡æ¯</param>
+        /// <returns>-1å‡ºé”™;0æ²¡æœ‰æ‰¾åˆ°;1æ‰¾åˆ°</returns>
+        public int GetCfgFile(
             string strServerUrl,
-			string strQueryXml,
-			out string strPath,
-			out string strError)
-		{
-			strPath = "";
-			strError = "";
+            string strCfgFilePath,
+            out string strContent,
+            out string strError)
+        {
+            strError = "";
+            strContent = "";
+
+            if (strServerUrl == "" || strServerUrl == null)
+            {
+                strServerUrl = this.ServerUrl;
+            }
+
+            if (strServerUrl == "")
+            {
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨URL";
+                return -1;
+            }
+
+            RmsChannel channelSave = channel;
+
+            channel = Channels.GetChannel(strServerUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            try
+            {
+
+                this.BeginLoop("æ­£åœ¨ä¸‹è½½æ–‡ä»¶" + strCfgFilePath);
+
+                byte[] baTimeStamp = null;
+                string strMetaData;
+                string strOutputPath;
+
+                long lRet = channel.GetRes(
+                    this.cfgCache,
+                    strCfgFilePath,
+                    out strContent,
+                    out strMetaData,
+                    out baTimeStamp,
+                    out strOutputPath,
+                    out strError);
+
+                this.EndLoop();
+
+
+
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        return 0;	// not found
+                    return -1;
+                }
+
+                return 1;	// found
+            }
+            finally
+            {
+                this.channel = channelSave;
+            }
+        }
+
+        /// <summary>
+        /// å½“åœæ­¢æŒ‰é’®æŒ‰ä¸‹æ—¶è§¦å‘çš„åŠ¨ä½œ
+        /// </summary>
+        public void DoStopClick()
+        {
+            if (stopManager != null)
+                stopManager.DoStopActive();
+        }
+
+        /// <summary>
+        /// ç»ˆæ­¢é€šè®¯æ“ä½œ
+        /// </summary>
+        public void DoStop(object sender, StopEventArgs e)
+        {
+            if (this.channel != null)
+                this.channel.Abort();
+        }
+
+        // 
+        // return:
+        //		-1	error
+        //		0	not found
+        //		1	found
+        /// <summary>
+        /// è·å¾—é…ç½®æ–‡ä»¶
+        /// </summary>
+        /// <param name="strServerUrl">æœåŠ¡å™¨URLã€‚å¦‚æœä¸ºnullï¼Œåˆ™è‡ªåŠ¨ä½¿ç”¨this.ServerUrl</param>
+        /// <param name="strCfgFilePath">é…ç½®æ–‡ä»¶çº¯è·¯å¾„ï¼Œä¸åŒ…å«ServerUrléƒ¨åˆ†</param>
+        /// <param name="dom">è¿”å›è£…è½½äº†é…ç½®æ–‡ä»¶å†…å®¹çš„XmlDocumentå¯¹è±¡</param>
+        /// <param name="strError"></param>
+        /// <returns>-1å‡ºé”™;0æ²¡æœ‰æ‰¾åˆ°;1æ‰¾åˆ°</returns>
+        public int GetCfgFile(
+            string strServerUrl,
+            string strCfgFilePath,
+            out XmlDocument dom,
+            out string strError)
+        {
+            strError = "";
+            dom = null;
+
+            string strContent = "";
+
+            int nRet = GetCfgFile(
+                strServerUrl,
+                strCfgFilePath,
+                out strContent,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;
+
+            dom = new XmlDocument();
+
+            try
+            {
+                dom.LoadXml(strContent);
+            }
+            catch (Exception ex)
+            {
+                dom = null;
+                strError = "è£…è½½é…ç½®æ–‡ä»¶ '" + strCfgFilePath + "' å†…å®¹è¿›å…¥domå¤±è´¥: " + ex.Message;
+                return -1;
+            }
+
+            return 1;
+        }
+
+        /// <summary>
+        /// å¼€å§‹æ£€ç´¢å¾ªç¯
+        /// </summary>
+        /// <param name="strMessage">å¾ªç¯æœŸé—´è¦æ˜¾ç¤ºåœ¨çŠ¶æ€è¡Œçš„æç¤ºä¿¡æ¯</param>
+        public void BeginLoop(string strMessage)
+        {
+            if (stop != null)
+            {
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.Initial(strMessage);
+                stop.BeginLoop();
+            }
+        }
+
+        /// <summary>
+        /// ç»“æŸæ£€ç´¢å¾ªç¯
+        /// </summary>
+        public void EndLoop()
+        {
+            if (stop != null)
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+            }
+        }
+
+
+        /// <summary>
+        /// æ£€ç´¢ä¸€ä¸ªå‘½ä¸­ç»“æœ
+        /// </summary>
+        /// <param name="strServerUrl">æœåŠ¡å™¨URL</param>
+        /// <param name="strQueryXml">æ£€ç´¢å¼XML</param>
+        /// <param name="strPath">è¿”å›çš„è®°å½•è·¯å¾„</param>
+        /// <param name="strError">è¿”å›çš„é”™è¯¯ä¿¡æ¯</param>
+        /// <returns>-1	ä¸€èˆ¬é”™è¯¯;0	not found;1	found;>1	å‘½ä¸­å¤šäºä¸€æ¡</returns>
+        public int SearchOnePath(
+            string strServerUrl,
+            string strQueryXml,
+            out string strPath,
+            out string strError)
+        {
+            strPath = "";
+            strError = "";
 
             if (String.IsNullOrEmpty(strServerUrl) == true)
                 strServerUrl = this.ServerUrl;
 
-			RmsChannel channelSave = channel;
+            RmsChannel channelSave = channel;
 
-			channel = Channels.GetChannel(strServerUrl);
-			if (channel == null)
-			{
-				strError = "get channel error";
-				return -1;
-			}
+            channel = Channels.GetChannel(strServerUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
 
-			try 
-			{
-
-
-				long lRet = channel.DoSearch(strQueryXml,
+            try
+            {
+                long lRet = channel.DoSearch(strQueryXml,
                     "default",
                     "", // strOuputStyle
                     out strError);
-				if (lRet == -1) 
-					return -1;
+                if (lRet == -1)
+                    return -1;
 
-				if (lRet == 0) 
-				{
-					return 0;	// Ã»ÓĞÕÒµ½
-				}
+                if (lRet == 0)
+                {
+                    return 0;	// æ²¡æœ‰æ‰¾åˆ°
+                }
 
-				long lCount = lRet;
+                long lCount = lRet;
 
-				if (lRet > 1)
-				{
-					strError = "ÃüÖĞ " + Convert.ToString(lRet) + " Ìõ¡£";
-				}
+                if (lRet > 1)
+                {
+                    strError = "å‘½ä¸­ " + Convert.ToString(lRet) + " æ¡ã€‚";
+                }
 
-				List<string> aPath = null;
-				lRet = channel.DoGetSearchResult(
+                List<string> aPath = null;
+                lRet = channel.DoGetSearchResult(
                     "default",
                     0,
-					1,
-					"zh",
-					this.stop,
-					out aPath,
-					out strError);
-				if (lRet == -1) 
-				{
-					strError = "»ñÈ¡¼ìË÷½á¹ûÊ±³ö´í: " + strError;
-					return -1;
-				}
+                    1,
+                    "zh",
+                    this.stop,
+                    out aPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "è·å–æ£€ç´¢ç»“æœæ—¶å‡ºé”™: " + strError;
+                    return -1;
+                }
 
-
-				strPath = (string)aPath[0];
-
-				return (int)lCount;
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
-		}
+                strPath = (string)aPath[0];
+                return (int)lCount;
+            }
+            finally
+            {
+                channel = channelSave;
+            }
+        }
 
 
         /// <summary>
-        /// ¼ìË÷µÃµ½Èô¸ÉÃüÖĞ½á¹û
+        /// æ£€ç´¢å¾—åˆ°è‹¥å¹²å‘½ä¸­ç»“æœ
         /// </summary>
-        /// <param name="strServerUrl">·şÎñÆ÷URL</param>
-        /// <param name="strQueryXml">¼ìË÷Ê½XML</param>
-        /// <param name="nMax">×î´ó½á¹ûÊı</param>
-        /// <param name="aPath">·µ»ØµÄ¼ÇÂ¼Â·¾¶Êı×é</param>
-        /// <param name="strError">·µ»ØµÄ´íÎóĞÅÏ¢</param>
-        /// <returns>-1	Ò»°ã´íÎó;0	not found;1	found;>1	ÃüÖĞ¶àÓÚÒ»Ìõ</returns>
+        /// <param name="strServerUrl">æœåŠ¡å™¨URL</param>
+        /// <param name="strQueryXml">æ£€ç´¢å¼XML</param>
+        /// <param name="nMax">æœ€å¤§ç»“æœæ•°</param>
+        /// <param name="aPath">è¿”å›çš„è®°å½•è·¯å¾„æ•°ç»„</param>
+        /// <param name="strError">è¿”å›çš„é”™è¯¯ä¿¡æ¯</param>
+        /// <returns>-1	ä¸€èˆ¬é”™è¯¯;0	not found;1	found;>1	å‘½ä¸­å¤šäºä¸€æ¡</returns>
         public int SearchMultiPath(
             string strServerUrl,
             string strQueryXml,
@@ -495,7 +491,7 @@ namespace DigitalPlatform.Library
 
                 if (lRet == 0)
                 {
-                    return 0;	// Ã»ÓĞÕÒµ½
+                    return 0;	// æ²¡æœ‰æ‰¾åˆ°
                 }
 
                 long lCount = lRet;
@@ -504,7 +500,7 @@ namespace DigitalPlatform.Library
 
                 if (lRet > 1)
                 {
-                    strError = "ÃüÖĞ " + Convert.ToString(lRet) + " Ìõ¡£";
+                    strError = "å‘½ä¸­ " + Convert.ToString(lRet) + " æ¡ã€‚";
                 }
 
                 lRet = channel.DoGetSearchResult(
@@ -517,7 +513,7 @@ namespace DigitalPlatform.Library
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "»ñÈ¡¼ìË÷½á¹ûÊ±³ö´í: " + strError;
+                    strError = "è·å–æ£€ç´¢ç»“æœæ—¶å‡ºé”™: " + strError;
                     return -1;
                 }
 
@@ -531,23 +527,23 @@ namespace DigitalPlatform.Library
 
 
         /// <summary>
-        /// »ñÈ¡¼ÇÂ¼
+        /// è·å–è®°å½•
         /// </summary>
-        /// <param name="strServerUrl">·şÎñÆ÷URL¡£Èç¹û==null£¬±íÊ¾ÓÃSearchPannel×Ô¼ºµÄServerUrl</param>
-        /// <param name="strPath">¼ÇÂ¼Â·¾¶</param>
-        /// <param name="dom">·µ»Ø×°ÔØÁË¼ÇÂ¼ÄÚÈİµÄXmlDocument¶ÔÏó</param>
-        /// <param name="baTimeStamp">·µ»ØÊ±¼ä´Á</param>
-        /// <param name="strError">·µ»Ø´íÎóĞÅÏ¢</param>
+        /// <param name="strServerUrl">æœåŠ¡å™¨URLã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºç”¨SearchPannelè‡ªå·±çš„ServerUrl</param>
+        /// <param name="strPath">è®°å½•è·¯å¾„</param>
+        /// <param name="dom">è¿”å›è£…è½½äº†è®°å½•å†…å®¹çš„XmlDocumentå¯¹è±¡</param>
+        /// <param name="baTimeStamp">è¿”å›æ—¶é—´æˆ³</param>
+        /// <param name="strError">è¿”å›é”™è¯¯ä¿¡æ¯</param>
         /// <returns>-1	error;0	not found;1	found</returns>
-		public int GetRecord(
+        public int GetRecord(
             string strServerUrl,
             string strPath,
-			out XmlDocument dom,
-			out byte[] baTimeStamp,
-			out string strError)
-		{
-			dom = null;
-			string strXml = "";
+            out XmlDocument dom,
+            out byte[] baTimeStamp,
+            out string strError)
+        {
+            dom = null;
+            string strXml = "";
 
             int nRet = GetRecord(
                 strServerUrl,
@@ -555,216 +551,216 @@ namespace DigitalPlatform.Library
                 out strXml,
                 out baTimeStamp,
                 out strError);
-			if (nRet == -1 || nRet == 0)
-				return nRet;
+            if (nRet == -1 || nRet == 0)
+                return nRet;
 
-			dom = new XmlDocument();
-			try 
-			{
-				dom.LoadXml(strXml);
-			}
-			catch(Exception ex)
-			{
-				strError = "×°ÔØÂ·¾¶Îª '"+strPath+"' µÄxml¼ÇÂ¼Ê±³ö´í: " + ex.Message;
-				return -1;
-			}
+            dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "è£…è½½è·¯å¾„ä¸º '" + strPath + "' çš„xmlè®°å½•æ—¶å‡ºé”™: " + ex.Message;
+                return -1;
+            }
 
-			return 1;
-		}
+            return 1;
+        }
 
 
         /// <summary>
-        /// »ñÈ¡ä¯ÀÀ¼ÇÂ¼¡£´¥·¢ÊÂ¼şµÄ°æ±¾
+        /// è·å–æµè§ˆè®°å½•ã€‚è§¦å‘äº‹ä»¶çš„ç‰ˆæœ¬
         /// </summary>
-        /// <param name="fullpaths">Èô¸É¼ÇÂ¼È«Â·¾¶</param>
-        /// <param name="bReverse">fullpathsÖĞÂ·¾¶ÊÇ·ñÎª·´×ªĞÎÊ½</param>
-        /// <param name="strStyle">¼ìË÷·ç¸ñ</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
+        /// <param name="fullpaths">è‹¥å¹²è®°å½•å…¨è·¯å¾„</param>
+        /// <param name="bReverse">fullpathsä¸­è·¯å¾„æ˜¯å¦ä¸ºåè½¬å½¢å¼</param>
+        /// <param name="strStyle">æ£€ç´¢é£æ ¼</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
         /// <returns>-1	error;0	not found;1	found</returns>
-		public int GetBrowseRecord(string [] fullpaths,
-			bool bReverse,
-			string strStyle,
-			out string strError)
-		{
-			strError = "";
-			int nRet = 0;
+        public int GetBrowseRecord(string[] fullpaths,
+            bool bReverse,
+            string strStyle,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
 
-			int nIndex = 0;
+            int nIndex = 0;
 
-			ArrayList aTempPath = new ArrayList();
-			ArrayList aTempRecord = new ArrayList();
-			string strLastUrl = "";
-			for(int i=0;i<=fullpaths.Length;i++)
-			{
-				bool bPush = false;
-				ResPath respath = null;
+            ArrayList aTempPath = new ArrayList();
+            ArrayList aTempRecord = new ArrayList();
+            string strLastUrl = "";
+            for (int i = 0; i <= fullpaths.Length; i++)
+            {
+                bool bPush = false;
+                ResPath respath = null;
 
-				if (i<fullpaths.Length)
-				{
-					string strFullPath = fullpaths[i];
+                if (i < fullpaths.Length)
+                {
+                    string strFullPath = fullpaths[i];
 
-					if (bReverse == true)
-						strFullPath = ResPath.GetRegularRecordPath(strFullPath);
+                    if (bReverse == true)
+                        strFullPath = ResPath.GetRegularRecordPath(strFullPath);
 
-					respath = new ResPath(strFullPath);
+                    respath = new ResPath(strFullPath);
 
-					if ( respath.Url != strLastUrl 
-						|| aTempPath.Count >= 5)	// ×î´ó5ÌõÎªÒ»Åú¡£¼õÉÙÓÃ»§µÈ´ı¸Ğ
-						bPush = true;
+                    if (respath.Url != strLastUrl
+                        || aTempPath.Count >= 5)	// æœ€å¤§5æ¡ä¸ºä¸€æ‰¹ã€‚å‡å°‘ç”¨æˆ·ç­‰å¾…æ„Ÿ
+                        bPush = true;
 
-				}
-				else 
-				{
-					bPush = true;
-				}
+                }
+                else
+                {
+                    bPush = true;
+                }
 
-				if ( bPush == true && aTempPath.Count > 0)
-				{
-							
-					string [] temppaths = new string[aTempPath.Count];
-					for(int j=0;j<temppaths.Length;j++)
-					{
-						temppaths[j] = (string)aTempPath[j];
-					}
-					nRet = GetBrowseRecord(
-						strLastUrl,
-						temppaths,
-						strStyle,
-						out aTempRecord,
-						out strError);
-					if (nRet == -1)
-						return -1;
+                if (bPush == true && aTempPath.Count > 0)
+                {
 
-					// ´¥·¢ÊÂ¼ş
-					if (this.BrowseRecord != null)
-					{
-						
-						for(int j=0;j<aTempRecord.Count;j++)
-						{
-							BrowseRecordEventArgs e = new BrowseRecordEventArgs();
-							e.SearchCount = 0;
-							e.Index = nIndex ++;
-							e.FullPath = strLastUrl + "?" + temppaths[j];
-							e.Cols = (string[])aTempRecord[j];
-							this.BrowseRecord(this, e);
-							if (e.Cancel == true)
-							{
-								if (e.ErrorInfo == "")
-									strError = "ÓÃ»§ÖĞ¶Ï";
-								else
-									strError = e.ErrorInfo;
-								return -2;
-							}
-						}
-					}
+                    string[] temppaths = new string[aTempPath.Count];
+                    for (int j = 0; j < temppaths.Length; j++)
+                    {
+                        temppaths[j] = (string)aTempPath[j];
+                    }
+                    nRet = GetBrowseRecord(
+                        strLastUrl,
+                        temppaths,
+                        strStyle,
+                        out aTempRecord,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
 
-					aTempRecord.Clear();
+                    // è§¦å‘äº‹ä»¶
+                    if (this.BrowseRecord != null)
+                    {
 
-					aTempPath.Clear();
-				}
+                        for (int j = 0; j < aTempRecord.Count; j++)
+                        {
+                            BrowseRecordEventArgs e = new BrowseRecordEventArgs();
+                            e.SearchCount = 0;
+                            e.Index = nIndex++;
+                            e.FullPath = strLastUrl + "?" + temppaths[j];
+                            e.Cols = (string[])aTempRecord[j];
+                            this.BrowseRecord(this, e);
+                            if (e.Cancel == true)
+                            {
+                                if (e.ErrorInfo == "")
+                                    strError = "ç”¨æˆ·ä¸­æ–­";
+                                else
+                                    strError = e.ErrorInfo;
+                                return -2;
+                            }
+                        }
+                    }
+
+                    aTempRecord.Clear();
+
+                    aTempPath.Clear();
+                }
 
 
-				if (i<fullpaths.Length)
-				{
-					aTempPath.Add(respath.Path);
+                if (i < fullpaths.Length)
+                {
+                    aTempPath.Add(respath.Path);
 
-					strLastUrl = respath.Url;
-				}
+                    strLastUrl = respath.Url;
+                }
 
-			} // end of for
+            } // end of for
 
-			return 0;
+            return 0;
 
-		}
+        }
 
-	
+
 
 
         /// <summary>
-        ///  »ñÈ¡ä¯ÀÀ¼ÇÂ¼
+        ///  è·å–æµè§ˆè®°å½•
         /// </summary>
-        /// <param name="fullpaths">Èô¸É¼ÇÂ¼È«Â·¾¶</param>
-        /// <param name="bReverse">fullpathsÖĞÂ·¾¶ÊÇ·ñÎª·´×ªĞÎÊ½</param>
-        /// <param name="strStyle">¼ìË÷·ç¸ñ</param>
-        /// <param name="records">·µ»Ø¼ÇÂ¼¶ÔÏó</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
+        /// <param name="fullpaths">è‹¥å¹²è®°å½•å…¨è·¯å¾„</param>
+        /// <param name="bReverse">fullpathsä¸­è·¯å¾„æ˜¯å¦ä¸ºåè½¬å½¢å¼</param>
+        /// <param name="strStyle">æ£€ç´¢é£æ ¼</param>
+        /// <param name="records">è¿”å›è®°å½•å¯¹è±¡</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
         /// <returns>-1	error;0	not found;1	found</returns>
-		public int GetBrowseRecord(string [] fullpaths,
-			bool bReverse,
-			string strStyle,
-			out ArrayList records,
-			out string strError)
-		{
-			strError = "";
-			records = new ArrayList();
-			int nRet = 0;
+        public int GetBrowseRecord(string[] fullpaths,
+            bool bReverse,
+            string strStyle,
+            out ArrayList records,
+            out string strError)
+        {
+            strError = "";
+            records = new ArrayList();
+            int nRet = 0;
 
 
-			ArrayList aTempPath = new ArrayList();
-			ArrayList aTempRecord = new ArrayList();
-			string strLastUrl = "";
-			for(int i=0;i<=fullpaths.Length;i++)
-			{
-				bool bPush = false;
-				ResPath respath = null;
+            ArrayList aTempPath = new ArrayList();
+            ArrayList aTempRecord = new ArrayList();
+            string strLastUrl = "";
+            for (int i = 0; i <= fullpaths.Length; i++)
+            {
+                bool bPush = false;
+                ResPath respath = null;
 
-				if (i<fullpaths.Length)
-				{
-					string strFullPath = fullpaths[i];
+                if (i < fullpaths.Length)
+                {
+                    string strFullPath = fullpaths[i];
 
-					if (bReverse == true)
-						strFullPath = ResPath.GetRegularRecordPath(strFullPath);
+                    if (bReverse == true)
+                        strFullPath = ResPath.GetRegularRecordPath(strFullPath);
 
-					respath = new ResPath(strFullPath);
+                    respath = new ResPath(strFullPath);
 
-					if ( respath.Url != strLastUrl )
-						bPush = true;
+                    if (respath.Url != strLastUrl)
+                        bPush = true;
 
-				}
-				else 
-				{
-					bPush = true;
-				}
+                }
+                else
+                {
+                    bPush = true;
+                }
 
-				if ( bPush == true && aTempPath.Count > 0)
-				{
-							
-					string [] temppaths = new string[aTempPath.Count];
-					for(int j=0;j<temppaths.Length;j++)
-					{
-						temppaths[j] = (string)aTempPath[j];
-					}
-					nRet = GetBrowseRecord(
-						strLastUrl,
-						temppaths,
-						strStyle,
-						out aTempRecord,
-						out strError);
-					if (nRet == -1)
-						return -1;
+                if (bPush == true && aTempPath.Count > 0)
+                {
 
-					records.AddRange(aTempRecord);
-					aTempRecord.Clear();
+                    string[] temppaths = new string[aTempPath.Count];
+                    for (int j = 0; j < temppaths.Length; j++)
+                    {
+                        temppaths[j] = (string)aTempPath[j];
+                    }
+                    nRet = GetBrowseRecord(
+                        strLastUrl,
+                        temppaths,
+                        strStyle,
+                        out aTempRecord,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
 
-					aTempPath.Clear();
-				}
+                    records.AddRange(aTempRecord);
+                    aTempRecord.Clear();
+
+                    aTempPath.Clear();
+                }
 
 
-				if (i<fullpaths.Length)
-				{
-					aTempPath.Add(respath.Path);
+                if (i < fullpaths.Length)
+                {
+                    aTempPath.Add(respath.Path);
 
-					strLastUrl = respath.Url;
-				}
+                    strLastUrl = respath.Url;
+                }
 
-			} // end of for
+            } // end of for
 
-			return 0;
+            return 0;
 
-		}
+        }
 
         /// <summary>
-        /// »ñÈ¡ä¯ÀÀ¼ÇÂ¼
+        /// è·å–æµè§ˆè®°å½•
         /// </summary>
         /// <param name="strServerUrl"></param>
         /// <param name="paths"></param>
@@ -772,253 +768,253 @@ namespace DigitalPlatform.Library
         /// <param name="records"></param>
         /// <param name="strError"></param>
         /// <returns></returns>
-		public int GetBrowseRecord(
-			string strServerUrl,
-			string [] paths,
-			string strStyle,
-			out ArrayList records,
-			out string strError)
-		{
-			strError = "";
-			records = null;
+        public int GetBrowseRecord(
+            string strServerUrl,
+            string[] paths,
+            string strStyle,
+            out ArrayList records,
+            out string strError)
+        {
+            strError = "";
+            records = null;
 
-			if (String.IsNullOrEmpty(strServerUrl) == true)
-				strServerUrl = this.ServerUrl;
+            if (String.IsNullOrEmpty(strServerUrl) == true)
+                strServerUrl = this.ServerUrl;
 
-			RmsChannel channelSave = channel;
-			
-			channel = Channels.GetChannel(strServerUrl);
-			if (channel == null)
-			{
-				strError = "get channel error";
-				return -1;
-			}
+            RmsChannel channelSave = channel;
 
-			try 
-			{
-				// ¸ù¾İÖÆ¶¨µÄ¼ÇÂ¼Â·¾¶»ñµÃä¯ÀÀ¸ñÊ½¼ÇÂ¼
-				// parameter:
-				//		aRecord	·µ»ØµÄä¯ÀÀ¼ÇÂ¼ĞÅÏ¢¡£Ò»¸öArrayListÊı×é¡£Ã¿¸öÔªËØÎªÒ»¸östring[]£¬Ëù°üº¬µÄÄÚÈİ
-				//				¸ù¾İstrStyle¶ø¶¨¡£Èç¹ûstrStyleÖĞÓĞid£¬ÔòaRecordÃ¿¸öÔªËØÖĞµÄstring[]µÚÒ»¸ö×Ö·û´®¾ÍÊÇid£¬ºóÃæÊÇ¸÷ÁĞÄÚÈİ¡£
-				return channel.GetBrowseRecords(paths,
-					strStyle,
-					out records,
-					out strError);
-			}
+            channel = Channels.GetChannel(strServerUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
 
-			finally 
-			{
-				channel = channelSave;
-			}
+            try
+            {
+                // æ ¹æ®åˆ¶å®šçš„è®°å½•è·¯å¾„è·å¾—æµè§ˆæ ¼å¼è®°å½•
+                // parameter:
+                //		aRecord	è¿”å›çš„æµè§ˆè®°å½•ä¿¡æ¯ã€‚ä¸€ä¸ªArrayListæ•°ç»„ã€‚æ¯ä¸ªå…ƒç´ ä¸ºä¸€ä¸ªstring[]ï¼Œæ‰€åŒ…å«çš„å†…å®¹
+                //				æ ¹æ®strStyleè€Œå®šã€‚å¦‚æœstrStyleä¸­æœ‰idï¼Œåˆ™aRecordæ¯ä¸ªå…ƒç´ ä¸­çš„string[]ç¬¬ä¸€ä¸ªå­—ç¬¦ä¸²å°±æ˜¯idï¼Œåé¢æ˜¯å„åˆ—å†…å®¹ã€‚
+                return channel.GetBrowseRecords(paths,
+                    strStyle,
+                    out records,
+                    out strError);
+            }
 
-		}
+            finally
+            {
+                channel = channelSave;
+            }
+
+        }
 
 
         /// <summary>
-        /// »ñÈ¡¼ÇÂ¼
+        /// è·å–è®°å½•
         /// </summary>
-        /// <param name="strServerUrl">·şÎñÆ÷URL¡£Èç¹û==null£¬±íÊ¾ÓÃSearchPannel×Ô¼ºµÄServerUrl</param>
+        /// <param name="strServerUrl">æœåŠ¡å™¨URLã€‚å¦‚æœ==nullï¼Œè¡¨ç¤ºç”¨SearchPannelè‡ªå·±çš„ServerUrl</param>
         /// <param name="strPath"></param>
         /// <param name="strXml"></param>
         /// <param name="baTimeStamp"></param>
         /// <param name="strError"></param>
         /// <returns>-1	error;0	not found;1	found</returns>
-		public int GetRecord(
+        public int GetRecord(
             string strServerUrl,
             string strPath,
-			out string strXml,
-			out byte[] baTimeStamp,
-			out string strError)
-		{
-			strError = "";
-			baTimeStamp = null;
-			strXml = "";
+            out string strXml,
+            out byte[] baTimeStamp,
+            out string strError)
+        {
+            strError = "";
+            baTimeStamp = null;
+            strXml = "";
 
             if (String.IsNullOrEmpty(strServerUrl) == true)
                 strServerUrl = this.ServerUrl;
 
-			RmsChannel channelSave = channel;
-			
-			channel = Channels.GetChannel(strServerUrl);
-			if (channel == null)
-			{
-				strError = "get channel error";
-				return -1;
-			}
+            RmsChannel channelSave = channel;
 
-			try 
-			{
+            channel = Channels.GetChannel(strServerUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
 
-				// È¡¼ÇÂ¼
-				string strStyle = "content,data,timestamp";
+            try
+            {
 
-				string strMetaData;
-				string strOutputPath;
+                // å–è®°å½•
+                string strStyle = "content,data,timestamp";
 
-
-				long lRet = channel.GetRes(strPath,
-					strStyle,
-					out strXml,
-					out strMetaData,
-					out baTimeStamp,
-					out strOutputPath,
-					out strError);
-				if (lRet == -1) 
-				{
-					strError = "»ñÈ¡ '" + strPath + "' ¼ÇÂ¼ÌåÊ±³ö´í: " + strError;
-					if (channel.ErrorCode == ChannelErrorCode.NotFound)
-					{
-						return 0;
-					}
-
-					return -1;
-				}
+                string strMetaData;
+                string strOutputPath;
 
 
-				return 1;
-			}
+                long lRet = channel.GetRes(strPath,
+                    strStyle,
+                    out strXml,
+                    out strMetaData,
+                    out baTimeStamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "è·å– '" + strPath + "' è®°å½•ä½“æ—¶å‡ºé”™: " + strError;
+                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    {
+                        return 0;
+                    }
 
-			finally 
-			{
-				channel = channelSave;
-			}
+                    return -1;
+                }
 
-		}
+
+                return 1;
+            }
+
+            finally
+            {
+                channel = channelSave;
+            }
+
+        }
 
 
         /// <summary>
-        /// ±£´æ¼ÇÂ¼
+        /// ä¿å­˜è®°å½•
         /// </summary>
-        /// <param name="strServerUrl">·şÎñÆ÷URL</param>
+        /// <param name="strServerUrl">æœåŠ¡å™¨URL</param>
         /// <param name="strPath"></param>
         /// <param name="strXml"></param>
         /// <param name="baTimestamp"></param>
         /// <param name="bForceSaveOnTimestampMismatch"></param>
         /// <param name="baOutputTimestamp"></param>
         /// <param name="strError"></param>
-        /// <returns>-2	Ê±¼ä´Á²»Æ¥Åä;-1	Ò»°ã³ö´í;0	Õı³£</returns>
-		public int SaveRecord(
+        /// <returns>-2	æ—¶é—´æˆ³ä¸åŒ¹é…;-1	ä¸€èˆ¬å‡ºé”™;0	æ­£å¸¸</returns>
+        public int SaveRecord(
             string strServerUrl,
-			string strPath,
-			string strXml,
-			byte [] baTimestamp,
-			bool bForceSaveOnTimestampMismatch,
-			out byte [] baOutputTimestamp,
-			out string strError)
-		{
-			strError = "";
-			baOutputTimestamp = null;
+            string strPath,
+            string strXml,
+            byte[] baTimestamp,
+            bool bForceSaveOnTimestampMismatch,
+            out byte[] baOutputTimestamp,
+            out string strError)
+        {
+            strError = "";
+            baOutputTimestamp = null;
 
             if (String.IsNullOrEmpty(strServerUrl) == true)
                 strServerUrl = this.ServerUrl;
 
-			RmsChannel channelSave = channel;
+            RmsChannel channelSave = channel;
 
-			channel = Channels.GetChannel(strServerUrl);
-			if (channel == null)
-			{
-				strError = "get channel error";
-				return -1;
-			}
+            channel = Channels.GetChannel(strServerUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
 
-			try 
-			{
-				string strOutputPath = "";
+            try
+            {
+                string strOutputPath = "";
 
-			REDO:
+            REDO:
 
-				long lRet = channel.DoSaveTextRes(strPath,
-					strXml,
-					false,	// bInlucdePreamble
-					"",	// style
-					baTimestamp,
-					out baOutputTimestamp,
-					out strOutputPath,
-					out strError);
-				if (lRet == -1)
-				{
-					if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
-					{
-						if (bForceSaveOnTimestampMismatch == true)
-						{
-							baTimestamp = baOutputTimestamp;
-							goto REDO;
-						}
-						else
-							return -2;
+                long lRet = channel.DoSaveTextRes(strPath,
+                    strXml,
+                    false,	// bInlucdePreamble
+                    "",	// style
+                    baTimestamp,
+                    out baOutputTimestamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
+                    {
+                        if (bForceSaveOnTimestampMismatch == true)
+                        {
+                            baTimestamp = baOutputTimestamp;
+                            goto REDO;
+                        }
+                        else
+                            return -2;
 
-					}
+                    }
 
-					return -1;
-				}
+                    return -1;
+                }
 
-				strError = channel.ErrorInfo;	// ÌØÊâAPI·ç¸ñ
+                strError = channel.ErrorInfo;	// ç‰¹æ®ŠAPIé£æ ¼
 
-				return 0;
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
-		}
+                return 0;
+            }
+            finally
+            {
+                channel = channelSave;
+            }
+        }
 
 
         /// <summary>
-        /// Ä£Äâ´´½¨¼ìË÷µã
+        /// æ¨¡æ‹Ÿåˆ›å»ºæ£€ç´¢ç‚¹
         /// </summary>
-        /// <param name="strServerUrl">·şÎñÆ÷URL¡£ÎªÊ²Ã´Òªµ¥¸ø³öÕâ¸öURL£¬¶ø²»²ÉÓÃthis.ServerUrl? ÒòÎªÒªÄ£Äâ¼ìË÷µãµÄ¼ÇÂ¼£¬Æä·şÎñÆ÷URL³£³£ºÍÖ÷·şÎñÆ÷µÄURL²»Í¬¡£</param>
+        /// <param name="strServerUrl">æœåŠ¡å™¨URLã€‚ä¸ºä»€ä¹ˆè¦å•ç»™å‡ºè¿™ä¸ªURLï¼Œè€Œä¸é‡‡ç”¨this.ServerUrl? å› ä¸ºè¦æ¨¡æ‹Ÿæ£€ç´¢ç‚¹çš„è®°å½•ï¼Œå…¶æœåŠ¡å™¨URLå¸¸å¸¸å’Œä¸»æœåŠ¡å™¨çš„URLä¸åŒã€‚</param>
         /// <param name="strPath"></param>
         /// <param name="strXml"></param>
         /// <param name="aLine"></param>
         /// <param name="strError"></param>
-        /// <returns>-1	Ò»°ã³ö´í;0	Õı³£</returns>
-		public int GetKeys(
-			string strServerUrl,
-			string strPath,
-			string strXml,
+        /// <returns>-1	ä¸€èˆ¬å‡ºé”™;0	æ­£å¸¸</returns>
+        public int GetKeys(
+            string strServerUrl,
+            string strPath,
+            string strXml,
             out List<AccessKeyInfo> aLine,
-			out string strError)
-		{
-			strError = "";
-			aLine = null;
+            out string strError)
+        {
+            strError = "";
+            aLine = null;
 
             if (String.IsNullOrEmpty(strServerUrl) == true)
                 strServerUrl = this.ServerUrl;
 
-			
-			RmsChannel channelSave = channel;
 
-			channel = Channels.GetChannel(strServerUrl);
-			if (channel == null)
-			{
-				strError = "get channel error";
-				return -1;
-			}
+            RmsChannel channelSave = channel;
 
-			try 
-			{
-				long lRet = channel.DoGetKeys(
+            channel = Channels.GetChannel(strServerUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            try
+            {
+                long lRet = channel.DoGetKeys(
                     strPath,
-					strXml,
-					"zh",	// strLang
-					// "",	// strStyle
-					null,	// this.stop,
-					out aLine,
-					out strError);
-				if (lRet == -1)
-				{
-					return -1;
-				}
-				return 0;
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
-		}
+                    strXml,
+                    "zh",	// strLang
+                    // "",	// strStyle
+                    null,	// this.stop,
+                    out aLine,
+                    out strError);
+                if (lRet == -1)
+                {
+                    return -1;
+                }
+                return 0;
+            }
+            finally
+            {
+                channel = channelSave;
+            }
+        }
 
         /// <summary>
-        /// ¼ìË÷ÊµÓÃ¿â
+        /// æ£€ç´¢å®ç”¨åº“
         /// </summary>
         /// <param name="strDbName"></param>
         /// <param name="strFrom"></param>
@@ -1026,63 +1022,63 @@ namespace DigitalPlatform.Library
         /// <param name="dom"></param>
         /// <param name="strError"></param>
         /// <returns></returns>
-		public int SearchUtilDb(
-			string strDbName,
-			string strFrom,
-			string strKey,
-			out XmlDocument dom,
-			out string strError)
-		{
-			strError = "";
-			dom = null;
+        public int SearchUtilDb(
+            string strDbName,
+            string strFrom,
+            string strKey,
+            out XmlDocument dom,
+            out string strError)
+        {
+            strError = "";
+            dom = null;
 
-            // 2007/4/5 ¸ÄÔì ¼ÓÉÏÁË GetXmlStringSimple()
-			string strQueryXml = "<target list='"
+            // 2007/4/5 æ”¹é€  åŠ ä¸Šäº† GetXmlStringSimple()
+            string strQueryXml = "<target list='"
                 + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14
                 + "'><item><word>"
-				+ StringUtil.GetXmlStringSimple(strKey)
+                + StringUtil.GetXmlStringSimple(strKey)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
 
-			string strPath = "";
+            string strPath = "";
 
-			// ¼ìË÷Ò»¸öÃüÖĞ½á¹û
-			// return:
-			//		-1	Ò»°ã´íÎó
-			//		0	not found
-			//		1	found
-			//		>1	ÃüÖĞ¶àÓÚÒ»Ìõ
-			int nRet = SearchOnePath(
+            // æ£€ç´¢ä¸€ä¸ªå‘½ä¸­ç»“æœ
+            // return:
+            //		-1	ä¸€èˆ¬é”™è¯¯
+            //		0	not found
+            //		1	found
+            //		>1	å‘½ä¸­å¤šäºä¸€æ¡
+            int nRet = SearchOnePath(
                 null,
-				strQueryXml,
-				out strPath,
-				out strError);
-			if (nRet == -1)
-				return -1;
-			if (nRet == 0)
-				return 0;
+                strQueryXml,
+                out strPath,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;
 
-			byte [] baTimeStamp = null;
-			// »ñÈ¡¼ÇÂ¼
-			// return:
-			//		-1	error
-			//		0	not found
-			//		1	found
-			nRet = this.GetRecord(
+            byte[] baTimeStamp = null;
+            // è·å–è®°å½•
+            // return:
+            //		-1	error
+            //		0	not found
+            //		1	found
+            nRet = this.GetRecord(
                 null,
                 strPath,
-				out dom,
-				out baTimeStamp,
-				out strError);
-			if (nRet == -1)
-				return -1;
-			if (nRet == 0)
-				return 0;
+                out dom,
+                out baTimeStamp,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;
 
-			return 1;
-		}
+            return 1;
+        }
 
         /// <summary>
-        /// ¼ìË÷ÊµÓÃ¿â
+        /// æ£€ç´¢å®ç”¨åº“
         /// </summary>
         /// <param name="strDbName"></param>
         /// <param name="strFrom"></param>
@@ -1091,130 +1087,130 @@ namespace DigitalPlatform.Library
         /// <param name="strValue"></param>
         /// <param name="strError"></param>
         /// <returns></returns>
-		public int SearchUtilDb(
-			string strDbName,
-			string strFrom,
-			string strKey,
-			string strValueAttrName,
-			out string strValue,
-			out string strError)
-		{
-			strError = "";
-			strValue = "";
+        public int SearchUtilDb(
+            string strDbName,
+            string strFrom,
+            string strKey,
+            string strValueAttrName,
+            out string strValue,
+            out string strError)
+        {
+            strError = "";
+            strValue = "";
 
-            // 2007/4/5 ¸ÄÔì ¼ÓÉÏÁË GetXmlStringSimple()
-			string strQueryXml = "<target list='"
+            // 2007/4/5 æ”¹é€  åŠ ä¸Šäº† GetXmlStringSimple()
+            string strQueryXml = "<target list='"
                 + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14
                 + "'><item><word>"
-				+ StringUtil.GetXmlStringSimple(strKey)
+                + StringUtil.GetXmlStringSimple(strKey)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
 
-			string strPath = "";
+            string strPath = "";
 
-			// ¼ìË÷Ò»¸öÃüÖĞ½á¹û
-		// return:
-		//		-1	Ò»°ã´íÎó
-		//		0	not found
-		//		1	found
-		//		>1	ÃüÖĞ¶àÓÚÒ»Ìõ
-			int nRet = SearchOnePath(
+            // æ£€ç´¢ä¸€ä¸ªå‘½ä¸­ç»“æœ
+            // return:
+            //		-1	ä¸€èˆ¬é”™è¯¯
+            //		0	not found
+            //		1	found
+            //		>1	å‘½ä¸­å¤šäºä¸€æ¡
+            int nRet = SearchOnePath(
                 null,
-				strQueryXml,
-				out strPath,
-				out strError);
-			if (nRet == -1)
-				return -1;
-			if (nRet == 0)
-				return 0;
+                strQueryXml,
+                out strPath,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;
 
-			byte [] baTimeStamp = null;
-			XmlDocument domRecord = null;
-			// »ñÈ¡¼ÇÂ¼
-			// return:
-			//		-1	error
-			//		0	not found
-			//		1	found
-			nRet = this.GetRecord(
+            byte[] baTimeStamp = null;
+            XmlDocument domRecord = null;
+            // è·å–è®°å½•
+            // return:
+            //		-1	error
+            //		0	not found
+            //		1	found
+            nRet = this.GetRecord(
                 null,
                 strPath,
-				out domRecord,
-				out baTimeStamp,
-				out strError);
-			if (nRet == -1)
-				return -1;
-			if (nRet == 0)
-				return 0;
+                out domRecord,
+                out baTimeStamp,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;
 
-			strValue = DomUtil.GetAttr(domRecord.DocumentElement, strValueAttrName);
+            strValue = DomUtil.GetAttr(domRecord.DocumentElement, strValueAttrName);
 
-			return 1;
-		}
+            return 1;
+        }
 
 
 
         /// <summary>
-        /// ¼ìË÷²¢»ñÈ¡ä¯ÀÀ½á¹û
+        /// æ£€ç´¢å¹¶è·å–æµè§ˆç»“æœ
         /// </summary>
-        /// <param name="strServerUrl">·şÎñÆ÷URL¡£Èç¹û==""»òÕß==null£¬±íÊ¾ÓÃthis.ServerUrl</param>
+        /// <param name="strServerUrl">æœåŠ¡å™¨URLã€‚å¦‚æœ==""æˆ–è€…==nullï¼Œè¡¨ç¤ºç”¨this.ServerUrl</param>
         /// <param name="strQueryXml"></param>
-        /// <param name="bGetBrowseCols">ÊÇ·ñÒª»ñµÃä¯ÀÀÁĞ</param>
+        /// <param name="bGetBrowseCols">æ˜¯å¦è¦è·å¾—æµè§ˆåˆ—</param>
         /// <param name="strError"></param>
-        /// <returns>-2	ÓÃ»§ÖĞ¶Ï;-1	Ò»°ã´íÎó;0	Î´ÃüÖĞ;	>=1	Õı³£½áÊø£¬·µ»ØÃüÖĞÌõÊı</returns>
-		public long SearchAndBrowse(
-			string strServerUrl,
-			string strQueryXml,
+        /// <returns>-2	ç”¨æˆ·ä¸­æ–­;-1	ä¸€èˆ¬é”™è¯¯;0	æœªå‘½ä¸­;	>=1	æ­£å¸¸ç»“æŸï¼Œè¿”å›å‘½ä¸­æ¡æ•°</returns>
+        public long SearchAndBrowse(
+            string strServerUrl,
+            string strQueryXml,
             bool bGetBrowseCols,
-			out string strError)
-		{
-			strError = "";
-			
-			if (strServerUrl == null || strServerUrl == null)
-				strServerUrl = this.ServerUrl;
+            out string strError)
+        {
+            strError = "";
 
-			RmsChannel channelSave = channel;
+            if (strServerUrl == null || strServerUrl == null)
+                strServerUrl = this.ServerUrl;
+
+            RmsChannel channelSave = channel;
 
 
-			channel = Channels.GetChannel(strServerUrl);
-			if (channel == null)
-			{
-				strError = "get channel error";
-				return -1;
-			}
+            channel = Channels.GetChannel(strServerUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
 
-			try 
-			{
+            try
+            {
 
-				// ¼ìË÷
-				long lRet = channel.DoSearch(strQueryXml,
+                // æ£€ç´¢
+                long lRet = channel.DoSearch(strQueryXml,
                     "default",
                     "", // strOuputStyle
                     out strError);
-				if (lRet == -1) 
-					return -1;
+                if (lRet == -1)
+                    return -1;
 
-				if (lRet == 0) 
-					return 0;
+                if (lRet == 0)
+                    return 0;
 
-				// Ñ­»·»ñÈ¡½á¹û
-				long nHitCount = lRet;
-				long nStart = 0;
-				long nCount = 10;
-				long nIndex = 0;
+                // å¾ªç¯è·å–ç»“æœ
+                long nHitCount = lRet;
+                long nStart = 0;
+                long nCount = 10;
+                long nIndex = 0;
 
-				for(;;)
-				{
-					Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                for (; ; )
+                {
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
-					if (stop != null) 
-					{
-						if (stop.State != 0)
-						{
-							strError = "ÓÃ»§ÖĞ¶Ï";
-							return -2;
-						}
-					}
+                    if (stop != null)
+                    {
+                        if (stop.State != 0)
+                        {
+                            strError = "ç”¨æˆ·ä¸­æ–­";
+                            return -2;
+                        }
+                    }
 
-					List<string> aPath = null;
+                    List<string> aPath = null;
                     ArrayList aLine = null;
                     if (bGetBrowseCols == false)
                     {
@@ -1238,21 +1234,21 @@ namespace DigitalPlatform.Library
                             out aLine,
                             out strError);
                     }
-					if (lRet == -1) 
-					{
-						strError = "»ñÈ¡¼ìË÷½á¹ûÊ±³ö´í: " + strError;
-						return -1;
-					}
+                    if (lRet == -1)
+                    {
+                        strError = "è·å–æ£€ç´¢ç»“æœæ—¶å‡ºé”™: " + strError;
+                        return -1;
+                    }
 
                     if (bGetBrowseCols == false)
-					    nStart += aPath.Count;
+                        nStart += aPath.Count;
                     else
                         nStart += aLine.Count;
 
 
-					// ´¥·¢ÊÂ¼ş
-					if (this.BrowseRecord != null)
-					{
+                    // è§¦å‘äº‹ä»¶
+                    if (this.BrowseRecord != null)
+                    {
                         int nThisCount = 0;
 
                         if (bGetBrowseCols == false)
@@ -1262,10 +1258,10 @@ namespace DigitalPlatform.Library
 
 
                         for (int j = 0; j < nThisCount; j++)
-						{
-							BrowseRecordEventArgs e = new BrowseRecordEventArgs();
-							e.SearchCount = nHitCount;
-							e.Index = nIndex ++;
+                        {
+                            BrowseRecordEventArgs e = new BrowseRecordEventArgs();
+                            e.SearchCount = nHitCount;
+                            e.Index = nIndex++;
                             if (bGetBrowseCols == false)
                             {
                                 e.FullPath = strServerUrl + "?" + (string)aPath[j];
@@ -1274,145 +1270,145 @@ namespace DigitalPlatform.Library
                             {
                                 string[] cols = (string[])aLine[j];
                                 e.FullPath = strServerUrl + "?" + cols[0];
-                                // ¶ªµôµÚÒ»ÁĞ
+                                // ä¸¢æ‰ç¬¬ä¸€åˆ—
                                 e.Cols = new string[Math.Max(cols.Length - 1, 0)];
                                 Array.Copy(cols, 1, e.Cols, 0, cols.Length - 1);
                             }
-							this.BrowseRecord(this, e);
-							if (e.Cancel == true)
-							{
-								if (e.ErrorInfo == "")
-									strError = "ÓÃ»§ÖĞ¶Ï";
-								else
-									strError = e.ErrorInfo;
-								return -2;
-							}
-						}
-					}
+                            this.BrowseRecord(this, e);
+                            if (e.Cancel == true)
+                            {
+                                if (e.ErrorInfo == "")
+                                    strError = "ç”¨æˆ·ä¸­æ–­";
+                                else
+                                    strError = e.ErrorInfo;
+                                return -2;
+                            }
+                        }
+                    }
 
 
 
-					if (nStart >= nHitCount)
-						break;
+                    if (nStart >= nHitCount)
+                        break;
 
-                    // 2006/9/24 add ·ÀÖ¹nStart + nCountÔ½½ç
+                    // 2006/9/24 add é˜²æ­¢nStart + nCountè¶Šç•Œ
                     if (nStart + nCount > nHitCount)
                         nCount = nHitCount - nStart;
                     else
                         nCount = 10;
 
-				}
+                }
 
 
-				return nHitCount;
-			}
-			finally 
-			{
-				channel = channelSave;
-			}
+                return nHitCount;
+            }
+            finally
+            {
+                channel = channelSave;
+            }
 
-		}
+        }
 
 
 
         /// <summary>
-        /// ´ÓmarcdefÅäÖÃÎÄ¼şÖĞ»ñµÃmarc¸ñÊ½¶¨Òå
+        /// ä»marcdefé…ç½®æ–‡ä»¶ä¸­è·å¾—marcæ ¼å¼å®šä¹‰
         /// </summary>
         /// <param name="strDbFullPath"></param>
         /// <param name="strMarcSyntax"></param>
         /// <param name="strError"></param>
-        /// <returns>-1	³ö´í;0	Ã»ÓĞÕÒµ½;1	ÕÒµ½</returns>
-		public int GetMarcSyntax(string strDbFullPath,
-			out string strMarcSyntax,
-			out string strError)
-		{
-			strError = "";
-			strMarcSyntax = "";
+        /// <returns>-1	å‡ºé”™;0	æ²¡æœ‰æ‰¾åˆ°;1	æ‰¾åˆ°</returns>
+        public int GetMarcSyntax(string strDbFullPath,
+            out string strMarcSyntax,
+            out string strError)
+        {
+            strError = "";
+            strMarcSyntax = "";
 
-			ResPath respath = new ResPath(strDbFullPath);
+            ResPath respath = new ResPath(strDbFullPath);
 
-			string strCfgFilePath = respath.Path + "/cfgs/marcdef";
+            string strCfgFilePath = respath.Path + "/cfgs/marcdef";
 
-			XmlDocument tempdom = null;
-			// »ñµÃÅäÖÃÎÄ¼ş
-			// return:
-			//		-1	error
-			//		0	not found
-			//		1	found
-			int nRet = this.GetCfgFile(
-				respath.Url,
-				strCfgFilePath,
-				out tempdom,
-				out strError);
-			if (nRet == -1)
-				return -1;
-			if (nRet == 0) 
-			{
-				strError = "ÅäÖÃÎÄ¼ş '" + strCfgFilePath + "' Ã»ÓĞÕÒµ½...";
-				return 0;
-			}
+            XmlDocument tempdom = null;
+            // è·å¾—é…ç½®æ–‡ä»¶
+            // return:
+            //		-1	error
+            //		0	not found
+            //		1	found
+            int nRet = this.GetCfgFile(
+                respath.Url,
+                strCfgFilePath,
+                out tempdom,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "é…ç½®æ–‡ä»¶ '" + strCfgFilePath + "' æ²¡æœ‰æ‰¾åˆ°...";
+                return 0;
+            }
 
-			XmlNode node = tempdom.DocumentElement.SelectSingleNode("//MARCSyntax");
-			if (node == null)
-			{
-				strError = "marcdefÎÄ¼ş "+strCfgFilePath+" ÖĞÃ»ÓĞ<MARCSyntax>ÔªËØ";
-				return 0;
-			}
+            XmlNode node = tempdom.DocumentElement.SelectSingleNode("//MARCSyntax");
+            if (node == null)
+            {
+                strError = "marcdefæ–‡ä»¶ " + strCfgFilePath + " ä¸­æ²¡æœ‰<MARCSyntax>å…ƒç´ ";
+                return 0;
+            }
 
-			strMarcSyntax = DomUtil.GetNodeText(node);
+            strMarcSyntax = DomUtil.GetNodeText(node);
 
-			strMarcSyntax = strMarcSyntax.ToLower();
+            strMarcSyntax = strMarcSyntax.ToLower();
 
-			return 1;
-		}
-
-
-	}
+            return 1;
+        }
 
 
+    }
 
-    /// <summary>
-    /// ä¯ÀÀ¼ÇÂ¼µ½´ï
-    /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
-	public delegate void BrowseRecordEventHandler(object sender,
-	BrowseRecordEventArgs e);
+
 
     /// <summary>
-    /// ä¯ÀÀ¼ÇÂ¼µ½´ïÊÂ¼ş²ÎÊı
+    /// æµè§ˆè®°å½•åˆ°è¾¾
     /// </summary>
-	public class BrowseRecordEventArgs: EventArgs
-	{
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
+    public delegate void BrowseRecordEventHandler(object sender,
+    BrowseRecordEventArgs e);
+
+    /// <summary>
+    /// æµè§ˆè®°å½•åˆ°è¾¾äº‹ä»¶å‚æ•°
+    /// </summary>
+    public class BrowseRecordEventArgs : EventArgs
+    {
         /// <summary>
-        /// ÃüÖĞ×ÜÊı
+        /// å‘½ä¸­æ€»æ•°
         /// </summary>
-		public long SearchCount = 0;	// 
+        public long SearchCount = 0;	// 
 
         /// <summary>
-        /// µ±Ç°¼ÇÂ¼ËùÔÚÆ«ÒÆ
+        /// å½“å‰è®°å½•æ‰€åœ¨åç§»
         /// </summary>
-		public long Index = 0;	// 
+        public long Index = 0;	// 
 
         /// <summary>
-        /// ¼ÇÂ¼Â·¾¶£¬Õı¹æÈ«Â·¾¶£¬ÀıÈç http://dp2003.com/rmsservice/rmsservice.asmx?ÊéÄ¿¿â/1
+        /// è®°å½•è·¯å¾„ï¼Œæ­£è§„å…¨è·¯å¾„ï¼Œä¾‹å¦‚ http://dp2003.com/rmsservice/rmsservice.asmx?ä¹¦ç›®åº“/1
         /// </summary>
-		public string FullPath = "";	// 
+        public string FullPath = "";	// 
 
         /// <summary>
-        /// ä¯ÀÀ¸÷ÁĞĞÅÏ¢
+        /// æµè§ˆå„åˆ—ä¿¡æ¯
         /// </summary>
-		public string [] Cols = null;	// 
+        public string[] Cols = null;	// 
 
         /// <summary>
-        /// ÊÇ·ñĞèÒªÖĞ¶Ï
+        /// æ˜¯å¦éœ€è¦ä¸­æ–­
         /// </summary>
-		public bool Cancel = false;	// 
+        public bool Cancel = false;	// 
 
         /// <summary>
-        /// »Øµ÷ÆÚ¼ä·¢ÉúµÄ´íÎóĞÅÏ¢
+        /// å›è°ƒæœŸé—´å‘ç”Ÿçš„é”™è¯¯ä¿¡æ¯
         /// </summary>
-		public string ErrorInfo = "";	// 
-	}
+        public string ErrorInfo = "";	// 
+    }
 
 }

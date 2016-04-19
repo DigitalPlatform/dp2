@@ -274,7 +274,6 @@ namespace DigitalPlatform.LibraryServer
 
             long lResultCount = lRet;
 
-
             searchresults = new CallNumberSearchResult[origin_searchresults.Length];
 
             for (int i = 0; i < origin_searchresults.Length; i++)

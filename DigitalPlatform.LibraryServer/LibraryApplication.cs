@@ -271,6 +271,7 @@ namespace DigitalPlatform.LibraryServer
         public int OutofReservationThreshold = 10;  // 预约到书多少不取次后，被惩罚禁止预约
         public bool CanReserveOnshelf = true;   // 是否可以预约在架图书
         public string NotifyDef = "";       // 提醒通知的定义。"15day,50%,70%"
+        public string ArrivedNotifyTypes = "dpmail,email";   // 到书通知的类型
 
         DefaultThread defaultManagerThread = null; // 缺省管理后台任务
 
@@ -744,7 +745,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 预约到书
                     // 元素<arrived>
-                    // 属性dbname/reserveTimeSpan/outofReservationThreshold/canReserveOnshelf
+                    // 属性dbname/reserveTimeSpan/outofReservationThreshold/canReserveOnshelf/notifyTypes
                     node = dom.DocumentElement.SelectSingleNode("arrived") as XmlElement;
                     if (node != null)
                     {
@@ -778,6 +779,13 @@ namespace DigitalPlatform.LibraryServer
                         }
 
                         app.CanReserveOnshelf = bValue;
+
+                        // 没有这个属性的时候，默认 "dpmail,email"，否则依其值，哪怕为 ""
+                        if (node.GetAttributeNode("notifyTypes") == null)
+                            app.ArrivedNotifyTypes = "dpmail,email";
+                        else
+                            app.ArrivedNotifyTypes = node.GetAttribute("notifyTypes");
+
                     }
                     else
                     {
@@ -785,6 +793,7 @@ namespace DigitalPlatform.LibraryServer
                         app.ArrivedReserveTimeSpan = "";
                         app.OutofReservationThreshold = 10;
                         app.CanReserveOnshelf = true;
+                        app.ArrivedNotifyTypes = "dpmail,email";
                     }
 
                     // 2013/9/24
@@ -2981,6 +2990,7 @@ namespace DigitalPlatform.LibraryServer
                     // 2007/11/5 
                     writer.WriteAttributeString("outofReservationThreshold", this.OutofReservationThreshold.ToString());
                     writer.WriteAttributeString("canReserveOnshelf", this.CanReserveOnshelf == true ? "true" : "false");
+                    writer.WriteAttributeString("notifyTypes", this.ArrivedNotifyTypes);
 
                     writer.WriteEndElement();
 
@@ -8905,7 +8915,7 @@ out strError);
 
                 // 观察 password 元素的 lastResetTime 属性，需在规定的时间长度以外才能再次进行重设
 
-                        string strBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+                string strBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
                 {
                     string strPrefix = "";
                     string strValue = "";
@@ -8929,11 +8939,11 @@ out strError);
                         string strEmail = DomUtil.GetElementText(readerdom.DocumentElement, "email");
                         if (StringUtil.SplitList(strEmail).IndexOf(strValue) == -1)
                         {
-                            strError = "地址 '"+strValue+"' 不匹配";
+                            strError = "地址 '" + strValue + "' 不匹配";
                             return -1;
                         }
                     }
-                    if (strPrefix == "TP:") 
+                    if (strPrefix == "TP:")
                     {
                         // 核对 电话号码
                         string strTel1 = DomUtil.GetElementText(readerdom.DocumentElement, "tel");

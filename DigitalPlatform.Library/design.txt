@@ -1,49 +1,49 @@
-
-»ñÈ¡Ä£Äâ¼ìË÷µã
+ï»¿
+è·å–æ¨¡æ‹Ÿæ£€ç´¢ç‚¹
 
 ===
 
-¸ù¾İÅäÖÃÎÄ¼şÖĞµÄproject£¬¿ÉÒÔÃæ°åÑ¡ÔñÒ»¸ö£¬ÓÃÀ´½øĞĞ²éÖØ¡£Ñ¡Ôñproject
-ÓÖĞèÒªÒ»¸ö×¨ÓÃ¶Ô»°¿ò¡£
+æ ¹æ®é…ç½®æ–‡ä»¶ä¸­çš„projectï¼Œå¯ä»¥é¢æ¿é€‰æ‹©ä¸€ä¸ªï¼Œç”¨æ¥è¿›è¡ŒæŸ¥é‡ã€‚é€‰æ‹©project
+åˆéœ€è¦ä¸€ä¸ªä¸“ç”¨å¯¹è¯æ¡†ã€‚
 
-ÔÚC#½Å±¾ÖĞ£¬¿ÉÒÔÖ¸¶¨Ò»¸öprojectÃû£¬ÓÃÀ´²éÖØ¡£Èç¹ûÕâ¸öprojectÃûÔÚserver
-¶Ë»ñÈ¡À´µÄdupÎÄ¼şÖĞ²»´æÔÚ£¬Òª¾¯¸æ¡£
-
----
-³¬¹ıãĞÖµµÄĞĞ±³¾°Òª±äÉ«¡£
-
-¿ª´°¿ÚÒª¼Ç×¡´óĞ¡Î»ÖÃ¡£
+åœ¨C#è„šæœ¬ä¸­ï¼Œå¯ä»¥æŒ‡å®šä¸€ä¸ªprojectåï¼Œç”¨æ¥æŸ¥é‡ã€‚å¦‚æœè¿™ä¸ªprojectååœ¨server
+ç«¯è·å–æ¥çš„dupæ–‡ä»¶ä¸­ä¸å­˜åœ¨ï¼Œè¦è­¦å‘Šã€‚
 
 ---
-¹â±êÔÚÂ·¾¶ÉÏ£¬tips³öÏÖÍêÕûÂ·¾¶¡£¹â±êÔÚÈ¨ÖµºÍÉÏ£¬³öÏÖ¼ìË÷¹ı³Ìtips¡£
+è¶…è¿‡é˜ˆå€¼çš„è¡ŒèƒŒæ™¯è¦å˜è‰²ã€‚
+
+å¼€çª—å£è¦è®°ä½å¤§å°ä½ç½®ã€‚
 
 ---
-ÉèÖÃ´°¿Ú±êÌâ
+å…‰æ ‡åœ¨è·¯å¾„ä¸Šï¼Œtipså‡ºç°å®Œæ•´è·¯å¾„ã€‚å…‰æ ‡åœ¨æƒå€¼å’Œä¸Šï¼Œå‡ºç°æ£€ç´¢è¿‡ç¨‹tipsã€‚
 
 ---
-×îºóÅÅĞò½×¶ÎºÍÈ¡µÃbrowse½×¶Î£¬Òª¿ÉÒÔÖĞ¶Ï£¬×´Ì¬ÌõÒ²ÒªÏÔÊ¾ÊÊµ±ĞÅÏ¢¡£
+è®¾ç½®çª—å£æ ‡é¢˜
 
 ---
-²éÖØ½áÊøºó£¬ÓĞÒ»¸ömessagebox»ã±¨ÊÇ·ñÖØµÄĞÅÏ¢¡£Ò²¿ÉÒÔÍ¨¹ıÄ³Ğ©ÊôĞÔ¿ØÖÆÆäÊ¡ÂÔ¡£
+æœ€åæ’åºé˜¶æ®µå’Œå–å¾—browseé˜¶æ®µï¼Œè¦å¯ä»¥ä¸­æ–­ï¼ŒçŠ¶æ€æ¡ä¹Ÿè¦æ˜¾ç¤ºé€‚å½“ä¿¡æ¯ã€‚
 
 ---
-Ó¦¿ÉÒÔXML¹Û²ì·¢Æğ¼ÇÂ¼¡£ ÒòÎªºÍ·¢ÆğµÄÏêÏ¸´°ÍÑ¹³ºó£¬ÓĞÊ±ĞèÒª¹Û²ìÕâ¸öĞÅÏ¢¡£
+æŸ¥é‡ç»“æŸåï¼Œæœ‰ä¸€ä¸ªmessageboxæ±‡æŠ¥æ˜¯å¦é‡çš„ä¿¡æ¯ã€‚ä¹Ÿå¯ä»¥é€šè¿‡æŸäº›å±æ€§æ§åˆ¶å…¶çœç•¥ã€‚
 
 ---
-Ò»ÉÏÀ´¾Í×Ô¶¯¼ìË÷¡£
+åº”å¯ä»¥XMLè§‚å¯Ÿå‘èµ·è®°å½•ã€‚ å› ä¸ºå’Œå‘èµ·çš„è¯¦ç»†çª—è„±é’©åï¼Œæœ‰æ—¶éœ€è¦è§‚å¯Ÿè¿™ä¸ªä¿¡æ¯ã€‚
 
 ---
-Ã¿´Î¼ìË÷Ç°Çå¿ÕlistviewºÍhashtable
+ä¸€ä¸Šæ¥å°±è‡ªåŠ¨æ£€ç´¢ã€‚
+
+---
+æ¯æ¬¡æ£€ç´¢å‰æ¸…ç©ºlistviewå’Œhashtable
 
 
 ~~~~
 
-²éÖØ¼ìË÷ÕıÔÚ½øĞĞÊ±,¼ìË÷°´Å¥Ó¦µ±·¢»Ò.
+æŸ¥é‡æ£€ç´¢æ­£åœ¨è¿›è¡Œæ—¶,æ£€ç´¢æŒ‰é’®åº”å½“å‘ç°.
 
-¸ü»»·½°¸Ãû, ×Ô¶¯ÖØĞÂ¼ìË÷Ò»´Î? »òÕßÇå³ılistview? ¿ÕlistviewÈçºÎÓëÃ»ÓĞÖØÇø±ğ?
+æ›´æ¢æ–¹æ¡ˆå, è‡ªåŠ¨é‡æ–°æ£€ç´¢ä¸€æ¬¡? æˆ–è€…æ¸…é™¤listview? ç©ºlistviewå¦‚ä½•ä¸æ²¡æœ‰é‡åŒºåˆ«?
 
 ~~~~~
-¿ÉÒÔÔÚlistviewÇ°Ãæ¸²¸ÇÒ»¸ö°ëÍ¸Ã÷µÄ¿Ø¼ş
+å¯ä»¥åœ¨listviewå‰é¢è¦†ç›–ä¸€ä¸ªåŠé€æ˜çš„æ§ä»¶
 
 
 ~~~~~~~~~~~~~~~
@@ -75,14 +75,14 @@ int MakeHtmlPage(XmlDocument dom,
 			mngr.AddNamespace("dc", "http://purl.org/dc/elements/1.1/");
 			mngr.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
-			// ÉÏ¼¶ÀàºÅ
+			// ä¸Šçº§ç±»å·
 			string strParent = DomUtil.GetAttr(dom.DocumentElement, "parentID");
 
 			strHtml += "<p class='parentlink'>";
 			if (strParent != "")
 			{
 				string strUrl = "action://navi/" + strParent;
-				strHtml += "ÉÏ¼¶Àà: <a class='parentlink' href='"+strUrl+"' >" + strParent + "</a>";
+				strHtml += "ä¸Šçº§ç±»: <a class='parentlink' href='"+strUrl+"' >" + strParent + "</a>";
 			}
 			strHtml += "</p>";
 
@@ -90,10 +90,10 @@ int MakeHtmlPage(XmlDocument dom,
 
 			XmlNode node = null;
 
-			// ÀàºÅ
+			// ç±»å·
 			node = dom.DocumentElement.SelectSingleNode("dc:subject[@xsi:type='dpdc:CLC']", mngr);
 			strHtml += "<tr class='classnumber'>";
-			strHtml += "<td class='classnumbertitle' valign='bottom' nowrap align='right' width='20%'>ÀàºÅ</td>";
+			strHtml += "<td class='classnumbertitle' valign='bottom' nowrap align='right' width='20%'>ç±»å·</td>";
 
 			strHtml += "<td class='classnumbertext' width='80%'>";
 
@@ -103,10 +103,10 @@ int MakeHtmlPage(XmlDocument dom,
 			strHtml += "</td>";
 			strHtml += "</tr>";
 
-			// ÀàÃû
+			// ç±»å
 			node = dom.DocumentElement.SelectSingleNode("dc:title", mngr);
 			strHtml += "<tr class='classname'>";
-			strHtml += "<td class='classnametitle'  nowrap align='right' width='20%'>ÀàÃû</td>";
+			strHtml += "<td class='classnametitle'  nowrap align='right' width='20%'>ç±»å</td>";
 
 			strHtml += "<td class='classnametext' width='80%'>";
 
@@ -124,10 +124,10 @@ int MakeHtmlPage(XmlDocument dom,
 
 			int i = 0;
 
-			// Ö÷Ìâ´ÊÈô¸É
+			// ä¸»é¢˜è¯è‹¥å¹²
 			XmlNodeList nodes = dom.DocumentElement.SelectNodes("dc:subject[@xsi:type='dpdc:CT']", mngr);
 			strHtml += "<tr class='subject'>";
-			strHtml += "<td class='subjecttitle'  nowrap align='right'>Ö÷Ìâ´Ê</td>";
+			strHtml += "<td class='subjecttitle'  nowrap align='right'>ä¸»é¢˜è¯</td>";
 
 			strHtml += "<td class='subjecttext'>";
 			for(i=0;i<nodes.Count;i++)
@@ -137,7 +137,7 @@ int MakeHtmlPage(XmlDocument dom,
 				string strText = DomUtil.GetNodeText(node);
 				string strSelectUrl = "action://copyone/" + HttpUtility.UrlEncode(strText);
 			
-				strHtml += "<div class='relatesubjectline'><input class='checkbox' name='subject' type='checkbox' value='"+ DomUtil.GetNodeText(node) +"'/>" + strText + " <a href='"+strSelectUrl+"' alt='Ñ¡ÓÃÖ÷Ìâ´Ê"+strText+"'>*</a></div>";
+				strHtml += "<div class='relatesubjectline'><input class='checkbox' name='subject' type='checkbox' value='"+ DomUtil.GetNodeText(node) +"'/>" + strText + " <a href='"+strSelectUrl+"' alt='é€‰ç”¨ä¸»é¢˜è¯"+strText+"'>*</a></div>";
 			
 				// strHtml += "<div class='subjectline'><input class='checkbox' name='subject' type='checkbox' value='"+ DomUtil.GetNodeText(node) +"'/>" + DomUtil.GetNodeText(node) + "</div>";
 
@@ -145,10 +145,10 @@ int MakeHtmlPage(XmlDocument dom,
 			strHtml += "</td>";
 			strHtml += "</tr>";
 
-			// Ïà¹ØÖ÷Ìâ´ÊÈô¸É
+			// ç›¸å…³ä¸»é¢˜è¯è‹¥å¹²
 			nodes = dom.DocumentElement.SelectNodes("dc:subject[@xsi:type='dpdc:subject']/dc:subject[@xsi:type='dpdc:CT']", mngr);
 			strHtml += "<tr class='relatesubject'>";
-			strHtml += "<td class='relatesubjecttitle'  nowrap align='right'>Ïà¹ØÖ÷Ìâ´Ê</td>";
+			strHtml += "<td class='relatesubjecttitle'  nowrap align='right'>ç›¸å…³ä¸»é¢˜è¯</td>";
 
 			strHtml += "<td class='relatesubjecttext'>";
 			for(i=0;i<nodes.Count;i++)
@@ -158,16 +158,16 @@ int MakeHtmlPage(XmlDocument dom,
 				string strText = DomUtil.GetNodeText(node);
 				string strSelectUrl = "action://copyone/" + HttpUtility.UrlEncode(strText);
 			
-				strHtml += "<div class='relatesubjectline'><input class='checkbox' name='subject' type='checkbox' value='"+ DomUtil.GetNodeText(node) +"'/>" + strText + " <a href='"+strSelectUrl+"' alt='Ñ¡ÓÃÖ÷Ìâ´Ê"+strText+"'>*</a></div>";
+				strHtml += "<div class='relatesubjectline'><input class='checkbox' name='subject' type='checkbox' value='"+ DomUtil.GetNodeText(node) +"'/>" + strText + " <a href='"+strSelectUrl+"' alt='é€‰ç”¨ä¸»é¢˜è¯"+strText+"'>*</a></div>";
 
 			}
 			strHtml += "</td>";
 			strHtml += "</tr>";
 
-			// ÃüÁî°´Å¥
+			// å‘½ä»¤æŒ‰é’®
 			strHtml += "<tr class='command'>";
 			strHtml += "<td class='command' colspan='2'>";
-			strHtml += "<input type='submit' value='Ñ¡ÓÃ´ò¹´µÄÖ÷Ìâ´Ê' />";
+			strHtml += "<input type='submit' value='é€‰ç”¨æ‰“å‹¾çš„ä¸»é¢˜è¯' />";
 			strHtml += "</td></tr>";
 
 
@@ -177,10 +177,10 @@ int MakeHtmlPage(XmlDocument dom,
 			strHtml += "</tr>";
 
 
-			// ÏÂ¼¶Àà
+			// ä¸‹çº§ç±»
 			nodes = dom.DocumentElement.SelectNodes("dpdc:record", mngr);
 			strHtml += "<tr class='childrenclass'>";
-			strHtml += "<td class='childrenclasstitle'  nowrap align='right'>ÏÂ¼¶Àà</td>";
+			strHtml += "<td class='childrenclasstitle'  nowrap align='right'>ä¸‹çº§ç±»</td>";
 
 			strHtml += "<td class='childrenclasstext'>";
 			for(i=0;i<nodes.Count;i++)
@@ -217,8 +217,8 @@ int MakeHtmlPage(XmlDocument dom,
 
 
 
-	<dblink bibliodb="ÖĞÎÄÍ¼Êé" itemdb="ÖĞÎÄÍ¼ÊéÊµÌå" />
-	<dblink bibliodb="Î÷ÎÄÍ¼Êé" itemdb="Î÷ÎÄÍ¼ÊéÊµÌå" />
+	<dblink bibliodb="ä¸­æ–‡å›¾ä¹¦" itemdb="ä¸­æ–‡å›¾ä¹¦å®ä½“" />
+	<dblink bibliodb="è¥¿æ–‡å›¾ä¹¦" itemdb="è¥¿æ–‡å›¾ä¹¦å®ä½“" />
 
 
 ~~~~~~~~~~~~

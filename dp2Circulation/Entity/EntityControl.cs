@@ -1061,8 +1061,8 @@ MessageBoxDefaultButton.Button2);
         void menu_copyEntity_Click(object sender, EventArgs e)
         {
             ClipboardBookItemCollection newbookitems = new ClipboardBookItemCollection();
-
-
+            StringBuilder text = new StringBuilder();
+            List<string> xmls = new List<string>();
             for (int i = 0; i < this.listView.Items.Count; i++)
             {
                 ListViewItem item = this.listView.Items[i];
@@ -1076,11 +1076,32 @@ MessageBoxDefaultButton.Button2);
                 BookItem dupitem = bookitem.Clone();
 
                 newbookitems.Add(dupitem);
+
+                // text
+                text.Append(Global.BuildLine(item) + "\r\n");
+
+                // xml
+                string strXml = "";
+                string strError = "";
+                int nRet = bookitem.BuildRecord(
+                    true,   // 要检查 Parent 成员
+                    out strXml,
+                    out strError);
+                if (nRet == -1)
+                    xmls.Add("!" + strError);
+                else
+                    xmls.Add(strXml);
             }
 
             // DataObject obj = new DataObject(newbookitems);
 
-            Clipboard.SetDataObject(newbookitems, true);
+            // Clipboard.SetDataObject(newbookitems, true);
+
+            DataObject obj = new DataObject();
+            obj.SetData(typeof(ClipboardBookItemCollection), newbookitems);
+            obj.SetData(text.ToString());
+            obj.SetData("xml", xmls);
+            Clipboard.SetDataObject(obj, true);
         }
 
         // 实作粘贴
@@ -1164,7 +1185,6 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
                 if (String.IsNullOrEmpty(strBarcode) == true)
                     continue;   // 2008/11/3
-
 
                 // 对当前窗口内进行条码查重
                 BookItem dupitem = this.Items.GetItemByBarcode(strBarcode);
@@ -1270,7 +1290,6 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             }
              * */
             this.Changed = this.Changed;
-
             return 0;
         }
 

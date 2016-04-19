@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Threading;
 
-
 using DigitalPlatform;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
@@ -15,7 +14,6 @@ using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Library
 {
-
     /// <summary>
     /// 种次号维护对话框
     /// </summary>
@@ -489,7 +487,6 @@ namespace DigitalPlatform.Library
                 this.BeginInvoke(new Delegate_Search(this.button_search_Click), pList);
             }
         }
-
 
         delegate void Delegate_Search(object sender, EventArgs e);
 

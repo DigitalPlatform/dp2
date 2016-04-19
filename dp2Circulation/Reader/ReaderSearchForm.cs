@@ -5527,6 +5527,7 @@ dlg.UiState);
 
             ExportPatronExcelDialog dlg = new ExportPatronExcelDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.OverwritePrompt = true;
             dlg.UiState = this.MainForm.AppInfo.GetString(
         "ReaderSearchForm",
         "ExportPatronExcelDialog_uiState",
@@ -5545,6 +5546,24 @@ dlg.UiState);
                 strError = "放弃操作";
                 return 0;
             }
+
+#if NO
+            // 提醒覆盖文件
+            if (File.Exists(dlg.FileName) == true)
+            {
+                DialogResult result = MessageBox.Show(this,
+                    "文件 '" + dlg.FileName + "' 已经存在。继续操作将覆盖此文件。\r\n\r\n请问是否要覆盖此文件? (OK 覆盖；Cancel 放弃操作)",
+                    "ReaderSearchForm",
+                    MessageBoxButtons.OKCancel,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Cancel)
+                {
+                    strError = "放弃操作";
+                    return 0;
+                }
+            }
+#endif
 
             string strTimeRange = "";
 
