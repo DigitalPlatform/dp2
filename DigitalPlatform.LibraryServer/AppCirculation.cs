@@ -5897,7 +5897,7 @@ start_time_1,
         }
 
         // 从读者记录中删除 password 元素
-        static int RemovePassword(ref string strReaderXml, 
+        static int RemovePassword(ref string strReaderXml,
             out string strError)
         {
             strError = "";
@@ -5906,7 +5906,7 @@ start_time_1,
             {
                 readerdom.LoadXml(strReaderXml);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = "读者记录 XML 装入 DOM 时出错:" + ex.Message;
                 return -1;
@@ -9397,7 +9397,6 @@ out string strError)
                 return -1;
             }
 
-
             // 加读者记录锁
 #if DEBUG_LOCK_READER
             this.WriteErrorLog("UndoOneAmerce 开始为读者加写锁 '" + strReaderBarcode + "'");
@@ -9480,7 +9479,6 @@ out string strError)
                         root = readerdom.CreateElement("overdues");
                         readerdom.DocumentElement.AppendChild(root);
                     }
-
 
                     // 2008/11/11
                     // undo交押金
@@ -18313,6 +18311,8 @@ strBookPrice);    // 图书价格
                     strError = "未命中";
                     break;  // ??
                 }
+
+                // TODO: 要判断 aPath.Count == 0 跳出循环。否则容易进入死循环
 
                 // 处理浏览结果
                 for (int i = 0; i < aPath.Count; i++)

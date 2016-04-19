@@ -1,4 +1,4 @@
-using System;
+Ôªøusing System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -10,73 +10,73 @@ using DigitalPlatform.rms.Client;
 
 namespace DigitalPlatform.Library
 {
-	/// <summary>
-	/// ¥”dup≈‰÷√Œƒº˛÷–ªÒ»°∑Ω∞∏√˚µƒ∂‘ª∞øÚ
-	/// </summary>
-	public class GetDupProjectNameDlg : System.Windows.Forms.Form
-	{
+    /// <summary>
+    /// ‰ªédupÈÖçÁΩÆÊñá‰ª∂‰∏≠Ëé∑ÂèñÊñπÊ°àÂêçÁöÑÂØπËØùÊ°Ü
+    /// </summary>
+    public class GetDupProjectNameDlg : System.Windows.Forms.Form
+    {
         /// <summary>
-        /// ºÏÀ˜√Ê∞Â
+        /// Ê£ÄÁ¥¢Èù¢Êùø
         /// </summary>
         public SearchPanel SearchPanel = null;
 
         /// <summary>
-        /// cfgs/dup≈‰÷√Œƒº˛ƒ⁄»›
+        /// cfgs/dupÈÖçÁΩÆÊñá‰ª∂ÂÜÖÂÆπ
         /// </summary>
-		public XmlDocument DomDupCfg = null;
+        public XmlDocument DomDupCfg = null;
 
-		private System.Windows.Forms.ListView listView_projectNames;
-		private System.Windows.Forms.ColumnHeader columnHeader_name;
-		private System.Windows.Forms.ColumnHeader columnHeader_comment;
-		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.TextBox textBox_projectName;
-		private System.Windows.Forms.Button button_OK;
-		private System.Windows.Forms.Button button_Cancel;
+        private System.Windows.Forms.ListView listView_projectNames;
+        private System.Windows.Forms.ColumnHeader columnHeader_name;
+        private System.Windows.Forms.ColumnHeader columnHeader_comment;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox textBox_projectName;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.Button button_Cancel;
         private Label label2;
         private TextBox textBox_serverUrl;
         private Button button_findServerUrl;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
         /// <summary>
-        /// ππ‘Ï∫Ø ˝
+        /// ÊûÑÈÄ†ÂáΩÊï∞
         /// </summary>
-		public GetDupProjectNameDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public GetDupProjectNameDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GetDupProjectNameDlg));
             this.listView_projectNames = new System.Windows.Forms.ListView();
             this.columnHeader_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -92,8 +92,8 @@ namespace DigitalPlatform.Library
             // 
             // listView_projectNames
             // 
-            this.listView_projectNames.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.listView_projectNames.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_projectNames.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_name,
@@ -112,12 +112,12 @@ namespace DigitalPlatform.Library
             // 
             // columnHeader_name
             // 
-            this.columnHeader_name.Text = "∑Ω∞∏√˚";
+            this.columnHeader_name.Text = "ÊñπÊ°àÂêç";
             this.columnHeader_name.Width = 109;
             // 
             // columnHeader_comment
             // 
-            this.columnHeader_comment.Text = "◊¢ Õ";
+            this.columnHeader_comment.Text = "Ê≥®Èáä";
             this.columnHeader_comment.Width = 335;
             // 
             // label1
@@ -128,11 +128,11 @@ namespace DigitalPlatform.Library
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(65, 12);
             this.label1.TabIndex = 1;
-            this.label1.Text = "∑Ω∞∏√˚(&N):";
+            this.label1.Text = "ÊñπÊ°àÂêç(&N):";
             // 
             // textBox_projectName
             // 
-            this.textBox_projectName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_projectName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_projectName.Location = new System.Drawing.Point(92, 329);
             this.textBox_projectName.Name = "textBox_projectName";
@@ -146,7 +146,7 @@ namespace DigitalPlatform.Library
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 3;
-            this.button_OK.Text = "»∑∂®";
+            this.button_OK.Text = "Á°ÆÂÆö";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -156,7 +156,7 @@ namespace DigitalPlatform.Library
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
             this.button_Cancel.TabIndex = 4;
-            this.button_Cancel.Text = "»°œ˚";
+            this.button_Cancel.Text = "ÂèñÊ∂à";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // label2
@@ -166,11 +166,11 @@ namespace DigitalPlatform.Library
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(77, 12);
             this.label2.TabIndex = 5;
-            this.label2.Text = "÷˜∑˛ŒÒ∆˜(&S):";
+            this.label2.Text = "‰∏ªÊúçÂä°Âô®(&S):";
             // 
             // textBox_serverUrl
             // 
-            this.textBox_serverUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_serverUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_serverUrl.Location = new System.Drawing.Point(14, 29);
             this.textBox_serverUrl.Name = "textBox_serverUrl";
@@ -202,97 +202,97 @@ namespace DigitalPlatform.Library
             this.Controls.Add(this.listView_projectNames);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "GetDupProjectNameDlg";
-            this.Text = "«Î÷∏∂®≤È÷ÿ∑Ω∞∏√˚";
+            this.Text = "ËØ∑ÊåáÂÆöÊü•ÈáçÊñπÊ°àÂêç";
             this.Load += new System.EventHandler(this.GetProjectNameDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		private void GetProjectNameDlg_Load(object sender, System.EventArgs e)
-		{
+        private void GetProjectNameDlg_Load(object sender, System.EventArgs e)
+        {
 
-			FillList();
-		
-		}
+            FillList();
 
-		void FillList()
-		{
-			this.listView_projectNames.Items.Clear();
+        }
 
-			if (this.DomDupCfg == null)
-				return;
+        void FillList()
+        {
+            this.listView_projectNames.Items.Clear();
 
-			XmlNodeList nodes = this.DomDupCfg.SelectNodes("//project");
-			for(int i=0;i<nodes.Count;i++)
-			{
-				XmlNode node = nodes[i];
+            if (this.DomDupCfg == null)
+                return;
 
-				string strName = DomUtil.GetAttr(node, "name");
-				string strComment = DomUtil.GetAttr(node, "comment");
+            XmlNodeList nodes = this.DomDupCfg.SelectNodes("//project");
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
 
-				ListViewItem item = new ListViewItem(strName, 0);
+                string strName = DomUtil.GetAttr(node, "name");
+                string strComment = DomUtil.GetAttr(node, "comment");
 
-				item.SubItems.Add(strComment);
+                ListViewItem item = new ListViewItem(strName, 0);
 
-				this.listView_projectNames.Items.Add(item);
+                item.SubItems.Add(strComment);
 
-				if (strName == this.ProjectName)
-					item.Selected = true;
-			}
+                this.listView_projectNames.Items.Add(item);
 
-		}
+                if (strName == this.ProjectName)
+                    item.Selected = true;
+            }
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-			if (this.textBox_projectName.Text == "")
-			{
-				MessageBox.Show(this, "…–Œ¥÷∏∂®∑Ω∞∏√˚");
-				return;
-			}
+        }
 
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            if (this.textBox_projectName.Text == "")
+            {
+                MessageBox.Show(this, "Â∞öÊú™ÊåáÂÆöÊñπÊ°àÂêç");
+                return;
+            }
 
-		private void button_Cancel_Click(object sender, System.EventArgs e)
-		{
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-		}
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
 
-		private void listView_projectNames_DoubleClick(object sender, System.EventArgs e)
-		{
-			button_OK_Click(this, null);
-		
-		}
+        private void button_Cancel_Click(object sender, System.EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
 
-		private void listView_projectNames_SelectedIndexChanged(object sender, System.EventArgs e)
-		{
-			if (this.listView_projectNames.SelectedItems.Count > 0)
-				this.textBox_projectName.Text = this.listView_projectNames.SelectedItems[0].Text;
-			else
-				this.textBox_projectName.Text = "";
-		}
+        private void listView_projectNames_DoubleClick(object sender, System.EventArgs e)
+        {
+            button_OK_Click(this, null);
+
+        }
+
+        private void listView_projectNames_SelectedIndexChanged(object sender, System.EventArgs e)
+        {
+            if (this.listView_projectNames.SelectedItems.Count > 0)
+                this.textBox_projectName.Text = this.listView_projectNames.SelectedItems[0].Text;
+            else
+                this.textBox_projectName.Text = "";
+        }
 
         /// <summary>
-        /// ∑Ω∞∏√˚
+        /// ÊñπÊ°àÂêç
         /// </summary>
-		public string ProjectName
-		{
-			get
-			{
-				return this.textBox_projectName.Text;
-			}
-			set
-			{
-				this.textBox_projectName.Text = value;
-			}
-		}
+        public string ProjectName
+        {
+            get
+            {
+                return this.textBox_projectName.Text;
+            }
+            set
+            {
+                this.textBox_projectName.Text = value;
+            }
+        }
 
         /// <summary>
-        /// ÷˜∑˛ŒÒ∆˜URL
+        /// ‰∏ªÊúçÂä°Âô®URL
         /// </summary>
         public string ServerUrl
         {
@@ -304,7 +304,7 @@ namespace DigitalPlatform.Library
             {
                 this.textBox_serverUrl.Text = value;
             }
-        
+
 
         }
 
@@ -312,7 +312,7 @@ namespace DigitalPlatform.Library
         {
             OpenResDlg dlg = new OpenResDlg();
 
-            dlg.Text = "«Î—°‘Ò÷˜∑˛ŒÒ∆˜";
+            dlg.Text = "ËØ∑ÈÄâÊã©‰∏ªÊúçÂä°Âô®";
             dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
             dlg.ap = this.SearchPanel.ap;
             dlg.ApCfgTitle = "findServerUrl_openresdlg";
@@ -327,7 +327,7 @@ namespace DigitalPlatform.Library
 
             textBox_serverUrl.Text = dlg.Path;
 
-            // ÃÓ≥‰listƒ⁄»›
+            // Â°´ÂÖÖlistÂÜÖÂÆπ
             if (this.ServerUrl != "")
             {
                 int nRet = 0;
@@ -357,23 +357,23 @@ namespace DigitalPlatform.Library
             }
         }
 
-        // ¥”∑˛ŒÒ∆˜…œªÒ»°dup≈‰÷√Œƒº˛
+        // ‰ªéÊúçÂä°Âô®‰∏äËé∑ÂèñdupÈÖçÁΩÆÊñá‰ª∂
         int GetDupCfgFile(out string strError)
         {
             strError = "";
 
             if (this.DomDupCfg != null)
-                return 0;	// ”≈ªØ
+                return 0;	// ‰ºòÂåñ
 
             if (this.textBox_serverUrl.Text == "")
             {
-                strError = "…–Œ¥÷∏∂®∑˛ŒÒ∆˜URL";
+                strError = "Â∞öÊú™ÊåáÂÆöÊúçÂä°Âô®URL";
                 return -1;
             }
 
             string strCfgFilePath = "cfgs/dup";
             XmlDocument tempdom = null;
-            // ªÒµ√≈‰÷√Œƒº˛
+            // Ëé∑ÂæóÈÖçÁΩÆÊñá‰ª∂
             // return:
             //		-1	error
             //		0	not found
@@ -387,7 +387,7 @@ namespace DigitalPlatform.Library
                 return -1;
             if (nRet == 0)
             {
-                strError = "≈‰÷√Œƒº˛ '" + strCfgFilePath + "' √ª”–’“µΩ...";
+                strError = "ÈÖçÁΩÆÊñá‰ª∂ '" + strCfgFilePath + "' Ê≤°ÊúâÊâæÂà∞...";
                 return -1;
             }
 
@@ -397,5 +397,5 @@ namespace DigitalPlatform.Library
         }
 
 
-	}
+    }
 }

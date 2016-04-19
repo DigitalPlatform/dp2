@@ -1,4 +1,4 @@
-namespace DigitalPlatform.Library.Properties {
+﻿namespace DigitalPlatform.Library.Properties {
     
     
     // This class allows you to handle specific events on the settings class:

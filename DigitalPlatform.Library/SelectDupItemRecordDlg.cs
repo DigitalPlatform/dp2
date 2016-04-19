@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,22 +9,22 @@ using System.Windows.Forms;
 namespace DigitalPlatform.Library
 {
     /// <summary>
-    /// ¶Ô»°¿ò£º´ÓÈô¸ÉÖØ¸´µÄ²á¼ÇÂ¼ÖĞÑ¡ÔñÒ»¸ö
+    /// å¯¹è¯æ¡†ï¼šä»è‹¥å¹²é‡å¤çš„å†Œè®°å½•ä¸­é€‰æ‹©ä¸€ä¸ª
     /// </summary>
     public partial class SelectDupItemRecordDlg : Form
     {
         /// <summary>
-        /// Â·¾¶µÄ¼¯ºÏ
+        /// è·¯å¾„çš„é›†åˆ
         /// </summary>
         public List<DoublePath> Paths = null;
 
         /// <summary>
-        /// Ñ¡ÔñµÄÂ·¾¶(Ë«Â·¾¶)
+        /// é€‰æ‹©çš„è·¯å¾„(åŒè·¯å¾„)
         /// </summary>
         public DoublePath SelectedDoublePath = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public SelectDupItemRecordDlg()
         {
@@ -32,7 +32,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ÏûÏ¢ÎÄ×Ö
+        /// æ¶ˆæ¯æ–‡å­—
         /// </summary>
         public string MessageText
         {
@@ -57,7 +57,7 @@ namespace DigitalPlatform.Library
         {
             if (this.listView_paths.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÈÎºÎÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©ä»»ä½•äº‹é¡¹");
                 return;
             }
 
@@ -108,17 +108,17 @@ namespace DigitalPlatform.Library
 
 
     /// <summary>
-    /// ×¨ÓÃÓÚ´æ´¢ÖÖ¡¢²áÏà¹Ø¼ÇÂ¼Â·¾¶µÄË«Â·¾¶½á¹¹
+    /// ä¸“ç”¨äºå­˜å‚¨ç§ã€å†Œç›¸å…³è®°å½•è·¯å¾„çš„åŒè·¯å¾„ç»“æ„
     /// </summary>
     public class DoublePath
     {
         /// <summary>
-        /// ÊéÄ¿¿âÂ·¾¶
+        /// ä¹¦ç›®åº“è·¯å¾„
         /// </summary>
         public string BiblioRecPath = "";
 
         /// <summary>
-        /// ÊµÌå¿âÂ·¾¶
+        /// å®ä½“åº“è·¯å¾„
         /// </summary>
         public string ItemRecPath = "";
     }

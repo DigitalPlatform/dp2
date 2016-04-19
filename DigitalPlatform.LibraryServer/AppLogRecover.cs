@@ -7629,8 +7629,6 @@ API: Settlement()
                     goto ERROR1;
 
             }
-
-
             return 0;
         ERROR1:
             if (level == RecoverLevel.LogicAndSnapshot)

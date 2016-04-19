@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,7 +11,7 @@ using DigitalPlatform.rms.Client;
 namespace DigitalPlatform.Library
 {
     /// <summary>
-    /// ä¯ÀÀ¼ìË÷ÃüÖĞµÄ½á¹ûµÄ´°¿Ú
+    /// æµè§ˆæ£€ç´¢å‘½ä¸­çš„ç»“æœçš„çª—å£
     /// </summary>
     public partial class BrowseSearchResultDlg : Form
     {
@@ -21,23 +21,23 @@ namespace DigitalPlatform.Library
         public SearchPanel SearchPannel = null;
 
         /// <summary>
-        /// ´ò¿ªÏêÏ¸´°
+        /// æ‰“å¼€è¯¦ç»†çª—
         /// </summary>
         public event OpenDetailEventHandler OpenDetail = null;
 
         /// <summary>
-        /// ÏÔÊ¾¼ÇÂ¼µÄListView´°
+        /// æ˜¾ç¤ºè®°å½•çš„ListViewçª—
         /// </summary>
         public ListView RecordsList
         {
-            get 
+            get
             {
                 return this.listView_records;
             }
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public BrowseSearchResultDlg()
         {
@@ -52,7 +52,7 @@ namespace DigitalPlatform.Library
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©äº‹é¡¹");
                 return;
             }
 
@@ -69,7 +69,7 @@ namespace DigitalPlatform.Library
             this.Close();
         }
 
-        // È·±£ÁĞ±êÌâÊıÁ¿×ã¹»
+        // ç¡®ä¿åˆ—æ ‡é¢˜æ•°é‡è¶³å¤Ÿ
         void EnsureColumns(int nCount)
         {
             if (this.listView_records.Columns.Count >= nCount)
@@ -80,7 +80,7 @@ namespace DigitalPlatform.Library
                 string strText = "";
                 if (i == 0)
                 {
-                    strText = "¼ÇÂ¼Â·¾¶";
+                    strText = "è®°å½•è·¯å¾„";
                 }
                 else
                 {
@@ -97,7 +97,7 @@ namespace DigitalPlatform.Library
 
 
         /// <summary>
-        /// ÔÚlistview×îºó×·¼ÓÒ»ĞĞ
+        /// åœ¨listviewæœ€åè¿½åŠ ä¸€è¡Œ
         /// </summary>
         /// <param name="strID"></param>
         /// <param name="others"></param>
@@ -125,7 +125,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ×°ÈëµÚÒ»Ìõ¼ÇÂ¼µ½ÏêÏ¸´°
+        /// è£…å…¥ç¬¬ä¸€æ¡è®°å½•åˆ°è¯¦ç»†çª—
         /// </summary>
         /// <param name="bCloseWindow"></param>
         public void LoadFirstDetail(bool bCloseWindow)

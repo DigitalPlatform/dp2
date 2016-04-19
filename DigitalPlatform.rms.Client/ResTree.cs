@@ -1991,6 +1991,8 @@ out strError);
                                 goto ERROR1;
                             }
 
+                            // TODO: 要判断 searchresults.Length == 0 跳出循环。否则容易进入死循环
+
                             for (int i = 0; i < searchresults.Length; i++)
                             {
                                 Application.DoEvents();

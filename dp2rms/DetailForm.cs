@@ -2859,7 +2859,6 @@ namespace dp2rms
 
                 try
                 {
-
                     long nRet = channel.DoSearch(strQueryXml,
                         "default",
                         out strError);

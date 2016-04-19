@@ -2884,7 +2884,6 @@ out strError);
             if (String.IsNullOrEmpty(strItemDbName) == true)
                 return 0;
 
-
             // 检索实体库中全部从属于特定id的记录
 
             string strQueryXml = "<target list='"
@@ -2950,6 +2949,7 @@ out strError);
                     byte[] timestamp = null;
                     string strOutputPath = "";
 
+                    // TODO: 这里需要改造为直接从结果集中获取 xml,timestamp
                     lRet = channel.GetRes(aPath[i],
                         out strXml,
                         out strMetaData,

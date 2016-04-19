@@ -1,20 +1,20 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-
 using System.Xml;
+
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 
 namespace DigitalPlatform.Library
 {
     /// <summary>
-    /// ÏÔÊ¾²¢Ñ¡ÔñÁ¬½Ó×ÅµÄÊı¾İ¿â
-    /// Ò»¸öÊéÄ¿¿âºÍÒ»¸öÊµÌå¿â£¬Á¬½ÓÆğÀ´£¬¹²Í¬ÃèÊöÁËÖÖ¡¢²áĞÅÏ¢
+    /// æ˜¾ç¤ºå¹¶é€‰æ‹©è¿æ¥ç€çš„æ•°æ®åº“
+    /// ä¸€ä¸ªä¹¦ç›®åº“å’Œä¸€ä¸ªå®ä½“åº“ï¼Œè¿æ¥èµ·æ¥ï¼Œå…±åŒæè¿°äº†ç§ã€å†Œä¿¡æ¯
     /// </summary>
     public partial class GetLinkDbDlg : Form
     {
@@ -26,10 +26,10 @@ namespace DigitalPlatform.Library
         string m_strItemDbName = "";
         string m_strBiblioDbName = "";
 
-        XmlDocument dom = null; // globalÅäÖÃÎÄ¼şdom
+        XmlDocument dom = null; // globalé…ç½®æ–‡ä»¶dom
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public GetLinkDbDlg()
         {
@@ -37,7 +37,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ·şÎñÆ÷URL
+        /// æœåŠ¡å™¨URL
         /// </summary>
         public string ServerUrl
         {
@@ -48,12 +48,12 @@ namespace DigitalPlatform.Library
             set
             {
                 this.textBox_serverUrl.Text = value;
-                dom = null; // Çå³ı»º´æµÄÅäÖÃÎÄ¼şdom
+                dom = null; // æ¸…é™¤ç¼“å­˜çš„é…ç½®æ–‡ä»¶dom
             }
         }
 
         /// <summary>
-        /// ÊéÄ¿¿âÃû
+        /// ä¹¦ç›®åº“å
         /// </summary>
         public string BiblioDbName
         {
@@ -68,7 +68,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ÊµÌå¿âÃû
+        /// å®ä½“åº“å
         /// </summary>
         public string ItemDbName
         {
@@ -104,7 +104,7 @@ namespace DigitalPlatform.Library
         {
             if (this.listView_dbs.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÊéÄ¿¿âºÍÊµÌå¿â");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©ä¹¦ç›®åº“å’Œå®ä½“åº“");
                 return;
             }
 
@@ -123,10 +123,10 @@ namespace DigitalPlatform.Library
 
         private void button_findServer_Click(object sender, EventArgs e)
         {
-            // Ñ¡ÔñÄ¿±ê·şÎñÆ÷
+            // é€‰æ‹©ç›®æ ‡æœåŠ¡å™¨
             OpenResDlg dlg = new OpenResDlg();
 
-            dlg.Text = "ÇëÑ¡Ôñ·şÎñÆ÷";
+            dlg.Text = "è¯·é€‰æ‹©æœåŠ¡å™¨";
             dlg.EnabledIndices = new int[] { ResTree.RESTYPE_SERVER };
             dlg.ap = this.SearchPanel.ap;
             dlg.ApCfgTitle = "getlinkdbdlg_findserver";
@@ -154,23 +154,23 @@ namespace DigitalPlatform.Library
 
         }
 
-        // »ñµÃcfgs/globalÅäÖÃÎÄ¼ş
+        // è·å¾—cfgs/globalé…ç½®æ–‡ä»¶
         int GetGlobalCfgFile(out string strError)
         {
             strError = "";
 
             if (this.dom != null)
-                return 0;	// ÓÅ»¯
+                return 0;	// ä¼˜åŒ–
 
             if (this.textBox_serverUrl.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨·şÎñÆ÷URL";
+                strError = "å°šæœªæŒ‡å®šæœåŠ¡å™¨URL";
                 return -1;
             }
 
             string strCfgFilePath = "cfgs/global";
             XmlDocument tempdom = null;
-            // »ñµÃÅäÖÃÎÄ¼ş
+            // è·å¾—é…ç½®æ–‡ä»¶
             // return:
             //		-1	error
             //		0	not found
@@ -184,7 +184,7 @@ namespace DigitalPlatform.Library
                 return -1;
             if (nRet == 0)
             {
-                strError = "ÅäÖÃÎÄ¼ş '" + strCfgFilePath + "' Ã»ÓĞÕÒµ½...";
+                strError = "é…ç½®æ–‡ä»¶ '" + strCfgFilePath + "' æ²¡æœ‰æ‰¾åˆ°...";
                 return -1;
             }
 

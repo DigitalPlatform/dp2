@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
@@ -11,86 +11,86 @@ using DigitalPlatform.Xml;
 namespace DigitalPlatform.Library
 {
     /// <summary>
-    /// ²áĞÅÏ¢
+    /// å†Œä¿¡æ¯
     /// </summary>
     public class BookItem
     {
         /// <summary>
-        ///  ²áÌõÂëºÅ
+        ///  å†Œæ¡ç å·
         /// </summary>
-        public string Barcode = ""; 
+        public string Barcode = "";
 
         /// <summary>
-        /// ²á×´Ì¬
+        /// å†ŒçŠ¶æ€
         /// </summary>
-        public string State = "";   
+        public string State = "";
 
         /// <summary>
-        /// ´ÓÊôµÄÊéÄ¿¼ÇÂ¼id
+        /// ä»å±çš„ä¹¦ç›®è®°å½•id
         /// </summary>
-        public string Parent = ""; 
+        public string Parent = "";
 
         /// <summary>
-        /// ¹İ²ØµØµã
+        /// é¦†è—åœ°ç‚¹
         /// </summary>
-        public string Location = "";  
+        public string Location = "";
 
         /// <summary>
-        /// ²á¼Û¸ñ
+        /// å†Œä»·æ ¼
         /// </summary>
-        public string Price = ""; 
+        public string Price = "";
         /// <summary>
-        /// Í¼ÊéÀàĞÍ
+        /// å›¾ä¹¦ç±»å‹
         /// </summary>
-        public string BookType = "";  
+        public string BookType = "";
         /// <summary>
-        /// ×¢ÊÍ
+        /// æ³¨é‡Š
         /// </summary>
-        public string Comment = ""; 
+        public string Comment = "";
         /// <summary>
-        /// ½èÊéÈËÖ¤ÌõÂëºÅ
+        /// å€Ÿä¹¦äººè¯æ¡ç å·
         /// </summary>
-        public string Borrower = "";  
+        public string Borrower = "";
         /// <summary>
-        /// ½èÊéµÄÈÕÆÚ
+        /// å€Ÿä¹¦çš„æ—¥æœŸ
         /// </summary>
-        public string BorrowDate = ""; 
+        public string BorrowDate = "";
         /// <summary>
-        /// ½èÔÄÆÚÏŞ
+        /// å€Ÿé˜…æœŸé™
         /// </summary>
-        public string BorrowPeriod = ""; 
+        public string BorrowPeriod = "";
 
         /// <summary>
-        ///  ²á¼ÇÂ¼Â·¾¶
+        ///  å†Œè®°å½•è·¯å¾„
         /// </summary>
         public string RecPath = "";
 
         /// <summary>
-        /// ÊÇ·ñ±»ĞŞ¸Ä
+        /// æ˜¯å¦è¢«ä¿®æ”¹
         /// </summary>
         bool m_bChanged = false;
 
         /// <summary>
-        /// ¼ÇÂ¼µÄdom
+        /// è®°å½•çš„dom
         /// </summary>
-        public XmlDocument RecordDom = null;  
+        public XmlDocument RecordDom = null;
 
         /// <summary>
-        /// Ê±¼ä´Á
+        /// æ—¶é—´æˆ³
         /// </summary>
         public byte[] Timestamp = null;
 
         ListViewItem ListViewItem = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public BookItem()
         {
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         /// <param name="strRecPath"></param>
         /// <param name="dom"></param>
@@ -104,7 +104,7 @@ namespace DigitalPlatform.Library
 
 
         /// <summary>
-        /// ¸ù¾İdom³õÊ¼»¯¸÷¸ö³ÉÔ±
+        /// æ ¹æ®domåˆå§‹åŒ–å„ä¸ªæˆå‘˜
         /// </summary>
         /// <returns></returns>
         public int Initial()
@@ -129,7 +129,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ´´½¨ºÃÊÊºÏÓÚ±£´æµÄ¼ÇÂ¼ĞÅÏ¢
+        /// åˆ›å»ºå¥½é€‚åˆäºä¿å­˜çš„è®°å½•ä¿¡æ¯
         /// </summary>
         /// <param name="strXml"></param>
         /// <param name="strError"></param>
@@ -149,13 +149,13 @@ namespace DigitalPlatform.Library
 
             if (this.Parent == "")
             {
-                strError = "Parent³ÉÔ±ÉĞÎ´¶¨Òå";
+                strError = "Parentæˆå‘˜å°šæœªå®šä¹‰";
                 return -1;
             }
 
             if (this.Barcode == "")
             {
-                strError = "Barcode³ÉÔ±ÉĞÎ´¶¨Òå";
+                strError = "Barcodeæˆå‘˜å°šæœªå®šä¹‰";
                 return -1;
             }
 
@@ -178,7 +178,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ÊÇ·ñ±»ĞŞ¸Ä¹ı
+        /// æ˜¯å¦è¢«ä¿®æ”¹è¿‡
         /// </summary>
         public bool Changed
         {
@@ -190,12 +190,12 @@ namespace DigitalPlatform.Library
             {
                 m_bChanged = value;
             }
-        
+
         }
 
 
         /// <summary>
-        /// ½«±¾ÊÂÏî¼ÓÈëµ½listviewÖĞ
+        /// å°†æœ¬äº‹é¡¹åŠ å…¥åˆ°listviewä¸­
         /// </summary>
         /// <param name="list"></param>
         /// <returns></returns>
@@ -226,13 +226,13 @@ namespace DigitalPlatform.Library
         {
             if (this.State == "" && this.m_bChanged == true)
             {
-                // ĞÂÊÂÏî
-               item.BackColor = Color.FromArgb(255, 255, 100); // Ç³»ÆÉ«
+                // æ–°äº‹é¡¹
+                item.BackColor = Color.FromArgb(255, 255, 100); // æµ…é»„è‰²
             }
             else if (this.m_bChanged == true)
             {
-                // ĞŞ¸Ä¹ıµÄ¾ÉÊÂÏî
-                item.BackColor = Color.FromArgb(100, 255, 100); // Ç³ÂÌÉ«
+                // ä¿®æ”¹è¿‡çš„æ—§äº‹é¡¹
+                item.BackColor = Color.FromArgb(100, 255, 100); // æµ…ç»¿è‰²
             }
             else
             {
@@ -241,7 +241,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// Ë¢ĞÂÊÂÏîÑÕÉ«
+        /// åˆ·æ–°äº‹é¡¹é¢œè‰²
         /// </summary>
         public void RefreshItemColor()
         {
@@ -252,13 +252,13 @@ namespace DigitalPlatform.Library
     }
 
     /// <summary>
-    /// ²áĞÅÏ¢µÄ¼¯ºÏÈİÆ÷
+    /// å†Œä¿¡æ¯çš„é›†åˆå®¹å™¨
     /// </summary>
     public class BookItemCollection : List<BookItem>
     {
 
         /// <summary>
-        /// ÒÔ²áÌõÂëºÅ¶¨Î»Ò»¸öÊÂÏî
+        /// ä»¥å†Œæ¡ç å·å®šä½ä¸€ä¸ªäº‹é¡¹
         /// </summary>
         /// <param name="strBarcode"></param>
         /// <returns></returns>
@@ -275,7 +275,7 @@ namespace DigitalPlatform.Library
         }
 
         /// <summary>
-        /// ÊÇ·ñĞŞ¸Ä¹ı
+        /// æ˜¯å¦ä¿®æ”¹è¿‡
         /// </summary>
         public bool Changed
         {

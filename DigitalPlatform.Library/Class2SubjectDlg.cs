@@ -4,25 +4,18 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Diagnostics;
-
-// using SHDocVw;
-
 using System.Runtime.InteropServices;
 using System.Collections.Specialized;
-
 using System.Text;
 using System.Web;
 using System.Threading;
 using System.Xml;
-
-// using mshtml;
 
 using DigitalPlatform;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
-
 
 namespace DigitalPlatform.Library
 {
