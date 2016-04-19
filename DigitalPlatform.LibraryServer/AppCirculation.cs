@@ -3819,6 +3819,12 @@ start_time_1,
 
             string strReaderBarcode = strReaderBarcodeParam;
 
+            if (strAction == "read" && string.IsNullOrEmpty(strReaderBarcode))
+            {
+                strError = "读过功能 strReaderBarcode 参数值不应为空";
+                goto ERROR1;
+            }
+
             string strBatchNo = "";
             if (strAction == "inventory")
             {
@@ -4763,7 +4769,8 @@ start_time_1,
 
                     DateTime start_time_process = DateTime.Now;
 
-                    string strReaderName = DomUtil.GetElementText(readerdom.DocumentElement, "name");
+                    string strReaderName = readerdom == null ? "" :
+                        DomUtil.GetElementText(readerdom.DocumentElement, "name");
 
                     if (bDelayVerifyReaderBarcode == true)
                     {

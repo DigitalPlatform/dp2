@@ -398,7 +398,6 @@ namespace DigitalPlatform.LibraryServer
                         if (bArrived == true)
                             ArriveItemBarcodes.Add(strItemBarcode);
 
-
                         // 写回册记录
                         lRet = channel.DoSaveTextRes(strOutputItemRecPath,
                             itemdom.OuterXml,
@@ -425,14 +424,11 @@ namespace DigitalPlatform.LibraryServer
                             // 即把刚才增加的<request>元素找到后删除
                             goto ERROR1;
                         }
-
-
                     }
                     finally
                     {
                         this.EntityLocks.UnlockForWrite(strItemBarcode);
                     }
-
                 } // end of for
 
                 // 在读者记录中加入或删除预约信息
@@ -1729,12 +1725,12 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
-
             // 发送短消息通知
             string strTotalError = "";
 
             // *** dpmail
-            if (this.MessageCenter != null)
+            if (this.MessageCenter != null
+                && StringUtil.IsInList("dpmail", this.ArrivedNotifyTypes))
             {
                 string strTemplate = "";
                 // 获得邮件模板
@@ -1796,7 +1792,8 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // ** email
-            if (String.IsNullOrEmpty(strReaderEmailAddress) == false)
+            if (String.IsNullOrEmpty(strReaderEmailAddress) == false
+                && StringUtil.IsInList("email", this.ArrivedNotifyTypes))
             {
                 string strTemplate = "";
                 // 获得邮件模板
@@ -1861,6 +1858,10 @@ namespace DigitalPlatform.LibraryServer
             {
                 foreach (MessageInterface message_interface in this.m_externalMessageInterfaces)
                 {
+                    // types
+                    if (StringUtil.IsInList(message_interface.Type, this.ArrivedNotifyTypes) == false)
+                        continue;
+
                     string strTemplate = "";
                     // 获得邮件模板
                     nRet = GetMailTemplate(
