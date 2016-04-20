@@ -300,6 +300,13 @@ FormWindowState.Normal);
 
             try
             {
+
+                nRet = CopyUserBinDirectory(out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, "复制用户目录的 bin 子目录到程序目录时出错: " + strError);
+                }
+
                 // 首次运行自动安装数据目录
                 {
                     nRet = SetupKernelDataDir(
@@ -435,6 +442,23 @@ FormWindowState.Normal);
                 }
             }
 #endif
+        }
+
+        // 将用户目录里面的 bin 子目录中的文件，拷贝覆盖到程序文件夹
+        // 这个动作要在启动 dp2kernel 和 dp2library 以前做。因为这两个模块可能会挂接这些文件，如果挂接了就无法覆盖了
+        int CopyUserBinDirectory(out string strError)
+        {
+            strError = "";
+
+            string strSourceDir = Path.Combine(this.UserDir, "bin");
+            if (Directory.Exists(strSourceDir))
+            {
+                string strTargetDir = Environment.CurrentDirectory;
+                if (PathUtil.CopyDirectory(strSourceDir, strTargetDir, false, out strError) == -1)
+                    return -1;
+            }
+
+            return 0;
         }
 
         public bool AutoStartDp2circulation

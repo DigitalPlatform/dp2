@@ -110,6 +110,17 @@ namespace dp2Circulation
 
         private void RelationDialog_Load(object sender, EventArgs e)
         {
+            string strError = "";
+            int nRet = Program.MainForm.VerifySerialCode("relationdialog",
+                false,
+                out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, "RelationDialog 需要先设置序列号才能使用");
+                API.PostMessage(this.Handle, API.WM_CLOSE, 0, 0);
+                return;
+            }
+
             _stopManager.Initial(this.toolStripButton_stop,
 (object)this.toolStripLabel_message,
 (object)null);

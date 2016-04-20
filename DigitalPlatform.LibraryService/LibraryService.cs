@@ -801,7 +801,9 @@ namespace dp2Library
                 }
 
                 // 检查前端版本
-                if (nRet == 1 && StringUtil.IsInList("checkclientversion", strRights) == true)
+                if (nRet == 1
+                    // && StringUtil.IsInList("checkclientversion", strRights) == true
+                    )
                 {
                     string strClientVersion = (string)parameters["client"];
                     if (string.IsNullOrEmpty(strClientVersion) == true)
@@ -858,7 +860,7 @@ namespace dp2Library
             strName = strName.ToLower();
             if (strName == "dp2circulation")
             {
-                if (version.CompareTo(new Version("2.13")) < 0)
+                if (version.CompareTo(new Version("2.14")) < 0)
                     return "前端 dp2circulation (内务)版本太旧，登录失败。请立即升级到最新版本";
             }
 

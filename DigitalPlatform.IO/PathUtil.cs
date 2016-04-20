@@ -853,6 +853,7 @@ namespace DigitalPlatform.IO
         }
 
         // 拷贝目录
+        // 遇到有同名文件会覆盖
         public static int CopyDirectory(string strSourceDir,
             string strTargetDir,
             bool bDeleteTargetBeforeCopy,
