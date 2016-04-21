@@ -17,6 +17,7 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Xml;
 
 namespace dp2Circulation
 {
@@ -280,11 +281,15 @@ SearchRequest searchParam
             Task.Factory.StartNew(() => SearchAndResponse(searchParam));
         }
 
+#if NO
         public override void OnSetInfoRecieved(SetInfoRequest request)
         {
             Task.Factory.StartNew(() => SetInfoAndResponse(request));
         }
+#endif
 
+#if NO
+        暂时不启用
         void GetPatronInfo(SearchRequest searchParam)
         {
             string strError = "";
@@ -377,7 +382,7 @@ records,
 strError,
 strErrorCode);
         }
-
+#endif
         static void SetValue(Entity entity, EntityInfo info)
         {
             if (entity.OldRecord != null)
@@ -426,15 +431,18 @@ strErrorCode);
         // Form Close 的时候要及时中断工作线程
         void SearchAndResponse(SearchRequest searchParam)
         {
+#if NO
             if (searchParam.Operation == "getPatronInfo")
             {
                 GetPatronInfo(searchParam);
                 return;
             }
+#endif
 
             string strError = "";
             string strErrorCode = "";
             IList<DigitalPlatform.MessageClient.Record> records = new List<DigitalPlatform.MessageClient.Record>();
+            long batch_size = -1;
 
             string strResultSetName = searchParam.ResultSetName;
             if (string.IsNullOrEmpty(strResultSetName) == true)
@@ -548,7 +556,7 @@ strErrorCode);
                     // 装入浏览格式
                     for (; ; )
                     {
-                        string strBrowseStyle = "id,xml";
+                        string strBrowseStyle = searchParam.FormatList; // "id,xml";
 
                         lRet = channel.GetSearchResult(
             null,
@@ -575,12 +583,17 @@ strErrorCode);
                         records.Clear();
                         foreach (DigitalPlatform.LibraryClient.localhost.Record record in searchresults)
                         {
+#if NO
                             DigitalPlatform.MessageClient.Record biblio = new DigitalPlatform.MessageClient.Record();
                             biblio.RecPath = record.Path;
                             biblio.Data = record.RecordBody.Xml;
                             records.Add(biblio);
+#endif
+                            DigitalPlatform.MessageClient.Record biblio = FillBiblio(record);
+                            records.Add(biblio);
                         }
 
+#if NO
                         ResponseSearch(
                             searchParam.TaskID,
                             lHitCount,
@@ -588,6 +601,18 @@ strErrorCode);
                             records,
                             "",
                             strErrorCode);
+#endif
+                        bool bRet = TryResponseSearch(
+searchParam.TaskID,
+lHitCount,
+lStart,
+records,
+"",
+strErrorCode,
+ref batch_size);
+                        // Console.WriteLine("ResponseSearch called " + records.Count.ToString() + ", bRet=" + bRet);
+                        if (bRet == false)
+                            return;
 
                         lStart += searchresults.Length;
 
@@ -623,6 +648,75 @@ strError,
 strErrorCode);
         }
 
+        static DigitalPlatform.MessageClient.Record FillBiblio(DigitalPlatform.LibraryClient.localhost.Record record)
+        {
+            DigitalPlatform.MessageClient.Record biblio = new DigitalPlatform.MessageClient.Record();
+            biblio.RecPath = record.Path;
+
+            if (record.RecordBody != null
+                && record.RecordBody.Result != null
+                && record.RecordBody.Result.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCodeValue.NotFound)
+                return biblio;  // 记录不存在
+
+            // biblio 中里面应该有表示错误码的成员就好了。Result.ErrorInfo 提供了错误信息
+
+            XmlDocument dom = new XmlDocument();
+            if (record.RecordBody != null
+                && string.IsNullOrEmpty(record.RecordBody.Xml) == false)
+            {
+                // xml
+                dom.LoadXml(record.RecordBody.Xml);
+            }
+            else
+            {
+                dom.LoadXml("<root />");
+            }
+
+            if (record.Cols != null)
+            {
+                // cols
+                foreach (string s in record.Cols)
+                {
+                    XmlElement col = dom.CreateElement("col");
+                    dom.DocumentElement.AppendChild(col);
+                    col.InnerText = s;
+                }
+            }
+
+            biblio.Format = "";
+            if (record.RecordBody != null)
+            {
+                // metadata
+                if (string.IsNullOrEmpty(record.RecordBody.Metadata) == false)
+                {
+                    // 在根元素下放一个 metadata 元素
+                    XmlElement metadata = dom.CreateElement("metadata");
+                    dom.DocumentElement.AppendChild(metadata);
+
+                    try
+                    {
+                        XmlDocument metadata_dom = new XmlDocument();
+                        metadata_dom.LoadXml(record.RecordBody.Metadata);
+
+                        foreach (XmlAttribute attr in metadata_dom.DocumentElement.Attributes)
+                        {
+                            metadata.SetAttribute(attr.Name, attr.Value);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        metadata.SetAttribute("error", "metadata XML '" + record.RecordBody.Metadata + "' 装入 DOM 时出错: " + ex.Message);
+                    }
+                }
+                // timestamp
+                biblio.Timestamp = ByteArray.GetHexTimeStampString(record.RecordBody.Timestamp);
+            }
+
+            biblio.Data = dom.DocumentElement.OuterXml;
+            return biblio;
+        }
+
+#if NO
         // 写入实体库
         void SetEntity(SetInfoRequest request)
         {
@@ -694,6 +788,8 @@ strError);
                 return;
             }
         }
+
+#endif
 
         public override void OnSearchResponseRecieved(string searchID,
             long resultCount,
@@ -777,6 +873,7 @@ strError);
                 this.ShareBiblio ? "biblio_search" : "");
         }
 
+#if NO
         public override void WaitTaskComplete(Task task)
         {
             while (task.IsCompleted == false)
@@ -785,6 +882,7 @@ strError);
                 Thread.Sleep(200);
             }
         }
+#endif
     }
 
 

@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.AspNet.SignalR.Client;
+using System.Diagnostics;
+using System.Threading;
 
 namespace DigitalPlatform.MessageClient
 {
@@ -421,6 +423,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             return text.ToString();
         }
 
+#if NO
         // 等待 Task 结束。重载时可以在其中加入出让界面控制权，或者显示进度的功能
         public virtual void WaitTaskComplete(Task task)
         {
@@ -433,6 +436,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 #endif
             task.Wait();
         }
+#endif
 
         #region 调用 Server 端函数
 
@@ -444,17 +448,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         //      1   成功发起检索
         public int BeginSearchBiblio(
             string userNameList,
-#if NO
-            string operation,
-            string inputSearchID,
-            string dbNameList,
-            string queryWord,
-            string fromList,
-            string matchStyle,
-            string formatList,
-            long maxResults,
-#endif
- SearchRequest searchParam,
+            SearchRequest searchParam,
             out string outputSearchID,
             out string strError)
         {
@@ -476,28 +470,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 );
             try
             {
-                Task<MessageResult> task = HubProxy.Invoke<MessageResult>("RequestSearch",
-#if NO
-                    inputSearchID,
-                    dbNameList,
-                    queryWord,
-                    fromList,
-                    matchStyle,
-                    formatList,
-                    maxResults
-#endif
- searchParam
-                    );
+                MessageResult result = HubProxy.Invoke<MessageResult>("RequestSearch",
+                    userNameList,
+                    searchParam).Result;
 
 #if NO
-                while (task.IsCompleted == false)
-                {
-                    Application.DoEvents();
-                    Thread.Sleep(200);
-                }
-#endif
-                WaitTaskComplete(task);
-
                 if (task.IsFaulted == true)
                 {
                     // AddErrorLine(GetExceptionText(task.Exception));
@@ -508,7 +485,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     return -1;
                 }
 
+
                 MessageResult result = task.Result;
+#endif
                 if (result.Value == -1)
                 {
                     // AddErrorLine(result.ErrorInfo);
@@ -544,6 +523,190 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             }
         }
 
+        DateTime _lastTime = DateTime.Now;
+
+        // 和上次操作的时刻之间，等待至少这么多时间。
+        void Wait(TimeSpan length)
+        {
+            DateTime now = DateTime.Now;
+            TimeSpan delta = now - _lastTime;
+            if (delta < length)
+            {
+                // Console.WriteLine("Sleep " + (length - delta).ToString());
+                Thread.Sleep(length - delta);
+            }
+            _lastTime = DateTime.Now;
+        }
+
+        // TODO: 注意测试，一次只能发送一个元素，或者连一个元素都发送不成功的情况
+        // 具有重试机制的 ReponseSearch
+        // 运行策略是，当遇到 InvalidOperationException 异常时，减少一半数量重试发送，用多次小批发送解决问题
+        // 如果最终无法完成发送，则尝试发送一条报错信息，然后返回 false
+        // parameters:
+        //      batch_size  建议的最佳一次发送数目。-1 表示不限制
+        // return:
+        //      true    成功
+        //      false   失败
+        public bool TryResponseSearch(string taskID,
+            long resultCount,
+            long start,
+            IList<Record> records,
+            string errorInfo,
+            string errorCode,
+            ref long batch_size)
+        {
+            string strError = "";
+
+            List<Record> rest = new List<Record>(); // 等待发送的
+            List<Record> current = new List<Record>();  // 当前正在发送的
+            if (batch_size == -1)
+                current.AddRange(records);
+            else
+            {
+                rest.AddRange(records);
+
+                // 将最多 batch_size 个元素从 rest 中移动到 current 中
+                for (int i = 0; i < batch_size && rest.Count > 0; i++)
+                {
+                    current.Add(rest[0]);
+                    rest.RemoveAt(0);
+                }
+            }
+
+            long send = 0;  // 已经发送过的元素数
+            while (current.Count > 0)
+            {
+                try
+                {
+                    Wait(new TimeSpan(0, 0, 0, 0, 50));
+
+                    MessageResult result = ResponseSearchAsync(
+                        taskID,
+                        resultCount,
+                        start + send,
+                        current,
+                        errorInfo,
+                        errorCode).Result;
+                    _lastTime = DateTime.Now;
+                    if (result.Value == -1)
+                        return false;   // 可能因为服务器端已经中断此 taskID，或者执行 ReponseSearch() 时出错
+                }
+                catch (Exception ex)
+                {
+                    if (ex.InnerException is InvalidOperationException)
+                    {
+                        if (current.Count == 1)
+                        {
+                            strError = "向中心发送 ResponseSearch 消息时出现异常(连一个元素也发送不出去): " + ex.InnerException.Message;
+                            goto ERROR1;
+                        }
+                        // 减少一半元素发送
+                        int half = Math.Max(1, current.Count / 2);
+                        int offs = current.Count - half;
+                        for (int i = 0; current.Count > offs; i++)
+                        {
+                            Record record = current[offs];
+                            rest.Insert(i, record);
+                            current.RemoveAt(offs);
+                        }
+                        batch_size = half;
+                        continue;
+                    }
+
+                    strError = "向中心发送 ResponseSearch 消息时出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                    goto ERROR1;
+                }
+
+                Console.WriteLine("成功发送 " + current.Count.ToString());
+
+                send += current.Count;
+                current.Clear();
+                if (batch_size == -1)
+                    current.AddRange(rest);
+                else
+                {
+                    // 将最多 batch_size 个元素从 rest 中移动到 current 中
+                    for (int i = 0; i < batch_size && rest.Count > 0; i++)
+                    {
+                        current.Add(rest[0]);
+                        rest.RemoveAt(0);
+                    }
+                }
+            }
+
+            Debug.Assert(rest.Count == 0, "");
+            Debug.Assert(current.Count == 0, "");
+            return true;
+        ERROR1:
+            // 报错
+            ResponseSearch(
+taskID,
+-1,
+0,
+new List<Record>(),
+strError,
+"_sendResponseSearchError");    // 消息层面发生的错误(表示不是 dp2library 层面的错误)，错误码为 _ 开头
+            return false;
+        }
+
+        // 调用 server 端 ResponseSearchBiblio
+        public Task<MessageResult> ResponseSearchAsync(
+            string taskID,
+            long resultCount,
+            long start,
+            IList<Record> records,
+            string errorInfo,
+            string errorCode)
+        {
+            return HubProxy.Invoke<MessageResult>("ResponseSearch",
+taskID,
+resultCount,
+start,
+records,
+errorInfo,
+errorCode);
+        }
+
+        // 调用 server 端 ResponseSearchBiblio
+        public async void ResponseSearch(
+            string taskID,
+            long resultCount,
+            long start,
+            IList<Record> records,
+            string errorInfo,
+            string errorCode)
+        {
+            // TODO: 等待执行完成。如果有异常要当时处理。比如减小尺寸重发。
+            int nRedoCount = 0;
+        REDO:
+            try
+            {
+                MessageResult result = await HubProxy.Invoke<MessageResult>("ResponseSearch",
+    taskID,
+    resultCount,
+    start,
+    records,
+    errorInfo,
+    errorCode);
+                if (result.Value == -1)
+                {
+                    AddErrorLine(result.ErrorInfo);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                AddErrorLine(ex.Message);
+                if (ex.InnerException is InvalidOperationException
+                    && nRedoCount < 2)
+                {
+                    nRedoCount++;
+                    Thread.Sleep(1000);
+                    goto REDO;
+                }
+            }
+        }
+#if NO
         // 调用 server 端 ResponseSearch
         public async void ResponseSearch(
             string searchID,
@@ -593,6 +756,7 @@ errorInfo);
             }
 #endif
         }
+#endif
 
         // 调用 server 端 ResponseSetInfo
         public async void ResponseSetInfo(
@@ -676,6 +840,13 @@ errorInfo);
         public string String { get; set; }  // 字符串类型的返回值
         public long Value { get; set; }      // 整数类型的返回值
         public string ErrorInfo { get; set; }   // 出错信息
+
+        public void SetError(string errorInfo, string errorCode)
+        {
+            this.ErrorInfo = errorInfo;
+            this.String = errorCode;
+            this.Value = -1;
+        }
     }
 
     public class Record
@@ -715,10 +886,10 @@ errorInfo);
 
     public class SearchRequest
     {
-        public string TaskID { get; set; }    // 本次检索的 ID。由于一个 Connection 可以用于同时进行若干检索操作，本参数用于区分不同的检索操作
-        public string Operation { get; set; }   // 操作名。若为 getResult 表示本次不需要进行检索，而是从已有的结果集中获取数据。结果集名在 ResultSetName 中
+        public string TaskID { get; set; }    // 本次检索的任务 ID。由于一个 Connection 可以用于同时进行若干检索操作，本参数用于区分不同的检索操作
+        public string Operation { get; set; }   // 操作名。
         public string DbNameList { get; set; }  // 数据库名列表。一般为 "<全部>"
-        public string QueryWord { get; set; }   // 检索词。
+        public string QueryWord { get; set; }   // 检索词。若为 !getResult 表示不检索、从已有结果集中获取记录
         public string UseList { get; set; }     // 检索途径列表
         public string MatchStyle { get; set; }  // 匹配方式。为 exact/left/right/middle 之一
         public string ResultSetName { get; set; }   // 检索创建的结果集名。空表示为默认结果集
@@ -727,7 +898,7 @@ errorInfo);
         public long Start { get; set; } // 本次获得结果的开始位置
         public long Count { get; set; } // 本次获得结果的个数。 -1表示尽可能多
 
-        public SearchRequest(string searchID,
+        public SearchRequest(string taskID,
             string operation,
             string dbNameList,
             string queryWord,
@@ -739,7 +910,7 @@ errorInfo);
             long start,
             long count)
         {
-            this.TaskID = searchID;
+            this.TaskID = taskID;
             this.Operation = operation;
             this.DbNameList = dbNameList;
             this.QueryWord = queryWord;
