@@ -11,8 +11,8 @@
     <RootNamespace>dp2Catalog</RootNamespace>
     <AssemblyName>dp2Catalog</AssemblyName>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>94C22C2413347575F6A059EE7A9B42B429D742F4</ManifestCertificateThumbprint>
-    <ManifestKeyFile>dp2Catalog_8_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>B7108E87849142383B98CB59BFA84FAB7240A65D</ManifestCertificateThumbprint>
+    <ManifestKeyFile>dp2Catalog_1_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
     <SccProjectName>
@@ -447,6 +447,7 @@
     <Content Include="1_2_840_10003_5_10\dp2catalog_marc_autogen.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="dp2Catalog_1_TemporaryKey.pfx" />
     <None Include="dp2Catalog_8_TemporaryKey.pfx" />
     <None Include="dp2Catalog_TemporaryKey.pfx" />
     <Content Include="1_2_840_10003_5_10\marc_browse.fltx">

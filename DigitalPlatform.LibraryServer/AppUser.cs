@@ -568,6 +568,324 @@ namespace DigitalPlatform.LibraryServer
             // return 0;
         }
 
+        // 检查一个馆代码，看是否匹配指定的馆代码。完整匹配或者局部匹配都返回 true
+        static bool CompareLibraryCode(string strText, string strLibraryCode)
+        {
+            if (strText == null)
+                strText = "";
+            if (strLibraryCode == null)
+                strLibraryCode = "";
+
+            if (strText == strLibraryCode)
+                return true;
+            if (strText.StartsWith(strLibraryCode) == true)
+            {
+                // 一致的部分以后的第一个多出来的字符，应该是 '/' 才算匹配
+                char ch = strText[strLibraryCode.Length];
+                if (ch == '/')
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 检查一个馆藏地字符串，看是否匹配指定的馆代码。完整匹配或者局部匹配都返回 true
+        static bool MatchLocationLibraryCode(string strLocation, string strLibraryCode)
+        {
+            if (strLocation == null)
+                strLocation = "";
+            if (strLibraryCode == null)
+                strLibraryCode = "";
+
+            // 这是总馆的阅览室名。
+            if (strLocation.IndexOf("/") == -1)
+            {
+                // strLocation = “阅览室”  strLibraryCode=""
+                if (string.IsNullOrEmpty(strLibraryCode) == true)
+                    return true;
+                return false;   // 否则其他任何馆代码都无法匹配
+            }
+
+            // 下面是 strLocation 为 "海淀分馆/阅览室" 这样的情况
+
+            if (strLocation == strLibraryCode)
+                return true;
+            if (strLocation.StartsWith(strLibraryCode) == true)
+            {
+                // 一致的部分以后的第一个多出来的字符，应该是 '/' 才算匹配
+                char ch = strLocation[strLibraryCode.Length];
+                if (ch == '/')
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 正在编写中
+        // 将 library.xml 中的(全部定义中)一个馆代码修改为指定的值
+        public int ChangeLibraryCode(
+    SessionInfo sessioninfo,
+    string strOldLibraryCode,
+    string strNewLibraryCode,
+    out string strError)
+        {
+            strError = "";
+            if (strOldLibraryCode == null)
+                strOldLibraryCode = "";
+            if (strNewLibraryCode == null)
+                strNewLibraryCode = "";
+
+            if (strOldLibraryCode == strNewLibraryCode)
+                return 0;
+
+
+            // TODO: 检查馆代码，不允许在末尾包含符号 '/'
+
+            bool bChanged = false;
+
+            // 读者库的 libraryCode 属性
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("readerdbgroup/database");
+            foreach (XmlElement database in nodes)
+            {
+                string strLibraryCode = database.GetAttribute("libraryCode");
+                if (CompareLibraryCode(strLibraryCode, strOldLibraryCode))
+                {
+                    if (strLibraryCode == null)
+                        strLibraryCode = "";
+                    strLibraryCode = strNewLibraryCode + strLibraryCode.Substring(strOldLibraryCode.Length);
+                    database.SetAttribute("libraryCode", strLibraryCode);
+                    bChanged = true;
+                }
+            }
+
+            /*
+    <locationTypes>
+        <item canborrow="no" itemBarcodeNullable="yes">保存本库</item>
+        <item canborrow="no" itemBarcodeNullable="yes">阅览室</item>
+        <item canborrow="yes" itemBarcodeNullable="yes">流通库</item>
+        <item canborrow="yes" itemBarcodeNullable="yes">测试库</item>
+        <library code="海淀分馆">
+            <item canborrow="yes" itemBarcodeNullable="yes">流通库</item>
+            <item canborrow="yes" itemBarcodeNullable="no">班级书架</item>
+        </library>
+    </locationTypes>
+             * */
+
+            // 1) 如果是从 "" --> "非空"，则需要把 locationTypes 直接下属的 item 元素移动到一个 library 元素下级
+            // 2) 如果是从 "非空" --> ""，则需要把特定 library 元素的全部下级移动到 locationTypes 元素的直接下级，并删除刚才这个 library 元素
+            // 3) 如果是其他情况，也就是 "非空1" --> "非空2"，则找到相应的 library 元素并修改 code 属性即可。
+            // 不过需要考虑部分匹配馆代码的情况，也要修改
+
+            {
+                XmlElement locationTypes = this.LibraryCfgDom.DocumentElement.SelectSingleNode("locationTypes") as XmlElement;
+                if (locationTypes == null)
+                {
+                    locationTypes = this.LibraryCfgDom.CreateElement("locationTypes");
+                    this.LibraryCfgDom.DocumentElement.AppendChild(locationTypes);
+                    bChanged = true;
+                }
+
+                // 1)
+                if (string.IsNullOrEmpty(strOldLibraryCode)
+                    && string.IsNullOrEmpty(strNewLibraryCode) == false)
+                {
+                    // 创建一个新的 library 元素
+                    // 创建前要看看它是否已经存在
+                    XmlElement library = locationTypes.SelectSingleNode("library[@code='" + strNewLibraryCode + "']") as XmlElement;
+                    if (library == null)
+                    {
+                        library = this.LibraryCfgDom.CreateElement("library");
+                        locationTypes.AppendChild(library);
+                    }
+
+                    // 把发现的元素都移动到 library 下面
+                    XmlNodeList top_items = locationTypes.SelectNodes("item");
+                    foreach (XmlElement item in top_items)
+                    {
+                        library.AppendChild(item);
+                    }
+
+                    bChanged = true;
+                }
+
+                // 2)
+                else if (string.IsNullOrEmpty(strOldLibraryCode) == false
+                    && string.IsNullOrEmpty(strNewLibraryCode) == true)
+                {
+                    XmlElement parent = null;
+                    XmlNodeList items = locationTypes.SelectNodes("library[@code='" + strOldLibraryCode + "']/item");
+                    foreach (XmlElement item in items)
+                    {
+                        if (parent == null)
+                            parent = item.ParentNode as XmlElement;
+                        locationTypes.AppendChild(item);
+                        bChanged = true;
+                    }
+
+                    if (parent != null)
+                        parent.ParentNode.RemoveChild(parent);
+
+                }
+
+                {
+                    // 3)
+
+                    // 无法用 xpath 进行定位，必须一个一个 library 元素判断其 code 属性
+                    XmlNodeList librarys = locationTypes.SelectNodes("library");
+                    foreach (XmlElement library in librarys)
+                    {
+                        string strLibraryCode = library.GetAttribute("code");
+                        if (CompareLibraryCode(strLibraryCode, strOldLibraryCode))
+                        {
+                            if (strLibraryCode == null)
+                                strLibraryCode = "";
+                            strLibraryCode = strNewLibraryCode + strLibraryCode.Substring(strOldLibraryCode.Length);
+                            library.SetAttribute("code", strLibraryCode);
+                            bChanged = true;
+                        }
+                    }
+                }
+
+            }
+
+
+            /* 排架体系。注意 location 元素 name 属性值包含通配符的情况
+    <callNumber>
+        <group name="中图法" classType="中图法" qufenhaoType="Cutter-Sanborn Three-Figure,GCAT" zhongcihaodb="" callNumberStyle="索取类号+区分号">
+            <location name="保存本库" />
+            <location name="阅览室" />
+            <location name="流通库" />
+        </group>
+    </callNumber>
+             * */
+            XmlNodeList locations = this.LibraryCfgDom.DocumentElement.SelectNodes("callNumber/group/location");
+            foreach (XmlElement location in locations)
+            {
+                string strLocation = location.GetAttribute("name");
+                if (MatchLocationLibraryCode(strLocation, strOldLibraryCode))
+                {
+                    if (strLocation == null)
+                        strLocation = "";
+                    strLocation = strNewLibraryCode + strLocation.Substring(strOldLibraryCode.Length);
+                    location.SetAttribute("name", strLocation);
+                    bChanged = true;
+                }
+            }
+
+            /*
+<rightsTable>
+        <type reader="本科生">
+            <param name="可借总册数" value="10" />
+            <param name="可预约册数" value="5" />
+            <param name="以停代金因子" value="1.0" />
+            <param name="工作日历名" value="基本日历" />
+            <type book="普通">
+                <param name="可借册数" value="10" />
+                <param name="借期" value="31day,15day" />
+                <param name="超期违约金因子" value="CNY1.0/day" />
+...
+        </type>
+        <readerTypes>
+            <item>本科生</item>
+            <item>硕士生</item>
+            <item>博士生</item>
+            <item>讲师</item>
+            <item>教授</item>
+        </readerTypes>
+        <bookTypes>
+            <item>普通</item>
+            <item>教材</item>
+            <item>教学参考</item>
+            <item>原版西文</item>
+        </bookTypes>
+        <library code="海淀分馆">
+...
+        </library>
+    </rightsTable>
+             * */
+
+            // 1) 如果是从 "" --> "非空"，则需要把 rightsTable 直接下属的 除了 library 元素移动到一个 library 元素下级
+            // 这个新的 library 元素，后面记住不再处理它
+            // 2) 如果是从 "非空" --> ""，则需要把特定 library 元素的全部下级移动到 rightsTable 元素的直接下级，并删除刚才这个 library 元素
+            // 3) 如果是其他情况，也就是 "非空1" --> "非空2"，则找到相应的 library 元素并修改 code 属性即可。
+            // 如果 library 元素的 code 属性有空的情况，也用此法修改
+            // 不过需要考虑部分匹配馆代码的情况，也要修改
+            {
+                XmlElement rightsTable = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rightsTable") as XmlElement;
+                if (rightsTable == null)
+                {
+                    rightsTable = this.LibraryCfgDom.CreateElement("rightsTable");
+                    this.LibraryCfgDom.DocumentElement.AppendChild(rightsTable);
+                    bChanged = true;
+                }
+
+                // 1)
+                if (string.IsNullOrEmpty(strOldLibraryCode)
+                    && string.IsNullOrEmpty(strNewLibraryCode) == false)
+                {
+                    // 创建一个新的 library 元素
+                    // 创建前要看看它是否已经存在
+                    XmlElement library = rightsTable.SelectSingleNode("library[@code='" + strNewLibraryCode + "']") as XmlElement;
+                    if (library == null)
+                    {
+                        library = this.LibraryCfgDom.CreateElement("library");
+                        rightsTable.AppendChild(library);
+                    }
+
+                    // 把发现的元素都移动到 library 下面
+                    XmlNodeList top_items = rightsTable.SelectNodes("*");    // 所有不是 library 的元素
+                    foreach (XmlElement item in top_items)
+                    {
+                        if (item.Name == "library")
+                            continue;
+                        library.AppendChild(item);
+                    }
+
+                    bChanged = true;
+                }
+
+                // 2)
+                else if (string.IsNullOrEmpty(strOldLibraryCode) == false
+                    && string.IsNullOrEmpty(strNewLibraryCode) == true)
+                {
+                    XmlElement parent = null;
+                    XmlNodeList items = rightsTable.SelectNodes("library[@code='" + strOldLibraryCode + "']/*");
+                    foreach (XmlElement item in items)
+                    {
+                        if (parent == null)
+                            parent = item.ParentNode as XmlElement;
+                        rightsTable.AppendChild(item);
+                        bChanged = true;
+                    }
+
+                    if (parent != null)
+                        parent.ParentNode.RemoveChild(parent);
+
+                }
+
+                {
+                    // 3)
+
+                    // 无法用 xpath 进行定位，必须一个一个 library 元素判断其 code 属性
+                    XmlNodeList librarys = rightsTable.SelectNodes("library");
+                    foreach (XmlElement library in librarys)
+                    {
+                        string strLibraryCode = library.GetAttribute("code");
+                        if (CompareLibraryCode(strLibraryCode, strOldLibraryCode))
+                        {
+                            if (strLibraryCode == null)
+                                strLibraryCode = "";
+                            strLibraryCode = strNewLibraryCode + strLibraryCode.Substring(strOldLibraryCode.Length);
+                            library.SetAttribute("code", strLibraryCode);
+                            bChanged = true;
+                        }
+                    }
+                }
+            }
+
+            return 0;
+        }
+
         public int ChangeKernelPassword(
             SessionInfo sessioninfo,
             string strOldPassword,

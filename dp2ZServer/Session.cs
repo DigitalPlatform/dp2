@@ -1505,12 +1505,10 @@ namedResultSets        (14)
                     out results,
                     out timestamp,
                     out strError);
-                if (lRet == 0)
-                {
-                    return 0;   // not found
-                }
                 if (lRet == -1)
                     return -1;
+                if (lRet == 0)
+                    return 0;   // not found
 
                 strXml = results[0];
             }

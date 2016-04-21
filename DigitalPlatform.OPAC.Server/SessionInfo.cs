@@ -276,6 +276,8 @@ namespace DigitalPlatform.OPAC.Server
                     string strParameters = "location=#opac@" + this.ClientIP + ",client=dp2OPAC|" + OpacApplication.ClientVersion;
                     if (m_bIsReader == true)
                         strParameters += ",type=reader,libraryCode=";    // TODO: 可以用一个参数设定馆代码限制范围
+                    strParameters += ",client=dp2OPAC|" + OpacApplication.ClientVersion;
+
                     channel.Param = strParameters;  // Tag
                 }
             }

@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>46</ApplicationRevision>
+    <ApplicationRevision>48</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -2443,6 +2443,7 @@
       <DependentUpon>UrgentChargingForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Thread\ThreadBase.cs" />
+    <Content Include="readme.txt" />
     <Content Include="report_def\9212.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

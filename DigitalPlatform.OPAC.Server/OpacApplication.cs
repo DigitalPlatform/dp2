@@ -750,7 +750,8 @@ namespace DigitalPlatform.OPAC.Server
                 e.UserName = channel.UserName;
                 e.Password = channel.Password;
                 e.LibraryServerUrl = channel.Url;
-                e.Parameters = "";
+                e.Parameters = "client=dp2OPAC|" + OpacApplication.ClientVersion;
+
 #if NO
                 if (channel.Param is string)
                     e.Parameters = (string)channel.Param;

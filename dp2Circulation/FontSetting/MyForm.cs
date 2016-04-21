@@ -1148,6 +1148,11 @@ namespace dp2Circulation
                 strError = "XML 转换到 MARC 记录时出错: " + strError;
                 return -1;
             }
+            if (string.IsNullOrEmpty(strMARC))
+            {
+                strError = "MARC 记录为空";
+                return -1;
+            }
 
             Debug.Assert(string.IsNullOrEmpty(strMarcSyntax) == false, "");
 

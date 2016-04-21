@@ -1072,12 +1072,11 @@ Stack:
                         lRet = Channel.GetBiblioInfos(
                             stop,
                             strAccessPoint,
-                    "",
+                            "",
                             formats,
                             out results,
                             out baTimestamp,
                             out strError);
-
                         if (lRet == -1)
                         {
                             strError = "获得书目记录 " + strAccessPoint + " 时发生错误: " + strError;

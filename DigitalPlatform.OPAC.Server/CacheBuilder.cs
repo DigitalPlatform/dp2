@@ -2066,9 +2066,7 @@ namespace DigitalPlatform.OPAC.Server
                             out timestamp,
                             out strError);
                         if (lRet == -1)
-                        {
                             return -1;
-                        }
 
                         if (lRet == 0)
                             continue;   // TODO: 产生一条占位记录?
@@ -2091,7 +2089,7 @@ namespace DigitalPlatform.OPAC.Server
 
                         if (results == null || results.Length != 3)
                         {
-                            strError = "results error";
+                            strError = "results error {5E0FC5A1-819D-4655-AB3B-5CE6AAAB1BFE}";
                             return -1;
                         }
 

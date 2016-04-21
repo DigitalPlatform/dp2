@@ -1448,7 +1448,7 @@ namespace DigitalPlatform.OPAC.Web
 
                         if (results == null || results.Length < 1)
                         {
-                            strError = "results error";
+                            strError = "results error {837C0AC5-F257-45F6-BABC-1495F5243D85}";
                             goto ERROR1;
                         }
 
