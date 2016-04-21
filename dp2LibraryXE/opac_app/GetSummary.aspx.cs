@@ -113,12 +113,17 @@ ref sessioninfo) == false)
 #endif
             if (lRet == -1)
             {
-                strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
+                strError = "获得书目记录 '" + strBiblioRecPath + "' 时出错: " + strError;
+                goto ERROR1;
+            }
+            if (lRet == 0)
+            {
+                strError = "书目记录 '" + strBiblioRecPath + "' 不存在";
                 goto ERROR1;
             }
             if (results == null || results.Length < 1)
             {
-                strError = "results error ";
+                strError = "results error {87C72690-662D-48E3-920D-B0E0C5D53726}";
                 goto ERROR1;
             }
             string strBiblioXml = results[0];

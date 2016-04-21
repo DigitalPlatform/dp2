@@ -437,12 +437,17 @@ namespace DigitalPlatform.OPAC.Web
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
+                    strError = "获得书目记录 '" + strBiblioRecPath + "' 时出错: " + strError;
+                    goto ERROR1;
+                }
+                if (lRet == 0)
+                {
+                    strError = "书目记录 '" + strBiblioRecPath + "' 不存在";
                     goto ERROR1;
                 }
                 if (results == null || results.Length < 1)
                 {
-                    strError = "results error ";
+                    strError = "results error {11AD709F-2DBC-41DE-8129-184FFAD59815}";
                     goto ERROR1;
                 }
                 strBiblioXml = results[0];
@@ -685,12 +690,17 @@ namespace DigitalPlatform.OPAC.Web
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "获得种记录 '" + this.RecPath + "' 时出错: " + strError;
+                    strError = "获得书目记录 '" + this.RecPath + "' 时出错: " + strError;
+                    goto ERROR1;
+                }
+                if (lRet == 0)
+                {
+                    strError = "书目记录 '" + this.RecPath + "' 不存在";
                     goto ERROR1;
                 }
                 if (results == null || results.Length < 1)
                 {
-                    strError = "results error ";
+                    strError = "results error {A9217775-645E-42F1-8307-22B26C0E1D69}";
                     goto ERROR1;
                 }
 

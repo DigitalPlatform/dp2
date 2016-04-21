@@ -961,7 +961,7 @@ value);
             {
                 long lRet = this.Channel.IdleLogin(this._userName,
                     this._password,
-                    "location=console",
+                    "location=console,client=dp2LibraryConsole|0.01",
                     out strError);
                 if (lRet == -1 || lRet == 0)
                     return -1;
@@ -989,7 +989,7 @@ value);
                 if (bIsReader == true)
                     e.Parameters += ",type=reader";
 
-                e.Parameters += ",client=dp2libraryconsole|";
+                e.Parameters += ",client=dp2libraryconsole|0.01";
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录

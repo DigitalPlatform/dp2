@@ -3633,12 +3633,11 @@ true);
                     out results,
                     out timestamp,
                     out strError);
-                if (lRet == 0)
-                {
-                    return 0;   // not found
-                }
                 if (lRet == -1)
                     return -1;
+                if (lRet == 0)
+                    return 0;   // not found
+
                 return 1;
             }
             finally
@@ -7191,7 +7190,7 @@ MessageBoxDefaultButton.Button2);
                     }
                     if (results == null)
                     {
-                        strError = "重新装载书目记录时出错: result == null";
+                        strError = "重新装载书目记录时出错: result == null {6C619D72-73B0-48E0-8248-AB9348297D4F}";
                         goto ERROR1;
                     }
 

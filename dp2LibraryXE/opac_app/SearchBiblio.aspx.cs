@@ -303,7 +303,8 @@ ref sessioninfo) == false)
             string strTitle = this.Request["title"];
             if (string.IsNullOrEmpty(strResultSet) == false)
             {
-                string strResultsetFilename = PathUtil.MergePath(sessioninfo.GetTempDir(), strResultSet);
+                string strResultsetFilename = PathUtil.MergePath(app.TempDir,   // sessioninfo.GetTempDir(), // ??
+                    strResultSet);
                 if (File.Exists(strResultsetFilename) == true)
                 {
                     long lHitCount = CacheBuilder.GetCount(app, strResultsetFilename, true);
