@@ -8901,6 +8901,34 @@ namespace dp2Library
                     return result;
                 }
 
+                // 特殊功能：修改 library.xml 中所有的匹配的馆代码
+                if (strUserName == "!changeLibraryCode")
+                {
+                    if (StringUtil.IsInList("supervisor", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "当前登录用户 " + sessioninfo.UserID + " 不具备 supervisor 权限，无法修改 library.xml 中的馆代码定义";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+
+                    nRet = app.ChangeLibraryCode(
+                        sessioninfo,
+                        strOldPassword,
+                        strNewPassword,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    // 促使立即写入 library.xml
+                    if (app.Changed == true)
+                        app.ActivateManagerThread();
+
+                    result.Value = nRet;
+                    return result;
+                }
+
+
                 // 权限判断
 
                 // 只能自己修改自己的密码

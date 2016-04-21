@@ -42,4 +42,4 @@ using System.Runtime.InteropServices;
 // V2.11 2016/1/4 读者查询窗和读者窗在导出读者详情 Excel 文件时，可以选择输出借阅历史了。“关于”窗口里面标识了开源的情况。
 // V2.12 2016/1/22 clientcfgs 子目录从数据目录移动到用户目录中了。*projects.xml 也移动了。
 // V2.13 2016/3/31 启用按照每个分馆进行条码号校验的功能
-// V2.14 2016/4/20 * 
+// V2.14 2016/4/20 dp2library 最新版本的 Login() API 会强制检查，要求 dp2circulation 前端至少达到这个版本号

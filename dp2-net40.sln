@@ -166,6 +166,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.KernelClien
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DongshifangMessageInterface", "DongshifangMessageInterface\DongshifangMessageInterface.csproj", "{E0C00B33-6BBF-4F9F-8B69-42325C888A46}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2SIPServer", "dp2SIPServer\dp2SIPServer.csproj", "{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1271,6 +1273,21 @@ Global
 		{E0C00B33-6BBF-4F9F-8B69-42325C888A46}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{E0C00B33-6BBF-4F9F-8B69-42325C888A46}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{E0C00B33-6BBF-4F9F-8B69-42325C888A46}.Test|x86.ActiveCfg = Release|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Release|x86.ActiveCfg = Release|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Test|Any CPU.Build.0 = Release|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Test|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
