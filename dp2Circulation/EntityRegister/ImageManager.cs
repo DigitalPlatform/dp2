@@ -193,7 +193,7 @@ namespace dp2Circulation
                 _localFileCache[info.ObjectPath] = info.FileName;
             }
 
-            END1:
+        END1:
             // 通知
             if (this.GetObjectComplete != null)
             {

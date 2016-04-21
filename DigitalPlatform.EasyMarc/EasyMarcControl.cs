@@ -175,7 +175,8 @@ namespace DigitalPlatform.EasyMarc
                         if (line is FieldLine)
                         {
                             FieldLine field = line as FieldLine;
-                            if (field.IsControlField == false)
+                            if (field.IsControlField == false
+                                && field.Visible == true)
                                 field.textBox_content.Visible = !value;
                         }
                     }

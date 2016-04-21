@@ -428,7 +428,6 @@ namespace dp2SIPServer
         {
             strError = "";
 
-
             LibraryChannel channel = this.GetChannel();
 
             // return:
@@ -437,7 +436,7 @@ namespace dp2SIPServer
             //      1   登录成功
             long lRet = channel.Login(strUserName,
                 strPassword,
-                "type=worker",
+                "type=worker,client=dp2SIPServer|0.01",
                 out strError);
             if (lRet == -1)
             {

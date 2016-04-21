@@ -201,7 +201,6 @@ namespace dp2Circulation
                 //_floatingMessage.Clicked += _floatingMessage_Clicked;
                 if (this.MainForm != null)
                     this.MainForm.Move -= new EventHandler(MainForm_Move);
-
             }
         }
 

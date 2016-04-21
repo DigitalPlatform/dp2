@@ -4520,7 +4520,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                     //      1   登录成功
                     long lRet = Channel.Login(this.SupervisorUserName,
                         "",
-                        "type=worker",
+                        "type=worker,client=dp2LibraryXE|" + Program.ClientVersion,
                         out strError);
                     if (lRet == -1)
                     {

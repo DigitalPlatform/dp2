@@ -315,7 +315,7 @@ namespace dp2Catalog
                     //      1   µÇÂ¼³É¹¦
                     lRet = Channel.Login(this.textBox_dp2library_userName.Text,
                         this.textBox_dp2library_oldPassword.Text,
-                        "location=dp2Catalog,type=worker",
+                        "location=dp2Catalog,type=worker,client=dp2catalog|" + Program.ClientVersion,
                         /*
                         "",
                         false,
