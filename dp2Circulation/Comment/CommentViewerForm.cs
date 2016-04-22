@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Threading;
+
+using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation

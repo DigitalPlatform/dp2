@@ -321,9 +321,15 @@ FormWindowState.Normal);
 
         void ScrollToEnd()
         {
-            this.webBrowser1.Document.Window.ScrollTo(
-                0,
-                this.webBrowser1.Document.Body.ScrollRectangle.Height);
+#if NO
+            if (this.webBrowser1.Document != null
+                && this.webBrowser1.Document.Window != null
+                && this.webBrowser1.Document.Body != null)
+                this.webBrowser1.Document.Window.ScrollTo(
+                    0,
+                    this.webBrowser1.Document.Body.ScrollRectangle.Height);
+#endif
+            this.webBrowser1.ScrollToEnd();
         }
 
 
