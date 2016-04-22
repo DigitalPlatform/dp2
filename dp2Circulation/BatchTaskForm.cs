@@ -14,6 +14,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -697,8 +698,11 @@ namespace dp2Circulation
 
         void ScrollToEnd()
         {
+#if NO
             this.webBrowser_info.Document.Window.ScrollTo(0,
 this.webBrowser_info.Document.Body.ScrollRectangle.Height);
+#endif
+            this.webBrowser_info.ScrollToEnd();
         }
 
         // *** 已经删除

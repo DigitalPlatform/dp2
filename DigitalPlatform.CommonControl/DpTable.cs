@@ -1518,6 +1518,7 @@ Color.FromArgb(100, this.m_hoverBackColor)
             Rectangle rect = Rectangle.Ceiling(cell.GetViewRect());
             rect.Inflate(1, 1);
             this.Invalidate(rect);
+            return;
         }
 
         public void InvalidateCellIcon(DpCell cell)
@@ -2773,7 +2774,6 @@ Color.FromArgb(100, this.m_hoverBackColor)
             {
                 long lDelta = (long)rectCell.Y;
 
-
                 if (lDelta + rectCaret.Height >= this.ClientSize.Height)
                 {
                     if (rectCaret.Height >= this.ClientSize.Height)
@@ -2803,7 +2803,6 @@ Color.FromArgb(100, this.m_hoverBackColor)
                 long lDelta = 0;
 
                 lDelta = (long)rectCell.X;
-
 
                 if (lDelta + rectCaret.Width >= this.ClientSize.Width)
                 {
@@ -3917,9 +3916,23 @@ nHeight);
                     if (this.Container != null
                         && this.Container.Control != null)
                     {
+                        long lOldHeight = this.Container.Control.DocumentHeight;
                         // 重新初始化行的高度
                         if (this.Container.UpdateLineHeight() == false) // == false表示没有Invalid当前行
                             this.Container.Control.InvalidateCell(this);
+
+                        // 2016/4/21
+                        long lDelta = this.Container.Control.DocumentHeight - lOldHeight;
+                        if (lDelta != 0)
+                        {
+                            RectangleF rect = this.GetViewRect();
+                            Debug.WriteLine("rect.Bottom = " + rect.Bottom + ", DocumentOrgY=" + this.Container.Control.DocumentOrgY);
+                            if (rect.Bottom < 0)
+                            {
+                                // 行高度发生改变。如果此行在当前可见范围以上，则要把可见窗口下移 delta 高度，以让可见区域显示稳定
+                                this.Container.Control.DocumentOrgY -= lDelta;
+                            }
+                        }
                     }
                 }
             }

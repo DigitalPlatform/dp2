@@ -173,7 +173,7 @@ namespace dp2ZServer
                 //      1   µÇÂ¼³É¹¦
                 long lRet = Channel.Login(strUserName,
                     strPassword,
-                    "location=z39.50 server,type=worker",
+                    "location=z39.50 server,type=worker,client=dp2ZServer|0.01",
                     /*
                     "z39.50 server",    // string strLocation,
                     false,  // bReader,

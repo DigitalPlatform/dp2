@@ -81,6 +81,8 @@ namespace dp2Circulation
 
         void _imageManager_GetObjectComplete(object sender, GetObjectCompleteEventArgs e)
         {
+            // Thread.Sleep(500);  // test
+
             EventFilter filter = e.TraceObject.Tag as EventFilter;
             this.AsyncGetImageComplete(filter.Row,
                 filter.BiblioRecPath,
@@ -1956,7 +1958,14 @@ out strError);
 
                 strUrl = ScriptUtil.GetCoverImageUrl(strMARC);
                 if (string.IsNullOrEmpty(strUrl) == true)
+                {
+                    // 表示没有封面图像
+                    DpCell cell = row[2];
+                    cell.Text = "...";
+                    cell.Alignment = DpTextAlignment.Center;
+                    cell.LineAlignment = DpTextAlignment.Center;
                     return;
+                }
             }
 
 #if NO

@@ -102,7 +102,7 @@
             this.label_comment.Name = "label_comment";
             this.label_comment.Size = new System.Drawing.Size(460, 55);
             this.label_comment.TabIndex = 14;
-            this.label_comment.Text = "共享书目数据，将允许 Internet 上他人检索获取您的全部数据数据，同时也允许您检索获取他人的书目数据";
+            this.label_comment.Text = "共享书目数据，将允许 Internet 上他人检索获取您的全部书目数据，同时也允许您检索获取他人的书目数据";
             // 
             // button_OK
             // 

@@ -4484,9 +4484,12 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
         void ScrollToEnd()
         {
+#if NO
             this.webBrowser1.Document.Window.ScrollTo(
                 0,
                 this.webBrowser1.Document.Body.ScrollRectangle.Height);
+#endif
+            this.webBrowser1.ScrollToEnd();
         }
 
 
@@ -4520,7 +4523,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                     //      1   登录成功
                     long lRet = Channel.Login(this.SupervisorUserName,
                         "",
-                        "type=worker",
+                        "type=worker,client=dp2LibraryXE|" + Program.ClientVersion,
                         out strError);
                     if (lRet == -1)
                     {

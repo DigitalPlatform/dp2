@@ -442,7 +442,7 @@ strErrorCode);
             string strError = "";
             string strErrorCode = "";
             IList<DigitalPlatform.MessageClient.Record> records = new List<DigitalPlatform.MessageClient.Record>();
-            long batch_size = -1;
+            long batch_size = 50;
 
             string strResultSetName = searchParam.ResultSetName;
             if (string.IsNullOrEmpty(strResultSetName) == true)

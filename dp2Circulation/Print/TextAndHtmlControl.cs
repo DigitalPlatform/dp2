@@ -5,6 +5,8 @@ using System.Drawing;
 using System.Data;
 using System.Text;
 using System.Windows.Forms;
+
+using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation.Print

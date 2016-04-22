@@ -13,6 +13,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Windows.Forms;
 
 namespace dp2Circulation
 {
@@ -162,21 +163,31 @@ false);
         }
 
         public LibraryChannel GetChannel(string strServerUrl,
-    string strUserName)
+            string strUserName,
+            dp2Circulation.MainForm.GetChannelStyle style = dp2Circulation.MainForm.GetChannelStyle.GUI)
         {
             if (EntityRegisterBase.IsDot(strServerUrl) == true)
                 strServerUrl = this.MainForm.LibraryServerUrl;
             if (EntityRegisterBase.IsDot(strUserName) == true)
                 strUserName = this.MainForm.DefaultUserName;
 
-            return this._channelPool.GetChannel(strServerUrl, strUserName);
+            LibraryChannel channel =  this._channelPool.GetChannel(strServerUrl, strUserName);
+            if ((style & dp2Circulation.MainForm.GetChannelStyle.GUI) != 0)
+                channel.Idle += channel_Idle;
+            return channel;
+        }
+
+        void channel_Idle(object sender, IdleEventArgs e)
+        {
+            Application.DoEvents();
         }
 
         public void ReturnChannel(LibraryChannel channel)
         {
+            channel.Idle -= channel_Idle;
+
             this._channelPool.ReturnChannel(channel);
         }
-
 
         string GetServerName(string strServerName)
         {

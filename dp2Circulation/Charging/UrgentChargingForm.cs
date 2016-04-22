@@ -149,7 +149,7 @@ namespace dp2Circulation
 
         private void UrgentChargingForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (this.MainForm != null) 
+            if (this.MainForm != null)
                 this.MainForm.Urgent = false;
         }
 
@@ -193,8 +193,6 @@ namespace dp2Circulation
             Global.WriteHtml(this.webBrowser_operationInfo,
                 strLine);
             Global.ScrollToEnd(this.webBrowser_operationInfo);
-
-
             return 0;
         }
 
@@ -503,8 +501,6 @@ this.InfoDlgOpacity,
 
             // Global.ScrollToEnd(this.webBrowser_operationInfo);
             API.PostMessage(this.Handle, WM_SCROLLTOEND, 0, 0);
-
-
             return 0;
         }
 
@@ -729,7 +725,6 @@ this.InfoDlgOpacity,
             strLine + "\r\n");
                     CONTINUE_1:
                         Global.ScrollToEnd(this.webBrowser_operationInfo);
-
                         nLineCount++;
                     }
                 }
@@ -759,7 +754,6 @@ this.InfoDlgOpacity,
     "注意打开数据目录，改名保存 " + this.LogFileName + " 文件，避免将来不小心重复恢复。\r\n");
 
             API.PostMessage(this.Handle, WM_SCROLLTOEND, 0, 0);
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);

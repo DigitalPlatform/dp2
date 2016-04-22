@@ -25,6 +25,7 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.CirculationClient;
 // using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -2657,12 +2658,14 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
             // ScrollToEnd(webBrowser);
         }
 
+        // 用 WebBrowserExtension 中的ScrollToEnd() 替代
         /// <summary>
         /// 把浏览器控件内容卷滚到尾部
         /// </summary>
         /// <param name="webBrowser">浏览器控件对象</param>
         public static void ScrollToEnd(WebBrowser webBrowser)
         {
+#if NO
             /*
             API.SendMessage(window.Handle,
                 API.WM_VSCROLL,
@@ -2676,8 +2679,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
             webBrowser.Invalidate();
             webBrowser.Update();
              * */
-
-
+#endif
+            webBrowser.ScrollToEnd();   // 2016/4/22
         }
 
 #if NO
