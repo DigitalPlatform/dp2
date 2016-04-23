@@ -805,26 +805,32 @@ errorInfo);
 
         // 调用 server 端 Login
         public async void Login(
+#if NO
             string userName,
             string password,
             string libraryUID,
             string libraryName,
-            string propertyList)
+            string propertyList
+#endif
+            LoginRequest param)
         {
             try
             {
                 MessageResult result = await HubProxy.Invoke<MessageResult>("Login",
+#if NO
                     userName,
                     password,
                     libraryUID,
                     libraryName,
-                    propertyList);
+                    propertyList
+#endif
+                    param);
                 if (result.Value == -1)
                 {
                     AddErrorLine(result.ErrorInfo);
                     return;
                 }
-                AddInfoLine("成功登录。属性为 " + propertyList);
+                AddInfoLine("成功登录。属性为 " + param.PropertyList);
             }
             catch (Exception ex)
             {
@@ -950,4 +956,14 @@ errorInfo);
         public string ErrorCode { get; set; }   // 出错码（表示属于何种类型的错误）
     }
 
+    public class LoginRequest
+    {
+        public string UserName { get; set; }
+        public string Password { get; set; }
+
+        public string LibraryUserName { get; set; }
+        public string LibraryUID { get; set; }
+        public string LibraryName { get; set; }
+        public string PropertyList { get; set; }
+    }
 }

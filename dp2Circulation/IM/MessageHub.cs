@@ -866,11 +866,14 @@ strError);
             Guid.NewGuid().ToString(),   // this.MainForm.ServerUID,
             dlg.ShareBiblio ? "biblio_search" : "");
 #endif
-            Login(this.MainForm.MessageUserName,
-                this.MainForm.MessagePassword,
-                this.MainForm.ServerUID,    // 测试用 Guid.NewGuid().ToString(),
-                this.MainForm.LibraryName,
-                this.ShareBiblio ? "biblio_search" : "");
+            LoginRequest param = new LoginRequest();
+            param.UserName = this.MainForm.MessageUserName;
+            param.Password = this.MainForm.MessagePassword;
+            param.LibraryUID = this.MainForm.ServerUID;    // 测试用 Guid.NewGuid().ToString(),
+            param.LibraryName = this.MainForm.LibraryName;
+            param.PropertyList = (this.ShareBiblio ? "biblio_search" : "");
+            param.LibraryUserName = this.MainForm.GetCurrentUserName();
+            Login(param);
         }
 
 #if NO
