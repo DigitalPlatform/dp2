@@ -241,6 +241,7 @@ false);
         }
 #endif
 
+#if NO
         public override void OnAddMessageRecieved(string strName, string strContent)
         {
             if (strName == null)
@@ -257,6 +258,7 @@ false);
 + "</div>";
             AppendHtml(strText);
         }
+#endif
 
 #if NO
         void AddErrorLine(string strContent)
@@ -898,6 +900,7 @@ strError);
             }
         }
 #endif
+
     }
 
 

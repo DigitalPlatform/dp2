@@ -41,6 +41,7 @@ namespace DigitalPlatform.MessageClient
             this.textBox_duty.Text = this.UserItem.duty;
             this.textBox_tel.Text = this.UserItem.tel;
             this.textBox_comment.Text = this.UserItem.comment;
+            this.textBox_groups.Text = this.UserItem.groups == null? "" : string.Join(",", this.UserItem.groups);
         }
 
         void BuildUserItem()
@@ -55,6 +56,7 @@ namespace DigitalPlatform.MessageClient
             this.UserItem.duty = this.textBox_duty.Text;
             this.UserItem.tel = this.textBox_tel.Text;
             this.UserItem.comment = this.textBox_comment.Text;
+            this.UserItem.groups = this.textBox_groups.Text.Split(new char[] {','});
         }
 
         private void UserDialog_Load(object sender, EventArgs e)
