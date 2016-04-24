@@ -47,6 +47,8 @@
             this.textBox_duty = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
             this.checkBox_changePassword = new System.Windows.Forms.CheckBox();
+            this.textBox_groups = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -179,7 +181,7 @@
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Cancel.Location = new System.Drawing.Point(333, 325);
+            this.button_Cancel.Location = new System.Drawing.Point(333, 333);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
             this.button_Cancel.TabIndex = 17;
@@ -190,7 +192,7 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(252, 325);
+            this.button_OK.Location = new System.Drawing.Point(252, 333);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 16;
@@ -228,11 +230,32 @@
             this.checkBox_changePassword.UseVisualStyleBackColor = true;
             this.checkBox_changePassword.CheckedChanged += new System.EventHandler(this.checkBox_changePassword_CheckedChanged);
             // 
+            // textBox_groups
+            // 
+            this.textBox_groups.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_groups.Location = new System.Drawing.Point(119, 303);
+            this.textBox_groups.Name = "textBox_groups";
+            this.textBox_groups.Size = new System.Drawing.Size(289, 21);
+            this.textBox_groups.TabIndex = 20;
+            this.textBox_groups.TextChanged += new System.EventHandler(this.textBox_comment_TextChanged);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(12, 306);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(53, 12);
+            this.label9.TabIndex = 19;
+            this.label9.Text = "群组(&G):";
+            // 
             // UserDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(420, 360);
+            this.ClientSize = new System.Drawing.Size(420, 368);
+            this.Controls.Add(this.textBox_groups);
+            this.Controls.Add(this.label9);
             this.Controls.Add(this.checkBox_changePassword);
             this.Controls.Add(this.textBox_duty);
             this.Controls.Add(this.label8);
@@ -283,5 +306,7 @@
         private System.Windows.Forms.TextBox textBox_duty;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.CheckBox checkBox_changePassword;
+        private System.Windows.Forms.TextBox textBox_groups;
+        private System.Windows.Forms.Label label9;
     }
 }

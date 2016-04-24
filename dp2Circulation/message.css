@@ -1,0 +1,259 @@
+﻿body {
+    font-family: Microsoft YaHei, Tahoma, Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    margin: 0px;
+    padding: 0px;
+    background-color: #222222;
+}
+
+A:link, A:visited, A:active {
+    text-decoration: none;
+    color: #aaaaaa;
+}
+
+A:hover {
+    font-weight: bold;
+}
+
+.debug {
+    padding: 2px;
+    padding-left: 8px;
+    border-width: 0px;
+    border-left-width: 4px;
+    border-color: Gray;
+    border-style: solid;
+}
+
+    .debug.begin {
+        margin-top: 8px;
+        background-color: #bbbbbb;
+        color: White;
+    }
+
+    .debug.end {
+        margin-bottom: 8px;
+        background-color: #bbbbbb;
+        color: White;
+    }
+
+    .debug.warning {
+        background-color: #ffff99;
+        color: Black;
+    }
+
+    .debug.error {
+        background-color: #990000;
+        color: White;
+    }
+
+DIV.item {
+    padding: 2px;
+}
+
+DIV.odd {
+    /*background-color: #fefeff;*/
+    background-color: #ffffff;
+}
+
+DIV.even {
+    background-color: #eeeeff;
+}
+
+DIV.time_line {
+    clear: both;
+    float: right;
+    padding: 0px;
+    font-size: 7pt;
+    font-weight: lighter;
+}
+
+
+    DIV.time_line .time {
+        float: right;
+        margin-right: 8px;
+    }
+
+    DIV.time_line .time_span {
+        float: right;
+        margin-right: 8px;
+    }
+
+DIV.reader_line {
+    clear: both;
+    float: left;
+    width: 100%;
+    margin: 0px;
+    margin-left: 10px;
+    margin-top: 6px;
+    padding: 0px;
+    padding-left: 20px;
+    border-left: 4px solid #bbbbbb;
+}
+
+    DIV.reader_line .reader_prefix_text {
+        float: left;
+        margin-right: 8px;
+        /* font-size: 9pt; */
+        font-weight: normal;
+        color: #aaaaaa;
+    }
+
+
+    DIV.reader_line .reader_barcode {
+        float: left;
+        margin-right: 8px;
+        /* font-size: 10pt; */
+        font-weight: normal;
+        color: #aaaaaa;
+    }
+
+    DIV.reader_line .reader_summary {
+        float: left;
+        margin-right: 8px;
+        font-size: 10pt;
+        font-weight: bolder;
+    }
+
+.clear {
+    clear: both;
+}
+
+DIV.opername_line {
+    clear: both;
+    float: left;
+    width: 100%;
+    padding: 0px;
+    margin: 0px;
+}
+
+.opername {
+    padding: 0px;
+    font-size: 10pt;
+    font-weight: bolder;
+}
+
+.borrow .opername {
+    color: Blue;
+}
+
+.return .opername {
+    color: Green;
+}
+
+DIV.item_line_left {
+    clear: both;
+    float: left;
+    width: 100%;
+    margin: 0px;
+    margin-left: 10px;
+    margin-bottom: 6px;
+    padding: 0px;
+    padding-left: 20px;
+    border-left: 4px solid #cccccc;
+}
+
+div.item_line_right {
+    clear: both;
+    float: right;
+    width: 100%;
+    margin: 0px;
+    margin-right: 10px;
+    margin-bottom: 6px;
+    padding: 0px;
+    padding-right: 20px;
+    border-right: 4px solid #cccccc;
+}
+
+DIV.item_line_left .item_prefix_text_left {
+    float: left;
+    margin-right: 8px;
+    /* font-size: 9pt; */
+    font-weight: normal;
+    color: white;
+    background-color: #000000;
+    line-break: auto;
+    width: 50pt;
+    padding: 8px;
+    min-height: 200px;
+}
+
+DIV.item_line_right .item_prefix_text_right {
+    float: right;
+    margin-left: 8px;
+    /* font-size: 9pt; */
+    font-weight: normal;
+    color: white;
+    background-color: #000000;
+    line-break: auto;
+    width: 50pt;
+    padding: 8px;
+    min-height: 200px;
+}
+
+DIV.item_line .item_barcode {
+    float: left;
+    margin-right: 8px;
+    /* font-size: 10pt; */
+    font-weight: normal;
+    color: #aaaaaa;
+}
+
+DIV.item_line_left .item_summary_left {
+    float: left;
+    margin-right: 8px;
+    font-size: 12pt;
+    font-weight: normal;
+    padding: 16px;
+    color: #222222;
+    background-color: #bbbbbb;
+
+
+}
+
+DIV.item_line_right .item_summary_right {
+    float: right;
+    margin-left: 8px;
+    font-size: 12pt;
+    font-weight: normal;
+    padding: 16px;
+    color: white;
+    background-color: #227406;
+
+}
+
+DIV.item_line .item_location {
+    clear: both;
+    float: left;
+    white-space: nowrap;
+    font-size: 10pt;
+    font-weight: bolder;
+    border: 2px dotted #cccccc;
+    padding: 2px 4px 2px 4px;
+}
+
+TABLE.amerce_item {
+    font-size: 9pt;
+    width: 100%;
+    border-width: 0px;
+    border-style: solid;
+    border-collapse: collapse;
+}
+
+    TABLE.amerce_item TD {
+        padding: 4px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+        TABLE.amerce_item TD.name {
+            text-align: right;
+            color: #777777;
+            width: 10%;
+            border: 0px;
+            border-right: 1px;
+            border-color: #999999;
+            border-style: solid;
+            text-align: right;
+            vertical-align: top;
+            white-space: nowrap;
+        }

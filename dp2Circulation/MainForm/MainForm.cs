@@ -1499,9 +1499,12 @@ Stack:
                     this.MessageHub.CloseConnection();
 
                 // TODO: 如果没有 Connect，要先 Connect
+                this.MessageHub.RefreshUserName();
                 this.MessageHub.Connect();
+#if NO
                 if (bOldShareBiblio != this.MessageHub.ShareBiblio)
                     this.MessageHub.Login();    // 重新登录
+#endif
             }
         }
 
@@ -8353,16 +8356,19 @@ Keys keyData)
             if (dlg.Changed == true)
             {
                 this.MessageHub.CloseConnection();
+
                 this.MessageHub.Connect();
-                this.MessageHub.Login();
+                // this.MessageHub.Login();
             }
         }
 
         private void toolStripButton_messageHub_relogin_Click(object sender, EventArgs e)
         {
             this.MessageHub.CloseConnection();
+
+            this.MessageHub.RefreshUserName();
             this.MessageHub.Connect();
-            this.MessageHub.Login();
+            // this.MessageHub.Login();
         }
 
     }

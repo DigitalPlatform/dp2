@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using Microsoft.AspNet.SignalR.Client;
 using System.Diagnostics;
 using System.Threading;
+
+using Microsoft.AspNet.SignalR.Client;
 
 namespace DigitalPlatform.MessageClient
 {
@@ -38,6 +38,25 @@ namespace DigitalPlatform.MessageClient
             set;
         }
 
+        public string UserName
+        {
+            get;
+            set;
+        }
+
+        public string Password
+        {
+            get;
+            set;
+        }
+
+        public string Parameters
+        {
+            get;
+            set;
+        }
+
+
         public virtual void Initial()
         {
             _timer.Interval = 1000 * 30;
@@ -46,7 +65,9 @@ namespace DigitalPlatform.MessageClient
             if (string.IsNullOrEmpty(this.dp2MServerUrl) == false)
             {
                 // this.MainForm.BeginInvoke(new Action<string>(ConnectAsync), this.dp2MServerUrl);
-                ConnectAsync(this.dp2MServerUrl);
+                ConnectAsync(
+                    // this.dp2MServerUrl
+                    );
             }
         }
 
@@ -76,7 +97,8 @@ namespace DigitalPlatform.MessageClient
                 && (this.Connection == null || this.Connection.State == Microsoft.AspNet.SignalR.Client.ConnectionState.Disconnected))
             {
                 // this.MainForm.BeginInvoke(new Action<string>(ConnectAsync), this.dp2MServerUrl);
-                ConnectAsync(this.dp2MServerUrl);
+                ConnectAsync(//this.dp2MServerUrl
+                    );
             }
         }
 
@@ -113,21 +135,28 @@ namespace DigitalPlatform.MessageClient
         #endregion
 
         // 连接 server
-        private void ConnectAsync(string strServerUrl)
+        // 要求调用前设置好 this.ServerUrl this.UserName this.Password this.Parameters
+        private void ConnectAsync(
+            // string strServerUrl
+            )
         {
-            AddInfoLine("正在连接服务器 " + strServerUrl + " ...");
+            AddInfoLine("正在连接服务器 " + this.dp2MServerUrl + " ...");
 
-            Connection = new HubConnection(strServerUrl);
+            Connection = new HubConnection(this.dp2MServerUrl);
             Connection.Closed += new Action(Connection_Closed);
             Connection.Reconnecting += Connection_Reconnecting;
             Connection.Reconnected += Connection_Reconnected;
             // Connection.Error += Connection_Error;
 
+            Connection.Headers.Add("username", this.UserName);
+            Connection.Headers.Add("password", this.Password);
+            Connection.Headers.Add("parameters", this.Parameters);
+
             HubProxy = Connection.CreateHubProxy("MyHub");
 
-            HubProxy.On<string, string>("AddMessage",
-                (name, message) =>
-                OnAddMessageRecieved(name, message)
+            HubProxy.On<string, IList<MessageRecord>>("addMessage",
+                (name, messages) =>
+                OnAddMessageRecieved(name, messages)
                 );
 
             HubProxy.On<SearchRequest>("search",
@@ -206,8 +235,8 @@ namespace DigitalPlatform.MessageClient
                         }
                         AddInfoLine("停止 Timer");
                         _timer.Stop();
-                        AddInfoLine("成功连接到 " + strServerUrl);
-                        Login();
+                        AddInfoLine("成功连接到 " + this.dp2MServerUrl);
+                        // Login();
                     });
             }
             catch (Exception ex)
@@ -217,11 +246,13 @@ namespace DigitalPlatform.MessageClient
             }
         }
 
+#if NO
         // 连接成功后被调用，执行登录功能。重载时要调用 Login(...) 向 server 发送 login 消息
         public virtual void Login()
         {
 
         }
+#endif
 
         void Connection_Reconnecting()
         {
@@ -234,7 +265,7 @@ namespace DigitalPlatform.MessageClient
 
             AddInfoLine("Connection_Reconnected");
 
-            this.Login();
+            // this.Login();
         }
 
         void Connection_Closed()
@@ -257,9 +288,27 @@ namespace DigitalPlatform.MessageClient
             AddErrorLine(obj.ToString());
         }
 
-        public virtual void OnAddMessageRecieved(string strName, string strContent)
+        public virtual void OnAddMessageRecieved(string action,
+    IList<MessageRecord> messages)
         {
+            AddMessageEventArgs e = new AddMessageEventArgs();
+            e.Action = action;
+            e.Records = new List<MessageRecord>();
+            e.Records.AddRange(messages);
+            this.TriggerAddMessage(this, e);
+        }
 
+        public event AddMessageEventHandler AddMessage = null;
+
+        // 触发消息通知事件
+        public virtual void TriggerAddMessage(MessageConnection connection,
+            AddMessageEventArgs e)
+        {
+            AddMessageEventHandler handler = this.AddMessage;
+            if (handler != null)
+            {
+                handler(connection, e);
+            }
         }
 
         // 
@@ -803,33 +852,223 @@ errorInfo);
             return task.Result;
         }
 
+#if NO
         // 调用 server 端 Login
         public async void Login(
-            string userName,
-            string password,
-            string libraryUID,
-            string libraryName,
-            string propertyList)
+            LoginRequest param)
         {
             try
             {
                 MessageResult result = await HubProxy.Invoke<MessageResult>("Login",
-                    userName,
-                    password,
-                    libraryUID,
-                    libraryName,
-                    propertyList);
+                    param);
                 if (result.Value == -1)
                 {
                     AddErrorLine(result.ErrorInfo);
                     return;
                 }
-                AddInfoLine("成功登录。属性为 " + propertyList);
+                AddInfoLine("成功登录。属性为 " + param.PropertyList);
             }
             catch (Exception ex)
             {
                 AddErrorLine(ex.Message);
             }
+        }
+#endif
+
+        #endregion
+
+        #region GetMessage() API
+
+        // 请求服务器中断一个 task
+        public Task<MessageResult> CancelSearchAsync(string taskID)
+        {
+            return HubProxy.Invoke<MessageResult>(
+                "CancelSearch",
+                taskID);
+        }
+
+
+        class WaitEvents : IDisposable
+        {
+            public ManualResetEvent finish_event = new ManualResetEvent(false);    // 表示数据全部到来
+            public AutoResetEvent active_event = new AutoResetEvent(false);    // 表示中途数据到来
+
+            public virtual void Dispose()
+            {
+                finish_event.Dispose();
+                active_event.Dispose();
+            }
+        }
+
+        void Wait(string taskID,
+            WaitEvents wait_events,
+            TimeSpan timeout,
+            CancellationToken cancellation_token)
+        {
+            DateTime start_time = DateTime.Now; // 其实可以不用
+
+            WaitHandle[] events = null;
+
+            if (cancellation_token != null)
+            {
+                events = new WaitHandle[3];
+                events[0] = wait_events.finish_event;
+                events[1] = wait_events.active_event;
+                events[2] = cancellation_token.WaitHandle;
+            }
+            else
+            {
+                events = new WaitHandle[2];
+                events[0] = wait_events.finish_event;
+                events[1] = wait_events.active_event;
+            }
+
+            while (true)
+            {
+                int index = WaitHandle.WaitAny(events,
+                    timeout,
+                    false);
+
+                if (index == 0) // 正常完成
+                    return; //  result;
+                else if (index == 1)
+                {
+                    start_time = DateTime.Now;  // 重新计算超时开始时刻
+                }
+                else if (index == 2)
+                {
+                    if (cancellation_token != null)
+                    {
+                        // 向服务器发送 CancelSearch 请求
+                        CancelSearchAsync(taskID);
+                        cancellation_token.ThrowIfCancellationRequested();
+                    }
+                }
+                else if (index == WaitHandle.WaitTimeout)
+                {
+                    // if (DateTime.Now - start_time >= timeout)
+                    {
+                        // 向服务器发送 CancelSearch 请求
+                        CancelSearchAsync(taskID);
+                        throw new TimeoutException("已超时 " + timeout.ToString());
+                    }
+                }
+            }
+        }
+
+
+        static bool IsComplete(long requestStart,
+    long requestCount,
+    long totalCount,
+    long recordsCount)
+        {
+            long tail = 0;
+            if (requestCount != -1)
+                tail = Math.Min(requestStart + requestCount, totalCount);
+            else
+                tail = totalCount;
+
+            if (requestStart + recordsCount >= totalCount)
+                return true;
+            return false;
+        }
+
+        public delegate void Delegate_outputMessage(long totalCount,
+            long start,
+            IList<MessageRecord> records,
+            string errorInfo,
+            string errorCode);
+
+        public Task<MessageResult> GetMessageAsync(
+            GetMessageRequest request,
+            Delegate_outputMessage proc,
+            TimeSpan timeout,
+            CancellationToken token)
+        {
+            return Task.Factory.StartNew<MessageResult>(
+                () =>
+                {
+                    MessageResult result = new MessageResult();
+
+                    if (string.IsNullOrEmpty(request.TaskID) == true)
+                        request.TaskID = Guid.NewGuid().ToString();
+
+                    long recieved = 0;
+
+                    using (WaitEvents wait_events = new WaitEvents())    // 表示中途数据到来
+                    {
+                        using (var handler = HubProxy.On<
+                            string, long, long, IList<MessageRecord>, string, string>(
+                            "responseGetMessage",
+                            (taskID, resultCount, start, records, errorInfo, errorCode) =>
+                            {
+                                if (taskID != request.TaskID)
+                                    return;
+
+                                if (resultCount == -1 && start == -1)
+                                {
+                                    if (start == -1)
+                                    {
+                                        // 表示发送响应过程已经结束。只是起到通知的作用，不携带任何信息
+                                        // result.Finished = true;
+                                    }
+                                    else
+                                    {
+                                        result.Value = resultCount;
+                                        result.ErrorInfo = errorInfo;
+                                        result.String = errorCode;
+                                    }
+                                    wait_events.finish_event.Set();
+                                    return;
+                                }
+
+                                proc(resultCount,
+                                    start,
+                                    records,
+                                    errorInfo,
+                                    errorCode);
+
+                                if (records != null)
+                                    recieved += records.Count;
+
+                                if (IsComplete(request.Start, request.Count, resultCount, recieved) == true)
+                                    wait_events.finish_event.Set();
+                                else
+                                    wait_events.active_event.Set();
+                            }))
+                        {
+                            MessageResult temp = HubProxy.Invoke<MessageResult>(
+"RequestGetMessage",
+request).Result;
+                            if (temp.Value == -1 || temp.Value == 0)
+                                return temp;
+
+                            // result.String 里面是返回的 taskID
+
+                            Wait(
+            request.TaskID,
+            wait_events,
+            timeout,
+            token);
+                            return result;
+                        }
+                    }
+                },
+            token);
+        }
+
+        #endregion
+
+        #region SetMessage() API
+
+        public Task<SetMessageResult> SetMessageAsync(
+            string action,
+            List<MessageRecord> messages)
+        {
+            return HubProxy.Invoke<SetMessageResult>(
+ "SetMessage",
+ action,
+ messages);
         }
 
         #endregion
@@ -882,6 +1121,8 @@ errorInfo);
         public string department { get; set; } // 部门名称
         public string tel { get; set; }  // 电话号码
         public string comment { get; set; }  // 注释
+        public string [] groups { get; set; }  
+
     }
 
     public class SearchRequest
@@ -950,4 +1191,86 @@ errorInfo);
         public string ErrorCode { get; set; }   // 出错码（表示属于何种类型的错误）
     }
 
+#if NO
+    public class LoginRequest
+    {
+        public string UserName { get; set; }
+        public string Password { get; set; }
+
+        public string LibraryUserName { get; set; }
+        public string LibraryUID { get; set; }
+        public string LibraryName { get; set; }
+        public string PropertyList { get; set; }
+    }
+#endif
+
+    public class MessageRecord
+    {
+        public string id { get; set; }  // 消息的 id
+
+        public string group { get; set; }   // 组名 或 组id。消息所从属的组
+        public string creator { get; set; } // 创建消息的人。也就是发送消息的用户名或 id
+        public string userName { get; set; } // 创建消息的人的用户名
+        public string data { get; set; }  // 消息数据体
+        public string format { get; set; } // 消息格式。格式是从存储格式角度来说的
+        public string type { get; set; }    // 消息类型。类型是从用途角度来说的
+        public string thread { get; set; }    // 消息所从属的话题线索
+
+        public DateTime publishTime { get; set; } // 消息发布时间
+        public DateTime expireTime { get; set; } // 消息失效时间
+    }
+
+    public class SetMessageResult : MessageResult
+    {
+        public List<MessageRecord> Results { get; set; }    // 返回的实际被创建或者修改的消息
+    }
+
+    public class GetMessageRequest
+    {
+        public string TaskID { get; set; }    // 本次检索的任务 ID。由于一个 Connection 可以用于同时进行若干检索操作，本参数用于区分不同的检索操作
+
+        public string GroupCondition { get; set; }
+        public string UserCondition { get; set; }
+        public string TimeCondition { get; set; }
+
+        public long Start { get; set; }
+        public long Count { get; set; }
+
+        public GetMessageRequest(string taskID,
+            string groupCondition,
+            string userCondition,
+            string timeCondition,
+            long start,
+            long count)
+        {
+            this.TaskID = taskID;
+            this.GroupCondition = groupCondition;
+            this.UserCondition = userCondition;
+            this.TimeCondition = timeCondition;
+            this.Start = start;
+            this.Count = count;
+        }
+    }
+
+    public class GetMessageResult : MessageResult
+    {
+        public List<MessageRecord> Results { get; set; }
+    }
+
+    /// <summary>
+    /// 消息通知事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void AddMessageEventHandler(object sender,
+        AddMessageEventArgs e);
+
+    /// <summary>
+    /// 消息通知事件的参数
+    /// </summary>
+    public class AddMessageEventArgs : EventArgs
+    {
+        public string Action = "";
+        public List<MessageRecord> Records = null;
+    }
 }

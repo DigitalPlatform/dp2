@@ -1021,7 +1021,7 @@ MessageBoxDefaultButton.Button1);
             if (StringUtil.IsDevelopMode() == false)
             {
                 this.MenuItem_separator_function2.Visible = false;
-                this.MenuItem_chatForm.Visible = false;
+                // this.MenuItem_chatForm.Visible = false;
                 this.MenuItem_messageForm.Visible = false;
                 this.MenuItem_openReservationListForm.Visible = false;
                 // this.MenuItem_inventory.Visible = false;
