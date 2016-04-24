@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using Microsoft.AspNet.SignalR.Client;
 using System.Diagnostics;
 using System.Threading;
+
+using Microsoft.AspNet.SignalR.Client;
 
 namespace DigitalPlatform.MessageClient
 {
@@ -38,6 +38,25 @@ namespace DigitalPlatform.MessageClient
             set;
         }
 
+        public string UserName
+        {
+            get;
+            set;
+        }
+
+        public string Password
+        {
+            get;
+            set;
+        }
+
+        public string Parameters
+        {
+            get;
+            set;
+        }
+
+
         public virtual void Initial()
         {
             _timer.Interval = 1000 * 30;
@@ -46,7 +65,9 @@ namespace DigitalPlatform.MessageClient
             if (string.IsNullOrEmpty(this.dp2MServerUrl) == false)
             {
                 // this.MainForm.BeginInvoke(new Action<string>(ConnectAsync), this.dp2MServerUrl);
-                ConnectAsync(this.dp2MServerUrl);
+                ConnectAsync(
+                    // this.dp2MServerUrl
+                    );
             }
         }
 
@@ -76,7 +97,8 @@ namespace DigitalPlatform.MessageClient
                 && (this.Connection == null || this.Connection.State == Microsoft.AspNet.SignalR.Client.ConnectionState.Disconnected))
             {
                 // this.MainForm.BeginInvoke(new Action<string>(ConnectAsync), this.dp2MServerUrl);
-                ConnectAsync(this.dp2MServerUrl);
+                ConnectAsync(//this.dp2MServerUrl
+                    );
             }
         }
 
@@ -113,15 +135,22 @@ namespace DigitalPlatform.MessageClient
         #endregion
 
         // 连接 server
-        private void ConnectAsync(string strServerUrl)
+        // 要求调用前设置好 this.ServerUrl this.UserName this.Password this.Parameters
+        private void ConnectAsync(
+            // string strServerUrl
+            )
         {
-            AddInfoLine("正在连接服务器 " + strServerUrl + " ...");
+            AddInfoLine("正在连接服务器 " + this.dp2MServerUrl + " ...");
 
-            Connection = new HubConnection(strServerUrl);
+            Connection = new HubConnection(this.dp2MServerUrl);
             Connection.Closed += new Action(Connection_Closed);
             Connection.Reconnecting += Connection_Reconnecting;
             Connection.Reconnected += Connection_Reconnected;
             // Connection.Error += Connection_Error;
+
+            Connection.Headers.Add("username", this.UserName);
+            Connection.Headers.Add("password", this.Password);
+            Connection.Headers.Add("parameters", this.Parameters);
 
             HubProxy = Connection.CreateHubProxy("MyHub");
 
@@ -206,8 +235,8 @@ namespace DigitalPlatform.MessageClient
                         }
                         AddInfoLine("停止 Timer");
                         _timer.Stop();
-                        AddInfoLine("成功连接到 " + strServerUrl);
-                        Login();
+                        AddInfoLine("成功连接到 " + this.dp2MServerUrl);
+                        // Login();
                     });
             }
             catch (Exception ex)
@@ -217,11 +246,13 @@ namespace DigitalPlatform.MessageClient
             }
         }
 
+#if NO
         // 连接成功后被调用，执行登录功能。重载时要调用 Login(...) 向 server 发送 login 消息
         public virtual void Login()
         {
 
         }
+#endif
 
         void Connection_Reconnecting()
         {
@@ -234,7 +265,7 @@ namespace DigitalPlatform.MessageClient
 
             AddInfoLine("Connection_Reconnected");
 
-            this.Login();
+            // this.Login();
         }
 
         void Connection_Closed()
@@ -803,27 +834,14 @@ errorInfo);
             return task.Result;
         }
 
+#if NO
         // 调用 server 端 Login
         public async void Login(
-#if NO
-            string userName,
-            string password,
-            string libraryUID,
-            string libraryName,
-            string propertyList
-#endif
             LoginRequest param)
         {
             try
             {
                 MessageResult result = await HubProxy.Invoke<MessageResult>("Login",
-#if NO
-                    userName,
-                    password,
-                    libraryUID,
-                    libraryName,
-                    propertyList
-#endif
                     param);
                 if (result.Value == -1)
                 {
@@ -837,6 +855,7 @@ errorInfo);
                 AddErrorLine(ex.Message);
             }
         }
+#endif
 
         #endregion
     }

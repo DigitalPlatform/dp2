@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
+using System.Xml;
+using System.Collections;
 
 // using Microsoft.AspNet.SignalR.Client.Hubs;
 
@@ -17,7 +19,6 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Xml;
 
 namespace dp2Circulation
 {
@@ -55,7 +56,22 @@ namespace dp2Circulation
             _timer.Interval = 1000 * 30;
             _timer.Elapsed += _timer_Elapsed;
 #endif
+            this.RefreshUserName();
+
             base.Initial();
+        }
+
+        public void RefreshUserName()
+        {
+            // 2016/4/24
+            this.UserName = this.MainForm.MessageUserName;
+            this.Password = this.MainForm.MessagePassword;
+            Hashtable table = new Hashtable();
+            table["libraryUID"] = this.MainForm.ServerUID;    // 测试用 Guid.NewGuid().ToString(),
+            table["libraryName"] = this.MainForm.LibraryName;
+            table["propertyList"] = (this.ShareBiblio ? "biblio_search" : "");
+            table["libraryUserName"] = this.MainForm.GetCurrentUserName();
+            this.Parameters = StringUtil.BuildParameterString(table, ',', '=', "url");
         }
 
         public override void Destroy()
@@ -847,25 +863,20 @@ strError);
                         "share_biblio",
                         value);
                     if (this.IsConnected)
-                        this.Login();    // 重新登录
+                    {
+                        // this.Login();    // 重新登录
+                        this.CloseConnection();
+
+                        this.RefreshUserName();
+                        this.Connect();
+                    }
                 }
             }
         }
 
+#if NO
         public override void Login()
         {
-#if NO
-            ChatLoginDialog dlg = new ChatLoginDialog();
-            dlg.ShowDialog(this.MainForm);
-
-            if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
-                return;
-
-            Login(dlg.UserName,
-            dlg.Password,
-            Guid.NewGuid().ToString(),   // this.MainForm.ServerUID,
-            dlg.ShareBiblio ? "biblio_search" : "");
-#endif
             LoginRequest param = new LoginRequest();
             param.UserName = this.MainForm.MessageUserName;
             param.Password = this.MainForm.MessagePassword;
@@ -875,6 +886,7 @@ strError);
             param.LibraryUserName = this.MainForm.GetCurrentUserName();
             Login(param);
         }
+#endif
 
 #if NO
         public override void WaitTaskComplete(Task task)
