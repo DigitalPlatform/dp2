@@ -1947,7 +1947,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (strBodyType == "mq")
             {
-                return NotifyReaderSMS(
+                return NotifyReaderMQ(
                     readerdom,
                     calendar,
                     strBodyType,
@@ -2206,6 +2206,243 @@ namespace DigitalPlatform.LibraryServer
             return false;
         }
 
+        // 2016/4/25
+        /*
+<root>
+        <name>读者姓名</name>
+        <items overdueCount=已经到期册数 normalCount=即将到期册数 >
+            <item summary='书目摘要' timeReturning='应还时间' overdue='超期情况描述' overdueType='overdue/warning'>
+        <items/>
+        <text>纯文本描述</text>
+<root/>
+         * */
+        // MQ 通知读者超期的版本。供 NotifyReader() 的重载版本必要时引用
+        public int NotifyReaderMQ(
+            XmlDocument readerdom,
+            Calendar calendar,
+            string strBodyType,
+            out string strBody,
+            out string strMime,
+            out string strError)
+        {
+            strBody = "";
+            strError = "";
+            strMime = "xml";
+            int nRet = 0;
+
+            string strResult = "";
+            int nOverdueCount = 0;  // 超期提醒的事项数
+            int nNormalCount = 0;   // 一般提醒的事项数
+
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+
+            if (nodes.Count == 0)
+                return 0;
+
+            // 表达通知信息的 XML 记录
+            XmlDocument output_dom = new XmlDocument();
+            output_dom.LoadXml("<root />");
+
+            string strName = DomUtil.GetElementText(readerdom.DocumentElement,
+                "name");
+
+            DomUtil.SetElementText(output_dom.DocumentElement, "name", strName);
+            XmlElement items = output_dom.CreateElement("items");
+            output_dom.DocumentElement.AppendChild(items);
+
+            strResult += "您借阅的下列书刊：\n";
+
+            // 借阅的册
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+
+                string strBarcode = DomUtil.GetAttr(node, "barcode");
+                string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
+                // string strNo = DomUtil.GetAttr(node, "no");
+                string strBorrowDate = DomUtil.GetAttr(node, "borrowDate");
+                string strPeriod = DomUtil.GetAttr(node, "borrowPeriod");
+                // string strOperator = DomUtil.GetAttr(node, "operator");
+                // string strRenewComment = DomUtil.GetAttr(node, "renewComment");
+                string strHistory = DomUtil.GetAttr(node, "notifyHistory");
+
+                string strOverDue = "";
+                bool bOverdue = false;  // 是否超期
+                DateTime timeReturning = DateTime.MinValue;
+                {
+                    DateTime timeNextWorkingDay;
+                    long lOver = 0;
+                    string strPeriodUnit = "";
+
+                    // 获得还书日期
+                    // return:
+                    //      -1  数据格式错误
+                    //      0   没有发现超期
+                    //      1   发现超期   strError中有提示信息
+                    //      2   已经在宽限期内，很容易超期 
+                    nRet = this.App.GetReturningTime(
+                        calendar,
+                        strBorrowDate,
+                        strPeriod,
+                        out timeReturning,
+                        out timeNextWorkingDay,
+                        out lOver,
+                        out strPeriodUnit,
+                        out strError);
+                    if (nRet == -1)
+                        strOverDue = strError;
+                    else
+                    {
+                        if (nRet == 1)
+                        {
+                            bOverdue = true;
+                            strOverDue = string.Format(this.App.GetString("已超期s"),  // 已超期 {0}
+                                                this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit));
+                        }
+                    }
+                }
+
+                string strChars = "";
+                // 获得一种 body type 的全部通知字符
+                strChars = ReadersMonitor.GetNotifiedChars(App,
+                    strBodyType,
+                    strHistory);
+
+                if (bOverdue == true)
+                {
+                    // 看看是不是已经通知过
+                    if (string.IsNullOrEmpty(strChars) == false && strChars[0] == 'y')
+                        continue;
+
+                    // 合并设置一种 body type 的全部通知字符
+                    // 把 strChars 中的 'y' 设置到 strHistory 中对应达到位。'n' 不设置
+                    nRet = ReadersMonitor.SetNotifiedChars(App,
+                        strBodyType,
+                        "y",
+                        ref strHistory,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    ReadersMonitor.SetChar(ref strChars,
+                        0,
+                        'y',
+                        'n');
+
+                    nOverdueCount++;
+                }
+                else if (string.IsNullOrEmpty(App.NotifyDef) == false)
+                {
+                    // 检查超期前的通知点
+
+                    List<int> indices = null;
+                    // 检查每个通知点，返回当前时间已经达到或者超过了通知点的那些检查点的下标
+                    // return:
+                    //      -1  数据格式错误
+                    //      0   成功
+                    nRet = App.CheckNotifyPoint(
+                        calendar,
+                        strBorrowDate,
+                        strPeriod,
+                        App.NotifyDef,
+                        out indices,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    // 偏移量 0 让给了超期通知
+                    for (int k = 0; k < indices.Count; k++)
+                    {
+                        indices[k] = indices[k] + 1;
+                    }
+
+                    // 检查是否至少有一个字符位置为 ch 代表的值
+                    if (CheckChar(strChars, indices, 'n', 'n') == true)
+                    {
+                        // 至少有一个检查点尚未通知
+                        strOverDue = "即将到期";
+                    }
+                    else
+                        continue;
+
+                    foreach (int index in indices)
+                    {
+                        ReadersMonitor.SetChar(ref strChars,
+                            index,
+                            'y',
+                            'n');
+                    }
+
+                    nNormalCount++;
+                }
+                else
+                    continue;
+
+                // 合并设置一种 body type 的全部通知字符
+                // 把 strChars 中的 'y' 设置到 strHistory 中对应达到位。'n' 不设置
+                nRet = ReadersMonitor.SetNotifiedChars(App,
+                    strBodyType,
+                    strChars,
+                    ref strHistory,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                DomUtil.SetAttr(node, "notifyHistory", strHistory);
+
+                // 获得图书摘要信息
+                string strSummary = "";
+                string strBiblioRecPath = "";
+                nRet = this.App.GetBiblioSummary(strBarcode,
+                    strConfirmItemRecPath,
+                    null,   //  strBiblioRecPathExclude,
+                    25, // 10
+                    out strBiblioRecPath,
+                    out strSummary,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strSummary = "ERROR: " + strError;
+                }
+
+                // strResult += (i + 1).ToString() + ") " 
+                strResult += strSummary + " ";
+                // strResult += "借阅日期: " + DateTimeUtil.LocalDate(strBorrowDate) + " ";
+                strResult += "应还日期: " + timeReturning.ToString("d") + " ";
+                strResult += strOverDue + "\n";
+
+                {
+                    XmlElement item = output_dom.CreateElement("item");
+                    items.AppendChild(item);
+
+                    item.SetAttribute("summary", strSummary);
+                    item.SetAttribute("timeReturning", timeReturning.ToString("d"));
+                    item.SetAttribute("overdue", strOverDue);
+                    if (bOverdue)
+                        item.SetAttribute("overdueType", "overdue");
+                    else
+                        item.SetAttribute("overdueType", "warning");
+                }
+            }
+
+            /*
+            if (nOverdueCount > 0)
+                strResult += "=== 共有 " + nOverdueCount.ToString() + " 册图书超期, 请尽快归还。";
+            if (nNormalCount > 0)
+                strResult += "=== 共有 " + nNormalCount.ToString() + " 册图书即将到期, 请注意在期限内归还。";
+             * */
+            items.SetAttribute("overdueCount", nOverdueCount.ToString());
+            items.SetAttribute("normalCount", nNormalCount.ToString());
+
+            DomUtil.SetElementText(output_dom.DocumentElement, "text", strResult);
+
+            strBody = output_dom.DocumentElement.OuterXml;
+
+            if (nOverdueCount + nNormalCount > 0)
+                return 1;
+            else
+                return 0;
+        }
+
         // 短消息通知读者超期的版本。供NotifyReader()的重载版本必要时引用
         public int NotifyReaderSMS(
             XmlDocument readerdom,
@@ -2399,7 +2636,7 @@ namespace DigitalPlatform.LibraryServer
             if (nOverdueCount > 0)
                 strResult += "=== 共有 " + nOverdueCount.ToString() + " 册图书超期, 请尽快归还。";
             if (nNormalCount > 0)
-                strResult += "=== 共有 " + nOverdueCount.ToString() + " 册图书即将到期, 请注意在期限内归还。";
+                strResult += "=== 共有 " + nNormalCount.ToString() + " 册图书即将到期, 请注意在期限内归还。";
              * */
 
             strBody = strResult;
