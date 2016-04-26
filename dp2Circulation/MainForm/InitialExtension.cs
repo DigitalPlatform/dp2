@@ -1025,6 +1025,7 @@ MessageBoxDefaultButton.Button1);
                 File.Delete(strTestFile1);
                 File.Delete(strTestFile2);
 
+                // TODO: 检查下级有没有隐藏文件属性?
             }
             catch
             {

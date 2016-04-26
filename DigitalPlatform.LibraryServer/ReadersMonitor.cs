@@ -153,6 +153,7 @@ namespace DigitalPlatform.LibraryServer
             }
             else
                 this._queue = null;
+
             List<string> bodytypes = new List<string>();
 
             string strBodyTypesDef = GetBodyTypesDef();
@@ -864,7 +865,7 @@ namespace DigitalPlatform.LibraryServer
         //      strRecipient    消息最终接收者。常见的格式为 R0000001@LUID:xxxxxx 或者 !refID:xxxxxx@LUID:xxxxxx
         //                      应优先用读者记录的 refID 字段(格式为 @refID:xxxxxx)，如果没有则用 barcode 字段
         //                      如果是和微信绑定的读者，则只能从 strBody 中解析出读者记录的 email 元素内容了
-        static int SendToQueue(MessageQueue myQueue,
+        public static int SendToQueue(MessageQueue myQueue,
             string strRecipient,
             string strMime,
             string strBody,
