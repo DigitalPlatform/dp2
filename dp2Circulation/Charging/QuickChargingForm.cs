@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Threading;
 using System.Diagnostics;
-using System.Xml;
 
 using DigitalPlatform;
-using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
@@ -154,6 +150,18 @@ namespace dp2Circulation
                 "quickchargingform",
                 "upper_input",
                 true);
+            {   // 恢复列宽度
+                string strWidths = this.MainForm.AppInfo.GetString(
+                               "quickchargingform",
+                                "tasklist_column_width",
+                               "");
+                if (String.IsNullOrEmpty(strWidths) == false)
+                {
+                    DpTable.SetColumnHeaderWidth(this.dpTable_tasks,
+                        strWidths,
+                        false);
+                }
+            }
 
             this.SetControlsColor(this.DisplayStyle);
             if (this.DisplayFormat == "HTML")
@@ -306,6 +314,13 @@ namespace dp2Circulation
                     "quickchargingform",
                     "upper_input",
                     this.toolStripButton_upperInput.Checked);
+                {   // 保存列宽度
+                    string strWidths = DpTable.GetColumnWidthListString(this.dpTable_tasks);
+                    this.MainForm.AppInfo.SetString(
+                        "quickchargingform",
+                        "tasklist_column_width",
+                        strWidths);
+                }
             }
         }
 

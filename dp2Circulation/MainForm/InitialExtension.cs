@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Deployment.Application;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
@@ -14,7 +13,6 @@ using System.Xml;
 using System.ServiceProcess;
 using System.ComponentModel;
 using System.Web;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 
@@ -26,9 +24,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
