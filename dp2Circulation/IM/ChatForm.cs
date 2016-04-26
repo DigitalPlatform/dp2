@@ -52,15 +52,45 @@ namespace dp2Circulation
             this.BeginInvoke(new Action<AddMessageEventArgs>(AddMessage), e);
         }
 
+        // 如果必要，加入时间提示行
+        void AddTimeLine(MessageRecord record)
+        {
+            DateTime lastTime = new DateTime(0);
+            if (_lastMessage != null)
+                lastTime = _lastMessage.publishTime;
+
+            if (lastTime.Date != record.publishTime.Date    // 不是同一天
+    )
+            {
+                this.AddTimeLine(record.publishTime.ToString());
+                return;
+            }
+
+            if (lastTime.Date != record.publishTime.Date    // 不是同一天
+                || lastTime.Hour != record.publishTime.Hour // 不是同一小时
+                || record.publishTime - lastTime > new TimeSpan(1, 0, 0)    // 和前一条差距超过一个小时
+            )
+            {
+                if (record.publishTime.Date == DateTime.Now.Date)
+                    this.AddTimeLine(record.publishTime.ToLongTimeString());    // 今天的时间，显示简略格式
+                else
+                    this.AddTimeLine(record.publishTime.ToString());
+            }
+        }
+
         void AddMessage(AddMessageEventArgs e)
         {
             foreach (MessageRecord record in e.Records)
             {
+                AddTimeLine(record);
+
                 // creator 要替换为用户名
                 this.AddMessageLine(
                     IsMe(record) ? "right" : "left",
                     string.IsNullOrEmpty(record.userName) ? record.creator : record.userName,
                     record.data);
+
+                _lastMessage = record;
             }
         }
 
@@ -134,6 +164,17 @@ namespace dp2Circulation
             string strText = "<div class='item'>"
 + "<div class='item_line'>"
 + " <div class='item_summary'>" + HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>") + "</div>"
++ "</div>"
++ " <div class='clear'></div>"
++ "</div>";
+            AppendHtml(strText);
+        }
+
+        void AddTimeLine(string strContent)
+        {
+            string strText = "<div class='item'>"
++ "<div class='item_line'>"
++ " <div class='time'>" + HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>") + "</div>"
 + "</div>"
 + " <div class='clear'></div>"
 + "</div>";
@@ -318,13 +359,15 @@ namespace dp2Circulation
 
                 string id = Guid.NewGuid().ToString();
                 GetMessageRequest request = new GetMessageRequest(id,
-                    strGroupName, // "" 表示默认群组
+                    strGroupName, // "<default>" 表示默认群组
                     "",
                     "",
                     0,
                     -1);
                 try
                 {
+                    _lastMessage = null;
+
                     MessageResult result = await this.MainForm.MessageHub.GetMessageAsync(
                         request,
                         FillMessage,
@@ -364,6 +407,8 @@ namespace dp2Circulation
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
         }
 
+        MessageRecord _lastMessage = null;   // 当前消息显示界面中最后一条消息
+
         // 回调函数，用消息填充浏览器控件
         void FillMessage(long totalCount,
     long start,
@@ -382,11 +427,16 @@ namespace dp2Circulation
             {
                 foreach (MessageRecord record in records)
                 {
+
+                    AddTimeLine(record);
+
                     // creator 要替换为用户名
                     this.AddMessageLine(
                         IsMe(record) ? "right" : "left",
                         string.IsNullOrEmpty(record.userName) ? record.creator : record.userName,
                         record.data);
+
+                    _lastMessage = record;
                 }
             }
         }

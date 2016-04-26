@@ -451,11 +451,11 @@ namespace dp2Circulation
                 // 凭条打印
                 {
                     nRet = InstallProjects(
-    this.OperHistory,
-    "凭条打印",
-    dlg.SelectedProjects,
+                        this.OperHistory,
+                        "凭条打印",
+                        dlg.SelectedProjects,
                         "!url",
-    out strError);
+                        out strError);
                     if (nRet == -1)
                         goto ERROR1;
                     nInstallCount += nRet;
@@ -464,11 +464,11 @@ namespace dp2Circulation
                 // MainForm
                 {
                     nRet = InstallProjects(
-    this,
-    "框架窗口",
-    dlg.SelectedProjects,
+                        this,
+                        "框架窗口",
+                        dlg.SelectedProjects,
                         "!url",
-    out strError);
+                        out strError);
                     if (nRet == -1)
                         goto ERROR1;
                     nInstallCount += nRet;

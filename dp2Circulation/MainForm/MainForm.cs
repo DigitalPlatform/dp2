@@ -6688,8 +6688,6 @@ out strError);
             InstallStatisProjects();
         }
 
-
-
         // 从 dp2003.com 检查更新全部方案
         private void MenuItem_updateStatisProjects_Click(object sender, EventArgs e)
         {

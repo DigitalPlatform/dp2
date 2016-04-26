@@ -1419,7 +1419,7 @@ namespace DigitalPlatform.LibraryServer
             // 构造一个XML记录, 加入"预约到书"库
             // 加入记录预约到书库的目的，是为了让工作线程可以监控读者是否来取书，如果超过保留期限，要转而通知下一个预约了此册的读者。
             // 兼有email通知功能
-            nRet = AddNotifyRecordToQueue(
+            nRet = AddNotifyRecordToQueueDatabase(
                 // channels,
                 channel,
                 strItemBarcodeParam,
@@ -1467,7 +1467,7 @@ namespace DigitalPlatform.LibraryServer
         //      bOnShelf    要通知的册是否在架。在架指并没有人借阅过，本来就在书架上。
         //      strLibraryCode  读者所在的馆代码
         //      strReaderXml    预约了图书的读者的XML记录。用于消息通知接口
-        int AddNotifyRecordToQueue(
+        int AddNotifyRecordToQueueDatabase(
             // RmsChannelCollection channels,
             RmsChannel channel,
             string strItemBarcode,
@@ -1790,6 +1790,45 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
             }
+
+#if NO
+            // 2016/4/26
+            if (string.IsNullOrEmpty(this.OutgoingQueue) == false
+                && StringUtil.IsInList("email", this.ArrivedNotifyTypes))
+            {
+                // 向 MSMQ 消息队列发送消息
+                nRet = SendToQueue(this._queue,
+                    (string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "!refID:" + strRefID)
+                    + "@LUID:" + this.App.UID,
+                    strMime,
+                    strBody,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "发送 MQ 出错: " + strError;
+                    if (this.App.Statis != null)
+                        this.App.Statis.IncreaseEntryValue(strLibraryCode,
+                        "超期通知",
+                        "MQ超期通知消息发送错误数",
+                        1);
+                    this.AppendResultText(strError + "\r\n");
+                    bSendMessageError = true;
+
+                    this.App.WriteErrorLog(strError);
+                    readerdom = new XmlDocument();
+                    readerdom.LoadXml(strOldReaderXml);
+                }
+                else
+                {
+                    if (this.App.Statis != null)
+                        this.App.Statis.IncreaseEntryValue(
+                        strLibraryCode,
+                        "超期通知",
+                        "MQ超期通知人数",
+                        1);
+                }
+            }
+#endif
 
             // ** email
             if (String.IsNullOrEmpty(strReaderEmailAddress) == false

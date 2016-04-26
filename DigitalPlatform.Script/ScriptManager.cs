@@ -114,7 +114,7 @@ namespace DigitalPlatform.Script
             }
             catch (Exception ex0)
             {
-                throw new Exception("装载文件 '"+this.CfgFilePath+"' 到 XmlDocument 时出错: " + ex0.Message, ex0);
+                throw new Exception("装载文件 '" + this.CfgFilePath + "' 到 XmlDocument 时出错: " + ex0.Message, ex0);
             }
 
             // 缺省代码目录
@@ -271,9 +271,7 @@ namespace DigitalPlatform.Script
                     else
                         treeNode.Nodes.Add(nodeNew);
                 }
-
             }
-
         }
 
         // 列出全部已经安装的URL
@@ -301,15 +299,11 @@ namespace DigitalPlatform.Script
                 int nRet = ScriptManager.GetProjectMetadata(strLocate,
                 out metadata_dom,
                 out strError);
-
-
                 if (nRet == -1)
                     return -1;
 
                 if (nRet == 0)
-                {
                     continue;
-                }
 
                 string strUpdateUrl = DomUtil.GetAttr(metadata_dom.DocumentElement,
         "updateUrl");
@@ -895,7 +889,15 @@ namespace DigitalPlatform.Script
             if (nCount > 0)
             {
                 this.m_bChanged = true;
-                this.Save();
+                try
+                {
+                    this.Save();
+                }
+                catch(Exception ex)
+                {
+                    strError = "保存方案配置文件时出现异常: " + ex.Message;
+                    return -1;
+                }
             }
 
             return nCount;

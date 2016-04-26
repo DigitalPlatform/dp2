@@ -2209,7 +2209,10 @@ namespace DigitalPlatform.LibraryServer
         // 2016/4/25
         /*
 <root>
-        <name>读者姓名</name>
+        <type>超期通知</type>
+        <record>
+         ... 读者记录 XML 原始形态
+        </record>
         <items overdueCount=已经到期册数 normalCount=即将到期册数 >
             <item summary='书目摘要' timeReturning='应还时间' overdue='超期情况描述' overdueType='overdue/warning'>
         <items/>
@@ -2246,7 +2249,7 @@ namespace DigitalPlatform.LibraryServer
             string strName = DomUtil.GetElementText(readerdom.DocumentElement,
                 "name");
 
-            DomUtil.SetElementText(output_dom.DocumentElement, "name", strName);
+            DomUtil.SetElementText(output_dom.DocumentElement, "type", "超期通知");
             XmlElement items = output_dom.CreateElement("items");
             output_dom.DocumentElement.AppendChild(items);
 
@@ -2434,6 +2437,17 @@ namespace DigitalPlatform.LibraryServer
             items.SetAttribute("normalCount", nNormalCount.ToString());
 
             DomUtil.SetElementText(output_dom.DocumentElement, "text", strResult);
+
+            {
+                XmlElement record = output_dom.CreateElement("record");
+                output_dom.DocumentElement.AppendChild(record);
+                record.InnerXml = readerdom.DocumentElement.InnerXml;
+
+                DomUtil.DeleteElement(record, "borrowHistory");
+                DomUtil.DeleteElement(record, "password");
+                DomUtil.DeleteElement(record, "fingerprint");
+                // TODO: 是否包含 librryCode 元素?
+            }
 
             strBody = output_dom.DocumentElement.OuterXml;
 

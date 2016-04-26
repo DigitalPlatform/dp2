@@ -290,7 +290,7 @@ namespace DigitalPlatform.OPAC
                 channel.Url = this.textBox_dp2LibraryUrl.Text;
 
                 // Debug.Assert(false, "");
-                string strParameters = "location=#setup,type=worker,client=dp2OPAC|";
+                string strParameters = "location=#setup,type=worker,client=dp2OPAC|0.01";   // 2016/4/26 加上 0.01 部分
                 long nRet = channel.Login(this.textBox_manageUserName.Text,
                     this.textBox_managePassword.Text,
                     strParameters,
@@ -666,7 +666,7 @@ namespace DigitalPlatform.OPAC
                 channel.Url = this.textBox_dp2LibraryUrl.Text;
 
                 // Debug.Assert(false, "");
-                string strParameters = "location=#setup,type=worker,client=dp2OPAC|";
+                string strParameters = "location=#setup,type=worker,client=dp2OPAC|0.01";  // 2016/4/26 加上 0.01 部分
                 long nRet = channel.Login(this.textBox_manageUserName.Text,
                     this.textBox_managePassword.Text,
                     strParameters,

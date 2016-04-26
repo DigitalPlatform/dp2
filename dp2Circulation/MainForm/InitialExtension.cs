@@ -1075,6 +1075,13 @@ MessageBoxDefaultButton.Button1);
                     "dp2Circulation_v2");
                 PathUtil.CreateDirIfNeed(this.UserDir);
 
+                // 2016/4/26
+                if (Directory.Exists(this.UserDir) == false)
+                {
+                    Program.PromptAndExit(this, "用户目录 '"+this.UserDir+"' 创建失败或者权限不足。请确保当前 Windows 用户能访问和修改这个目录以及下级子目录、文件，并确保它或者上级目录不是隐藏的状态");
+                    return;
+                }
+
                 this.UserTempDir = Path.Combine(this.UserDir, "temp");
                 PathUtil.CreateDirIfNeed(this.UserTempDir);
 
