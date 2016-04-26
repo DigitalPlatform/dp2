@@ -1007,13 +1007,24 @@ MessageBoxDefaultButton.Button1);
                 Directory.Delete(strTestDir);
 
                 // 创建文件试验
-                string strTestFile = Path.Combine(this.UserDir, "_testfile_");
-                using (StreamWriter sw = new StreamWriter(strTestFile, false))
+                string strTestFile1 = Path.Combine(this.UserDir, "_testfile1_");
+                using (StreamWriter sw = new StreamWriter(strTestFile1, false))
                 {
                     sw.WriteLine("first line");
                 }
 
-                File.Delete(strTestFile);
+                string strTestFile2 = Path.Combine(this.UserDir, "_testfile2_");
+                using (StreamWriter sw = new StreamWriter(strTestFile2, false))
+                {
+                    sw.WriteLine("first line");
+                }
+
+                // 复制文件试验
+                File.Copy(strTestFile1, strTestFile2, true);
+
+                File.Delete(strTestFile1);
+                File.Delete(strTestFile2);
+
             }
             catch
             {
