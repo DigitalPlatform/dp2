@@ -1,0 +1,326 @@
+﻿TABLE.biblio
+{
+	width: 100%;
+}
+
+TABLE.column
+{
+	width: 100%;
+	font-size: 12px;
+	overflow:scroll;
+	
+	background-color: White;
+	text-align: left;
+	
+	border-style:solid;
+	border-width:1px;
+	border-top-width:0px;
+	border-right-width:1px;
+	border-color:#aaaaaa;
+	border-collapse:separate;
+	
+	/* background-color: #cfd8dd; */
+}
+
+TABLE.column TD
+{
+    /*
+	padding: 4pt;
+*/
+}
+
+TABLE.column TR.contentup
+{
+	border-left-width: 0px;
+	border-top-width: 2px;
+	border-right-width: 0px;
+	border-bottom-width: 0px;
+
+	border-style: solid;
+	border-color: #cccccc;
+}
+
+TABLE.column TD.no
+{
+	width: 1%;	
+	white-space:nowrap;
+	vertical-align: top;
+}
+
+TABLE.column TD.review
+{
+	width: 60%;	
+}
+
+TABLE.column TD.biblio
+{
+	width: 40%;	
+}
+
+/*
+TABLE.column TD.path
+{
+    padding: 4px;
+	width: 60%;	
+	text-align: right;
+}
+
+TABLE.column TD.bibliorecpath
+{
+    padding: 4px;
+	width: 40%;	
+	text-align: right;
+}
+*/
+
+
+TABLE.column TR.debugline
+{
+	font-size: 12px;
+	/*background-color: yellow;*/
+}
+
+TABLE.column DIV.none
+{
+	width: 100%;
+	background-color: white;
+	color:Gray;
+	text-align:center;
+}
+
+TABLE.column TABLE.edit
+{
+	width: 100%;
+}
+
+TABLE.column TABLE.edit TD
+{
+	margin:0pt;
+	padding: 1pt;
+}
+
+TABLE.column TABLE.edit TD.left
+{
+	width: 1%;
+	white-space: nowrap;
+}
+
+TABLE.column TABLE.edit INPUT.title
+{
+	width: 50%;
+}
+
+TABLE.column TABLE.edit TEXTAREA.content
+{
+	width: 99%;
+	height:80pt;
+}
+
+TABLE.wrapper
+{
+	border-style:solid;
+	border-width:1px;
+	border-top-width:0px;
+	border-bottom-width: 26px;
+	border-color:#aaaaaa;
+	border-collapse:collapse;
+	padding: 5px;
+}
+
+TABLE.column DIV.cmd
+{
+	float: right;
+}
+
+TABLE.column TD.biblio DIV.ditto
+{
+    text-align:center;
+}
+TABLE.column TD.biblio 
+{
+    vertical-align:top;
+}
+
+
+/*
+TABLE.column TD.bibliosummary 
+{
+    font-size: 11px;
+}
+TABLE.column TD 
+{
+    padding: 2px;
+}
+*/
+
+/*
+TABLE.column TD.bibliosummary TD.value
+{
+    border-right-width: 0px;
+    border-bottom-width: 0px;
+}
+*/
+
+TABLE.column TR.contentup TD.path, TABLE.column TR.contentup TD.bibliorecpath
+{
+/* thanks to http://blog.fakedarren.com/2010/01/cross-browser-css-gradients/ */
+ 
+    /* fallback (Opera) */
+    background: #dddddd;
+    /* Mozilla: */
+    background: -moz-linear-gradient(left, #ffffff, #dddddd);
+    /* Chrome, Safari:*/
+    background: -webkit-gradient(linear,
+                left top, right top, from(#ffffff), to(#dddddd));
+    /* MSIE */
+    filter: progid:DXImageTransform.Microsoft.Gradient(
+                StartColorStr='#ffffff', EndColorStr='#dddddd', GradientType=1);
+}
+  
+TABLE.column TR.cmdline DIV.buttons
+{
+      float:left;
+}
+
+TABLE.column TR.cmdline DIV.pager
+{
+      float:right;      
+}
+  
+TABLE.column TR.cmdline DIV.cmdline
+{
+    /*
+    padding: 20px;
+    background-color: Red;
+*/
+    padding:0px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    
+    border:0px;
+    border-top:1px;
+    border-color: Gray;
+    border-style: dotted;
+}
+  
+TABLE.column TR.cmdline TD
+{
+	padding: 0pt;
+
+	border-width: 0px;
+}
+
+TABLE.column TR.content TD.no
+{
+    padding: 0px;
+}
+
+TABLE.column TR.content TD.no DIV
+{
+	font-size: 16px;
+	text-align:right;
+	/* margin: 2px; */
+	padding: 5px;
+	color:White;
+	background-color: #999999;
+	vertical-align:top;
+}
+
+TABLE.column TR.content SPAN.comment_checkbox
+{
+    float:right;
+}
+
+TABLE.column INPUT.delete, TABLE.column INPUT.openmodifystate
+{
+    margin-left: 20px;
+}
+
+TABLE.column .selected
+{
+    /* background-color: Red; */
+    
+    border-style:solid;
+    border-width:0px;
+	border-left-width:2px;
+	border-color:Red;
+}
+
+TABLE.column DIV.biblio
+{
+    margin-bottom: 20px;
+}
+
+TABLE.column INPUT.newreview
+{
+    float: right;
+}
+
+TABLE.column TR.content TD.review
+{
+    vertical-align: top;
+}
+
+/* tooltip */
+#tooltip_chat
+{
+    text-align: center;
+    color: #fff;
+	background: #00bb00;
+    position: absolute;
+    z-index: 100;
+    padding: 15px;
+    
+	text-shadow: 0 1px rgba( 0, 0, 0, .5 );
+	line-height: 1.5;
+	color: #fff;
+
+	background: -webkit-gradient( linear, left top, left bottom, from( rgba( 0, 180, 0,  .6 ) ), to( rgba( 0, 180, 0, .8 ) ) );
+	background: -webkit-linear-gradient( top, rgba( 0, 180, 0, .6 ), rgba( 0, 180, 0, .8 ) );
+	background: -moz-linear-gradient( top, rgba( 0, 180, 0, .6 ), rgba( 0, 180, 0, .8 ) );
+	background: -ms-radial-gradient( top, rgba( 0, 180, 0, .6 ), rgba( 0, 180, 0, .8 ) );
+	background: -o-linear-gradient( top, rgba( 0, 180, 0, .6 ), rgba( 0, 180, 0, .8 ) );
+	background: linear-gradient( top, rgba( 0, 180, 0, .6 ), rgba( 0, 180, 0, .8 ) );
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	border-top: 1px solid #fff;
+	-webkit-box-shadow: 0 3px 5px rgba( 0, 0, 0, .3 );
+	-moz-box-shadow: 0 3px 5px rgba( 0, 0, 0, .3 );
+	box-shadow: 0 3px 5px rgba( 0, 0, 0, .3 );
+   
+}
+ 
+#tooltip_chat:after
+{
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+	border-top: 10px solid #00bb00;
+    border-top-color: rgba( 0, 180, 0, .7 );
+	content: '';
+	position: absolute;
+	left: 50%;
+	bottom: -10px;
+	margin-left: -10px;
+}
+#tooltip_chat.top:after
+{
+    border-top-color: transparent;
+	border-bottom: 10px solid #333;
+    border-bottom-color: rgba( 0, 0, 0, .6 );
+	top: -20px;
+	bottom: auto;
+}
+#tooltip_chat.left:after
+{
+	left: 10px;
+	margin: 0;
+}
+#tooltip_chat.right:after
+{
+	right: 10px;
+	left: auto;
+	margin: 0;
+}

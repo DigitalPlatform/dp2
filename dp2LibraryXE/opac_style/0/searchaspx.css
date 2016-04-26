@@ -1,0 +1,21 @@
+﻿
+.treebutton.hidden
+{
+    display: none;
+}
+
+#BrowseSearchResultControl1:not([class=fullwidth])
+{
+    float:right;
+    width: 80%;
+}
+
+#BiblioSearchControl1
+{
+    clear:both;
+}
+
+.fullwidth
+{
+    width: 100%;
+}
