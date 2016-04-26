@@ -79,7 +79,7 @@ namespace dp2Circulation
             // button_search
             // 
             this.button_search.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_search.Location = new System.Drawing.Point(344, 54);
+            this.button_search.Location = new System.Drawing.Point(372, 54);
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(0, 0);
             this.button_search.TabIndex = 11;
@@ -98,7 +98,7 @@ namespace dp2Circulation
             this.listView_records.Location = new System.Drawing.Point(0, 0);
             this.listView_records.Margin = new System.Windows.Forms.Padding(0);
             this.listView_records.Name = "listView_records";
-            this.listView_records.Size = new System.Drawing.Size(361, 118);
+            this.listView_records.Size = new System.Drawing.Size(446, 172);
             this.listView_records.TabIndex = 10;
             this.listView_records.UseCompatibleStateImageBehavior = false;
             this.listView_records.View = System.Windows.Forms.View.Details;
@@ -141,7 +141,7 @@ namespace dp2Circulation
             "__id"});
             this.comboBox_from.Location = new System.Drawing.Point(86, 54);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(132, 20);
+            this.comboBox_from.Size = new System.Drawing.Size(160, 20);
             this.comboBox_from.TabIndex = 9;
             this.comboBox_from.Text = "册条码";
             this.comboBox_from.SizeChanged += new System.EventHandler(this.comboBox_from_SizeChanged);
@@ -153,7 +153,7 @@ namespace dp2Circulation
             this.textBox_queryWord.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_queryWord.Location = new System.Drawing.Point(86, 3);
             this.textBox_queryWord.Name = "textBox_queryWord";
-            this.textBox_queryWord.Size = new System.Drawing.Size(132, 21);
+            this.textBox_queryWord.Size = new System.Drawing.Size(160, 21);
             this.textBox_queryWord.TabIndex = 7;
             this.textBox_queryWord.TextChanged += new System.EventHandler(this.textBox_queryWord_TextChanged);
             this.textBox_queryWord.Enter += new System.EventHandler(this.textBox_queryWord_Enter);
@@ -174,17 +174,17 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_main.Size = new System.Drawing.Size(367, 276);
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(452, 373);
             this.tableLayoutPanel_main.TabIndex = 12;
             // 
             // label_message
             // 
             this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_message.Location = new System.Drawing.Point(0, 248);
+            this.label_message.Location = new System.Drawing.Point(0, 345);
             this.label_message.Margin = new System.Windows.Forms.Padding(0, 2, 0, 0);
             this.label_message.Name = "label_message";
-            this.label_message.Size = new System.Drawing.Size(367, 18);
+            this.label_message.Size = new System.Drawing.Size(452, 18);
             this.label_message.TabIndex = 9;
             // 
             // splitContainer_main
@@ -201,8 +201,8 @@ namespace dp2Circulation
             // splitContainer_main.Panel2
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.listView_records);
-            this.splitContainer_main.Size = new System.Drawing.Size(361, 230);
-            this.splitContainer_main.SplitterDistance = 104;
+            this.splitContainer_main.Size = new System.Drawing.Size(446, 327);
+            this.splitContainer_main.SplitterDistance = 147;
             this.splitContainer_main.SplitterWidth = 8;
             this.splitContainer_main.TabIndex = 10;
             // 
@@ -214,7 +214,7 @@ namespace dp2Circulation
             this.tabControl_query.Location = new System.Drawing.Point(0, 0);
             this.tabControl_query.Name = "tabControl_query";
             this.tabControl_query.SelectedIndex = 0;
-            this.tabControl_query.Size = new System.Drawing.Size(361, 104);
+            this.tabControl_query.Size = new System.Drawing.Size(446, 147);
             this.tabControl_query.TabIndex = 10;
             // 
             // tabPage_simple
@@ -223,7 +223,7 @@ namespace dp2Circulation
             this.tabPage_simple.Location = new System.Drawing.Point(4, 22);
             this.tabPage_simple.Name = "tabPage_simple";
             this.tabPage_simple.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_simple.Size = new System.Drawing.Size(353, 78);
+            this.tabPage_simple.Size = new System.Drawing.Size(438, 121);
             this.tabPage_simple.TabIndex = 0;
             this.tabPage_simple.Text = "简单";
             this.tabPage_simple.UseVisualStyleBackColor = true;
@@ -256,7 +256,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_query.Size = new System.Drawing.Size(347, 72);
+            this.tableLayoutPanel_query.Size = new System.Drawing.Size(375, 115);
             this.tableLayoutPanel_query.TabIndex = 8;
             // 
             // comboBox_entityDbName
@@ -270,7 +270,7 @@ namespace dp2Circulation
             this.comboBox_entityDbName.Location = new System.Drawing.Point(85, 29);
             this.comboBox_entityDbName.Margin = new System.Windows.Forms.Padding(2);
             this.comboBox_entityDbName.Name = "comboBox_entityDbName";
-            this.comboBox_entityDbName.Size = new System.Drawing.Size(134, 20);
+            this.comboBox_entityDbName.Size = new System.Drawing.Size(162, 20);
             this.comboBox_entityDbName.TabIndex = 4;
             this.comboBox_entityDbName.DropDown += new System.EventHandler(this.comboBox_entityDbName_DropDown);
             this.comboBox_entityDbName.SizeChanged += new System.EventHandler(this.comboBox_entityDbName_SizeChanged);
@@ -335,7 +335,7 @@ namespace dp2Circulation
             "空值"});
             this.comboBox_matchStyle.Location = new System.Drawing.Point(86, 80);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
-            this.comboBox_matchStyle.Size = new System.Drawing.Size(132, 20);
+            this.comboBox_matchStyle.Size = new System.Drawing.Size(160, 20);
             this.comboBox_matchStyle.TabIndex = 8;
             this.comboBox_matchStyle.Text = "精确一致";
             this.comboBox_matchStyle.SizeChanged += new System.EventHandler(this.comboBox_matchStyle_SizeChanged);
@@ -354,7 +354,7 @@ namespace dp2Circulation
             this.toolStripSeparator3,
             this.toolStripButton_prevQuery,
             this.toolStripButton_nextQuery});
-            this.toolStrip_search.Location = new System.Drawing.Point(221, 0);
+            this.toolStrip_search.Location = new System.Drawing.Point(249, 0);
             this.toolStrip_search.Name = "toolStrip_search";
             this.toolStrip_search.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.toolStrip_search.Size = new System.Drawing.Size(126, 27);
@@ -483,7 +483,7 @@ namespace dp2Circulation
             this.tabPage_logic.Location = new System.Drawing.Point(4, 22);
             this.tabPage_logic.Name = "tabPage_logic";
             this.tabPage_logic.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_logic.Size = new System.Drawing.Size(353, 79);
+            this.tabPage_logic.Size = new System.Drawing.Size(438, 121);
             this.tabPage_logic.TabIndex = 1;
             this.tabPage_logic.Text = "逻辑";
             this.tabPage_logic.UseVisualStyleBackColor = true;
@@ -494,7 +494,7 @@ namespace dp2Circulation
             this.dp2QueryControl1.Location = new System.Drawing.Point(3, 3);
             this.dp2QueryControl1.Name = "dp2QueryControl1";
             this.dp2QueryControl1.PanelMode = DigitalPlatform.CommonControl.PanelMode.None;
-            this.dp2QueryControl1.Size = new System.Drawing.Size(347, 73);
+            this.dp2QueryControl1.Size = new System.Drawing.Size(432, 115);
             this.dp2QueryControl1.TabIndex = 1;
             this.dp2QueryControl1.GetList += new DigitalPlatform.CommonControl.GetListEventHandler(this.dp2QueryControl1_GetList);
             this.dp2QueryControl1.ViewXml += new System.EventHandler(this.dp2QueryControl1_ViewXml);
@@ -504,7 +504,7 @@ namespace dp2Circulation
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(367, 276);
+            this.ClientSize = new System.Drawing.Size(452, 373);
             this.Controls.Add(this.tableLayoutPanel_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ItemSearchForm";
