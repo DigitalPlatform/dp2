@@ -344,11 +344,11 @@
             this.textBox_input.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_input.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_input.Font = new System.Drawing.Font("宋体", 30F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textBox_input.Font = new System.Drawing.Font("宋体", 22F);
             this.textBox_input.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.textBox_input.Location = new System.Drawing.Point(3, 25);
             this.textBox_input.Name = "textBox_input";
-            this.textBox_input.Size = new System.Drawing.Size(173, 42);
+            this.textBox_input.Size = new System.Drawing.Size(173, 41);
             this.textBox_input.TabIndex = 1;
             this.textBox_input.Enter += new System.EventHandler(this.textBox_input_Enter);
             this.textBox_input.Leave += new System.EventHandler(this.textBox_input_Leave);

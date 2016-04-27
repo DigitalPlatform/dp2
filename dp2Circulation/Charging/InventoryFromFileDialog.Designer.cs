@@ -67,6 +67,7 @@
             // 
             // button_findBarcodeFileName
             // 
+            this.button_findBarcodeFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_findBarcodeFileName.Location = new System.Drawing.Point(362, 82);
             this.button_findBarcodeFileName.Name = "button_findBarcodeFileName";
             this.button_findBarcodeFileName.Size = new System.Drawing.Size(47, 23);
@@ -115,8 +116,8 @@
             // InventoryFromFileDialog
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(421, 261);
             this.Controls.Add(this.button_Cancel);
