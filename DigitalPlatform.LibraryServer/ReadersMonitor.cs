@@ -153,6 +153,7 @@ namespace DigitalPlatform.LibraryServer
             }
             else
                 this._queue = null;
+
             List<string> bodytypes = new List<string>();
 
             string strBodyTypesDef = GetBodyTypesDef();
@@ -180,7 +181,7 @@ namespace DigitalPlatform.LibraryServer
             RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
 
             int nTotalRecCount = 0;
-            for (int i = 0; i < this.App.ReaderDbs.Count; i++)
+            foreach (DigitalPlatform.LibraryServer.LibraryApplication.ReaderDbCfg cfg in this.App.ReaderDbs)
             {
 #if NO
                 // 系统挂起的时候，不运行本线程
@@ -194,10 +195,8 @@ namespace DigitalPlatform.LibraryServer
                 if (this.Stopped == true)
                     break;
 
-                if (this.Stopped == true)
-                    break;
-
-                string strReaderDbName = this.App.ReaderDbs[i].DbName;
+                string strReaderDbName = cfg.DbName;
+                string strLibraryCode = cfg.LibraryCode;
 
                 AppendResultText("开始处理读者库 " + strReaderDbName + " 的循环\r\n");
 
@@ -285,12 +284,14 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
 
+#if NO
                     string strLibraryCode = "";
                     nRet = this.App.GetLibraryCode(strOutputPath,
                         out strLibraryCode,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+#endif
 
                     bFirst = false;
 
@@ -315,11 +316,9 @@ namespace DigitalPlatform.LibraryServer
 
                 CONTINUE:
                     continue;
-
                 } // end of for
 
                 AppendResultText("针对读者库 " + strReaderDbName + " 的循环结束。共处理 " + nOnePassRecCount.ToString() + " 条记录。\r\n");
-
             }
 
             recpath_table.Clear();
@@ -391,6 +390,9 @@ namespace DigitalPlatform.LibraryServer
                 strError = "装载 XML 到 DOM 出错: " + ex.Message;
                 return -1;
             }
+
+            // 2016/4/26
+            DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
 
             string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
                 "barcode");
@@ -538,7 +540,9 @@ namespace DigitalPlatform.LibraryServer
                     {
                         // 向 MSMQ 消息队列发送消息
                         nRet = SendToQueue(this._queue,
-                            string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "@refID:" + strRefID,
+                            (string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "!refID:" + strRefID)
+                            + "@LUID:" + this.App.UID,
+                            strMime,
                             strBody,
                             out strError);
                         if (nRet == -1)
@@ -858,9 +862,12 @@ namespace DigitalPlatform.LibraryServer
 
         // 向 MSMQ 消息队列发送消息
         // parameters:
-        //      strRecipient    应优先用读者记录的 refID 字段(格式为 @refID:xxxxxx)，如果没有则用 barcode 字段
-        static int SendToQueue(MessageQueue myQueue,
+        //      strRecipient    消息最终接收者。常见的格式为 R0000001@LUID:xxxxxx 或者 !refID:xxxxxx@LUID:xxxxxx
+        //                      应优先用读者记录的 refID 字段(格式为 @refID:xxxxxx)，如果没有则用 barcode 字段
+        //                      如果是和微信绑定的读者，则只能从 strBody 中解析出读者记录的 email 元素内容了
+        public static int SendToQueue(MessageQueue myQueue,
             string strRecipient,
+            string strMime,
             string strBody,
             out string strError)
         {
@@ -870,8 +877,8 @@ namespace DigitalPlatform.LibraryServer
             dom.LoadXml("<root />");
             DomUtil.SetElementText(dom.DocumentElement, "type", "patronNotify");
             DomUtil.SetElementText(dom.DocumentElement, "recipient", strRecipient);
+            DomUtil.SetElementText(dom.DocumentElement, "mime", strMime);
             DomUtil.SetElementText(dom.DocumentElement, "body", strBody);
-            DomUtil.SetElementText(dom.DocumentElement, "mime", "text");
 
             try
             {

@@ -3,6 +3,7 @@
     font-size: 9pt;
     margin: 0px;
     padding: 0px;
+    color: #f5f0f0;
     background-color: #222222;
 }
 
@@ -208,6 +209,15 @@ DIV.item_line_left .item_summary_left {
     background-color: #bbbbbb;
 
 
+}
+
+DIV.item_line .time {
+    float: left;
+    font-weight: normal;
+    padding: 16px;
+    color: #cccccc;
+    width: 100%;
+    text-align: center;
 }
 
 DIV.item_line_right .item_summary_right {

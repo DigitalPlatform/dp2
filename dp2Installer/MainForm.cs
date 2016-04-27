@@ -1614,7 +1614,6 @@ MessageBoxDefaultButton.Button2);
 
             try
             {
-
                 string strZipFileName = Path.Combine(this.DataDir, "opac_app.zip");
 
                 List<OpacAppInfo> infos = null;

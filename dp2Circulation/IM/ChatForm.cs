@@ -44,7 +44,7 @@ namespace dp2Circulation
             if (this.MainForm != null && this.MainForm.MessageHub != null)
                 this.MainForm.MessageHub.AddMessage += MessageHub_AddMessage;
 
-            Task.Factory.StartNew(() => DoLoadMessage(""));
+            Task.Factory.StartNew(() => DoLoadMessage("<default>"));
         }
 
         void MessageHub_AddMessage(object sender, AddMessageEventArgs e)
@@ -52,15 +52,45 @@ namespace dp2Circulation
             this.BeginInvoke(new Action<AddMessageEventArgs>(AddMessage), e);
         }
 
+        // 如果必要，加入时间提示行
+        void AddTimeLine(MessageRecord record)
+        {
+            DateTime lastTime = new DateTime(0);
+            if (_lastMessage != null)
+                lastTime = _lastMessage.publishTime;
+
+            if (lastTime.Date != record.publishTime.Date    // 不是同一天
+    )
+            {
+                this.AddTimeLine(record.publishTime.ToString());
+                return;
+            }
+
+            if (lastTime.Date != record.publishTime.Date    // 不是同一天
+                || lastTime.Hour != record.publishTime.Hour // 不是同一小时
+                || record.publishTime - lastTime > new TimeSpan(1, 0, 0)    // 和前一条差距超过一个小时
+            )
+            {
+                if (record.publishTime.Date == DateTime.Now.Date)
+                    this.AddTimeLine(record.publishTime.ToLongTimeString());    // 今天的时间，显示简略格式
+                else
+                    this.AddTimeLine(record.publishTime.ToString());
+            }
+        }
+
         void AddMessage(AddMessageEventArgs e)
         {
             foreach (MessageRecord record in e.Records)
             {
+                AddTimeLine(record);
+
                 // creator 要替换为用户名
                 this.AddMessageLine(
                     IsMe(record) ? "right" : "left",
                     string.IsNullOrEmpty(record.userName) ? record.creator : record.userName,
                     record.data);
+
+                _lastMessage = record;
             }
         }
 
@@ -97,6 +127,8 @@ namespace dp2Circulation
 
         private void IMForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            _redoLoadMesssageCount = 100; // 让重试尽快结束
+
             if (this.MainForm != null && this.MainForm.MessageHub != null)
                 this.MainForm.MessageHub.AddMessage -= MessageHub_AddMessage;
 
@@ -104,9 +136,6 @@ namespace dp2Circulation
 
             //this._channelPool.BeforeLogin -= new BeforeLoginEventHandle(_channelPool_BeforeLogin);
         }
-
-
-
 
         // 登录到 IM 服务器
         void SignIn()
@@ -135,6 +164,17 @@ namespace dp2Circulation
             string strText = "<div class='item'>"
 + "<div class='item_line'>"
 + " <div class='item_summary'>" + HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>") + "</div>"
++ "</div>"
++ " <div class='clear'></div>"
++ "</div>";
+            AppendHtml(strText);
+        }
+
+        void AddTimeLine(string strContent)
+        {
+            string strText = "<div class='item'>"
++ "<div class='item_line'>"
++ " <div class='time'>" + HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>") + "</div>"
 + "</div>"
 + " <div class='clear'></div>"
 + "</div>";
@@ -170,9 +210,7 @@ namespace dp2Circulation
         }
 
 
-        /// <summary>
         /// 清除已有的 HTML 显示
-        /// </summary>
         public void ClearHtml()
         {
             string strCssUrl = Path.Combine(this.MainForm.DataDir, "message.css");
@@ -194,6 +232,26 @@ namespace dp2Circulation
                 "<html><head>" + strLink + strJs + "</head><body>");
         }
 
+        // parameters:
+        //      strText 要显示的文字。如果为空，表示清除以前的显示，本次也不显示任何东西
+        public void HtmlWaiting(WebBrowser webBrowser,
+            string strText)
+        {
+            string[] ids = new[] { "waiting1", "waiting2" };
+            foreach (string id in ids)
+            {
+                HtmlElement obj = this.webBrowser1.Document.GetElementById(id);
+                if (obj != null)
+                    obj.OuterHtml = "";
+            }
+
+            if (string.IsNullOrEmpty(strText) == false)
+            {
+                string strGifFileName = Path.Combine(this.MainForm.DataDir, "ajax-loader3.gif");
+                AppendHtml("<h2 id='waiting1' align='center'><img src='" + strGifFileName + "' /></h2>"
+                    + "<h2 id='waiting2' align='center'>" + HttpUtility.HtmlEncode(strText) + "</h2>");
+            }
+        }
 
         // delegate void Delegate_AppendHtml(string strText);
         /// <summary>
@@ -229,21 +287,24 @@ namespace dp2Circulation
                 MessageBox.Show(this, "尚未输入文字");
                 return;
             }
-            Task.Factory.StartNew(() => SendMessage(this.textBox_input.Text));
+            Task.Factory.StartNew(() => SendMessage("<default>", this.textBox_input.Text));
         }
 
-        void SendMessage(string strText)
+        void SendMessage(string strGroupName, string strText)
         {
             this.EnableControls(false);
 
             List<MessageRecord> messages = new List<MessageRecord>();
             MessageRecord record = new MessageRecord();
+            record.group = strGroupName;
             record.data = strText;
             messages.Add(record);
 
-            SetMessageResult result = this.MainForm.MessageHub.SetMessageAsync(
-               "create",
-               messages).Result;
+            SetMessageRequest param = new SetMessageRequest("create",
+                "",
+               messages);
+
+            SetMessageResult result = this.MainForm.MessageHub.SetMessageAsync(param).Result;
             if (result.Value == -1)
             {
                 this.Invoke((Action)(() => MessageBox.Show(this, result.ErrorInfo)));
@@ -258,11 +319,38 @@ namespace dp2Circulation
             this.EnableControls(true);
         }
 
+        int _redoLoadMesssageCount = 0;
+
+        // 装载已经存在的消息记录
         async void DoLoadMessage(string strGroupName)
         {
             string strError = "";
 
+            if (this.MainForm == null)
+                return;
+
+            // TODO: 如果当前 Connection 尚未连接，则要促使它连接，然后重试 load
+            if (this.MainForm.MessageHub.IsConnected == false)
+            {
+                if (_redoLoadMesssageCount < 5)
+                {
+                    AddErrorLine("当前点对点连接尚未建立。重试操作中 ...");
+                    this.MainForm.MessageHub.Connect();
+                    Thread.Sleep(5000);
+                    _redoLoadMesssageCount++;
+                    Task.Factory.StartNew(() => DoLoadMessage(strGroupName));
+                    return;
+                }
+                else
+                {
+                    AddErrorLine("当前点对点连接尚未建立。停止重试。消息装载失败。");
+                    _redoLoadMesssageCount = 0; // 以后再调用本函数，就重新计算重试次数
+                    return;
+                }
+            }
+
             this.Invoke((Action)(() => this.ClearHtml()));
+            this.Invoke((Action)(() => this.HtmlWaiting(this.webBrowser1, "正在获取消息，请等待 ...")));
 
             EnableControls(false);
             try
@@ -271,13 +359,15 @@ namespace dp2Circulation
 
                 string id = Guid.NewGuid().ToString();
                 GetMessageRequest request = new GetMessageRequest(id,
-                    strGroupName, // "" 表示默认群组
+                    strGroupName, // "<default>" 表示默认群组
                     "",
                     "",
                     0,
                     -1);
                 try
                 {
+                    _lastMessage = null;
+
                     MessageResult result = await this.MainForm.MessageHub.GetMessageAsync(
                         request,
                         FillMessage,
@@ -311,11 +401,15 @@ namespace dp2Circulation
             finally
             {
                 EnableControls(true);
+                this.Invoke((Action)(() => this.HtmlWaiting(this.webBrowser1, "")));
             }
         ERROR1:
             this.Invoke((Action)(() => MessageBox.Show(this, strError)));
         }
 
+        MessageRecord _lastMessage = null;   // 当前消息显示界面中最后一条消息
+
+        // 回调函数，用消息填充浏览器控件
         void FillMessage(long totalCount,
     long start,
     IList<MessageRecord> records,
@@ -333,11 +427,16 @@ namespace dp2Circulation
             {
                 foreach (MessageRecord record in records)
                 {
+
+                    AddTimeLine(record);
+
                     // creator 要替换为用户名
                     this.AddMessageLine(
                         IsMe(record) ? "right" : "left",
                         string.IsNullOrEmpty(record.userName) ? record.creator : record.userName,
                         record.data);
+
+                    _lastMessage = record;
                 }
             }
         }

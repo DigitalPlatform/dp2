@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Deployment.Application;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
@@ -14,7 +13,6 @@ using System.Xml;
 using System.ServiceProcess;
 using System.ComponentModel;
 using System.Web;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 
@@ -26,9 +24,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -988,6 +984,56 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, "迁移统计方案目录时出错: " + strError);
         }
 
+        // 2016/4/26
+        // 检查用户目录的权限是否足够
+        bool CheckUserDirectory()
+        {
+            try
+            {
+                if (Directory.Exists(this.UserDir) == false)
+                    goto ERROR1;
+
+                // 创建和删除子目录试验
+                string strTestDir = Path.Combine(this.UserDir, "_testdir_");
+                PathUtil.CreateDirIfNeed(strTestDir);
+
+                if (Directory.Exists(strTestDir) == false)
+                    goto ERROR1;
+
+                Directory.Delete(strTestDir);
+
+                // 创建文件试验
+                string strTestFile1 = Path.Combine(this.UserDir, "_testfile1_");
+                using (StreamWriter sw = new StreamWriter(strTestFile1, false))
+                {
+                    sw.WriteLine("first line");
+                }
+
+                string strTestFile2 = Path.Combine(this.UserDir, "_testfile2_");
+                using (StreamWriter sw = new StreamWriter(strTestFile2, false))
+                {
+                    sw.WriteLine("first line");
+                }
+
+                // 复制文件试验
+                File.Copy(strTestFile1, strTestFile2, true);
+
+                File.Delete(strTestFile1);
+                File.Delete(strTestFile2);
+
+                // TODO: 检查下级有没有隐藏文件属性?
+            }
+            catch
+            {
+                goto ERROR1;
+            }
+
+            return true;
+        ERROR1:
+            Program.PromptAndExit(this, "用户目录 '" + this.UserDir + "' 创建失败或者权限不足。请确保当前 Windows 用户能访问和修改这个目录以及下级子目录、文件，并确保它或者上级目录不是隐藏的状态");
+            return false;
+        }
+
         // 程序启动时候需要执行的初始化操作
         // 这些操作只需要执行一次。也就是说，和登录和连接的服务器无关。如果有关，则要放在 InitialProperties() 中
         // FormLoad() 中的许多操作应当移动到这里来，以便尽早显示出框架窗口
@@ -1074,6 +1120,9 @@ MessageBoxDefaultButton.Button1);
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     "dp2Circulation_v2");
                 PathUtil.CreateDirIfNeed(this.UserDir);
+
+                if (CheckUserDirectory() == false)
+                    return;
 
                 this.UserTempDir = Path.Combine(this.UserDir, "temp");
                 PathUtil.CreateDirIfNeed(this.UserTempDir);
@@ -1914,7 +1963,7 @@ MessageBoxDefaultButton.Button1);
                 if (filenames.IndexOf(fi.Name.ToLower()) != -1)
                     filenames.Remove(fi.Name.ToLower());
 
-                    string strSourceFileName = fi.FullName;
+                string strSourceFileName = fi.FullName;
                 string strTargetFileName = Path.Combine(this.UserDir, fi.Name);
                 if (File.Exists(strTargetFileName) == false    // 偶尔会出现判断错误
                     || VersionChanged(strSourceFileName, strTargetFileName) == true)

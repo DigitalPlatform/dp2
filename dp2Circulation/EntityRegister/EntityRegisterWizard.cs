@@ -972,7 +972,7 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 nRet = search.LoadBrowseLines(appendBrowseLine,
-                    null,   // line,
+                    account,   // line,
                     bAutoSetFocus,
                     out strError);
                 if (nRet == -1)
@@ -1006,6 +1006,7 @@ MessageBoxDefaultButton.Button1);
             strError = "";
 
             // RegisterLine line = param as RegisterLine;
+            AccountInfo account = param as AccountInfo; // 将来如果再有其他信息需要传入，这里可以使用一种包装的结构
 
             XmlDocument dom = new XmlDocument();
             dom.LoadXml(strRecord);
@@ -1045,7 +1046,7 @@ MessageBoxDefaultButton.Button1);
             RegisterBiblioInfo info = new RegisterBiblioInfo();
             info.OldXml = strXml;   //  strMARC;
             info.Timestamp = null;
-            info.RecPath = strASIN + "@" + _base.CurrentAccount.ServerName;
+            info.RecPath = strASIN + "@" + account.ServerName;  // 2016/4/25 修改 // _base.CurrentAccount.ServerName;
             info.MarcSyntax = "unimarc";
             AddBiblioBrowseLine(
                 TYPE_AMAZON,  // -1,
@@ -1158,7 +1159,7 @@ MessageBoxDefaultButton.Button1);
                         strFromStyle,
                         strMatchStyle,
                         "",
-                        "",
+                        "id,xml,timestamp",
                         1000,
                         0,
                         -1),

@@ -55,26 +55,38 @@ namespace dp2Circulation
             CloseGenDataViewer();
         }
 
+        int _inCloseGenDataViewer = 0;  // 防止重入
+
         void CloseGenDataViewer()
         {
-            if (this.m_genDataViewer != null)
+            if (_inCloseGenDataViewer > 0)
+                return;
+
+            _inCloseGenDataViewer++;
+            try
             {
-                // 2015/11/7
-                // 注意解除 dock 时建立的关系。便于后面 Dispose()
-                if (this.MainForm.CurrentGenerateDataControl == m_genDataViewer.Table)
+                if (this.m_genDataViewer != null)
                 {
-                    this.MainForm.CurrentGenerateDataControl = null;
+                    // 2015/11/7
+                    // 注意解除 dock 时建立的关系。便于后面 Dispose()
+                    if (this.MainForm.CurrentGenerateDataControl == m_genDataViewer.Table)
+                    {
+                        this.MainForm.CurrentGenerateDataControl = null;
+                    }
+
+                    this.m_genDataViewer.Close();
+                    m_genDataViewer.DoDockEvent -= new DoDockEventHandler(m_genDataViewer_DoDockEvent);
+                    m_genDataViewer.SetMenu -= new RefreshMenuEventHandler(m_genDataViewer_SetMenu);
+                    m_genDataViewer.TriggerAction -= new TriggerActionEventHandler(m_genDataViewer_TriggerAction);
+                    m_genDataViewer.MyFormClosed -= new EventHandler(m_genDataViewer_MyFormClosed);
+                    m_genDataViewer.FormClosed -= new FormClosedEventHandler(m_genDataViewer_FormClosed);
+                    this.m_genDataViewer = null;
                 }
-
-                m_genDataViewer.DoDockEvent -= new DoDockEventHandler(m_genDataViewer_DoDockEvent);
-                m_genDataViewer.SetMenu -= new RefreshMenuEventHandler(m_genDataViewer_SetMenu);
-                m_genDataViewer.TriggerAction -= new TriggerActionEventHandler(m_genDataViewer_TriggerAction);
-                m_genDataViewer.MyFormClosed -= new EventHandler(m_genDataViewer_MyFormClosed);
-                m_genDataViewer.FormClosed -= new FormClosedEventHandler(m_genDataViewer_FormClosed);
-                this.m_genDataViewer.Close();
-                this.m_genDataViewer = null;
             }
-
+            finally
+            {
+                _inCloseGenDataViewer--;
+            }
         }
 
         public void ClearViewer()
@@ -676,7 +688,7 @@ out strError);
                     {
                         DpTable.SetColumnHeaderWidth(m_genDataViewer.ActionTable,
                             strWidths,
-                            true);
+                            false);
                     }
                 }
 

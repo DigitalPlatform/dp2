@@ -887,7 +887,7 @@ namespace DigitalPlatform.IO
                     if ((subs[i].Attributes & FileAttributes.Directory) == FileAttributes.Directory)
                     {
                         int nRet = CopyDirectory(subs[i].FullName,
-                            strTargetDir + "\\" + subs[i].Name,
+                            Path.Combine(strTargetDir, subs[i].Name),
                             bDeleteTargetBeforeCopy,
                             out strError);
                         if (nRet == -1)
@@ -895,7 +895,9 @@ namespace DigitalPlatform.IO
                         continue;
                     }
                     // 复制文件
-                    File.Copy(subs[i].FullName, strTargetDir + "\\" + subs[i].Name, true);
+                    File.Copy(subs[i].FullName, 
+                        Path.Combine(strTargetDir, subs[i].Name),
+                        true);
                 }
             }
             catch (Exception ex)

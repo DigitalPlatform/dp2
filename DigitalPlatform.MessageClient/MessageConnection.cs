@@ -1062,13 +1062,11 @@ request).Result;
         #region SetMessage() API
 
         public Task<SetMessageResult> SetMessageAsync(
-            string action,
-            List<MessageRecord> messages)
+            SetMessageRequest param)
         {
             return HubProxy.Invoke<SetMessageResult>(
  "SetMessage",
- action,
- messages);
+ param);
         }
 
         #endregion
@@ -1218,6 +1216,22 @@ request).Result;
 
         public DateTime publishTime { get; set; } // 消息发布时间
         public DateTime expireTime { get; set; } // 消息失效时间
+    }
+
+    public class SetMessageRequest
+    {
+        public string Action { get; set; }
+        public string Style { get; set; }
+        public List<MessageRecord> Records { get; set; }
+
+        public SetMessageRequest(string action,
+            string style,
+            List<MessageRecord> records)
+        {
+            this.Action = action;
+            this.Style = style;
+            this.Records = records;
+        }
     }
 
     public class SetMessageResult : MessageResult

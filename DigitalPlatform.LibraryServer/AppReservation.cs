@@ -9,6 +9,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.IO;
+using System.Messaging;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1419,7 +1420,7 @@ namespace DigitalPlatform.LibraryServer
             // 构造一个XML记录, 加入"预约到书"库
             // 加入记录预约到书库的目的，是为了让工作线程可以监控读者是否来取书，如果超过保留期限，要转而通知下一个预约了此册的读者。
             // 兼有email通知功能
-            nRet = AddNotifyRecordToQueue(
+            nRet = AddNotifyRecordToQueueDatabase(
                 // channels,
                 channel,
                 strItemBarcodeParam,
@@ -1458,8 +1459,8 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // text-level: 内部处理
-        // 在 预约到书 库中，追加一条新的记录
-        // 并作email通知
+        // 在 预约到书 库中，追加一条新的记录，
+        // 并作 email / dpmail / mq 通知
         // 注：本函数可能要删除部分通知记录
         // parameters:
         //      strItemBarcode  册条码号。必须是册条码号。如果册条码号为空，参考ID需要使用 strRefID 参数
@@ -1467,7 +1468,7 @@ namespace DigitalPlatform.LibraryServer
         //      bOnShelf    要通知的册是否在架。在架指并没有人借阅过，本来就在书架上。
         //      strLibraryCode  读者所在的馆代码
         //      strReaderXml    预约了图书的读者的XML记录。用于消息通知接口
-        int AddNotifyRecordToQueue(
+        int AddNotifyRecordToQueueDatabase(
             // RmsChannelCollection channels,
             RmsChannel channel,
             string strItemBarcode,
@@ -1788,6 +1789,77 @@ namespace DigitalPlatform.LibraryServer
                     {
                         strTotalError += "发送dpmail消息时出错: " + strError + "\r\n";
                     }
+                }
+            }
+
+            // 2016/4/26
+            // *** mq
+            if (string.IsNullOrEmpty(this.OutgoingQueue) == false
+                && StringUtil.IsInList("mq", this.ArrivedNotifyTypes))
+            {
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml("<root />");
+
+                /* 元素名
+                 * itemBarcode 册条码号
+                 * refID    参考 ID
+                 * opacURL  图书在 OPAC 中的 URL
+                 * reserveTime 保留的时间
+                 * today 今天的日期
+                 * summary 书目摘要
+                 * patronName   读者姓名
+                 * patronRecord 读者 XML 记录
+ * */
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "itemBarcode", strItemBarcode);
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "refID", strRefID);
+
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "opacURL", this.OpacServerUrl + "/book.aspx?barcode=" 
+                    + (string.IsNullOrEmpty(strItemBarcode) ? "@refID:" + strRefID :strItemBarcode));
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "reserveTime", this.GetDisplayTimePeriodStringEx(this.ArrivedReserveTimeSpan));
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "today", DateTime.Now.ToString());
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "summary", strSummary);
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "patronName", strName);
+
+                {
+                    XmlDocument readerdom = new XmlDocument();
+                    readerdom.LoadXml(strReaderXml);
+
+                    XmlElement record = dom.CreateElement("patronRecord");
+                    dom.DocumentElement.AppendChild(record);
+                    record.InnerXml = readerdom.DocumentElement.InnerXml;
+
+                    DomUtil.DeleteElement(record, "borrowHistory");
+                    DomUtil.DeleteElement(record, "password");
+                    DomUtil.DeleteElement(record, "fingerprint");
+                    DomUtil.SetElementText(record, "libraryCode", strLibraryCode);
+                }
+
+                try
+                {
+                    MessageQueue queue = new MessageQueue(this.OutgoingQueue);
+
+                    // 向 MSMQ 消息队列发送消息
+                    nRet = ReadersMonitor.SendToQueue(queue,
+                        (string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "!refID:" + strRefID)
+                        + "@LUID:" + this.UID,
+                        "xml",
+                        dom.DocumentElement.OuterXml,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strTotalError += "发送 MQ 消息时出错: " + strError + "\r\n";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    strTotalError += "创建路径为 '" + this.OutgoingQueue + "' 的 MessageQueue 对象失败: " + ExceptionUtil.GetDebugText(ex);
                 }
             }
 
