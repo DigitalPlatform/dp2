@@ -124,18 +124,29 @@ namespace dp2Circulation
                     if (StringUtil.IsDevelopMode() == false)
                         PrepareCatchException();
 
+                    // Vista on up = 6
+                    // http://stackoverflow.com/questions/17406850/how-can-we-check-if-the-current-os-is-win8-or-blue
+                    if (Environment.OSVersion.Version.Major > 6
+                        || (Environment.OSVersion.Version.Major == 6
+                            && Environment.OSVersion.Version.Minor >= 2)
+                        )
                     {
-                        var result = SetProcessDpiAwareness(PROCESS_DPI_AWARENESS.Process_System_DPI_Aware);
-                        var setDpiError = Marshal.GetLastWin32Error();
-                        //MessageBox.Show("Dpi set: " + result.ToString());
+                        try
+                        {
+                            // https://msdn.microsoft.com/en-us/library/windows/desktop/dn302122(v=vs.85).aspx
+                            var result = SetProcessDpiAwareness(PROCESS_DPI_AWARENESS.Process_System_DPI_Aware);
+                            // var setDpiError = Marshal.GetLastWin32Error();
+                        }
+                        catch
+                        {
 
+                        }
+
+#if NO
                         PROCESS_DPI_AWARENESS awareness;
                         GetProcessDpiAwareness(Process.GetCurrentProcess().Handle, out awareness);
                         var getDpiError = Marshal.GetLastWin32Error();
-                        //MessageBox.Show(awareness.ToString());
-
-                        //MessageBox.Show("Set DPI error: " + new Win32Exception(setDpiError).ToString());
-                        //MessageBox.Show("Get DPI error: " + new Win32Exception(getDpiError).ToString());
+#endif
                     }
 
                     Application.EnableVisualStyles();
