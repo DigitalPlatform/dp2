@@ -119,16 +119,21 @@ namespace dp2Circulation
         static void ChangeDifferentFaceFont(ToolStrip tool,
     Font font)
         {
+            tool.ImageScalingSize = new Size(16, 16);   // 2016/4/27
+
             // 修改所有事项的字体，如果字体名不一样的话
             for (int i = 0; i < tool.Items.Count; i++)
             {
                 ToolStripItem item = tool.Items[i];
+
+                item.ImageScaling = ToolStripItemImageScaling.SizeToFit;
 
                 Font subfont = item.Font;
                 float ratio = subfont.SizeInPoints / font.SizeInPoints;
                 if (subfont.Name != font.Name
                     || subfont.SizeInPoints != font.SizeInPoints)
                 {
+
                     // item.Font = new Font(font, subfont.Style);
                     item.Font = new Font(font.FontFamily, ratio * font.SizeInPoints, subfont.Style, GraphicsUnit.Point);
                 }
