@@ -111,8 +111,26 @@ namespace dp2Circulation
                     ChangeDifferentFaceFont((ToolStrip)sub, font);
                 }
 
+                if (sub is SplitContainer)
+                {
+                    ChangeSplitContainerFont(sub as SplitContainer, font);
+                }
+
                 // 递归
                 ChangeDifferentFaceFont(sub, font);
+            }
+        }
+
+        static void ChangeSplitContainerFont(SplitContainer container, Font font)
+        {
+            foreach(Control control in container.Panel1.Controls)
+            {
+                ChangeDifferentFaceFont(control, font);
+            }
+
+            foreach (Control control in container.Panel2.Controls)
+            {
+                ChangeDifferentFaceFont(control, font);
             }
         }
 
