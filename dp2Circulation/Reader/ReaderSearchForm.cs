@@ -3785,7 +3785,7 @@ MessageBoxDefaultButton.Button1);
 
                 if (nCount == 0)
                 {
-                    strError = "因当前用户管辖的读者库 " + StringUtil.MakePathList(readerdbnames) + " 中没有任何读者记录，初始化指纹缓存的操作没有完成";
+                    strError = "因当前用户管辖的读者库 " + StringUtil.MakePathList(readerdbnames) + " 中没有任何具有指纹信息的读者记录，初始化指纹缓存的操作没有完成";
                     return -1;
                 }
             }

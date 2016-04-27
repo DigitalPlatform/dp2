@@ -131,6 +131,11 @@ namespace dp2Circulation
                             && Environment.OSVersion.Version.Minor >= 2)
                         )
                     {
+                        // http://stackoverflow.com/questions/32148151/setprocessdpiawareness-not-having-effect
+                        /*
+I've been trying to disable the DPI awareness on a ClickOnce application.
+ I quickly found out, it is not possible to specify it in the manifest, because ClickOnce does not support asm.v3 in the manifest file.
+                         * */
                         try
                         {
                             // https://msdn.microsoft.com/en-us/library/windows/desktop/dn302122(v=vs.85).aspx

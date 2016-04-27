@@ -60,4 +60,10 @@
   <action element="rights" type="" list="readerRights" additional="combine">
     <caption lang="zh">权限</caption>
   </action>
+  <action element="access" type="">
+    <caption lang="zh">存取定义</caption>
+  </action>
+  <action element="fingerprint" type="">
+    <caption lang="zh">指纹</caption>
+  </action>
 </root>

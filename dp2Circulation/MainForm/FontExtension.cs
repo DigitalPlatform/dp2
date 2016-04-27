@@ -123,10 +123,14 @@ namespace dp2Circulation
 
         static void ChangeSplitContainerFont(SplitContainer container, Font font)
         {
+            ChangeFont(font, container.Panel1);
+
             foreach(Control control in container.Panel1.Controls)
             {
                 ChangeDifferentFaceFont(control, font);
             }
+
+            ChangeFont(font, container.Panel2);
 
             foreach (Control control in container.Panel2.Controls)
             {
@@ -203,6 +207,7 @@ namespace dp2Circulation
             }
         }
 
+#if NO
         static void ChangeDifferentFaceFont(SplitContainer tool,
 Font font)
         {
@@ -215,6 +220,7 @@ Font font)
             // 递归
             ChangeDifferentFaceFont(tool.Panel2, font);
         }
+#endif
 
     }
 }

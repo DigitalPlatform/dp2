@@ -110,14 +110,14 @@
             this.inventoryBatchNoControl_start_batchNo.LibraryCodeText = "";
             this.inventoryBatchNoControl_start_batchNo.Location = new System.Drawing.Point(12, 24);
             this.inventoryBatchNoControl_start_batchNo.Name = "inventoryBatchNoControl_start_batchNo";
-            this.inventoryBatchNoControl_start_batchNo.Size = new System.Drawing.Size(348, 27);
+            this.inventoryBatchNoControl_start_batchNo.Size = new System.Drawing.Size(398, 27);
             this.inventoryBatchNoControl_start_batchNo.TabIndex = 11;
             // 
             // InventoryFromFileDialog
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(421, 261);
             this.Controls.Add(this.button_Cancel);
