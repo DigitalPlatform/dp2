@@ -233,7 +233,6 @@ namespace dp2Circulation
             // 
             // menuStrip_main
             // 
-            this.menuStrip_main.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.menuStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_file,
             this.MenuItem_functionWindows,
@@ -830,66 +829,66 @@ namespace dp2Circulation
             // toolStripSeparator8
             // 
             this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(189, 6);
+            this.toolStripSeparator8.Size = new System.Drawing.Size(173, 6);
             // 
             // MenuItem_openBatchTaskForm
             // 
             this.MenuItem_openBatchTaskForm.Name = "MenuItem_openBatchTaskForm";
-            this.MenuItem_openBatchTaskForm.Size = new System.Drawing.Size(192, 38);
+            this.MenuItem_openBatchTaskForm.Size = new System.Drawing.Size(176, 22);
             this.MenuItem_openBatchTaskForm.Text = "批处理任务窗(&T)";
             this.MenuItem_openBatchTaskForm.Click += new System.EventHandler(this.MenuItem_openBatchTaskForm_Click);
             // 
             // MenuItem_openOperLogForm
             // 
             this.MenuItem_openOperLogForm.Name = "MenuItem_openOperLogForm";
-            this.MenuItem_openOperLogForm.Size = new System.Drawing.Size(192, 38);
+            this.MenuItem_openOperLogForm.Size = new System.Drawing.Size(176, 22);
             this.MenuItem_openOperLogForm.Text = "日志窗(&L)";
             this.MenuItem_openOperLogForm.Click += new System.EventHandler(this.MenuItem_openOperLogForm_Click);
             // 
             // MenuItem_openManagerForm
             // 
             this.MenuItem_openManagerForm.Name = "MenuItem_openManagerForm";
-            this.MenuItem_openManagerForm.Size = new System.Drawing.Size(192, 38);
+            this.MenuItem_openManagerForm.Size = new System.Drawing.Size(176, 22);
             this.MenuItem_openManagerForm.Text = "系统管理窗(&M)";
             this.MenuItem_openManagerForm.Click += new System.EventHandler(this.MenuItem_openManagerForm_Click);
             // 
             // MenuItem_openUserForm
             // 
             this.MenuItem_openUserForm.Name = "MenuItem_openUserForm";
-            this.MenuItem_openUserForm.Size = new System.Drawing.Size(192, 38);
+            this.MenuItem_openUserForm.Size = new System.Drawing.Size(176, 22);
             this.MenuItem_openUserForm.Text = "用户窗(&U)";
             this.MenuItem_openUserForm.Click += new System.EventHandler(this.MenuItem_openUserForm_Click);
             // 
             // MenuItem_channelForm
             // 
             this.MenuItem_channelForm.Name = "MenuItem_channelForm";
-            this.MenuItem_channelForm.Size = new System.Drawing.Size(192, 38);
+            this.MenuItem_channelForm.Size = new System.Drawing.Size(176, 22);
             this.MenuItem_channelForm.Text = "通道管理窗(&C)";
             this.MenuItem_channelForm.Click += new System.EventHandler(this.MenuItem_channelForm_Click);
             // 
             // toolStripSeparator9
             // 
             this.toolStripSeparator9.Name = "toolStripSeparator9";
-            this.toolStripSeparator9.Size = new System.Drawing.Size(189, 6);
+            this.toolStripSeparator9.Size = new System.Drawing.Size(173, 6);
             // 
             // MenuItem_openTestForm
             // 
             this.MenuItem_openTestForm.Name = "MenuItem_openTestForm";
-            this.MenuItem_openTestForm.Size = new System.Drawing.Size(192, 38);
+            this.MenuItem_openTestForm.Size = new System.Drawing.Size(176, 22);
             this.MenuItem_openTestForm.Text = "测试窗(&T)";
             this.MenuItem_openTestForm.Click += new System.EventHandler(this.MenuItem_openTestForm_Click);
             // 
             // MenuItem_openUrgentChargingForm
             // 
             this.MenuItem_openUrgentChargingForm.Name = "MenuItem_openUrgentChargingForm";
-            this.MenuItem_openUrgentChargingForm.Size = new System.Drawing.Size(192, 38);
+            this.MenuItem_openUrgentChargingForm.Size = new System.Drawing.Size(176, 22);
             this.MenuItem_openUrgentChargingForm.Text = "应急出纳窗(&U)";
             this.MenuItem_openUrgentChargingForm.Click += new System.EventHandler(this.MenuItem_openUrgentChargingForm_Click);
             // 
             // MenuItem_operCheckBorrowInfoForm
             // 
             this.MenuItem_operCheckBorrowInfoForm.Name = "MenuItem_operCheckBorrowInfoForm";
-            this.MenuItem_operCheckBorrowInfoForm.Size = new System.Drawing.Size(192, 38);
+            this.MenuItem_operCheckBorrowInfoForm.Size = new System.Drawing.Size(176, 22);
             this.MenuItem_operCheckBorrowInfoForm.Text = "检查借还信息窗(&C)";
             this.MenuItem_operCheckBorrowInfoForm.Click += new System.EventHandler(this.MenuItem_operCheckBorrowInfoForm_Click);
             // 
@@ -1326,7 +1325,7 @@ namespace dp2Circulation
             // 
             this.toolStrip_main.AllowDrop = true;
             this.toolStrip_main.BackColor = System.Drawing.SystemColors.Control;
-            this.toolStrip_main.ImageScalingSize = new System.Drawing.Size(32, 32);
+            this.toolStrip_main.ImageScalingSize = new System.Drawing.Size(64, 64);
             this.toolStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolButton_stop,
             this.toolStripDropDownButton_stopAll,
@@ -1567,12 +1566,12 @@ namespace dp2Circulation
             // 
             // toolButton_print
             // 
-            this.toolButton_print.Font = new System.Drawing.Font("Tahoma", 8.400001F, System.Drawing.FontStyle.Bold);
+            this.toolButton_print.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolButton_print.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_print.Image")));
             this.toolButton_print.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolButton_print.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_print.Name = "toolButton_print";
-            this.toolButton_print.Size = new System.Drawing.Size(53, 20);
+            this.toolButton_print.Size = new System.Drawing.Size(52, 21);
             this.toolButton_print.Text = "打印";
             this.toolButton_print.Click += new System.EventHandler(this.toolButton_print_Click);
             // 
@@ -1582,7 +1581,7 @@ namespace dp2Circulation
             this.panel_fixed.Controls.Add(this.toolStrip_panelFixed);
             this.panel_fixed.Dock = System.Windows.Forms.DockStyle.Right;
             this.panel_fixed.Location = new System.Drawing.Point(389, 54);
-            this.panel_fixed.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel_fixed.Margin = new System.Windows.Forms.Padding(2);
             this.panel_fixed.Name = "panel_fixed";
             this.panel_fixed.Size = new System.Drawing.Size(207, 294);
             this.panel_fixed.TabIndex = 5;
@@ -1640,7 +1639,7 @@ namespace dp2Circulation
             // 
             this.webBrowser_history.Dock = System.Windows.Forms.DockStyle.Fill;
             this.webBrowser_history.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_history.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.webBrowser_history.Margin = new System.Windows.Forms.Padding(2);
             this.webBrowser_history.MinimumSize = new System.Drawing.Size(15, 16);
             this.webBrowser_history.Name = "webBrowser_history";
             this.webBrowser_history.Size = new System.Drawing.Size(199, 236);
@@ -1650,7 +1649,7 @@ namespace dp2Circulation
             // 
             this.tabPage_property.Location = new System.Drawing.Point(4, 29);
             this.tabPage_property.Name = "tabPage_property";
-            this.tabPage_property.Size = new System.Drawing.Size(199, 297);
+            this.tabPage_property.Size = new System.Drawing.Size(199, 236);
             this.tabPage_property.TabIndex = 1;
             this.tabPage_property.Text = "属性";
             this.tabPage_property.UseVisualStyleBackColor = true;
@@ -1659,7 +1658,7 @@ namespace dp2Circulation
             // 
             this.tabPage_verifyResult.Location = new System.Drawing.Point(4, 29);
             this.tabPage_verifyResult.Name = "tabPage_verifyResult";
-            this.tabPage_verifyResult.Size = new System.Drawing.Size(199, 297);
+            this.tabPage_verifyResult.Size = new System.Drawing.Size(199, 236);
             this.tabPage_verifyResult.TabIndex = 2;
             this.tabPage_verifyResult.Text = "校验结果";
             this.tabPage_verifyResult.UseVisualStyleBackColor = true;
@@ -1668,7 +1667,7 @@ namespace dp2Circulation
             // 
             this.tabPage_generateData.Location = new System.Drawing.Point(4, 29);
             this.tabPage_generateData.Name = "tabPage_generateData";
-            this.tabPage_generateData.Size = new System.Drawing.Size(199, 297);
+            this.tabPage_generateData.Size = new System.Drawing.Size(199, 236);
             this.tabPage_generateData.TabIndex = 3;
             this.tabPage_generateData.Text = "创建数据";
             this.tabPage_generateData.UseVisualStyleBackColor = true;
@@ -1677,7 +1676,7 @@ namespace dp2Circulation
             // 
             this.tabPage_camera.Location = new System.Drawing.Point(4, 29);
             this.tabPage_camera.Name = "tabPage_camera";
-            this.tabPage_camera.Size = new System.Drawing.Size(199, 297);
+            this.tabPage_camera.Size = new System.Drawing.Size(199, 236);
             this.tabPage_camera.TabIndex = 4;
             this.tabPage_camera.Text = "QR 识别";
             this.tabPage_camera.UseVisualStyleBackColor = true;
@@ -1686,7 +1685,7 @@ namespace dp2Circulation
             // 
             this.tabPage_accept.Location = new System.Drawing.Point(4, 29);
             this.tabPage_accept.Name = "tabPage_accept";
-            this.tabPage_accept.Size = new System.Drawing.Size(199, 297);
+            this.tabPage_accept.Size = new System.Drawing.Size(199, 236);
             this.tabPage_accept.TabIndex = 5;
             this.tabPage_accept.Text = "验收";
             this.tabPage_accept.UseVisualStyleBackColor = true;
@@ -1697,9 +1696,9 @@ namespace dp2Circulation
             // 
             this.tabPage_share.Controls.Add(this.tableLayoutPanel_messageHub);
             this.tabPage_share.Location = new System.Drawing.Point(4, 29);
-            this.tabPage_share.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tabPage_share.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_share.Name = "tabPage_share";
-            this.tabPage_share.Size = new System.Drawing.Size(199, 297);
+            this.tabPage_share.Size = new System.Drawing.Size(199, 236);
             this.tabPage_share.TabIndex = 6;
             this.tabPage_share.Text = "分享";
             this.tabPage_share.UseVisualStyleBackColor = true;
@@ -1717,7 +1716,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_messageHub.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 0F));
-            this.tableLayoutPanel_messageHub.Size = new System.Drawing.Size(199, 297);
+            this.tableLayoutPanel_messageHub.Size = new System.Drawing.Size(199, 236);
             this.tableLayoutPanel_messageHub.TabIndex = 2;
             // 
             // webBrowser_messageHub
@@ -1726,7 +1725,7 @@ namespace dp2Circulation
             this.webBrowser_messageHub.Location = new System.Drawing.Point(3, 3);
             this.webBrowser_messageHub.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser_messageHub.Name = "webBrowser_messageHub";
-            this.webBrowser_messageHub.Size = new System.Drawing.Size(193, 266);
+            this.webBrowser_messageHub.Size = new System.Drawing.Size(193, 205);
             this.webBrowser_messageHub.TabIndex = 0;
             // 
             // toolStrip_messageHub
@@ -1736,7 +1735,7 @@ namespace dp2Circulation
             this.toolStrip_messageHub.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_messageHub_userManage,
             this.toolStripButton_messageHub_relogin});
-            this.toolStrip_messageHub.Location = new System.Drawing.Point(0, 272);
+            this.toolStrip_messageHub.Location = new System.Drawing.Point(0, 211);
             this.toolStrip_messageHub.Name = "toolStrip_messageHub";
             this.toolStrip_messageHub.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.toolStrip_messageHub.Size = new System.Drawing.Size(199, 25);
@@ -1792,7 +1791,7 @@ namespace dp2Circulation
             // 
             this.splitter_fixed.Dock = System.Windows.Forms.DockStyle.Right;
             this.splitter_fixed.Location = new System.Drawing.Point(387, 54);
-            this.splitter_fixed.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.splitter_fixed.Margin = new System.Windows.Forms.Padding(2);
             this.splitter_fixed.Name = "splitter_fixed";
             this.splitter_fixed.Size = new System.Drawing.Size(2, 294);
             this.splitter_fixed.TabIndex = 6;

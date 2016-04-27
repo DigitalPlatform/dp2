@@ -119,18 +119,54 @@ namespace dp2Circulation
         static void ChangeDifferentFaceFont(ToolStrip tool,
     Font font)
         {
-            // 修改所有事项的字体，如果字体名不一样的话
-            for (int i = 0; i < tool.Items.Count; i++)
+            using (Graphics g = Program.MainForm.CreateGraphics())
             {
-                ToolStripItem item = tool.Items[i];
+                tool.ImageScalingSize = new Size(Convert.ToInt32(16 * (g.DpiX / 96F)),
+                    Convert.ToInt32(16 * (g.DpiY / 96F)));   // 2016/4/27
+            }
+
+            // 修改所有事项的字体，如果字体名不一样的话
+            foreach (ToolStripItem item in tool.Items)
+            { 
+                item.ImageScaling = ToolStripItemImageScaling.SizeToFit;
 
                 Font subfont = item.Font;
                 float ratio = subfont.SizeInPoints / font.SizeInPoints;
                 if (subfont.Name != font.Name
                     || subfont.SizeInPoints != font.SizeInPoints)
                 {
+
                     // item.Font = new Font(font, subfont.Style);
                     item.Font = new Font(font.FontFamily, ratio * font.SizeInPoints, subfont.Style, GraphicsUnit.Point);
+                }
+
+                if (item is ToolStripMenuItem)
+                {
+                    ChangeDropDownItemsFont(item as ToolStripMenuItem, font);
+                }
+            }
+        }
+
+        static void ChangeDropDownItemsFont(ToolStripMenuItem menu, Font font)
+        {
+            // 修改所有事项的字体，如果字体名不一样的话
+            foreach (ToolStripItem item in menu.DropDownItems)
+            {
+                item.ImageScaling = ToolStripItemImageScaling.SizeToFit;
+
+                Font subfont = item.Font;
+                float ratio = subfont.SizeInPoints / font.SizeInPoints;
+                if (subfont.Name != font.Name
+                    || subfont.SizeInPoints != font.SizeInPoints)
+                {
+
+                    // item.Font = new Font(font, subfont.Style);
+                    item.Font = new Font(font.FontFamily, ratio * font.SizeInPoints, subfont.Style, GraphicsUnit.Point);
+                }
+
+                if (item is ToolStripMenuItem)
+                {
+                    ChangeDropDownItemsFont(item as ToolStripMenuItem, font);
                 }
             }
         }
