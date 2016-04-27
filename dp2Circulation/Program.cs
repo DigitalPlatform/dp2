@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using System.IO;
+using System.Runtime.InteropServices;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -15,8 +16,22 @@ using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
+
     static class Program
     {
+        [DllImport("SHCore.dll", SetLastError = true)]
+        private static extern bool SetProcessDpiAwareness(PROCESS_DPI_AWARENESS awareness);
+
+        [DllImport("SHCore.dll", SetLastError = true)]
+        private static extern void GetProcessDpiAwareness(IntPtr hprocess, out PROCESS_DPI_AWARENESS awareness);
+
+        private enum PROCESS_DPI_AWARENESS
+        {
+            Process_DPI_Unaware = 0,
+            Process_System_DPI_Aware = 1,
+            Process_Per_Monitor_DPI_Aware = 2
+        }
+
         /// <summary>
         /// 前端，也就是 dp2circulation.exe 的版本号
         /// </summary>
@@ -102,12 +117,26 @@ namespace dp2Circulation
                 out createdNew);
             try
             {
-                if (createdNew 
+                if (createdNew
                     // || _suppressMutex 
                     || args.IndexOf("newinstance") != -1)
                 {
                     if (StringUtil.IsDevelopMode() == false)
                         PrepareCatchException();
+
+                    {
+                        var result = SetProcessDpiAwareness(PROCESS_DPI_AWARENESS.Process_System_DPI_Aware);
+                        var setDpiError = Marshal.GetLastWin32Error();
+                        //MessageBox.Show("Dpi set: " + result.ToString());
+
+                        PROCESS_DPI_AWARENESS awareness;
+                        GetProcessDpiAwareness(Process.GetCurrentProcess().Handle, out awareness);
+                        var getDpiError = Marshal.GetLastWin32Error();
+                        //MessageBox.Show(awareness.ToString());
+
+                        //MessageBox.Show("Set DPI error: " + new Win32Exception(setDpiError).ToString());
+                        //MessageBox.Show("Get DPI error: " + new Win32Exception(getDpiError).ToString());
+                    }
 
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
@@ -152,7 +181,8 @@ namespace dp2Circulation
 
         public static void ReleaseMutex()
         {
-            ExecutionContext.Run(context, (state) => {
+            ExecutionContext.Run(context, (state) =>
+            {
                 if (mutex != null)
                 {
 #if NO
@@ -249,7 +279,7 @@ namespace dp2Circulation
         static string GetExceptionText(Exception ex, string strType)
         {
             // Exception ex = (Exception)e.Exception;
-            string strError = "发生未捕获的"+strType+"异常: \r\n" + ExceptionUtil.GetDebugText(ex);
+            string strError = "发生未捕获的" + strType + "异常: \r\n" + ExceptionUtil.GetDebugText(ex);
             Assembly myAssembly = Assembly.GetAssembly(typeof(Program));
             strError += "\r\ndp2Circulation 版本: " + myAssembly.FullName;
             strError += "\r\n操作系统：" + Environment.OSVersion.ToString();
@@ -275,7 +305,7 @@ namespace dp2Circulation
             return strError;
         }
 
-        static void Application_ThreadException(object sender, 
+        static void Application_ThreadException(object sender,
             ThreadExceptionEventArgs e)
         {
             if (_bExiting == true)
