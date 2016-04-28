@@ -86,7 +86,7 @@ namespace dp2Circulation
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(461, 17);
             this.label1.TabIndex = 0;
-            this.label1.Text = "dp2 内务/流通 dp2Circulation V2.14";
+            this.label1.Text = "dp2 内务/流通 dp2Circulation V2.15";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label_copyright
@@ -143,7 +143,7 @@ namespace dp2Circulation
             this.textBox_environment.TabIndex = 6;
             this.textBox_environment.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // CopyrightDlg
+            // AboutDlg
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
@@ -158,7 +158,7 @@ namespace dp2Circulation
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "About";
+            this.Name = "AboutDlg";
             this.ShowInTaskbar = false;
             this.Text = "关于 About";
             this.Load += new System.EventHandler(this.CopyrightDlg_Load);

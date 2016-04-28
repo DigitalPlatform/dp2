@@ -67,6 +67,7 @@
             // 
             // button_findBarcodeFileName
             // 
+            this.button_findBarcodeFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_findBarcodeFileName.Location = new System.Drawing.Point(362, 82);
             this.button_findBarcodeFileName.Name = "button_findBarcodeFileName";
             this.button_findBarcodeFileName.Size = new System.Drawing.Size(47, 23);
@@ -109,7 +110,7 @@
             this.inventoryBatchNoControl_start_batchNo.LibraryCodeText = "";
             this.inventoryBatchNoControl_start_batchNo.Location = new System.Drawing.Point(12, 24);
             this.inventoryBatchNoControl_start_batchNo.Name = "inventoryBatchNoControl_start_batchNo";
-            this.inventoryBatchNoControl_start_batchNo.Size = new System.Drawing.Size(348, 27);
+            this.inventoryBatchNoControl_start_batchNo.Size = new System.Drawing.Size(398, 27);
             this.inventoryBatchNoControl_start_batchNo.TabIndex = 11;
             // 
             // InventoryFromFileDialog

@@ -299,16 +299,27 @@ namespace DigitalPlatform.LibraryServer
                     {
                         string strTextOld = DomUtil.GetElementOuterXml(domExist.DocumentElement,
                             strElementName);
-                        // 如果元素文本或者属性发生变化
-                        if (strTextNew != strTextOld)
+
+                        if (string.IsNullOrEmpty(DomUtil.GetElementText(domNew.DocumentElement,
+                        strElementName)))
                         {
-                            DomUtil.SetElementOuterXml(domExist.DocumentElement,
-    strElementName,
-    strTextNew);
-                            // 刷新timestamp属性
-                            XmlNode node = domExist.DocumentElement.SelectSingleNode(strElementName);
-                            if (node != null)
-                                DomUtil.SetAttr(node, "timestamp", DateTime.Now.ToString("u"));
+                            // 2016/4/27
+                            // 删除 fingerprint 元素
+                            DomUtil.DeleteElement(domExist.DocumentElement, strElementName);
+                        }
+                        else
+                        {
+                            // 如果元素文本或者属性发生变化
+                            if (strTextNew != strTextOld)
+                            {
+                                DomUtil.SetElementOuterXml(domExist.DocumentElement,
+        strElementName,
+        strTextNew);
+                                // 刷新timestamp属性
+                                XmlNode node = domExist.DocumentElement.SelectSingleNode(strElementName);
+                                if (node != null)
+                                    DomUtil.SetAttr(node, "timestamp", DateTime.Now.ToString("u"));
+                            }
                         }
                         continue;
                     }

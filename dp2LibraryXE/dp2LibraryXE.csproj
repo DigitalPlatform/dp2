@@ -62,13 +62,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>false</SignManifests>
+    <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>AC08492057F1FE982B12657E3B85D56739D85CCD</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>B8D09834D83AD2740F5BEA6295A24D7AB66B72B4</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>dp2LibraryXE_2_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>dp2LibraryXE_3_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -193,6 +193,7 @@
     <None Include="copyopac.bat" />
     <None Include="dp2LibraryXE_1_TemporaryKey.pfx" />
     <None Include="dp2LibraryXE_2_TemporaryKey.pfx" />
+    <None Include="dp2LibraryXE_3_TemporaryKey.pfx" />
     <None Include="dp2LibraryXE_TemporaryKey.pfx" />
     <Content Include="opac_app.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

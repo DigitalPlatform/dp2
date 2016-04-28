@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using System.IO;
+using System.Runtime.InteropServices;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -15,8 +16,22 @@ using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
+
     static class Program
     {
+        [DllImport("SHCore.dll", SetLastError = true)]
+        private static extern bool SetProcessDpiAwareness(PROCESS_DPI_AWARENESS awareness);
+
+        [DllImport("SHCore.dll", SetLastError = true)]
+        private static extern void GetProcessDpiAwareness(IntPtr hprocess, out PROCESS_DPI_AWARENESS awareness);
+
+        private enum PROCESS_DPI_AWARENESS
+        {
+            Process_DPI_Unaware = 0,
+            Process_System_DPI_Aware = 1,
+            Process_Per_Monitor_DPI_Aware = 2
+        }
+
         /// <summary>
         /// 前端，也就是 dp2circulation.exe 的版本号
         /// </summary>
@@ -102,12 +117,42 @@ namespace dp2Circulation
                 out createdNew);
             try
             {
-                if (createdNew 
+                if (createdNew
                     // || _suppressMutex 
                     || args.IndexOf("newinstance") != -1)
                 {
                     if (StringUtil.IsDevelopMode() == false)
                         PrepareCatchException();
+
+                    // Vista on up = 6
+                    // http://stackoverflow.com/questions/17406850/how-can-we-check-if-the-current-os-is-win8-or-blue
+                    if (Environment.OSVersion.Version.Major > 6
+                        || (Environment.OSVersion.Version.Major == 6
+                            && Environment.OSVersion.Version.Minor >= 2)
+                        )
+                    {
+                        // http://stackoverflow.com/questions/32148151/setprocessdpiawareness-not-having-effect
+                        /*
+I've been trying to disable the DPI awareness on a ClickOnce application.
+ I quickly found out, it is not possible to specify it in the manifest, because ClickOnce does not support asm.v3 in the manifest file.
+                         * */
+                        try
+                        {
+                            // https://msdn.microsoft.com/en-us/library/windows/desktop/dn302122(v=vs.85).aspx
+                            var result = SetProcessDpiAwareness(PROCESS_DPI_AWARENESS.Process_System_DPI_Aware);
+                            // var setDpiError = Marshal.GetLastWin32Error();
+                        }
+                        catch
+                        {
+
+                        }
+
+#if NO
+                        PROCESS_DPI_AWARENESS awareness;
+                        GetProcessDpiAwareness(Process.GetCurrentProcess().Handle, out awareness);
+                        var getDpiError = Marshal.GetLastWin32Error();
+#endif
+                    }
 
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
@@ -152,7 +197,8 @@ namespace dp2Circulation
 
         public static void ReleaseMutex()
         {
-            ExecutionContext.Run(context, (state) => {
+            ExecutionContext.Run(context, (state) =>
+            {
                 if (mutex != null)
                 {
 #if NO
@@ -249,7 +295,7 @@ namespace dp2Circulation
         static string GetExceptionText(Exception ex, string strType)
         {
             // Exception ex = (Exception)e.Exception;
-            string strError = "发生未捕获的"+strType+"异常: \r\n" + ExceptionUtil.GetDebugText(ex);
+            string strError = "发生未捕获的" + strType + "异常: \r\n" + ExceptionUtil.GetDebugText(ex);
             Assembly myAssembly = Assembly.GetAssembly(typeof(Program));
             strError += "\r\ndp2Circulation 版本: " + myAssembly.FullName;
             strError += "\r\n操作系统：" + Environment.OSVersion.ToString();
@@ -275,7 +321,7 @@ namespace dp2Circulation
             return strError;
         }
 
-        static void Application_ThreadException(object sender, 
+        static void Application_ThreadException(object sender,
             ThreadExceptionEventArgs e)
         {
             if (_bExiting == true)
