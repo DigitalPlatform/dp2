@@ -309,7 +309,11 @@ namespace dp2Circulation
 
         void EndChannel()
         {
-            ChannelServices.UnregisterChannel(this.channel);
+            if (this.channel != null)
+            {
+                ChannelServices.UnregisterChannel(this.channel);
+                this.channel = null;
+            }
         }
 
 #if NO

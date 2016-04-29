@@ -336,7 +336,11 @@ namespace dp2Circulation
 
         void EndChannel()
         {
-            ChannelServices.UnregisterChannel(channel);
+            if (this.channel != null)
+            {
+                ChannelServices.UnregisterChannel(this.channel);
+                this.channel = null;
+            }
         }
 
         string m_strSubmitPrice = "";

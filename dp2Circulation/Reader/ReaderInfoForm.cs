@@ -3988,7 +3988,10 @@ MessageBoxDefaultButton.Button2);
             strError = "";
 
             //Register the channel with ChannelServices.
-            ChannelServices.RegisterChannel(m_idcardChannel, false);
+            if (this.m_idcardChannel == null)
+                this.m_idcardChannel = new IpcClientChannel();
+
+            ChannelServices.RegisterChannel(this.m_idcardChannel, false);
 
             try
             {
@@ -4009,7 +4012,11 @@ MessageBoxDefaultButton.Button2);
 
         void EndIdcardChannel()
         {
-            ChannelServices.UnregisterChannel(m_idcardChannel);
+            if (this.m_idcardChannel != null)
+            {
+                ChannelServices.UnregisterChannel(this.m_idcardChannel);
+                this.m_idcardChannel = null;
+            }
         }
 
         // parameters:
@@ -4887,6 +4894,9 @@ MessageBoxDefaultButton.Button2);
             strError = "";
 
             //Register the channel with ChannelServices.
+            if (this.m_fingerPrintChannel == null)
+                this.m_fingerPrintChannel = new IpcClientChannel();
+
             ChannelServices.RegisterChannel(m_fingerPrintChannel, true);
 
             try
@@ -4908,7 +4918,11 @@ MessageBoxDefaultButton.Button2);
 
         void EndFingerprintChannel()
         {
-            ChannelServices.UnregisterChannel(m_fingerPrintChannel);
+            if (this.m_fingerPrintChannel != null)
+            {
+                ChannelServices.UnregisterChannel(m_fingerPrintChannel);
+                this.m_fingerPrintChannel = null;
+            }
         }
 
         // 局部更新指纹信息高速缓存
