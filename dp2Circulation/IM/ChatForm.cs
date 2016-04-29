@@ -17,6 +17,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using System.Collections;
+using Microsoft.Win32;
 // using Microsoft.AspNet.SignalR.Client.Hubs;
 
 
@@ -42,9 +43,51 @@ namespace dp2Circulation
             this.ClearHtml();
 
             if (this.MainForm != null && this.MainForm.MessageHub != null)
+            {
+                this.MainForm.MessageHub.ConnectionStateChange += MessageHub_ConnectionStateChange;
                 this.MainForm.MessageHub.AddMessage += MessageHub_AddMessage;
+            }
+            SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
-            Task.Factory.StartNew(() => DoLoadMessage("<default>"));
+            Task.Factory.StartNew(() => DoLoadMessage(_currentGroupName, "", true));
+        }
+
+        void SystemEvents_PowerModeChanged(object sender, PowerModeChangedEventArgs e)
+        {
+            if (e.Mode == PowerModes.Resume)
+                FillDeltaMessage();
+        }
+
+        void MessageHub_ConnectionStateChange(object sender, ConnectionEventArgs e)
+        {
+            if (_inGetMessage > 0)
+                return;
+
+            if (e.Action == "Reconnected"
+                || e.Action == "Connected")
+            {
+                FillDeltaMessage();
+            }
+        }
+
+
+        void FillDeltaMessage()
+        {
+            // 补充获取先前在没有连接时间段的消息
+            bool bUrlChanged = this.MainForm.MessageHub.dp2MServerUrl != _currentUrl;
+            //if (bUrlChanged == true)
+            //    _lastMessage = null;
+
+            _currentUrl = this.MainForm.MessageHub.dp2MServerUrl;
+
+            string strLastTime = "";
+            if (_lastMessage != null && bUrlChanged == false)
+                strLastTime = _lastMessage.publishTime.ToString("G");
+
+            _edgeRecord = _lastMessage;
+
+            Task.Factory.StartNew(() => DoLoadMessage(_currentGroupName, strLastTime + "~", bUrlChanged));
+            // TODO: 填充消息的时候，如果和上次最末一条同样时间，则要从返回结果集合中和上次最末一条 ID 匹配的后一条开始填充
         }
 
         void MessageHub_AddMessage(object sender, AddMessageEventArgs e)
@@ -129,8 +172,12 @@ namespace dp2Circulation
         {
             _redoLoadMesssageCount = 100; // 让重试尽快结束
 
+            SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
             if (this.MainForm != null && this.MainForm.MessageHub != null)
+            {
                 this.MainForm.MessageHub.AddMessage -= MessageHub_AddMessage;
+                this.MainForm.MessageHub.ConnectionStateChange -= MessageHub_ConnectionStateChange;
+            }
 
             //CloseConnection();
 
@@ -321,93 +368,169 @@ namespace dp2Circulation
 
         int _redoLoadMesssageCount = 0;
 
-        // 装载已经存在的消息记录
-        async void DoLoadMessage(string strGroupName)
-        {
-            string strError = "";
+        int _inGetMessage = 0;  // 防止因为 ConnectionStateChange 事件导致重入
 
-            if (this.MainForm == null)
+        // 装载已经存在的消息记录
+        async void DoLoadMessage(string strGroupName,
+            string strTimeRange,
+            bool bClearAll)
+        {
+            if (_inGetMessage > 0)
                 return;
 
-            // TODO: 如果当前 Connection 尚未连接，则要促使它连接，然后重试 load
-            if (this.MainForm.MessageHub.IsConnected == false)
-            {
-                if (_redoLoadMesssageCount < 5)
-                {
-                    AddErrorLine("当前点对点连接尚未建立。重试操作中 ...");
-                    this.MainForm.MessageHub.Connect();
-                    Thread.Sleep(5000);
-                    _redoLoadMesssageCount++;
-                    Task.Factory.StartNew(() => DoLoadMessage(strGroupName));
-                    return;
-                }
-                else
-                {
-                    AddErrorLine("当前点对点连接尚未建立。停止重试。消息装载失败。");
-                    _redoLoadMesssageCount = 0; // 以后再调用本函数，就重新计算重试次数
-                    return;
-                }
-            }
-
-            this.Invoke((Action)(() => this.ClearHtml()));
-            this.Invoke((Action)(() => this.HtmlWaiting(this.webBrowser1, "正在获取消息，请等待 ...")));
-
-            EnableControls(false);
+            _inGetMessage++;
             try
             {
-                CancellationToken cancel_token = new CancellationToken();
+                string strError = "";
 
-                string id = Guid.NewGuid().ToString();
-                GetMessageRequest request = new GetMessageRequest(id,
-                    strGroupName, // "<default>" 表示默认群组
-                    "",
-                    "",
-                    0,
-                    -1);
+                if (this.MainForm == null)
+                    return;
+
+                // TODO: 如果当前 Connection 尚未连接，则要促使它连接，然后重试 load
+                if (this.MainForm.MessageHub.IsConnected == false)
+                {
+                    if (_redoLoadMesssageCount < 5)
+                    {
+                        AddErrorLine("当前点对点连接尚未建立。重试操作中 ...");
+                        this.MainForm.MessageHub.Connect();
+                        Thread.Sleep(5000);
+                        _redoLoadMesssageCount++;
+                        Task.Factory.StartNew(() => DoLoadMessage(strGroupName, strTimeRange, bClearAll));
+                        return;
+                    }
+                    else
+                    {
+                        AddErrorLine("当前点对点连接尚未建立。停止重试。消息装载失败。");
+                        _redoLoadMesssageCount = 0; // 以后再调用本函数，就重新计算重试次数
+                        return;
+                    }
+                }
+
+                if (bClearAll)
+                {
+                    this.Invoke((Action)(() => this.ClearHtml()));
+                    _lastMessage = null;
+                }
+                this.Invoke((Action)(() => this.HtmlWaiting(this.webBrowser1, "正在获取消息，请等待 ...")));
+
+                EnableControls(false);
                 try
                 {
-                    _lastMessage = null;
+                    CancellationToken cancel_token = new CancellationToken();
 
-                    MessageResult result = await this.MainForm.MessageHub.GetMessageAsync(
-                        request,
-                        FillMessage,
-                        new TimeSpan(0, 1, 0),
-                        cancel_token);
+                    string id = Guid.NewGuid().ToString();
+                    GetMessageRequest request = new GetMessageRequest(id,
+                        strGroupName, // "<default>" 表示默认群组
+                        "",
+                        strTimeRange,
+                        0,
+                        -1);
+                    try
+                    {
+                        MessageResult result = await this.MainForm.MessageHub.GetMessageAsync(
+                            request,
+                            FillMessage,
+                            new TimeSpan(0, 1, 0),
+                            cancel_token);
 #if NO
                     this.Invoke(new Action(() =>
                     {
                         SetTextString(this.webBrowser1, ToString(result));
                     }));
 #endif
-                    if (result.Value == -1)
-                    {
-                        //strError = result.ErrorInfo;
-                        //goto ERROR1;
-                        this.AddErrorLine(result.ErrorInfo);
+                        if (result.Value == -1)
+                        {
+                            //strError = result.ErrorInfo;
+                            //goto ERROR1;
+                            this.AddErrorLine(result.ErrorInfo);
+                        }
                     }
+                    catch (AggregateException ex)
+                    {
+                        strError = MessageConnection.GetExceptionText(ex);
+                        goto ERROR1;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = ex.Message;
+                        goto ERROR1;
+                    }
+                    return;
                 }
-                catch (AggregateException ex)
+                finally
                 {
-                    strError = MessageConnection.GetExceptionText(ex);
-                    goto ERROR1;
+                    EnableControls(true);
+                    this.Invoke((Action)(() => this.HtmlWaiting(this.webBrowser1, "")));
                 }
-                catch (Exception ex)
-                {
-                    strError = ex.Message;
-                    goto ERROR1;
-                }
-                return;
+            ERROR1:
+                this.Invoke((Action)(() => MessageBox.Show(this, strError)));
             }
             finally
             {
-                EnableControls(true);
-                this.Invoke((Action)(() => this.HtmlWaiting(this.webBrowser1, "")));
+                _inGetMessage--;
             }
-        ERROR1:
-            this.Invoke((Action)(() => MessageBox.Show(this, strError)));
         }
 
+        // 增量获取时候的起点边界时间。要在这个 publishTime 的若干条记录中找到一条 id 为 的，它前面的记录要忽略
+        MessageRecord _edgeRecord = null;
+        List<MessageRecord> _edgeRecords = new List<MessageRecord>();
+
+        string _currentUrl = "";
+        string _currentGroupName = "<default>";
         MessageRecord _lastMessage = null;   // 当前消息显示界面中最后一条消息
+
+        // return:
+        //      true    这条记录已经被缓存，暂时不加入显示
+        //      false   函数返回后继续处理，加入显示
+        bool ProcessEdge(MessageRecord record)
+        {
+            if (_edgeRecord != null)
+            {
+                if (record.publishTime == _edgeRecord.publishTime)
+                {
+                    _edgeRecords.Add(record);
+                    return true;
+                }
+                // 提取 id 位置后面的
+                List<MessageRecord> results = new List<MessageRecord>();
+                foreach (MessageRecord r in _edgeRecords)
+                {
+                    if (r.id == _edgeRecord.id)
+                    {
+                        results.Clear();
+                        continue;
+                    }
+                    results.Add(r);
+                }
+
+                _edgeRecord = null;
+                _edgeRecords.Clear();
+
+                // results 加入显示
+                FillMessage(results);
+            }
+
+            return false;
+        }
+
+        void FillMessage(IList<MessageRecord> records)
+        {
+            if (records != null)
+            {
+                foreach (MessageRecord record in records)
+                {
+                    AddTimeLine(record);
+
+                    // creator 要替换为用户名
+                    this.AddMessageLine(
+                        IsMe(record) ? "right" : "left",
+                        string.IsNullOrEmpty(record.userName) ? record.creator : record.userName,
+                        record.data);
+
+                    _lastMessage = record;
+                }
+            }
+        }
 
         // 回调函数，用消息填充浏览器控件
         void FillMessage(long totalCount,
@@ -427,14 +550,20 @@ namespace dp2Circulation
             {
                 foreach (MessageRecord record in records)
                 {
+                    if (ProcessEdge(record))
+                        continue;
 
+
+#if NO
                     AddTimeLine(record);
-
                     // creator 要替换为用户名
                     this.AddMessageLine(
                         IsMe(record) ? "right" : "left",
                         string.IsNullOrEmpty(record.userName) ? record.creator : record.userName,
                         record.data);
+#endif
+                    List<MessageRecord> temp = new List<MessageRecord>() { record };
+                    FillMessage(temp);
 
                     _lastMessage = record;
                 }

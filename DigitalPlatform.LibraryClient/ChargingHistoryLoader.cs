@@ -10,10 +10,10 @@ namespace DigitalPlatform.LibraryClient
 {
     public class ChargingHistoryLoader : IEnumerable
     {
-        public string PatronBarcode {get;set;}
-        public string TimeRange {get;set;}
-        public string Actions {get;set;}
-        public string Order {get;set;}
+        public string PatronBarcode { get; set; }
+        public string TimeRange { get; set; }
+        public string Actions { get; set; }
+        public string Order { get; set; }
         public long Start = 0;
         public long Length = -1;
 
@@ -75,8 +75,8 @@ namespace DigitalPlatform.LibraryClient
                 lHitCount = lRet;
                 if (temp_results == null || temp_results.Length == 0)
                     break;
-                
-                foreach(ChargingItemWrapper wrapper in temp_results)
+
+                foreach (ChargingItemWrapper wrapper in temp_results)
                 {
                     yield return wrapper;
                 }
