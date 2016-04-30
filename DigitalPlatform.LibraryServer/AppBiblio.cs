@@ -648,7 +648,8 @@ namespace DigitalPlatform.LibraryServer
                 string strBiblio = "";
 
                 // 表明只需获取局部数据
-                if (strBiblioType[0] == '@')
+                if (string.IsNullOrEmpty(strBiblioType) == false
+                    && strBiblioType[0] == '@')
                 {
                     if (String.IsNullOrEmpty(strBiblioXml) == true)
                     {
