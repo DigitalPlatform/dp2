@@ -99,11 +99,11 @@ namespace dp2Circulation
         /// 构造函数
         /// </summary>
         public OperLogStatis()
-		{
-			//
-			// TODO: Add constructor logic here
-			//
-		}
+        {
+            //
+            // TODO: Add constructor logic here
+            //
+        }
 
         internal override string GetOutputFileNamePrefix()
         {
@@ -332,7 +332,6 @@ namespace dp2Circulation
             if (list.Count == 0)
                 return 0;
 
-
             XmlNodeList nodes = domOperLog.DocumentElement.SelectNodes("amerceItems/amerceItem");
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -351,7 +350,6 @@ namespace dp2Circulation
                 // 2012/3/23
                 if (string.IsNullOrEmpty(strPureNewPrice) == true)
                     continue;
-
 
                 // 
                 string strDebug = "";
@@ -920,7 +918,7 @@ out strError);
             {
                 IdPrice item = list[i];
 
-                strDebug += "item[" + i.ToString() + "] id=" + item.ID + ", price=" + item.Price + ", reason="+item.Reason+";\r\n";
+                strDebug += "item[" + i.ToString() + "] id=" + item.ID + ", price=" + item.Price + ", reason=" + item.Reason + ";\r\n";
 
                 if (strID == item.ID)
                     return item.Price;
@@ -1086,7 +1084,7 @@ out strError);
             }
         }
 
-        static void Inc(TimeRangedStatisTable table, 
+        static void Inc(TimeRangedStatisTable table,
             string strEntry,
             int nColumn,
             string strPrice)

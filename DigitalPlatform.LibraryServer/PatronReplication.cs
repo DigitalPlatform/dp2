@@ -546,6 +546,10 @@ namespace DigitalPlatform.LibraryServer
             Uri uri = new Uri(strUrl);
             string strScheme = uri.Scheme.ToLower();
 
+            // 2016/4/29
+            if (this.m_cardCenterChannel != null)
+                this.EndChannel();
+
             if (strScheme == "ipc")
                 m_cardCenterChannel = new IpcClientChannel();
             else if (strScheme == "tcp")
@@ -580,7 +584,11 @@ namespace DigitalPlatform.LibraryServer
 
         void EndChannel()
         {
-            ChannelServices.UnregisterChannel(this.m_cardCenterChannel);
+            if (this.m_cardCenterChannel != null)
+            {
+                ChannelServices.UnregisterChannel(this.m_cardCenterChannel);
+                this.m_cardCenterChannel = null;
+            }
         }
 
         // 从卡中心获取全部记录，写入一个XML文件

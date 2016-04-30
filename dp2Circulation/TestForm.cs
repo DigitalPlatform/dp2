@@ -838,6 +838,9 @@ namespace dp2Circulation
             strError = "";
 
             //Register the channel with ChannelServices.
+            if (this.m_idcardChannel == null)
+                this.m_idcardChannel = new IpcClientChannel();
+
             ChannelServices.RegisterChannel(m_idcardChannel, false);
 
             try
@@ -859,7 +862,11 @@ namespace dp2Circulation
 
         void EndChannel()
         {
-            ChannelServices.UnregisterChannel(m_idcardChannel);
+            if (this.m_idcardChannel != null)
+            {
+                ChannelServices.UnregisterChannel(m_idcardChannel);
+                this.m_idcardChannel = null;
+            }
         }
 
         private void button_idcardReader_messageBeep_Click(object sender, EventArgs e)

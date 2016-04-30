@@ -4480,6 +4480,9 @@ out strFingerprint);
             strError = "";
 
             //Register the channel with ChannelServices.
+            if (this.m_fingerPrintChannel == null)
+                this.m_fingerPrintChannel = new IpcClientChannel();
+
             ChannelServices.RegisterChannel(m_fingerPrintChannel, false);
 
             try
@@ -4501,7 +4504,11 @@ out strFingerprint);
 
         void EndFingerprintChannel()
         {
-            ChannelServices.UnregisterChannel(m_fingerPrintChannel);
+            if (this.m_fingerPrintChannel != null)
+            {
+                ChannelServices.UnregisterChannel(m_fingerPrintChannel);
+                this.m_fingerPrintChannel = null;
+            }
         }
 
         #endregion

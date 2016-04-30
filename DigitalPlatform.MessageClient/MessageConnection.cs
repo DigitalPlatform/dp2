@@ -16,6 +16,8 @@ namespace DigitalPlatform.MessageClient
     /// </summary>
     public class MessageConnection
     {
+        public event ConnectionEventHandler ConnectionStateChange = null;
+
         private IHubProxy HubProxy
         {
             get;
@@ -237,6 +239,8 @@ namespace DigitalPlatform.MessageClient
                         _timer.Stop();
                         AddInfoLine("成功连接到 " + this.dp2MServerUrl);
                         // Login();
+                        TriggerConnectionStateChange("Connected");
+
                     });
             }
             catch (Exception ex)
@@ -257,6 +261,18 @@ namespace DigitalPlatform.MessageClient
         void Connection_Reconnecting()
         {
             // tryingToReconnect = true;
+            TriggerConnectionStateChange("Reconnecting");
+        }
+
+        void TriggerConnectionStateChange(string strAction)
+        {
+            ConnectionEventHandler handler = this.ConnectionStateChange;
+            if (handler != null)
+            {
+                ConnectionEventArgs e = new ConnectionEventArgs();
+                e.Action = strAction;
+                handler(this, e);
+            }
         }
 
         void Connection_Reconnected()
@@ -264,6 +280,8 @@ namespace DigitalPlatform.MessageClient
             // tryingToReconnect = false;
 
             AddInfoLine("Connection_Reconnected");
+
+            TriggerConnectionStateChange("Reconnected");
 
             // this.Login();
         }
@@ -275,12 +293,16 @@ namespace DigitalPlatform.MessageClient
                 AddInfoLine("开启 Timer");
                 _timer.Start();
             }
+
+            TriggerConnectionStateChange("Closed");
+
 #if NO
             this.Invoke((Action)(() => panelChat.Visible = false));
             this.Invoke((Action)(() => buttonSend.Enabled = false));
             this.Invoke((Action)(() => this.labelStatusText.Text = "You have been disconnected."));
             this.Invoke((Action)(() => this.panelSignIn.Visible = true));
 #endif
+
         }
 
         void Connection_Error(Exception obj)
@@ -1005,7 +1027,7 @@ errorInfo);
                                 if (taskID != request.TaskID)
                                     return;
 
-                                if (resultCount == -1 && start == -1)
+                                if (resultCount == -1 || start == -1)
                                 {
                                     if (start == -1)
                                     {
@@ -1286,5 +1308,21 @@ request).Result;
     {
         public string Action = "";
         public List<MessageRecord> Records = null;
+    }
+
+    /// <summary>
+    /// 连接状态变化事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void ConnectionEventHandler(object sender,
+        ConnectionEventArgs e);
+
+    /// <summary>
+    /// 连接状态变化事件的参数
+    /// </summary>
+    public class ConnectionEventArgs : EventArgs
+    {
+        public string Action = "";
     }
 }
