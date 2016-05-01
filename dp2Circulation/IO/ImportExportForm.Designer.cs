@@ -28,136 +28,279 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage_range = new System.Windows.Forms.TabPage();
-            this.listView_in = new DigitalPlatform.GUI.ListViewNF();
-            this.button_load_scanBarcode = new System.Windows.Forms.Button();
-            this.button_load_loadFromRecPathFile = new System.Windows.Forms.Button();
-            this.button_load_loadFromBatchNo = new System.Windows.Forms.Button();
-            this.button_load_loadFromBarcodeFile = new System.Windows.Forms.Button();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.tabControl1.SuspendLayout();
-            this.tabPage_range.SuspendLayout();
+            this.tabControl_main = new System.Windows.Forms.TabControl();
+            this.tabPage_source = new System.Windows.Forms.TabPage();
+            this.button_getObjectDirectoryName = new System.Windows.Forms.Button();
+            this.textBox_objectDirectoryName = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.button_source_findFileName = new System.Windows.Forms.Button();
+            this.textBox_source_fileName = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.checkBox_subRecords_object = new System.Windows.Forms.CheckBox();
+            this.checkBox_subRecords_comment = new System.Windows.Forms.CheckBox();
+            this.checkBox_subRecords_issue = new System.Windows.Forms.CheckBox();
+            this.checkBox_subRecords_order = new System.Windows.Forms.CheckBox();
+            this.checkBox_subRecords_entity = new System.Windows.Forms.CheckBox();
+            this.tabPage_target = new System.Windows.Forms.TabPage();
+            this.comboBox_target_targetBiblioDbName = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.button_next = new System.Windows.Forms.Button();
+            this.tabPage_run = new System.Windows.Forms.TabPage();
+            this.tabControl_main.SuspendLayout();
+            this.tabPage_source.SuspendLayout();
+            this.tabPage_target.SuspendLayout();
             this.SuspendLayout();
             // 
-            // tabControl1
+            // tabControl_main
             // 
-            this.tabControl1.Controls.Add(this.tabPage_range);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Location = new System.Drawing.Point(13, 13);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(443, 309);
-            this.tabControl1.TabIndex = 0;
-            // 
-            // tabPage_range
-            // 
-            this.tabPage_range.Controls.Add(this.listView_in);
-            this.tabPage_range.Controls.Add(this.button_load_scanBarcode);
-            this.tabPage_range.Controls.Add(this.button_load_loadFromRecPathFile);
-            this.tabPage_range.Controls.Add(this.button_load_loadFromBatchNo);
-            this.tabPage_range.Controls.Add(this.button_load_loadFromBarcodeFile);
-            this.tabPage_range.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_range.Name = "tabPage_range";
-            this.tabPage_range.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_range.Size = new System.Drawing.Size(435, 283);
-            this.tabPage_range.TabIndex = 0;
-            this.tabPage_range.Text = "范围";
-            this.tabPage_range.UseVisualStyleBackColor = true;
-            // 
-            // listView_in
-            // 
-            this.listView_in.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.tabControl_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.listView_in.FullRowSelect = true;
-            this.listView_in.HideSelection = false;
-            this.listView_in.Location = new System.Drawing.Point(5, 92);
-            this.listView_in.Margin = new System.Windows.Forms.Padding(2);
-            this.listView_in.Name = "listView_in";
-            this.listView_in.Size = new System.Drawing.Size(425, 186);
-            this.listView_in.TabIndex = 10;
-            this.listView_in.UseCompatibleStateImageBehavior = false;
-            this.listView_in.View = System.Windows.Forms.View.Details;
+            this.tabControl_main.Controls.Add(this.tabPage_source);
+            this.tabControl_main.Controls.Add(this.tabPage_target);
+            this.tabControl_main.Controls.Add(this.tabPage_run);
+            this.tabControl_main.Location = new System.Drawing.Point(13, 13);
+            this.tabControl_main.Name = "tabControl_main";
+            this.tabControl_main.SelectedIndex = 0;
+            this.tabControl_main.Size = new System.Drawing.Size(443, 283);
+            this.tabControl_main.TabIndex = 0;
             // 
-            // button_load_scanBarcode
+            // tabPage_source
             // 
-            this.button_load_scanBarcode.Location = new System.Drawing.Point(179, 44);
-            this.button_load_scanBarcode.Margin = new System.Windows.Forms.Padding(2);
-            this.button_load_scanBarcode.Name = "button_load_scanBarcode";
-            this.button_load_scanBarcode.Size = new System.Drawing.Size(170, 22);
-            this.button_load_scanBarcode.TabIndex = 9;
-            this.button_load_scanBarcode.Text = "扫入册条码(&S)...";
-            this.button_load_scanBarcode.UseVisualStyleBackColor = true;
-            this.button_load_scanBarcode.Click += new System.EventHandler(this.button_load_scanBarcode_Click);
+            this.tabPage_source.AutoScroll = true;
+            this.tabPage_source.Controls.Add(this.button_getObjectDirectoryName);
+            this.tabPage_source.Controls.Add(this.textBox_objectDirectoryName);
+            this.tabPage_source.Controls.Add(this.label3);
+            this.tabPage_source.Controls.Add(this.button_source_findFileName);
+            this.tabPage_source.Controls.Add(this.textBox_source_fileName);
+            this.tabPage_source.Controls.Add(this.label2);
+            this.tabPage_source.Controls.Add(this.checkBox_subRecords_object);
+            this.tabPage_source.Controls.Add(this.checkBox_subRecords_comment);
+            this.tabPage_source.Controls.Add(this.checkBox_subRecords_issue);
+            this.tabPage_source.Controls.Add(this.checkBox_subRecords_order);
+            this.tabPage_source.Controls.Add(this.checkBox_subRecords_entity);
+            this.tabPage_source.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_source.Name = "tabPage_source";
+            this.tabPage_source.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_source.Size = new System.Drawing.Size(435, 257);
+            this.tabPage_source.TabIndex = 1;
+            this.tabPage_source.Text = "源文件";
+            this.tabPage_source.UseVisualStyleBackColor = true;
             // 
-            // button_load_loadFromRecPathFile
+            // button_getObjectDirectoryName
             // 
-            this.button_load_loadFromRecPathFile.Location = new System.Drawing.Point(5, 45);
-            this.button_load_loadFromRecPathFile.Margin = new System.Windows.Forms.Padding(2);
-            this.button_load_loadFromRecPathFile.Name = "button_load_loadFromRecPathFile";
-            this.button_load_loadFromRecPathFile.Size = new System.Drawing.Size(170, 22);
-            this.button_load_loadFromRecPathFile.TabIndex = 7;
-            this.button_load_loadFromRecPathFile.Text = "从册记录路径文件(&R)...";
-            this.button_load_loadFromRecPathFile.UseVisualStyleBackColor = true;
+            this.button_getObjectDirectoryName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_getObjectDirectoryName.Location = new System.Drawing.Point(389, 205);
+            this.button_getObjectDirectoryName.Name = "button_getObjectDirectoryName";
+            this.button_getObjectDirectoryName.Size = new System.Drawing.Size(39, 23);
+            this.button_getObjectDirectoryName.TabIndex = 13;
+            this.button_getObjectDirectoryName.Text = "...";
+            this.button_getObjectDirectoryName.UseVisualStyleBackColor = true;
+            this.button_getObjectDirectoryName.Click += new System.EventHandler(this.button_getObjectDirectoryName_Click);
             // 
-            // button_load_loadFromBatchNo
+            // textBox_objectDirectoryName
             // 
-            this.button_load_loadFromBatchNo.Location = new System.Drawing.Point(179, 18);
-            this.button_load_loadFromBatchNo.Margin = new System.Windows.Forms.Padding(2);
-            this.button_load_loadFromBatchNo.Name = "button_load_loadFromBatchNo";
-            this.button_load_loadFromBatchNo.Size = new System.Drawing.Size(170, 22);
-            this.button_load_loadFromBatchNo.TabIndex = 8;
-            this.button_load_loadFromBatchNo.Text = "根据批次号检索(&B)...";
-            this.button_load_loadFromBatchNo.UseVisualStyleBackColor = true;
+            this.textBox_objectDirectoryName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_objectDirectoryName.Location = new System.Drawing.Point(27, 207);
+            this.textBox_objectDirectoryName.Name = "textBox_objectDirectoryName";
+            this.textBox_objectDirectoryName.Size = new System.Drawing.Size(356, 21);
+            this.textBox_objectDirectoryName.TabIndex = 12;
             // 
-            // button_load_loadFromBarcodeFile
+            // label3
             // 
-            this.button_load_loadFromBarcodeFile.Location = new System.Drawing.Point(5, 19);
-            this.button_load_loadFromBarcodeFile.Margin = new System.Windows.Forms.Padding(2);
-            this.button_load_loadFromBarcodeFile.Name = "button_load_loadFromBarcodeFile";
-            this.button_load_loadFromBarcodeFile.Size = new System.Drawing.Size(170, 22);
-            this.button_load_loadFromBarcodeFile.TabIndex = 6;
-            this.button_load_loadFromBarcodeFile.Text = "从条码号文件(&F)...";
-            this.button_load_loadFromBarcodeFile.UseVisualStyleBackColor = true;
-            this.button_load_loadFromBarcodeFile.Click += new System.EventHandler(this.button_load_loadFromBarcodeFile_Click);
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(25, 192);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(101, 12);
+            this.label3.TabIndex = 11;
+            this.label3.Text = "对象文件目录(&O):";
             // 
-            // tabPage2
+            // button_source_findFileName
             // 
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(435, 283);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "tabPage2";
-            this.tabPage2.UseVisualStyleBackColor = true;
+            this.button_source_findFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_source_findFileName.Location = new System.Drawing.Point(389, 19);
+            this.button_source_findFileName.Name = "button_source_findFileName";
+            this.button_source_findFileName.Size = new System.Drawing.Size(39, 23);
+            this.button_source_findFileName.TabIndex = 7;
+            this.button_source_findFileName.Text = "...";
+            this.button_source_findFileName.UseVisualStyleBackColor = true;
+            this.button_source_findFileName.Click += new System.EventHandler(this.button_source_findFileName_Click);
+            // 
+            // textBox_source_fileName
+            // 
+            this.textBox_source_fileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_source_fileName.Location = new System.Drawing.Point(125, 21);
+            this.textBox_source_fileName.Name = "textBox_source_fileName";
+            this.textBox_source_fileName.Size = new System.Drawing.Size(258, 21);
+            this.textBox_source_fileName.TabIndex = 6;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 24);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(113, 12);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "书目转储文件名(&D):";
+            // 
+            // checkBox_subRecords_object
+            // 
+            this.checkBox_subRecords_object.AutoSize = true;
+            this.checkBox_subRecords_object.Checked = true;
+            this.checkBox_subRecords_object.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_subRecords_object.Location = new System.Drawing.Point(8, 173);
+            this.checkBox_subRecords_object.Name = "checkBox_subRecords_object";
+            this.checkBox_subRecords_object.Size = new System.Drawing.Size(66, 16);
+            this.checkBox_subRecords_object.TabIndex = 4;
+            this.checkBox_subRecords_object.Text = "对象(&O)";
+            this.checkBox_subRecords_object.UseVisualStyleBackColor = true;
+            this.checkBox_subRecords_object.CheckedChanged += new System.EventHandler(this.checkBox_subRecords_object_CheckedChanged);
+            // 
+            // checkBox_subRecords_comment
+            // 
+            this.checkBox_subRecords_comment.AutoSize = true;
+            this.checkBox_subRecords_comment.Checked = true;
+            this.checkBox_subRecords_comment.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_subRecords_comment.Location = new System.Drawing.Point(8, 120);
+            this.checkBox_subRecords_comment.Name = "checkBox_subRecords_comment";
+            this.checkBox_subRecords_comment.Size = new System.Drawing.Size(66, 16);
+            this.checkBox_subRecords_comment.TabIndex = 3;
+            this.checkBox_subRecords_comment.Text = "评注(&C)";
+            this.checkBox_subRecords_comment.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_subRecords_issue
+            // 
+            this.checkBox_subRecords_issue.AutoSize = true;
+            this.checkBox_subRecords_issue.Checked = true;
+            this.checkBox_subRecords_issue.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_subRecords_issue.Location = new System.Drawing.Point(8, 98);
+            this.checkBox_subRecords_issue.Name = "checkBox_subRecords_issue";
+            this.checkBox_subRecords_issue.Size = new System.Drawing.Size(54, 16);
+            this.checkBox_subRecords_issue.TabIndex = 2;
+            this.checkBox_subRecords_issue.Text = "期(&I)";
+            this.checkBox_subRecords_issue.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_subRecords_order
+            // 
+            this.checkBox_subRecords_order.AutoSize = true;
+            this.checkBox_subRecords_order.Checked = true;
+            this.checkBox_subRecords_order.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_subRecords_order.Location = new System.Drawing.Point(8, 76);
+            this.checkBox_subRecords_order.Name = "checkBox_subRecords_order";
+            this.checkBox_subRecords_order.Size = new System.Drawing.Size(66, 16);
+            this.checkBox_subRecords_order.TabIndex = 1;
+            this.checkBox_subRecords_order.Text = "订购(&O)";
+            this.checkBox_subRecords_order.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_subRecords_entity
+            // 
+            this.checkBox_subRecords_entity.AutoSize = true;
+            this.checkBox_subRecords_entity.Checked = true;
+            this.checkBox_subRecords_entity.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_subRecords_entity.Location = new System.Drawing.Point(8, 54);
+            this.checkBox_subRecords_entity.Name = "checkBox_subRecords_entity";
+            this.checkBox_subRecords_entity.Size = new System.Drawing.Size(54, 16);
+            this.checkBox_subRecords_entity.TabIndex = 0;
+            this.checkBox_subRecords_entity.Text = "册(&E)";
+            this.checkBox_subRecords_entity.UseVisualStyleBackColor = true;
+            // 
+            // tabPage_target
+            // 
+            this.tabPage_target.AutoScroll = true;
+            this.tabPage_target.Controls.Add(this.comboBox_target_targetBiblioDbName);
+            this.tabPage_target.Controls.Add(this.label1);
+            this.tabPage_target.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_target.Name = "tabPage_target";
+            this.tabPage_target.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage_target.Size = new System.Drawing.Size(435, 257);
+            this.tabPage_target.TabIndex = 0;
+            this.tabPage_target.Text = "目标库";
+            this.tabPage_target.UseVisualStyleBackColor = true;
+            // 
+            // comboBox_target_targetBiblioDbName
+            // 
+            this.comboBox_target_targetBiblioDbName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_target_targetBiblioDbName.FormattingEnabled = true;
+            this.comboBox_target_targetBiblioDbName.Location = new System.Drawing.Point(126, 61);
+            this.comboBox_target_targetBiblioDbName.Name = "comboBox_target_targetBiblioDbName";
+            this.comboBox_target_targetBiblioDbName.Size = new System.Drawing.Size(182, 20);
+            this.comboBox_target_targetBiblioDbName.TabIndex = 1;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(7, 64);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(101, 12);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "目标书目库名(&B):";
+            // 
+            // button_next
+            // 
+            this.button_next.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_next.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button_next.Location = new System.Drawing.Point(369, 301);
+            this.button_next.Margin = new System.Windows.Forms.Padding(2);
+            this.button_next.Name = "button_next";
+            this.button_next.Size = new System.Drawing.Size(83, 22);
+            this.button_next.TabIndex = 2;
+            this.button_next.Text = "下一步(&N)";
+            this.button_next.UseVisualStyleBackColor = true;
+            this.button_next.Click += new System.EventHandler(this.button_next_Click);
+            // 
+            // tabPage_run
+            // 
+            this.tabPage_run.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_run.Name = "tabPage_run";
+            this.tabPage_run.Size = new System.Drawing.Size(435, 257);
+            this.tabPage_run.TabIndex = 2;
+            this.tabPage_run.Text = "导入";
+            this.tabPage_run.UseVisualStyleBackColor = true;
             // 
             // ImportExportForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(468, 334);
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.button_next);
+            this.Controls.Add(this.tabControl_main);
             this.Name = "ImportExportForm";
-            this.Text = "ImportExportForm";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
+            this.Text = "从书目转储文件导入";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ImportExportForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ImportExportForm_FormClosed);
             this.Load += new System.EventHandler(this.ImportExportForm_Load);
-            this.tabControl1.ResumeLayout(false);
-            this.tabPage_range.ResumeLayout(false);
+            this.tabControl_main.ResumeLayout(false);
+            this.tabPage_source.ResumeLayout(false);
+            this.tabPage_source.PerformLayout();
+            this.tabPage_target.ResumeLayout(false);
+            this.tabPage_target.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage_range;
-        private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.Button button_load_scanBarcode;
-        private System.Windows.Forms.Button button_load_loadFromRecPathFile;
-        private System.Windows.Forms.Button button_load_loadFromBatchNo;
-        private System.Windows.Forms.Button button_load_loadFromBarcodeFile;
-        private DigitalPlatform.GUI.ListViewNF listView_in;
+        private System.Windows.Forms.TabControl tabControl_main;
+        private System.Windows.Forms.TabPage tabPage_target;
+        private System.Windows.Forms.TabPage tabPage_source;
+        private System.Windows.Forms.ComboBox comboBox_target_targetBiblioDbName;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.CheckBox checkBox_subRecords_object;
+        private System.Windows.Forms.CheckBox checkBox_subRecords_comment;
+        private System.Windows.Forms.CheckBox checkBox_subRecords_issue;
+        private System.Windows.Forms.CheckBox checkBox_subRecords_order;
+        private System.Windows.Forms.CheckBox checkBox_subRecords_entity;
+        private System.Windows.Forms.Button button_next;
+        private System.Windows.Forms.Button button_source_findFileName;
+        private System.Windows.Forms.TextBox textBox_source_fileName;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button button_getObjectDirectoryName;
+        private System.Windows.Forms.TextBox textBox_objectDirectoryName;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TabPage tabPage_run;
     }
 }
