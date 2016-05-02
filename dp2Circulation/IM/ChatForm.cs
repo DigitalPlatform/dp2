@@ -11,15 +11,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
+using System.Collections;
+using Microsoft.Win32;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
-using System.Collections;
-using Microsoft.Win32;
-// using Microsoft.AspNet.SignalR.Client.Hubs;
-
 
 namespace dp2Circulation
 {
@@ -130,7 +128,7 @@ namespace dp2Circulation
                 // creator 要替换为用户名
                 this.AddMessageLine(
                     IsMe(record) ? "right" : "left",
-                    string.IsNullOrEmpty(record.userName) ? record.creator : record.userName,
+                    string.IsNullOrEmpty(record.userName) ? GetShortUserName(record.creator) : record.userName,
                     record.data);
 
                 _lastMessage = record;
@@ -140,7 +138,8 @@ namespace dp2Circulation
         // 是否为自己发出的消息
         bool IsMe(MessageRecord record)
         {
-            if (record.userName == this.MainForm.MessageHub.UserName)
+            if (string.IsNullOrEmpty(this.MainForm.MessageHub.UserName) == false
+                && record.userName == this.MainForm.MessageHub.UserName)
                 return true;
             if (string.IsNullOrEmpty(this.MainForm.MessageHub.UserName))
             {
@@ -150,17 +149,72 @@ namespace dp2Circulation
                 string strLibraryUID = (string)table["libraryUID"];
                 string strLibraryUserName = (string)table["libraryUserName"];
 
-                string strText = strLibraryUserName + "@";
-                if (string.IsNullOrEmpty(strLibraryName))
-                    strText += strLibraryName;
-                else
-                    strText += strLibraryUID;
+                string strText = strLibraryUserName + "@" + strLibraryName + "|" +strLibraryUID;
 
-                if (record.creator == strText)
+                if (CompareUserName(record.creator,"~" + strText) == true)
                     return true;
             }
 
             return false;
+        }
+
+        // 从 xxxx@xxxx|xxxxx 中取得前两个部分
+        static string GetShortUserName(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return "";
+
+            int nRet = strText.IndexOf("|");
+            if (nRet == -1)
+                return strText;
+            return strText.Substring(0, nRet);
+        }
+
+        static bool CompareUserName(string s1, string s2)
+        {
+            if (s1 == s2)
+                return true;
+
+            UserNameStruct userName1 = UserNameStruct.Build(s1);
+            UserNameStruct userName2 = UserNameStruct.Build(s2);
+
+            // 优先比较 UID
+            if (string.IsNullOrEmpty(userName1.LibraryUID) == false
+                && string.IsNullOrEmpty(userName2.LibraryUID) == false)
+            {
+                if (userName1.UserName == userName2.UserName
+                    && userName1.LibraryUID == userName2.LibraryUID)
+                    return true;
+            }
+
+            // 然后比较 LibraryName
+            if (string.IsNullOrEmpty(userName1.LibraryUID) == true
+    && string.IsNullOrEmpty(userName2.LibraryUID) == true)
+            {
+                if (userName1.UserName == userName2.UserName
+                    && userName1.LibraryName == userName2.LibraryName)
+                    return true;
+            }
+
+            return false;
+        }
+
+        class UserNameStruct
+        {
+            public string UserName = "";
+            public string LibraryName = "";
+            public string LibraryUID = "";
+            public static UserNameStruct Build(string strText)
+            {
+                UserNameStruct result = new UserNameStruct();
+                List<string> array1 = StringUtil.ParseTwoPart(strText, "@");
+                result.UserName = array1[0];
+
+                List<string> array2 = StringUtil.ParseTwoPart(array1[1], "|");
+                result.LibraryName = array2[0];
+                result.LibraryUID = array2[1];
+                return result;
+            }
         }
 
         private void IMForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -524,7 +578,7 @@ namespace dp2Circulation
                     // creator 要替换为用户名
                     this.AddMessageLine(
                         IsMe(record) ? "right" : "left",
-                        string.IsNullOrEmpty(record.userName) ? record.creator : record.userName,
+                        string.IsNullOrEmpty(record.userName) ? GetShortUserName(record.creator) : record.userName,
                         record.data);
 
                     _lastMessage = record;

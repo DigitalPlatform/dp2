@@ -32,6 +32,7 @@ using DigitalPlatform.Range;
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using System.Messaging;
+using System.Security.Principal;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -1229,12 +1230,64 @@ namespace DigitalPlatform.LibraryServer
 #if LOG_INFO
                     app.WriteErrorLog("INFO: Message Queue");
 #endif
+
                     if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
                     {
                         try
                         {
+#if NO
+                            if (MessageQueue.Exists(this.OutgoingQueue))
+                            {
+                                MessageQueue.Delete(this.OutgoingQueue);
+                            }
+#endif
+
                             if (!MessageQueue.Exists(this.OutgoingQueue))
-                                MessageQueue.Create(this.OutgoingQueue);
+                            {
+                                MessageQueue queue = MessageQueue.Create(this.OutgoingQueue);
+
+#if NO
+                                // Create an AccessControlList.
+                                AccessControlList list = new AccessControlList();
+
+                                // Create a new trustee to represent the "Everyone" user group.
+                                Trustee tr = new Trustee("Everyone");
+
+                                // Create an AccessControlEntry, granting the trustee read access to
+                                // the queue.
+                                AccessControlEntry entry = new AccessControlEntry(
+                                    tr, GenericAccessRights.Read,
+                         StandardAccessRights.Read,
+                                    AccessControlEntryType.Allow);
+
+                                // Add the AccessControlEntry to the AccessControlList.
+                                list.Add(entry);
+
+
+                                // Apply the AccessControlList to the queue.
+                                queue.SetPermissions(list);
+#endif
+
+                                var wi = WindowsIdentity.GetCurrent();
+                                if (wi.IsSystem == true)
+                                {
+                                    // 当前用户已经是 LocalSystem 了，需要额外给 Everyone 添加权限，以便让 dp2Capo 的控制台方式运行能访问这个 Queue
+                                    queue.SetPermissions(@"Everyone",
+                MessageQueueAccessRights.ReceiveMessage
+                | MessageQueueAccessRights.DeleteMessage
+                | MessageQueueAccessRights.PeekMessage
+                | MessageQueueAccessRights.GenericRead);
+                                }
+
+                                // 如果当前是 Administrator，表示可能是 dp2libraryxe 启动的方式，那么需要专门给 LocalSystem 操作 Queue 的权限，以便 Windows Service 方式的 dp2Capo 能访问 Queue
+                                var wp = new WindowsPrincipal(wi);
+                                if (wp.IsInRole(WindowsBuiltInRole.Administrator))
+                                {
+                                    queue.SetPermissions(@"NT AUTHORITY\System",
+                                        MessageQueueAccessRights.FullControl);
+                                }
+
+                            }
                         }
                         catch (Exception ex)
                         {

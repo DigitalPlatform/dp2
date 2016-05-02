@@ -1061,7 +1061,7 @@ namespace dp2Circulation
             // 
             this.MenuItem_importExport.Name = "MenuItem_importExport";
             this.MenuItem_importExport.Size = new System.Drawing.Size(152, 22);
-            this.MenuItem_importExport.Text = "导入导出(&I)";
+            this.MenuItem_importExport.Text = "从书目转储文件导入(&I)";
             this.MenuItem_importExport.Click += new System.EventHandler(this.MenuItem_importExport_Click);
             // 
             // toolStripSeparator17

@@ -229,7 +229,7 @@ namespace dp2Circulation
         /// <param name="e">事件参数</param>
         public virtual void OnMyFormClosing(FormClosingEventArgs e)
         {
-            if ( (stop != null && stop.State == 0)    // 0 表示正在处理
+            if ((stop != null && stop.State == 0)    // 0 表示正在处理
                 || this._processing > 0)
             {
                 MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
@@ -664,7 +664,7 @@ namespace dp2Circulation
                 }
 
                 string strFontColor = MainForm.AppInfo.GetString(
-                        this.FormName,
+                    this.FormName,
                     "default_font_color",
                     "");
 
@@ -676,9 +676,8 @@ namespace dp2Circulation
 
                     this.ForeColor = (Color)converter.ConvertFromString(strFontColor);
                 }
+                this.PerformLayout();
             }
-
-            this.PerformLayout();
         }
 
         /// <summary>
@@ -755,11 +754,14 @@ namespace dp2Circulation
         /// <param name="e">事件参数</param>
         protected override void OnActivated(EventArgs e)
         {
-            // if (this.stop != null)
-            this.MainForm.stopManager.Active(this.stop);
+            if (this.MainForm != null)
+            {
+                // if (this.stop != null)
+                this.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_font.Enabled = true;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = true;
+                this.MainForm.MenuItem_font.Enabled = true;
+                this.MainForm.MenuItem_restoreDefaultFont.Enabled = true;
+            }
 
             base.OnActivated(e);
         }

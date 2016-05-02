@@ -206,6 +206,7 @@
             this.Controls.Add(this.textBox_biblioDumpFileName);
             this.Controls.Add(this.label1);
             this.Name = "OpenBiblioDumpFileDialog";
+            this.ShowInTaskbar = false;
             this.Text = "打开书目转储文件";
             this.Load += new System.EventHandler(this.OpenBiblioDumpFileDialog_Load);
             this.ResumeLayout(false);

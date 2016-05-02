@@ -6058,6 +6058,7 @@ MessageBoxDefaultButton.Button2);
 #endif
             OpenBiblioDumpFileDialog dlg = new OpenBiblioDumpFileDialog();
             MainForm.SetControlFont(dlg, this.Font);
+            dlg.CreateMode = true;
 
             this.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_OpenBiblioDumpFileDialog");
             dlg.ShowDialog(this);

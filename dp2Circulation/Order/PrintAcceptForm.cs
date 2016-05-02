@@ -1634,6 +1634,7 @@ namespace dp2Circulation
             return 1;
         }
 
+        // TODO: 此函数和 LocationCollection 中的功能重复了，考虑用后者替代
         // 将采购馆藏字符串中的refid解析出来
         /// <summary>
         /// 将采购馆藏字符串中的参考 ID 解析出来

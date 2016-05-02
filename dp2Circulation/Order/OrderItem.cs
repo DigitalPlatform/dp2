@@ -1428,6 +1428,8 @@ out string strError)
                     changed_refids[strOldRefID] = order_item.RefID;
                 }
 
+                // TODO: distribute 里面的册参考 ID 需要替换
+
                 this.Add(order_item);
                 order_item.ItemDisplayState = ItemDisplayState.New;
                 order_item.AddToListView(list);
