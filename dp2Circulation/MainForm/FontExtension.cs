@@ -138,14 +138,29 @@ namespace dp2Circulation
             }
         }
 
+        static Size GetImageScalingSize()
+        {
+            using (Graphics g = Program.MainForm.CreateGraphics())
+            {
+                int width = Convert.ToInt32(16 * (g.DpiX / 96F));
+                int height = Convert.ToInt32(16 * (g.DpiY / 96F));
+                return new Size(
+                    Math.Max(18, width),
+                    Math.Max(18, height));   // 2016/4/27
+            }
+        }
+
         static void ChangeDifferentFaceFont(ToolStrip tool,
     Font font)
         {
+#if NO
             using (Graphics g = Program.MainForm.CreateGraphics())
             {
                 tool.ImageScalingSize = new Size(Convert.ToInt32(16 * (g.DpiX / 96F)),
                     Convert.ToInt32(16 * (g.DpiY / 96F)));   // 2016/4/27
             }
+#endif
+            tool.ImageScalingSize = GetImageScalingSize();
 
             // 修改所有事项的字体，如果字体名不一样的话
             foreach (ToolStripItem item in tool.Items)

@@ -556,6 +556,17 @@ namespace DigitalPlatform.Text
             return result;
         }
 
+        public static List<string> ParseTwoPart(string strText, string strSep)
+        {
+            string strLeft = "";
+            string strRight = "";
+            ParseTwoPart(strText, strSep, out strLeft, out strRight);
+            List<string> results = new List<string>();
+            results.Add(strLeft);
+            results.Add(strRight);
+            return results;
+        }
+
         /// <summary>
         /// 通用的，切割两个部分的函数
         /// </summary>

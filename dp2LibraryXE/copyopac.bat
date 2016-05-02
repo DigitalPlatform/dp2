@@ -16,6 +16,11 @@ del testlogin.* /Q
 del *.txt /Q
 del start.xml /Q
 
+del circulation.* /Q
+del default.* /Q
+del restart.* /Q
+del test.* /Q
+
 
 md bin
 cd bin

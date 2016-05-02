@@ -1727,7 +1727,6 @@ namespace dp2Circulation
 
             XmlNodeList exist_nodes = this.dom.DocumentElement.SelectNodes("orderInfo/*");
 
-
             List<string> exist_xmls = new List<string>();   // 刷新前已经存在的XML片断
             List<string> exist_refids = new List<string>(); // 这些XML片断的refid字符串
             foreach (XmlNode node in exist_nodes)

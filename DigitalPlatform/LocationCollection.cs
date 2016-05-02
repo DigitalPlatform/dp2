@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -380,6 +381,35 @@ namespace DigitalPlatform
                 return 1;
 
             return 0;
+        }
+
+        // 刷新所有 refid
+        // parameters:
+        //      table   参考 ID 替换表。旧参考 ID --> 新参考 ID
+        //              如果在 table 中查到了对照关系，则用它来替换已有的参考 ID；如果没有查到，则替换新的参考 ID 后加入这一个对照关系
+        // return:
+        //      被替换的参考 ID 个数
+        public int RefreshRefIDs(ref Hashtable table)
+        {
+            int count = 0;
+            foreach (Location location in this)
+            {
+                if (string.IsNullOrEmpty(location.RefID) == false)
+                {
+                    string old_refid = location.RefID;
+                    string new_refid = (string)table[old_refid];
+                    if (string.IsNullOrEmpty(new_refid) == false)
+                        location.RefID = new_refid;
+                    else
+                    {
+                        location.RefID = Guid.NewGuid().ToString();
+                        table[old_refid] = location.RefID;
+                    }
+                    count++;
+                }
+            }
+
+            return count;
         }
     }
 }

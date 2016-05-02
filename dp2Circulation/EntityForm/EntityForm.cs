@@ -7719,6 +7719,8 @@ MessageBoxDefaultButton.Button1);
             strError = "";
 
             LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 2, 0);
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在删除书目记录 ...");
@@ -7760,6 +7762,7 @@ MessageBoxDefaultButton.Button1);
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
             }
         }
@@ -10867,10 +10870,10 @@ merge_dlg.UiState);
                 bRefreshRefID = false;
 
             OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Title = "请指定要打开的XML文件名";
+            dlg.Title = "请指定要打开的 XML 文件名";
             dlg.FileName = "";
             // dlg.InitialDirectory = 
-            dlg.Filter = "XML文件 (*.xml)|*.xml|All files (*.*)|*.*";
+            dlg.Filter = "XML 文件 (*.xml)|*.xml|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)

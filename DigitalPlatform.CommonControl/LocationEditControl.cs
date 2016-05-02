@@ -508,7 +508,7 @@ namespace DigitalPlatform.CommonControl
                     controls.Add(control);
             }
 
-            foreach(Control control in controls)
+            foreach (Control control in controls)
             {
                 control.Dispose();
             }
@@ -2392,8 +2392,6 @@ namespace DigitalPlatform.CommonControl
             }
         }
     }
-
-
 
     /*
     /// <summary>

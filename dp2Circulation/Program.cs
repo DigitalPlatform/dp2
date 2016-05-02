@@ -126,7 +126,8 @@ namespace dp2Circulation
 
                     // Vista on up = 6
                     // http://stackoverflow.com/questions/17406850/how-can-we-check-if-the-current-os-is-win8-or-blue
-                    if (Environment.OSVersion.Version.Major > 6
+                    if (
+                        Environment.OSVersion.Version.Major > 6
                         || (Environment.OSVersion.Version.Major == 6
                             && Environment.OSVersion.Version.Minor >= 2)
                         )
