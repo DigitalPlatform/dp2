@@ -90,6 +90,7 @@
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
             this.toolStripLabel_biblioSource = new System.Windows.Forms.ToolStripLabel();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
+            this.checkBox_settings_addDefaultFields = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_settings.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -126,6 +127,7 @@
             // 
             this.tabPage_settings.AutoScroll = true;
             this.tabPage_settings.BackColor = System.Drawing.Color.DimGray;
+            this.tabPage_settings.Controls.Add(this.checkBox_settings_addDefaultFields);
             this.tabPage_settings.Controls.Add(this.button_settings_bilbioDefault);
             this.tabPage_settings.Controls.Add(this.button_settings_reCreateServersXml);
             this.tabPage_settings.Controls.Add(this.label2);
@@ -151,7 +153,7 @@
             // 
             // button_settings_reCreateServersXml
             // 
-            this.button_settings_reCreateServersXml.Location = new System.Drawing.Point(9, 128);
+            this.button_settings_reCreateServersXml.Location = new System.Drawing.Point(9, 150);
             this.button_settings_reCreateServersXml.Name = "button_settings_reCreateServersXml";
             this.button_settings_reCreateServersXml.Size = new System.Drawing.Size(241, 23);
             this.button_settings_reCreateServersXml.TabIndex = 7;
@@ -608,6 +610,16 @@
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(473, 307);
             this.tableLayoutPanel_main.TabIndex = 10;
             // 
+            // checkBox_settings_addDefaultFields
+            // 
+            this.checkBox_settings_addDefaultFields.AutoSize = true;
+            this.checkBox_settings_addDefaultFields.Location = new System.Drawing.Point(9, 106);
+            this.checkBox_settings_addDefaultFields.Name = "checkBox_settings_addDefaultFields";
+            this.checkBox_settings_addDefaultFields.Size = new System.Drawing.Size(210, 16);
+            this.checkBox_settings_addDefaultFields.TabIndex = 9;
+            this.checkBox_settings_addDefaultFields.Text = "为下载的书目记录添加默认字段(&D)";
+            this.checkBox_settings_addDefaultFields.UseVisualStyleBackColor = true;
+            // 
             // EntityRegisterWizard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -695,5 +707,6 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_main;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_search;
         private System.Windows.Forms.Panel panel_search;
+        private System.Windows.Forms.CheckBox checkBox_settings_addDefaultFields;
     }
 }

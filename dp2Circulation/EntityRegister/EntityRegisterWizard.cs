@@ -219,6 +219,9 @@ namespace dp2Circulation
                 controls.Add(new ControlWrapper(this.checkBox_settings_keyboardWizard, false));
                 controls.Add(new ControlWrapper(this.comboBox_settings_colorStyle, 0));
                 controls.Add(this.dpTable_browseLines);
+
+                controls.Add(new ControlWrapper(this.checkBox_settings_addDefaultFields, true));
+
                 return GuiState.GetUiState(controls);
             }
             set
@@ -238,6 +241,9 @@ namespace dp2Circulation
                 controls.Add(new ControlWrapper(this.checkBox_settings_keyboardWizard, false));
                 controls.Add(new ControlWrapper(this.comboBox_settings_colorStyle, 0));
                 controls.Add(this.dpTable_browseLines);
+
+                controls.Add(new ControlWrapper(this.checkBox_settings_addDefaultFields, true));
+
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -2315,6 +2321,21 @@ out strError);
             // 清除窗口内容
             _biblio.Clear();
 
+            if (this.checkBox_settings_addDefaultFields.Checked)
+            {
+                string strDefaultRecord = this.UnimarcBiblioDefault;
+                if (string.IsNullOrEmpty(strDefaultRecord) == false)
+                {
+                    strDefaultRecord = BuildMarcFromDefaultDef(strDefaultRecord);
+                    // 给一条书目记录添加默认字段
+                    // parameters:
+                    //      strDefaultRecord   包含默认字段的一条 MARC 记录
+                    AddFields(
+                        info,
+                        strDefaultRecord);
+                }
+            }
+
             nRet = SetBiblio(info, bAutoSetFocus, out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -3875,6 +3896,32 @@ MessageBoxDefaultButton.Button1);
             NewBiblio();
         }
 
+        // 把默认字段定义转换为 MARC 字符串形态
+        static string BuildMarcFromDefaultDef(string strRecord)
+        {
+            if (string.IsNullOrEmpty(strRecord) == false)
+            {
+                if (StringUtil.HasHead(strRecord, "hdr") == true
+                    || StringUtil.HasHead(strRecord, "###") == true)
+                {
+                    strRecord = strRecord.Substring(3);
+                    // 去掉第一个回车
+                    int nRet = strRecord.IndexOf("\r\n");
+                    if (nRet != -1)
+                        strRecord = strRecord.Remove(nRet, 2);
+                }
+                else
+                {
+                    // 加上头标区
+                    strRecord = "?????nam0 22?????3i 45  " + strRecord;
+                }
+                strRecord = strRecord.Replace("$", new string((char)31, 1))
+                    .Replace("\r\n", new string((char)30, 1));
+            }
+
+            return strRecord;
+        }
+
         // 装入一条空白书目记录
         // return:
         //      -1      出错
@@ -3896,6 +3943,7 @@ MessageBoxDefaultButton.Button1);
             strRecord = this.UnimarcBiblioDefault;
             if (string.IsNullOrEmpty(strRecord) == false)
             {
+#if NO
                 if (StringUtil.HasHead(strRecord, "hdr") == true
                     || StringUtil.HasHead(strRecord, "###") == true)
                 {
@@ -3912,6 +3960,8 @@ MessageBoxDefaultButton.Button1);
                 }
                 strRecord = strRecord.Replace("$", new string((char)31, 1))
                     .Replace("\r\n", new string((char)30, 1));
+#endif
+                strRecord = BuildMarcFromDefaultDef(strRecord);
             }
 
             RegisterBiblioInfo info = null;
@@ -4073,6 +4123,55 @@ MessageBoxDefaultButton.Button1);
 
             info.OldXml = strXml;
             return info;
+        }
+
+        // 给一条书目记录添加默认字段
+        // parameters:
+        //      strDefaultRecord   包含默认字段的一条 MARC 记录
+        void AddFields(
+            RegisterBiblioInfo info,
+            string strDefaultRecord)
+        {
+            string strError = "";
+            string strMARC = "";
+            string strMarcSyntax = "";
+            // 将XML格式转换为MARC格式
+            // 自动从数据记录中获得MARC语法
+            int nRet = MarcUtil.Xml2Marc(info.OldXml,
+                true,
+                null,
+                out strMarcSyntax,
+                out strMARC,
+                out strError);
+            if (nRet == -1)
+            {
+                Debug.Assert(false, "");
+                return;
+            }
+
+            MarcRecord default_record = new MarcRecord(strDefaultRecord);
+            MarcRecord record = new MarcRecord(strMARC);
+            bool bChanged = true;
+            foreach (MarcField field in default_record.ChildNodes)
+            {
+                if (record.select("field[@name='" + field.Name + "']").count > 0)
+                    continue;   // 已经存在的字段不会加入
+                record.ChildNodes.insertSequence(field, InsertSequenceStyle.PreferTail);
+                bChanged = true;
+            }
+
+            if (bChanged == true)
+            {
+                string strXml = "";
+                nRet = MarcUtil.Marc2Xml(record.Text,
+                    info.MarcSyntax,
+                    out strXml,
+                    out strError);
+                if (nRet == -1)
+                    throw new Exception(strError);
+
+                info.OldXml = strXml;
+            }
         }
 
         private void splitContainer_biblioAndItems_DoubleClick(object sender, EventArgs e)

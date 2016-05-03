@@ -1613,6 +1613,7 @@ namespace dp2Circulation
             return strText.Replace("（", "(").Replace("）", ")").Replace("，", ",");
         }
 
+#if NO
         // 去掉外围的括号
         // (Hatzel, Richardson)
         static string Unquote(string strValue)
@@ -1628,6 +1629,7 @@ namespace dp2Circulation
 
             return strValue;
         }
+#endif
 
         // 从选定的字段中获得石头汤著者字符串
         // TODO: 题名字符串不看 $b

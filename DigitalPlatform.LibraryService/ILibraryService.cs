@@ -406,7 +406,8 @@ namespace dp2Library
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult ResetPassword(string strParameters,
-            string strMessageTemplate);
+            string strMessageTemplate,
+            out string strMessage);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult GetValueTable(

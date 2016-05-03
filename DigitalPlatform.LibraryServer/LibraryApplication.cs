@@ -8837,6 +8837,7 @@ out strError);
         // 重设密码
         // parameters:
         //      strMessageTempate   消息文字模板。其中可以使用 %name% %barcode% %temppassword% %expiretime% %period% 等宏
+        //      strMessage  返回拟发送给读者的消息文字
         // return:
         //      -1  出错
         //      0   因为条件不具备功能没有成功执行
@@ -8845,23 +8846,33 @@ out strError);
             // string strLibraryCodeList,
             string strParameters,
             string strMessageTemplate,
+            out string strMessage,
             out string strError)
         {
             strError = "";
+            strMessage = "";
 
             MessageInterface external_interface = this.GetMessageInterface("sms");
-
-            if (external_interface == null)
-            {
-                strError = "当前系统尚未配置短消息 (sms) 接口，无法进行重设密码的操作";
-                return -1;
-            }
 
             Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
             string strLoginName = (string)parameters["barcode"];
             string strNameParam = (string)parameters["name"];
             string strTelParam = (string)parameters["tel"];
             string strLibraryCodeList = (string)parameters["librarycode"];  // 控制检索读者记录的范围
+
+            string strStyle = (string)parameters["style"];
+            if (StringUtil.IsInList("returnMessage", strStyle) == false)
+            {
+                // 直接给调用者返回拟发送到手机短信的内容。要求调用者具有特殊权限才行，要求在调用本函数前判断好。
+            }
+            else
+            {
+                if (external_interface == null)
+                {
+                    strError = "当前系统尚未配置短消息 (sms) 接口，无法进行重设密码的操作";
+                    return -1;
+                }
+            }
 
             if (string.IsNullOrEmpty(strLoginName) == true)
             {
@@ -9089,68 +9100,83 @@ out strError);
                 DateTime expire = this.Clock.Now + new TimeSpan(1, 0, 0);   // 本地时间
                 string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(expire);
 
-                if (string.IsNullOrEmpty(strMessageTemplate) == true)
-                    strMessageTemplate = "%name% 您好！\n您的读者帐户(证条码号为 %barcode%)已设临时密码 %temppassword%，在 %period% 内登录会成为正式密码";
-
-                string strBody = strMessageTemplate.Replace("%barcode%", strBarcode)
-                    .Replace("%name%", strName)
-                    .Replace("%temppassword%", strReaderTempPassword)
-                    .Replace("%expiretime%", expire.ToLongTimeString())
-                    .Replace("%period%", "一小时");
-                // string strBody = "读者(证条码号) " + strBarcode + " 的帐户密码已经被重设为 " + strReaderNewPassword + "";
-
-                // 向手机号码发送短信
+                if (StringUtil.IsInList("returnMessage", strStyle) == true)
                 {
-                    // 发送消息
-                    try
+                    // 直接给调用者返回消息内容。消息内容中有临时密码，属于敏感信息，要求调用者具有特殊权限才行。
+                    Hashtable table = new Hashtable();
+                    table["tel"] = strTelParam;
+                    table["barcode"] = strBarcode;
+                    table["name"] = strName;
+                    table["tempPassword"] = strReaderTempPassword;
+                    table["expireTime"] = expire.ToLongTimeString();
+                    table["period"] = "一小时";
+                    strMessage = BuildMessageXml(table);
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(strMessageTemplate) == true)
+                        strMessageTemplate = "%name% 您好！\n您的读者帐户(证条码号为 %barcode%)已设临时密码 %temppassword%，在 %period% 内登录会成为正式密码";
+
+                    string strBody = strMessageTemplate.Replace("%barcode%", strBarcode)
+                        .Replace("%name%", strName)
+                        .Replace("%temppassword%", strReaderTempPassword)
+                        .Replace("%expiretime%", expire.ToLongTimeString())
+                        .Replace("%period%", "一小时");
+                    // string strBody = "读者(证条码号) " + strBarcode + " 的帐户密码已经被重设为 " + strReaderNewPassword + "";
+
+                    // 向手机号码发送短信
                     {
-                        // 发送一条消息
-                        // parameters:
-                        //      strPatronBarcode    读者证条码号
-                        //      strPatronXml    读者记录XML字符串。如果需要除证条码号以外的某些字段来确定消息发送地址，可以从XML记录中取
-                        //      strMessageText  消息文字
-                        //      strError    [out]返回错误字符串
-                        // return:
-                        //      -1  发送失败
-                        //      0   没有必要发送
-                        //      >=1   发送成功，返回实际发送的消息条数
-                        nRet = external_interface.HostObj.SendMessage(
-                            strBarcode,
-                            readerdom.DocumentElement.OuterXml,
-                            strBody,
-                            strLibraryCode,
-                            out strError);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = external_interface.Type + " 类型的外部消息接口Assembly中SendMessage()函数抛出异常: " + ex.Message;
-                        nRet = -1;
-                    }
-                    if (nRet == -1)
-                    {
-                        strError = "向读者 '" + strBarcode + "' 发送" + external_interface.Type + " message时出错: " + strError;
-                        if (this.Statis != null)
-                            this.Statis.IncreaseEntryValue(
-                            strLibraryCode,
-                            "重设密码通知",
-                            external_interface.Type + " message 重设密码通知消息发送错误数",
-                            1);
-                        this.WriteErrorLog(strError);
-                        return -1;
-                    }
-                    else
-                    {
-                        if (this.Statis != null)
-                            this.Statis.IncreaseEntryValue(
-        strLibraryCode,
-        "重设密码通知",
-        external_interface.Type + " message 重设密码通知消息发送数",
-        nRet);  // 短信条数可能多于次数
-                        if (this.Statis != null)
-                            this.Statis.IncreaseEntryValue(strLibraryCode,
-                            "重设密码通知",
-                            external_interface.Type + " message 重设密码通知人数",
-                            1);
+                        // 发送消息
+                        try
+                        {
+                            // 发送一条消息
+                            // parameters:
+                            //      strPatronBarcode    读者证条码号
+                            //      strPatronXml    读者记录XML字符串。如果需要除证条码号以外的某些字段来确定消息发送地址，可以从XML记录中取
+                            //      strMessageText  消息文字
+                            //      strError    [out]返回错误字符串
+                            // return:
+                            //      -1  发送失败
+                            //      0   没有必要发送
+                            //      >=1   发送成功，返回实际发送的消息条数
+                            nRet = external_interface.HostObj.SendMessage(
+                                strBarcode,
+                                readerdom.DocumentElement.OuterXml,
+                                strBody,
+                                strLibraryCode,
+                                out strError);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = external_interface.Type + " 类型的外部消息接口Assembly中SendMessage()函数抛出异常: " + ex.Message;
+                            nRet = -1;
+                        }
+                        if (nRet == -1)
+                        {
+                            strError = "向读者 '" + strBarcode + "' 发送" + external_interface.Type + " message时出错: " + strError;
+                            if (this.Statis != null)
+                                this.Statis.IncreaseEntryValue(
+                                strLibraryCode,
+                                "重设密码通知",
+                                external_interface.Type + " message 重设密码通知消息发送错误数",
+                                1);
+                            this.WriteErrorLog(strError);
+                            return -1;
+                        }
+                        else
+                        {
+                            if (this.Statis != null)
+                                this.Statis.IncreaseEntryValue(
+            strLibraryCode,
+            "重设密码通知",
+            external_interface.Type + " message 重设密码通知消息发送数",
+            nRet);  // 短信条数可能多于次数
+                            if (this.Statis != null)
+                                this.Statis.IncreaseEntryValue(strLibraryCode,
+                                "重设密码通知",
+                                external_interface.Type + " message 重设密码通知人数",
+                                1);
+                        }
                     }
                 }
 
@@ -9174,8 +9200,24 @@ out strError);
                 sessioninfo = null;
             }
 
-            strError = "临时密码已通过短信方式发送到手机 " + strTelParam + "。请按照手机短信提示进行操作";
+            if (StringUtil.IsInList("returnMessage", strStyle) == false)
+                strError = "临时密码已通过短信方式发送到手机 " + strTelParam + "。请按照手机短信提示进行操作";
             return 1;
+        }
+
+        // 构造拟发送给读者的消息 XML
+        static string BuildMessageXml(Hashtable table)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+
+            foreach (string key in table.Keys)
+            {
+                string value = (string)table[key];
+                DomUtil.SetElementText(dom.DocumentElement, key, value);
+            }
+
+            return dom.DocumentElement.OuterXml;
         }
 
         // 观察在 password 元素 tempPasswordExpire 属性中残留的失效期，必须在这个时间以后才能进行本次操作

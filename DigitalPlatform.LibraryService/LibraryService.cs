@@ -7666,13 +7666,35 @@ namespace dp2Library
         //                      librarycode=????
         //      strMessageTempate   消息文字模板。其中可以使用 %name% %barcode% %temppassword% %expiretime% %period% 等宏
         public LibraryServerResult ResetPassword(string strParameters,
-            string strMessageTemplate)
+            string strMessageTemplate,
+            out string strMessage)
         {
-            LibraryServerResult result = this.PrepareEnvironment("ResetPassword", false);
+            strMessage = "";
+
+            bool bReturnMessage = false;
+
+            Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
+            string strStyle = (string)parameters["style"];
+            if (StringUtil.IsInList("returnMessage", strStyle) == false)
+                bReturnMessage = true;
+
+            LibraryServerResult result = this.PrepareEnvironment("ResetPassword", bReturnMessage, bReturnMessage);
             if (result.Value == -1)
                 return result;
 
+            if (bReturnMessage)
+            {
+                if (sessioninfo.RightsOriginList.IsInList("resetpasswordreturnmessage") == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "(style为'returnMessage'的)重设密码的操作被拒绝。不具备 resetpasswordreturnmessage 权限";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
             string strError = "";
+
             // 不需要登录
             // return:
             //      -1  出错
@@ -7682,6 +7704,7 @@ namespace dp2Library
                 // sessioninfo.LibraryCodeList,
                 strParameters,
                 strMessageTemplate,
+                out strMessage,
                 out strError);
             result.Value = nRet;
             result.ErrorInfo = strError;
@@ -9469,6 +9492,12 @@ namespace dp2Library
 
             LibraryServerResult result = this.PrepareEnvironment("GetSystemParameter", true, true, true);
             if (result.Value == -1)
+                return result;
+
+            // 2016/5/3
+            // 两个参数都为空的情况，可以用来迫使前端登录一次
+            if (string.IsNullOrEmpty(strCategory) == true
+                && string.IsNullOrEmpty(strName) == true)
                 return result;
 
             app.LockForRead();

@@ -93,6 +93,18 @@ namespace DigitalPlatform.OPAC.Server
         {
             get
             {
+                if (string.IsNullOrEmpty(this._rights) == true)
+                    this.EnsureGetRights();
+
+                return _rights;
+            }
+        }
+
+        // 不会导致访问服务器的简单属性
+        public string _rightsOrigin
+        {
+            get
+            {
                 return _rights;
             }
         }
@@ -343,6 +355,7 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
+#if NO
         // 重新登录
         // parameters:
         // return:
@@ -370,20 +383,56 @@ namespace DigitalPlatform.OPAC.Server
             return 0;
 #else
             LibraryChannel channel = this.GetChannel(true); //  this.GetChannel(true, this.m_strParameters);
-            // return:
-            //      -1  error
-            //      0   登录未成功
-            //      1   登录成功
-            //      >1  有多个账户符合条件。
-            long lRet = channel.Login(channel.UserName,
-                channel.Password,
-                this.m_strParameters,
-                out strError);
-            if (lRet == -1 || lRet == 0)
-                return -1;
-            _rights = channel.Rights;
-            return 0;
+            try
+            {
+                // return:
+                //      -1  error
+                //      0   登录未成功
+                //      1   登录成功
+                //      >1  有多个账户符合条件。
+                long lRet = channel.Login(channel.UserName,
+                    channel.Password,
+                    this.m_strParameters,
+                    out strError);
+                if (lRet == -1 || lRet == 0)
+                    return -1;
+                _rights = channel.Rights;
+                return 0;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
 #endif
+        }
+#endif
+
+        bool EnsureGetRights()
+        {
+            LibraryChannel channel = this.GetChannel(true);
+            try
+            {
+                string strError = "";
+                string strValue = "";
+                // return:
+                //      -1  错误
+                //      0   没有得到所要求的参数值
+                //      1   得到所要求的参数值
+                long lRet = channel.GetSystemParameter(
+                    null,
+                    "",
+                    "",
+                    out strValue,
+                    out strError);
+                if (lRet == -1)
+                    return false;
+                _rights = channel.Rights;
+                return true;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
         }
 
         // return:

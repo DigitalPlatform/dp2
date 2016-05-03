@@ -2019,7 +2019,7 @@ true);
         void m_macroutil_ParseOneMacro(object sender, ParseOneMacroEventArgs e)
         {
             // string strError = "";
-            string strName = Unquote(e.Macro);  // 去掉百分号
+            string strName = StringUtil.Unquote(e.Macro, "%%");  // 去掉百分号
 
             // 函数名：
             string strFuncName = "";
@@ -2159,6 +2159,7 @@ true);
             e.ErrorInfo = strError;
         }
 
+#if NO
         static string Unquote(string strValue)
         {
             if (string.IsNullOrEmpty(strValue) == true)
@@ -2173,6 +2174,7 @@ true);
 
             return strValue;
         }
+#endif
 
         void binaryResControl1_ContentChanged(object sender, ContentChangedEventArgs e)
         {

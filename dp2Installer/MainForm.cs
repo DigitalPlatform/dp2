@@ -423,6 +423,7 @@ FormWindowState.Normal);
             this.Close();
         }
 
+#if NO
         static string Unquote(string strValue)
         {
             if (string.IsNullOrEmpty(strValue) == true)
@@ -436,6 +437,7 @@ FormWindowState.Normal);
 
             return strValue;
         }
+#endif
 
         private void MenuItem_dp2library_upgrade_Click(object sender, EventArgs e)
         {
@@ -458,7 +460,7 @@ FormWindowState.Normal);
                     strError = "dp2library 未曾安装过";
                     goto ERROR1;
                 }
-                strExePath = Unquote(strExePath);
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
                 AppendString("正在停止 dp2library 服务 ...\r\n");
                 nRet = StopService("dp2LibraryService",
@@ -1560,7 +1562,7 @@ MessageBoxDefaultButton.Button2);
                     strError = "dp2kernel 未曾安装过";
                     goto ERROR1;
                 }
-                strExePath = Unquote(strExePath);
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
                 AppendString("正在停止 dp2kernel 服务 ...\r\n");
                 nRet = StopService("dp2KernelService",
@@ -1923,7 +1925,7 @@ MessageBoxDefaultButton.Button1);
             string strExePath = GetPathOfService("dp2LibraryService");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
-                strExePath = Unquote(strExePath);
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
                 try
                 {
                     System.Diagnostics.Process.Start(Path.GetDirectoryName(strExePath));
@@ -1944,7 +1946,7 @@ MessageBoxDefaultButton.Button1);
             string strExePath = GetPathOfService("dp2KernelService");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
-                strExePath = Unquote(strExePath);
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
                 try
                 {
                     System.Diagnostics.Process.Start(Path.GetDirectoryName(strExePath));
@@ -2791,7 +2793,7 @@ MessageBoxDefaultButton.Button1);
             string strExePath = GetPathOfService("dp2LibraryService");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
-                strExePath = Unquote(strExePath);
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
                 text.Append("\r\n*** dp2library\r\n");
                 text.Append("可执行文件目录:\t" + Path.GetDirectoryName(strExePath) + "\r\n");
@@ -2828,7 +2830,7 @@ MessageBoxDefaultButton.Button1);
             strExePath = GetPathOfService("dp2KernelService");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
-                strExePath = Unquote(strExePath);
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
                 text.Append("\r\n*** dp2kernel\r\n");
                 text.Append("可执行文件目录:\t" + Path.GetDirectoryName(strExePath) + "\r\n");
@@ -3258,7 +3260,7 @@ MessageBoxDefaultButton.Button1);
                 strError = "dp2kernel 尚未安装和注册为 Windows Service，无法进行注销";
                 goto ERROR1;
             }
-            strExePath = Unquote(strExePath);
+            strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
             // 注销 Windows Service
 
@@ -3302,7 +3304,7 @@ MessageBoxDefaultButton.Button1);
                 strError = "dp2kernel 未曾安装过";
                 goto ERROR1;
             }
-            strExePath = Unquote(strExePath);
+            strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
             AppendString("正在启动 dp2kernel 服务 ...\r\n");
             Application.DoEvents();
@@ -3332,7 +3334,7 @@ MessageBoxDefaultButton.Button1);
                 strError = "dp2kernel 未曾安装过";
                 goto ERROR1;
             }
-            strExePath = Unquote(strExePath);
+            strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
             AppendString("正在停止 dp2kernel 服务 ...\r\n");
             Application.DoEvents();
@@ -3549,7 +3551,7 @@ out string strError)
                 strError = "dp2library 未曾安装过";
                 goto ERROR1;
             }
-            strExePath = Unquote(strExePath);
+            strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
             AppendString("正在启动 dp2library 服务 ...\r\n");
             Application.DoEvents();
@@ -3579,7 +3581,7 @@ out string strError)
                 strError = "dp2library 未曾安装过";
                 goto ERROR1;
             }
-            strExePath = Unquote(strExePath);
+            strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
             AppendString("正在停止 dp2library 服务 ...\r\n");
             Application.DoEvents();
@@ -3649,7 +3651,7 @@ out string strError)
                 strError = "dp2library 尚未安装和注册为 Windows Service，无法进行注销";
                 goto ERROR1;
             }
-            strExePath = Unquote(strExePath);
+            strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
             // 注销 Windows Service
             nRet = InstallService(strExePath,
@@ -3689,7 +3691,7 @@ out string strError)
                     strError = "dp2kernel 尚未安装和注册为 Windows Service，无法进行注销";
                     goto ERROR1;
                 }
-                strExePath = Unquote(strExePath);
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
                 {
                     AppendString("正在停止 dp2kernel 服务 ...\r\n");
@@ -4466,7 +4468,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     strError = "dp2library 未曾安装过";
                     goto ERROR1;
                 }
-                strExePath = Unquote(strExePath);
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
                 {
                     AppendString("正在停止 dp2library 服务 ...\r\n");

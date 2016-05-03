@@ -1575,7 +1575,7 @@ dlg.UiState);
         {
             strError = "";
 
-            strName = MacroUtil.Unquote(strName);  // 去掉百分号
+            strName = StringUtil.Unquote(strName, "%%");  // 去掉百分号
 
             strValue = "";
             // 从marceditor_macrotable.xml文件中解析宏

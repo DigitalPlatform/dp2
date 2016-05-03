@@ -468,6 +468,7 @@ namespace dp2rms
             this.AutoGenerate();
         }
 
+#if NO
         static string Unquote(string strValue)
         {
             if (strValue.Length == 0)
@@ -481,12 +482,13 @@ namespace dp2rms
 
             return strValue;
         }
+#endif
 
         // 解析每一个宏
         void m_macroutil_ParseOneMacro(object sender, ParseOneMacroEventArgs e)
         {
             string strError = "";
-            string strName = Unquote(e.Macro);  // 去掉百分号
+            string strName = StringUtil.Unquote(e.Macro, "%%");  // 去掉百分号
 
             // 函数名：
             string strFuncName = "";

@@ -173,7 +173,7 @@ DIV.item_line_left .item_prefix_text_left {
     color: white;
     background-color: #000000;
     line-break: auto;
-    width: 50pt;
+    width: 100pt;
     padding: 8px;
     min-height: 200px;
 }
@@ -186,7 +186,7 @@ DIV.item_line_right .item_prefix_text_right {
     color: white;
     background-color: #000000;
     line-break: auto;
-    width: 50pt;
+    width: 100pt;
     padding: 8px;
     min-height: 200px;
 }

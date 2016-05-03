@@ -16,6 +16,55 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        // 去掉外围括住的符号
+        // parameters:
+        //      pairs   若干对打算去除的符号。例如 "%%" "()" "[](){}"。如果包含多对符号，则从左到右匹配，用上前面的就用它处理然后返回了，后面的若干对就不发生作用了
+        public static string Unquote(string strValue, string pairs)
+        {
+            if (string.IsNullOrEmpty(pairs))
+                throw new ArgumentException("pairs 参数值不应为空", "pairs");
+
+            if ((pairs.Length % 2) != 0)
+                throw new ArgumentException("pairs 参数值的字符个数应为偶数", "pairs");
+
+            if (string.IsNullOrEmpty(strValue) == true)
+                return "";
+
+            for (int i = 0; i < pairs.Length / 2; i++)
+            {
+                char left = pairs[i * 2];
+                if (strValue[0] == left)
+                {
+                    strValue = strValue.Substring(1);
+                    if (strValue.Length == 0)
+                        return "";
+
+                    char right = pairs[(i * 2) + 1];
+                    if (strValue[strValue.Length - 1] == right)
+                        return strValue.Substring(0, strValue.Length - 1);
+                }
+            }
+
+            return strValue;
+        }
+#if NO
+        // 去掉外围括住的符号
+        public static string Unquote(string strValue, char quote)
+        {
+            if (string.IsNullOrEmpty(strValue) == true)
+                return "";
+
+            if (strValue[0] == quote)
+                strValue = strValue.Substring(1);
+            if (strValue.Length == 0)
+                return "";
+            if (strValue[strValue.Length - 1] == quote)
+                return strValue.Substring(0, strValue.Length - 1);
+
+            return strValue;
+        }
+#endif
+
         // 注: 和 GetStyleParam() 函数相似
         // parameters:
         //      strPrefix 前缀。例如 "getreaderinfo"
