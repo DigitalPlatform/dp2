@@ -35,7 +35,7 @@ namespace dp2Circulation
         public FlowLayoutPanel flowLayoutPanel1 = null;     // ItemsContainer
 
         string OldMARC = "";
-        public byte [] Timestamp = null;
+        public byte[] Timestamp = null;
 
         public string ServerName = "";
         public string BiblioRecPath = "";
@@ -225,7 +225,6 @@ namespace dp2Circulation
             return 0;
         }
 
-
         // 从列表中选择一条书目记录装入编辑模板
         // return:
         //      -1  出错
@@ -251,7 +250,7 @@ namespace dp2Circulation
                     strParts += "册记录";
                 }
                 DialogResult result = MessageBox.Show(this.Owner,
-"当前"+strParts+"修改后尚未保存。如果此时装入新记录内容，先前的修改将会丢失。\r\n\r\n是否装入新记录?",
+"当前" + strParts + "修改后尚未保存。如果此时装入新记录内容，先前的修改将会丢失。\r\n\r\n是否装入新记录?",
 "册登记",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -468,7 +467,7 @@ MessageBoxDefaultButton.Button2);
             control.BackColor = Color.Transparent;
             control.Margin = new Padding(8, 8, 8, 8);
             // control.TableMargin = new Padding(100);
-            control.TablePadding = new Padding(64,12,24,12);
+            control.TablePadding = new Padding(64, 12, 24, 12);
 
             // control.ErrorInfo = "测试文字 asdfasdf a asd fa daf a df af asdf asdf adf asdf asdf asf asdf asdf ---- ";
 
@@ -549,7 +548,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             // 把当前已经创建的 EntityEditControl 和 PlusButton 重设颜色
-            foreach(Control control in this.flowLayoutPanel1.Controls)
+            foreach (Control control in this.flowLayoutPanel1.Controls)
             {
                 if (control is EntityEditControl)
                 {
@@ -686,7 +685,7 @@ MessageBoxDefaultButton.Button2);
 
             EntityEditControl next = GetPrevOrNextEdit(edit, bUp);
             if (next == null)
-                return; 
+                return;
             switch (e.Name)
             {
                 case "PublishTime":
@@ -853,7 +852,7 @@ MessageBoxDefaultButton.Button2);
 
         public PlusButton GetPlusButton()
         {
-            foreach(Control control in this.flowLayoutPanel1.Controls)
+            foreach (Control control in this.flowLayoutPanel1.Controls)
             {
                 if (control is PlusButton)
                     return control as PlusButton;
@@ -1038,11 +1037,11 @@ MessageBoxDefaultButton.Button2);
             this.flowLayoutPanel1.Controls.Add(edit);
 
             // 将 Button 加到末尾
-            foreach(Control control in buttons)
+            foreach (Control control in buttons)
             {
                 this.flowLayoutPanel1.Controls.Add(control);
             }
-            
+
             // 注：edit 控件加入到末尾，不会改变前面已有的 edit 控件显示的序号
 
             // 重新设置 TabIndex
@@ -1231,7 +1230,7 @@ MessageBoxDefaultButton.Button2);
         {
             if (index == -1)
                 index = 0;
-            for (int i = index; i < this.flowLayoutPanel1.Controls.Count; i++ )
+            for (int i = index; i < this.flowLayoutPanel1.Controls.Count; i++)
             {
                 Control control = this.flowLayoutPanel1.Controls[i];
                 if (control is EntityEditControl)
@@ -1453,8 +1452,8 @@ MessageBoxDefaultButton.Button2);
             for (int i = 0; i < nodes.Count; i++)
             {
                 string strText = nodes[i].InnerText;
-                if (strText.Length > 0 
-                    && (strText[0] == '@' ||  strText.IndexOf("%") != -1))
+                if (strText.Length > 0
+                    && (strText[0] == '@' || strText.IndexOf("%") != -1))
                 {
                     // 兑现宏
                     string strResult = DoGetMacroValue(strText);
@@ -1628,7 +1627,7 @@ MessageBoxDefaultButton.Button2);
                         errors.Add(new BiblioError(strFieldName, strSubfieldName,
                             "字段 '"
                             + this.easyMarcControl1.GetCaption(strFieldName, null, false)
-                            + "' 中出现了空子字段 '" 
+                            + "' 中出现了空子字段 '"
                             + this.easyMarcControl1.GetCaption(strFieldName, strSubfieldName, false)
                             + "'。需要把它删除"));
                     }
@@ -1636,7 +1635,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             if (errors.Count > 0)
-                return 1; 
+                return 1;
             return 0;
         }
 
@@ -1732,7 +1731,7 @@ MessageBoxDefaultButton.Button2);
             bool bVerifyAll = (StringUtil.IsInList("verify_all", strStyle) == true);
 
             int i = 0;
-            foreach(Control control in this.flowLayoutPanel1.Controls)
+            foreach (Control control in this.flowLayoutPanel1.Controls)
             {
                 if (!(control is EntityEditControl))
                     continue;
@@ -2418,7 +2417,7 @@ MessageBoxDefaultButton.Button2);
             int n = (int)menu.Tag;
             for (int i = 0; i < n; i++)
             {
-                int nRet = AddNewEntity("", 
+                int nRet = AddNewEntity("",
                     i == n - 1 ? true : false,
                     out strError);
                 if (nRet == -1)
@@ -2549,7 +2548,7 @@ MessageBoxDefaultButton.Button2);
         public static string GetListString(List<BiblioError> list, string strSep)
         {
             StringBuilder result = new StringBuilder();
-            foreach(BiblioError error in list)
+            foreach (BiblioError error in list)
             {
                 result.Append(error.ToString() + strSep);
             }

@@ -87,11 +87,13 @@ ref sessioninfo) == false)
         LibraryChannel channel = sessioninfo.GetChannel(true);
         try
         {
+            string strMessage = "";
             long lRet = // sessioninfo.Channel.
                 channel.ResetPassword(
                 null,
                 strParameters,
                 "",
+                out strMessage,
                 out strError);
             if (lRet != 1)
                 goto ERROR1;

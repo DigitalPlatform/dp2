@@ -3670,12 +3670,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetClock(out string strTime, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ResetPassword", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ResetPasswordResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResetPassword(string strParameters, string strMessageTemplate);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResetPassword(out string strMessage, string strParameters, string strMessageTemplate);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ResetPassword", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/ResetPasswordResponse")]
         System.IAsyncResult BeginResetPassword(string strParameters, string strMessageTemplate, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndResetPassword(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndResetPassword(out string strMessage, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetValueTable", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetValueTableResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetValueTable(out string[] values, string strTableName, string strDbName);
@@ -5754,10 +5754,17 @@ namespace DigitalPlatform.LibraryClient.localhost {
             this.results = results;
         }
         
+        public string strMessage {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -11133,8 +11140,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             base.InvokeAsync(this.onBeginGetClockDelegate, null, this.onEndGetClockDelegate, this.onGetClockCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResetPassword(string strParameters, string strMessageTemplate) {
-            return base.Channel.ResetPassword(strParameters, strMessageTemplate);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResetPassword(out string strMessage, string strParameters, string strMessageTemplate) {
+            return base.Channel.ResetPassword(out strMessage, strParameters, strMessageTemplate);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -11143,8 +11150,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndResetPassword(System.IAsyncResult result) {
-            return base.Channel.EndResetPassword(result);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndResetPassword(out string strMessage, System.IAsyncResult result) {
+            return base.Channel.EndResetPassword(out strMessage, result);
         }
         
         private System.IAsyncResult OnBeginResetPassword(object[] inValues, System.AsyncCallback callback, object asyncState) {
@@ -11154,8 +11161,10 @@ namespace DigitalPlatform.LibraryClient.localhost {
         }
         
         private object[] OnEndResetPassword(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndResetPassword(result);
+            string strMessage = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndResetPassword(out strMessage, result);
             return new object[] {
+                    strMessage,
                     retVal};
         }
         
@@ -13859,12 +13868,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetClock(out string strTime, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/ResetPassword", ReplyAction="http://dp2003.com/dp2library/dp2library/ResetPasswordResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResetPassword(string strParameters, string strMessageTemplate);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResetPassword(out string strMessage, string strParameters, string strMessageTemplate);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/ResetPassword", ReplyAction="http://dp2003.com/dp2library/dp2library/ResetPasswordResponse")]
         System.IAsyncResult BeginResetPassword(string strParameters, string strMessageTemplate, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndResetPassword(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndResetPassword(out string strMessage, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetValueTable", ReplyAction="http://dp2003.com/dp2library/dp2library/GetValueTableResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetValueTable(out string[] values, string strTableName, string strDbName);
@@ -15937,10 +15946,17 @@ namespace DigitalPlatform.LibraryClient.localhost {
             this.results = results;
         }
         
+        public string strMessage {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -21316,8 +21332,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             base.InvokeAsync(this.onBeginGetClockDelegate, null, this.onEndGetClockDelegate, this.onGetClockCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResetPassword(string strParameters, string strMessageTemplate) {
-            return base.Channel.ResetPassword(strParameters, strMessageTemplate);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ResetPassword(out string strMessage, string strParameters, string strMessageTemplate) {
+            return base.Channel.ResetPassword(out strMessage, strParameters, strMessageTemplate);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -21326,8 +21342,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndResetPassword(System.IAsyncResult result) {
-            return base.Channel.EndResetPassword(result);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndResetPassword(out string strMessage, System.IAsyncResult result) {
+            return base.Channel.EndResetPassword(out strMessage, result);
         }
         
         private System.IAsyncResult OnBeginResetPassword(object[] inValues, System.AsyncCallback callback, object asyncState) {
@@ -21337,8 +21353,10 @@ namespace DigitalPlatform.LibraryClient.localhost {
         }
         
         private object[] OnEndResetPassword(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndResetPassword(result);
+            string strMessage = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndResetPassword(out strMessage, result);
             return new object[] {
+                    strMessage,
                     retVal};
         }
         

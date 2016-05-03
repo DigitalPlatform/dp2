@@ -1111,6 +1111,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element xmlns:q108="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="ResetPasswordResult" nillable="true" type="q108:LibraryServerResult" />
+        <xs:element minOccurs="0" name="strMessage" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

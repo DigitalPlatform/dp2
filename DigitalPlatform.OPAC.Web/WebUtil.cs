@@ -292,7 +292,6 @@ namespace DigitalPlatform.OPAC.Web
                 string strKeepLogin = (string)table["keeplogin"];
                 bool bKeepLogin = DomUtil.IsBooleanTrue(strKeepLogin, false);
 
-
                 string strOnline = (string)table["online"];
                 bool bOnline = DomUtil.IsBooleanTrue(strOnline, false);
 
@@ -307,6 +306,7 @@ namespace DigitalPlatform.OPAC.Web
                         sessioninfo.IsReader = false;
                     }
 #endif
+                    // TODO: _rights 没有恢复。
                     sessioninfo.IsReader = bIsReader;
 
                     sessioninfo.UserID = strID;
@@ -445,7 +445,7 @@ namespace DigitalPlatform.OPAC.Web
             int nOnline)
         {
             string strOptions = "";
-            string strToken = FindTokenString(sessioninfo.RightsOrigin);
+            string strToken = FindTokenString(sessioninfo._rightsOrigin);
             if (string.IsNullOrEmpty(strToken) == true)
             {
                 ClearCookiesLogin("all");

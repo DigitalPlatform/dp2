@@ -348,6 +348,7 @@ namespace DigitalPlatform.CommonControl
             return 1;
         }
 
+#if NO
         public static string Unquote(string strValue)
         {
             if (string.IsNullOrEmpty(strValue) == true)
@@ -362,6 +363,7 @@ namespace DigitalPlatform.CommonControl
 
             return strValue;
         }
+#endif
     }
 
 

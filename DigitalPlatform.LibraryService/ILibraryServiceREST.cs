@@ -425,7 +425,8 @@ SessionMode = SessionMode.NotAllowed)]
 
         [OperationContract]
         LibraryServerResult ResetPassword(string strParameters,
-            string strMessageTemplate);
+            string strMessageTemplate,
+            out string strMessage);
 
         [OperationContract]
         LibraryServerResult GetValueTable(
