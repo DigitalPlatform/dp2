@@ -8369,6 +8369,11 @@ Keys keyData)
             // this.MessageHub.Login();
         }
 
+        private void MenuItem_refreshLibraryUID_Click(object sender, EventArgs e)
+        {
+            this.ServerUID = Guid.NewGuid().ToString();
+        }
+
     }
 
     /// <summary>

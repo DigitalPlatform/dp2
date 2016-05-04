@@ -1073,6 +1073,7 @@ MessageBoxDefaultButton.Button1);
                 // this.MenuItem_inventory.Visible = false;
                 this.MenuItem_openMarc856SearchForm.Visible = false;
                 this.MenuItem_createGreenApplication.Visible = false;
+                this.MenuItem_refreshLibraryUID.Visible = false;
             }
 
 #if NO

@@ -4919,6 +4919,7 @@ true);
             _searchParam._searchID = strSearchID;
             _searchParam._searchComplete = false;
             _searchParam._searchCount = 0;
+            _searchParam._serverPushEncoding = "utf-7";
             this.MainForm.MessageHub.SearchResponseEvent += MessageHub_SearchResponseEvent;
 
             string strOutputSearchID = "";
@@ -4934,7 +4935,8 @@ strMatchStyle,
 "",
 1000,
 0,
--1),
+-1,
+_searchParam._serverPushEncoding),
 out strOutputSearchID,
 out strError);
             if (nRet == -1)
@@ -4992,6 +4994,7 @@ out strError);
             public string _searchID = "";
             public bool _searchComplete = false;
             public int _searchCount = 0;
+            public string _serverPushEncoding = "";
         }
 
         SearchParam _searchParam = null;
@@ -5022,6 +5025,8 @@ out strError);
             // TODO: 来自共享网络的记录，图标或 @ 后面的名字应该有明显的形态区别
             foreach (DigitalPlatform.MessageClient.Record record in e.Records)
             {
+                MessageHub.DecodeRecord(record, _searchParam._serverPushEncoding);
+
                 string strXml = record.Data;
 
                 string strMarcSyntax = "";

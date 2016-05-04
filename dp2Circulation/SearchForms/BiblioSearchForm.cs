@@ -28,6 +28,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -1194,7 +1195,6 @@ Keys keyData)
                                 }
                                 else if (bOutputKeyID == true)
                                 {
-
                                     // 输出keys
                                     if (searchresult.Cols == null
                                         && bTempQuickLoad == false)
@@ -1352,6 +1352,7 @@ Keys keyData)
             _searchParam._searchID = strSearchID;
             _searchParam._searchComplete = false;
             _searchParam._searchCount = 0;
+            _searchParam._serverPushEncoding = "utf-7";
             this.MainForm.MessageHub.SearchResponseEvent += MessageHub_SearchResponseEvent;
 
             string strOutputSearchID = "";
@@ -1367,7 +1368,8 @@ strMatchStyle,
 "id,xml",
 1000,
 0,
--1),
+-1,
+_searchParam._serverPushEncoding),
 out strOutputSearchID,
 out strError);
             if (nRet == -1)
@@ -1426,6 +1428,40 @@ out strError);
             // public bool _autoSetFocus = false;
             public bool _searchComplete = false;
             public int _searchCount = 0;
+
+            public string _serverPushEncoding = "";
+
+            public Hashtable LibraryNameTable = new Hashtable();    //  图书馆 UID --> 图书馆名字
+
+            // 将图书馆名和 UID 的对照关系记载下来
+            public void SetLibraryNameTable(string strLongPath)
+            {
+                List<string> array1 = StringUtil.ParseTwoPart(strLongPath, "@");
+                List<string> array2 = StringUtil.ParseTwoPart(array1[1], "|");
+                string strLibraryName = array2[0];
+                string strLibraryUID = array2[1];
+                if (string.IsNullOrEmpty(strLibraryName) == false
+                    && string.IsNullOrEmpty(strLibraryUID) == false)
+                    this.LibraryNameTable[strLibraryUID] = strLibraryName;
+            }
+
+            // 将路径中的图书馆 UID 部分替换为图书馆名字
+            public string BuildNamePath(string strLongPath)
+            {
+                List<string> array1 = StringUtil.ParseTwoPart(strLongPath, "@");
+                string strShortPath = array1[0];
+                List<string> array2 = StringUtil.ParseTwoPart(array1[1], "|");
+                string strLibraryName = array2[0];
+                if (string.IsNullOrEmpty(strLibraryName) == false)
+                    return strShortPath + "@" + strLibraryName;
+
+                string strLibraryUID = array2[1];
+                strLibraryName = (string)this.LibraryNameTable[strLibraryUID];
+                if (string.IsNullOrEmpty(strLibraryName) == false)
+                    return strShortPath + "@" + strLibraryName;
+                else
+                    return strLongPath; // 实在不行还是维持原样
+            }
         }
 
         SearchParam _searchParam = null;
@@ -1451,60 +1487,123 @@ out strError);
                 goto ERROR1;
             }
 
-            // TODO: 注意来自共享网络的图书馆名不能和 servers.xml 中的名字冲突。另外需要检查，不同的 UID，图书馆名字不能相同，如果发生冲突，则需要给分配 ..1 ..2 这样的编号以示区别
-            // 需要一直保存一个 UID 到图书馆命的对照表在内存备用
-            // TODO: 来自共享网络的记录，图标或 @ 后面的名字应该有明显的形态区别
-            foreach (DigitalPlatform.MessageClient.Record record in e.Records)
+            if (e.Records != null)
+                _searchParam._searchCount += e.Records.Count;
+
+            // 单独给一个线程来执行
+            Task.Factory.StartNew(() => FillList(e.Start, e.Records));
+            return;
+        ERROR1:
+            // 加入一个文本行
             {
-                string strXml = record.Data;
+                string[] cols = new string[1];
+                cols[0] = strError;
+                this.Invoke((Action)(() =>
+                {
 
-                string strMarcSyntax = "";
-                string strBrowseText = "";
-                string strColumnTitles = "";
-                int nRet = BuildBrowseText(strXml,
-out strBrowseText,
-out strMarcSyntax,
-out strColumnTitles,
-out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+                    ListViewItem item = Global.AppendNewLine(
+        this.listView_records,
+        "error",
+        cols);
+                }
+    ));
+            }
 
-                // string strRecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
-                string strRecPath = record.RecPath;
+        }
+
+        void FillList(long lStart,
+            IList<DigitalPlatform.MessageClient.Record> Records)
+        {
+            string strError = "";
+
+            lock (_searchParam)
+            {
+                // TODO: 注意来自共享网络的图书馆名不能和 servers.xml 中的名字冲突。另外需要检查，不同的 UID，图书馆名字不能相同，如果发生冲突，则需要给分配 ..1 ..2 这样的编号以示区别
+                // 需要一直保存一个 UID 到图书馆命的对照表在内存备用
+                // TODO: 来自共享网络的记录，图标或 @ 后面的名字应该有明显的形态区别
+                int i = 0;
+                foreach (DigitalPlatform.MessageClient.Record record in Records)
+                {
+                    MessageHub.DecodeRecord(record, _searchParam._serverPushEncoding);
+
+                    if (i == 0)
+                        _searchParam.SetLibraryNameTable(record.RecPath);
+
+
+                    // 校验一下 MD5
+                    if (string.IsNullOrEmpty(record.MD5) == false)
+                    {
+                        string strMD5 = StringUtil.GetMd5(record.Data);
+                        if (record.MD5 != strMD5)
+                        {
+                            strError = "dp2Circulation : 记录 '" + record.RecPath + "' Data 的 MD5 校验出现异常";
+                            {
+                                string[] cols1 = new string[1];
+                                cols1[0] = strError;
+                                this.Invoke((Action)(() =>
+                                {
+
+                                    ListViewItem item1 = Global.AppendNewLine(
+                        this.listView_records,
+                        "error",
+                        cols1);
+                                }
+                    ));
+                            }
+                            goto CONTINUE;
+                        }
+                    }
+
+                    string strXml = record.Data;
+
+                    string strMarcSyntax = "";
+                    string strBrowseText = "";
+                    string strColumnTitles = "";
+                    int nRet = BuildBrowseText(strXml,
+    out strBrowseText,
+    out strMarcSyntax,
+    out strColumnTitles,
+    out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    // string strRecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
+                    string strRecPath = // "lStart="+lStart.ToString() + " " + i + "/"+ Records.Count + " " +
+                        _searchParam.BuildNamePath(record.RecPath);
 
 
 #if NO
                 string strDbName = ListViewProperty.GetDbName(strRecPath);
                 _browseTitleTable[strDbName] = strColumnTitles;
 #endif
-                _browseTitleTable[strMarcSyntax] = strColumnTitles;
+                    _browseTitleTable[strMarcSyntax] = strColumnTitles;
 
-                // 将书目记录放入 m_biblioTable
-                {
-                    BiblioInfo info = new BiblioInfo();
-                    info.OldXml = strXml;
-                    info.RecPath = strRecPath;
-                    info.Timestamp = ByteArray.GetTimeStampByteArray(record.Timestamp);
-                    info.Format = strMarcSyntax;
-                    this.m_biblioTable[strRecPath] = info;
-                }
+                    // 将书目记录放入 m_biblioTable
+                    {
+                        BiblioInfo info = new BiblioInfo();
+                        info.OldXml = strXml;
+                        info.RecPath = strRecPath;
+                        info.Timestamp = ByteArray.GetTimeStampByteArray(record.Timestamp);
+                        info.Format = strMarcSyntax;
+                        this.m_biblioTable[strRecPath] = info;
+                    }
 
-                List<string> column_list = StringUtil.SplitList(strBrowseText, '\t');
-                string[] cols = new string[column_list.Count];
-                column_list.CopyTo(cols);
+                    List<string> column_list = StringUtil.SplitList(strBrowseText, '\t');
+                    string[] cols = new string[column_list.Count];
+                    column_list.CopyTo(cols);
 
-                ListViewItem item = null;
-                this.Invoke((Action)(() =>
-                {
-                    item = Global.AppendNewLine(
-    this.listView_records,
-    strRecPath,
-    cols);
-                }
-                ));
+                    ListViewItem item = null;
+                    this.Invoke((Action)(() =>
+                    {
+                        item = Global.AppendNewLine(
+        this.listView_records,
+        strRecPath,
+        cols);
+                    }
+                    ));
 
-                if (item != null)
-                    item.BackColor = Color.LightGreen;
+                    if (item != null)
+                        item.BackColor = Color.LightGreen;
 
 #if NO
                 RegisterBiblioInfo info = new RegisterBiblioInfo();
@@ -1513,7 +1612,13 @@ out strError);
                 info.RecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
                 info.MarcSyntax = strMarcSyntax;
 #endif
-                _searchParam._searchCount++;
+
+                    CONTINUE:
+                    i++;
+                }
+
+                // Debug.Assert(e.Start == _searchParam._searchCount, "");
+                return;
             }
 
             return;
@@ -1532,6 +1637,7 @@ out strError);
                 }
     ));
             }
+
         }
 
         private void listView_records_DoubleClick(object sender, EventArgs e)
