@@ -1436,6 +1436,7 @@ out strError);
 
             public ResultManager _manager = new ResultManager();
 
+#if NO
             public Hashtable LibraryNameTable = new Hashtable();    //  图书馆 UID --> 图书馆名字
 
             // 将图书馆名和 UID 的对照关系记载下来
@@ -1467,6 +1468,7 @@ out strError);
                 else
                     return strLongPath; // 实在不行还是维持原样
             }
+#endif
         }
 
         SearchParam _searchParam = null;
