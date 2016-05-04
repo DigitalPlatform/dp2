@@ -8,6 +8,7 @@ using System.Threading;
 
 using Microsoft.AspNet.SignalR.Client;
 using Microsoft.AspNet.SignalR.Client.Transports;
+using System.IO;
 
 namespace DigitalPlatform.MessageClient
 {
@@ -137,6 +138,8 @@ namespace DigitalPlatform.MessageClient
 
         #endregion
 
+        StreamWriter _writer = null;
+
         // 连接 server
         // 要求调用前设置好 this.ServerUrl this.UserName this.Password this.Parameters
         private void ConnectAsync(
@@ -150,6 +153,16 @@ namespace DigitalPlatform.MessageClient
             Connection.Reconnecting += Connection_Reconnecting;
             Connection.Reconnected += Connection_Reconnected;
             // Connection.Error += Connection_Error;
+
+#if NO
+            if (_writer == null)
+            {
+                _writer = new StreamWriter("c:\\log.txt", true, Encoding.UTF8);
+                _writer.AutoFlush = true;
+            }
+            Connection.TraceLevel = TraceLevels.All;
+            Connection.TraceWriter = _writer;
+#endif
 
             Connection.Headers.Add("username", this.UserName);
             Connection.Headers.Add("password", this.Password);
@@ -274,6 +287,7 @@ namespace DigitalPlatform.MessageClient
 
         void Connection_Closed()
         {
+
             if (_exiting == false)
             {
                 AddInfoLine("开启 Timer");
@@ -572,7 +586,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 AddInfoLine("BeginSearchBiblio inputSearchID=" + searchParam.TaskID
 + "; return value="
 + 1);
-                return 1;
+                return (int)result.Value;
             }
             catch (Exception ex)
             {

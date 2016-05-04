@@ -1385,6 +1385,9 @@ out strError);
                 return 0;
             }
 
+            if (_searchParam._manager.SetTargetCount(nRet) == true)
+                _searchParam._searchComplete = true;
+
             return 1;
         }
 
@@ -1425,11 +1428,13 @@ out strError);
         class SearchParam
         {
             public string _searchID = "";
-            // public bool _autoSetFocus = false;
+
             public bool _searchComplete = false;
             public int _searchCount = 0;
 
             public string _serverPushEncoding = "";
+
+            public ResultManager _manager = new ResultManager();
 
             public Hashtable LibraryNameTable = new Hashtable();    //  图书馆 UID --> 图书馆名字
 
@@ -1473,10 +1478,12 @@ out strError);
         {
             if (e.TaskID != _searchParam._searchID)
                 return;
+
             if (e.ResultCount == -1 && e.Start == -1)
             {
                 // 检索过程结束
                 _searchParam._searchComplete = true;
+                _searchParam._searchCount = (int)_searchParam._manager.GetTotalCount();
                 return;
             }
             string strError = "";
@@ -1487,11 +1494,31 @@ out strError);
                 goto ERROR1;
             }
 
+            // _searchParam.SetLibraryNameTable("@" + e.LibraryUID);
+            List<string> array = StringUtil.ParseTwoPart(e.LibraryUID, "|");
+            string strLibraryName = array[0];
+
+            // 标记结束一个检索目标
+            // return:
+            //      0   尚未结束
+            //      1   结束
+            //      2   全部结束
+            int nRet = _searchParam._manager.CompleteTarget(e.LibraryUID,
+                e.ResultCount,
+                e.Records == null ? 0 : e.Records.Count);
+
+            _searchParam._searchCount = (int)_searchParam._manager.GetTotalCount();
+
+            if (nRet == 2)
+                _searchParam._searchComplete = true;
+
+#if NO
             if (e.Records != null)
                 _searchParam._searchCount += e.Records.Count;
+#endif
 
             // 单独给一个线程来执行
-            Task.Factory.StartNew(() => FillList(e.Start, e.Records));
+            Task.Factory.StartNew(() => FillList(e.Start, strLibraryName, e.Records));
             return;
         ERROR1:
             // 加入一个文本行
@@ -1512,11 +1539,12 @@ out strError);
         }
 
         void FillList(long lStart,
+            string strLibraryName,
             IList<DigitalPlatform.MessageClient.Record> Records)
         {
             string strError = "";
 
-            lock (_searchParam)
+            // lock (_searchParam)
             {
                 // TODO: 注意来自共享网络的图书馆名不能和 servers.xml 中的名字冲突。另外需要检查，不同的 UID，图书馆名字不能相同，如果发生冲突，则需要给分配 ..1 ..2 这样的编号以示区别
                 // 需要一直保存一个 UID 到图书馆命的对照表在内存备用
@@ -1525,10 +1553,6 @@ out strError);
                 foreach (DigitalPlatform.MessageClient.Record record in Records)
                 {
                     MessageHub.DecodeRecord(record, _searchParam._serverPushEncoding);
-
-                    if (i == 0)
-                        _searchParam.SetLibraryNameTable(record.RecPath);
-
 
                     // 校验一下 MD5
                     if (string.IsNullOrEmpty(record.MD5) == false)
@@ -1567,10 +1591,12 @@ out strError);
                     if (nRet == -1)
                         goto ERROR1;
 
+#if NO
                     // string strRecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
                     string strRecPath = // "lStart="+lStart.ToString() + " " + i + "/"+ Records.Count + " " +
                         _searchParam.BuildNamePath(record.RecPath);
-
+#endif
+                    string strRecPath = record.RecPath + "@" + strLibraryName;
 
 #if NO
                 string strDbName = ListViewProperty.GetDbName(strRecPath);
@@ -1613,7 +1639,7 @@ out strError);
                 info.MarcSyntax = strMarcSyntax;
 #endif
 
-                    CONTINUE:
+                CONTINUE:
                     i++;
                 }
 
