@@ -71,7 +71,10 @@ namespace dp2Circulation
             table["libraryName"] = this.MainForm.LibraryName;
             table["propertyList"] = (this.ShareBiblio ? "biblio_search" : "");
             table["libraryUserName"] = this.MainForm.GetCurrentUserName();
-            this.Parameters = StringUtil.BuildParameterString(table, ',', '=', "url");
+            this.Parameters = StringUtil.BuildParameterString(table,
+                ',',
+                '=',
+                "url");    // "url"
         }
 
         public override void Destroy()
@@ -523,12 +526,14 @@ strErrorCode);
                         {
                             // 没有命中
                             ResponseSearch(
+                                new SearchResponse(
     searchParam.TaskID,
     0,
     0,
+    this.MainForm.ServerUID,
     records,
     strError,  // 出错信息大概为 not found。
-    strErrorCode);
+    strErrorCode));
                             return;
                         }
                         goto ERROR1;
@@ -543,12 +548,14 @@ strErrorCode);
                     {
                         // 返回命中数
                         ResponseSearch(
+                            new SearchResponse(
                             searchParam.TaskID,
                             lHitCount,
 0,
+    this.MainForm.ServerUID,
 records,
 "本次没有返回任何记录",
-strErrorCode);
+strErrorCode));
                         return;
                     }
 
@@ -624,6 +631,7 @@ strErrorCode);
 searchParam.TaskID,
 lHitCount,
 lStart,
+    this.MainForm.ServerUID,
 records,
 "",
 strErrorCode,
@@ -658,12 +666,14 @@ ref batch_size);
         ERROR1:
             // 报错
             ResponseSearch(
+                new SearchResponse(
 searchParam.TaskID,
 -1,
 0,
+    this.MainForm.ServerUID,
 records,
 strError,
-strErrorCode);
+strErrorCode));
         }
 
         static DigitalPlatform.MessageClient.Record FillBiblio(DigitalPlatform.LibraryClient.localhost.Record record)
@@ -808,13 +818,42 @@ strError);
         }
 
 #endif
+        static List<DigitalPlatform.MessageClient.Record> Clone(IList<DigitalPlatform.MessageClient.Record> records)
+        {
+            if (records == null)
+                return null;
 
-        public override void OnSearchResponseRecieved(string searchID,
+            List<DigitalPlatform.MessageClient.Record> results = new List<DigitalPlatform.MessageClient.Record>();
+            foreach (DigitalPlatform.MessageClient.Record record in records)
+            {
+                results.Add(Clone(record));
+            }
+
+            return results;
+        }
+
+        static DigitalPlatform.MessageClient.Record Clone(DigitalPlatform.MessageClient.Record record)
+        {
+            DigitalPlatform.MessageClient.Record result = new DigitalPlatform.MessageClient.Record();
+            result.RecPath = (string)record.RecPath.Clone();
+            result.Format = (string)record.Format.Clone();
+            result.Data = (string)record.Data.Clone();
+            result.Timestamp = (string)record.Timestamp.Clone();
+
+            result.MD5 = (string)record.MD5.Clone();
+            return result;
+        }
+
+        public override void OnSearchResponseRecieved(
+#if NO
+            string searchID,
             long resultCount,
             long start,
             IList<DigitalPlatform.MessageClient.Record> records,
             string errorInfo,
-            string errorCode)
+            string errorCode
+#endif
+            SearchResponse responseParam)
         {
 #if NO
             int i = 0;
@@ -825,16 +864,18 @@ strError);
                 i++;
             }
 #endif
-            if (SearchResponseEvent != null)
+            SearchResponseEventHandler handler = this.SearchResponseEvent;
+            if (handler != null)
             {
                 SearchResponseEventArgs e = new SearchResponseEventArgs();
-                e.TaskID = searchID;
-                e.ResultCount = resultCount;
-                e.Start = start;
-                e.Records = records;
-                e.ErrorInfo = errorInfo;
-                e.ErrorCode = errorCode;
-                this.SearchResponseEvent(this, e);
+                e.TaskID = responseParam.TaskID;
+                e.ResultCount = responseParam.ResultCount;
+                e.Start = responseParam.Start;
+                e.LibraryUID = responseParam.LibraryUID;
+                e.Records = responseParam.Records;    // Clone(records);
+                e.ErrorInfo = responseParam.ErrorInfo;
+                e.ErrorCode = responseParam.ErrorCode;
+                handler(this, e);
             }
         }
 
@@ -900,7 +941,29 @@ strError);
             }
         }
 #endif
+        public static void DecodeRecord(DigitalPlatform.MessageClient.Record record,
+    string strServerPushEncoding)
+        {
+            if (string.IsNullOrEmpty(strServerPushEncoding) == false)
+            {
+                Encoding encoding = Encoding.GetEncoding(strServerPushEncoding);
+                record.Data = encoding.GetString(GetBytes(record.Data));
+                record.RecPath = encoding.GetString(GetBytes(record.RecPath));
+            }
+        }
 
+        static byte[] GetBytes(string strText)
+        {
+            byte[] results = new byte[strText.Length];
+            int i = 0;
+            foreach (char ch in strText)
+            {
+                results[i] = (byte)ch;
+                i++;
+            }
+
+            return results;
+        }
     }
 
 
@@ -920,6 +983,7 @@ strError);
         public string TaskID = "";   // 检索请求的 ID
         public long ResultCount = 0;    // 整个结果集中记录个数
         public long Start = 0;  // Records 从整个结果集的何处开始
+        public string LibraryUID = "";
         public IList<DigitalPlatform.MessageClient.Record> Records = null;  // 命中的书目记录集合
         public string ErrorInfo = "";   // 错误信息
         public string ErrorCode = "";   // 错误代码。2016/4/15 增加

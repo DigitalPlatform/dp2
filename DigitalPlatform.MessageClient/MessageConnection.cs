@@ -7,6 +7,8 @@ using System.Diagnostics;
 using System.Threading;
 
 using Microsoft.AspNet.SignalR.Client;
+using Microsoft.AspNet.SignalR.Client.Transports;
+using System.IO;
 
 namespace DigitalPlatform.MessageClient
 {
@@ -136,6 +138,8 @@ namespace DigitalPlatform.MessageClient
 
         #endregion
 
+        StreamWriter _writer = null;
+
         // 连接 server
         // 要求调用前设置好 this.ServerUrl this.UserName this.Password this.Parameters
         private void ConnectAsync(
@@ -149,6 +153,16 @@ namespace DigitalPlatform.MessageClient
             Connection.Reconnecting += Connection_Reconnecting;
             Connection.Reconnected += Connection_Reconnected;
             // Connection.Error += Connection_Error;
+
+#if NO
+            if (_writer == null)
+            {
+                _writer = new StreamWriter("c:\\log.txt", true, Encoding.UTF8);
+                _writer.AutoFlush = true;
+            }
+            Connection.TraceLevel = TraceLevels.All;
+            Connection.TraceWriter = _writer;
+#endif
 
             Connection.Headers.Add("username", this.UserName);
             Connection.Headers.Add("password", this.Password);
@@ -165,23 +179,8 @@ namespace DigitalPlatform.MessageClient
                 (searchParam) => OnSearchBiblioRecieved(searchParam)
                 );
 
-            HubProxy.On<string,
-    long,
-    long,
-    IList<Record>,
-        string,
-            string>("responseSearch", (searchID,
-    resultCount,
-    start,
-    records,
-    errorInfo,
-    errorCode) =>
- OnSearchResponseRecieved(searchID,
-    resultCount,
-    start,
-    records,
-    errorInfo,
-    errorCode)
+            HubProxy.On<SearchResponse>("responseSearch", (responseParam) =>
+ OnSearchResponseRecieved(responseParam)
 );
             HubProxy.On<SetInfoRequest>("setInfo",
             (searchParam) => OnSetInfoRecieved(searchParam)
@@ -227,7 +226,7 @@ namespace DigitalPlatform.MessageClient
 #endif
             try
             {
-                Connection.Start()
+                Connection.Start()  // new ServerSentEventsTransport()
                     .ContinueWith((antecendent) =>
                     {
                         if (antecendent.IsFaulted == true)
@@ -288,6 +287,7 @@ namespace DigitalPlatform.MessageClient
 
         void Connection_Closed()
         {
+
             if (_exiting == false)
             {
                 AddInfoLine("开启 Timer");
@@ -357,12 +357,16 @@ SearchRequest param
         }
 
         // 当 server 发来检索响应的时候被调用。重载时可以显示收到的记录
-        public virtual void OnSearchResponseRecieved(string searchID,
+        public virtual void OnSearchResponseRecieved(
+#if NO
+            string searchID,
     long resultCount,
     long start,
     IList<Record> records,
     string errorInfo,
-            string errorCode)
+            string errorCode
+#endif
+            SearchResponse responseParam)
         {
         }
 
@@ -582,7 +586,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 AddInfoLine("BeginSearchBiblio inputSearchID=" + searchParam.TaskID
 + "; return value="
 + 1);
-                return 1;
+                return (int)result.Value;
             }
             catch (Exception ex)
             {
@@ -621,6 +625,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         public bool TryResponseSearch(string taskID,
             long resultCount,
             long start,
+            string libraryUID,
             IList<Record> records,
             string errorInfo,
             string errorCode,
@@ -652,12 +657,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     Wait(new TimeSpan(0, 0, 0, 0, 50));
 
                     MessageResult result = ResponseSearchAsync(
+                        new SearchResponse(
                         taskID,
                         resultCount,
                         start + send,
+                        libraryUID,
                         current,
                         errorInfo,
-                        errorCode).Result;
+                        errorCode)).Result;
                     _lastTime = DateTime.Now;
                     if (result.Value == -1)
                         return false;   // 可能因为服务器端已经中断此 taskID，或者执行 ReponseSearch() 时出错
@@ -711,41 +718,52 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         ERROR1:
             // 报错
             ResponseSearch(
+                new SearchResponse(
 taskID,
 -1,
 0,
+libraryUID,
 new List<Record>(),
 strError,
-"_sendResponseSearchError");    // 消息层面发生的错误(表示不是 dp2library 层面的错误)，错误码为 _ 开头
+"_sendResponseSearchError"));    // 消息层面发生的错误(表示不是 dp2library 层面的错误)，错误码为 _ 开头
             return false;
         }
 
         // 调用 server 端 ResponseSearchBiblio
         public Task<MessageResult> ResponseSearchAsync(
+#if NO
             string taskID,
             long resultCount,
             long start,
             IList<Record> records,
             string errorInfo,
-            string errorCode)
+            string errorCode
+#endif
+            SearchResponse responseParam)
         {
             return HubProxy.Invoke<MessageResult>("ResponseSearch",
+#if NO
 taskID,
 resultCount,
 start,
 records,
 errorInfo,
-errorCode);
+errorCode
+#endif
+                responseParam);
         }
 
         // 调用 server 端 ResponseSearchBiblio
         public async void ResponseSearch(
+#if NO
             string taskID,
             long resultCount,
             long start,
             IList<Record> records,
             string errorInfo,
-            string errorCode)
+            string errorCode
+#endif
+            SearchResponse responseParam)
         {
             // TODO: 等待执行完成。如果有异常要当时处理。比如减小尺寸重发。
             int nRedoCount = 0;
@@ -753,12 +771,15 @@ errorCode);
             try
             {
                 MessageResult result = await HubProxy.Invoke<MessageResult>("ResponseSearch",
-    taskID,
+#if NO
+                    taskID,
     resultCount,
     start,
     records,
     errorInfo,
-    errorCode);
+    errorCode
+#endif
+                    responseParam);
                 if (result.Value == -1)
                 {
                     AddErrorLine(result.ErrorInfo);
@@ -1112,17 +1133,11 @@ request).Result;
     {
         // 记录路径。可能是本地路径，例如 “图书总库/1”；也可能是全局路径，例如“图书总库@xxxxxxx”
         public string RecPath { get; set; }
-
-#if NO
-        // 图书馆 UID
-        public string LibraryUID { get; set; }
-        // 图书馆名
-        public string LibraryName { get; set; }
-#endif
-
         public string Format { get; set; }
         public string Data { get; set; }
         public string Timestamp { get; set; }
+
+        public string MD5 { get; set; } // Data 的 MD5 hash
     }
 
     public class GetUserResult : MessageResult
@@ -1158,6 +1173,7 @@ request).Result;
         public long MaxResults { get; set; }    // 本次检索最多命中的记录数。-1 表示不限制
         public long Start { get; set; } // 本次获得结果的开始位置
         public long Count { get; set; } // 本次获得结果的个数。 -1表示尽可能多
+        public string ServerPushEncoding { get; set; }
 
         public SearchRequest(string taskID,
             string operation,
@@ -1169,7 +1185,8 @@ request).Result;
             string formatList,
             long maxResults,
             long start,
-            long count)
+            long count,
+            string serverPushEncoding = "")
         {
             this.TaskID = taskID;
             this.Operation = operation;
@@ -1182,8 +1199,38 @@ request).Result;
             this.MaxResults = maxResults;
             this.Start = start;
             this.Count = count;
+            this.ServerPushEncoding = serverPushEncoding;
         }
     }
+
+    public class SearchResponse
+    {
+        public string TaskID { get; set; }    // 本次检索的任务 ID。由于一个 Connection 可以用于同时进行若干检索操作，本参数用于区分不同的检索操作
+        public long ResultCount { get; set; }
+        public long Start { get; set; }    // 本次响应的偏移
+        public string LibraryUID { get; set; }  // 响应者的 UID。这样 Record.RecPath 中就记载短路径即可
+        public IList<Record> Records { get; set; }
+        public string ErrorInfo { get; set; }
+        public string ErrorCode { get; set; }
+
+        public SearchResponse(string taskID,
+            long resultCount,
+            long start,
+            string libraryUID,
+            IList<Record> records,
+            string errorInfo,
+            string errorCode)
+        {
+            this.TaskID = taskID;
+            this.ResultCount = resultCount;
+            this.Start = start;
+            this.LibraryUID = libraryUID;
+            this.Records = records;
+            this.ErrorInfo = errorInfo;
+            this.ErrorCode = errorCode;
+        }
+    }
+
 
     public class SetInfoRequest
     {

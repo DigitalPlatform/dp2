@@ -218,6 +218,7 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
+            this.MenuItem_refreshLibraryUID = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -985,94 +986,94 @@ namespace dp2Circulation
             // MenuItem_openQuickChangeEntityForm_1
             // 
             this.MenuItem_openQuickChangeEntityForm_1.Name = "MenuItem_openQuickChangeEntityForm_1";
-            this.MenuItem_openQuickChangeEntityForm_1.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_openQuickChangeEntityForm_1.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_openQuickChangeEntityForm_1.Text = "批修改册(&I)";
             this.MenuItem_openQuickChangeEntityForm_1.Click += new System.EventHandler(this.MenuItem_openQuickChangeEntityForm_Click);
             // 
             // MenuItem_openQuickChangeBiblioForm
             // 
             this.MenuItem_openQuickChangeBiblioForm.Name = "MenuItem_openQuickChangeBiblioForm";
-            this.MenuItem_openQuickChangeBiblioForm.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_openQuickChangeBiblioForm.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_openQuickChangeBiblioForm.Text = "批修改书目(&B)";
             this.MenuItem_openQuickChangeBiblioForm.Click += new System.EventHandler(this.MenuItem_openQuickChangeBiblioForm_Click);
             // 
             // toolStripSeparator16
             // 
             this.toolStripSeparator16.Name = "toolStripSeparator16";
-            this.toolStripSeparator16.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator16.Size = new System.Drawing.Size(193, 6);
             // 
             // MenuItem_itemHandover
             // 
             this.MenuItem_itemHandover.Name = "MenuItem_itemHandover";
-            this.MenuItem_itemHandover.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_itemHandover.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_itemHandover.Text = "典藏移交(&D)";
             this.MenuItem_itemHandover.Click += new System.EventHandler(this.MenuItem_handover_Click);
             // 
             // MenuItem_printOrder
             // 
             this.MenuItem_printOrder.Name = "MenuItem_printOrder";
-            this.MenuItem_printOrder.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_printOrder.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_printOrder.Text = "打印订单(&O)";
             this.MenuItem_printOrder.Click += new System.EventHandler(this.MenuItem_printOrder_Click);
             // 
             // MenuItem_accept
             // 
             this.MenuItem_accept.Name = "MenuItem_accept";
-            this.MenuItem_accept.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_accept.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_accept.Text = "验收(&A)";
             this.MenuItem_accept.Click += new System.EventHandler(this.MenuItem_accept_Click);
             // 
             // MenuItem_printAccept
             // 
             this.MenuItem_printAccept.Name = "MenuItem_printAccept";
-            this.MenuItem_printAccept.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_printAccept.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_printAccept.Text = "打印验收单(&P)";
             this.MenuItem_printAccept.Click += new System.EventHandler(this.MenuItem_printAccept_Click);
             // 
             // MenuItem_printClaim
             // 
             this.MenuItem_printClaim.Name = "MenuItem_printClaim";
-            this.MenuItem_printClaim.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_printClaim.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_printClaim.Text = "打印催询单(&C)";
             this.MenuItem_printClaim.Click += new System.EventHandler(this.MenuItem_printClaim_Click);
             // 
             // MenuItem_printAccountBook
             // 
             this.MenuItem_printAccountBook.Name = "MenuItem_printAccountBook";
-            this.MenuItem_printAccountBook.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_printAccountBook.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_printAccountBook.Text = "打印财产账(&A)";
             this.MenuItem_printAccountBook.Click += new System.EventHandler(this.MenuItem_printAccountBook_Click);
             // 
             // MenuItem_printBindingList
             // 
             this.MenuItem_printBindingList.Name = "MenuItem_printBindingList";
-            this.MenuItem_printBindingList.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_printBindingList.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_printBindingList.Text = "打印装订单(&B)";
             this.MenuItem_printBindingList.Click += new System.EventHandler(this.MenuItem_printBindingList_Click);
             // 
             // MenuItem_inventory
             // 
             this.MenuItem_inventory.Name = "MenuItem_inventory";
-            this.MenuItem_inventory.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_inventory.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_inventory.Text = "盘点(&V)";
             this.MenuItem_inventory.Click += new System.EventHandler(this.MenuItem_inventory_Click);
             // 
             // MenuItem_importExport
             // 
             this.MenuItem_importExport.Name = "MenuItem_importExport";
-            this.MenuItem_importExport.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_importExport.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_importExport.Text = "从书目转储文件导入(&I)";
             this.MenuItem_importExport.Click += new System.EventHandler(this.MenuItem_importExport_Click);
             // 
             // toolStripSeparator17
             // 
             this.toolStripSeparator17.Name = "toolStripSeparator17";
-            this.toolStripSeparator17.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator17.Size = new System.Drawing.Size(193, 6);
             // 
             // MenuItem_openTestSearch
             // 
             this.MenuItem_openTestSearch.Name = "MenuItem_openTestSearch";
-            this.MenuItem_openTestSearch.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_openTestSearch.Size = new System.Drawing.Size(196, 22);
             this.MenuItem_openTestSearch.Text = "测试检索窗(&T)";
             this.MenuItem_openTestSearch.Click += new System.EventHandler(this.MenuItem_openTestSearch_Click);
             // 
@@ -1189,6 +1190,7 @@ namespace dp2Circulation
             this.menuItem_updateDp2circulation,
             this.MenuItem_createGreenApplication,
             this.MenuItem_upgradeFromDisk,
+            this.MenuItem_refreshLibraryUID,
             this.toolStripSeparator31,
             this.MenuItem_copyright});
             this.MenuItem_help.Name = "MenuItem_help";
@@ -1797,6 +1799,13 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
+            // MenuItem_refreshLibraryUID
+            // 
+            this.MenuItem_refreshLibraryUID.Name = "MenuItem_refreshLibraryUID";
+            this.MenuItem_refreshLibraryUID.Size = new System.Drawing.Size(196, 22);
+            this.MenuItem_refreshLibraryUID.Text = "刷新 LibraryUID";
+            this.MenuItem_refreshLibraryUID.Click += new System.EventHandler(this.MenuItem_refreshLibraryUID_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -2028,6 +2037,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripButton toolStripButton_messageHub_relogin;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_importExport;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_selectLibraryCode;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_refreshLibraryUID;
     }
 }
 

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
@@ -15,6 +16,20 @@ namespace DigitalPlatform.Text
     public class StringUtil
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
+
+        public static string GetMd5(string strText)
+        {
+            MD5 hasher = MD5.Create();
+            byte[] buffer = Encoding.UTF8.GetBytes(strText);
+            byte[] target = hasher.ComputeHash(buffer);
+            StringBuilder sb = new StringBuilder();
+            foreach (byte b in target)
+            {
+                sb.Append(b.ToString("x2").ToLower());
+            }
+
+            return sb.ToString();
+        }
 
         // 去掉外围括住的符号
         // parameters:

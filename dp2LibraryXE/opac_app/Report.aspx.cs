@@ -90,7 +90,7 @@ ref sessioninfo) == false)
         if (string.IsNullOrEmpty(sessioninfo.RightsOrigin) == true)
         {
             string strError = "";
-            if (sessioninfo.ReLogin(out strError) == -1)
+            // if (sessioninfo.EnsureGetRights() == false)
             {
                 this.Response.StatusCode = 403;
                 this.Response.StatusDescription = strError + "。请重新登录";
