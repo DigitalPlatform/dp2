@@ -77,9 +77,11 @@ namespace DigitalPlatform.MessageClient
 
         void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            AddInfoLine("tick connection state = " + this.Connection.State.ToString());
+            if (this.Connection != null)
+                AddInfoLine("tick connection state = " + this.Connection.State.ToString());
 
-            if (this.Connection.State == Microsoft.AspNet.SignalR.Client.ConnectionState.Disconnected)
+            if (this.Connection == null ||
+                this.Connection.State == Microsoft.AspNet.SignalR.Client.ConnectionState.Disconnected)
             {
                 AddInfoLine("自动重新连接 ...");
                 this.Connect();

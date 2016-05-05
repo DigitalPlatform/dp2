@@ -100,7 +100,7 @@ namespace dp2Circulation
                 MessageBox.Show(this, "报表窗需要和 dp2library " + dp2library_version + " 以上版本配套使用。(当前 dp2library 版本为 " + this.MainForm.ServerVersion + ")\r\n\r\n请及时升级 dp2library 到最新版本");
             else
             {
-                double local_version = 0;
+                string local_version = "0.0";
                 // 读入断点信息的版本号
                 // return:
                 //      -1  出错
@@ -113,7 +113,7 @@ namespace dp2Circulation
                     MessageBox.Show(this, strError);
                 else if (nRet == 1)
                 {
-                    if (local_version < _local_version)
+                    if (StringUtil.CompareVersion(local_version, _local_version) < 0)
                     {
                         MessageBox.Show(this, "由于程序升级，本地存储的结构定义发生改变，请注意稍后重新从头创建本地存储");
                     }
@@ -409,6 +409,20 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        /* 2016/5/5 下午五点过
+System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总库实体/297710;cols(1)=记录'0000297710'在库中不存在
+   在 dp2Circulation.ReportForm.BuildItemRecords(String strItemDbNameParam, Int64 lOldCount, Int64& lProgress, Int64& lIndex, String& strError) 位置 c:\dp2-master\dp2\dp2Circulation\Statis\ReportForm.cs:行号 514
+   在 dp2Circulation.ReportForm.DoPlan(XmlDocument& task_dom, String& strError) 位置 c:\dp2-master\dp2\dp2Circulation\Statis\ReportForm.cs:行号 6356
+   在 dp2Circulation.ReportForm.button_start_createLocalStorage_Click(Object sender, EventArgs e) 位置 c:\dp2-master\dp2\dp2Circulation\Statis\ReportForm.cs:行号 6739
+   在 System.Windows.Forms.Control.OnClick(EventArgs e)
+   在 System.Windows.Forms.Button.OnClick(EventArgs e)
+   在 System.Windows.Forms.Button.OnMouseUp(MouseEventArgs mevent)
+   在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+   在 System.Windows.Forms.Control.WndProc(Message& m)
+   在 System.Windows.Forms.ButtonBase.WndProc(Message& m)
+   在 System.Windows.Forms.Button.WndProc(Message& m)
+   在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+         * */
         // 复制册记录
         // parameters:
         //      lIndex  [in] 起点 index
@@ -500,16 +514,19 @@ MessageBoxDefaultButton.Button1);
 
                     // 处理浏览结果
                     int i = 0;
-                    foreach(DigitalPlatform.LibraryClient.localhost.Record searchresult in searchresults)
+                    foreach (DigitalPlatform.LibraryClient.localhost.Record searchresult in searchresults)
                     {
                         // DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
                         // 2016/4/12
                         // 检查事项状态。主动抛出异常，避免后面出现 index 异常
                         if (searchresult.Cols == null)
-                            throw new Exception("浏览事项 Cols 为空: (lStart="+lStart+" index="+i+")  " + DumpResultItem(searchresult));
+                            throw new Exception("浏览事项 Cols 为空: (lStart=" + lStart + " index=" + i + ")  " + DumpResultItem(searchresult));
                         if (searchresult.Cols.Length < 11)
-                            throw new Exception("浏览事项异常: (lStart=" + lStart + " index=" + i + ")  " + DumpResultItem(searchresult));
+                        {
+                            // throw new Exception("浏览事项异常: (lStart=" + lStart + " index=" + i + ")  " + DumpResultItem(searchresult));
+                            goto CONTINUE;   // 中途遇到服务器有人删除册记录，很常见的现象
+                        }
 
                         ItemLine line = new ItemLine();
                         line.ItemRecPath = searchresult.Path;
@@ -586,6 +603,7 @@ MessageBoxDefaultButton.Button1);
                         line.BiblioRecPath = strBiblioRecPath;
                         lines.Add(line);
 
+                    CONTINUE:
                         i++;
                     }
 
@@ -651,7 +669,7 @@ MessageBoxDefaultButton.Button1);
         {
             if (searchresult.Cols == null)
                 return "path=" + searchresult.Path + ";cols=[null]";
-            return "path=" + searchresult.Path + ";cols("+searchresult.Cols.Length.ToString()+")=" + string.Join("|", searchresult.Cols);
+            return "path=" + searchresult.Path + ";cols(" + searchresult.Cols.Length.ToString() + ")=" + string.Join("|", searchresult.Cols);
         }
 
         // safe set progress value, between max and min
@@ -5749,7 +5767,8 @@ MessageBoxDefaultButton.Button2);
         // 0.07 (2014/6/19) operlogitem 表增加了 itembarcode 字段
         // 0.08 (2014/11/6) reader 表增加了 state 字段 
         // 0.09 (2015/7/14) 增加了 operlogpassgate 和 operloggetres 表
-        static double _local_version = 0.09;
+        // 0.10 (2016/5/5) 给每个 operlogxxx 表增加了 librarycode 字段
+        static string _local_version = "0.10";
 
         // TODO: 最好把第一次初始化本地 sql 表的动作也纳入 XML 文件中，这样做单项任务的时候，就不会毁掉其他的表
         // 创建批处理计划
@@ -5776,7 +5795,7 @@ MessageBoxDefaultButton.Button2);
                 // 开始处理时的日期
                 string strEndDate = DateTimeUtil.DateTimeToString8(DateTime.Now);
 
-                DomUtil.SetAttr(task_dom.DocumentElement, "version", _local_version.ToString());
+                DomUtil.SetAttr(task_dom.DocumentElement, "version", _local_version);
 
                 DomUtil.SetAttr(task_dom.DocumentElement,
                     "state", "first");  // 表示首次创建尚未完成
@@ -6352,12 +6371,20 @@ MessageBoxDefaultButton.Button2);
 
                         if (strType == "item" && strState != "finish")
                         {
-                            nRet = BuildItemRecords(
-        strDbName,
-        lCurrentCount,
-        ref lProgress,
-        ref lIndex,
-        out strError);
+                            try
+                            {
+                                nRet = BuildItemRecords(
+            strDbName,
+            lCurrentCount,
+            ref lProgress,
+            ref lIndex,
+            out strError);
+                            }
+                            catch
+                            {
+                                DomUtil.SetAttr(node, "index", lIndex.ToString());
+                                throw;
+                            }
                             if (nRet == -1)
                             {
                                 DomUtil.SetAttr(node, "index", lIndex.ToString());
@@ -6368,12 +6395,20 @@ MessageBoxDefaultButton.Button2);
 
                         if (strType == "reader" && strState != "finish")
                         {
-                            nRet = BuildReaderRecords(
-        strDbName,
-        lCurrentCount,
-        ref lProgress,
-        ref lIndex,
-        out strError);
+                            try
+                            {
+                                nRet = BuildReaderRecords(
+            strDbName,
+            lCurrentCount,
+            ref lProgress,
+            ref lIndex,
+            out strError);
+                            }
+                            catch
+                            {
+                                DomUtil.SetAttr(node, "index", lIndex.ToString());
+                                throw;
+                            }
                             if (nRet == -1)
                             {
                                 DomUtil.SetAttr(node, "index", lIndex.ToString());
@@ -6386,12 +6421,20 @@ MessageBoxDefaultButton.Button2);
                         {
                             if (strState != "finish")
                             {
-                                nRet = BuildBiblioRecords(
-            strDbName,
-            lCurrentCount,
-        ref lProgress,
-        ref lIndex,
-            out strError);
+                                try
+                                {
+                                    nRet = BuildBiblioRecords(
+                strDbName,
+                lCurrentCount,
+            ref lProgress,
+            ref lIndex,
+                out strError);
+                                }
+                                catch
+                                {
+                                    DomUtil.SetAttr(node, "index", lIndex.ToString());
+                                    throw;
+                                }
                                 if (nRet == -1)
                                 {
                                     DomUtil.SetAttr(node, "index", lIndex.ToString());
@@ -6424,17 +6467,24 @@ MessageBoxDefaultButton.Button2);
                                 if (nRet == -1)
                                     return -1;
 
-
                                 if (strState != "finish")
                                 {
-                                    nRet = BuildClassRecords(
-                                        strDbName,
-                                        strFromStyle,
-                                        strClassTableName,
-                                        lCurrentCount,
-                                        ref lProgress,
-                                        ref lIndex,
-                                        out strError);
+                                    try
+                                    {
+                                        nRet = BuildClassRecords(
+                                            strDbName,
+                                            strFromStyle,
+                                            strClassTableName,
+                                            lCurrentCount,
+                                            ref lProgress,
+                                            ref lIndex,
+                                            out strError);
+                                    }
+                                    catch
+                                    {
+                                        DomUtil.SetAttr(class_node, "index", lIndex.ToString());
+                                        throw;
+                                    }
                                     if (nRet == -1)
                                     {
                                         DomUtil.SetAttr(class_node, "index", lIndex.ToString());
@@ -6851,11 +6901,11 @@ MessageBoxDefaultButton.Button2);
         //      0   文件不存在
         //      1   成功
         int GetBreakPointVersion(
-            out double version,
+            out string version,
             out string strError)
         {
             strError = "";
-            version = 0;
+            version = "";
 
             string strFileName = Path.Combine(GetBaseDirectory(), "report_breakpoint.xml");
             XmlDocument dom = new XmlDocument();
@@ -6873,13 +6923,15 @@ MessageBoxDefaultButton.Button2);
                 return -1;
             }
 
+            version = dom.DocumentElement.GetAttribute("version");
+#if NO
             int nRet = DomUtil.GetDoubleParam(dom.DocumentElement, "version",
                 0,
                 out version,
                 out strError);
             if (nRet == -1)
                 return -1;
-
+#endif
             return 1;
         }
 

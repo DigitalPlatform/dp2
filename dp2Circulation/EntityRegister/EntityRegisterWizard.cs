@@ -222,6 +222,8 @@ namespace dp2Circulation
                 controls.Add(this.dpTable_browseLines);
 
                 controls.Add(new ControlWrapper(this.checkBox_settings_addDefaultFields, true));
+                controls.Add(new ControlWrapper(this.checkBox_settings_searchAmazon, true));
+                controls.Add(new ControlWrapper(this.checkBox_settings_searchHongniba, true));
 
                 return GuiState.GetUiState(controls);
             }
@@ -244,6 +246,8 @@ namespace dp2Circulation
                 controls.Add(this.dpTable_browseLines);
 
                 controls.Add(new ControlWrapper(this.checkBox_settings_addDefaultFields, true));
+                controls.Add(new ControlWrapper(this.checkBox_settings_searchAmazon, true));
+                controls.Add(new ControlWrapper(this.checkBox_settings_searchHongniba, true));
 
                 GuiState.SetUiState(controls, value);
             }
@@ -802,6 +806,10 @@ MessageBoxDefaultButton.Button1);
 
                     if (account.ServerType == "dp2library")
                     {
+                        if (account.ServerName == "红泥巴.数字平台中心"
+                            && this.checkBox_settings_searchHongniba.Checked == false)
+                            continue;
+
                         nRet = SearchLineDp2library(
                             strQueryWord,
                             strFrom,
@@ -813,7 +821,8 @@ MessageBoxDefaultButton.Button1);
                         else
                             nHitCount += nRet;
                     }
-                    else if (account.ServerType == "amazon")
+                    else if (account.ServerType == "amazon"
+                        && this.checkBox_settings_searchAmazon.Checked)
                     {
                         nRet = SearchLineAmazon(
                             strQueryWord,

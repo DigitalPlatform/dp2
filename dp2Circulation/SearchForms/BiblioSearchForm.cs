@@ -1490,12 +1490,6 @@ out strError);
             }
             string strError = "";
 
-            if (e.ResultCount == -1)
-            {
-                strError = e.ErrorInfo;
-                goto ERROR1;
-            }
-
             // _searchParam.SetLibraryNameTable("@" + e.LibraryUID);
             List<string> array = StringUtil.ParseTwoPart(e.LibraryUID, "|");
             string strLibraryName = array[0];
@@ -1514,6 +1508,12 @@ out strError);
             if (nRet == 2)
                 _searchParam._searchComplete = true;
 
+            if (e.ResultCount == -1)
+            {
+                strError = e.ErrorInfo;
+                goto ERROR1;
+            }
+
 #if NO
             if (e.Records != null)
                 _searchParam._searchCount += e.Records.Count;
@@ -1523,21 +1523,22 @@ out strError);
             Task.Factory.StartNew(() => FillList(e.Start, strLibraryName, e.Records));
             return;
         ERROR1:
-            // 加入一个文本行
+            AddErrorLine(strError);
+        }
+
+        // 加入一个错误文本行
+        void AddErrorLine(string strError)
+        {
+            string[] cols = new string[1];
+            cols[0] = strError;
+            this.Invoke((Action)(() =>
             {
-                string[] cols = new string[1];
-                cols[0] = strError;
-                this.Invoke((Action)(() =>
-                {
-
-                    ListViewItem item = Global.AppendNewLine(
-        this.listView_records,
-        "error",
-        cols);
-                }
-    ));
+                ListViewItem item = Global.AppendNewLine(
+    this.listView_records,
+    "error",
+    cols);
             }
-
+));
         }
 
         void FillList(long lStart,
@@ -1551,10 +1552,11 @@ out strError);
                 // TODO: 注意来自共享网络的图书馆名不能和 servers.xml 中的名字冲突。另外需要检查，不同的 UID，图书馆名字不能相同，如果发生冲突，则需要给分配 ..1 ..2 这样的编号以示区别
                 // 需要一直保存一个 UID 到图书馆命的对照表在内存备用
                 // TODO: 来自共享网络的记录，图标或 @ 后面的名字应该有明显的形态区别
-                int i = 0;
                 foreach (DigitalPlatform.MessageClient.Record record in Records)
                 {
                     MessageHub.DecodeRecord(record, _searchParam._serverPushEncoding);
+
+                    string strRecPath = record.RecPath + "@" + strLibraryName;
 
                     // 校验一下 MD5
                     if (string.IsNullOrEmpty(record.MD5) == false)
@@ -1562,21 +1564,9 @@ out strError);
                         string strMD5 = StringUtil.GetMd5(record.Data);
                         if (record.MD5 != strMD5)
                         {
-                            strError = "dp2Circulation : 记录 '" + record.RecPath + "' Data 的 MD5 校验出现异常";
-                            {
-                                string[] cols1 = new string[1];
-                                cols1[0] = strError;
-                                this.Invoke((Action)(() =>
-                                {
-
-                                    ListViewItem item1 = Global.AppendNewLine(
-                        this.listView_records,
-                        "error",
-                        cols1);
-                                }
-                    ));
-                            }
-                            goto CONTINUE;
+                            strError = "dp2Circulation : 记录 '" + strRecPath + "' Data 的 MD5 校验出现异常";
+                            AddErrorLine(strError);
+                            continue;
                         }
                     }
 
@@ -1591,14 +1581,16 @@ out strError);
     out strColumnTitles,
     out strError);
                     if (nRet == -1)
-                        goto ERROR1;
+                    {
+                        AddErrorLine("记录 "+strRecPath+" 创建浏览格式时出: " + strError);
+                        continue;
+                    }
 
 #if NO
                     // string strRecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
                     string strRecPath = // "lStart="+lStart.ToString() + " " + i + "/"+ Records.Count + " " +
                         _searchParam.BuildNamePath(record.RecPath);
 #endif
-                    string strRecPath = record.RecPath + "@" + strLibraryName;
 
 #if NO
                 string strDbName = ListViewProperty.GetDbName(strRecPath);
@@ -1613,7 +1605,10 @@ out strError);
                         info.RecPath = strRecPath;
                         info.Timestamp = ByteArray.GetTimeStampByteArray(record.Timestamp);
                         info.Format = strMarcSyntax;
-                        this.m_biblioTable[strRecPath] = info;
+                        lock (this.m_biblioTable)
+                        {
+                            this.m_biblioTable[strRecPath] = info;
+                        }
                     }
 
                     List<string> column_list = StringUtil.SplitList(strBrowseText, '\t');
@@ -1640,9 +1635,6 @@ out strError);
                 info.RecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
                 info.MarcSyntax = strMarcSyntax;
 #endif
-
-                CONTINUE:
-                    i++;
                 }
 
                 // Debug.Assert(e.Start == _searchParam._searchCount, "");
@@ -1650,22 +1642,10 @@ out strError);
             }
 
             return;
+#if NO
         ERROR1:
-            // 加入一个文本行
-            {
-                string[] cols = new string[1];
-                cols[0] = strError;
-                this.Invoke((Action)(() =>
-                {
-
-                    ListViewItem item = Global.AppendNewLine(
-        this.listView_records,
-        "error",
-        cols);
-                }
-    ));
-            }
-
+            AddErrorLine(strError);
+#endif
         }
 
         private void listView_records_DoubleClick(object sender, EventArgs e)
