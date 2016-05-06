@@ -360,7 +360,7 @@ namespace DigitalPlatform.OPAC
                 e.UserName = this.SupervisorUserName;
                 e.Password = this.SupervisorPassword;
 
-                e.Parameters = "location=#setup,type=worker,client=dp2OPAC|";
+                e.Parameters = "location=#setup,type=worker,client=dp2OPAC|0.01";   // 2016/5/6 加上 0.01 部分
 
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
@@ -398,7 +398,7 @@ namespace DigitalPlatform.OPAC
             e.UserName = dlg.UserName;
             e.Password = dlg.Password;
             e.SavePasswordShort = dlg.SavePasswordShort;
-            e.Parameters = "location=#setup,type=worker,client=dp2OPAC|";
+            e.Parameters = "location=#setup,type=worker,client=dp2OPAC|0.01";   // 2016/5/6 加上 0.01 部分
 
             e.SavePasswordLong = dlg.SavePasswordLong;
             e.LibraryServerUrl = dlg.ServerUrl;

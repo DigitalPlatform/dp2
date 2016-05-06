@@ -4932,7 +4932,7 @@ strQueryWord,
 strFromStyle,
 strMatchStyle,
 "",
-"",
+"id",
 1000,
 0,
 -1,
@@ -4951,6 +4951,9 @@ out strError);
                 _searchParam._searchComplete = true;
                 return 0;
             }
+
+            if (_searchParam._manager.SetTargetCount(nRet) == true)
+                _searchParam._searchComplete = true;
 
             return 1;
         }
@@ -4995,6 +4998,8 @@ out strError);
             public bool _searchComplete = false;
             public int _searchCount = 0;
             public string _serverPushEncoding = "";
+
+            public ResultManager _manager = new ResultManager();
         }
 
         SearchParam _searchParam = null;
@@ -5006,12 +5011,15 @@ out strError);
         {
             if (e.TaskID != _searchParam._searchID)
                 return;
+
             if (e.ResultCount == -1 && e.Start == -1)
             {
                 // 检索过程结束
                 _searchParam._searchComplete = true;
+                _searchParam._searchCount = (int)_searchParam._manager.GetTotalCount();
                 return;
             }
+
             string strError = "";
 
             if (e.ResultCount == -1)
@@ -5020,6 +5028,28 @@ out strError);
                 goto ERROR1;
             }
 
+            List<string> array = StringUtil.ParseTwoPart(e.LibraryUID, "|");
+            string strLibraryName = array[0];
+
+            // 标记结束一个检索目标
+            // return:
+            //      0   尚未结束
+            //      1   结束
+            //      2   全部结束
+            int nRet = _searchParam._manager.CompleteTarget(e.LibraryUID,
+                e.ResultCount,
+                e.Records == null ? 0 : e.Records.Count);
+
+            _searchParam._searchCount = (int)_searchParam._manager.GetTotalCount();
+
+            if (nRet == 2)
+                _searchParam._searchComplete = true;
+
+            // 单独给一个线程来执行
+            Task.Factory.StartNew(() => FillList(e.Start, strLibraryName, e.Records));
+            return;
+
+#if NO
             // TODO: 注意来自共享网络的图书馆名不能和 servers.xml 中的名字冲突。另外需要检查，不同的 UID，图书馆名字不能相同，如果发生冲突，则需要给分配 ..1 ..2 这样的编号以示区别
             // 需要一直保存一个 UID 到图书馆命的对照表在内存备用
             // TODO: 来自共享网络的记录，图标或 @ 后面的名字应该有明显的形态区别
@@ -5085,23 +5115,104 @@ out strError);
 #endif
                 _searchParam._searchCount++;
             }
-
             return;
+#endif
         ERROR1:
             // 加入一个文本行
-            {
-                string[] cols = new string[1];
-                cols[0] = strError;
-                this.Invoke((Action)(() =>
-                {
+            AddErrorLine(strError);
+        }
 
-                    ListViewItem item = Global.AppendNewLine(
+        void FillList(long lStart,
+    string strLibraryName,
+    IList<DigitalPlatform.MessageClient.Record> Records)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            // lock (_searchParam)
+            {
+                // TODO: 注意来自共享网络的图书馆名不能和 servers.xml 中的名字冲突。另外需要检查，不同的 UID，图书馆名字不能相同，如果发生冲突，则需要给分配 ..1 ..2 这样的编号以示区别
+                // 需要一直保存一个 UID 到图书馆命的对照表在内存备用
+                // TODO: 来自共享网络的记录，图标或 @ 后面的名字应该有明显的形态区别
+                int i = 0;
+                foreach (DigitalPlatform.MessageClient.Record record in Records)
+                {
+                    MessageHub.DecodeRecord(record, _searchParam._serverPushEncoding);
+
+                    string strRecPath = record.RecPath + "@" + strLibraryName;
+                    string strXml = record.Data;
+
+                    string strMarcSyntax = "";
+                    string strBrowseText = "";
+                    string strColumnTitles = "";
+                    this.Invoke((Action)(() =>
+                    {
+                        nRet = BuildBrowseText(strXml,
+        out strBrowseText,
+        out strMarcSyntax,
+        out strColumnTitles,
+        out strError);
+                    }
+));
+                    if (nRet == -1)
+                    {
+                        AddErrorLine("记录 " + strRecPath + " 创建浏览格式时出: " + strError);
+                        continue;
+                    }
+
+                    _browseTitleTable[strMarcSyntax] = strColumnTitles;
+
+                    // 将书目记录放入 m_biblioTable
+                    {
+                        BiblioInfo info = new BiblioInfo();
+                        info.OldXml = strXml;
+                        info.RecPath = strRecPath;
+                        info.Timestamp = ByteArray.GetTimeStampByteArray(record.Timestamp);
+                        info.Format = strMarcSyntax;
+                        lock (this.browseWindow.BiblioTable)
+                        {
+                            this.browseWindow.BiblioTable[strRecPath] = info;
+                        }
+                    }
+
+                    List<string> column_list = StringUtil.SplitList(strBrowseText, '\t');
+                    string[] cols = new string[column_list.Count];
+                    column_list.CopyTo(cols);
+
+                    ListViewItem item = null;
+                    this.Invoke((Action)(() =>
+                    {
+                        item = Global.AppendNewLine(
         this.browseWindow.RecordsList,
-        "error",
+        strRecPath,
         cols);
+                    }
+                    ));
+
+                    if (item != null)
+                        item.BackColor = Color.LightGreen;
                 }
-    ));
             }
+            return;
+#if NO
+        ERROR1:
+            // 加入一个文本行
+            AddErrorLine(strError);
+#endif
+        }
+
+        void AddErrorLine(string strError)
+        {
+            string[] cols = new string[1];
+            cols[0] = strError;
+            this.Invoke((Action)(() =>
+            {
+                ListViewItem item = Global.AppendNewLine(
+    this.browseWindow.RecordsList,
+    "error",
+    cols);
+            }
+));
         }
 
         void CloseBrowseWindow()

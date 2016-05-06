@@ -52,6 +52,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EntityRegisterWizard));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_settings = new System.Windows.Forms.TabPage();
+            this.checkBox_settings_addDefaultFields = new System.Windows.Forms.CheckBox();
             this.button_settings_bilbioDefault = new System.Windows.Forms.Button();
             this.button_settings_reCreateServersXml = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
@@ -90,7 +91,8 @@
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
             this.toolStripLabel_biblioSource = new System.Windows.Forms.ToolStripLabel();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.checkBox_settings_addDefaultFields = new System.Windows.Forms.CheckBox();
+            this.checkBox_settings_searchAmazon = new System.Windows.Forms.CheckBox();
+            this.checkBox_settings_searchHongniba = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_settings.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -118,7 +120,7 @@
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(0);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(473, 282);
+            this.tabControl_main.Size = new System.Drawing.Size(510, 317);
             this.tabControl_main.TabIndex = 0;
             this.tabControl_main.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.tabControl_main_DrawItem);
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
@@ -127,6 +129,8 @@
             // 
             this.tabPage_settings.AutoScroll = true;
             this.tabPage_settings.BackColor = System.Drawing.Color.DimGray;
+            this.tabPage_settings.Controls.Add(this.checkBox_settings_searchHongniba);
+            this.tabPage_settings.Controls.Add(this.checkBox_settings_searchAmazon);
             this.tabPage_settings.Controls.Add(this.checkBox_settings_addDefaultFields);
             this.tabPage_settings.Controls.Add(this.button_settings_bilbioDefault);
             this.tabPage_settings.Controls.Add(this.button_settings_reCreateServersXml);
@@ -137,9 +141,19 @@
             this.tabPage_settings.Controls.Add(this.button_settings_entityDefault);
             this.tabPage_settings.Location = new System.Drawing.Point(4, 22);
             this.tabPage_settings.Name = "tabPage_settings";
-            this.tabPage_settings.Size = new System.Drawing.Size(465, 256);
+            this.tabPage_settings.Size = new System.Drawing.Size(502, 291);
             this.tabPage_settings.TabIndex = 2;
             this.tabPage_settings.Text = "参数设定";
+            // 
+            // checkBox_settings_addDefaultFields
+            // 
+            this.checkBox_settings_addDefaultFields.AutoSize = true;
+            this.checkBox_settings_addDefaultFields.Location = new System.Drawing.Point(9, 106);
+            this.checkBox_settings_addDefaultFields.Name = "checkBox_settings_addDefaultFields";
+            this.checkBox_settings_addDefaultFields.Size = new System.Drawing.Size(210, 16);
+            this.checkBox_settings_addDefaultFields.TabIndex = 9;
+            this.checkBox_settings_addDefaultFields.Text = "为下载的书目记录添加默认字段(&D)";
+            this.checkBox_settings_addDefaultFields.UseVisualStyleBackColor = true;
             // 
             // button_settings_bilbioDefault
             // 
@@ -502,9 +516,9 @@
             this.toolStripSeparator2,
             this.toolStripButton_delete,
             this.toolStripLabel_biblioSource});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 282);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 317);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(473, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(510, 25);
             this.toolStrip1.TabIndex = 9;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -607,25 +621,35 @@
             this.tableLayoutPanel_main.RowCount = 2;
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_main.Size = new System.Drawing.Size(473, 307);
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(510, 342);
             this.tableLayoutPanel_main.TabIndex = 10;
             // 
-            // checkBox_settings_addDefaultFields
+            // checkBox_settings_searchAmazon
             // 
-            this.checkBox_settings_addDefaultFields.AutoSize = true;
-            this.checkBox_settings_addDefaultFields.Location = new System.Drawing.Point(9, 106);
-            this.checkBox_settings_addDefaultFields.Name = "checkBox_settings_addDefaultFields";
-            this.checkBox_settings_addDefaultFields.Size = new System.Drawing.Size(210, 16);
-            this.checkBox_settings_addDefaultFields.TabIndex = 9;
-            this.checkBox_settings_addDefaultFields.Text = "为下载的书目记录添加默认字段(&D)";
-            this.checkBox_settings_addDefaultFields.UseVisualStyleBackColor = true;
+            this.checkBox_settings_searchAmazon.AutoSize = true;
+            this.checkBox_settings_searchAmazon.Location = new System.Drawing.Point(9, 214);
+            this.checkBox_settings_searchAmazon.Name = "checkBox_settings_searchAmazon";
+            this.checkBox_settings_searchAmazon.Size = new System.Drawing.Size(138, 16);
+            this.checkBox_settings_searchAmazon.TabIndex = 10;
+            this.checkBox_settings_searchAmazon.Text = "检索亚马逊服务器(&A)";
+            this.checkBox_settings_searchAmazon.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_settings_searchHongniba
+            // 
+            this.checkBox_settings_searchHongniba.AutoSize = true;
+            this.checkBox_settings_searchHongniba.Location = new System.Drawing.Point(9, 236);
+            this.checkBox_settings_searchHongniba.Name = "checkBox_settings_searchHongniba";
+            this.checkBox_settings_searchHongniba.Size = new System.Drawing.Size(138, 16);
+            this.checkBox_settings_searchHongniba.TabIndex = 11;
+            this.checkBox_settings_searchHongniba.Text = "检索红泥巴服务器(&H)";
+            this.checkBox_settings_searchHongniba.UseVisualStyleBackColor = true;
             // 
             // EntityRegisterWizard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
-            this.ClientSize = new System.Drawing.Size(473, 307);
+            this.ClientSize = new System.Drawing.Size(510, 342);
             this.Controls.Add(this.tableLayoutPanel_main);
             this.DoubleBuffered = true;
             this.ForeColor = System.Drawing.Color.White;
@@ -708,5 +732,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_search;
         private System.Windows.Forms.Panel panel_search;
         private System.Windows.Forms.CheckBox checkBox_settings_addDefaultFields;
+        private System.Windows.Forms.CheckBox checkBox_settings_searchHongniba;
+        private System.Windows.Forms.CheckBox checkBox_settings_searchAmazon;
     }
 }

@@ -75,6 +75,8 @@
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.MenuItem_restartDp2library = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -128,7 +130,9 @@
             this.toolStripSeparator6,
             this.MenuItem_test,
             this.MenuItem_openDp2OPACHomePage,
-            this.MenuItem_getSqllocaldbexePath});
+            this.MenuItem_getSqllocaldbexePath,
+            this.toolStripSeparator8,
+            this.MenuItem_restartDp2library});
             this.MenuItem_management1.Name = "MenuItem_management1";
             this.MenuItem_management1.Size = new System.Drawing.Size(64, 21);
             this.MenuItem_management1.Text = "维护(&M)";
@@ -421,6 +425,18 @@
             this.webBrowser1.Size = new System.Drawing.Size(372, 229);
             this.webBrowser1.TabIndex = 7;
             // 
+            // MenuItem_restartDp2library
+            // 
+            this.MenuItem_restartDp2library.Name = "MenuItem_restartDp2library";
+            this.MenuItem_restartDp2library.Size = new System.Drawing.Size(320, 22);
+            this.MenuItem_restartDp2library.Text = "重新启动 dp2Library";
+            this.MenuItem_restartDp2library.Click += new System.EventHandler(this.MenuItem_restartDp2library_Click);
+            // 
+            // toolStripSeparator8
+            // 
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            this.toolStripSeparator8.Size = new System.Drawing.Size(317, 6);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -494,6 +510,8 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openDp2OPACHomePage;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_updateDp2Opac;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_getSqllocaldbexePath;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_restartDp2library;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
     }
 }
 

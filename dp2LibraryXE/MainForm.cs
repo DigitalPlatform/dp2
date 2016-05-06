@@ -1649,6 +1649,8 @@ http://github.com/digitalplatform/dp2"
 
         LibraryHost library_host = null;
 
+        // parameters:
+        //      bAutoStart  是否自动启动。如果为 false，表示会重新启动，假如以前启动过的话
         int dp2Library_start(
             bool bAutoStart,
             out string strError)
@@ -3235,7 +3237,6 @@ this.Font);
 
                 // 重新启动
                 RestartDp2libraryIfNeed();
-
             }
             else
             {
@@ -4758,6 +4759,11 @@ Stack:
                 strText,
                 "log_",
                 ".txt");
+        }
+
+        private void MenuItem_restartDp2library_Click(object sender, EventArgs e)
+        {
+            RestartDp2libraryIfNeed();
         }
     }
 

@@ -90,11 +90,11 @@ DbType.Int64);
         public static int IndexOfType(string strType)
         {
             int i = 0;
-            foreach(string type in DbTypes)
+            foreach (string type in DbTypes)
             {
                 if (type == strType)
                     return i;
-                i ++;
+                i++;
             }
 
             return -1;
@@ -127,7 +127,7 @@ DbType.Int64);
             else if (strDbType == "item")
             {
                 strFields = "bibliorecpath nvarchar (255) NULL ," + " "
-                // + "itembarcode nvarchar (255) NULL ," + " "
+                    // + "itembarcode nvarchar (255) NULL ," + " "
                 + "itemrecpath nvarchar (255) NULL ," + " ";
             }
             else if (strDbType == "order")
@@ -156,8 +156,8 @@ DbType.Int64);
             }
             else if (strDbType == "passgate")
             {
-                strFields = "librarycode nvarchar (255) NULL ," + " "
-                + "gatename nvarchar (255) NULL ," + " "
+                strFields = // "librarycode nvarchar (255) NULL ," + " " +
+                "gatename nvarchar (255) NULL ," + " "
                 + "readerbarcode nvarchar (255) NULL ," + " ";
             }
             else if (strDbType == "getres")
@@ -180,6 +180,7 @@ DbType.Int64);
                 + "date nvarchar (255) NULL," + " "
                 + "no integer ," + " "
                 + "subno integer ," + " "
+                + "librarycode nvarchar (255) NULL," + " "  // 2016/5/5
                 + "operation nvarchar (255) NULL," + " "
                 + "action nvarchar (255) NULL ," + " "
 
@@ -187,7 +188,7 @@ DbType.Int64);
                 + "itembarcode nvarchar (255) NULL ," + " "
                 + "readerbarcode nvarchar (255) NULL ," + " "
 #endif
-                + strFields
+ + strFields
                 + "operator nvarchar (255) NULL," + " "
                 + "opertime nvarchar (255) NULL  "
                 + ") ; ";
@@ -330,6 +331,7 @@ DbType.Int64);
         public string Date = "";  // 所在日志文件日期，8 字符
         public long No = 0;
         public long SubNo = 0;  // 2014/6/16 子序号。用于区分一个日志记录拆分为多个的情况
+        public string LibraryCode = ""; // 2016/5/5
         public string Operation = "";
         public string Action = "";
         public string OperTime = "";
@@ -360,11 +362,13 @@ DbType.Int64);
             string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
             string strOperTime = DomUtil.GetElementText(dom.DocumentElement,
                 "operTime");
+            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
 
             Debug.Assert(strDate.Length == 8, "");
             this.Date = strDate;
             this.No = lIndex;
             this.SubNo = 0;
+            this.LibraryCode = "," + strLibraryCode + ",";  // 这样便于构造 SQL like 语句
             this.Operation = strOperation;
             this.Action = strAction;
             this.OperTime = SQLiteUtil.GetLocalTime(strOperTime);
@@ -379,6 +383,7 @@ DbType.Int64);
             another.Date = this.Date;
             another.No = this.No;
             another.SubNo = this.SubNo;
+            another.LibraryCode = this.LibraryCode;
             another.Operation = this.Operation;
             another.Action = this.Action;
             another.OperTime = this.OperTime;
@@ -617,7 +622,7 @@ line.ReaderBarcode);
                 else if (type == "getres")
                     this._buffers.Add(new OperLogLines<GetResOperLogLine>() as OperLogLinesBase);
                 else
-                    throw new Exception("未知的 dbtype '"+type+"'");
+                    throw new Exception("未知的 dbtype '" + type + "'");
             }
         }
 
@@ -732,7 +737,7 @@ line.ReaderBarcode);
                 strLastDate = item.Date;
                 lLastIndex = item.Index + 1;
 #endif
-                    nWriteCount ++;
+                    nWriteCount++;
                 }
 
                 i++;
@@ -808,11 +813,12 @@ line.ReaderBarcode);
                 text.Append(" INSERT ");
 
             text.Append(
-" INTO " + TableName + " (date, no, subno, operation, action, readerrecpath, readerbarcode, operator, opertime) "
+" INTO " + TableName + " (date, no, subno, librarycode, operation, action, readerrecpath, readerbarcode, operator, opertime) "
 + " VALUES("
 + "@date" + i
 + ", @no" + i
 + ", @subno" + i
++ ", @librarycode" + i
 + ", @operation" + i
 + ", @action" + i
 + ", @readerrecpath" + i
@@ -831,6 +837,9 @@ line.ReaderBarcode);
     this.SubNo.ToString());
 
             SQLiteUtil.SetParameter(command,
+    "@librarycode" + i,
+    this.LibraryCode);
+            SQLiteUtil.SetParameter(command,
                 "@operation" + i,
                 this.Operation);
             SQLiteUtil.SetParameter(command,
@@ -847,13 +856,11 @@ this.ReaderBarcode);
 
             SQLiteUtil.SetParameter(command,
 "@operator" + i,
-this.Operator); 
-            
+this.Operator);
+
             SQLiteUtil.SetParameter(command,
 "@opertime" + i,
 this.OperTime);
-
-
         }
     }
 
@@ -909,11 +916,12 @@ this.OperTime);
                 text.Append(" INSERT ");
 
             text.Append(
-" INTO " + TableName + " (date, no, subno, operation, action, bibliorecpath, operator, opertime) "
+" INTO " + TableName + " (date, no, subno, librarycode, operation, action, bibliorecpath, operator, opertime) "
 + " VALUES("
 + "@date" + i
 + ", @no" + i
 + ", @subno" + i
++ ", @librarycode" + i
 + ", @operation" + i
 + ", @action" + i
 + ", @bibliorecpath" + i
@@ -930,6 +938,9 @@ this.OperTime);
             SQLiteUtil.SetParameter(command,
 "@subno" + i,
 this.SubNo.ToString());
+            SQLiteUtil.SetParameter(command,
+    "@librarycode" + i,
+    this.LibraryCode);
             SQLiteUtil.SetParameter(command,
                 "@operation" + i,
                 this.Operation);
@@ -1035,11 +1046,12 @@ this.Operator);
                 text.Append(" INSERT ");
 
             text.Append(
-" INTO " + TableName + " (date, no, subno, operation, action, itemrecpath, bibliorecpath, operator, opertime) "
+" INTO " + TableName + " (date, no, subno, librarycode, operation, action, itemrecpath, bibliorecpath, operator, opertime) "
 + " VALUES("
 + "@date" + i
 + ", @no" + i
 + ", @subno" + i
++ ", @librarycode" + i
 + ", @operation" + i
 + ", @action" + i
 + ", @itemrecpath" + i
@@ -1056,6 +1068,9 @@ this.Operator);
             SQLiteUtil.SetParameter(command,
 "@subno" + i,
 this.SubNo.ToString());
+            SQLiteUtil.SetParameter(command,
+"@librarycode" + i,
+this.LibraryCode);
             SQLiteUtil.SetParameter(command,
                 "@operation" + i,
                 this.Operation);
@@ -1221,43 +1236,43 @@ this.OperTime);
                 return;
 
             string strError = "";
-                line.AmerceRecPath = DomUtil.GetAttr(record,
-                    "recPath");
-                string strRecord = record.InnerText;
-                XmlDocument reader_dom = new XmlDocument();
-                try
-                {
-                    reader_dom.LoadXml(strRecord);
-                    line.ReaderBarcode = DomUtil.GetElementText(reader_dom.DocumentElement,
-                        "readerBarcode");
-                    line.ItemBarcode = DomUtil.GetElementText(reader_dom.DocumentElement,
-                        "itemBarcode");
+            line.AmerceRecPath = DomUtil.GetAttr(record,
+                "recPath");
+            string strRecord = record.InnerText;
+            XmlDocument reader_dom = new XmlDocument();
+            try
+            {
+                reader_dom.LoadXml(strRecord);
+                line.ReaderBarcode = DomUtil.GetElementText(reader_dom.DocumentElement,
+                    "readerBarcode");
+                line.ItemBarcode = DomUtil.GetElementText(reader_dom.DocumentElement,
+                    "itemBarcode");
 
-                    string strPrice = DomUtil.GetElementText(reader_dom.DocumentElement,
-                        "price");
-                    long value = 0;
-                    string strUnit = "";
-                    int nRet = ParsePriceString(strPrice,
-            out value,
-            out strUnit,
-            out strError);
-                    if (nRet == -1)
-                    {
-                        line.Unit = "";
-                        line.Price = 0;
-                    }
-                    else
-                    {
-                        line.Unit = strUnit;
-                        line.Price = value;
-                    }
-
-                    line.Reason = DomUtil.GetElementText(reader_dom.DocumentElement,
-                        "reason");
-                }
-                catch
+                string strPrice = DomUtil.GetElementText(reader_dom.DocumentElement,
+                    "price");
+                long value = 0;
+                string strUnit = "";
+                int nRet = ParsePriceString(strPrice,
+        out value,
+        out strUnit,
+        out strError);
+                if (nRet == -1)
                 {
+                    line.Unit = "";
+                    line.Price = 0;
                 }
+                else
+                {
+                    line.Unit = strUnit;
+                    line.Price = value;
+                }
+
+                line.Reason = DomUtil.GetElementText(reader_dom.DocumentElement,
+                    "reason");
+            }
+            catch
+            {
+            }
         }
 
         // 按照时间单位,把时间值零头去除,正规化,便于后面计算差额
@@ -1427,10 +1442,10 @@ out borrowdate) == false)
             {
                 value = (long)(item.Value * 100);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // 2016/3/31
-                strError = "元值 '"+item.Value.ToString()+"' 折算为分值的时候出现异常：" + ex.Message;
+                strError = "元值 '" + item.Value.ToString() + "' 折算为分值的时候出现异常：" + ex.Message;
                 return -1;
             }
             return 0;
@@ -1447,11 +1462,12 @@ out borrowdate) == false)
                 text.Append(" INSERT ");
 
             text.Append(
-" INTO " + TableName + " (date, no, subno, operation, action, amercerecpath, readerbarcode, itembarcode, price, unit, reason, operator, opertime) "
+" INTO " + TableName + " (date, no, subno, librarycode, operation, action, amercerecpath, readerbarcode, itembarcode, price, unit, reason, operator, opertime) "
 + " VALUES("
 + "@date" + i
 + ", @no" + i
 + ", @subno" + i
++ ", @librarycode" + i
 + ", @operation" + i
 + ", @action" + i
 
@@ -1474,6 +1490,9 @@ out borrowdate) == false)
             SQLiteUtil.SetParameter(command,
 "@subno" + i,
 this.SubNo.ToString());
+            SQLiteUtil.SetParameter(command,
+"@librarycode" + i,
+this.LibraryCode);
             SQLiteUtil.SetParameter(command,
                 "@operation" + i,
                 this.Operation);
@@ -1566,11 +1585,12 @@ this.OperTime);
                 text.Append(" INSERT ");
 
             text.Append(
-" INTO " + TableName + " (date, no, subno, operation, action, itembarcode, readerbarcode, operator, opertime) "
+" INTO " + TableName + " (date, no, subno, librarycode, operation, action, itembarcode, readerbarcode, operator, opertime) "
 + " VALUES("
 + "@date" + i
 + ", @no" + i
 + ", @subno" + i
++ ", @librarycode" + i
 + ", @operation" + i
 + ", @action" + i
 + ", @itembarcode" + i
@@ -1587,6 +1607,9 @@ this.OperTime);
             SQLiteUtil.SetParameter(command,
 "@subno" + i,
 this.SubNo.ToString());
+            SQLiteUtil.SetParameter(command,
+"@librarycode" + i,
+this.LibraryCode);
             SQLiteUtil.SetParameter(command,
                 "@operation" + i,
                 this.Operation);
@@ -1683,11 +1706,12 @@ this.OperTime);
                 text.Append(" INSERT ");
 
             text.Append(
-" INTO " + TableName + " (date, no, subno, operation, action, xmlrecpath, objectid, size, mime, operator, opertime) "
+" INTO " + TableName + " (date, no, subno, librarycode, operation, action, xmlrecpath, objectid, size, mime, operator, opertime) "
 + " VALUES("
 + "@date" + i
 + ", @no" + i
 + ", @subno" + i
++ ", @librarycode" + i
 + ", @operation" + i
 + ", @action" + i
 + ", @xmlrecpath" + i
@@ -1706,6 +1730,9 @@ this.OperTime);
             SQLiteUtil.SetParameter(command,
                 "@subno" + i,
                 this.SubNo.ToString());
+            SQLiteUtil.SetParameter(command,
+"@librarycode" + i,
+this.LibraryCode);
             SQLiteUtil.SetParameter(command,
                 "@operation" + i,
                 this.Operation);
@@ -1779,7 +1806,7 @@ this.OperTime);
             string strGateName = DomUtil.GetElementText(dom.DocumentElement,
     "gateName");
 
-            this.LibraryCode = strLibraryCode;
+            this.LibraryCode = strLibraryCode;  // 这里和基础类的 LibraryCode 什么关系?
             this.ReaderBarcode = strReaderBarcode;
             this.GateName = strGateName;
             return 0;
@@ -1796,16 +1823,16 @@ this.OperTime);
                 text.Append(" INSERT ");
 
             text.Append(
-" INTO " + TableName + " (date, no, subno, operation, action, gatename, readerbarcode, librarycode, operator, opertime) "
+" INTO " + TableName + " (date, no, subno, librarycode, operation, action, gatename, readerbarcode, operator, opertime) "
 + " VALUES("
 + "@date" + i
 + ", @no" + i
 + ", @subno" + i
++ ", @librarycode" + i
 + ", @operation" + i
 + ", @action" + i
 + ", @gatename" + i
 + ", @readerbarcode" + i
-+ ", @librarycode" + i
 + ", @operator" + i
 + ", @opertime" + i + ")"
 + " ; ");
@@ -1818,6 +1845,9 @@ this.OperTime);
             SQLiteUtil.SetParameter(command,
                 "@subno" + i,
                 this.SubNo.ToString());
+            SQLiteUtil.SetParameter(command,
+"@librarycode" + i,
+this.LibraryCode);
             SQLiteUtil.SetParameter(command,
                 "@operation" + i,
                 this.Operation);
@@ -1832,10 +1862,6 @@ this.OperTime);
             SQLiteUtil.SetParameter(command,
                 "@readerbarcode" + i,
                 this.ReaderBarcode);
-
-            SQLiteUtil.SetParameter(command,
-    "@librarycode" + i,
-    this.LibraryCode);
 
             SQLiteUtil.SetParameter(command,
 "@operator" + i,
@@ -2170,7 +2196,7 @@ line.ReaderBarcode);
         // 0 全部字段;
         // 1 brrower borrowtime borrowperiod returningtime itemrecpath 字段; 
         // 2 borrower itemrecpath 字段
-        
+
         public string Borrower = "";
         public string BorrowTime = "";
         public string BorrowPeriod = "";
@@ -2295,7 +2321,7 @@ line.ReaderBarcode);
             {
                 if (i > 0)
                     text.Append(",");
-                text.Append("@"+s+param_index.ToString());
+                text.Append("@" + s + param_index.ToString());
                 i++;
             }
             text.Append(" ) ;");
@@ -2368,7 +2394,6 @@ line.ReaderBarcode);
             text.Append(" FROM " + strTableName);
             text.Append(" WHERE " + strKeyFieldName + " = @" + strKeyFieldName + param_index.ToString() + " ) ");
             text.Append(" AS old ON old." + strKeyFieldName + " = new." + strKeyFieldName + "; ");
-
             return 0;
         }
 
@@ -3155,7 +3180,7 @@ connection))
             strError = "";
 
             // 创建表
-            string strCommand = "DROP TABLE if exists " + strTargetTableName + " ; " 
+            string strCommand = "DROP TABLE if exists " + strTargetTableName + " ; "
                 + "CREATE TABLE " + strTargetTableName + " AS "
                 + "select * from " + strSourceTableName + " group by bibliorecpath ;\n";
 
@@ -3308,7 +3333,7 @@ connection))
      line.LibraryCodeList);
                     SQLiteUtil.SetParameter(command,
      "@rights" + i,
-     line.Rights); 
+     line.Rights);
                     i++;
                 }
 
@@ -3336,6 +3361,4 @@ connection))
         }
 
     }
-
-
 }
