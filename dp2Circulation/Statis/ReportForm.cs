@@ -4324,11 +4324,25 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                 return -1;
             }
 
+            string strLibraryCode = Global.GetLibraryCode(strLocation);
+            string strLocationLike = " operlogcircu.librarycode like '%," + strLibraryCode + ",%' ";
+            if (string.IsNullOrEmpty(Global.GetLocationRoom(strLocation)) == false)
+            {
+                // 沿用以前的方法
+                strLocationLike = " item.location like '" + strLocation + "%' ";
+                if (string.IsNullOrEmpty(strLocation) == true)
+                    strLocationLike = " item.location = '' ";   // 2014/5/28
+                else if (strLocation == "/")
+                    strLocationLike = " (item.location like '/%' OR item.location not like '%/%') ";   // 全局的馆藏点比较特殊
+            }
+
+#if NO
             string strLocationLike = " item.location like '" + strLocation + "%' ";
             if (string.IsNullOrEmpty(strLocation) == true)
                 strLocationLike = " item.location = '' ";   // 2014/5/28
             else if (strLocation == "/")
                 strLocationLike = " (item.location like '/%' OR item.location not like '%/%') ";   // 全局的馆藏点比较特殊
+#endif
 
             if (StringUtil.IsInList("201", strStyle) == true)
             {
@@ -4348,8 +4362,8 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                     + " count(case operlogcircu.operation when 'borrow' then operlogcircu.action end) as borrow, "
                     + " count(case operlogcircu.operation when 'return' then operlogcircu.action end) as return "
      + " FROM operlogcircu "
-    + " JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
-     + " JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
+    + " left JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
+     + " left JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
      + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
      + "     AND " + strLocationLike
      + " GROUP BY item.bibliorecpath ORDER BY borrow DESC ;";
@@ -4361,8 +4375,8 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                 strCommand = "select item.bibliorecpath, biblio.summary, "
                     + " count(*) as count1 "
                     + " FROM operlogcircu "
-                    + " JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
-                    + " JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
+                    + " left JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
+                    + " left JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
                     + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                     + "     AND operlogcircu.operation = 'return' AND operlogcircu.action = 'read' "
                     + "     AND " + strLocationLike
@@ -4373,8 +4387,8 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                 // 202 表 从来没有借出的图书 *种* 。册数列表示种下属的册数，不是被借出的册数
                 strCommand = "select item.bibliorecpath, biblio.summary, count(*) as count "
                      + " FROM item "
-                     + " JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
-                     + " WHERE item.bibliorecpath not in "
+                     + " left JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
+                     + " left WHERE item.bibliorecpath not in "
                      + " ( select item.bibliorecpath "
                      + " FROM operlogcircu JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
                      + " WHERE operlogcircu.operation = 'borrow' and operlogcircu.action = 'borrow' "
@@ -4389,7 +4403,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                 // 9202 表 从来没有阅读的图书 *种* 。册数列表示种下属的册数，不是被阅读的册数
                 strCommand = "select item.bibliorecpath, biblio.summary, count(*) as count "
                      + " FROM item "
-                     + " JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
+                     + " left JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
                      + " WHERE item.bibliorecpath not in "
                      + " ( select item.bibliorecpath "
                      + " FROM operlogcircu JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "

@@ -156,8 +156,8 @@ DbType.Int64);
             }
             else if (strDbType == "passgate")
             {
-                strFields = "librarycode nvarchar (255) NULL ," + " "
-                + "gatename nvarchar (255) NULL ," + " "
+                strFields = // "librarycode nvarchar (255) NULL ," + " " +
+                "gatename nvarchar (255) NULL ," + " "
                 + "readerbarcode nvarchar (255) NULL ," + " ";
             }
             else if (strDbType == "getres")
@@ -1806,7 +1806,7 @@ this.OperTime);
             string strGateName = DomUtil.GetElementText(dom.DocumentElement,
     "gateName");
 
-            this.LibraryCode = strLibraryCode;
+            this.LibraryCode = strLibraryCode;  // 这里和基础类的 LibraryCode 什么关系?
             this.ReaderBarcode = strReaderBarcode;
             this.GateName = strGateName;
             return 0;
@@ -1823,7 +1823,7 @@ this.OperTime);
                 text.Append(" INSERT ");
 
             text.Append(
-" INTO " + TableName + " (date, no, subno, librarycode, operation, action, gatename, readerbarcode, librarycode, operator, opertime) "
+" INTO " + TableName + " (date, no, subno, librarycode, operation, action, gatename, readerbarcode, operator, opertime) "
 + " VALUES("
 + "@date" + i
 + ", @no" + i
@@ -1833,7 +1833,6 @@ this.OperTime);
 + ", @action" + i
 + ", @gatename" + i
 + ", @readerbarcode" + i
-+ ", @librarycode" + i
 + ", @operator" + i
 + ", @opertime" + i + ")"
 + " ; ");
@@ -1863,10 +1862,6 @@ this.LibraryCode);
             SQLiteUtil.SetParameter(command,
                 "@readerbarcode" + i,
                 this.ReaderBarcode);
-
-            SQLiteUtil.SetParameter(command,
-    "@librarycode" + i,
-    this.LibraryCode);
 
             SQLiteUtil.SetParameter(command,
 "@operator" + i,

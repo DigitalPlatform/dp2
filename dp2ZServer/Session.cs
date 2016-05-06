@@ -98,7 +98,7 @@ namespace dp2ZServer
             {
                 e.UserName = this.strUserName;
                 e.Password = this.strPassword;
-                e.Parameters = "location=z39.50 server, type=worker,client=dp2ZServer|";
+                e.Parameters = "location=z39.50 server, type=worker,client=dp2ZServer|0.01";
                 /*
                 e.IsReader = false;
                 e.Location = "z39.50 server";

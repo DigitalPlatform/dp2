@@ -826,6 +826,19 @@ namespace dp2Circulation
             return strLibraryCode;
         }
 
+        // 2016/5/5
+        public static string GetLocationRoom(string strLocationString)
+        {
+            string strLibraryCode = "";
+            string strPureName = "";
+
+            // 解析
+            ParseCalendarName(strLocationString,
+        out strLibraryCode,
+        out strPureName);
+
+            return strPureName;
+        }
 
         /// <summary>
         /// 合成日历名
