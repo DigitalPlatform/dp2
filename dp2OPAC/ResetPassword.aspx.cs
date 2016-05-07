@@ -82,7 +82,8 @@ ref sessioninfo) == false)
 
         string strParameters = "name=" + GetParamValue(this.TextBox_name.Text)
             + ",tel=" + GetParamValue(this.TextBox_tel.Text)
-            + ",barcode=" + GetParamValue(this.TextBox_readerBarcode.Text);
+            + ",barcode=" + GetParamValue(this.TextBox_readerBarcode.Text)
+            + ",queryword=" + GetParamValue(this.TextBox_readerBarcode.Text);
 
         LibraryChannel channel = sessioninfo.GetChannel(true);
         try

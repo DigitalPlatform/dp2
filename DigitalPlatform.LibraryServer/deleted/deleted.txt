@@ -605,3 +605,378 @@
         ERROR1:
             return -1;
         }
+
+
+
+		~~~
+		        // 重设密码
+        // parameters:
+        //      strMessageTempate   消息文字模板。其中可以使用 %name% %barcode% %temppassword% %expiretime% %period% 等宏
+        //      strMessage  返回拟发送给读者的消息文字
+        // return:
+        //      -1  出错
+        //      0   因为条件不具备功能没有成功执行
+        //      1   功能成功执行
+        public int ResetPassword(
+            // string strLibraryCodeList,
+            string strParameters,
+            string strMessageTemplate,
+            out string strMessage,
+            out string strError)
+        {
+            strError = "";
+            strMessage = "";
+
+            MessageInterface external_interface = this.GetMessageInterface("sms");
+
+            Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
+            string strLoginName = (string)parameters["barcode"];
+            string strNameParam = (string)parameters["name"];
+            string strTelParam = (string)parameters["tel"];
+            string strLibraryCodeList = (string)parameters["librarycode"];  // 控制检索读者记录的范围
+
+            string strStyle = (string)parameters["style"];
+            if (StringUtil.IsInList("returnMessage", strStyle) == false)
+            {
+                // 直接给调用者返回拟发送到手机短信的内容。要求调用者具有特殊权限才行，要求在调用本函数前判断好。
+            }
+            else
+            {
+                if (external_interface == null)
+                {
+                    strError = "当前系统尚未配置短消息 (sms) 接口，无法进行重设密码的操作";
+                    return -1;
+                }
+            }
+
+            if (string.IsNullOrEmpty(strLoginName) == true)
+            {
+                strError = "缺乏 barcode 参数";
+                return -1;
+            }
+            if (string.IsNullOrEmpty(strNameParam) == true)
+            {
+                strError = "缺乏 name 参数";
+                return -1;
+            }
+            if (string.IsNullOrEmpty(strTelParam) == true)
+            {
+                strError = "缺乏 tel 参数";
+                return -1;
+            }
+
+            // 判断电话号码是否为手机号码
+            if (strTelParam.Length != 11)
+            {
+                strError = "所提供的电话号码应该是 11 位的手机号码";
+                return 0;
+            }
+
+            string strXml = "";
+            string strOutputPath = "";
+
+            byte[] timestamp = null;
+
+            // 临时的SessionInfo对象
+            SessionInfo sessioninfo = new SessionInfo(this);
+            try
+            {
+                RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                if (channel == null)
+                {
+                    strError = "get channel error";
+                    return -1;
+                }
+
+                bool bTempPassword = false;
+                string strToken = "";
+                // 获得读者记录
+                // return:
+                //      -2  当前没有配置任何读者库，或者可以操作的读者库
+                //      -1  error
+                //      0   not found
+                //      1   命中1条
+                //      >1  命中多于1条
+                int nRet = this.GetReaderRecXmlForLogin(
+                    // sessioninfo.Channels,
+                    channel,
+                    strLibraryCodeList,
+                    strLoginName,
+                    null,
+                    -1,
+                    sessioninfo.ClientIP,
+                    null,
+                    out bTempPassword,
+                    out strXml,
+                    out strOutputPath,
+                    out timestamp,
+                    out strToken,
+                    out strError);
+                if (nRet == -1 || nRet == -2)
+                {
+                    strError = "以登录名 '" + strLoginName + "' 检索读者记录出错: " + strError;
+                    return -1;
+                }
+                if (nRet == 0)
+                {
+                    strError = "读者帐户 '" + strLoginName + "' 不存在";
+                    return 0;
+                }
+                if (nRet > 1)
+                {
+                    strError = "登录名 '" + strLoginName + "' 所匹配的帐户多于一个";
+                    return 0;
+                }
+
+                Debug.Assert(nRet == 1);
+
+                string strLibraryCode = "";
+                // 获得读者库的馆代码
+                // return:
+                //      -1  出错
+                //      0   成功
+                nRet = GetLibraryCode(
+                    strOutputPath,
+                    out strLibraryCode,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                XmlDocument readerdom = null;
+                nRet = LibraryApplication.LoadToDom(strXml,
+                    out readerdom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                    return -1;
+                }
+
+                // 观察 password 元素的 lastResetTime 属性，需在规定的时间长度以外才能再次进行重设
+
+                string strBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+                {
+                    string strPrefix = "";
+                    string strValue = "";
+                    // 将登录名切割为前缀和名字值两个部分
+                    SplitLoginName(strLoginName,
+                out strPrefix,
+                out strValue);
+
+                    if (string.IsNullOrEmpty(strPrefix) == true)
+                    {
+                        // 核对 barcode
+                        if (strBarcode.Trim() != strLoginName.Trim())
+                        {
+                            strError = "证条码号不匹配";
+                            return -1;
+                        }
+                    }
+                    if (strPrefix == "EM:") // 注意，整个 strLoginName 应该是 EM:email:xxxxx 这样的形态
+                    {
+                        // 核对 Email
+                        string strEmail = DomUtil.GetElementText(readerdom.DocumentElement, "email");
+                        if (StringUtil.SplitList(strEmail).IndexOf(strValue) == -1)
+                        {
+                            strError = "地址 '" + strValue + "' 不匹配";
+                            return -1;
+                        }
+                    }
+                    if (strPrefix == "TP:")
+                    {
+                        // 核对 电话号码
+                        string strTel1 = DomUtil.GetElementText(readerdom.DocumentElement, "tel");
+                        if (StringUtil.SplitList(strTel1).IndexOf(strValue) == -1)
+                        {
+                            strError = "电话号码不匹配";
+                            return -1;
+                        }
+                    }
+                    if (strPrefix == "ID:")
+                    {
+                        // 核对 身份证号
+                        string strID = DomUtil.GetElementText(readerdom.DocumentElement, "idCardNumber");
+                        if (strID != strValue)
+                        {
+                            strError = "身份证号不匹配";
+                            return -1;
+                        }
+                    }
+                    if (strPrefix == "CN:")
+                    {
+                        // 核对 身份证号
+                        string strCN = DomUtil.GetElementText(readerdom.DocumentElement, "cardNumber");
+                        if (strCN != strValue)
+                        {
+                            strError = "证号不匹配";
+                            return -1;
+                        }
+                    }
+                }
+
+                // 核对 name
+                string strName = DomUtil.GetElementText(readerdom.DocumentElement, "name");
+                if (strName.Trim() != strNameParam.Trim())
+                {
+                    strError = "姓名不匹配";
+                    return 0;
+                }
+
+                // 核对 tel
+                string strTel = DomUtil.GetElementText(readerdom.DocumentElement, "tel");
+                if (string.IsNullOrEmpty(strTel) == true)
+                {
+                    strError = "读者记录中没有登记电话号码，无法进行重设密码的操作";
+                    return 0;
+                }
+
+                string strResultTel = ""; ;
+                string[] tels = strTel.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string tel in tels)
+                {
+                    string strOneTel = tel.Trim();
+                    if (strOneTel == strTelParam.Trim())
+                    {
+                        strResultTel = strOneTel;
+                        break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(strResultTel) == true)
+                {
+                    strError = "所提供的电话号码和读者记录中的电话号码不匹配";
+                    return -1;
+                }
+
+                DateTime end;
+                // 观察在 password 元素 tempPasswordExpire 属性中残留的失效期，必须在这个时间以后才能进行本次操作
+                // parameters:
+                //      now 当前时间。本地时间
+                // return:
+                //      -1  出错
+                //      0   已经过了失效期
+                //      1   还在失效期以内
+                nRet = CheckOldExpireTime(readerdom,
+                    this.Clock.Now,
+                    out end,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                {
+                    strError = "本次重设密码的操作距离上次操作间隔不足一小时，操作被拒绝。请在 " + end.ToShortTimeString() + " 以后再进行操作";
+                    return 0;
+                }
+
+                // 重新设定一个密码
+                Random rnd = new Random();
+                string strReaderTempPassword = rnd.Next(1, 999999).ToString();
+
+                DateTime expire = this.Clock.Now + new TimeSpan(1, 0, 0);   // 本地时间
+                string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(expire);
+
+                if (StringUtil.IsInList("returnMessage", strStyle) == true)
+                {
+                    // 直接给调用者返回消息内容。消息内容中有临时密码，属于敏感信息，要求调用者具有特殊权限才行。
+                    Hashtable table = new Hashtable();
+                    table["tel"] = strTelParam;
+                    table["barcode"] = strBarcode;
+                    table["name"] = strName;
+                    table["tempPassword"] = strReaderTempPassword;
+                    table["expireTime"] = expire.ToLongTimeString();
+                    table["period"] = "一小时";
+                    table["refID"] = DomUtil.GetElementText(readerdom.DocumentElement, "refID");    // 在所提供的姓名或者电话号码命中不止一条读者记录的情形，调用者后面使用读者记录的 refID 来绑定特别重要。
+                    strMessage = BuildMessageXml(table);
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(strMessageTemplate) == true)
+                        strMessageTemplate = "%name% 您好！\n您的读者帐户(证条码号为 %barcode%)已设临时密码 %temppassword%，在 %period% 内登录会成为正式密码";
+
+                    string strBody = strMessageTemplate.Replace("%barcode%", strBarcode)
+                        .Replace("%name%", strName)
+                        .Replace("%temppassword%", strReaderTempPassword)
+                        .Replace("%expiretime%", expire.ToLongTimeString())
+                        .Replace("%period%", "一小时");
+                    // string strBody = "读者(证条码号) " + strBarcode + " 的帐户密码已经被重设为 " + strReaderNewPassword + "";
+
+                    // 向手机号码发送短信
+                    {
+                        // 发送消息
+                        try
+                        {
+                            // 发送一条消息
+                            // parameters:
+                            //      strPatronBarcode    读者证条码号
+                            //      strPatronXml    读者记录XML字符串。如果需要除证条码号以外的某些字段来确定消息发送地址，可以从XML记录中取
+                            //      strMessageText  消息文字
+                            //      strError    [out]返回错误字符串
+                            // return:
+                            //      -1  发送失败
+                            //      0   没有必要发送
+                            //      >=1   发送成功，返回实际发送的消息条数
+                            nRet = external_interface.HostObj.SendMessage(
+                                strBarcode,
+                                readerdom.DocumentElement.OuterXml,
+                                strBody,
+                                strLibraryCode,
+                                out strError);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = external_interface.Type + " 类型的外部消息接口Assembly中SendMessage()函数抛出异常: " + ex.Message;
+                            nRet = -1;
+                        }
+                        if (nRet == -1)
+                        {
+                            strError = "向读者 '" + strBarcode + "' 发送" + external_interface.Type + " message时出错: " + strError;
+                            if (this.Statis != null)
+                                this.Statis.IncreaseEntryValue(
+                                strLibraryCode,
+                                "重设密码通知",
+                                external_interface.Type + " message 重设密码通知消息发送错误数",
+                                1);
+                            this.WriteErrorLog(strError);
+                            return -1;
+                        }
+                        else
+                        {
+                            if (this.Statis != null)
+                                this.Statis.IncreaseEntryValue(
+            strLibraryCode,
+            "重设密码通知",
+            external_interface.Type + " message 重设密码通知消息发送数",
+            nRet);  // 短信条数可能多于次数
+                            if (this.Statis != null)
+                                this.Statis.IncreaseEntryValue(strLibraryCode,
+                                "重设密码通知",
+                                external_interface.Type + " message 重设密码通知人数",
+                                1);
+                        }
+                    }
+                }
+
+                byte[] output_timestamp = null;
+                nRet = ChangeReaderTempPassword(
+        sessioninfo,
+        strOutputPath,
+        readerdom,
+        strReaderTempPassword,
+        strExpireTime,
+        timestamp,
+        out output_timestamp,
+        out strError);
+                if (nRet == -1)
+                    return -1;  // 此时短信已经发出，但临时密码并未修改成功
+
+            }
+            finally
+            {
+                sessioninfo.CloseSession();
+                sessioninfo = null;
+            }
+
+            if (StringUtil.IsInList("returnMessage", strStyle) == false)
+                strError = "临时密码已通过短信方式发送到手机 " + strTelParam + "。请按照手机短信提示进行操作";
+            return 1;
+        }

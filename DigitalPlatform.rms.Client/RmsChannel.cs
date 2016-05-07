@@ -6102,4 +6102,29 @@ ref strNewStyle);	// 不要数据体和metadata
 
 #endif
 
+
+    /// <summary>
+    /// 一个内核记录
+    /// </summary>
+    public class KernelRecord
+    {
+        public string Xml = "";
+        public string RecPath = "";
+        public string Metadata = "";
+        public byte[] Timestamp = null;
+
+        public static KernelRecord From(Record record)
+        {
+            KernelRecord result = new KernelRecord();
+            result.RecPath = record.Path;
+            if (record.RecordBody != null)
+            {
+                result.Xml = record.RecordBody.Xml;
+                result.Metadata = record.RecordBody.Metadata;
+                result.Timestamp = record.RecordBody.Timestamp;
+            }
+            return result;
+        }
+    }
+
 }

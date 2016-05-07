@@ -278,6 +278,7 @@
     <Compile Include="Script.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="SearchResultLoader.cs" />
     <Compile Include="SelectRecordTemplateDlg.cs">
       <SubType>Form</SubType>
     </Compile>
