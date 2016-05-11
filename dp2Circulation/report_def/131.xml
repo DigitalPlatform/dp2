@@ -13,6 +13,6 @@
   <typeName>131 单个读者的借阅清单</typeName>
   <columnSortStyle>
   </columnSortStyle>
-  <createFrequency>month,year</createFrequency>
+  <createFrequency></createFrequency>
   <property fresh="false" />
 </root>

@@ -31,6 +31,7 @@ using DigitalPlatform.CirculationClient;
 // using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -85,7 +86,12 @@ namespace dp2Circulation
             string strError = "";
             int nRet = _cfg.LoadCfgFile(GetBaseDirectory(), "report_def.xml", out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+            {
+                this.Invoke((Action)(() =>
+                {
+                    MessageBox.Show(this, strError);
+                }));
+            }
 
             _cfg.FillList(this.listView_libraryConfig);
 
@@ -97,7 +103,12 @@ namespace dp2Circulation
             string dp2library_version = "2.60";
 
             if (StringUtil.CompareVersion(this.MainForm.ServerVersion, dp2library_version) < 0)
-                MessageBox.Show(this, "报表窗需要和 dp2library " + dp2library_version + " 以上版本配套使用。(当前 dp2library 版本为 " + this.MainForm.ServerVersion + ")\r\n\r\n请及时升级 dp2library 到最新版本");
+            {
+                this.Invoke((Action)(() =>
+                {
+                    MessageBox.Show(this, "报表窗需要和 dp2library " + dp2library_version + " 以上版本配套使用。(当前 dp2library 版本为 " + this.MainForm.ServerVersion + ")\r\n\r\n请及时升级 dp2library 到最新版本");
+                }));
+            }
             else
             {
                 string local_version = "0.0";
@@ -110,12 +121,20 @@ namespace dp2Circulation
                 out local_version,
                 out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this, strError);
+                {
+                    this.Invoke((Action)(() =>
+                    {
+                        MessageBox.Show(this, strError);
+                    }));
+                }
                 else if (nRet == 1)
                 {
                     if (StringUtil.CompareVersion(local_version, _local_version) < 0)
                     {
-                        MessageBox.Show(this, "由于程序升级，本地存储的结构定义发生改变，请注意稍后重新从头创建本地存储");
+                        this.Invoke((Action)(() =>
+                        {
+                            MessageBox.Show(this, "由于程序升级，本地存储的结构定义发生改变，请注意稍后重新从头创建本地存储");
+                        }));
                     }
                 }
             }
@@ -165,10 +184,15 @@ namespace dp2Circulation
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
+            if (this.InvokeRequired == true)
+            {
+                this.Invoke(new Action<bool>(EnableControls), bEnable);
+                return;
+            }
+
             this.tabControl1.Enabled = bEnable;
             this.toolStrip_main.Enabled = bEnable;
         }
-
 
         string _connectionString = "";
         // const int INSERT_BATCH = 100;  // 300;
@@ -244,7 +268,12 @@ namespace dp2Circulation
                 return -1;
 
             if (String.IsNullOrEmpty(strWarning) == false)
-                MessageBox.Show(this, strWarning);
+            {
+                this.Invoke((Action)(() =>
+                {
+                    MessageBox.Show(this, strWarning);
+                }));
+            }
 
             if (filenames.Count > 0 && string.IsNullOrEmpty(strEndRange) == false)
             {
@@ -307,12 +336,18 @@ namespace dp2Circulation
                             catch (Exception ex)
                             {
                                 strError = item.Date + " 中偏移为 " + item.Index.ToString() + " 的日志记录 XML 装载到 DOM 时出错: " + ex.Message;
-                                DialogResult result = MessageBox.Show(this,
-strError + "\r\n\r\n是否跳过此条记录继续处理?",
-"ReportForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
+                                DialogResult result = DialogResult.No;
+
+                                string strText = strError;
+                                this.Invoke((Action)(() =>
+                                {
+                                    MessageBox.Show(this,
+     strText + "\r\n\r\n是否跳过此条记录继续处理?",
+     "ReportForm",
+     MessageBoxButtons.YesNo,
+     MessageBoxIcon.Question,
+     MessageBoxDefaultButton.Button1);
+                                }));
                                 if (result == DialogResult.No)
                                     return -1;
                                 continue;
@@ -379,18 +414,21 @@ MessageBoxDefaultButton.Button1);
             // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
             if (e.Actions == "yes,no,cancel")
             {
-                DialogResult result = MessageBox.Show(this,
-    e.MessageText + "\r\n\r\n是否重试操作?\r\n\r\n(是: 重试;  否: 跳过本次操作，继续后面的操作; 取消: 停止全部操作)",
-    "ReportForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Yes)
-                    e.ResultAction = "yes";
-                else if (result == DialogResult.Cancel)
-                    e.ResultAction = "cancel";
-                else
-                    e.ResultAction = "no";
+                this.Invoke((Action)(() =>
+                {
+                    DialogResult result = MessageBox.Show(this,
+        e.MessageText + "\r\n\r\n是否重试操作?\r\n\r\n(是: 重试;  否: 跳过本次操作，继续后面的操作; 取消: 停止全部操作)",
+        "ReportForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.Yes)
+                        e.ResultAction = "yes";
+                    else if (result == DialogResult.Cancel)
+                        e.ResultAction = "cancel";
+                    else
+                        e.ResultAction = "no";
+                }));
             }
         }
 
@@ -484,7 +522,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 // 装入浏览格式
                 for (; ; )
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    if (this.InvokeRequired == false)
+                        Application.DoEvents();	// 出让界面控制权
 
                     if (stop != null && stop.State != 0)
                     {
@@ -730,7 +769,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 // 装入浏览格式
                 for (; ; )
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    if (this.InvokeRequired == false)
+                        Application.DoEvents();	// 出让界面控制权
 
                     if (stop != null && stop.State != 0)
                     {
@@ -883,7 +923,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 // 装入浏览格式
                 for (; ; )
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    if (this.InvokeRequired == false)
+                        Application.DoEvents();	// 出让界面控制权
 
                     if (stop != null && stop.State != 0)
                     {
@@ -1270,7 +1311,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                 List<ClassLine> lines = new List<ClassLine>();
                 for (; ; )
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    if (this.InvokeRequired == false)
+                        Application.DoEvents();	// 出让界面控制权
 
                     if (stop != null && stop.State != 0)
                     {
@@ -2781,7 +2823,8 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
             // stop.SetProgressRange(0, reader_table.Count);
             for (int i = 0; i < reader_table.Count; i++)
             {
-                Application.DoEvents();
+                if (this.InvokeRequired == false)
+                    Application.DoEvents();
                 if (stop != null && stop.State != 0)
                 {
                     strError = "用户中断...";
@@ -4328,13 +4371,21 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
             string strLocationLike = " operlogcircu.librarycode like '%," + strLibraryCode + ",%' ";
             if (string.IsNullOrEmpty(Global.GetLocationRoom(strLocation)) == false)
             {
-                // 沿用以前的方法
+                // 改为沿用以前的方法
                 strLocationLike = " item.location like '" + strLocation + "%' ";
                 if (string.IsNullOrEmpty(strLocation) == true)
                     strLocationLike = " item.location = '' ";   // 2014/5/28
                 else if (strLocation == "/")
                     strLocationLike = " (item.location like '/%' OR item.location not like '%/%') ";   // 全局的馆藏点比较特殊
             }
+
+            // 通过 item 表实现的地点筛选
+            string strLocationLike_item = " item.location like '" + strLocation + "%' ";
+            if (string.IsNullOrEmpty(strLocation) == true)
+                strLocationLike_item = " item.location = '' ";
+            else if (strLocation == "/")
+                strLocationLike_item = " (item.location like '/%' OR item.location not like '%/%') ";   // 全局的馆藏点比较特殊
+
 
 #if NO
             string strLocationLike = " item.location like '" + strLocation + "%' ";
@@ -4388,13 +4439,13 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                 strCommand = "select item.bibliorecpath, biblio.summary, count(*) as count "
                      + " FROM item "
                      + " left JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
-                     + " left WHERE item.bibliorecpath not in "
+                     + " WHERE item.bibliorecpath not in "
                      + " ( select item.bibliorecpath "
                      + " FROM operlogcircu JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
                      + " WHERE operlogcircu.operation = 'borrow' and operlogcircu.action = 'borrow' "
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND " + strLocationLike + " ) "
-                     + " AND " + strLocationLike    // 限定 item 表里面的记录范围为分馆的册
+                     + " AND " + strLocationLike_item    // 限定 item 表里面的记录范围为分馆的册
                      + " AND substr(item.createtime,1,10) <= '" + strEndDate.Insert(6, "-").Insert(4, "-") + "' "  // 限定册记录创建的时间在 end 以前
                      + " GROUP BY item.bibliorecpath ORDER BY item.bibliorecpath;";
             }
@@ -4410,7 +4461,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                      + " WHERE operlogcircu.operation = 'return' and operlogcircu.action = 'read' "
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND " + strLocationLike + " ) "
-                     + " AND " + strLocationLike    // 限定 item 表里面的记录范围为分馆的册
+                     + " AND " + strLocationLike_item    // 限定 item 表里面的记录范围为分馆的册
                      + " AND substr(item.createtime,1,10) <= '" + strEndDate.Insert(6, "-").Insert(4, "-") + "' "  // 限定册记录创建的时间在 end 以前
                      + " GROUP BY item.bibliorecpath ORDER BY item.bibliorecpath;";
             }
@@ -5535,7 +5586,10 @@ out strError);
                 this._cfg.Save();
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }));
         }
 
         // 首次自动创建全部分馆的配置
@@ -5584,7 +5638,10 @@ out strError);
             this._cfg.Save();
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }));
         }
 
         // 修改一个分馆配置
@@ -5636,7 +5693,10 @@ out strError);
             this._cfg.Save();
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }));
         }
 
         // 创建一个新的分馆配置
@@ -5678,7 +5738,10 @@ out strError);
                 goto ERROR1;
             if (nRet == 1)
             {
+                this.Invoke((Action)(() =>
+                {
                 MessageBox.Show(this, strError + "\r\n\r\n请修改馆代码");
+                }));
                 goto REDO;
             }
 
@@ -5692,7 +5755,10 @@ out strError);
             this._cfg.Save();
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }));
         }
 
         // 删除选定的分馆配置
@@ -5737,7 +5803,10 @@ MessageBoxDefaultButton.Button2);
                 this._cfg.Save();
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }));
         }
 
         // 保存分馆参数配置
@@ -5919,7 +5988,6 @@ MessageBoxDefaultButton.Button2);
                 if (strTypeList == "*"
                     || StringUtil.IsInList("biblio", strTypeList) == true)
                 {
-
                     // 获得全部书目库名
                     List<string> biblio_dbnames = new List<string>();
                     if (this.MainForm.BiblioDbProperties != null)
@@ -5947,12 +6015,17 @@ MessageBoxDefaultButton.Button2);
                         return -1;
                     if (nRet == 0)
                     {
-                        DialogResult result = MessageBox.Show(this,
-strError + "\r\n\r\n建议先中断处理，配置好书目库的分类号检索点再重新创建本地存储。如果此时继续处理，则会无法同步分类号信息，以后也无法创建和分类号有关的报表。\r\n\r\n是否继续处理?",
-"ReportForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
+                        DialogResult result = DialogResult.No;
+                        string strText = strError;
+                        this.Invoke((Action)(() =>
+                        {
+                            result = MessageBox.Show(this,
+     strText + "\r\n\r\n建议先中断处理，配置好书目库的分类号检索点再重新创建本地存储。如果此时继续处理，则会无法同步分类号信息，以后也无法创建和分类号有关的报表。\r\n\r\n是否继续处理?",
+     "ReportForm",
+     MessageBoxButtons.YesNo,
+     MessageBoxIcon.Question,
+     MessageBoxDefaultButton.Button2);
+                        }));
                         if (result == System.Windows.Forms.DialogResult.No)
                             return -1;  // 
                     }
@@ -6315,15 +6388,6 @@ MessageBoxDefaultButton.Button2);
                         }
                     }
 
-#if NO
-                    stop.SetMessage("正在初始化本地数据库的日志表 ...");
-                    Application.DoEvents();
-
-                    nRet = CreateOperLogTables(out strError);
-                    if (nRet == -1)
-                        return -1;
-#endif
-
                     DomUtil.SetAttr(task_dom.DocumentElement,
                         "initial_tables", "finish");
                 }
@@ -6514,26 +6578,6 @@ MessageBoxDefaultButton.Button2);
                     {
                         string strState = DomUtil.GetAttr(node, "state");
 
-#if NO
-                        string strTableInitilized = DomUtil.GetAttr(node,
-    "initial_tables");
-                        if (strTableInitilized != "finish")
-                        {
-                            stop.SetMessage("正在初始化本地数据库的用户表 ...");
-                            Application.DoEvents();
-
-                            this._connectionString = GetOperlogConnectionString();
-                            nRet = UserLine.CreateUserTable(
-                                this._connectionString,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-
-                            DomUtil.SetAttr(node,
-                                "initial_tables", "finish");
-                        }
-#endif
-
                         if (strState != "finish")
                         {
                             nRet = DoCreateUserTable(
@@ -6571,7 +6615,8 @@ MessageBoxDefaultButton.Button2);
                         if (strTableInitilized != "finish")
                         {
                             stop.SetMessage("正在初始化本地数据库的日志表 ...");
-                            Application.DoEvents();
+                            if (this.InvokeRequired == false)
+                                Application.DoEvents();
 
                             nRet = CreateOperLogTables(out strError);
                             if (nRet == -1)
@@ -6627,14 +6672,6 @@ MessageBoxDefaultButton.Button2);
 
                         if (strTableInitilized != "finish")
                         {
-#if NO
-                            stop.SetMessage("正在初始化本地数据库的日志表 ...");
-                            Application.DoEvents();
-
-                            nRet = CreateAccessLogTables(out strError);
-                            if (nRet == -1)
-                                return -1;
-#endif
                             // 前面应该已经初始化过了
                             DomUtil.SetAttr(node,
                                 "initial_tables", "finish");
@@ -6687,7 +6724,8 @@ MessageBoxDefaultButton.Button2);
             strError = "";
 
             stop.SetMessage("正在初始化本地数据库的用户表 ...");
-            Application.DoEvents();
+            if (this.InvokeRequired == false)
+                Application.DoEvents();
 
             this._connectionString = GetOperlogConnectionString();
             int nRet = UserLine.CreateUserTable(
@@ -6766,6 +6804,11 @@ MessageBoxDefaultButton.Button2);
         // TODO: 中间从服务器复制表的阶段，也应该可以中断，以后可以从断点继续。会出现一个对话框，询问是否继续
         private void button_start_createLocalStorage_Click(object sender, EventArgs e)
         {
+            Task.Factory.StartNew(() => CreateLocalStorage());
+        }
+
+        void CreateLocalStorage()
+        {
             string strError = "";
             int nRet = 0;
 
@@ -6811,66 +6854,76 @@ MessageBoxDefaultButton.Button2);
 
             SetStartButtonStates();
             SetDailyReportButtonState();
-            MessageBox.Show(this, "处理完成");
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, "处理完成");
+            }));
             return;
         ERROR1:
             SetStartButtonStates();
             SetDailyReportButtonState();
-            MessageBox.Show(this, strError);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }));
         }
+
 
         void SetStartButtonStates()
         {
-            string strError = "";
-            int nRet = 0;
-
-            string strEndDate = "";
-            long lIndex = 0;
-            string strState = "";
-
-            // 读入断点信息
-            // return:
-            //      -1  出错
-            //      0   正常
-            //      1   首次创建尚未完成
-            nRet = LoadDailyBreakPoint(
-                out strEndDate,
-                out lIndex,
-                out strState,
-                out strError);
-            if (nRet == -1)
-                MessageBox.Show(this, strError);
-            if (strState == "daily")
+            this.Invoke((Action)(() =>
             {
-                this.button_start_dailyReplication.Enabled = true;
-                this.button_start_createLocalStorage.Enabled = false;
-            }
-            else if (string.IsNullOrEmpty(strState) == true || strState == "first")
-            {
-                this.button_start_dailyReplication.Enabled = false;
-                this.button_start_createLocalStorage.Enabled = true;
-            }
-            else
-            {
-                this.button_start_dailyReplication.Enabled = false;
-                this.button_start_createLocalStorage.Enabled = false;
-            }
+                string strError = "";
+                int nRet = 0;
 
-            if (string.IsNullOrEmpty(strEndDate) == true)
-                this.button_start_dailyReplication.Text = "每日同步";
-            else
-                this.button_start_dailyReplication.Text = "每日同步 " + strEndDate + "-";
+                string strEndDate = "";
+                long lIndex = 0;
+                string strState = "";
 
-            if (strState == "first")
-            {
-                this.button_start_createLocalStorage.Text = "继续创建本地存储";
-            }
-            else
-            {
-                this.button_start_createLocalStorage.Text = "首次创建本地存储";
-            }
+                // 读入断点信息
+                // return:
+                //      -1  出错
+                //      0   正常
+                //      1   首次创建尚未完成
+                nRet = LoadDailyBreakPoint(
+                    out strEndDate,
+                    out lIndex,
+                    out strState,
+                    out strError);
+                if (nRet == -1)
+                    MessageBox.Show(this, strError);
+                if (strState == "daily")
+                {
+                    this.button_start_dailyReplication.Enabled = true;
+                    this.button_start_createLocalStorage.Enabled = false;
+                }
+                else if (string.IsNullOrEmpty(strState) == true || strState == "first")
+                {
+                    this.button_start_dailyReplication.Enabled = false;
+                    this.button_start_createLocalStorage.Enabled = true;
+                }
+                else
+                {
+                    this.button_start_dailyReplication.Enabled = false;
+                    this.button_start_createLocalStorage.Enabled = false;
+                }
 
-            this.checkBox_start_enableFirst.Checked = false;
+                if (string.IsNullOrEmpty(strEndDate) == true)
+                    this.button_start_dailyReplication.Text = "每日同步";
+                else
+                    this.button_start_dailyReplication.Text = "每日同步 " + strEndDate + "-";
+
+                if (strState == "first")
+                {
+                    this.button_start_createLocalStorage.Text = "继续创建本地存储";
+                }
+                else
+                {
+                    this.button_start_createLocalStorage.Text = "首次创建本地存储";
+                }
+
+                this.checkBox_start_enableFirst.Checked = false;
+            }));
         }
 
         // 写入断点信息
@@ -7218,13 +7271,20 @@ MessageBoxDefaultButton.Button2);
                         }
                         catch (Exception ex)
                         {
+                            DialogResult result = System.Windows.Forms.DialogResult.No;
                             strError = logType.ToString() + "日志记录 " + item.Date + " " + item.Index.ToString() + " XML 装入 DOM 的时候发生错误: " + ex.Message;
-                            DialogResult result = MessageBox.Show(this,
-strError + "\r\n\r\n是否跳过此条记录继续处理?",
-"ReportForm",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
+                            string strText = strError;
+
+                            this.Invoke((Action)(() =>
+                            {
+                                result = MessageBox.Show(this,
+    strText + "\r\n\r\n是否跳过此条记录继续处理?",
+    "ReportForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                            }));
+
                             if (result == System.Windows.Forms.DialogResult.No)
                                 return -1;
 
@@ -7311,7 +7371,13 @@ MessageBoxDefaultButton.Button1);
                             strError = "同步 " + item.Date + " " + item.Index.ToString() + " 时出错: " + strError;
 
                             // TODO: 最好有个冻结按钮
-                            DialogResult result = AutoCloseMessageBox.Show(this, strError + "\r\n\r\n(点右上角关闭按钮可以中断批处理)", 5000);
+                            DialogResult result = System.Windows.Forms.DialogResult.Cancel;
+                            string strText = strError;
+                            this.Invoke((Action)(() =>
+                            {
+                                result = AutoCloseMessageBox.Show(this, strText + "\r\n\r\n(点右上角关闭按钮可以中断批处理)", 5000);
+                            }));
+
                             if (result != System.Windows.Forms.DialogResult.OK)
                                 return -1;  // TODO: 缓存中没有兑现的怎么办?
 
@@ -7815,12 +7881,18 @@ connection))
                         out strError);
                     if (lRet == -1)
                     {
-                        DialogResult result = MessageBox.Show(this,
-        "获取书目记录信息 (" + StringUtil.MakePathList(recpaths) + ") 的操作发生错误： " + strError + "\r\n\r\n是否重试操作?\r\n\r\n(是: 重试; 取消: 停止操作)",
-        "ReportForm",
-        MessageBoxButtons.OKCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button1);
+                        DialogResult result = DialogResult.Cancel;
+
+                        string strText = strError;
+                        this.Invoke((Action)(() =>
+                        {
+                            result = MessageBox.Show(this,
+             "获取书目记录信息 (" + StringUtil.MakePathList(recpaths) + ") 的操作发生错误： " + strText + "\r\n\r\n是否重试操作?\r\n\r\n(是: 重试; 取消: 停止操作)",
+             "ReportForm",
+             MessageBoxButtons.OKCancel,
+             MessageBoxIcon.Question,
+             MessageBoxDefaultButton.Button1);
+                        }));
                         if (result == DialogResult.OK)
                             goto REDO;
                         if (result == DialogResult.Cancel)
@@ -9078,6 +9150,7 @@ strSourceRecPath);
         // 从上次记忆的断点位置，开始同步
         private void button_start_dailyReplication_Click(object sender, EventArgs e)
         {
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -9091,6 +9164,35 @@ strSourceRecPath);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
+            Task.Factory.StartNew(() => DoDailyReplication(LogType.OperLog))
+                    .ContinueWith((antecendent) =>
+                    {
+                        if (antecendent.IsFaulted == true)
+                        {
+                            this.Invoke((Action)(() => MessageBox.Show(this, ExceptionUtil.GetDebugText(antecendent.Exception))));
+                            return;
+                        }
+                        Task.Factory.StartNew(() => DoDailyReplication(LogType.AccessLog));
+                    })
+                    .ContinueWith((antecendent) =>
+                    {
+                        if (antecendent.IsFaulted == true)
+                        {
+                            this.Invoke((Action)(() => MessageBox.Show(this, ExceptionUtil.GetDebugText(antecendent.Exception))));
+                            return;
+                        }
+                        this.Invoke((Action)(() => MessageBox.Show(this, "处理完成")));
+                    });
+        }
+
+        void DoDailyReplication(
+            LogType logType)
+        {
+            string strError = "";
+            int nRet = DoDailyReplication(logType, out strError);
+            if (nRet == -1)
+                this.Invoke((Action)(() => MessageBox.Show(this, strError)));
         }
 
         // 执行每日同步任务
@@ -9194,7 +9296,12 @@ strSourceRecPath);
                         last_index,
                         out strError_1);
                     if (nRet == -1)
-                        MessageBox.Show(this, strError_1);
+                    {
+                        this.Invoke((Action)(() =>
+                        {
+                            MessageBox.Show(this, strError_1);
+                        }));
+                    }
                 }
 
                 SetStartButtonStates();
@@ -9241,6 +9348,8 @@ strSourceRecPath);
 
         List<int> _resultColumnWidths = new List<int>();
 
+
+
         /* 空 SQL 语句容易造成：
 发生未捕获的界面线程异常: 
 Type: System.NullReferenceException
@@ -9266,7 +9375,7 @@ Stack:
             string strError = "";
             // int nRet = 0;
 
-            if (string.IsNullOrEmpty(this.textBox_query_command.Text.Trim()) == true)
+            if (string.IsNullOrEmpty(this.textBox_query_command.GetText().Trim()) == true)
             {
                 strError = "尚未输入 SQL 语句";
                 goto ERROR1;
@@ -9298,7 +9407,7 @@ Stack:
                 {
                     connection.Open();
 
-                    using (SQLiteCommand command = new SQLiteCommand(this.textBox_query_command.Text, connection))
+                    using (SQLiteCommand command = new SQLiteCommand(this.textBox_query_command.GetText(), connection))
                     {
                         try
                         {
@@ -9333,7 +9442,8 @@ Stack:
                                 // 如果记录已经存在
                                 while (dr.Read())
                                 {
-                                    Application.DoEvents();
+                                    if (this.InvokeRequired == false)
+                                        Application.DoEvents();
                                     if (stop != null && stop.State != 0)
                                     {
                                         strError = "用户中断...";
@@ -9359,7 +9469,7 @@ Stack:
                         }
                         catch (SQLiteException ex)
                         {
-                            strError = "执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + this.textBox_query_command.Text;
+                            strError = "执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + this.textBox_query_command.GetText();
                             goto ERROR1;
                         }
                     }
@@ -9380,7 +9490,10 @@ Stack:
 
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }));
         }
 
         private void toolStripButton_query_do_Click(object sender, EventArgs e)
@@ -9399,16 +9512,19 @@ Stack:
         // 获得错误信息窗
         internal HtmlViewerForm GetErrorInfoForm()
         {
-            if (this.ErrorInfoForm == null
-                || this.ErrorInfoForm.IsDisposed == true
-                || this.ErrorInfoForm.IsHandleCreated == false)
+            this.Invoke((Action)(() =>
             {
-                this.ErrorInfoForm = new HtmlViewerForm();
-                this.ErrorInfoForm.ShowInTaskbar = false;
-                this.ErrorInfoForm.Text = "错误信息";
-                this.ErrorInfoForm.Show(this);
-                this.ErrorInfoForm.WriteHtml("<pre>");  // 准备文本输出
-            }
+                if (this.ErrorInfoForm == null
+                    || this.ErrorInfoForm.IsDisposed == true
+                    || this.ErrorInfoForm.IsHandleCreated == false)
+                {
+                    this.ErrorInfoForm = new HtmlViewerForm();
+                    this.ErrorInfoForm.ShowInTaskbar = false;
+                    this.ErrorInfoForm.Text = "错误信息";
+                    this.ErrorInfoForm.Show(this);
+                    this.ErrorInfoForm.WriteHtml("<pre>");  // 准备文本输出
+                }
+            }));
 
             return this.ErrorInfoForm;
         }
@@ -9452,7 +9568,10 @@ Stack:
                     out strError);
                 if (nRet == -1)
                 {
-                    MessageBox.Show(this, strError);
+                    this.Invoke((Action)(() =>
+                    {
+                        MessageBox.Show(this, strError);
+                    }));
                     return;
                 }
 
@@ -9668,7 +9787,8 @@ dlg.DateRange);
 
                     foreach (string strLibraryCode in librarycodes)
                     {
-                        Application.DoEvents();
+                        if (this.InvokeRequired == false)
+                            Application.DoEvents();
 
                         XmlElement library_element = task_dom.CreateElement("library");
                         task_dom.DocumentElement.AppendChild(library_element);
@@ -9713,7 +9833,8 @@ dlg.DateRange);
                             {
                                 // stop.SetMessage("正在创建 " + GetDisplayLibraryCode(strLibraryCode) + " " + time.Time + " 的报表");
 
-                                Application.DoEvents();
+                                if (this.InvokeRequired == false)
+                                    Application.DoEvents();
                                 if (stop != null && stop.State != 0)
                                 {
                                     strError = "中断";
@@ -9785,6 +9906,7 @@ dlg.DateRange);
             task_dom.Save(strTaskFileName); // 预先保存一次
 
             DO_TASK:
+#if NO
             nRet = DoDailyReportTask(
                 ref task_dom,
                 out strError);
@@ -9792,20 +9914,14 @@ dlg.DateRange);
                 goto ERROR1;
             else
                 File.Delete(strTaskFileName);   // 任务完成，删除任务文件
+#endif
+            Task.Factory.StartNew(() => DoDailyReportTask(strTaskFileName, task_dom));
             return;
         ERROR1:
             if (task_dom != null && string.IsNullOrEmpty(strTaskFileName) == false)
                 task_dom.Save(strTaskFileName);
 
             MessageBox.Show(this, strError);
-
-#if NO
-            SetUploadButtonState();
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-#endif
-
         }
 
         delegate void Delegate_SetUploadButtonText(string strText, string strEnabled);
@@ -9818,6 +9934,7 @@ dlg.DateRange);
                 this.BeginInvoke(d, new object[] { strText, strEnabled });
                 return;
             }
+
             this.button_start_uploadReport.Text = strText;
             if (strEnabled == "true")
                 this.button_start_uploadReport.Enabled = true;
@@ -9838,14 +9955,30 @@ dlg.DateRange);
             int nRet = GetDailyReportRangeString(out strRange,
                 out strError);
             if (nRet == -1 || nRet == 0)
-                this.button_start_dailyReport.Text = "每日报表 " + strError;
+            {
+                this.Invoke((Action)(() =>
+    this.button_start_dailyReport.Text = "每日报表 " + strError
+));
+            }
             else
-                this.button_start_dailyReport.Text = "每日报表 " + strRange;
+            {
+                this.Invoke((Action)(() =>
+this.button_start_dailyReport.Text = "每日报表 " + strRange
+));
+            }
 
             if (string.IsNullOrEmpty(strRange) == true)
-                this.button_start_dailyReport.Enabled = false;
+            {
+                this.Invoke((Action)(() =>
+this.button_start_dailyReport.Enabled = false
+));
+            }
             else
-                this.button_start_dailyReport.Enabled = true;
+            {
+                this.Invoke((Action)(() =>
+this.button_start_dailyReport.Enabled = true
+));
+            }
         }
 
         // 已经创建唯一事项表的原始 classtable 的名字列表
@@ -9948,7 +10081,6 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
             }
-
 
             task_dom.LoadXml("<root />");
             File.Delete(strTaskFileName);
@@ -10058,6 +10190,7 @@ MessageBoxDefaultButton.Button1);
                 stop.SetMessage("正在检查和创建 SQL 索引 ...");
                 foreach (string type in OperLogTable.DbTypes)
                 {
+                    if (this.InvokeRequired == false)
                     Application.DoEvents();
 
                     nRet = OperLogTable.CreateAdditionalIndex(
@@ -10081,7 +10214,8 @@ MessageBoxDefaultButton.Button1);
 
                 foreach (string strLibraryCode in librarycodes)
                 {
-                    Application.DoEvents();
+                    if (this.InvokeRequired == false)
+                        Application.DoEvents();
 
                     XmlElement library_element = task_dom.CreateElement("library");
                     task_dom.DocumentElement.AppendChild(library_element);
@@ -10091,7 +10225,8 @@ MessageBoxDefaultButton.Button1);
                     {
                         foreach (string strTimeType in types)
                         {
-                            Application.DoEvents();
+                            if (this.InvokeRequired == false)
+                                Application.DoEvents();
                             List<OneTime> times = null;
 
                             // parameters:
@@ -10110,7 +10245,8 @@ MessageBoxDefaultButton.Button1);
                             {
                                 // stop.SetMessage("正在创建 " + GetDisplayLibraryCode(strLibraryCode) + " " + time.Time + " 的报表");
 
-                                Application.DoEvents();
+                                if (this.InvokeRequired == false)
+                                    Application.DoEvents();
                                 if (stop != null && stop.State != 0)
                                 {
                                     strError = "中断";
@@ -10206,6 +10342,7 @@ MessageBoxDefaultButton.Button1);
             task_dom.Save(strTaskFileName); // 预先保存一次
 
             DO_TASK:
+#if NO
             nRet = DoDailyReportTask(
                 ref task_dom,
                 out strError);
@@ -10213,19 +10350,10 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             else
                 File.Delete(strTaskFileName);   // 任务完成，删除任务文件
+#endif
+            Task.Factory.StartNew(() => DoDailyReportTask(strTaskFileName, task_dom));
             return;
         ERROR1:
-#if NO
-            {
-                string strError1 = "";
-                // 中间出错，或者中断，保存遗留信息文件
-                nRet = SaveDoneTable(
-                    false,
-                    out strError1);
-                if (nRet == -1)
-                    MessageBox.Show(this, strError1);
-            }
-#endif
             if (task_dom != null && string.IsNullOrEmpty(strTaskFileName) == false)
                 task_dom.Save(strTaskFileName);
 
@@ -10238,6 +10366,25 @@ MessageBoxDefaultButton.Button1);
             this._libraryLocationCache.Clear();
         }
 
+        void DoDailyReportTask(
+            string strTaskFileName,
+            XmlDocument task_dom)
+        {
+            string strError = "";
+            int nRet = DoDailyReportTask(ref task_dom,
+                out strError);
+            if (nRet == -1)
+            {
+                if (task_dom != null && string.IsNullOrEmpty(strTaskFileName) == false)
+                    task_dom.Save(strTaskFileName);
+
+                this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+            }
+            else
+                File.Delete(strTaskFileName);   // 任务完成，删除任务文件
+        }
+
+        // 线程安全版本
         // 每日增量创建报表
         // return:
         //      -1  出错，或者中断
@@ -10294,7 +10441,7 @@ MessageBoxDefaultButton.Button1);
                 stop.SetMessage("正在检查和创建 SQL 索引 ...");
                 foreach (string type in OperLogTable.DbTypes)
                 {
-                    Application.DoEvents();
+                    // Application.DoEvents();
 
                     nRet = OperLogTable.CreateAdditionalIndex(
                         type,
@@ -10320,7 +10467,8 @@ MessageBoxDefaultButton.Button1);
                 stop.SetProgressValue(i);
                 foreach (XmlElement library_element in library_nodes)
                 {
-                    Application.DoEvents();
+                    if (this.InvokeRequired == false)
+                        Application.DoEvents();
 
                     string strLibraryCode = library_element.GetAttribute("code");
 
@@ -10338,7 +10486,8 @@ MessageBoxDefaultButton.Button1);
 
                         stop.SetMessage("正在创建 " + GetDisplayLibraryCode(strLibraryCode) + " " + time.Time + " 的报表。" + GetProgressTimeString(i));
 
-                        Application.DoEvents();
+                        if (this.InvokeRequired == false)
+                            Application.DoEvents();
                         if (stop != null && stop.State != 0)
                         {
                             strError = "中断";
@@ -10440,7 +10589,9 @@ MessageBoxDefaultButton.Button1);
             }
 
             ClearCache();
-            this.MainForm.StatusBarMessage = "耗费时间 " + ProgressEstimate.Format(_estimate.delta_passed);
+            this.Invoke((Action)(() =>
+            this.MainForm.StatusBarMessage = "耗费时间 " + ProgressEstimate.Format(_estimate.delta_passed)
+));
             return 1;
         ERROR1:
 #if NO
@@ -11126,7 +11277,8 @@ MessageBoxDefaultButton.Button1);
 
             foreach (XmlNode node in report_nodes)
             {
-                Application.DoEvents();
+                if (this.InvokeRequired == false)
+                    Application.DoEvents();
                 string strName = DomUtil.GetAttr(node, "name");
                 string strReportType = DomUtil.GetAttr(node, "type");
                 string strCfgFile = DomUtil.GetAttr(node, "cfgFile");
@@ -11284,7 +11436,8 @@ MessageBoxDefaultButton.Button1);
 
                     foreach (string strLocation in locations)
                     {
-                        Application.DoEvents();
+                        if (this.InvokeRequired == false)
+                            Application.DoEvents();
 
                         macro_table["%location%"] = GetLocationCaption(strLocation);
 
@@ -11332,7 +11485,8 @@ MessageBoxDefaultButton.Button1);
 
                             foreach (BiblioDbFromInfo style in class_styles)
                             {
-                                Application.DoEvents();
+                                if (this.InvokeRequired == false)
+                                    Application.DoEvents();
 
 #if NO
                                 if (names.Count > 0)
@@ -11465,7 +11619,8 @@ MessageBoxDefaultButton.Button1);
 
                             foreach (BiblioDbFromInfo style in class_styles)
                             {
-                                Application.DoEvents();
+                                if (this.InvokeRequired == false)
+                                    Application.DoEvents();
 
 #if NO
                                 if (names.Count > 0)
@@ -11606,7 +11761,8 @@ MessageBoxDefaultButton.Button1);
 
                     foreach (BiblioDbFromInfo style in class_styles)
                     {
-                        Application.DoEvents();
+                        if (this.InvokeRequired == false)
+                            Application.DoEvents();
 
                         OneClassType current_type = null;
                         if (class_table.Count > 0)
@@ -12588,7 +12744,8 @@ MessageBoxDefaultButton.Button1);
                 if (stop != null)
                     stop.SetMessage("正在搜集文件名 ...");
 
-                Application.DoEvents();
+                if (this.InvokeRequired == false)
+                    Application.DoEvents();
 
                 // 获得全部文件名
                 filenames = GetFileNames(strReportDir, FileAttributes.Archive);
@@ -12603,7 +12760,8 @@ MessageBoxDefaultButton.Button1);
                 // 分批进行上传
                 for (; ; )
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    if (this.InvokeRequired == false)
+                        Application.DoEvents();	// 出让界面控制权
 
                     if (stop != null && stop.State != 0)
                     {
@@ -12710,16 +12868,25 @@ MessageBoxDefaultButton.Button1);
             // SetUploadButtonState();
             BeginUpdateUploadButtonText();
 
-            this.MainForm.StatusBarMessage = "完成上传 " + lUploadedFiles.ToString() + " 个文件, 总尺寸" + lUnzipFileLength.ToString() + "，压缩后尺寸 " + lZipFileLength.ToString();
-            if (this.DeleteReportFileAfterUpload == true && lUploadedFiles > 0)
-                this.MainForm.StatusBarMessage += "。文件上传后，本地文件已经被删除";
+            this.Invoke((Action)(() =>
+            {
+                this.MainForm.StatusBarMessage = "完成上传 " + lUploadedFiles.ToString() + " 个文件, 总尺寸" + lUnzipFileLength.ToString() + "，压缩后尺寸 " + lZipFileLength.ToString();
+                if (this.DeleteReportFileAfterUpload == true && lUploadedFiles > 0)
+                    this.MainForm.StatusBarMessage += "。文件上传后，本地文件已经被删除";
+            }));
             return;
         NOT_FOUND:
-            this.MainForm.StatusBarMessage = strError;
+            this.Invoke((Action)(() =>
+            {
+                this.MainForm.StatusBarMessage = strError;
+            }));
             return;
         ERROR1:
             BeginUpdateUploadButtonText();
-            MessageBox.Show(this, strError);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }));
         }
 
         static bool IsRmlFileName(string strFileName)
@@ -12759,14 +12926,16 @@ MessageBoxDefaultButton.Button1);
             if (stop != null)
                 stop.SetMessage("正在搜集文件名 ...");
 
-            Application.DoEvents();
+            if (this.InvokeRequired == false)
+                Application.DoEvents();
 
             string strReportDir = Path.Combine(GetBaseDirectory(), "reports");
             List<string> filenames = null;
 
             bool bDelete = this.DeleteReportFileAfterUpload;
 
-            Application.DoEvents();
+            if (this.InvokeRequired == false)
+                Application.DoEvents();
 
             filenames = GetFileNames(strReportDir, FileAttributes.Archive);
 
@@ -12790,7 +12959,8 @@ MessageBoxDefaultButton.Button1);
                 int i = 0;
                 foreach (string filename in filenames)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    if (this.InvokeRequired == false)
+                        Application.DoEvents();	// 出让界面控制权
 
                     if (stop != null && stop.State != 0)
                     {
@@ -12861,19 +13031,27 @@ MessageBoxDefaultButton.Button1);
                 // SetUploadButtonState();
                 BeginUpdateUploadButtonText();
             }
-            MessageBox.Show(this, strError);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }));
         }
 
         // 上传报表
         private void button_start_uploadReport_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(this.comboBox_start_uploadMethod.Text) == true
-                || this.comboBox_start_uploadMethod.Text == "dp2Library")
+                || this.comboBox_start_uploadMethod.GetText() == "dp2Library")
                 UploadReportByDp2library();
-            else if (this.comboBox_start_uploadMethod.Text == "FTP")
+            else if (this.comboBox_start_uploadMethod.GetText() == "FTP")
                 UploadReportByFtp();
             else
-                MessageBox.Show(this, "未知的上传方式 '" + this.comboBox_start_uploadMethod.Text + "'");
+            {
+                this.Invoke((Action)(() =>
+{
+    MessageBox.Show(this, "未知的上传方式 '" + this.comboBox_start_uploadMethod.GetText() + "'");
+}));
+            }
         }
 
         // 上传文件到到 dp2lbrary 服务器
@@ -12944,7 +13122,8 @@ MessageBoxDefaultButton.Button1);
             {
                 for (int j = 0; j < ranges.Length; j++)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    if (Program.MainForm.InvokeRequired == false)
+                        Application.DoEvents();	// 出让界面控制权
 
                     if (stop != null && stop.State != 0)
                     {
@@ -13038,6 +13217,7 @@ MessageBoxDefaultButton.Button1);
             if (stop != null)
                 stop.SetMessage("正在搜集文件名 ...");
 
+                    if (this.InvokeRequired == false)
             Application.DoEvents();
 
             filenames = GetFileNames(strReportDir, FileAttributes.Archive);
@@ -13051,7 +13231,8 @@ MessageBoxDefaultButton.Button1);
             {
                 foreach (string filename in filenames)
                 {
-                    Application.DoEvents();
+                    if (Program.MainForm.InvokeRequired == false)
+                        Application.DoEvents();
 
                     if (stop != null && stop.State != 0)
                     {
@@ -13069,11 +13250,13 @@ MessageBoxDefaultButton.Button1);
                 if (stop != null)
                     stop.SetMessage("正在写入压缩文件 ...");
 
-                Application.DoEvents();
+                if (Program.MainForm.InvokeRequired == false)
+                    Application.DoEvents();
 
                 zip.SaveProgress += (s, e) =>
                     {
-                        Application.DoEvents();
+                        if (Program.MainForm.InvokeRequired == false)
+                            Application.DoEvents();
                         if (stop != null && stop.State != 0)
                         {
                             e.Cancel = true;
@@ -13181,7 +13364,8 @@ MessageBoxDefaultButton.Button1);
         // 获得一个目录下的全部 .rml 文件名。包括子目录中的
         static List<string> GetRmlFileNames(string strDataDir)
         {
-            Application.DoEvents();
+            if (Program.MainForm.InvokeRequired == false)
+                Application.DoEvents();
 
             DirectoryInfo di = new DirectoryInfo(strDataDir);
 
@@ -13246,7 +13430,8 @@ MessageBoxDefaultButton.Button1);
                 if (stop != null)
                     stop.SetMessage("正在搜集文件名 ...");
 
-                Application.DoEvents();
+                if (this.InvokeRequired == false)
+                    Application.DoEvents();
 
                 List<string> filenames = GetRmlFileNames(dlg.ReportDirectory);
 
@@ -13258,7 +13443,8 @@ MessageBoxDefaultButton.Button1);
 
                 foreach (string strFileName in filenames)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    if (this.InvokeRequired == false)
+                        Application.DoEvents();	// 出让界面控制权
 
                     if (stop != null && stop.State != 0)
                     {
@@ -13308,10 +13494,16 @@ MessageBoxDefaultButton.Button1);
                 EnableControls(true);
             }
 
-            MessageBox.Show(this, "成功转换文件 " + nCount.ToString() + " 个");
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, "成功转换文件 " + nCount.ToString() + " 个");
+            }));
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }));
         }
 
         FileCounting _counting = null;
@@ -13397,7 +13589,6 @@ MessageBoxDefaultButton.Button1);
 
 
             contextMenu.Show(this.listView_query_results, new Point(e.X, e.Y));
-
         }
 
         void menu_queryResult_selectAll_Click(object sender, EventArgs e)
@@ -13482,7 +13673,10 @@ MessageBoxDefaultButton.Button1);
             this.MainForm.StatusBarMessage = "导出成功。";
             return;
         ERROR1:
-            MessageBox.Show(this, strError);
+            this.Invoke((Action)(() =>
+            {
+                MessageBox.Show(this, strError);
+            }));
         }
 
         void menu_queryResult_copyToClipboard_Click(object sender, EventArgs e)

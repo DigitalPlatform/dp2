@@ -46,9 +46,12 @@ namespace dp2Circulation
         /// <param name="strHtml">HTML 字符串</param>
         public void WriteHtml(string strHtml)
         {
-            Global.WriteHtml(this.webBrowser1,
-                strHtml);
+            this.Invoke((Action)(() =>
+            {
+                Global.WriteHtml(this.webBrowser1,
+                    strHtml);
+            }));
         }
 
-     }
+    }
 }
