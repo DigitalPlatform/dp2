@@ -61,6 +61,30 @@ namespace DigitalPlatform
             }
         }
 
+        public static string GetText(this Control control)
+        {
+            if (control.InvokeRequired == false)
+                return control.Text;
+            string strText = "";
+            control.Invoke((Action)(() =>
+            {
+                strText = control.Text;
+            }));
+            return strText;
+        }
+
+        public static void SetText(this Control control, string strText)
+        {
+            if (control.InvokeRequired == false)
+                control.Text = strText;
+            else
+            {
+                control.Invoke((Action)(() =>
+                {
+                    control.Text = strText;
+                }));
+            }
+        }
     }
 
     /// <summary>

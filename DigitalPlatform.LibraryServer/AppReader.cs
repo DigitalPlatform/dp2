@@ -3333,7 +3333,8 @@ strLibraryCode);    // 读者所在的馆代码
             bool bRecordGetted = false; // 记录释放后已经获取到
 
             // 命令状态
-            if (strBarcode[0] == '@')
+            if (strBarcode[0] == '@'
+                && strBarcode.StartsWith("@refID:") == false)
             {
                 // 获得册记录，通过册记录路径
                 string strLeadPath = "@path:";

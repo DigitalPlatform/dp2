@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.16.*")]  // "2.4.*"
-[assembly: AssemblyFileVersion("2.16.0.0")]
+[assembly: AssemblyVersion("2.17.*")]  // "2.4.*"
+[assembly: AssemblyFileVersion("2.17.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -45,3 +45,4 @@ using System.Runtime.InteropServices;
 // V2.14 2016/4/20 dp2library 最新版本的 Login() API 会强制检查，要求 dp2circulation 前端至少达到这个版本号
 // V2.15 2016/4/27 适应 HiDPI
 // V2.16 2016/5/6 报表窗 operlogxxx 表结构修改，增加 librarycode 字段。212 表统计时候可以显示没有分类号的事项，这可能是册记录删除造成的结果。
+// V2.17 2016/5/8 报表窗的长操作改为用单独的线程实现。修正 202 表创建时的一个 Bug

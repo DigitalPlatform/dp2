@@ -23,6 +23,30 @@ namespace DigitalPlatform.GUI
 
     public class GuiUtil
     {
+        public static string GetText(Control control)
+        {
+            if (control.InvokeRequired == false)
+                return control.Text;
+            string strText = "";
+            control.Invoke((Action)(() =>
+            {
+                strText = control.Text;
+            }));
+            return strText;
+        }
+
+        public static void SetText(Control control, string strText)
+        {
+            if (control.InvokeRequired == false)
+                control.Text = strText;
+            else
+            {
+                control.Invoke((Action)(() =>
+                {
+                    control.Text = strText;
+                }));
+            }
+        }
 
         // http://stackoverflow.com/questions/4842160/auto-width-of-comboboxs-content
         // 获得 ComboBox 列表事项的最大宽度

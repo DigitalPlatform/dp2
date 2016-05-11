@@ -5449,7 +5449,7 @@ out strError);
         public int GetReaderRecXml(
             // RmsChannelCollection channels,
             RmsChannel channel,
-            string strBarcode,
+            string strBarcodeParam,
             int nMax,
             string strLibraryCodeList,
             out List<string> recpaths,
@@ -5467,6 +5467,20 @@ out strError);
             recpaths = new List<string>();
 
             LibraryApplication app = this;
+
+            string strBarcode = strBarcodeParam;
+            string strHead = "@refID:";
+            string strFrom = "证条码";
+            if (StringUtil.HasHead(strBarcode, strHead, true) == true)
+            {
+                strFrom = "参考ID";
+                strBarcode = strBarcode.Substring(strHead.Length).Trim();
+                if (string.IsNullOrEmpty(strBarcode) == true)
+                {
+                    strError = "字符串 '" + strBarcodeParam + "' 中 参考ID 部分不应为空";
+                    return -1;
+                }
+            }
 
             List<string> dbnames = new List<string>();
             // 获得读者库名列表
@@ -5497,7 +5511,7 @@ out strError);
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "证条码")  // TODO: 将来统一修改为“证条码号”     // 2007/9/14 
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)  // "证条码"  // TODO: 将来统一修改为“证条码号”     // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
@@ -9045,7 +9059,7 @@ out strError);
         }
          */
 
-        // 删选读者记录
+        // 筛选读者记录
         static int FilterPatron(List<KernelRecord> records,
             string strName,
             string strPatronBarcode,

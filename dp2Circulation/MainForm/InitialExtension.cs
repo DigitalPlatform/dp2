@@ -176,7 +176,7 @@ namespace dp2Circulation
             }
             else
             {
-                this.DisplayBackgroundText("当前没有更新的版本\r\n");
+                this.DisplayBackgroundText("当前没有发现新的版本\r\n");
             }
         }
 
