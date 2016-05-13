@@ -1513,7 +1513,7 @@ namespace DigitalPlatform.rms
             if (nRet == 1)
             {
                 // 资源将被置空
-                using(Stream s = File.Create(strNewFileName))
+                using (Stream s = File.Create(strNewFileName))
                 {
 
                 }
@@ -1688,13 +1688,13 @@ namespace DigitalPlatform.rms
 
         public void InsertRecord(string strRecordID,
             string strStyle,
-            byte [] inputTimestamp,
+            byte[] inputTimestamp,
             out byte[] outputTimestamp)
         {
             outputTimestamp = null;
             string strXmlFilePath = this.GetXmlFilePath(strRecordID);
 
-            using(Stream file = File.Create(strXmlFilePath))
+            using (Stream file = File.Create(strXmlFilePath))
             {
 
             }
@@ -1720,8 +1720,8 @@ namespace DigitalPlatform.rms
             if (bForceTimestamp == true)
                 strTimestamp = ByteArray.GetHexTimeStampString(inputTimestamp);
             else
-                strTimestamp = this.CreateTimestampForDb(); 
-            
+                strTimestamp = this.CreateTimestampForDb();
+
             FileUtil.String2File(strTimestamp, strTimestampFileName);
             outputTimestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
 
@@ -1762,8 +1762,8 @@ namespace DigitalPlatform.rms
             if (bForceTimestamp == true)
                 strTimestamp = ByteArray.GetHexTimeStampString(inputTimestamp);
             else
-                strTimestamp = this.CreateTimestampForDb(); 
-            
+                strTimestamp = this.CreateTimestampForDb();
+
             FileUtil.String2File(strTimestamp, strTimestampFileName);
             outputTimestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
 
@@ -2287,16 +2287,13 @@ namespace DigitalPlatform.rms
                 {
                     foreach (string recordID in records)
                     {
-
-                            string strStartID;
-                            string strEndID;
-                            bool bRet = StringUtil.SplitRangeEx(searchItem.Word,
-                                out strStartID,
-                                out strEndID);
+                        string strStartID;
+                        string strEndID;
+                        bool bRet = StringUtil.SplitRangeEx(searchItem.Word,
+                            out strStartID,
+                            out strEndID);
                         if (bRet == true)
                         {
-
-
                             strStartID = DbPath.GetID10(strStartID);
                             strEndID = DbPath.GetID10(strEndID);
 
@@ -2434,7 +2431,7 @@ namespace DigitalPlatform.rms
             // TODO: 为什么没有支持中间一致？2007/10/9
             if (searchItem.Match == "middle")
             {
-                strError = "对于文件方式的数据库 '"+this.GetCaption("zh")+"'，不支持中间一致(middle)匹配方式";
+                strError = "对于文件方式的数据库 '" + this.GetCaption("zh") + "'，不支持中间一致(middle)匹配方式";
                 return -1;
             }
 

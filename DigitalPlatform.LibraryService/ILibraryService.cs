@@ -157,6 +157,7 @@ namespace dp2Library
             string strResultSetName,
             string strSearchStyle,
             string strOutputStyle,
+            string strLocationFilter,
             out string strQueryXml);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]

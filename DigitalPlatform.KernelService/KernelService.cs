@@ -1780,12 +1780,59 @@ namespace dp2Kernel
                     return result;
                 }
 
+                string strError = "";
+                int nRet = 0;
+
+                if (StringUtil.IsInList("createResultset", strStyle) == true)
+                {
+                    DpResultSet resultSet = null;
+
+                    string strResultSetName = StringUtil.GetStyleParam(strStyle, "name");
+                    if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
+                        resultSet = app.ResultSets.GetResultSet(strResultSetName.Substring(1), true);
+                    else
+                        resultSet = this.sessioninfo.GetResultSet(strResultSetName, true);
+
+                    lock (result)
+                    {
+                        if (StringUtil.IsInList("clear", strStyle) == true && resultSet != null)
+                            resultSet.Clear();
+
+                        foreach (RecordBody body in inputs)
+                        {
+                            // body.Path 要翻译为 kernel 内部形态
+                            DigitalPlatform.rms.DatabaseCollection.PathInfo info = null;
+                            // 解析资源路径
+                            // return:
+                            //      -1  一般性错误
+                            //		-5	未找到数据库
+                            //		-7	路径不合法
+                            //      0   成功
+                            nRet = app.Dbs.ParsePath(body.Path,
+                out info,
+                out strError);
+                            if (nRet <= -1)
+                            {
+                                result.Value = -1;
+                                result.ErrorCode = KernelApplication.Ret2ErrorCode(nRet);
+                                result.ErrorString = strError;
+                                return result;
+                            }
+                            Database database = app.Dbs.GetDatabase(info.DbName);
+
+                            DpRecord record = new DpRecord(database.FullID + "/" + info.RecordID10);
+                            resultSet.Add(record);
+                        }
+                    }
+
+                    return result;
+                }
+
                 // 得到当前帐户对象
                 if (PrepareUser(ref result) == -1)
                     return result;
 
-                string strError = "";
-                int nRet = app.Dbs.API_WriteRecords(
+                nRet = app.Dbs.API_WriteRecords(
                     // this.sessioninfo,
                     user,
                     inputs,
@@ -1801,8 +1848,11 @@ namespace dp2Kernel
                     // 前面部分成功的，连同最后一条出错信息，也要返回
                     if (output_records != null)
                     {
+#if NO
                         results = new RecordBody[output_records.Count];
                         output_records.CopyTo(results);
+#endif
+                        results = output_records.ToArray();
                     }
                     return result;
                 }
@@ -1826,14 +1876,15 @@ namespace dp2Kernel
                 // 前面部分成功的，也要返回
                 if (output_records != null)
                 {
+#if NO
                     results = new RecordBody[output_records.Count];
                     output_records.CopyTo(results);
+#endif
+                    results = output_records.ToArray();
                 }
                 return result;
             }
         }
-
-
 
 #if NOOOOO
         // 成批写入XML记录

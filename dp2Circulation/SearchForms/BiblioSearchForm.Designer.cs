@@ -37,6 +37,7 @@ namespace dp2Circulation
             this.contextMenuStrip_biblioDb = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.MenuItem_viewBiblioDbProperty = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel_query = new System.Windows.Forms.TableLayoutPanel();
+            this.label4 = new System.Windows.Forms.Label();
             this.comboBox_from = new DigitalPlatform.CommonControl.TabComboBox();
             this.label_matchStyle = new System.Windows.Forms.Label();
             this.comboBox_matchStyle = new System.Windows.Forms.ComboBox();
@@ -60,6 +61,7 @@ namespace dp2Circulation
             this.toolStripButton_prevQuery = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_nextQuery = new System.Windows.Forms.ToolStripButton();
             this.button_search = new System.Windows.Forms.Button();
+            this.comboBox_location = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
             this.label_message = new System.Windows.Forms.Label();
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
@@ -103,7 +105,7 @@ namespace dp2Circulation
             this.textBox_queryWord.Location = new System.Drawing.Point(89, 4);
             this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_queryWord.Name = "textBox_queryWord";
-            this.textBox_queryWord.Size = new System.Drawing.Size(150, 21);
+            this.textBox_queryWord.Size = new System.Drawing.Size(187, 21);
             this.textBox_queryWord.TabIndex = 1;
             this.textBox_queryWord.TextChanged += new System.EventHandler(this.textBox_queryWord_TextChanged);
             this.textBox_queryWord.Enter += new System.EventHandler(this.textBox_queryWord_Enter);
@@ -156,6 +158,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_query.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel_query.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_query.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_query.Controls.Add(this.label4, 0, 4);
             this.tableLayoutPanel_query.Controls.Add(this.label2, 0, 2);
             this.tableLayoutPanel_query.Controls.Add(this.textBox_queryWord, 1, 0);
             this.tableLayoutPanel_query.Controls.Add(this.label3, 0, 1);
@@ -166,12 +169,14 @@ namespace dp2Circulation
             this.tableLayoutPanel_query.Controls.Add(this.checkedComboBox_biblioDbNames, 1, 1);
             this.tableLayoutPanel_query.Controls.Add(this.toolStrip_search, 2, 0);
             this.tableLayoutPanel_query.Controls.Add(this.button_search, 2, 1);
+            this.tableLayoutPanel_query.Controls.Add(this.comboBox_location, 1, 4);
             this.tableLayoutPanel_query.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_query.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel_query.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel_query.MaximumSize = new System.Drawing.Size(400, 0);
             this.tableLayoutPanel_query.Name = "tableLayoutPanel_query";
-            this.tableLayoutPanel_query.RowCount = 5;
+            this.tableLayoutPanel_query.RowCount = 6;
+            this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -179,6 +184,18 @@ namespace dp2Circulation
             this.tableLayoutPanel_query.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_query.Size = new System.Drawing.Size(400, 134);
             this.tableLayoutPanel_query.TabIndex = 8;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label4.Location = new System.Drawing.Point(4, 117);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(77, 28);
+            this.label4.TabIndex = 15;
+            this.label4.Text = "¹Ý²ØµØ(&L):";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // comboBox_from
             // 
@@ -191,7 +208,7 @@ namespace dp2Circulation
             this.comboBox_from.Location = new System.Drawing.Point(89, 63);
             this.comboBox_from.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(150, 22);
+            this.comboBox_from.Size = new System.Drawing.Size(187, 22);
             this.comboBox_from.TabIndex = 6;
             this.comboBox_from.SizeChanged += new System.EventHandler(this.comboBox_from_SizeChanged);
             // 
@@ -221,7 +238,7 @@ namespace dp2Circulation
             this.comboBox_matchStyle.Location = new System.Drawing.Point(89, 93);
             this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
-            this.comboBox_matchStyle.Size = new System.Drawing.Size(150, 20);
+            this.comboBox_matchStyle.Size = new System.Drawing.Size(187, 20);
             this.comboBox_matchStyle.TabIndex = 8;
             this.comboBox_matchStyle.Text = "Ç°·½Ò»ÖÂ";
             this.comboBox_matchStyle.SizeChanged += new System.EventHandler(this.comboBox_matchStyle_SizeChanged);
@@ -236,7 +253,7 @@ namespace dp2Circulation
             this.checkedComboBox_biblioDbNames.Margin = new System.Windows.Forms.Padding(4);
             this.checkedComboBox_biblioDbNames.Name = "checkedComboBox_biblioDbNames";
             this.checkedComboBox_biblioDbNames.Padding = new System.Windows.Forms.Padding(4);
-            this.checkedComboBox_biblioDbNames.Size = new System.Drawing.Size(150, 22);
+            this.checkedComboBox_biblioDbNames.Size = new System.Drawing.Size(187, 22);
             this.checkedComboBox_biblioDbNames.TabIndex = 9;
             this.checkedComboBox_biblioDbNames.DropDown += new System.EventHandler(this.checkedComboBox_biblioDbNames_DropDown);
             this.checkedComboBox_biblioDbNames.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.checkedComboBox_biblioDbNames_ItemChecked);
@@ -255,10 +272,10 @@ namespace dp2Circulation
             this.toolStripSeparator1,
             this.toolStripButton_prevQuery,
             this.toolStripButton_nextQuery});
-            this.toolStrip_search.Location = new System.Drawing.Point(243, 0);
+            this.toolStrip_search.Location = new System.Drawing.Point(280, 0);
             this.toolStrip_search.Name = "toolStrip_search";
             this.toolStrip_search.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_search.Size = new System.Drawing.Size(157, 29);
+            this.toolStrip_search.Size = new System.Drawing.Size(120, 29);
             this.toolStrip_search.TabIndex = 13;
             this.toolStrip_search.Text = "¼ìË÷";
             // 
@@ -408,7 +425,7 @@ namespace dp2Circulation
             // 
             // button_search
             // 
-            this.button_search.Location = new System.Drawing.Point(246, 31);
+            this.button_search.Location = new System.Drawing.Point(283, 31);
             this.button_search.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(0, 0);
@@ -416,6 +433,17 @@ namespace dp2Circulation
             this.button_search.Text = "¼ìË÷(&S)";
             this.button_search.UseVisualStyleBackColor = true;
             this.button_search.Click += new System.EventHandler(this.button_search_Click);
+            // 
+            // comboBox_location
+            // 
+            this.comboBox_location.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.comboBox_location.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboBox_location.FormattingEnabled = true;
+            this.comboBox_location.Location = new System.Drawing.Point(89, 121);
+            this.comboBox_location.Margin = new System.Windows.Forms.Padding(4);
+            this.comboBox_location.Name = "comboBox_location";
+            this.comboBox_location.Size = new System.Drawing.Size(187, 20);
+            this.comboBox_location.TabIndex = 16;
             // 
             // tableLayoutPanel_main
             // 
@@ -619,5 +647,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_searchShareBiblio;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox comboBox_location;
     }
 }

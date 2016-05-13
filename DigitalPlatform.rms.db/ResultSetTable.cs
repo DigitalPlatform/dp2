@@ -43,6 +43,7 @@ namespace DigitalPlatform.rms
         }
 #endif
 
+        // TODO: 全局结果集的名字可否就是文件名? 这样如果需要永久保持，下次启动的时候从文件系统就能列举出结果集名字
         public DpResultSet GetResultSet(string strResultSetName,
     bool bAutoCreate = true)
         {

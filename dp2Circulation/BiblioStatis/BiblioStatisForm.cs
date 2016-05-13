@@ -1331,7 +1331,8 @@ Stack:
                              this.Lang,
                              null,   // strResultSetName
                              "",    // strSearchStyle
-                            "", // strOutputStyle
+                             "", // strOutputStyle
+                             "",
                              out strQueryXml,
                              out strError);
                         if (lRet == -1)
@@ -1349,7 +1350,8 @@ Stack:
                              this.Lang,
                              null,   // strResultSetName
                              "",    // strSearchStyle
-                            "", // strOutputStyle
+                             "", // strOutputStyle
+                             "",
                              out strQueryXml,
                              out strError);
                         if (lRet == -1)

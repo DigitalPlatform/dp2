@@ -80,7 +80,6 @@ namespace DigitalPlatform.Text
             string strMultiper = "";
             string strPrice = "";
 
-
             if (StringUtil.IsDouble(strLeft) == false
                 && StringUtil.IsDouble(strRight) == false)
             {

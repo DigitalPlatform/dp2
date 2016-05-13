@@ -466,9 +466,10 @@ namespace DigitalPlatform.rms
         //		-6	无足够的权限
         //		0	成功
         public int doItem(
+            SessionInfo sessioninfo,
             string strOutputStyle,
-            XmlNode nodeItem,
-            DpResultSet resultSet,
+            XmlElement nodeItem,
+            ref DpResultSet resultSet,
             ChannelHandle handle,
             // Delegate_isConnected isConnected,
             out string strError)
@@ -484,6 +485,31 @@ namespace DigitalPlatform.rms
             {
                 strError = "doItem() oResult参数为null.";
                 return -1;
+            }
+
+            string strResultSetName = nodeItem.GetAttribute("resultset");
+            if (string.IsNullOrEmpty(strResultSetName) == false)
+            {
+                resultSet.Close();
+                resultSet = null;
+
+                if (KernelApplication.IsGlobalResultSetName(strResultSetName) == true)
+                {
+                    resultSet = this.m_dbColl.KernelApplication.ResultSets.GetResultSet(strResultSetName.Substring(1), false);
+                }
+                else
+                {
+                    resultSet = sessioninfo.GetResultSet(strResultSetName, false);
+                }
+
+                if (resultSet == null)
+                {
+                    strError = "没有找到名为 '"+strResultSetName+"' 的结果集对象";
+                    return -1;
+                }
+
+                resultSet.ReadOnly = true;
+                return 0;
             }
 
             //先清空一下
@@ -699,7 +725,7 @@ namespace DigitalPlatform.rms
         public int DoQuery(
             SessionInfo sessioninfo,
             string strOutputStyle,
-            XmlNode nodeRoot,
+            XmlElement nodeRoot,
             ref DpResultSet resultSet,
             ChannelHandle handle,
             // Delegate_isConnected isConnected,
@@ -743,9 +769,10 @@ namespace DigitalPlatform.rms
                     //		-6	无足够的权限
                     //		0	成功
                     return doItem(
+                        sessioninfo,
                         strOutputStyle,
                         nodeRoot,
-                        resultSet,
+                        ref resultSet,
                         handle,
                         // isConnected,
                         out strError);
@@ -899,7 +926,7 @@ namespace DigitalPlatform.rms
                 //做循环
                 for (int i = 0; i < rpn.Count; i++)
                 {
-                    XmlNode node = (XmlNode)rpn[i];
+                    XmlElement node = (XmlElement)rpn[i];
 
                     if (node.Name != "operator")  //操作数直接push到栈里
                     {
@@ -936,7 +963,7 @@ namespace DigitalPlatform.rms
                                 //表示放得是node
                                 if (oReversePolandStack.PeekType() == 0)
                                 {
-                                    XmlNode nodePop;
+                                    XmlElement nodePop;
                                     nodePop = oReversePolandStack.PopNode();
                                     if (nodePop == null)
                                     {
@@ -962,7 +989,7 @@ namespace DigitalPlatform.rms
                                     if (temp != oSource[j])
                                     {
                                         // 2014/3/11
-                                        if (oSource[j] != null)
+                                        if (oSource[j] != null && oSource[j].ReadOnly == false)
                                             oSource[j].Close();
                                         oSource[j] = temp;
                                     }
@@ -973,7 +1000,7 @@ namespace DigitalPlatform.rms
                                     Debug.Assert(temp != oSource[j], "");
 
                                     // 2014/3/11
-                                    if (oSource[j] != null)
+                                    if (oSource[j] != null && oSource[j].ReadOnly == false)
                                         oSource[j].Close();
                                     oSource[j] = temp;
 
@@ -1021,21 +1048,28 @@ namespace DigitalPlatform.rms
                             Debug.Assert(right.IsClosed == false, "");
 #endif
 
+                            // TODO: 如果 .ReadOnly == false，不能直接利用，要复制出来
                             {
                                 // 直接相加
                                 if (left.Count == 0)
                                 {
-                                    oReversePolandStack.PushResultSet(right);
+                                    oReversePolandStack.PushResultSet(
+                                        right.ReadOnly ? right.Clone() : right
+                                        );
                                     // 2014/3/11
                                     Debug.Assert(left != right, "");
-                                    left.Close();
+                                    if (left.ReadOnly == false)
+                                        left.Close();
                                 }
                                 else if (right.Count == 0)
                                 {
-                                    oReversePolandStack.PushResultSet(left);
+                                    oReversePolandStack.PushResultSet(
+                                        left.ReadOnly ? left.Clone() : left
+                                        );
                                     // 2014/3/11
                                     Debug.Assert(left != right, "");
-                                    right.Close();
+                                    if (right.ReadOnly == false)
+                                        right.Close();
                                 }
                                 else
                                 {
@@ -1062,17 +1096,21 @@ namespace DigitalPlatform.rms
                                         if (ret == -1)
                                             return -1;
 
-                                        oReversePolandStack.PushResultSet(left);
+                                        oReversePolandStack.PushResultSet(
+                                            left.ReadOnly ? left.Clone() : left
+                                            );
                                         // 2014/3/11
                                         if (left != right)
                                         {
                                             Debug.Assert(left_save == left, "");
-                                            right.Close();
+                                            if (right.ReadOnly == false)
+                                                right.Close();
                                         }
                                         else
                                         {
                                             Debug.Assert(left_save != left, "");
-                                            left_save.Close();
+                                            if (left_save.ReadOnly == false)
+                                                left_save.Close();
                                         }
                                     }
                                     else
@@ -1110,8 +1148,10 @@ namespace DigitalPlatform.rms
                                             // 2014/3/11
                                             Debug.Assert(left != oTargetMiddle, "");
                                             Debug.Assert(right != oTargetMiddle, "");
-                                            left.Close();
-                                            right.Close();
+                                            if (left.ReadOnly == false)
+                                                left.Close();
+                                            if (right.ReadOnly == false)
+                                                right.Close();
                                         }
                                     }
                                 }
@@ -1140,20 +1180,28 @@ namespace DigitalPlatform.rms
                             if (EnsureSorted(right, handle, out strError) == -1)
                                 return -1;
 
+                            // TODO: 如果 .ReadOnly == false，不能直接利用，要复制出来
+
                             // 优化
                             if (left.Count == 0)
                             {
-                                oReversePolandStack.PushResultSet(left);
+                                oReversePolandStack.PushResultSet(
+                                    left.ReadOnly ? left.Clone() : left
+                                    );
                                 // 2014/3/11
                                 Debug.Assert(left != right, "");
-                                right.Close();
+                                if (right.ReadOnly == false)
+                                    right.Close();
                             }
                             else if (right.Count == 0)
                             {
-                                oReversePolandStack.PushResultSet(right);
+                                oReversePolandStack.PushResultSet(
+                                    right.ReadOnly ? right.Clone() : right
+                                    );
                                 // 2014/3/11
                                 Debug.Assert(left != right, "");
-                                left.Close();
+                                if (left.ReadOnly == false)
+                                    left.Close();
                             }
                             else
                             {
@@ -1178,8 +1226,10 @@ namespace DigitalPlatform.rms
                                 // 2014/3/11
                                 Debug.Assert(left != oTargetMiddle, "");
                                 Debug.Assert(right != oTargetMiddle, "");
-                                left.Close();
-                                right.Close();
+                                if (left.ReadOnly == false)
+                                    left.Close();
+                                if (right.ReadOnly == false)
+                                    right.Close();
                             }
 
                             continue;
@@ -1209,17 +1259,23 @@ namespace DigitalPlatform.rms
                             // 优化
                             if (left.Count == 0)
                             {
-                                oReversePolandStack.PushResultSet(left);
+                                oReversePolandStack.PushResultSet(
+                                    left.ReadOnly ? left.Clone() : left
+                                    );
                                 // 2014/3/11
                                 Debug.Assert(left != right, "");
-                                right.Close();
+                                if (right.ReadOnly == false)
+                                    right.Close();
                             }
                             else if (right.Count == 0)
                             {
-                                oReversePolandStack.PushResultSet(left);
+                                oReversePolandStack.PushResultSet(
+                                    left.ReadOnly ? left.Clone() : left
+                                    );
                                 // 2014/3/11
                                 Debug.Assert(left != right, "");
-                                right.Close();
+                                if (right.ReadOnly == false)
+                                    right.Close();
                             }
                             else
                             {
@@ -1246,8 +1302,10 @@ namespace DigitalPlatform.rms
                                 // 2014/3/11
                                 Debug.Assert(left != oTargetLeft, "");
                                 Debug.Assert(right != oTargetLeft, "");
-                                left.Close();
-                                right.Close();
+                                if (left.ReadOnly == false)
+                                    left.Close();
+                                if (right.ReadOnly == false)
+                                    right.Close();
                             }
 
                             continue;
@@ -1265,7 +1323,7 @@ namespace DigitalPlatform.rms
                     //如果类型为0,表示存放的是节点
                     if (nTemp == 0)
                     {
-                        XmlNode node = oReversePolandStack.PopNode();
+                        XmlElement node = oReversePolandStack.PopNode();
 
                         // return:
                         //		-1	出错
@@ -1333,14 +1391,14 @@ namespace DigitalPlatform.rms
     public class ReversePolishItem
     {
         public int m_int;               // 类型 0:node 1:结果集
-        public XmlNode m_node;          // node节点
+        public XmlElement m_node;          // node节点
         public DpResultSet m_resultSet; // 结果集
 
         // 构造函数
         // parameter:
         //		node        节点
         //		oResultSet  结果集
-        public ReversePolishItem(XmlNode node,
+        public ReversePolishItem(XmlElement node,
             DpResultSet resultSet)
         {
             m_node = node;
@@ -1371,7 +1429,7 @@ namespace DigitalPlatform.rms
         //		node    node节点
         // return:
         //      void
-        public void PushNode(XmlNode node)
+        public void PushNode(XmlElement node)
         {
             ReversePolishItem oItem = new ReversePolishItem(node,
                 null);
@@ -1396,7 +1454,7 @@ namespace DigitalPlatform.rms
         //		oResult 结果集
         // return:
         //      void
-        public void Push(XmlNode node,
+        public void Push(XmlElement node,
             DpResultSet oResult)
         {
             ReversePolishItem oItem = new ReversePolishItem(node,
@@ -1407,7 +1465,7 @@ namespace DigitalPlatform.rms
         // pop一个对象，只返回节点
         // return:
         //		node节点
-        public XmlNode PopNode()
+        public XmlElement PopNode()
         {
             //栈为空，抛出StackUnderflowException异常
             if (this.Count == 0)
@@ -1496,7 +1554,7 @@ namespace DigitalPlatform.rms
     {
         public InterruptException(string s)
             : base(s)
-		{
-		}
+        {
+        }
     }
 }

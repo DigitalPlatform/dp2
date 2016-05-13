@@ -717,6 +717,7 @@
         <xs:element minOccurs="0" name="strResultSetName" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strSearchStyle" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strOutputStyle" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strLocationFilter" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

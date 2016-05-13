@@ -3438,10 +3438,10 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListBiblioDbFroms(out DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchBiblio", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchBiblioResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchBiblio", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SearchBiblioResponse")]
-        System.IAsyncResult BeginSearchBiblio(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSearchBiblio(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, System.IAsyncResult result);
         
@@ -9474,13 +9474,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strLang}, this.onEndListBiblioDbFromsDelegate, this.onListBiblioDbFromsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
-            return base.Channel.SearchBiblio(out strQueryXml, strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter) {
+            return base.Channel.SearchBiblio(out strQueryXml, strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, strLocationFilter);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSearchBiblio(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSearchBiblio(strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, callback, asyncState);
+        public System.IAsyncResult BeginSearchBiblio(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSearchBiblio(strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, strLocationFilter, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -9498,7 +9498,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             string strResultSetName = ((string)(inValues[6]));
             string strSearchStyle = ((string)(inValues[7]));
             string strOutputStyle = ((string)(inValues[8]));
-            return this.BeginSearchBiblio(strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, callback, asyncState);
+            string strLocationFilter = ((string)(inValues[9]));
+            return this.BeginSearchBiblio(strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, strLocationFilter, callback, asyncState);
         }
         
         private object[] OnEndSearchBiblio(System.IAsyncResult result) {
@@ -9516,11 +9517,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void SearchBiblioAsync(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
-            this.SearchBiblioAsync(strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, null);
+        public void SearchBiblioAsync(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter) {
+            this.SearchBiblioAsync(strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, strLocationFilter, null);
         }
         
-        public void SearchBiblioAsync(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, object userState) {
+        public void SearchBiblioAsync(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter, object userState) {
             if ((this.onBeginSearchBiblioDelegate == null)) {
                 this.onBeginSearchBiblioDelegate = new BeginOperationDelegate(this.OnBeginSearchBiblio);
             }
@@ -9539,7 +9540,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strLang,
                         strResultSetName,
                         strSearchStyle,
-                        strOutputStyle}, this.onEndSearchBiblioDelegate, this.onSearchBiblioCompletedDelegate, userState);
+                        strOutputStyle,
+                        strLocationFilter}, this.onEndSearchBiblioDelegate, this.onSearchBiblioCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment) {
@@ -13636,10 +13638,10 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndListBiblioDbFroms(out DigitalPlatform.LibraryClient.localhost.BiblioDbFromInfo[] infos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SearchBiblio", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchBiblioResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SearchBiblio", ReplyAction="http://dp2003.com/dp2library/dp2library/SearchBiblioResponse")]
-        System.IAsyncResult BeginSearchBiblio(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSearchBiblio(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, System.IAsyncResult result);
         
@@ -19666,13 +19668,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strLang}, this.onEndListBiblioDbFromsDelegate, this.onListBiblioDbFromsCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
-            return base.Channel.SearchBiblio(out strQueryXml, strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SearchBiblio(out string strQueryXml, string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter) {
+            return base.Channel.SearchBiblio(out strQueryXml, strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, strLocationFilter);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSearchBiblio(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSearchBiblio(strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, callback, asyncState);
+        public System.IAsyncResult BeginSearchBiblio(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSearchBiblio(strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, strLocationFilter, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -19690,7 +19692,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             string strResultSetName = ((string)(inValues[6]));
             string strSearchStyle = ((string)(inValues[7]));
             string strOutputStyle = ((string)(inValues[8]));
-            return this.BeginSearchBiblio(strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, callback, asyncState);
+            string strLocationFilter = ((string)(inValues[9]));
+            return this.BeginSearchBiblio(strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, strLocationFilter, callback, asyncState);
         }
         
         private object[] OnEndSearchBiblio(System.IAsyncResult result) {
@@ -19708,11 +19711,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void SearchBiblioAsync(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle) {
-            this.SearchBiblioAsync(strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, null);
+        public void SearchBiblioAsync(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter) {
+            this.SearchBiblioAsync(strBiblioDbNames, strQueryWord, nPerMax, strFromStyle, strMatchStyle, strLang, strResultSetName, strSearchStyle, strOutputStyle, strLocationFilter, null);
         }
         
-        public void SearchBiblioAsync(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, object userState) {
+        public void SearchBiblioAsync(string strBiblioDbNames, string strQueryWord, int nPerMax, string strFromStyle, string strMatchStyle, string strLang, string strResultSetName, string strSearchStyle, string strOutputStyle, string strLocationFilter, object userState) {
             if ((this.onBeginSearchBiblioDelegate == null)) {
                 this.onBeginSearchBiblioDelegate = new BeginOperationDelegate(this.OnBeginSearchBiblio);
             }
@@ -19731,7 +19734,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strLang,
                         strResultSetName,
                         strSearchStyle,
-                        strOutputStyle}, this.onEndSearchBiblioDelegate, this.onSearchBiblioCompletedDelegate, userState);
+                        strOutputStyle,
+                        strLocationFilter}, this.onEndSearchBiblioDelegate, this.onSearchBiblioCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment) {

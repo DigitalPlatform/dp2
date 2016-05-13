@@ -397,7 +397,7 @@ namespace dp2Circulation
 
             List<MessageRecord> messages = new List<MessageRecord>();
             MessageRecord record = new MessageRecord();
-            record.group = strGroupName;
+            record.groups = new string [1] {strGroupName};
             record.data = strText;
             messages.Add(record);
 

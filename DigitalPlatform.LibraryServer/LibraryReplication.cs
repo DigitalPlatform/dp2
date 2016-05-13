@@ -699,6 +699,7 @@ namespace DigitalPlatform.LibraryServer
                 "zh",
                 null,   // strResultSetName
                 "",    // strSearchStyle
+                "",
                 strOutputStyle,
                 out strQueryXml,
                 out strError);
