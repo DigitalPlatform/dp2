@@ -2966,6 +2966,7 @@ namespace dp2Library
         //      strQueryXml 返回数据库内核层所使用的XML检索式，便于进行调试
         //      strSearchStyle  可以包含 desc，表示命中结果按照降序排列
         //      strOutputStyle  如果为"keycount"，表示输出key+count形式
+        //      strLocationFilter   馆藏地点过滤条件
         // rights:
         //      需要 searchbiblio 权限
         // return:
@@ -2980,6 +2981,7 @@ namespace dp2Library
             string strResultSetName,
             string strSearchStyle,
             string strOutputStyle,
+            string strLocationFilter,
             out string strQueryXml)
         {
             strQueryXml = "";
@@ -3003,6 +3005,7 @@ namespace dp2Library
                     return result;
                 }
 
+#if NO
                 List<string> dbnames = new List<string>();
 
                 if (String.IsNullOrEmpty(strBiblioDbNames) == true
@@ -3087,7 +3090,6 @@ namespace dp2Library
                     if (strError != null)
                         goto ERROR1;
 
-
                     string strFromCaptions = app.kdbs.BuildCaptionListByStyleList(strDbName, strFromStyle, strLang);
 
                     if (String.IsNullOrEmpty(strFromCaptions) == true)
@@ -3171,6 +3173,40 @@ namespace dp2Library
                     + "<word>"
                     + StringUtil.GetXmlStringSimple(strQueryWord)
                     + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
+#endif
+
+                // 构造检索书目库的 XML 检索式
+                // return:
+                //      -2  没有找到指定风格的检索途径
+                //      -1  出错
+                //      0   没有发现任何书目库定义
+                //      1   成功
+                int nRet = app.BuildSearchBiblioQuery(
+            strBiblioDbNames,
+            strQueryWord,
+            nPerMax,
+            strFromStyle,
+            strMatchStyle,
+            strLang,
+            strSearchStyle,
+            out strQueryXml,
+                    out strError);
+                if (nRet == -1 || nRet == 0)
+                    goto ERROR1;
+                if (nRet == -2)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = strError;
+                    result.ErrorCode = ErrorCode.FromNotFound;
+                    return result;
+                }
+
+                // strLocationFilter = "海淀分馆"; // testing
+                if (string.IsNullOrEmpty(strLocationFilter) == false)
+                {
+                    string strLocationQueryXml = "<item resultset='#"+strLocationFilter+"' />";
+                    strQueryXml = "<group>" + strQueryXml + "<operator value='AND'/>" + strLocationQueryXml + "</group>";    // !!!
+                }
 
                 RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                 if (channel == null)
@@ -3840,6 +3876,7 @@ namespace dp2Library
                     return result;
                 }
 
+#if NO
                 List<string> dbnames = new List<string>();
 
                 if (String.IsNullOrEmpty(strItemDbName) == true
@@ -4016,6 +4053,27 @@ namespace dp2Library
                 {
                     strQueryXml = "<group>" + strQueryXml + "</group>";
                 }
+
+#endif
+
+                string strQueryXml = "";
+                // 构造检索实体库的 XML 检索式
+                // return:
+                //      -1  出错
+                //      0   没有发现任何实体库定义
+                //      1   成功
+                int nRet = app.BuildSearchItemQuery(
+    strItemDbName,
+    strQueryWord,
+    nPerMax,
+    strFrom,
+    strMatchStyle,
+    strLang,
+    strSearchStyle,
+                out strQueryXml,
+            out strError);
+                if (nRet == -1 || nRet == 0)
+                    goto ERROR1;
 
                 if (StringUtil.IsInList("__buildqueryxml", strOutputStyle) == true)
                 {

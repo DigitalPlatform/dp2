@@ -752,12 +752,26 @@ namespace DigitalPlatform.ResultSet
     // 结果集类	
     public class DpResultSet : IEnumerable, IDisposable
     {
+        public bool ReadOnly { get; set; }
+
         public event GetTempFilenameEventHandler GetTempFilename = null;
         public string TempFileDir = ""; // 用于创建和存储临时文件的目录
 
         int m_nLoopCount = 0;
         public event IdleEventHandler Idle = null;
-        public object Param = null;
+
+        object _param = null;
+        public object Param
+        {
+            get
+            {
+                return _param;
+            }
+            set
+            {
+                this._param = value;
+            }
+        }
 
         public int Asc = 1; // 1 升序 -1 降序
         public bool Sorted = false; // 是否已经排过序
@@ -938,7 +952,7 @@ namespace DigitalPlatform.ResultSet
             bool bFirst = true;
             long lPos = 0;
             DpRecord record = null;
-            for (;;)
+            for (; ; )
             {
                 if (bFirst == true)
                 {
@@ -997,8 +1011,8 @@ namespace DigitalPlatform.ResultSet
         public void Create(string strBigFilename,
             string strSmallFilename)
         {
-            CloseAndDeleteBigFile();
-            CloseAndDeleteSmallFile();
+            CloseAndDeleteBigFile("");
+            CloseAndDeleteSmallFile("");
 
             File.Delete(strBigFilename);
             File.Delete(strSmallFilename);
@@ -1138,8 +1152,53 @@ namespace DigitalPlatform.ResultSet
             }
         }
 
+        // 2016/5/13 编写，尚未测试
+        // 克隆出一个新对象
+        public DpResultSet Clone()
+        {
+            string filename_big = "";
+            string filename_small = "";
+            try
+            {
+                // 和原先文件在相同子目录创建新文件
+                if (string.IsNullOrEmpty(this.m_strBigFileName) == false)
+                {
+                    filename_big = Path.Combine(Path.GetDirectoryName(this.m_strBigFileName), Guid.NewGuid().ToString());
+                    File.Copy(this.m_strBigFileName, filename_big, false);
+                }
+
+                if (string.IsNullOrEmpty(this.m_strSmallFileName) == false
+                    && string.IsNullOrEmpty(this.m_strBigFileName) == false)
+                {
+                    filename_small = Path.Combine(Path.GetDirectoryName(this.m_strSmallFileName), Guid.NewGuid().ToString());
+                    File.Copy(this.m_strSmallFileName, filename_small, false);
+                }
+
+                DpResultSet result = new DpResultSet();
+                if (string.IsNullOrEmpty(filename_big) == false
+                    && string.IsNullOrEmpty(filename_small) == false)
+                    result.Attach(filename_big, filename_small);
+                else if (string.IsNullOrEmpty(filename_big) == false)
+                    result.Attach(filename_big);
+                return result;
+            }
+            catch (Exception)
+            {
+                if (string.IsNullOrEmpty(filename_big) == false)
+                    File.Delete(filename_big);
+                if (string.IsNullOrEmpty(filename_small) == false)
+                    File.Delete(filename_small);
+                throw;
+            }
+        }
+
         public void Close()
         {
+#if NO // testing
+            if (this.ReadOnly)
+                throw new Exception("readonly close triggered");
+#endif
+
             if (m_streamBig != null)
             {
                 m_streamBig.Close();
@@ -1187,14 +1246,16 @@ namespace DigitalPlatform.ResultSet
             m_strBigFileName = "";
         }
 
-        public void CloseAndDeleteBigFile()
+        // parameters:
+        //      strExcludeFileName  如果和这个文件名相同，则不要删除它
+        public void CloseAndDeleteBigFile(string strExcludeFileName)
         {
             if (m_streamBig != null)
             {
                 m_streamBig.Close();
                 m_streamBig = null;
             }
-            if (m_strBigFileName != "")
+            if (m_strBigFileName != "" && m_strSmallFileName != strExcludeFileName)
                 File.Delete(m_strBigFileName);
             m_strBigFileName = "";
         }
@@ -1209,14 +1270,17 @@ namespace DigitalPlatform.ResultSet
             }
         }
 
-        public void CloseAndDeleteSmallFile()
+        // parameters:
+        //      strExcludeFileName  如果和这个文件名相同，则不要删除它
+        public void CloseAndDeleteSmallFile(string strExcludeFileName)
         {
             if (m_streamSmall != null)
             {
                 m_streamSmall.Close();
                 m_streamSmall = null;
             }
-            if (string.IsNullOrEmpty(m_strSmallFileName) == false)
+            if (string.IsNullOrEmpty(m_strSmallFileName) == false
+                && m_strSmallFileName != strExcludeFileName)
                 File.Delete(m_strSmallFileName);
             // m_strBigFileName = ""; BUG!!!
             this.m_strSmallFileName = "";   // 2010/10/11
@@ -1243,7 +1307,12 @@ namespace DigitalPlatform.ResultSet
         public void Attach(string strBigFileName,
             string strSmallFileName)
         {
-            CloseAndDeleteBigFile();
+            if (string.IsNullOrEmpty(strBigFileName))
+                throw new ArgumentException("strBigFileName 参数值不应为空", "strBigFileName");
+            if (string.IsNullOrEmpty(strSmallFileName))
+                throw new ArgumentException("strSmallFileName 参数值不应为空", "strSmallFileName");
+
+            CloseAndDeleteBigFile(strBigFileName);
 
             m_strBigFileName = strBigFileName;
             m_streamBig = File.Open(m_strBigFileName,
@@ -1251,7 +1320,7 @@ namespace DigitalPlatform.ResultSet
                 FileAccess.ReadWrite,
                     FileShare.ReadWrite);
 
-            CloseAndDeleteSmallFile();
+            CloseAndDeleteSmallFile(strSmallFileName);
 
             if (String.IsNullOrEmpty(strSmallFileName) == false)
             {
@@ -1263,7 +1332,6 @@ namespace DigitalPlatform.ResultSet
                     FileShare.ReadWrite);
 
                 this.m_count = m_streamSmall.Length / 8;  //m_count;
-
             }
             else
             {
@@ -1276,7 +1344,10 @@ namespace DigitalPlatform.ResultSet
         //      strFileName 大文件名称
         public void Attach(string strFileName)
         {
-            CloseAndDeleteBigFile();
+            if (string.IsNullOrEmpty(strFileName))
+                throw new ArgumentException("strFileName 参数值不应为空", "strFileName");
+
+            CloseAndDeleteBigFile(strFileName);
 
             m_strBigFileName = strFileName;
             m_streamBig = File.Open(m_strBigFileName,
@@ -1350,7 +1421,7 @@ namespace DigitalPlatform.ResultSet
         {
             string strFileName = m_strBigFileName;
             CloseBigFile();
-            CloseAndDeleteSmallFile();
+            CloseAndDeleteSmallFile("");
             return strFileName;
         }
 
@@ -1478,7 +1549,6 @@ namespace DigitalPlatform.ResultSet
             // 为了以后快速访问，把索引文件中的删除标记的记录压缩掉
             this.CompressIndex();
         }
-
 
         //标记删除一条记录
         public void RemoveAtPhysical(int nIndex)
@@ -1645,8 +1715,6 @@ namespace DigitalPlatform.ResultSet
 
             return 0;
         }
-
-
 
         //自动返回大文件的编移量,小文件存在时，从小文件得到，不存在时，从大文件得到
         //bContainDeleted等于false，忽略已删除的记录，为true,不忽略
@@ -1816,7 +1884,6 @@ namespace DigitalPlatform.ResultSet
             }
         }
 
-
         //record
         //0:结束
         //1:找到
@@ -1918,8 +1985,6 @@ namespace DigitalPlatform.ResultSet
                 return record;
             }
 
-
-
             // 不计算打了删除标记的记录
             {
 
@@ -1948,7 +2013,6 @@ namespace DigitalPlatform.ResultSet
             Debug.Assert(lPos > 0, "文件指针不正确");
             return record;
         }
-
 
         // 特殊版本
         public DpRecord GetRecordByOffsetEx(long lPos)
@@ -2595,7 +2659,6 @@ namespace DigitalPlatform.ResultSet
                 aBuffer[i] = buffer[i - lStart];
             }
         }
-
 
         //确保流的指针放到恰当位置
         public virtual void Add(DpRecord record)  //virtual

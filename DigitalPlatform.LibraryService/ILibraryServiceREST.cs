@@ -174,6 +174,7 @@ SessionMode = SessionMode.NotAllowed)]
             string strResultSetName,
             string strSearchStyle,
             string strOutputStyle,
+            string strLocationFilter,
             out string strQueryXml);
 
         [OperationContract]

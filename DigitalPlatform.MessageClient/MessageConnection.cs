@@ -1277,7 +1277,7 @@ request).Result;
     {
         public string id { get; set; }  // 消息的 id
 
-        public string group { get; set; }   // 组名 或 组id。消息所从属的组
+        public string[] groups { get; set; }   // 组名 或 组id。消息所从属的组
         public string creator { get; set; } // 创建消息的人。也就是发送消息的用户名或 id
         public string userName { get; set; } // 创建消息的人的用户名
         public string data { get; set; }  // 消息数据体

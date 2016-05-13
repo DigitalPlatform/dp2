@@ -2059,6 +2059,7 @@ namespace dp2Circulation
                         "batchno",   // strResultSetName
                         "desc",
                         "keycount", // strOutputStyle
+                        "",
                         out strQueryXml,
                         out strError);
                 }

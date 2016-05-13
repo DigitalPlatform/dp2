@@ -13,6 +13,8 @@ namespace DigitalPlatform.rms.Client
     /// </summary>
     public class SearchResultLoader : IEnumerable
     {
+        public string ElementType { get; set; } // KernelRecord / Record。默认 KernelRecord
+
         public string ResultSetName { get; set; }
 
         public RmsChannel Channel { get; set; }
@@ -56,7 +58,7 @@ namespace DigitalPlatform.rms.Client
                 Record[] searchresults = null;
 
                 long lRet = this.Channel.DoGetSearchResult(
-                    "default",
+                    this.ResultSetName, // "default",
                     lStart,
                     nPerCount,
                     this.FormatList,  // "id,xml,timestamp,metadata",
@@ -80,8 +82,14 @@ namespace DigitalPlatform.rms.Client
 
                 foreach (Record record in searchresults)
                 {
-                    KernelRecord k = KernelRecord.From(record);
-                    yield return k;
+                    if (string.IsNullOrEmpty(this.ElementType) == true
+                        || this.ElementType == "KernelRecord")
+                    {
+                        KernelRecord k = KernelRecord.From(record);
+                        yield return k;
+                    }
+                    else
+                        yield return record;
                 }
 
                 lStart += searchresults.Length;

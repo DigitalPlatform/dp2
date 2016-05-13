@@ -1040,32 +1040,55 @@ nsmgr,
             return results;
         }
 
+        /*
+         * 日元比较特殊
+        <ListPrice>
+            <Amount>1404</Amount>
+            <CurrencyCode>JPY</CurrencyCode>
+            <FormattedPrice>￥ 1,404</FormattedPrice>
+        </ListPrice>
+         * 美元和人民币等货币，要把 Amount 元素的值除以 100
+        <ListPrice>
+            <Amount>3495</Amount>
+            <CurrencyCode>USD</CurrencyCode>
+            <FormattedPrice>$34.95</FormattedPrice>
+        </ListPrice>
+         * */
         static string GetPriceValue(XmlElement element,
             XmlNamespaceManager nsmgr)
         {
             XmlElement amount = element.SelectSingleNode("amazon:Amount", nsmgr) as XmlElement;
             XmlElement code = element.SelectSingleNode("amazon:CurrencyCode", nsmgr) as XmlElement;
+            XmlElement formatted = element.SelectSingleNode("amazon:FormattedPrice", nsmgr) as XmlElement;
 
             string strText = "";
             if (code != null)
                 strText += code.InnerText.Trim();
+
+            // 2016/5/13
+            // 优先用 FormattedPrice 元素
+            if (formatted != null)
+            {
+                strText += PriceUtil.GetPurePrice(formatted.InnerText.Trim().Replace(",", ""));
+                return strText;
+            }
+
             if (amount != null)
             {
                 string strAmount = amount.InnerText.Trim();
                 if (string.IsNullOrEmpty(strAmount) == false)
                 {
-                    if (code.InnerText.Trim() == "CNY")
+                    if (code.InnerText.Trim() != "JPY")
                     {
                         long v = 0;
                         if (long.TryParse(strAmount, out v) == false)
                         {
                             strText += " 数字 '" + strAmount + "' 格式错误";
+                            return strText;
                         }
-                        else
-                        {
-                            strAmount = (((decimal)v) / 100).ToString();
-                            strText += strAmount;
-                        }
+
+                        strAmount = (((decimal)v) / 100).ToString();
+                        strText += strAmount;
                     }
                     else
                         strText += strAmount;

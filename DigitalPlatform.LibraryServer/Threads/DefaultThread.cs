@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -29,9 +30,23 @@ namespace DigitalPlatform.LibraryServer
         DateTime m_lastRetryTime = DateTime.Now;
         int m_nRetryAfterMinutes = 5;   // 每间隔多少分钟以后重试一次
 
+        int _createLocationResultsetCount = 0;
+
         // 一次操作循环
         public override void Worker()
         {
+            // 首次自动启动创建馆藏地结果集的任务。以后就靠固定时间启动，或者 _request 触发
+            if (_createLocationResultsetCount == 0)
+            {
+                this.App.StartCreateLocationResultset("");
+                _createLocationResultsetCount++;
+            }
+            else
+            {
+                this.App.StartCreateLocationResultset(null);
+                _createLocationResultsetCount++;
+            }
+
             // 清理 Garden
             try
             {

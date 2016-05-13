@@ -752,6 +752,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     "accept",   // strResultSetName
                     "",    // strSearchStyle
                     "", // strOutputStyle
+                    "",
                     out strQueryXml,
                     out strError);
                 if (lRet == -1)

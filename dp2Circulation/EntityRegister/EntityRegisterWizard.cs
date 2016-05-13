@@ -1537,6 +1537,7 @@ false);
                     null,   // strResultSetName
                     "",    // strSearchStyle
                     "", // strOutputStyle
+                    "",
                     out strQueryXml,
                     out strError);
                 if (lRet == -1)

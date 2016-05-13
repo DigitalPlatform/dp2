@@ -366,6 +366,7 @@ namespace dp2Circulation
                             null,   // strResultSetName
                             "",    // strSearchStyle
                             "", // strOutputStyle,
+                            "",
                             out strQueryXml,
                             out strError);
 

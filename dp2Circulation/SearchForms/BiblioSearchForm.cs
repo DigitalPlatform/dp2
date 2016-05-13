@@ -204,6 +204,30 @@ namespace dp2Circulation
                 this.tableLayoutPanel_main.Enabled = false;
             }
 #endif
+
+            {
+                string strError = "";
+                List<string> codes = null;
+                // 获得全部可用的图书馆代码。注意，并不包含 "" (全局)
+                int nRet = this.MainForm.GetAllLibraryCodes(out codes,
+                out strError);
+                if (nRet == -1)
+                    MessageBox.Show(this, strError);
+                else
+                {
+                    this.comboBox_location.Items.Clear();
+                    this.comboBox_location.Items.Add("<不筛选>");
+                    foreach (string code in codes)
+                    {
+                        this.comboBox_location.Items.Add(code);
+                    }
+                }
+
+                this.comboBox_location.Text = this.MainForm.AppInfo.GetString(
+    "bibliosearchform",
+    "location_filter",
+    "<不筛选>");
+            }
         }
 
         void MainForm_FixedSelectedPageChanged(object sender, EventArgs e)
@@ -325,6 +349,11 @@ this.splitContainer_main,
     "bibliosearchform",
     "query_lines",
     this.dp2QueryControl1.GetSaveString());
+
+                this.MainForm.AppInfo.SetString(
+"bibliosearchform",
+"location_filter",
+this.comboBox_location.Text);
 
 
                 this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
@@ -1075,6 +1104,7 @@ Keys keyData)
                     null,   // strResultSetName
                     "",    // strSearchStyle
                     strOutputStyle,
+                    this.GetLocationFilter(),
                     out strQueryXml,
                     out strError);
                 if (lRet == -1)
@@ -1326,6 +1356,13 @@ Keys keyData)
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        string GetLocationFilter()
+        {
+            if (this.comboBox_location.Text == "<不筛选>")
+                return "";
+            return this.comboBox_location.Text;
         }
 
         // 开始检索共享书目

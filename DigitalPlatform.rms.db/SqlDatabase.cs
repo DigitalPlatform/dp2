@@ -3427,7 +3427,6 @@ namespace DigitalPlatform.rms
                                     resultSet.Add(new DpRecord(strId));
                                 }
 
-
                                 nLoopCount++;
 
                                 if (nLoopCount % 100 == 0)
@@ -14968,7 +14967,7 @@ start_time,
                                     command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
                                         + strCommand
 #if !PARAMETERS
- // + " ;\n"
+                                        // + " ;\n"
 #endif
 ;
                                     try

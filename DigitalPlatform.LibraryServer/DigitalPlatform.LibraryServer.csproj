@@ -153,6 +153,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Query.cs" />
     <Compile Include="ReadersMonitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="deleted\QuestionCollection.cs" />
@@ -165,6 +166,7 @@
     <Compile Include="deleted\TestControl2.cs" />
     <Compile Include="AccountTable.cs" />
     <Compile Include="Threads\DefaultThread.cs" />
+    <Compile Include="Threads\LocationResultset.cs" />
     <Compile Include="Threads\OperLogThread.cs" />
     <Compile Include="Threads\RebuildKeys.cs" />
     <Compile Include="TraceDTLP.cs" />
