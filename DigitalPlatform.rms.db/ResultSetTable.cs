@@ -43,6 +43,46 @@ namespace DigitalPlatform.rms
         }
 #endif
 
+        // 注意，没有锁定集合
+        void FreeResultSet(string strOldName)
+        {
+            DpResultSet resultset = (DpResultSet)this[strOldName];
+            if (resultset == null)
+                return;
+            this.Remove(strOldName);
+            resultset.Close();
+        }
+
+        public bool RenameResultSet(string strOldName, string strNewName)
+        {
+            if (String.IsNullOrEmpty(strOldName) == true)
+                throw new ArgumentException("结果集名不应为空", "strOldName");
+            if (String.IsNullOrEmpty(strNewName) == true)
+                throw new ArgumentException("结果集名不应为空", "strNewName");
+
+            if (this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
+                throw new ApplicationException("为 全局结果集集合 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
+            try
+            {
+                strOldName = strOldName.ToLower();
+                strNewName = strNewName.ToLower();
+
+                DpResultSet resultset = (DpResultSet)this[strOldName];
+                if (resultset == null)
+                    return false;
+
+                // 如果新名字存在，则要释放已有对象
+                FreeResultSet(strNewName);
+                this[strNewName] = resultset;
+                return true;
+            }
+            finally
+            {
+                this.m_lock.ExitWriteLock();
+            }
+        }
+
+        // TODO: 似乎锁定不太严密。可以改用 UpgradeableReadLock
         // TODO: 全局结果集的名字可否就是文件名? 这样如果需要永久保持，下次启动的时候从文件系统就能列举出结果集名字
         public DpResultSet GetResultSet(string strResultSetName,
     bool bAutoCreate = true)
@@ -50,7 +90,7 @@ namespace DigitalPlatform.rms
             if (String.IsNullOrEmpty(strResultSetName) == true)
             {
                 // strResultSetName = "default";
-                throw new Exception("结果集名不应为空");
+                throw new ArgumentException("结果集名不应为空");
             }
 
             strResultSetName = strResultSetName.ToLower();
@@ -176,6 +216,8 @@ namespace DigitalPlatform.rms
                     return strName;
                 }
 
+                FreeResultSet(strName);
+
                 resultset.Touch();
                 this[strName] = resultset;
                 return strName;
@@ -203,6 +245,9 @@ namespace DigitalPlatform.rms
                     DpResultSet resultset = (DpResultSet)this[key];
 
                     if (resultset == null)
+                        continue;
+
+                    if (resultset.Permanent == true)
                         continue;
 
                     if ((DateTime.Now - resultset.LastUsedTime) >= delta)

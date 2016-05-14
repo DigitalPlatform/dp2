@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define TEST_LOCATION
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text;
@@ -6,14 +8,12 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Diagnostics;
-
 using System.Threading;
 using System.Resources;
 using System.Globalization;
 using System.Xml;
 
 using DigitalPlatform.Text;
-//using DigitalPlatform.CirculationClient;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
@@ -131,8 +131,37 @@ namespace DigitalPlatform.OPAC.Web
             }
         }
 
-        // public int LineCount = 5;
-
+        public string Location
+        {
+            get
+            {
+                this.EnsureChildControls();
+#if TEST_LOCATION
+                TextBox location = this.FindControl("location") as TextBox;
+                if (location == null)
+                    return "";
+                return location.Text;
+#else
+                HiddenField location = this.FindControl("location") as HiddenField;
+                if (location == null)
+                    return "";
+                return location.Value;
+#endif
+            }
+            set
+            {
+                this.EnsureChildControls();
+#if TEST_LOCATION
+                TextBox location = this.FindControl("location") as TextBox;
+                if (location != null)
+                    location.Text = value;
+#else
+                HiddenField location = this.FindControl("location") as HiddenField;
+                if (location != null)
+                location.Value = value;
+#endif
+            }
+        }
 
         public int LineCount
         {
@@ -169,104 +198,9 @@ namespace DigitalPlatform.OPAC.Web
             }
         }
 
-        /*
-        public string ServerUrl
-        {
-            get
-            {
-                object o = ViewState["ServerUrl"];
-                return (o == null) ? String.Empty : (String)o;
-            }
-            set
-            {
-                ViewState["ServerUrl"] = (object)value;
-            }
-
-        }
-         */
-
-        /*
-        public ChannelCollection Channels
-        {
-            get
-            {
-                object o = ViewState["Channels"];
-                return (o == null) ? null : (ChannelCollection)o;
-            }
-            set
-            {
-                ViewState["Channels"] = (object)value;
-            }
-
-        }
-         */
-
-
-        /*
-        ResInfoItem[] rootitems // 根级的所有事项。其中大部分为数据库名
-        {
-            get
-            {
-                object o = ViewState["rootitems"];
-                return (o == null) ? null : (ResInfoItem[])o;
-            }
-            set
-            {
-                ViewState["rootitems"] = (object)value;
-            }
-        }
-
-        Hashtable fromitems // 库名对应的From事项集合
-        {
-            get
-            {
-                object o = ViewState["fromitems"];
-                return (o == null) ? null : (Hashtable)o;
-            }
-            set
-            {
-                ViewState["fromitems"] = (object)value;
-            }
-        } 
-         */
-
-        /*
-         * 
-        public PanelStyle PanelStyle = PanelStyle.MatchStyle | PanelStyle.Xml;
-
         protected override void OnInit(EventArgs e)
         {
-            Page.RegisterRequiresControlState(this);
             base.OnInit(e);
-        }
-
-        protected override object SaveControlState()
-        {
-            return (this.PanelStyle != (PanelStyle.MatchStyle | PanelStyle.Xml)) ? (object)this.PanelStyle : null;
-        }
-        
-        protected override void LoadControlState(object state)
-        {
-            if (state != null)
-            {
-                this.PanelStyle = (PanelStyle)state;
-            }
-        }
-         * 
-         */
-
-        // public ChannelCollection Channels = null;
-
-        /*
-        ResInfoItem[] rootitems = null; // 根级的所有事项。其中大部分为数据库名
-        Hashtable fromitems = null; // new Hashtable();  // 库名对应的From事项集合
-         */
-
-        protected override void OnInit(EventArgs e)
-        {
-
-            base.OnInit(e);
-
         }
 
         protected override void OnUnload(EventArgs e)
@@ -306,7 +240,6 @@ namespace DigitalPlatform.OPAC.Web
                 ));
 
             // ***标题行
-
             PlaceHolder columntitle = new PlaceHolder();
             columntitle.ID = "columntitle";  // id用于render()时定位
             this.Controls.Add(columntitle);
@@ -376,7 +309,6 @@ namespace DigitalPlatform.OPAC.Web
                     list.CssClass = "logic";
                     line.Controls.Add(list);
                     FillLogicOperList(list);
-
                 }
 
                 // 文字part2
@@ -386,7 +318,6 @@ namespace DigitalPlatform.OPAC.Web
                 part2.ID = "queryline_" + i.ToString() + "_part2";  // id用于render()时定位
 
                 line.Controls.Add(part2);
-
 
                 // 检索词
                 TextBox box = new TextBox();
@@ -600,8 +531,6 @@ namespace DigitalPlatform.OPAC.Web
             else
                 literal.Visible = false;
 
-
-
             // Xml检索式
             literal = new LiteralControl("<tr class='xml'><td colspan='" + Convert.ToString(nCols) + "'>");
             this.Controls.Add(literal);
@@ -620,6 +549,17 @@ namespace DigitalPlatform.OPAC.Web
                 xmlbox.Visible = true;
             else
                 xmlbox.Visible = false;
+
+            // 2016/5/14
+#if TEST_LOCATION
+            TextBox location = new TextBox();
+            location.ID = "location";
+            this.Controls.Add(location);
+#else
+            HiddenField location = new HiddenField();
+            location.ID = "location";
+            this.Controls.Add(location);
+#endif
 
             literal = new LiteralControl("</td></tr>");
             this.Controls.Add(literal);
@@ -936,7 +876,6 @@ namespace DigitalPlatform.OPAC.Web
 
             bool bDesc = StringUtil.IsInList("desc", this.SearchStyle);
 
-
             string strNotFound = "";
 
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
@@ -969,7 +908,6 @@ namespace DigitalPlatform.OPAC.Web
                     list = (DropDownList)FindControl(strID);
                     strLogic = list.Text;
                 }
-
 
                 string strWord = "";
                 strID = "word" + Convert.ToString(i);
@@ -1033,7 +971,6 @@ namespace DigitalPlatform.OPAC.Web
                             strError = "目前 opac.xml 中 <virtualDatabases> 内尚未具备检索目标。(注：需要在 dp2Library 服务器的 library.xml 中配置相关事项，然后重启 dp2OPAC)";
                             return -1;
                         }
-
 
                         // 所有虚拟库包含的去重后的物理库名 和全部物理名 (整体去重一次)
                         // 要注意检查特定的from名在物理库中是否存在，如果不存在则排除该库名
@@ -1155,8 +1092,6 @@ namespace DigitalPlatform.OPAC.Web
                         strMatchStyle = "exact";
                     }
 
-
-
                     // strFrom为"<全部>"，表示利用全部途径检索，内核是支持这样使用的
 
                     // 2007/4/5 改造 加上了 GetXmlStringSimple()
@@ -1195,6 +1130,13 @@ namespace DigitalPlatform.OPAC.Web
                 }
                 strError = "检索式为空";
                 return -1;
+            }
+
+            string strLibraryCode = this.Location;  // (string)this.Page.Session["librarycode"];
+            if (string.IsNullOrEmpty(strLibraryCode) == false)
+            {
+                string strLocationQueryXml = "<item resultset='#" + strLibraryCode + "' />";
+                strXml = "<group>" + strXml + "<operator value='AND'/>" + strLocationQueryXml + "</group>";
             }
 
             return 0;
@@ -1513,8 +1455,6 @@ string strWrapperClass)
                         match.Text = this.DefaultHiddenMatchStyle == "" ? "left" : this.DefaultHiddenMatchStyle;
                     }
                 }
-
-
             }
 
             // columntitle

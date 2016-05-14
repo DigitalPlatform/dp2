@@ -100,6 +100,9 @@ namespace DigitalPlatform.LibraryServer
                 this.WriteErrorLog("馆藏地结果集创建开始 " + location_list);
                 foreach (string code in librarycodes)
                 {
+                    this._app_down.Token.ThrowIfCancellationRequested();
+
+                    this.WriteErrorLog("--- 馆藏地结果集创建 " + code);
                     CreateOneLocationResultset(code);
                 }
                 this.WriteErrorLog("馆藏地结果集创建结束 " + location_list);
@@ -143,6 +146,8 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == 0)
                     return;
 
+                this._app_down.Token.ThrowIfCancellationRequested();
+
                 RmsChannel channel = session.Channels.GetChannel(this.WsUrl);
                 if (channel == null)
                 {
@@ -150,6 +155,9 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
 
+#if DETAIL_LOG
+                this.WriteErrorLog("开始检索");
+#endif
                 long lHitCount = channel.DoSearch(strQueryXml,
     "default",
     "", // strOutputStyle,
@@ -161,6 +169,8 @@ namespace DigitalPlatform.LibraryServer
                 {
                     // 没有命中任何记录，也要继续后面的处理
                 }
+
+                this._app_down.Token.ThrowIfCancellationRequested();
 
                 DpResultSet resultset = new DpResultSet(true);
 
@@ -202,6 +212,8 @@ namespace DigitalPlatform.LibraryServer
             return;
         }
 
+        const int _upload_batchSize = 1000; // 上传结果集每批个数
+
         // 写入 dp2kernel 成为永久结果集
         int UploadPermanentResultset(RmsChannel channel,
             string strResultsetName,
@@ -220,13 +232,17 @@ namespace DigitalPlatform.LibraryServer
                 RecordBody[] results = null;
                 long lRet = channel.DoWriteRecords(null,
 records.ToArray(),
-"createResultset,name:#" + strResultsetName + ",clear",
+"createResultset,name:#" + strResultsetName + ",clear,permanent",
 out results,
 out strError);
                 if (lRet == -1)
                     return -1;
                 return 0;
             }
+
+#if DETAIL_LOG
+            this.WriteErrorLog("开始上传结果集到 dp2kernel");
+#endif
 
             long lPos = -1; // 中间保持不透明的值
             bool bFirst = true;
@@ -255,20 +271,40 @@ out strError);
                 record.Path = dpRecord.ID;
                 records.Add(record);
 
-                if (records.Count >= 100 || (i >= resultset.Count - 1 && records.Count > 0))
+                if (records.Count >= _upload_batchSize || (i >= resultset.Count - 1 && records.Count > 0))
                 {
+                    this._app_down.Token.ThrowIfCancellationRequested();
+
+#if DETAIL_LOG
+                    this.WriteErrorLog("一批 " + records.Count);
+#endif
                     RecordBody[] results = null;
                     long lRet = channel.DoWriteRecords(null,
     records.ToArray(),
-    "createResultset,name:#" + strResultsetName + (bFirst ? ",clear" : ""),
+    "createResultset,name:#~" + strResultsetName + (bFirst ? ",clear" : ""),
     out results,
     out strError);
                     if (lRet == -1)
                         return -1;
                     bFirst = false;
+                    records.Clear();
                 }
             }
 
+            // 最后一次执行改名、排序
+            {
+                RecordBody[] results = null;
+                long lRet = channel.DoWriteRecords(null,
+null,
+"renameResultset,oldname:#~" + strResultsetName + ",newname:#" + strResultsetName + ",permanent,sort",
+out results,
+out strError);
+                if (lRet == -1)
+                    return -1;
+            }
+#if DETAIL_LOG
+            this.WriteErrorLog("结束上传结果集");
+#endif
             return 0;
         }
 
@@ -329,6 +365,8 @@ out strError);
             return 1;
         }
 
+        const int _removeDup_batchSize = 10000; // 利用 hashtable 进行局部去重的每批个数
+
         // 从 dp2Kernel 端获取结果集
         // parameters:
         //      strStyle    tobibliorecpath 将实体\期\订购\评注 记录路径转换为书目记录路径,并去重
@@ -341,8 +379,6 @@ out strError);
 
             m_biblioDbNameTable.Clear();
 
-            // bool bToBiblioRecPath = StringUtil.IsInList("tobibliorecpath", strStyle);
-
             Hashtable temp_table = new Hashtable();
 
             string strFormat = "id,cols,format:@coldef://parent"; // "id,xml";
@@ -353,10 +389,16 @@ out strError);
                 strFormat);
             loader.ElementType = "Record";
 
+#if DETAIL_LOG
+            this.WriteErrorLog("开始从 dp2kernel 获取结果集");
+#endif
+
+            int hashtable_removedup_loops = 0;  // 利用 hashtable 去重的轮次。如果只有一轮，则可以免去最后的结果集文件去重
             try
             {
                 foreach (Record rec in loader)
                 {
+                    this._app_down.Token.ThrowIfCancellationRequested();
 
                     {
                         if (rec.RecordBody != null
@@ -405,14 +447,15 @@ out strError);
                         if (nRet == -1)
                             return -1;
 
-                        // 缓冲并局部去重
+                        // 缓冲并局部去重。局部去重可以减轻后面全局去重的压力
                         if (temp_table.Contains(strBiblioRecPath) == false)
                         {
                             temp_table.Add(strBiblioRecPath, null);
-                            if (temp_table.Count > 1000)
+                            if (temp_table.Count > _removeDup_batchSize)
                             {
                                 FlushTable(temp_table, resultset);
                                 temp_table.Clear();
+                                hashtable_removedup_loops++;
                             }
                         }
 
@@ -429,38 +472,75 @@ out strError);
 
             // if (bToBiblioRecPath == true)
             {
+                // 最后一批
                 if (temp_table.Count > 0)
                 {
                     FlushTable(temp_table, resultset);
                     temp_table.Clear();
+                    hashtable_removedup_loops++;
                 }
 
-                // 归并后写入结果集文件
-                resultset.QuickSort();
-                resultset.Sorted = true;
+                resultset.Idle += new IdleEventHandler(biblio_paths_Idle);  // 2016/1/23 原来这里是 -=，令人费解
+                try
+                {
+#if DETAIL_LOG
+                this.WriteErrorLog("开始排序结果集, count=" + resultset.Count);
+#endif
 
-                resultset.RemoveDup();
+                    // 归并后写入结果集文件
+                    resultset.QuickSort();
+                    resultset.Sorted = true;
 
+                    if (hashtable_removedup_loops > 1)
+                    {
+                        // 全局去重
+#if DETAIL_LOG
+                    this.WriteErrorLog("开始对结果集去重, count=" + resultset.Count);
+#endif
+                        resultset.RemoveDup();
+
+#if DETAIL_LOG
+                    this.WriteErrorLog("结束对结果集去重, count=" + resultset.Count);
+#endif
+                    }
+                }
+                finally
+                {
+                    resultset.Idle -= new IdleEventHandler(biblio_paths_Idle);
+                }
             }
 
             return 0;
         }
 
-        static void FlushTable(Hashtable temp_table, DpResultSet resultset)
+        void FlushTable(Hashtable temp_table, DpResultSet resultset)
         {
             foreach (string path in temp_table.Keys)
             {
+                this._app_down.Token.ThrowIfCancellationRequested();
+
                 DpRecord record_bibliorecpath = new DpRecord(path);
                 resultset.Add(record_bibliorecpath);
             }
         }
 
-#if NO
         void biblio_paths_Idle(object sender, IdleEventArgs e)
         {
+            this._app_down.Token.ThrowIfCancellationRequested();
+#if NO
             if (this.m_bClosed == true || this.Stopped == true)
             {
                 throw new InterruptException("中断");
+            }
+#endif
+        }
+
+#if NO
+        class InterruptException : Exception
+        {
+            public InterruptException(string s)
+                : base(s)
+            {
             }
         }
 #endif

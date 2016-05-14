@@ -13,7 +13,6 @@ using System.Resources;
 using System.Globalization;
 
 using DigitalPlatform.Text;
-//using DigitalPlatform.CirculationClient;
 using DigitalPlatform.OPAC.Server;
 
 namespace DigitalPlatform.OPAC.Web
@@ -42,7 +41,6 @@ namespace DigitalPlatform.OPAC.Web
             // TODO: 如果抛出异常，则要试着取zh-cn的字符串，或者返回一个报错的字符串
             try
             {
-
                 string s = GetRm().GetString(strID, ci);
                 if (String.IsNullOrEmpty(s) == true)
                     return strID;
@@ -61,7 +59,6 @@ namespace DigitalPlatform.OPAC.Web
                 return Thread.CurrentThread.CurrentUICulture.Name;
             }
         }
-
 
         string m_strDefaultFormatName = "simple";
 
@@ -107,7 +104,6 @@ namespace DigitalPlatform.OPAC.Web
         void FillTabControl(TabControl tabcontrol)
         {
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
-
 
             string strDefaultFormatName = this.DefaultFormatName;
 

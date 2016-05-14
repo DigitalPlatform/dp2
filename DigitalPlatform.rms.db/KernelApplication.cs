@@ -476,7 +476,7 @@ namespace DigitalPlatform.rms
         {
             string strResult = "";
 
-            strResult = "(C) 版权所有 2005-2008 数字平台(北京)软件有限责任公司\r\nDigital Platform (Beijing) Software Corp. Ltd.<br/>";
+            strResult = "(C) 版权所有 2005-2015 数字平台(北京)软件有限责任公司\r\nDigital Platform (Beijing) Software Corp. Ltd.<br/>";
 
             Assembly myAssembly;
 

@@ -19,7 +19,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 
@@ -107,11 +106,12 @@ ref this.sessioninfo) == false)
 
     protected void Page_Load(object sender, EventArgs e)
     {
+        this.BiblioSearchControl1.Location = this.TitleBarControl1.SelectedLibraryCode;
+
         if (WebUtil.PrepareEnvironment(this,
 ref app,
 ref sessioninfo) == false)
             return;
-
 
         string strSideBarFile = Server.MapPath("./search_sidebar.xml");
         if (File.Exists(strSideBarFile) == true)
@@ -425,7 +425,6 @@ ref sessioninfo) == false)
         Hashtable table = StringUtil.ParseParameters(strQueryString, '&', '=', "");
 
         string strFlag = (string)table["flag"];
-
 
         Encoding encoding = DetectEncoding(strFlag);
         if (encoding == null)

@@ -1619,7 +1619,7 @@ out strError);
     out strError);
                     if (nRet == -1)
                     {
-                        AddErrorLine("记录 "+strRecPath+" 创建浏览格式时出: " + strError);
+                        AddErrorLine("记录 " + strRecPath + " 创建浏览格式时出: " + strError);
                         continue;
                     }
 
@@ -1850,20 +1850,6 @@ out strError);
         {
             EnableControlsInSearching(bEnable);
             this.listView_records.Enabled = bEnable;
-
-            /*
-            this.toolStrip_search.Enabled = bEnable;
-            this.listView_records.Enabled = bEnable;
-
-            this.comboBox_from.Enabled = bEnable;
-            this.checkedComboBox_biblioDbNames.Enabled = bEnable;
-            this.comboBox_matchStyle.Enabled = bEnable;
-
-            if (this.comboBox_matchStyle.Text == "空值")
-                this.textBox_queryWord.Enabled = false;
-            else
-                this.textBox_queryWord.Enabled = bEnable;
-            */
         }
 
         bool InSearching
@@ -1885,6 +1871,8 @@ out strError);
             this.comboBox_from.Enabled = bEnable;
             this.checkedComboBox_biblioDbNames.Enabled = bEnable;
             this.comboBox_matchStyle.Enabled = bEnable;
+
+            this.comboBox_location.Enabled = bEnable;
 
             if (this.comboBox_matchStyle.Text == "空值")
                 this.textBox_queryWord.Enabled = false;
