@@ -426,7 +426,6 @@ ref sessioninfo) == false)
 
         string strFlag = (string)table["flag"];
 
-
         Encoding encoding = DetectEncoding(strFlag);
         if (encoding == null)
         {

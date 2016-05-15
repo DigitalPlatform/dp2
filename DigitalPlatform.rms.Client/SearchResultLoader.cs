@@ -52,7 +52,7 @@ namespace DigitalPlatform.rms.Client
             long lHitCount = -1;
             long lStart = 0;
             long nPerCount = this.BatchSize == 0 ? -1 : this.BatchSize;
-            nPerCount = 1;  // test
+            // nPerCount = 1;  // test
             for (; ; )
             {
                 Record[] searchresults = null;

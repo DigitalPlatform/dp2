@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define FAST_SEEK
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -391,13 +393,12 @@ namespace DigitalPlatform.ResultSet
             DpResultSet targetLeft,
             DpResultSet targetMiddle,
             DpResultSet targetRight,
-            bool bOutputDebugInfo,
+            // bool bOutputDebugInfo,
             QueryStop query_stop,
             object param,
-            out string strDebugInfo,
+            ref StringBuilder debugInfo,
             out string strError)
         {
-            strDebugInfo = "";
             strError = "";
 
             DateTime start_time = DateTime.Now;
@@ -444,11 +445,11 @@ namespace DigitalPlatform.ResultSet
                 return -1;
             }
 
-            if (bOutputDebugInfo == true)
+            if (debugInfo != null)
             {
-                strDebugInfo += "strStyle值:" + logicoper.ToString() + "<br/>";
-                strDebugInfo += "sourceLeft结果集:" + sourceLeft.Dump() + "<br/>";
-                strDebugInfo += "sourceRight结果集:" + sourceRight.Dump() + "<br/>";
+                debugInfo.Append("strStyle值:" + logicoper.ToString() + "<br/>");
+                debugInfo.Append("sourceLeft结果集:" + sourceLeft.Dump() + "<br/>");
+                debugInfo.Append("sourceRight结果集:" + sourceRight.Dump() + "<br/>");
             }
 
             if (logicoper == LogicOper.OR)
@@ -508,9 +509,9 @@ namespace DigitalPlatform.ResultSet
                 right = null;
                 if (i >= sourceLeft.Count)
                 {
-                    if (bOutputDebugInfo == true)
+                    if (debugInfo != null)
                     {
-                        strDebugInfo += "i大于等于sourceLeft的个数，将i改为-1<br/>";
+                        debugInfo.Append("i大于等于sourceLeft的个数，将i改为-1<br/>");
                     }
                     i = -1;
                 }
@@ -519,9 +520,9 @@ namespace DigitalPlatform.ResultSet
                     try
                     {
                         left = (DpRecord)sourceLeft[i];
-                        if (bOutputDebugInfo == true)
+                        if (debugInfo != null)
                         {
-                            strDebugInfo += "取出sourceLeft集合中第" + Convert.ToString(i) + "个元素，ID为" + left.ID + "<br/>";
+                            debugInfo.Append("取出sourceLeft集合中第" + Convert.ToString(i) + "个元素，ID为" + left.ID + "<br/>");
                         }
                     }
                     catch (Exception e)
@@ -532,9 +533,9 @@ namespace DigitalPlatform.ResultSet
                 }
                 if (j >= sourceRight.Count)
                 {
-                    if (bOutputDebugInfo == true)
+                    if (debugInfo != null)
                     {
-                        strDebugInfo += "j大于等于sourceRight的个数，将j改为-1<br/>";
+                        debugInfo.Append("j大于等于sourceRight的个数，将j改为-1<br/>");
                     }
                     j = -1;
                 }
@@ -543,9 +544,9 @@ namespace DigitalPlatform.ResultSet
                     try
                     {
                         right = (DpRecord)sourceRight[j];
-                        if (bOutputDebugInfo == true)
+                        if (debugInfo != null)
                         {
-                            strDebugInfo += "取出sourceRight集合中第" + Convert.ToString(j) + "个元素，ID为" + right.ID + "<br/>";
+                            debugInfo.Append("取出sourceRight集合中第" + Convert.ToString(j) + "个元素，ID为" + right.ID + "<br/>");
                         }
                     }
                     catch
@@ -555,42 +556,39 @@ namespace DigitalPlatform.ResultSet
                     }
                 }
 
-
                 if (i == -1 && j == -1)
                 {
-                    if (bOutputDebugInfo == true)
+                    if (debugInfo != null)
                     {
-                        strDebugInfo += "i,j都等于-1跳出<br/>";
+                        debugInfo.Append("i,j都等于-1跳出<br/>");
                     }
                     break;
                 }
 
                 if (left == null)
                 {
-                    if (bOutputDebugInfo == true)
+                    if (debugInfo != null)
                     {
-                        strDebugInfo += "dpRecordLeft为null，设ret等于1<br/>";
+                        debugInfo.Append("dpRecordLeft为null，设ret等于1<br/>");
                     }
                     ret = 1;
                 }
                 else if (right == null)
                 {
-                    if (bOutputDebugInfo == true)
+                    if (debugInfo != null)
                     {
-                        strDebugInfo += "dpRecordRight为null，设ret等于-1<br/>";
+                        debugInfo.Append("dpRecordRight为null，设ret等于-1<br/>");
                     }
                     ret = -1;
                 }
                 else
                 {
                     ret = nAsc * left.CompareTo(right);  //MyCompareTo(oldOneKey); //改CompareTO
-                    if (bOutputDebugInfo == true)
+                    if (debugInfo != null)
                     {
-                        strDebugInfo += "dpRecordLeft与dpRecordRight均不为null，比较两条记录得到ret等于" + Convert.ToString(ret) + "<br/>";
+                        debugInfo.Append("dpRecordLeft与dpRecordRight均不为null，比较两条记录得到ret等于" + Convert.ToString(ret) + "<br/>");
                     }
                 }
-
-
 
                 if (logicoper == LogicOper.OR && targetMiddle != null)
                 {
@@ -649,9 +647,9 @@ namespace DigitalPlatform.ResultSet
                 {
                     if (targetMiddle != null)
                     {
-                        if (bOutputDebugInfo == true)
+                        if (debugInfo != null)
                         {
-                            strDebugInfo += "ret等于0,加到targetMiddle里面<br/>";
+                            debugInfo.Append("ret等于0,加到targetMiddle里面<br/>");
                         }
 
                         if (logicoper != LogicOper.AND)
@@ -708,9 +706,9 @@ namespace DigitalPlatform.ResultSet
 
                 if (ret < 0)
                 {
-                    if (bOutputDebugInfo == true)
+                    if (debugInfo != null)
                     {
-                        strDebugInfo += "ret小于0,加到targetLeft里面<br/>";
+                        debugInfo.Append("ret小于0,加到targetLeft里面<br/>");
                     }
 
                     if (targetLeft != null && left != null)
@@ -720,9 +718,9 @@ namespace DigitalPlatform.ResultSet
 
                 if (ret > 0)
                 {
-                    if (bOutputDebugInfo == true)
+                    if (debugInfo != null)
                     {
-                        strDebugInfo += "ret大于0,加到targetRight里面<br/>";
+                        debugInfo.Append("ret大于0,加到targetRight里面<br/>");
                     }
 
                     if (targetRight != null && right != null)
@@ -740,19 +738,18 @@ namespace DigitalPlatform.ResultSet
                 targetRight.Sorted = true;
 
             TimeSpan delta = DateTime.Now - start_time;
-            Debug.WriteLine("Merge() " + logicoper.ToString() + " 耗时 " + delta.ToString());
-
+            Debug.WriteLine("Merge() " + logicoper.ToString() + " 耗时(秒) " + delta.TotalSeconds.ToString());
             return 0;
         }
 
 
     } //end of class DpResultSetManager
 
-
     // 结果集类	
     public class DpResultSet : IEnumerable, IDisposable
     {
         public bool ReadOnly { get; set; }
+        public bool Permanent { get; set; }
 
         public event GetTempFilenameEventHandler GetTempFilename = null;
         public string TempFileDir = ""; // 用于创建和存储临时文件的目录
@@ -1088,7 +1085,7 @@ namespace DigitalPlatform.ResultSet
             }
         }
 
-        //创建索引
+        // 创建索引
         public void CreateIndex()
         {
             if (m_streamSmall != null)
@@ -1154,24 +1151,72 @@ namespace DigitalPlatform.ResultSet
 
         // 2016/5/13 编写，尚未测试
         // 克隆出一个新对象
-        public DpResultSet Clone()
+        // parameters:
+        //      strStyle    file/handle  分别是 复制物理文件/沿用物理文件、仅重新打开文件
+        public DpResultSet Clone(string strStyle = "file")
         {
             string filename_big = "";
             string filename_small = "";
-            try
+
+            if (this.m_streamBig != null)
+                this.m_streamBig.Flush();
+            if (this.m_streamSmall != null)
+                this.m_streamSmall.Flush();
+
+            if (strStyle == "file")
             {
-                // 和原先文件在相同子目录创建新文件
+                try
+                {
+                    // 和原先文件在相同子目录创建新文件
+                    if (string.IsNullOrEmpty(this.m_strBigFileName) == false)
+                    {
+                        filename_big = Path.Combine(Path.GetDirectoryName(this.m_strBigFileName), Guid.NewGuid().ToString());
+                        File.Copy(this.m_strBigFileName, filename_big, false);
+                    }
+
+                    if (string.IsNullOrEmpty(this.m_strSmallFileName) == false
+                        && string.IsNullOrEmpty(this.m_strBigFileName) == false)
+                    {
+                        filename_small = Path.Combine(Path.GetDirectoryName(this.m_strSmallFileName), Guid.NewGuid().ToString());
+                        File.Copy(this.m_strSmallFileName, filename_small, false);
+                    }
+
+                    DpResultSet result = new DpResultSet();
+                    if (string.IsNullOrEmpty(filename_big) == false
+                        && string.IsNullOrEmpty(filename_small) == false)
+                        result.Attach(filename_big, filename_small);
+                    else if (string.IsNullOrEmpty(filename_big) == false)
+                        result.Attach(filename_big);
+
+                    result.Sorted = this.Sorted;
+                    return result;
+                }
+                catch (Exception)
+                {
+                    if (string.IsNullOrEmpty(filename_big) == false)
+                        File.Delete(filename_big);
+                    if (string.IsNullOrEmpty(filename_small) == false)
+                        File.Delete(filename_small);
+                    throw;
+                }
+            }
+            else if (strStyle == "handle")
+            {
                 if (string.IsNullOrEmpty(this.m_strBigFileName) == false)
                 {
-                    filename_big = Path.Combine(Path.GetDirectoryName(this.m_strBigFileName), Guid.NewGuid().ToString());
-                    File.Copy(this.m_strBigFileName, filename_big, false);
+                    filename_big = this.m_strBigFileName;
                 }
 
                 if (string.IsNullOrEmpty(this.m_strSmallFileName) == false
                     && string.IsNullOrEmpty(this.m_strBigFileName) == false)
                 {
-                    filename_small = Path.Combine(Path.GetDirectoryName(this.m_strSmallFileName), Guid.NewGuid().ToString());
-                    File.Copy(this.m_strSmallFileName, filename_small, false);
+                    filename_small = this.m_strSmallFileName;
+                }
+
+                if (string.IsNullOrEmpty(this.m_strSmallFileName) == true
+    && string.IsNullOrEmpty(this.m_strBigFileName) == true)
+                {
+                    throw new Exception("源 resultset 已经被关闭，无法克隆");
                 }
 
                 DpResultSet result = new DpResultSet();
@@ -1180,16 +1225,12 @@ namespace DigitalPlatform.ResultSet
                     result.Attach(filename_big, filename_small);
                 else if (string.IsNullOrEmpty(filename_big) == false)
                     result.Attach(filename_big);
+
+                result.Sorted = this.Sorted;
                 return result;
             }
-            catch (Exception)
-            {
-                if (string.IsNullOrEmpty(filename_big) == false)
-                    File.Delete(filename_big);
-                if (string.IsNullOrEmpty(filename_small) == false)
-                    File.Delete(filename_small);
-                throw;
-            }
+            else
+                throw new ArgumentException("未知的 strStyle 值 '" + strStyle + "'");
         }
 
         public void Close()
@@ -1198,6 +1239,13 @@ namespace DigitalPlatform.ResultSet
             if (this.ReadOnly)
                 throw new Exception("readonly close triggered");
 #endif
+            if (this.ReadOnly)
+            {
+                string temp1;
+                string temp2;
+                this.Detach(out temp1, out temp2);
+                return;
+            }
 
             if (m_streamBig != null)
             {
@@ -1492,7 +1540,6 @@ namespace DigitalPlatform.ResultSet
             return lPositionOrLength;
         }
 
-
         public long GetPhysicalCount()
         {
             Debug.Assert(this.m_streamSmall != null, "");
@@ -1560,8 +1607,14 @@ namespace DigitalPlatform.ResultSet
             byte[] bufferBigOffset = new byte[8];
             bufferBigOffset = BitConverter.GetBytes((long)lBigOffset);
 
-            if (m_streamSmall.Position != nIndex * 8)  // 2012/2/15 ***
+            if (m_streamSmall.Position != nIndex * 8)
+            {
+#if FAST_SEEK
+                m_streamSmall.FastSeek(nIndex * 8);
+#else
                 m_streamSmall.Seek(nIndex * 8, SeekOrigin.Begin);
+#endif
+            }
             Debug.Assert(bufferBigOffset.Length == 8, "");
             m_streamSmall.Write(bufferBigOffset, 0, 8);
         }
@@ -1613,8 +1666,14 @@ namespace DigitalPlatform.ResultSet
                 {
                     throw (new Exception("下标越界..."));
                 }
-                if (m_streamSmall.Position != lPositionS)  // 2012/2/15 ***
+                if (m_streamSmall.Position != lPositionS)
+                {
+#if FAST_SEEK
+                    m_streamSmall.FastSeek(lPositionS);
+#else
                     m_streamSmall.Seek(lPositionS, SeekOrigin.Begin);
+#endif
+                }
                 return lPositionS;
             }
             else
@@ -1641,8 +1700,14 @@ namespace DigitalPlatform.ResultSet
                     //表示按序号找到
                     if (i == nIndex)
                     {
-                        if (m_streamSmall.Position != lPositionS)  // 2012/2/15 ***
+                        if (m_streamSmall.Position != lPositionS)
+                        {
+#if FAST_SEEK
+                            m_streamSmall.FastSeek(lPositionS);
+#else
                             m_streamSmall.Seek(lPositionS, SeekOrigin.Begin);
+#endif
+                        }
                         return lPositionS;
                     }
                     i++;
@@ -1692,8 +1757,14 @@ namespace DigitalPlatform.ResultSet
                 //return null;
             }
 
-            if (m_streamBig.Position != lBigOffset)  // 2012/2/15 ***
+            if (m_streamBig.Position != lBigOffset)
+            {
+#if FAST_SEEK
+                m_streamBig.FastSeek(lBigOffset);
+#else
                 m_streamBig.Seek(lBigOffset, SeekOrigin.Begin);
+#endif
+            }
             //长度字节数组
             byte[] bufferLength = new byte[4];
             int n = m_streamBig.Read(bufferLength, 0, 4);
@@ -1791,8 +1862,15 @@ namespace DigitalPlatform.ResultSet
         // 从大文件中得到下一条记录的地址，不算被打删除标记的记录
         public long GetNextOffsetOfBigFile(long lPos)
         {
-            if (m_streamBig.Position != lPos)  // 2012/2/15 ***
+            if (m_streamBig.Position != lPos)
+            {
+#if FAST_SEEK
+                m_streamBig.FastSeek(lPos);
+#else
                 m_streamBig.Seek(lPos, SeekOrigin.Begin);
+#endif
+            }
+
             long lOffset = lPos;
 
             int nLength;
@@ -1832,6 +1910,7 @@ namespace DigitalPlatform.ResultSet
         {
             if (m_streamBig.Position != 0)  // 2012/2/15 ***
                 m_streamBig.Seek(0, SeekOrigin.Begin);
+
             long lBigOffset = 0;
 
             int nLength;
@@ -1908,7 +1987,6 @@ namespace DigitalPlatform.ResultSet
                     return null;
             }
             record = GetRecordByOffset(lBigOffset);
-
             return record;
         }
 
@@ -2220,8 +2298,14 @@ namespace DigitalPlatform.ResultSet
             }
             else
             {
-                if (m_streamBig.Position != lOffset)    // 2012/2/15 ***
+                if (m_streamBig.Position != lOffset)
+                {
+#if FAST_SEEK
+                    m_streamBig.FastSeek(lOffset);
+#else
                     m_streamBig.Seek(lOffset, SeekOrigin.Begin);
+#endif
+                }
 
                 //长度字节数组
                 byte[] bufferLength = new byte[4];
@@ -2292,8 +2376,14 @@ namespace DigitalPlatform.ResultSet
                 return System.BitConverter.ToInt64(bufferOffset, 0);
             }
 
-            if (m_streamSmall.Position != nIndex * 8)    // 2012/2/15 ***
+            if (m_streamSmall.Position != nIndex * 8)
+            {
+#if FAST_SEEK
+                m_streamSmall.FastSeek(nIndex * 8);
+#else
                 m_streamSmall.Seek(nIndex * 8, SeekOrigin.Begin);
+#endif
+            }
 
             int n = m_streamSmall.Read(bufferOffset, 0, 8);
             if (n <= 0)
@@ -2314,8 +2404,10 @@ namespace DigitalPlatform.ResultSet
             Debug.Assert(this.m_streamBig != null, "");
 
             CreateIndex();
+
             if (m_streamBig.Position != 0)  // 2012/2/15 ***
                 m_streamBig.Seek(0, SeekOrigin.Begin);
+
             m_streamSmall.Seek(0, SeekOrigin.End);
 
             int i = 0;
@@ -2328,7 +2420,6 @@ namespace DigitalPlatform.ResultSet
                 int n = m_streamBig.Read(bufferLength, 0, 4);
                 if (n < 4)   //表示文件到尾
                     break;
-
 
                 nLength = System.BitConverter.ToInt32(bufferLength, 0);
                 if (nLength < 0)  //删除项
@@ -2345,7 +2436,6 @@ namespace DigitalPlatform.ResultSet
                 m_streamSmall.Write(bufferOffset, 0, 8);
 
             CONTINUE:
-
                 m_streamBig.Seek(nLength, SeekOrigin.Current);
                 lPosition += (4 + nLength);
             }
@@ -2353,7 +2443,7 @@ namespace DigitalPlatform.ResultSet
             return 0;
         }
 
-        //排序
+        // 排序
         public void Sort()
         {
             if (this.Count <= 1)
@@ -2363,9 +2453,17 @@ namespace DigitalPlatform.ResultSet
                 return;
             }
 
+            if (this.ReadOnly)
+                throw new Exception("只读的结果集不允许发生修改");
+
             DateTime start_time = DateTime.Now;
 
-            CreateSmallFile();
+            if (this.m_streamSmall != null)
+            {
+                //  已经有了小文件，就不要再创建了
+            }
+            else
+                CreateSmallFile();
 
             TimeSpan delta = DateTime.Now - start_time;
             Debug.WriteLine("CreateSmallFile() 耗时 " + delta.ToString());
@@ -2558,6 +2656,7 @@ namespace DigitalPlatform.ResultSet
 
             if (oStream.Position != 0)  // 2012/2/15 ***
                 oStream.Seek(0, SeekOrigin.Begin);
+
             lCount = oStream.Length / 8;
             for (long i = 0; i < lCount; i++)
             {
@@ -2589,8 +2688,14 @@ namespace DigitalPlatform.ResultSet
                         lRestLength,
                         oStream.Position - 8);
 
-                    if (oStream.Position != lSavePosition - 8)  // 2012/2/15 ***
+                    if (oStream.Position != lSavePosition - 8)
+                    {
+#if FAST_SEEK
+                        oStream.FastSeek(lSavePosition - 8);
+#else
                         oStream.Seek(lSavePosition - 8, SeekOrigin.Begin);
+#endif
+                    }
 
                     lDeleted++;
                 }
@@ -2732,6 +2837,7 @@ namespace DigitalPlatform.ResultSet
         {
             if (m_streamBig.Position != 0)  // 2012/2/15 ***
                 m_streamBig.Seek(0, SeekOrigin.Begin);
+
             long lBigOffset = 0;
 
             int nLength;
@@ -2807,8 +2913,15 @@ namespace DigitalPlatform.ResultSet
                 //return null;
             }
 
-            if (m_streamBig.Position != lBigOffset)  // 2012/2/15 ***
+            if (m_streamBig.Position != lBigOffset)
+            {
+#if FAST_SEEK
+                m_streamBig.FastSeek(lBigOffset);
+#else
                 m_streamBig.Seek(lBigOffset, SeekOrigin.Begin);
+#endif
+            }
+
             //长度字节数组
             byte[] bufferLength = new byte[4];
             int n = m_streamBig.Read(bufferLength, 0, 4);
@@ -2921,8 +3034,15 @@ namespace DigitalPlatform.ResultSet
                     m_streamSmall.Length - lStart,
                     lStart + 8);
 
-                if (m_streamSmall.Position != lStart)  // 2012/2/15 ***
+                if (m_streamSmall.Position != lStart)
+                {
+#if FAST_SEEK
+                    m_streamSmall.FastSeek(lStart);
+#else
                     m_streamSmall.Seek(lStart, SeekOrigin.Begin);
+#endif
+                }
+
                 long nPosition = m_streamBig.Position;
 
                 byte[] bufferPosition = new byte[8];
@@ -3152,7 +3272,6 @@ namespace DigitalPlatform.ResultSet
                 return;
             }
 
-
             pMiddle = GetBigOffsetBySmall(nMiddle);   //GetRowPtr(nMiddle);
 
             nRet = this.Asc * Compare(pStart, pEnd);
@@ -3251,8 +3370,14 @@ namespace DigitalPlatform.ResultSet
             }
 
             //覆盖值
-            if (m_streamSmall.Position != nIndex * 8)  // 2012/2/15 ***
+            if (m_streamSmall.Position != nIndex * 8)
+            {
+#if FAST_SEEK
+                m_streamSmall.FastSeek(nIndex * 8);
+#else
                 m_streamSmall.Seek(nIndex * 8, SeekOrigin.Begin);
+#endif
+            }
 
             Debug.Assert(bufferOffset.Length == 8, "");
             m_streamSmall.Write(bufferOffset, 0, 8);

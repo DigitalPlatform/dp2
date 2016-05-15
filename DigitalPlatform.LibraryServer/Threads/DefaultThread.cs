@@ -31,6 +31,7 @@ namespace DigitalPlatform.LibraryServer
         int m_nRetryAfterMinutes = 5;   // 每间隔多少分钟以后重试一次
 
         int _createLocationResultsetCount = 0;
+        DateTime _locationResultsetLastTime = new DateTime(0);  // 最近一次执行结果集更新的时间
 
         // 一次操作循环
         public override void Worker()
@@ -39,10 +40,21 @@ namespace DigitalPlatform.LibraryServer
             if (_createLocationResultsetCount == 0)
             {
                 this.App.StartCreateLocationResultset("");
+                _locationResultsetLastTime = DateTime.Now;
                 _createLocationResultsetCount++;
             }
             else
             {
+                // 每隔 24 小时自动启动执行一次
+                // TODO: 有可能每次都在每天的同一小时开始执行，如果这正好是每日繁忙时段就不理想了。一个办法是可以定义每日定时时间；另外一个做法是增加一点随机性，不是正好 24 小时间隔
+                if (DateTime.Now - _locationResultsetLastTime > new TimeSpan(25,0,0)
+                    || this.App.NeedRebuildResultset() == true)
+                {
+                    this.App.StartCreateLocationResultset("");
+                    _locationResultsetLastTime = DateTime.Now;
+                }
+
+                // 促使累积的请求执行
                 this.App.StartCreateLocationResultset(null);
                 _createLocationResultsetCount++;
             }

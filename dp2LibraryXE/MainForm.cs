@@ -3265,6 +3265,26 @@ this.Font);
             }
         }
 
+        // 如果必要，重新启动 dp2kernel
+        void RestartDp2kernelIfNeed()
+        {
+            dp2Kernel_stop();
+
+            // 重新启动
+            if (kernel_host == null)
+            {
+                string strError = "";
+                int nRet = dp2Kernel_start(
+                    false,
+                    out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, "重新启动 dp2Kernel 时出错：" + strError);
+                    return;
+                }
+            }
+        }
+
         // 从安装包更新数据目录中的配置文件
         private void MenuItem_updateDataDir_Click(object sender, EventArgs e)
         {
@@ -4764,6 +4784,11 @@ Stack:
         private void MenuItem_restartDp2library_Click(object sender, EventArgs e)
         {
             RestartDp2libraryIfNeed();
+        }
+
+        private void MenuItem_restartDp2Kernel_Click(object sender, EventArgs e)
+        {
+            RestartDp2kernelIfNeed();
         }
     }
 

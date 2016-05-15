@@ -2687,6 +2687,8 @@ System.Text.Encoding.UTF8))
                 strXml = "<group>" + strXml + "</group>";
             }
 
+            // TODO: 增加 strLocationFilter 功能
+
             return 1;
         }
 

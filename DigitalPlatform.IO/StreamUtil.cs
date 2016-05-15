@@ -1,25 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 
 namespace DigitalPlatform.IO
 {
+    public static class StreamExtention
+    {
+        public static void FastSeek(this Stream stream, long lOffset)
+        {
+            long delta1 = lOffset - stream.Position;
+#if NO
+            if (delta1 < 0)
+                delta1 = -delta1;
+#endif
+            if (Math.Abs(delta1) < lOffset)
+            {
+                stream.Seek(delta1, SeekOrigin.Current);
+                Debug.Assert(stream.Position == lOffset, "");
+            }
+            else
+                stream.Seek(lOffset, SeekOrigin.Begin);
+        }
+    }
     /// <remarks>
     /// StreamUtil类，Stream功能扩展函数
     /// </remarks>
     public class StreamUtil
     {
+        // 2016/5/14 修正 Bug。
         // 快速移动文件指针到相对于文件头部的 lOffset 位置
         // 根据要 seek 到的位置距离当前位置和文件头的远近，选择近的起点来进行移动
         public static void FastSeek(Stream stream, long lOffset)
         {
             long delta1 = lOffset - stream.Position;
+#if NO
             if (delta1 < 0)
                 delta1 = -delta1;
-            if (delta1 < lOffset)
+#endif
+            if (Math.Abs(delta1) < lOffset)
+            {
                 stream.Seek(delta1, SeekOrigin.Current);
+                Debug.Assert(stream.Position == lOffset, "");
+            }
             else
                 stream.Seek(lOffset, SeekOrigin.Begin);
         }

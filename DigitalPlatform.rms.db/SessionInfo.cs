@@ -170,6 +170,8 @@ namespace DigitalPlatform.rms
         }
 
         // 把结果集归入容器管理
+        // parameters:
+        //      resultset   结果集对象。如果为 null，实际上效果是删除这个结果集条目
         public void SetResultSet1(string strResultSetName,
             DpResultSet resultset)
         {
@@ -184,7 +186,10 @@ namespace DigitalPlatform.rms
             if (exist_resultset == resultset)
                 return; //  exist_resultset;
 
-            this.ResultSets[strResultSetName] = resultset;
+            if (resultset == null)
+                this.ResultSets.Remove(strResultSetName);
+            else
+                this.ResultSets[strResultSetName] = resultset;
             /*
             resultset.GetTempFilename -= new GetTempFilenameEventHandler(resultset_GetTempFilename);
             resultset.GetTempFilename += new GetTempFilenameEventHandler(resultset_GetTempFilename);
@@ -685,7 +690,6 @@ out strError);
 
             return resultSet.Count;
         }
-
 
         // 获得一条记录的 XML 字符串
         // return:

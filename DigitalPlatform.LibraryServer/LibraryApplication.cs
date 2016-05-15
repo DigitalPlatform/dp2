@@ -114,7 +114,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.69 (2016/1/29) 各个 API 都对读者身份加强了检查，防止出现权限漏洞。
         //      2.70 (2016/4/10) 增加 MSMQ 消息队列功能，读者记录的修改、dp2mail 消息都自动发送到这个消息队列。dp2library 失效日期从 5.1 变为 7.1。ReadersMonitor 后台任务会自动给没有 refID 元素的读者记录增加此元素
         //      2.71 (2016/4/15) 对各个环节的密码相关功能进行加固。GetReaderInfo() API 不会返回 password 元素；GetOperLog() GetOperLogs() API 会滤除各种密码
-        public static string Version = "2.71";
+        //      2.72 (2016/5/14) SearchBiblio() API 支持按照馆代码筛选
+        public static string Version = "2.72";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -1311,6 +1312,25 @@ namespace DigitalPlatform.LibraryServer
                         app.WriteErrorLog("ERR002 首次初始化 mongodb database 失败: " + strError);
                     }
 
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: 准备下属数据库对象");
+#endif
+                    //
+                    this.IssueItemDatabase = new IssueItemDatabase(this);
+                    this.OrderItemDatabase = new OrderItemDatabase(this);
+                    this.CommentItemDatabase = new CommentItemDatabase(this);
+
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: MessageCenter");
+#endif
+                    // 
+                    this.MessageCenter = new MessageCenter();
+                    this.MessageCenter.ServerUrl = this.WsUrl;
+                    this.MessageCenter.MessageDbName = this.MessageDbName;
+
+                    this.MessageCenter.VerifyAccount -= new VerifyAccountEventHandler(MessageCenter_VerifyAccount); // 2008/6/6 
+                    this.MessageCenter.VerifyAccount += new VerifyAccountEventHandler(MessageCenter_VerifyAccount);
+
                     if (this.BatchTasks == null)
                         this.BatchTasks = new BatchTaskCollection();    // Close() 的时候会设置为 null。因此这里要准备重新 new
 
@@ -1632,24 +1652,6 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: 准备下属数据库对象");
-#endif
-                    //
-                    this.IssueItemDatabase = new IssueItemDatabase(this);
-                    this.OrderItemDatabase = new OrderItemDatabase(this);
-                    this.CommentItemDatabase = new CommentItemDatabase(this);
-
-#if LOG_INFO
-                    app.WriteErrorLog("INFO: MessageCenter");
-#endif
-                    // 
-                    this.MessageCenter = new MessageCenter();
-                    this.MessageCenter.ServerUrl = this.WsUrl;
-                    this.MessageCenter.MessageDbName = this.MessageDbName;
-
-                    this.MessageCenter.VerifyAccount -= new VerifyAccountEventHandler(MessageCenter_VerifyAccount); // 2008/6/6 
-                    this.MessageCenter.VerifyAccount += new VerifyAccountEventHandler(MessageCenter_VerifyAccount);
 
 #if NO
             if (bReload == false)
@@ -1806,7 +1808,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 Version version = new Version(strVersion);
-                Version base_version = new Version("2.64");
+                Version base_version = new Version("2.65");
                 if (version.CompareTo(base_version) < 0)
                 {
                     strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + version + ")。请立即升级 dp2Kernel 到最新版本。";
@@ -3470,8 +3472,12 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        internal CancellationTokenSource _app_down = new CancellationTokenSource();
+
         public void Close()
         {
+            _app_down.Cancel();
+
             this.EndWather();
 
             //this.HangupReason = LibraryServer.HangupReason.Exit;    // 阻止后继 API 访问

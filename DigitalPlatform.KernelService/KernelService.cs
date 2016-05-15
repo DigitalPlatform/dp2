@@ -322,11 +322,12 @@ namespace dp2Kernel
         //      2.62 2015/11/14 GetBrowse() API 允许获得对象记录的 metadata 和 timestamp
         //      2.63 2015/11/16 WriteRes() API WriteRes() API 允许通过 lTotalLength 为 -1 调用，作用是仅修改 metadata
         //      2.64 2016/1/6 MySQL 版本在删除和创建检索点的时候所使用的 SQL 语句多了一个分号。此 Bug 已经排除
+        //      2.65 2016/5/14 WriteRecords() API 支持上载结果集。XML 检索式为 item 元素增加 resultset 属性，允许已有结果集参与逻辑运算。优化 resultset[] 操作符速度。
         public Result GetVersion()
         {
             Result result = new Result();
             result.Value = 0;
-            result.ErrorString = "2.64";
+            result.ErrorString = "2.65";
             return result;
         }
 
@@ -1303,6 +1304,15 @@ namespace dp2Kernel
                     }
                     else
                         resultset = this.sessioninfo.GetResultSet(strResultSetName);
+
+                    // 2016/5/15
+                    if (resultset == null)
+                    {
+                        result.Value = -1;
+                        result.ErrorCode = ErrorCodeValue.NotFound;
+                        result.ErrorString = "结果集 '"+strResultSetName+"' 不存在";
+                        return result;
+                    }
                 }
 
                 if (bCommand == true)
@@ -1783,6 +1793,47 @@ namespace dp2Kernel
                 string strError = "";
                 int nRet = 0;
 
+                if (StringUtil.IsInList("renameResultset", strStyle) == true)
+                {
+                    DpResultSet resultSet = null;
+
+                    string strOldName = StringUtil.GetStyleParam(strStyle, "oldname");
+                    string strNewName = StringUtil.GetStyleParam(strStyle, "newname");
+                    if (KernelApplication.IsGlobalResultSetName(strOldName) == true)
+                    {
+                        if (KernelApplication.IsGlobalResultSetName(strNewName) == false)
+                        {
+                            strError = "strStyle '"+strStyle+"' 中 newname 参数值 '"+strNewName+"' 应该和 oldname 一致，为全局结果集名称形态";
+                            throw new ArgumentException(strError);
+                        }
+
+                        resultSet = app.ResultSets.GetResultSet(strOldName.Substring(1), true);
+                        app.ResultSets.RenameResultSet(strOldName.Substring(1), strNewName.Substring(1));
+                    }
+                    else
+                    {
+                        if (KernelApplication.IsGlobalResultSetName(strNewName) == true)
+                        {
+                            strError = "strStyle '" + strStyle + "' 中 newname 参数值 '" + strNewName + "' 应该和 oldname 一致，为通道结果集名称形态";
+                            throw new ArgumentException(strError);
+                        }
+
+                        resultSet = this.sessioninfo.GetResultSet(strOldName, true);
+                        this.sessioninfo.SetResultSet1(strOldName, null);
+                        this.sessioninfo.SetResultSet1(strNewName, resultSet);
+                    }
+
+                    // 设为永久属性
+                    if (StringUtil.IsInList("permanent", strStyle) == true)
+                        resultSet.Permanent = true;
+
+                    // 顺便进行排序
+                    if (StringUtil.IsInList("sort", strStyle) == true)
+                        resultSet.Sort();
+
+                    return result;
+                }
+
                 if (StringUtil.IsInList("createResultset", strStyle) == true)
                 {
                     DpResultSet resultSet = null;
@@ -1792,6 +1843,10 @@ namespace dp2Kernel
                         resultSet = app.ResultSets.GetResultSet(strResultSetName.Substring(1), true);
                     else
                         resultSet = this.sessioninfo.GetResultSet(strResultSetName, true);
+
+                    // 设为永久属性
+                    if (StringUtil.IsInList("permanent", strStyle) == true)
+                        resultSet.Permanent = true;
 
                     lock (result)
                     {
