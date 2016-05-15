@@ -1304,6 +1304,15 @@ namespace dp2Kernel
                     }
                     else
                         resultset = this.sessioninfo.GetResultSet(strResultSetName);
+
+                    // 2016/5/15
+                    if (resultset == null)
+                    {
+                        result.Value = -1;
+                        result.ErrorCode = ErrorCodeValue.NotFound;
+                        result.ErrorString = "结果集 '"+strResultSetName+"' 不存在";
+                        return result;
+                    }
                 }
 
                 if (bCommand == true)

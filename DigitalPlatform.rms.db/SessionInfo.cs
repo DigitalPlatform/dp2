@@ -691,7 +691,6 @@ out strError);
             return resultSet.Count;
         }
 
-
         // 获得一条记录的 XML 字符串
         // return:
         //		-1  出错

@@ -115,7 +115,7 @@ namespace DigitalPlatform.LibraryServer
         //      2.70 (2016/4/10) 增加 MSMQ 消息队列功能，读者记录的修改、dp2mail 消息都自动发送到这个消息队列。dp2library 失效日期从 5.1 变为 7.1。ReadersMonitor 后台任务会自动给没有 refID 元素的读者记录增加此元素
         //      2.71 (2016/4/15) 对各个环节的密码相关功能进行加固。GetReaderInfo() API 不会返回 password 元素；GetOperLog() GetOperLogs() API 会滤除各种密码
         //      2.72 (2016/5/14) SearchBiblio() API 支持按照馆代码筛选
-        public static string Version = "2.71";
+        public static string Version = "2.72";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

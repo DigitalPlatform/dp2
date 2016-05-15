@@ -116,6 +116,81 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        public bool NeedRebuildResultset()
+        {
+            lock (syncRoot_location)
+            {
+                // 任务正在执行中，放弃探测
+                if (_taskCreateLocationResultset != null)
+                    return false;
+            }
+
+            List<string> librarycodes = new List<string>();
+
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("readerdbgroup/database");
+            foreach (XmlElement node in nodes)
+            {
+                string strLibraryCode = node.GetAttribute("libraryCode");
+                if (string.IsNullOrEmpty(strLibraryCode) == true)
+                    continue;
+                librarycodes.Add(strLibraryCode);
+            }
+
+            if (librarycodes.Count == 0)
+                return false;
+
+            return !LocationResultsetExists(librarycodes[0]);
+        }
+
+        // 探测一个结果集在 dp2kernel 一侧是否已经存在
+        bool LocationResultsetExists(string strLocation)
+        {
+            string strError = "";
+
+            // 临时的SessionInfo对象
+            SessionInfo session = new SessionInfo(this);
+            try
+            {
+                this._app_down.Token.ThrowIfCancellationRequested();
+
+                RmsChannel channel = session.Channels.GetChannel(this.WsUrl);
+                if (channel == null)
+                    return false;
+
+#if DETAIL_LOG
+                this.WriteErrorLog("开始探测结果集 " + strLocation);
+#endif
+
+
+                Record[] searchresults = null;
+
+                // 获得检索结果的浏览格式
+                // 浅包装版本
+                long lHitCount = channel.DoGetSearchResult(
+                    "#" + strLocation,
+                    0,
+                    0,
+                    "id",
+                    "zh",
+                    null,
+                    out searchresults,
+                    out strError);
+                if (lHitCount == -1)
+                {
+                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        return false;
+                    return false;
+                }
+
+                return true;
+            }
+            finally
+            {
+                session.CloseSession();
+                session = null;
+            }
+        }
+
         // 创建一个馆藏地的限定结果集
         void CreateOneLocationResultset(string strLocation)
         {

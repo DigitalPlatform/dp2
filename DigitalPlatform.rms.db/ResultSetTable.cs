@@ -60,13 +60,16 @@ namespace DigitalPlatform.rms
             if (String.IsNullOrEmpty(strNewName) == true)
                 throw new ArgumentException("结果集名不应为空", "strNewName");
 
+            strOldName = strOldName.ToLower();
+            strNewName = strNewName.ToLower();
+
+            if (strOldName == strNewName)
+                throw new ArgumentException("strOldName 和 strNewName 参数值不应相同");
+
             if (this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
                 throw new ApplicationException("为 全局结果集集合 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
             try
             {
-                strOldName = strOldName.ToLower();
-                strNewName = strNewName.ToLower();
-
                 DpResultSet resultset = (DpResultSet)this[strOldName];
                 if (resultset == null)
                     return false;
@@ -74,6 +77,7 @@ namespace DigitalPlatform.rms
                 // 如果新名字存在，则要释放已有对象
                 FreeResultSet(strNewName);
                 this[strNewName] = resultset;
+                this.Remove(strOldName);
                 return true;
             }
             finally

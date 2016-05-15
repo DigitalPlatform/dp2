@@ -56,6 +56,8 @@
             this.MenuItem_test = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDp2OPACHomePage = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_getSqllocaldbexePath = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_restartDp2library = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -75,8 +77,7 @@
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_restartDp2library = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_restartDp2Kernel = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -132,7 +133,8 @@
             this.MenuItem_openDp2OPACHomePage,
             this.MenuItem_getSqllocaldbexePath,
             this.toolStripSeparator8,
-            this.MenuItem_restartDp2library});
+            this.MenuItem_restartDp2library,
+            this.MenuItem_restartDp2Kernel});
             this.MenuItem_management1.Name = "MenuItem_management1";
             this.MenuItem_management1.Size = new System.Drawing.Size(64, 21);
             this.MenuItem_management1.Text = "维护(&M)";
@@ -261,6 +263,18 @@
             this.MenuItem_getSqllocaldbexePath.Text = "get sqllocaldb.exe path";
             this.MenuItem_getSqllocaldbexePath.Visible = false;
             this.MenuItem_getSqllocaldbexePath.Click += new System.EventHandler(this.MenuItem_getSqllocaldbexePath_Click);
+            // 
+            // toolStripSeparator8
+            // 
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            this.toolStripSeparator8.Size = new System.Drawing.Size(317, 6);
+            // 
+            // MenuItem_restartDp2library
+            // 
+            this.MenuItem_restartDp2library.Name = "MenuItem_restartDp2library";
+            this.MenuItem_restartDp2library.Size = new System.Drawing.Size(320, 22);
+            this.MenuItem_restartDp2library.Text = "重新启动 dp2Library";
+            this.MenuItem_restartDp2library.Click += new System.EventHandler(this.MenuItem_restartDp2library_Click);
             // 
             // MenuItem_help
             // 
@@ -425,17 +439,12 @@
             this.webBrowser1.Size = new System.Drawing.Size(372, 229);
             this.webBrowser1.TabIndex = 7;
             // 
-            // MenuItem_restartDp2library
+            // MenuItem_restartDp2Kernel
             // 
-            this.MenuItem_restartDp2library.Name = "MenuItem_restartDp2library";
-            this.MenuItem_restartDp2library.Size = new System.Drawing.Size(320, 22);
-            this.MenuItem_restartDp2library.Text = "重新启动 dp2Library";
-            this.MenuItem_restartDp2library.Click += new System.EventHandler(this.MenuItem_restartDp2library_Click);
-            // 
-            // toolStripSeparator8
-            // 
-            this.toolStripSeparator8.Name = "toolStripSeparator8";
-            this.toolStripSeparator8.Size = new System.Drawing.Size(317, 6);
+            this.MenuItem_restartDp2Kernel.Name = "MenuItem_restartDp2Kernel";
+            this.MenuItem_restartDp2Kernel.Size = new System.Drawing.Size(320, 22);
+            this.MenuItem_restartDp2Kernel.Text = "重新启动 dp2Kernel";
+            this.MenuItem_restartDp2Kernel.Click += new System.EventHandler(this.MenuItem_restartDp2Kernel_Click);
             // 
             // MainForm
             // 
@@ -512,6 +521,7 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_getSqllocaldbexePath;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_restartDp2library;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_restartDp2Kernel;
     }
 }
 

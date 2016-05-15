@@ -7729,12 +7729,9 @@ namespace dp2Library
         {
             strMessage = "";
 
-            bool bReturnMessage = false;
-
             Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
             string strStyle = (string)parameters["style"];
-            if (StringUtil.IsInList("returnMessage", strStyle) == false)
-                bReturnMessage = true;
+            bool bReturnMessage = StringUtil.IsInList("returnMessage", strStyle);
 
             LibraryServerResult result = this.PrepareEnvironment("ResetPassword", bReturnMessage, bReturnMessage);
             if (result.Value == -1)

@@ -28,11 +28,13 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.rms.Client
 {
+#if NO
     public class dp2opacRecord
     {
         public Record Record;
         public long IndexOfResult;
     }
+#endif
 
     public enum LoginStyle
     {
@@ -52,7 +54,6 @@ namespace DigitalPlatform.rms.Client
         QuotaExceeded = 5,  // 超过通讯包尺寸配额
         OtherError = 6,	// 未翻译的错误码
 
-
         // 以下错误码和服务器对应
         TimestampMismatch = 10,	// 时间戳不匹配
         NotFound = 11,	// 未命中
@@ -69,7 +70,6 @@ namespace DigitalPlatform.rms.Client
         NotFoundSubRes = 25,    // 部分下级资源记录不存在
 
         // LoginFail = 26, // dp2library向dp2Kernel登录失败。这意味着library.xml中的代理帐户有问题
-
     }
 
     // 一个通讯通道
@@ -2544,12 +2544,13 @@ namespace DigitalPlatform.rms.Client
 
         }
 
-
+#if NO
+        // 暂时无人使用
         // 获得浏览格式记录
         // parameter:
         //		nStart	起始序号
         //		nLength	长度
-        public int GetRecords(
+        public long GetRecords(
             string strResultSetName,
             long nStart,
             long nLength,
@@ -2561,12 +2562,17 @@ namespace DigitalPlatform.rms.Client
             aRecord = new ArrayList();
 
             long nPerCount = -1;    // BUG? 这里有一点问题，可能获取过多的记录，超过nLength
+            
+            // 2016/5/15
+            if (nLength >= 0)
+                nPerCount = nLength;
 
             int nCount = 0;
             long lTotalCount = nLength;
             for (; ; )
             {
                 DoIdle(); // 出让控制权，避免CPU资源耗费过度
+        REDO:
                 try
                 {
                     IAsyncResult soapresult = this.ws.BeginGetRecords(
@@ -2577,7 +2583,6 @@ namespace DigitalPlatform.rms.Client
                         "id,cols",
                         null,
                         null);
-
                     for (; ; )
                     {
                         DoIdle(); // 出让控制权，避免CPU资源耗费过度
@@ -2597,6 +2602,30 @@ namespace DigitalPlatform.rms.Client
 
                     if (result.Value == -1)
                     {
+#if NO
+                        strError = result.ErrorString;
+                        return -1;
+#endif
+                        // 2016/5/15
+                        if (result.ErrorCode == ErrorCodeValue.NotLogin
+                                && this.Container != null)
+                        {
+                            // return:
+                            //		-1	error
+                            //		0	login failed
+                            //		1	login succeed
+                            int nRet = this.UiLogin("",
+                                out strError);
+                            if (nRet == -1 || nRet == 0)
+                            {
+                                return -1;
+                            }
+
+                            goto REDO;
+                        }
+
+                        ConvertErrorCode(result);
+
                         strError = result.ErrorString;
                         return -1;
                     }
@@ -2604,8 +2633,6 @@ namespace DigitalPlatform.rms.Client
                     {
                         if (records == null)
                             throw new Exception("WebService GetRecords() API record参数返回值不应为null");
-
-                        //lTotalCount = result.Value;
                     }
 
                     // 做事
@@ -2626,29 +2653,24 @@ namespace DigitalPlatform.rms.Client
 
                         if (lTotalCount != -1
                             && nCount >= lTotalCount)
-                            break;
+                            return result.Value;
                     }
 
                     if (lTotalCount != -1
                         && nCount >= lTotalCount)
-                        break;
+                        return result.Value;
 
                     if (nCount >= result.Value)
-                        break;
-
+                        return result.Value;
                 }
                 catch (Exception ex)
                 {
                     strError = ExceptionUtil.GetAutoText(ex);
                     return -1;
                 }
-
             } // end of for
-
-            return 0;
-
         }
-
+#endif
 
         // 获得浏览格式记录
         // parameter:
@@ -3770,7 +3792,6 @@ namespace DigitalPlatform.rms.Client
                     }
 
                     ConvertErrorCode(result);
-
                     strError = result.ErrorString;
                     return -1;
                 }
@@ -3779,25 +3800,12 @@ namespace DigitalPlatform.rms.Client
                     // Debug.Assert(records != null, "WebService GetRecords() API record参数返回值不应为null");
                 }
 
-#if NO
-                // 将结果移出
-                searchresults = new Record[records.Length]; // SearchResult
-                for (int i = 0; i < records.Length; i++)
-                {
-                    searchresults[i] = records[i];
-                }
-#endif
-
                 this.ClearRedoCount();
                 return result.Value;    // 结果集内总数
             }
-
             catch (Exception ex)
             {
-                /*
-                strError = ConvertWebError(ex);
-                return -1;
-                 * */
+
                 int nRet = ConvertWebError(ex, out strError);
                 if (nRet == 0)
                     return -1;

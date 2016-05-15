@@ -47,7 +47,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 每隔 24 小时自动启动执行一次
                 // TODO: 有可能每次都在每天的同一小时开始执行，如果这正好是每日繁忙时段就不理想了。一个办法是可以定义每日定时时间；另外一个做法是增加一点随机性，不是正好 24 小时间隔
-                if (DateTime.Now - _locationResultsetLastTime > new TimeSpan(25,0,0))
+                if (DateTime.Now - _locationResultsetLastTime > new TimeSpan(25,0,0)
+                    || this.App.NeedRebuildResultset() == true)
                 {
                     this.App.StartCreateLocationResultset("");
                     _locationResultsetLastTime = DateTime.Now;
