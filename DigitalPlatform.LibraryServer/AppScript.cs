@@ -1511,7 +1511,15 @@ namespace DigitalPlatform.LibraryServer
             foreach (string s in left)
             {
                 if (Array.IndexOf<string>(right, s) == -1)
+                {
+                    if (StringUtil.HasHead(s, "level-") == true)
+                    {
+                        if (LibraryApplication.HasLevel(s, right) == true)
+                            continue;
+                    }
+
                     warning_rights.Add(s);
+                }
             }
 
             if (warning_rights.Count > 0)

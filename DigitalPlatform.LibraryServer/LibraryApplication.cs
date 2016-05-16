@@ -14111,7 +14111,7 @@ strLibraryCode);    // 读者所在的馆代码
         }
 
         // strList 中是否包含了高于或者等于 strLevel 要求的字符串?
-        static bool HasLevel(string strLevel, string[] list)
+        public static bool HasLevel(string strLevel, string[] list)
         {
             int level = GetLevelNumber(strLevel);
 

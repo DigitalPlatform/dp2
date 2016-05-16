@@ -575,15 +575,6 @@ namespace DigitalPlatform.OPAC.Web
 
         void CreateResultLine(PlaceHolder line)
         {
-
-            /*
-            line.Controls.Add(new LiteralControl("<tr class='resultline'><td colspan='13'>"));
-            LiteralControl literal = new LiteralControl();
-            literal.ID = "resultinfo";
-            literal.Text = "";
-            line.Controls.Add(literal);
-            line.Controls.Add(new LiteralControl("</td></tr>"));
-             * */
             TableRow row = new TableRow();
             row.CssClass = "resultline";
             line.Controls.Add(row);
@@ -807,7 +798,6 @@ namespace DigitalPlatform.OPAC.Web
                 nSearchMaxResultCount,
                 out es.QueryXml,
                 out strError);
-
             if (nRet == -1)
             {
                 this.Page.Response.Write(HttpUtility.HtmlEncode(strError));
@@ -860,6 +850,11 @@ namespace DigitalPlatform.OPAC.Web
         {
             strError = "";
             strXml = "";
+
+            string strLocationFilter = this.Location;  // (string)this.Page.Session["librarycode"];
+            if (string.IsNullOrEmpty(strLocationFilter) == false
+                && nMaxCount != -1)
+                nMaxCount *= 10;    // 在有馆藏地过滤的情况下把极限值放大十倍 2016/5/15
 
             bool bSimple = false;
             if ((this.SearchPanelStyle & SearchPanelStyle.Advance) == 0
@@ -1132,10 +1127,9 @@ namespace DigitalPlatform.OPAC.Web
                 return -1;
             }
 
-            string strLibraryCode = this.Location;  // (string)this.Page.Session["librarycode"];
-            if (string.IsNullOrEmpty(strLibraryCode) == false)
+            if (string.IsNullOrEmpty(strLocationFilter) == false)
             {
-                string strLocationQueryXml = "<item resultset='#" + strLibraryCode + "' />";
+                string strLocationQueryXml = "<item resultset='#" + strLocationFilter + "' />";
                 strXml = "<group>" + strXml + "<operator value='AND'/>" + strLocationQueryXml + "</group>";
             }
 
