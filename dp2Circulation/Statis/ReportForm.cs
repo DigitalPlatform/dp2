@@ -341,7 +341,7 @@ namespace dp2Circulation
                                 string strText = strError;
                                 this.Invoke((Action)(() =>
                                 {
-                                    MessageBox.Show(this,
+                                    result = MessageBox.Show(this,
      strText + "\r\n\r\n是否跳过此条记录继续处理?",
      "ReportForm",
      MessageBoxButtons.YesNo,
@@ -6871,7 +6871,6 @@ MessageBoxDefaultButton.Button2);
                 MessageBox.Show(this, strError);
             }));
         }
-
 
         void SetStartButtonStates()
         {

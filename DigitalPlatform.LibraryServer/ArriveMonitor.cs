@@ -5,12 +5,12 @@ using System.Threading;
 using System.Xml;
 using System.Diagnostics;
 using System.Web;
+using System.Collections;
 
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.Collections;
 
 
 namespace DigitalPlatform.LibraryServer
@@ -19,8 +19,7 @@ namespace DigitalPlatform.LibraryServer
     /// 荐购到书通知也在这里进行
     public class ArriveMonitor : BatchTask
     {
-
-        public ArriveMonitor(LibraryApplication app, 
+        public ArriveMonitor(LibraryApplication app,
             string strName)
             : base(app, strName)
         {
@@ -93,12 +92,12 @@ namespace DigitalPlatform.LibraryServer
                 // 如果nRet == 0，表示没有断点文件存在，也就没有必要的参数来启动这个任务
                 if (nRet == 0)
                 {
-                    strError = "当前服务器没有发现 "+this.DefaultName+" 断点信息，无法启动任务";
+                    strError = "当前服务器没有发现 " + this.DefaultName + " 断点信息，无法启动任务";
                     return -1;
                 }
 
                 Debug.Assert(nRet == 1, "");
-                this.AppendResultText("服务器记忆的 "+this.DefaultName+" 上次断点字符串为: "
+                this.AppendResultText("服务器记忆的 " + this.DefaultName + " 上次断点字符串为: "
                     + HttpUtility.HtmlEncode(strStart)
                     + "\r\n");
 
@@ -137,7 +136,6 @@ namespace DigitalPlatform.LibraryServer
             return dom.OuterXml;
         }
 
-
         // 解析通用启动参数
         // 格式
         /*
@@ -156,7 +154,6 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
 
             XmlDocument dom = new XmlDocument();
-
             try
             {
                 dom.LoadXml(strParam);
@@ -194,19 +191,6 @@ namespace DigitalPlatform.LibraryServer
             bool bFirst = true;
             string strError = "";
             int nRet = 0;
-
-            /*
-            // 代为刷新
-            if (this.App.Statis != null)
-            {
-                this.App.Statis.Flush();
-
-                // 2008/3/27 
-                if (this.App.Changed == true)
-                {
-                    this.App.Flush();
-                }
-            }*/
 
             BatchTaskStartInfo startinfo = this.StartInfo;
             if (startinfo == null)
@@ -320,7 +304,7 @@ namespace DigitalPlatform.LibraryServer
             this._calendarTable.Clear();
 
             int nRecCount = 0;
-            for (; ; nRecCount ++)
+            for (; ; nRecCount++)
             {
 #if NO
                 // 系统挂起的时候，不运行本线程
@@ -427,7 +411,6 @@ namespace DigitalPlatform.LibraryServer
 
             CONTINUE:
                 continue;
-
             } // end of for
 
             this.AppendResultText("循环结束。共处理 " + nRecCount.ToString() + " 条记录。\r\n");
@@ -641,7 +624,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "装载对列记录XML到DOM出错: " + ex.Message;
+                strError = "装载队列记录 XML 到 DOM 出错: " + ex.Message;
                 return -1;
             }
 
@@ -745,7 +728,7 @@ namespace DigitalPlatform.LibraryServer
                 string strNotifyDate = DomUtil.GetElementText(dom.DocumentElement,
                     "notifyDate");
                 nRet = AddReaderOutOfReservationInfo(
-                        // this.RmsChannels,
+                    // this.RmsChannels,
                         channel,
                         strReaderBarcode,
                         strItemBarcode,
@@ -758,7 +741,7 @@ namespace DigitalPlatform.LibraryServer
 
                 // 已经超过保留期限，要通知下一位预约者
                 nRet = this.App.DoNotifyNext(
-                        // this.RmsChannels,
+                    // this.RmsChannels,
                         channel,
                         strQueueRecPath,
                         dom,
@@ -801,7 +784,7 @@ namespace DigitalPlatform.LibraryServer
 
             int nRedoCount = 0;
 
-            REDO_MEMO:
+        REDO_MEMO:
             // 加读者记录锁
 #if DEBUG_LOCK_READER
             this.App.WriteErrorLog("AddReaderOutOfReservationInfo 开始为读者加写锁 '" + strReaderBarcode + "'");

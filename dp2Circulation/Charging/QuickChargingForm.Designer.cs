@@ -81,6 +81,8 @@
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_inventoryFromFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton_selectLibraryCode = new System.Windows.Forms.ToolStripDropDownButton();
+            this.contextMenuStrip_testFunction = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem_test_simulateReservationArrive = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_selectFunc.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -90,6 +92,7 @@
             this.panel_input.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_action)).BeginInit();
             this.toolStrip_main.SuspendLayout();
+            this.contextMenuStrip_testFunction.SuspendLayout();
             this.SuspendLayout();
             // 
             // imageList_barcodeType
@@ -355,6 +358,7 @@
             // 
             // label_barcode_type
             // 
+            this.label_barcode_type.ContextMenuStrip = this.contextMenuStrip_testFunction;
             this.label_barcode_type.ImageIndex = 0;
             this.label_barcode_type.ImageList = this.imageList_barcodeType;
             this.label_barcode_type.Location = new System.Drawing.Point(-2, 6);
@@ -520,6 +524,20 @@
             this.toolStripDropDownButton_selectLibraryCode.ToolTipText = "选择当前操作所针对的分馆";
             this.toolStripDropDownButton_selectLibraryCode.Visible = false;
             // 
+            // contextMenuStrip_testFunction
+            // 
+            this.contextMenuStrip_testFunction.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem_test_simulateReservationArrive});
+            this.contextMenuStrip_testFunction.Name = "contextMenuStrip_testFunction";
+            this.contextMenuStrip_testFunction.Size = new System.Drawing.Size(153, 48);
+            // 
+            // toolStripMenuItem_test_simulateReservationArrive
+            // 
+            this.toolStripMenuItem_test_simulateReservationArrive.Name = "toolStripMenuItem_test_simulateReservationArrive";
+            this.toolStripMenuItem_test_simulateReservationArrive.Size = new System.Drawing.Size(152, 22);
+            this.toolStripMenuItem_test_simulateReservationArrive.Text = "模拟预约到书";
+            this.toolStripMenuItem_test_simulateReservationArrive.Click += new System.EventHandler(this.toolStripMenuItem_test_simulateReservationArrive_Click);
+            // 
             // QuickChargingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -548,6 +566,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_action)).EndInit();
             this.toolStrip_main.ResumeLayout(false);
             this.toolStrip_main.PerformLayout();
+            this.contextMenuStrip_testFunction.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -595,5 +614,7 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_inventoryFromFile;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_read;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_selectLibraryCode;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip_testFunction;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_test_simulateReservationArrive;
     }
 }

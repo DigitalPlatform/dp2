@@ -1400,7 +1400,8 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
 
         delegate void Delegate_DoAction(FuncState func,
             string strText,
-            string strTaskID);
+            string strTaskID,
+            string strParameters);
         // //
         /// <summary>
         /// 执行一个出纳动作。
@@ -1411,10 +1412,11 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
         /// <param name="strTaskID">任务 ID，用于管理和查询任务状态</param>
         public void AsyncDoAction(FuncState func,
             string strText,
-            string strTaskID = "")
+            string strTaskID = "",
+            string strParameters = "")
         {
             Delegate_DoAction d = new Delegate_DoAction(_doAction);
-            this.BeginInvoke(d, new object[] { func, strText, strTaskID });
+            this.BeginInvoke(d, new object[] { func, strText, strTaskID, strParameters });
         }
 
         // 盘算是否为 ISBN 字符串
@@ -1489,9 +1491,11 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
 
         // parameters:
         //      strTaskID   任务 ID，用于管理和查询任务状态
+        //      strParameters   附加的参数。可用于描述测试要求
         void _doAction(FuncState func,
             string strText,
-            string strTaskID)
+            string strTaskID,
+            string strParameters)
         {
             if (string.IsNullOrEmpty(strText) == true)
             {
@@ -1670,6 +1674,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             {
                 task.ItemBarcode = strText;
                 task.Action = "return";
+                task.Parameters = strParameters;
             }
             else if (func == dp2Circulation.FuncState.InventoryBook)
             {
@@ -1691,11 +1696,13 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
                 task.ItemBarcode = strText;
                 task.Action = "verify_return";
+                task.Parameters = strParameters;
             }
             else if (func == dp2Circulation.FuncState.Lost)
             {
                 task.ItemBarcode = strText;
                 task.Action = "lost";
+                task.Parameters = strParameters;
             }
             else if (func == dp2Circulation.FuncState.VerifyLost)
             {
@@ -1710,6 +1717,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
                 task.ItemBarcode = strText;
                 task.Action = "verify_lost";
+                task.Parameters = strParameters;
             }
             else if (func == dp2Circulation.FuncState.Read)
             {
@@ -3568,7 +3576,20 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
             return 0;
         }
 
-
+        // 模拟预约到书
+        private void toolStripMenuItem_test_simulateReservationArrive_Click(object sender, EventArgs e)
+        {
+            if (this.FuncState == dp2Circulation.FuncState.Return
+                || this.FuncState == dp2Circulation.FuncState.VerifyReturn
+                || this.FuncState == dp2Circulation.FuncState.Lost
+                || this.FuncState == dp2Circulation.FuncState.VerifyLost)
+                AsyncDoAction(this.FuncState,
+                    GetUpperCase(this.textBox_input.Text),
+                    "",
+                    "simulate_reservation_arrive");
+            else
+                MessageBox.Show(this, "此功能必须和还书、丢失功能配套使用");
+        }
     }
 
     /// <summary>

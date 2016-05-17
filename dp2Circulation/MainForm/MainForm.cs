@@ -7295,6 +7295,12 @@ Keys keyData)
 
         void SetTitle()
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(SetTitle));
+                return;
+            }
+
             if (this.TestMode == true)
                 this.Text = "dp2Circulation V2 -- 内务 [评估模式]";
             else if (this.CommunityMode == true)

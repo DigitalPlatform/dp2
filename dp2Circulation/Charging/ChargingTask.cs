@@ -26,6 +26,7 @@ namespace dp2Circulation
         public string ReaderBarcode = "";
         public string ItemBarcode = "";
         public string Action = "";  // load_reader_info borrow return lost renew
+        public string Parameters = "";  // 附加的参数。simulate_reservation_arrive 等
         public string State = "";   // 空 / begin / finish / error
         public string Color = "";   // 颜色
         public string ErrorInfo = "";   // 出错信息
@@ -1046,6 +1047,9 @@ end_time);
 
             if (this.Container.MainForm.ChargingNeedReturnItemXml)
                 strStyle += ",item";
+
+            if (string.IsNullOrEmpty(task.Parameters) == false)
+                strStyle += "," + task.Parameters;
 
 #if NO
             if (strAction == "inventory")

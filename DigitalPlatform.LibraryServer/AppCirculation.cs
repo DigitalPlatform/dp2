@@ -5003,6 +5003,17 @@ start_time_1,
 
                     DateTime start_time_reservation_check = DateTime.Now;
 
+                    if (StringUtil.IsInList("simulate_reservation_arrive", strStyle))
+                    {
+                        // 模拟预约情况
+                        nRet = SimulateReservation(
+                            ref readerdom,
+                            ref itemdom,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+
                     // 察看本册预约情况, 并进行初步处理
                     // 如果为丢失处理，需要通知等待者，书已经丢失了，不用再等待
                     // return:
@@ -13176,6 +13187,61 @@ out string strError)
             return_info.BookType = DomUtil.GetElementText(item_dom.DocumentElement, "bookType");
             // return_info.Location = StringUtil.GetPureLocation(DomUtil.GetElementText(item_dom.DocumentElement, "location"));
             return_info.Location = DomUtil.GetElementText(item_dom.DocumentElement, "location");    // 可能会携带 #reservatoin, 部分
+        }
+
+        // 模拟预约情况
+        int SimulateReservation(
+            ref XmlDocument readerdom,
+            ref XmlDocument itemdom,
+            out string strError)
+        {
+            strError = "";
+
+            string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
+                "barcode");
+            if (string.IsNullOrEmpty(strReaderBarcode))
+            {
+                strReaderBarcode = "@refID:" + DomUtil.GetElementText(readerdom.DocumentElement,
+                    "refID");
+            }
+
+            string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
+                "barcode");
+            if (string.IsNullOrEmpty(strItemBarcode))
+            {
+                strItemBarcode = "@refID:" + DomUtil.GetElementText(itemdom.DocumentElement,
+                    "refID");
+            }
+
+            {
+                XmlElement reservations = itemdom.DocumentElement.SelectSingleNode("reservations") as XmlElement;
+                if (reservations == null)
+                {
+                    reservations = itemdom.CreateElement("reservations");
+                    itemdom.DocumentElement.AppendChild(reservations);
+                }
+
+                XmlElement request = itemdom.CreateElement("request");
+                reservations.AppendChild(request);
+
+                request.SetAttribute("reader", strReaderBarcode);
+            }
+
+            {
+                XmlElement reservations = readerdom.DocumentElement.SelectSingleNode("reservations") as XmlElement;
+                if (reservations == null)
+                {
+                    reservations = readerdom.CreateElement("reservations");
+                    readerdom.DocumentElement.AppendChild(reservations);
+                }
+
+                XmlElement request = readerdom.CreateElement("request");
+                reservations.AppendChild(request);
+
+                request.SetAttribute("items", strItemBarcode);
+            }
+
+            return 0;
         }
 
         // 还书后对册记录中的预约信息进行检查和处理
