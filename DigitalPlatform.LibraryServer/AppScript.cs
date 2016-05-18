@@ -1510,6 +1510,10 @@ namespace DigitalPlatform.LibraryServer
 
             foreach (string s in left)
             {
+                if (string.IsNullOrEmpty(s) == false
+                    && s[0] == '_')
+                    continue;
+
                 if (Array.IndexOf<string>(right, s) == -1)
                 {
                     if (StringUtil.HasHead(s, "level-") == true)
@@ -1939,7 +1943,6 @@ namespace DigitalPlatform.LibraryServer
             // out List<string> wantNotifyBarcodes,
             out string strError)
         {
-
             if (strBodyType == "sms")
             {
                 return NotifyReaderSMS(
@@ -2261,6 +2264,9 @@ namespace DigitalPlatform.LibraryServer
             XmlElement items = output_dom.CreateElement("items");
             output_dom.DocumentElement.AppendChild(items);
 
+            string strRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
+            bool bTestNotify = (StringUtil.IsInList("_testoverduenotify", strRights) == true);
+
             strResult += "您借阅的下列书刊：\n";
 
             // 借阅的册
@@ -2285,21 +2291,36 @@ namespace DigitalPlatform.LibraryServer
                     long lOver = 0;
                     string strPeriodUnit = "";
 
-                    // 获得还书日期
-                    // return:
-                    //      -1  数据格式错误
-                    //      0   没有发现超期
-                    //      1   发现超期   strError中有提示信息
-                    //      2   已经在宽限期内，很容易超期 
-                    nRet = this.App.GetReturningTime(
-                        calendar,
-                        strBorrowDate,
-                        strPeriod,
-                        out timeReturning,
-                        out timeNextWorkingDay,
-                        out lOver,
-                        out strPeriodUnit,
-                        out strError);
+                    if (bTestNotify == true)
+                    {
+                        timeReturning = DateTime.Now;
+                        timeNextWorkingDay = DateTime.Now;
+                        long lValue = 0;
+                        LibraryApplication.ParsePeriodUnit(strPeriod,
+                            out lValue,
+                            out strPeriodUnit, 
+                            out strError);
+                        lOver = lValue;
+                        nRet = 1;
+                    }
+                    else
+                    {
+                        // 获得还书日期
+                        // return:
+                        //      -1  数据格式错误
+                        //      0   没有发现超期
+                        //      1   发现超期   strError中有提示信息
+                        //      2   已经在宽限期内，很容易超期 
+                        nRet = this.App.GetReturningTime(
+                            calendar,
+                            strBorrowDate,
+                            strPeriod,
+                            out timeReturning,
+                            out timeNextWorkingDay,
+                            out lOver,
+                            out strPeriodUnit,
+                            out strError);
+                    }
                     if (nRet == -1)
                         strOverDue = strError;
                     else
@@ -2322,7 +2343,8 @@ namespace DigitalPlatform.LibraryServer
                 if (bOverdue == true)
                 {
                     // 看看是不是已经通知过
-                    if (string.IsNullOrEmpty(strChars) == false && strChars[0] == 'y')
+                    if (string.IsNullOrEmpty(strChars) == false && strChars[0] == 'y'
+                        && bTestNotify == false)
                         continue;
 
                     // 合并设置一种 body type 的全部通知字符
@@ -2447,7 +2469,7 @@ namespace DigitalPlatform.LibraryServer
             DomUtil.SetElementText(output_dom.DocumentElement, "text", strResult);
 
             {
-                XmlElement record = output_dom.CreateElement("record");
+                XmlElement record = output_dom.CreateElement("patronRecord");
                 output_dom.DocumentElement.AppendChild(record);
                 record.InnerXml = readerdom.DocumentElement.InnerXml;
 

@@ -393,6 +393,8 @@ namespace dp2Circulation
                 nRet = GetMemoString(dom, out strHtml, out strError);
             else if (strOperation == "changeReaderPassword")
                 nRet = GetChangeReaderPasswordString(dom, out strHtml, out strError);
+            else if (strOperation == "changeReaderTempPassword")
+                nRet = GetChangeReaderTempPasswordString(dom, out strHtml, out strError);
             else if (strOperation == "setReaderInfo")
                 nRet = GetSetReaderInfoString(dom, out strHtml, out strError);
             else if (strOperation == "reservation")
@@ -867,6 +869,65 @@ namespace dp2Circulation
                 BuildHtmlPendingLine("(读者摘要)", BuildPendingReaderSummary(strReaderBarcode)) +
 
                 BuildHtmlLine("新的密码", strNewPassword) +
+
+                BuildHtmlEncodedLine("读者记录", strReaderRecPath, strReaderRecordHtml) +
+
+                BuildHtmlLine("操作者", strOperator) +
+                BuildHtmlLine("操作时间", strOperTime) +
+                BuildClientAddressLine(dom) +
+                "</table>";
+
+            return 0;
+        }
+
+        // ChangeReaderTempPassword
+        int GetChangeReaderTempPasswordString(XmlDocument dom,
+    out string strHtml,
+    out string strError)
+        {
+            strHtml = "";
+            strError = "";
+            int nRet = 0;
+
+            XmlNode node = null;
+            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode", out node);
+            if (node != null && string.IsNullOrEmpty(strLibraryCode) == true)
+                strLibraryCode = "<空>";
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+            string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement, "readerBarcode");
+            string strTempPassword = DomUtil.GetElementText(dom.DocumentElement, "tempPassword");
+            string strTempPasswordExpire = DomUtil.GetElementText(dom.DocumentElement, "tempPasswordExpire");
+
+            string strReaderRecord = DomUtil.GetElementText(dom.DocumentElement, "readerRecord", out node);
+            string strReaderRecPath = "";
+            string strReaderRecordHtml = "";
+            if (node != null)
+            {
+                strReaderRecPath = DomUtil.GetAttr(node, "recPath");
+                nRet = GetReaderInfoString(
+                    this.DisplayReaderBorrowHistory,
+                    strReaderRecord,
+                    out strReaderRecordHtml,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
+            string strOperTime = GetRfc1123DisplayString(
+                DomUtil.GetElementText(dom.DocumentElement, "operTime"));
+
+            // string strReaderBarcodeLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + strReaderBarcode + "</a>";
+
+            strHtml =
+                "<table class='operlog'>" +
+                BuildHtmlLine("馆代码", strLibraryCode) +
+                BuildHtmlLine("操作类型", strOperation + " -- 修改读者临时密码") +
+                BuildHtmlEncodedLine("读者证条码号", BuildReaderBarcodeLink(strReaderBarcode)) +
+                BuildHtmlPendingLine("(读者摘要)", BuildPendingReaderSummary(strReaderBarcode)) +
+
+                BuildHtmlLine("临时密码", strTempPassword) +
+                BuildHtmlLine("临时密码失效期", strTempPasswordExpire) +
 
                 BuildHtmlEncodedLine("读者记录", strReaderRecPath, strReaderRecordHtml) +
 

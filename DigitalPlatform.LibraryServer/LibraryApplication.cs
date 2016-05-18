@@ -112,10 +112,11 @@ namespace DigitalPlatform.LibraryServer
         //      2.67 (2016/1/6) GetItemInfo() API 的 @barcode-list:" "get-path-list" 功能允许间杂 @refID:前缀的号码。
         //      2.68 (2016/1/9) Return() API 增加了 read action。会将动作记入操作日志。ChargingOperDatabase 库也会自动更新
         //      2.69 (2016/1/29) 各个 API 都对读者身份加强了检查，防止出现权限漏洞。
-        //      2.70 (2016/4/10) 增加 MSMQ 消息队列功能，读者记录的修改、dp2mail 消息都自动发送到这个消息队列。dp2library 失效日期从 5.1 变为 7.1。ReadersMonitor 后台任务会自动给没有 refID 元素的读者记录增加此元素
+        //      2.70 (2016/4/10) 增加 MSMQ 消息队列功能。dp2library 失效日期从 5.1 变为 7.1。ReadersMonitor 后台任务会自动给没有 refID 元素的读者记录增加此元素
         //      2.71 (2016/4/15) 对各个环节的密码相关功能进行加固。GetReaderInfo() API 不会返回 password 元素；GetOperLog() GetOperLogs() API 会滤除各种密码
         //      2.72 (2016/5/14) SearchBiblio() API 支持按照馆代码筛选
-        public static string Version = "2.72";
+        //      2.73 (2016/5/18) MaxItemHistoryItems 和 MaxPatronHistoryItems 的默认值都修改为 10
+        public static string Version = "2.73";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -857,7 +858,7 @@ namespace DigitalPlatform.LibraryServer
                         int v = 0;
                         nRet = DomUtil.GetIntegerParam(node,
                             "maxPatronHistoryItems",
-                            100,
+                            10, // 100,
                             out v,
                             out strError);
                         if (nRet == -1)
@@ -866,7 +867,7 @@ namespace DigitalPlatform.LibraryServer
 
                         nRet = DomUtil.GetIntegerParam(node,
         "maxItemHistoryItems",
-        100,
+        10, // 100,
         out v,
         out strError);
                         if (nRet == -1)

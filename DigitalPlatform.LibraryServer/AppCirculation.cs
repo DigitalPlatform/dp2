@@ -45,10 +45,10 @@ namespace DigitalPlatform.LibraryServer
         // string m_strLastReaderBarcode = "";
 
         // 读者记录中，借阅历史中最大保存个数
-        public int MaxPatronHistoryItems = 100;
+        public int MaxPatronHistoryItems = 10;  // 100;
 
         // 册记录中，借阅历史中最大保存个数
-        public int MaxItemHistoryItems = 100;
+        public int MaxItemHistoryItems = 10;    // 100;
 
 
         public bool VerifyBarcode = false;  // 创建和修改读者记录、册记录的时候是否验证条码号

@@ -5017,9 +5017,13 @@ Culture=neutral, PublicKeyToken=null
             library_codes = new List<string>();
 
             LibraryChannel channel = this.GetChannel();
-            Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("正在获得全部馆代码 ...");
-            Stop.BeginLoop();
+            if (Stop != null)
+            {
+                Stop.OnStop += new StopEventHandler(this.DoStop);
+                Stop.Initial("正在获得全部馆代码 ...");
+                Stop.BeginLoop();
+            }
+
             try
             {
                 string strValue = "";
@@ -5035,9 +5039,13 @@ Culture=neutral, PublicKeyToken=null
             }
             finally
             {
-                Stop.EndLoop();
-                Stop.OnStop -= new StopEventHandler(this.DoStop);
-                Stop.Initial("");
+                if (Stop != null)
+                {
+                    Stop.EndLoop();
+                    Stop.OnStop -= new StopEventHandler(this.DoStop);
+                    Stop.Initial("");
+                }
+
                 this.ReturnChannel(channel);
             }
         }
