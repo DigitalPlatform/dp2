@@ -139,6 +139,12 @@ namespace dp2Circulation
         {
             InitializeComponent();
 
+            //this.panel1.MaximumSize = new System.Drawing.Size(500, 0);
+            //this.panel2.MaximumSize = new System.Drawing.Size(500, 0);
+            //this.listView_browse.Size = new System.Drawing.Size(200, this.listView_browse.Size.Height);
+            //this.tableLayoutPanel1.Size = new System.Drawing.Size(200, this.tableLayoutPanel1.Size.Height);
+            //this.tableLayoutPanel1.PerformLayout();
+
             ListViewProperty prop = new ListViewProperty();
             this.listView_browse.Tag = prop;
             // 第一列特殊，记录路径
@@ -1013,6 +1019,12 @@ namespace dp2Circulation
             }
 
             return 0;
+        }
+
+        private void DupForm_SizeChanged(object sender, EventArgs e)
+        {
+            this.listView_browse.Width = this.ClientSize.Width;
+            this.tableLayoutPanel1.PerformLayout();
         }
     }
 }
