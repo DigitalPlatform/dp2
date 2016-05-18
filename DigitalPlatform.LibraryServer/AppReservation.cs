@@ -1231,7 +1231,6 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 return 0;   // not found request
-
             FOUND:
                 Debug.Assert(readerRequestNode != null, "");
 
@@ -1383,15 +1382,6 @@ namespace DigitalPlatform.LibraryServer
 
             if (string.IsNullOrEmpty(strItemXml) == true)
             {
-#if NO
-                RmsChannel channel = channels.GetChannel(this.WsUrl);
-                if (channel == null)
-                {
-                    strError = "get channel error";
-                    return -1;
-                }
-#endif
-
                 // 读入册记录
                 string strOutputItemRecPath = "";
                 // 获得册记录
@@ -2168,7 +2158,6 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1)
                 return -1;
 
-
             // 3) 通知预约到书的操作
             List<string> DeletedNotifyRecPaths = null;  // 被删除的通知记录。
 
@@ -2245,8 +2234,6 @@ namespace DigitalPlatform.LibraryServer
 
             if (bAlreadeDeleted == false)
             {
-                // channel = channels.GetChannel(this.WsUrl);
-
                 lRet = channel.DoDeleteRes(
                     strQueueRecPath,
                     baQueueRecTimeStamp,

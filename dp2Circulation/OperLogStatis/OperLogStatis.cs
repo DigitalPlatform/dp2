@@ -280,6 +280,19 @@ namespace dp2Circulation
         }
 
 #endif
+
+        // 2016/5/17
+        static string GetPriceByID(string strReaderRecord, string strID)
+        {
+            XmlDocument readerdom = new XmlDocument();
+            readerdom.LoadXml(strReaderRecord);
+
+            XmlElement overdue = readerdom.DocumentElement.SelectSingleNode("overdues/overdue[@id='" + strID + "']") as XmlElement;
+            if (overdue == null)
+                return null;    // not found
+            return overdue.GetAttribute("price");
+        }
+
         // 新版本
         // 获得一个modifyprice或者amerce动作型的日志记录中的修改违约金的细节
         // return:
@@ -309,6 +322,8 @@ namespace dp2Circulation
                 return -1;
             }
 
+            // modifyprice 类型的记录里面没有 amerceRecord
+
             List<IdPrice> list = null;
             int nRet = 0;
 
@@ -329,8 +344,10 @@ namespace dp2Circulation
     out strError);
             if (nRet == -1)
                 return -1;
+#if NO
             if (list.Count == 0)
                 return 0;
+#endif
 
             XmlNodeList nodes = domOperLog.DocumentElement.SelectNodes("amerceItems/amerceItem");
             for (int i = 0; i < nodes.Count; i++)
@@ -356,8 +373,15 @@ namespace dp2Circulation
                 string strOldPrice = GetPriceByID(list, strID, out strDebug);
                 if (strOldPrice == null)
                 {
-                    strError = "日志文件格式错误: 根据id '" + strID + "' 在日志记录<oldReaderRecord>元素文本内<overdue>元素中没有找到对应的事项。debug: " + strDebug;
-                    return -1;
+                    // strError = "日志文件格式错误: 根据id '" + strID + "' 在日志记录<oldReaderRecord>元素文本内<overdue>元素中没有找到对应的事项。debug: " + strDebug;
+                    // return -1;
+                    string strOldRecord = DomUtil.GetElementText(domOperLog.DocumentElement, "oldReaderRecord");
+                    strOldPrice = GetPriceByID(strOldRecord, strID);
+                    if (strOldPrice == null)
+                    {
+                        strError = "日志文件格式错误: 根据id '" + strID + "' 在日志记录<oldReaderRecord>元素文本内<overdue>元素中没有找到对应的事项";
+                        return -1;
+                    }
                 }
 
                 PricePair pair = new PricePair();
@@ -367,6 +391,30 @@ namespace dp2Circulation
                 prices.Add(pair);
             }
 
+            return 0;
+        }
+
+        public static int TotalPrices(List<PricePair> pairs,
+            out string strResult,
+            out string strError)
+        {
+            strError = "";
+            strResult = "";
+
+            List<string> prices = new List<string>();
+            foreach (PricePair pair in pairs)
+            {
+                if (string.IsNullOrEmpty(pair.NewPrice) == false)
+                    prices.Add(pair.NewPrice);
+                if (string.IsNullOrEmpty(pair.OldPrice) == false)
+                    prices.Add("-" + pair.OldPrice);
+            }
+
+            int nRet = PriceUtil.TotalPrice(prices,
+    out strResult,
+    out strError);
+            if (nRet == -1)
+                return -1;
             return 0;
         }
 
@@ -691,6 +739,8 @@ amerce 交费
                 return -1;
             }
 
+            // modifyprice 类型的记录里面没有 amerceRecord
+
             List<IdPrice> list = null;
             int nRet = 0;
 
@@ -711,9 +761,10 @@ out list,
 out strError);
             if (nRet == -1)
                 return -1;
+#if NO
             if (list.Count == 0)
                 return 0;
-
+#endif
 
             XmlNodeList nodes = domOperLog.DocumentElement.SelectNodes("amerceItems/amerceItem");
             for (int i = 0; i < nodes.Count; i++)
@@ -734,7 +785,6 @@ out strError);
                 if (string.IsNullOrEmpty(strPureNewPrice) == true)
                     continue;
 
-
                 decimal new_price = 0;
                 try
                 {
@@ -751,8 +801,17 @@ out strError);
                 string strOldPrice = GetPriceByID(list, strID, out strDebug);
                 if (strOldPrice == null)
                 {
+#if NO
                     strError = "日志文件格式错误: 根据id '" + strID + "' 在日志记录<oldReaderRecord>元素文本内<overdue>元素中没有找到对应的事项。debug: " + strDebug;
                     return -1;
+#endif
+                    string strOldRecord = DomUtil.GetElementText(domOperLog.DocumentElement, "oldReaderRecord");
+                    strOldPrice = GetPriceByID(strOldRecord, strID);
+                    if (strOldPrice == null)
+                    {
+                        strError = "日志文件格式错误: 根据id '" + strID + "' 在日志记录<oldReaderRecord>元素文本内<overdue>元素中没有找到对应的事项";
+                        return -1;
+                    }
                 }
 
                 string strOldPurePrice = PriceUtil.GetPurePrice(strOldPrice);
@@ -780,12 +839,11 @@ out strError);
                     dec_price += delta;
                 }
 
-
                 total_delta_price += delta;
+                nCount++;
             }
 
-            nCount = nodes.Count;
-
+            // nCount = nodes.Count;
             return 1;
         }
 
@@ -819,7 +877,6 @@ out strError);
 
                 string strOriginPrice = DomUtil.GetElementText(dom.DocumentElement,
                     "originPrice").Trim();
-
 
                 string strPrice = DomUtil.GetElementText(dom.DocumentElement,
                     "price").Trim();

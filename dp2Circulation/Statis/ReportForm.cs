@@ -341,7 +341,7 @@ namespace dp2Circulation
                                 string strText = strError;
                                 this.Invoke((Action)(() =>
                                 {
-                                    MessageBox.Show(this,
+                                    result = MessageBox.Show(this,
      strText + "\r\n\r\n是否跳过此条记录继续处理?",
      "ReportForm",
      MessageBoxButtons.YesNo,
@@ -778,7 +778,6 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         return -1;
                     }
 
-
                     lRet = this.Channel.GetSearchResult(
                         stop,
                         null,   // strResultSetName
@@ -804,6 +803,10 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                     for (int i = 0; i < searchresults.Length; i++)
                     {
                         DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
+                        if (searchresult.Cols.Length < 5)
+                        {
+                            continue;   // 中途遇到服务器有人删除读者记录，很常见的现象
+                        }
 
                         ReaderLine line = new ReaderLine();
                         line.ReaderRecPath = searchresult.Path;
@@ -1352,7 +1355,6 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         if (searchresult.Keys != null && searchresult.Keys.Length > 0)
                             line.Class = searchresult.Keys[0].Key;
                         lines.Add(line);
-
                     }
 
 #if NO
@@ -6872,7 +6874,6 @@ MessageBoxDefaultButton.Button2);
             }));
         }
 
-
         void SetStartButtonStates()
         {
             this.Invoke((Action)(() =>
@@ -10700,6 +10701,8 @@ MessageBoxDefaultButton.Button1);
                 // strError = "上次统计最末日期 '"+strLastDay+"' 不应晚于 日志同步最后日期 " + strDailyEndDate + " 的前一天";
                 // return -1;
                 strError = "报表已经是最新";
+                if (start > daily_end)
+                    strError += " (警告!" + strLastDay + "有误)";
                 return 0;
             }
 

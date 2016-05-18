@@ -160,8 +160,6 @@ namespace DigitalPlatform.LibraryServer
 #if DETAIL_LOG
                 this.WriteErrorLog("开始探测结果集 " + strLocation);
 #endif
-
-
                 Record[] searchresults = null;
 
                 // 获得检索结果的浏览格式

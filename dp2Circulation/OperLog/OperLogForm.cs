@@ -304,7 +304,7 @@ namespace dp2Circulation
             finally
             {
 #if DELAY_UPDATE
-                    this.listView_records.EndUpdate();
+                this.listView_records.EndUpdate();
 #endif
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -428,7 +428,7 @@ namespace dp2Circulation
                 nRet = GetSetUserString(dom, out strHtml, out strError);
             else
             {
-                strError = "未知的操作类型 '"+strOperation+"'";
+                strError = "未知的操作类型 '" + strOperation + "'";
                 return 1;
             }
 
@@ -462,7 +462,7 @@ namespace dp2Circulation
             string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
             string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
 
-            string strRecord = DomUtil.GetElementText(dom.DocumentElement, "record",out node);
+            string strRecord = DomUtil.GetElementText(dom.DocumentElement, "record", out node);
             string strRecPath = "";
             string strRecordHtml = "";
             if (node != null)
@@ -496,7 +496,7 @@ namespace dp2Circulation
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 设置读者记录") +
@@ -659,7 +659,7 @@ namespace dp2Circulation
             //string strItemBarcodeLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ItemInfoForm', this.innerText, true);\">" + strItemBarcode + "</a>";
             //string strReaderBarcodeLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + strReaderBarcode + "</a>";
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- " + (string.IsNullOrEmpty(strNo) == true || strNo == "0" ? "借书" : "续借")) +
@@ -749,7 +749,7 @@ namespace dp2Circulation
             //string strItemBarcodeLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ItemInfoForm', this.innerText, true);\">" + strItemBarcode + "</a>";
             //string strReaderBarcodeLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + strReaderBarcode + "</a>";
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 还书") +
@@ -757,7 +757,7 @@ namespace dp2Circulation
                 BuildHtmlEncodedLine("读者证条码号", BuildReaderBarcodeLink(strReaderBarcode)) +
                 BuildHtmlPendingLine("(读者摘要)", BuildPendingReaderSummary(strReaderBarcode)) +
                 BuildHtmlEncodedLine("册条码号", BuildItemBarcodeLink(strItemBarcode)) +
-                BuildHtmlPendingLine("(书目摘要)", BuildPendingBiblioSummary(strItemBarcode,strConfirmItemRecPath)) +
+                BuildHtmlPendingLine("(书目摘要)", BuildPendingBiblioSummary(strItemBarcode, strConfirmItemRecPath)) +
                 BuildHtmlLine("册记录路径", strConfirmItemRecPath) +
 
                 BuildHtmlLine("丢失情况附注", strLostComment) +
@@ -792,7 +792,7 @@ namespace dp2Circulation
 
             List<string> comments = StringUtil.SplitList(strComment, ';');
             StringBuilder encoded_comment = new StringBuilder();
-            foreach(string comment in comments)
+            foreach (string comment in comments)
             {
                 encoded_comment.Append(HttpUtility.HtmlEncode(comment) + "<br/>");
             }
@@ -859,7 +859,7 @@ namespace dp2Circulation
 
             // string strReaderBarcodeLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + strReaderBarcode + "</a>";
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 修改读者密码") +
@@ -911,7 +911,7 @@ namespace dp2Circulation
 
             // string strReaderBarcodeLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + strReaderBarcode + "</a>";
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 预约") +
@@ -1004,13 +1004,13 @@ namespace dp2Circulation
                     if (nRet == -1)
                         return -1;
                 }
-                strAmerceRecords += BuildHtmlEncodedLine("违约金记录 " + (i+1).ToString() + "/" + nodes.Count.ToString(),
+                strAmerceRecords += BuildHtmlEncodedLine("违约金记录 " + (i + 1).ToString() + "/" + nodes.Count.ToString(),
                     strAmerceRecPath, strAmerceRecordHtml);
 
                 i++;
             }
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 违约金操作") +
@@ -1192,7 +1192,7 @@ namespace dp2Circulation
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 转移借阅信息") +
@@ -1241,7 +1241,7 @@ namespace dp2Circulation
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 修复借阅信息") +
@@ -1299,7 +1299,7 @@ namespace dp2Circulation
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 创建租金交费请求") +
@@ -1358,7 +1358,7 @@ namespace dp2Circulation
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 创建押金交费请求") +
@@ -1427,7 +1427,7 @@ namespace dp2Circulation
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 结算") +
@@ -1467,7 +1467,7 @@ namespace dp2Circulation
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 入馆登记") +
@@ -1550,7 +1550,7 @@ namespace dp2Circulation
                 BuildHtmlLine("主题", strSubject) +
                 BuildHtmlLine("发送者", strSender) +
                 BuildHtmlLine("媒体类型", strMime) +
-                BuildHtmlEncodedLine("内容",  HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>")) +
+                BuildHtmlEncodedLine("内容", HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>")) +
                 BuildHtmlLine("操作者", strOperator) +
                 BuildHtmlLine("操作时间", strOperTime) +
                 BuildClientAddressLine(dom) +
@@ -1657,7 +1657,7 @@ namespace dp2Circulation
             else if (strOperation == "setComment")
                 strOperationCaption = "设置评注记录";
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- " + strOperationCaption) +
@@ -1701,7 +1701,7 @@ namespace dp2Circulation
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 写入对象资源") +
@@ -1817,7 +1817,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
 
-            strHtml = 
+            strHtml =
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 设置书目信息") +
@@ -1976,7 +1976,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 return "";
 
             return "<tr>" +
-                "<td class='name'>" + HttpUtility.HtmlEncode(strCaption) + "</td>" + 
+                "<td class='name'>" + HttpUtility.HtmlEncode(strCaption) + "</td>" +
                 "<td class='content'>" + HttpUtility.HtmlEncode(strValue) + "</td>" +
                 "</tr>";
         }
@@ -1999,7 +1999,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
 
             return "<tr>" +
                 "<td class='name " + strCaptionClass + "'>" + HttpUtility.HtmlEncode(strCaption) + "</td>" +
-                "<td class='content "+strValueClass+"'>" + strValue + "</td>" +
+                "<td class='content " + strValueClass + "'>" + strValue + "</td>" +
                 "</tr>";
         }
 
@@ -2067,7 +2067,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
 
             return HttpUtility.HtmlEncode(strText);
         }
-        
+
         // 一列, content
         static string BuildHtmlEncodedOneColumnLine(string strFirstLine,
             string strValue)
@@ -2241,7 +2241,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 + BuildHtmlLine("地址", strAddress)
                 + BuildHtmlLine("电话号码", strTel)
                 + BuildHtmlLine("Email", strEmail)
-                + BuildHtmlLine("押金余额", strEmail)
+                + BuildHtmlLine("押金余额", strForegift)
                 + BuildHtmlLine("租金信息", strHireXml)
 
                 + BuildHtmlEncodedLine("借阅信息", strBorrows)
@@ -2271,7 +2271,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 && string.IsNullOrEmpty(strNewBiblioXml) == true)
                 return 0;
 
-            if (string.IsNullOrEmpty(strOldBiblioXml) == true 
+            if (string.IsNullOrEmpty(strOldBiblioXml) == true
                 || string.IsNullOrEmpty(strNewBiblioXml) == true)
             {
                 if (string.IsNullOrEmpty(strOldBiblioXml) == false)
@@ -2383,17 +2383,17 @@ strOldMarc);
                             return -1;
                     }
                     else
-                    strHtml = MarcUtil.GetHtmlOfMarc(strOldMarc,
-                        strOldFragmentXml,
-                        strOldImageFragment,
-                        false);
+                        strHtml = MarcUtil.GetHtmlOfMarc(strOldMarc,
+                            strOldFragmentXml,
+                            strOldImageFragment,
+                            false);
                 }
                 else if (string.IsNullOrEmpty(strOldMarc) == true
                     && string.IsNullOrEmpty(strNewMarc) == false)
                 {
                     string strNewImageFragment = BiblioSearchForm.GetImageHtmlFragment(
 strBiblioRecPath,
-    strNewMarc); 
+    strNewMarc);
                     if (string.IsNullOrEmpty(strOldFragmentXml) == false)
                     {
                         nRet = MarcDiff.DiffHtml(
@@ -2408,7 +2408,7 @@ strBiblioRecPath,
                         if (nRet == -1)
                             return -1;
                     }
-                    else 
+                    else
                         strHtml = MarcUtil.GetHtmlOfMarc(strNewMarc,
                         strNewFragmentXml,
                         strNewImageFragment,
@@ -2497,7 +2497,7 @@ strBiblioRecPath,
 
             return GetItemInfoString(
                 bDisplayBorrowHistory,
-                item_dom, 
+                item_dom,
                 strItemRecPath,
                 out strHtml,
                 out strError);
@@ -2673,7 +2673,7 @@ out string strError)
                 "<table class='amerceinfo'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlEncodedLine("册条码号", BuildItemBarcodeLink(strItemBarcode)) +
-                BuildHtmlPendingLine("(书目摘要)", BuildPendingBiblioSummary(strItemBarcode,"")) +
+                BuildHtmlPendingLine("(书目摘要)", BuildPendingBiblioSummary(strItemBarcode, "")) +
                 BuildHtmlEncodedLine("读者证条码号", BuildReaderBarcodeLink(strReaderBarcode)) +
                 BuildHtmlPendingLine("(读者摘要)", BuildPendingReaderSummary(strReaderBarcode)) +
                 BuildHtmlLine("状态", strState) +
@@ -3013,7 +3013,7 @@ out string strError)
                 BuildHtmlLine("用户名", strName) +
                 BuildHtmlLine("图书馆代码", strLibraryCode) +
                 BuildHtmlLine("类型", strType) +
-                BuildClassHtmlEncodedLine("权限", "", 
+                BuildClassHtmlEncodedLine("权限", "",
                 strRights.Replace(",", ",<wbr/>"), "rights") +
                 BuildHtmlLine("存取代码", strAccess) +
                 BuildHtmlLine("注释", strComment) +
@@ -3288,7 +3288,7 @@ out string strError)
                 else
                 {
                     string strCacheFilename = Path.Combine(
-                        this.MainForm.OperLogCacheDir, 
+                        this.MainForm.OperLogCacheDir,
                         strLogFileName);
                     using (Stream stream = File.Open(
 strCacheFilename,
@@ -4108,7 +4108,7 @@ FileShare.ReadWrite))
 
             this.EnableControls(false);
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在修复日志文件 "+this.textBox_repair_sourceFilename.Text+" ...");
+            stop.Initial("正在修复日志文件 " + this.textBox_repair_sourceFilename.Text + " ...");
             stop.BeginLoop();
             try
             {
@@ -4128,7 +4128,7 @@ FileShare.ReadWrite))
                 this.EnableControls(true);
             }
 
-            MessageBox.Show(this, "修复完成。\r\n\r\n共丢弃 "+nRet.ToString()+" 个段落。\r\n\r\n修复后的内容已经写入目标文件 " + this.textBox_repair_targetFilename.Text);
+            MessageBox.Show(this, "修复完成。\r\n\r\n共丢弃 " + nRet.ToString() + " 个段落。\r\n\r\n修复后的内容已经写入目标文件 " + this.textBox_repair_targetFilename.Text);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -4195,7 +4195,8 @@ FileShare.ReadWrite))
                     return -1;
                 }
 
-                stop.SetProgressRange(0, source.Length);
+                if (stop != null)
+                    stop.SetProgressRange(0, source.Length);
 
                 bool bTry = false;
                 // TODO: 要汇报丢弃的段数
@@ -4203,13 +4204,10 @@ FileShare.ReadWrite))
                 {
                     Application.DoEvents();
 
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断1";
-                            return -1;
-                        }
+                        strError = "用户中断1";
+                        return -1;
                     }
 
                     long lStart = source.Position;
@@ -4232,7 +4230,8 @@ FileShare.ReadWrite))
                         bTry = false;
                     }
 
-                    stop.SetProgressValue(source.Position);
+                    if (stop != null)
+                        stop.SetProgressValue(source.Position);
 
                     long lBodyLength = source.Position - lStart;
                     // 写入目标文件
@@ -4264,8 +4263,10 @@ FileShare.ReadWrite))
             }
             finally
             {
-                source.Close();
-                target.Close();
+                if (source != null)
+                    source.Close();
+                if (target != null)
+                    target.Close();
             }
 
             return nTryCount;
@@ -4307,7 +4308,7 @@ FileShare.ReadWrite))
 
             if (lRecordLength > stream.Length - (lStart + 8))
             {
-                strError = "lRecordLength = "+lRecordLength.ToString()+"不正常，超过文件尾部";
+                strError = "lRecordLength = " + lRecordLength.ToString() + "不正常，超过文件尾部";
                 return -1;
             }
 
@@ -4370,7 +4371,7 @@ FileShare.ReadWrite))
             nRet = stream.Read(length, 0, 8);
             if (nRet < 8)
             {
-                strError = "VerifyEntry()从偏移量 " + (lStart+8).ToString() + " 开始试图读入8个byte，但是只读入了 " + nRet.ToString() + " 个。metadata长度部分不足";
+                strError = "VerifyEntry()从偏移量 " + (lStart + 8).ToString() + " 开始试图读入8个byte，但是只读入了 " + nRet.ToString() + " 个。metadata长度部分不足";
                 return -1;
             }
 
@@ -4383,7 +4384,7 @@ FileShare.ReadWrite))
             }
             if (lMetaDataLength > 100 * 1024)
             {
-                strError = "metadata长度("+lMetaDataLength.ToString()+")超过100K，不正常";
+                strError = "metadata长度(" + lMetaDataLength.ToString() + ")超过100K，不正常";
                 return -1;
             }
 
@@ -4406,7 +4407,7 @@ FileShare.ReadWrite))
             {
                 strError = "XML记录体metadata部分长度(" + lMetaDataLength.ToString() + ")超过文件剩余部分尺寸";
                 return -1;
-            } 
+            }
             stream.Seek(lMetaDataLength, SeekOrigin.Current);
 
             long lBodyStart = stream.Position;
@@ -4428,7 +4429,7 @@ FileShare.ReadWrite))
             }
             if (lBodyLength > 1000 * 1024)
             {
-                strError = "body长度("+lBodyLength.ToString()+")超过1000K，不正常";
+                strError = "body长度(" + lBodyLength.ToString() + ")超过1000K，不正常";
                 return -1;
             }
 
@@ -4451,7 +4452,7 @@ FileShare.ReadWrite))
             {
                 strError = "XML记录体body部分长度(" + lBodyLength.ToString() + ")超过文件剩余部分尺寸";
                 return -1;
-            } 
+            }
             stream.Seek(lBodyLength, SeekOrigin.Current);
 
             // 文件指针此时自然在末尾
@@ -4521,7 +4522,7 @@ FileShare.ReadWrite))
             {
                 strError = "metadata长度(" + lMetaDataLength.ToString() + ")小于0，错误";
                 return -1;
-            } 
+            }
             if (lMetaDataLength > 100 * 1024)
             {
                 strError = "metadata长度超过100K，不正常";
@@ -4564,10 +4565,10 @@ FileShare.ReadWrite))
             {
                 strError = "body长度(" + lBodyLength.ToString() + ")小于0，错误";
                 return -1;
-            } 
+            }
             if (lBodyLength > stream.Length - stream.Position)
             {
-                strError = "记录格式不正确，body长度("+lBodyLength.ToString()+")超过文件剩余部分尺寸";
+                strError = "记录格式不正确，body长度(" + lBodyLength.ToString() + ")超过文件剩余部分尺寸";
                 return -1;
             }
 
@@ -4654,7 +4655,7 @@ FileShare.ReadWrite))
 
             this.EnableControls(false);
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在验证目录 "+this.textBox_repair_verifyFolderName.Text +" 中的所有日志文件 ...");
+            stop.Initial("正在验证目录 " + this.textBox_repair_verifyFolderName.Text + " 中的所有日志文件 ...");
             stop.BeginLoop();
             try
             {
@@ -4678,7 +4679,7 @@ FileShare.ReadWrite))
                 this.EnableControls(true);
             }
 
-            MessageBox.Show(this, "验证完成。\r\n\r\n共验证 "+nFileCount+" 个日志文件，其中有 "+nRet.ToString()+" 个日志文件发现格式错误。\r\n\r\n" 
+            MessageBox.Show(this, "验证完成。\r\n\r\n共验证 " + nFileCount + " 个日志文件，其中有 " + nRet.ToString() + " 个日志文件发现格式错误。\r\n\r\n"
                 + StringUtil.MakePathList(errorfilenames, "\r\n"));
             return;
         ERROR1:
@@ -4851,7 +4852,7 @@ FileShare.ReadWrite))
             string strStartDate = "";
             string strEndDate = "";
 
-            string strName = control.Text.Replace(" ","").Trim();
+            string strName = control.Text.Replace(" ", "").Trim();
 
             if (strName == "本周")
             {
@@ -4878,7 +4879,7 @@ FileShare.ReadWrite))
             else if (strName == "最近七天" || strName == "最近7天")
             {
                 DateTime now = DateTime.Now;
-                DateTime start = now - new TimeSpan(7-1, 0, 0, 0);
+                DateTime start = now - new TimeSpan(7 - 1, 0, 0, 0);
 
                 strStartDate = DateTimeUtil.DateTimeToString8(start);
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
@@ -4886,21 +4887,21 @@ FileShare.ReadWrite))
             else if (strName == "最近三十天" || strName == "最近30天")
             {
                 DateTime now = DateTime.Now;
-                DateTime start = now - new TimeSpan(30-1, 0, 0, 0);
+                DateTime start = now - new TimeSpan(30 - 1, 0, 0, 0);
                 strStartDate = DateTimeUtil.DateTimeToString8(start);
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
             }
             else if (strName == "最近三十一天" || strName == "最近31天")
             {
                 DateTime now = DateTime.Now;
-                DateTime start = now - new TimeSpan(31-1, 0, 0, 0);
+                DateTime start = now - new TimeSpan(31 - 1, 0, 0, 0);
                 strStartDate = DateTimeUtil.DateTimeToString8(start);
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
             }
             else if (strName == "最近三百六十五天" || strName == "最近365天")
             {
                 DateTime now = DateTime.Now;
-                DateTime start = now - new TimeSpan(365-1, 0, 0, 0);
+                DateTime start = now - new TimeSpan(365 - 1, 0, 0, 0);
                 strStartDate = DateTimeUtil.DateTimeToString8(start);
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
             }
@@ -5105,10 +5106,10 @@ FileShare.ReadWrite))
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("筛选(&I) ["+this.listView_records.SelectedItems.Count.ToString()+"]");
+            menuItem = new MenuItem("筛选(&I) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_filter_Click);
             if (this.listView_records.SelectedItems.Count == 0)
-                menuItem.Enabled = false; 
+                menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             // ---
@@ -5123,7 +5124,7 @@ FileShare.ReadWrite))
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("打印解释内容(&P) ["+this.listView_records.SelectedItems.Count.ToString()+"]");
+            menuItem = new MenuItem("打印解释内容(&P) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_printHtml_Click);
             if (this.listView_records.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -5249,7 +5250,7 @@ FileShare.ReadWrite))
                     StreamUtil.WriteText(strFilename,
         "<p class='record_title'>" + strLogFileName + " : " + strIndex + "</p>" + strHtml);
 
-                    stop.SetProgressValue( i + 1);
+                    stop.SetProgressValue(i + 1);
                     i++;
                 }
             }
@@ -5305,7 +5306,7 @@ FileShare.ReadWrite))
                 e.Summary = this.m_webExternalHost.GetPatronSummary(e.Command.Substring(2));
             }
             else
-                e.Summary = "不支持的命令 '"+e.Command+"'";
+                e.Summary = "不支持的命令 '" + e.Command + "'";
         }
 
         // 筛选
@@ -5989,7 +5990,7 @@ MessageBoxDefaultButton.Button1);
             if (File.Exists(strVersionFilePath) == false)
                 return 1;
 
-                XmlDocument dom = new XmlDocument();
+            XmlDocument dom = new XmlDocument();
             try
             {
                 dom.Load(strVersionFilePath);
@@ -6104,7 +6105,7 @@ MessageBoxDefaultButton.Button1);
             strError = "";
             stream = null;
             // 观察本地缓存文件是否存在
-             bCacheFileExist = false;
+            bCacheFileExist = false;
             XmlDocument metadata_dom = new XmlDocument();
 
             string strCacheFilename = PathUtil.MergePath(strCacheDir, strLogFileName);
@@ -6729,7 +6730,7 @@ FileShare.ReadWrite);
                             if (nRet == -1)
                             {
                                 DialogResult result = MessageBox.Show(owner,
-                                    strLogFileName + " : " + lIndex.ToString() + "\r\n" +  strError + "\r\n\r\n是否继续处理?",
+                                    strLogFileName + " : " + lIndex.ToString() + "\r\n" + strError + "\r\n\r\n是否继续处理?",
 "OperLogForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,

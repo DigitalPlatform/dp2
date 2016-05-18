@@ -15,6 +15,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.LibraryClient.localhost;
+using System.IO;
 
 namespace dp2Circulation
 {
@@ -710,6 +711,9 @@ namespace dp2Circulation
         // 编辑权限
         private void button_editUserRights_Click(object sender, EventArgs e)
         {
+            bool bControl = Control.ModifierKeys == Keys.Control;
+            string strRightsCfgFileName = Path.Combine(this.MainForm.UserDir, "objectrights.xml");
+
             DigitalPlatform.CommonControl.PropertyDlg dlg = new DigitalPlatform.CommonControl.PropertyDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
@@ -717,6 +721,11 @@ namespace dp2Circulation
             dlg.Text = "用户 '" + this.textBox_userName.Text + "' 的权限";
             dlg.PropertyString = this.textBox_userRights.Text;
             dlg.CfgFileName = this.MainForm.DataDir + "\\userrightsdef.xml";
+            if (bControl)
+            {
+                if (File.Exists(strRightsCfgFileName) == true)
+                    dlg.CfgFileName += "," + strRightsCfgFileName;
+            }
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)

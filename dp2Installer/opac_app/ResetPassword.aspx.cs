@@ -12,22 +12,10 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 public partial class ResetPassword : MyWebPage  // System.Web.UI.Page
 {
-    //OpacApplication app = null;
-    //SessionInfo sessioninfo = null;
-
-#if NO
-    protected override void InitializeCulture()
-    {
-        WebUtil.InitLang(this);
-        base.InitializeCulture();
-    }
-#endif
-
     protected void Page_Init(object sender, EventArgs e)
     {
         if (WebUtil.PrepareEnvironment(this,
