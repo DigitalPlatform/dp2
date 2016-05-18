@@ -3063,8 +3063,8 @@ true);
             }
 
             LibraryChannel channel = this.GetChannel();
-            // TimeSpan old_timeout = channel.Timeout;
-            // channel.Timeout = new TimeSpan(0, 1, 0);    // 保存大量册记录时可能会耗时长一点
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);    // 保存大量册记录时可能会耗时长一点
 
             string strMessage = "正在装载书目记录 " + strBiblioRecPath + " " + strPrevNextStyle + " ...";
             Progress.OnStop += new StopEventHandler(this.DoStop);
@@ -3463,7 +3463,7 @@ true);
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
-                // channel.Timeout = old_timeout;
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 // this.m_nChannelInUse--;

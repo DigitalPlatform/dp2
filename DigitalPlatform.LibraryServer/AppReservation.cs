@@ -1791,6 +1791,7 @@ namespace DigitalPlatform.LibraryServer
                 dom.LoadXml("<root />");
 
                 /* 元素名
+                 * type 消息类型。预约到书通知
                  * itemBarcode 册条码号
                  * refID    参考 ID
                  * opacURL  图书在 OPAC 中的 URL
@@ -1800,6 +1801,8 @@ namespace DigitalPlatform.LibraryServer
                  * patronName   读者姓名
                  * patronRecord 读者 XML 记录
  * */
+                DomUtil.SetElementText(dom.DocumentElement, "type", "预约到书通知");
+
                 DomUtil.SetElementText(dom.DocumentElement,
                     "itemBarcode", strItemBarcode);
                 DomUtil.SetElementText(dom.DocumentElement,

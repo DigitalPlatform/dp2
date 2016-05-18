@@ -3204,7 +3204,7 @@ namespace dp2Library
                 // strLocationFilter = "海淀分馆"; // testing
                 if (string.IsNullOrEmpty(strLocationFilter) == false)
                 {
-                    string strLocationQueryXml = "<item resultset='#"+strLocationFilter+"' />";
+                    string strLocationQueryXml = "<item resultset='#" + strLocationFilter + "' />";
                     strQueryXml = "<group>" + strQueryXml + "<operator value='AND'/>" + strLocationQueryXml + "</group>";    // !!!
                 }
 
@@ -7723,6 +7723,10 @@ namespace dp2Library
         //                      email=?????,barcode=??????,name=??????
         //                      librarycode=????
         //      strMessageTempate   消息文字模板。其中可以使用 %name% %barcode% %temppassword% %expiretime% %period% 等宏
+        // result.Value:
+        //      -1  出错
+        //      0   因为条件不具备功能没有成功执行(其中，如果 ErrorCode 为 NotFound，表示读者账户尚未注册手机号)
+        //      1   功能成功执行
         public LibraryServerResult ResetPassword(string strParameters,
             string strMessageTemplate,
             out string strMessage)
@@ -7752,6 +7756,7 @@ namespace dp2Library
 
             // 不需要登录
             // return:
+            //      -2  读者的图书馆账户尚未注册手机号
             //      -1  出错
             //      0   因为条件不具备功能没有成功执行
             //      1   功能成功执行
@@ -7761,8 +7766,16 @@ namespace dp2Library
                 strMessageTemplate,
                 out strMessage,
                 out strError);
-            result.Value = nRet;
             result.ErrorInfo = strError;
+            if (nRet == -2)
+            {
+                result.Value = 0;
+                result.ErrorCode = ErrorCode.NotFound;
+            }
+            else
+            {
+                result.Value = nRet;
+            }
             return result;
         }
 

@@ -1870,6 +1870,7 @@ out strTargetLibraryCode);
             // operation:borrow -- readerRecord
             // operation:return -- readerRecord
             // operation:changeReaderPassword -- readerRecord 注意 newPassword 元素里面有新密码的 hash 字符串
+            // operation:changeReaderTempPassword -- readerRecord 注意 tempPassword 元素里面有新密码的 hash 字符串
             // operation:setReaderInfo -- record 和 oldRecord 元素
             // operation:amerce -- readerRecord 和 oldReaderRecord 元素
             // operation:devolveReaderInfo -- sourceReaderRecord 和 targetRecordRecord 元素
@@ -1890,6 +1891,12 @@ out strTargetLibraryCode);
             {
                 RemoveReaderPassword(ref dom, "readerRecord");
                 DomUtil.DeleteElement(dom.DocumentElement, "newPassword");
+                return;
+            }
+            if (strOperation == "changeReaderTempPassword")
+            {
+                RemoveReaderPassword(ref dom, "readerRecord");
+                DomUtil.DeleteElement(dom.DocumentElement, "tempPassword");
                 return;
             }
             if (strOperation == "setReaderInfo")

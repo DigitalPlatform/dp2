@@ -159,7 +159,10 @@ namespace DigitalPlatform.LibraryServer
             string strBodyTypesDef = GetBodyTypesDef();
 
             if (string.IsNullOrEmpty(strBodyTypesDef) == true)
+            {
                 strBodyTypesDef = "dpmail,email";   // 空表示只使用两种保守的类型
+                bodytypes = StringUtil.SplitList(strBodyTypesDef);
+            }
             else if (strBodyTypesDef == "[all]")
             {
                 // 全部类型。包括 mq 和外部接口
@@ -522,6 +525,8 @@ namespace DigitalPlatform.LibraryServer
                     this.AppendResultText("DoNotifyReaderScriptFunction [strReaderBarcode=" + strReaderBarcode + "] nResultValue == -1, errorinfo: " + strError + "\r\n");
                     continue;
                 }
+
+                // nRet = 1;  // testing
 
                 if (nResultValue == 0)
                 {
