@@ -9066,6 +9066,11 @@ out strError);
          */
 
         // 筛选读者记录
+        // parameters:
+        // return:
+        //      -2  尚未注册手机号
+        //      -1  出错
+        //      0   完成筛选
         static int FilterPatron(List<KernelRecord> records,
             string strName,
             string strPatronBarcode,
@@ -9105,12 +9110,20 @@ out strError);
                 {
                     string strTelList = DomUtil.GetElementText(dom.DocumentElement, "tel");
 
+                    if (string.IsNullOrEmpty(strTelList) == true
+                        && records.Count == 1)
+                    {
+                        strError = "尚未注册手机号码";
+                        return -2;
+                    }
+
                     if (MatchTel(strTelList, strTel) == false)
                         continue;
                 }
 
                 results.Add(record);
             }
+
             return 0;
         }
 
@@ -9140,6 +9153,7 @@ out strError);
         //      strMessageTempate   消息文字模板。其中可以使用 %name% %barcode% %temppassword% %expiretime% %period% 等宏
         //      strMessage  返回拟发送给读者的消息文字
         // return:
+        //      -2  读者的图书馆账户尚未注册手机号
         //      -1  出错
         //      0   因为条件不具备功能没有成功执行
         //      1   功能成功执行
@@ -9251,6 +9265,10 @@ out strError);
                 List<KernelRecord> results = null;
 
                 // 筛选读者记录
+                // return:
+                //      -2  尚未注册手机号
+                //      -1  出错
+                //      0   完成筛选
                 nRet = FilterPatron(records,
             strNameParam,
             strPatronBarcodeParam,
@@ -9262,6 +9280,12 @@ out strError);
 
                 if (results.Count == 0)
                 {
+                    if (nRet == -2)
+                    {
+                        strError = "读者帐户 '" + strQueryWord + "' " + strError;
+                        return -2;
+                    }
+
                     strError = "符合条件的读者帐户 '" + strQueryWord + "' 不存在";
                     return 0;
                 }
@@ -9317,7 +9341,6 @@ out strError);
                     string strBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
                     string strRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
                     string strName = DomUtil.GetElementText(readerdom.DocumentElement, "name");
-
 
                     // 重新设定一个密码
                     Random rnd = new Random();
