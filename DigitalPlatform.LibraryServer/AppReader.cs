@@ -5078,6 +5078,27 @@ out strError);
                 bChanged = true;
             }
 
+            // 把临时密码设置为正式密码
+            if (bTempPassword == true
+                && strPassword != null)
+            {
+                byte[] output_timestamp = null;
+                // 修改读者密码
+                nRet = ChangeReaderPassword(
+                    sessioninfo,
+                    strOutputPath,
+                    ref readerdom,
+                    strPassword,    // TODO: 如果 strPassword == null 会怎么样？
+                    timestamp,
+                    out output_timestamp,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                timestamp = output_timestamp;
+
+                bChanged = true;
+            }
+
             if (bChanged == true)
             {
                 string strRecPath = strOutputPath;
