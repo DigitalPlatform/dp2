@@ -1448,9 +1448,9 @@ namespace DigitalPlatform.LibraryServer
             return false;
         }
 
+        // TODO: 各个环节要改为尽量使用 refID。要做大量测试
         // text-level: 内部处理
-        // 在 预约到书 库中，追加一条新的记录，
-        // 并作 email / dpmail / mq 通知
+        // 在 预约到书 库中，追加一条新的记录，并作 email / dpmail / mq 通知
         // 注：本函数可能要删除部分通知记录
         // parameters:
         //      strItemBarcode  册条码号。必须是册条码号。如果册条码号为空，参考ID需要使用 strRefID 参数
