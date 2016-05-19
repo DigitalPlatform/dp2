@@ -60,10 +60,10 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.toolStrip_main = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_printHtml = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton_setReportEndDay = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_setReportStartDay = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_convertFormat = new System.Windows.Forms.ToolStripButton();
-            this.timer_qu = new System.Windows.Forms.Timer(this.components);
             this.toolStripButton_openReportFolder = new System.Windows.Forms.ToolStripButton();
+            this.timer_qu = new System.Windows.Forms.Timer(this.components);
             this.tabControl1.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             this.tabPage_libraryConfig.SuspendLayout();
@@ -360,7 +360,7 @@
             this.toolStrip_main.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.toolStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_printHtml,
-            this.toolStripButton_setReportEndDay,
+            this.toolStripButton_setReportStartDay,
             this.toolStripButton_convertFormat,
             this.toolStripButton_openReportFolder});
             this.toolStrip_main.Location = new System.Drawing.Point(0, 303);
@@ -380,15 +380,15 @@
             this.toolStripButton_printHtml.Visible = false;
             this.toolStripButton_printHtml.Click += new System.EventHandler(this.toolStripButton_printHtml_Click);
             // 
-            // toolStripButton_setReportEndDay
+            // toolStripButton_setReportStartDay
             // 
-            this.toolStripButton_setReportEndDay.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_setReportEndDay.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_setReportEndDay.Image")));
-            this.toolStripButton_setReportEndDay.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_setReportEndDay.Name = "toolStripButton_setReportEndDay";
-            this.toolStripButton_setReportEndDay.Size = new System.Drawing.Size(108, 22);
-            this.toolStripButton_setReportEndDay.Text = "设置报表最末日期";
-            this.toolStripButton_setReportEndDay.Click += new System.EventHandler(this.toolStripButton_setReportEndDay_Click);
+            this.toolStripButton_setReportStartDay.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_setReportStartDay.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_setReportStartDay.Image")));
+            this.toolStripButton_setReportStartDay.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_setReportStartDay.Name = "toolStripButton_setReportStartDay";
+            this.toolStripButton_setReportStartDay.Size = new System.Drawing.Size(132, 22);
+            this.toolStripButton_setReportStartDay.Text = "设置报表创建起始日期";
+            this.toolStripButton_setReportStartDay.Click += new System.EventHandler(this.toolStripButton_setReportStartDay_Click);
             // 
             // toolStripButton_convertFormat
             // 
@@ -401,11 +401,6 @@
             this.toolStripButton_convertFormat.ToolTipText = "把 .rml 格式转换为其它格式";
             this.toolStripButton_convertFormat.Click += new System.EventHandler(this.toolStripButton_convertFormat_Click);
             // 
-            // timer_qu
-            // 
-            this.timer_qu.Interval = 1000;
-            this.timer_qu.Tick += new System.EventHandler(this.timer_qu_Tick);
-            // 
             // toolStripButton_openReportFolder
             // 
             this.toolStripButton_openReportFolder.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -415,6 +410,11 @@
             this.toolStripButton_openReportFolder.Size = new System.Drawing.Size(96, 22);
             this.toolStripButton_openReportFolder.Text = "打开报表文件夹";
             this.toolStripButton_openReportFolder.Click += new System.EventHandler(this.toolStripButton_openReportFolder_Click);
+            // 
+            // timer_qu
+            // 
+            this.timer_qu.Interval = 1000;
+            this.timer_qu.Tick += new System.EventHandler(this.timer_qu_Tick);
             // 
             // ReportForm
             // 
@@ -478,7 +478,7 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_query_do;
         private System.Windows.Forms.CheckBox checkBox_start_enableFirst;
         private System.Windows.Forms.Button button_start_dailyReport;
-        private System.Windows.Forms.ToolStripButton toolStripButton_setReportEndDay;
+        private System.Windows.Forms.ToolStripButton toolStripButton_setReportStartDay;
         private System.Windows.Forms.Button button_start_uploadReport;
         private System.Windows.Forms.Timer timer_qu;
         private System.Windows.Forms.ComboBox comboBox_start_uploadMethod;

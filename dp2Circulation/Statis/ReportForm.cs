@@ -10642,7 +10642,7 @@ MessageBoxDefaultButton.Button1);
     "");
             if (string.IsNullOrEmpty(strLastDay) == true)
             {
-                strError = "尚未配置报表最末日期";
+                strError = "尚未配置报表创建起点日期";
                 return -1;
             }
 
@@ -12640,7 +12640,7 @@ MessageBoxDefaultButton.Button1);
 
         #endregion
 
-        private void toolStripButton_setReportEndDay_Click(object sender, EventArgs e)
+        private void toolStripButton_setReportStartDay_Click(object sender, EventArgs e)
         {
             // string strError = "";
 
@@ -12652,8 +12652,8 @@ MessageBoxDefaultButton.Button1);
         REDO:
             strLastDate = InputDlg.GetInput(
     this,
-    "设置报表最末日期",
-    "报表的最末日期: ",
+    "设置报表创建起点日期",
+    "报表创建起点日期: ",
     strLastDate,
     this.MainForm.DefaultFont);
             if (strLastDate == null)

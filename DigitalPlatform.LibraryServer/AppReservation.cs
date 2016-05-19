@@ -1794,7 +1794,8 @@ namespace DigitalPlatform.LibraryServer
                  * type 消息类型。预约到书通知
                  * itemBarcode 册条码号
                  * refID    参考 ID
-                 * opacURL  图书在 OPAC 中的 URL
+                 * onShelf 是否在架。true/false
+                 * opacURL  图书在 OPAC 中的 URL。相对路径
                  * reserveTime 保留的时间
                  * today 今天的日期
                  * summary 书目摘要
@@ -1807,6 +1808,8 @@ namespace DigitalPlatform.LibraryServer
                     "itemBarcode", strItemBarcode);
                 DomUtil.SetElementText(dom.DocumentElement,
                     "refID", strRefID);
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "onShelf", bOnShelf ? "true" : "false");
 
                 DomUtil.SetElementText(dom.DocumentElement,
                     "opacURL", this.OpacServerUrl + "/book.aspx?barcode=" 
