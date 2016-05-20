@@ -538,11 +538,10 @@ namespace DigitalPlatform.dp2.Statis
     /// <summary>
     /// 帮助归类统计的2维内存表格
     /// </summary>
-    public class Table
+    public class Table : IEnumerable
     {
         Hashtable lines = new Hashtable();
 
-        // ArrayList sorted = null;
         List<Line> sorted = null;
 
         int m_nColumnsHint = 0;	// 暗示表的列数
@@ -579,6 +578,27 @@ namespace DigitalPlatform.dp2.Statis
             get
             {
                 return this.lines.Keys;
+            }
+        }
+
+        // 2016/5/19
+        public IEnumerator GetEnumerator()
+        {
+            if (this.sorted != null)
+            {
+                for(int i = 0;i<this.Count;i++)
+                {
+                    Line line = this[i];
+                    yield return line;
+                }
+            }
+            else
+            {
+                foreach(string key in this.lines.Keys)
+                {
+                    Line line = this[key];
+                    yield return line;
+                }
             }
         }
 
