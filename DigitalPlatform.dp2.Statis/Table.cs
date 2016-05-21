@@ -76,6 +76,7 @@ namespace DigitalPlatform.dp2.Statis
             }
 
             return strDefaultValue;
+
         }
 
         // 得到一个单元值，自动转换为字符串
@@ -84,24 +85,24 @@ namespace DigitalPlatform.dp2.Statis
         //      nIndex  列索引。如果为-1，表示希望获取Entry列
         public string GetString(int nIndex)
         {
-           /*
-            if (cells == null)
-                return "";
-            if (nIndex >= cells.Length)
-                return "";
+            /*
+             if (cells == null)
+                 return "";
+             if (nIndex >= cells.Length)
+                 return "";
 
-            Object obj = cells[nIndex];
-            if (obj != null) 
-            {
-                if ((obj is Int32) || (obj is Int64))
-                    return Convert.ToString((Int64)obj);
-                if (obj is string)
-                    return (string)obj;
-                throw(new Exception("不支持的数据类型"));
-            }
+             Object obj = cells[nIndex];
+             if (obj != null) 
+             {
+                 if ((obj is Int32) || (obj is Int64))
+                     return Convert.ToString((Int64)obj);
+                 if (obj is string)
+                     return (string)obj;
+                 throw(new Exception("不支持的数据类型"));
+             }
 
-            return "";
-            */
+             return "";
+             */
             return GetString(nIndex, "");
         }
 
@@ -195,7 +196,7 @@ namespace DigitalPlatform.dp2.Statis
         // 2014/6/8
         public object[] GetAllCells()
         {
-            object [] result = new object [cells.Length + 1];
+            object[] result = new object[cells.Length + 1];
             result[0] = this.strKey;
             Array.Copy(cells, 0, result, 1, cells.Length);
             return result;
@@ -225,7 +226,7 @@ namespace DigitalPlatform.dp2.Statis
                     string strText = (string)obj;
                     try
                     {
-                       return Convert.ToDecimal(strText);
+                        return Convert.ToDecimal(strText);
                     }
                     catch (Exception ex)
                     {
@@ -233,7 +234,7 @@ namespace DigitalPlatform.dp2.Statis
                         throw new Exception("字符串值 '" + strText + "' 在转换为decimal类型时发生错误: " + ex.Message);
                     }
                 }
-                else 
+                else
                     throw (new Exception("不支持的数据类型 " + obj.GetType().ToString()));
             }
 
@@ -298,7 +299,6 @@ namespace DigitalPlatform.dp2.Statis
             }
         }
 
-
         // 确保列空间足够
         void EnsureCells(int nColumn)
         {
@@ -348,7 +348,7 @@ namespace DigitalPlatform.dp2.Statis
                     Int64 v = (Int32)oldvalue;
                     v += incValue;
                     cells[nColumn] = v;
-                } 
+                }
                 else if (oldvalue is Int64)
                 {
                     Int64 v = (Int64)oldvalue;
@@ -508,20 +508,20 @@ namespace DigitalPlatform.dp2.Statis
                 {
                     string v = (string)oldvalue;
 
-                   // 连接两个价格字符串
+                    // 连接两个价格字符串
                     v = PriceUtil.JoinPriceString(v,
                         incValue);
 
                     string strSumPrices = "";
                     string strError = "";
-                            // 将形如"-123.4+10.55-20.3"的价格字符串归并汇总
+                    // 将形如"-123.4+10.55-20.3"的价格字符串归并汇总
                     int nRet = PriceUtil.SumPrices(v,
             out strSumPrices,
             out strError);
                     if (nRet == 0)
                         v = strSumPrices;
                     if (nRet == -1)
-                        throw new Exception("汇总金额字符串 '"+v+"' 时出错：" + strError);
+                        throw new Exception("汇总金额字符串 '" + v + "' 时出错：" + strError);
 
                     // v += incValue;
                     cells[nColumn] = v;
@@ -538,11 +538,10 @@ namespace DigitalPlatform.dp2.Statis
     /// <summary>
     /// 帮助归类统计的2维内存表格
     /// </summary>
-    public class Table
+    public class Table : IEnumerable
     {
         Hashtable lines = new Hashtable();
 
-        // ArrayList sorted = null;
         List<Line> sorted = null;
 
         int m_nColumnsHint = 0;	// 暗示表的列数
@@ -558,7 +557,7 @@ namespace DigitalPlatform.dp2.Statis
         public int GetMaxColumnCount()
         {
             int nResult = 0;
-            foreach(string key in this.lines.Keys)
+            foreach (string key in this.lines.Keys)
             {
                 Line line = (Line)this.lines[key];
                 if (line.Count > nResult)
@@ -579,6 +578,27 @@ namespace DigitalPlatform.dp2.Statis
             get
             {
                 return this.lines.Keys;
+            }
+        }
+
+        // 2016/5/19
+        public IEnumerator GetEnumerator()
+        {
+            if (this.sorted != null)
+            {
+                for(int i = 0;i<this.Count;i++)
+                {
+                    Line line = this[i];
+                    yield return line;
+                }
+            }
+            else
+            {
+                foreach(string key in this.lines.Keys)
+                {
+                    Line line = this[key];
+                    yield return line;
+                }
             }
         }
 

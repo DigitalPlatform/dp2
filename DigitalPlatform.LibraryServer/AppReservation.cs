@@ -1448,9 +1448,9 @@ namespace DigitalPlatform.LibraryServer
             return false;
         }
 
+        // TODO: 各个环节要改为尽量使用 refID。要做大量测试
         // text-level: 内部处理
-        // 在 预约到书 库中，追加一条新的记录，
-        // 并作 email / dpmail / mq 通知
+        // 在 预约到书 库中，追加一条新的记录，并作 email / dpmail / mq 通知
         // 注：本函数可能要删除部分通知记录
         // parameters:
         //      strItemBarcode  册条码号。必须是册条码号。如果册条码号为空，参考ID需要使用 strRefID 参数
@@ -1794,7 +1794,8 @@ namespace DigitalPlatform.LibraryServer
                  * type 消息类型。预约到书通知
                  * itemBarcode 册条码号
                  * refID    参考 ID
-                 * opacURL  图书在 OPAC 中的 URL
+                 * onShelf 是否在架。true/false
+                 * opacURL  图书在 OPAC 中的 URL。相对路径
                  * reserveTime 保留的时间
                  * today 今天的日期
                  * summary 书目摘要
@@ -1807,6 +1808,8 @@ namespace DigitalPlatform.LibraryServer
                     "itemBarcode", strItemBarcode);
                 DomUtil.SetElementText(dom.DocumentElement,
                     "refID", strRefID);
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "onShelf", bOnShelf ? "true" : "false");
 
                 DomUtil.SetElementText(dom.DocumentElement,
                     "opacURL", this.OpacServerUrl + "/book.aspx?barcode=" 

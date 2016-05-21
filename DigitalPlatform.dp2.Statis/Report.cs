@@ -1400,6 +1400,11 @@ true);
                     string strText = "";
                     if (column.ColumnNumber != -1)
                     {
+#if NO
+                        if (column.ColumnNumber == 9)
+                            Debug.Assert(false, "");
+#endif
+
                         if (column.DataType == DataType.PriceDouble)
                         {
                             if (line.IsNull(column.ColumnNumber) == true)
@@ -1447,6 +1452,7 @@ true);
                         }
                         else
                             strText = line.GetString(column.ColumnNumber, column.DefaultValue);
+
                     }
                     else
                     {

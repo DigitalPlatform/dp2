@@ -2275,6 +2275,8 @@ namespace DigitalPlatform.LibraryServer
                 XmlNode node = nodes[i];
 
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
+                string strRefID = DomUtil.GetAttr(node, "refID");
+
                 string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
                 // string strNo = DomUtil.GetAttr(node, "no");
                 string strBorrowDate = DomUtil.GetAttr(node, "borrowDate");
@@ -2447,6 +2449,8 @@ namespace DigitalPlatform.LibraryServer
                     XmlElement item = output_dom.CreateElement("item");
                     items.AppendChild(item);
 
+                    item.SetAttribute("barcode", strBarcode);
+                    item.SetAttribute("refID", strRefID);
                     item.SetAttribute("summary", strSummary);
                     item.SetAttribute("timeReturning", timeReturning.ToString("d"));
                     item.SetAttribute("overdue", strOverDue);
