@@ -5316,7 +5316,6 @@ strElementName);
   
   <oldReaderRecord recPath='...'>...</oldReaderRecord>	操作前旧的读者记录。<oldReaderRecord>元素是modifyprice操作时特有的元素
   <readerRecord recPath='...'>...</readerRecord>	最新读者记录
-
 </root>
 
 2007/12/18
@@ -5364,7 +5363,6 @@ strElementName);
             // 暂时把Robust当作Logic处理
             if (level == RecoverLevel.Robust)
                 level = RecoverLevel.Logic;
-
 
             long lRet = 0;
             int nRet = 0;

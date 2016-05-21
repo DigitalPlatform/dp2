@@ -12,6 +12,8 @@
     <column name="撤销金额" type="Currency" align="right" sum="yes" class="undo_money" eval="" />
     <column name="失效次" type="" align="right" sum="yes" class="expire_count" eval="" />
     <column name="操作总量" type="" align="right" sum="yes" class="total" eval="" />
+
+    <column name="实收金额" type="Currency" align="right" sum="yes" class="amerce_money_1" eval="currency.Set(line.GetString(2)).Substract(line.GetString(6)).ToString()" />
   </columns>
   <css>
   </css>

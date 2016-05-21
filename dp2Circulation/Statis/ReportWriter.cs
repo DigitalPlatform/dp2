@@ -295,7 +295,6 @@ namespace dp2Circulation
             string strComment = DomUtil.GetElementText(_cfgDom.DocumentElement, "titleComment").Replace("\\r", "\r");
             strComment = StringUtil.MacroString(macro_table, strComment);
 
-
             string strCreateTime = DateTime.Now.ToString();
 
             string strCssContent = this._cfgDom.DocumentElement.GetAttribute("css").Replace("\\r", "\r\n").Replace("\\t", "\t");
@@ -312,8 +311,10 @@ namespace dp2Circulation
                 PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strOutputFileName));
             }
 
+#if NO
             try
             {
+#endif
                 using (XmlTextWriter writer = new XmlTextWriter(strOutputFileName, Encoding.UTF8))
                 {
                     writer.Formatting = Formatting.Indented;
@@ -362,12 +363,15 @@ namespace dp2Circulation
                     writer.WriteEndElement();   // </report>
                     writer.WriteEndDocument();
                 }
+
+#if NO
             }
             catch (Exception ex)
             {
-                strError = "写入文件 '" + strOutputFileName + "' 的过程中出现错误: " + ex.Message;
+                strError = "写入文件 '" + strOutputFileName + "' 的过程中出现异常: " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
+#endif
 
             // TODO: 没有必要?
             File.SetAttributes(strOutputFileName, FileAttributes.Archive);
@@ -478,7 +482,9 @@ namespace dp2Circulation
                 // Line line = table[i];
 
                 if (engine != null)
+                {
                     engine.SetGlobalValue("line", data_reader);
+                }
 
                 string strLineCssClass = "content";
 #if NO
@@ -519,6 +525,7 @@ namespace dp2Circulation
                         {
                             // engine.SetGlobalValue("cell", line.GetObject(column.ColumnNumber));
                             engine.SetGlobalValue("rowNumber", nLineCount.ToString());
+                            engine.SetGlobalValue("currency", new PriceUtil());
                             strText = engine.Evaluate(column.Eval).ToString();
                         }
                         else if (column.DataType == ColumnDataType.PriceDouble)
@@ -638,7 +645,7 @@ namespace dp2Circulation
                         }
                         catch (Exception ex)	// 俘获可能因字符串转换为整数抛出的异常
                         {
-                            throw new Exception("在累加 行 " + i.ToString() + " 列 " + column.ColumnNumber.ToString() + " 值的时候，抛出异常: " + ExceptionUtil.GetAutoText(ex));
+                            throw new Exception("在累加 行 " + i.ToString() + " 列 " + column.ColumnNumber.ToString() + " 值的时候，出现异常: " + ExceptionUtil.GetAutoText(ex));
                         }
                     }
                 }
@@ -689,6 +696,7 @@ namespace dp2Circulation
                     {
                         if (string.IsNullOrEmpty(column.Eval) == false)
                         {
+                            engine.SetGlobalValue("currency", new PriceUtil());
                             strText = engine.Evaluate(column.Eval).ToString();
                         }
                         else if (column.Sum == true
@@ -822,8 +830,12 @@ object o2)
             }
             if (datatype == ColumnDataType.Currency)
             {
+#if NO
                 // 这一句容易发现列 数据类型 的错误
                 return PriceUtil.JoinPriceString((string)o1,
+                    (string)o2);
+#endif
+                return PriceUtil.Add((string)o1,
                     (string)o2);
 #if NO
                 // 这一句更健壮一些
@@ -1012,7 +1024,6 @@ object o2)
             return this.FieldValues[i] == null;
         }
 
-
         //
         // 摘要:
         //     Returns True if the resultset has rows that can be fetched
@@ -1036,7 +1047,6 @@ object o2)
                 return false;
             }
         }
-
 
         //
         // 摘要:
@@ -1137,7 +1147,6 @@ object o2)
                 return (char)o;
             throw new Exception("列 " + i.ToString() + " 不是 byte 类型");
         }
-
 
         //
         // 摘要:
@@ -1437,7 +1446,10 @@ object o2)
         //     string
         public override string GetString(int i)
         {
-            return this.FieldValues[i].ToString();
+            var o = this.FieldValues[i];
+            if ( o == null)
+                return "";
+            return o.ToString();
         }
         //
         // 摘要:

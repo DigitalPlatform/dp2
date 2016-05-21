@@ -415,7 +415,10 @@ namespace DigitalPlatform.dp2.Statis
         //     Type
         public override Type GetFieldType(int i)
         {
-            return this[i].GetType();
+            var o = this[i];
+            if (o == null)
+                return null;
+            return o.GetType();
         }
         //
         // 摘要:
@@ -475,7 +478,11 @@ namespace DigitalPlatform.dp2.Statis
         //     Int16
         public override short GetInt16(int i)
         {
-            return (short)this[i];
+            var o = this[i];
+            if (o == null)
+                return 0;
+
+            return (short)o;
         }
         //
         // 摘要:
@@ -489,7 +496,11 @@ namespace DigitalPlatform.dp2.Statis
         //     Int32
         public override int GetInt32(int i)
         {
-            return (int)this[i];
+            var o = this[i];
+            if (o == null)
+                return 0;
+
+            return (int)o;
         }
 
         //
@@ -504,7 +515,11 @@ namespace DigitalPlatform.dp2.Statis
         //     Int64
         public override long GetInt64(int i)
         {
-            return (long)this[i];
+            var o = this[i];
+            if (o == null)
+                return 0;
+
+            return (long)o;
         }
 
         //
@@ -560,7 +575,10 @@ namespace DigitalPlatform.dp2.Statis
         //     string
         public override string GetString(int i)
         {
-            return this[i].ToString();
+            var o = this[i];
+            if (o == null)
+                return "";
+            return o.ToString();
         }
         //
         // 摘要:

@@ -18,7 +18,7 @@ using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
-    public class OperLogLoader : IEnumerable 
+    public class OperLogLoader : IEnumerable
     {
         /// <summary>
         /// 提示框事件
@@ -62,7 +62,7 @@ namespace dp2Circulation
             set;
         }
 
-        public int nLevel
+        public int Level
         {
             get;
             set;
@@ -555,7 +555,7 @@ namespace dp2Circulation
                     // loader.owner = this.owner;
                     loader.estimate = this.estimate;
                     loader.FileName = strLogFilename;
-                    loader.nLevel = this.nLevel;
+                    loader.Level = this.Level;
                     loader.lServerFileSize = sizes[i];
                     loader.Range = strRange;
                     loader.AutoCache = this.AutoCache;
@@ -582,6 +582,38 @@ namespace dp2Circulation
         {
             if (this.Prompt != null)
                 this.Prompt(sender, e);
+        }
+
+        // 重新用不同详细级别获取事项内容
+        // parameters:
+        //      item    要被重新获取内容的对象
+        //      nLevel  内容详细级别。0/1/2。0 为最详细级
+        public OperLogItem LoadOperLogItem(OperLogItem item, int nLevel)
+        {
+            OperLogItemLoader loader = new OperLogItemLoader();
+            loader.Stop = this.Stop;
+            loader.Channel = this.Channel;
+            loader.estimate = null;//
+            loader.FileName = item.Date + ".log";
+            loader.Level = nLevel;
+            loader.lServerFileSize = -1;
+            loader.Range = item.Index.ToString() + "-" + item.Index.ToString();
+            loader.AutoCache = this.AutoCache;
+            loader.lProgressValue = 0;
+            loader.lSize = 0;
+            loader.Filter = this.Filter;
+            loader.LogType = this.LogType;
+
+#if NO
+                    loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                    loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+#endif
+            foreach (OperLogItem new_item in loader)
+            {
+                return new_item;
+            }
+
+            return null;
         }
     }
 

@@ -116,7 +116,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.71 (2016/4/15) 对各个环节的密码相关功能进行加固。GetReaderInfo() API 不会返回 password 元素；GetOperLog() GetOperLogs() API 会滤除各种密码
         //      2.72 (2016/5/14) SearchBiblio() API 支持按照馆代码筛选
         //      2.73 (2016/5/18) MaxItemHistoryItems 和 MaxPatronHistoryItems 的默认值都修改为 10
-        public static string Version = "2.73";
+        //      2.74 (2016/5/21) GetOperLogs() API 返回的 amerce 操作的日志记录，无论何种详细级别，都不去除 oldReaderRecord 元素
+        public static string Version = "2.74";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
