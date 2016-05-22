@@ -60,6 +60,7 @@ namespace DigitalPlatform.LibraryServer
         public bool VerifyReaderType = false;  // 创建和修改读者记录的时候是否验证读者类型
         public bool BorrowCheckOverdue = true;  // 借书的时候是否检查未还超期册
 
+        public string CirculationNotifyTypes = "";  // 流通操作时发出实时通知的类型
 #if NO
         // 保存资源
         // return:
@@ -10796,7 +10797,7 @@ out string strError)
         //      -1  error
         //      0   strAmercedXml中<state>元素的值为*非*"settlemented"
         //      1   strAmercedXml中<state>元素的值为"settlemented"
-        static int ConvertAmerceRecordToOverdueString(string strAmercedXml,
+        public static int ConvertAmerceRecordToOverdueString(string strAmercedXml,
             out string strReaderBarcode,
             out string strOverdueString,
             out string strError)
@@ -10849,7 +10850,6 @@ out string strError)
             string strBorrowOperator = DomUtil.GetElementText(dom.DocumentElement,
                 "borrowOperator");  // 2006/3/27
 
-
             string strReturnDate = DomUtil.GetElementText(dom.DocumentElement,
                 "returnDate");
             string strReturnOperator = DomUtil.GetElementText(dom.DocumentElement,
@@ -10874,8 +10874,6 @@ out string strError)
             if (String.IsNullOrEmpty(strOverduePeriod) == false)
                 DomUtil.SetAttr(nodeOverdue, "overduePeriod", strOverduePeriod);
 
-
-
             if (String.IsNullOrEmpty(strOriginPrice) == false)
             {
                 DomUtil.SetAttr(nodeOverdue, "price", strOriginPrice);
@@ -10883,7 +10881,6 @@ out string strError)
             }
             else
                 DomUtil.SetAttr(nodeOverdue, "price", strPrice);
-
 
             // 撤回的时候不丢失注释。因为已经无法分辨哪次追加的注释，所以原样保留。
             // 2007/4/19

@@ -4,8 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Xml;
+using System.Messaging;
 
 using DigitalPlatform.Xml;
+using DigitalPlatform.Text;
+using DigitalPlatform.rms.Client;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -24,6 +27,21 @@ namespace DigitalPlatform.LibraryServer
         {
             this.Loop = true;
             this.PerTime = 5 * 60 * 1000;	// 5分钟
+
+            if (string.IsNullOrEmpty(this.App.OutgoingQueue) == false)
+            {
+                try
+                {
+                    _queue = new MessageQueue(this.App.OutgoingQueue);
+                }
+                catch (Exception ex)
+                {
+                    string strError = "OperLogThread 构造时，创建路径为 '" + this.App.OutgoingQueue + "' 的 MessageQueue 对象失败: " + ex.Message;
+                    this.App.WriteErrorLog(strError);
+                }
+            }
+            else
+                this._queue = null;
         }
 
         public override string DefaultName
@@ -54,6 +72,9 @@ namespace DigitalPlatform.LibraryServer
         {
             if (strOperation == "borrow" || strOperation == "return")
                 return true;
+            if (strOperation == "amerce")
+                return true;
+
             return false;
         }
 
@@ -118,7 +139,334 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                         this.App.WriteErrorLog("OperLogThread 写入 mongodb 日志库时出错: " + strError);
                 }
+
+                if ((strOperation == "borrow" || strOperation == "return" || strOperation == "amerce")
+                    && string.IsNullOrEmpty(this.App.OutgoingQueue) == false
+                    && StringUtil.IsInList("mq", this.App.CirculationNotifyTypes) == true
+                    )
+                {
+                    // 写入 MSMQ 队列
+                    string strError = "";
+                    int nRet = SendToQueue(
+                        dom,
+                        strOperation,
+                        out strError);
+                    if (nRet == -1)
+                        this.App.WriteErrorLog("OperLogThread 写入 MSMQ 队列时出错: " + strError);
+                }
             }
+        }
+
+        MessageQueue _queue = null;
+
+        int SendToQueue(XmlDocument domOperLog,
+            string strOperation,
+            out string strError)
+        {
+            strError = "";
+
+            string strBodyXml = "";
+            string strReaderBarcode = "";
+            string strReaderRefID = "";
+
+            try
+            {
+                if (strOperation == "borrow" || strOperation == "return")
+                    BuildBorrowReturnRecord(domOperLog,
+                    out strBodyXml,
+                    out strReaderBarcode,
+                    out strReaderRefID);
+                else if (strOperation == "amerce")
+                    BuildAmerceRecord(domOperLog,
+                    out strBodyXml,
+                    out strReaderBarcode,
+                    out strReaderRefID);
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+
+            if (string.IsNullOrEmpty(strBodyXml))
+                return 0;
+
+            // 向 MSMQ 消息队列发送消息
+            return ReadersMonitor.SendToQueue(this._queue,
+                (string.IsNullOrEmpty(strReaderRefID) ? strReaderBarcode : "!refID:" + strReaderRefID)
+                + "@LUID:" + this.App.UID,
+                "xml",
+                strBodyXml,
+                out strError);
+        }
+
+        void BuildBorrowReturnRecord(XmlDocument domOperLog,
+            out string strBodyXml,
+            out string strReaderBarcode,
+            out string strReaderRefID)
+        {
+            strBodyXml = "";
+            strReaderBarcode = "";
+            strReaderRefID = "";
+
+            string strError = "";
+
+            string strOperation = DomUtil.GetElementText(domOperLog.DocumentElement, "operation");
+
+            string strLibraryCode = DomUtil.GetElementText(domOperLog.DocumentElement, "libraryCode");
+
+            string strReaderRecord = DomUtil.GetElementText(domOperLog.DocumentElement, "readerRecord");
+            XmlDocument readerdom = new XmlDocument();
+            readerdom.LoadXml(strReaderRecord);
+
+            string strItemRecord = DomUtil.GetElementText(domOperLog.DocumentElement, "itemRecord");
+            XmlDocument itemdom = new XmlDocument();
+            itemdom.LoadXml(strItemRecord);
+
+            string strItemRecPath = "";
+            XmlElement item_record = domOperLog.DocumentElement.SelectSingleNode("itemRecord") as XmlElement;
+            if (item_record != null)
+                strItemRecPath = item_record.GetAttribute("recPath");
+
+            strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+            strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+
+            // 构造内容
+            XmlDocument bodydom = new XmlDocument();
+            bodydom.LoadXml("<root />");
+
+            if (strOperation == "borrow")
+                DomUtil.SetElementText(bodydom.DocumentElement, "type", "借书成功");
+            else if (strOperation == "return")
+                DomUtil.SetElementText(bodydom.DocumentElement, "type", "还书成功");
+            else
+            {
+#if NO
+                strError = "无法识别的 strOperation '" + strOperation + "'";
+                throw new Exception(strError);
+#endif
+                DomUtil.SetElementText(bodydom.DocumentElement, "type", "修改交费注释");
+                strBodyXml = "";
+                return;
+            }
+
+            // 复制日志记录中的一级元素
+            XmlNodeList nodes = domOperLog.DocumentElement.SelectNodes("*");
+            foreach (XmlNode node in nodes)
+            {
+                if (node.Name == "readerRecord" || node.Name == "itemRecord")
+                    continue;
+                if (node.Name == "type")
+                    DomUtil.SetElementText(bodydom.DocumentElement, "bookType", node.InnerText);
+                else
+                    DomUtil.SetElementText(bodydom.DocumentElement, node.Name, node.InnerText);
+            }
+
+            {
+                XmlElement record = bodydom.CreateElement("patronRecord");
+                bodydom.DocumentElement.AppendChild(record);
+                record.InnerXml = readerdom.DocumentElement.InnerXml;
+
+                DomUtil.DeleteElement(record, "borrowHistory");
+                DomUtil.DeleteElement(record, "password");
+                DomUtil.DeleteElement(record, "fingerprint");
+                DomUtil.SetElementText(record, "libraryCode", strLibraryCode);
+            }
+
+            {
+                XmlElement record = bodydom.CreateElement("itemRecord");
+                bodydom.DocumentElement.AppendChild(record);
+                record.InnerXml = itemdom.DocumentElement.InnerXml;
+
+                string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+
+                DomUtil.DeleteElement(record, "borrowHistory");
+                // 加入书目摘要
+                string strSummary = "";
+                string strBiblioRecPath = "";
+                RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
+                if (channel == null)
+                {
+                    strError = "channel == null";
+                    throw new Exception(strError);
+                }
+                LibraryServerResult result = this.App.GetBiblioSummary(
+                    null,
+                    channel,
+                    strItemBarcode,
+                    strItemRecPath,
+                    null,
+                    out strBiblioRecPath,
+                    out strSummary);
+                if (result.Value == -1)
+                {
+                    // strSummary = result.ErrorInfo;
+                }
+                else
+                {
+                }
+
+                DomUtil.SetElementText(record, "summary", strSummary);
+            }
+
+            strBodyXml = bodydom.DocumentElement.OuterXml;
+        }
+
+        void BuildAmerceRecord(XmlDocument domOperLog,
+    out string strBodyXml,
+    out string strReaderBarcode,
+    out string strReaderRefID)
+        {
+            strBodyXml = "";
+            strReaderBarcode = "";
+            strReaderRefID = "";
+
+            string strError = "";
+
+            // string strOperation = DomUtil.GetElementText(domOperLog.DocumentElement, "operation");
+            string strAction = DomUtil.GetElementText(domOperLog.DocumentElement, "action");
+            string strLibraryCode = DomUtil.GetElementText(domOperLog.DocumentElement, "libraryCode");
+
+            string strReaderRecord = DomUtil.GetElementText(domOperLog.DocumentElement, "readerRecord");
+            XmlDocument readerdom = new XmlDocument();
+            readerdom.LoadXml(strReaderRecord);
+
+            strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+            strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+
+            // 构造内容
+            XmlDocument bodydom = new XmlDocument();
+            bodydom.LoadXml("<root />");
+
+            if (strAction == "amerce")
+                DomUtil.SetElementText(bodydom.DocumentElement, "type", "交费");
+            else if (strAction == "undo")
+                DomUtil.SetElementText(bodydom.DocumentElement, "type", "撤销交费");
+            else if (strAction == "modifyprice")
+            {
+                // DomUtil.SetElementText(bodydom.DocumentElement, "type", "变更交费金额");
+                strBodyXml = "";
+                return;
+            }
+            else if (strAction == "expire")
+                DomUtil.SetElementText(bodydom.DocumentElement, "type", "以停代金到期");
+            else if (strAction == "modifycomment")
+            {
+                // DomUtil.SetElementText(bodydom.DocumentElement, "type", "修改交费注释");
+                strBodyXml = "";
+                return;
+            }
+            else
+            {
+#if NO
+                strError = "无法识别的 strAction '" + strAction + "'";
+                throw new Exception(strError);
+#endif
+                strBodyXml = "";
+                return;
+            }
+
+            // 复制日志记录中的一级元素
+            XmlNodeList nodes = domOperLog.DocumentElement.SelectNodes("*");
+            foreach (XmlNode node in nodes)
+            {
+                if (node.Name == "readerRecord"
+                    || node.Name == "oldReaderRecord"
+                    || node.Name == "expireOverdues"
+                    || node.Name == "amerceItems"
+                    || node.Name == "amerceRecord")
+                    continue;
+                DomUtil.SetElementText(bodydom.DocumentElement, node.Name, node.InnerText);
+            }
+
+            {
+                XmlElement record = bodydom.CreateElement("patronRecord");
+                bodydom.DocumentElement.AppendChild(record);
+                record.InnerXml = readerdom.DocumentElement.InnerXml;
+
+                DomUtil.DeleteElement(record, "borrowHistory");
+                DomUtil.DeleteElement(record, "password");
+                DomUtil.DeleteElement(record, "fingerprint");
+                DomUtil.SetElementText(record, "libraryCode", strLibraryCode);
+            }
+
+            // items
+            XmlElement amerce_items = bodydom.DocumentElement.SelectSingleNode("items") as XmlElement;
+            if (amerce_items == null)
+            {
+                amerce_items = bodydom.CreateElement("items");
+                bodydom.DocumentElement.AppendChild(amerce_items);
+            }
+
+            XmlNodeList amerce_records = domOperLog.DocumentElement.SelectNodes("amerceRecord");
+            foreach (XmlElement amerce_record in amerce_records)
+            {
+                string strAmercedXml = amerce_record.InnerText;
+                if (string.IsNullOrEmpty(strAmercedXml))
+                    continue;
+
+                string strOverdueString = "";
+                string strTemp = "";
+                int nRet = LibraryApplication.ConvertAmerceRecordToOverdueString(strAmercedXml,
+            out strTemp,
+            out strOverdueString,
+            out strError);
+                if (nRet == -1)
+                    throw new Exception(strError);
+
+                XmlDocumentFragment fragment = bodydom.CreateDocumentFragment();
+                fragment.InnerXml = strOverdueString;
+
+                amerce_items.AppendChild(fragment);
+            }
+
+            // expire 情况要把 expireOverdues/overdue 翻译为 items/overdue 元素
+            if (strAction == "expire")
+            {
+                XmlElement expireOverdues = domOperLog.DocumentElement.SelectSingleNode("expireOverdues") as XmlElement;
+                if (expireOverdues != null)
+                    amerce_items.InnerXml = expireOverdues.InnerXml;
+            }
+            else
+            {
+                // 留着 amerceItem 元素做测试对照
+
+            }
+
+            RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
+            if (channel == null)
+            {
+                strError = "channel == null";
+                throw new Exception(strError);
+            }
+            // 为 overdue 元素添加 summary 属性
+            XmlNodeList overdues = bodydom.DocumentElement.SelectNodes("items/overdue");
+            foreach (XmlElement overdue in overdues)
+            {
+                string strItemBarcode = overdue.GetAttribute("barcode");
+                if (string.IsNullOrEmpty(strItemBarcode))
+                    continue;
+
+                // 加入书目摘要
+                string strSummary = "";
+                string strBiblioRecPath = "";
+                LibraryServerResult result = this.App.GetBiblioSummary(
+                    null,
+                    channel,
+                    strItemBarcode,
+                    "", // strItemRecPath,
+                    null,
+                    out strBiblioRecPath,
+                    out strSummary);
+                if (result.Value == -1)
+                {
+                    // strSummary = result.ErrorInfo;
+                }
+                else
+                    overdue.SetAttribute("summary", strSummary);
+            }
+
+            strBodyXml = bodydom.DocumentElement.OuterXml;
         }
     }
 }

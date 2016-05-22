@@ -1390,15 +1390,18 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
-            // 权限判断
-            // 权限字符串
-            if (StringUtil.IsInList("getbibliosummary", sessioninfo.RightsOrigin) == false
-                && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+            if (sessioninfo != null)
             {
-                result.Value = -1;
-                result.ErrorInfo = "获取种摘要信息被拒绝。不具备 order 或 getbibliosummary 权限。";
-                result.ErrorCode = ErrorCode.AccessDenied;
-                return result;
+                // 权限判断
+                // 权限字符串
+                if (StringUtil.IsInList("getbibliosummary", sessioninfo.RightsOrigin) == false
+                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "获取种摘要信息被拒绝。不具备 order 或 getbibliosummary 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
             }
 
             int nRet = 0;
@@ -1628,7 +1631,8 @@ namespace DigitalPlatform.LibraryServer
                     strSummary = summary.ImageFragment + summary.Summary;
                 else
                     strSummary = summary.Summary;
-                if (string.IsNullOrEmpty(strSummary) == false)
+                if (string.IsNullOrEmpty(strSummary) == false
+                    && sessioninfo != null)
                 {
                     // 从存储中命中
                     if (this.Statis != null)
@@ -1803,7 +1807,8 @@ return result;
             }
 #endif
 
-            if (this.Statis != null)
+            if (this.Statis != null
+                && sessioninfo != null)
                 this.Statis.IncreaseEntryValue(
                 sessioninfo.LibraryCodeList,
                 "获取书目摘要",

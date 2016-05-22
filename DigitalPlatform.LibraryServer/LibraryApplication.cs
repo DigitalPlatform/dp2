@@ -884,6 +884,8 @@ namespace DigitalPlatform.LibraryServer
                         this.VerifyBookType = DomUtil.GetBooleanParam(node, "verifyBookType", false);
                         this.VerifyReaderType = DomUtil.GetBooleanParam(node, "verifyReaderType", false);
                         this.BorrowCheckOverdue = DomUtil.GetBooleanParam(node, "borrowCheckOverdue", true);
+
+                        this.CirculationNotifyTypes = node.GetAttribute("notifyTypes");
                     }
                     else
                     {
@@ -897,6 +899,7 @@ namespace DigitalPlatform.LibraryServer
                         this.VerifyBookType = false;
                         this.VerifyReaderType = false;
                         this.BorrowCheckOverdue = true;
+                        this.CirculationNotifyTypes = "";
                     }
 
                     // <channel>

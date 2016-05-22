@@ -363,7 +363,7 @@ namespace dp2Circulation
                                 }
 #endif
                             if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.74") < 0
-                                && strOperation == "amerce" && strAction == "modifyprice")
+                                && strOperation == "amerce" && (strAction == "amerce" || strAction == "modifyprice"))
                             {
                                 // 重新获得当前日志记录，用最详细级别
                                 OperLogItem new_item = loader.LoadOperLogItem(item, 0);
@@ -7410,12 +7410,29 @@ MessageBoxDefaultButton.Button2);
                         }
                         else
                         {
+                            string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
+
+                            OperLogItem current_item = item;
+                            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.74") < 0
+    && strOperation == "amerce" && (strAction == "amerce" || strAction == "modifyprice"))
+                            {
+                                // 重新获得当前日志记录，用最详细级别
+                                OperLogItem new_item = loader.LoadOperLogItem(item, 0);
+                                if (new_item == null)
+                                {
+                                    strError = "重新获取 OperLogItem 时出错";
+                                    return -1;
+                                }
+                                dom.LoadXml(new_item.Xml);
+                                current_item = new_item;
+                            }
+
                             // 在内存中增加一行，关于 operlogXXX 表的信息
                             nRet = buffer.AddLine(
         strOperation,
         dom,
-        item.Date,
-        item.Index,
+        current_item.Date,
+        current_item.Index,
         out strError);
                             if (nRet == -1)
                                 return -1;
