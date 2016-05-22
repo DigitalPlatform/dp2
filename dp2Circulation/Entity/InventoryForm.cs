@@ -2703,7 +2703,7 @@ null);
                 loader.Stop = this.Progress;
                 loader.estimate = estimate;
                 loader.FileNames = dates;
-                loader.nLevel = 2;  // this.MainForm.OperLogLevel;
+                loader.Level = 2;  // this.MainForm.OperLogLevel;
                 loader.AutoCache = false;
                 loader.CacheDir = "";
 

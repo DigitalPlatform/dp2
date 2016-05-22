@@ -1150,6 +1150,16 @@ this.OperTime);
             }
         }
 
+        static XmlElement GetOverdueByID(string strReaderRecord, string strID)
+        {
+            XmlDocument readerdom = new XmlDocument();
+            readerdom.LoadXml(strReaderRecord);
+            XmlElement overdue = readerdom.DocumentElement.SelectSingleNode("overdues/overdue[@id='" + strID + "']") as XmlElement;
+            if (overdue == null)
+                return null;    // not found
+            return overdue;
+        }
+
         // 根据日志 XML 记录填充数据
         public override int SetData(XmlDocument dom,
             string strDate,
@@ -1165,7 +1175,13 @@ this.OperTime);
 
             this.ReaderBarcode = DomUtil.GetElementText(dom.DocumentElement, "readerBarcode");
 
-            XmlNodeList records = dom.DocumentElement.SelectNodes("amerceRecord");
+            string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
+
+            // 建立交费记录
+            int i = 0;
+            if (strAction == "amerce")
+            {
+                XmlNodeList records = dom.DocumentElement.SelectNodes("amerceRecord");
 #if NO
             if (record != null)
             {
@@ -1208,28 +1224,170 @@ this.OperTime);
                 }
             }
 #endif
-            int i = 0;
-            foreach (XmlNode record in records)
-            {
-                if (i == 0)
-                    FillRecord(record, this);
-                else
+                foreach (XmlNode record in records)
                 {
-                    if (lines == null)
-                        lines = new List<OperLogLineBase>();
-                    AmerceOperLogLine line = new AmerceOperLogLine();
-                    (this as OperLogLineBase).CopyTo(line);
-                    line.SubNo = i;
-                    FillRecord(record, line);
-                    lines.Add(line);
+                    if (i == 0)
+                        FillRecord(record, this);
+                    else
+                    {
+                        if (lines == null)
+                            lines = new List<OperLogLineBase>();
+                        AmerceOperLogLine line = new AmerceOperLogLine();
+                        (this as OperLogLineBase).CopyTo(line);
+                        line.SubNo = i;
+                        FillRecord(record, line);
+                        lines.Add(line);
+                    }
+
+                    i++;
+                }
+            }
+
+            // 建立价格变更记录
+            {
+
+
+                // modifyprice 动作，并没有对应的 amerceRecord 元素，因为尚未交费，只是修改了金额
+                // 所以需要选出全部 amerceItem 元素
+                XmlNodeList temp_items = dom.DocumentElement.SelectNodes("amerceItems/amerceItem");
+                List<XmlElement> items = new List<XmlElement>();
+                foreach(XmlElement item in temp_items)
+                {
+                    if (item.GetAttributeNode("newPrice") != null)
+                        items.Add(item);
+                    else
+                    {
+                        if (strAction == "modifyprice")
+                        {
+                            strError = "action 为 modifyprice 的日志记录中，出现了 amerceItem 元素缺乏 newPrice 属性的情况，格式错误";
+                            return -1;
+                        }
+                        continue;   // action 为 amerce 则有可能并不修改金额
+                    }
                 }
 
-                i++;
+                if (items.Count > 0)
+                {
+                    string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement, "readerBarcode");
+                    string strOldRecord = DomUtil.GetElementText(dom.DocumentElement, "oldReaderRecord");
+                    if (string.IsNullOrEmpty(strOldRecord))
+                    {
+                        strError = "amerce 类型的日志记录要求具备 oldReaderRecord 元素文本内容，需要用详细级获取日志信息";
+                        return -1;
+                    }
+
+                    foreach (XmlElement item in items)
+                    {
+                        string strID = item.GetAttribute("id");
+                        string strNewPrice = null;
+                        if (item.GetAttributeNode("newPrice") != null)
+                            strNewPrice = item.GetAttribute("newPrice");
+                        else
+                        {
+                            if (strAction == "modifyprice")
+                            {
+                                strError = "action 为 modifyprice 的日志记录中，出现了 amerceItem 元素缺乏 newPrice 属性的情况，格式错误";
+                                return -1;
+                            }
+                            continue;   // action 为 amerce 则有可能并不修改金额
+                        }
+
+                        // oldPrice 需要从 oldReaderRecord 元素中获得
+                        XmlElement overdue = GetOverdueByID(strOldRecord, strID);
+                        if (overdue == null)
+                        {
+                            strError = "日志记录格式错误: 根据id '" + strID + "' 在日志记录<oldReaderRecord>元素内没有找到对应的<overdue>元素";
+                            return -1;
+                        }
+
+                        if (i == 0)
+                            FillRecordByOverdue(overdue,
+                    strReaderBarcode,
+                    strNewPrice,
+                    this);
+                        else
+                        {
+                            if (lines == null)
+                                lines = new List<OperLogLineBase>();
+                            AmerceOperLogLine line = new AmerceOperLogLine();
+                            (this as OperLogLineBase).CopyTo(line);
+                            line.SubNo = i;
+                            FillRecordByOverdue(overdue,
+                    strReaderBarcode,
+                    strNewPrice,
+                    line);
+                            lines.Add(line);
+                        }
+
+                        i++;
+                    }
+                }
             }
 
             return 0;
         }
 
+        // 2016/5/20
+        // 根据读者记录中 overdue 内容填充 line 的各个成员
+        static void FillRecordByOverdue(XmlElement overdue,
+            string strReaderBarcode,
+            string strNewPrice,
+            AmerceOperLogLine line)
+        {
+            if (overdue == null)
+                return;
+
+            string strError = "";
+            line.AmerceRecPath = "";
+            line.Action = "modifyprice";
+            try
+            {
+                line.ReaderBarcode = strReaderBarcode;
+                line.ItemBarcode = overdue.GetAttribute("barcode");
+
+                // 变化的金额
+                string strOldPrice = overdue.GetAttribute("price");
+                List<string> prices = new List<string>();
+                if (string.IsNullOrEmpty(strNewPrice) == false)
+                    prices.Add(strNewPrice);
+                if (string.IsNullOrEmpty(strOldPrice) == false)
+                    prices.Add("-" + strOldPrice);
+
+                string strResult = "";
+                int nRet = PriceUtil.TotalPrice(prices,
+        out strResult,
+        out strError);
+                if (nRet == -1)
+                {
+                    // return -1;
+                    return;
+                }
+
+                long value = 0;
+                string strUnit = "";
+                nRet = ParsePriceString(strResult,
+        out value,
+        out strUnit,
+        out strError);
+                if (nRet == -1)
+                {
+                    line.Unit = "";
+                    line.Price = 0;
+                }
+                else
+                {
+                    line.Unit = strUnit;
+                    line.Price = value;
+                }
+
+                line.Reason = overdue.GetAttribute("reason");
+            }
+            catch
+            {
+            }
+        }
+
+        // 根据 amerceRecord 元素内容填充 line 的各个成员
         static void FillRecord(XmlNode record, AmerceOperLogLine line)
         {
             if (record == null)
@@ -1238,6 +1396,7 @@ this.OperTime);
             string strError = "";
             line.AmerceRecPath = DomUtil.GetAttr(record,
                 "recPath");
+            line.Action = "amerce";
             string strRecord = record.InnerText;
             XmlDocument reader_dom = new XmlDocument();
             try

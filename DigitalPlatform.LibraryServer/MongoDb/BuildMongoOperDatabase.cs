@@ -442,6 +442,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 将一条 borrow 或 return 操作日志信息加入 mongodb 日志库
+        // mongodb 日志库的意义在于提供借阅历史检索功能
         public static int AppendOperationBorrowReturn(
             LibraryApplication app,
             XmlDocument domOperLog,

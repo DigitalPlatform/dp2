@@ -379,7 +379,7 @@ namespace dp2Circulation
                     strOldPrice = GetPriceByID(strOldRecord, strID);
                     if (strOldPrice == null)
                     {
-                        strError = "日志文件格式错误: 根据id '" + strID + "' 在日志记录<oldReaderRecord>元素文本内<overdue>元素中没有找到对应的事项";
+                        strError = "日志记录格式错误: 根据id '" + strID + "' 在日志记录<oldReaderRecord>元素文本内<overdue>元素中没有找到对应的事项";
                         return -1;
                     }
                 }
@@ -809,7 +809,7 @@ out strError);
                     strOldPrice = GetPriceByID(strOldRecord, strID);
                     if (strOldPrice == null)
                     {
-                        strError = "日志文件格式错误: 根据id '" + strID + "' 在日志记录<oldReaderRecord>元素文本内<overdue>元素中没有找到对应的事项";
+                        strError = "日志记录格式错误: 根据id '" + strID + "' 在日志记录<oldReaderRecord>元素文本内<overdue>元素中没有找到对应的事项";
                         return -1;
                     }
                 }

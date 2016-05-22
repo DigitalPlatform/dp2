@@ -298,7 +298,7 @@ namespace dp2Circulation
                 // loader.owner = this;
                 loader.estimate = estimate;
                 loader.FileNames = filenames;
-                loader.nLevel = 2;  //  this.MainForm.OperLogLevel;
+                loader.Level = 2;  //  this.MainForm.OperLogLevel;
                 loader.AutoCache = false;
                 loader.CacheDir = "";
                 loader.Filter = "borrow,return,setReaderInfo,setBiblioInfo,setEntity,setOrder,setIssue,setComment,amerce,passgate,getRes";
@@ -354,6 +354,7 @@ namespace dp2Circulation
                             }
 
                             string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+                            string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
 #if NO
                                 if (strOperation != "borrow" && strOperation != "return")
                                 {
@@ -361,12 +362,33 @@ namespace dp2Circulation
                                     continue;
                                 }
 #endif
-                            nRet = buffer.AddLine(
-                                strOperation,
-                                dom,
-                                item.Date,
-                                item.Index,
-                                out strError);
+                            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.74") < 0
+                                && strOperation == "amerce" && (strAction == "amerce" || strAction == "modifyprice"))
+                            {
+                                // 重新获得当前日志记录，用最详细级别
+                                OperLogItem new_item = loader.LoadOperLogItem(item, 0);
+                                if (new_item == null)
+                                {
+                                    strError = "重新获取 OperLogItem 时出错";
+                                    return -1;
+                                }
+                                dom.LoadXml(new_item.Xml);
+                                nRet = buffer.AddLine(
+    strOperation,
+    dom,
+    new_item.Date,
+    new_item.Index,
+    out strError);
+                            }
+                            else
+                            {
+                                nRet = buffer.AddLine(
+                                    strOperation,
+                                    dom,
+                                    item.Date,
+                                    item.Index,
+                                    out strError);
+                            }
                             if (nRet == -1)
                                 return -1;
                             // -2 不要报错
@@ -5143,6 +5165,7 @@ out strError);
             }
             else if (nNumber == 471)
             {
+#if NO
                 // 471 表，违约金流水
                 strCommand = "select '', operlogamerce.action, operlogamerce.price, operlogamerce.unit, operlogamerce.amercerecpath, operlogamerce.reason, operlogamerce.itembarcode,biblio.summary, operlogamerce.readerbarcode, reader.name, operlogamerce.opertime, operlogamerce.operator "  // 
                      + " FROM operlogamerce "
@@ -5153,6 +5176,17 @@ out strError);
                      + " WHERE "
                      + "     operlogamerce.date >= '" + strStartDate + "' AND operlogamerce.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "' "
+                     + " ORDER BY operlogamerce.opertime ;";
+#endif
+                // 471 表，违约金流水
+                strCommand = "select '', operlogamerce.action, operlogamerce.price, operlogamerce.unit, operlogamerce.amercerecpath, operlogamerce.reason, operlogamerce.itembarcode,biblio.summary, operlogamerce.readerbarcode, reader.name, operlogamerce.opertime, operlogamerce.operator "  // 
+                     + " FROM operlogamerce "
+                     + " left outer JOIN item ON operlogamerce.itembarcode <> '' AND operlogamerce.itembarcode <> '' AND operlogamerce.itembarcode = item.itembarcode "
+                     + " left outer JOIN biblio ON item.bibliorecpath <> '' AND item.bibliorecpath = biblio.bibliorecpath "
+                     + " left outer JOIN reader ON operlogamerce.readerbarcode <> '' AND operlogamerce.readerbarcode = reader.readerbarcode "
+                     + " WHERE "
+                     + "     operlogamerce.date >= '" + strStartDate + "' AND operlogamerce.date <= '" + strEndDate + "' "
+                     + "     AND operlogamerce.librarycode like '%," + strLibraryCode + ",%' "
                      + " ORDER BY operlogamerce.opertime ;";
             }
             else if (nNumber == 472)
@@ -5173,7 +5207,7 @@ from operlogamerce
    GROUP BY operlogamerce.operator, operlogamerce.unit;
                  * 
                  * */
-
+#if NO
                 // 472 表，每个工作人员违约金工作量
                 strCommand = "select operlogamerce.operator,  "  // 
                     + " operlogamerce.unit, "
@@ -5190,6 +5224,24 @@ from operlogamerce
                      + " WHERE "
                      + "     operlogamerce.date >= '" + strStartDate + "' AND operlogamerce.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "' "
+                     + " GROUP BY operlogamerce.operator, operlogamerce.unit "
+                    + " ORDER BY operlogamerce.operator ;";
+#endif
+                // 472 表，每个工作人员违约金工作量
+                strCommand = "select operlogamerce.operator,  "  // 
+                    + " operlogamerce.unit, "
+                    + "  count(case operlogamerce.action when 'amerce' then operlogamerce.action end) as amerce_count,"
+                    + "  sum(case operlogamerce.action when 'amerce' then operlogamerce.price end) / 100.0 as amerce_money,"
+                    + "  count(case operlogamerce.action when 'modifyprice' then operlogamerce.action end) as modify_count,"
+                    + "  sum(case operlogamerce.action when 'modifyprice' then operlogamerce.price end) / 100.0 as modify_money,"
+                    + "  count(case operlogamerce.action when 'undo' then operlogamerce.action end) as undo_count,  "
+                    + "  sum(case operlogamerce.action when 'undo' then operlogamerce.price end) / 100.0 as undo_money, "
+                    + "  count(case operlogamerce.action when 'expire' then operlogamerce.action end) as expire_count,  "
+                    + "  count(*) as total_count "
+                     + " FROM operlogamerce "
+                     + " WHERE "
+                     + "     operlogamerce.date >= '" + strStartDate + "' AND operlogamerce.date <= '" + strEndDate + "' "
+                     + "     AND operlogamerce.librarycode like '%," + strLibraryCode + ",%' "
                      + " GROUP BY operlogamerce.operator, operlogamerce.unit "
                     + " ORDER BY operlogamerce.operator ;";
             }
@@ -5744,7 +5796,7 @@ out strError);
             {
                 this.Invoke((Action)(() =>
                 {
-                MessageBox.Show(this, strError + "\r\n\r\n请修改馆代码");
+                    MessageBox.Show(this, strError + "\r\n\r\n请修改馆代码");
                 }));
                 goto REDO;
             }
@@ -6816,54 +6868,64 @@ MessageBoxDefaultButton.Button2);
         void CreateLocalStorage()
         {
             string strError = "";
-            int nRet = 0;
 
-            string strBreakPointFileName = Path.Combine(GetBaseDirectory(), "report_breakpoint.xml");
-
-            XmlDocument task_dom = new XmlDocument();
             try
             {
-                task_dom.Load(strBreakPointFileName);
-            }
-            catch (FileNotFoundException)
-            {
-                task_dom = null;
+                int nRet = 0;
+
+                string strBreakPointFileName = Path.Combine(GetBaseDirectory(), "report_breakpoint.xml");
+
+                XmlDocument task_dom = new XmlDocument();
+                try
+                {
+                    task_dom.Load(strBreakPointFileName);
+                }
+                catch (FileNotFoundException)
+                {
+                    task_dom = null;
+                }
+                catch (Exception ex)
+                {
+                    strError = "装载文件 '" + strBreakPointFileName + "' 时出错: " + ex.Message;
+                    goto ERROR1;
+                }
+
+                if (task_dom == null)
+                {
+                    // 创建批处理计划
+                    nRet = BuildPlan("*",    // * "operlog"
+                        out task_dom,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    task_dom.Save(strBreakPointFileName);
+                }
+
+                try
+                {
+                    nRet = DoPlan(ref task_dom, out strError);
+                }
+                finally
+                {
+                    task_dom.Save(strBreakPointFileName);
+                }
+
+                if (nRet == -1)
+                    goto ERROR1;
+
+                SetStartButtonStates();
+                SetDailyReportButtonState();
+                this.Invoke((Action)(() =>
+                {
+                    MessageBox.Show(this, "处理完成");
+                }));
             }
             catch (Exception ex)
             {
-                strError = "装载文件 '" + strBreakPointFileName + "' 时出错: " + ex.Message;
+                strError = "创建本地存储时出现异常: " + ExceptionUtil.GetDebugText(ex);
+                ReportException(strError, false);
                 goto ERROR1;
             }
-
-            if (task_dom == null)
-            {
-                // 创建批处理计划
-                nRet = BuildPlan("*",    // * "operlog"
-                    out task_dom,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                task_dom.Save(strBreakPointFileName);
-            }
-
-            try
-            {
-                nRet = DoPlan(ref task_dom, out strError);
-            }
-            finally
-            {
-                task_dom.Save(strBreakPointFileName);
-            }
-
-            if (nRet == -1)
-                goto ERROR1;
-
-            SetStartButtonStates();
-            SetDailyReportButtonState();
-            this.Invoke((Action)(() =>
-            {
-                MessageBox.Show(this, "处理完成");
-            }));
             return;
         ERROR1:
             SetStartButtonStates();
@@ -6872,6 +6934,19 @@ MessageBoxDefaultButton.Button2);
             {
                 MessageBox.Show(this, strError);
             }));
+        }
+
+        void ReportException(string strError, bool bMessageBox = true)
+        {
+            if (bMessageBox)
+            {
+                this.Invoke((Action)(() =>
+                {
+                    MessageBox.Show(this, strError);
+                }));
+            }
+            if (StringUtil.IsDevelopMode() == false)
+                Program.MainForm.ReportError("dp2circulation 调试信息", strError);
         }
 
         void SetStartButtonStates()
@@ -7238,7 +7313,7 @@ MessageBoxDefaultButton.Button2);
                     // loader.owner = this;
                     loader.estimate = estimate;
                     loader.FileNames = dates;
-                    loader.nLevel = 2;  // this.MainForm.OperLogLevel;
+                    loader.Level = 2;  // this.MainForm.OperLogLevel;
                     loader.AutoCache = false;
                     loader.CacheDir = "";
                     loader.LogType = logType;
@@ -7335,12 +7410,29 @@ MessageBoxDefaultButton.Button2);
                         }
                         else
                         {
+                            string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
+
+                            OperLogItem current_item = item;
+                            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.74") < 0
+    && strOperation == "amerce" && (strAction == "amerce" || strAction == "modifyprice"))
+                            {
+                                // 重新获得当前日志记录，用最详细级别
+                                OperLogItem new_item = loader.LoadOperLogItem(item, 0);
+                                if (new_item == null)
+                                {
+                                    strError = "重新获取 OperLogItem 时出错";
+                                    return -1;
+                                }
+                                dom.LoadXml(new_item.Xml);
+                                current_item = new_item;
+                            }
+
                             // 在内存中增加一行，关于 operlogXXX 表的信息
                             nRet = buffer.AddLine(
         strOperation,
         dom,
-        item.Date,
-        item.Index,
+        current_item.Date,
+        current_item.Index,
         out strError);
                             if (nRet == -1)
                                 return -1;
@@ -9195,9 +9287,17 @@ strSourceRecPath);
             LogType logType)
         {
             string strError = "";
-            int nRet = DoDailyReplication(logType, out strError);
-            if (nRet == -1)
-                this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+            try
+            {
+                int nRet = DoDailyReplication(logType, out strError);
+                if (nRet == -1)
+                    this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+            }
+            catch (Exception ex)
+            {
+                strError = "每日同步时出现异常: " + ExceptionUtil.GetDebugText(ex);
+                ReportException(strError);
+            }
         }
 
         // 执行每日同步任务
@@ -10376,17 +10476,25 @@ MessageBoxDefaultButton.Button1);
             XmlDocument task_dom)
         {
             string strError = "";
-            int nRet = DoDailyReportTask(ref task_dom,
-                out strError);
-            if (nRet == -1)
+            try
             {
-                if (task_dom != null && string.IsNullOrEmpty(strTaskFileName) == false)
-                    task_dom.Save(strTaskFileName);
+                int nRet = DoDailyReportTask(ref task_dom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    if (task_dom != null && string.IsNullOrEmpty(strTaskFileName) == false)
+                        task_dom.Save(strTaskFileName);
 
-                this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+                    this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+                }
+                else
+                    File.Delete(strTaskFileName);   // 任务完成，删除任务文件
             }
-            else
-                File.Delete(strTaskFileName);   // 任务完成，删除任务文件
+            catch (Exception ex)
+            {
+                strError = "创建报表时出现异常: " + ExceptionUtil.GetDebugText(ex);
+                ReportException(strError);
+            }
         }
 
         // 线程安全版本

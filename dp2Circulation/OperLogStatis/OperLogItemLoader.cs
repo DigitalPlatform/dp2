@@ -107,7 +107,7 @@ namespace dp2Circulation
             set;
         }
 
-        public int nLevel
+        public int Level
         {
             get;
             set;
@@ -542,8 +542,9 @@ FileShare.ReadWrite);
                 && (this.LogType & dp2Circulation.LogType.OperLog) != 0)
                 throw new ArgumentException("OperLogItemLoader 的 LogType 只能使用一种类型");
 
-            this.Stop.SetMessage("正在装入日志文件 " + this.FileName + " 中的记录。"
-                + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(lProgressValue)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
+            if (this.Stop != null && this.estimate != null)
+                this.Stop.SetMessage("正在装入日志文件 " + this.FileName + " 中的记录。"
+                    + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(lProgressValue)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
 
             string strXml = "";
             long lAttachmentTotalLength = 0;
@@ -554,7 +555,7 @@ FileShare.ReadWrite);
             {
                 long _lServerFileSize = 0;
 
-                string strStyle = "level-" + nLevel.ToString();
+                string strStyle = "level-" + Level.ToString();
                 if ((this.LogType & dp2Circulation.LogType.AccessLog) != 0)
                     strStyle += ",accessLog";
 
@@ -702,7 +703,7 @@ FileShare.ReadWrite);
                                 else
                                     nCount = (int)ri.lLength;   // Math.Min(500, (int)ri.lLength);
 
-                                string strStyle = "level-" + nLevel.ToString();
+                                string strStyle = "level-" + Level.ToString();
                                 if ((this.LogType & dp2Circulation.LogType.AccessLog) != 0)
                                     strStyle += ",accessLog";
                             REDO:
@@ -745,7 +746,7 @@ FileShare.ReadWrite);
                                     if (this.Prompt != null)
                                     {
                                         MessagePromptEventArgs e = new MessagePromptEventArgs();
-                                        e.MessageText = "获取 "+this._logType.ToString()+" 日志信息 ("+this.FileName + " " +lIndex.ToString() + ") 的操作发生错误： " + strError;
+                                        e.MessageText = "获取 " + this._logType.ToString() + " 日志信息 (" + this.FileName + " " + lIndex.ToString() + ") 的操作发生错误： " + strError;
                                         e.Actions = "yes,no,cancel";
                                         this.Prompt(this, e);
                                         if (e.ResultAction == "cancel")
@@ -815,8 +816,11 @@ FileShare.ReadWrite);
                             {
                                 lSize = lProgressValue + lHintNext;
 
-                                this.Stop.SetProgressRange(0, lSize);
-                                estimate.SetRange(0, lSize);
+                                if (this.Stop != null && this.estimate != null)
+                                {
+                                    this.Stop.SetProgressRange(0, lSize);
+                                    estimate.SetRange(0, lSize);
+                                }
                             }
 
                             this.Stop.SetProgressValue(lProgressValue + lHintNext);
@@ -824,9 +828,12 @@ FileShare.ReadWrite);
 
                         if (lIndex % 100 == 0)
                         {
-                            estimate.Text = "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(lProgressValue + lHintNext)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed);
-                            this.Stop.SetMessage("正在装入日志文件 " + this.FileName + " 中的记录 " + lIndex.ToString() + " 。"
-                                + estimate.Text);
+                            if (this.Stop != null && this.estimate != null)
+                            {
+                                estimate.Text = "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(lProgressValue + lHintNext)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed);
+                                this.Stop.SetMessage("正在装入日志文件 " + this.FileName + " 中的记录 " + lIndex.ToString() + " 。"
+                                    + estimate.Text);
+                            }
                         }
 
                         {

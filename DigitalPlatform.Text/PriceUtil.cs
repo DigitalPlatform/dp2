@@ -14,6 +14,218 @@ namespace DigitalPlatform.Text
 {
     public class PriceUtil
     {
+        #region 级联操作函数
+
+        public static string Add(string strText1, string strText2)
+        {
+            PriceUtil currency = new PriceUtil(strText1);
+            return currency.Add(strText2).ToString();
+        }
+
+        string _current = "";   // 金额字符串
+
+        public PriceUtil()
+        {
+        }
+
+        public PriceUtil(string strText)
+        {
+            this._current = strText;
+        }
+
+        public PriceUtil Set(string strText)
+        {
+            this._current = strText;
+            return this;
+        }
+
+        public PriceUtil Clear()
+        {
+            this._current = "";
+            return this;
+        }
+
+        public PriceUtil Add(string strText)
+        {
+            return this.Operator(strText, "+");
+        }
+
+        public PriceUtil Substract(string strText)
+        {
+            return this.Operator(strText, "-");
+        }
+
+        public PriceUtil Mutiple(string strText)
+        {
+            return this.Operator(strText, "*");
+        }
+
+        public PriceUtil Divide(string strText)
+        {
+            return this.Operator(strText, "/");
+        }
+
+#if NO
+        public PriceUtil Operator(string strText, string strOperator)
+        {
+            int nRet = 0;
+            string strError = "";
+            string strResult = "";
+
+            if (strOperator == "*" || strOperator == "/")
+            {
+                if (string.IsNullOrEmpty(this._current)
+                    || string.IsNullOrEmpty(strText))
+                    throw new ArgumentException("乘法和除法运算要求两个操作数都不能为空");
+
+                string strString = this._current + strOperator + strText;
+                nRet = SumPrices(strString,
+    out strResult,
+    out strError);
+                if (nRet == -1)
+                {
+                    strError = strError + " (SumPrices)'" + strString + "'";
+                    throw new Exception(strError);
+                }
+                this._current = strResult;
+                return this;
+            }
+
+
+            if (string.IsNullOrEmpty(strText))
+                return this;
+
+            List<string> prices = new List<string>();
+            string s1 = "";
+            nRet = SumPrices(this._current,
+                out s1,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = strError + " (SumPrices)'" + this._current + "'";
+                throw new Exception(strError);
+            }
+
+            string s2 = "";
+            if (strOperator == "-")
+            {
+                nRet = NegativePrices(strText,
+                    true,
+                    out s2,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = strError + " (NegativePrices)'" + strText + "'";
+                    throw new Exception(strError);
+                }
+            }
+            else
+            {
+                nRet = SumPrices(strText,
+                    out s2,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = strError + " (SumPrices)'" + strText + "'";
+                    throw new Exception(strError);
+                }
+            }
+
+            prices.Add(s1);
+            prices.Add(s2);
+
+            nRet = TotalPrice(prices,
+    out strResult,
+    out strError);
+            if (nRet == -1)
+            {
+                strError = strError + " (TotalPrices)'" + StringUtil.MakePathList(prices) + "'";
+                throw new Exception(strError);
+            }
+            this._current = strResult;
+            return this;
+        }
+#endif
+
+        public PriceUtil Operator(string strText, string strOperator)
+        {
+            int nRet = 0;
+            string strError = "";
+            string strResult = "";
+
+            if (strOperator == "*" || strOperator == "/")
+            {
+                if (string.IsNullOrEmpty(this._current)
+                    || string.IsNullOrEmpty(strText))
+                    throw new ArgumentException("乘法和除法运算要求两个操作数都不能为空");
+
+                string strString = this._current + strOperator + strText;
+                nRet = SumPrices(strString,
+    out strResult,
+    out strError);
+                if (nRet == -1)
+                {
+                    strError = strError + " (SumPrices)'" + strString + "'";
+                    throw new Exception(strError);
+                }
+                this._current = strResult;
+                return this;
+            }
+
+
+            if (string.IsNullOrEmpty(strText))
+                return this;
+
+            string s2 = "";
+            if (strOperator == "-")
+            {
+                nRet = NegativePrices(strText,
+                    true,
+                    out s2,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = strError + " (NegativePrices)'" + strText + "'";
+                    throw new Exception(strError);
+                }
+            }
+            else
+            {
+#if NO
+                nRet = SumPrices(strText,
+                    out s2,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = strError + " (SumPrices)'" + strText + "'";
+                    throw new Exception(strError);
+                }
+#endif
+                s2 = strText;
+            }
+
+            string s3 = JoinPriceString(this._current, s2);
+
+            nRet = SumPrices(s3,
+    out strResult,
+    out strError);
+            if (nRet == -1)
+            {
+                strError = strError + " (SumPrices)'" + s3 + "'";
+                throw new Exception(strError);
+            }
+
+            this._current = strResult;
+            return this;
+        }
+
+        public override string ToString()
+        {
+            return this._current;
+        }
+
+        #endregion
+
         // 计算价格乘积
         // 从PrintOrderForm中转移过来
         public static int MultiPrice(string strPrice,
@@ -244,7 +456,7 @@ namespace DigitalPlatform.Text
 
             return strResult;
         }
-        
+
         // 汇总价格
         // 货币单位不同的，互相独立
         // 本函数还有另外一个版本，是返回List<string>的
@@ -344,7 +556,7 @@ namespace DigitalPlatform.Text
 
             if (String.IsNullOrEmpty(strPrices) == true)
                 return 0;
-            
+
             List<string> prices = null;
             // 将形如"-123.4+10.55-20.3"的价格字符串切割为单个的价格字符串，并各自带上正负号
             // return:
@@ -589,7 +801,6 @@ namespace DigitalPlatform.Text
             strError = "";
             strSumPrices = "";
 
-
             List<string> prices = null;
             // 将形如"-123.4+10.55-20.3"的价格字符串切割为单个的价格字符串，并各自带上正负号
             // return:
@@ -629,8 +840,8 @@ namespace DigitalPlatform.Text
             strError = "";
             prices = new List<string>();
 
-            strPrices = strPrices.Replace("+", ",+").Replace("-",",-");
-            string[] parts = strPrices.Split(new char[] {','});
+            strPrices = strPrices.Replace("+", ",+").Replace("-", ",-");
+            string[] parts = strPrices.Split(new char[] { ',' });
             for (int i = 0; i < parts.Length; i++)
             {
                 string strPart = parts[i].Trim();
@@ -696,7 +907,7 @@ namespace DigitalPlatform.Text
                 return 0;
             }
 
-            strError = "金额字符串 '"+strString+"' 的格式不符合定义 '" + StringUtil.MakePathList(valid_formats) + "' 的要求";
+            strError = "金额字符串 '" + strString + "' 的格式不符合定义 '" + StringUtil.MakePathList(valid_formats) + "' 的要求";
             return -1;
         }
 
@@ -805,7 +1016,7 @@ namespace DigitalPlatform.Text
             strOperator = "";
             strError = "";
 
-            int nRet = strText.IndexOfAny(new char[] {'/','*'});
+            int nRet = strText.IndexOfAny(new char[] { '/', '*' });
             if (nRet == -1)
                 return 0;
 

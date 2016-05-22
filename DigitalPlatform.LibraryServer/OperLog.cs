@@ -1592,7 +1592,6 @@ out strTargetLibraryCode);
                 && StringUtil.IsInList(strSourceLibraryCode, strLibraryCodeList) == true
                 && StringUtil.IsInList(strTargetLibraryCode, strLibraryCodeList) == false)
             {
-
                 if (strOperation == "devolveReaderInfo")
                 {
                     FilterDovolveReaderInfo(ref dom);
@@ -2089,7 +2088,8 @@ out strTargetLibraryCode);
         static void ResizeAmerce(int nLevel, ref XmlDocument dom)
         {
             RemoveReaderRecord(nLevel, "readerRecord", ref dom);
-            RemoveReaderRecord(nLevel, "oldReaderRecord", ref dom);
+            // 注: oldReaderRecord 要用来体现修改前的 overdue 金额，因而不能清除 2016/5/21
+            // RemoveReaderRecord(nLevel, "oldReaderRecord", ref dom);
         }
 
         static void ResizeHire(int nLevel, ref XmlDocument dom)
