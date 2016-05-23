@@ -415,41 +415,32 @@ DbType.Int64);
             if (this.Count == 0)
                 return 0;
 
-            using (SQLiteCommand command = new SQLiteCommand("",
-connection))
+            Debug.WriteLine("WriteToDb() this.Count=" + this.Count);
+
+            using (SQLiteTransaction mytransaction = connection.BeginTransaction())
             {
-                StringBuilder text = new StringBuilder(4096);
-                int i = 0;
-                foreach (OperLogLineBase line in this)
+                using (SQLiteCommand command = new SQLiteCommand("",
+    connection))
                 {
-                    line.BuidWriteCommand(command,
-             i,
-             bInsertOrReplace,
-             text);
+                    StringBuilder text = new StringBuilder(4096);
+                    int i = 0;
+                    foreach (OperLogLineBase line in this)
+                    {
+                        line.BuidWriteCommand(command,
+                 i,
+                 bInsertOrReplace,
+                 text);
 
-                    i++;
-                }
+                        i++;
+                    }
 
-                IDbTransaction trans = null;
-
-                trans = connection.BeginTransaction();
-                try
-                {
                     command.CommandText = text.ToString();
                     int nCount = command.ExecuteNonQuery();
-                    if (trans != null)
-                    {
-                        trans.Commit();
-                        trans = null;
-                    }
-                }
-                finally
-                {
-                    if (trans != null)
-                        trans.Rollback();
-                }
-            }
 
+                }
+
+                mytransaction.Commit();
+            }
             return 0;
         }
     }
@@ -1251,7 +1242,7 @@ this.OperTime);
                 // 所以需要选出全部 amerceItem 元素
                 XmlNodeList temp_items = dom.DocumentElement.SelectNodes("amerceItems/amerceItem");
                 List<XmlElement> items = new List<XmlElement>();
-                foreach(XmlElement item in temp_items)
+                foreach (XmlElement item in temp_items)
                 {
                     if (item.GetAttributeNode("newPrice") != null)
                         items.Add(item);
@@ -2569,6 +2560,147 @@ line.ReaderBarcode);
             if (lines.Count == 0)
                 return 0;
 
+            Debug.WriteLine("AppendItemLines() lines.Count=" + lines.Count);
+
+            using (SQLiteTransaction mytransaction = connection.BeginTransaction())
+            {
+                using (SQLiteCommand command = new SQLiteCommand("",
+    connection))
+                {
+                    StringBuilder text = new StringBuilder(4096);
+                    int i = 0;
+                    foreach (ItemLine line in lines)
+                    {
+                        if (line.Level == 0)
+                        {
+                            // 替换全部字段
+                            nRet = BuildInsertOrReplaceCommand(
+        "item",
+        new List<string>(all_fields),
+        i,
+        ref text,
+        out strError);
+                            if (nRet == -1)
+                                return -1;
+                        }
+                        else if (line.Level == 1)
+                        {
+                            // 替换部分字段
+                            nRet = BuildInsertOrReplaceCommand(
+                "item",
+                "itembarcode",
+                new List<string>(borrow_fields),
+                new List<string>(all_fields),
+                i,
+                ref text,
+                out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            Debug.Assert(string.IsNullOrEmpty(line.ItemBarcode) == false, "ItemBarcode 不能为空");
+                        }
+                        else if (line.Level == 2)
+                        {
+                            // 替换部分字段
+                            nRet = BuildInsertOrReplaceCommand(
+                "item",
+                "itembarcode",
+                new List<string>(borrower_fields),
+                new List<string>(all_fields),
+                i,
+                ref text,
+                out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            Debug.Assert(string.IsNullOrEmpty(line.ItemBarcode) == false, "ItemBarcode 不能为空");
+                        }
+
+                        SQLiteUtil.SetParameter(command,
+                            "@itemrecpath" + i,
+                            line.ItemRecPath);
+                        SQLiteUtil.SetParameter(command,
+         "@itembarcode" + i,
+         line.ItemBarcode);
+
+                        SQLiteUtil.SetParameter(command,
+         "@location" + i,
+         line.Location);
+
+                        SQLiteUtil.SetParameter(command,
+    "@accessno" + i,
+    line.AccessNo);
+
+                        SQLiteUtil.SetParameter(command,
+    "@state" + i,
+    line.State);
+
+#if NO
+                    if (string.IsNullOrEmpty(line.CreateTime) == false)
+                    {
+                        SQLiteUtil.SetParameter(command,
+    "@createtime" + i,
+    line.CreateTime);
+                    }
+#endif
+                        SQLiteUtil.SetParameter(command,
+    "@createtime" + i,
+    line.CreateTime);
+
+                        SQLiteUtil.SetParameter(command,
+    "@price" + i,
+    line.Price);
+
+                        SQLiteUtil.SetParameter(command,
+    "@unit" + i,
+    line.Unit);
+
+                        SQLiteUtil.SetParameter(command,
+    "@borrower" + i,
+    line.Borrower);
+                        SQLiteUtil.SetParameter(command,
+    "@borrowtime" + i,
+    line.BorrowTime);
+                        SQLiteUtil.SetParameter(command,
+    "@borrowperiod" + i,
+    line.BorrowPeriod);
+                        SQLiteUtil.SetParameter(command,
+    "@returningtime" + i,
+    line.ReturningTime);
+
+                        SQLiteUtil.SetParameter(command,
+         "@bibliorecpath" + i,
+         line.BiblioRecPath);
+
+                        i++;
+                    }
+
+                    command.CommandText = text.ToString();
+                    int nCount = command.ExecuteNonQuery();
+
+                }
+                mytransaction.Commit();
+            }
+
+            return 0;
+        }
+
+#if NO
+        // 插入一批册记录
+        public static int AppendItemLines(
+            SQLiteConnection connection,
+            List<ItemLine> lines,
+            bool bInsertOrReplace,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (lines.Count == 0)
+                return 0;
+
+            Debug.WriteLine("AppendItemLines() lines.Count=" + lines.Count);
+
             using (SQLiteCommand command = new SQLiteCommand("",
 connection))
             {
@@ -2753,6 +2885,8 @@ line.ReturningTime);
             return 0;
         }
 
+#endif
+
         //  XML 记录变换为 SQL 记录
         // parameters:
         //      strLogCreateTime    日志操作记载的创建时间。不是创建动作的其他时间，不要放在这里
@@ -2864,32 +2998,23 @@ out string strError)
 
             StringBuilder text = new StringBuilder(4096);
             // int i = 0;
-            using (SQLiteCommand command = new SQLiteCommand("",
-connection))
+            using (SQLiteTransaction mytransaction = connection.BeginTransaction())
             {
-                SQLiteUtil.SetParameter(command,
-"@itemrecpath",
-strItemRecPath);
-
-                // 删除 item 记录
-                text.Append("delete from item where itemrecpath = @itemrecpath ;");
-
-                IDbTransaction trans = connection.BeginTransaction();
-                try
+                using (SQLiteCommand command = new SQLiteCommand("",
+    connection))
                 {
+                    SQLiteUtil.SetParameter(command,
+    "@itemrecpath",
+    strItemRecPath);
+
+                    // 删除 item 记录
+                    text.Append("delete from item where itemrecpath = @itemrecpath ;");
+
                     command.CommandText = text.ToString();
                     int nCount = command.ExecuteNonQuery();
-                    if (trans != null)
-                    {
-                        trans.Commit();
-                        trans = null;
-                    }
+
                 }
-                finally
-                {
-                    if (trans != null)
-                        trans.Rollback();
-                }
+                mytransaction.Commit();
             }
 
             return 0;
@@ -2994,79 +3119,67 @@ strItemRecPath);
             if (lines.Count == 0)
                 return 0;
 
-            using (SQLiteCommand command = new SQLiteCommand("",
-connection))
+            Debug.WriteLine("AppendReaderLines() lines.Count=" + lines.Count);
+            using (SQLiteTransaction mytransaction = connection.BeginTransaction())
             {
-
-                StringBuilder text = new StringBuilder(4096);
-                int i = 0;
-                foreach (ReaderLine line in lines)
+                using (SQLiteCommand command = new SQLiteCommand("",
+    connection))
                 {
-                    if (bInsertOrReplace == true)
-                        text.Append(" INSERT OR REPLACE ");
-                    else
-                        text.Append(" INSERT ");
 
-                    text.Append(
-    " INTO reader (readerrecpath, readerbarcode, librarycode, department, readertype, state, name) "
-    + " VALUES(@readerrecpath" + i
-    + ", @readerbarcode" + i
-    + ", @librarycode" + i
-    + ", @department" + i
-    + ", @readertype" + i
-    + ", @state" + i
-    + ", @name" + i + ")"
-    + " ; ");
-                    SQLiteUtil.SetParameter(command,
-                        "@readerrecpath" + i,
-                        line.ReaderRecPath);
-                    SQLiteUtil.SetParameter(command,
-                        "@readerbarcode" + i,
-                        line.ReaderBarcode);
+                    StringBuilder text = new StringBuilder(4096);
+                    int i = 0;
+                    foreach (ReaderLine line in lines)
+                    {
+                        if (bInsertOrReplace == true)
+                            text.Append(" INSERT OR REPLACE ");
+                        else
+                            text.Append(" INSERT ");
 
-                    SQLiteUtil.SetParameter(command,
-                        "@librarycode" + i,
-                        line.LibraryCode);
+                        text.Append(
+        " INTO reader (readerrecpath, readerbarcode, librarycode, department, readertype, state, name) "
+        + " VALUES(@readerrecpath" + i
+        + ", @readerbarcode" + i
+        + ", @librarycode" + i
+        + ", @department" + i
+        + ", @readertype" + i
+        + ", @state" + i
+        + ", @name" + i + ")"
+        + " ; ");
+                        SQLiteUtil.SetParameter(command,
+                            "@readerrecpath" + i,
+                            line.ReaderRecPath);
+                        SQLiteUtil.SetParameter(command,
+                            "@readerbarcode" + i,
+                            line.ReaderBarcode);
 
-                    SQLiteUtil.SetParameter(command,
-                        "@department" + i,
-                        line.Department);
+                        SQLiteUtil.SetParameter(command,
+                            "@librarycode" + i,
+                            line.LibraryCode);
 
-                    SQLiteUtil.SetParameter(command,
-                        "@readertype" + i,
-                        line.ReaderType);
+                        SQLiteUtil.SetParameter(command,
+                            "@department" + i,
+                            line.Department);
 
-                    SQLiteUtil.SetParameter(command,
-    "@state" + i,
-    line.State);
+                        SQLiteUtil.SetParameter(command,
+                            "@readertype" + i,
+                            line.ReaderType);
 
-                    SQLiteUtil.SetParameter(command,
-                        "@name" + i,
-                        line.Name);
+                        SQLiteUtil.SetParameter(command,
+        "@state" + i,
+        line.State);
 
-                    i++;
-                }
+                        SQLiteUtil.SetParameter(command,
+                            "@name" + i,
+                            line.Name);
 
-                IDbTransaction trans = null;
+                        i++;
+                    }
 
-                trans = connection.BeginTransaction();
-                try
-                {
                     command.CommandText = text.ToString();
                     int nCount = command.ExecuteNonQuery();
-                    if (trans != null)
-                    {
-                        trans.Commit();
-                        trans = null;
-                    }
                 }
-                finally
-                {
-                    if (trans != null)
-                        trans.Rollback();
-                }
+                mytransaction.Commit();
             }
-
             return 0;
         }
 
@@ -3078,35 +3191,26 @@ out string strError)
             strError = "";
 
             StringBuilder text = new StringBuilder(4096);
-            //int i = 0;
-            using (SQLiteCommand command = new SQLiteCommand("",
-connection))
+
+            using (SQLiteTransaction mytransaction = connection.BeginTransaction())
             {
-                SQLiteUtil.SetParameter(command,
-"@readerrecpath",
-strReaderRecPath);
-
-                // 删除 item 记录
-                text.Append("delete from reader where readerrecpath = @readerrecpath ;");
-
-                IDbTransaction trans = connection.BeginTransaction();
-                try
+                //int i = 0;
+                using (SQLiteCommand command = new SQLiteCommand("",
+    connection))
                 {
+                    SQLiteUtil.SetParameter(command,
+    "@readerrecpath",
+    strReaderRecPath);
+
+                    // 删除 item 记录
+                    text.Append("delete from reader where readerrecpath = @readerrecpath ;");
+
                     command.CommandText = text.ToString();
                     int nCount = command.ExecuteNonQuery();
-                    if (trans != null)
-                    {
-                        trans.Commit();
-                        trans = null;
-                    }
-                }
-                finally
-                {
-                    if (trans != null)
-                        trans.Rollback();
-                }
-            }
 
+                }
+                mytransaction.Commit();
+            }
             return 0;
         }
     }
@@ -3173,51 +3277,42 @@ strReaderRecPath);
             if (lines.Count == 0)
                 return 0;
 
-            using (SQLiteCommand command = new SQLiteCommand("",
-connection))
+            Debug.WriteLine("AppendBiblioLines() lines.Count=" + lines.Count);
+
+            using (SQLiteTransaction mytransaction = connection.BeginTransaction())
             {
-
-                StringBuilder text = new StringBuilder(4096);
-                int i = 0;
-                foreach (BiblioLine line in lines)
+                using (SQLiteCommand command = new SQLiteCommand("",
+    connection))
                 {
-                    if (bInsertOrReplace == true)
-                        text.Append(" INSERT OR REPLACE ");
-                    else
-                        text.Append(" INSERT ");
 
-                    text.Append(
-    " INTO biblio (bibliorecpath, summary) "
-    + " VALUES(@bibliorecpath" + i
-    + ", @summary" + i + ")"
-    + " ; ");
-                    SQLiteUtil.SetParameter(command,
-                        "@bibliorecpath" + i,
-                        line.BiblioRecPath);
-                    SQLiteUtil.SetParameter(command,
-     "@summary" + i,
-     line.Summary);
-                    i++;
-                }
+                    StringBuilder text = new StringBuilder(4096);
+                    int i = 0;
+                    foreach (BiblioLine line in lines)
+                    {
+                        if (bInsertOrReplace == true)
+                            text.Append(" INSERT OR REPLACE ");
+                        else
+                            text.Append(" INSERT ");
 
-                IDbTransaction trans = null;
+                        text.Append(
+        " INTO biblio (bibliorecpath, summary) "
+        + " VALUES(@bibliorecpath" + i
+        + ", @summary" + i + ")"
+        + " ; ");
+                        SQLiteUtil.SetParameter(command,
+                            "@bibliorecpath" + i,
+                            line.BiblioRecPath);
+                        SQLiteUtil.SetParameter(command,
+         "@summary" + i,
+         line.Summary);
+                        i++;
+                    }
 
-                trans = connection.BeginTransaction();
-                try
-                {
                     command.CommandText = text.ToString();
                     int nCount = command.ExecuteNonQuery();
-                    if (trans != null)
-                    {
-                        trans.Commit();
-                        trans = null;
-                    }
+
                 }
-                finally
-                {
-                    if (trans != null)
-                        trans.Rollback();
-                }
+                mytransaction.Commit();
             }
 
             return 0;
@@ -3284,46 +3379,37 @@ connection))
         {
             strError = "";
 
-            using (SQLiteCommand command = new SQLiteCommand("",
-connection))
+            Debug.WriteLine("AppendClassLines() lines.Count=" + lines.Count);
+
+            using (SQLiteTransaction mytransaction = connection.BeginTransaction())
             {
-
-                StringBuilder text = new StringBuilder(4096);
-                int i = 0;
-                foreach (ClassLine line in lines)
+                using (SQLiteCommand command = new SQLiteCommand("",
+    connection))
                 {
-                    text.Append(
-    " INSERT INTO " + strClassTableName + " (bibliorecpath, class) "
-    + " VALUES(@bibliorecpath" + i
-    + ", @class" + i + ")"
-    + " ; ");
-                    SQLiteUtil.SetParameter(command,
-                        "@bibliorecpath" + i,
-                        line.BiblioRecPath);
-                    SQLiteUtil.SetParameter(command,
-     "@class" + i,
-     line.Class);
-                    i++;
-                }
 
-                IDbTransaction trans = null;
+                    StringBuilder text = new StringBuilder(4096);
+                    int i = 0;
+                    foreach (ClassLine line in lines)
+                    {
+                        text.Append(
+        " INSERT INTO " + strClassTableName + " (bibliorecpath, class) "
+        + " VALUES(@bibliorecpath" + i
+        + ", @class" + i + ")"
+        + " ; ");
+                        SQLiteUtil.SetParameter(command,
+                            "@bibliorecpath" + i,
+                            line.BiblioRecPath);
+                        SQLiteUtil.SetParameter(command,
+         "@class" + i,
+         line.Class);
+                        i++;
+                    }
 
-                trans = connection.BeginTransaction();
-                try
-                {
                     command.CommandText = text.ToString();
                     int nCount = command.ExecuteNonQuery();
-                    if (trans != null)
-                    {
-                        trans.Commit();
-                        trans = null;
-                    }
+
                 }
-                finally
-                {
-                    if (trans != null)
-                        trans.Rollback();
-                }
+                mytransaction.Commit();
             }
 
             return 0;
@@ -3337,6 +3423,8 @@ connection))
             out string strError)
         {
             strError = "";
+
+            Debug.WriteLine("CreateDistinctClassTable()");
 
             // 创建表
             string strCommand = "DROP TABLE if exists " + strTargetTableName + " ; "
@@ -3463,59 +3551,49 @@ connection))
         }
 
         // 插入一批用户记录
-        public static int AppendClassLines(
+        public static int AppendUserLines(
             SQLiteConnection connection,
             List<UserLine> lines,
             out string strError)
         {
             strError = "";
 
-            using (SQLiteCommand command = new SQLiteCommand("",
-connection))
+            Debug.WriteLine("AppendUserLines() lines.Count=" + lines.Count);
+
+            using (SQLiteTransaction mytransaction = connection.BeginTransaction())
             {
-
-                StringBuilder text = new StringBuilder(4096);
-                int i = 0;
-                foreach (UserLine line in lines)
+                using (SQLiteCommand command = new SQLiteCommand("",
+    connection))
                 {
-                    text.Append(
-    " INSERT INTO user (id, librarycodelist, rights) "
-    + " VALUES(@id" + i
-    + ", @librarycodelist" + i
-    + ", @rights" + i + ")"
-    + " ; ");
-                    SQLiteUtil.SetParameter(command,
-                        "@id" + i,
-                        line.ID);
-                    SQLiteUtil.SetParameter(command,
-     "@librarycodelist" + i,
-     line.LibraryCodeList);
-                    SQLiteUtil.SetParameter(command,
-     "@rights" + i,
-     line.Rights);
-                    i++;
-                }
 
-                IDbTransaction trans = null;
+                    StringBuilder text = new StringBuilder(4096);
+                    int i = 0;
+                    foreach (UserLine line in lines)
+                    {
+                        text.Append(
+        " INSERT INTO user (id, librarycodelist, rights) "
+        + " VALUES(@id" + i
+        + ", @librarycodelist" + i
+        + ", @rights" + i + ")"
+        + " ; ");
+                        SQLiteUtil.SetParameter(command,
+                            "@id" + i,
+                            line.ID);
+                        SQLiteUtil.SetParameter(command,
+         "@librarycodelist" + i,
+         line.LibraryCodeList);
+                        SQLiteUtil.SetParameter(command,
+         "@rights" + i,
+         line.Rights);
+                        i++;
+                    }
 
-                trans = connection.BeginTransaction();
-                try
-                {
                     command.CommandText = text.ToString();
                     int nCount = command.ExecuteNonQuery();
-                    if (trans != null)
-                    {
-                        trans.Commit();
-                        trans = null;
-                    }
                 }
-                finally
-                {
-                    if (trans != null)
-                        trans.Rollback();
-                }
-            }
 
+                mytransaction.Commit();
+            }
             return 0;
         }
 

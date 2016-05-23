@@ -504,7 +504,6 @@ FileShare.ReadWrite);
 
             Debug.Assert(lRecordLength != 0, "");
 
-
             // 读出xml事项
             nRet = ReadCachedEntry(stream,
                 out strXmlBody,

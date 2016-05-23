@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading;
+using System.IO;
 
 using Microsoft.AspNet.SignalR.Client;
 using Microsoft.AspNet.SignalR.Client.Transports;
-using System.IO;
 
 namespace DigitalPlatform.MessageClient
 {
@@ -932,7 +932,6 @@ errorInfo);
                 taskID);
         }
 
-
         class WaitEvents : IDisposable
         {
             public ManualResetEvent finish_event = new ManualResetEvent(false);    // 表示数据全部到来
@@ -1076,7 +1075,15 @@ errorInfo);
                                 if (records != null)
                                     recieved += records.Count;
 
-                                if (IsComplete(request.Start, request.Count, resultCount, recieved) == true)
+                                if (result.String == "_complete")
+                                {
+                                    result.Value = resultCount;
+                                    wait_events.finish_event.Set();
+                                    return;
+                                }
+
+                                if (resultCount >= 0 &&
+                                    IsComplete(request.Start, request.Count, resultCount, recieved) == true)
                                     wait_events.finish_event.Set();
                                 else
                                     wait_events.active_event.Set();

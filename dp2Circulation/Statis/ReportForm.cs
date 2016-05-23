@@ -407,6 +407,10 @@ namespace dp2Circulation
                             lLastIndex = item.Index + 1;
                             nRecCount = 0;
                         }
+                        // 2016/5/22
+                        if (nRet == -1)
+                            return -1;
+
                         nRecCount++;
                     }
                 }
@@ -5922,6 +5926,8 @@ MessageBoxDefaultButton.Button2);
 
             EnableControls(false);
 
+            this.ChannelDoEvents = !this.InvokeRequired;
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在计划任务 ...");
             stop.BeginLoop();
@@ -6392,6 +6398,8 @@ MessageBoxDefaultButton.Button2);
 
             EnableControls(false);
 
+            this.ChannelDoEvents = !this.InvokeRequired;
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在创建本地存储 ...");
             stop.BeginLoop();
@@ -6831,7 +6839,7 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     // 插入一批用户记录
-                    nRet = UserLine.AppendClassLines(
+                    nRet = UserLine.AppendUserLines(
                         connection,
                         lines,
                         out strError);
@@ -6862,7 +6870,10 @@ MessageBoxDefaultButton.Button2);
         // TODO: 中间从服务器复制表的阶段，也应该可以中断，以后可以从断点继续。会出现一个对话框，询问是否继续
         private void button_start_createLocalStorage_Click(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => CreateLocalStorage());
+            Task.Factory.StartNew(() => CreateLocalStorage(),
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
         }
 
         void CreateLocalStorage()
@@ -7262,6 +7273,8 @@ MessageBoxDefaultButton.Button2);
 
             EnableControls(false);
 
+            this.ChannelDoEvents = !this.InvokeRequired;
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在进行同步 ...");
             stop.BeginLoop();
@@ -7450,6 +7463,9 @@ MessageBoxDefaultButton.Button2);
                                 last_index = item.Index + 1;
                                 nRecCount = 0;
                             }
+                            // 2016/5/22
+                            if (nRet == -1)
+                                return -1;
                             nRecCount++;
                         }
 
@@ -7568,6 +7584,7 @@ out strError);
                 strError = "FlushUpdate() 中 CommitUpdateItems() 出错: " + strError;
                 return -1;
             }
+
             nRet = CommitUpdateReaders(
 connection,
 out strError);
@@ -7699,7 +7716,8 @@ out strError);
             // update.BiblioXml = strBiblioXml;
             _deleteBiblios.Add(update);
 
-            if (this._updateBiblios.Count >= 100)
+            // if (this._updateBiblios.Count >= UPDATE_BIBLIOS_BATCHSIZE)   // BUG
+            if (this._deleteBiblios.Count >= DELETE_BIBLIOS_BATCHSIZE)
             {
                 nRet = CommitDeleteBiblios(
         connection,
@@ -7724,6 +7742,7 @@ out strError);
             if (this._deleteBiblios.Count == 0)
                 return 0;
 
+            Debug.WriteLine("CommitDeleteBiblios() _deleteBiblios.Count=" + _deleteBiblios.Count);
 #if NO
             List<BiblioDbFromInfo> styles = null;
             // 获得所有分类号检索途径 style
@@ -7734,38 +7753,40 @@ out strError);
 #endif
             Debug.Assert(this._classFromStyles != null, "");
 
-            using (SQLiteCommand command = new SQLiteCommand("",
-connection))
+            using (SQLiteTransaction mytransaction = connection.BeginTransaction())
             {
-
-                StringBuilder text = new StringBuilder(4096);
-                int i = 0;
-                foreach (UpdateBiblio update in this._deleteBiblios)
+                using (SQLiteCommand command = new SQLiteCommand("",
+    connection))
                 {
-                    string strBiblioRecPath = update.BiblioRecPath;
-                    Debug.Assert(string.IsNullOrEmpty(strBiblioRecPath) == false, "");
-                    if (update.DeleteBiblio)
+
+                    StringBuilder text = new StringBuilder(4096);
+                    int i = 0;
+                    foreach (UpdateBiblio update in this._deleteBiblios)
                     {
-                        foreach (BiblioDbFromInfo style in this._classFromStyles)
+                        string strBiblioRecPath = update.BiblioRecPath;
+                        Debug.Assert(string.IsNullOrEmpty(strBiblioRecPath) == false, "");
+                        if (update.DeleteBiblio)
                         {
-                            // 删除 class 记录
-                            text.Append("delete from class_" + style.Style + " where bibliorecpath = @bibliorecpath" + i.ToString() + " ;");
+                            foreach (BiblioDbFromInfo style in this._classFromStyles)
+                            {
+                                // 删除 class 记录
+                                text.Append("delete from class_" + style.Style + " where bibliorecpath = @bibliorecpath" + i.ToString() + " ;");
+                            }
                         }
-                    }
-                    SQLiteUtil.SetParameter(command,
-    "@bibliorecpath" + i.ToString(),
-    strBiblioRecPath);
+                        SQLiteUtil.SetParameter(command,
+        "@bibliorecpath" + i.ToString(),
+        strBiblioRecPath);
 
-                    if (update.DeleteBiblio)
-                    {
-                        // 删除 biblio 记录
-                        text.Append("delete from biblio where bibliorecpath = @bibliorecpath" + i.ToString() + " ;");
-                    }
+                        if (update.DeleteBiblio)
+                        {
+                            // 删除 biblio 记录
+                            text.Append("delete from biblio where bibliorecpath = @bibliorecpath" + i.ToString() + " ;");
+                        }
 
-                    if (update.DeleteSubrecord)
-                    {
-                        // 删除 item 记录
-                        text.Append("delete from item where bibliorecpath = @bibliorecpath" + i.ToString() + " ;");
+                        if (update.DeleteSubrecord)
+                        {
+                            // 删除 item 记录
+                            text.Append("delete from item where bibliorecpath = @bibliorecpath" + i.ToString() + " ;");
 
 #if NO
                     // 删除 order 记录
@@ -7777,36 +7798,24 @@ connection))
                     // 删除 comment 记录
                     text.Append("delete from comment where bibliorecpath = @bibliorecpath" + i.ToString() + " ;");
 #endif
+                        }
+
+                        i++;
                     }
 
-                    i++;
-                }
-
-                if (text.Length > 0)
-                {
-                    IDbTransaction trans = connection.BeginTransaction();
-                    try
+                    if (text.Length > 0)
                     {
                         command.CommandText = text.ToString();
                         int nCount = command.ExecuteNonQuery();
-                        if (trans != null)
-                        {
-                            trans.Commit();
-                            trans = null;
-                        }
-                    }
-                    finally
-                    {
-                        if (trans != null)
-                            trans.Rollback();
                     }
                 }
+                mytransaction.Commit();
             }
-
             this._deleteBiblios.Clear();
-
             return 0;
         }
+
+        const int DELETE_BIBLIOS_BATCHSIZE = 10;
 
         List<UpdateBiblio> _deleteBiblios = new List<UpdateBiblio>();
 
@@ -7825,6 +7834,7 @@ connection))
             public string KeysXml = ""; // [out]
         }
 
+        const int UPDATE_BIBLIOS_BATCHSIZE = 10;
         List<UpdateBiblio> _updateBiblios = new List<UpdateBiblio>();
 
         // 更新 biblio 表 和 class_xxx 表中的行
@@ -7862,7 +7872,7 @@ connection))
             // update.BiblioXml = strBiblioXml;
             _updateBiblios.Add(update);
 
-            if (this._updateBiblios.Count >= 100)
+            if (this._updateBiblios.Count >= UPDATE_BIBLIOS_BATCHSIZE)
             {
                 nRet = CommitUpdateBiblios(
         connection,
@@ -7885,6 +7895,8 @@ connection))
 
             if (this._updateBiblios.Count == 0)
                 return 0;
+
+            Debug.WriteLine("CommitUpdateBiblios() _updateBiblios.Count=" + _updateBiblios.Count);
 
             List<UpdateBiblio> temp_updates = new List<UpdateBiblio>();
             List<string> recpaths = new List<string>();
@@ -8037,7 +8049,6 @@ connection))
                 return -1;
 
             this._updateBiblios.Clear();
-
             return 1;
         }
 
@@ -8049,120 +8060,115 @@ connection))
         {
             strError = "";
 
+            Debug.WriteLine("CommitUpdateBiblioRecord() updates.Count=" + updates.Count);
+
             StringBuilder command_text = new StringBuilder(4096);
-            using (SQLiteCommand command = new SQLiteCommand("",
-connection))
+
+            using (SQLiteTransaction mytransaction = connection.BeginTransaction())
             {
-
-                int i = 0;
-                foreach (UpdateBiblio update in updates)
+                using (SQLiteCommand command = new SQLiteCommand("",
+    connection))
                 {
-                    if (string.IsNullOrEmpty(update.Summary) == true
-                        && string.IsNullOrEmpty(update.BiblioRecPath) == true)
-                        continue;
 
-                    bool bBiblioRecPathParamSetted = false;
-                    if (string.IsNullOrEmpty(update.Summary) == false)
+                    int i = 0;
+                    foreach (UpdateBiblio update in updates)
                     {
-                        // 把书目摘要写入 biblio 表
-                        command_text.Append("insert or replace into biblio values (@bibliorecpath" + i + ", @summary" + i + ") ;");
+                        if (string.IsNullOrEmpty(update.Summary) == true
+                            && string.IsNullOrEmpty(update.BiblioRecPath) == true)
+                            continue;
 
-                        SQLiteUtil.SetParameter(command,
-            "@bibliorecpath" + i,
-            update.BiblioRecPath);
-                        bBiblioRecPathParamSetted = true;
+                        bool bBiblioRecPathParamSetted = false;
+                        if (string.IsNullOrEmpty(update.Summary) == false)
+                        {
+                            // 把书目摘要写入 biblio 表
+                            command_text.Append("insert or replace into biblio values (@bibliorecpath" + i + ", @summary" + i + ") ;");
 
-                        SQLiteUtil.SetParameter(command,
-         "@summary" + i,
-         update.Summary);
+                            SQLiteUtil.SetParameter(command,
+                "@bibliorecpath" + i,
+                update.BiblioRecPath);
+                            bBiblioRecPathParamSetted = true;
+
+                            SQLiteUtil.SetParameter(command,
+             "@summary" + i,
+             update.Summary);
+                        }
+
+                        // *** 取得分类号 keys
+
+                        if (_classFromStyles.Count == 0)
+                            goto CONTINUE;
+
+                        if (string.IsNullOrEmpty(update.KeysXml) == true)
+                            goto CONTINUE;
+
+                        XmlDocument dom = new XmlDocument();
+                        try
+                        {
+                            dom.LoadXml(update.KeysXml);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "update.KeysXml XML 装入 DOM 时出错: " + ex.Message;
+                            return -1;
+                        }
+
+                        int j = 0;
+                        foreach (BiblioDbFromInfo style in _classFromStyles)
+                        {
+                            XmlNodeList nodes = dom.DocumentElement.SelectNodes("k[@f='" + style.Caption + "']");
+                            List<string> keys = new List<string>();
+                            foreach (XmlNode node in nodes)
+                            {
+                                keys.Add(DomUtil.GetAttr(node, "k"));
+                            }
+
+                            command_text.Append("delete from class_" + style.Style + " where bibliorecpath = @bibliorecpath" + i + " ;");
+
+                            if (bBiblioRecPathParamSetted == false)
+                            {
+                                SQLiteUtil.SetParameter(command,
+    "@bibliorecpath" + i,
+    update.BiblioRecPath);
+                                bBiblioRecPathParamSetted = true;
+                            }
+                            /*
+                                SQLiteUtil.SetParameter(command,
+                    "@bibliorecpath",
+                    update.BiblioRecPath);
+                             * */
+
+                            foreach (string key in keys)
+                            {
+                                // 把分类号写入分类号表
+                                command_text.Append("insert into class_" + style.Style + " values (@bibliorecpath" + i + ", @class_" + i + "_" + j + ") ;");
+
+                                SQLiteUtil.SetParameter(command,
+                 "@class_" + i + "_" + j,
+                 key);
+                                j++;
+                            }
+                        }
+
+                    CONTINUE:
+                        i++;
                     }
 
-                    // *** 取得分类号 keys
-
-                    if (_classFromStyles.Count == 0)
-                        goto CONTINUE;
-
-                    if (string.IsNullOrEmpty(update.KeysXml) == true)
-                        goto CONTINUE;
-
-                    XmlDocument dom = new XmlDocument();
                     try
                     {
-                        dom.LoadXml(update.KeysXml);
+                        command.CommandText = command_text.ToString();
+                        int nCount = command.ExecuteNonQuery();
                     }
                     catch (Exception ex)
                     {
-                        strError = "update.KeysXml XML 装入 DOM 时出错: " + ex.Message;
+                        strError = "更新 biblio 表时出错.\r\n"
+                            + ex.Message + "\r\n"
+                            + "SQL 命令:\r\n"
+                            + command_text.ToString();
                         return -1;
                     }
-
-                    int j = 0;
-                    foreach (BiblioDbFromInfo style in _classFromStyles)
-                    {
-                        XmlNodeList nodes = dom.DocumentElement.SelectNodes("k[@f='" + style.Caption + "']");
-                        List<string> keys = new List<string>();
-                        foreach (XmlNode node in nodes)
-                        {
-                            keys.Add(DomUtil.GetAttr(node, "k"));
-                        }
-
-                        command_text.Append("delete from class_" + style.Style + " where bibliorecpath = @bibliorecpath" + i + " ;");
-
-                        if (bBiblioRecPathParamSetted == false)
-                        {
-                            SQLiteUtil.SetParameter(command,
-"@bibliorecpath" + i,
-update.BiblioRecPath);
-                            bBiblioRecPathParamSetted = true;
-                        }
-                        /*
-                            SQLiteUtil.SetParameter(command,
-                "@bibliorecpath",
-                update.BiblioRecPath);
-                         * */
-
-                        foreach (string key in keys)
-                        {
-                            // 把分类号写入分类号表
-                            command_text.Append("insert into class_" + style.Style + " values (@bibliorecpath" + i + ", @class_" + i + "_" + j + ") ;");
-
-                            SQLiteUtil.SetParameter(command,
-             "@class_" + i + "_" + j,
-             key);
-                            j++;
-                        }
-                    }
-
-                CONTINUE:
-                    i++;
                 }
-
-                IDbTransaction trans = connection.BeginTransaction();
-                try
-                {
-                    command.CommandText = command_text.ToString();
-                    int nCount = command.ExecuteNonQuery();
-                    if (trans != null)
-                    {
-                        trans.Commit();
-                        trans = null;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    strError = "更新 biblio 表时出错.\r\n"
-                        + ex.Message + "\r\n"
-                        + "SQL 命令:\r\n"
-                        + command_text.ToString();
-                    return -1;
-                }
-                finally
-                {
-                    if (trans != null)
-                        trans.Rollback();
-                }
+                mytransaction.Commit();
             }
-
             return 0;
         }
 
@@ -8207,8 +8213,6 @@ out string strError)
                 return -1;
             }
 
-
-
             // 读入册记录
             string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
                 "confirmItemRecPath");
@@ -8232,7 +8236,7 @@ out string strError)
             line.ItemRecPath = strConfirmItemRecPath;
 
             this._updateItems.Add(line);
-            if (this._updateItems.Count >= 100)
+            if (this._updateItems.Count >= UPDATE_ITEMS_BATCHSIZE)
             {
                 nRet = CommitUpdateItems(
                     connection,
@@ -8328,7 +8332,7 @@ out string strError)
             line.ItemRecPath = strConfirmItemRecPath;
 
             this._updateItems.Add(line);
-            if (this._updateItems.Count >= 100)
+            if (this._updateItems.Count >= UPDATE_ITEMS_BATCHSIZE)
             {
                 nRet = CommitUpdateItems(
                     connection,
@@ -8522,7 +8526,7 @@ out strError);
             line.ItemRecPath = strItemRecPath;
 
             this._updateItems.Add(line);
-            if (this._updateItems.Count >= 100)
+            if (this._updateItems.Count >= UPDATE_ITEMS_BATCHSIZE)
             {
                 nRet = CommitUpdateItems(
                     connection,
@@ -8938,6 +8942,7 @@ out strError);
                 strError = "CopySubRecords() 中 CommitUpdateBiblios() 出错: " + strError;
                 return -1;
             }
+
             nRet = CommitDeleteBiblios(
 connection,
 out strError);
@@ -8948,77 +8953,68 @@ out strError);
             }
 
             StringBuilder text = new StringBuilder(4096);
-            int i = 0;
-            using (SQLiteCommand command = new SQLiteCommand("",
-connection))
+
+            using (SQLiteTransaction mytransaction = connection.BeginTransaction())
             {
-                SQLiteUtil.SetParameter(command,
-"@t_bibliorecpath",
-strTargetBiblioRecPath);
-
-                foreach (XmlNode node in nodes)
+                int i = 0;
+                using (SQLiteCommand command = new SQLiteCommand("",
+    connection))
                 {
-                    string strSourceRecPath = DomUtil.GetAttr(node, "recPath");
-                    string strTargetRecPath = DomUtil.GetAttr(node, "targetRecPath");
+                    SQLiteUtil.SetParameter(command,
+    "@t_bibliorecpath",
+    strTargetBiblioRecPath);
 
-                    if (strAction == "copy")
+                    Debug.WriteLine("CopySubRecords() nodes.Count=" + nodes.Count);
+                    foreach (XmlNode node in nodes)
                     {
-                        string strNewBarcode = DomUtil.GetAttr(node, "newBarocde");
-                        // TODO: 目标位置实体记录已经存在怎么办 ?
-                        // 目标册记录的 barcode 字段要修改为空
-                        text.Append("insert or replace into item (itemrecpath, itembarcode, location, accessno, bibliorecpath) ");
-                        text.Append("select @t_itemrecpath" + i + " as itemrecpath, @newbarcode" + i + " as itembarcode, location, accessno, @t_bibliorecpath as bibliorecpath from item where itemrecpath = @s_itemrecpath" + i + " ; ");
+                        string strSourceRecPath = DomUtil.GetAttr(node, "recPath");
+                        string strTargetRecPath = DomUtil.GetAttr(node, "targetRecPath");
+
+                        if (strAction == "copy")
+                        {
+                            string strNewBarcode = DomUtil.GetAttr(node, "newBarocde");
+                            // TODO: 目标位置实体记录已经存在怎么办 ?
+                            // 目标册记录的 barcode 字段要修改为空
+                            text.Append("insert or replace into item (itemrecpath, itembarcode, location, accessno, bibliorecpath) ");
+                            text.Append("select @t_itemrecpath" + i + " as itemrecpath, @newbarcode" + i + " as itembarcode, location, accessno, @t_bibliorecpath as bibliorecpath from item where itemrecpath = @s_itemrecpath" + i + " ; ");
+
+                            SQLiteUtil.SetParameter(command,
+    "@newbarcode" + i,
+    strNewBarcode);
+                        }
+                        else
+                        {
+                            // *** 如果目标位置有记录，而源位置没有记录，应该是直接在目标记录上修改
+
+                            // 确保源位置有记录
+                            text.Append("insert or ignore into item (itemrecpath, itembarcode, location, accessno, bibliorecpath) ");
+                            text.Append("select @s_itemrecpath" + i + " as itemrecpath, itembarcode, location, accessno, @t_bibliorecpath as bibliorecpath from item where itemrecpath = @t_itemrecpath" + i + " ; ");
+
+                            // 如果目标位置已经有记录，先删除
+                            text.Append("delete from item where itemrecpath = @t_itemrecpath" + i + " ;");
+
+                            // 等于是修改 item 表的 itemrecpath 字段内容
+                            text.Append("update item SET itemrecpath = @t_itemrecpath" + i + " , bibliorecpath = @t_bibliorecpath where itemrecpath=@s_itemrecpath" + i + " ;");
+                        }
 
                         SQLiteUtil.SetParameter(command,
-"@newbarcode" + i,
-strNewBarcode);
-                    }
-                    else
-                    {
-                        // *** 如果目标位置有记录，而源位置没有记录，应该是直接在目标记录上修改
-
-                        // 确保源位置有记录
-                        text.Append("insert or ignore into item (itemrecpath, itembarcode, location, accessno, bibliorecpath) ");
-                        text.Append("select @s_itemrecpath" + i + " as itemrecpath, itembarcode, location, accessno, @t_bibliorecpath as bibliorecpath from item where itemrecpath = @t_itemrecpath" + i + " ; ");
-
-                        // 如果目标位置已经有记录，先删除
-                        text.Append("delete from item where itemrecpath = @t_itemrecpath" + i + " ;");
-
-
-                        // 等于是修改 item 表的 itemrecpath 字段内容
-                        text.Append("update item SET itemrecpath = @t_itemrecpath" + i + " , bibliorecpath = @t_bibliorecpath where itemrecpath=@s_itemrecpath" + i + " ;");
+    "@t_itemrecpath" + i,
+    strTargetRecPath);
+                        SQLiteUtil.SetParameter(command,
+    "@s_itemrecpath" + i,
+    strSourceRecPath);
+                        i++;
                     }
 
-                    SQLiteUtil.SetParameter(command,
-"@t_itemrecpath" + i,
-strTargetRecPath);
-                    SQLiteUtil.SetParameter(command,
-"@s_itemrecpath" + i,
-strSourceRecPath);
-                    i++;
-                }
-
-                IDbTransaction trans = connection.BeginTransaction();
-                try
-                {
                     command.CommandText = text.ToString();
                     int nCount = command.ExecuteNonQuery();
-                    if (trans != null)
-                    {
-                        trans.Commit();
-                        trans = null;
-                    }
                 }
-                finally
-                {
-                    if (trans != null)
-                        trans.Rollback();
-                }
+                mytransaction.Commit();
             }
-
             return 0;
         }
 
+        const int UPDATE_ITEMS_BATCHSIZE = 10;
 
         List<ItemLine> _updateItems = new List<ItemLine>();
 
@@ -9069,7 +9065,7 @@ strSourceRecPath);
 
             this._updateItems.Add(line);
 
-            if (this._updateItems.Count >= 100)
+            if (this._updateItems.Count >= UPDATE_ITEMS_BATCHSIZE)
             {
                 nRet = CommitUpdateItems(
                     connection,
@@ -9091,6 +9087,8 @@ strSourceRecPath);
             if (this._updateItems.Count == 0)
                 return 0;
 
+            Debug.WriteLine("CommitUpdateItems() _updateItems.Count=" + _updateItems.Count);
+
             // 插入一批册记录
             nRet = ItemLine.AppendItemLines(
                 connection,
@@ -9103,6 +9101,8 @@ strSourceRecPath);
             this._updateItems.Clear();
             return 0;
         }
+
+        const int UPDATE_READERS_BATCHSIZE = 10;
 
         List<ReaderLine> _updateReaders = new List<ReaderLine>();
 
@@ -9145,8 +9145,7 @@ strSourceRecPath);
 
             _updateReaders.Add(line);
 
-
-            if (this._updateReaders.Count >= 100)
+            if (this._updateReaders.Count >= UPDATE_READERS_BATCHSIZE)
             {
                 nRet = CommitUpdateReaders(
                     connection,
@@ -9167,6 +9166,7 @@ strSourceRecPath);
             if (this._updateReaders.Count == 0)
                 return 0;
 
+            Debug.WriteLine("CommitUpdateReaders() _updateReaders.Count=" + _updateReaders.Count);
 
             // 插入一批读者记录
             nRet = ReaderLine.AppendReaderLines(
@@ -9262,7 +9262,11 @@ strSourceRecPath);
         ERROR1:
             MessageBox.Show(this, strError);
 #endif
-            Task.Factory.StartNew(() => DoDailyReplication(LogType.OperLog))
+
+#if NO
+            Task.Factory.StartNew(() => DoDailyReplication(LogType.OperLog), CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default)
                     .ContinueWith((antecendent) =>
                     {
                         if (antecendent.IsFaulted == true)
@@ -9270,7 +9274,9 @@ strSourceRecPath);
                             this.Invoke((Action)(() => MessageBox.Show(this, ExceptionUtil.GetDebugText(antecendent.Exception))));
                             return;
                         }
-                        Task.Factory.StartNew(() => DoDailyReplication(LogType.AccessLog));
+                        Task.Factory.StartNew(() => DoDailyReplication(LogType.AccessLog), CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
                     })
                     .ContinueWith((antecendent) =>
                     {
@@ -9281,6 +9287,27 @@ strSourceRecPath);
                         }
                         this.Invoke((Action)(() => MessageBox.Show(this, "处理完成")));
                     });
+#endif
+
+            Thread thread = new Thread(new ThreadStart(this.DoDailyReplication));
+            thread.Start();
+        }
+
+        void DoDailyReplication()
+        {
+            string strError = "";
+            int nRet = 0;
+
+            nRet = DoDailyReplication(LogType.OperLog, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            nRet = DoDailyReplication(LogType.AccessLog, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            this.Invoke((Action)(() => MessageBox.Show(this, "处理完成")));
+            return;
+        ERROR1:
+            this.Invoke((Action)(() => MessageBox.Show(this, strError)));
         }
 
         void DoDailyReplication(
@@ -9487,6 +9514,8 @@ Stack:
             }
 
             EnableControls(false);
+
+            this.ChannelDoEvents = !this.InvokeRequired;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在查询数据库 ...");
@@ -10020,7 +10049,10 @@ dlg.DateRange);
             else
                 File.Delete(strTaskFileName);   // 任务完成，删除任务文件
 #endif
-            Task.Factory.StartNew(() => DoDailyReportTask(strTaskFileName, task_dom));
+            Task.Factory.StartNew(() => DoDailyReportTask(strTaskFileName, task_dom),
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
             return;
         ERROR1:
             if (task_dom != null && string.IsNullOrEmpty(strTaskFileName) == false)
@@ -10456,7 +10488,10 @@ MessageBoxDefaultButton.Button1);
             else
                 File.Delete(strTaskFileName);   // 任务完成，删除任务文件
 #endif
-            Task.Factory.StartNew(() => DoDailyReportTask(strTaskFileName, task_dom));
+            Task.Factory.StartNew(() => DoDailyReportTask(strTaskFileName, task_dom),
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Default);
             return;
         ERROR1:
             if (task_dom != null && string.IsNullOrEmpty(strTaskFileName) == false)
@@ -12849,6 +12884,8 @@ MessageBoxDefaultButton.Button1);
             long lUploadedFiles = 0;
 
             EnableControls(false);
+
+            this.ChannelDoEvents = !this.InvokeRequired;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在上传报表 ...");
