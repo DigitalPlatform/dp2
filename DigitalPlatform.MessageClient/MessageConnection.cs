@@ -1075,7 +1075,7 @@ errorInfo);
                                 if (records != null)
                                     recieved += records.Count;
 
-                                if (result.String == "_complete")
+                                if (errorCode == "_complete")
                                 {
                                     result.Value = resultCount;
                                     wait_events.finish_event.Set();

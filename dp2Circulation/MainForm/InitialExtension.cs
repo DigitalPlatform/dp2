@@ -1458,6 +1458,11 @@ MessageBoxDefaultButton.Button1);
             this.DisplayBackgroundText("正在创建备用绿色安装包 ...\r\n");
 
             StringBuilder debugInfo = new StringBuilder();
+            // return:
+            //      -2  权限不够
+            //      -1  出错
+            //      0   没有必要创建。(也许是因为当前程序正是从备用位置启动的、版本没有发生更新)
+            //      1   已经创建
             nRet = GreenProgram.CopyGreen(
                 Program.ClientVersion,
                 strProgramDir,
@@ -1495,6 +1500,8 @@ MessageBoxDefaultButton.Button1);
                 }
 #endif
             }
+            else if (nRet == -2)
+                return false;
             else
             {
                 try
