@@ -26,6 +26,7 @@ namespace dp2Circulation
         //      strDataDir  数据目录
         //      strTargetDir    目标安装目录
         // return:
+        //      -2  权限不够
         //      -1  出错
         //      0   没有必要创建。(也许是因为当前程序正是从备用位置启动的、版本没有发生更新)
         //      1   已经创建
@@ -68,6 +69,8 @@ namespace dp2Circulation
                 out strError);
             if (nRet == -1)
                 return -1;
+            if (nRet == -2)
+                return -2;
 
             if (PathUtil.IsEqual(strProgramDir, strDataDir) == false)
             {
@@ -78,6 +81,8 @@ namespace dp2Circulation
         out strError);
                 if (nRet == -1)
                     return -1;
+                if (nRet == -2)
+                    return -2;
             }
 
             // 最后写入主要 .exe 的版本号
@@ -119,6 +124,7 @@ Stack:
          * */
         // 拷贝目录
         // return:
+        //      -2  权限不够
         //      -1  出错
         //      >=0 复制的文件总数
         public static int CopyDirectory(string strSourceDir,
@@ -167,6 +173,8 @@ Stack:
                             out strError);
                         if (nRet == -1)
                             return -1;
+                        if (nRet == -2)
+                            return -2;
                         nCount += nRet;
                         continue;
                     }
@@ -187,9 +195,9 @@ Stack:
                         {
                             File.Copy(source, target, true);
                             if (debugInfo != null)
-                                debugInfo.Append("复制文件 "+source+" --> "+target+"\r\n");
+                                debugInfo.Append("复制文件 " + source + " --> " + target + "\r\n");
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             if (nRedoCount < 10)
                             {
@@ -199,7 +207,7 @@ Stack:
                             else
                             {
                                 // TODO: 如果重试多次复制依然失败，并且当前是 Administrator 身份，则可以考虑使用延迟复制方法，最后提醒用户重启 Windows
-                                string strText = "source '" + source + "' lastmodified = '" + File.GetLastWriteTimeUtc(source) .ToString()+ "'; "
+                                string strText = "source '" + source + "' lastmodified = '" + File.GetLastWriteTimeUtc(source).ToString() + "'; "
                                     + "target '" + target + "' lastmodified = '" + File.GetLastWriteTimeUtc(target).ToString() + "'";
                                 throw new Exception(strText, ex);
                             }
@@ -209,6 +217,11 @@ Stack:
                     }
                     nCount++;
                 }
+            }
+            catch (System.UnauthorizedAccessException)
+            {
+                strError = ExceptionUtil.GetDebugText(ex);
+                return -2;
             }
             catch (Exception ex)
             {
