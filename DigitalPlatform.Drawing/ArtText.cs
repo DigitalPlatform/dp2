@@ -280,6 +280,7 @@ namespace DigitalPlatform.Drawing
 
                         StringFormat stringFormat = new StringFormat();
                         stringFormat.Alignment = StringAlignment.Near;
+                        stringFormat.LineAlignment = StringAlignment.Center;    // 2016/5/24
 
                         // Color.FromArgb(128, 100, 100, 100)
                         using (Brush objBrush = new SolidBrush(colorText)) // 透明颜色 ' Color.Black

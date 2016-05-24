@@ -9,6 +9,9 @@ using System.Web.UI.WebControls;
 using System.Threading;
 using System.Resources;
 using System.Globalization;
+using DigitalPlatform.OPAC.Server;
+using System.Xml;
+using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -36,7 +39,6 @@ namespace DigitalPlatform.OPAC.Web
             // TODO: 如果抛出异常，则要试着取zh-cn的字符串，或者返回一个报错的字符串
             try
             {
-
                 string s = GetRm().GetString(strID, ci);
                 if (String.IsNullOrEmpty(s) == true)
                     return strID;
@@ -61,8 +63,82 @@ namespace DigitalPlatform.OPAC.Web
             return nCount;
         }
 
+        public string Lang
+        {
+            get
+            {
+                return Thread.CurrentThread.CurrentUICulture.Name;
+            }
+        }
+
+        void GetCustomHtml(out string strLeftHtml, 
+            out string strRightHtml,
+            out string strTopHtml,
+            out string strBottomHtml)
+        {
+            strLeftHtml = "";
+            strRightHtml = "";
+            strTopHtml = "";
+            strBottomHtml = "";
+
+            // 获得配置参数
+            OpacApplication app = (OpacApplication)this.Page.Application["app"];
+            /*
+             * 
+	<footerBarControl>
+		<leftAnchor lang='zh'>
+			<a href="http://dp2003.com">图书馆主页</a>
+		</leftAnchor>
+		<leftAnchor lang='en'>
+			<a href="http://dp2003.com">Library Homepage</a>
+		</leftAnchor>        ...
+             */
+            // XmlNode nodeLeftAnchor = app.WebUiDom.DocumentElement.SelectSingleNode("titleBarControl/leftAnchor");
+            XmlNode parent = app.WebUiDom.DocumentElement.SelectSingleNode("footerBarControl");
+            if (parent != null)
+            {
+                // 从一个元素的下级的多个<strElementName>元素中, 提取语言符合的XmlNode
+                // parameters:
+                //      bReturnFirstNode    如果找不到相关语言的，是否返回第一个<strElementName>
+                XmlNode nodeLeftAnchor = DomUtil.GetLangedNode(
+                    this.Lang,
+                    parent,
+                    "leftHtml");
+                if (nodeLeftAnchor != null)
+                    strLeftHtml = nodeLeftAnchor.InnerXml;
+
+                XmlNode nodeRightAnchor = DomUtil.GetLangedNode(
+    this.Lang,
+    parent,
+    "rightHtml");
+                if (nodeRightAnchor != null)
+                    strRightHtml = nodeRightAnchor.InnerXml;
+
+                XmlNode nodeTopAnchor = DomUtil.GetLangedNode(
+    this.Lang,
+    parent,
+    "topHtml");
+                if (nodeTopAnchor != null)
+                    strTopHtml = nodeTopAnchor.InnerXml;
+
+                XmlNode nodeBottomAnchor = DomUtil.GetLangedNode(
+    this.Lang,
+    parent,
+    "bottomHtml");
+                if (nodeBottomAnchor != null)
+                    strBottomHtml = nodeBottomAnchor.InnerXml;
+
+            }
+        }
+
         protected override void RenderContents(HtmlTextWriter output)
         {
+            string strLeftHtml = "";
+            string strRightHtml = "";
+            string strTopHtml = "";
+            string strBottomHtml = "";
+            GetCustomHtml(out strLeftHtml, out strRightHtml, out strTopHtml, out strBottomHtml);
+
             int nParentCount = GetParentCount();
             output.Indent += nParentCount;
 
@@ -87,10 +163,9 @@ namespace DigitalPlatform.OPAC.Web
             BeginIndentor.Write(output);
             output.Write("<tr class='footer'>");
 
-
             // 左
             NormalIndentor.Write(output);
-            output.Write("<td class='left'></td>");
+            output.Write("<td class='left'>"+strLeftHtml+"</td>");
 
             // 中
             NormalIndentor.Write(output);
@@ -103,27 +178,27 @@ namespace DigitalPlatform.OPAC.Web
                 + "</td>");
 #endif
             output.Write("<td class='middle'>"
+                + strTopHtml
     + this.GetString("dp2图书馆集成系统")
     + " V2 - <a href='https://github.com/DigitalPlatform/dp2'>"
     + "开源的图书馆管理系统"
     + "</a>"
+    + strBottomHtml
     + "</td>");
 
             // 右
             NormalIndentor.Write(output);
-            output.Write("<td class='right'>");
+            output.Write("<td class='right'>" + strRightHtml + "</td>");
 
             EndIndentor.Write(output);
             output.Write("</tr>");
             EndIndentor.Write(output);
             output.Write("</table>");
 
-
             EndIndentor.Write(output);
             output.Write("</td></tr>");
             NormalIndentor.Write(output);
             output.Write("<!-- 底部图像结束 -->");
-
 
             // 总表格结束
             EndIndentor.Write(output);
@@ -132,7 +207,6 @@ namespace DigitalPlatform.OPAC.Web
             output.Write("<!-- FooterBarControl 结束 -->");
 
             output.Indent -= nParentCount;
-
         }
 
         public override void RenderBeginTag(HtmlTextWriter writer)

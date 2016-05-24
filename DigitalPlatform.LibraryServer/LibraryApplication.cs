@@ -7846,6 +7846,8 @@ out strError);
         // 一次检索多个检索词
         // "册条码";
         // "参考ID";
+        // parameters:
+        //      bMixRefID   是否在条码号中间杂了 @refID: 前缀的元素?
         // return:
         //      -1  出错
         //      0   一个也没有命中
@@ -7858,10 +7860,12 @@ out strError);
             string strFrom,
             int nMax,
             string strStyle,
+            out bool bMixRefID,
             out List<Record> results,
             out string strError)
         {
             strError = "";
+            bMixRefID = false;
 
             results = new List<Record>();
 
@@ -7916,6 +7920,7 @@ out strError);
 
                 if (string.IsNullOrEmpty(strRefIDList) == false)
                 {
+                    bMixRefID = true;
                     string strOneDbQuery = "<target list='"
     + StringUtil.GetXmlStringSimple(strDbName + ":" + "参考ID")
     + "'><item><word>"

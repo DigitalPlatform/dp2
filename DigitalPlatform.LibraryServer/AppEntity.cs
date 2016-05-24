@@ -5063,6 +5063,7 @@ namespace DigitalPlatform.LibraryServer
 
             int nMaxCount = Math.Max(word_list.Count * 3, 1000);    // 至少为 1000
             List<Record> records = null;
+            bool bMixRefID = false;
 
             // return:
             //      -1  出错
@@ -5075,6 +5076,7 @@ namespace DigitalPlatform.LibraryServer
     strFrom,
     nMaxCount,
     "keyid,id,key",    // 要返回key，这样才知道是否发生了条码号重复
+    out bMixRefID,
     out records,
     out strError);
             if (nRet == -1)
@@ -5130,13 +5132,13 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 string strKey = record.Keys[0].Key;
-                if (record.Keys[0].From == "refID")
+                if (bMixRefID == true && record.Keys[0].From == "refID")    // 2016/5/24 增加 bMixRefID
                     strKey = "@refID:" + strKey;    // TODO: 前缀用法需要统一。比如前端发来的册条码号也故意指定了前缀怎么办？
 
                 List<int> indices = IndexOf(word_list, strKey, bIgnoreCase);
                 if (indices.Count == 0)
                 {
-                    strError = "很奇怪出现了 key '" + strKey + "' 在wordlist '" + strWordList + "' 中没有匹配的项";
+                    strError = "1) 很奇怪出现了 key '" + strKey + "' 在wordlist '" + strWordList + "' 中没有匹配的项";
                     return -1;
                 }
 
@@ -5249,7 +5251,7 @@ namespace DigitalPlatform.LibraryServer
                     List<int> indices = IndexOf(word_list, word, bIgnoreCase);
                     if (indices.Count == 0)
                     {
-                        strError = "很奇怪出现了 temp_word '" + word + "' 在wordlist '" + strWordList + "' 中没有匹配的项";
+                        strError = "2) 很奇怪出现了 temp_word '" + word + "' 在wordlist '" + strWordList + "' 中没有匹配的项";
                         return -1;
                     }
 

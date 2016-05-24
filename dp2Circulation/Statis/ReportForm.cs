@@ -13,6 +13,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Threading;
 using System.Globalization;
+using System.Threading.Tasks;
 
 using Ionic.Zip;
 using System.Data.SQLite;
@@ -31,7 +32,6 @@ using DigitalPlatform.CirculationClient;
 // using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -6406,6 +6406,13 @@ MessageBoxDefaultButton.Button2);
 
             try
             {
+                // 删除以前遗留的数据库文件
+                string strDatabaseFile = Path.Combine(GetBaseDirectory(), "operlog.bin");
+                if (File.Exists(strDatabaseFile) == true)
+                {
+                    File.Delete(strDatabaseFile);
+                }
+
                 this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
 
                 // 初始化各种表，除了 operlogXXX 表以外
