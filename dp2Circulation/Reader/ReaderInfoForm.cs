@@ -271,7 +271,6 @@ namespace dp2Circulation
                 if (this.binaryResControl1 != null)
                     this.binaryResControl1.Changed = value;
             }
-
         }
 
         /// <summary>
@@ -855,17 +854,6 @@ MessageBoxDefaultButton.Button2);
                         strError = "记录路径 " + strRecPath + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
                         goto ERROR1;
                     }
-
-
-                    /*
-                    this.RecPath = strRecPath;
-
-                    this.Timestamp = baTimestamp;
-
-                    // 保存刚获得的记录
-                    this.OldRecord = strXml;
-                     */
-
 
                     if (results == null || results.Length < 2)
                     {

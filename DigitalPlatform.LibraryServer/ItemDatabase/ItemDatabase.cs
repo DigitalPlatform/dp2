@@ -1731,7 +1731,6 @@ out strError);
                     }
                 }
 
-
                 // 对info内的参数进行检查。
                 strError = "";
 
@@ -1792,7 +1791,6 @@ out strError);
                     {
                         strError = "strAction值为new时, info.OldTimestamp参数必须为空";
                     }
-
                 }
 
                 if (strError != "")
@@ -1917,8 +1915,6 @@ out strError);
 
                 try
                 {
-
-
                     // 命令new和change的共有部分 -- 出版时间查重, 也需要加锁
                     // delete则需要加锁
                     if (info.Action == "new"
@@ -1926,7 +1922,6 @@ out strError);
                         || info.Action == "delete"
                         || info.Action == "move")
                     {
-
                         // 仅仅用来获取一下新出版时间
                         // 看看新旧出版时间是否有差异
                         // 对IssueInfo中的OldRecord和NewRecord中包含的条码号进行比较, 看看是否发生了变化(进而就需要查重)
@@ -1983,7 +1978,6 @@ out strError);
                         if (nRet == -1)
                             goto ERROR1;
 
-
                         // 加锁
                         if (nRet == 0)
                         {
@@ -2001,7 +1995,6 @@ out strError);
                             bIsNewLocateParamNull = true;
                         else
                             bIsNewLocateParamNull = false;
-
 
                         if ((info.Action == "new"
         || info.Action == "change"
@@ -2242,7 +2235,6 @@ out strError);
                             }
                         }
 
-
                         // 2010/4/8
                         XmlDocument temp = new XmlDocument();
                         temp.LoadXml(strNewXml);
@@ -2282,7 +2274,6 @@ out strError);
                         }
                         else // 成功
                         {
-
                             DomUtil.SetElementText(domOperLog.DocumentElement,
                                 "action",
                                 "new");

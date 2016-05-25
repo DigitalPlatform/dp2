@@ -41,8 +41,12 @@ namespace dp2Circulation
             this.tabControl_item = new System.Windows.Forms.TabControl();
             this.tabPage_html = new System.Windows.Forms.TabPage();
             this.webBrowser_itemHTML = new System.Windows.Forms.WebBrowser();
+            this.tabPage_borrowHistory = new System.Windows.Forms.TabPage();
+            this.webBrowser_borrowHistory = new System.Windows.Forms.WebBrowser();
             this.tabPage_xml = new System.Windows.Forms.TabPage();
             this.webBrowser_itemXml = new System.Windows.Forms.WebBrowser();
+            this.tabPage_object = new System.Windows.Forms.TabPage();
+            this.binaryResControl1 = new DigitalPlatform.CirculationClient.BinaryResControl();
             this.webBrowser_biblio = new System.Windows.Forms.WebBrowser();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBox_from = new System.Windows.Forms.ComboBox();
@@ -53,23 +57,23 @@ namespace dp2Circulation
             this.toolStripButton_prevRecord = new System.Windows.Forms.ToolStripButton();
             this.toolStripLabel_message = new System.Windows.Forms.ToolStripLabel();
             this.toolStripButton_addSubject = new System.Windows.Forms.ToolStripButton();
-            this.tabPage_borrowHistory = new System.Windows.Forms.TabPage();
-            this.webBrowser_borrowHistory = new System.Windows.Forms.WebBrowser();
+            this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
             this.splitContainer_main.SuspendLayout();
             this.tabControl_item.SuspendLayout();
             this.tabPage_html.SuspendLayout();
-            this.tabPage_xml.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
             this.tabPage_borrowHistory.SuspendLayout();
+            this.tabPage_xml.SuspendLayout();
+            this.tabPage_object.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer_main
             // 
-            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_main.Location = new System.Drawing.Point(0, 37);
             this.splitContainer_main.Name = "splitContainer_main";
@@ -92,6 +96,7 @@ namespace dp2Circulation
             this.tabControl_item.Controls.Add(this.tabPage_html);
             this.tabControl_item.Controls.Add(this.tabPage_borrowHistory);
             this.tabControl_item.Controls.Add(this.tabPage_xml);
+            this.tabControl_item.Controls.Add(this.tabPage_object);
             this.tabControl_item.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_item.Location = new System.Drawing.Point(0, 0);
             this.tabControl_item.Margin = new System.Windows.Forms.Padding(0);
@@ -122,13 +127,32 @@ namespace dp2Circulation
             this.webBrowser_itemHTML.Size = new System.Drawing.Size(179, 229);
             this.webBrowser_itemHTML.TabIndex = 0;
             // 
+            // tabPage_borrowHistory
+            // 
+            this.tabPage_borrowHistory.Controls.Add(this.webBrowser_borrowHistory);
+            this.tabPage_borrowHistory.Location = new System.Drawing.Point(4, 25);
+            this.tabPage_borrowHistory.Name = "tabPage_borrowHistory";
+            this.tabPage_borrowHistory.Size = new System.Drawing.Size(179, 229);
+            this.tabPage_borrowHistory.TabIndex = 2;
+            this.tabPage_borrowHistory.Text = "借阅历史";
+            this.tabPage_borrowHistory.UseVisualStyleBackColor = true;
+            // 
+            // webBrowser_borrowHistory
+            // 
+            this.webBrowser_borrowHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser_borrowHistory.Location = new System.Drawing.Point(0, 0);
+            this.webBrowser_borrowHistory.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser_borrowHistory.Name = "webBrowser_borrowHistory";
+            this.webBrowser_borrowHistory.Size = new System.Drawing.Size(179, 229);
+            this.webBrowser_borrowHistory.TabIndex = 0;
+            // 
             // tabPage_xml
             // 
             this.tabPage_xml.Controls.Add(this.webBrowser_itemXml);
             this.tabPage_xml.Location = new System.Drawing.Point(4, 25);
             this.tabPage_xml.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage_xml.Name = "tabPage_xml";
-            this.tabPage_xml.Size = new System.Drawing.Size(152, 229);
+            this.tabPage_xml.Size = new System.Drawing.Size(179, 229);
             this.tabPage_xml.TabIndex = 1;
             this.tabPage_xml.Text = "XML";
             this.tabPage_xml.UseVisualStyleBackColor = true;
@@ -140,8 +164,32 @@ namespace dp2Circulation
             this.webBrowser_itemXml.Margin = new System.Windows.Forms.Padding(2);
             this.webBrowser_itemXml.MinimumSize = new System.Drawing.Size(15, 16);
             this.webBrowser_itemXml.Name = "webBrowser_itemXml";
-            this.webBrowser_itemXml.Size = new System.Drawing.Size(152, 229);
+            this.webBrowser_itemXml.Size = new System.Drawing.Size(179, 229);
             this.webBrowser_itemXml.TabIndex = 0;
+            // 
+            // tabPage_object
+            // 
+            this.tabPage_object.Controls.Add(this.binaryResControl1);
+            this.tabPage_object.Location = new System.Drawing.Point(4, 25);
+            this.tabPage_object.Name = "tabPage_object";
+            this.tabPage_object.Size = new System.Drawing.Size(179, 229);
+            this.tabPage_object.TabIndex = 3;
+            this.tabPage_object.Text = "对象";
+            this.tabPage_object.UseVisualStyleBackColor = true;
+            // 
+            // binaryResControl1
+            // 
+            this.binaryResControl1.BiblioRecPath = "";
+            this.binaryResControl1.Changed = false;
+            this.binaryResControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.binaryResControl1.ErrorInfo = "";
+            this.binaryResControl1.Location = new System.Drawing.Point(0, 0);
+            this.binaryResControl1.Margin = new System.Windows.Forms.Padding(2);
+            this.binaryResControl1.Name = "binaryResControl1";
+            this.binaryResControl1.RightsCfgFileName = null;
+            this.binaryResControl1.Size = new System.Drawing.Size(179, 229);
+            this.binaryResControl1.TabIndex = 0;
+            this.binaryResControl1.TempDir = null;
             // 
             // webBrowser_biblio
             // 
@@ -178,7 +226,7 @@ namespace dp2Circulation
             // 
             // textBox_queryWord
             // 
-            this.textBox_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_queryWord.Location = new System.Drawing.Point(166, 10);
             this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(2);
@@ -200,7 +248,7 @@ namespace dp2Circulation
             // 
             // toolStrip1
             // 
-            this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.toolStrip1.AutoSize = false;
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
@@ -208,7 +256,8 @@ namespace dp2Circulation
             this.toolStripButton_nextRecord,
             this.toolStripButton_prevRecord,
             this.toolStripLabel_message,
-            this.toolStripButton_addSubject});
+            this.toolStripButton_addSubject,
+            this.toolStripButton_save});
             this.toolStrip1.Location = new System.Drawing.Point(0, 298);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(513, 20);
@@ -254,24 +303,16 @@ namespace dp2Circulation
             this.toolStripButton_addSubject.Visible = false;
             this.toolStripButton_addSubject.Click += new System.EventHandler(this.toolStripButton_addSubject_Click);
             // 
-            // tabPage_borrowHistory
+            // toolStripButton_save
             // 
-            this.tabPage_borrowHistory.Controls.Add(this.webBrowser_borrowHistory);
-            this.tabPage_borrowHistory.Location = new System.Drawing.Point(4, 25);
-            this.tabPage_borrowHistory.Name = "tabPage_borrowHistory";
-            this.tabPage_borrowHistory.Size = new System.Drawing.Size(179, 229);
-            this.tabPage_borrowHistory.TabIndex = 2;
-            this.tabPage_borrowHistory.Text = "借阅历史";
-            this.tabPage_borrowHistory.UseVisualStyleBackColor = true;
-            // 
-            // webBrowser_borrowHistory
-            // 
-            this.webBrowser_borrowHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser_borrowHistory.Location = new System.Drawing.Point(0, 0);
-            this.webBrowser_borrowHistory.MinimumSize = new System.Drawing.Size(20, 20);
-            this.webBrowser_borrowHistory.Name = "webBrowser_borrowHistory";
-            this.webBrowser_borrowHistory.Size = new System.Drawing.Size(179, 229);
-            this.webBrowser_borrowHistory.TabIndex = 0;
+            this.toolStripButton_save.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_save.Enabled = false;
+            this.toolStripButton_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_save.Image")));
+            this.toolStripButton_save.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
+            this.toolStripButton_save.Name = "toolStripButton_save";
+            this.toolStripButton_save.Size = new System.Drawing.Size(23, 17);
+            this.toolStripButton_save.Text = "保存";
+            this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
             // 
             // ItemInfoForm
             // 
@@ -299,10 +340,11 @@ namespace dp2Circulation
             this.splitContainer_main.ResumeLayout(false);
             this.tabControl_item.ResumeLayout(false);
             this.tabPage_html.ResumeLayout(false);
+            this.tabPage_borrowHistory.ResumeLayout(false);
             this.tabPage_xml.ResumeLayout(false);
+            this.tabPage_object.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
-            this.tabPage_borrowHistory.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -328,5 +370,8 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripButton toolStripButton_addSubject;
         private System.Windows.Forms.TabPage tabPage_borrowHistory;
         private System.Windows.Forms.WebBrowser webBrowser_borrowHistory;
+        private System.Windows.Forms.TabPage tabPage_object;
+        private DigitalPlatform.CirculationClient.BinaryResControl binaryResControl1;
+        private System.Windows.Forms.ToolStripButton toolStripButton_save;
     }
 }

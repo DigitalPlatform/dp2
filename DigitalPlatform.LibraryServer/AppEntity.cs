@@ -99,8 +99,25 @@ namespace DigitalPlatform.LibraryServer
                     core_entity_element_names[i], strTextNew);
             }
 
-            strMergedXml = domExist.OuterXml;
+            // 清除以前的<dprms:file>元素
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
 
+            XmlNodeList nodes = domExist.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            foreach (XmlNode node in nodes)
+            {
+                node.ParentNode.RemoveChild(node);
+            }
+            // 兑现新记录中的 dprms:file 元素
+            nodes = domNew.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            foreach(XmlElement node in nodes)
+            {
+                XmlDocumentFragment frag = domExist.CreateDocumentFragment();
+                frag.InnerXml = node.OuterXml;
+                domExist.DocumentElement.AppendChild(frag);
+            }
+
+            strMergedXml = domExist.OuterXml;
             return 0;
         }
 
@@ -3797,9 +3814,7 @@ namespace DigitalPlatform.LibraryServer
             string strOutputPath = "";
             string strMetaData = "";
 
-
             // 先读出数据库中即将覆盖位置的已有记录
-
         REDOLOAD:
 
             lRet = channel.GetRes(info.NewRecPath,
@@ -3828,9 +3843,7 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-
             // 把两个记录装入DOM
-
             XmlDocument domExist = new XmlDocument();
             XmlDocument domNew = new XmlDocument();
 
@@ -3955,7 +3968,6 @@ namespace DigitalPlatform.LibraryServer
                     out strDetailInfo);
                 // bDetectCiculationInfo = true;
 
-
                 if (nRet == 1)  // 册条码号有改变
                 {
                     if (bHasCirculationInfo == true
@@ -3998,7 +4010,6 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 比较新旧记录的状态是否有改变，如果从其他状态修改为“注销”状态，则应引起注意，后面要进行必要的检查
-
                 string strOldState = "";
                 string strNewState = "";
 
@@ -4099,7 +4110,6 @@ namespace DigitalPlatform.LibraryServer
 
                     }
                     // endif 如果新记录状态没有包含“加工中”...
-
                 }
             }
 
@@ -4169,14 +4179,12 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                 }
 
-
                 nRet = MergeTwoEntityXml(domExist,
                     domNew,
                     out strNewXml,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
-
             }
             else
             {

@@ -895,7 +895,6 @@ namespace dp2Circulation
 
                     info.OldRecord = bookitem.OldRecord;
                     info.OldTimestamp = bookitem.Timestamp;
-
                 }
 
                 if (bookitem.ItemDisplayState == ItemDisplayState.Deleted)

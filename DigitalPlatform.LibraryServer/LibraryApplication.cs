@@ -13805,8 +13805,11 @@ strLibraryCode);    // 读者所在的馆代码
                 return 0;
             }*/
 
-            // 评注库
-            if (this.IsCommentDbName(strDbName) == true)
+            // 评注库等
+            if (this.IsCommentDbName(strDbName) == true
+                || this.IsItemDbName(strDbName) == true
+                || this.IsIssueDbName(strDbName) == true
+                || this.IsOrderDbName(strDbName) == true)
             {
                 string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
 
