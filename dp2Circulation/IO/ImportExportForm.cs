@@ -150,7 +150,6 @@ namespace dp2Circulation
             string strError = "";
             bool bRet = false;
 
-
             this.Invoke((Action)(() =>
                 EnableControls(false)
                 ));
