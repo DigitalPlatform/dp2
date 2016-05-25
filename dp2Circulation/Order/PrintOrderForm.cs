@@ -9575,6 +9575,7 @@ MessageBoxDefaultButton.Button2);
             {
                 if (line.Books == null)
                     continue;
+
                 foreach (OneBook book in line.Books)
                 {
                     if (string.IsNullOrEmpty(book.RefID) == true)
@@ -9889,7 +9890,6 @@ MessageBoxDefaultButton.Button1);
             option.LoadData(this.MainForm.AppInfo,
                 "printorder_printoption");
 
-
             macro_table["%batchno%"] = this.BatchNo; // 批次号
             macro_table["%seller%"] = items.Seller; // 渠道名
             macro_table["%date%"] = DateTime.Now.ToLongDateString();
@@ -9900,8 +9900,6 @@ MessageBoxDefaultButton.Button1);
 
             // 批次号或文件名 多个宏不方便判断后选用，只好合并为一个宏
             macro_table["%batchno_or_recpathfilename%"] = String.IsNullOrEmpty(this.BatchNo) == true ? strRecPathFilename : this.BatchNo;
-
-
 
             // 需要将属于不同渠道的文件名前缀区别开来
             string strFileNamePrefix = this.MainForm.DataDir + "\\~printorder_" + items.GetHashCode().ToString() + "_";

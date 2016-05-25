@@ -74,7 +74,6 @@ namespace DigitalPlatform.OPAC.Web
         {
             string strLang = "";
 
-
             // lang下拉菜单
             strLang = page.Request.Form[strSelControlID];
             if (String.IsNullOrEmpty(strLang) == false)
@@ -1257,7 +1256,6 @@ strLibraryStyleDir,
 
                 if (loginstate == LoginState.Reader)
                 {
-
                     // 其余栏目
 
                     // 借阅信息
@@ -1278,12 +1276,10 @@ strLibraryStyleDir,
                     literal = new AutoIndentLiteral();
                     literal.Text = "</td>";
                     this.Controls.Add(literal);
-
                 }
 
                 if (loginstate == LoginState.Reader)
                 {
-
                     // 预约
                     if (this.CurrentColumn == TitleColumn.ReservationInfo)
                         strClass = "active";

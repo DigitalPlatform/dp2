@@ -201,6 +201,24 @@ namespace DigitalPlatform.LibraryServer
                 domExist.DocumentElement.InnerXml = strTempMergedXml;
             }
 
+            // 清除以前的<dprms:file>元素
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            XmlNodeList nodes = domExist.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            foreach (XmlNode node in nodes)
+            {
+                node.ParentNode.RemoveChild(node);
+            }
+            // 兑现新记录中的 dprms:file 元素
+            nodes = domNew.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            foreach (XmlElement node in nodes)
+            {
+                XmlDocumentFragment frag = domExist.CreateDocumentFragment();
+                frag.InnerXml = node.OuterXml;
+                domExist.DocumentElement.AppendChild(frag);
+            }
+
             strMergedXml = domExist.OuterXml;
 
             if (string.IsNullOrEmpty(strWarning) == false)

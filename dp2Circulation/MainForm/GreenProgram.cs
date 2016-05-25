@@ -218,7 +218,7 @@ Stack:
                     nCount++;
                 }
             }
-            catch (System.UnauthorizedAccessException)
+            catch (System.UnauthorizedAccessException ex)
             {
                 strError = ExceptionUtil.GetDebugText(ex);
                 return -2;

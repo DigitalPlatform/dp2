@@ -14,7 +14,6 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
@@ -806,13 +805,11 @@ bool bChanged)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-
             menuItem = new MenuItem("新增(&N)");
             menuItem.Click += new System.EventHandler(this.menu_new_Click);
             if (bHasBillioLoaded == false)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
-
 
             //
             menuItem = new MenuItem("标记删除(&D)");
@@ -844,7 +841,6 @@ bool bChanged)
             if (bHasBillioLoaded == false || bHasClipboardObject == false)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
-
 
             // ---
             menuItem = new MenuItem("-");

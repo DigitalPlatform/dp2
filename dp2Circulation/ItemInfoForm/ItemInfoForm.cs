@@ -18,6 +18,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -58,11 +59,47 @@ namespace dp2Circulation
         /// <summary>
         /// 当前已经装载的记录路径
         /// </summary>
-        public string ItemRecPath = ""; // 当前已经装载的册记录路径
+        public string ItemRecPath { get; set; } // 当前已经装载的册记录路径
+
         /// <summary>
         /// 当前已装载的书目记录路径
         /// </summary>
-        public string BiblioRecPath = "";   // 当前已装载的书目记录路径
+        public string BiblioRecPath { get; set; }   // 当前已装载的书目记录路径
+
+        string _xml = "";
+        /// <summary>
+        /// 记录 XML
+        /// </summary>
+        public string Xml
+        {
+            get
+            {
+                return this._xml;
+            }
+            set
+            {
+                this._xml = value;
+
+                /*
+SetXmlToWebbrowser(this.webBrowser_itemXml,
+    strItemText);
+ * */
+                // 把 XML 字符串装入一个Web浏览器控件
+                // 这个函数能够适应"<root ... />"这样的没有prolog的XML内容
+                Global.SetXmlToWebbrowser(this.webBrowser_itemXml,
+                    this.MainForm.DataDir,
+                    "xml",
+                    value);
+
+                SetItemRefID(value);
+            }
+        }
+
+        /// <summary>
+        /// 记录时间戳
+        /// </summary>
+        public byte[] Timestamp { get; set; }
+
 
         const int WM_LOAD_RECORD = API.WM_USER + 200;
         const int WM_PREV_RECORD = API.WM_USER + 201;
@@ -110,6 +147,19 @@ namespace dp2Circulation
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
+            {
+                //
+                this.binaryResControl1.ContentChanged -= new ContentChangedEventHandler(binaryResControl1_ContentChanged);
+                this.binaryResControl1.ContentChanged += new ContentChangedEventHandler(binaryResControl1_ContentChanged);
+
+                this.binaryResControl1.GetChannel -= binaryResControl1_GetChannel;
+                this.binaryResControl1.GetChannel += binaryResControl1_GetChannel;
+
+                this.binaryResControl1.ReturnChannel -= binaryResControl1_ReturnChannel;
+                this.binaryResControl1.ReturnChannel += binaryResControl1_ReturnChannel;
+
+                this.binaryResControl1.Stop = this.stop;
+            }
 
             // webbrowser
             this.m_webExternalHost_item.Initial(this.MainForm, this.webBrowser_itemHTML);
@@ -131,6 +181,45 @@ namespace dp2Circulation
             ClearBorrowHistoryPage();
         }
 
+        void binaryResControl1_ContentChanged(object sender, ContentChangedEventArgs e)
+        {
+            this.toolStripButton_save.Enabled = e.CurrentChanged;
+        }
+
+        void binaryResControl1_ReturnChannel(object sender, ReturnChannelEventArgs e)
+        {
+            this.stop.EndLoop();
+            this.stop.OnStop -= new StopEventHandler(this.DoStop);
+            this.ReturnChannel(e.Channel);
+        }
+
+        void binaryResControl1_GetChannel(object sender, GetChannelEventArgs e)
+        {
+            e.Channel = this.GetChannel();
+            this.stop.OnStop += new StopEventHandler(this.DoStop);
+            this.stop.BeginLoop();
+        }
+
+        // 
+        /// <summary>
+        /// 对象信息是否被改变
+        /// </summary>
+        public bool ObjectChanged
+        {
+            get
+            {
+                if (this.binaryResControl1 != null)
+                    return this.binaryResControl1.Changed;
+
+                return false;
+            }
+            set
+            {
+                if (this.binaryResControl1 != null)
+                    this.binaryResControl1.Changed = value;
+            }
+        }
+
         void commander_IsBusy(object sender, IsBusyEventArgs e)
         {
             e.IsBusy = this.m_webExternalHost_item.ChannelInUse || this.m_webExternalHost_biblio.ChannelInUse;
@@ -150,6 +239,22 @@ namespace dp2Circulation
 
             }
 #endif
+            if (// this.ItemXmlChanged == true ||
+                this.ObjectChanged == true)
+            {
+                // 警告尚未保存
+                DialogResult result = MessageBox.Show(this,
+    "当前有信息被修改后尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
+    "ItemInfoForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
         }
 
         private void ItemInfoForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -316,18 +421,23 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    /*
-                    SetXmlToWebbrowser(this.webBrowser_itemXml,
-                        strItemText);
-                     * */
-                    // 把 XML 字符串装入一个Web浏览器控件
-                    // 这个函数能够适应"<root ... />"这样的没有prolog的XML内容
-                    Global.SetXmlToWebbrowser(this.webBrowser_itemXml,
-                        this.MainForm.DataDir,
-                        "xml",
-                        strItemText);
+                    this.Xml = strItemText;
+                    this.Timestamp = item_timestamp;
 
-                    SetItemRefID(strItemText);
+                    // 接着装入对象资源
+                    {
+                        this.binaryResControl1.Clear();
+                        int nRet = this.binaryResControl1.LoadObject(
+                            this.Channel,
+                            strItemRecPath,
+                            this.Xml,
+                            this.MainForm.ServerVersion,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            MessageBox.Show(this, strError);
+                        }
+                    }
                 }
             }
             finally
@@ -498,27 +608,15 @@ namespace dp2Circulation
 
                     this.ItemRecPath = strOutputItemRecPath;    // 2011/9/5
                     this.BiblioRecPath = strBiblioRecPath;  // 2013/3/4
-#if NO
-                    Global.SetHtmlString(this.webBrowser_itemHTML,
-    strError,
-    this.MainForm.DataDir,
-    "iteminfoform_item");
-#endif
+
                     this.m_webExternalHost_item.SetHtmlString(strError,
     "iteminfoform_item");
-
                 }
                 else
                 {
                     this.ItemRecPath = strOutputItemRecPath;    // 2009/10/18
                     this.BiblioRecPath = strBiblioRecPath;  // 2013/3/4
 
-#if NO
-                    Global.SetHtmlString(this.webBrowser_itemHTML,
-                        strItemText,
-                        this.MainForm.DataDir,
-                        "iteminfoform_item");
-#endif
                     this.m_webExternalHost_item.SetHtmlString(strItemText,
                         "iteminfoform_item");
                 }
@@ -528,12 +626,6 @@ namespace dp2Circulation
                         "(书目记录 '" + strBiblioRecPath + "' 不存在)");
                 else
                 {
-#if NO
-                    Global.SetHtmlString(this.webBrowser_biblio,
-                        strBiblioText,
-                        this.MainForm.DataDir,
-                        "iteminfoform_biblio");
-#endif
                     this.m_webExternalHost_biblio.SetHtmlString(strBiblioText,
                         "iteminfoform_biblio");
                 }
@@ -605,6 +697,10 @@ namespace dp2Circulation
                 }
                 else
                 {
+                    this.Xml = strItemText;
+                    this.Timestamp = item_timestamp;
+
+#if NO
                     /*
                     SetXmlToWebbrowser(this.webBrowser_itemXml,
                         strItemText);
@@ -617,6 +713,22 @@ namespace dp2Circulation
                         strItemText);
 
                     SetItemRefID(strItemText);
+#endif
+
+                    // 接着装入对象资源
+                    {
+                        this.binaryResControl1.Clear();
+                        int nRet = this.binaryResControl1.LoadObject(
+                            this.Channel,
+                            strOutputItemRecPath,
+                            this.Xml,
+                            this.MainForm.ServerVersion,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            MessageBox.Show(this, strError);
+                        }
+                    }
                 }
             }
             finally
@@ -633,6 +745,222 @@ namespace dp2Circulation
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
+        }
+
+        void SaveRecord()
+        {
+            string strError = "";
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在保存册记录 " + this.ItemRecPath + " ...");
+            stop.BeginLoop();
+
+            EnableControls(false);
+            try
+            {
+                int nRet = SaveItemInfo(this.DbType,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 保存对象
+                // 提交对象保存请求
+                // return:
+                //		-1	error
+                //		>=0 实际上载的资源对象数
+                nRet = this.binaryResControl1.Save(
+                    this.Channel,
+                    this.MainForm.ServerVersion,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 重新装载记录
+                nRet = LoadRecordByRecPath(this.ItemRecPath, "");
+                return;
+            }
+            finally
+            {
+                EnableControls(true);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 获得记录的XML格式
+        // parameters:
+        //      bIncludeFileID  是否要根据当前rescontrol内容合成<dprms:file>元素?
+        //      bClearFileID    是否要清除以前的<dprms:file>元素
+        int GetXml(
+            bool bIncludeFileID,
+            bool bClearFileID,
+            out string strXml,
+            out string strError)
+        {
+            strError = "";
+            strXml = "";
+            int nRet = 0;
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(this.Xml);
+            }
+            catch (Exception ex)
+            {
+                strError = "XML数据装入DOM时出错: " + ex.Message;
+                return -1;
+            }
+
+            Debug.Assert(dom != null, "");
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            if (bClearFileID == true
+                || (this.binaryResControl1 != null && bIncludeFileID == true)
+                )
+            {
+                // 2011/10/13
+                // 清除以前的<dprms:file>元素
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+                foreach (XmlNode node in nodes)
+                {
+                    node.ParentNode.RemoveChild(node);
+                }
+            }
+
+            // 合成<dprms:file>元素
+            if (this.binaryResControl1 != null
+                && bIncludeFileID == true)  // 2008/12/3
+            {
+                // 在 XmlDocument 对象中添加 <file> 元素。新元素加入在根之下
+                nRet = this.binaryResControl1.AddFileFragments(ref dom,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            // 如果没有 refID 元素，需要给添加一个
+            string strRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+            if (string.IsNullOrEmpty(strRefID) == true)
+                DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
+
+            strXml = dom.OuterXml;
+            return 0;
+        }
+
+        public int SaveItemInfo(
+            string strDbType,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            List<EntityInfo> entityArray = new List<EntityInfo>();
+
+            {
+                EntityInfo info = new EntityInfo();
+
+                if (String.IsNullOrEmpty(this._refID) == true)
+                {
+                    this._refID = Guid.NewGuid().ToString();
+                }
+
+                info.RefID = this._refID;
+
+                string strXml = "";
+                nRet = GetXml(true,
+            false,
+            out strXml,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+
+                info.OldRecPath = this.ItemRecPath;
+                info.Action = "change";
+                info.NewRecPath = this.ItemRecPath;
+
+                info.NewRecord = strXml;
+                info.NewTimestamp = null;
+
+                info.OldRecord = this.Xml;
+                info.OldTimestamp = this.Timestamp;
+
+                entityArray.Add(info);
+            }
+
+            // 复制到目标
+            EntityInfo[] entities = entityArray.ToArray();
+            EntityInfo[] errorinfos = null;
+
+            long lRet = 0;
+
+            if (strDbType == "item")
+                lRet = this.Channel.SetEntities(
+                     this.stop,
+                     this.BiblioRecPath,
+                     entities,
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "order")
+                lRet = this.Channel.SetOrders(
+                     this.stop,
+                     this.BiblioRecPath,
+                     entities,
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "issue")
+                lRet = this.Channel.SetIssues(
+                     this.stop,
+                     this.BiblioRecPath,
+                     entities,
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "comment")
+                lRet = this.Channel.SetComments(
+                     this.stop,
+                     this.BiblioRecPath,
+                     entities,
+                     out errorinfos,
+                     out strError);
+            else
+            {
+                strError = "未知的 strDbType '" + strDbType + "'";
+                return -1;
+            }
+            if (lRet == -1)
+                return -1;
+
+            if (errorinfos == null)
+                return 0;
+
+            strError = "";
+            foreach (EntityInfo error in errorinfos)
+            {
+                if (String.IsNullOrEmpty(error.RefID) == true)
+                {
+                    strError = "服务器返回的EntityInfo结构中RefID为空";
+                    return -1;
+                }
+
+                this.Timestamp = error.NewTimestamp;
+
+                // 正常信息处理
+                if (error.ErrorCode == ErrorCodeValue.NoError)
+                    continue;
+
+                strError += error.RefID + "在提交保存过程中发生错误 -- " + error.ErrorInfo + "\r\n";
+            }
+
+            if (String.IsNullOrEmpty(strError) == false)
+                return -1;
+
+            return 0;
         }
 
         string _itemBarcode = "";
@@ -1888,6 +2216,11 @@ out strError);
                     _borrowHistoryLoaded = true;
                 }
             }
+        }
+
+        private void toolStripButton_save_Click(object sender, EventArgs e)
+        {
+            SaveRecord();
         }
 
     }

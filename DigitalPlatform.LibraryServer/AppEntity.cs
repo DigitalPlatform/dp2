@@ -99,8 +99,25 @@ namespace DigitalPlatform.LibraryServer
                     core_entity_element_names[i], strTextNew);
             }
 
-            strMergedXml = domExist.OuterXml;
+            // 清除以前的<dprms:file>元素
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
 
+            XmlNodeList nodes = domExist.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            foreach (XmlNode node in nodes)
+            {
+                node.ParentNode.RemoveChild(node);
+            }
+            // 兑现新记录中的 dprms:file 元素
+            nodes = domNew.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            foreach(XmlElement node in nodes)
+            {
+                XmlDocumentFragment frag = domExist.CreateDocumentFragment();
+                frag.InnerXml = node.OuterXml;
+                domExist.DocumentElement.AppendChild(frag);
+            }
+
+            strMergedXml = domExist.OuterXml;
             return 0;
         }
 
@@ -3797,9 +3814,7 @@ namespace DigitalPlatform.LibraryServer
             string strOutputPath = "";
             string strMetaData = "";
 
-
             // 先读出数据库中即将覆盖位置的已有记录
-
         REDOLOAD:
 
             lRet = channel.GetRes(info.NewRecPath,
@@ -3828,9 +3843,7 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-
             // 把两个记录装入DOM
-
             XmlDocument domExist = new XmlDocument();
             XmlDocument domNew = new XmlDocument();
 
@@ -3955,7 +3968,6 @@ namespace DigitalPlatform.LibraryServer
                     out strDetailInfo);
                 // bDetectCiculationInfo = true;
 
-
                 if (nRet == 1)  // 册条码号有改变
                 {
                     if (bHasCirculationInfo == true
@@ -3998,7 +4010,6 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 比较新旧记录的状态是否有改变，如果从其他状态修改为“注销”状态，则应引起注意，后面要进行必要的检查
-
                 string strOldState = "";
                 string strNewState = "";
 
@@ -4099,7 +4110,6 @@ namespace DigitalPlatform.LibraryServer
 
                     }
                     // endif 如果新记录状态没有包含“加工中”...
-
                 }
             }
 
@@ -4169,14 +4179,12 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                 }
 
-
                 nRet = MergeTwoEntityXml(domExist,
                     domNew,
                     out strNewXml,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
-
             }
             else
             {
@@ -5063,6 +5071,7 @@ namespace DigitalPlatform.LibraryServer
 
             int nMaxCount = Math.Max(word_list.Count * 3, 1000);    // 至少为 1000
             List<Record> records = null;
+            bool bMixRefID = false;
 
             // return:
             //      -1  出错
@@ -5075,6 +5084,7 @@ namespace DigitalPlatform.LibraryServer
     strFrom,
     nMaxCount,
     "keyid,id,key",    // 要返回key，这样才知道是否发生了条码号重复
+    out bMixRefID,
     out records,
     out strError);
             if (nRet == -1)
@@ -5130,13 +5140,13 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 string strKey = record.Keys[0].Key;
-                if (record.Keys[0].From == "refID")
+                if (bMixRefID == true && record.Keys[0].From == "refID")    // 2016/5/24 增加 bMixRefID
                     strKey = "@refID:" + strKey;    // TODO: 前缀用法需要统一。比如前端发来的册条码号也故意指定了前缀怎么办？
 
                 List<int> indices = IndexOf(word_list, strKey, bIgnoreCase);
                 if (indices.Count == 0)
                 {
-                    strError = "很奇怪出现了 key '" + strKey + "' 在wordlist '" + strWordList + "' 中没有匹配的项";
+                    strError = "1) 很奇怪出现了 key '" + strKey + "' 在wordlist '" + strWordList + "' 中没有匹配的项";
                     return -1;
                 }
 
@@ -5249,7 +5259,7 @@ namespace DigitalPlatform.LibraryServer
                     List<int> indices = IndexOf(word_list, word, bIgnoreCase);
                     if (indices.Count == 0)
                     {
-                        strError = "很奇怪出现了 temp_word '" + word + "' 在wordlist '" + strWordList + "' 中没有匹配的项";
+                        strError = "2) 很奇怪出现了 temp_word '" + word + "' 在wordlist '" + strWordList + "' 中没有匹配的项";
                         return -1;
                     }
 

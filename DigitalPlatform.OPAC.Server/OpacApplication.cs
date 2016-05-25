@@ -4147,7 +4147,8 @@ Value data: HEX 0x1
         // 输出 计数数字 图像
         public static void OutputImage(Page Page,
             Color text_color,
-            string strReadCount)
+            string strReadCount,
+            int nFontSize = 8)
         {
             if (string.IsNullOrEmpty(strReadCount) == true)
                 strReadCount = "0";
@@ -4158,7 +4159,7 @@ Value data: HEX 0x1
             using (MemoryStream image = ArtText.BuildArtText(
                 strReadCount,
                 "Consolas", // "Microsoft YaHei",
-                (float)8,
+                (float)nFontSize,
                 FontStyle.Bold,
             text_color, // Color.FromArgb(100, Color.Black),
             Color.Transparent,

@@ -110,7 +110,24 @@ namespace DigitalPlatform.LibraryServer
 
                 DomUtil.SetElementOuterXml(domExist.DocumentElement,
                     element_table[i], strTextNew);
+            }
 
+            // 清除以前的<dprms:file>元素
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            XmlNodeList nodes = domExist.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            foreach (XmlNode node in nodes)
+            {
+                node.ParentNode.RemoveChild(node);
+            }
+            // 兑现新记录中的 dprms:file 元素
+            nodes = domNew.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            foreach (XmlElement node in nodes)
+            {
+                XmlDocumentFragment frag = domExist.CreateDocumentFragment();
+                frag.InnerXml = node.OuterXml;
+                domExist.DocumentElement.AppendChild(frag);
             }
 
             /*
@@ -121,13 +138,9 @@ namespace DigitalPlatform.LibraryServer
                 sessioninfo.LibraryCodeList);
              * */
             // 修改者不能改变最初的馆代码
-
             strMergedXml = domExist.OuterXml;
-
             return 0;
         }
-
-
 
         // (派生类必须重载)
         // 比较两个记录, 看看和事项要害信息有关的字段是否发生了变化
@@ -151,7 +164,8 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        public CommentItemDatabase(LibraryApplication app) : base(app)
+        public CommentItemDatabase(LibraryApplication app)
+            : base(app)
         {
         }
 
@@ -241,14 +255,8 @@ out string strError)
 
             locateParam = new List<string>();
             locateParam.Add(strRefID);
-
             return 0;
-            /*
-        ERROR1:
-            return -1;
-             * */
         }
-
 
 #if NO
         // 构造用于获取事项记录的XML检索式
@@ -517,7 +525,7 @@ out string strError)
                 // 检查当前用户是否管辖评注记录
                 if (StringUtil.IsInList(strLibraryCode, sessioninfo.LibraryCodeList) == false)
                 {
-                    strError = "当前评注记录(<libraryCode>元素中)的馆代码 '"+strLibraryCode+"' 不在当前用户的馆代码 '"+sessioninfo.LibraryCodeList+"' 管辖范围内。修改评注记录的操作被拒绝";
+                    strError = "当前评注记录(<libraryCode>元素中)的馆代码 '" + strLibraryCode + "' 不在当前用户的馆代码 '" + sessioninfo.LibraryCodeList + "' 管辖范围内。修改评注记录的操作被拒绝";
                     return 0;
                 }
             }

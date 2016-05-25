@@ -77,11 +77,17 @@ ref sessioninfo) == false)
                         "*"); // 星号表示尚未启用外部链接计数功能
                     this.Response.End();
 #endif
+                    int nFontSize = 8;
+                    string strFontSize = Request.QueryString["fontSize"];
+                    if (string.IsNullOrEmpty(strFontSize) == false)
+                        Int32.TryParse(strFontSize, out nFontSize);
+
                     if (StringUtil.IsInList("hitcount", app.SearchLogEnable) == false)
                     {
                         OpacApplication.OutputImage(this,
                             Color.FromArgb(200, Color.Blue),
-                            "*"); // 星号表示尚未启用外部链接计数功能
+                            "*",
+                            nFontSize); // 星号表示尚未启用外部链接计数功能
                         this.Response.End();
                         return;
                     }
@@ -98,10 +104,30 @@ ref sessioninfo) == false)
                         strText = (lValue == -1 ? "*" : lValue.ToString());    // * 表示 dp2library 中 mongodb 没有启用
                     OpacApplication.OutputImage(this,
                         Color.FromArgb(200, Color.Blue),
-                        strText);
+                        strText,
+                        nFontSize);
+
+                    // 不但返回图像，而且滞后增量一次
+                    if (StringUtil.IsInList("inc", strStyle) == true)
+                    {
+                        lRet = app.IncHitCount(channel,
+        strBiblioRecPath + "|" + strURI,
+        this.Request.UserHostAddress,
+        false,    // 是否要创建日志
+        out strError);
+                        if (lRet == -1)
+                        {
+                            Response.Write("IncHitCount 出错: " + strError);
+                            this.Response.End();
+                            return;
+                        }
+                    }
+
                     this.Response.End();
                     return;
                 }
+
+
                 else
                 {
 #if NO
