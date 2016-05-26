@@ -61,9 +61,39 @@ namespace DigitalPlatform.LibraryServer
         {
             get
             {
+#if NO
                 if (this.App._mongoClient == null || this.App.ChargingOperDatabase == null)
                     return false;
                 return true;
+#endif
+                if (string.IsNullOrEmpty(this.App.OutgoingQueue) == false
+                    && StringUtil.IsInList("mq", this.App.CirculationNotifyTypes) == true)
+                    return true;
+                if (this.App._mongoClient != null && this.App.ChargingOperDatabase != null)
+                    return true;
+                return false;
+            }
+        }
+
+        public bool MqNotifyEnabled
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.App.OutgoingQueue) == false
+                    && StringUtil.IsInList("mq", this.App.CirculationNotifyTypes) == true)
+                    return true;
+                return false;
+            }
+        }
+
+        // 流通操作日志(mongodb)是否已经启用
+        public bool ChargingOperEnabled
+        {
+            get
+            {
+                if (this.App._mongoClient != null && this.App.ChargingOperDatabase != null)
+                    return true;
+                return false;
             }
         }
 
@@ -80,7 +110,11 @@ namespace DigitalPlatform.LibraryServer
 
         public void AddOperLog(XmlDocument dom)
         {
+#if NO
             if (this.App._mongoClient == null || this.App.ChargingOperDatabase == null)
+                return;
+#endif
+            if (this.Enabled == false)
                 return;
 
             this.m_lock.EnterWriteLock();
@@ -129,7 +163,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 string strOperation = DomUtil.GetElementText(dom.DocumentElement,
     "operation");
-                if (strOperation == "borrow" || strOperation == "return")
+                if (this.ChargingOperEnabled == true
+                    && (strOperation == "borrow" || strOperation == "return"))
                 {
                     string strError = "";
                     int nRet = BuildMongoOperDatabase.AppendOperationBorrowReturn(this.App,
@@ -141,8 +176,11 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 if ((strOperation == "borrow" || strOperation == "return" || strOperation == "amerce")
+#if NO
                     && string.IsNullOrEmpty(this.App.OutgoingQueue) == false
                     && StringUtil.IsInList("mq", this.App.CirculationNotifyTypes) == true
+#endif
+                    && this.MqNotifyEnabled == true
                     )
                 {
                     // 写入 MSMQ 队列
