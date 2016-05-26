@@ -739,7 +739,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数 NotifyReader() 时抛出异常：" + ex.Message;
+                strError = "执行脚本函数 NotifyReader() 时抛出异常：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
 

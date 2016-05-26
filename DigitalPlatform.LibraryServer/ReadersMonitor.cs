@@ -1147,7 +1147,7 @@ namespace DigitalPlatform.LibraryServer
             if (app.m_externalMessageInterfaces != null)
                 nExtendCount = app.m_externalMessageInterfaces.Count;
 
-            int nSegmentLength = nExtendCount + 2;  // 每个小部分的长度
+            int nSegmentLength = nExtendCount + 3; // 原来是 2 // 每个小部分的长度
 
             int index = -1; // 0: dpmail; 1: email; >=2: 其他扩充的消息接口方式
             if (strBodyType == "dpmail")
@@ -1214,7 +1214,7 @@ namespace DigitalPlatform.LibraryServer
             if (app.m_externalMessageInterfaces != null)
                 nExtendCount = app.m_externalMessageInterfaces.Count;
 
-            int nSegmentLength = nExtendCount + 2;  // 每个小部分的长度
+            int nSegmentLength = nExtendCount + 3;  // 原来是 2 // 每个小部分的长度
 
             int index = -1; // 0: dpmail; 1: email; >=2: 其他扩充的消息接口方式
             if (strBodyType == "dpmail")
