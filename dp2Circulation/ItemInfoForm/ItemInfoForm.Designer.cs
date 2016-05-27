@@ -53,11 +53,14 @@ namespace dp2Circulation
             this.textBox_queryWord = new System.Windows.Forms.TextBox();
             this.button_load = new System.Windows.Forms.Button();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSplitButton_insertCoverImage = new System.Windows.Forms.ToolStripSplitButton();
+            this.ToolStripMenuItem_insertCoverImageFromClipboard = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_clearCoverImage = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripButton_addSubject = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_nextRecord = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_prevRecord = new System.Windows.Forms.ToolStripButton();
             this.toolStripLabel_message = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripButton_addSubject = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
@@ -253,16 +256,66 @@ namespace dp2Circulation
             this.toolStrip1.AutoSize = false;
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton_save,
+            this.toolStripSplitButton_insertCoverImage,
+            this.toolStripButton_addSubject,
             this.toolStripButton_nextRecord,
             this.toolStripButton_prevRecord,
-            this.toolStripLabel_message,
-            this.toolStripButton_addSubject,
-            this.toolStripButton_save});
+            this.toolStripLabel_message});
             this.toolStrip1.Location = new System.Drawing.Point(0, 298);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(513, 20);
             this.toolStrip1.TabIndex = 6;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripButton_save
+            // 
+            this.toolStripButton_save.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_save.Enabled = false;
+            this.toolStripButton_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_save.Image")));
+            this.toolStripButton_save.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
+            this.toolStripButton_save.Name = "toolStripButton_save";
+            this.toolStripButton_save.Size = new System.Drawing.Size(23, 17);
+            this.toolStripButton_save.Text = "保存";
+            this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
+            // 
+            // toolStripSplitButton_insertCoverImage
+            // 
+            this.toolStripSplitButton_insertCoverImage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripSplitButton_insertCoverImage.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_insertCoverImageFromClipboard,
+            this.ToolStripMenuItem_clearCoverImage});
+            this.toolStripSplitButton_insertCoverImage.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_insertCoverImage.Image")));
+            this.toolStripSplitButton_insertCoverImage.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripSplitButton_insertCoverImage.Name = "toolStripSplitButton_insertCoverImage";
+            this.toolStripSplitButton_insertCoverImage.Size = new System.Drawing.Size(32, 17);
+            this.toolStripSplitButton_insertCoverImage.Text = "toolStripSplitButton1";
+            this.toolStripSplitButton_insertCoverImage.ButtonClick += new System.EventHandler(this.toolStripSplitButton_insertCoverImage_ButtonClick);
+            // 
+            // ToolStripMenuItem_insertCoverImageFromClipboard
+            // 
+            this.ToolStripMenuItem_insertCoverImageFromClipboard.Name = "ToolStripMenuItem_insertCoverImageFromClipboard";
+            this.ToolStripMenuItem_insertCoverImageFromClipboard.Size = new System.Drawing.Size(196, 22);
+            this.ToolStripMenuItem_insertCoverImageFromClipboard.Text = "从剪贴板插入封面图像";
+            this.ToolStripMenuItem_insertCoverImageFromClipboard.Click += new System.EventHandler(this.ToolStripMenuItem_insertCoverImageFromClipboard_Click);
+            // 
+            // ToolStripMenuItem_clearCoverImage
+            // 
+            this.ToolStripMenuItem_clearCoverImage.Name = "ToolStripMenuItem_clearCoverImage";
+            this.ToolStripMenuItem_clearCoverImage.Size = new System.Drawing.Size(196, 22);
+            this.ToolStripMenuItem_clearCoverImage.Text = "清除封面图像";
+            this.ToolStripMenuItem_clearCoverImage.Click += new System.EventHandler(this.ToolStripMenuItem_clearCoverImage_Click);
+            // 
+            // toolStripButton_addSubject
+            // 
+            this.toolStripButton_addSubject.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_addSubject.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_addSubject.Image")));
+            this.toolStripButton_addSubject.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_addSubject.Name = "toolStripButton_addSubject";
+            this.toolStripButton_addSubject.Size = new System.Drawing.Size(23, 17);
+            this.toolStripButton_addSubject.Text = "增添自由词";
+            this.toolStripButton_addSubject.Visible = false;
+            this.toolStripButton_addSubject.Click += new System.EventHandler(this.toolStripButton_addSubject_Click);
             // 
             // toolStripButton_nextRecord
             // 
@@ -291,28 +344,6 @@ namespace dp2Circulation
             this.toolStripLabel_message.Name = "toolStripLabel_message";
             this.toolStripLabel_message.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.toolStripLabel_message.Size = new System.Drawing.Size(0, 17);
-            // 
-            // toolStripButton_addSubject
-            // 
-            this.toolStripButton_addSubject.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton_addSubject.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_addSubject.Image")));
-            this.toolStripButton_addSubject.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_addSubject.Name = "toolStripButton_addSubject";
-            this.toolStripButton_addSubject.Size = new System.Drawing.Size(23, 17);
-            this.toolStripButton_addSubject.Text = "增添自由词";
-            this.toolStripButton_addSubject.Visible = false;
-            this.toolStripButton_addSubject.Click += new System.EventHandler(this.toolStripButton_addSubject_Click);
-            // 
-            // toolStripButton_save
-            // 
-            this.toolStripButton_save.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton_save.Enabled = false;
-            this.toolStripButton_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_save.Image")));
-            this.toolStripButton_save.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
-            this.toolStripButton_save.Name = "toolStripButton_save";
-            this.toolStripButton_save.Size = new System.Drawing.Size(23, 17);
-            this.toolStripButton_save.Text = "保存";
-            this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
             // 
             // ItemInfoForm
             // 
@@ -373,5 +404,8 @@ namespace dp2Circulation
         private System.Windows.Forms.TabPage tabPage_object;
         private DigitalPlatform.CirculationClient.BinaryResControl binaryResControl1;
         private System.Windows.Forms.ToolStripButton toolStripButton_save;
+        private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_insertCoverImage;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_insertCoverImageFromClipboard;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_clearCoverImage;
     }
 }

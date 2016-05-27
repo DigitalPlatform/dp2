@@ -35,7 +35,7 @@ namespace dp2Circulation
         /// <summary>
         /// 期刊控件所关联的 ApplicationInfo 对象
         /// </summary>
-        public ApplicationInfo AppInfo 
+        public ApplicationInfo AppInfo
         {
             get
             {
@@ -111,7 +111,6 @@ this.splitContainer_main,
         // 获得索取号
         void button_getAccessNo_Click(object sender, EventArgs e)
         {
-
             if (this.GenerateData != null)
             {
                 GenerateDataEventArgs e1 = new GenerateDataEventArgs();
@@ -183,7 +182,7 @@ this.splitContainer_main,
                 item.Barcode = entityEditControl1.Barcode;
             }
 
-        // FOUND:
+            // FOUND:
             return callnumber_items;
         }
 
@@ -241,10 +240,10 @@ this.splitContainer_main,
             }
 
             // 显示分馆外订购组
-             bValue = this.AppInfo.GetBoolean(
-                "binding_form",
-                "display_lockedOrderGroup",
-                true);
+            bValue = this.AppInfo.GetBoolean(
+               "binding_form",
+               "display_lockedOrderGroup",
+               true);
             if (this.bindingControl1.HideLockedOrderGroup != !bValue)
             {
                 this.bindingControl1.HideLockedOrderGroup = !bValue;
@@ -397,13 +396,15 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        internal List<IssueBindingItem> Items
+#if NO
+        internal List<IssueBindingItem> Items   // 是否笔误?
         {
             get
             {
                 return this.bindingControl1.Issues;
             }
         }
+#endif
 
         internal List<ItemBindingItem> BindItems
         {
@@ -794,7 +795,7 @@ MessageBoxDefaultButton.Button2);
                     if (cell.item.Calculated == true
                         || cell.item.Deleted == true
                         || cell.item.Locked == true
-                        || (cell.item.ParentItem != null && cell.item.ParentItem.Locked == true) )
+                        || (cell.item.ParentItem != null && cell.item.ParentItem.Locked == true))
                         this.entityEditControl1.SetReadOnly("all");
                     else
                         this.entityEditControl1.SetReadOnly("binding");
@@ -805,10 +806,10 @@ MessageBoxDefaultButton.Button2);
                     this.orderDesignControl1.Visible = false;
                     return;
                 }
-                
+
             }
 
-            #if ORDERDESIGN_CONTROL
+#if ORDERDESIGN_CONTROL
 
             // 从期对象到编辑器
             if (e.NewFocusObject is IssueBindingItem)
@@ -847,7 +848,7 @@ MessageBoxDefaultButton.Button2);
             }
 #endif
 
-        // END1:
+            // END1:
             this.orderDesignControl1.Visible = false;
             this.orderDesignControl1.Clear();
             this.m_item = null;

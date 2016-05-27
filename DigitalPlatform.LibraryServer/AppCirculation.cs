@@ -11699,14 +11699,12 @@ out string strError)
             strError = "";
             int nRet = 0;
 
-
             // 启动
             if (strAction == "start")
             {
                 XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
                 if (nodes.Count == 0)
                     return 0;
-
 
                 for (int i = 0; i < nodes.Count; i++)
                 {
@@ -11735,7 +11733,6 @@ out string strError)
                 if (bFound == false)
                     return 0;   // 没有找到具有overduePeriod属性值的事项
 
-
                 // 写入统计指标
                 // 启动事项数，而不是读者个数
                 if (this.Statis != null)
@@ -11744,7 +11741,6 @@ out string strError)
                     "出纳",
                     "以停代金事项启动",
                     1);
-
 
                 // TODO: 创建事件日志，记录启动事项的动作
                 return 1;
@@ -11823,7 +11819,6 @@ out string strError)
                     }
                     break;
                 FOUND:
-
                     string strUnit = "";
                     long lOverduePeriod = 0;
 
@@ -11866,7 +11861,6 @@ out string strError)
                         out strError);
                     if (nRet == -1)
                         return -1;
-
 
                     DateTime nextWorkingDay = new DateTime(0);
                     long lDistance = 0;
@@ -11921,7 +11915,6 @@ out string strError)
 
                     // TODO: 创建事件日志，记录到期消除事项的动作
 
-
                     // 启动下一个具有overduePeriod属性的<overdue>元素
                     nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
                     for (int i = 0; i < nodes.Count; i++)
@@ -11964,7 +11957,6 @@ out string strError)
                         "以停代金事项启动",
                         1);
 
-
                     // TODO: 创建事件日志，记录启动事项的动作
 
                     // 需要重新刷新，因为刚启动的事项可能马上就到期
@@ -12001,7 +11993,6 @@ out string strError)
                 }
 
                 return bChanged == true ? 1 : 0;
-
             } // end of if 
 
             return 0;

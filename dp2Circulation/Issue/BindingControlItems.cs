@@ -62,7 +62,6 @@ namespace dp2Circulation
                     return dom.OuterXml;
 
                 return "";
-
                 // return m_strXml;
             }
             /*
@@ -72,6 +71,7 @@ namespace dp2Circulation
             }
              * */
         }
+
         internal XmlDocument dom = null;
 
         internal bool Virtual = false;  // 是否为虚拟的期？== true 是虚拟的。所谓虚拟的，就是根据实有的册的publishtime临时创建的期对象，而不是真实存在于数据库中的期对象
@@ -160,7 +160,6 @@ namespace dp2Circulation
                     + (String.IsNullOrEmpty(strZongAndVolume) == false ?
                         "(" + strZongAndVolume + ")" : "");
             }
-
         }
 
         /// <summary>

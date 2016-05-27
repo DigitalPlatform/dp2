@@ -19,6 +19,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.CommonDialog;
 
 namespace dp2Circulation
 {
@@ -2221,6 +2222,161 @@ out strError);
         private void toolStripButton_save_Click(object sender, EventArgs e)
         {
             SaveRecord();
+        }
+
+        private void ToolStripMenuItem_insertCoverImageFromClipboard_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            if (this.tabControl_item.SelectedTab != this.tabPage_object)
+                this.tabControl_item.SelectedTab = this.tabPage_object;
+
+            List<ListViewItem> deleted_items = this.binaryResControl1.FindAllMaskDeleteItem();
+            if (deleted_items.Count > 0)
+            {
+                strError = "当前有标记删除的对象尚未提交保存。请先提交这些保存后，再进行插入封面图像的操作";
+                goto ERROR1;
+            }
+
+            Image image = null;
+            IDataObject obj1 = Clipboard.GetDataObject();
+            if (obj1.GetDataPresent(typeof(Bitmap)))
+            {
+                image = (Image)obj1.GetData(typeof(Bitmap));
+            }
+            else if (obj1.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])obj1.GetData(DataFormats.FileDrop);
+
+                try
+                {
+                    image = Image.FromFile(files[0]);
+                }
+                catch (OutOfMemoryException)
+                {
+                    strError = "当前 Windows 剪贴板中的第一个文件不是图像文件。无法创建封面图像";
+                    goto ERROR1;
+                }
+            }
+            else
+            {
+                strError = "当前 Windows 剪贴板中没有图形对象。无法创建封面图像";
+                goto ERROR1;
+            }
+
+            CreateCoverImageDialog dlg = null;
+            try
+            {
+                dlg = new CreateCoverImageDialog();
+
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.OriginImage = image;
+                this.MainForm.AppInfo.LinkFormState(dlg, "entityform_CreateCoverImageDialog_state");
+                dlg.ShowDialog(this);
+                this.MainForm.AppInfo.UnlinkFormState(dlg);
+                if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                    return;
+            }
+            finally
+            {
+                if (image != null)
+                {
+                    image.Dispose();
+                    image = null;
+                }
+            }
+
+            foreach (ImageType type in dlg.ResultImages)
+            {
+                if (type.Image == null)
+                {
+                    continue;
+                }
+
+                string strType = "FrontCover." + type.TypeName;
+                string strSize = type.Image.Width.ToString() + "X" + type.Image.Height.ToString() + "px";
+
+                // string strShrinkComment = "";
+                string strID = "";
+                nRet = EntityForm.SetImageObject(
+                    this.binaryResControl1,
+                    type.Image,
+                    strType,    // "coverimage",
+                    // out strShrinkComment,
+                    out strID,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+#if NO
+                Field field_856 = null;
+                List<Field> fields = DetailHost.Find856ByResID(this.m_marcEditor,
+                        strID);
+                if (fields.Count == 1)
+                {
+                    field_856 = fields[0];
+                    // TODO: 出现对话框
+                }
+                else if (fields.Count > 1)
+                {
+                    DialogResult result = MessageBox.Show(this,
+                        "当前 MARC 编辑器中已经存在 " + fields.Count.ToString() + " 个 856 字段其 $" + DetailHost.LinkSubfieldName + " 子字段关联了对象 ID '" + strID + "' ，是否要编辑其中的第一个 856 字段?\r\n\r\n(注：可改在 MARC 编辑器中选中一个具体的 856 字段进行编辑)\r\n\r\n(OK: 编辑其中的第一个 856 字段; Cancel: 取消操作",
+                        "EntityForm",
+                        MessageBoxButtons.OKCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button2);
+                    if (result == DialogResult.Cancel)
+                        return;
+                    field_856 = fields[0];
+                    // TODO: 出现对话框
+                }
+                else
+                    field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
+
+                field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize + "$2dp2res").Replace('$', (char)31);
+#endif
+            }
+
+            MessageBox.Show(this, "封面图像已经成功创建。\r\n"
+                + "\r\n\r\n(但因当前记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前记录。");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void ToolStripMenuItem_clearCoverImage_Click(object sender, EventArgs e)
+        {
+            string[] types = new string[] {
+                "FrontCover.SmallImage",
+                "FrontCover.MediumImage",
+                "FrontCover.LargeImage"};
+
+            if (this.tabControl_item.SelectedTab != this.tabPage_object)
+                this.tabControl_item.SelectedTab = this.tabPage_object;
+
+            bool bChanged = false;
+            foreach (string type in types)
+            {
+                // TODO: 最好支持 CoverImage.* 通配符匹配。或者用正则表达式
+                List<ListViewItem> items = this.binaryResControl1.FindItemByUsage(type);
+                if (items.Count > 0)
+                {
+                    this.binaryResControl1.MaskDelete(items);
+                    bChanged = true;
+                }
+            }
+
+            if (bChanged == true)
+                MessageBox.Show(this, "封面图像对象已经成功标记删除。\r\n"
+                    + "\r\n\r\n(但因当前记录还未保存，删除动作尚未提交到服务器)\r\n\r\n注意稍后保存当前记录。");
+            else
+                MessageBox.Show(this, "没有发现封面图像对象");
+        }
+
+        private void toolStripSplitButton_insertCoverImage_ButtonClick(object sender, EventArgs e)
+        {
+            ToolStripMenuItem_insertCoverImageFromClipboard_Click(sender, e);
         }
 
     }

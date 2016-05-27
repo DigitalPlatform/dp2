@@ -2252,9 +2252,9 @@ namespace dp2Circulation
                     List<string> Xmls = new List<string>(); // 要创建或者修改的期记录
 
                     // 遍历对象数组，创建deleting_issue_refids和Xmls
-                    for (int i = 0; i < dlg.Issues.Count; i++)
+                    foreach(IssueBindingItem issue_item in dlg.Issues)
                     {
-                        IssueBindingItem issue_item = dlg.Issues[i];
+                        // IssueBindingItem issue_item = dlg.Issues[i];
 
                         if (issue_item.Virtual == true)
                             continue;

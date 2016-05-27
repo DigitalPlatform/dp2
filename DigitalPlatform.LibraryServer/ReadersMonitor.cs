@@ -755,7 +755,7 @@ namespace DigitalPlatform.LibraryServer
                     strPath,
                     "#readersMonitor",
                     "refresh",
-                    "", // 因为是机触发，所以不记载IP地址
+                    "", // 因为是机器触发，所以不记载IP地址
                     out strError);
                 if (nRet == -1)
                 {
