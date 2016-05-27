@@ -30,7 +30,6 @@ using DigitalPlatform.GcatClient.gcat_new_ws;
 using DigitalPlatform.CommonDialog;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -12459,12 +12458,15 @@ strMARC);
         /// <summary>
         /// 设置当前记录的图片对象
         /// </summary>
+        /// <param name="binaryResControl1">对象控件</param>
         /// <param name="image">Image 对象</param>
         /// <param name="strUsage">用途字符串</param>
         /// <param name="strID">返回实际使用的对象 ID</param>
         /// <param name="strError">返回错误信息</param>
         /// <returns>0: 成功; -1: 出错</returns>
-        public int SetImageObject(Image image,
+        public static int SetImageObject(
+            BinaryResControl binaryResControl1,
+            Image image,
             string strUsage,
             out string strID,
             out string strError)
@@ -12473,7 +12475,7 @@ strMARC);
             strID = "";
             int nRet = 0;
 
-            string strTempFilePath = FileUtil.NewTempFileName(this.MainForm.DataDir,
+            string strTempFilePath = FileUtil.NewTempFileName(Program.MainForm.DataDir,
                 "~temp_make_pic_",
                 ".png");
 
@@ -12482,10 +12484,10 @@ strMARC);
             //image = null;
 
             ListViewItem item = null;
-            List<ListViewItem> items = this.binaryResControl1.FindItemByUsage(strUsage);
+            List<ListViewItem> items = binaryResControl1.FindItemByUsage(strUsage);
             if (items.Count == 0)
             {
-                nRet = this.binaryResControl1.AppendNewItem(
+                nRet = binaryResControl1.AppendNewItem(
                     strTempFilePath,
                     strUsage,
                     "", // rights
@@ -12496,7 +12498,7 @@ strMARC);
             {
                 item = items[0];
 
-                nRet = this.binaryResControl1.ChangeObjectFile(item,
+                nRet = binaryResControl1.ChangeObjectFile(item,
                     strTempFilePath,
                     strUsage,
                     out strError);
@@ -12505,7 +12507,6 @@ strMARC);
                 goto ERROR1;
 
             strID = ListViewUtil.GetItemText(item, BinaryResControl.COLUMN_ID);
-
             return 0;
         ERROR1:
             return -1;
@@ -12613,7 +12614,9 @@ strMARC);
 
                 // string strShrinkComment = "";
                 string strID = "";
-                nRet = SetImageObject(type.Image,
+                nRet = SetImageObject(
+                    this.binaryResControl1,
+                    type.Image,
                     strType,    // "coverimage",
                     // out strShrinkComment,
                     out strID,

@@ -330,6 +330,7 @@ namespace DigitalPlatform.CirculationClient
                             if (record.RecordBody.Result != null
                                 && record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
                             {
+                                strError = record.RecordBody.Result.ErrorString;    // 2016/5/27
                                 ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
                                 item.ImageIndex = 1;    // error!
                                 i++;
@@ -1131,7 +1132,6 @@ bool bChanged)
                 if (ids.IndexOf(strID) == -1)
                     return strID;
             }
-
         }
 
         void menu_new_Click(object sender, EventArgs e)
@@ -1545,7 +1545,6 @@ bool bChanged)
             if (nMaskDeleteCount > 0)
                 MessageBox.Show(this, "注意：标记删除的事项直到提交/保存时才会真正从服务器删除。");
         }
-
 
         void menu_undoDelete_Click(object sender, EventArgs e)
         {

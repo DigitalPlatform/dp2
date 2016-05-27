@@ -162,6 +162,7 @@
       <DependentUpon>LocationItemDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="ManageHelper.cs" />
+    <Compile Include="Object\ObjectInfo.cs" />
     <Compile Include="PatronCardControl.cs">
       <SubType>Component</SubType>
     </Compile>

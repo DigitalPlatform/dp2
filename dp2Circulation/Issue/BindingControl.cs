@@ -264,7 +264,6 @@ namespace dp2Circulation
         bool m_bRectSelectMode = true;
         bool m_bRectSelecting = false;  // 正在矩形选择中途
 
-
         bool m_bDraging = false;    // 正在拖拽中途 2010/2/12
 
         ToolTip trackTip;

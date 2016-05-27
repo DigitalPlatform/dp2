@@ -461,7 +461,7 @@ namespace DigitalPlatform.LibraryServer
             // expire 情况要把 expireOverdues/overdue 翻译为 items/overdue 元素
             if (strAction == "expire")
             {
-                XmlElement expireOverdues = domOperLog.DocumentElement.SelectSingleNode("expireOverdues") as XmlElement;
+                XmlElement expireOverdues = domOperLog.DocumentElement.SelectSingleNode("expiredOverdues") as XmlElement;
                 if (expireOverdues != null)
                     amerce_items.InnerXml = expireOverdues.InnerXml;
             }
