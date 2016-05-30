@@ -18,6 +18,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Script;
 
 namespace dp2Circulation
 {
@@ -26,27 +27,8 @@ namespace dp2Circulation
     /// </summary>
     internal partial class BindingControl : Control
     {
-#if NOOOOOOOOOOOOOO
-
-        int m_nDirectionAB = 0;
-        int m_nDirectionBC = 0;
-
-#endif
-
-        /*
-        bool m_bChanged = false;
-
-        public bool Changed
-        {
-            get
-            {
-                return this.m_bChanged;
-            }
-            set
-            {
-                this.m_bChanged = value;
-            }
-        }*/
+        // 封面图像 图像管理器
+        public ImageManager ImageManager { get; set; }
 
         public string Operator = "";    // 当前操作者帐户名
         public string LibraryCodeList = "";     // 当前用户管辖的馆代码列表
@@ -275,8 +257,6 @@ namespace dp2Circulation
         // 焦点单元
         public Cell FocusedCell = null;
 
-
-
         // 获得册信息
         public event GetItemInfoEventHandler GetItemInfo = null;
 
@@ -305,7 +285,6 @@ namespace dp2Circulation
         BorderStyle borderStyle = BorderStyle.Fixed3D;
 
         #region 图形相关成员
-
 
         public bool DisplayOrderInfoXY = false;
 
@@ -396,6 +375,8 @@ namespace dp2Circulation
         internal int m_nCellWidth = 130;
         internal int m_nLeftTextWidth = 130;
 
+        internal int m_nCoverImageWidth = 100;  // 期格子左边的封面图像宽度
+
         internal Padding CellMargin = new Padding(6);
         internal Padding CellPadding = new Padding(8);
 
@@ -451,6 +432,21 @@ namespace dp2Circulation
                 FontStyle.Bold,
                 GraphicsUnit.Pixel);
 
+            Program.MainForm._imageManager.GetObjectComplete += _imageManager_GetObjectComplete;
+        }
+
+        void _imageManager_GetObjectComplete(object sender, GetObjectCompleteEventArgs e)
+        {
+            if (e.TraceObject == null)
+                return;
+
+            IssueBindingItem issue = e.TraceObject.Tag as IssueBindingItem;
+            if (issue == null)
+                return;
+            if (string.IsNullOrEmpty(e.ErrorInfo))
+            {
+                issue.CoverImageFileName = e.TraceObject.FileName;
+            }
         }
 
         string m_strBiblioDbName = "";
@@ -471,6 +467,16 @@ namespace dp2Circulation
         public void Clear()
         {
             this.Issues.Clear();
+        }
+
+        public void StartGetCoverImage(IssueBindingItem issue,
+            string strObjectPath)
+        {
+            Program.MainForm._imageManager.AsyncGetObjectFile(Program.MainForm.LibraryServerUrl,
+                Program.MainForm.GetCurrentUserName(),
+                strObjectPath,
+                null,   // e.FileName,
+                issue);
         }
 
         // 所有隐藏的册事项
@@ -2669,6 +2675,11 @@ namespace dp2Circulation
                 }
             }
 
+            // 准备封面图像
+            foreach(IssueBindingItem issue in this.Issues)
+            {
+                issue.PrepareCoverImage();
+            }
 #if DEBUG
             this.VerifyAll();
 #endif
@@ -3763,7 +3774,7 @@ namespace dp2Circulation
         {
             Debug.Assert(this.m_nMaxItemCountOfOneIssue != -1, "");
             // 整个内容区域的宽度
-            this.m_lContentWidth = m_nLeftTextWidth + (this.m_nMaxItemCountOfOneIssue * m_nCellWidth);
+            this.m_lContentWidth = m_nCoverImageWidth + m_nLeftTextWidth + (this.m_nMaxItemCountOfOneIssue * m_nCellWidth);
         }
 
 #if OLD_INITIAL
@@ -3825,7 +3836,6 @@ namespace dp2Circulation
 
             if (dest_type == typeof(BindingControl))
                 bIsRequiredType = true;
-
 
             // 换算为整体文档(包含上下左右的空白区域)坐标
             long x = p_x - m_lWindowOrgX;
@@ -3959,7 +3969,6 @@ namespace dp2Circulation
                     goto END1;
                 }
 
-
                 if (result.Object is CellBase)  // new changed 2010/2/26
                     this.FocusObject = (CellBase)result.Object;
 
@@ -4039,10 +4048,8 @@ namespace dp2Circulation
                         SelectObjects(temp, SelectAction.On);
                     }
 
-
                     if (EnsureVisible((CellBase)result.Object) == true)
                         this.Update();
-
 
                     /*
                     ShowTip(result.Object, e.Location, false);
@@ -4774,7 +4781,6 @@ namespace dp2Circulation
                     }
                 }
             }
-
 
             // 拖动矩形框围选的结束处理
             if (m_bRectSelecting == true
@@ -14100,7 +14106,7 @@ Color.FromArgb(100, color)
             {
                 // 修正
                 IssueBindingItem issue = (IssueBindingItem)obj;
-                rectCaret.Width = this.m_nLeftTextWidth;
+                rectCaret.Width = this.m_nCoverImageWidth + this.m_nLeftTextWidth;
             }
 
             return EnsureVisible(rectCell, rectCaret);
@@ -14145,7 +14151,7 @@ Color.FromArgb(100, color)
             {
                 // 修正 2010/3/26
                 IssueBindingItem issue = (IssueBindingItem)obj;
-                rectCaret.Width = this.m_nLeftTextWidth;
+                rectCaret.Width = this.m_nCoverImageWidth + this.m_nLeftTextWidth;
             }
 
             return EnsureVisible(rectCell, rectCaret);
@@ -14164,7 +14170,7 @@ Color.FromArgb(100, color)
                 IssueBindingItem issue = (IssueBindingItem)result.Object;
 
                 RectangleF rectUpdate = GetViewRect(issue);
-                rectUpdate.Width = this.m_nLeftTextWidth;   // 左边标题部分
+                rectUpdate.Width = this.m_nCoverImageWidth + this.m_nLeftTextWidth;   // 左边标题部分
 
                 RectangleF rectCell = rectUpdate;
                 RectangleF rectCaret = rectUpdate;
@@ -14578,7 +14584,7 @@ Color.FromArgb(100, color)
                 RectangleF rect = new RectangleF(0, 0, this.m_nCellWidth, this.m_nCellHeight);
 
                 // 变换为内容文档坐标
-                rect.Offset(this.m_nLeftTextWidth + obj.X * this.m_nCellWidth,
+                rect.Offset(this.m_nCoverImageWidth + this.m_nLeftTextWidth + obj.X * this.m_nCellWidth,
                     obj.Y * this.m_nCellHeight);
 
                 // 由内容文档坐标，变换为整体文档坐标，然后变换为view坐标
@@ -14602,7 +14608,7 @@ Color.FromArgb(100, color)
 
                 RectangleF rect = new RectangleF(0,
                     0,
-                    this.m_nLeftTextWidth + this.m_nCellWidth * this.m_nMaxItemCountOfOneIssue, // 只包括左侧标题部分
+                    this.m_nCoverImageWidth + this.m_nLeftTextWidth + this.m_nCellWidth * this.m_nMaxItemCountOfOneIssue, // 只包括左侧标题部分
                     this.m_nCellHeight);
 
                 // 变换为内容文档坐标
@@ -14774,7 +14780,6 @@ Color.FromArgb(100, color)
                     goto CONTINUE;
 
                 issue.Paint(i, (int)x, (int)y, e);
-
             CONTINUE:
                 y += lIssueHeight;
                 //  lHeight += lIssueHeight;
@@ -14802,7 +14807,7 @@ Color.FromArgb(100, color)
                 {
 
                     e.Graphics.DrawLine(penFrame,
-                        new PointF((int)x0 + this.m_nLeftTextWidth, (int)(y0 + lHeight)),
+                        new PointF((int)x0 + this.m_nCoverImageWidth + this.m_nLeftTextWidth, (int)(y0 + lHeight)),
                         new PointF((int)x0 + this.m_lContentWidth, (int)(y0 + lHeight))
                         );
                 }
@@ -14826,7 +14831,7 @@ Color.FromArgb(100, color)
 
                 bool bAllBindingLayout = GetBoundPoints(
                     parent_item,
-                    this.m_lWindowOrgX + this.m_nLeftBlank + this.m_nLeftTextWidth,
+                    this.m_lWindowOrgX + this.m_nLeftBlank + this.m_nCoverImageWidth + this.m_nLeftTextWidth,
                     this.m_lWindowOrgY + this.m_nTopBlank,
                     out points,
                     out rectBound);
@@ -15572,7 +15577,8 @@ Color.FromArgb(100, color)
         None = 0,
         Blank = 1,    // 空白部分。指Cell不足延伸到的部分，或者空的Cell对象所在位置
 
-        Content = 3,    // 内容本体
+        Content = 2,    // 内容本体
+        CoverImage = 3, // 左边的封面图像
         LeftText = 4,   // 左边的文字，指IssueBindingItem
 
         LeftBlank = 5,  // 左边空白

@@ -9,11 +9,12 @@ using System.Windows.Forms;
 using System.Net;
 using System.Threading;
 using System.Xml;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.Text;
 using System.Diagnostics;
 using System.IO;
 using System.Collections;
+
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.AmazonInterface
 {
@@ -53,7 +54,6 @@ namespace DigitalPlatform.AmazonInterface
                 _floatingMessage.AutoHide = false;
                 _floatingMessage.Show(this);
                 this._floatingMessage.OnResizeOrMove();
-
             }
 
             BeginThread();
@@ -383,7 +383,6 @@ MessageBoxDefaultButton.Button1);
                     _search.Idle -= new EventHandler(search_Idle);
                     _search.Idle += new EventHandler(search_Idle);
                 }
-
 
                 // 多行检索中的一行检索
                 int nRedoCount = 0;

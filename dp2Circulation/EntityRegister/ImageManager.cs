@@ -289,7 +289,6 @@ namespace dp2Circulation
 
             this._tempFileNames.Clear();
         }
-
     }
 
     // 追踪图像和行对象的关系

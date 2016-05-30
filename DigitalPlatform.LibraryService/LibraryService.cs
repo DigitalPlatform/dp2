@@ -14168,6 +14168,53 @@ out strError);
 
             try
             {
+                if (message_ids.Length == 2 && message_ids[0] == "!msmq")
+                {
+                    if (StringUtil.IsInList("getmsmqmessage", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "从 MSMQ 获取消息被拒绝。当前用户不具备 getmsmqmessage 权限";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+
+                    if (app.operLogThread == null || app.operLogThread.MqNotifyEnabled == false)
+                    {
+                        strError = "dp2library circulation MSMQ 通知功能尚未启用";
+                        goto ERROR1;
+                    }
+
+                    // action=get,count=10
+                    // action=remove,count=10
+                    Hashtable table = StringUtil.ParseParameters(message_ids[1]);
+                    string strAction = (string)table["action"];
+                    string strCount = (string)table["count"];
+                    int nCount = 0;
+                    if (Int32.TryParse(strCount, out nCount) == false)
+                    {
+                        strError = "count 子参数 '"+strCount+"' 格式不正确。应该为纯数字";
+                        goto ERROR1;
+                    }
+
+                    if (strAction == "get")
+                    {
+                        TimeSpan timeout = new TimeSpan(0, 1, 0);   // 最多等待一分钟
+
+                        messages = app.operLogThread.GetMessage(nCount, timeout);
+                        return result;
+                    }
+                    else if (strAction == "remove")
+                    {
+                        app.operLogThread.RemoveMessage(nCount);
+                        return result;
+                    }
+                    else
+                    {
+                        strError = "无法识别的 action 子参数 '" + strAction + "'";
+                        goto ERROR1;
+                    }
+                }
+
                 int nRet = app.MessageCenter.GetMessage(
         sessioninfo.Channels,
         sessioninfo.UserID,

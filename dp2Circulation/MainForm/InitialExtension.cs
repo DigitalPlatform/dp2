@@ -1277,6 +1277,13 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 #endif
+            {
+                this._imageManager = new ImageManager();
+                this._imageManager.TempFileDir = this.UserTempDir;
+                this._imageManager.ChannelPool = Program.MainForm._channelPool;
+                // this._imageManager.GetObjectComplete += new GetObjectCompleteEventHandler(_imageManager_GetObjectComplete);
+                this._imageManager.BeginThread();
+            }
 
             // 设置窗口尺寸状态
             if (AppInfo != null)

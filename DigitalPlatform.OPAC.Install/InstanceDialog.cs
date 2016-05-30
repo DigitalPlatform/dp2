@@ -100,8 +100,6 @@ namespace DigitalPlatform.OPAC
             }
 
             listView_instance_SelectedIndexChanged(null, null);
-
-
         }
 
         private void listView_instance_SelectedIndexChanged(object sender, EventArgs e)
@@ -140,7 +138,6 @@ namespace DigitalPlatform.OPAC
             m_firstUseBalloon.Dispose();
             m_firstUseBalloon = null;
         }
-
 
         // 根据已有的配置，填充InstanceList
         // TODO: 另外还需要从 IIS 中寻找名为 dp2OPAC 的虚拟目录。这是为了兼容以前的安装形态
@@ -427,7 +424,6 @@ out strError);
 
             return 0;
         }
-
 
         // 进行检查
         // return:

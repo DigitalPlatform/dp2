@@ -17,6 +17,9 @@ namespace dp2Circulation
             {
                 components.Dispose();
             }
+
+            Program.MainForm._imageManager.GetObjectComplete -= _imageManager_GetObjectComplete;
+
             base.Dispose(disposing);
         }
 

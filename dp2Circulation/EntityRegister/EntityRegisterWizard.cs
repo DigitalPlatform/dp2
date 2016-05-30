@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.AmazonInterface;
@@ -28,10 +29,8 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -2215,48 +2214,6 @@ out strError);
                 row[COLUMN_IMAGE].Text = "!" + strErrorInfo;
             else
                 SetImage(row[COLUMN_IMAGE], strFileName);
-
-#if NO
-            // 已经选定了书目记录的情况
-            if (row == null)
-            {
-                if (string.IsNullOrEmpty(strErrorInfo) == false)
-                {
-                    // 如何报错?
-                    // row 为空
-                    // this.pictureBox1.Image = null;
-                    return;
-                }
-
-                // 给相关浏览行设定
-                row = FindRowByRecPath(this.BiblioRecPath + "@" + this.ServerName);
-                if (row != null)
-                {
-                    RegisterBiblioInfo info = row.Tag as RegisterBiblioInfo;
-                    if (info != null)
-                        info.CoverImageFileName = strFileName;
-                }
-
-                if (strBiblioRecPath == this.BiblioRecPath
-                    && this.DisplayMode == "detail")
-                {
-                    this.ImageFileName = strFileName;
-                    this.pictureBox1.LoadAsync(strFileName);
-                }
-                return;
-            }
-
-            {
-                RegisterBiblioInfo info = row.Tag as RegisterBiblioInfo;
-                if (info != null)
-                    info.CoverImageFileName = strFileName;
-
-                if (this.DisplayMode == "select"
-                    && this.dpTable_browseLines.SelectedRows.Count == 1
-                    && this.dpTable_browseLines.SelectedRows[0] == row)
-                    this.pictureBox1.LoadAsync(strFileName);
-            }
-#endif
         }
 
         // 事件筛选

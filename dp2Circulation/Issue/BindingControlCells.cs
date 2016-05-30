@@ -240,7 +240,7 @@ namespace dp2Circulation
             IssueBindingItem issue = this.Container;
             Debug.Assert(issue != null, "");
 
-            x_offs += issue.Container.m_nLeftTextWidth;
+            x_offs += issue.Container.m_nCoverImageWidth + issue.Container.m_nLeftTextWidth;
             int index = issue.Cells.IndexOf(this);
             Debug.Assert(index != -1, "");
 
