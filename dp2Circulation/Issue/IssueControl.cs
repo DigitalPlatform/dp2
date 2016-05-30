@@ -15,19 +15,16 @@ using DigitalPlatform.CommonControl;    // LocationCollection
 using DigitalPlatform.Text;
 
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
-    //public partial class IssueControl : UserControl
     /// <summary>
     /// 期记录列表控件
     /// </summary>
     public partial class IssueControl : IssueControlBase
     {
-
         // 
         /// <summary>
         /// 准备验收
@@ -82,57 +79,6 @@ namespace dp2Circulation
         /// </summary>
         public event GetItemInfoEventHandler GetItemInfo = null;
 
-#if NO
-                public event LoadRecordHandler LoadRecord = null;
-
-                // Ctrl+A自动创建数据
-        /// <summary>
-        /// 自动创建数据
-        /// </summary>
-        public event GenerateDataEventHandler GenerateData = null;
-
-        // 参与排序的列号数组
-        SortColumns SortColumns = new SortColumns();
-
-
-        /// <summary>
-        /// 界面许可 / 禁止状态发生改变
-        /// </summary>
-        public event EnableControlsHandler EnableControlsEvent = null;
-
-        public bool m_bRemoveDeletedItem = false;   // 在删除事项时, 是否从视觉上抹除这些事项(实际上内存里面还保留有即将提交的事项)?
-
-        /// <summary>
-        /// 通讯通道
-        /// </summary>
-        public LibraryChannel Channel = null;
-
-        /// <summary>
-        /// 停止控制
-        /// </summary>
-        public DigitalPlatform.Stop Stop = null;
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        /// <summary>
-        /// 获得宏的值
-        /// </summary>
-        public event GetMacroValueHandler GetMacroValue = null;
-
-        /// <summary>
-        /// 内容发生改变
-        /// </summary>
-        public event ContentChangedEventHandler ContentChanged = null;
-
-        string m_strBiblioRecPath = "";
-
-        public IssueItemCollection Items = null;
-
-#endif
-
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -144,122 +90,6 @@ namespace dp2Circulation
             this.ItemType = "issue";
             this.ItemTypeName = "期";
         }
-
-#if NO
-        public int IssueCount
-        {
-            get
-            {
-                if (this.Items != null)
-                    return this.Items.Count;
-
-                return 0;
-            }
-        }
-
-        // 将listview中的期事项修改为new状态
-        public void ChangeAllItemToNewState()
-        {
-            foreach (IssueItem issueitem in this.Items)
-            {
-                // IssueItem issueitem = this.IssueItems[i];
-
-                if (issueitem.ItemDisplayState == ItemDisplayState.Normal
-                    || issueitem.ItemDisplayState == ItemDisplayState.Changed
-                    || issueitem.ItemDisplayState == ItemDisplayState.Deleted)   // 注意未提交的deleted也变为new了
-                {
-                    issueitem.ItemDisplayState = ItemDisplayState.New;
-                    issueitem.RefreshListView();
-                    issueitem.Changed = true;    // 这一句决定了使能后如果立即关闭窗口，是否会警告(实体修改)内容丢失
-                }
-            }
-        }
-
-        public string BiblioRecPath
-        {
-            get
-            {
-                return this.m_strBiblioRecPath;
-            }
-            set
-            {
-                this.m_strBiblioRecPath = value;
-
-                if (this.Items != null)
-                {
-                    string strID = Global.GetRecordID(value);
-                    this.Items.SetParentID(strID);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 内容是否发生过修改
-        /// </summary>
-        public bool Changed
-        {
-            get
-            {
-                if (this.Items == null)
-                    return false;
-
-                return this.Items.Changed;
-            }
-            set
-            {
-                if (this.Items != null)
-                    this.Items.Changed = value;
-            }
-        }
-
-        // 清除listview中的全部事项
-        public void Clear()
-        {
-            this.ListView.Items.Clear();
-            // this.BiblioRecPath = "";
-
-            // 2009/2/10
-            this.SortColumns.Clear();
-            SortColumns.ClearColumnSortDisplay(this.ListView.Columns);
-        }
-
-        // 清除期有关信息
-        public void ClearIssues()
-        {
-            this.Clear();
-            this.Items = new IssueItemCollection();
-        }
-
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-
-        public int CountOfVisibleIssueItems()
-        {
-            return this.ListView.Items.Count;
-        }
-
-        public int IndexOfVisibleIssueItems(IssueItem issueitem)
-        {
-            for (int i = 0; i < this.ListView.Items.Count; i++)
-            {
-                IssueItem cur = (IssueItem)this.ListView.Items[i].Tag;
-
-                if (cur == issueitem)
-                    return i;
-            }
-
-            return -1;
-        }
-
-        public IssueItem GetAtVisibleIssueItems(int nIndex)
-        {
-            return (IssueItem)this.ListView.Items[nIndex].Tag;
-        }
-
-#endif
 
         // 
         // return:
@@ -328,7 +158,6 @@ namespace dp2Circulation
                     return 0;
 
                 Debug.Assert(entities != null, "");
-
 
                 for (int i = 0; i < entities.Length; i++)
                 {
@@ -2098,19 +1927,13 @@ namespace dp2Circulation
                     if (nRet == -1)
                         goto ERROR1;
 
+                    // 给期记录 XML 中增加 recPath 元素
+                    AddRecPath(ref strIssueXml, issue_item.RecPath);
+
                     IssueXmls.Add(strIssueXml);
                     Debug.Assert(String.IsNullOrEmpty(issue_item.RefID) == false, "");
                     all_issue_refids.Add(issue_item.RefID);
 
-                    /*
-                // 将已有的期信息反映到对话框中
-                    IssueBindingItem design_item =
-                        dlg.AppendIssue(strIssueXml, out strError);
-                    if (design_item == null)
-                        goto ERROR1;
-
-                    design_item.Tag = (object)item; // 建立连接关系
-                     * */
                 }
 
 #if OLD_INITIAL
@@ -2252,7 +2075,7 @@ namespace dp2Circulation
                     List<string> Xmls = new List<string>(); // 要创建或者修改的期记录
 
                     // 遍历对象数组，创建deleting_issue_refids和Xmls
-                    foreach(IssueBindingItem issue_item in dlg.Issues)
+                    foreach (IssueBindingItem issue_item in dlg.Issues)
                     {
                         // IssueBindingItem issue_item = dlg.Issues[i];
 
@@ -2314,6 +2137,23 @@ namespace dp2Circulation
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        // 给期记录 XML 中增加 recPath 元素
+        static void AddRecPath(ref string strIssueXml, string strRecPath)
+        {
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strIssueXml);
+            }
+            catch
+            {
+                return;
+            }
+            DomUtil.SetElementText(dom.DocumentElement, "recPath", strRecPath);
+            strIssueXml = dom.DocumentElement.OuterXml;
+        }
+
 
         void dlg_GenerateData(object sender, GenerateDataEventArgs e)
         {

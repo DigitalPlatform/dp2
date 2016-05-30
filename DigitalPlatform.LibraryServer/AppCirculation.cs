@@ -5920,6 +5920,9 @@ start_time_1,
             out string strError)
         {
             strError = "";
+            if (string.IsNullOrEmpty(strReaderXml))
+                return 0;
+
             XmlDocument readerdom = new XmlDocument();
             try
             {

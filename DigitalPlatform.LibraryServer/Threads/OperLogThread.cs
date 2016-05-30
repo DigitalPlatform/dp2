@@ -9,6 +9,7 @@ using System.Messaging;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client;
+using DigitalPlatform.Message;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -33,6 +34,7 @@ namespace DigitalPlatform.LibraryServer
                 try
                 {
                     _queue = new MessageQueue(this.App.OutgoingQueue);
+                    _queue.Formatter = new XmlMessageFormatter(new Type[] { typeof(string) });
                 }
                 catch (Exception ex)
                 {
@@ -180,7 +182,7 @@ namespace DigitalPlatform.LibraryServer
                     && string.IsNullOrEmpty(this.App.OutgoingQueue) == false
                     && StringUtil.IsInList("mq", this.App.CirculationNotifyTypes) == true
 #endif
-                    && this.MqNotifyEnabled == true
+ && this.MqNotifyEnabled == true
                     )
                 {
                     // 写入 MSMQ 队列
@@ -506,5 +508,80 @@ namespace DigitalPlatform.LibraryServer
 
             strBodyXml = bodydom.DocumentElement.OuterXml;
         }
+
+        // 从 MSMQ 队列获得若干消息
+        // parameters:
+        public List<MessageData> GetMessage(int nMaxCount, TimeSpan timeout)
+        {
+            List<MessageData> results = new List<MessageData>();
+            if (nMaxCount == 0)
+                return results;
+            try
+            {
+                MessageEnumerator iterator = _queue.GetMessageEnumerator2();
+                int i = 0;
+                while (iterator.MoveNext(timeout))
+                {
+                    System.Messaging.Message message = iterator.Current;
+
+                    MessageData record = new MessageData();
+                    record.strBody = (string)message.Body;
+                    record.strMime = "xml";
+
+                    results.Add(record);
+                    // iterator.RemoveCurrent();
+                    i++;
+                    if (i >= nMaxCount)
+                        break;
+                }
+
+                return results;
+            }
+            catch (MessageQueueException ex)
+            {
+                this.App.WriteErrorLog("GetMessage() 出现异常: " + ExceptionUtil.GetDebugText(ex));
+            }
+            catch (Exception ex)
+            {
+                this.App.WriteErrorLog("GetMessage() 出现异常: " + ExceptionUtil.GetDebugText(ex));
+            }
+
+            return results;
+        }
+
+        // 从 MSMQ 队列中移走若干消息
+        // parameters:
+        public void RemoveMessage(int nCount)
+        {
+            if (nCount == 0)
+                return;
+
+            List<MessageData> results = new List<MessageData>();
+            TimeSpan timeout = new TimeSpan(0, 0, 1);
+
+            try
+            {
+                MessageEnumerator iterator = _queue.GetMessageEnumerator2();
+                int i = 0;
+                while (iterator.MoveNext(timeout))
+                {
+                    if (i >= nCount)
+                        break;
+
+                    iterator.RemoveCurrent();
+                    i++;
+                }
+                return;
+            }
+            catch (MessageQueueException ex)
+            {
+                this.App.WriteErrorLog("RemoveMessage(" + nCount + ") 出现异常: " + ExceptionUtil.GetDebugText(ex));
+            }
+            catch (Exception ex)
+            {
+                this.App.WriteErrorLog("RemoveMessage(" + nCount + ") 出现异常: " + ExceptionUtil.GetDebugText(ex));
+            }
+        }
+
     }
 }

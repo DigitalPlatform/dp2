@@ -50,6 +50,8 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm : Form
     {
+        internal ImageManager _imageManager = null;
+
         public PropertyTaskList PropertyTaskList = new PropertyTaskList();
 
         internal CommentViewerForm m_commentViewer = null;
@@ -387,6 +389,7 @@ namespace dp2Circulation
         {
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
+
             this.BeginInvoke(new Action(FirstInitial));
         }
 

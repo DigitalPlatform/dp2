@@ -73,7 +73,6 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, this.MainForm.DefaultFont);
             }
-            // this.bindingControl1.AppInfo = this.AppInfo;
 
             this.bindingControl1.GetOrderInfo -= new GetOrderInfoEventHandler(bindingControl1_GetOrderInfo);
             this.bindingControl1.GetOrderInfo += new GetOrderInfoEventHandler(bindingControl1_GetOrderInfo);

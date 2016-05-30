@@ -19,6 +19,8 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Script;
+using System.IO;
 
 namespace dp2Circulation
 {
@@ -107,7 +109,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.Container.m_nLeftTextWidth + (Container.m_nCellWidth * this.Cells.Count);
+                return this.Container.m_nCoverImageWidth + this.Container.m_nLeftTextWidth + (Container.m_nCellWidth * this.Cells.Count);
             }
         }
 
@@ -119,6 +121,105 @@ namespace dp2Circulation
             get
             {
                 return this.Container.m_nCellHeight;
+            }
+        }
+
+        string _coverImageFileName = "";
+        public string CoverImageFileName
+        {
+            get
+            {
+                return _coverImageFileName;
+            }
+            set
+            {
+                _coverImageFileName = value;
+                // 触发刷新
+                if (this.Container != null)
+                    this.Container.UpdateObject(this);
+            }
+        }
+
+        // 从 XML 记录中获得特定的数字对象 id
+        static string GetCoverImageID(XmlDocument dom,
+            string strPreferredType = "MediumImage")
+        {
+            string strLargeUrl = "";
+            string strMediumUrl = "";   // type:FrontCover.MediumImage
+            string strUrl = ""; // type:FronCover
+            string strSmallUrl = "";
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            foreach (XmlElement file in nodes)
+            {
+                string strID = file.GetAttribute("id");
+                string strType = file.GetAttribute("usage");
+
+                // . 分隔 FrontCover.MediumImage
+                if (StringUtil.HasHead(strType, "FrontCover." + strPreferredType) == true)
+                    return strID;
+
+                if (StringUtil.HasHead(strType, "FrontCover.SmallImage") == true)
+                    strSmallUrl = strID;
+                else if (StringUtil.HasHead(strType, "FrontCover.MediumImage") == true)
+                    strMediumUrl = strID;
+                else if (StringUtil.HasHead(strType, "FrontCover.LargeImage") == true)
+                    strLargeUrl = strID;
+                else if (StringUtil.HasHead(strType, "FrontCover") == true)
+                    strUrl = strID;
+
+            }
+
+            if (string.IsNullOrEmpty(strLargeUrl) == false)
+                return strLargeUrl;
+            if (string.IsNullOrEmpty(strMediumUrl) == false)
+                return strMediumUrl;
+            if (string.IsNullOrEmpty(strUrl) == false)
+                return strUrl;
+            return strSmallUrl;
+        }
+
+        // 期记录路径。依靠 XML 记录中的 recPath 元素
+        string RecPath
+        {
+            get
+            {
+                if (this.dom == null)
+                    return "";
+                return DomUtil.GetElementText(this.dom.DocumentElement, "recPath");
+            }
+        }
+
+        public void PrepareCoverImage(bool bRetry = false)
+        {
+            if (string.IsNullOrEmpty(this.CoverImageFileName) == false)
+                return;
+
+            if (dom == null)
+                return;
+
+            if (string.IsNullOrEmpty(this.RecPath))
+                return;
+
+            // 从 XML 记录中获得特定的对象 id
+            string strID = GetCoverImageID(dom);    // , "LargeImage"
+
+            string strObjectPath = ScriptUtil.MakeObjectUrl(this.RecPath, strID);
+            this.Container.StartGetCoverImage(this,
+                strObjectPath);
+        }
+
+        /// <summary>
+        /// 左侧封面图像的像素宽度
+        /// </summary>
+        public int CoverImageWidth
+        {
+            get
+            {
+                return this.Container.m_nCoverImageWidth;
             }
         }
 
@@ -4274,7 +4375,7 @@ this.Volume);
             ref List<CellBase> update_objects,
             int nMaxCount)
         {
-            float x0 = this.Container.m_nLeftTextWidth;
+            float x0 = this.Container.m_nCoverImageWidth + this.Container.m_nLeftTextWidth;
 
             // 先看看整体上有没有交会
             RectangleF rectAll = new RectangleF(0,
@@ -4404,12 +4505,8 @@ this.Volume);
                     return -1;
             }
 
-
-
             return 0;
         }
-
-
 
         #region 数据成员
 
@@ -4701,8 +4798,6 @@ this.Volume);
             return 0;
         }
 
-
-
         // IssueBindingItem 点击测试
         // parameters:
         //      p_x   已经是文档坐标。即文档左上角为(0,0)
@@ -4723,7 +4818,16 @@ this.Volume);
                 return;
             }
 
-            if (p_x < this.Container.m_nLeftTextWidth)
+            if (p_x < this.Container.m_nCoverImageWidth)
+            {
+                result.AreaPortion = AreaPortion.CoverImage;
+                result.X = p_x;
+                result.Y = p_y;
+                result.Object = this;
+                return;
+            }
+
+            if (p_x < this.Container.m_nCoverImageWidth + this.Container.m_nLeftTextWidth)
             {
                 result.AreaPortion = AreaPortion.LeftText;
                 result.X = p_x;
@@ -4732,7 +4836,7 @@ this.Volume);
                 return;
             }
 
-            p_x -= this.Container.m_nLeftTextWidth;
+            p_x -= this.Container.m_nCoverImageWidth + this.Container.m_nLeftTextWidth;
             long x0 = 0;
             for (int i = 0; i < this.Cells.Count; i++)
             {
@@ -4883,7 +4987,27 @@ this.Volume);
 
             RectangleF rect;
 
-            // 绘制第一栏，年期卷文字
+            // 绘制封面图像
+            rect = new RectangleF(
+    x0,
+    y0,
+    this.CoverImageWidth,
+    this.Height);
+            // 优化
+            if (rect.IntersectsWith(e.ClipRectangle) == true)
+            {
+                PaintCoverImage(
+                    nLineNo,
+                    x0,
+                    y0,
+                    this.CoverImageWidth,
+                    (int)this.Height,
+                    e);
+            }
+
+            x0 += this.CoverImageWidth;
+
+            // 绘制第二栏，年期卷文字
             rect = new RectangleF(
                 x0,
                 y0,
@@ -4972,6 +5096,80 @@ this.Volume);
                     Rectangle.Round(rect));
                 }
             }
+        }
+
+        // 2016/5/28
+        // 绘制封面图像
+        void PaintCoverImage(
+    int nLineNo,
+    int start_x,
+    int start_y,
+    int nWidth,
+    int nHeight,
+    PaintEventArgs e)
+        {
+            if (string.IsNullOrEmpty(this.CoverImageFileName))
+                return;
+
+            Rectangle rectFrame = new Rectangle(start_x, start_y, nWidth, nHeight);
+            // 边条。左侧
+            using (Brush brushSideBar = new SolidBrush(Color.White))
+            {
+                e.Graphics.FillRectangle(brushSideBar, rectFrame);
+            }
+
+            try
+            {
+                // TODO: 文件似乎可以用共享方式打开
+                using (Stream s = File.Open(this.CoverImageFileName, FileMode.Open))
+                {
+#if NO
+                    Region old_clip = e.Graphics.Clip;
+                    Rectangle clip = new Rectangle(start_x, start_x, nWidth, nHeight);
+
+                    e.Graphics.IntersectClip(clip);
+#endif
+                    using (Image image = Image.FromStream(s))
+                    {
+                        double ratio = (double)image.Height / (double)this.Height;
+
+                        // 根据目标宽度，计算能显示的图像原始宽度
+                        int nMaxSourceWidth = (int)(ratio * (double)nWidth);
+                        int nSourceWidth = Math.Min(nMaxSourceWidth, image.Width);
+
+                        Rectangle source = new Rectangle(0, 0, 
+                            nSourceWidth, 
+                            image.Height); 
+                        Rectangle target = new Rectangle(start_x + 1, start_y + 1,
+                            (int)((double)nSourceWidth / ratio) - 2,
+                            this.Height - 2);
+                        // TODO: 居中缩放绘制
+                        // 绘制图像
+                        e.Graphics.DrawImage(image, target, source, GraphicsUnit.Pixel);
+                    }
+#if NO
+                    e.Graphics.Clip = old_clip;
+#endif
+                }
+            }
+            catch (Exception)
+            {
+#if NO
+                    // throw new Exception("read image error:" + ex.Message);
+                    if (cell_info.RetryCount < 5)
+                    {
+                        cell_info.RetryCount++;
+                        DpRow row = cell.Container;
+                        PrepareCoverImage(row, true);
+                    }
+                    else
+                    {
+                        cell.OwnerDraw = false;
+                        cell.Text = "read image error";
+                    }
+#endif
+            }
+
         }
 
         // 绘制一个期的左侧文字部分。包括年期卷等信息

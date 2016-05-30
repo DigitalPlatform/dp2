@@ -22,6 +22,22 @@ namespace dp2Circulation
             if (this.OperHistory != null)
                 this.OperHistory.Dispose();
 
+            if (this._imageManager != null)
+            {
+                this._imageManager.StopThread(true);
+                try
+                {
+                    this._imageManager.ClearList();
+                }
+                catch
+                {
+
+                }
+                this._imageManager.DeleteTempFiles();
+                this._imageManager.Dispose();
+                this._imageManager = null;
+            }
+
             base.Dispose(disposing);
         }
 
