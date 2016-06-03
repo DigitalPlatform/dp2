@@ -1235,8 +1235,6 @@ this.OperTime);
 
             // 建立价格变更记录
             {
-
-
                 // modifyprice 动作，并没有对应的 amerceRecord 元素，因为尚未交费，只是修改了金额
                 // 所以需要选出全部 amerceItem 元素
                 XmlNodeList temp_items = dom.DocumentElement.SelectNodes("amerceItems/amerceItem");
@@ -1262,54 +1260,58 @@ this.OperTime);
                     string strOldRecord = DomUtil.GetElementText(dom.DocumentElement, "oldReaderRecord");
                     if (string.IsNullOrEmpty(strOldRecord))
                     {
-                        strError = "amerce 类型的日志记录要求具备 oldReaderRecord 元素文本内容，需要用详细级获取日志信息";
-                        return -1;
+                        // strError = "amerce 类型的日志记录要求具备 oldReaderRecord 元素文本内容，需要用详细级获取日志信息";
+                        // return -1;
+                        strError = "ReportForm SetData(): amerce 类型的日志记录要求具备 oldReaderRecord 元素文本内容，此日志记录并不具备。strDate=" + strDate + ", lIndex=" + lIndex;
+                        Program.MainForm.WriteErrorLog(strError);
                     }
-
-                    foreach (XmlElement item in items)
+                    else
                     {
-                        string strID = item.GetAttribute("id");
-                        string strNewPrice = null;
-                        if (item.GetAttributeNode("newPrice") != null)
-                            strNewPrice = item.GetAttribute("newPrice");
-                        else
+                        foreach (XmlElement item in items)
                         {
-                            if (strAction == "modifyprice")
+                            string strID = item.GetAttribute("id");
+                            string strNewPrice = null;
+                            if (item.GetAttributeNode("newPrice") != null)
+                                strNewPrice = item.GetAttribute("newPrice");
+                            else
                             {
-                                strError = "action 为 modifyprice 的日志记录中，出现了 amerceItem 元素缺乏 newPrice 属性的情况，格式错误";
+                                if (strAction == "modifyprice")
+                                {
+                                    strError = "action 为 modifyprice 的日志记录中，出现了 amerceItem 元素缺乏 newPrice 属性的情况，格式错误";
+                                    return -1;
+                                }
+                                continue;   // action 为 amerce 则有可能并不修改金额
+                            }
+
+                            // oldPrice 需要从 oldReaderRecord 元素中获得
+                            XmlElement overdue = GetOverdueByID(strOldRecord, strID);
+                            if (overdue == null)
+                            {
+                                strError = "日志记录格式错误: 根据id '" + strID + "' 在日志记录<oldReaderRecord>元素内没有找到对应的<overdue>元素";
                                 return -1;
                             }
-                            continue;   // action 为 amerce 则有可能并不修改金额
-                        }
 
-                        // oldPrice 需要从 oldReaderRecord 元素中获得
-                        XmlElement overdue = GetOverdueByID(strOldRecord, strID);
-                        if (overdue == null)
-                        {
-                            strError = "日志记录格式错误: 根据id '" + strID + "' 在日志记录<oldReaderRecord>元素内没有找到对应的<overdue>元素";
-                            return -1;
-                        }
+                            if (i == 0)
+                                FillRecordByOverdue(overdue,
+                        strReaderBarcode,
+                        strNewPrice,
+                        this);
+                            else
+                            {
+                                if (lines == null)
+                                    lines = new List<OperLogLineBase>();
+                                AmerceOperLogLine line = new AmerceOperLogLine();
+                                (this as OperLogLineBase).CopyTo(line);
+                                line.SubNo = i;
+                                FillRecordByOverdue(overdue,
+                        strReaderBarcode,
+                        strNewPrice,
+                        line);
+                                lines.Add(line);
+                            }
 
-                        if (i == 0)
-                            FillRecordByOverdue(overdue,
-                    strReaderBarcode,
-                    strNewPrice,
-                    this);
-                        else
-                        {
-                            if (lines == null)
-                                lines = new List<OperLogLineBase>();
-                            AmerceOperLogLine line = new AmerceOperLogLine();
-                            (this as OperLogLineBase).CopyTo(line);
-                            line.SubNo = i;
-                            FillRecordByOverdue(overdue,
-                    strReaderBarcode,
-                    strNewPrice,
-                    line);
-                            lines.Add(line);
+                            i++;
                         }
-
-                        i++;
                     }
                 }
             }
