@@ -168,6 +168,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DongshifangMessageInterface
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2SIPServer", "dp2SIPServer\dp2SIPServer.csproj", "{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpgradeDt1000ToDp2", "UpgradeDt1000ToDp2\UpgradeDt1000ToDp2.csproj", "{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1288,6 +1290,21 @@ Global
 		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{121A9867-D5DA-4324-8CAA-C7DFE82FEDEB}.Test|x86.ActiveCfg = Release|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Release|x86.ActiveCfg = Release|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Test|Any CPU.Build.0 = Release|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{B1421B92-A8ED-440E-AEB5-1EBC8AB58C1D}.Test|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
