@@ -6406,12 +6406,6 @@ MessageBoxDefaultButton.Button2);
 
             try
             {
-                // 删除以前遗留的数据库文件
-                string strDatabaseFile = Path.Combine(GetBaseDirectory(), "operlog.bin");
-                if (File.Exists(strDatabaseFile) == true)
-                {
-                    File.Delete(strDatabaseFile);
-                }
 
                 this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
 
@@ -6420,6 +6414,14 @@ MessageBoxDefaultButton.Button2);
                     "initial_tables");
                 if (strInitilized != "finish")
                 {
+                    stop.SetMessage("正在删除残余的数据库文件 ...");
+                    // 删除以前遗留的数据库文件
+                    string strDatabaseFile = Path.Combine(GetBaseDirectory(), "operlog.bin");
+                    if (File.Exists(strDatabaseFile) == true)
+                    {
+                        File.Delete(strDatabaseFile);
+                    }
+
                     stop.SetMessage("正在初始化本地数据库 ...");
                     nRet = ItemLine.CreateItemTable(
         this._connectionString,

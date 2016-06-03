@@ -391,7 +391,7 @@ DbType.Int64);
         }
 
         // 构造一个写入命令片断
-        public virtual void BuidWriteCommand(SQLiteCommand command,
+        public virtual void BuildWriteCommand(SQLiteCommand command,
     int i,
     bool bInsertOrReplace,
     StringBuilder text)
@@ -426,11 +426,10 @@ DbType.Int64);
                     int i = 0;
                     foreach (OperLogLineBase line in this)
                     {
-                        line.BuidWriteCommand(command,
+                        line.BuildWriteCommand(command,
                  i,
                  bInsertOrReplace,
                  text);
-
                         i++;
                     }
 
@@ -793,7 +792,7 @@ line.ReaderBarcode);
             return 0;
         }
 
-        public override void BuidWriteCommand(SQLiteCommand command,
+        public override void BuildWriteCommand(SQLiteCommand command,
             int i,
             bool bInsertOrReplace,
             StringBuilder text)
@@ -896,7 +895,7 @@ this.OperTime);
             return 0;
         }
 
-        public override void BuidWriteCommand(SQLiteCommand command,
+        public override void BuildWriteCommand(SQLiteCommand command,
     int i,
     bool bInsertOrReplace,
     StringBuilder text)
@@ -1026,7 +1025,7 @@ this.Operator);
             return 0;
         }
 
-        public override void BuidWriteCommand(SQLiteCommand command,
+        public override void BuildWriteCommand(SQLiteCommand command,
             int i,
             bool bInsertOrReplace,
             StringBuilder text)
@@ -1601,7 +1600,7 @@ out borrowdate) == false)
             return 0;
         }
 
-        public override void BuidWriteCommand(SQLiteCommand command,
+        public override void BuildWriteCommand(SQLiteCommand command,
             int i,
             bool bInsertOrReplace,
             StringBuilder text)
@@ -1724,7 +1723,7 @@ this.OperTime);
             return 0;
         }
 
-        public override void BuidWriteCommand(SQLiteCommand command,
+        public override void BuildWriteCommand(SQLiteCommand command,
     int i,
     bool bInsertOrReplace,
     StringBuilder text)
@@ -1845,7 +1844,7 @@ this.OperTime);
             return 0;
         }
 
-        public override void BuidWriteCommand(SQLiteCommand command,
+        public override void BuildWriteCommand(SQLiteCommand command,
     int i,
     bool bInsertOrReplace,
     StringBuilder text)
@@ -1962,7 +1961,7 @@ this.OperTime);
             return 0;
         }
 
-        public override void BuidWriteCommand(SQLiteCommand command,
+        public override void BuildWriteCommand(SQLiteCommand command,
     int i,
     bool bInsertOrReplace,
     StringBuilder text)

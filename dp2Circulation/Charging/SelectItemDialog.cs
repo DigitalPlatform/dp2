@@ -8,22 +8,21 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
+using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Collections;
 using DigitalPlatform.Marc;
 
 namespace dp2Circulation
 {
     /// <summary>
-    /// 通过 ISBN 等检索出书目记录，然后列出下属的侧记录供选择的对话框
+    /// 通过 ISBN 等检索出书目记录，然后列出下属的册记录供选择的对话框
     /// 用于出纳窗
     /// </summary>
     public partial class SelectItemDialog : MyForm
