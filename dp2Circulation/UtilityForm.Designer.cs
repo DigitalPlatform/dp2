@@ -78,6 +78,7 @@
             this.toolStripButton_isbn_to13 = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_isbn_hyphen = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_isbn_removeHyphen = new System.Windows.Forms.ToolStripButton();
             this.label9 = new System.Windows.Forms.Label();
             this.textBox_isbn_text = new System.Windows.Forms.TextBox();
             this.tabPage_health = new System.Windows.Forms.TabPage();
@@ -102,7 +103,7 @@
             this.label13 = new System.Windows.Forms.Label();
             this.textBox_worToIso_worFilename = new System.Windows.Forms.TextBox();
             this.button_worToIso_findFileName = new System.Windows.Forms.Button();
-            this.toolStripButton_isbn_removeHyphen = new System.Windows.Forms.ToolStripButton();
+            this.button_xmlEditor_replaceControlChar = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_sjhm.SuspendLayout();
             this.tabPage_xmlEditor.SuspendLayout();
@@ -218,6 +219,7 @@
             // 
             // tabPage_xmlEditor
             // 
+            this.tabPage_xmlEditor.Controls.Add(this.button_xmlEditor_replaceControlChar);
             this.tabPage_xmlEditor.Controls.Add(this.comboBox_xmlFile_encoding);
             this.tabPage_xmlEditor.Controls.Add(this.label4);
             this.tabPage_xmlEditor.Controls.Add(this.checkBox_xmlEditor_indent);
@@ -459,7 +461,7 @@
             this.textBox_currency_target.Multiline = true;
             this.textBox_currency_target.Name = "textBox_currency_target";
             this.textBox_currency_target.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_currency_target.Size = new System.Drawing.Size(186, 303);
+            this.textBox_currency_target.Size = new System.Drawing.Size(182, 303);
             this.textBox_currency_target.TabIndex = 2;
             // 
             // tabPage_textLines
@@ -556,7 +558,7 @@
             this.textBox_textLines_source2.Multiline = true;
             this.textBox_textLines_source2.Name = "textBox_textLines_source2";
             this.textBox_textLines_source2.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_textLines_source2.Size = new System.Drawing.Size(207, 145);
+            this.textBox_textLines_source2.Size = new System.Drawing.Size(203, 145);
             this.textBox_textLines_source2.TabIndex = 2;
             // 
             // tableLayoutPanel_textLines_down
@@ -714,6 +716,16 @@
             this.toolStripButton_isbn_hyphen.Size = new System.Drawing.Size(36, 22);
             this.toolStripButton_isbn_hyphen.Text = "横杠";
             this.toolStripButton_isbn_hyphen.Visible = false;
+            // 
+            // toolStripButton_isbn_removeHyphen
+            // 
+            this.toolStripButton_isbn_removeHyphen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_isbn_removeHyphen.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_isbn_removeHyphen.Image")));
+            this.toolStripButton_isbn_removeHyphen.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_isbn_removeHyphen.Name = "toolStripButton_isbn_removeHyphen";
+            this.toolStripButton_isbn_removeHyphen.Size = new System.Drawing.Size(60, 22);
+            this.toolStripButton_isbn_removeHyphen.Text = "去掉横杠";
+            this.toolStripButton_isbn_removeHyphen.Click += new System.EventHandler(this.toolStripButton_isbn_removeHyphen_Click);
             // 
             // label9
             // 
@@ -972,15 +984,16 @@
             this.button_worToIso_findFileName.Text = "...";
             this.button_worToIso_findFileName.Click += new System.EventHandler(this.button_worToIso_findWorFileName_Click);
             // 
-            // toolStripButton_isbn_removeHyphen
+            // button_xmlEditor_replaceControlChar
             // 
-            this.toolStripButton_isbn_removeHyphen.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_isbn_removeHyphen.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_isbn_removeHyphen.Image")));
-            this.toolStripButton_isbn_removeHyphen.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_isbn_removeHyphen.Name = "toolStripButton_isbn_removeHyphen";
-            this.toolStripButton_isbn_removeHyphen.Size = new System.Drawing.Size(60, 22);
-            this.toolStripButton_isbn_removeHyphen.Text = "去掉横杠";
-            this.toolStripButton_isbn_removeHyphen.Click += new System.EventHandler(this.toolStripButton_isbn_removeHyphen_Click);
+            this.button_xmlEditor_replaceControlChar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_xmlEditor_replaceControlChar.Location = new System.Drawing.Point(251, 68);
+            this.button_xmlEditor_replaceControlChar.Name = "button_xmlEditor_replaceControlChar";
+            this.button_xmlEditor_replaceControlChar.Size = new System.Drawing.Size(137, 23);
+            this.button_xmlEditor_replaceControlChar.TabIndex = 8;
+            this.button_xmlEditor_replaceControlChar.Text = "替换非法字符(&R)";
+            this.button_xmlEditor_replaceControlChar.UseVisualStyleBackColor = true;
+            this.button_xmlEditor_replaceControlChar.Click += new System.EventHandler(this.button_xmlEditor_replaceControlChar_Click);
             // 
             // UtilityForm
             // 
@@ -1114,5 +1127,6 @@
         private System.Windows.Forms.TextBox textBox_worToIso_preview;
         private System.Windows.Forms.Button button_worToIso_convert;
         private System.Windows.Forms.ToolStripButton toolStripButton_isbn_removeHyphen;
+        private System.Windows.Forms.Button button_xmlEditor_replaceControlChar;
     }
 }
