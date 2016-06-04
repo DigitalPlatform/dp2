@@ -892,8 +892,8 @@ namespace DigitalPlatform.LibraryServer
                     {
                         this.PatronAdditionalFroms = new List<string>();
                         this.PatronAdditionalFields = new List<string>();
-                        this.MaxPatronHistoryItems = 100;
-                        this.MaxItemHistoryItems = 100;
+                        this.MaxPatronHistoryItems = DEFAULT_MAXPATRONHITSTORYITEMS;
+                        this.MaxItemHistoryItems = DEFAULT_MACITEMHISTORYITEMS;
                         this.VerifyBarcode = false;
                         this.AcceptBlankItemBarcode = true;
                         this.AcceptBlankReaderBarcode = true;

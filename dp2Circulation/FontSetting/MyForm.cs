@@ -19,7 +19,6 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.CirculationClient;
-//using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
