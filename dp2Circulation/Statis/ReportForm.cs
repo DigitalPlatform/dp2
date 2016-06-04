@@ -13642,6 +13642,10 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
                 }
 
+                if (stop != null)
+                    stop.SetProgressRange(0, filenames.Count);
+
+                int i = 0;
                 foreach (string strFileName in filenames)
                 {
                     if (this.InvokeRequired == false)
@@ -13682,6 +13686,9 @@ MessageBoxDefaultButton.Button1);
                         RemoveArchiveAttribute(strExcelFileName);
                         nCount++;
                     }
+
+                    if (stop != null)
+                        stop.SetProgressValue(++i);
                 }
 
             }
