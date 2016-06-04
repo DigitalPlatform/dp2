@@ -1122,10 +1122,14 @@ MessageBoxDefaultButton.Button1);
                     "dp2Circulation_v2");
                 PathUtil.CreateDirIfNeed(this.UserDir);
 
+                // 2016/6/4
                 // 用户目录可以重定向
                 nRet = RedirectUserDir(out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this, "重定向用户目录时发生错误: " + strError);
+                {
+                    Program.PromptAndExit(this, "重定向用户目录时发生错误: " + strError);
+                    return;
+                }
 
                 if (CheckUserDirectory() == false)
                     return;
