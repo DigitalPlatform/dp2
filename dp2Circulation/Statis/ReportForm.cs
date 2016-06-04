@@ -11438,6 +11438,12 @@ MessageBoxDefaultButton.Button1);
             {
                 if (this.InvokeRequired == false)
                     Application.DoEvents();
+                if (stop != null && stop.State != 0)
+                {
+                    strError = "中断";
+                    return -1;
+                }
+
                 string strName = DomUtil.GetAttr(node, "name");
                 string strReportType = DomUtil.GetAttr(node, "type");
                 string strCfgFile = DomUtil.GetAttr(node, "cfgFile");
@@ -11598,6 +11604,11 @@ MessageBoxDefaultButton.Button1);
                     {
                         if (this.InvokeRequired == false)
                             Application.DoEvents();
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "中断";
+                            return -1;
+                        }
 
                         this.ShowMessage("正在为馆藏地 '" + strLocation + "' 创建 2xx 报表 (" + (iLocation + 1) + "/" + locations.Count + ")");
 
@@ -11733,17 +11744,6 @@ MessageBoxDefaultButton.Button1);
                     || strReportType == "302") // begin of 3xx
                 {
                     // 获得分馆的所有馆藏地点
-#if NO
-                    List<string> locations = null;
-                    nRet = GetAllItemLocations(
-                        strLibraryCode,
-                        true,
-                        out locations,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-#endif
-
                     List<string> locations = null;
                     locations = this._libraryLocationCache.FindObject(strLibraryCode);
                     if (locations == null)
@@ -11761,6 +11761,14 @@ MessageBoxDefaultButton.Button1);
                     int iLocation = 0;
                     foreach (string strLocation in locations)
                     {
+                        if (this.InvokeRequired == false)
+                            Application.DoEvents();
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "中断";
+                            return -1;
+                        }
+
                         this.ShowMessage("正在为馆藏地 '" + strLocation + "' 创建 301 302 报表 (" + (iLocation + 1) + "/" + locations.Count + ")");
 
                         macro_table["%location%"] = GetLocationCaption(strLocation);
@@ -11768,7 +11776,6 @@ MessageBoxDefaultButton.Button1);
                         // 这里稍微特殊一点，循环要写入多个输出文件
                         if (string.IsNullOrEmpty(strOutputFileName) == true)
                             strOutputFileName = Path.Combine(strOutputDir, Guid.NewGuid().ToString() + ".rml");
-
 
                         if (strReportType == "301"
                             || strReportType == "302")
@@ -11788,6 +11795,11 @@ MessageBoxDefaultButton.Button1);
                             {
                                 if (this.InvokeRequired == false)
                                     Application.DoEvents();
+                                if (stop != null && stop.State != 0)
+                                {
+                                    strError = "中断";
+                                    return -1;
+                                }
 
 #if NO
                                 if (names.Count > 0)
@@ -11932,6 +11944,11 @@ MessageBoxDefaultButton.Button1);
                     {
                         if (this.InvokeRequired == false)
                             Application.DoEvents();
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "中断";
+                            return -1;
+                        }
 
                         OneClassType current_type = null;
                         if (class_table.Count > 0)
