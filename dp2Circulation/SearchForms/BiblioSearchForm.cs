@@ -2090,6 +2090,13 @@ out strError);
                 subMenuItem = new MenuItem("-");
                 menuItem.MenuItems.Add(subMenuItem);
 
+                subMenuItem = new MenuItem("校验书目记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&V)");
+                subMenuItem.Click += new System.EventHandler(this.menu_verifyBiblioRecord_Click);
+                if (this.listView_records.SelectedItems.Count == 0 || this.InSearching == true
+                    )
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
             }
 
 
@@ -2364,6 +2371,144 @@ out strError);
 
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
         }
+
+        void menu_verifyBiblioRecord_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            nRet = VerifyBiblioRecord(out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个书目记录");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        int VerifyBiblioRecord(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要进行批处理的事项";
+                return -1;
+            }
+
+            if (stop != null && stop.State == 0)    // 0 表示正在处理
+            {
+                strError = "目前有长操作正在进行，无法进行校验书目记录的操作";
+                return -1;
+            }
+
+            // 切换到“操作历史”属性页
+            this.MainForm.ActivateFixPage("history");
+
+            int nCount = 0;
+
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) 
+                + " 开始进行书目记录校验</div>");
+
+            LibraryChannel channel = this.GetChannel();
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在进行校验书目记录的操作 ...");
+            stop.BeginLoop();
+
+            this.EnableControls(false);
+            try
+            {
+                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
+                    stop,
+                    items,
+                    this.m_biblioTable);
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null
+                        && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    XmlDocument itemdom = new XmlDocument();
+                    try
+                    {
+                        itemdom.LoadXml(info.OldXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
+                        return -1;
+                    }
+
+                    List<string> errors = new List<string>();
+
+                    // 校验 XML 记录中是否有非法字符
+                    string strReplaced = DomUtil.ReplaceControlCharsButCrLf(info.OldXml, '*');
+                    if (strReplaced != info.OldXml)
+                    {
+                        errors.Add("XML 记录中有非法字符");
+                    }
+
+                    if (errors.Count > 0)
+                    {
+                        this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                        foreach (string error in errors)
+                        {
+                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                        }
+
+                        {
+                            item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
+                            item.ListViewItem.ForeColor = Color.FromArgb(255, 255, 255);
+                        }
+                    }
+
+                    nCount++;
+                    stop.SetProgressValue(++i);
+                }
+
+                return nCount;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                this.ReturnChannel(channel);
+
+                this.EnableControls(true);
+
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                    + " 结束执行书目记录校验</div>");
+            }
+        }
+
 
         // 导出选择的行到 Excel 文件
         void menu_exportExcelFile_Click(object sender, EventArgs e)

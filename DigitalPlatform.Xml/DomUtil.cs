@@ -1707,7 +1707,7 @@ namespace DigitalPlatform.Xml
         // 替换控制字符，但不替换 \0d \0a
         // parameters:
         //      chReplace   要替换成的字符。如果为 0 ，表示删除控制字符
-        static string ReplaceControlCharsButCrLf(string strText,
+        public static string ReplaceControlCharsButCrLf(string strText,
     char chReplace)
         {
             if (String.IsNullOrEmpty(strText) == true)

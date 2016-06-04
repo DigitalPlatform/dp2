@@ -40,19 +40,13 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
-
-        // 为统计指标"出纳/读者数"而暂存的(流通操作)最后一位读者的证条码。可能不太准确
-        // string m_strLastReaderBarcode = "";
-
-        public const int DEFAULT_MAXPATRONHITSTORYITEMS = 10;   // MaxPatronHistoryItems 的默认值
-        public const int DEFAULT_MACITEMHISTORYITEMS = 10;  // MaxItemHistoryItems 的默认值
-
         // 读者记录中，借阅历史中最大保存个数
+        public const int DEFAULT_MAXPATRONHITSTORYITEMS = 10;   // MaxPatronHistoryItems 的默认值
         public int MaxPatronHistoryItems = DEFAULT_MAXPATRONHITSTORYITEMS;  // 100;
 
         // 册记录中，借阅历史中最大保存个数
-        public int MaxItemHistoryItems = DEFAULT_MACITEMHISTORYITEMS;    // 100;
-
+        public const int DEFAULT_MAXITEMHISTORYITEMS = 10;  // MaxItemHistoryItems 的默认值
+        public int MaxItemHistoryItems = DEFAULT_MAXITEMHISTORYITEMS;    // 100;
 
         public bool VerifyBarcode = false;  // 创建和修改读者记录、册记录的时候是否验证条码号
 
@@ -331,7 +325,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 看看是不是已经有图像对象
-
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
 
@@ -345,7 +338,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             strPhotoPath = strOutputReaderRecPath + "/object/" + DomUtil.GetAttr(nodes[0], "id");
-
             return 1;
         }
 

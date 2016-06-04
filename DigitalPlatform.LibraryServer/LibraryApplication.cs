@@ -893,7 +893,7 @@ namespace DigitalPlatform.LibraryServer
                         this.PatronAdditionalFroms = new List<string>();
                         this.PatronAdditionalFields = new List<string>();
                         this.MaxPatronHistoryItems = DEFAULT_MAXPATRONHITSTORYITEMS;
-                        this.MaxItemHistoryItems = DEFAULT_MACITEMHISTORYITEMS;
+                        this.MaxItemHistoryItems = DEFAULT_MAXITEMHISTORYITEMS;
                         this.VerifyBarcode = false;
                         this.AcceptBlankItemBarcode = true;
                         this.AcceptBlankReaderBarcode = true;

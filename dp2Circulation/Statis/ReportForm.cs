@@ -6054,7 +6054,6 @@ MessageBoxDefaultButton.Button2);
                         DomUtil.SetAttr(node, "name", strReaderDbName);
                         DomUtil.SetAttr(node, "type", "reader");
                         DomUtil.SetAttr(node, "count", lRet.ToString());
-
                     }
                 }
 
@@ -6221,6 +6220,7 @@ MessageBoxDefaultButton.Button2);
                         this.MainForm.AppInfo.SetString(GetReportSection(),
                             "daily_report_end_date",
                             strFirstDate);
+                        this.MainForm.AppInfo.Save();   // 为防止程序中途崩溃丢失记忆，这里预先保存一下
 
                         XmlNode node = task_dom.CreateElement("operlog");
                         task_dom.DocumentElement.AppendChild(node);
@@ -11585,7 +11585,6 @@ MessageBoxDefaultButton.Button1);
                             return -1;
                     }
                 }
-
                 else if (strReportType == "201" || strReportType == "9201"
                     || strReportType == "202" || strReportType == "9202"
                     || strReportType == "212" || strReportType == "9212"
@@ -11624,7 +11623,7 @@ MessageBoxDefaultButton.Button1);
                             return -1;
                         }
 
-                        this.ShowMessage("正在为馆藏地 '" + strLocation + "' 创建 2xx 报表 (" + (iLocation + 1) + "/" + locations.Count + ")");
+                        this.ShowMessage("正在为馆藏地 '" + strLocation + "' 创建 " + strReportType + " 报表 (" + (iLocation + 1) + "/" + locations.Count + ")");
 
                         macro_table["%location%"] = GetLocationCaption(strLocation);
 
@@ -11783,7 +11782,7 @@ MessageBoxDefaultButton.Button1);
                             return -1;
                         }
 
-                        this.ShowMessage("正在为馆藏地 '" + strLocation + "' 创建 301 302 报表 (" + (iLocation + 1) + "/" + locations.Count + ")");
+                        this.ShowMessage("正在为馆藏地 '" + strLocation + "' 创建 " + strReportType + " 报表 (" + (iLocation + 1) + "/" + locations.Count + ")");
 
                         macro_table["%location%"] = GetLocationCaption(strLocation);
 

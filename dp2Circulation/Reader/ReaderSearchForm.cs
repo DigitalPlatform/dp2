@@ -1580,7 +1580,8 @@ out strError);
 
             int nCount = 0;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始进行读者记录校验</div>");
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) 
+                + " 开始进行读者记录校验</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1629,7 +1630,49 @@ out strError);
                     // this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
 
                     XmlDocument dom = new XmlDocument();
-                    dom.LoadXml(info.OldXml);
+                    try
+                    {
+                        dom.LoadXml(info.OldXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
+                        goto ERROR1;
+                    }
+
+                    List<string> errors = new List<string>();
+
+                    // 校验 XML 记录中是否有非法字符
+                    string strReplaced = DomUtil.ReplaceControlCharsButCrLf(info.OldXml, '*');
+                    if (strReplaced != info.OldXml)
+                    {
+                        errors.Add("XML 记录中有非法字符");
+                    }
+
+                    // 校验借书时间字符串是否合法
+                    XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
+                    foreach (XmlElement borrow in borrows)
+                    {
+                        string borrowDate = borrow.GetAttribute("borrowDate");
+                        if (string.IsNullOrEmpty(borrowDate))
+                        {
+                            errors.Add("出现了 borrow 元素的 borrowDate 属性值为空的情况");
+                            continue;
+                        }
+
+                        try
+                        {
+                            DateTime time = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
+                            if (time > DateTime.Now)
+                            {
+                                errors.Add("借书时间 '" + time.ToString() + "' 比当前时间还靠后");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            errors.Add("borrow 元素的 borrowDate 属性值 '" + borrowDate + "' 不合法: " + ex.Message);
+                        }
+                    }
 
                     string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
 
@@ -1657,17 +1700,25 @@ out strError);
                             if (nRet == 2 && string.IsNullOrEmpty(strError) == true)
                                 strError = strLibraryCode + ": 这看起来是一个册条码号";
 
-                            this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
-                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + "证条码号 '" + strBarcode + "' 不合法: " + strError + "</div>");
+                            errors.Add("证条码号 '" + strBarcode + "' 不合法: " + strError);
+                        }
+                    }
 
-                            {
-                                item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
-                                item.ListViewItem.ForeColor = Color.FromArgb(255, 255, 255);
-                            }
+                    if (errors.Count > 0)
+                    {
+                        this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                        foreach (string error in errors)
+                        {
+                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
                         }
 
-                        nCount++;
+                        {
+                            item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
+                            item.ListViewItem.ForeColor = Color.FromArgb(255, 255, 255);
+                        }
                     }
+
+                    nCount++;
 
                     i++;
                 }
@@ -1690,7 +1741,8 @@ out strError);
 
                 this.EnableControls(true);
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行读者记录校验</div>");
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                    + " 结束执行读者记录校验</div>");
             }
 
             return;
@@ -5870,7 +5922,7 @@ dlg.UiState);
                     long lRet = Channel.GetReaderInfo(
                         stop,
                         strBarcode,
-                        string.IsNullOrEmpty(strGetReaderInfoStyle) ? 
+                        string.IsNullOrEmpty(strGetReaderInfoStyle) ?
                         "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary"
                         : strGetReaderInfoStyle, // advancexml_history_bibliosummary
                         out results,
