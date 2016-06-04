@@ -4819,7 +4819,6 @@ out strError);
 
             results = new List<string>();
 
-
             string strLibraryCodeFilter = "";
             if (string.IsNullOrEmpty(strLibraryCode) == true)
             {
@@ -4858,7 +4857,7 @@ out strError);
                             // 如果记录已经存在
                             while (dr.Read())
                             {
-                                results.Add(dr.GetString(0));
+                                results.Add(RemoveShelfName(dr.GetString(0)));
                             }
                         }
                         finally
@@ -4875,6 +4874,9 @@ out strError);
             }
 
         END1:
+            // 去重
+            StringUtil.RemoveDupNoSort(ref results);
+
             if (bRoot == true)
             {
                 string strRoot = strLibraryCode + "/";
@@ -4883,6 +4885,18 @@ out strError);
             }
 
             return 0;
+        }
+
+        // 2016/6/4
+        // 去掉末尾的 -架号 部分
+        static string RemoveShelfName(string strText)
+        {
+            int index = strText.LastIndexOfAny(new char [] {'/','-'});
+            if (index == -1)
+                return strText;
+            if (strText[index] == '/')
+                return strText;
+            return strText.Substring(0, index);
         }
 
         // 获得一个分馆内读者记录的证条码号、姓名和单位名称
@@ -10529,6 +10543,7 @@ MessageBoxDefaultButton.Button1);
                     if (task_dom != null && string.IsNullOrEmpty(strTaskFileName) == false)
                         task_dom.Save(strTaskFileName);
 
+                    this.ShowMessage(strError, "red", true);
                     this.Invoke((Action)(() => MessageBox.Show(this, strError)));
                 }
                 else
