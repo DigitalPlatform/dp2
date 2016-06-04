@@ -8,6 +8,7 @@ using System.IO;
 using System.Drawing;
 
 using ClosedXML.Excel;
+using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.dp2.Statis
 {
@@ -114,7 +115,7 @@ namespace DigitalPlatform.dp2.Statis
             int nColIndex = 1;
             foreach (ColumnHeader header in list.Columns)
             {
-                IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(header.Text);
+                IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(header.Text, '*'));
                 cell.Style.Alignment.WrapText = true;
                 cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                 cell.Style.Font.Bold = true;
@@ -148,7 +149,7 @@ namespace DigitalPlatform.dp2.Statis
                     {
                         column_max_chars[nColIndex - 1] = subitem.Text.Length;
                     }
-                    IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(subitem.Text);
+                    IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(DomUtil.ReplaceControlCharsButCrLf(subitem.Text, '*'));
                     cell.Style.Alignment.WrapText = true;
                     cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
                     cell.Style.Font.FontName = strFontName;
