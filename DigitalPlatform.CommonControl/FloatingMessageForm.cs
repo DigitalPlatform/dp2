@@ -247,8 +247,7 @@ size.Height);
             }
         }
 
-        //
-        //
+        // 线程安全
         // 返回结果:
         //     与该控件关联的文本。
         /// <summary>
@@ -258,22 +257,40 @@ size.Height);
         {
             get
             {
+                if (this.InvokeRequired)
+                {
+                    return (string)this.Invoke(new Func<string>(() =>
+                    {
+                        return base.Text;
+                    }));
+                }
                 return base.Text;
             }
             set
             {
-                bool bChanged = false;
-                if (base.Text != value)
-                {
-                    bChanged = true;
-                    StopDelayClear();  // 文字被主动修改后，延时清除就被取消了
-                }
-
-                base.Text = value;
-
-                if (bChanged == true)
-                    this.Invalidate();
+                SetText(value);
             }
+        }
+
+        void SetText(string value)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action<string>(SetText), value);
+                return;
+            }
+
+            bool bChanged = false;
+            if (base.Text != value)
+            {
+                bChanged = true;
+                StopDelayClear();  // 文字被主动修改后，延时清除就被取消了
+            }
+
+            base.Text = value;
+
+            if (bChanged == true)
+                this.Invalidate();
         }
 
         double _saveOpacity = 0.7;

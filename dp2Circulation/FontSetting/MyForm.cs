@@ -313,6 +313,7 @@ namespace dp2Circulation
             this._floatingMessage.SetMessage(strMessage, color, bClickClose);
         }
 
+        // 线程安全
         public void ClearMessage()
         {
             if (this._floatingMessage == null)
@@ -321,11 +322,13 @@ namespace dp2Circulation
             this._floatingMessage.Text = "";
         }
 
+        // 线程安全
         public void AppendFloatingMessage(string strText)
         {
             this._floatingMessage.Text += strText;
         }
 
+        // 线程安全
         public string FloatingMessage
         {
             get

@@ -117,6 +117,12 @@ namespace dp2Circulation
         void SetFloatMessage(string strColor,
             string strText)
         {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action<string, string>(SetFloatMessage), strColor, strText);
+                return;
+            }
+
             if (strColor == "waiting")
                 this._floatingMessage.RectColor = Color.FromArgb(80, 80, 80);
             else
