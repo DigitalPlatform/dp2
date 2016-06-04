@@ -569,7 +569,17 @@ out strError);
                             break;
                     }
 
-                    using (XmlWriter writer = XmlWriter.Create(strHtmlFileName, new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true }))
+                    /*
+                     * https://msdn.microsoft.com/en-us/library/system.xml.xmlwriter.writestring(v=vs.110).aspx
+The default behavior of an XmlWriter created using Create is to throw an ArgumentException when attempting to write character values in the range 0x-0x1F (excluding white space characters 0x9, 0xA, and 0xD). These invalid XML characters can be written by creating the XmlWriter with the CheckCharacters property set to false. Doing so will result in the characters being replaced with numeric character entities (&#0; through &#0x1F). Additionally, an XmlTextWriter created with the new operator will replace the invalid characters with numeric character entities by default.
+                     * */
+                    using (XmlWriter writer = XmlWriter.Create(strHtmlFileName,
+                        new XmlWriterSettings
+                        {
+                            Indent = true,
+                            OmitXmlDeclaration = true,
+                            CheckCharacters = false // 2016/6/3
+                        }))   
                     {
                         writer.WriteDocType("html", "-//W3C//DTD XHTML 1.0 Transitional//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd", null);
                         writer.WriteStartElement("html", "http://www.w3.org/1999/xhtml");
@@ -615,7 +625,6 @@ out strError);
                                         strError = "ReadColumnStyle() error : " + strError;
                                         return -1;
                                     }
-
                                 }
                                 else if (reader.Name == "table")
                                 {
@@ -706,7 +715,7 @@ out strError);
 
                 return 0;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = "RmlToHtml() 出现异常: " + ExceptionUtil.GetDebugText(ex)
                     + "\r\nstrRmlFileName=" + strRmlFileName

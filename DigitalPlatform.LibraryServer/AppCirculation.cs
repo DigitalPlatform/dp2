@@ -10215,7 +10215,6 @@ out string strError)
                 if (nRet == 1)
                     bReaderDomChanged = true;
 
-
                 // 在违约金数据库中创建若干新的违约金记录
                 // parameters:
                 //      AmerceRecordXmls    需要写入的新记录的数组
@@ -10305,7 +10304,6 @@ out string strError)
                     // 仅当功能为amerce时，才把被修改的实体记录写入日志。
                     if (String.Compare(strFunction, "amerce", true) == 0)
                     {
-
                         Debug.Assert(AmerceRecordXmls.Count == CreatedNewPaths.Count, "");
 
                         // 写入多个重复的<amerceRecord>元素

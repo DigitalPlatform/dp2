@@ -11593,10 +11593,13 @@ MessageBoxDefaultButton.Button1);
                         this._libraryLocationCache.SetObject(strLibraryCode, locations);
                     }
 
+                    int iLocation = 0;
                     foreach (string strLocation in locations)
                     {
                         if (this.InvokeRequired == false)
                             Application.DoEvents();
+
+                        this.ShowMessage("正在为馆藏地 '" + strLocation + "' 创建 2xx 报表 (" + (iLocation + 1) + "/" + locations.Count + ")");
 
                         macro_table["%location%"] = GetLocationCaption(strLocation);
 
@@ -11719,8 +11722,10 @@ MessageBoxDefaultButton.Button1);
 
                             strOutputFileName = "";
                         }
-                    }
 
+                        iLocation++;
+                    }
+                    this.ClearMessage();
                     // TODO: 总的馆藏地点还要来一次
 
                 } // end 2xx
@@ -11753,8 +11758,11 @@ MessageBoxDefaultButton.Button1);
                         this._libraryLocationCache.SetObject(strLibraryCode, locations);
                     }
 
+                    int iLocation = 0;
                     foreach (string strLocation in locations)
                     {
+                        this.ShowMessage("正在为馆藏地 '" + strLocation + "' 创建 301 302 报表 (" + (iLocation + 1) + "/" + locations.Count + ")");
+
                         macro_table["%location%"] = GetLocationCaption(strLocation);
 
                         // 这里稍微特殊一点，循环要写入多个输出文件
@@ -11863,8 +11871,10 @@ MessageBoxDefaultButton.Button1);
 
                             strOutputFileName = "";
                         }
-                    }
 
+                        iLocation++;
+                    }
+                    this.ClearMessage();
                     // TODO: 总的馆藏地点还要来一次
 
                 } // end 3xx

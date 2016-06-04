@@ -5282,6 +5282,7 @@ strElementName);
   <operator>test</operator> 操作者
   <operTime>Fri, 08 Dec 2006 10:09:36 GMT</operTime> 操作时间
   
+         * 早期缺乏 oldReaderRecord 元素，无法计算 修改了金额情况下 新旧金额之间的差值
   <readerRecord recPath='...'>...</readerRecord>	最新读者记录
 </root>
 

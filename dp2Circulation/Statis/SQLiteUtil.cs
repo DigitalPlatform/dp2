@@ -1262,7 +1262,7 @@ this.OperTime);
                     {
                         // strError = "amerce 类型的日志记录要求具备 oldReaderRecord 元素文本内容，需要用详细级获取日志信息";
                         // return -1;
-                        strError = "ReportForm SetData(): amerce 类型的日志记录要求具备 oldReaderRecord 元素文本内容，此日志记录并不具备。strDate=" + strDate + ", lIndex=" + lIndex;
+                        strError = "ReportForm SetData(): amerce 类型的日志记录要求具备 oldReaderRecord 元素文本内容，此日志记录并不具备(可能属于早期的不完备的日志记录)。因此无法计算修改金额的差值。strDate=" + strDate + ", lIndex=" + lIndex;
                         Program.MainForm.WriteErrorLog(strError);
                     }
                     else
