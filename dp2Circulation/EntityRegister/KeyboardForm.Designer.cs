@@ -111,7 +111,7 @@
             this.panel_barcode.Controls.Add(this.textBox_input);
             this.panel_barcode.Controls.Add(this.label_name);
             this.panel_barcode.Controls.Add(this.button_scan);
-            this.panel_barcode.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel_barcode.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel_barcode.Location = new System.Drawing.Point(3, 155);
             this.panel_barcode.Name = "panel_barcode";
             this.panel_barcode.Size = new System.Drawing.Size(326, 55);
