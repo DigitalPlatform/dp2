@@ -40,14 +40,14 @@
             this.comboBox_libraryCode.Location = new System.Drawing.Point(0, 1);
             this.comboBox_libraryCode.Margin = new System.Windows.Forms.Padding(6);
             this.comboBox_libraryCode.Name = "comboBox_libraryCode";
-            this.comboBox_libraryCode.Size = new System.Drawing.Size(126, 20);
+            this.comboBox_libraryCode.Size = new System.Drawing.Size(172, 20);
             this.comboBox_libraryCode.TabIndex = 0;
             this.comboBox_libraryCode.TextChanged += new System.EventHandler(this.comboBox_libraryCode_TextChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(129, 6);
+            this.label1.Location = new System.Drawing.Point(177, 4);
             this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(11, 12);
@@ -58,10 +58,10 @@
             // 
             this.textBox_number.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_number.Location = new System.Drawing.Point(142, 1);
+            this.textBox_number.Location = new System.Drawing.Point(200, 1);
             this.textBox_number.Margin = new System.Windows.Forms.Padding(6);
             this.textBox_number.Name = "textBox_number";
-            this.textBox_number.Size = new System.Drawing.Size(129, 21);
+            this.textBox_number.Size = new System.Drawing.Size(71, 21);
             this.textBox_number.TabIndex = 2;
             this.textBox_number.TextChanged += new System.EventHandler(this.textBox_number_TextChanged);
             // 

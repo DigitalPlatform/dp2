@@ -47,10 +47,10 @@
             // 
             this.button_scan.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_scan.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_scan.Location = new System.Drawing.Point(244, 22);
+            this.button_scan.Location = new System.Drawing.Point(243, 24);
             this.button_scan.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.button_scan.Name = "button_scan";
-            this.button_scan.Size = new System.Drawing.Size(81, 27);
+            this.button_scan.Size = new System.Drawing.Size(75, 27);
             this.button_scan.TabIndex = 15;
             this.button_scan.Text = "提交(&S)";
             this.button_scan.UseVisualStyleBackColor = true;
