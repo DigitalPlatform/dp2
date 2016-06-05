@@ -1069,6 +1069,7 @@ namespace dp2Circulation
             int nWidth = this.tableLayoutPanel1.ClientSize.Width - this.tableLayoutPanel1.Padding.Horizontal - this.tableLayoutPanel1.Margin.Horizontal;
             this.webBrowser_info.Size = new System.Drawing.Size(nWidth, this.webBrowser_info.Size.Height);
             this.panel_barcode.Size = new System.Drawing.Size(nWidth, this.panel_barcode.Size.Height);
+            this.panel_barcode.PerformLayout();
             // this.panel_barcode.BackColor = Color.Red;
             //this.tableLayoutPanel1.Width = this.ClientSize.Width;
             UpdateRectSource();
