@@ -104,5 +104,6 @@ namespace dp2Circulation
 
             this.textBox_barcodeFileName.Text = dlg.FileName;
         }
+
     }
 }
