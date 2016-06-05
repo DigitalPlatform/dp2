@@ -50,7 +50,7 @@
             this.button_scan.Location = new System.Drawing.Point(244, 22);
             this.button_scan.Margin = new System.Windows.Forms.Padding(2);
             this.button_scan.Name = "button_scan";
-            this.button_scan.Size = new System.Drawing.Size(81, 23);
+            this.button_scan.Size = new System.Drawing.Size(81, 27);
             this.button_scan.TabIndex = 15;
             this.button_scan.Text = "提交(&S)";
             this.button_scan.UseVisualStyleBackColor = true;
@@ -75,7 +75,7 @@
             // label_name
             // 
             this.label_name.AutoSize = true;
-            this.label_name.Location = new System.Drawing.Point(-2, 8);
+            this.label_name.Location = new System.Drawing.Point(-2, 6);
             this.label_name.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_name.Name = "label_name";
             this.label_name.Size = new System.Drawing.Size(77, 12);
@@ -108,15 +108,12 @@
             // 
             // panel_barcode
             // 
-            this.panel_barcode.AutoSize = true;
-            this.panel_barcode.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.panel_barcode.Controls.Add(this.textBox_input);
             this.panel_barcode.Controls.Add(this.label_name);
             this.panel_barcode.Controls.Add(this.button_scan);
-            this.panel_barcode.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel_barcode.Location = new System.Drawing.Point(3, 157);
+            this.panel_barcode.Location = new System.Drawing.Point(3, 155);
             this.panel_barcode.Name = "panel_barcode";
-            this.panel_barcode.Size = new System.Drawing.Size(326, 53);
+            this.panel_barcode.Size = new System.Drawing.Size(326, 55);
             this.panel_barcode.TabIndex = 18;
             // 
             // webBrowser_info
@@ -125,7 +122,7 @@
             this.webBrowser_info.Location = new System.Drawing.Point(3, 3);
             this.webBrowser_info.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser_info.Name = "webBrowser_info";
-            this.webBrowser_info.Size = new System.Drawing.Size(326, 148);
+            this.webBrowser_info.Size = new System.Drawing.Size(326, 146);
             this.webBrowser_info.TabIndex = 19;
             // 
             // toolStrip1
@@ -166,8 +163,8 @@
             // KeyboardForm
             // 
             this.AcceptButton = this.button_scan;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.DimGray;
             this.ClientSize = new System.Drawing.Size(332, 238);
             this.Controls.Add(this.tableLayoutPanel1);

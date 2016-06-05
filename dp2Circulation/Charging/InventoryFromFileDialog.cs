@@ -17,6 +17,8 @@ namespace dp2Circulation
         public InventoryFromFileDialog()
         {
             InitializeComponent();
+
+            inventoryBatchNoControl_start_batchNo.AutoScaleMode = this.AutoScaleMode;
         }
 
         private void InventoryFromFileDialog_Load(object sender, EventArgs e)

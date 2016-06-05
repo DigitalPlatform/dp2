@@ -58,14 +58,14 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_number.Location = new System.Drawing.Point(162, 0);
             this.textBox_number.Name = "textBox_number";
-            this.textBox_number.Size = new System.Drawing.Size(186, 21);
+            this.textBox_number.Size = new System.Drawing.Size(183, 21);
             this.textBox_number.TabIndex = 2;
             this.textBox_number.TextChanged += new System.EventHandler(this.textBox_number_TextChanged);
             // 
             // InventoryBatchNoControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.Controls.Add(this.textBox_number);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.comboBox_libraryCode);
