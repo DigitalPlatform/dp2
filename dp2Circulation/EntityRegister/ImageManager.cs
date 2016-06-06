@@ -171,26 +171,32 @@ namespace dp2Circulation
                 // dp2library 协议的对象资源
 
                 LibraryChannel channel = this.ChannelPool.GetChannel(info.ServerUrl, info.UserName);
-
-                byte[] baOutputTimeStamp = null;
-                string strMetaData = "";
-                string strTempOutputPath = "";
-
-                long lRet = channel.GetRes(
-                    null,
-                    info.ObjectPath,
-                    info.FileName,
-                    out strMetaData,
-                    out baOutputTimeStamp,
-                    out strTempOutputPath,
-                    out strError);
-                if (lRet == -1)
+                try
                 {
-                    strError = "下载资源文件失败，原因: " + strError;
-                    goto ERROR1;
-                }
+                    byte[] baOutputTimeStamp = null;
+                    string strMetaData = "";
+                    string strTempOutputPath = "";
 
-                _localFileCache[info.ObjectPath] = info.FileName;
+                    long lRet = channel.GetRes(
+                        null,
+                        info.ObjectPath,
+                        info.FileName,
+                        out strMetaData,
+                        out baOutputTimeStamp,
+                        out strTempOutputPath,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        strError = "下载资源文件失败，原因: " + strError;
+                        goto ERROR1;
+                    }
+
+                    _localFileCache[info.ObjectPath] = info.FileName;
+                }
+                finally
+                {
+                    this.ChannelPool.ReturnChannel(channel);    // 2016/6/6
+                }
             }
 
         END1:
