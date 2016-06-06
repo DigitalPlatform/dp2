@@ -12691,8 +12691,6 @@ strLibraryCode);    // 读者所在的馆代码
                     strLibraryCode,
                     strTableNameParam,
                     strDbNameParam);
-
-
                 // 如果没有找到
                 if (temp == null || temp.Count == 0)
                 {

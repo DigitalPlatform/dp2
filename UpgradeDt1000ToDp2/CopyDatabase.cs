@@ -2133,7 +2133,6 @@ namespace UpgradeDt1000ToDp2
                 DomUtil.SetElementText(dom.DocumentElement, "barcode", strBarcode);
             }
 
-
             // 登录号
             nRet = MarcUtil.GetSubfield(strGroup,
     ItemType.Group,
@@ -2151,13 +2150,10 @@ namespace UpgradeDt1000ToDp2
                 }
             }
 
-
-
             // 状态?
             DomUtil.SetElementText(dom.DocumentElement, "state", "");
 
             // 馆藏地点
-
             nRet = MarcUtil.GetSubfield(strGroup,
                 ItemType.Group,
                 "b",
@@ -2369,7 +2365,6 @@ out strNextSubfieldName);
 
             if (bSeries == true)
             {
-
                 // $C几期一装? 从907$C复制过来
                 nRet = MarcUtil.GetSubfield(strGroup,
                     ItemType.Group,
@@ -2554,7 +2549,6 @@ out strNextSubfieldName);
             }
 
             strXml = dom.OuterXml;
-
             return 0;
         }
 

@@ -2543,7 +2543,7 @@ out strError);
 
             int nCount = 0;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) 
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                 + " 开始进行册记录校验</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
@@ -2597,6 +2597,12 @@ out strError);
                     }
 
                     List<string> errors = new List<string>();
+
+                    // 检查根元素下的元素名是否有重复的
+                    nRet = VerifyDupElementName(itemdom,
+            out strError);
+                    if (nRet == -1)
+                        errors.Add(strError);
 
                     // 校验 XML 记录中是否有非法字符
                     string strReplaced = DomUtil.ReplaceControlCharsButCrLf(info.OldXml, '*');
@@ -2661,6 +2667,12 @@ out strError);
                         }
                     }
 
+                    // 模拟删除一些元素
+                    nRet = SimulateDeleteElement(itemdom,
+out strError);
+                    if (nRet == -1)
+                        errors.Add(strError);
+
                     if (errors.Count > 0)
                     {
                         this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
@@ -2696,6 +2708,63 @@ out strError);
             }
         }
 
+        int SimulateDeleteElement(XmlDocument dom,
+            out string strError)
+        {
+            strError = "";
+
+            string[] names = {
+    "borrower",
+    "borrowerReaderType",
+"borrowerRecPath",
+"borrowDate",
+"borrowPeriod",
+                "returningDate",
+                "lastReturningDate",
+"operator",
+                "no",
+                "renewComment"};
+
+            List<string> errors = new List<string>();
+            foreach (string name in names)
+            {
+                DomUtil.DeleteElement(dom.DocumentElement, name);
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes(name);
+                if (nodes.Count > 0)
+                    errors.Add("根元素下的 " + name + " 元素模拟删除一次后依然存在");
+            }
+
+            if (errors.Count == 0)
+                return 0;
+            strError = StringUtil.MakePathList(errors, "; ");
+            return -1;
+        }
+
+        int VerifyDupElementName(XmlDocument dom,
+            out string strError)
+        {
+            strError = "";
+            if (dom.DocumentElement == null)
+                return 0;
+
+            List<string> errors = new List<string>();
+            foreach (XmlNode node in dom.DocumentElement.ChildNodes)
+            {
+                if (node.NodeType == XmlNodeType.Element)
+                {
+                    XmlNodeList nodes = dom.DocumentElement.SelectNodes("node.Name");
+                    if (nodes.Count > 1)
+                    {
+                        errors.Add("根元素下的 " + node.Name + " 元素出现了多次 " + nodes.Count);
+                    }
+                }
+            }
+
+            if (errors.Count == 0)
+                return 0;
+            strError = StringUtil.MakePathList(errors, "; ");
+            return -1;
+        }
 
         // 进行流通操作
         int DoCirculation(string strAction,
