@@ -1522,8 +1522,17 @@ strLibraryCode);    // 读者所在的馆代码
             string strReaderType = DomUtil.GetElementText(dom.DocumentElement,
     "readerType");
 
-            if (IsInList(strReaderType, values) == true)
+            if (string.IsNullOrEmpty(strReaderType)
+                && values.IndexOf("") != -1)
+            {
+                // 允许列表中出现 ""
                 return 0;
+            }
+            else
+            {
+                if (IsInList(strReaderType, values) == true)
+                    return 0;
+            }
 
             GetPureValue(ref values);
             strError = "读者类型 '" + strReaderType + "' 不是合法的值。应为 '" + StringUtil.MakePathList(values) + "' 之一";

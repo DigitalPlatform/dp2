@@ -3227,9 +3227,7 @@ namespace DigitalPlatform.LibraryServer
             if (values.Count > 0)
                 goto FOUND;
 
-
             // 试探不使用数据库名
-
             values = GetOneLibraryValueTable(
     strLibraryCode,
     "bookType",
@@ -3243,8 +3241,17 @@ namespace DigitalPlatform.LibraryServer
             string strBookType = DomUtil.GetElementText(dom.DocumentElement,
     "bookType");
 
-            if (IsInList(strBookType, values) == true)
+            if (string.IsNullOrEmpty(strReaderType)
+    && values.IndexOf("") != -1)
+            {
+                // 允许列表中出现 ""
                 return 0;
+            }
+            else
+            {
+                if (IsInList(strBookType, values) == true)
+                    return 0;
+            }
 
             GetPureValue(ref values);
             strError = "图书类型 '" + strBookType + "' 不是合法的值。应为 '" + StringUtil.MakePathList(values) + "' 之一";

@@ -118,7 +118,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.73 (2016/5/18) MaxItemHistoryItems 和 MaxPatronHistoryItems 的默认值都修改为 10
         //      2.74 (2016/5/21) GetOperLogs() API 返回的 amerce 操作的日志记录，无论何种详细级别，都不去除 oldReaderRecord 元素
         //      2.75 (2016/5/30) GetMessage() API 加入了获取 MSMQ 消息的功能
-        public static string Version = "2.75";
+        //      2.76 (2016/6/4) 将读者记录和册记录中的借阅历史缺省个数修改为 10 
+        public static string Version = "2.76";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -892,8 +893,8 @@ namespace DigitalPlatform.LibraryServer
                     {
                         this.PatronAdditionalFroms = new List<string>();
                         this.PatronAdditionalFields = new List<string>();
-                        this.MaxPatronHistoryItems = 100;
-                        this.MaxItemHistoryItems = 100;
+                        this.MaxPatronHistoryItems = DEFAULT_MAXPATRONHITSTORYITEMS;
+                        this.MaxItemHistoryItems = DEFAULT_MAXITEMHISTORYITEMS;
                         this.VerifyBarcode = false;
                         this.AcceptBlankItemBarcode = true;
                         this.AcceptBlankReaderBarcode = true;
@@ -12690,8 +12691,6 @@ strLibraryCode);    // 读者所在的馆代码
                     strLibraryCode,
                     strTableNameParam,
                     strDbNameParam);
-
-
                 // 如果没有找到
                 if (temp == null || temp.Count == 0)
                 {

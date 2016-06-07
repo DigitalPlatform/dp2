@@ -40,16 +40,13 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
-
-        // 为统计指标"出纳/读者数"而暂存的(流通操作)最后一位读者的证条码。可能不太准确
-        // string m_strLastReaderBarcode = "";
-
         // 读者记录中，借阅历史中最大保存个数
-        public int MaxPatronHistoryItems = 10;  // 100;
+        public const int DEFAULT_MAXPATRONHITSTORYITEMS = 10;   // MaxPatronHistoryItems 的默认值
+        public int MaxPatronHistoryItems = DEFAULT_MAXPATRONHITSTORYITEMS;  // 100;
 
         // 册记录中，借阅历史中最大保存个数
-        public int MaxItemHistoryItems = 10;    // 100;
-
+        public const int DEFAULT_MAXITEMHISTORYITEMS = 10;  // MaxItemHistoryItems 的默认值
+        public int MaxItemHistoryItems = DEFAULT_MAXITEMHISTORYITEMS;    // 100;
 
         public bool VerifyBarcode = false;  // 创建和修改读者记录、册记录的时候是否验证条码号
 
@@ -328,7 +325,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 看看是不是已经有图像对象
-
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
 
@@ -342,7 +338,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             strPhotoPath = strOutputReaderRecPath + "/object/" + DomUtil.GetAttr(nodes[0], "id");
-
             return 1;
         }
 
@@ -9009,7 +9004,6 @@ out string strError)
                 return -1;
             }
             time = time.ToUniversalTime();
-
             return 0;
         }
 
@@ -10216,7 +10210,6 @@ out string strError)
                 if (nRet == 1)
                     bReaderDomChanged = true;
 
-
                 // 在违约金数据库中创建若干新的违约金记录
                 // parameters:
                 //      AmerceRecordXmls    需要写入的新记录的数组
@@ -10306,7 +10299,6 @@ out string strError)
                     // 仅当功能为amerce时，才把被修改的实体记录写入日志。
                     if (String.Compare(strFunction, "amerce", true) == 0)
                     {
-
                         Debug.Assert(AmerceRecordXmls.Count == CreatedNewPaths.Count, "");
 
                         // 写入多个重复的<amerceRecord>元素
@@ -12544,7 +12536,6 @@ out string strError)
 
             // 册价格
             string strItemPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
-
 
             if (strAction == "lost"
                 && String.IsNullOrEmpty(strItemPrice) == true

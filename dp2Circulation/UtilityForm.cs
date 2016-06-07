@@ -1358,5 +1358,10 @@ MessageBoxDefaultButton.Button2);
             this.textBox_isbn_text.Text = text.ToString();
         }
 
+        private void button_xmlEditor_replaceControlChar_Click(object sender, EventArgs e)
+        {
+            this.textBox_xmlEditor_content.Text = DomUtil.ReplaceControlCharsButCrLf(this.textBox_xmlEditor_content.Text, '*');
+        }
+
     }
 }

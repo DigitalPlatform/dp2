@@ -1445,7 +1445,6 @@ true);
                 item_barcode_dlg.ShowDialog(this);
                 this.MainForm.AppInfo.UnlinkFormState(item_barcode_dlg);
 
-
                 if (item_barcode_dlg.DialogResult != DialogResult.OK)
                 {
                 }

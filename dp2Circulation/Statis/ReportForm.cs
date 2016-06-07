@@ -29,7 +29,6 @@ using DigitalPlatform.Range;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -4819,7 +4818,6 @@ out strError);
 
             results = new List<string>();
 
-
             string strLibraryCodeFilter = "";
             if (string.IsNullOrEmpty(strLibraryCode) == true)
             {
@@ -4858,7 +4856,7 @@ out strError);
                             // 如果记录已经存在
                             while (dr.Read())
                             {
-                                results.Add(dr.GetString(0));
+                                results.Add(RemoveShelfName(dr.GetString(0)));
                             }
                         }
                         finally
@@ -4875,6 +4873,9 @@ out strError);
             }
 
         END1:
+            // 去重
+            StringUtil.RemoveDupNoSort(ref results);
+
             if (bRoot == true)
             {
                 string strRoot = strLibraryCode + "/";
@@ -4883,6 +4884,18 @@ out strError);
             }
 
             return 0;
+        }
+
+        // 2016/6/4
+        // 去掉末尾的 -架号 部分
+        static string RemoveShelfName(string strText)
+        {
+            int index = strText.LastIndexOfAny(new char [] {'/','-'});
+            if (index == -1)
+                return strText;
+            if (strText[index] == '/')
+                return strText;
+            return strText.Substring(0, index);
         }
 
         // 获得一个分馆内读者记录的证条码号、姓名和单位名称
@@ -6041,7 +6054,6 @@ MessageBoxDefaultButton.Button2);
                         DomUtil.SetAttr(node, "name", strReaderDbName);
                         DomUtil.SetAttr(node, "type", "reader");
                         DomUtil.SetAttr(node, "count", lRet.ToString());
-
                     }
                 }
 
@@ -6208,6 +6220,7 @@ MessageBoxDefaultButton.Button2);
                         this.MainForm.AppInfo.SetString(GetReportSection(),
                             "daily_report_end_date",
                             strFirstDate);
+                        this.MainForm.AppInfo.Save();   // 为防止程序中途崩溃丢失记忆，这里预先保存一下
 
                         XmlNode node = task_dom.CreateElement("operlog");
                         task_dom.DocumentElement.AppendChild(node);
@@ -6406,12 +6419,6 @@ MessageBoxDefaultButton.Button2);
 
             try
             {
-                // 删除以前遗留的数据库文件
-                string strDatabaseFile = Path.Combine(GetBaseDirectory(), "operlog.bin");
-                if (File.Exists(strDatabaseFile) == true)
-                {
-                    File.Delete(strDatabaseFile);
-                }
 
                 this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
 
@@ -6420,6 +6427,14 @@ MessageBoxDefaultButton.Button2);
                     "initial_tables");
                 if (strInitilized != "finish")
                 {
+                    stop.SetMessage("正在删除残余的数据库文件 ...");
+                    // 删除以前遗留的数据库文件
+                    string strDatabaseFile = Path.Combine(GetBaseDirectory(), "operlog.bin");
+                    if (File.Exists(strDatabaseFile) == true)
+                    {
+                        File.Delete(strDatabaseFile);
+                    }
+
                     stop.SetMessage("正在初始化本地数据库 ...");
                     nRet = ItemLine.CreateItemTable(
         this._connectionString,
@@ -10527,6 +10542,7 @@ MessageBoxDefaultButton.Button1);
                     if (task_dom != null && string.IsNullOrEmpty(strTaskFileName) == false)
                         task_dom.Save(strTaskFileName);
 
+                    this.ShowMessage(strError, "red", true);
                     this.Invoke((Action)(() => MessageBox.Show(this, strError)));
                 }
                 else
@@ -11436,6 +11452,12 @@ MessageBoxDefaultButton.Button1);
             {
                 if (this.InvokeRequired == false)
                     Application.DoEvents();
+                if (stop != null && stop.State != 0)
+                {
+                    strError = "中断";
+                    return -1;
+                }
+
                 string strName = DomUtil.GetAttr(node, "name");
                 string strReportType = DomUtil.GetAttr(node, "type");
                 string strCfgFile = DomUtil.GetAttr(node, "cfgFile");
@@ -11563,7 +11585,6 @@ MessageBoxDefaultButton.Button1);
                             return -1;
                     }
                 }
-
                 else if (strReportType == "201" || strReportType == "9201"
                     || strReportType == "202" || strReportType == "9202"
                     || strReportType == "212" || strReportType == "9212"
@@ -11591,10 +11612,18 @@ MessageBoxDefaultButton.Button1);
                         this._libraryLocationCache.SetObject(strLibraryCode, locations);
                     }
 
+                    int iLocation = 0;
                     foreach (string strLocation in locations)
                     {
                         if (this.InvokeRequired == false)
                             Application.DoEvents();
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "中断";
+                            return -1;
+                        }
+
+                        this.ShowMessage("正在为馆藏地 '" + strLocation + "' 创建 " + strReportType + " 报表 (" + (iLocation + 1) + "/" + locations.Count + ")");
 
                         macro_table["%location%"] = GetLocationCaption(strLocation);
 
@@ -11717,8 +11746,10 @@ MessageBoxDefaultButton.Button1);
 
                             strOutputFileName = "";
                         }
-                    }
 
+                        iLocation++;
+                    }
+                    this.ClearMessage();
                     // TODO: 总的馆藏地点还要来一次
 
                 } // end 2xx
@@ -11726,17 +11757,6 @@ MessageBoxDefaultButton.Button1);
                     || strReportType == "302") // begin of 3xx
                 {
                     // 获得分馆的所有馆藏地点
-#if NO
-                    List<string> locations = null;
-                    nRet = GetAllItemLocations(
-                        strLibraryCode,
-                        true,
-                        out locations,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-#endif
-
                     List<string> locations = null;
                     locations = this._libraryLocationCache.FindObject(strLibraryCode);
                     if (locations == null)
@@ -11751,14 +11771,24 @@ MessageBoxDefaultButton.Button1);
                         this._libraryLocationCache.SetObject(strLibraryCode, locations);
                     }
 
+                    int iLocation = 0;
                     foreach (string strLocation in locations)
                     {
+                        if (this.InvokeRequired == false)
+                            Application.DoEvents();
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "中断";
+                            return -1;
+                        }
+
+                        this.ShowMessage("正在为馆藏地 '" + strLocation + "' 创建 " + strReportType + " 报表 (" + (iLocation + 1) + "/" + locations.Count + ")");
+
                         macro_table["%location%"] = GetLocationCaption(strLocation);
 
                         // 这里稍微特殊一点，循环要写入多个输出文件
                         if (string.IsNullOrEmpty(strOutputFileName) == true)
                             strOutputFileName = Path.Combine(strOutputDir, Guid.NewGuid().ToString() + ".rml");
-
 
                         if (strReportType == "301"
                             || strReportType == "302")
@@ -11778,6 +11808,11 @@ MessageBoxDefaultButton.Button1);
                             {
                                 if (this.InvokeRequired == false)
                                     Application.DoEvents();
+                                if (stop != null && stop.State != 0)
+                                {
+                                    strError = "中断";
+                                    return -1;
+                                }
 
 #if NO
                                 if (names.Count > 0)
@@ -11861,8 +11896,10 @@ MessageBoxDefaultButton.Button1);
 
                             strOutputFileName = "";
                         }
-                    }
 
+                        iLocation++;
+                    }
+                    this.ClearMessage();
                     // TODO: 总的馆藏地点还要来一次
 
                 } // end 3xx
@@ -11920,6 +11957,11 @@ MessageBoxDefaultButton.Button1);
                     {
                         if (this.InvokeRequired == false)
                             Application.DoEvents();
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "中断";
+                            return -1;
+                        }
 
                         OneClassType current_type = null;
                         if (class_table.Count > 0)
@@ -13600,6 +13642,10 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
                 }
 
+                if (stop != null)
+                    stop.SetProgressRange(0, filenames.Count);
+
+                int i = 0;
                 foreach (string strFileName in filenames)
                 {
                     if (this.InvokeRequired == false)
@@ -13640,6 +13686,9 @@ MessageBoxDefaultButton.Button1);
                         RemoveArchiveAttribute(strExcelFileName);
                         nCount++;
                     }
+
+                    if (stop != null)
+                        stop.SetProgressValue(++i);
                 }
 
             }

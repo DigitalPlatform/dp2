@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Diagnostics;
+
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 
 using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
-using System.Diagnostics;
-using System.Reflection;
 
 namespace DigitalPlatform.dp2.Statis
 {
@@ -50,7 +50,7 @@ namespace DigitalPlatform.dp2.Statis
         public CellData(int nColIndex, string value)
         {
             this.Col = nColIndex;
-            this.Value = value;
+            this.Value = DomUtil.ReplaceControlCharsButCrLf(value, '*');
         }
 
         public CellData(int nColIndex,
@@ -59,7 +59,7 @@ namespace DigitalPlatform.dp2.Statis
             uint style_index)
         {
             this.Col = nColIndex;
-            this.Value = value;
+            this.Value = DomUtil.ReplaceControlCharsButCrLf(value, '*');
             this.StyleIndex = new UInt32Value(style_index);
             this.IsString = bIsString;
         }

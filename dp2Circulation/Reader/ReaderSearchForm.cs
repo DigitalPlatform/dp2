@@ -1473,6 +1473,12 @@ out strError);
                 if (this.listView_records.SelectedItems.Count == 0)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
+
+                subMenuItem = new MenuItem("筛选 --> 读者查询窗");
+                subMenuItem.Click += new System.EventHandler(this.menu_filterToAnotherReaderSearchForm_Click);
+                if (this.listView_records.SelectedItems.Count == 0)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
             }
 
             // ---
@@ -1574,7 +1580,8 @@ out strError);
 
             int nCount = 0;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始进行读者记录校验</div>");
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) 
+                + " 开始进行读者记录校验</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1623,7 +1630,49 @@ out strError);
                     // this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
 
                     XmlDocument dom = new XmlDocument();
-                    dom.LoadXml(info.OldXml);
+                    try
+                    {
+                        dom.LoadXml(info.OldXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
+                        goto ERROR1;
+                    }
+
+                    List<string> errors = new List<string>();
+
+                    // 校验 XML 记录中是否有非法字符
+                    string strReplaced = DomUtil.ReplaceControlCharsButCrLf(info.OldXml, '*');
+                    if (strReplaced != info.OldXml)
+                    {
+                        errors.Add("XML 记录中有非法字符");
+                    }
+
+                    // 校验借书时间字符串是否合法
+                    XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
+                    foreach (XmlElement borrow in borrows)
+                    {
+                        string borrowDate = borrow.GetAttribute("borrowDate");
+                        if (string.IsNullOrEmpty(borrowDate))
+                        {
+                            errors.Add("出现了 borrow 元素的 borrowDate 属性值为空的情况");
+                            continue;
+                        }
+
+                        try
+                        {
+                            DateTime time = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
+                            if (time > DateTime.Now)
+                            {
+                                errors.Add("借书时间 '" + time.ToString() + "' 比当前时间还靠后");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            errors.Add("borrow 元素的 borrowDate 属性值 '" + borrowDate + "' 不合法: " + ex.Message);
+                        }
+                    }
 
                     string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
 
@@ -1651,19 +1700,25 @@ out strError);
                             if (nRet == 2 && string.IsNullOrEmpty(strError) == true)
                                 strError = strLibraryCode + ": 这看起来是一个册条码号";
 
-                            this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
-                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + "证条码号 '" + strBarcode + "' 不合法: " + strError + "</div>");
-
-                            {
-                                item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
-                                item.ListViewItem.ForeColor = Color.FromArgb(255,255,255);
-                            }
+                            errors.Add("证条码号 '" + strBarcode + "' 不合法: " + strError);
                         }
-
-                        nCount++;
                     }
 
+                    if (errors.Count > 0)
+                    {
+                        this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                        foreach (string error in errors)
+                        {
+                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                        }
 
+                        {
+                            item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
+                            item.ListViewItem.ForeColor = Color.FromArgb(255, 255, 255);
+                        }
+                    }
+
+                    nCount++;
 
                     i++;
                 }
@@ -1686,7 +1741,8 @@ out strError);
 
                 this.EnableControls(true);
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行读者记录校验</div>");
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                    + " 结束执行读者记录校验</div>");
             }
 
             return;
@@ -1694,6 +1750,180 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
+        // 筛选 --> 读者查询窗
+        void menu_filterToAnotherReaderSearchForm_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            FilterPatronDialog dlg = new FilterPatronDialog();
+            this.MainForm.AppInfo.LinkFormState(dlg, "readersearchform_FilterPatronDialog_state");
+            dlg.ShowDialog(this);
+            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            ReaderSearchForm form = new ReaderSearchForm();
+            form.MdiParent = this.MainForm;
+            form.Show();
+
+            form.EnableControls(false);
+            try
+            {
+                int nCount = 0;
+
+                // return:
+                //      -1  出错。包括用户中断的情况
+                //      >=0 实际处理的读者记录数
+                int nRet = this.ProcessSelectedPatrons(
+                    (strRecPath, dom, timestamp) =>
+                    {
+                        this.ShowMessage("正在处理读者记录 " + strRecPath);
+                        form.ShowMessage("正在处理读者记录 " + strRecPath);
+
+                        string barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                        XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
+                        XmlNodeList overdues = dom.DocumentElement.SelectNodes("overdues/overdue");
+
+                        bool bOn = false;
+
+                        // “无在借册和违约金的”
+                        if (dlg.NoBorrowAndOverdueItem == true)
+                        {
+                            if (borrows.Count == 0 || overdues.Count == 0)
+                                bOn = true;
+                        }
+
+                        // “有在借册的 / 已超期”
+
+                        if (dlg.OutofPeriodItem == true)
+                        {
+                            if (borrows.Count > 0)
+                            {
+                                foreach (XmlElement borrow in borrows)
+                                {
+                                    string strReturningDate = borrow.GetAttribute("returningDate");
+                                    // TODO: 处理抛出异常
+                                    DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strReturningDate);
+                                    // TODO: 时间要正规化以后再比较
+                                    if (time.ToLocalTime() < DateTime.Now)
+                                    {
+                                        bOn = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        // “有在借册的 / 未超期”是否被勾选
+                        if (dlg.InPeriodItem == true)
+                        {
+                            if (borrows.Count > 0)
+                            {
+                                int nOverdueCount = 0;
+                                foreach (XmlElement borrow in borrows)
+                                {
+                                    string strReturningDate = borrow.GetAttribute("returningDate");
+                                    // TODO: 处理抛出异常
+                                    DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strReturningDate);
+                                    // TODO: 时间要正规化以后再比较
+                                    if (time.ToLocalTime() < DateTime.Now)
+                                        nOverdueCount++;
+                                }
+                                if (nOverdueCount == 0)
+                                    bOn = true;
+                            }
+                        }
+
+                        // “有违约金的”是否被勾选
+                        if (dlg.HasOverdueItem == true)
+                        {
+                            if (overdues.Count > 0)
+                                bOn = true;
+                        }
+
+                        if (bOn == true)
+                        {
+                            form.AddBarcodeToBrowseList(barcode);
+                            nCount++;
+                        }
+                        return true;
+                    },
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                form.RrefreshAllItems();
+                form.ShowMessage("共装入读者记录 " + nCount + " 个", "green", true);
+            }
+            finally
+            {
+                form.EnableControls(true);
+            }
+
+            this.ShowMessage("完成", "green", true);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+#if NO
+        // 有在借册的 --> 读者查询窗
+        void menu_exportBorrowingToReaderSearchForm_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            List<string> barcodes = new List<string>();
+            foreach (ListViewItem item in this.listView_records.SelectedItems)
+            {
+                // TODO: 用 style 来识别列
+                barcodes.Add(item.SubItems[1].Text);
+            }
+
+            int nCount = 0;
+
+            ReaderSearchForm form = new ReaderSearchForm();
+            form.MdiParent = this.MainForm;
+            form.Show();
+
+            form.EnableControls(false);
+            try
+            {
+                // return:
+                //      -1  出错。包括用户中断的情况
+                //      >=0 实际处理的读者记录数
+                int nRet = this.ProcessPatrons(barcodes,
+                    (strRecPath, dom, timestamp) =>
+                    {
+                        this.ShowMessage("正在处理读者记录 " + strRecPath);
+                        form.ShowMessage("正在处理读者记录 " + strRecPath);
+
+                        string barcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                        XmlNodeList nodes = dom.DocumentElement.SelectNodes("borrows/borrow");
+                        if (nodes.Count > 0)
+                        {
+                            form.AddBarcodeToBrowseList(barcode);
+                            nCount++;
+                        }
+                        return true;
+                    },
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                form.RrefreshAllItems();
+                form.ShowMessage("共装入读者记录 " + nCount + " 个", "green", true);
+            }
+            finally
+            {
+                form.EnableControls(true);
+            }
+
+            this.ShowMessage("完成", "green", true);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+#endif
         // 借阅历史 --> 实体查询窗
         void menu_exportChargingHistoryToItemSearchForm_Click(object sender, EventArgs e)
         {
@@ -5324,7 +5554,6 @@ dlg.UiState);
             return 1;
         }
 
-
         // return:
         //      -1  出错
         //      0   用户中断
@@ -5525,6 +5754,240 @@ dlg.UiState);
             }
         }
 
+        public delegate bool Delegate_processPatron(string strRecPath,
+            XmlDocument dom,
+            byte[] timestamp);
+
+        // 通用的，遍历和处理读者记录的函数
+        // 该函数的弱点是不能按照特殊风格来获取读者记录，而 ProcessPatrons() 能做到
+        // 优点是速度特别快
+        // return:
+        //      -1  出错。包括用户中断的情况
+        //      >=0 实际处理的读者记录数
+        public int ProcessSelectedPatrons(
+            Delegate_processPatron func,
+            out string strError)
+        {
+            strError = "";
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选择要处理的读者记录事项";
+                return -1;
+            }
+
+            // 读者信息缓存
+            // 如果已经初始化，则保持
+            if (this.m_biblioTable == null)
+                this.m_biblioTable = new Hashtable();
+
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始进行读者记录校验</div>");
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在处理读者记录 ...");
+            stop.BeginLoop();
+
+            this.EnableControls(false);
+
+            this.listView_records.Enabled = false;
+            try
+            {
+                if (stop != null)
+                    stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+
+                ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
+                    stop,
+                    items,
+                    this.m_biblioTable);
+                loader.DbTypeCaption = this.DbTypeCaption;
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    stop.SetProgressValue(i);
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    // this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+
+                    XmlDocument dom = new XmlDocument();
+                    try
+                    {
+                        dom.LoadXml(info.OldXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "装载读者记录 XML 到 DOM 时发生错误: " + ex.Message;
+                        return -1;
+                    }
+
+                    if (func != null)
+                    {
+                        if (func(info.RecPath,
+                dom,
+                info.Timestamp) == false)
+                            break;
+                    }
+
+                    i++;
+                }
+
+                return i;
+            }
+            catch (Exception ex)
+            {
+                strError = "处理读者记录的过程中出现异常: " + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
+            finally
+            {
+                this.listView_records.Enabled = true;
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                this.EnableControls(true);
+
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行读者记录处理</div>");
+            }
+        }
+
+        // 通用的，遍历和处理读者记录的函数
+        // 该函数的弱点是速度慢，优点是能按照特殊风格来获取读者记录
+        // return:
+        //      -1  出错。包括用户中断的情况
+        //      >=0 实际处理的读者记录数
+        public int ProcessPatrons(List<string> reader_barcodes,
+            string strGetReaderInfoStyle,
+            Delegate_processPatron func,
+            out string strError)
+        {
+            strError = "";
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在处理读者记录 ...");
+            stop.BeginLoop();
+
+            EnableControls(false);
+            this.listView_records.Enabled = false;
+
+            try
+            {
+                if (stop != null)
+                    stop.SetProgressRange(0, reader_barcodes.Count);
+
+                int nReaderIndex = 0;
+                foreach (string strBarcode in reader_barcodes)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    if (string.IsNullOrEmpty(strBarcode) == true)
+                        continue;
+
+                    // 获得读者记录
+                    byte[] baTimestamp = null;
+                    string strOutputRecPath = "";
+
+                    stop.SetMessage("正在处理读者记录 " + strBarcode + " ...");
+
+                    string[] results = null;
+                    long lRet = Channel.GetReaderInfo(
+                        stop,
+                        strBarcode,
+                        string.IsNullOrEmpty(strGetReaderInfoStyle) ?
+                        "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary"
+                        : strGetReaderInfoStyle, // advancexml_history_bibliosummary
+                        out results,
+                        out strOutputRecPath,
+                        out baTimestamp,
+                        out strError);
+                    if (lRet == -1)
+                        return -1;
+
+                    if (lRet == 0)
+                        return -1;
+
+                    if (lRet > 1)   // 不可能发生吧?
+                    {
+                        strError = "读者证条码号 " + strBarcode + " 命中记录 " + lRet.ToString() + " 条，放弃装入读者记录。\r\n\r\n注意这是一个严重错误，请系统管理员尽快排除。";
+                        return -1;
+                    }
+                    if (results == null || results.Length < 1)
+                    {
+                        strError = "返回的results不正常。";
+                        return -1;
+                    }
+
+                    string strXml = results[0];
+
+                    XmlDocument dom = new XmlDocument();
+                    try
+                    {
+                        dom.LoadXml(strXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "装载读者记录 XML 到 DOM 时发生错误: " + ex.Message;
+                        return -1;
+                    }
+
+                    if (func != null)
+                    {
+                        if (func(strOutputRecPath,
+                dom,
+                baTimestamp) == false)
+                            break;
+                    }
+
+                    nReaderIndex++;
+                    if (stop != null)
+                        stop.SetProgressValue(nReaderIndex);
+                }
+
+                return nReaderIndex;    // 实际处理的读者记录数
+            }
+            finally
+            {
+                EnableControls(true);
+                this.listView_records.Enabled = true;
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+            }
+        }
+
+#if NO
         // return:
         //      -1  出错
         //      0   用户中断
@@ -5842,6 +6305,235 @@ dlg.UiState);
                 }
 
             }
+            return 1;
+        }
+
+#endif
+
+        // return:
+        //      -1  出错
+        //      0   用户中断
+        //      1   成功
+        public int CreateReaderDetailExcelFile(List<string> reader_barcodes,
+            bool bLaunchExcel,
+            out string strError)
+        {
+            strError = "";
+            //int nRet = 0;
+
+            ExportPatronExcelDialog dlg = new ExportPatronExcelDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.OverwritePrompt = true;
+            dlg.UiState = this.MainForm.AppInfo.GetString(
+        "ReaderSearchForm",
+        "ExportPatronExcelDialog_uiState",
+        "");
+
+            this.MainForm.AppInfo.LinkFormState(dlg, "ReaderSearchForm_ExportPatronExcelDialog_uiState_state");
+            dlg.ShowDialog(this);
+
+            this.MainForm.AppInfo.SetString(
+"ReaderSearchForm",
+"ExportPatronExcelDialog_uiState",
+dlg.UiState);
+
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+            {
+                strError = "放弃操作";
+                return 0;
+            }
+
+            string strTimeRange = "";
+
+            try
+            {
+                strTimeRange = GetTimeRange(dlg.ChargingHistoryDateRange);
+            }
+            catch (Exception ex)
+            {
+                strError = "日期范围字符串 '" + dlg.ChargingHistoryDateRange + "' 格式不合法: " + ex.Message;
+                return -1;
+            }
+
+            XLWorkbook doc = null;
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "ReaderSearchForm new XLWorkbook() {39D0940F-33FF-4A10-8F61-1FFFEEBFF4D0} exception: " + ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("表格");
+
+            // 每个列的最大字符数
+            List<int> column_max_chars = new List<int>();
+
+            // TODO: 表的标题，创建时间
+
+            int nRowIndex = 3;  // 空出前两行
+            //int nColIndex = 1;
+
+            int nReaderIndex = 0;
+
+            try
+            {
+                // return:
+                //      -1  出错。包括用户中断的情况
+                //      >=0 实际处理的读者记录数
+                int nRet = this.ProcessPatrons(
+                    reader_barcodes,
+                    "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary", // advancexml_history_bibliosummary
+                    (strRecPath, dom, timestamp) =>
+                    {
+                        this.ShowMessage("正在处理读者记录 " + strRecPath);
+
+                        string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+
+                        // 
+                        if (dlg.ExportReaderInfo)
+                        {
+                            OutputReaderInfo(sheet,
+                    dom,
+                    nReaderIndex,
+                    ref nRowIndex,
+                    ref column_max_chars);
+                        }
+
+                        // 输出在借册表格
+                        if (dlg.ExportBorrowInfo)
+                        {
+                            OutputBorrows(sheet,
+                    dom,
+                    this.MainForm.GetBiblioSummary,
+                    true,
+                    ref nRowIndex,
+                    ref column_max_chars);
+                        }
+
+                        // 输出违约金表格
+                        if (dlg.ExportOverdueInfo)
+                        {
+                            OutputOverdues(sheet,
+                    dom,
+                    this.MainForm.GetBiblioSummary,
+                    ref nRowIndex,
+                    ref column_max_chars);
+                        }
+
+                        if (dlg.ExportChargingHistory)
+                        {
+                            try
+                            {
+                                ChargingHistoryLoader history_loader = new ChargingHistoryLoader();
+                                history_loader.Channel = this.Channel;
+                                history_loader.Stop = this.stop;
+                                history_loader.PatronBarcode = strBarcode;
+                                history_loader.TimeRange = strTimeRange;
+                                history_loader.Actions = "return,lost";
+                                history_loader.Order = "descending";
+
+                                CacheableBiblioLoader summary_loader = new CacheableBiblioLoader();
+                                summary_loader.Channel = this.Channel;
+                                summary_loader.Stop = this.stop;
+                                summary_loader.Format = "summary";
+                                summary_loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
+                                // summary_loader.RecPaths = biblio_recpaths;
+
+                                // 输出借阅历史表格
+                                OutputBorrowHistory(sheet,
+                        dom,
+                        history_loader,
+                                    // this.MainForm.GetBiblioSummary,
+                        summary_loader,
+                        ref nRowIndex,
+                        ref column_max_chars);
+                            }
+                            catch (Exception ex)
+                            {
+                                string strErrorText = "输出借阅历史时出现异常: " + ex.Message;
+                                throw new Exception(strErrorText);
+                            }
+                        }
+
+                        nRowIndex++;    // 读者之间的空行
+
+                        nReaderIndex++;
+                        return true;
+                    },
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                {
+                    if (stop != null)
+                        stop.SetMessage("正在调整列宽度 ...");
+                    Application.DoEvents();
+
+                    //double char_width = GetAverageCharPixelWidth(list);
+
+                    // 字符数太多的列不要做 width auto adjust
+                    foreach (IXLColumn column in sheet.Columns())
+                    {
+                        int MAX_CHARS = 50;   // 60
+
+                        int nIndex = column.FirstCell().Address.ColumnNumber - 1;
+                        if (nIndex >= column_max_chars.Count)
+                            break;
+                        int nChars = column_max_chars[nIndex];
+
+                        if (nIndex == 1)
+                        {
+                            column.Width = 10;
+                            continue;
+                        }
+
+                        if (nIndex == 3)
+                            MAX_CHARS = 50;
+                        else
+                            MAX_CHARS = 24;
+
+                        if (nChars < MAX_CHARS)
+                            column.AdjustToContents();
+                        else
+                            column.Width = Math.Min(MAX_CHARS, nChars);
+
+                        //else
+                        //    column.Width = (double)list.Columns[i].Width / char_width;  // Math.Min(MAX_CHARS, nChars);
+                    }
+                }
+
+                this.ShowMessage("共导出读者记录 " + nReaderIndex + " 个", "green", true);
+            }
+            finally
+            {
+                if (stop != null)
+                    stop.SetMessage("");
+
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.FileName);
+                    doc.Dispose();
+                }
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(dlg.FileName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+
+            // TODO: sheet 可以按照单位来区分。例如按照班级
             return 1;
         }
 

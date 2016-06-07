@@ -315,54 +315,54 @@ namespace dp2Circulation
             try
             {
 #endif
-                using (XmlTextWriter writer = new XmlTextWriter(strOutputFileName, Encoding.UTF8))
+            using (XmlTextWriter writer = new XmlTextWriter(strOutputFileName, Encoding.UTF8))
+            {
+                writer.Formatting = Formatting.Indented;
+                writer.Indentation = 4;
+
+                writer.WriteStartDocument();
+                writer.WriteStartElement("report");
+                WriteAttributeString(writer, "version", "0.01");
+
+                if (string.IsNullOrEmpty(strTitle) == false)
                 {
-                    writer.Formatting = Formatting.Indented;
-                    writer.Indentation = 4;
-
-                    writer.WriteStartDocument();
-                    writer.WriteStartElement("report");
-                    writer.WriteAttributeString("version", "0.01");
-
-                    if (string.IsNullOrEmpty(strTitle) == false)
-                    {
-                        writer.WriteStartElement("title");
-                        WriteTitles(writer, strTitle);
-                        writer.WriteEndElement();
-                    }
-
-                    if (string.IsNullOrEmpty(strComment) == false)
-                    {
-                        writer.WriteStartElement("comment");
-                        WriteTitles(writer, strComment);
-                        writer.WriteEndElement();
-                    }
-
-                    if (string.IsNullOrEmpty(strCreateTime) == false)
-                    {
-                        writer.WriteStartElement("createTime");
-                        writer.WriteString(strCreateTime);
-                        writer.WriteEndElement();
-                    }
-
-                    if (string.IsNullOrEmpty(strCssContent) == false)
-                    {
-                        writer.WriteStartElement("style");
-                        writer.WriteCData("\r\n" + strCssContent + "\r\n");
-                        writer.WriteEndElement();
-                    }
-
-                    // XmlNode node = dom.DocumentElement.SelectSingleNode("columns");
-                    if (columns_dom != null && columns_dom.DocumentElement != null)
-                        columns_dom.DocumentElement.WriteTo(writer);
-
-                    OutputRmlTable(
-                        data_reader,
-                        writer);
-
-                    writer.WriteEndElement();   // </report>
-                    writer.WriteEndDocument();
+                    writer.WriteStartElement("title");
+                    WriteTitles(writer, strTitle);
+                    writer.WriteEndElement();
                 }
+
+                if (string.IsNullOrEmpty(strComment) == false)
+                {
+                    writer.WriteStartElement("comment");
+                    WriteTitles(writer, strComment);
+                    writer.WriteEndElement();
+                }
+
+                if (string.IsNullOrEmpty(strCreateTime) == false)
+                {
+                    writer.WriteStartElement("createTime");
+                    WriteString(writer, strCreateTime);
+                    writer.WriteEndElement();
+                }
+
+                if (string.IsNullOrEmpty(strCssContent) == false)
+                {
+                    writer.WriteStartElement("style");
+                    writer.WriteCData("\r\n" + strCssContent + "\r\n");
+                    writer.WriteEndElement();
+                }
+
+                // XmlNode node = dom.DocumentElement.SelectSingleNode("columns");
+                if (columns_dom != null && columns_dom.DocumentElement != null)
+                    columns_dom.DocumentElement.WriteTo(writer);
+
+                OutputRmlTable(
+                    data_reader,
+                    writer);
+
+                writer.WriteEndElement();   // </report>
+                writer.WriteEndDocument();
+            }
 
 #if NO
             }
@@ -408,7 +408,7 @@ namespace dp2Circulation
 #endif
 
             writer.WriteStartElement("table");
-            writer.WriteAttributeString("class", "table");
+            WriteAttributeString(writer, "class", "table");
 
             writer.WriteStartElement("thead");
             writer.WriteStartElement("tr");
@@ -425,11 +425,11 @@ namespace dp2Circulation
 
                 writer.WriteStartElement("th");
                 if (string.IsNullOrEmpty(column.CssClass) == false)
-                    writer.WriteAttributeString("class", column.CssClass);
+                    WriteAttributeString(writer, "class", column.CssClass);
                 if (column.Colspan > 1)
-                    writer.WriteAttributeString("colspan", column.Colspan.ToString());
+                    WriteAttributeString(writer, "colspan", column.Colspan.ToString());
 
-                writer.WriteString(column.Title);
+                WriteString(writer, column.Title);
                 writer.WriteEndElement();   // </th>
             }
 
@@ -504,7 +504,7 @@ namespace dp2Circulation
 
                 // strResult.Append("<tr class='" + strLineCssClass + "'>\r\n");
                 writer.WriteStartElement("tr");
-                writer.WriteAttributeString("class", strLineCssClass);
+                WriteAttributeString(writer, "class", strLineCssClass);
 
                 // 列循环
                 for (j = 0; j < this.Columns.Count; j++)
@@ -599,8 +599,8 @@ namespace dp2Circulation
 
                     writer.WriteStartElement(j == 0 ? "th" : "td");
                     if (string.IsNullOrEmpty(column.CssClass) == false)
-                        writer.WriteAttributeString("class", column.CssClass);
-                    writer.WriteString(strText);
+                        WriteAttributeString(writer, "class", column.CssClass);
+                    WriteString(writer, strText);
                     writer.WriteEndElement();   // </td>
 
                     if (this.SumLine == true
@@ -683,7 +683,7 @@ namespace dp2Circulation
                 // strResult.Append("<tr class='sum'>\r\n");
                 writer.WriteStartElement("tfoot");
                 writer.WriteStartElement("tr");
-                writer.WriteAttributeString("class", "sum");
+                WriteAttributeString(writer, "class", "sum");
 
                 for (j = 0; j < this.Columns.Count; j++)
                 {
@@ -741,8 +741,8 @@ namespace dp2Circulation
 #endif
                     writer.WriteStartElement(j == 0 ? "th" : "td");
                     if (string.IsNullOrEmpty(column.CssClass) == false)
-                        writer.WriteAttributeString("class", column.CssClass);
-                    writer.WriteString(strText);
+                        WriteAttributeString(writer, "class", column.CssClass);
+                    WriteString(writer, strText);
                     writer.WriteEndElement();   // </td>
                 }
 
@@ -861,10 +861,22 @@ object o2)
             {
                 if (i > 0)
                     writer.WriteElementString("br", "");
-                writer.WriteString(title);
+                WriteString(writer, title);
                 i++;
             }
         }
+
+        static void WriteString(XmlWriter writer, string strText)
+        {
+            writer.WriteString(DomUtil.ReplaceControlCharsButCrLf(strText, '*'));
+        }
+
+        static void WriteAttributeString(XmlWriter writer, string strName, string strValue)
+        {
+            writer.WriteAttributeString(DomUtil.ReplaceControlCharsButCrLf(strName, '*'),
+                DomUtil.ReplaceControlCharsButCrLf(strValue, '*'));
+        }
+
     }
 
     // 列数据类型
@@ -1447,7 +1459,7 @@ object o2)
         public override string GetString(int i)
         {
             var o = this.FieldValues[i];
-            if ( o == null)
+            if (o == null)
                 return "";
             return o.ToString();
         }

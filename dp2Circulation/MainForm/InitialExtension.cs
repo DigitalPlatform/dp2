@@ -1122,6 +1122,15 @@ MessageBoxDefaultButton.Button1);
                     "dp2Circulation_v2");
                 PathUtil.CreateDirIfNeed(this.UserDir);
 
+                // 2016/6/4
+                // 用户目录可以重定向
+                nRet = RedirectUserDir(out strError);
+                if (nRet == -1)
+                {
+                    Program.PromptAndExit(this, "重定向用户目录时发生错误: " + strError);
+                    return;
+                }
+
                 if (CheckUserDirectory() == false)
                     return;
 
@@ -1439,6 +1448,37 @@ MessageBoxDefaultButton.Button1);
 
             this.PropertyTaskList.MainForm = this;
             this.PropertyTaskList.BeginThread();
+        }
+
+        int RedirectUserDir(out string strError)
+        {
+            strError = "";
+
+            string strRedirectFileName = Path.Combine(this.UserDir, "redirect.txt");
+            if (File.Exists(strRedirectFileName) == false)
+                return 0;
+
+            try
+            {
+                using (StreamReader sr = new StreamReader(strRedirectFileName))
+                {
+                    string strLine = sr.ReadLine();
+                    if (Directory.Exists(strLine) == false)
+                    {
+                        strError = "目录 '" + strLine + "' 尚未创建";
+                        return -1;
+                    }
+
+                    this.UserDir = strLine;
+                }
+
+                return 1;
+            }
+            catch(Exception ex)
+            {
+                strError = "读取文件 '"+strRedirectFileName+"' 时出现异常：" + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
         }
 
         bool _copyGreenError = false;   // 第一次 CopyGreen() 是否出错

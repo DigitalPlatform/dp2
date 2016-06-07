@@ -81,7 +81,7 @@
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button_Cancel.Location = new System.Drawing.Point(335, 227);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
             this.button_Cancel.TabIndex = 16;
@@ -93,7 +93,7 @@
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Location = new System.Drawing.Point(256, 227);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(2);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 15;
@@ -109,8 +109,9 @@
             this.inventoryBatchNoControl_start_batchNo.LibraryCodeList = ((System.Collections.Generic.List<string>)(resources.GetObject("inventoryBatchNoControl_start_batchNo.LibraryCodeList")));
             this.inventoryBatchNoControl_start_batchNo.LibraryCodeText = "";
             this.inventoryBatchNoControl_start_batchNo.Location = new System.Drawing.Point(12, 24);
+            this.inventoryBatchNoControl_start_batchNo.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
             this.inventoryBatchNoControl_start_batchNo.Name = "inventoryBatchNoControl_start_batchNo";
-            this.inventoryBatchNoControl_start_batchNo.Size = new System.Drawing.Size(398, 27);
+            this.inventoryBatchNoControl_start_batchNo.Size = new System.Drawing.Size(392, 28);
             this.inventoryBatchNoControl_start_batchNo.TabIndex = 11;
             // 
             // InventoryFromFileDialog

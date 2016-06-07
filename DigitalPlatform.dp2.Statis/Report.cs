@@ -552,159 +552,177 @@ out strError);
         {
             strError = "";
             int nRet = 0;
-            using (Stream stream = File.OpenRead(strRmlFileName))
-            using (XmlTextReader reader = new XmlTextReader(stream))
+            try
             {
-                while (true)
+                using (Stream stream = File.OpenRead(strRmlFileName))
+                using (XmlTextReader reader = new XmlTextReader(stream))
                 {
-                    bool bRet = reader.Read();
-                    if (bRet == false)
-                    {
-                        strError = "文件 " + strRmlFileName + " 没有根元素";
-                        return -1;
-                    }
-                    if (reader.NodeType == XmlNodeType.Element)
-                        break;
-                }
-
-                using (XmlWriter writer = XmlWriter.Create(strHtmlFileName, new XmlWriterSettings { Indent = true, OmitXmlDeclaration = true }))
-                {
-                    writer.WriteDocType("html", "-//W3C//DTD XHTML 1.0 Transitional//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd", null);
-                    writer.WriteStartElement("html", "http://www.w3.org/1999/xhtml");
-                    // writer.WriteAttributeString("xml", "lang", "", "en");
-
-                    string strTitle = "";
-                    string strComment = "";
-                    string strCreateTime = "";
-                    string strCss = "";
-                    List<ColumnStyle> styles = null;
-
                     while (true)
                     {
                         bool bRet = reader.Read();
                         if (bRet == false)
-                            break;
-                        if (reader.NodeType == XmlNodeType.Element)
                         {
-                            if (reader.Name == "title")
-                            {
-                                strTitle = reader.ReadInnerXml();
-                            }
-                            else if (reader.Name == "comment")
-                            {
-                                strComment = reader.ReadInnerXml();
-                            }
-                            else if (reader.Name == "createTime")
-                            {
-                                strCreateTime = reader.ReadElementContentAsString();
-                            }
-                            else if (reader.Name == "style")
-                            {
-                                strCss = reader.ReadElementContentAsString();
-                            }
-                            else if (reader.Name == "columns")
-                            {
-                                // 从 RML 文件中读入 <columns> 元素
-                                nRet = ReadColumnStyle(reader,
-            out styles,
-            out strError);
-                                if (nRet == -1)
-                                {
-                                    strError = "ReadColumnStyle() error : " + strError;
-                                    return -1;
-                                }
-
-                            }
-                            else if (reader.Name == "table")
-                            {
-
-                                writer.WriteStartElement("head");
-
-                                writer.WriteStartElement("meta");
-                                writer.WriteAttributeString("http-equiv", "Content-Type");
-                                writer.WriteAttributeString("content", "text/html; charset=utf-8");
-                                writer.WriteEndElement();
-
-                                // title
-                                {
-                                    writer.WriteStartElement("title");
-                                    // TODO 读入的时候直接形成 lines
-                                    writer.WriteString(strTitle.Replace("<br />", " ").Replace("<br/>", " "));
-                                    writer.WriteEndElement();
-                                }
-
-                                // css
-                                if (string.IsNullOrEmpty(strCss) == false)
-                                {
-                                    writer.WriteStartElement("style");
-                                    writer.WriteAttributeString("media", "screen");
-                                    writer.WriteAttributeString("type", "text/css");
-                                    writer.WriteString(strCss);
-                                    writer.WriteEndElement();
-                                }
-
-                                // CSS 模板
-                                else if (string.IsNullOrEmpty(strCssTemplate) == false)
-                                {
-                                    StringBuilder text = new StringBuilder();
-                                    foreach (ColumnStyle style in styles)
-                                    {
-                                        string strAlign = style.Align;
-                                        if (string.IsNullOrEmpty(strAlign) == true)
-                                            strAlign = "left";
-                                        text.Append("TABLE.table ." + style.Class + " {"
-                                            + "text-align: " + strAlign + "; }\r\n");
-                                    }
-
-                                    writer.WriteStartElement("style");
-                                    writer.WriteAttributeString("media", "screen");
-                                    writer.WriteAttributeString("type", "text/css");
-                                    writer.WriteString("\r\n" + strCssTemplate.Replace("%columns%", text.ToString()) + "\r\n");
-                                    writer.WriteEndElement();
-                                }
-
-                                writer.WriteEndElement();   // </head>
-
-                                writer.WriteStartElement("body");
-
-                                if (string.IsNullOrEmpty(strTitle) == false)
-                                {
-                                    writer.WriteStartElement("div");
-                                    writer.WriteAttributeString("class", "tabletitle");
-                                    writer.WriteRaw(strTitle);
-                                    writer.WriteEndElement();
-                                }
-
-                                if (string.IsNullOrEmpty(strComment) == false)
-                                {
-                                    writer.WriteStartElement("div");
-                                    writer.WriteAttributeString("class", "titlecomment");
-                                    writer.WriteRaw(strComment);
-                                    writer.WriteEndElement();
-                                }
-
-
-                                // writer.WriteRaw(reader.ReadOuterXml());
-                                // DumpNode(reader, writer);
-                                writer.WriteNode(reader, true);
-
-                                {
-                                    writer.WriteStartElement("div");
-                                    writer.WriteAttributeString("class", "createtime");
-                                    writer.WriteString("创建时间: " + strCreateTime);
-                                    writer.WriteEndElement();
-                                }
-
-                                writer.WriteEndElement();   // </body>
-                            }
+                            strError = "文件 " + strRmlFileName + " 没有根元素";
+                            return -1;
                         }
+                        if (reader.NodeType == XmlNodeType.Element)
+                            break;
                     }
 
-                    writer.WriteEndElement();   // </html>
-                }
-            }
+                    /*
+                     * https://msdn.microsoft.com/en-us/library/system.xml.xmlwriter.writestring(v=vs.110).aspx
+The default behavior of an XmlWriter created using Create is to throw an ArgumentException when attempting to write character values in the range 0x-0x1F (excluding white space characters 0x9, 0xA, and 0xD). These invalid XML characters can be written by creating the XmlWriter with the CheckCharacters property set to false. Doing so will result in the characters being replaced with numeric character entities (&#0; through &#0x1F). Additionally, an XmlTextWriter created with the new operator will replace the invalid characters with numeric character entities by default.
+                     * */
+                    using (XmlWriter writer = XmlWriter.Create(strHtmlFileName,
+                        new XmlWriterSettings
+                        {
+                            Indent = true,
+                            OmitXmlDeclaration = true,
+                            CheckCharacters = false // 2016/6/3
+                        }))   
+                    {
+                        writer.WriteDocType("html", "-//W3C//DTD XHTML 1.0 Transitional//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd", null);
+                        writer.WriteStartElement("html", "http://www.w3.org/1999/xhtml");
+                        // writer.WriteAttributeString("xml", "lang", "", "en");
 
-            return 0;
+                        string strTitle = "";
+                        string strComment = "";
+                        string strCreateTime = "";
+                        string strCss = "";
+                        List<ColumnStyle> styles = null;
+
+                        while (true)
+                        {
+                            bool bRet = reader.Read();
+                            if (bRet == false)
+                                break;
+                            if (reader.NodeType == XmlNodeType.Element)
+                            {
+                                if (reader.Name == "title")
+                                {
+                                    strTitle = reader.ReadInnerXml();
+                                }
+                                else if (reader.Name == "comment")
+                                {
+                                    strComment = reader.ReadInnerXml();
+                                }
+                                else if (reader.Name == "createTime")
+                                {
+                                    strCreateTime = reader.ReadElementContentAsString();
+                                }
+                                else if (reader.Name == "style")
+                                {
+                                    strCss = reader.ReadElementContentAsString();
+                                }
+                                else if (reader.Name == "columns")
+                                {
+                                    // 从 RML 文件中读入 <columns> 元素
+                                    nRet = ReadColumnStyle(reader,
+                out styles,
+                out strError);
+                                    if (nRet == -1)
+                                    {
+                                        strError = "ReadColumnStyle() error : " + strError;
+                                        return -1;
+                                    }
+                                }
+                                else if (reader.Name == "table")
+                                {
+                                    writer.WriteStartElement("head");
+
+                                    writer.WriteStartElement("meta");
+                                    writer.WriteAttributeString("http-equiv", "Content-Type");
+                                    writer.WriteAttributeString("content", "text/html; charset=utf-8");
+                                    writer.WriteEndElement();
+
+                                    // title
+                                    {
+                                        writer.WriteStartElement("title");
+                                        // TODO 读入的时候直接形成 lines
+                                        writer.WriteString(strTitle.Replace("<br />", " ").Replace("<br/>", " "));
+                                        writer.WriteEndElement();
+                                    }
+
+                                    // css
+                                    if (string.IsNullOrEmpty(strCss) == false)
+                                    {
+                                        writer.WriteStartElement("style");
+                                        writer.WriteAttributeString("media", "screen");
+                                        writer.WriteAttributeString("type", "text/css");
+                                        writer.WriteString(strCss);
+                                        writer.WriteEndElement();
+                                    }
+
+                                    // CSS 模板
+                                    else if (string.IsNullOrEmpty(strCssTemplate) == false)
+                                    {
+                                        StringBuilder text = new StringBuilder();
+                                        foreach (ColumnStyle style in styles)
+                                        {
+                                            string strAlign = style.Align;
+                                            if (string.IsNullOrEmpty(strAlign) == true)
+                                                strAlign = "left";
+                                            text.Append("TABLE.table ." + style.Class + " {"
+                                                + "text-align: " + strAlign + "; }\r\n");
+                                        }
+
+                                        writer.WriteStartElement("style");
+                                        writer.WriteAttributeString("media", "screen");
+                                        writer.WriteAttributeString("type", "text/css");
+                                        writer.WriteString("\r\n" + strCssTemplate.Replace("%columns%", text.ToString()) + "\r\n");
+                                        writer.WriteEndElement();
+                                    }
+
+                                    writer.WriteEndElement();   // </head>
+
+                                    writer.WriteStartElement("body");
+
+                                    if (string.IsNullOrEmpty(strTitle) == false)
+                                    {
+                                        writer.WriteStartElement("div");
+                                        writer.WriteAttributeString("class", "tabletitle");
+                                        writer.WriteRaw(strTitle);
+                                        writer.WriteEndElement();
+                                    }
+
+                                    if (string.IsNullOrEmpty(strComment) == false)
+                                    {
+                                        writer.WriteStartElement("div");
+                                        writer.WriteAttributeString("class", "titlecomment");
+                                        writer.WriteRaw(strComment);
+                                        writer.WriteEndElement();
+                                    }
+
+                                    // writer.WriteRaw(reader.ReadOuterXml());
+                                    // DumpNode(reader, writer);
+                                    writer.WriteNode(reader, true);
+
+                                    {
+                                        writer.WriteStartElement("div");
+                                        writer.WriteAttributeString("class", "createtime");
+                                        writer.WriteString("创建时间: " + strCreateTime);
+                                        writer.WriteEndElement();
+                                    }
+
+                                    writer.WriteEndElement();   // </body>
+                                }
+                            }
+                        }
+
+                        writer.WriteEndElement();   // </html>
+                    }
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = "RmlToHtml() 出现异常: " + ExceptionUtil.GetDebugText(ex)
+                    + "\r\nstrRmlFileName=" + strRmlFileName
+                    + "\r\nstrHtmlFileName=" + strHtmlFileName
+                    + "\r\nstrCssTemplate=" + strCssTemplate;
+                throw new Exception(strError);
+            }
         }
 
         static Jurassic.ScriptEngine engine = null;

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
@@ -23,8 +21,6 @@ using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.Script;
 using DigitalPlatform.dp2.Statis;
-using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -2547,7 +2543,8 @@ out strError);
 
             int nCount = 0;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始进行册记录校验</div>");
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                + " 开始进行册记录校验</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -2599,11 +2596,43 @@ out strError);
                         return -1;
                     }
 
+                    List<string> errors = new List<string>();
+
+                    // 检查根元素下的元素名是否有重复的
+                    nRet = VerifyDupElementName(itemdom,
+            out strError);
+                    if (nRet == -1)
+                        errors.Add(strError);
+
+                    // 校验 XML 记录中是否有非法字符
+                    string strReplaced = DomUtil.ReplaceControlCharsButCrLf(info.OldXml, '*');
+                    if (strReplaced != info.OldXml)
+                    {
+                        errors.Add("XML 记录中有非法字符");
+                    }
+
+                    // 校验借书时间字符串是否合法
+                    string borrowDate = DomUtil.GetElementText(itemdom.DocumentElement, "borrowDate");
+                    if (string.IsNullOrEmpty(borrowDate) == false)
+                    {
+                        try
+                        {
+                            DateTime time = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
+                            if (time > DateTime.Now)
+                            {
+                                errors.Add("借书时间 '" + time.ToString() + "' 比当前时间还靠后");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            errors.Add("borrow 元素的 borrowDate 属性值 '" + borrowDate + "' 不合法: " + ex.Message);
+                        }
+                    }
+
                     string strBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
 
                     if (string.IsNullOrEmpty(strBarcode) == false)
                     {
-
                         string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
                         strLocation = StringUtil.GetPureLocationString(strLocation);
 
@@ -2613,7 +2642,6 @@ out strError);
                         Global.ParseCalendarName(strLocation,
                     out strLibraryCode,
                     out strRoom);
-
 
                         // <para>-2  服务器没有配置校验方法，无法校验</para>
                         // <para>-1  出错</para>
@@ -2634,18 +2662,32 @@ out strError);
                             if (nRet == 1 && string.IsNullOrEmpty(strError) == true)
                                 strError = strLibraryCode + ": 这看起来是一个证条码号";
 
-                            this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
-                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + "册条码号 '" + strBarcode + "' 不合法: " + strError + "</div>");
+                            errors.Add("册条码号 '" + strBarcode + "' 不合法: " + strError);
 
-                            {
-                                item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
-                                item.ListViewItem.ForeColor = Color.FromArgb(255, 255, 255);
-                            }
                         }
-
-                        nCount++;
                     }
 
+                    // 模拟删除一些元素
+                    nRet = SimulateDeleteElement(itemdom,
+out strError);
+                    if (nRet == -1)
+                        errors.Add(strError);
+
+                    if (errors.Count > 0)
+                    {
+                        this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                        foreach (string error in errors)
+                        {
+                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                        }
+
+                        {
+                            item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
+                            item.ListViewItem.ForeColor = Color.FromArgb(255, 255, 255);
+                        }
+                    }
+
+                    nCount++;
                     stop.SetProgressValue(++i);
                 }
 
@@ -2661,10 +2703,68 @@ out strError);
 
                 this.EnableControls(true);
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行读者记录校验</div>");
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                    + " 结束执行册记录校验</div>");
             }
         }
 
+        int SimulateDeleteElement(XmlDocument dom,
+            out string strError)
+        {
+            strError = "";
+
+            string[] names = {
+    "borrower",
+    "borrowerReaderType",
+"borrowerRecPath",
+"borrowDate",
+"borrowPeriod",
+                "returningDate",
+                "lastReturningDate",
+"operator",
+                "no",
+                "renewComment"};
+
+            List<string> errors = new List<string>();
+            foreach (string name in names)
+            {
+                DomUtil.DeleteElement(dom.DocumentElement, name);
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes(name);
+                if (nodes.Count > 0)
+                    errors.Add("根元素下的 " + name + " 元素模拟删除一次后依然存在");
+            }
+
+            if (errors.Count == 0)
+                return 0;
+            strError = StringUtil.MakePathList(errors, "; ");
+            return -1;
+        }
+
+        int VerifyDupElementName(XmlDocument dom,
+            out string strError)
+        {
+            strError = "";
+            if (dom.DocumentElement == null)
+                return 0;
+
+            List<string> errors = new List<string>();
+            foreach (XmlNode node in dom.DocumentElement.ChildNodes)
+            {
+                if (node.NodeType == XmlNodeType.Element)
+                {
+                    XmlNodeList nodes = dom.DocumentElement.SelectNodes("node.Name");
+                    if (nodes.Count > 1)
+                    {
+                        errors.Add("根元素下的 " + node.Name + " 元素出现了多次 " + nodes.Count);
+                    }
+                }
+            }
+
+            if (errors.Count == 0)
+                return 0;
+            strError = StringUtil.MakePathList(errors, "; ");
+            return -1;
+        }
 
         // 进行流通操作
         int DoCirculation(string strAction,

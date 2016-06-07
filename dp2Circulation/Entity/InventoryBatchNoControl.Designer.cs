@@ -37,16 +37,18 @@
             // 
             this.comboBox_libraryCode.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_libraryCode.FormattingEnabled = true;
-            this.comboBox_libraryCode.Location = new System.Drawing.Point(0, 0);
+            this.comboBox_libraryCode.Location = new System.Drawing.Point(0, 1);
+            this.comboBox_libraryCode.Margin = new System.Windows.Forms.Padding(6);
             this.comboBox_libraryCode.Name = "comboBox_libraryCode";
-            this.comboBox_libraryCode.Size = new System.Drawing.Size(139, 20);
+            this.comboBox_libraryCode.Size = new System.Drawing.Size(172, 20);
             this.comboBox_libraryCode.TabIndex = 0;
             this.comboBox_libraryCode.TextChanged += new System.EventHandler(this.comboBox_libraryCode_TextChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(145, 3);
+            this.label1.Location = new System.Drawing.Point(177, 4);
+            this.label1.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(11, 12);
             this.label1.TabIndex = 1;
@@ -56,21 +58,23 @@
             // 
             this.textBox_number.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_number.Location = new System.Drawing.Point(162, 0);
+            this.textBox_number.Location = new System.Drawing.Point(200, 1);
+            this.textBox_number.Margin = new System.Windows.Forms.Padding(6);
             this.textBox_number.Name = "textBox_number";
-            this.textBox_number.Size = new System.Drawing.Size(186, 21);
+            this.textBox_number.Size = new System.Drawing.Size(71, 21);
             this.textBox_number.TabIndex = 2;
             this.textBox_number.TextChanged += new System.EventHandler(this.textBox_number_TextChanged);
             // 
             // InventoryBatchNoControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoSize = true;
             this.Controls.Add(this.textBox_number);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.comboBox_libraryCode);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "InventoryBatchNoControl";
-            this.Size = new System.Drawing.Size(348, 22);
+            this.Size = new System.Drawing.Size(277, 28);
             this.ResumeLayout(false);
             this.PerformLayout();
 
