@@ -3241,7 +3241,7 @@ namespace DigitalPlatform.LibraryServer
             string strBookType = DomUtil.GetElementText(dom.DocumentElement,
     "bookType");
 
-            if (string.IsNullOrEmpty(strReaderType)
+            if (string.IsNullOrEmpty(strBookType)
     && values.IndexOf("") != -1)
             {
                 // 允许列表中出现 ""

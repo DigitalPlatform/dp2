@@ -2728,10 +2728,17 @@ out strError);
             List<string> errors = new List<string>();
             foreach (string name in names)
             {
+#if NO
                 DomUtil.DeleteElement(dom.DocumentElement, name);
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes(name);
                 if (nodes.Count > 0)
                     errors.Add("根元素下的 " + name + " 元素模拟删除一次后依然存在");
+#endif
+                DomUtil.DeleteElements(dom.DocumentElement, name);
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes(name);
+                if (nodes.Count > 0)
+                    errors.Add("根元素下的 " + name + " 元素模拟 DeleteElements 删除后依然存在");
+
             }
 
             if (errors.Count == 0)

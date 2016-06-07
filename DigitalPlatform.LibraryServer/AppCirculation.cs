@@ -8918,8 +8918,22 @@ out string strError)
             return 0;
         }
 
+        // 包装后的版本
+        public static int ParsePeriodUnit(string strPeriod,
+    out long lValue,
+    out string strUnit,
+    out string strError)
+        {
+            return ParsePeriodUnit(strPeriod,
+                "day",
+                out lValue,
+                out strUnit,
+                out strError);
+        }
+
         // 分析期限参数
         public static int ParsePeriodUnit(string strPeriod,
+            string strDefaultUnit,
             out long lValue,
             out string strUnit,
             out string strError)
@@ -8964,10 +8978,12 @@ out string strError)
             }
 
             if (String.IsNullOrEmpty(strUnit) == true)
+                strUnit = strDefaultUnit;
+
+            if (String.IsNullOrEmpty(strUnit) == true)
                 strUnit = "day";   // 缺省单位为"天"
 
             strUnit = strUnit.ToLower();    // 统一转换为小写
-
             return 0;
         }
 
@@ -12521,7 +12537,8 @@ out string strError)
 
             string strBorrowDate = DomUtil.GetElementText(itemdom.DocumentElement, "borrowDate");
             string strPeriod = DomUtil.GetElementText(itemdom.DocumentElement, "borrowPeriod");
-
+            // 2016/6/7
+            string strDenyPeriod = DomUtil.GetElementText(itemdom.DocumentElement, "denyPeriod");
 
             // 这是借阅时的操作者
             string strBorrowOperator = DomUtil.GetElementText(itemdom.DocumentElement, "operator");
@@ -12573,6 +12590,25 @@ out string strError)
                     goto DOCHANGE;
                 strError = "册记录中借阅期限值 '" + strPeriod + "' 格式错误: " + strError;
                 return -1;
+            }
+
+            if (string.IsNullOrEmpty(strDenyPeriod) == false)
+            {
+                // 检查是否在禁止还书时间范围内
+                // return:
+                //      -1  出错
+                //      0   正常，可以还书
+                //      1   在禁止还书时间范围内
+                nRet = CheckDenyPeriod(
+            calendar,
+            borrowdate,
+            strDenyPeriod,
+            strPeriodUnit,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    return -1;
             }
 
             DateTime timeEnd = DateTime.MinValue;
@@ -12974,18 +13010,18 @@ out string strError)
                     "barcode",
                     DomUtil.GetElementText(itemdom.DocumentElement, "borrower"));
             // DomUtil.SetElementText(itemdom.DocumentElement, "borrower", "");
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
     "borrower");
 
             // 2009/9/18
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "borrowerReaderType", "");
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
     "borrowerReaderType");
             // 2012/9/8
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "borrowerRecPath", "");
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
 "borrowerRecPath");
 
             if (nodeOldBorrower != null)
@@ -12994,7 +13030,7 @@ out string strError)
                DomUtil.GetElementText(itemdom.DocumentElement, "borrowDate"));
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "borrowDate", "");
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
 "borrowDate");
 
             if (nodeOldBorrower != null)
@@ -13003,7 +13039,7 @@ out string strError)
                DomUtil.GetElementText(itemdom.DocumentElement, "borrowPeriod"));
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "borrowPeriod", "");
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
 "borrowPeriod");
 
             // 2014/11/14
@@ -13015,17 +13051,17 @@ out string strError)
                         "returningDate",
                         strValue);
             }
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
                 "returningDate");
 
             // 2014/11/14
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
                 "lastReturningDate");
 
             // string strBorrowOperator = DomUtil.GetElementText(itemdom.DocumentElement, "operator");
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "operator", "");    // 清除
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
 "operator");
 
             // item中原operator元素值表示借阅操作者，此时应转入历史中的borrowOperator元素中
@@ -13053,7 +13089,7 @@ out string strError)
                         "no",
                         strNo);
             }
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
                 "no");
 
             string strRenewComment = DomUtil.GetElementText(itemdom.DocumentElement, "renewComment");
@@ -13064,7 +13100,7 @@ out string strError)
                         "renewComment",
                         strRenewComment);
             }
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
                 "renewComment");
 
             if (nodeOldBorrower != null)
@@ -13148,6 +13184,90 @@ out string strError)
                 || strAction == "lost")
             {
                 strError = strOverdueMessage;
+                return 1;
+            }
+
+            return 0;
+        }
+
+        // 检查是否在禁止还书时间范围内
+        // return:
+        //      -1  出错
+        //      0   正常，可以还书
+        //      1   在禁止还书时间范围内
+        int CheckDenyPeriod(
+            Calendar calendar,
+            DateTime borrowdate,
+            string strDenyPeriod,
+            string strDefaultUnit,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strPeriodUnit = "";
+            long lPeriodValue = 0;
+
+            nRet = LibraryApplication.ParsePeriodUnit(strDenyPeriod,
+                strDefaultUnit,
+                out lPeriodValue,
+                out strPeriodUnit,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "册记录中借阅期限值的右半部份 '" + strDenyPeriod + "' 格式错误: " + strError;
+                return -1;
+            }
+
+            DateTime timeEnd = DateTime.MinValue;
+            DateTime nextWorkingDay = DateTime.MinValue;
+
+            // 测算还书日期
+            // parameters:
+            //      calendar    工作日历。如果为null，表示函数不进行非工作日判断。
+            // return:
+            //      -1  出错
+            //      0   成功。timeEnd在工作日范围内。
+            //      1   成功。timeEnd正好在非工作日。nextWorkingDay已经返回了下一个工作日的时间
+            nRet = LibraryApplication.GetReturnDay(
+                calendar,
+                borrowdate,
+                lPeriodValue,
+                strPeriodUnit,
+                out timeEnd,
+                out nextWorkingDay,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "测算禁止还书日期过程发生错误: " + strError;
+                return -1;
+            }
+
+            DateTime now = this.Clock.UtcNow;  //  今天  当下
+
+            // 正规化时间
+            DateTime now_rounded = now;
+            nRet = RoundTime(strPeriodUnit,
+                ref now_rounded,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            TimeSpan delta = now_rounded - timeEnd;
+
+            long lDelta = 0;
+
+            nRet = ParseTimeSpan(
+                delta,
+                strPeriodUnit,
+                out lDelta,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (lDelta < 0)
+            {
+                strError = "还书操作被拒绝。当前尚在禁止还书时间范围内(从 " + GetLocalTimeString(strPeriodUnit, borrowdate) + " 开始，禁止 " + lPeriodValue + GetDisplayTimePeriodStringEx(strPeriodUnit) + "，直到 " + GetLocalTimeString(strPeriodUnit, timeEnd) + ")";
                 return 1;
             }
 
@@ -13988,6 +14108,7 @@ out string strError)
             //
             string strThisBorrowPeriod = "10day";   // 本次借阅的期限
             string strLastBorrowPeriod = "";    // 上次借阅的期限
+            string strThisDenyPeriod = "";
 
             // barcode
             DomUtil.SetAttr(nodeBorrow, "barcode", strItemBarcode);
@@ -14055,7 +14176,6 @@ out string strError)
             }
 
             // 按照逗号分列值，需要根据序号取出某个参数
-
             string[] aPeriod = strBorrowPeriodList.Split(new char[] { ',' });
 
             if (aPeriod.Length == 0)
@@ -14125,6 +14245,17 @@ out string strError)
                 }
             }
 
+            {
+                List<string> parts = StringUtil.ParseTwoPart(strThisBorrowPeriod, "|");
+                strThisBorrowPeriod = parts[0];
+                strThisDenyPeriod = parts[1];
+            }
+            string strLastDenyPeriod = "";
+            {
+                List<string> parts = StringUtil.ParseTwoPart(strLastBorrowPeriod, "|");
+                strLastBorrowPeriod = parts[0];
+                strLastDenyPeriod = parts[1];
+            }
             // 检查strBorrowPeriod是否合法
             {
                 long lPeriodValue = 0;
@@ -14319,7 +14450,12 @@ out string strError)
             if (nNo > 0)    // 2013/12/23
                 DomUtil.SetAttr(nodeBorrow, "no", Convert.ToString(nNo));
 
-            DomUtil.SetAttr(nodeBorrow, "borrowPeriod", strThisBorrowPeriod);
+            DomUtil.SetAttr(nodeBorrow, "borrowPeriod",
+                strThisBorrowPeriod);
+            // 2016/6/7
+            if (string.IsNullOrEmpty(strThisDenyPeriod) == false)
+                DomUtil.SetAttr(nodeBorrow, "denyPeriod",
+                   strThisDenyPeriod);
 
             // 2014/11/14
             // returningDate
@@ -14394,6 +14530,11 @@ out string strError)
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "borrowPeriod",
                 strThisBorrowPeriod);   // strBorrowPeriod现在已经是个别参数，不是逗号分隔的列举值了
+            // 2016/6/7
+            if (string.IsNullOrEmpty(strThisDenyPeriod) == false)
+                DomUtil.SetElementText(itemdom.DocumentElement,
+                    "denyPeriod",
+                    strThisDenyPeriod);
 
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "returningDate",
@@ -14432,6 +14573,11 @@ out string strError)
                 strBorrowDate);     // 借阅日期
             DomUtil.SetElementText(domOperLog.DocumentElement, "borrowPeriod",
                 strThisBorrowPeriod);   // 借阅期限
+            // 2016/6/7
+            if (string.IsNullOrEmpty(strThisDenyPeriod) == false)
+                DomUtil.SetElementText(domOperLog.DocumentElement, "denyPeriod",
+                    strThisDenyPeriod);
+
             DomUtil.SetElementText(domOperLog.DocumentElement, "returningDate",
                 strReturningDate);     // 应还日期
 
@@ -14459,6 +14605,7 @@ strBookPrice);    // 图书价格
             // 返回满足RFC1123的时间值字符串 GMT时间
             borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(this_return_time.ToLocalTime());
             borrow_info.Period = strThisBorrowPeriod;
+            borrow_info.DenyPeriod = strThisDenyPeriod;
             borrow_info.BorrowCount = nNo;
 
             // 2011/6/26
@@ -16969,6 +17116,9 @@ strBookPrice);    // 图书价格
                         "returningDate");
                     DomUtil.DeleteElement(itemdom.DocumentElement,
                         "operator");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+                        "no");
+
                     DomUtil.RemoveEmptyElements(itemdom.DocumentElement);
 
                     byte[] output_timestamp = null;
@@ -18956,6 +19106,12 @@ Value data: HEX 0x1
         // 借书期限。例如“20day”
         [DataMember]
         public string Period = "";
+
+        // 2016/6/7
+        // 禁止还书期限。例如“20day”
+        [DataMember]
+        public string DenyPeriod = "";
+
 
         // 当前为续借的第几次？0表示初次借阅
         [DataMember]

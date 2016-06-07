@@ -178,7 +178,12 @@ ref sessioninfo) == false)
                 strStyle,
                 out strError);
             if (nRet == -1)
-                Response.Write(strError);
+            {
+                // Response.Write(strError);
+                OpacApplication.OutputImage(Page,
+    Color.FromArgb(200, Color.DarkRed),
+    strError);
+            }
 
             Response.End();
             return;
