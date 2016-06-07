@@ -119,7 +119,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.74 (2016/5/21) GetOperLogs() API 返回的 amerce 操作的日志记录，无论何种详细级别，都不去除 oldReaderRecord 元素
         //      2.75 (2016/5/30) GetMessage() API 加入了获取 MSMQ 消息的功能
         //      2.76 (2016/6/4) 将读者记录和册记录中的借阅历史缺省个数修改为 10 
-        public static string Version = "2.76";
+        //      2.77 (2016/6/7) 读者身份的账户在登录时 dp2library 会给其权限值自动添加一个 patron 值(如果读者记录 state 元素有值则会从权限值中删除可能存在的 patron); 工作人员身份的账户在登录时 dp2library 会给其权限值自动添加一个 librarian 值
+        public static string Version = "2.77";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -9933,6 +9934,16 @@ out strError);
             string strAddRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
             if (string.IsNullOrEmpty(strAddRights) == false)
                 account.Rights += "," + strAddRights;
+
+            {
+                // 2016/6/7
+                // 如果读者记录状态有值，则需要从 account.Rights 中删除 patron 权限值
+                // 反之则增加 patron 值
+                string strState = DomUtil.GetElementText(readerdom.DocumentElement, "state");
+                string strTemp = account.Rights;
+                StringUtil.SetInList(ref strTemp, "patron", string.IsNullOrEmpty(strState));
+                account.Rights = strTemp;
+            }
 
             // 2015/1/15
             if (string.IsNullOrEmpty(strToken) == false)

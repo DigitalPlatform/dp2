@@ -395,7 +395,15 @@ namespace DigitalPlatform.LibraryServer
             this.Account = account;
 
             if (this.Account != null)
+            {
                 this.Account.Location = strLocation;
+
+                // 2016/6/7
+                // 给工作人员账户权限补上 librarian
+                string strTemp = this.Account.Rights;
+                StringUtil.SetInList(ref strTemp, "librarian", true);
+                this.Account.Rights = strTemp;
+            }
 
             strRights = this.RightsOrigin;
             strLibraryCode = this.LibraryCodeList;
