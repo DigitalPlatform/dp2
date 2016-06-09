@@ -1701,7 +1701,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'force' 的修改" + this.ItemName + "信息的" + strAction + "操作被拒绝。不具备restore权限。";
+                        result.ErrorInfo = "带有风格 'force' 的修改" + this.ItemName + "信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1713,7 +1713,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'nocheckdup' 的修改" + this.ItemName + "信息的" + strAction + "操作被拒绝。不具备restore权限。";
+                        result.ErrorInfo = "带有风格 'nocheckdup' 的修改" + this.ItemName + "信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -1725,7 +1725,7 @@ out strError);
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'noeventlog' 的修改" + this.ItemName + "信息的" + strAction + "操作被拒绝。不具备restore权限。";
+                        result.ErrorInfo = "带有风格 'noeventlog' 的修改" + this.ItemName + "信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }

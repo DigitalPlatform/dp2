@@ -619,7 +619,7 @@ namespace DigitalPlatform.LibraryServer
                         if (StringUtil.IsInList("changereaderstate", sessioninfo.RightsOrigin) == false)
                         {
                             result.Value = -1;
-                            result.ErrorInfo = "修改读者信息被拒绝。不具备changereaderstate权限。";
+                            result.ErrorInfo = "修改读者信息被拒绝。不具备 changereaderstate 权限。";
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
@@ -641,7 +641,7 @@ namespace DigitalPlatform.LibraryServer
                     if (StringUtil.IsInList("changereaderforegift", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "changeforegift方式修改读者信息被拒绝。不具备changereaderforegift权限。";
+                        result.ErrorInfo = "changeforegift方式修改读者信息被拒绝。不具备 changereaderforegift 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -651,7 +651,7 @@ namespace DigitalPlatform.LibraryServer
                     if (StringUtil.IsInList("setreaderinfo", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "修改读者信息被拒绝。不具备setreaderinfo权限。";
+                        result.ErrorInfo = "修改读者信息被拒绝。不具备 setreaderinfo 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -3273,7 +3273,7 @@ strLibraryCode);    // 读者所在的馆代码
             if (StringUtil.IsInList("getreaderinfo", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "读取读者信息被拒绝。不具备getreaderinfo权限。";
+                result.ErrorInfo = "读取读者信息被拒绝。不具备 getreaderinfo 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -4392,7 +4392,7 @@ out strError);
             if (StringUtil.IsInList("movereaderinfo", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "移动读者记录的操作被拒绝。不具备movereaderinfo权限。";
+                result.ErrorInfo = "移动读者记录的操作被拒绝。不具备 movereaderinfo 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }

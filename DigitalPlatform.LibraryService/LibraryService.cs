@@ -4193,7 +4193,7 @@ namespace dp2Library
                         && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "获取实体信息被拒绝。不具备order、getiteminfo或getentities权限。";
+                        result.ErrorInfo = "用户 '"+sessioninfo.UserID+"' 获取实体信息被拒绝。不具备order、getiteminfo或getentities权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -4205,7 +4205,7 @@ namespace dp2Library
                         && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "获取订购信息被拒绝。不具备order或getorderinfo权限。";
+                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取订购信息被拒绝。不具备order或getorderinfo权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -4217,7 +4217,7 @@ namespace dp2Library
                         && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "获取期信息被拒绝。不具备order或getissueinfo权限。";
+                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取期信息被拒绝。不具备order或getissueinfo权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -4229,7 +4229,7 @@ namespace dp2Library
                         && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
+                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -12460,7 +12460,7 @@ namespace dp2Library
                 if (StringUtil.IsInList("getres", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "当前用户 "+sessioninfo.UserID+" 获取资源被拒绝。不具备getres权限。";
+                    result.ErrorInfo = "用户 "+sessioninfo.UserID+" 获取资源被拒绝。不具备 getres 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

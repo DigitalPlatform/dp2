@@ -33,7 +33,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 result.Value = -1;
                 // text-level: 用户提示
-                result.ErrorInfo = this.GetString("预约操作被拒绝。不具备reservation权限。");
+                result.ErrorInfo = this.GetString("预约操作被拒绝。不具备 reservation 权限。");
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }

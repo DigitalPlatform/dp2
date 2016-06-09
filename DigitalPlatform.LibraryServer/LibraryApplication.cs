@@ -121,7 +121,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.76 (2016/6/4) 将读者记录和册记录中的借阅历史缺省个数修改为 10 
         //      2.77 (2016/6/7) 读者身份的账户在登录时 dp2library 会给其权限值自动添加一个 patron 值(如果读者记录 state 元素有值则会从权限值中删除可能存在的 patron); 工作人员身份的账户在登录时 dp2library 会给其权限值自动添加一个 librarian 值
         //      2.78 (2016/6/8) Return() API 在某些特殊情况下会无法清除册记录 XmlDocument 中的 borrower 和其他元素，新版本在此环节做了多种尝试，如果最后依然无法从 XmlDocument 删除元素，则(API 会)报错，并把错误情况写入 dp2library 错误日志。dp2library 失效期改为 2016.11.1
-        public static string Version = "2.78";
+        //      2.79 (2016/6/9) 增加放弃取书通知。优化 Reservation() API 中重复写入册记录和读者记录的情况
+        public static string Version = "2.79";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -11585,7 +11586,7 @@ out strError);
             if (StringUtil.IsInList("changereaderpassword", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "修改读者密码被拒绝。不具备changereaderpassword权限。";
+                result.ErrorInfo = "修改读者密码被拒绝。不具备 changereaderpassword 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -13696,7 +13697,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         if (StringUtil.IsInList("writetemplate", strRights) == false)
                         {
-                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备writetemplate权限";
+                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备 writetemplate 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
@@ -13712,7 +13713,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         if (StringUtil.IsInList("writerecord", strRights) == false)
                         {
-                            strError = "直接写入记录 " + strResPath + " 被拒绝。不具备writerecord权限";
+                            strError = "直接写入记录 " + strResPath + " 被拒绝。不具备 writerecord 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writerecord权限，就不再需要writeres权限
@@ -13725,7 +13726,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         if (StringUtil.IsInList("writeobject", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备writeobject权限";
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writeobject 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writeobject权限，就不再需要writeres权限
@@ -13734,7 +13735,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 if (StringUtil.IsInList("writeres", strRights) == false)
                 {
-                    strError = "写入资源 " + strResPath + " 被拒绝。不具备writeres权限";
+                    strError = "写入资源 " + strResPath + " 被拒绝。不具备 writeres 权限";
                     return 0;
                 }
             }
@@ -13762,7 +13763,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         if (StringUtil.IsInList("writetemplate", strRights) == false)
                         {
-                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备writetemplate权限";
+                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备 writetemplate 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
@@ -13795,7 +13796,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         if (StringUtil.IsInList("writeobject", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备writeobject权限";
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writeobject 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writeobject权限，就不再需要writeres权限
@@ -13804,7 +13805,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 if (StringUtil.IsInList("writeres", strRights) == false)
                 {
-                    strError = "写入资源 " + strResPath + " 被拒绝。不具备writeres权限";
+                    strError = "写入资源 " + strResPath + " 被拒绝。不具备 writeres 权限";
                     return 0;
                 }
             }
@@ -13833,7 +13834,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         if (StringUtil.IsInList("writetemplate", strRights) == false)
                         {
-                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备writetemplate权限";
+                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备 writetemplate 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
@@ -13858,7 +13859,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         if (StringUtil.IsInList("writeobject", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备writeobject权限";
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writeobject 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writeobject权限，就不再需要writeres权限
@@ -13867,7 +13868,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 if (StringUtil.IsInList("writeres", strRights) == false)
                 {
-                    strError = "写入资源 " + strResPath + " 被拒绝。不具备writeres权限";
+                    strError = "写入资源 " + strResPath + " 被拒绝。不具备 writeres 权限";
                     return 0;
                 }
             }
@@ -13885,7 +13886,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         if (StringUtil.IsInList("writetemplate", strRights) == false)
                         {
-                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备writetemplate权限";
+                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备 writetemplate 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
@@ -13902,7 +13903,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         if (StringUtil.IsInList("writerecord", strRights) == false)
                         {
-                            strError = "直接写入记录 " + strResPath + " 被拒绝。不具备writerecord权限";
+                            strError = "直接写入记录 " + strResPath + " 被拒绝。不具备 writerecord 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writerecord权限，就不再需要writeres权限
@@ -13916,7 +13917,7 @@ strLibraryCode);    // 读者所在的馆代码
                     {
                         if (StringUtil.IsInList("writeobject", strRights) == false)
                         {
-                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备writeobject权限";
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备 writeobject 权限";
                             return 0;
                         }
                         return 1;   // 如果有了writeobject权限，就不再需要writeres权限
@@ -13925,7 +13926,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 if (StringUtil.IsInList("writeres", strRights) == false)
                 {
-                    strError = "写入资源 " + strResPath + " 被拒绝。不具备writeres权限";
+                    strError = "写入资源 " + strResPath + " 被拒绝。不具备 writeres 权限";
                     return 0;
                 }
             }
