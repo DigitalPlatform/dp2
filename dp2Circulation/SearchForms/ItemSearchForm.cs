@@ -998,6 +998,8 @@ this.DbType + "_search_form",
                     out strError);
                 if (nRet == 0)
                     return 0;
+                if (nRet == -1)
+                    this.ShowMessage("填充浏览列时出错: " + strError, "red", true);
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
                 this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已全部装入";
@@ -1165,7 +1167,6 @@ this.DbType + "_search_form",
                         return 0;
                     }
                 }
-
 
                 long lRet = Channel.GetSearchResult(
                     stop,
@@ -2714,14 +2715,14 @@ out strError);
             strError = "";
 
             string[] names = {
-    "borrower",
-    "borrowerReaderType",
-"borrowerRecPath",
-"borrowDate",
-"borrowPeriod",
+                "borrower",
+                "borrowerReaderType",
+                "borrowerRecPath",
+                "borrowDate",
+                "borrowPeriod",
                 "returningDate",
                 "lastReturningDate",
-"operator",
+                "operator",
                 "no",
                 "renewComment"};
 
@@ -2738,7 +2739,6 @@ out strError);
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes(name);
                 if (nodes.Count > 0)
                     errors.Add("根元素下的 " + name + " 元素模拟 DeleteElements 删除后依然存在");
-
             }
 
             if (errors.Count == 0)

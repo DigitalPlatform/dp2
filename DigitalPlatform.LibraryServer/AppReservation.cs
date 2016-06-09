@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using System.Diagnostics;
+using System.Messaging;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.IO;
-using System.Messaging;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -167,6 +167,9 @@ namespace DigitalPlatform.LibraryServer
                     // "装载读者记录进入XML DOM时发生错误: " + strError;
                     goto ERROR1;
                 }
+
+                CachedRecordCollection records = new CachedRecordCollection();
+                records.Add(strOutputReaderRecPath, readerdom, reader_timestamp);
 
                 if (strFunction == "delete"
                     && sessioninfo.UserType != "reader")
@@ -343,6 +346,8 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR1;
                         }
 
+                        records.Add(strOutputItemRecPath, itemdom, item_timestamp);
+
                         // TODO: 若册属于个人藏书，则不仅要求预约者是同一分馆的读者，另外还要求预约者是主人的好友。即，主人的读者记录中 firends 列表中有预约者
 
                         // 2012/9/13
@@ -381,7 +386,7 @@ namespace DigitalPlatform.LibraryServer
 
                         // 在册记录中添加或者删除预约信息
                         nRet = this.DoReservationItemXml(
-                            // sessioninfo.Channels,
+                            records,
                             channel,
                             strFunction,
                             strReaderBarcode,
@@ -392,6 +397,24 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
+
+                        if (strFunction == "delete")
+                        {
+                            nRet = NotifyCancelArrive(
+    channel,
+    strItemBarcode,
+    "", // strRefID 暂时不使用此参数
+    itemdom,
+    strLibraryCode,
+    strReaderBarcode,
+    strReaderXml,
+    out strError);
+                            if (nRet == -1)
+                            {
+                                this.WriteErrorLog("发出放弃取书通知(册条码号=" + strItemBarcode + ")时出错: " + strError);
+                            }
+
+                        }
 
                         if (bOnShelf == true)
                             OnShelfItemBarcodes.Add(strItemBarcode);
@@ -425,6 +448,8 @@ namespace DigitalPlatform.LibraryServer
                             // 即把刚才增加的<request>元素找到后删除
                             goto ERROR1;
                         }
+
+                        records.Remove(strOutputItemRecPath);
                     }
                     finally
                     {
@@ -448,7 +473,8 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     goto ERROR1;
 
-                if (nRet == 1)
+                CachedRecord reader_record = records.Find(strOutputReaderRecPath);
+                if (nRet == 1 || (reader_record != null && reader_record.Changed))
                 {
                     // 野蛮写入
                     lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -462,6 +488,7 @@ namespace DigitalPlatform.LibraryServer
                     if (lRet == -1)
                         goto ERROR1;
 
+                    records.Remove(strOutputReaderRecPath);
 
                     DomUtil.SetElementText(domOperLog.DocumentElement,
                         "action", strFunction);
@@ -493,7 +520,6 @@ namespace DigitalPlatform.LibraryServer
                         "出纳",
                         "预约次",
                         1);
-
                 }
 
                 // 对当前在普通架的图书，立即发出到书通知
@@ -516,7 +542,7 @@ namespace DigitalPlatform.LibraryServer
                     //      -1  error
                     //      0   没有找到<request>元素
                     nRet = DoReservationNotify(
-                        // sessioninfo.Channels,
+                        null,
                         channel,
                         strReaderBarcode,
                         false,  // 不需要函数内加读者锁，因为这里已经加了
@@ -739,12 +765,13 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 在册记录中加入预约信息
+        // TODO: 要关注本函数到底保存了 itemdom 代表的册记录没有？因为这样会引起时间戳发生变化
         // parameters:
         //      strFunction "new"新增预约信息；"delete"删除预约信息
         //      bOnShelf    strFunction为"new"的情况下，如果册本来就没有人借阅，并且当前读者为预约该册的第一人，则bOnShelf返回true
         //      bArrived    strFunciont为"delete"的情况下，删除了状态为"arrived"的预约请求
         public int DoReservationItemXml(
-            // RmsChannelCollection channels,
+            CachedRecordCollection records,
             RmsChannel channel,
             string strFunction,
             string strReaderBarcode,
@@ -877,7 +904,7 @@ namespace DigitalPlatform.LibraryServer
                                 return -1;
                             }
                             nRet = DoNotifyNext(
-                                // channels,
+                                records,
                                 channel,
                                 strQueueRecPath,
                                 queue_rec_dom,
@@ -904,7 +931,10 @@ namespace DigitalPlatform.LibraryServer
 
                     } // end of -- if (strState == "arrived")
 
-                    nodeRequest.ParentNode.RemoveChild(nodeRequest);
+                    // 经过 DoNotifyNext() 以后 itemdom 内容可能会发生变化
+                    nodeRequest = root.SelectSingleNode("request[@reader='" + strReaderBarcode + "']");
+                    if (nodeRequest != null && nodeRequest.ParentNode != null)
+                        nodeRequest.ParentNode.RemoveChild(nodeRequest);
                 } // end of -- if (nodeRequest != null)
             }
 
@@ -940,6 +970,10 @@ namespace DigitalPlatform.LibraryServer
             root = readerdom.DocumentElement.SelectSingleNode("reservations");
             if (root == null)
             {
+                // 2016/6/9
+                if (String.Compare(strFunction, "delete", true) == 0)
+                    return 0;
+
                 root = readerdom.CreateElement("reservations");
                 root = readerdom.DocumentElement.AppendChild(root);
             }
@@ -1145,7 +1179,7 @@ namespace DigitalPlatform.LibraryServer
         //      0   没有找到<request>元素
         //      1   已成功处理
         public int DoReservationNotify(
-            // RmsChannelCollection channels,
+            CachedRecordCollection records,
             RmsChannel channel,
             string strReservationReaderBarcode,
             bool bNeedLockReader,
@@ -1197,14 +1231,24 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 XmlDocument readerdom = null;
-                nRet = LibraryApplication.LoadToDom(strReaderXml,
-                    out readerdom,
-                    out strError);
-                if (nRet == -1)
+
+                CachedRecord reader_record = null;
+                if (records != null)
+                    reader_record = records.Find(strOutputReaderRecPath);
+
+                if (reader_record == null)
                 {
-                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
-                    return -1;
+                    nRet = LibraryApplication.LoadToDom(strReaderXml,
+                        out readerdom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                        return -1;
+                    }
                 }
+                else
+                    readerdom = reader_record.Dom;
 
                 byte[] timestamp = null;
                 byte[] output_timestamp = null;
@@ -1276,14 +1320,24 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     XmlDocument itemdom = null;
-                    nRet = LibraryApplication.LoadToDom(strCurrentItemXml,
-                        out itemdom,
-                        out strError);
-                    if (nRet == -1)
+
+                    CachedRecord item_record = null;
+                    if (records != null)
+                        item_record = records.Find(strOutputItemRecPath);
+
+                    if (item_record == null)
                     {
-                        strError = "装载册记录进入XML DOM时发生错误: " + strError;
-                        return -1;
+                        nRet = LibraryApplication.LoadToDom(strCurrentItemXml,
+                            out itemdom,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "装载册记录进入XML DOM时发生错误: " + strError;
+                            return -1;
+                        }
                     }
+                    else
+                        itemdom = item_record.Dom;
 
                     if (strBarcode == strItemBarcodeParam)
                         strItemXml = strCurrentItemXml;
@@ -1291,6 +1345,8 @@ namespace DigitalPlatform.LibraryServer
                     if (strBarcode == strItemBarcodeParam)
                     {
                         string strTempReservationReaderBarcode = "";
+
+                        // TODO: 确认一下这个函数内部不会保存册记录
                         // 如果正好是当前册记录，需要设置arrived状态
                         // 如果为丢失处理，本函数的调用者需要通知等待者：书已经丢失了，不用再等待
                         // parameters:
@@ -1325,20 +1381,26 @@ namespace DigitalPlatform.LibraryServer
                         itemrequestnode.ParentNode.RemoveChild(itemrequestnode);
                     }
 
-                    // 写回册记录
-                    lRet = channel.DoSaveTextRes(strOutputItemRecPath,
-                        itemdom.OuterXml,
-                        false,
-                        "content,ignorechecktimestamp",
-                        timestamp,
-                        out output_timestamp,
-                        out strOutputPath,
-                        out strError);
-                    if (lRet == -1)
+                    if (item_record == null)
                     {
-                        strError = "写回册记录'" + strBarcode + "' (记录路径'" + strOutputItemRecPath + "')时发生错误: " + strError;
-                        return -1;
+                        // 写回册记录
+                        lRet = channel.DoSaveTextRes(strOutputItemRecPath,
+                            itemdom.OuterXml,
+                            false,
+                            "content,ignorechecktimestamp",
+                            timestamp,
+                            out output_timestamp,
+                            out strOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            strError = "写回册记录'" + strBarcode + "' (记录路径'" + strOutputItemRecPath + "')时发生错误: " + strError;
+                            return -1;
+                        }
                     }
+                    else
+                        item_record.Changed = true;
+
                 } // end of for
 
                 // 读者记录中为对应的<request>元素打上状态记号
@@ -1348,17 +1410,22 @@ namespace DigitalPlatform.LibraryServer
                 // 实际到达的一个册条码号 2007/1/18 
                 DomUtil.SetAttr(readerRequestNode, "arrivedItemBarcode", strItemBarcodeParam);
 
-                // 写回读者记录
-                lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
-                    readerdom.OuterXml,
-                    false,
-                    "content,ignorechecktimestamp",
-                    timestamp,
-                    out output_timestamp,
-                    out strOutputPath,
-                    out strError);
-                if (lRet == -1)
-                    return -1;
+                if (reader_record == null)
+                {
+                    // 写回读者记录
+                    lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
+                        readerdom.OuterXml,
+                        false,
+                        "content,ignorechecktimestamp",
+                        timestamp,
+                        out output_timestamp,
+                        out strOutputPath,
+                        out strError);
+                    if (lRet == -1)
+                        return -1;
+                }
+                else
+                    reader_record.Changed = true;
 
                 strReaderXml = readerdom.DocumentElement.OuterXml;
             }
@@ -1405,6 +1472,15 @@ namespace DigitalPlatform.LibraryServer
                     strError = "读入册记录 '" + strItemBarcodeParam + "' 时发生错误: " + strError;
                     return -1;
                 }
+
+                CachedRecord temp_record = null;
+                if (records != null)
+                    temp_record = records.Find(strOutputItemRecPath);
+
+                if (temp_record != null
+                    && temp_record.Dom != null
+                    && temp_record.Dom.DocumentElement != null)
+                    strItemXml = temp_record.Dom.DocumentElement.OuterXml;
             }
 
             // 构造一个XML记录, 加入"预约到书"库
@@ -1446,6 +1522,348 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return false;
+        }
+
+        // 发出放弃取书通知
+        // parameters:
+        //      strItemBarcode  册条码号。必须是册条码号。如果册条码号为空，参考ID需要使用 strRefID 参数
+        //      strRefID        参考ID
+        //      strLibraryCode  读者所在的馆代码
+        //      strReaderXml    预约了图书的读者的XML记录。用于消息通知接口
+        int NotifyCancelArrive(
+            RmsChannel channel,
+            string strItemBarcode,
+            string strRefID,
+            // string strItemXml,
+            XmlDocument itemdom,
+            string strLibraryCode,
+            string strReaderBarcode,
+            string strReaderXml,
+            out string strError)
+        {
+            strError = "";
+
+            int nRet = 0;
+
+            if (String.IsNullOrEmpty(strItemBarcode) == true)
+            {
+                // 如果检索用的册条码号为空，加上对命中结果数量不设限，那就会造成系统严重繁忙。
+                strError = "参数strItemBarcode中的册条码号不能为空。";
+                return -1;
+            }
+
+            string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
+            strLocation = StringUtil.GetPureLocationString(strLocation);
+
+            // 兼容 strItemBarcode 中含有前缀的用法
+            string strHead = "@refID:";
+            if (StringUtil.HasHead(strItemBarcode, strHead, true) == true)
+            {
+                strRefID = strItemBarcode.Substring(strHead.Length);
+                strItemBarcode = "";
+            }
+
+            string strReaderEmailAddress = "";
+            string strName = "";
+            nRet = GetReaderNotifyInfo(
+                strReaderXml,
+                out strName,
+                out strReaderEmailAddress,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            // 获得图书摘要信息
+            string strSummary = "";
+            string strBiblioRecPath = "";
+
+            nRet = this.GetBiblioSummary(strItemBarcode,
+                "", //  strConfirmItemRecPath,
+                null,   //  strBiblioRecPathExclude,
+                25,
+                out strBiblioRecPath,
+                out strSummary,
+                out strError);
+            if (nRet == -1)
+            {
+                strSummary = "ERROR: " + strError;
+            }
+
+            // 发送短消息通知
+            string strTotalError = "";
+
+            // *** dpmail
+            if (this.MessageCenter != null
+                && StringUtil.IsInList("dpmail", this.ArrivedNotifyTypes))
+            {
+                string strTemplate = "";
+                // 获得邮件模板
+                nRet = GetMailTemplate(
+                    "dpmail",
+                    "放弃取书通知",
+                    out strTemplate,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                {
+#if NO
+                    strError = "放弃取书通知<mailTemplate/template>尚未配置。";
+                    return -1;
+#endif
+                    return 0;   // 没有配置模板就不通知了
+                }
+
+                /*
+                %item%  册信息
+                %reservetime%   保留期限
+                %today% 发出email的当天
+                %summary% 书目摘要
+                %itembarcode% 册条码号 
+                %name% 读者姓名
+                 * */
+                Hashtable table = new Hashtable();
+                table["%item%"] = "(册条码号为: " + strItemBarcode + " URL为: " + this.OpacServerUrl + "/book.aspx?barcode=" + strItemBarcode + " )";
+                table["%today%"] = DateTime.Now.ToString();
+                table["%summary%"] = strSummary;
+                table["%itembarcode%"] = strItemBarcode;
+                table["%name%"] = strName;
+                string strBody = "";
+
+                nRet = GetMailText(strTemplate,
+                    table,
+                    out strBody,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (String.IsNullOrEmpty(this.MessageCenter.MessageDbName) == false)
+                {
+                    Debug.Assert(channel.Container != null, "");
+                    // 发送消息
+                    nRet = this.MessageCenter.SendMessage(
+                        channel.Container,  // channels,
+                        strReaderBarcode,
+                        "图书馆",
+                        "放弃取书通知",
+                        "text",
+                        strBody,
+                        false,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strTotalError += "发送dpmail消息时出错: " + strError + "\r\n";
+                    }
+                }
+            }
+
+            // 2016/4/26
+            // *** mq
+            if (string.IsNullOrEmpty(this.OutgoingQueue) == false
+                && StringUtil.IsInList("mq", this.ArrivedNotifyTypes))
+            {
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml("<root />");
+
+                /* 元素名
+                 * type 消息类型。预约到书通知
+                 * itemBarcode 册条码号
+                 * refID    参考 ID
+                 * opacURL  图书在 OPAC 中的 URL。相对路径
+                 * today 今天的日期
+                 * summary 书目摘要
+                 * patronName   读者姓名
+                 * patronRecord 读者 XML 记录
+ * */
+                DomUtil.SetElementText(dom.DocumentElement, "type", "放弃取书通知");
+
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "itemBarcode", strItemBarcode);
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "refID", strRefID);
+
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "opacURL", this.OpacServerUrl + "/book.aspx?barcode="
+                    + (string.IsNullOrEmpty(strItemBarcode) ? "@refID:" + strRefID : strItemBarcode));
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "today", DateTime.Now.ToString());
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "summary", strSummary);
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "patronName", strName);
+
+                {
+                    XmlDocument readerdom = new XmlDocument();
+                    readerdom.LoadXml(strReaderXml);
+
+                    XmlElement record = dom.CreateElement("patronRecord");
+                    dom.DocumentElement.AppendChild(record);
+                    record.InnerXml = readerdom.DocumentElement.InnerXml;
+
+                    DomUtil.DeleteElement(record, "borrowHistory");
+                    DomUtil.DeleteElement(record, "password");
+                    DomUtil.DeleteElement(record, "fingerprint");
+                    DomUtil.SetElementText(record, "libraryCode", strLibraryCode);
+                }
+
+                try
+                {
+                    MessageQueue queue = new MessageQueue(this.OutgoingQueue);
+
+                    // 向 MSMQ 消息队列发送消息
+                    nRet = ReadersMonitor.SendToQueue(queue,
+                        (string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "!refID:" + strRefID)
+                        + "@LUID:" + this.UID,
+                        "xml",
+                        dom.DocumentElement.OuterXml,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strTotalError += "发送 MQ 消息时出错: " + strError + "\r\n";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    strTotalError += "创建路径为 '" + this.OutgoingQueue + "' 的 MessageQueue 对象失败: " + ExceptionUtil.GetDebugText(ex);
+                }
+            }
+
+            // ** email
+            if (String.IsNullOrEmpty(strReaderEmailAddress) == false
+                && StringUtil.IsInList("email", this.ArrivedNotifyTypes))
+            {
+                string strTemplate = "";
+                // 获得邮件模板
+                nRet = GetMailTemplate(
+                    "email",
+                    "放弃取书通知",
+                    out strTemplate,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                {
+#if NO
+                    strError = "预约到书通知<mailTemplate/template>尚未配置。";
+                    return -1;
+#endif
+                    return 0;   // 没有配置模板就不通知
+                }
+
+                /*
+                %item%  册信息
+                %reservetime%   保留期限
+                %today% 发出email的当天
+                %summary% 书目摘要
+                %itembarcode% 册条码号 
+                %name% 读者姓名
+                 * */
+                Hashtable table = new Hashtable();
+                table["%item%"] = "(册条码号为: " + strItemBarcode + " URL为: " + this.OpacServerUrl + "/book.aspx?barcode=" + strItemBarcode + " )";
+                table["%today%"] = DateTime.Now.ToString();
+                table["%summary%"] = strSummary;
+                table["%itembarcode%"] = strItemBarcode;
+                table["%name%"] = strName;
+
+                string strBody = "";
+
+                nRet = GetMailText(strTemplate,
+                    table,
+                    out strBody,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                {
+                    // 发送email
+                    // return:
+                    //      -1  error
+                    //      0   not found smtp server cfg
+                    //      1   succeed
+                    nRet = SendEmail(strReaderEmailAddress,
+                        "放弃取书通知",
+                        strBody,
+                        "text",
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strTotalError += "发送email消息时出错: " + strError + "\r\n";
+                    }
+                }
+            }
+
+            // *** external messageinterfaces
+            if (this.m_externalMessageInterfaces != null)
+            {
+                foreach (MessageInterface message_interface in this.m_externalMessageInterfaces)
+                {
+                    // types
+                    if (StringUtil.IsInList(message_interface.Type, this.ArrivedNotifyTypes) == false)
+                        continue;
+
+                    string strTemplate = "";
+                    // 获得邮件模板
+                    nRet = GetMailTemplate(
+                        message_interface.Type,
+                        "放弃取书通知",
+                        out strTemplate,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 0)
+                    {
+#if NO
+                        strError = "预约到书通知<mailTemplate/template>尚未配置。";
+                        return -1;
+#endif
+                        return 0;   // 没有配置模板就不通知
+                    }
+
+                    /*
+                    %item%  册信息
+                    %reservetime%   保留期限
+                    %today% 发出email的当天
+                %summary% 书目摘要
+                %itembarcode% 册条码号 
+                %name% 读者姓名
+                     * */
+                    Hashtable table = new Hashtable();
+                    table["%item%"] = "(册条码号为: " + strItemBarcode + " URL为: " + this.OpacServerUrl + "/book.aspx?barcode=" + strItemBarcode + " )";
+                    table["%today%"] = DateTime.Now.ToString();
+                    table["%summary%"] = strSummary;
+                    table["%itembarcode%"] = strItemBarcode;
+                    table["%name%"] = strName;
+
+                    string strBody = "";
+
+                    nRet = GetMailText(strTemplate,
+                        table,
+                        out strBody,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    // 发送消息
+                    nRet = message_interface.HostObj.SendMessage(
+                        strReaderBarcode,
+                        strReaderXml,
+                        strBody,
+                        strLibraryCode,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strTotalError += "发送" + message_interface.Type + "消息时出错: " + strError + "\r\n";
+                    }
+                }
+            }
+
+            if (String.IsNullOrEmpty(strTotalError) == false)
+            {
+                strError = strTotalError;
+                return -1;
+            }
+
+            return 0;
         }
 
         // TODO: 各个环节要改为尽量使用 refID。要做大量测试
@@ -1812,8 +2230,8 @@ namespace DigitalPlatform.LibraryServer
                     "onShelf", bOnShelf ? "true" : "false");
 
                 DomUtil.SetElementText(dom.DocumentElement,
-                    "opacURL", this.OpacServerUrl + "/book.aspx?barcode=" 
-                    + (string.IsNullOrEmpty(strItemBarcode) ? "@refID:" + strRefID :strItemBarcode));
+                    "opacURL", this.OpacServerUrl + "/book.aspx?barcode="
+                    + (string.IsNullOrEmpty(strItemBarcode) ? "@refID:" + strRefID : strItemBarcode));
                 DomUtil.SetElementText(dom.DocumentElement,
                     "reserveTime", this.GetDisplayTimePeriodStringEx(this.ArrivedReserveTimeSpan));
                 DomUtil.SetElementText(dom.DocumentElement,
@@ -2091,7 +2509,7 @@ namespace DigitalPlatform.LibraryServer
         //      0   正常
         //      1   后面已经没有预约者，已通知管理员归架
         public int DoNotifyNext(
-            // RmsChannelCollection channels,
+            CachedRecordCollection records,
             RmsChannel channel,
             string strQueueRecPath,
             XmlDocument queue_rec_dom,
@@ -2154,7 +2572,7 @@ namespace DigitalPlatform.LibraryServer
             // 清除读者和册记录中的已到预约事项，并提取下一个预约读者证条码号
             // 本函数还负责清除册记录中以前残留的state=arrived的<request>元素
             nRet = this.ClearArrivedInfo(
-                // channels,
+                records,
                 channel,
                 strReaderBarcode,
                 strItemBarcode,
@@ -2177,7 +2595,7 @@ namespace DigitalPlatform.LibraryServer
                 //      0   没有找到<request>元素
                 //      1   已成功处理
                 nRet = this.DoReservationNotify(
-                    // channels,
+                    records,
                     channel,
                     strReservationReaderBarcode,
                     true,

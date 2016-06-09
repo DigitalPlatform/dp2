@@ -5185,6 +5185,17 @@ FileShare.ReadWrite))
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("导出到 XML 文件(&E) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
+            menuItem.Click += new System.EventHandler(this.menu_exportXml_Click);
+            if (this.listView_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+
             menuItem = new MenuItem("打印解释内容(&P) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_printHtml_Click);
             if (this.listView_records.SelectedItems.Count == 0)
@@ -5193,6 +5204,59 @@ FileShare.ReadWrite))
 
 
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
+        }
+
+        // 导出到 XML 文件
+        void menu_exportXml_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要创建的 XML 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = "";
+            dlg.Filter = "XML 文件 (*.xml)|*.xml|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            using (XmlTextWriter writer = new XmlTextWriter(dlg.FileName, Encoding.UTF8))
+            {
+                writer.Formatting = Formatting.Indented;
+                writer.Indentation = 4;
+
+                writer.WriteStartDocument();
+                writer.WriteStartElement("dprms", "collection", DpNs.dprms);
+                writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
+
+                int nRet = ProcessSelectedRecords((date, index, dom, timestamp) =>
+                        {
+                            if (dom.DocumentElement != null)
+                            {
+                                // 给根元素设置几个参数
+                                DomUtil.SetAttr(dom.DocumentElement, "date", date);
+                                DomUtil.SetAttr(dom.DocumentElement, "index", index.ToString());
+
+                                dom.DocumentElement.WriteTo(writer);
+                            }
+
+                            return true;
+                        },
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                writer.WriteEndElement();   // </collection>
+                writer.WriteEndDocument();
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         void menu_selectAllLines_Click(object sender, EventArgs e)
@@ -5216,6 +5280,103 @@ FileShare.ReadWrite))
 
         void DoStopPrint(object sender, StopEventArgs e)
         {
+        }
+
+        public delegate bool Delegate_processLog(string strDate,
+            int index,
+            XmlDocument dom,
+            byte[] timestamp);
+
+        int ProcessSelectedRecords(Delegate_processLog func,
+            out string strError)
+        {
+            strError = "";
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要处理的行";
+                return -1;
+            }
+
+            Stop stop = new DigitalPlatform.Stop();
+            stop.Register(MainForm.stopManager, true);	// 和容器关联
+
+            stop.OnStop += new StopEventHandler(this.DoStopPrint);
+            stop.Initial("正在处理日志记录 ...");
+            stop.BeginLoop();
+
+            try
+            {
+                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                int i = 0;
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    Application.DoEvents();
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    OperLogItemInfo info = (OperLogItemInfo)item.Tag;
+
+                    string strLogFileName = ListViewUtil.GetItemText(item, COLUMN_FILENAME);
+                    string strIndex = ListViewUtil.GetItemText(item, COLUMN_INDEX);
+
+                    string strXml = "";
+                    // 从服务器获得
+                    // return:
+                    //      -1  出错
+                    //      0   正常
+                    //      1   用户中断
+                    int nRet = GetXml(item,
+            out strXml,
+            out strError);
+                    if (nRet == 1)
+                        return -1;
+                    if (nRet == -1)
+                        return -1;
+
+                    XmlDocument dom = new XmlDocument();
+                    try
+                    {
+                        dom.LoadXml(strXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "装载日志记录 '" + strLogFileName + ":" + strIndex + "' XML 到 DOM 时发生错误: " + ex.Message;
+                        return -1;
+                    }
+
+                    if (func != null)
+                    {
+                        if (func(strLogFileName,
+                            Convert.ToInt32(strIndex),
+                dom,
+                null) == false)
+                            break;
+                    }
+
+                    stop.SetProgressValue(i + 1);
+                    i++;
+                }
+
+                return 0;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStopPrint);
+                stop.Initial("处理完成");
+                stop.HideProgress();
+
+                if (stop != null) // 脱离关联
+                {
+                    stop.Unregister();	// 和容器关联
+                    stop = null;
+                }
+            }
         }
 
         // 打印解释内容
@@ -5286,7 +5447,6 @@ FileShare.ReadWrite))
                     if (nRet == -1)
 
                         goto ERROR1;
-
 
                     Global.SetXmlString(this.webBrowser_xml,
     strXml,

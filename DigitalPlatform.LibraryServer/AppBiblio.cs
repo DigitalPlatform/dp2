@@ -158,10 +158,17 @@ namespace DigitalPlatform.LibraryServer
             out strSummary);
                 if (result.Value == -1)
                 {
+                    if (result.ErrorCode == ErrorCode.NotFound)
+                        result_strings.Add("");
+                    else
+                        result_strings.Add("!" + result.ErrorInfo);
+                    /*
                     strError = result.ErrorInfo;
                     return -1;
+                     * */
                 }
-                result_strings.Add(strSummary);
+                else
+                    result_strings.Add(strSummary);
             }
             return 0;
         }
@@ -1721,6 +1728,13 @@ return result;
             if (lRet == -1)
             {
                 strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
+                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = strError;
+                    result.ErrorCode = ErrorCode.NotFound;
+                    return result;
+                }
                 goto ERROR1;
             }
 

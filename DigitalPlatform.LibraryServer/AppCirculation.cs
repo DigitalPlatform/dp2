@@ -5417,7 +5417,7 @@ start_time_1,
                 //      -1  error
                 //      0   没有找到<request>元素
                 nRet = DoReservationNotify(
-                    // sessioninfo.Channels,
+                    null,
                     channel,
                     strReservationReaderBarcode,
                     true,   // 需要函数内加锁
@@ -12970,7 +12970,6 @@ out string strError)
                     itemdom.DocumentElement.AppendChild(root);
                 }
 
-
                 if (this.MaxItemHistoryItems > 0)
                 {
                     nodeOldBorrower = itemdom.CreateElement("borrower");
@@ -13010,8 +13009,12 @@ out string strError)
                     "barcode",
                     DomUtil.GetElementText(itemdom.DocumentElement, "borrower"));
             // DomUtil.SetElementText(itemdom.DocumentElement, "borrower", "");
-            DomUtil.DeleteElements(itemdom.DocumentElement,
-    "borrower");
+            if (EnsureDeleteElement(ref itemdom,
+    "borrower") == false)
+            {
+                strError = "!!! 还书操作过程中 DeleteElement() 出错。详情请见 dp2library 错误日志";
+                return -1;
+            }
 
             // 2009/9/18
             //DomUtil.SetElementText(itemdom.DocumentElement,
@@ -13041,6 +13044,14 @@ out string strError)
             //    "borrowPeriod", "");
             DomUtil.DeleteElements(itemdom.DocumentElement,
 "borrowPeriod");
+
+            // 2016/6/8
+            if (nodeOldBorrower != null)
+                DomUtil.SetAttr(nodeOldBorrower,
+               "denyPeriod",
+               DomUtil.GetElementText(itemdom.DocumentElement, "denyPeriod"));
+            DomUtil.DeleteElements(itemdom.DocumentElement,
+"denyPeriod");
 
             // 2014/11/14
             if (nodeOldBorrower != null)
@@ -13188,6 +13199,49 @@ out string strError)
             }
 
             return 0;
+        }
+
+        bool EnsureDeleteElement(ref XmlDocument itemdom, string strXPath)
+        {
+            DomUtil.DeleteElement(itemdom.DocumentElement, strXPath);
+            {
+                XmlNodeList nodes = itemdom.DocumentElement.SelectNodes(strXPath);
+                if (nodes.Count > 0)
+                {
+                    // 再尝试使用 DeleteElements
+                    DomUtil.DeleteElements(itemdom.DocumentElement, strXPath);
+                }
+                else
+                    return true;
+            }
+
+            {
+                XmlNodeList nodes = itemdom.DocumentElement.SelectNodes(strXPath);
+                if (nodes.Count > 0)
+                {
+                    // 再尝试更换 XmlDocument
+                    XmlDocument new_dom = new XmlDocument();
+                    new_dom.LoadXml(itemdom.DocumentElement.OuterXml);
+                    itemdom = new_dom;
+
+                    // 使用 DeleteElements
+                    DomUtil.DeleteElements(itemdom.DocumentElement, strXPath);
+                }
+                else
+                    return true;
+            }
+
+            {
+                // 最后发现如果还是不奏效，就报错吧 ~
+                XmlNodeList nodes = itemdom.DocumentElement.SelectNodes(strXPath);
+                if (nodes.Count > 0)
+                {
+                    this.WriteErrorLog("*** 严重错误: 在处理还书，删除册记录中 '" + strXPath + "' 元素的过程中，无法删除。XML 记录内容 '" + itemdom.OuterXml + "'");
+                    return false;
+                }
+                else
+                    return true;
+            }
         }
 
         // 检查是否在禁止还书时间范围内
@@ -13780,7 +13834,27 @@ out string strError)
             // 应当也看看<reservations/request>是否存在。
             if (nodesReservationRequest.Count == 0
                 && StringUtil.IsInList("#reservation", strLocation) == false)// 看看这册是否属于在预约保留架上的
+            {
+                // 去除(读者)半边预约请求信息
+                // parameters:
+                //      strFunction "new"新增预约信息；"delete"删除预约信息; "merge"合并; "split"拆散
+                // return:
+                //      -1  error
+                //      0   unchanged
+                //      1   changed
+                nRet = DoReservationReaderXml(
+                    "delete",
+                    strItemBarcodeParam,    // strItemBarcode
+                    sessioninfo.Account.UserID,
+                    ref readerdom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    // 写入错误日志?
+                    this.WriteErrorLog("借阅操作中, 在读者记录中删除潜在的预约信息时(调用DoReservationReaderXml() function=delete itembarcode=" + strItemBarcodeParam + ")出错: " + strError);
+                }
                 return 0;
+            }
 
             int nRedoLoadCount = 0;
 
@@ -14526,6 +14600,9 @@ out string strError)
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "no",
                     Convert.ToString(nNo));
+            else
+                DomUtil.DeleteElements(itemdom.DocumentElement,
+    "no");  // 2016/6/8
 
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "borrowPeriod",
@@ -14535,6 +14612,9 @@ out string strError)
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "denyPeriod",
                     strThisDenyPeriod);
+            else
+                DomUtil.DeleteElements(itemdom.DocumentElement,
+                    "denyPeriod");  // 2016/6/8
 
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "returningDate",
@@ -14803,7 +14883,7 @@ strBookPrice);    // 图书价格
         //      bMaskLocationReservation    不要给册记录<location>打上#reservation标记
         //      strReservationReaderBarcode 返回下一个预约读者的证条码号
         public int ClearArrivedInfo(
-            // RmsChannelCollection channels,
+            CachedRecordCollection records,
             RmsChannel channel,
             string strReaderBarcode,
             string strItemBarcode,
@@ -14819,16 +14899,6 @@ strBookPrice);    // 图书价格
             long lRet = 0;
             int nRet = 0;
             strReservationReaderBarcode = "";
-
-#if NO
-            RmsChannel channel = null;
-            channel = channels.GetChannel(this.WsUrl);
-            if (channel == null)
-            {
-                strError = "get channel error";
-                return -1;
-            }
-#endif
 
             bool bDontLock = false;
 
@@ -14848,12 +14918,10 @@ strBookPrice);    // 图书价格
 #if DEBUG_LOCK_READER
                 this.WriteErrorLog("ClearArrivedInfo 开始为读者加写锁 '" + strReaderBarcode + "' 时遇到抛出 LockRecursionException 异常");
 #endif
-
             }
 
             try
             {
-
                 // 读入读者记录
                 string strReaderXml = "";
                 string strOutputReaderRecPath = "";
@@ -14876,14 +14944,25 @@ strBookPrice);    // 图书价格
                 }
 
                 XmlDocument readerdom = null;
-                nRet = LibraryApplication.LoadToDom(strReaderXml,
-                    out readerdom,
-                    out strError);
-                if (nRet == -1)
+
+                CachedRecord reader_record = null;
+
+                if (records != null)
+                    reader_record = records.Find(strOutputReaderRecPath);
+
+                if (reader_record == null)
                 {
-                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
-                    return -1;
+                    nRet = LibraryApplication.LoadToDom(strReaderXml,
+                        out readerdom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                        return -1;
+                    }
                 }
+                else
+                    readerdom = reader_record.Dom;
 
                 // 从当前读者记录中删除有关字段
                 XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("reservations/request");
@@ -14913,18 +14992,25 @@ strBookPrice);    // 图书价格
                 // 写回读者记录
                 if (bFound == true)
                 {
-                    lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
-                        readerdom.OuterXml,
-                        false,
-                        "content,ignorechecktimestamp",
-                        timestamp,
-                        out output_timestamp,
-                        out strOutputPath,
-                        out strError);
-                    if (lRet == -1)
+                    if (reader_record == null)
                     {
-                        strError = "写回读者记录 '" + strOutputReaderRecPath + "' 时发生错误 : " + strError;
-                        return -1;
+                        lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
+                            readerdom.OuterXml,
+                            false,
+                            "content,ignorechecktimestamp",
+                            timestamp,
+                            out output_timestamp,
+                            out strOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            strError = "写回读者记录 '" + strOutputReaderRecPath + "' 时发生错误 : " + strError;
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        reader_record.Changed = true;
                     }
                 }
 
@@ -14956,14 +15042,26 @@ strBookPrice);    // 图书价格
                 }
 
                 XmlDocument itemdom = null;
-                nRet = LibraryApplication.LoadToDom(strItemXml,
-                    out itemdom,
-                    out strError);
-                if (nRet == -1)
+
+                CachedRecord item_record = null;
+
+                if (records != null)
+                    item_record = records.Find(strOutputItemRecPath);
+
+                if (item_record == null)
                 {
-                    strError = "装载册记录进入XML DOM时发生错误: " + strError;
-                    return -1;
+                    nRet = LibraryApplication.LoadToDom(strItemXml,
+                        out itemdom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "装载册记录进入XML DOM时发生错误: " + strError;
+                        return -1;
+                    }
                 }
+                else
+                    itemdom = item_record.Dom;
+
                 // 察看本册预约情况, 如果有，提取出第一个预约读者的证条码号
                 // 该函数还负责清除以前残留的state=arrived的<request>元素
                 // return:
@@ -14980,31 +15078,25 @@ strBookPrice);    // 图书价格
 
                 if (nRet == 1)
                 {
-#if NO
-                    channel = channels.GetChannel(this.WsUrl);
-                    if (channel == null)
+                    if (item_record == null)
                     {
-                        strError = "get channel error";
-                        return -1;
+                        lRet = channel.DoSaveTextRes(strOutputItemRecPath,
+                            itemdom.OuterXml,
+                            false,
+                            "content,ignorechecktimestamp",
+                            timestamp,
+                            out output_timestamp,
+                            out strOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            strError = "写回册记录 '" + strOutputItemRecPath + "' 时发生错误: " + strError;
+                            return -1;
+                        }
                     }
-#endif
-
-                    lRet = channel.DoSaveTextRes(strOutputItemRecPath,
-                        itemdom.OuterXml,
-                        false,
-                        "content,ignorechecktimestamp",
-                        timestamp,
-                        out output_timestamp,
-                        out strOutputPath,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "写回册记录 '" + strOutputItemRecPath + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
+                    else
+                        item_record.Changed = true;
                 }
-
             }
             finally
             {

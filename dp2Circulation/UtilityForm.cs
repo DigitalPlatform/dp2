@@ -19,6 +19,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Range;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
+using System.Web;
 
 namespace dp2Circulation
 {
@@ -1358,9 +1359,19 @@ MessageBoxDefaultButton.Button2);
             this.textBox_isbn_text.Text = text.ToString();
         }
 
-        private void button_xmlEditor_replaceControlChar_Click(object sender, EventArgs e)
+        private void toolStripButton_xmlEditor_replaceControlChar_Click(object sender, EventArgs e)
         {
             this.textBox_xmlEditor_content.Text = DomUtil.ReplaceControlCharsButCrLf(this.textBox_xmlEditor_content.Text, '*');
+        }
+
+        private void toolStripButton_xmlEditor_htmlEncode_Click(object sender, EventArgs e)
+        {
+            this.textBox_xmlEditor_content.Text = HttpUtility.HtmlEncode(this.textBox_xmlEditor_content.Text);
+        }
+
+        private void toolStripButton_xmlEditor_htmlDecode_Click(object sender, EventArgs e)
+        {
+            this.textBox_xmlEditor_content.Text = HttpUtility.HtmlDecode(this.textBox_xmlEditor_content.Text);
         }
 
     }

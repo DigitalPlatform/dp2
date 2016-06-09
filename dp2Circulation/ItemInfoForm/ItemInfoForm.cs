@@ -81,6 +81,7 @@ namespace dp2Circulation
             {
                 this._xml = value;
 
+                this.ItemXmlChanged = true;
                 /*
 SetXmlToWebbrowser(this.webBrowser_itemXml,
     strItemText);
@@ -93,6 +94,21 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                     value);
 
                 SetItemRefID(value);
+            }
+        }
+
+        bool _itemXmlChanged = false;
+        public bool ItemXmlChanged
+        {
+            get
+            {
+                return _itemXmlChanged;
+            }
+            set
+            {
+                _itemXmlChanged = value;
+
+                this.toolStripButton_save.Enabled = _itemXmlChanged || this.ObjectChanged;
             }
         }
 
@@ -184,7 +200,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
         void binaryResControl1_ContentChanged(object sender, ContentChangedEventArgs e)
         {
-            this.toolStripButton_save.Enabled = e.CurrentChanged;
+            // this.toolStripButton_save.Enabled = e.CurrentChanged;
+            this.toolStripButton_save.Enabled = _itemXmlChanged || e.CurrentChanged;
         }
 
         void binaryResControl1_ReturnChannel(object sender, ReturnChannelEventArgs e)
@@ -240,7 +257,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
             }
 #endif
-            if (// this.ItemXmlChanged == true ||
+            if (this.ItemXmlChanged == true ||
                 this.ObjectChanged == true)
             {
                 // 警告尚未保存
@@ -424,6 +441,8 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 {
                     this.Xml = strItemText;
                     this.Timestamp = item_timestamp;
+
+                    this.ItemXmlChanged = false;
 
                     // 接着装入对象资源
                     {
@@ -701,6 +720,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                     this.Xml = strItemText;
                     this.Timestamp = item_timestamp;
 
+                    this.ItemXmlChanged = false;
 #if NO
                     /*
                     SetXmlToWebbrowser(this.webBrowser_itemXml,
@@ -748,7 +768,9 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             return -1;
         }
 
-        void SaveRecord()
+        // parameters:
+        //      strStyle    force/空
+        void SaveRecord(string strStyle)
         {
             string strError = "";
 
@@ -759,7 +781,9 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             EnableControls(false);
             try
             {
-                int nRet = SaveItemInfo(this.DbType,
+                int nRet = SaveItemInfo(
+                    strStyle,
+                    this.DbType,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -856,6 +880,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
         }
 
         public int SaveItemInfo(
+            string strStyle,
             string strDbType,
             out string strError)
         {
@@ -883,7 +908,13 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                     return -1;
 
                 info.OldRecPath = this.ItemRecPath;
-                info.Action = "change";
+                if (StringUtil.IsInList("force", strStyle) == true)
+                {
+                    info.Action = "forcechange";
+                    info.Style = "nocheckdup";
+                }
+                else
+                    info.Action = "change";
                 info.NewRecPath = this.ItemRecPath;
 
                 info.NewRecord = strXml;
@@ -2221,7 +2252,7 @@ out strError);
 
         private void toolStripButton_save_Click(object sender, EventArgs e)
         {
-            SaveRecord();
+            SaveRecord(Control.ModifierKeys == Keys.Control ? "force" : "");
         }
 
         private void ToolStripMenuItem_insertCoverImageFromClipboard_Click(object sender, EventArgs e)
@@ -2377,6 +2408,19 @@ out strError);
         private void toolStripSplitButton_insertCoverImage_ButtonClick(object sender, EventArgs e)
         {
             ToolStripMenuItem_insertCoverImageFromClipboard_Click(sender, e);
+        }
+
+        private void ToolStripMenuItem_pasteXmlRecord_Click(object sender, EventArgs e)
+        {
+            IDataObject ido = Clipboard.GetDataObject();
+            if (ido.GetDataPresent(DataFormats.UnicodeText) == false)
+            {
+                MessageBox.Show(this, "剪贴板中没有内容");
+                return;
+            }
+
+            this.Xml = (string)ido.GetData(DataFormats.UnicodeText);
+
         }
 
     }

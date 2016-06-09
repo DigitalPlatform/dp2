@@ -12,7 +12,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
-
 namespace DigitalPlatform.LibraryServer
 {
     /// 预约到书监控任务
@@ -100,7 +99,6 @@ namespace DigitalPlatform.LibraryServer
                 this.AppendResultText("服务器记忆的 " + this.DefaultName + " 上次断点字符串为: "
                     + HttpUtility.HtmlEncode(strStart)
                     + "\r\n");
-
             }
 
             XmlDocument dom = new XmlDocument();
@@ -110,7 +108,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "装载XML字符串进入DOM时发生错误: " + ex.Message;
+                strError = "装载 XML 字符串进入 DOM 时发生错误: " + ex.Message;
                 return -1;
             }
 
@@ -428,7 +426,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return;
-
         ERROR1:
             this.AppendResultText("arrivethread error : " + strError + "\r\n");
             this.App.WriteErrorLog("arrivethread error : " + strError);
@@ -741,12 +738,12 @@ namespace DigitalPlatform.LibraryServer
 
                 // 已经超过保留期限，要通知下一位预约者
                 nRet = this.App.DoNotifyNext(
-                    // this.RmsChannels,
-                        channel,
-                        strQueueRecPath,
-                        dom,
-                        baQueueRecTimeStamp,
-                        out strError);
+                    null,
+                    channel,
+                    strQueueRecPath,
+                    dom,
+                    baQueueRecTimeStamp,
+                    out strError);
                 if (nRet == -1)
                     return -1;
 
