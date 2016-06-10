@@ -11159,7 +11159,8 @@ merge_dlg.UiState);
             //      -1  error
             //      0   succeed
             nRet = this.issueControl1.ChangeIssues(dlg.Xmls,
-            out strError);
+                null,
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
 

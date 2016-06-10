@@ -11,6 +11,8 @@ using System.Collections;
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -20,6 +22,33 @@ namespace dp2Circulation
     [Serializable()]
     public class BookItemBase
     {
+        // 表达数字对象的 XML 结构
+        public string ObjectXml
+        {
+            get
+            {
+                if (this._objects == null)
+                    return "";
+                return this._objects.ToXml();
+            }
+            set
+            {
+                this._objects = ObjectInfoCollection.FromXml(value);
+            }
+        }
+
+        public bool ObjectChanged
+        {
+            get
+            {
+                if (this._objects == null)
+                    return false;
+                return this._objects.Changed;
+            }
+        }
+
+        ObjectInfoCollection _objects = new ObjectInfoCollection();
+
         /// <summary>
         /// 事项的显示状态
         /// </summary>
@@ -236,6 +265,16 @@ namespace dp2Circulation
                 }
             }
 
+            // 要考虑 dprms:file 元素的变化
+            if (this._objects != null)
+            {
+                int nRet = this._objects.AddFileFragments(ref this.RecordDom,
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
             strXml = this.RecordDom.OuterXml;
             return 0;
         }
@@ -263,6 +302,38 @@ namespace dp2Circulation
 
             }
 
+        }
+
+        public int LoadObjects(
+            LibraryChannel channel,
+            Stop stop,
+            string dp2library_version,
+            string strBiblioRecPath,
+            string strXml,
+            out string strError)
+        {
+            strError = "";
+            if (this._objects == null)
+                this._objects = new ObjectInfoCollection();
+
+            return this._objects.Load(channel,
+                stop,
+                strBiblioRecPath,
+                strXml,
+                dp2library_version,
+                out strError);
+        }
+
+        public int SaveObjects(
+            LibraryChannel channel,
+            Stop stop,
+            string dp2library_version,
+            out string strError)
+        {
+            strError = "";
+            if (this._objects == null)
+                return 0;
+            return this._objects.Save(channel, stop, dp2library_version, out strError);
         }
 
         /// <summary>

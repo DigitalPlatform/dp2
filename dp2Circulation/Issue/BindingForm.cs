@@ -507,6 +507,7 @@ MessageBoxDefaultButton.Button2);
         /// <param name="strLayoutMode">布局模式。"auto" "accepting" "binding" 之一。auto 为自动模式，accepting 为全部行为记到，binding 为全部行为装订</param>
         /// <param name="ItemXmls">册记录 XML 数组</param>
         /// <param name="IssueXmls">期记录 XML 数组</param>
+        /// <param name="IssueObjectXmls">期记录对象资源的 XML 数组</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>
         /// <para>-1: 出错</para>>
@@ -517,6 +518,7 @@ MessageBoxDefaultButton.Button2);
             string strLayoutMode,
             List<string> ItemXmls,
             List<string> IssueXmls,
+            List<string> IssueObjectXmls,
             out string strError)
         {
             if (this.bindingControl1.HasGetOrderInfo() == false)
@@ -528,6 +530,7 @@ MessageBoxDefaultButton.Button2);
                 strLayoutMode,
                 ItemXmls,
                 IssueXmls,
+                IssueObjectXmls,
                 out strError);
         }
 
