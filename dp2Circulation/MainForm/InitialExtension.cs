@@ -1134,6 +1134,16 @@ MessageBoxDefaultButton.Button1);
                 if (CheckUserDirectory() == false)
                     return;
 
+                // 将 dp2circulation.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+                nRet = MoveDp2circulationXml(out strError);
+                if (nRet == -1)
+                {
+                    this.ReportError("dp2circulation 移动 dp2circulation.xml 时出现错误", "(安静报错)" + strError);
+                    MessageBox.Show(this, strError);
+                }
+
+                this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "dp2circulation.xml"));
+
                 this.UserTempDir = Path.Combine(this.UserDir, "temp");
                 PathUtil.CreateDirIfNeed(this.UserTempDir);
 
@@ -1450,6 +1460,41 @@ MessageBoxDefaultButton.Button1);
             this.PropertyTaskList.BeginThread();
         }
 
+        // 将 dp2circulation.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+        int MoveDp2circulationXml(out string strError)
+        {
+            strError = "";
+
+            string strTargetFileName = Path.Combine(this.UserDir, "dp2circulation.xml");
+            if (File.Exists(strTargetFileName) == true)
+                return 0;
+
+            string strSourceDirectory = "";
+            if (ApplicationDeployment.IsNetworkDeployed == true)
+            {
+                strSourceDirectory = Application.LocalUserAppDataPath;
+            }
+            else
+            {
+                strSourceDirectory = Environment.CurrentDirectory;
+            }
+
+            string strSourceFileName = Path.Combine(strSourceDirectory, "dp2circulation.xml");
+            if (File.Exists(strSourceFileName) == false)
+                return 0;   // 没有源文件，无法做什么
+
+            try
+            {
+                File.Copy(strSourceFileName, strTargetFileName, false);
+            }
+            catch (Exception ex)
+            {
+                strError = "复制文件 '" + strSourceFileName + "' 到 '" + strTargetFileName + "' 时出现异常：" + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
+            return 0;
+        }
+
         int RedirectUserDir(out string strError)
         {
             strError = "";
@@ -1474,9 +1519,9 @@ MessageBoxDefaultButton.Button1);
 
                 return 1;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                strError = "读取文件 '"+strRedirectFileName+"' 时出现异常：" + ExceptionUtil.GetDebugText(ex);
+                strError = "读取文件 '" + strRedirectFileName + "' 时出现异常：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
         }

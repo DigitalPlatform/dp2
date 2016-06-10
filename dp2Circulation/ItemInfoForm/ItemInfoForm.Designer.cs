@@ -61,6 +61,8 @@ namespace dp2Circulation
             this.toolStripButton_nextRecord = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_prevRecord = new System.Windows.Forms.ToolStripButton();
             this.toolStripLabel_message = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripDropDownButton_edit = new System.Windows.Forms.ToolStripDropDownButton();
+            this.ToolStripMenuItem_pasteXmlRecord = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
@@ -261,7 +263,8 @@ namespace dp2Circulation
             this.toolStripButton_addSubject,
             this.toolStripButton_nextRecord,
             this.toolStripButton_prevRecord,
-            this.toolStripLabel_message});
+            this.toolStripLabel_message,
+            this.toolStripDropDownButton_edit});
             this.toolStrip1.Location = new System.Drawing.Point(0, 298);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(513, 20);
@@ -345,6 +348,24 @@ namespace dp2Circulation
             this.toolStripLabel_message.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.toolStripLabel_message.Size = new System.Drawing.Size(0, 17);
             // 
+            // toolStripDropDownButton_edit
+            // 
+            this.toolStripDropDownButton_edit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripDropDownButton_edit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_pasteXmlRecord});
+            this.toolStripDropDownButton_edit.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_edit.Image")));
+            this.toolStripDropDownButton_edit.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton_edit.Name = "toolStripDropDownButton_edit";
+            this.toolStripDropDownButton_edit.Size = new System.Drawing.Size(45, 17);
+            this.toolStripDropDownButton_edit.Text = "±à¼­";
+            // 
+            // ToolStripMenuItem_pasteXmlRecord
+            // 
+            this.ToolStripMenuItem_pasteXmlRecord.Name = "ToolStripMenuItem_pasteXmlRecord";
+            this.ToolStripMenuItem_pasteXmlRecord.Size = new System.Drawing.Size(206, 22);
+            this.ToolStripMenuItem_pasteXmlRecord.Text = "´Ó¼ôÌù°åÕ³Ìù XML ¼ÇÂ¼";
+            this.ToolStripMenuItem_pasteXmlRecord.Click += new System.EventHandler(this.ToolStripMenuItem_pasteXmlRecord_Click);
+            // 
             // ItemInfoForm
             // 
             this.AcceptButton = this.button_load;
@@ -407,5 +428,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_insertCoverImage;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_insertCoverImageFromClipboard;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_clearCoverImage;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_edit;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_pasteXmlRecord;
     }
 }

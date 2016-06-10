@@ -5417,7 +5417,7 @@ start_time_1,
                 //      -1  error
                 //      0   没有找到<request>元素
                 nRet = DoReservationNotify(
-                    // sessioninfo.Channels,
+                    null,
                     channel,
                     strReservationReaderBarcode,
                     true,   // 需要函数内加锁
@@ -8918,8 +8918,22 @@ out string strError)
             return 0;
         }
 
+        // 包装后的版本
+        public static int ParsePeriodUnit(string strPeriod,
+    out long lValue,
+    out string strUnit,
+    out string strError)
+        {
+            return ParsePeriodUnit(strPeriod,
+                "day",
+                out lValue,
+                out strUnit,
+                out strError);
+        }
+
         // 分析期限参数
         public static int ParsePeriodUnit(string strPeriod,
+            string strDefaultUnit,
             out long lValue,
             out string strUnit,
             out string strError)
@@ -8964,10 +8978,12 @@ out string strError)
             }
 
             if (String.IsNullOrEmpty(strUnit) == true)
+                strUnit = strDefaultUnit;
+
+            if (String.IsNullOrEmpty(strUnit) == true)
                 strUnit = "day";   // 缺省单位为"天"
 
             strUnit = strUnit.ToLower();    // 统一转换为小写
-
             return 0;
         }
 
@@ -12521,7 +12537,8 @@ out string strError)
 
             string strBorrowDate = DomUtil.GetElementText(itemdom.DocumentElement, "borrowDate");
             string strPeriod = DomUtil.GetElementText(itemdom.DocumentElement, "borrowPeriod");
-
+            // 2016/6/7
+            string strDenyPeriod = DomUtil.GetElementText(itemdom.DocumentElement, "denyPeriod");
 
             // 这是借阅时的操作者
             string strBorrowOperator = DomUtil.GetElementText(itemdom.DocumentElement, "operator");
@@ -12573,6 +12590,25 @@ out string strError)
                     goto DOCHANGE;
                 strError = "册记录中借阅期限值 '" + strPeriod + "' 格式错误: " + strError;
                 return -1;
+            }
+
+            if (string.IsNullOrEmpty(strDenyPeriod) == false)
+            {
+                // 检查是否在禁止还书时间范围内
+                // return:
+                //      -1  出错
+                //      0   正常，可以还书
+                //      1   在禁止还书时间范围内
+                nRet = CheckDenyPeriod(
+            calendar,
+            borrowdate,
+            strDenyPeriod,
+            strPeriodUnit,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    return -1;
             }
 
             DateTime timeEnd = DateTime.MinValue;
@@ -12934,7 +12970,6 @@ out string strError)
                     itemdom.DocumentElement.AppendChild(root);
                 }
 
-
                 if (this.MaxItemHistoryItems > 0)
                 {
                     nodeOldBorrower = itemdom.CreateElement("borrower");
@@ -12974,18 +13009,22 @@ out string strError)
                     "barcode",
                     DomUtil.GetElementText(itemdom.DocumentElement, "borrower"));
             // DomUtil.SetElementText(itemdom.DocumentElement, "borrower", "");
-            DomUtil.DeleteElement(itemdom.DocumentElement,
-    "borrower");
+            if (EnsureDeleteElement(ref itemdom,
+    "borrower") == false)
+            {
+                strError = "!!! 还书操作过程中 DeleteElement() 出错。详情请见 dp2library 错误日志";
+                return -1;
+            }
 
             // 2009/9/18
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "borrowerReaderType", "");
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
     "borrowerReaderType");
             // 2012/9/8
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "borrowerRecPath", "");
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
 "borrowerRecPath");
 
             if (nodeOldBorrower != null)
@@ -12994,7 +13033,7 @@ out string strError)
                DomUtil.GetElementText(itemdom.DocumentElement, "borrowDate"));
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "borrowDate", "");
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
 "borrowDate");
 
             if (nodeOldBorrower != null)
@@ -13003,8 +13042,16 @@ out string strError)
                DomUtil.GetElementText(itemdom.DocumentElement, "borrowPeriod"));
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "borrowPeriod", "");
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
 "borrowPeriod");
+
+            // 2016/6/8
+            if (nodeOldBorrower != null)
+                DomUtil.SetAttr(nodeOldBorrower,
+               "denyPeriod",
+               DomUtil.GetElementText(itemdom.DocumentElement, "denyPeriod"));
+            DomUtil.DeleteElements(itemdom.DocumentElement,
+"denyPeriod");
 
             // 2014/11/14
             if (nodeOldBorrower != null)
@@ -13015,17 +13062,17 @@ out string strError)
                         "returningDate",
                         strValue);
             }
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
                 "returningDate");
 
             // 2014/11/14
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
                 "lastReturningDate");
 
             // string strBorrowOperator = DomUtil.GetElementText(itemdom.DocumentElement, "operator");
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "operator", "");    // 清除
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
 "operator");
 
             // item中原operator元素值表示借阅操作者，此时应转入历史中的borrowOperator元素中
@@ -13053,7 +13100,7 @@ out string strError)
                         "no",
                         strNo);
             }
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
                 "no");
 
             string strRenewComment = DomUtil.GetElementText(itemdom.DocumentElement, "renewComment");
@@ -13064,7 +13111,7 @@ out string strError)
                         "renewComment",
                         strRenewComment);
             }
-            DomUtil.DeleteElement(itemdom.DocumentElement,
+            DomUtil.DeleteElements(itemdom.DocumentElement,
                 "renewComment");
 
             if (nodeOldBorrower != null)
@@ -13148,6 +13195,133 @@ out string strError)
                 || strAction == "lost")
             {
                 strError = strOverdueMessage;
+                return 1;
+            }
+
+            return 0;
+        }
+
+        bool EnsureDeleteElement(ref XmlDocument itemdom, string strXPath)
+        {
+            DomUtil.DeleteElement(itemdom.DocumentElement, strXPath);
+            {
+                XmlNodeList nodes = itemdom.DocumentElement.SelectNodes(strXPath);
+                if (nodes.Count > 0)
+                {
+                    // 再尝试使用 DeleteElements
+                    DomUtil.DeleteElements(itemdom.DocumentElement, strXPath);
+                }
+                else
+                    return true;
+            }
+
+            {
+                XmlNodeList nodes = itemdom.DocumentElement.SelectNodes(strXPath);
+                if (nodes.Count > 0)
+                {
+                    // 再尝试更换 XmlDocument
+                    XmlDocument new_dom = new XmlDocument();
+                    new_dom.LoadXml(itemdom.DocumentElement.OuterXml);
+                    itemdom = new_dom;
+
+                    // 使用 DeleteElements
+                    DomUtil.DeleteElements(itemdom.DocumentElement, strXPath);
+                }
+                else
+                    return true;
+            }
+
+            {
+                // 最后发现如果还是不奏效，就报错吧 ~
+                XmlNodeList nodes = itemdom.DocumentElement.SelectNodes(strXPath);
+                if (nodes.Count > 0)
+                {
+                    this.WriteErrorLog("*** 严重错误: 在处理还书，删除册记录中 '" + strXPath + "' 元素的过程中，无法删除。XML 记录内容 '" + itemdom.OuterXml + "'");
+                    return false;
+                }
+                else
+                    return true;
+            }
+        }
+
+        // 检查是否在禁止还书时间范围内
+        // return:
+        //      -1  出错
+        //      0   正常，可以还书
+        //      1   在禁止还书时间范围内
+        int CheckDenyPeriod(
+            Calendar calendar,
+            DateTime borrowdate,
+            string strDenyPeriod,
+            string strDefaultUnit,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strPeriodUnit = "";
+            long lPeriodValue = 0;
+
+            nRet = LibraryApplication.ParsePeriodUnit(strDenyPeriod,
+                strDefaultUnit,
+                out lPeriodValue,
+                out strPeriodUnit,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "册记录中借阅期限值的右半部份 '" + strDenyPeriod + "' 格式错误: " + strError;
+                return -1;
+            }
+
+            DateTime timeEnd = DateTime.MinValue;
+            DateTime nextWorkingDay = DateTime.MinValue;
+
+            // 测算还书日期
+            // parameters:
+            //      calendar    工作日历。如果为null，表示函数不进行非工作日判断。
+            // return:
+            //      -1  出错
+            //      0   成功。timeEnd在工作日范围内。
+            //      1   成功。timeEnd正好在非工作日。nextWorkingDay已经返回了下一个工作日的时间
+            nRet = LibraryApplication.GetReturnDay(
+                calendar,
+                borrowdate,
+                lPeriodValue,
+                strPeriodUnit,
+                out timeEnd,
+                out nextWorkingDay,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "测算禁止还书日期过程发生错误: " + strError;
+                return -1;
+            }
+
+            DateTime now = this.Clock.UtcNow;  //  今天  当下
+
+            // 正规化时间
+            DateTime now_rounded = now;
+            nRet = RoundTime(strPeriodUnit,
+                ref now_rounded,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            TimeSpan delta = now_rounded - timeEnd;
+
+            long lDelta = 0;
+
+            nRet = ParseTimeSpan(
+                delta,
+                strPeriodUnit,
+                out lDelta,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (lDelta < 0)
+            {
+                strError = "还书操作被拒绝。当前尚在禁止还书时间范围内(从 " + GetLocalTimeString(strPeriodUnit, borrowdate) + " 开始，禁止 " + lPeriodValue + GetDisplayTimePeriodStringEx(strPeriodUnit) + "，直到 " + GetLocalTimeString(strPeriodUnit, timeEnd) + ")";
                 return 1;
             }
 
@@ -13660,7 +13834,27 @@ out string strError)
             // 应当也看看<reservations/request>是否存在。
             if (nodesReservationRequest.Count == 0
                 && StringUtil.IsInList("#reservation", strLocation) == false)// 看看这册是否属于在预约保留架上的
+            {
+                // 去除(读者)半边预约请求信息
+                // parameters:
+                //      strFunction "new"新增预约信息；"delete"删除预约信息; "merge"合并; "split"拆散
+                // return:
+                //      -1  error
+                //      0   unchanged
+                //      1   changed
+                nRet = DoReservationReaderXml(
+                    "delete",
+                    strItemBarcodeParam,    // strItemBarcode
+                    sessioninfo.Account.UserID,
+                    ref readerdom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    // 写入错误日志?
+                    this.WriteErrorLog("借阅操作中, 在读者记录中删除潜在的预约信息时(调用DoReservationReaderXml() function=delete itembarcode=" + strItemBarcodeParam + ")出错: " + strError);
+                }
                 return 0;
+            }
 
             int nRedoLoadCount = 0;
 
@@ -13988,6 +14182,7 @@ out string strError)
             //
             string strThisBorrowPeriod = "10day";   // 本次借阅的期限
             string strLastBorrowPeriod = "";    // 上次借阅的期限
+            string strThisDenyPeriod = "";
 
             // barcode
             DomUtil.SetAttr(nodeBorrow, "barcode", strItemBarcode);
@@ -14055,7 +14250,6 @@ out string strError)
             }
 
             // 按照逗号分列值，需要根据序号取出某个参数
-
             string[] aPeriod = strBorrowPeriodList.Split(new char[] { ',' });
 
             if (aPeriod.Length == 0)
@@ -14125,6 +14319,17 @@ out string strError)
                 }
             }
 
+            {
+                List<string> parts = StringUtil.ParseTwoPart(strThisBorrowPeriod, "|");
+                strThisBorrowPeriod = parts[0];
+                strThisDenyPeriod = parts[1];
+            }
+            string strLastDenyPeriod = "";
+            {
+                List<string> parts = StringUtil.ParseTwoPart(strLastBorrowPeriod, "|");
+                strLastBorrowPeriod = parts[0];
+                strLastDenyPeriod = parts[1];
+            }
             // 检查strBorrowPeriod是否合法
             {
                 long lPeriodValue = 0;
@@ -14319,7 +14524,12 @@ out string strError)
             if (nNo > 0)    // 2013/12/23
                 DomUtil.SetAttr(nodeBorrow, "no", Convert.ToString(nNo));
 
-            DomUtil.SetAttr(nodeBorrow, "borrowPeriod", strThisBorrowPeriod);
+            DomUtil.SetAttr(nodeBorrow, "borrowPeriod",
+                strThisBorrowPeriod);
+            // 2016/6/7
+            if (string.IsNullOrEmpty(strThisDenyPeriod) == false)
+                DomUtil.SetAttr(nodeBorrow, "denyPeriod",
+                   strThisDenyPeriod);
 
             // 2014/11/14
             // returningDate
@@ -14390,10 +14600,21 @@ out string strError)
                 DomUtil.SetElementText(itemdom.DocumentElement,
                     "no",
                     Convert.ToString(nNo));
+            else
+                DomUtil.DeleteElements(itemdom.DocumentElement,
+    "no");  // 2016/6/8
 
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "borrowPeriod",
                 strThisBorrowPeriod);   // strBorrowPeriod现在已经是个别参数，不是逗号分隔的列举值了
+            // 2016/6/7
+            if (string.IsNullOrEmpty(strThisDenyPeriod) == false)
+                DomUtil.SetElementText(itemdom.DocumentElement,
+                    "denyPeriod",
+                    strThisDenyPeriod);
+            else
+                DomUtil.DeleteElements(itemdom.DocumentElement,
+                    "denyPeriod");  // 2016/6/8
 
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "returningDate",
@@ -14432,6 +14653,11 @@ out string strError)
                 strBorrowDate);     // 借阅日期
             DomUtil.SetElementText(domOperLog.DocumentElement, "borrowPeriod",
                 strThisBorrowPeriod);   // 借阅期限
+            // 2016/6/7
+            if (string.IsNullOrEmpty(strThisDenyPeriod) == false)
+                DomUtil.SetElementText(domOperLog.DocumentElement, "denyPeriod",
+                    strThisDenyPeriod);
+
             DomUtil.SetElementText(domOperLog.DocumentElement, "returningDate",
                 strReturningDate);     // 应还日期
 
@@ -14459,6 +14685,7 @@ strBookPrice);    // 图书价格
             // 返回满足RFC1123的时间值字符串 GMT时间
             borrow_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(this_return_time.ToLocalTime());
             borrow_info.Period = strThisBorrowPeriod;
+            borrow_info.DenyPeriod = strThisDenyPeriod;
             borrow_info.BorrowCount = nNo;
 
             // 2011/6/26
@@ -14656,7 +14883,7 @@ strBookPrice);    // 图书价格
         //      bMaskLocationReservation    不要给册记录<location>打上#reservation标记
         //      strReservationReaderBarcode 返回下一个预约读者的证条码号
         public int ClearArrivedInfo(
-            // RmsChannelCollection channels,
+            CachedRecordCollection records,
             RmsChannel channel,
             string strReaderBarcode,
             string strItemBarcode,
@@ -14672,16 +14899,6 @@ strBookPrice);    // 图书价格
             long lRet = 0;
             int nRet = 0;
             strReservationReaderBarcode = "";
-
-#if NO
-            RmsChannel channel = null;
-            channel = channels.GetChannel(this.WsUrl);
-            if (channel == null)
-            {
-                strError = "get channel error";
-                return -1;
-            }
-#endif
 
             bool bDontLock = false;
 
@@ -14701,12 +14918,10 @@ strBookPrice);    // 图书价格
 #if DEBUG_LOCK_READER
                 this.WriteErrorLog("ClearArrivedInfo 开始为读者加写锁 '" + strReaderBarcode + "' 时遇到抛出 LockRecursionException 异常");
 #endif
-
             }
 
             try
             {
-
                 // 读入读者记录
                 string strReaderXml = "";
                 string strOutputReaderRecPath = "";
@@ -14729,14 +14944,25 @@ strBookPrice);    // 图书价格
                 }
 
                 XmlDocument readerdom = null;
-                nRet = LibraryApplication.LoadToDom(strReaderXml,
-                    out readerdom,
-                    out strError);
-                if (nRet == -1)
+
+                CachedRecord reader_record = null;
+
+                if (records != null)
+                    reader_record = records.Find(strOutputReaderRecPath);
+
+                if (reader_record == null)
                 {
-                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
-                    return -1;
+                    nRet = LibraryApplication.LoadToDom(strReaderXml,
+                        out readerdom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                        return -1;
+                    }
                 }
+                else
+                    readerdom = reader_record.Dom;
 
                 // 从当前读者记录中删除有关字段
                 XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("reservations/request");
@@ -14766,18 +14992,25 @@ strBookPrice);    // 图书价格
                 // 写回读者记录
                 if (bFound == true)
                 {
-                    lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
-                        readerdom.OuterXml,
-                        false,
-                        "content,ignorechecktimestamp",
-                        timestamp,
-                        out output_timestamp,
-                        out strOutputPath,
-                        out strError);
-                    if (lRet == -1)
+                    if (reader_record == null)
                     {
-                        strError = "写回读者记录 '" + strOutputReaderRecPath + "' 时发生错误 : " + strError;
-                        return -1;
+                        lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
+                            readerdom.OuterXml,
+                            false,
+                            "content,ignorechecktimestamp",
+                            timestamp,
+                            out output_timestamp,
+                            out strOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            strError = "写回读者记录 '" + strOutputReaderRecPath + "' 时发生错误 : " + strError;
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        reader_record.Changed = true;
                     }
                 }
 
@@ -14809,14 +15042,26 @@ strBookPrice);    // 图书价格
                 }
 
                 XmlDocument itemdom = null;
-                nRet = LibraryApplication.LoadToDom(strItemXml,
-                    out itemdom,
-                    out strError);
-                if (nRet == -1)
+
+                CachedRecord item_record = null;
+
+                if (records != null)
+                    item_record = records.Find(strOutputItemRecPath);
+
+                if (item_record == null)
                 {
-                    strError = "装载册记录进入XML DOM时发生错误: " + strError;
-                    return -1;
+                    nRet = LibraryApplication.LoadToDom(strItemXml,
+                        out itemdom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "装载册记录进入XML DOM时发生错误: " + strError;
+                        return -1;
+                    }
                 }
+                else
+                    itemdom = item_record.Dom;
+
                 // 察看本册预约情况, 如果有，提取出第一个预约读者的证条码号
                 // 该函数还负责清除以前残留的state=arrived的<request>元素
                 // return:
@@ -14833,31 +15078,25 @@ strBookPrice);    // 图书价格
 
                 if (nRet == 1)
                 {
-#if NO
-                    channel = channels.GetChannel(this.WsUrl);
-                    if (channel == null)
+                    if (item_record == null)
                     {
-                        strError = "get channel error";
-                        return -1;
+                        lRet = channel.DoSaveTextRes(strOutputItemRecPath,
+                            itemdom.OuterXml,
+                            false,
+                            "content,ignorechecktimestamp",
+                            timestamp,
+                            out output_timestamp,
+                            out strOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            strError = "写回册记录 '" + strOutputItemRecPath + "' 时发生错误: " + strError;
+                            return -1;
+                        }
                     }
-#endif
-
-                    lRet = channel.DoSaveTextRes(strOutputItemRecPath,
-                        itemdom.OuterXml,
-                        false,
-                        "content,ignorechecktimestamp",
-                        timestamp,
-                        out output_timestamp,
-                        out strOutputPath,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "写回册记录 '" + strOutputItemRecPath + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-
+                    else
+                        item_record.Changed = true;
                 }
-
             }
             finally
             {
@@ -16969,6 +17208,9 @@ strBookPrice);    // 图书价格
                         "returningDate");
                     DomUtil.DeleteElement(itemdom.DocumentElement,
                         "operator");
+                    DomUtil.DeleteElement(itemdom.DocumentElement,
+                        "no");
+
                     DomUtil.RemoveEmptyElements(itemdom.DocumentElement);
 
                     byte[] output_timestamp = null;
@@ -18956,6 +19198,12 @@ Value data: HEX 0x1
         // 借书期限。例如“20day”
         [DataMember]
         public string Period = "";
+
+        // 2016/6/7
+        // 禁止还书期限。例如“20day”
+        [DataMember]
+        public string DenyPeriod = "";
+
 
         // 当前为续借的第几次？0表示初次借阅
         [DataMember]

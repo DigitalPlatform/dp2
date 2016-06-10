@@ -953,7 +953,6 @@ bool bChanged)
                 goto ERROR1;
 
             return;
-
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -2279,7 +2278,7 @@ size.Height);
         public bool XmlChanged = false; // 描述资源的 usage rights 是否修改过。2015/7/11
     }
 
-    enum LineState
+    public enum LineState
     {
         Normal = 0, // 普通，已经上载的事项
         New = 1,    // 新增的，尚未上载的时候

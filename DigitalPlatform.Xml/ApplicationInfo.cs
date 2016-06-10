@@ -78,23 +78,23 @@ namespace DigitalPlatform.Xml
             string strPureName = Path.GetFileName(strFileName);
             if (strPureName.ToUpper() != strFileName.ToUpper())
             {
-                PureFileName = strPureName;
-                FileName = strFileName;
+                this.PureFileName = strPureName;
+                this.FileName = strFileName;
             }
             else
             {
-                PureFileName = strFileName;
+                this.PureFileName = strFileName;
 
                 if (ApplicationDeployment.IsNetworkDeployed == true)
                 {
-                    CurrentDirectory = Application.LocalUserAppDataPath;
+                    this.CurrentDirectory = Application.LocalUserAppDataPath;
                 }
                 else
                 {
-                    CurrentDirectory = Environment.CurrentDirectory;
+                    this.CurrentDirectory = Environment.CurrentDirectory;
                 }
 
-                FileName = CurrentDirectory + "\\" + PureFileName;
+                this.FileName = Path.Combine(this.CurrentDirectory, PureFileName);
             }
 		}
 
@@ -128,7 +128,6 @@ namespace DigitalPlatform.Xml
 
 			return 0;
 		}
-
 
 		public int CreateBlank()
 		{

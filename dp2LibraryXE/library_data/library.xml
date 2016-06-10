@@ -434,6 +434,12 @@ public class MyLibraryHost : LibraryHost
 
 %today%
 	</template>
+        <template name="放弃取书通知">
+尊敬的读者：
+您先前预约并且已经到书的图书%item%，已被您放弃取书。图书馆将把优先借阅权转给后面排队等待的预约者，或允许其他读者借阅。
+
+%today%
+        </template>
     </mailTemplates>
     <zhongcihao>
         <nstable name="nstable">

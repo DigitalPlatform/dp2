@@ -5,11 +5,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.IO;
 
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using DigitalPlatform.Range;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -24,14 +26,136 @@ namespace DigitalPlatform.CirculationClient
 
         public string ErrorInfo { get; set; }
 
-        public string Metadata { get; set; }
-        // 以下几项是从 metadata 里面析出的信息
-        public string FileName { get; set; }    // 本地文件名
-        public string Size { get; set; }
-        public string Mime { get; set; }
-        public string Timestamp { get; set; }
+        string _metadata { get; set; }
+        public string Metadata
+        {
+            get
+            {
+                return _metadata;
+            }
+            set
+            {
+                _metadata = value;
+            }
+        }
 
-        // public LineState LineState = LineState.Normal;
+        string GetMetadataField(string name)
+        {
+            string strError = "";
+            // 取metadata值
+            Hashtable values = StringUtil.ParseMedaDataXml(this.Metadata,
+                out strError);
+            if (values == null)
+                throw new Exception(strError);
+            return (string)values[name];
+        }
+
+        void SetMetadataField(string name, string value)
+        {
+            XmlDocument dom = new XmlDocument();
+            if (string.IsNullOrEmpty(this.Metadata))
+                dom.LoadXml("<file />");
+            else
+                dom.LoadXml(this.Metadata);
+
+            dom.DocumentElement.SetAttribute(name, value);
+            this.Metadata = dom.DocumentElement.OuterXml;
+        }
+
+        // 以下几项是从 metadata 里面析出的信息
+        // 本地文件名
+        public string FileName
+        {
+            get
+            {
+                return GetMetadataField("fileName");
+            }
+            set
+            {
+                SetMetadataField("fieldName", value);
+            }
+        }
+
+        public string Size
+        {
+            get
+            {
+                return GetMetadataField("size");
+            }
+            set
+            {
+                SetMetadataField("size", value);
+            }
+        }
+        public string Mime
+        {
+            get
+            {
+                return GetMetadataField("mime");
+            }
+            set
+            {
+                SetMetadataField("mime", value);
+            }
+        }
+        public string Timestamp
+        {
+            get
+            {
+                return GetMetadataField("timestamp");
+            }
+            set
+            {
+                SetMetadataField("timestamp", value);
+            }
+        }
+
+        public LineState LineState = LineState.Normal;
+
+        public bool ResChanged { get; set; }
+        public bool XmlChanged { get; set; }
+
+        public string ToXml()
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<object />");
+
+            XmlElement root = dom.DocumentElement;
+            root.SetAttribute("id", this.ID);
+            root.SetAttribute("usage", this.Usage);
+            root.SetAttribute("rights", this.Rights);
+            root.SetAttribute("errorInfo", this.ErrorInfo);
+            root.SetAttribute("metadata", this.Metadata);
+#if NO
+            root.SetAttribute("fileName", this.FileName);
+            root.SetAttribute("size", this.Size);
+            root.SetAttribute("mime", this.Mime);
+            root.SetAttribute("timestamp", this.Timestamp);
+#endif
+
+            root.SetAttribute("lineState", this.LineState.ToString());
+            root.SetAttribute("resChanged", this.ResChanged ? "true" : "false");
+            root.SetAttribute("xmlChanged", this.XmlChanged ? "true" : "false");
+            return dom.DocumentElement.OuterXml;
+        }
+
+        public ObjectInfo FromXml(string strXml)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
+            XmlElement root = dom.DocumentElement;
+            ObjectInfo info = new ObjectInfo();
+            info.ID = root.GetAttribute("id");
+            info.Usage = root.GetAttribute("usage");
+            info.Rights = root.GetAttribute("rights");
+            info.ErrorInfo = root.GetAttribute("errorInfo");
+            info.Metadata = root.GetAttribute("metadata");
+            info.LineState = (LineState)Enum.Parse(typeof(LineState),
+                root.GetAttribute("lineState"));
+            info.ResChanged = DomUtil.IsBooleanTrue(root.GetAttribute("resChanged"));
+            info.XmlChanged = DomUtil.IsBooleanTrue(root.GetAttribute("xmlChanged"));
+            return info;
+        }
     }
 
     /// <summary>
@@ -162,6 +286,7 @@ namespace DigitalPlatform.CirculationClient
                         byte[] baMetadataTimestamp = record.RecordBody.Timestamp;
                         //Debug.Assert(baMetadataTimestamp != null, "");
 
+#if NO
                         // 取metadata值
                         Hashtable values = StringUtil.ParseMedaDataXml(strMetadataXml,
                             out strError);
@@ -179,6 +304,7 @@ namespace DigitalPlatform.CirculationClient
 
                         // mime
                         info.Mime = (string)values["mimetype"];
+#endif
 
                         // tiemstamp
                         string strTimestamp = ByteArray.GetHexTimeStampString(baMetadataTimestamp);
@@ -240,7 +366,6 @@ namespace DigitalPlatform.CirculationClient
             return false;
         }
 
-#if NO
         // 保存资源到服务器
         // return:
         //		-1	error
@@ -279,7 +404,7 @@ namespace DigitalPlatform.CirculationClient
             }
 
             int nUploadCount = 0;   // 实际上载的资源个数
-
+            List<ObjectInfo> delete_objects = new List<ObjectInfo>();
             try
             {
                 foreach (ObjectInfo obj in this)
@@ -303,14 +428,6 @@ namespace DigitalPlatform.CirculationClient
                                 }
                                 // 这种情况应该是 metadata 修改过
                                 bOnlyChangeMetadata = true;
-#if NO
-                                SetLineInfo(item,
-                                    // strUsage, 
-                                    LineState.Normal);
-                                SetXmlChanged(item, false);
-                                SetResChanged(item, false);
-                                continue;   // 资源没有修改的，则跳过上载
-#endif
                             }
                         }
                     }
@@ -321,22 +438,17 @@ namespace DigitalPlatform.CirculationClient
                         // 所以本函数只是简单Remove这样的listview事项即可
                         if (state == LineState.Deleted)
                         {
-                            this.ListView.Items.Remove(item);
-                            i--;
+                            delete_objects.Add(obj);
                         }
 
                         continue;
                     }
 
-                    string strState = ListViewUtil.GetItemText(item, COLUMN_STATE);
+                    // string strState = ListViewUtil.GetItemText(item, COLUMN_STATE);
 
-                    string strID = ListViewUtil.GetItemText(item, COLUMN_ID);
-                    string strResPath = this.BiblioRecPath + "/object/" + ListViewUtil.GetItemText(item, COLUMN_ID);
-                    string strLocalFilename = ListViewUtil.GetItemText(item, COLUMN_LOCALPATH);
-                    string strMime = ListViewUtil.GetItemText(item, COLUMN_MIME);
-                    string strTimestamp = ListViewUtil.GetItemText(item, COLUMN_TIMESTAMP);
+                    string strResPath = this.BiblioRecPath + "/object/" + obj.ID;
 
-                    byte[] timestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
+                    byte[] timestamp = ByteArray.GetTimeStampByteArray(obj.Timestamp);
                     byte[] output_timestamp = null;
 
                     nUploadCount++;
@@ -344,11 +456,11 @@ namespace DigitalPlatform.CirculationClient
                     if (bOnlyChangeMetadata)
                     {
                         long lRet = channel.SaveResObject(
-    Stop,
+    stop,
     strResPath,
     "",
-    strLocalFilename,
-    strMime,
+    obj.FileName,
+    obj.Mime,
     "", // range
     true,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
     timestamp,
@@ -356,9 +468,7 @@ namespace DigitalPlatform.CirculationClient
     out strError);
                         timestamp = output_timestamp;
                         if (timestamp != null)
-                            ListViewUtil.ChangeItemText(item,
-                                COLUMN_TIMESTAMP,
-                                ByteArray.GetHexTimeStampString(timestamp));
+                            obj.Timestamp = ByteArray.GetHexTimeStampString(timestamp);
                         if (lRet == -1)
                             goto ERROR1;
                         Debug.Assert(timestamp != null, "");
@@ -367,11 +477,11 @@ namespace DigitalPlatform.CirculationClient
                     else
                     {
                         // 检测文件尺寸
-                        FileInfo fi = new FileInfo(strLocalFilename);
+                        FileInfo fi = new FileInfo(obj.FileName);
 
                         if (fi.Exists == false)
                         {
-                            strError = "文件 '" + strLocalFilename + "' 不存在...";
+                            strError = "文件 '" + obj.FileName + "' 不存在...";
                             return -1;
                         }
 
@@ -399,11 +509,9 @@ namespace DigitalPlatform.CirculationClient
 
                         for (int j = 0; j < ranges.Length; j++)
                         {
-                            // REDOSINGLESAVE:
+                            // Application.DoEvents();	// 出让界面控制权
 
-                            Application.DoEvents();	// 出让界面控制权
-
-                            if (Stop.State != 0)
+                            if (stop != null && stop.State != 0)
                             {
                                 strError = "用户中断";
                                 goto ERROR1;
@@ -421,10 +529,10 @@ namespace DigitalPlatform.CirculationClient
                                 strPercent = String.Format("{0,3:N}", ratio * (double)100) + "%";
                             }
 
-                            if (Stop != null)
-                                Stop.SetMessage("正在上载 " + ranges[j] + "/"
+                            if (stop != null)
+                                stop.SetMessage("正在上载 " + ranges[j] + "/"
                                     + Convert.ToString(fi.Length)
-                                    + " " + strPercent + " " + strLocalFilename + strWarning + strWaiting);
+                                    + " " + strPercent + " " + obj.FileName + strWarning + strWaiting);
 
                             long lRet = 0;
                             TimeSpan old_timeout = channel.Timeout;
@@ -432,11 +540,11 @@ namespace DigitalPlatform.CirculationClient
                             try
                             {
                                 lRet = channel.SaveResObject(
-                                    Stop,
+                                    stop,
                                     strResPath,
-                                    strLocalFilename,
-                                    strLocalFilename,
-                                    strMime,
+                                    obj.FileName,
+                                    obj.FileName,
+                                    obj.Mime,
                                     ranges[j],
                                     j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
                                     timestamp,
@@ -450,72 +558,19 @@ namespace DigitalPlatform.CirculationClient
                             timestamp = output_timestamp;
 
                             if (timestamp != null)
-                                ListViewUtil.ChangeItemText(item,
-                                COLUMN_TIMESTAMP,
-                                ByteArray.GetHexTimeStampString(timestamp));
+                                obj.Timestamp = ByteArray.GetHexTimeStampString(timestamp);
 
                             strWarning = "";
 
                             if (lRet == -1)
-                            {
-                                /*
-                                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
-                                {
-
-                                    if (this.bNotAskTimestampMismatchWhenOverwrite == true)
-                                    {
-                                        timestamp = new byte[output_timestamp.Length];
-                                        Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-                                        strWarning = " (时间戳不匹配, 自动重试)";
-                                        if (ranges.Length == 1 || j == 0)
-                                            goto REDOSINGLESAVE;
-                                        goto REDOWHOLESAVE;
-                                    }
-
-
-                                    DialogResult result = MessageDlg.Show(this,
-                                        "上载 '" + strLocalFilename + "' (片断:" + ranges[j] + "/总尺寸:" + Convert.ToString(fi.Length)
-                                        + ") 时发现时间戳不匹配。详细情况如下：\r\n---\r\n"
-                                        + strError + "\r\n---\r\n\r\n是否以新时间戳强行上载?\r\n注：(是)强行上载 (否)忽略当前记录或资源上载，但继续后面的处理 (取消)中断整个批处理",
-                                        "dp2batch",
-                                        MessageBoxButtons.YesNoCancel,
-                                        MessageBoxDefaultButton.Button1,
-                                        ref this.bNotAskTimestampMismatchWhenOverwrite);
-                                    if (result == DialogResult.Yes)
-                                    {
-                                        timestamp = new byte[output_timestamp.Length];
-                                        Array.Copy(output_timestamp, 0, timestamp, 0, output_timestamp.Length);
-                                        strWarning = " (时间戳不匹配, 应用户要求重试)";
-                                        if (ranges.Length == 1 || j == 0)
-                                            goto REDOSINGLESAVE;
-                                        goto REDOWHOLESAVE;
-                                    }
-
-                                    if (result == DialogResult.No)
-                                    {
-                                        goto END1;	// 继续作后面的资源
-                                    }
-
-                                    if (result == DialogResult.Cancel)
-                                    {
-                                        strError = "用户中断";
-                                        goto ERROR1;	// 中断整个处理
-                                    }
-                                }
-                                 * */
                                 goto ERROR1;
-                            }
                         }
                     }
 
-                    SetLineInfo(item,
-                        // strUsage, 
-                        LineState.Normal);
-                    SetXmlChanged(item, false);
-                    SetResChanged(item, false);
+                    obj.LineState = LineState.Normal;
+                    obj.XmlChanged = false;
+                    obj.ResChanged = false;
                 }
-
-                this.DeleteTempFiles();
 
                 this.Changed = false;
                 return nUploadCount;
@@ -524,26 +579,15 @@ namespace DigitalPlatform.CirculationClient
             }
             finally
             {
-                if (Stop != null)
+                if (stop != null)
                 {
-#if NO
-                    Stop.EndLoop();
-                    Stop.OnStop -= new StopEventHandler(this.DoStop);
                     if (nUploadCount > 0)
-                        Stop.Initial("上载资源完成");
+                        stop.Initial("上载资源完成");
                     else
-                        Stop.Initial("");
-                    Stop.Style = old_stop_style;
-#endif
-                    if (nUploadCount > 0)
-                        Stop.Initial("上载资源完成");
-                    else
-                        Stop.Initial("");
+                        stop.Initial("");
                 }
             }
         }
-
-#endif
 
         public static ObjectInfoCollection FromXml(string strXml)
         {
@@ -552,7 +596,15 @@ namespace DigitalPlatform.CirculationClient
 
         public string ToXml()
         {
-            return "";
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+
+            foreach (ObjectInfo info in this)
+            {
+
+            }
+
+            return dom.DocumentElement.OuterXml;
         }
     }
 }

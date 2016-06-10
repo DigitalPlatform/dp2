@@ -2008,7 +2008,6 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-
         // 设置/保存册信息
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分。库名可以用来确定书目库，id可以被实体记录用来设置<parent>元素内容。另外书目库名和EntityInfo中的NewRecPath形成映照关系，需要检查它们是否正确对应
@@ -2427,7 +2426,6 @@ namespace DigitalPlatform.LibraryServer
                             strLockBarcode = strOldBarcode;
                         }
 
-
                         // 加锁
                         if (String.IsNullOrEmpty(strLockBarcode) == false)
                             this.EntityLocks.LockForWrite(strLockBarcode);
@@ -2578,8 +2576,6 @@ namespace DigitalPlatform.LibraryServer
                                 {
                                     Debug.Assert(false, "这里不可能出现的info.Action值 '" + info.Action + "'");
                                 }
-
-
                             } // end of if (nRet == 1)
                             else
                             {
@@ -3241,7 +3237,7 @@ namespace DigitalPlatform.LibraryServer
             string strBookType = DomUtil.GetElementText(dom.DocumentElement,
     "bookType");
 
-            if (string.IsNullOrEmpty(strReaderType)
+            if (string.IsNullOrEmpty(strBookType)
     && values.IndexOf("") != -1)
             {
                 // 允许列表中出现 ""
@@ -4091,7 +4087,7 @@ namespace DigitalPlatform.LibraryServer
                             //      -1  error
                             //      0   没有找到<request>元素
                             nRet = DoReservationNotify(
-                                // channel.Container,
+                                null,
                                 channel,
                                 strReservationReaderBarcode,
                                 true,   // 需要函数内加锁

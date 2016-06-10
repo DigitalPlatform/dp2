@@ -198,7 +198,7 @@ namespace dp2Circulation
         /// <summary>
         /// 配置存储
         /// </summary>
-        public ApplicationInfo AppInfo = new ApplicationInfo("dp2circulation.xml");
+        public ApplicationInfo AppInfo = null;  // new ApplicationInfo("dp2circulation.xml");
 
         /// <summary>
         /// Stop 管理器

@@ -12460,7 +12460,7 @@ namespace dp2Library
                 if (StringUtil.IsInList("getres", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获取资源被拒绝。不具备getres权限。";
+                    result.ErrorInfo = "当前用户 "+sessioninfo.UserID+" 获取资源被拒绝。不具备getres权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

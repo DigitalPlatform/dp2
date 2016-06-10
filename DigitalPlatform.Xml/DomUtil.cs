@@ -1638,7 +1638,6 @@ namespace DigitalPlatform.Xml
                 throw (new Exception("nodeRoot参数不能为null"));
             }
 
-
             XmlNodeList nodes = nodeRoot.SelectNodes(strXpath);
 
             if (nodes.Count == 0)
