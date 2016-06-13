@@ -1942,13 +1942,13 @@ namespace DigitalPlatform.LibraryServer
             DateTime now = DateTime.Now;
 
             // 正规化时间
-            nRet = LibraryApplication.RoundTime("day",
+            nRet = DateTimeUtil.RoundTime("day",
                 ref now,
                 out strError);
             if (nRet == -1)
                 return -1;
 
-            nRet = LibraryApplication.RoundTime("day",
+            nRet = DateTimeUtil.RoundTime("day",
                 ref time,
                 out strError);
             if (nRet == -1)

@@ -12,6 +12,96 @@ namespace DigitalPlatform.IO
     /// </summary>
     public class DateTimeUtil
     {
+        // 分析期限参数
+        public static int ParsePeriodUnit(string strPeriod,
+            string strDefaultUnit,
+            out long lValue,
+            out string strUnit,
+            out string strError)
+        {
+            lValue = 0;
+            strUnit = "";
+            strError = "";
+
+            strPeriod = strPeriod.Trim();
+
+            if (String.IsNullOrEmpty(strPeriod) == true)
+            {
+                strError = "期限字符串为空";
+                return -1;
+            }
+
+            string strValue = "";
+
+            for (int i = 0; i < strPeriod.Length; i++)
+            {
+                if (strPeriod[i] >= '0' && strPeriod[i] <= '9')
+                {
+                    strValue += strPeriod[i];
+                }
+                else
+                {
+                    strUnit = strPeriod.Substring(i).Trim();
+                    break;
+                }
+            }
+
+            // 将strValue转换为数字
+            try
+            {
+                lValue = Convert.ToInt64(strValue);
+            }
+            catch (Exception)
+            {
+                strError = "期限参数数字部分'" + strValue + "'格式不合法";
+                return -1;
+            }
+
+            if (String.IsNullOrEmpty(strUnit) == true)
+                strUnit = strDefaultUnit;
+
+            if (String.IsNullOrEmpty(strUnit) == true)
+                strUnit = "day";   // 缺省单位为"天"
+
+            strUnit = strUnit.ToLower();    // 统一转换为小写
+            return 0;
+        }
+
+        // 按照时间单位,把时间值零头去除,正规化,便于后面计算差额
+        /// <summary>
+        /// 按照时间基本单位，去掉零头，便于互相计算(整单位的)差额。
+        /// 算法是先转换为本地时间，去掉零头，再转换回 GMT 时间
+        /// </summary>
+        /// <param name="strUnit">时间单位。day/hour之一。如果为空，相当于 day</param>
+        /// <param name="time">要处理的时间。为 GMT 时间</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1: 出错; 0: 成功</returns>
+        public static int RoundTime(string strUnit,
+    ref DateTime time,
+    out string strError)
+        {
+            strError = "";
+
+            time = time.ToLocalTime();
+            if (strUnit == "day" || string.IsNullOrEmpty(strUnit) == true)
+            {
+                time = new DateTime(time.Year, time.Month, time.Day,
+                    12, 0, 0, 0);
+            }
+            else if (strUnit == "hour")
+            {
+                time = new DateTime(time.Year, time.Month, time.Day,
+                    time.Hour, 0, 0, 0);
+            }
+            else
+            {
+                strError = "未知的时间单位 '" + strUnit + "'";
+                return -1;
+            }
+            time = time.ToUniversalTime();
+            return 0;
+        }
+
         public static string ToDateString(DateTime day)
         {
             return day.Year.ToString() + "/" + day.Month.ToString() + "/" + day.Day.ToString();

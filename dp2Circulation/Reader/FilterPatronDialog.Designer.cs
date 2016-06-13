@@ -40,7 +40,7 @@
             // checkBox_range_inPeriod
             // 
             this.checkBox_range_inPeriod.AutoSize = true;
-            this.checkBox_range_inPeriod.Location = new System.Drawing.Point(26, 90);
+            this.checkBox_range_inPeriod.Location = new System.Drawing.Point(26, 61);
             this.checkBox_range_inPeriod.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_range_inPeriod.Name = "checkBox_range_inPeriod";
             this.checkBox_range_inPeriod.Size = new System.Drawing.Size(60, 16);
@@ -52,7 +52,7 @@
             // checkBox_range_noBorrowAndOverdueItem
             // 
             this.checkBox_range_noBorrowAndOverdueItem.AutoSize = true;
-            this.checkBox_range_noBorrowAndOverdueItem.Location = new System.Drawing.Point(11, 49);
+            this.checkBox_range_noBorrowAndOverdueItem.Location = new System.Drawing.Point(11, 20);
             this.checkBox_range_noBorrowAndOverdueItem.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_range_noBorrowAndOverdueItem.Name = "checkBox_range_noBorrowAndOverdueItem";
             this.checkBox_range_noBorrowAndOverdueItem.Size = new System.Drawing.Size(144, 16);
@@ -63,7 +63,7 @@
             // checkBox_range_outofPeriod
             // 
             this.checkBox_range_outofPeriod.AutoSize = true;
-            this.checkBox_range_outofPeriod.Location = new System.Drawing.Point(26, 110);
+            this.checkBox_range_outofPeriod.Location = new System.Drawing.Point(26, 81);
             this.checkBox_range_outofPeriod.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_range_outofPeriod.Name = "checkBox_range_outofPeriod";
             this.checkBox_range_outofPeriod.Size = new System.Drawing.Size(60, 16);
@@ -75,7 +75,7 @@
             // checkBox_range_hasOverdueItem
             // 
             this.checkBox_range_hasOverdueItem.AutoSize = true;
-            this.checkBox_range_hasOverdueItem.Location = new System.Drawing.Point(11, 130);
+            this.checkBox_range_hasOverdueItem.Location = new System.Drawing.Point(11, 101);
             this.checkBox_range_hasOverdueItem.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_range_hasOverdueItem.Name = "checkBox_range_hasOverdueItem";
             this.checkBox_range_hasOverdueItem.Size = new System.Drawing.Size(84, 16);
@@ -86,7 +86,7 @@
             // checkBox_range_hasBorrowItem
             // 
             this.checkBox_range_hasBorrowItem.AutoSize = true;
-            this.checkBox_range_hasBorrowItem.Location = new System.Drawing.Point(11, 70);
+            this.checkBox_range_hasBorrowItem.Location = new System.Drawing.Point(11, 41);
             this.checkBox_range_hasBorrowItem.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_range_hasBorrowItem.Name = "checkBox_range_hasBorrowItem";
             this.checkBox_range_hasBorrowItem.Size = new System.Drawing.Size(84, 16);
@@ -119,8 +119,10 @@
             // 
             // FilterPatronDialog
             // 
+            this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(338, 243);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);

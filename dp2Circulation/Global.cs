@@ -23,7 +23,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CommonControl;
 
@@ -34,6 +33,150 @@ namespace dp2Circulation
     /// </summary>
     public class Global
     {
+        // 检测应还书时间是否超过当前时间
+        // parameters:
+        //      end 应还书时间。GMT 时间
+        //      now 当前时间。GMT 时间
+        public static int IsOver(string strUnit,
+            DateTime end,
+            DateTime now,
+            out string strError)
+        {
+            strError = "";
+            int nRet = DateTimeUtil.RoundTime(strUnit, ref now, out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (now > end)
+                return 1;   // 超过
+            return 0;   // 没有超过
+        }
+
+        // 看现在是否已经超期
+        public static int IsOverdue(string strBorrowDate,
+            string strPeriod,
+            out string strError)
+        {
+            strError = "";
+
+            DateTime now = DateTime.UtcNow;
+            DateTime timeEnd = new DateTime(0);
+            int nRet = GetReturnDay(
+                strBorrowDate,
+                strPeriod,
+            out timeEnd,
+            out strError);
+            if (nRet == -1)
+                return -1;
+
+            string strPeriodUnit = "";
+            long lPeriodValue = 0;
+
+            nRet = DateTimeUtil.ParsePeriodUnit(strPeriod,
+                "day",
+                out lPeriodValue,
+                out strPeriodUnit,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "借阅期限值 '" + strPeriod + "' 格式错误: " + strError;
+                return -1;
+            }
+
+            return IsOver(strPeriodUnit, timeEnd, now, out strError);
+        }
+
+        // 测算应还书时间
+        public static int GetReturnDay(
+            string strBorrowDate,
+            string strPeriod,
+            out DateTime timeEnd,
+            out string strError)
+        {
+            timeEnd = new DateTime(0);
+            string strPeriodUnit = "";
+            long lPeriodValue = 0;
+
+            int nRet = DateTimeUtil.ParsePeriodUnit(strPeriod,
+                "day",
+                out lPeriodValue,
+                out strPeriodUnit,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "借阅期限值 '" + strPeriod + "' 格式错误: " + strError;
+                return -1;
+            }
+
+            DateTime borrowdate = new DateTime((long)0);
+
+            try
+            {
+                borrowdate = DateTimeUtil.FromRfc1123DateTimeString(strBorrowDate);
+            }
+            catch
+            {
+                strError = "借阅日期字符串 '" + strBorrowDate + "' 格式错误";
+                return -1;
+            }
+
+            return GetReturnDay(
+                borrowdate,
+                lPeriodValue,
+                strPeriodUnit,
+                out timeEnd,
+                out strError);
+        }
+
+        // 测算应还书日期
+        // 这是理论还书时间，不考虑宽限期情况
+        // parameters:
+        //      timeStart   借阅开始时间。GMT时间
+        //      timeEnd     返回应还回的最后时间。GMT时间
+        // return:
+        //      -1  出错
+        //      0   成功
+        public static int GetReturnDay(
+            DateTime timeStart,
+            long lPeriod,
+            string strUnit,
+            out DateTime timeEnd,
+            out string strError)
+        {
+            strError = "";
+            timeEnd = DateTime.MinValue;
+
+            // 正规化时间
+            int nRet = DateTimeUtil.RoundTime(strUnit,
+                ref timeStart,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            TimeSpan delta;
+
+            if (strUnit == "day")
+                delta = new TimeSpan((int)lPeriod, 0, 0, 0);
+            else if (strUnit == "hour")
+                delta = new TimeSpan((int)lPeriod, 0, 0);
+            else
+            {
+                strError = "未知的时间单位 '" + strUnit + "'";
+                return -1;
+            }
+
+            timeEnd = timeStart + delta;
+
+            // 正规化时间
+            nRet = DateTimeUtil.RoundTime(strUnit,
+                ref timeEnd,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            return 0;
+        }
+
         // parameters:
         //      strName 例如，"KB2544514"
         public static bool IsKbInstalled(string strName)
@@ -189,7 +332,7 @@ namespace dp2Circulation
 
             textbox.Text = strText;
         }
-        
+
         // 设置或者刷新一个操作记载
         internal static int SetOperation(
             ref XmlDocument dom,
@@ -419,7 +562,7 @@ namespace dp2Circulation
                     {
                         string strCmd = StringUtil.GetLeadingCommand(strContent);
 
-                        if (string.IsNullOrEmpty(strCmd) == false 
+                        if (string.IsNullOrEmpty(strCmd) == false
                             && StringUtil.HasHead(strCmd, "cr:") == true)
                             results.Add(strCmd.Substring(3));
                     }
@@ -1382,7 +1525,7 @@ namespace dp2Circulation
             if (end != new DateTime(0))
                 strEnd = DateTimeUtil.DateTimeToString8(end);
 
-            return  strStart + " - " + strEnd;
+            return strStart + " - " + strEnd;
         }
 
         // 解析时间范围字符串
@@ -1813,7 +1956,7 @@ namespace dp2Circulation
 
                 list.BeginUpdate();
 
-                for (int i = indices.Length - 1; i >= 0; i-- )
+                for (int i = indices.Length - 1; i >= 0; i--)
                 {
                     list.Items.RemoveAt(indices[i]);
                 }
@@ -1893,7 +2036,7 @@ namespace dp2Circulation
 
             }
 
-                // 确保列标题数目够
+            // 确保列标题数目够
             if (AutoExpandColumnCount == true)
             {
                 if (list != null)
@@ -2442,9 +2585,9 @@ namespace dp2Circulation
             StopWebBrowser(webBrowser);
 
             strHtml = strHtml.Replace("%datadir%", strDataDir);
-            strHtml = strHtml.Replace("%mappeddir%",  PathUtil.MergePath(strDataDir, "servermapped"));
+            strHtml = strHtml.Replace("%mappeddir%", PathUtil.MergePath(strDataDir, "servermapped"));
 
-            string strTempFilename = Path.Combine(strDataDir, "~temp_"+strTempFileType+".html");
+            string strTempFilename = Path.Combine(strDataDir, "~temp_" + strTempFileType + ".html");
             using (StreamWriter sw = new StreamWriter(strTempFilename, false, Encoding.UTF8))
             {
                 sw.Write(strHtml);
@@ -2609,7 +2752,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
                 return;
             }
             string strImageUrl = PathUtil.MergePath(strDataDir, "page_blank_128.png");
-            string strHtml = "<html><body style='background-color:" + ColorUtil.Color2String(backColor)+ ";'><img src='" + strImageUrl + "' width='64' height='64' alt='空'></body></html>";
+            string strHtml = "<html><body style='background-color:" + ColorUtil.Color2String(backColor) + ";'><img src='" + strImageUrl + "' width='64' height='64' alt='空'></body></html>";
             webBrowser.DocumentText = strHtml;
         }
 
@@ -2805,7 +2948,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
                     File.Delete(filenames[i]);
                 }
                 catch
-                { 
+                {
                 }
             }
         }
@@ -2841,7 +2984,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
             if (nRet == -1)
                 return "";
 
-            return strPath.Substring(nRet+1).Trim();
+            return strPath.Substring(nRet + 1).Trim();
         }
 
 #if NO
@@ -2880,7 +3023,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
         {
             strError = "";
             strPublisherNumber = "";
-            int nRet= 0;
+            int nRet = 0;
 
             if (strISBN == null)
             {
