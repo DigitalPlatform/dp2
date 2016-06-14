@@ -1901,6 +1901,7 @@ namespace dp2Circulation
                 // 汇集期信息
                 List<String> IssueXmls = new List<string>();
                 List<string> all_issue_refids = new List<string>();  // 调用对话框以前，全部期的refif数组
+                List<string> IssueObjectXmls = new List<string>();
                 foreach (IssueItem issue_item in this.Items)
                 {
                     // IssueItem issue_item = this.IssueItems[i];
@@ -1931,6 +1932,8 @@ namespace dp2Circulation
                     AddRecPath(ref strIssueXml, issue_item.RecPath);
 
                     IssueXmls.Add(strIssueXml);
+                    IssueObjectXmls.Add(issue_item.ObjectXml);
+
                     Debug.Assert(String.IsNullOrEmpty(issue_item.RefID) == false, "");
                     all_issue_refids.Add(issue_item.RefID);
 
@@ -1992,6 +1995,7 @@ namespace dp2Circulation
                     strLayoutMode,
                     ItemXmls,
                     IssueXmls,
+                    IssueObjectXmls,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -2073,7 +2077,7 @@ namespace dp2Circulation
                     deleting_issue_refids.AddRange(all_issue_refids);
 
                     List<string> Xmls = new List<string>(); // 要创建或者修改的期记录
-
+                    List<string> ObjectXmls = new List<string>();
                     // 遍历对象数组，创建deleting_issue_refids和Xmls
                     foreach (IssueBindingItem issue_item in dlg.Issues)
                     {
@@ -2084,11 +2088,13 @@ namespace dp2Circulation
 
                         deleting_issue_refids.Remove(issue_item.RefID);
 
-                        if (issue_item.Changed == true)
+                        if (issue_item.Changed == true
+                            || issue_item.ObjectChanged == true)
                         {
-                            // 根据refid找到这个册对象，并兑现修改
+                            // 根据refid找到这个期对象，并兑现修改
                             // 如果没有找到，则创建之
                             Xmls.Add(issue_item.Xml);
+                            ObjectXmls.Add(issue_item.ObjectXml);
                         }
                     }
 
@@ -2097,6 +2103,7 @@ namespace dp2Circulation
                     //      -1  error
                     //      0   succeed
                     nRet = ChangeIssues(Xmls,
+                        ObjectXmls,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -2338,13 +2345,15 @@ namespace dp2Circulation
         /// <summary>
         /// 根据期 XML 数据，创建或者修改期对象
         /// </summary>
-        /// <param name="Xmls">XML 字符串集合</param>
+        /// <param name="Xmls">表示期记录的 XML 字符串集合</param>
+        /// <param name="ObjectXmls">表示期记录下属对象的 XML 字符串集合</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>
         /// <para>-1: 出错</para>
         /// <para>0 : 成功</para>
         /// </returns>
         public int ChangeIssues(List<string> Xmls,
+            List<string> ObjectXmls,
             out string strError)
         {
             strError = "";
@@ -2356,6 +2365,10 @@ namespace dp2Circulation
             for (int i = 0; i < Xmls.Count; i++)
             {
                 string strXml = Xmls[i];
+                string strObjectXml = "";
+                
+                if (ObjectXmls != null && i < ObjectXmls.Count)
+                    strObjectXml = ObjectXmls[i];
 
                 XmlDocument issue_dom = new XmlDocument();
                 try
@@ -2460,12 +2473,13 @@ namespace dp2Circulation
                         issue_item.ItemDisplayState = ItemDisplayState.Changed;
                 }
 
+                issue_item.ObjectXml = strObjectXml;
+
                 issue_item.Changed = true;    // 否则“保存”按钮不能Enabled
 
                 // 将刚刚加入的事项滚入可见范围
                 issue_item.HilightListViewItem(true);
                 issue_item.RefreshListView(); // 2009/12/18 add
-
             } // end of for i
 
             return 0;

@@ -1580,7 +1580,7 @@ out strError);
 
             int nCount = 0;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) 
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                 + " 开始进行读者记录校验</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
@@ -1653,24 +1653,49 @@ out strError);
                     XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
                     foreach (XmlElement borrow in borrows)
                     {
-                        string borrowDate = borrow.GetAttribute("borrowDate");
-                        if (string.IsNullOrEmpty(borrowDate))
                         {
-                            errors.Add("出现了 borrow 元素的 borrowDate 属性值为空的情况");
-                            continue;
-                        }
-
-                        try
-                        {
-                            DateTime time = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
-                            if (time > DateTime.Now)
+                            string borrowDate = borrow.GetAttribute("borrowDate");
+                            if (string.IsNullOrEmpty(borrowDate))
                             {
-                                errors.Add("借书时间 '" + time.ToString() + "' 比当前时间还靠后");
+                                errors.Add("出现了 borrow 元素的 borrowDate 属性值为空的情况");
+                                continue;
+                            }
+
+                            try
+                            {
+                                DateTime time = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
+                                if (time > DateTime.Now)
+                                {
+                                    errors.Add("借书时间 '" + time.ToString() + "' 比当前时间还靠后");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                errors.Add("borrow 元素的 borrowDate 属性值 '" + borrowDate + "' 不合法: " + ex.Message);
                             }
                         }
-                        catch (Exception ex)
+
+                        /// 
                         {
-                            errors.Add("borrow 元素的 borrowDate 属性值 '" + borrowDate + "' 不合法: " + ex.Message);
+                            string returningDate = borrow.GetAttribute("returningDate");
+                            if (string.IsNullOrEmpty(returningDate))
+                            {
+                                errors.Add("出现了 borrow 元素的 returningDate 属性值为空的情况");
+                                continue;
+                            }
+
+                            try
+                            {
+                                DateTime time = DateTimeUtil.FromRfc1123DateTimeString(returningDate).ToLocalTime();
+                                if (time < DateTime.Now)
+                                {
+                                    errors.Add("还书时间 '" + time.ToString() + "' 比当前时间还靠前");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                errors.Add("borrow 元素的 returningDate 属性值 '" + returningDate + "' 不合法: " + ex.Message);
+                            }
                         }
                     }
 
@@ -1756,6 +1781,7 @@ out strError);
             string strError = "";
 
             FilterPatronDialog dlg = new FilterPatronDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
             this.MainForm.AppInfo.LinkFormState(dlg, "readersearchform_FilterPatronDialog_state");
             dlg.ShowDialog(this);
             this.MainForm.AppInfo.UnlinkFormState(dlg);
@@ -1801,15 +1827,53 @@ out strError);
                             {
                                 foreach (XmlElement borrow in borrows)
                                 {
-                                    string strReturningDate = borrow.GetAttribute("returningDate");
-                                    // TODO: 处理抛出异常
-                                    DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strReturningDate);
-                                    // TODO: 时间要正规化以后再比较
-                                    if (time.ToLocalTime() < DateTime.Now)
+                                    // 2016/6/12
                                     {
-                                        bOn = true;
-                                        break;
+                                        string strBorrowDate = borrow.GetAttribute("borrowDate");
+                                        string strPeriod = borrow.GetAttribute("borrowPeriod");
+                                        if (string.IsNullOrEmpty(strBorrowDate) == true
+                                            || string.IsNullOrEmpty(strPeriod) == true)
+                                        {
+                                            // 记入错误日志
+                                            continue;
+                                        }
+                                        nRet = Global.IsOverdue(strBorrowDate,
+                                            strPeriod,
+                                            out strError);
+                                        if (nRet == -1)
+                                        {
+                                            // 记入错误日志
+                                            continue;
+                                        }
+                                        if (nRet == 1)
+                                        {
+                                            bOn = true;
+                                            break;
+                                        }
+                                        continue;
                                     }
+
+#if NO
+                                    string strReturningDate = borrow.GetAttribute("returningDate");
+                                    // 注: returningDate 为空，这是不正常状态，或者早期的数据。但依然可以通过 borrowDate 和 period 来测算
+                                    if (string.IsNullOrEmpty(strReturningDate) == true)
+                                        continue;
+                                    try
+                                    {
+                                        // TODO: 处理抛出异常
+                                        DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strReturningDate);
+                                        // TODO: 时间要正规化以后再比较
+                                        if (time.ToLocalTime() < DateTime.Now)
+                                        {
+                                            bOn = true;
+                                            break;
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        // TODO: 记入错误日志
+                                    }
+#endif
                                 }
                             }
                         }
@@ -1822,11 +1886,31 @@ out strError);
                                 int nOverdueCount = 0;
                                 foreach (XmlElement borrow in borrows)
                                 {
+#if NO
                                     string strReturningDate = borrow.GetAttribute("returningDate");
                                     // TODO: 处理抛出异常
                                     DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strReturningDate);
                                     // TODO: 时间要正规化以后再比较
                                     if (time.ToLocalTime() < DateTime.Now)
+                                        nOverdueCount++;
+#endif
+                                    string strBorrowDate = borrow.GetAttribute("borrowDate");
+                                    string strPeriod = borrow.GetAttribute("borrowPeriod");
+                                    if (string.IsNullOrEmpty(strBorrowDate) == true
+                                        || string.IsNullOrEmpty(strPeriod) == true)
+                                    {
+                                        // 记入错误日志
+                                        continue;
+                                    }
+                                    nRet = Global.IsOverdue(strBorrowDate,
+                                        strPeriod,
+                                        out strError);
+                                    if (nRet == -1)
+                                    {
+                                        // 记入错误日志
+                                        continue;
+                                    }
+                                    if (nRet == 1)
                                         nOverdueCount++;
                                 }
                                 if (nOverdueCount == 0)
@@ -7015,30 +7099,34 @@ XLColor.DarkGreen,
                 {
                     string strPeriod = borrow.GetAttribute("borrowPeriod");
                     string strRfc1123String = borrow.GetAttribute("returningDate");
-                    try
-                    {
-                        DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strRfc1123String);
-                        TimeSpan delta = DateTime.Now - time.ToLocalTime();
-                        if (strPeriod.IndexOf("hour") != -1)
-                        {
-                            if (delta.Hours > 0)
-                            {
-                                strOverdueInfo = "已超期 " + delta.Hours + " 小时";
-                                bIsOverdue = true;
-                            }
-                        }
-                        else
-                        {
-                            if (delta.Days > 0)
-                            {
-                                strOverdueInfo = "已超期 " + delta.Days + " 天";
-                                bIsOverdue = true;
-                            }
-                        }
-                    }
-                    catch
-                    {
 
+                    if (string.IsNullOrEmpty(strRfc1123String) == false)
+                    {
+                        try
+                        {
+                            DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strRfc1123String);
+                            TimeSpan delta = DateTime.Now - time.ToLocalTime();
+                            if (strPeriod.IndexOf("hour") != -1)
+                            {
+                                if (delta.Hours > 0)
+                                {
+                                    strOverdueInfo = "已超期 " + delta.Hours + " 小时";
+                                    bIsOverdue = true;
+                                }
+                            }
+                            else
+                            {
+                                if (delta.Days > 0)
+                                {
+                                    strOverdueInfo = "已超期 " + delta.Days + " 天";
+                                    bIsOverdue = true;
+                                }
+                            }
+                        }
+                        catch
+                        {
+
+                        }
                     }
                 }
 

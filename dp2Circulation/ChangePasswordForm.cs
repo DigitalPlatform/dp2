@@ -114,6 +114,8 @@ namespace dp2Circulation
                 return;
             }
 
+            bool bOldPasswordEnabled = this.textBox_reader_oldPassword.Enabled;
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在修改读者密码 ...");
             stop.BeginLoop();
@@ -128,16 +130,13 @@ namespace dp2Circulation
                 long lRet = Channel.ChangeReaderPassword(
                     stop,
                     this.textBox_reader_barcode.Text,
-                    this.textBox_reader_oldPassword.Text,
+                    bOldPasswordEnabled == false ? null : this.textBox_reader_oldPassword.Text,
                     this.textBox_reader_newPassword.Text,
                     out strError);
                 if (lRet == 0)
-                {
                     goto ERROR1;
-                }
                 if (lRet == -1)
                     goto ERROR1;
-
             }
             finally
             {

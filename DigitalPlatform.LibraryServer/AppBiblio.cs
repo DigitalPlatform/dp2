@@ -362,7 +362,7 @@ namespace DigitalPlatform.LibraryServer
                             "",
                             "getbiblioinfo") != null)
                         {
-                            strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbiblioinfo 操作的存取权限";
+                            strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbiblioinfo 操作的存取权限";
                             result.Value = -1;
                             result.ErrorInfo = strError;
                             result.ErrorCode = ErrorCode.AccessDenied;
@@ -384,7 +384,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (IsInAccessList(strAction, strActionList, out strAccessParameters) == false)
                         {
-                            strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbiblioinfo 操作的存取权限";
+                            strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbiblioinfo 操作的存取权限";
                             result.Value = -1;
                             result.ErrorInfo = strError;
                             result.ErrorCode = ErrorCode.AccessDenied;
@@ -433,7 +433,7 @@ namespace DigitalPlatform.LibraryServer
                                         "",
                                         "getbibliosummary") != null)
                                     {
-                                        strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbibliosummary 操作的存取权限";
+                                        strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbibliosummary 操作的存取权限";
                                         result.Value = -1;
                                         result.ErrorInfo = strError;
                                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -455,7 +455,7 @@ namespace DigitalPlatform.LibraryServer
                                 {
                                     if (IsInAccessList(strAction, strActionList, out strAccessParameters) == false)
                                     {
-                                        strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbibliosummary 操作的存取权限";
+                                        strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 getbibliosummary 操作的存取权限";
                                         result.Value = -1;
                                         result.ErrorInfo = strError;
                                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -3760,7 +3760,7 @@ nsmgr);
                         }
                         else
                         {
-                            strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
+                            strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
                             result.Value = -1;
                             result.ErrorInfo = strError;
                             result.ErrorCode = ErrorCode.AccessDenied;
@@ -3795,7 +3795,7 @@ nsmgr);
                         }
                         else if (IsInAccessList(strAction, strAccessActionList, out strAccessParameters) == false)
                         {
-                            strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
+                            strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
                             result.Value = -1;
                             result.ErrorInfo = strError;
                             result.ErrorCode = ErrorCode.AccessDenied;
@@ -5044,14 +5044,14 @@ out strError);
                         }
                         else
                         {
-                            strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
+                            strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
                             result.Value = -1;
                             result.ErrorInfo = strError;
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
 #if NO
-                        strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
+                        strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -5066,7 +5066,7 @@ out strError);
                     {
                         if (IsInAccessList(strAction, strActionList, out strAccessParameters) == false)
                         {
-                            strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
+                            strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strBiblioDbName + "' 执行 setbiblioinfo " + strAction + " 操作的存取权限";
                             result.Value = -1;
                             result.ErrorInfo = strError;
                             result.ErrorCode = ErrorCode.AccessDenied;
@@ -5441,7 +5441,7 @@ out strError);
                 if (StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的实体记录，但当前用户不具备setiteminfo或setentities权限，不能复制或者移动它们。";
+                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的实体记录，但当前用户不具备 setiteminfo 或 setentities 权限，不能复制或者移动它们。";
                     return -2;
                 }
             }
@@ -5475,7 +5475,7 @@ out strError);
                     && StringUtil.IsInList("setorderinfo", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的订购记录，但当前用户不具备order、setorderinfo或setorders权限，不能复制或移动它们。";
+                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的订购记录，但当前用户不具备 order、setorderinfo 或 setorders 权限，不能复制或移动它们。";
                     return -2;
                 }
             }
@@ -5510,7 +5510,7 @@ out strError);
                 if (StringUtil.IsInList("setissues", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("setissueinfo", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的期记录，但当前用户不具备setissueinfo或setissues权限，不能复制或移动它们。";
+                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的期记录，但当前用户不具备 setissueinfo 或 setissues 权限，不能复制或移动它们。";
 
                     return -2;
                 }
@@ -5543,7 +5543,7 @@ out strError);
                 // 权限字符串
                 if (StringUtil.IsInList("setcommentinfo", sessioninfo.RightsOrigin) == false)
                 {
-                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的评注记录，但当前用户不具备setcommentinfo权限，不能复制或移动它们。";
+                    strError = "复制(移动)书目信息的操作被拒绝。因拟操作的书目记录带有下属的评注记录，但当前用户不具备 setcommentinfo 权限，不能复制或移动它们。";
                     return -2;
                 }
             }

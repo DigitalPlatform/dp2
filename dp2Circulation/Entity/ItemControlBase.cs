@@ -538,6 +538,8 @@ namespace dp2Circulation
 
             try
             {
+                List<string> errors = new List<string>();
+
                 // string strHtml = "";
                 this.ClearItems();
                 this.ErrorInfo = "";
@@ -548,7 +550,6 @@ namespace dp2Circulation
                 long lCount = -1;
                 for (; ; )
                 {
-
                     EntityInfo[] entities = null;
 
                     // ? Thread.Sleep(500);
@@ -570,7 +571,7 @@ namespace dp2Circulation
                              out entities,
                              out strError);
                         if (lRet == -1)
-                            goto ERROR1;
+                            return -1;
                     }
                     else if (this.ItemType == "order")
                     {
@@ -584,7 +585,7 @@ namespace dp2Circulation
     out entities,
     out strError);
                         if (lRet == -1)
-                            goto ERROR1;
+                            return -1;
                     }
                     else if (this.ItemType == "issue")
                     {
@@ -598,7 +599,7 @@ namespace dp2Circulation
     out entities,
     out strError);
                         if (lRet == -1)
-                            goto ERROR1;
+                            return -1;
                     }
                     else if (this.ItemType == "comment")
                     {
@@ -612,12 +613,12 @@ namespace dp2Circulation
     out entities,
     out strError);
                         if (lRet == -1)
-                            goto ERROR1;
+                            return -1;
                     }
                     else
                     {
                         strError = "未知的事项类型 '" + this.ItemType + "'";
-                        goto ERROR1;
+                        return -1;
                     }
 
                     lResultCount = lRet;
@@ -630,32 +631,48 @@ namespace dp2Circulation
                     this.m_listView.BeginUpdate();
                     try
                     {
-                        for (int i = 0; i < entities.Length; i++)
+                        foreach (EntityInfo entity in entities)
                         {
-                            if (entities[i].ErrorCode != ErrorCodeValue.NoError)
+                            if (entity.ErrorCode != ErrorCodeValue.NoError)
                             {
-                                strError = "路径为 '" + entities[i].OldRecPath + "' 的" + this.ItemTypeName + "记录装载中发生错误: " + entities[i].ErrorInfo;  // NewRecPath
+                                strError = "路径为 '" + entity.OldRecPath + "' 的" + this.ItemTypeName + "记录装载中发生错误: " + entity.ErrorInfo;  // NewRecPath
                                 return -1;
                             }
 
                             // 所返回的记录有可能是被过滤掉的
-                            if (string.IsNullOrEmpty(entities[i].OldRecord) == true)
+                            if (string.IsNullOrEmpty(entity.OldRecord) == true)
                                 continue;
 
                             // 剖析一个册的xml记录，取出有关信息放入listview中
                             T bookitem = new T();
 
-                            int nRet = bookitem.SetData(entities[i].OldRecPath, // NewRecPath
-                                     entities[i].OldRecord,
-                                     entities[i].OldTimestamp,
+                            int nRet = bookitem.SetData(entity.OldRecPath, // NewRecPath
+                                     entity.OldRecord,
+                                     entity.OldTimestamp,
                                      out strError);
                             if (nRet == -1)
                                 return -1;
 
-                            if (entities[i].ErrorCode == ErrorCodeValue.NoError)
+                            if (entity.ErrorCode == ErrorCodeValue.NoError)
                                 bookitem.Error = null;
                             else
-                                bookitem.Error = entities[i];
+                                bookitem.Error = entity;
+
+                            // 装载对象信息
+                            if (this.ItemType == "issue")   // 优化，只让期记录处理对象信息
+                            {
+                                nRet = bookitem.LoadObjects(
+                                    channel,
+                                    this.Stop,
+                                    Program.MainForm.ServerVersion,
+                                    entity.OldRecPath,
+                                    entity.OldRecord,
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    errors.Add(strError);
+                                }
+                            }
 
                             this.Items.Add(bookitem);
 
@@ -677,6 +694,13 @@ namespace dp2Circulation
                     if (lStart + lCount > lResultCount)
                         lCount = lResultCount - lStart;
                 }
+
+                if (errors.Count > 0)
+                {
+                    strError = StringUtil.MakePathList(errors, "; ");
+                    return -1;
+                }
+                return 1;
             }
             finally
             {
@@ -689,10 +713,6 @@ namespace dp2Circulation
 #endif
                 Stop.Initial("");
             }
-
-            return 1;
-        ERROR1:
-            return -1;
         }
 
         // 
@@ -1385,13 +1405,7 @@ namespace dp2Circulation
                     int nRet = 0;
 
                     if (this.Items == null)
-                    {
-                        /*
-                        strError = "没有册信息需要保存";
-                        goto ERROR1;
-                         * */
                         return 0;
-                    }
 
                     // 检查全部事项的Parent值是否适合保存
                     // return:
@@ -1401,14 +1415,14 @@ namespace dp2Circulation
                     if (nRet == -1)
                     {
                         strError = "无法保存册信息，原因：" + strError;
-                        goto ERROR1;
+                        return -1;
                     }
 
                     nRet = this.Items.CheckRefIDForSave(out strError);
                     if (nRet == -1)
                     {
                         strError = "无法保存册信息，原因：" + strError;
-                        goto ERROR1;
+                        return -1;
                     }
 
                     EntityInfo[] entities = null;
@@ -1418,7 +1432,7 @@ namespace dp2Circulation
                         out entities,
                         out strError);
                     if (nRet == -1)
-                        goto ERROR1;
+                        return -1;
 
                     if (entities == null || entities.Length == 0)
                         return 0; // 没有必要保存
@@ -1432,14 +1446,23 @@ namespace dp2Circulation
                         entities,
                         out strError);
                     if (nRet != 0)
-                        goto ERROR1;
+                        return -1;
+
+                    // 保存每个 item 的对象
+                    if (this.ItemType == "issue")   // 优化，只让期记录处理对象信息
+                    {
+                        nRet = SaveObjects(
+                            channel,
+                            this.Stop,
+                            Program.MainForm.ServerVersion,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
 
                     this.Changed = false;
                     this.MainForm.StatusBarMessage = this.ItemTypeName + "信息 提交 / 保存 成功";
                     return 1;
-                ERROR1:
-                    // MessageBox.Show(this/*ForegroundWindow.Instance*/, strError);
-                    return -1;
                 }
                 finally
                 {
@@ -1450,6 +1473,36 @@ namespace dp2Circulation
             {
                 m_nInSaveItems--;
             }
+        }
+
+        public int SaveObjects(
+            LibraryChannel channel,
+            Stop stop,
+            string dp2library_version,
+            out string strError)
+        {
+            strError = "";
+
+            foreach (T bookitem in this.Items)
+            {
+#if NO
+                if (bookitem.ItemDisplayState == ItemDisplayState.Normal)
+                    continue;
+#endif
+
+                if (bookitem.ObjectChanged == false)
+                    continue;
+
+                int nRet = bookitem.SaveObjects(
+            channel,
+            stop,
+            dp2library_version,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            return 0;
         }
 
         // 原名 DoSaveEntities

@@ -552,7 +552,7 @@ namespace DigitalPlatform.LibraryServer
 
 
             // 正规化时间date
-            nRet = LibraryApplication.RoundTime(strPeriodUnit,
+            nRet = DateTimeUtil.RoundTime(strPeriodUnit,
                 ref date,
                 out strError);
             if (nRet == -1)
@@ -564,7 +564,7 @@ namespace DigitalPlatform.LibraryServer
             DateTime now = this.App.Clock.UtcNow;  //  DateTime.UtcNow;
 
             // 正规化时间now
-            nRet = LibraryApplication.RoundTime(strPeriodUnit,
+            nRet = DateTimeUtil.RoundTime(strPeriodUnit,
                 ref now,
                 out strError);
             if (nRet == -1)

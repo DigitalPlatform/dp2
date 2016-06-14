@@ -12,6 +12,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Range;
+using DigitalPlatform.IO;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -72,7 +73,7 @@ namespace DigitalPlatform.CirculationClient
             }
             set
             {
-                SetMetadataField("fieldName", value);
+                SetMetadataField("fileName", value);
             }
         }
 
@@ -139,7 +140,7 @@ namespace DigitalPlatform.CirculationClient
             return dom.DocumentElement.OuterXml;
         }
 
-        public ObjectInfo FromXml(string strXml)
+        public static ObjectInfo FromXml(string strXml)
         {
             XmlDocument dom = new XmlDocument();
             dom.LoadXml(strXml);
@@ -156,6 +157,18 @@ namespace DigitalPlatform.CirculationClient
             info.XmlChanged = DomUtil.IsBooleanTrue(root.GetAttribute("xmlChanged"));
             return info;
         }
+
+        public bool IsLocal()
+        {
+            if (this.ResChanged)
+                return true;
+            return false;
+        }
+
+        public bool IsDeleted()
+        {
+            return this.LineState == CirculationClient.LineState.Deleted;
+        }
     }
 
     /// <summary>
@@ -163,7 +176,7 @@ namespace DigitalPlatform.CirculationClient
     /// </summary>
     public class ObjectInfoCollection : List<ObjectInfo>
     {
-        public string BiblioRecPath { get; set; }
+        public string HostRecPath { get; set; }
         public bool Changed { get; set; }
 
         // 装载一条元数据下属的全部对象信息
@@ -187,7 +200,7 @@ namespace DigitalPlatform.CirculationClient
                 return 0;
             }
 
-            this.BiblioRecPath = strBiblioRecPath;
+            this.HostRecPath = strBiblioRecPath;
 
             XmlDocument dom = new XmlDocument();
             try
@@ -240,51 +253,53 @@ namespace DigitalPlatform.CirculationClient
 
                 this.Add(info);
 
-                string strResPath = this.BiblioRecPath + "/object/" + info.ID;
+                string strResPath = this.HostRecPath + "/object/" + info.ID;
                 strResPath = strResPath.Replace(":", "/");
                 recpaths.Add(strResPath);
             }
 
-            if (StringUtil.CompareVersion(dp2library_version, "2.58") >= 0)
+            if (recpaths.Count > 0)
             {
-                // 新方法，速度快
-                if (stop != null)
-                    stop.Initial("正在下载对象的元数据");
-
-                try
+                if (StringUtil.CompareVersion(dp2library_version, "2.58") >= 0)
                 {
-                    BrowseLoader loader = new BrowseLoader();
-                    loader.Channel = channel;
-                    loader.Stop = stop;
-                    loader.RecPaths = recpaths;
-                    loader.Format = "id,metadata,timestamp";
+                    // 新方法，速度快
+                    if (stop != null)
+                        stop.Initial("正在下载对象的元数据");
 
-                    int i = 0;
-                    foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
+                    try
                     {
-                        if (stop != null && stop.State != 0)
+                        BrowseLoader loader = new BrowseLoader();
+                        loader.Channel = channel;
+                        loader.Stop = stop;
+                        loader.RecPaths = recpaths;
+                        loader.Format = "id,metadata,timestamp";
+
+                        int i = 0;
+                        foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
                         {
-                            strError = "用户中断";
-                            return -1;
-                        }
+                            if (stop != null && stop.State != 0)
+                            {
+                                strError = "用户中断";
+                                return -1;
+                            }
 
-                        Debug.Assert(record.Path == recpaths[i], "");
-                        ObjectInfo info = this[i];
+                            Debug.Assert(record.Path == recpaths[i], "");
+                            ObjectInfo info = this[i];
 
-                        if (record.RecordBody.Result != null
-                            && record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
-                        {
-                            info.ErrorInfo = record.RecordBody.Result.ErrorString;
-                            i++;
-                            continue;
-                        }
+                            if (record.RecordBody.Result != null
+                                && record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
+                            {
+                                info.ErrorInfo = record.RecordBody.Result.ErrorString;
+                                i++;
+                                continue;
+                            }
 
-                        string strMetadataXml = record.RecordBody.Metadata;
+                            string strMetadataXml = record.RecordBody.Metadata;
 
-                        info.Metadata = strMetadataXml;
+                            info.Metadata = strMetadataXml;
 
-                        byte[] baMetadataTimestamp = record.RecordBody.Timestamp;
-                        //Debug.Assert(baMetadataTimestamp != null, "");
+                            byte[] baMetadataTimestamp = record.RecordBody.Timestamp;
+                            //Debug.Assert(baMetadataTimestamp != null, "");
 
 #if NO
                         // 取metadata值
@@ -306,28 +321,29 @@ namespace DigitalPlatform.CirculationClient
                         info.Mime = (string)values["mimetype"];
 #endif
 
-                        // tiemstamp
-                        string strTimestamp = ByteArray.GetHexTimeStampString(baMetadataTimestamp);
-                        info.Timestamp = strTimestamp;
+                            // tiemstamp
+                            string strTimestamp = ByteArray.GetHexTimeStampString(baMetadataTimestamp);
+                            info.Timestamp = strTimestamp;
 
-                        i++;
+                            i++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // TODO: 出现异常后，是否改为用原来的方法一个一个对象地获取 metadata?
+                        strError = ex.Message;
+                        return -1;
+                    }
+                    finally
+                    {
+                        stop.Initial("");
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    // TODO: 出现异常后，是否改为用原来的方法一个一个对象地获取 metadata?
-                    strError = ex.Message;
+                    strError = "请升级 dp2library 到 2.58 以上版本";
                     return -1;
                 }
-                finally
-                {
-                    stop.Initial("");
-                }
-            }
-            else
-            {
-                strError = "请升级 dp2library 到 2.58 以上版本";
-                return -1;
             }
 
             this.Changed = false;
@@ -381,15 +397,15 @@ namespace DigitalPlatform.CirculationClient
             if (this.Count == 0)
                 return 0;
 
-            if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
+            if (String.IsNullOrEmpty(this.HostRecPath) == true)
             {
                 strError = "尚未指定 BiblioRecPath";
                 return -1;
             }
 
-            if (IsNewPath(this.BiblioRecPath) == true)
+            if (IsNewPath(this.HostRecPath) == true)
             {
-                strError = "书目记录路径 '" + this.BiblioRecPath + "' 不是已保存的记录路径，无法用于对象资源上载";
+                strError = "宿主记录路径 '" + this.HostRecPath + "' 不是已保存的记录路径，无法用于对象资源上载";
                 return -1;
             }
 
@@ -446,7 +462,7 @@ namespace DigitalPlatform.CirculationClient
 
                     // string strState = ListViewUtil.GetItemText(item, COLUMN_STATE);
 
-                    string strResPath = this.BiblioRecPath + "/object/" + obj.ID;
+                    string strResPath = this.HostRecPath + "/object/" + obj.ID;
 
                     byte[] timestamp = ByteArray.GetTimeStampByteArray(obj.Timestamp);
                     byte[] output_timestamp = null;
@@ -591,7 +607,26 @@ namespace DigitalPlatform.CirculationClient
 
         public static ObjectInfoCollection FromXml(string strXml)
         {
-            return null;
+            ObjectInfoCollection objects = new ObjectInfoCollection();
+
+            if (string.IsNullOrEmpty(strXml))
+                return objects;
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
+
+            foreach (XmlNode node in dom.DocumentElement.ChildNodes)
+            {
+                if (node.NodeType == XmlNodeType.Element && node.Name == "object")
+                {
+                    ObjectInfo info = ObjectInfo.FromXml(node.OuterXml);
+                    objects.Add(info);
+                }
+            }
+
+            objects.Changed = DomUtil.IsBooleanTrue(dom.DocumentElement.GetAttribute("changed"));
+            objects.HostRecPath = dom.DocumentElement.GetAttribute("recPath");
+            return objects;
         }
 
         public string ToXml()
@@ -601,10 +636,313 @@ namespace DigitalPlatform.CirculationClient
 
             foreach (ObjectInfo info in this)
             {
-
+                XmlDocumentFragment frag = dom.CreateDocumentFragment();
+                frag.InnerXml = info.ToXml();
+                dom.DocumentElement.AppendChild(frag);
             }
 
+            dom.DocumentElement.SetAttribute("changed", this.Changed ? "true" : "flase");
+            dom.DocumentElement.SetAttribute("recPath", this.HostRecPath);
             return dom.DocumentElement.OuterXml;
+        }
+
+        public List<ObjectInfo> FindByUsage(string strUsage)
+        {
+            List<ObjectInfo> results = new List<ObjectInfo>();
+            foreach (ObjectInfo info in this)
+            {
+                if (strUsage == "*" || info.Usage == strUsage)
+                    results.Add(info);
+            }
+
+            return results;
+        }
+
+        string GetNewID()
+        {
+            List<string> ids = new List<string>();
+            foreach (ObjectInfo info in this)
+            {
+                ids.Add(info.ID);
+            }
+
+            int nSeed = 0;
+            string strID = "";
+            for (; ; )
+            {
+                strID = Convert.ToString(nSeed++);
+                if (ids.IndexOf(strID) == -1)
+                    return strID;
+            }
+        }
+
+        public int MaskDeleteObjects(List<ObjectInfo> infos)
+        {
+            bool bRemoved = false;   // 是否发生过物理删除listview item的情况
+            int nMaskDeleteCount = 0;
+            foreach (ObjectInfo info in infos)
+            {
+                // 如果本来就是已经标记删除的事项
+                if (info.LineState == LineState.Deleted)
+                    continue;
+
+                // 如果本来就是新增事项，那么彻底从listview中移除
+                if (info.LineState == LineState.New)
+                {
+                    bRemoved = true;
+                    this.Remove(info);
+                    nMaskDeleteCount++;
+                    continue;
+                }
+
+                info.LineState = LineState.Deleted;
+
+                this.Changed = true;
+                nMaskDeleteCount++;
+            }
+
+#if NO
+            if (bRemoved == true)
+            {
+                // 需要看看listview中是不是至少有一个需要保存的事项？否则Changed设为false
+                if (IsChanged() == false)
+                {
+                    this.Changed = false;
+                    return 0;
+                }
+            }
+#endif
+
+            if (nMaskDeleteCount > 0)
+                this.Changed = true;
+            return nMaskDeleteCount;
+        }
+
+        // 确认是否还有增删改的事项
+        // 而this.Changed不是那么精确的
+        bool IsChanged()
+        {
+            foreach (ObjectInfo info in this)
+            {
+                if (info.LineState == LineState.Changed
+                    || info.LineState == LineState.Deleted
+                    || info.LineState == LineState.New)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public int AppendNewItem(
+    string strObjectFilePath,
+    string strUsage,
+    string strRights,
+    out ObjectInfo info,
+    out string strError)
+        {
+            strError = "";
+
+            info = new ObjectInfo();
+            info.LineState = LineState.New;
+            info.XmlChanged = true;
+            info.ResChanged = true;
+
+            info.ID = GetNewID();
+            info.Mime = PathUtil.MimeTypeFrom(strObjectFilePath);
+            FileInfo fileInfo = new FileInfo(strObjectFilePath);
+            info.FileName = fileInfo.FullName;
+            info.Size = Convert.ToString(fileInfo.Length);
+            info.Usage = strUsage;
+            info.Rights = strRights;
+            this.Add(info);
+
+            this.Changed = true;
+            return 0;
+        }
+
+        public int ChangeObjectFile(ObjectInfo info,
+    string strObjectFilePath,
+    string strUsage,
+    string strRights,
+    out string strError)
+        {
+            strError = "";
+
+            if (this.IndexOf(info) == -1)
+            {
+                strError = "info 不是当前集合的元素之一";
+                return -1;
+            }
+
+            if (info.LineState == LineState.Deleted)
+            {
+                strError = "对已经标记删除的对象不能进行修改...";
+                return -1;
+            }
+
+            LineState old_state = info.LineState;
+            string strOldUsage = info.Usage;
+            string strOldRights = info.Rights;
+
+            info.Mime = PathUtil.MimeTypeFrom(strObjectFilePath);
+            FileInfo fileInfo = new FileInfo(strObjectFilePath);
+            info.FileName = fileInfo.FullName;
+            info.Size = Convert.ToString(fileInfo.Length);
+            if (strUsage != null)
+                info.Usage = strUsage;
+            if (strRights != null)
+                info.Rights = strRights;
+            // info.Timestamp = null;   // 以前的时间戳不要修改
+
+            if (old_state != LineState.New)
+            {
+                info.LineState = LineState.Changed;
+                info.ResChanged = true;
+            }
+            else
+            {
+                info.ResChanged = true;
+            }
+
+            if (strOldRights != info.Rights
+                || strOldUsage != info.Usage)
+                info.XmlChanged = true;
+            this.Changed = true;
+            return 0;
+        }
+
+        public int SetObjectByUsage(
+    string strFileName,
+    string strUsage,
+    out string strID,
+    out string strError)
+        {
+            strError = "";
+            strID = "";
+            int nRet = 0;
+
+            ObjectInfo info = null;
+            List<ObjectInfo> infos = this.FindByUsage(strUsage);
+            if (infos.Count == 0)
+            {
+                nRet = this.AppendNewItem(
+                    strFileName,
+                    strUsage,
+                    null, // rights
+                    out info,
+                    out strError);
+            }
+            else
+            {
+                info = infos[0];
+
+                nRet = this.ChangeObjectFile(info,
+                    strFileName,
+                    strUsage,
+                    null,
+                    out strError);
+            }
+            if (nRet == -1)
+                return -1;
+
+            strID = info.ID;
+            return 0;
+        }
+
+        public void MaskDeleteCoverImageObject()
+        {
+            List<ObjectInfo> infos = new List<ObjectInfo>();
+            foreach (ObjectInfo info in this)
+            {
+                // . 分隔 FrontCover.MediumImage
+                if (StringUtil.HasHead(info.Usage, "FrontCover.") == true
+                    || info.Usage == "FrontCover")
+                    infos.Add(info);
+            }
+
+            if (infos.Count > 0)
+                MaskDeleteObjects(infos);
+        }
+
+        // 获得特定的数字对象
+        public ObjectInfo GetCoverImageObject(string strPreferredType = "MediumImage")
+        {
+            ObjectInfo large = null;
+            ObjectInfo medium = null;   // type:FrontCover.MediumImage
+            ObjectInfo normal = null; // type:FronCover
+            ObjectInfo small = null;
+
+            foreach (ObjectInfo info in this)
+            {
+                string strID = info.ID;
+                string strType = info.Usage;
+
+                // . 分隔 FrontCover.MediumImage
+                if (StringUtil.HasHead(strType, "FrontCover." + strPreferredType) == true)
+                    return info;
+
+                if (StringUtil.HasHead(strType, "FrontCover.SmallImage") == true)
+                    small = info;
+                else if (StringUtil.HasHead(strType, "FrontCover.MediumImage") == true)
+                    medium = info;
+                else if (StringUtil.HasHead(strType, "FrontCover.LargeImage") == true)
+                    large = info;
+                else if (StringUtil.HasHead(strType, "FrontCover") == true)
+                    normal = info;
+            }
+
+            if (large != null)
+                return large;
+            if (medium != null)
+                return medium;
+            if (normal != null)
+                return normal;
+            return small;
+        }
+
+        // 在 XmlDocument 对象中添加 <file> 元素。新元素加入在根之下
+        public int AddFileFragments(ref XmlDocument domRecord,
+            bool bRemoveOldFileElements,
+            out string strError)
+        {
+            strError = "";
+
+            if (bRemoveOldFileElements)
+            {
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+                nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+                // 清除以前的<dprms:file>元素
+                XmlNodeList nodes = domRecord.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+                foreach (XmlNode node in nodes)
+                {
+                    node.ParentNode.RemoveChild(node);
+                }
+            }
+
+            foreach (ObjectInfo info in this)
+            {
+                if (String.IsNullOrEmpty(info.ID) == true)
+                    continue;
+
+                LineState state = info.LineState;
+                // 如果是已经标记删除的事项
+                if (state == LineState.Deleted)
+                    continue;
+
+                XmlElement node = domRecord.CreateElement("dprms",
+                    "file",
+                    DpNs.dprms);
+                domRecord.DocumentElement.AppendChild(node);
+
+                node.SetAttribute("id", info.ID);
+                if (string.IsNullOrEmpty(info.Usage) == false)
+                    node.SetAttribute("usage", info.Usage);
+                if (string.IsNullOrEmpty(info.Rights) == false)
+                    node.SetAttribute("rights", info.Rights);
+            }
+
+            return 0;
         }
     }
 }

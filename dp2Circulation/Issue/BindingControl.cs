@@ -1433,6 +1433,7 @@ namespace dp2Circulation
             {
                 string strError = "";
                 int nRet = new_issue.Initial("<root />",
+                    "",
                     false,
                     out strError);
                 Debug.Assert(nRet != -1, "");
@@ -1586,6 +1587,7 @@ namespace dp2Circulation
         }
 
         int CreateIssues(List<string> IssueXmls,
+            List<string> IssueObjectXmls,
             out string strError)
         {
             strError = "";
@@ -1593,11 +1595,15 @@ namespace dp2Circulation
             for (int i = 0; i < IssueXmls.Count; i++)
             {
                 string strXml = IssueXmls[i];
+                string strObjectXml = "";
+                if (IssueObjectXmls != null && i < IssueObjectXmls.Count)
+                    strObjectXml = IssueObjectXmls[i];
 
                 IssueBindingItem issue = new IssueBindingItem();
 
                 issue.Container = this;
                 int nRet = issue.Initial(strXml,
+                    strObjectXml,
                     false,
                     out strError);
                 if (nRet == -1)
@@ -2286,6 +2292,7 @@ namespace dp2Circulation
             string strLayoutMode,
             List<string> ItemXmls,
             List<string> IssueXmls,
+            List<string> IssueObjectXmls,
             out string strError)
         {
             strError = "";
@@ -2341,6 +2348,7 @@ namespace dp2Circulation
 
             // 创建this.Issues
             nRet = CreateIssues(IssueXmls,
+                IssueObjectXmls,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -2676,8 +2684,12 @@ namespace dp2Circulation
             }
 
             // 准备封面图像
-            foreach(IssueBindingItem issue in this.Issues)
+            foreach (IssueBindingItem issue in this.Issues)
             {
+                // 跳过自由期
+                if (String.IsNullOrEmpty(issue.PublishTime) == true)
+                    continue;
+
                 issue.PrepareCoverImage();
             }
 #if DEBUG
@@ -5487,6 +5499,21 @@ namespace dp2Circulation
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
+            // 从剪贴板插入封面图像
+            menuItem = new ToolStripMenuItem(" 从剪贴板插入封面图像(&C)");
+            menuItem.Tag = point;
+            menuItem.Click += new EventHandler(menuItem_insertCoverImageFromClipboard_Click);
+            if (bHasIssueSelected == false)
+                menuItem.Enabled = false;
+            contextMenu.Items.Add(menuItem);
+
+            // 从剪贴板插入封面图像
+            menuItem = new ToolStripMenuItem(" 删除封面图像(&C)");
+            menuItem.Tag = point;
+            menuItem.Click += new EventHandler(menuItem_deleteCoverImage_Click);
+            if (bHasIssueSelected == false)
+                menuItem.Enabled = false;
+            contextMenu.Items.Add(menuItem);
 
             // 切换期布局
             menuItem = new ToolStripMenuItem(" 切换布局(&S)");
@@ -6760,6 +6787,7 @@ issue.Volume);
                 IssueBindingItem new_issue = new IssueBindingItem();
                 new_issue.Container = this;
                 nRet = new_issue.Initial("<root />",
+                    "",
                     false,
                     out strError);
                 if (nRet == -1)
@@ -6966,6 +6994,7 @@ issue.Volume);
                 IssueBindingItem new_issue = new IssueBindingItem();
                 new_issue.Container = this;
                 nRet = new_issue.Initial("<root />",
+                    "",
                     false,
                     out strError);
                 if (nRet == -1)
@@ -7519,6 +7548,7 @@ issue.Volume);
             new_issue = new IssueBindingItem();
             new_issue.Container = this;
             nRet = new_issue.Initial("<root />",
+                "",
                 false, //?
                 out strError);
             if (nRet == -1)
@@ -9103,6 +9133,87 @@ MessageBoxDefaultButton.Button2);
                 strCaptions += strDelimiter + "...";
 
             return strCaptions;
+        }
+
+        void menuItem_deleteCoverImage_Click(object sender, EventArgs e)
+        {
+            List<IssueBindingItem> selected_issues = new List<IssueBindingItem>();
+            foreach (IssueBindingItem issue in this.SelectedIssues)
+            {
+                // 跳过自由期
+                if (String.IsNullOrEmpty(issue.PublishTime) == true)
+                    continue;
+
+                selected_issues.Add(issue);
+            }
+
+            foreach (IssueBindingItem issue in selected_issues)
+            {
+                issue.DeleteCoverImage();
+            }
+        }
+
+
+        void menuItem_insertCoverImageFromClipboard_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            List<IssueBindingItem> selected_issues = new List<IssueBindingItem>();
+            foreach (IssueBindingItem issue in this.SelectedIssues)
+            {
+                // 跳过自由期
+                if (String.IsNullOrEmpty(issue.PublishTime) == true)
+                    continue;
+
+                selected_issues.Add(issue);
+            }
+
+            // 从剪贴板中取得图像对象
+            List<Image> images = new List<Image>();
+            IDataObject obj1 = Clipboard.GetDataObject();
+            if (obj1.GetDataPresent(typeof(Bitmap)))
+            {
+                images.Add((Image)obj1.GetData(typeof(Bitmap)));
+            }
+            else if (obj1.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])obj1.GetData(DataFormats.FileDrop);
+                foreach (string file in files)
+                {
+                    try
+                    {
+                        images.Add(Image.FromFile(file));
+                    }
+                    catch (OutOfMemoryException)
+                    {
+                        strError = "当前 Windows 剪贴板中的某个文件不是图像文件。无法创建封面图像";
+                        goto ERROR1;
+                    }
+                }
+            }
+            else
+            {
+                strError = "当前 Windows 剪贴板中没有图形对象。无法创建封面图像";
+                goto ERROR1;
+            }
+
+            {
+                int i = 0;
+                foreach (IssueBindingItem issue in selected_issues)
+                {
+                    if (i >= images.Count)
+                        break;
+                    Image image = images[i];
+                    if (issue.SetCoverImage(image, out strError) == -1)
+                        goto ERROR1;
+
+                    i++;
+                }
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         // 恢复若干个期记录

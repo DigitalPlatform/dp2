@@ -122,7 +122,6 @@ namespace dp2Circulation
             //this.SetStyle(ControlStyles.ResizeRedraw, true);
         }
 
-
         // 设置标签内容文件
         public int SetLabelFile(string strLabelFilename,
             out string strError)
@@ -207,7 +206,7 @@ namespace dp2Circulation
                 PageSettings settings = this._document.DefaultPageSettings.Clone() as PageSettings;
                 if (string.IsNullOrEmpty(_label_param.DefaultPrinter) == true)
                 {
-                    PaperSize paper_size = new PaperSize("Custom Label", 
+                    PaperSize paper_size = new PaperSize("Custom Label",
                         (int)_label_param.PageWidth,
                         (int)_label_param.PageHeight);
                     settings.PaperSize = paper_size;
@@ -230,7 +229,7 @@ namespace dp2Circulation
                     settings.PaperSize.Height,
                     settings.PaperSize.Width);
 
-                Rectangle marginBounds = new Rectangle(0,0,0,0);
+                Rectangle marginBounds = new Rectangle(0, 0, 0, 0);
 
 
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
@@ -238,7 +237,7 @@ namespace dp2Circulation
 
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-                PrintPageEventArgs e1 = new PrintPageEventArgs(e.Graphics, 
+                PrintPageEventArgs e1 = new PrintPageEventArgs(e.Graphics,
                     marginBounds,
                     pageBounds,
                     settings);  // 

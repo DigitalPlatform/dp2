@@ -1378,7 +1378,7 @@ namespace DigitalPlatform.LibraryServer
                 && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "获得册信息 操作被拒绝。不具备order、getiteminfo或getentities权限。";
+                result.ErrorInfo = "获得册信息 操作被拒绝。不具备 order、getiteminfo 或 getentities 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -2031,7 +2031,7 @@ namespace DigitalPlatform.LibraryServer
                 && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "保存册信息 操作被拒绝。不具备order、setiteminfo或setentities权限。";
+                result.ErrorInfo = "保存册信息 操作被拒绝。不具备 order、setiteminfo 或 setentities 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -2112,7 +2112,7 @@ namespace DigitalPlatform.LibraryServer
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "修改册信息的" + strAction + "操作被拒绝。不具备restore权限。";
+                        result.ErrorInfo = "修改册信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -2139,7 +2139,7 @@ namespace DigitalPlatform.LibraryServer
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'force' 的修改册信息的" + strAction + "操作被拒绝。不具备restore权限。";
+                        result.ErrorInfo = "带有风格 'force' 的修改册信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -2175,7 +2175,7 @@ namespace DigitalPlatform.LibraryServer
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'nocheckdup' 的修改册信息的" + strAction + "操作被拒绝。不具备restore权限。";
+                        result.ErrorInfo = "带有风格 'nocheckdup' 的修改册信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -2195,7 +2195,7 @@ namespace DigitalPlatform.LibraryServer
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'noeventlog' 的修改册信息的" + strAction + "操作被拒绝。不具备restore权限。";
+                        result.ErrorInfo = "带有风格 'noeventlog' 的修改册信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }

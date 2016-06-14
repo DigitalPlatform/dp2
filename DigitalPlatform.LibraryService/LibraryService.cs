@@ -1041,7 +1041,7 @@ namespace dp2Library
         // 验证读者密码
         // parameters:
         //      strReaderBarcode    读者证条码号。
-        //                          如果为 "!getpatrontempid:" 开头，表示希望返回一个二维码的读者证号，这个操作需要具有 getpatrontempid 权限才行
+        //                          如果为 "!getpatrontempid:" 开头，表示希望返回(关于一个读者的)二维码字符串，这个操作需要具有 getpatrontempid 权限才行
         // Result.Value -1出错 0密码不正确 1密码正确
         // 权限: 
         //		工作人员或者读者，必须有verifyreaderpassword权限
@@ -1244,6 +1244,8 @@ namespace dp2Library
         // 修改读者密码
         //		工作人员或者读者，必须有changereaderpassword权限
         //		如果为读者, 附加限制还只能修改属于自己的密码
+        // parameters:
+        //      strReaderOldPassword    旧密码。如果想达到不验证旧密码的效果，可以用 null 调用，但仅限工作人员身份调用的情况。读者身份是必须验证旧密码的
         // Result.Value -1出错 0旧密码不正确 1旧密码正确,已修改为新密码
         // 权限: 
         //		工作人员或者读者，必须有changereaderpassword权限
@@ -4193,7 +4195,7 @@ namespace dp2Library
                         && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "获取实体信息被拒绝。不具备order、getiteminfo或getentities权限。";
+                        result.ErrorInfo = "用户 '"+sessioninfo.UserID+"' 获取实体信息被拒绝。不具备order、getiteminfo或getentities权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -4205,7 +4207,7 @@ namespace dp2Library
                         && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "获取订购信息被拒绝。不具备order或getorderinfo权限。";
+                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取订购信息被拒绝。不具备order或getorderinfo权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -4217,7 +4219,7 @@ namespace dp2Library
                         && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "获取期信息被拒绝。不具备order或getissueinfo权限。";
+                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取期信息被拒绝。不具备order或getissueinfo权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -4229,7 +4231,7 @@ namespace dp2Library
                         && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
+                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -12460,7 +12462,7 @@ namespace dp2Library
                 if (StringUtil.IsInList("getres", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "当前用户 "+sessioninfo.UserID+" 获取资源被拒绝。不具备getres权限。";
+                    result.ErrorInfo = "用户 "+sessioninfo.UserID+" 获取资源被拒绝。不具备 getres 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

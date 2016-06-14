@@ -679,7 +679,7 @@ namespace DigitalPlatform.LibraryServer
                 if (StringUtil.IsInList("borrow", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "借阅操作被拒绝。不具备borrow权限。";
+                    result.ErrorInfo = "借阅操作被拒绝。不具备 borrow 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     // return result;
                 }
@@ -703,7 +703,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     result.Value = -1;
                     // text-level: 用户提示
-                    result.ErrorInfo = this.GetString("续借操作被拒绝。不具备renew权限。"); // "续借操作被拒绝。不具备renew权限。"
+                    result.ErrorInfo = this.GetString("续借操作被拒绝。不具备 renew 权限。"); // "续借操作被拒绝。不具备renew权限。"
                     result.ErrorCode = ErrorCode.AccessDenied;
                     // return result;
                 }
@@ -1071,7 +1071,7 @@ namespace DigitalPlatform.LibraryServer
                                 else
                                 {
                                     // 对其他实体库定义了存取权限，但对 strItemDbName 没有定义
-                                    strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳 操作的存取权限";
+                                    strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -1087,7 +1087,7 @@ namespace DigitalPlatform.LibraryServer
                             {
                                 if (IsInAccessList(strAction, strAccessActionList, out strAccessParameters) == false)
                                 {
-                                    strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳  " + strActionName + " 操作的存取权限";
+                                    strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳  " + strActionName + " 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -4231,7 +4231,7 @@ start_time_1,
                                 else
                                 {
                                     // 对其他实体库定义了存取权限，但对 strItemDbName 没有定义
-                                    strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳 操作的存取权限";
+                                    strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -4247,7 +4247,7 @@ start_time_1,
                             {
                                 if (IsInAccessList(strAction, strAccessActionList, out strAccessParameters) == false)
                                 {
-                                    strError = "当前用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳  " + strActionName + " 操作的存取权限";
+                                    strError = "用户 '" + sessioninfo.UserID + "' 不具备 针对数据库 '" + strItemDbName + "' 执行 出纳  " + strActionName + " 操作的存取权限";
                                     result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.AccessDenied;
@@ -8092,7 +8092,7 @@ out string strError)
             DateTime now_rounded = app.Clock.UtcNow;  //  今天
 
             // 正规化时间
-            nRet = RoundTime(strPeriodUnit,
+            nRet = DateTimeUtil.RoundTime(strPeriodUnit,
                 ref now_rounded,
                 out strError);
             if (nRet == -1)
@@ -8348,7 +8348,7 @@ out string strError)
             DateTime now_rounded = app.Clock.UtcNow;  //  今天
 
             // 正规化时间
-            nRet = RoundTime(strPeriodUnit,
+            nRet = DateTimeUtil.RoundTime(strPeriodUnit,
                 ref now_rounded,
                 out strError);
             if (nRet == -1)
@@ -8605,17 +8605,17 @@ out string strError)
             DateTime now = this.Clock.UtcNow;
 
             // 正规化时间
-            nRet = RoundTime(strPeriodUnit,
+            nRet = DateTimeUtil.RoundTime(strPeriodUnit,
                 ref borrowdate,
                 out strError);
             if (nRet == -1)
                 return -1;
-            nRet = RoundTime(strPeriodUnit,
+            nRet = DateTimeUtil.RoundTime(strPeriodUnit,
     ref timeEnd,
     out strError);
             if (nRet == -1)
                 return -1;
-            nRet = RoundTime(strPeriodUnit,
+            nRet = DateTimeUtil.RoundTime(strPeriodUnit,
     ref now,
     out strError);
             if (nRet == -1)
@@ -8924,13 +8924,28 @@ out string strError)
     out string strUnit,
     out string strError)
         {
-            return ParsePeriodUnit(strPeriod,
+            return DateTimeUtil.ParsePeriodUnit(strPeriod,
                 "day",
                 out lValue,
                 out strUnit,
                 out strError);
         }
 
+        // 分析期限参数
+        // 注: 保留这个函数是为了兼容以前的二次开发脚本
+        public static int ParsePeriodUnit(string strPeriod,
+            string strDefaultUnit,
+            out long lValue,
+            out string strUnit,
+            out string strError)
+        {
+            return DateTimeUtil.ParsePeriodUnit(strPeriod,
+                strDefaultUnit,
+                out lValue,
+                out strUnit,
+                out strError);
+        }
+#if NO
         // 分析期限参数
         public static int ParsePeriodUnit(string strPeriod,
             string strDefaultUnit,
@@ -8986,8 +9001,17 @@ out string strError)
             strUnit = strUnit.ToLower();    // 统一转换为小写
             return 0;
         }
+#endif
 
+        // 注: 保留这个函数是为了兼容以前的二次开发脚本
+        public static int RoundTime(string strUnit,
+    ref DateTime time,
+    out string strError)
+        {
+            return DateTimeUtil.RoundTime(strUnit, ref time, out strError);
+        }
 
+#if NO
         // 按照时间单位,把时间值零头去除,正规化,便于后面计算差额
         /// <summary>
         /// 按照时间基本单位，去掉零头，便于互相计算(整单位的)差额。
@@ -9022,6 +9046,8 @@ out string strError)
             time = time.ToUniversalTime();
             return 0;
         }
+
+#endif
 
         public static int ParseTimeSpan(
             TimeSpan delta,
@@ -9084,7 +9110,7 @@ out string strError)
             timeEnd = DateTime.MinValue;
 
             // 正规化时间
-            int nRet = RoundTime(strUnit,
+            int nRet = DateTimeUtil.RoundTime(strUnit,
                 ref timeStart,
                 out strError);
             if (nRet == -1)
@@ -9107,7 +9133,7 @@ out string strError)
                 timeEnd = timeStart + delta;
 
                 // 正规化时间
-                nRet = RoundTime(strUnit,
+                nRet = DateTimeUtil.RoundTime(strUnit,
                     ref timeEnd,
                     out strError);
                 if (nRet == -1)
@@ -9131,7 +9157,7 @@ out string strError)
                     delta);
 
                 // 正规化时间
-                nRet = RoundTime(strUnit,
+                nRet = DateTimeUtil.RoundTime(strUnit,
                     ref timeEnd,
                     out strError);
                 if (nRet == -1)
@@ -9164,7 +9190,7 @@ out string strError)
             nextWorkingDay = DateTime.MinValue;
 
             // 正规化时间
-            int nRet = RoundTime(strUnit,
+            int nRet = DateTimeUtil.RoundTime(strUnit,
                 ref timeStart,
                 out strError);
             if (nRet == -1)
@@ -9185,7 +9211,7 @@ out string strError)
             timeEnd = timeStart + delta;
 
             // 正规化时间
-            nRet = RoundTime(strUnit,
+            nRet = DateTimeUtil.RoundTime(strUnit,
                 ref timeEnd,
                 out strError);
             if (nRet == -1)
@@ -9198,7 +9224,7 @@ out string strError)
             {
                 bInNonWorkingDay = calendar.IsInNonWorkingDay(timeEnd,
                     out nextWorkingDay);
-                nRet = RoundTime(strUnit,
+                nRet = DateTimeUtil.RoundTime(strUnit,
     ref nextWorkingDay,
     out strError);
                 if (nRet == -1)
@@ -9212,7 +9238,6 @@ out string strError)
             }
 
             return 0;
-
         }
 
         // 计算时间之间的距离
@@ -9235,14 +9260,13 @@ out string strError)
             strError = "";
             nextWorkingDay = DateTime.MinValue;
 
-
-            int nRet = RoundTime(strUnit,
+            int nRet = DateTimeUtil.RoundTime(strUnit,
                 ref timeStart,
                 out strError);
             if (nRet == -1)
                 return -1;
 
-            nRet = RoundTime(strUnit,
+            nRet = DateTimeUtil.RoundTime(strUnit,
                 ref timeEnd,
                 out strError);
             if (nRet == -1)
@@ -9255,7 +9279,7 @@ out string strError)
             {
                 bInNonWorkingDay = calendar.IsInNonWorkingDay(timeEnd,
                     out nextWorkingDay);
-                nRet = RoundTime(strUnit,
+                nRet = DateTimeUtil.RoundTime(strUnit,
     ref nextWorkingDay,
     out strError);
                 if (nRet == -1)
@@ -9795,7 +9819,7 @@ out string strError)
                 if (StringUtil.IsInList("amerce", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "交违约金操作被拒绝。不具备amerce权限。";
+                    result.ErrorInfo = "交违约金操作被拒绝。不具备 amerce 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -9807,7 +9831,7 @@ out string strError)
                 if (StringUtil.IsInList("amercemodifyprice", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "修改违约金额的操作被拒绝。不具备amercemodifyprice权限。";
+                    result.ErrorInfo = "修改违约金额的操作被拒绝。不具备 amercemodifyprice 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -9820,7 +9844,7 @@ out string strError)
                 if (StringUtil.IsInList("amercemodifycomment", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "修改违约金之注释的操作被拒绝。不具备amercemodifycomment权限。";
+                    result.ErrorInfo = "修改违约金之注释的操作被拒绝。不具备 amercemodifycomment 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -9833,7 +9857,7 @@ out string strError)
                 if (StringUtil.IsInList("amerceundo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "撤销交违约金操作被拒绝。不具备amerceundo权限。";
+                    result.ErrorInfo = "撤销交违约金操作被拒绝。不具备 amerceundo 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -9845,7 +9869,7 @@ out string strError)
                 if (StringUtil.IsInList("amerce", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "撤回交违约金事务的操作被拒绝。不具备amerce权限。";
+                    result.ErrorInfo = "撤回交违约金事务的操作被拒绝。不具备 amerce 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -9897,7 +9921,7 @@ out string strError)
                     if (StringUtil.IsInList("amercemodifyprice", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "含有价格变更要求的交违约金操作被拒绝。不具备amercemodifyprice权限。(仅仅具备amerce权限还不够的)";
+                        result.ErrorInfo = "含有价格变更要求的交违约金操作被拒绝。不具备 amercemodifyprice 权限。(仅仅具备 amerce 权限还不够的)";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -9910,7 +9934,7 @@ out string strError)
                     if (StringUtil.IsInList("amercemodifycomment", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "含有违约金注释(覆盖型)变更要求的操作被拒绝。不具备amercemodifycomment权限。(仅仅具备amerce权限还不够的)";
+                        result.ErrorInfo = "含有违约金注释(覆盖型)变更要求的操作被拒绝。不具备 amercemodifycomment 权限。(仅仅具备 amerce 权限还不够的)";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -11638,7 +11662,7 @@ out string strError)
             DateTime now_rounded = this.Clock.UtcNow;  //  今天
 
             // 正规化时间
-            nRet = RoundTime(strTotalUnit,
+            nRet = DateTimeUtil.RoundTime(strTotalUnit,
                 ref now_rounded,
                 out strError);
             if (nRet == -1)
@@ -11860,14 +11884,14 @@ out string strError)
 
                     DateTime timeStart = DateTimeUtil.FromRfc1123DateTimeString(strPauseStart);
 
-                    nRet = RoundTime(strUnit,
+                    nRet = DateTimeUtil.RoundTime(strUnit,
                         ref timeStart,
                         out strError);
                     if (nRet == -1)
                         return -1;
 
                     DateTime timeNow = this.Clock.UtcNow;
-                    nRet = RoundTime(strUnit,
+                    nRet = DateTimeUtil.RoundTime(strUnit,
                         ref timeNow,
                         out strError);
                     if (nRet == -1)
@@ -12650,7 +12674,7 @@ out string strError)
 
             // 正规化时间
             DateTime now_rounded = now;
-            nRet = RoundTime(strPeriodUnit,
+            nRet = DateTimeUtil.RoundTime(strPeriodUnit,
                 ref now_rounded,
                 out strError);
             if (nRet == -1)
@@ -13301,7 +13325,7 @@ out string strError)
 
             // 正规化时间
             DateTime now_rounded = now;
-            nRet = RoundTime(strPeriodUnit,
+            nRet = DateTimeUtil.RoundTime(strPeriodUnit,
                 ref now_rounded,
                 out strError);
             if (nRet == -1)
@@ -14391,7 +14415,7 @@ out string strError)
                 }
 
                 // 正规化时间
-                nRet = RoundTime(strPeriodUnit,
+                nRet = DateTimeUtil.RoundTime(strPeriodUnit,
                     ref this_return_time,
                     out strError);
                 if (nRet == -1)
@@ -14454,7 +14478,7 @@ out string strError)
                 }
 
                 // 正规化时间
-                nRet = RoundTime(strLastPeriodUnit,
+                nRet = DateTimeUtil.RoundTime(strLastPeriodUnit,
                     ref last_return_time,
                     out strError);
                 if (nRet == -1)
@@ -15134,7 +15158,7 @@ strBookPrice);    // 图书价格
             if (StringUtil.IsInList("devolvereaderinfo", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "转移借阅信息操作被拒绝。不具备devolvereaderinfo权限。";
+                result.ErrorInfo = "转移借阅信息操作被拒绝。不具备 devolvereaderinfo 权限。";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
@@ -17648,7 +17672,7 @@ strBookPrice);    // 图书价格
                 if (StringUtil.IsInList("foregift", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "创建押金交费请求的操作被拒绝。不具备foregift权限。";
+                    result.ErrorInfo = "创建押金交费请求的操作被拒绝。不具备 foregift 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -17659,7 +17683,7 @@ strBookPrice);    // 图书价格
                 if (StringUtil.IsInList("returnforegift", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "创建退还押金(交费)请求的操作被拒绝。不具备returnforegift权限。";
+                    result.ErrorInfo = "创建退还押金(交费)请求的操作被拒绝。不具备 returnforegift 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -18042,7 +18066,7 @@ strBookPrice);    // 图书价格
                 if (StringUtil.IsInList("hire", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "创建租金交费请求的操作被拒绝。不具备hire权限。";
+                    result.ErrorInfo = "创建租金交费请求的操作被拒绝。不具备 hire 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -18053,7 +18077,7 @@ strBookPrice);    // 图书价格
                 if (StringUtil.IsInList("hirelate", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "(延迟)创建租金交费请求的操作被拒绝。不具备hirelate权限。";
+                    result.ErrorInfo = "(延迟)创建租金交费请求的操作被拒绝。不具备 hirelate 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -18494,7 +18518,7 @@ strBookPrice);    // 图书价格
                 if (StringUtil.IsInList("settlement", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "结算操作被拒绝。不具备settlement权限。";
+                    result.ErrorInfo = "结算操作被拒绝。不具备 settlement 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -18505,7 +18529,7 @@ strBookPrice);    // 图书价格
                 if (StringUtil.IsInList("undosettlement", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "撤销结算的操作被拒绝。不具备undosettlement权限。";
+                    result.ErrorInfo = "撤销结算的操作被拒绝。不具备 undosettlement 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -18516,7 +18540,7 @@ strBookPrice);    // 图书价格
                 if (StringUtil.IsInList("deletesettlement", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "删除结算记录的操作被拒绝。不具备deletesettlement权限。";
+                    result.ErrorInfo = "删除结算记录的操作被拒绝。不具备 deletesettlement 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }

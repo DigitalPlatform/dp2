@@ -10,6 +10,7 @@ using System.Drawing.Drawing2D;
 using System.Diagnostics;
 using System.Xml;
 using System.Drawing.Imaging;
+using System.IO;
 
 using System.Runtime.InteropServices;
 
@@ -20,7 +21,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
-using System.IO;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonDialog;
 
 namespace dp2Circulation
 {
@@ -29,6 +31,31 @@ namespace dp2Circulation
     /// </summary>
     internal class IssueBindingItem : CellBase
     {
+        // 管理数字对象的容器
+        internal ObjectInfoCollection _objects = new ObjectInfoCollection();
+
+        public string ObjectXml
+        {
+            get
+            {
+                return _objects.ToXml();
+            }
+            set
+            {
+                _objects = ObjectInfoCollection.FromXml(value);
+            }
+        }
+
+        public bool ObjectChanged
+        {
+            get
+            {
+                if (_objects == null)
+                    return false;
+                return _objects.Changed;
+            }
+        }
+
         /// <summary>
         /// 容器，期刊图形界面控件
         /// </summary>
@@ -195,8 +222,34 @@ namespace dp2Circulation
 
         public void PrepareCoverImage(bool bRetry = false)
         {
+#if NO
             if (string.IsNullOrEmpty(this.CoverImageFileName) == false)
                 return;
+#endif
+
+            // 如果存在 _objects，则从中获得封面对象 id。有可能是服务器对象，也有可能是本地临时对象
+            if (this._objects != null)
+            {
+                this.CoverImageFileName = "";
+                ObjectInfo info = this._objects.GetCoverImageObject();
+                if (info != null)
+                {
+                    // TODO: 如果是删除的图像，要显示一个叉叉符号?
+                    if (info.IsDeleted())
+                        return;
+
+                    if (info.IsLocal())
+                    {
+                        this.CoverImageFileName = info.FileName;
+                        return;
+                    }
+                    string strObjectPath = ScriptUtil.MakeObjectUrl(this.RecPath, info.ID);
+                    this.Container.StartGetCoverImage(this,
+                        strObjectPath);
+                    return;
+                }
+                return;
+            }
 
             if (dom == null)
                 return;
@@ -204,12 +257,14 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(this.RecPath))
                 return;
 
-            // 从 XML 记录中获得特定的对象 id
-            string strID = GetCoverImageID(dom);    // , "LargeImage"
+            {
+                // 从 XML 记录中获得特定的对象 id
+                string strID = GetCoverImageID(dom);    // , "LargeImage"
 
-            string strObjectPath = ScriptUtil.MakeObjectUrl(this.RecPath, strID);
-            this.Container.StartGetCoverImage(this,
-                strObjectPath);
+                string strObjectPath = ScriptUtil.MakeObjectUrl(this.RecPath, strID);
+                this.Container.StartGetCoverImage(this,
+                    strObjectPath);
+            }
         }
 
         /// <summary>
@@ -4474,6 +4529,7 @@ this.Volume);
         //      strXml  期记录XML
         //      bLoadItems  是否利用外部接口装载下属的册对象到Items数组中
         public int Initial(string strXml,
+            string strObjectXml,
             bool bLoadItems,
             out string strError)
         {
@@ -4505,6 +4561,7 @@ this.Volume);
                     return -1;
             }
 
+            this.ObjectXml = strObjectXml;
             return 0;
         }
 
@@ -4727,6 +4784,76 @@ this.Volume);
         }
 
         #endregion
+
+        public void DeleteCoverImage()
+        {
+            if (this._objects == null)
+                return;
+
+            this._objects.MaskDeleteCoverImageObject();
+            // 刷新封面区域的显示
+            this.PrepareCoverImage();
+        }
+
+        // 设置封面图像
+        public int SetCoverImage(Image image,
+            out string strError)
+        {
+            strError = "";
+
+            CreateCoverImageDialog dlg = null;
+            try
+            {
+                dlg = new CreateCoverImageDialog();
+
+                MainForm.SetControlFont(dlg, this.Container.Font, false);
+                dlg.OriginImage = image;
+                Program.MainForm.AppInfo.LinkFormState(dlg, "issue_CreateCoverImageDialog_state");
+                dlg.ShowDialog(this.Container);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
+                if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                    return 0;
+            }
+            finally
+            {
+                if (image != null)
+                {
+                    image.Dispose();
+                    image = null;
+                }
+            }
+
+            foreach (ImageType type in dlg.ResultImages)
+            {
+                if (type.Image == null)
+                {
+                    continue;
+                }
+
+                string strType = "FrontCover." + type.TypeName;
+                string strSize = type.Image.Width.ToString() + "X" + type.Image.Height.ToString() + "px";
+
+                string strTempFilePath = FileUtil.NewTempFileName(
+                    Program.MainForm.UserTempDir,
+    "~temp_make_pic_",
+    ".png");
+
+                type.Image.Save(strTempFilePath, System.Drawing.Imaging.ImageFormat.Png);
+
+                string strID = "";
+                int nRet = this._objects.SetObjectByUsage(
+                    strTempFilePath,
+                    strType,    // "coverimage",
+                    out strID,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            // 刷新封面区域的显示
+            this.PrepareCoverImage();
+            return 1;
+        }
 
         // 设置或者刷新一个操作记载
         // 可能会抛出异常
