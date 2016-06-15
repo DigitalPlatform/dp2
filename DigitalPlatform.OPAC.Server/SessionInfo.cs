@@ -270,6 +270,7 @@ namespace DigitalPlatform.OPAC.Server
             if (bPool == false)
                 return this.Channel;
 #endif
+            // TODO: 判断 this.UserID 如果为空，此时需要当作 public 来处理
 
             LibraryChannel channel = this.App.ChannelPool.GetChannel(this.App.WsUrl,
                 this.UserID,

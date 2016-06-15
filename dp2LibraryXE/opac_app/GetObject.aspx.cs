@@ -40,6 +40,12 @@ ref sessioninfo) == false)
             return;
         }
          * */
+        if (sessioninfo.UserID == "")
+        {
+            sessioninfo.UserID = "public";
+            sessioninfo.IsReader = false;
+        }
+
         string strError = "";
         int nRet = 0;
         // string strAction = Request.QueryString["action"];

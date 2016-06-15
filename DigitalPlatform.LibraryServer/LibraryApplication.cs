@@ -4800,7 +4800,6 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
-
         // 从library.xml文件定义 获得一个帐户的信息
         // TODO: 多文种提示
         // return:

@@ -7791,11 +7791,12 @@ namespace dp2Library
         //          3) 如果以"TP:"开头，表示利用电话号码进行检索
         //          4) 如果以"ID:"开头，表示利用身份证号进行检索
         //          5) 如果以"CN:"开头，表示利用证件号码进行检索
-        //          6) 否则用证条码号进行检索
+        //          6) 如果以"UN:"开头，表示利用用户名进行检索，意思就是工作人员的账户名了，不是针对读者绑定
+        //          7) 否则用证条码号进行检索
         //      strPassword     读者记录的密码
         //      strBindingID    要绑定的号码。格式如 email:xxxx 或 weixinid:xxxxx
         //      strStyle    风格。multiple/single。默认 single
-        //                  multiple 表示允许多次绑定同一类型号码；sigle 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除
+        //                  multiple 表示允许多次绑定同一类型号码；single 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除
         //      strResultTypeList   结果类型数组 xml/html/text/calendar/advancexml/recpaths/summary
         //              其中calendar表示获得读者所关联的日历名；advancexml表示经过运算了的提供了丰富附加信息的xml，例如具有超期和停借期附加信息
         //              advancexml_borrow_bibliosummary/advancexml_overdue_bibliosummary/advancexml_history_bibliosummary
@@ -8630,6 +8631,9 @@ namespace dp2Library
         }
 
         // 获得用户
+        // parameters:
+        //      strAction   暂未使用。保持空即可。
+        //      strName     用户名。如果为空，表示希望列出全部用户信息
         // return:
         //      result.Value    -1 错误; 其他 返回总结果数量
         public LibraryServerResult GetUser(

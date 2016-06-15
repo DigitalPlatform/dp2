@@ -173,7 +173,6 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
             userinfo = userinfos[0];
-
             return 1;
         }
 
@@ -212,12 +211,10 @@ namespace DigitalPlatform.LibraryServer
 
                 XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes(strXPath);
 
-                // 过滤为当前能管辖的小范围node数组
-                List<XmlNode> smallerlist = new List<XmlNode>();
-                for (int i = 0; i < nodes.Count; i++)
+                // 过滤为当前能管辖的小范围 node 数组
+                List<XmlElement> smallerlist = new List<XmlElement>();
+                foreach (XmlElement node in nodes)
                 {
-                    XmlNode node = nodes[i];
-
                     // 2012/9/9
                     // 分馆用户只允许列出管辖分馆的所有用户
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -237,7 +234,7 @@ namespace DigitalPlatform.LibraryServer
 
                 for (int i = nStart; i < Math.Min(nStart + nCount, smallerlist.Count); i++)   // 
                 {
-                    XmlNode node = smallerlist[i];
+                    XmlElement node = smallerlist[i];
 
                     string strCurrentLibraryCodeList = DomUtil.GetAttr(node, "libraryCode");
 
@@ -248,6 +245,7 @@ namespace DigitalPlatform.LibraryServer
                     userinfo.LibraryCode = strCurrentLibraryCodeList;
                     userinfo.Access = DomUtil.GetAttr(node, "access");
                     userinfo.Comment = DomUtil.GetAttr(node, "comment");
+                    userinfo.Binding = node.GetAttribute("binding");
 
                     userList.Add(userinfo);
                 }
@@ -337,13 +335,13 @@ namespace DigitalPlatform.LibraryServer
             }
 
         SKIP_VERIFY:
-            XmlNode nodeAccount = null;
+            XmlElement nodeAccount = null;
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
                 // 查重
-                nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts/account[@name='" + strUserName + "']");
+                nodeAccount = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts/account[@name='" + strUserName + "']") as XmlElement;
                 if (nodeAccount != null)
                 {
                     strError = "用户 '" + strUserName + "' 已经存在";
@@ -360,6 +358,8 @@ namespace DigitalPlatform.LibraryServer
                 nodeAccount = this.LibraryCfgDom.CreateElement("account");
                 root.AppendChild(nodeAccount);
 
+                SetUserXml(userinfo, nodeAccount);
+#if NO
                 DomUtil.SetAttr(nodeAccount, "name", userinfo.UserName);
 
                 if (String.IsNullOrEmpty(userinfo.Type) == false)
@@ -372,6 +372,9 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetAttr(nodeAccount, "access", userinfo.Access);
 
                 DomUtil.SetAttr(nodeAccount, "comment", userinfo.Comment);
+
+                DomUtil.SetAttr(nodeAccount, "binding", userinfo.Binding);
+#endif
 
                 // 设置密码
                 if (userinfo.SetPassword == true)
@@ -420,6 +423,24 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
+        }
+
+        public static void SetUserXml(UserInfo userinfo, XmlElement nodeAccount)
+        {
+            DomUtil.SetAttr(nodeAccount, "name", userinfo.UserName);
+
+            if (String.IsNullOrEmpty(userinfo.Type) == false)
+                DomUtil.SetAttr(nodeAccount, "type", userinfo.Type);
+
+            DomUtil.SetAttr(nodeAccount, "rights", userinfo.Rights);
+
+            DomUtil.SetAttr(nodeAccount, "libraryCode", userinfo.LibraryCode);
+
+            DomUtil.SetAttr(nodeAccount, "access", userinfo.Access);
+
+            DomUtil.SetAttr(nodeAccount, "comment", userinfo.Comment);
+
+            DomUtil.SetAttr(nodeAccount, "binding", userinfo.Binding);
         }
 
         XmlDocument PrepareOperlogDom(string strAction,
@@ -486,7 +507,6 @@ namespace DigitalPlatform.LibraryServer
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
-
                 // 查重
                 XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts/account[@name='" + strUserName + "']");
                 if (node == null)
@@ -1016,6 +1036,7 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetAttr(nodeAccount, "libraryCode", userinfo.LibraryCode);
                 DomUtil.SetAttr(nodeAccount, "access", userinfo.Access);
                 DomUtil.SetAttr(nodeAccount, "comment", userinfo.Comment);
+                DomUtil.SetAttr(nodeAccount, "binding", userinfo.Binding);
 
                 // 强制修改密码。无需验证旧密码
                 if (userinfo.SetPassword == true)
@@ -1371,5 +1392,8 @@ namespace DigitalPlatform.LibraryServer
 
         [DataMember]
         public string Comment = "";  // 注释 2012/10/8
+
+        [DataMember]
+        public string Binding = ""; // 绑定 2016/6/15
     }
 }

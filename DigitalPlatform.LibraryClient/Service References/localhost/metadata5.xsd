@@ -921,6 +921,7 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="BorrowCount" type="xs:long" />
       <xs:element minOccurs="0" name="BorrowOperator" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="DenyPeriod" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="LatestReturnTime" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Period" nillable="true" type="xs:string" />
     </xs:sequence>
@@ -1505,6 +1506,7 @@
   <xs:complexType name="UserInfo">
     <xs:sequence>
       <xs:element minOccurs="0" name="Access" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Binding" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Comment" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="LibraryCode" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Password" nillable="true" type="xs:string" />

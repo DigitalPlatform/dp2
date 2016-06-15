@@ -1704,6 +1704,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private string BorrowOperatorField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string DenyPeriodField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string LatestReturnTimeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -1741,6 +1744,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.BorrowOperatorField, value) != true)) {
                     this.BorrowOperatorField = value;
                     this.RaisePropertyChanged("BorrowOperator");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string DenyPeriod {
+            get {
+                return this.DenyPeriodField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.DenyPeriodField, value) != true)) {
+                    this.DenyPeriodField = value;
+                    this.RaisePropertyChanged("DenyPeriod");
                 }
             }
         }
@@ -2496,6 +2512,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private string AccessField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string BindingField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string CommentField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -2535,6 +2554,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.AccessField, value) != true)) {
                     this.AccessField = value;
                     this.RaisePropertyChanged("Access");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Binding {
+            get {
+                return this.BindingField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.BindingField, value) != true)) {
+                    this.BindingField = value;
+                    this.RaisePropertyChanged("Binding");
                 }
             }
         }
