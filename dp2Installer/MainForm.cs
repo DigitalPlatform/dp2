@@ -94,6 +94,7 @@ namespace dp2Installer
             stop = new DigitalPlatform.Stop();
             stop.Register(stopManager, true);	// 和容器关联
 
+            // TODO: 这里 this.UserDir 尚未初始化
             this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "settings.xml"));
             this.AppInfo.LoadFormStates(this,
 "mainformstate",

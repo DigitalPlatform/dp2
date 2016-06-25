@@ -261,6 +261,46 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        static bool AutoBindingIP(UserInfo info, string strClientAddress)
+        {
+            string strBinding = info.Binding;
+            if (string.IsNullOrEmpty(strBinding))
+                return false;
+
+            bool bChanged = false;
+            List<string> temp = StringUtil.ParseTwoPart(strClientAddress, "@");
+            string ip = temp[0];
+
+            if (ip == "::1" || ip == "127.0.0.1")
+                ip = "localhost";
+
+            List<string> results = new List<string>();
+            string[] parts = strBinding.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string s in parts)
+            {
+                string strLine = s.Trim();
+                if (string.IsNullOrEmpty(strLine))
+                    continue;
+                string strLeft = "";
+                string strRight = "";
+                StringUtil.ParseTwoPart(strLine, ":", out strLeft, out strRight);
+                if (strLeft == "ip")
+                {
+                    if (strRight == "[current]")
+                    {
+                        // 替换为当前前端的 ip 地址
+                        results.Add("ip:" + ip);
+                        bChanged = true;
+                        continue;
+                    }
+                }
+                results.Add(strLine);
+            }
+
+            info.Binding = StringUtil.MakePathList(results, ",");
+            return bChanged;
+        }
+
         // 创建新用户
         // TODO: 对DOM加锁
         public int CreateUser(
@@ -358,7 +398,11 @@ namespace DigitalPlatform.LibraryServer
                 nodeAccount = this.LibraryCfgDom.CreateElement("account");
                 root.AppendChild(nodeAccount);
 
+                // 替换 binding 中的自动绑定 IP 参数
+                AutoBindingIP(userinfo, strClientAddress);
+
                 SetUserXml(userinfo, nodeAccount);
+                
 #if NO
                 DomUtil.SetAttr(nodeAccount, "name", userinfo.UserName);
 

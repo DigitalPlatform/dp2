@@ -123,7 +123,9 @@ namespace DigitalPlatform.LibraryServer
         //      2.78 (2016/6/8) Return() API 在某些特殊情况下会无法清除册记录 XmlDocument 中的 borrower 和其他元素，新版本在此环节做了多种尝试，如果最后依然无法从 XmlDocument 删除元素，则(API 会)报错，并把错误情况写入 dp2library 错误日志。dp2library 失效期改为 2016.11.1
         //      2.79 (2016/6/9) 增加放弃取书通知。优化 Reservation() API 中重复写入册记录和读者记录的情况
         //      2.80 (2016/6/13) ChangeReaderPassword() API，即便是工作人员身份，也可以通过 strReaderOldPassword 参数决定是否验证旧密码。null 表示不验证。
-        public static string Version = "2.80";
+        //      2.81 (2016/6/25) SetUser() API 在创建新用户的时候允许 binding 字段使用 ip:[current] 表达自动绑定 IP 的要求
+        //                      GetSystemParameter() API system/outgoingQueue 可以获得 MSMQ 队列路径
+        public static string Version = "2.81";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

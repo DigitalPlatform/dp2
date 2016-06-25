@@ -9811,6 +9811,14 @@ namespace dp2Library
 
                 if (strCategory == "system")
                 {
+                    // 2016/6/25
+                    // MSMQ 队列名
+                    if (strName == "outgoingQueue")
+                    {
+                        strValue = app.OutgoingQueue;
+                        goto END1;
+                    }
+
                     // 2016/4/6
                     // 获得系统的临时文件目录
                     if (strName == "systemTempDir")
@@ -9844,7 +9852,6 @@ namespace dp2Library
 
                         StringUtil.RemoveDupNoSort(ref librarycodes);
                         strValue = StringUtil.MakePathList(librarycodes);
-
                         goto END1;
                     }
 
