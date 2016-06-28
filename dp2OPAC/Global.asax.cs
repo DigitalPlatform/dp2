@@ -185,6 +185,8 @@ namespace dp2OPAC
                 sessioninfo.ClientIP = strClientIP;
                 Session["sessioninfo"] = sessioninfo;
                 // throw new Exception("test exception");
+
+                app.IncSesstionCounter(Request.UserHostAddress);
             }
             catch (Exception ex)
             {

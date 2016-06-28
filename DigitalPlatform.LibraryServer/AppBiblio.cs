@@ -1052,6 +1052,33 @@ namespace DigitalPlatform.LibraryServer
                 {
                     strBiblio = strMetadata;  // 2010/10/27 
                 }
+                else if (String.Compare(strBiblioType, "table", true) == 0)
+                {
+                    if (String.IsNullOrEmpty(strBiblioXml) == true)
+                    {
+                        strBiblio = "XML记录为空";
+                        goto CONTINUE;
+                    }
+
+                    if (string.IsNullOrEmpty(strBiblioXml) == false)
+                    {
+                        nRet = this.ConvertBiblioXmlToTable(
+                            strBiblioXml,
+                            null,
+                            strCurrentBiblioRecPath,
+                            out strBiblio,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            if (String.IsNullOrEmpty(strErrorText) == false)
+                                strErrorText += ";\r\n";
+                            strErrorText += strError;
+                            goto CONTINUE;
+                        }
+                    }
+                    else
+                        strBiblio = "";
+                }
                 else if (String.Compare(strBiblioType, "html", true) == 0)
                 {
                     if (String.IsNullOrEmpty(strBiblioXml) == true)
@@ -1080,18 +1107,17 @@ namespace DigitalPlatform.LibraryServer
                         goto CONTINUE;
                     }
 
-
                     // 将种记录数据从XML格式转换为HTML格式
                     string strFilterFileName = strLocalPath;    // app.CfgDir + "\\biblio.fltx";
                     if (string.IsNullOrEmpty(strBiblioXml) == false)
                     {
                         nRet = this.ConvertBiblioXmlToHtml(
-                                strFilterFileName,
-                                strBiblioXml,
-                                     null,
-                               strCurrentBiblioRecPath,
-                                out strBiblio,
-                                out strError);
+                            strFilterFileName,
+                            strBiblioXml,
+                            null,
+                            strCurrentBiblioRecPath,
+                            out strBiblio,
+                            out strError);
                         if (nRet == -1)
                         {
                             // goto ERROR1;
@@ -1133,7 +1159,6 @@ namespace DigitalPlatform.LibraryServer
                         goto CONTINUE;
                     }
 
-
                     // 将种记录数据从XML格式转换为text格式
                     string strFilterFileName = strLocalPath;    // app.CfgDir + "\\biblio.fltx";
 
@@ -1142,7 +1167,7 @@ namespace DigitalPlatform.LibraryServer
                         nRet = this.ConvertBiblioXmlToHtml(
                             strFilterFileName,
                             strBiblioXml,
-                                    null,
+                            null,
                             strCurrentBiblioRecPath,
                             out strBiblio,
                             out strError);

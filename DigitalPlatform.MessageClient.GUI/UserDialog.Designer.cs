@@ -49,6 +49,8 @@
             this.checkBox_changePassword = new System.Windows.Forms.CheckBox();
             this.textBox_groups = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
+            this.textBox_binding = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -181,7 +183,7 @@
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Cancel.Location = new System.Drawing.Point(333, 377);
+            this.button_Cancel.Location = new System.Drawing.Point(333, 398);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
             this.button_Cancel.TabIndex = 17;
@@ -192,7 +194,7 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(252, 377);
+            this.button_OK.Location = new System.Drawing.Point(252, 398);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 16;
@@ -251,11 +253,32 @@
             this.label9.TabIndex = 19;
             this.label9.Text = "群组(&G):";
             // 
+            // textBox_binding
+            // 
+            this.textBox_binding.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_binding.Location = new System.Drawing.Point(119, 356);
+            this.textBox_binding.Name = "textBox_binding";
+            this.textBox_binding.Size = new System.Drawing.Size(289, 21);
+            this.textBox_binding.TabIndex = 22;
+            this.textBox_binding.TextChanged += new System.EventHandler(this.textBox_comment_TextChanged);
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(12, 359);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(53, 12);
+            this.label10.TabIndex = 21;
+            this.label10.Text = "绑定(&B):";
+            // 
             // UserDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(420, 412);
+            this.ClientSize = new System.Drawing.Size(420, 433);
+            this.Controls.Add(this.textBox_binding);
+            this.Controls.Add(this.label10);
             this.Controls.Add(this.textBox_groups);
             this.Controls.Add(this.label9);
             this.Controls.Add(this.checkBox_changePassword);
@@ -310,5 +333,7 @@
         private System.Windows.Forms.CheckBox checkBox_changePassword;
         private System.Windows.Forms.TextBox textBox_groups;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TextBox textBox_binding;
+        private System.Windows.Forms.Label label10;
     }
 }

@@ -228,7 +228,7 @@ namespace DigitalPlatform.LibraryServer
                         return assembly1;
                     });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 assembly = null;
@@ -539,7 +539,7 @@ namespace DigitalPlatform.LibraryServer
                         return assembly1;
                     });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strError = ex.Message;
                 return -1;
@@ -636,6 +636,50 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         ERROR1:
             return -1;
+        }
+
+        // 将书目 XML 转换为 table 格式
+        // parameters:
+        //      strBiblioXml    XML记录，或者 MARC 记录
+        //      strSyntax   MARC格式 usmarc/unimarc。如果strBiblioXml 第一字符为 '<' 则本参数可以为空
+        public int ConvertBiblioXmlToTable(
+            string strBiblioXml,
+            string strSyntax,
+            string strRecPath,
+            out string strBiblio,
+            out string strError)
+        {
+            strBiblio = "";
+            strError = "";
+            int nRet = 0;
+
+            string strMarc = "";
+            if (string.IsNullOrEmpty(strBiblioXml) == false
+                && strBiblioXml[0] == '<')
+            {
+                // 如果必要,转换为MARC格式,调用filter
+
+                // string strOutMarcSyntax = "";
+                // 将MARCXML格式的xml记录转换为marc机内格式字符串
+                // parameters:
+                //		bWarning	==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+                //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+                //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+                nRet = MarcUtil.Xml2Marc(strBiblioXml,
+                    true,
+                    "", // this.CurMarcSyntax,
+                    out strSyntax,
+                    out strMarc,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+            else
+                strMarc = strBiblioXml;
+
+
+
+            return 0;
         }
     }
 }
