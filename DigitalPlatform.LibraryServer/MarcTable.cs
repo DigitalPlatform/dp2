@@ -581,7 +581,7 @@ namespace DigitalPlatform.LibraryServer
 
     }
 
-    class NameValueLine
+    public class NameValueLine
     {
         public string Name = "";
         public string Value = "";
