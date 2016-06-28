@@ -4684,7 +4684,7 @@ out strError);
 
                 string strTimeCondition = " substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
                      + " AND substr(item.createtime,1,10) <= '" + strEndDate + "' ";
-                if (strStartDate == "00010101")
+                if (strStartDate.Replace("-","") == "00010101")
                     strTimeCondition = " ((substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
                      + " AND substr(item.createtime,1,10) <= '" + strEndDate + "' )"
                      + " OR item.createtime = '') ";
