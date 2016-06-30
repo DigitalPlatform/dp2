@@ -74,11 +74,12 @@ namespace DigitalPlatform.LibraryServer
         {
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
 
-            if (GetBatchTask(task.Name, false) != null)
-                throw new Exception("任务 '" + task.Name + "' 被重复加入容器。");
-
             try
             {
+                // 注: 2016/6/30 以前此语句在 try 以外，应该是一个 bug
+                if (GetBatchTask(task.Name, false) != null)
+                    throw new Exception("任务 '" + task.Name + "' 被重复加入容器。");
+
                 base.Add(task);
             }
             finally
