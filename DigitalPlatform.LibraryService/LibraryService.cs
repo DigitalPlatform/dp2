@@ -810,14 +810,20 @@ namespace dp2Library
                     {
                         sessioninfo.Account = null;
                         strError = "前端版本太旧，未达到 dp2library 服务器对前端版本的最低要求，登录失败。请立即升级前端程序到最新版本";
-                        goto ERROR1;
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.ClientVersionTooOld;
+                        return result;
                     }
                     // 参数值格式为 clientname|versionstring
                     strError = CheckClientVersion(strClientVersion);
                     if (string.IsNullOrEmpty(strError) == false)
                     {
                         sessioninfo.Account = null;
-                        goto ERROR1;
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.ClientVersionTooOld;
+                        return result;
                     }
                 }
 
@@ -860,7 +866,7 @@ namespace dp2Library
             strName = strName.ToLower();
             if (strName == "dp2circulation")
             {
-                if (version.CompareTo(new Version("2.14")) < 0)
+                if (version.CompareTo(new Version("2.14")) < 0) // 2.14
                     return "前端 dp2circulation (内务)版本太旧，登录失败。请立即升级到最新版本";
             }
 

@@ -43,6 +43,11 @@ namespace DigitalPlatform.LibraryClient
         /// 密码不正确
         /// </summary>
         PasswordError = 2,  // 密码不正确
+
+        /// <summary>
+        /// 前端版本太旧
+        /// </summary>
+        ClientVersionTooOld = 3,    // 前端版本太旧
     }
 
     /// <summary>
@@ -941,6 +946,7 @@ out strError);
                     );
 
                 strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;  // 2016/7/2
                 return result.Value;
             }
             catch (Exception ex)
@@ -981,6 +987,7 @@ out strError);
             LibraryServerResult result = ws.Logout();
 
             strError = result.ErrorInfo;
+            this.ErrorCode = result.ErrorCode;  // 2016/7/2
             return result.Value;
         }
 
@@ -2275,6 +2282,9 @@ out strError);
                     out strError);
                 if (lRet == -1 || lRet == 0)
                 {
+                    if (this.ErrorCode == localhost.ErrorCode.ClientVersionTooOld)
+                        return -1;
+
                     if (String.IsNullOrEmpty(strMessage) == false)
                         ea.ErrorInfo = strMessage + "\r\n\r\n首次自动登录报错: ";
                     else

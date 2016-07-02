@@ -489,6 +489,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
         Borrowing = 114,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ClientVersionTooOld = 115,
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]

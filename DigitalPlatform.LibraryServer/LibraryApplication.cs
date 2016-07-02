@@ -14400,6 +14400,7 @@ strLibraryCode);    // 读者所在的馆代码
         RequestTimeOut = 112,
         TimestampMismatch = 113,
         Borrowing = 114,    // 图书尚未还回(盘点前需修正此问题)
+        ClientVersionTooOld = 115, // 前端版本太旧
     }
 
     // API函数结果
