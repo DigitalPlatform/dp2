@@ -1,6 +1,4 @@
-﻿#define BASIC_HTTP
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +23,6 @@ using System.Collections;
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
-using System.ServiceModel.Description;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -107,11 +104,7 @@ namespace DigitalPlatform.LibraryClient
                 if (this.m_ws == null)
                     return this.OperationTimeout;
 
-#if BASIC_HTTP
-                return GetInnerChannelOperationTimeout();
-#else
                 return this.m_ws.InnerChannel.OperationTimeout;
-#endif
             }
             set
             {
@@ -121,19 +114,13 @@ namespace DigitalPlatform.LibraryClient
                 {
                     // this.m_ws.InnerChannel.OperationTimeout = this.OperationTimeout; // BUG!!! 2015/12/3
                     this.OperationTimeout = value;
-
-#if BASIC_HTTP
-                    SetInnerChannelOperationTimeout(value);
-#else
                     this.m_ws.InnerChannel.OperationTimeout = value;
-#endif
                 }
             }
         }
 
 #if BASIC_HTTP
-        // localhost.dp2libraryRESTClient m_ws = null;	// 拥有
-        dynamic m_ws = null;	// 拥有
+        localhost.dp2libraryRESTClient m_ws = null;	// 拥有
 #else
         localhost.dp2libraryClient m_ws = null;	// 拥有
 #endif
@@ -252,21 +239,6 @@ namespace DigitalPlatform.LibraryClient
         {
             BasicHttpBinding binding = new BasicHttpBinding();
             binding.Security.Mode = BasicHttpSecurityMode.None;
-            binding.AllowCookies = true;
-            binding.MaxReceivedMessageSize = MaxReceivedMessageSize;
-            XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas();
-            quotas.MaxArrayLength = 1024 * 1024;
-            quotas.MaxStringContentLength = 1024 * 1024;
-            binding.ReaderQuotas = quotas;
-            SetTimeout(binding);
-            return binding;
-        }
-
-        // rest: rest http
-        System.ServiceModel.Channels.Binding CreateRestBinding()
-        {
-            WebHttpBinding binding = new WebHttpBinding();
-            binding.Security.Mode = System.ServiceModel.WebHttpSecurityMode.None;
             binding.AllowCookies = true;
             binding.MaxReceivedMessageSize = MaxReceivedMessageSize;
             XmlDictionaryReaderQuotas quotas = new XmlDictionaryReaderQuotas();
@@ -495,8 +467,7 @@ out strError);
         /// 获取 localhost.dp2libraryClient 对象。这是 WCF 层的通道对象
         /// </summary>
 #if BASIC_HTTP
-        // localhost.dp2libraryRESTClient 
-        dynamic
+        localhost.dp2libraryRESTClient 
 #else
         localhost.dp2libraryClient
 #endif
@@ -511,15 +482,19 @@ out strError);
                     bool bWs0 = false;
                     Uri uri = new Uri(strUrl);
 
+#if !BASIC_HTTP
                     if (uri.Scheme.ToLower() == "net.pipe")
                     {
                         EndpointAddress address = new EndpointAddress(strUrl);
 
                         this.m_ws = new localhost.dp2libraryClient(CreateNp0Binding(), address);
                     }
-                    else if (uri.Scheme.ToLower() == "basic.http")
-                    {
-                        EndpointAddress address = new EndpointAddress(strUrl.Substring(6));
+                    else
+#endif
+
+                        if (uri.Scheme.ToLower() == "basic.http")
+                        {
+                            EndpointAddress address = new EndpointAddress(strUrl.Substring(6));
 
 #if BASIC_HTTP
                         this.m_ws = new localhost.dp2libraryRESTClient(CreateBasic0Binding(), address);
@@ -527,94 +502,71 @@ out strError);
                             throw new Exception("当前条件编译版本不支持 basic.http 协议方式");
 #endif
 
-                    }
-                    else if (uri.Scheme.ToLower() == "rest.http")
-                    {
-                        EndpointAddress address = new EndpointAddress(strUrl.Substring(5));
-
-                        // http://stackoverflow.com/questions/15401738/custom-endpoint-behavior-not-being-used-in-wcf-client-with-service-reference
-                        var factory = new ChannelFactory<localhost.dp2libraryREST>(CreateRestBinding(), address);
-                        if (factory.Endpoint.Behaviors.Find<WebHttpBehavior>() == null)
-                        {
-                            WebHttpBehavior behavior = new WebHttpBehavior();
-                            behavior.DefaultBodyStyle = System.ServiceModel.Web.WebMessageBodyStyle.Wrapped;
-                            behavior.DefaultOutgoingResponseFormat = System.ServiceModel.Web.WebMessageFormat.Json;
-                            behavior.AutomaticFormatSelectionEnabled = true;
-                            behavior.HelpEnabled = true;
-                            factory.Endpoint.Behaviors.Add(behavior);
                         }
-
-#if BASIC_HTTP
-                        this.m_ws = factory.CreateChannel();
-                        // this.m_ws = new localhost.dp2libraryRESTClient(CreateRestBinding(), address);
-#else
-                            throw new Exception("当前条件编译版本不支持 rest.http 协议方式");
-#endif
-                    }
-                    else if (uri.Scheme.ToLower() == "net.tcp")
-                    {
-                        EndpointAddress address = new EndpointAddress(strUrl);
-
-                        this.m_ws = new localhost.dp2libraryClient(CreateNt0Binding(), address);
-                    }
-                    else
-                    {
-                        if (uri.AbsolutePath.ToLower().IndexOf("/ws0") != -1)
-                            bWs0 = true;
-
-                        if (bWs0 == false)
+#if !BASIC_HTTP
+                        else if (uri.Scheme.ToLower() == "net.tcp")
                         {
-                            // ws1 
-                            EndpointAddress address = null;
+                            EndpointAddress address = new EndpointAddress(strUrl);
 
+                            this.m_ws = new localhost.dp2libraryClient(CreateNt0Binding(), address);
+                        }
+                        else
+                        {
+                            if (uri.AbsolutePath.ToLower().IndexOf("/ws0") != -1)
+                                bWs0 = true;
+
+                            if (bWs0 == false)
                             {
-                                address = new EndpointAddress(strUrl);
-                                this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
+                                // ws1 
+                                EndpointAddress address = null;
 
-                                this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
-                                this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =
-                new MyValidator();
+                                {
+                                    address = new EndpointAddress(strUrl);
+                                    this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
+
+                                    this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
+                                    this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =
+                    new MyValidator();
 
 #if NO
                                 ////
                                 this.m_ws.ClientCredentials.UserName.UserName = "test";
                                 this.m_ws.ClientCredentials.UserName.Password = "";
 #endif
-                            }
+                                }
 
-                            /*
+                                /*
+                                {
+
+                                    EndpointIdentity identity = EndpointIdentity.CreateDnsIdentity("DigitalPlatform");
+                                    address = new EndpointAddress(new Uri(strUrl),
+                                        identity, new AddressHeaderCollection());
+                                    this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
+
+                                    // this.m_ws.ClientCredentials.ClientCertificate.SetCertificate(
+                                    this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
+                                    this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =
+                    new MyValidator();
+                                }
+                                 * */
+
+                            }
+                            else
                             {
+                                // ws0
+                                EndpointAddress address = new EndpointAddress(strUrl);
 
-                                EndpointIdentity identity = EndpointIdentity.CreateDnsIdentity("DigitalPlatform");
-                                address = new EndpointAddress(new Uri(strUrl),
-                                    identity, new AddressHeaderCollection());
-                                this.m_ws = new localhost.dp2libraryClient(CreateWs1Binding(), address);
-
-                                // this.m_ws.ClientCredentials.ClientCertificate.SetCertificate(
-                                this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CertificateValidationMode = System.ServiceModel.Security.X509CertificateValidationMode.Custom;
-                                this.m_ws.ClientCredentials.ServiceCertificate.Authentication.CustomCertificateValidator =
-                new MyValidator();
+                                this.m_ws = new localhost.dp2libraryClient(CreateWs0Binding(), address);
+                                this.m_ws.ClientCredentials.UserName.UserName = "test";
+                                this.m_ws.ClientCredentials.UserName.Password = "";
                             }
-                             * */
-
                         }
-                        else
-                        {
-                            // ws0
-                            EndpointAddress address = new EndpointAddress(strUrl);
+#endif
 
-                            this.m_ws = new localhost.dp2libraryClient(CreateWs0Binding(), address);
-                            this.m_ws.ClientCredentials.UserName.UserName = "test";
-                            this.m_ws.ClientCredentials.UserName.Password = "";
-                        }
-                    }
-
-                    /*
 #if BASIC_HTTP
                     if (this.m_ws == null)
                         throw new Exception("当前编译版本只能使用 basic.http 绑定方式");
 #endif
-                     * */
 
 
                 }
@@ -655,26 +607,8 @@ out strError);
                 // m_ws.Url = this.Url;
                 // m_ws.CookieContainer = this.Cookies;
 
-#if BASIC_HTTP
 
-#if NO
-                if (this.m_ws is localhost.dp2libraryClient)
-                {
-                    localhost.dp2libraryClient temp = this.m_ws;
-                    temp.InnerChannel.OperationTimeout = this.OperationTimeout;
-                }
-                else if (this.m_ws is localhost.dp2libraryRESTClient)
-                {
-                    localhost.dp2libraryRESTClient temp = this.m_ws;
-                    temp.InnerChannel.OperationTimeout = this.OperationTimeout;
-                }
-
-#endif
-                SetInnerChannelOperationTimeout(this.OperationTimeout);
-#else
                 this.m_ws.InnerChannel.OperationTimeout = this.OperationTimeout;
-#endif
-
                 this.WcfException = null;
                 return m_ws;
             }
@@ -9683,12 +9617,12 @@ Stack:
                     {
                         // this.Timeout = new TimeSpan(0,0,4); // 2015/11/28
                         if (this.m_ws.State != CommunicationState.Faulted)
-                            WsClose();  // this.m_ws.Close();  // 如果长时间不返回怎么办？
+                            this.m_ws.Close();  // 如果长时间不返回怎么办？
                     }
                     catch
                     {
                         if (this.m_ws != null)
-                            WsAbort();  // this.m_ws.Abort();
+                            this.m_ws.Abort();
                     }
                     this.m_ws = null;
                 }
@@ -9704,50 +9638,11 @@ Stack:
             {
                 if (this.m_ws != null)
                 {
-                    WsAbort();  // this.m_ws.Abort();  // TODO: 是否因为这里没有调用 .Close() 导致通道泄露？
-                    WsClose();  // this.m_ws.Close();  // 2015/12/31
+                    this.m_ws.Abort();  // TODO: 是否因为这里没有调用 .Close() 导致通道泄露？
+                    this.m_ws.Close();  // 2015/12/31
                     this.m_ws = null;
                 }
             }
-        }
-
-        void WsAbort()
-        {
-            if (this.m_ws is IClientChannel)
-                ((IClientChannel)this.m_ws).Abort();
-            else
-                this.m_ws.Abort();
-        }
-
-        void WsClose()
-        {
-            if (this.m_ws is IClientChannel)
-                ((IClientChannel)this.m_ws).Close();
-            else
-                this.m_ws.Close();
-        }
-
-        void SetInnerChannelOperationTimeout(TimeSpan timeout)
-        {
-            if (this.m_ws is localhost.dp2libraryClient)
-                (this.m_ws as localhost.dp2libraryClient).InnerChannel.OperationTimeout = timeout;
-            else if (this.m_ws is localhost.dp2libraryRESTClient)
-                (this.m_ws as localhost.dp2libraryRESTClient).InnerChannel.OperationTimeout = timeout;
-            else
-            {
-                // http://stackoverflow.com/questions/4695656/add-operationtimeout-to-channel-implemented-in-code
-                ((IContextChannel)this.m_ws).OperationTimeout = timeout;
-            }
-        }
-
-        TimeSpan GetInnerChannelOperationTimeout()
-        {
-            if (this.m_ws is localhost.dp2libraryClient)
-                return (this.m_ws as localhost.dp2libraryClient).InnerChannel.OperationTimeout;
-            else if (this.m_ws is localhost.dp2libraryRESTClient)
-                return (this.m_ws as localhost.dp2libraryRESTClient).InnerChannel.OperationTimeout;
-
-            return ((IContextChannel)this.m_ws).OperationTimeout;
         }
 
         // 提供给

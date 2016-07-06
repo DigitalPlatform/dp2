@@ -3726,6 +3726,7 @@ nsmgr);
             bool bOwnerOnly = false;
 
             string strAccessParameters = "";
+            ItemDbCfg cfg = null;
 
             // 检查数据库路径，看看是不是已经正规定义的编目库？
             if (String.IsNullOrEmpty(strBiblioRecPath) == false)
@@ -3755,7 +3756,6 @@ nsmgr);
                 }
 #endif
 
-                ItemDbCfg cfg = null;
                 cfg = GetBiblioDbCfg(strBiblioDbName);
                 Debug.Assert(cfg != null, "");
                 strUnionCatalogStyle = cfg.UnionCatalogStyle;
@@ -3846,7 +3846,39 @@ nsmgr);
                 }
             }
 
-            // TODO: 需要额外的检查，看看所保存的数据MARC格式是不是这个数据库要求的格式？
+            // 2016/7/4
+            // 看看所保存的数据MARC格式是不是这个数据库要求的格式
+            if (strAction == "new" || strAction == "change")
+            {
+                string strMarcSyntax = "";
+                // 获得 MARCXML 字符串的 MARC 格式类型
+                // return:
+                //      -1  出错
+                //      0   无法探测
+                //      1   成功探测
+                nRet = MarcUtil.GetMarcSyntax(strBiblio,
+    out strMarcSyntax,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    strError = "无法获得 strBiblio 参数值中 MARC 记录的 MARC 格式";
+                    goto ERROR1;
+                }
+
+                if (cfg == null)
+                {
+                    strError = "cfg == null";
+                    goto ERROR1;
+                }
+
+                if (cfg.BiblioDbSyntax != strMarcSyntax)
+                {
+                    strError = "所提交保存的 MARC 格式为 '" + strMarcSyntax + "'，和书目库 '" + strBiblioDbName + "' 的 MARC 格式 '" + cfg.BiblioDbSyntax + "' 不符合";
+                    goto ERROR1;
+                }
+            }
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -5009,8 +5041,29 @@ out strError);
             string strUnionCatalogStyle = "";
             string strAccessParameters = "";
             bool bRightVerified = false;
+            ItemDbCfg cfg_source = null;
+            ItemDbCfg cfg_target = null;
 
-            // TODO: 也需要检查 strNewBiblioRecPath
+            // 2016/7/4
+            // 检查 strNewBiblioRecPath
+            if (String.IsNullOrEmpty(strNewBiblioRecPath) == false)
+            {
+                string strBiblioDbName = ResPath.GetDbName(strNewBiblioRecPath);
+
+                if (this.IsBiblioDbName(strBiblioDbName) == false)
+                {
+                    strError = "书目记录路径 '" + strNewBiblioRecPath + "' 中包含的数据库名 '" + strBiblioDbName + "' 不是合法的书目库名";
+                    goto ERROR1;
+                }
+
+                cfg_target = GetBiblioDbCfg(strBiblioDbName);
+                if (cfg_target == null)
+                {
+                    strError = "GetBiblioDbCfg("+strBiblioDbName+") return null";
+                    goto ERROR1;
+                }
+                Debug.Assert(cfg_target != null, "");
+            }
 
             // 检查数据库路径，看看是不是已经正规定义的编目库？
             if (String.IsNullOrEmpty(strBiblioRecPath) == false)
@@ -5040,10 +5093,20 @@ out strError);
                 }
 #endif
 
-                ItemDbCfg cfg = null;
-                cfg = GetBiblioDbCfg(strBiblioDbName);
-                Debug.Assert(cfg != null, "");
-                strUnionCatalogStyle = cfg.UnionCatalogStyle;
+                cfg_source = GetBiblioDbCfg(strBiblioDbName);
+                if (cfg_source == null)
+                {
+                    strError = "GetBiblioDbCfg(" + strBiblioDbName + ") return null";
+                    goto ERROR1;
+                }
+                Debug.Assert(cfg_source != null, "");
+                strUnionCatalogStyle = cfg_source.UnionCatalogStyle;
+
+                if (cfg_target != null && cfg_source.BiblioDbSyntax != cfg_target.BiblioDbSyntax)
+                {
+                    strError = "源书目库的 MARC 格式("+cfg_source.BiblioDbSyntax+") 和目标书目库的 MARC 格式("+cfg_target.BiblioDbSyntax+") 不一致，无法进行复制或移动操作";
+                    goto ERROR1;
+                }
 
                 // 检查存取权限
                 if (String.IsNullOrEmpty(sessioninfo.Access) == false)
