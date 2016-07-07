@@ -26,6 +26,7 @@ using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using System.ServiceModel.Description;
+using System.Web;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -538,8 +539,9 @@ out strError);
                         {
                             WebHttpBehavior behavior = new WebHttpBehavior();
                             behavior.DefaultBodyStyle = System.ServiceModel.Web.WebMessageBodyStyle.Wrapped;
+                            behavior.DefaultOutgoingRequestFormat = System.ServiceModel.Web.WebMessageFormat.Json;
                             behavior.DefaultOutgoingResponseFormat = System.ServiceModel.Web.WebMessageFormat.Json;
-                            behavior.AutomaticFormatSelectionEnabled = true;
+                            behavior.AutomaticFormatSelectionEnabled = true;   // true
                             behavior.HelpEnabled = true;
                             factory.Endpoint.Behaviors.Add(behavior);
                         }
@@ -1216,17 +1218,28 @@ out strError);
                 return ExceptionUtil.GetDebugText(ex);  // 2015/11/8
 
             {
-                string strResult = ex.GetType().ToString() + ":" + ex.Message;
+                string strResult = ex.GetType().ToString() + ":" + GetMessage(ex);
                 while (ex != null)
                 {
                     if (ex.InnerException != null)
-                        strResult += "\r\n" + ex.InnerException.GetType().ToString() + ": " + ex.InnerException.Message;
+                    {
+                        strResult += "\r\n" + ex.InnerException.GetType().ToString() + ": "
+                            + GetMessage(ex.InnerException);
+                    }
 
                     ex = ex.InnerException;
                 }
 
                 return strResult;
             }
+        }
+
+        static string GetMessage(Exception ex)
+        {
+            // 因为 Router 模块可能在 HTTP Reason-Phrase 里面用 UrlEncode 的汉字
+            if (ex is CommunicationException)
+                return HttpUtility.UrlDecode(ex.Message);
+            return ex.Message;
         }
 
         // 检索读者信息

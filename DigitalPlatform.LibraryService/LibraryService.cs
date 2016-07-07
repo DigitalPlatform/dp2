@@ -22,6 +22,7 @@ using DigitalPlatform.Message;
 
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Net;
 
 namespace dp2Library
 {
@@ -411,6 +412,11 @@ namespace dp2Library
         // 获得版本号
         public LibraryServerResult GetVersion(out string uid)
         {
+#if NO
+            throw new WebFaultException<string>(
+     "测试 My error description.", HttpStatusCode.BadRequest); 
+#endif
+
             uid = "";
             LibraryServerResult result = this.PrepareEnvironment("GerVersion", false);
             if (result.Value == -1)
