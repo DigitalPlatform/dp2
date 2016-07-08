@@ -2877,7 +2877,8 @@ this.checkBox_import_fastMode.Checked);
 
                 // 按照100K作为一个chunk
                 ranges = RangeList.ChunkRange(strRange,
-                    100 * 1024);
+                    100 * 1024
+                    );
             }
 
 

@@ -3567,7 +3567,8 @@ System.Text.Encoding.UTF8))
 
                     // 按照100K作为一个chunk
                     ranges = RangeList.ChunkRange(strRange,
-                        100 * 1024);
+                        channel.UploadResChunkSize // 100 * 1024
+                        );
                 }
 
                 byte[] timestamp = ByteArray.GetTimeStampByteArray(strResTimeStamp);

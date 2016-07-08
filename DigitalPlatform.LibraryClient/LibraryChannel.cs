@@ -9763,6 +9763,19 @@ Stack:
             return ((IContextChannel)this.m_ws).OperationTimeout;
         }
 
+        public long UploadResChunkSize
+        {
+            get
+            {
+                if (this.m_ws is localhost.dp2libraryClient)
+                    return 500 * 1024;  // other
+                else if (this.m_ws is localhost.dp2libraryRESTClient)
+                    return 500 * 1024;  // basic.http
+
+                return 250 * 1024;  // restful
+            }
+        }
+
         // 提供给
         //             stop.OnStop += new StopEventHandler(this.DoStop);
         public void DoStop(object sender, StopEventArgs e)
