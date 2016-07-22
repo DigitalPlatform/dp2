@@ -21,7 +21,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
 
             // 010
-            MarcNodeList fields = record.select("field[@name='010' or #name='011' or @name='091']");
+            MarcNodeList fields = record.select("field[@name='010' or @name='011' or @name='091']");
             if (fields.count > 0)
             {
                 results.Add(new NameValueLine("获得方式", BuildFields(fields)));
@@ -439,6 +439,7 @@ namespace DigitalPlatform.LibraryServer
 
             return text.ToString().Trim();
         }
+
         // 组合构造若干个普通字段内容
         // parameters:
         //      strSubfieldNameList 筛选的子字段名列表。如果为 null，表示不筛选
