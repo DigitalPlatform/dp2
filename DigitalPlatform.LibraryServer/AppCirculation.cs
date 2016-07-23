@@ -4851,6 +4851,7 @@ start_time_1,
                             strOutputItemRecPath,
                             sessioninfo.UserID, // 还书操作者
                             strOperTime,
+                            domOperLog,
                             out strOverdueString,
                             out strLostComment,
                             out return_info,
@@ -12406,6 +12407,7 @@ out string strError)
             string strItemRecPath,
             string strReturnOperator,
             string strOperTime,
+            XmlDocument domOperLog,
             out string strOverdueString,
             out string strLostComment,
             out ReturnInfo return_info,
@@ -12566,6 +12568,21 @@ out string strError)
 
             // 这是借阅时的操作者
             string strBorrowOperator = DomUtil.GetElementText(itemdom.DocumentElement, "operator");
+
+            // 2016/7/22
+            if (domOperLog != null)
+            {
+                DomUtil.SetElementText(domOperLog.DocumentElement, "borrowDate", strBorrowDate);
+                DomUtil.SetElementText(domOperLog.DocumentElement, "borrowPeriod", strPeriod);
+                if (string.IsNullOrEmpty(strDenyPeriod) == false)
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "denyPeriod", strDenyPeriod);
+
+                string strReturningDate = DomUtil.GetElementText(itemdom.DocumentElement, "returningDate");
+                if (string.IsNullOrEmpty(strReturningDate) == false)
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "returningDate", strReturningDate);
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "borrowOperator", strBorrowOperator);
+            }
 
             // 册状态
             string strState = DomUtil.GetElementText(itemdom.DocumentElement,

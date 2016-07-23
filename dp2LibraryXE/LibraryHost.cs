@@ -7,16 +7,15 @@ using System.Linq;
 // using System.ServiceProcess;
 using System.Text;
 using System.Threading;
-using Microsoft.Win32;
-
 using System.Security.Cryptography.X509Certificates;
-// using System.IdentityModel.Selectors;
-
 using System.ServiceModel;
 using System.ServiceModel.Description;
 using System.Xml;
 
+using Microsoft.Win32;
+
 using dp2Library;
+
 using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;

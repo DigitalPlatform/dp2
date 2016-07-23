@@ -4905,11 +4905,12 @@ out strError);
         //          3) 如果以"TP:"开头，表示利用电话号码进行检索
         //          4) 如果以"ID:"开头，表示利用身份证号进行检索
         //          5) 如果以"CN:"开头，表示利用证件号码进行检索
-        //          6) 否则用证条码号进行检索
+        //          6) 如果以"UN:"开头，表示利用用户名进行检索，意思就是工作人员的账户名了，不是针对读者绑定
+        //          7) 否则用证条码号进行检索
         //      strPassword     读者记录的密码
         //      strBindingID    要绑定的号码。格式如 email:xxxx 或 weixinid:xxxxx
         //      strStyle    风格。multiple/single。默认 single
-        //                  multiple 表示允许多次绑定同一类型号码；sigle 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除
+        //                  multiple 表示允许多次绑定同一类型号码；single 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除
         //                  如果包含 null_password，表示不用读者密码，strPassword 参数无效。但这个功能只能被工作人员使用
         //      strResultTypeList   结果类型数组 xml/html/text/calendar/advancexml/recpaths/summary
         //              其中calendar表示获得读者所关联的日历名；advancexml表示经过运算了的提供了丰富附加信息的xml，例如具有超期和停借期附加信息
@@ -4933,6 +4934,7 @@ out strError);
         {
             strError = "";
             results = null;
+            int nRet = 0;
 
             if (sessioninfo.UserType == "reader")
             {
@@ -4964,6 +4966,113 @@ out strError);
                 }
             }
 
+            // 绑定工作人员账户
+            if (StringUtil.HasHead(strQueryWord, "UN:") == true)
+            {
+                if (sessioninfo.UserType == "reader")
+                {
+                    strError = "读者身份不允许执行绑定工作人员账户的操作";
+                    return -1;
+                }
+
+                string strUserName = strQueryWord.Substring("UN:".Length);
+
+                if (strUserName == "public" || strUserName == "reader" || strUserName == "opac")
+                {
+                    strError = "不允许绑定到系统保留的代理账户";
+                    return -1;
+                }
+
+                UserInfo userinfo = null;
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                nRet = this.GetUserInfo(strUserName, out userinfo, out strError);
+                if (nRet == -1 || nRet == 0)
+                    return -1;
+
+                // 验证密码
+                {
+                    Account account = null;
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   found
+                    nRet = GetAccount(strUserName,
+            out account,
+            out strError);
+                    if (nRet == -1 || nRet == 0)
+                        return -1;
+
+                    nRet = LibraryServerUtil.MatchUserPassword(strPassword, account.Password, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "匹配过程出现错误";
+                        return -1;
+                    }
+                    if (nRet == 0)
+                    {
+                        strError = this.GetString("帐户不存在或密码不正确");
+                        return -1;
+                    }
+                }
+
+                bool bChanged = false;
+
+                bool bMultiple = StringUtil.IsInList("multiple", strStyle); // 若 mutilple 和 single 都包含了，则 multiple 有压倒优势
+
+                // 修改读者记录的 email 字段
+                string strEmail = userinfo.Binding;
+                string strNewEmail = "";
+                if (strAction == "bind")
+                {
+                    strNewEmail = AddBindingString(strEmail,
+                        strBindingID,
+                        bMultiple);
+                }
+                else if (strAction == "unbind")
+                {
+                    strNewEmail = RemoveBindingString(strEmail, strBindingID);
+                }
+                else
+                {
+                    strError = "未知的 strAction 参数值 '" + strAction + "'";
+                    return -1;
+                }
+
+                if (strNewEmail != strEmail)
+                {
+                    userinfo.Binding = strNewEmail;
+                    bChanged = true;
+                }
+
+                if (bChanged == true)
+                {
+                    nRet = this.ChangeUser(
+                        sessioninfo.LibraryCodeList,
+                        strUserName,
+                        sessioninfo.UserID,
+                        userinfo,
+                        sessioninfo.ClientAddress,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml("<account />");
+                SetUserXml(userinfo, dom.DocumentElement);
+
+                results = new string[1];
+                results[0] = dom.DocumentElement.OuterXml;
+
+                if (bChanged)
+                    return 1;
+
+                return 0;
+            }
+
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
@@ -4973,197 +5082,199 @@ out strError);
 
             int nRedoCount = 0;
         REDO:
-            bool bTempPassword = false;
-            string strXml = "";
-            string strOutputPath = "";
-            byte[] timestamp = null;
-            string strToken = "";
-
-            // 获得读者记录, 并检查密码是否符合。为登录用途
-            // 该函数的特殊性在于，它可以用多种检索入口，而不仅仅是条码号
-            // parameters:
-            //      strQueryWord 登录名
-            //          0) 如果以"RI:"开头，表示利用 参考ID 进行检索
-            //          1) 如果以"NB:"开头，表示利用姓名生日进行检索。姓名和生日之间间隔以'|'。姓名必须完整，生日为8字符形式
-            //          2) 如果以"EM:"开头，表示利用email地址进行检索。注意 email 本身应该是 email:xxxx 这样的形态。也就是说，整个加起来是 EM:email:xxxxx
-            //          3) 如果以"TP:"开头，表示利用电话号码进行检索
-            //          4) 如果以"ID:"开头，表示利用身份证号进行检索
-            //          5) 如果以"CN:"开头，表示利用证件号码进行检索
-            //          6) 否则用证条码号进行检索
-            //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
-            // return:
-            //      -2  当前没有配置任何读者库，或者可以操作的读者库
-            //      -1  error
-            //      0   not found
-            //      1   命中1条
-            //      >1  命中多于1条
-            int nRet = this.GetReaderRecXmlForLogin(
-                channel,
-                "", // strLibraryCodeList,
-                strQueryWord,
-                strPassword,
-                -1,  // nIndex,
-                sessioninfo.ClientIP,
-                null, // strGetToken,
-                out bTempPassword,
-                out strXml,
-                out strOutputPath,
-                out timestamp,
-                out strToken,
-                out strError);
-            if (nRet == -1 || nRet == -2)
             {
-                strError = "以 '" + strQueryWord + "' 检索读者帐户记录出错: " + strError;
-                return -1;
-            }
+                bool bTempPassword = false;
+                string strXml = "";
+                string strOutputPath = "";
+                byte[] timestamp = null;
+                string strToken = "";
 
-            if (nRet == 0)
-            {
-                strError = "帐户 '" + strQueryWord + "' 不存在或密码不正确";
-                return -1;
-            }
-
-            if (nRet > 1)
-            {
-                strError = "以 '" + strQueryWord + "' 检索读者记录时, 因所匹配的帐户多于一个，无法确认读者记录。可改用证条码号进行绑定操作。";
-                return -1;
-            }
-
-            XmlDocument readerdom = null;
-            nRet = LibraryApplication.LoadToDom(strXml,
-                out readerdom,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "装载读者记录进入XML DOM时发生错误: " + strError;
-                return -1;
-            }
-
-            // 对读者身份的附加判断
-            if (sessioninfo.UserType == "reader")
-            {
-                string strBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
-                if (sessioninfo.Account.Barcode != strBarcode)
+                // 获得读者记录, 并检查密码是否符合。为登录用途
+                // 该函数的特殊性在于，它可以用多种检索入口，而不仅仅是条码号
+                // parameters:
+                //      strQueryWord 登录名
+                //          0) 如果以"RI:"开头，表示利用 参考ID 进行检索
+                //          1) 如果以"NB:"开头，表示利用姓名生日进行检索。姓名和生日之间间隔以'|'。姓名必须完整，生日为8字符形式
+                //          2) 如果以"EM:"开头，表示利用email地址进行检索。注意 email 本身应该是 email:xxxx 这样的形态。也就是说，整个加起来是 EM:email:xxxxx
+                //          3) 如果以"TP:"开头，表示利用电话号码进行检索
+                //          4) 如果以"ID:"开头，表示利用身份证号进行检索
+                //          5) 如果以"CN:"开头，表示利用证件号码进行检索
+                //          6) 否则用证条码号进行检索
+                //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
+                // return:
+                //      -2  当前没有配置任何读者库，或者可以操作的读者库
+                //      -1  error
+                //      0   not found
+                //      1   命中1条
+                //      >1  命中多于1条
+                nRet = this.GetReaderRecXmlForLogin(
+                    channel,
+                    "", // strLibraryCodeList,
+                    strQueryWord,
+                    strPassword,
+                    -1,  // nIndex,
+                    sessioninfo.ClientIP,
+                    null, // strGetToken,
+                    out bTempPassword,
+                    out strXml,
+                    out strOutputPath,
+                    out timestamp,
+                    out strToken,
+                    out strError);
+                if (nRet == -1 || nRet == -2)
                 {
-                    strError = "绑定号码的操作被拒绝。作为读者不能对其他读者的记录进行操作";
-                    return -2;
+                    strError = "以 '" + strQueryWord + "' 检索读者帐户记录出错: " + strError;
+                    return -1;
                 }
-            }
 
-            bool bChanged = false;
+                if (nRet == 0)
+                {
+                    strError = "帐户 '" + strQueryWord + "' 不存在或密码不正确";
+                    return -1;
+                }
 
-            bool bMultiple = StringUtil.IsInList("multiple", strStyle); // 若 mutilple 和 single 都包含了，则 multiple 有压倒优势
+                if (nRet > 1)
+                {
+                    strError = "以 '" + strQueryWord + "' 检索读者记录时, 因所匹配的帐户多于一个，无法确认读者记录。可改用证条码号进行绑定操作。";
+                    return -1;
+                }
 
-            // 修改读者记录的 email 字段
-            string strEmail = DomUtil.GetElementText(readerdom.DocumentElement, "email");
-            string strNewEmail = "";
-            if (strAction == "bind")
-            {
-                strNewEmail = AddBindingString(strEmail,
-                    strBindingID,
-                    bMultiple);
-            }
-            else if (strAction == "unbind")
-            {
-                strNewEmail = RemoveBindingString(strEmail, strBindingID);
-            }
-            else
-            {
-                strError = "未知的 strAction 参数值 '" + strAction + "'";
-                return -1;
-            }
-
-            // 如果记录中没有 refID 字段，则主动填充
-            string strRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
-            if (string.IsNullOrEmpty(strRefID) == true)
-            {
-                DomUtil.SetElementText(readerdom.DocumentElement, "refID", Guid.NewGuid().ToString());
-                bChanged = true;
-            }
-
-            if (strNewEmail != strEmail)
-            {
-                DomUtil.SetElementText(readerdom.DocumentElement, "email", strNewEmail);
-                bChanged = true;
-            }
-
-            // 把临时密码设置为正式密码
-            if (bTempPassword == true
-                && strPassword != null)
-            {
-                byte[] output_timestamp = null;
-                // 修改读者密码
-                nRet = ChangeReaderPassword(
-                    sessioninfo,
-                    strOutputPath,
-                    ref readerdom,
-                    strPassword,    // TODO: 如果 strPassword == null 会怎么样？
-                    timestamp,
-                    out output_timestamp,
+                XmlDocument readerdom = null;
+                nRet = LibraryApplication.LoadToDom(strXml,
+                    out readerdom,
                     out strError);
                 if (nRet == -1)
-                    return -1;
-                timestamp = output_timestamp;
-
-                bChanged = true;
-            }
-
-            if (bChanged == true)
-            {
-                string strRecPath = strOutputPath;
-                byte[] output_timestamp = null;
-                // 保存读者记录
-                long lRet = channel.DoSaveTextRes(strRecPath,
-                    readerdom.OuterXml,
-                    false,
-                    "content", // "content,ignorechecktimestamp",
-                    timestamp,   // timestamp,
-                    out output_timestamp,
-                    out strOutputPath,
-                    out strError);
-                if (lRet == -1)
                 {
-                    if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
-                        && nRedoCount < 10)
-                    {
-                        nRedoCount++;
-                        goto REDO;
-                    }
+                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
                     return -1;
                 }
 
-                timestamp = output_timestamp;
+                // 对读者身份的附加判断
+                if (sessioninfo.UserType == "reader")
+                {
+                    string strBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+                    if (sessioninfo.Account.Barcode != strBarcode)
+                    {
+                        strError = "绑定号码的操作被拒绝。作为读者不能对其他读者的记录进行操作";
+                        return -2;
+                    }
+                }
 
-                // 让缓存失效
-                string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
-                this.ClearLoginCache(strReaderBarcode);   // 及时失效登录缓存
+                bool bChanged = false;
+
+                bool bMultiple = StringUtil.IsInList("multiple", strStyle); // 若 mutilple 和 single 都包含了，则 multiple 有压倒优势
+
+                // 修改读者记录的 email 字段
+                string strEmail = DomUtil.GetElementText(readerdom.DocumentElement, "email");
+                string strNewEmail = "";
+                if (strAction == "bind")
+                {
+                    strNewEmail = AddBindingString(strEmail,
+                        strBindingID,
+                        bMultiple);
+                }
+                else if (strAction == "unbind")
+                {
+                    strNewEmail = RemoveBindingString(strEmail, strBindingID);
+                }
+                else
+                {
+                    strError = "未知的 strAction 参数值 '" + strAction + "'";
+                    return -1;
+                }
+
+                // 如果记录中没有 refID 字段，则主动填充
+                string strRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+                if (string.IsNullOrEmpty(strRefID) == true)
+                {
+                    DomUtil.SetElementText(readerdom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                    bChanged = true;
+                }
+
+                if (strNewEmail != strEmail)
+                {
+                    DomUtil.SetElementText(readerdom.DocumentElement, "email", strNewEmail);
+                    bChanged = true;
+                }
+
+                // 把临时密码设置为正式密码
+                if (bTempPassword == true
+                    && strPassword != null)
+                {
+                    byte[] output_timestamp = null;
+                    // 修改读者密码
+                    nRet = ChangeReaderPassword(
+                        sessioninfo,
+                        strOutputPath,
+                        ref readerdom,
+                        strPassword,    // TODO: 如果 strPassword == null 会怎么样？
+                        timestamp,
+                        out output_timestamp,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    timestamp = output_timestamp;
+
+                    bChanged = true;
+                }
+
+                if (bChanged == true)
+                {
+                    string strRecPath = strOutputPath;
+                    byte[] output_timestamp = null;
+                    // 保存读者记录
+                    long lRet = channel.DoSaveTextRes(strRecPath,
+                        readerdom.OuterXml,
+                        false,
+                        "content", // "content,ignorechecktimestamp",
+                        timestamp,   // timestamp,
+                        out output_timestamp,
+                        out strOutputPath,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
+                            && nRedoCount < 10)
+                        {
+                            nRedoCount++;
+                            goto REDO;
+                        }
+                        return -1;
+                    }
+
+                    timestamp = output_timestamp;
+
+                    // 让缓存失效
+                    string strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+                    this.ClearLoginCache(strReaderBarcode);   // 及时失效登录缓存
+                }
+
+                List<string> recpaths = new List<string>();
+                recpaths.Add(strOutputPath);
+
+                // 构造读者记录的返回格式
+                DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+                nRet = BuildReaderResults(
+        sessioninfo,
+        readerdom,
+        readerdom.OuterXml,
+        strResultTypeList,
+        "", // strLibraryCode,
+        recpaths,
+        strOutputPath,
+        timestamp,
+        OperType.None,
+        null,
+        "",
+        ref results,
+        out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (bChanged)
+                    return 1;
+                return 0;
             }
-
-            List<string> recpaths = new List<string>();
-            recpaths.Add(strOutputPath);
-
-            // 构造读者记录的返回格式
-            DomUtil.DeleteElement(readerdom.DocumentElement, "password");
-            nRet = BuildReaderResults(
-    sessioninfo,
-    readerdom,
-    readerdom.OuterXml,
-    strResultTypeList,
-    "", // strLibraryCode,
-    recpaths,
-    strOutputPath,
-    timestamp,
-    OperType.None,
-    null,
-    "",
-    ref results,
-    out strError);
-            if (nRet == -1)
-                return -1;
-
-            if (bChanged)
-                return 1;
-            return 0;
         }
 
         // 加入一个绑定号码

@@ -123,7 +123,7 @@ using DigitalPlatform.OPAC.Server;
         Root.s17 += "<br/>"; // 前置"<br/>"
         if (this.DupCount > 1)
         Root.s17 += "; "; // 前置";"
-        Root.s17 += "<a href='./search.aspx?dbname=";
+        Root.s17 += "<a href='./searchbiblio.aspx?dbname=";
         Root.s17 += HttpUtility.UrlEncode("英文图书");
         Root.s17 += "&from=";
         Root.s17 += HttpUtility.UrlEncode("分类号");
@@ -144,7 +144,7 @@ using DigitalPlatform.OPAC.Server;
         Root.s18 += "<br/>"; // 前置"<br/>"
         if (this.DupCount > 1)
         Root.s18 += "; "; // 前置";"
-        Root.s18 += "<a href='./search.aspx?dbname=";
+        Root.s18 += "<a href='./searchbiblio.aspx?dbname=";
         Root.s18 += HttpUtility.UrlEncode("英文图书");
         Root.s18 += "&from=";
         Root.s18 += HttpUtility.UrlEncode("分类号");
@@ -164,7 +164,7 @@ using DigitalPlatform.OPAC.Server;
         Root.s19 += "<br/>"; // 前置"<br/>"
         if (this.DupCount > 1)
         Root.s19 += "; "; // 前置";"
-        Root.s19 += "<a href='./search.aspx?dbname=";
+        Root.s19 += "<a href='./searchbiblio.aspx?dbname=";
         Root.s19 += HttpUtility.UrlEncode("英文图书");
         Root.s19 += "&from=";
         Root.s19 += HttpUtility.UrlEncode("分类号");
@@ -183,7 +183,7 @@ using DigitalPlatform.OPAC.Server;
         Root.s19 += "<br/>"; // 前置"<br/>"
         if (this.DupCount > 1)
         Root.s19 += "; "; // 前置";"
-        Root.s19 += "<a href='./search.aspx?dbname=";
+        Root.s19 += "<a href='./searchbiblio.aspx?dbname=";
         Root.s19 += HttpUtility.UrlEncode("英文图书");
         Root.s19 += "&from=";
         Root.s19 += HttpUtility.UrlEncode("分类号");
@@ -200,7 +200,7 @@ using DigitalPlatform.OPAC.Server;
       <!-- 个人名称 -->
       <subfield name="a">
         <![CDATA[
-        	Root.s02 += "<a href='./search.aspx?dbname=";
+        	Root.s02 += "<a href='./searchbiblio.aspx?dbname=";
         	Root.s02 += HttpUtility.UrlEncode("英文图书");
         	Root.s02 += "&from=";
         	Root.s02 += HttpUtility.UrlEncode("责任者");
@@ -233,7 +233,7 @@ using DigitalPlatform.OPAC.Server;
       <!-- 团体名称 -->
       <subfield name="a">
         <![CDATA[
-        	Root.s02 += "<a href='./search.aspx?dbname=";
+        	Root.s02 += "<a href='./searchbiblio.aspx?dbname=";
         	Root.s02 += HttpUtility.UrlEncode("英文图书");
         	Root.s02 += "&from=";
         	Root.s02 += HttpUtility.UrlEncode("责任者");
@@ -261,7 +261,7 @@ using DigitalPlatform.OPAC.Server;
       <!-- 会议名称 -->
       <subfield name="a">
         <![CDATA[
-        	Root.s02 += "<a href='./search.aspx?dbname=";
+        	Root.s02 += "<a href='./searchbiblio.aspx?dbname=";
         	Root.s02 += HttpUtility.UrlEncode("英文图书");
         	Root.s02 += "&from=";
         	Root.s02 += HttpUtility.UrlEncode("责任者");
@@ -292,7 +292,7 @@ using DigitalPlatform.OPAC.Server;
         <![CDATA[
         	if (this.Parent.DupCount > 1)
         	Root.s14 += "<br/>";
-        	Root.s14 += "<a href='./search.aspx?dbname=";
+        	Root.s14 += "<a href='./searchbiblio.aspx?dbname=";
         	Root.s14 += HttpUtility.UrlEncode("英文图书");
         	Root.s14 += "&from=";
         	Root.s14 += HttpUtility.UrlEncode("责任者");
@@ -322,7 +322,7 @@ using DigitalPlatform.OPAC.Server;
         <![CDATA[
         	if (this.Parent.DupCount > 1)
         	Root.s14 += "<br/>";
-        	Root.s14 += "<a href='./search.aspx?dbname=";
+        	Root.s14 += "<a href='./searchbiblio.aspx?dbname=";
         	Root.s14 += HttpUtility.UrlEncode("英文图书");
         	Root.s14 += "&from=";
         	Root.s14 += HttpUtility.UrlEncode("责任者");
@@ -352,7 +352,7 @@ using DigitalPlatform.OPAC.Server;
         <![CDATA[
         	if (this.Parent.DupCount > 1)
         	Root.s14 += "<br/>";
-        	Root.s14 += "<a href='./search.aspx?dbname=";
+        	Root.s14 += "<a href='./searchbiblio.aspx?dbname=";
         	Root.s14 += HttpUtility.UrlEncode("英文图书");
         	Root.s14 += "&from=";
         	Root.s14 += HttpUtility.UrlEncode("责任者");
@@ -475,7 +475,7 @@ using DigitalPlatform.OPAC.Server;
         <![CDATA[
         if (this.DupCount > 1)
         Root.s05 += "; ";
-        	Root.s05 += "<a href='./search.aspx?dbname=";
+        	Root.s05 += "<a href='./searchbiblio.aspx?dbname=";
         	Root.s05 += HttpUtility.UrlEncode("英文图书");
         	Root.s05 += "&from=";
         	Root.s05 += HttpUtility.UrlEncode("出版发行者");
@@ -577,7 +577,7 @@ using DigitalPlatform.OPAC.Server;
         <![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s13 += "<br/>";
-        	Root.s13 += "<a href='./search.aspx?dbname=";
+        	Root.s13 += "<a href='./searchbiblio.aspx?dbname=";
         	Root.s13 += HttpUtility.UrlEncode("英文图书");
         	Root.s13 += "&from=";
         	Root.s13 += HttpUtility.UrlEncode("主题词");
@@ -651,7 +651,7 @@ using DigitalPlatform.OPAC.Server;
         <![CDATA[
         if (this.Parent.DupCount > 1)
         Root.s13 += "<br/>";
-        	Root.s13 += "<a href='./search.aspx?dbname=";
+        	Root.s13 += "<a href='./searchbiblio.aspx?dbname=";
         	Root.s13 += HttpUtility.UrlEncode("英文图书");
         	Root.s13 += "&from=";
         	Root.s13 += HttpUtility.UrlEncode("主题词");

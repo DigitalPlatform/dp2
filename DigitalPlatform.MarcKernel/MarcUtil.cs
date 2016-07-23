@@ -6,11 +6,11 @@ using System.IO;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using System.Web;
 
 namespace DigitalPlatform.Marc
 {
@@ -1392,7 +1392,7 @@ namespace DigitalPlatform.Marc
             domMarc = null;
 
             // MARC控件中内容更新一些. 需要刷新到xml控件中
-            using(MemoryStream s = new MemoryStream())
+            using (MemoryStream s = new MemoryStream())
             using (MarcXmlWriter writer = new MarcXmlWriter(s, Encoding.UTF8))
             {
                 if (strMarcSyntax == "unimarc")
@@ -1499,6 +1499,78 @@ namespace DigitalPlatform.Marc
 		}
 
 #endif
+
+        // 获得 MARCXML 字符串的 MARC 格式类型
+        // return:
+        //      -1  出错
+        //      0   无法探测
+        //      1   成功探测
+        public static int GetMarcSyntax(string strXml,
+out string strMarcSyntax,
+out string strError)
+        {
+            strError = "";
+            strMarcSyntax = "";
+
+            if (string.IsNullOrEmpty(strXml) == true)
+                return 0;
+
+            Debug.Assert(string.IsNullOrEmpty(strXml) == false, "");
+
+            XmlDocument dom = new XmlDocument();
+            dom.PreserveWhitespace = true;  // 在意空白符号
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "加载 XML 到 DOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            return GetMarcSyntax(dom,
+out strMarcSyntax,
+out strError);
+        }
+
+        // 获得 MARCXML 字符串的 MARC 格式类型
+        // return:
+        //      -1  出错
+        //      0   无法探测
+        //      1   成功探测
+        public static int GetMarcSyntax(XmlDocument dom,
+    out string strMarcSyntax,
+    out string strError)
+        {
+            strError = "";
+            strMarcSyntax = "";
+
+            // 取MARC根
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("unimarc", Ns.unimarcxml);
+            nsmgr.AddNamespace("usmarc", Ns.usmarcxml);
+
+            XmlElement root = null;
+            {
+                // '//'保证了无论MARC的根在何处，都可以正常取出。
+                root = dom.DocumentElement.SelectSingleNode("//unimarc:record", nsmgr) as XmlElement;
+                if (root == null)
+                {
+                    root = dom.DocumentElement.SelectSingleNode("//usmarc:record", nsmgr) as XmlElement;
+
+                    if (root == null)
+                        return 0;
+
+                    strMarcSyntax = "usmarc";
+                }
+                else
+                    strMarcSyntax = "unimarc";
+            }
+
+            return 1;
+        }
+
         // 将MARC记录转换为xml格式
         // 2015/5/10 改进了函数性能，采用 StringWriter 获取字符串结果
         // parameters:
@@ -1611,11 +1683,11 @@ namespace DigitalPlatform.Marc
                 return -1;
             }
 
-            // 取MARC根
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("unimarc", Ns.unimarcxml);
             nsmgr.AddNamespace("usmarc", Ns.usmarcxml);
 
+            // 取 MARC 根元素兼探测 MARC 格式类型
             XmlNode root = null;
             if (string.IsNullOrEmpty(strMarcSyntax) == true)
             {
@@ -1624,7 +1696,6 @@ namespace DigitalPlatform.Marc
                 if (root == null)
                 {
                     root = dom.DocumentElement.SelectSingleNode("//usmarc:record", nsmgr);
-
                     if (root == null)
                     {
                         // TODO: 是否要去除所有 MARC 相关元素
@@ -1693,7 +1764,6 @@ namespace DigitalPlatform.Marc
                         else
                             strLeader = strLeader.Substring(0, 24);
                     }
-
                 }
 
                 strMarc.Append(strLeader);
@@ -1850,6 +1920,7 @@ namespace DigitalPlatform.Marc
             strMARC = strMarc.ToString();
             if (bOutputFragmentXml)
                 strFragmentXml = dom.DocumentElement.OuterXml;
+
             return 0;
         }
 
@@ -4546,7 +4617,7 @@ namespace DigitalPlatform.Marc
                 StringBuilder text = new StringBuilder();
                 using (TextReader reader = new StreamReader(strFileName, encoding))
                 {
-                    for (int i = 0; ;i++)
+                    for (int i = 0; ; i++)
                     {
                         string line = reader.ReadLine();
                         if (line == null || i >= 100)

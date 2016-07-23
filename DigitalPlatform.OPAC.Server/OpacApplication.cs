@@ -1328,7 +1328,7 @@ namespace DigitalPlatform.OPAC.Server
                         "chargingOperDatabase",
                         out strValue,
                         out strError);
-                    this.WriteErrorLog("GetSystemParameters() circulation chargingOperDatabase return "+lRet+" , strError '"+strError+"'");
+                    this.WriteErrorLog("GetSystemParameters() circulation chargingOperDatabase return " + lRet + " , strError '" + strError + "'");
                     if (strValue == "enabled")
                         this.ChargingHistoryType = strValue;
                     else
@@ -2951,7 +2951,7 @@ System.Text.Encoding.UTF8))
                 {
                     if (channel.ErrorCode == ErrorCode.AccessDenied)
                     {
-                        strError = "用户身份 '"+channel.UserName+"' 获取册记录失败: " + strError;
+                        strError = "用户身份 '" + channel.UserName + "' 获取册记录失败: " + strError;
                     }
                     return -1;
                 }
@@ -3567,7 +3567,8 @@ System.Text.Encoding.UTF8))
 
                     // 按照100K作为一个chunk
                     ranges = RangeList.ChunkRange(strRange,
-                        100 * 1024);
+                        channel.UploadResChunkSize // 100 * 1024
+                        );
                 }
 
                 byte[] timestamp = ByteArray.GetTimeStampByteArray(strResTimeStamp);
@@ -3722,6 +3723,37 @@ out strError);
                 if (channel_param == null)
                     this.ReturnChannel(channel);
             }
+        }
+
+        public bool IncSesstionCounter(string strClientAddress)
+        {
+            if (this.WebUiDom != null && this.WebUiDom.DocumentElement != null)
+            {
+                XmlElement sessionCounter = this.WebUiDom.DocumentElement.SelectSingleNode("counters/sessionCounter") as XmlElement;
+                if (sessionCounter == null)
+                    return false;
+                string name = sessionCounter.GetAttribute("name");
+                if (string.IsNullOrEmpty(name))
+                    return false;
+                this.IncHitCount("", name, strClientAddress);
+                return true;
+            }
+            return false;
+        }
+
+        public bool IncHitCount(string strBiblioRecPath,
+            string strURI,
+            string strUserHostAddress)
+        {
+            string strError = "";
+            long lRet = this.IncHitCount(null,
+strBiblioRecPath + "|" + strURI,
+strUserHostAddress,
+false,    // 是否要创建日志
+out strError);
+            if (lRet == -1)
+                return false;
+            return true;
         }
 
         // 增量计数器值

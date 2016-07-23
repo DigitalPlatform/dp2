@@ -54,7 +54,7 @@ namespace DigitalPlatform.MessageClient
                         break;
                     start += result.Users.Count;
 
-                    foreach (UserItem user in result.Users)
+                    foreach (User user in result.Users)
                     {
 #if NO
                         ListViewItem item = new ListViewItem();
@@ -106,8 +106,8 @@ namespace DigitalPlatform.MessageClient
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
-            List<UserItem> users = new List<UserItem>();
-            UserItem user = dlg.UserItem;
+            List<User> users = new List<User>();
+            User user = dlg.UserItem;
             users.Add(user);
 
             this.EnableControls(false);
@@ -156,7 +156,7 @@ namespace DigitalPlatform.MessageClient
         // 修改 ListViewItem 值，或者新创建一个 ListViewItem
         // parameters:
         //      item_param  如果为 null，表示要新创建一个 item，否则就只用 user 来修改它的值
-        ListViewItem ChangeItem(ListViewItem item_param, UserItem user)
+        ListViewItem ChangeItem(ListViewItem item_param, User user)
         {
             ListViewItem item = item_param;
             if (item == null)
@@ -201,7 +201,7 @@ namespace DigitalPlatform.MessageClient
             UserDialog dlg = new UserDialog();
             dlg.Font = this.Font;
             dlg.ChangeMode = true;
-            dlg.UserItem = (UserItem)item.Tag;
+            dlg.UserItem = (User)item.Tag;
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
@@ -213,8 +213,8 @@ namespace DigitalPlatform.MessageClient
                 return;
             }
 
-            List<UserItem> users = new List<UserItem>();
-            UserItem user = dlg.UserItem;
+            List<User> users = new List<User>();
+            User user = dlg.UserItem;
             users.Add(user);
 
             this.EnableControls(false);
@@ -296,10 +296,10 @@ namespace DigitalPlatform.MessageClient
                     return;
             }
 
-            List<UserItem> users = new List<UserItem>();
+            List<User> users = new List<User>();
             foreach (ListViewItem item in this.listView1.SelectedItems)
             {
-                UserItem user = (UserItem)item.Tag;
+                User user = (User)item.Tag;
                 users.Add(user);
             }
 

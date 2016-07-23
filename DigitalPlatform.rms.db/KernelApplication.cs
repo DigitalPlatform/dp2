@@ -668,7 +668,7 @@ namespace DigitalPlatform.rms
         [DataMember]
         public ErrorCodeValue ErrorCode = ErrorCodeValue.NoError;
         [DataMember]
-        public string ErrorString = "错误信息未初始化...";
+        public string ErrorString = ""; // "错误信息未初始化...";
 
         public Result()
         {

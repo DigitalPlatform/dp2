@@ -1239,6 +1239,12 @@ strElementName);
   <readerRecord recPath='...'>...</readerRecord>	最新读者记录
   <itemRecord recPath='...'>...</itemRecord>	最新册记录
   
+         * 2016/7/22 新增加
+         * borrowDate
+         * borrowPeriod
+         * denyPeriod
+         * returningDate
+         * borrowOperator
 </root>
          * * */
         // parameters:

@@ -2044,7 +2044,8 @@ bool bChanged)
                             // 按照100K作为一个chunk
                             // TODO: 实现滑动窗口，根据速率来决定chunk尺寸
                             ranges = RangeList.ChunkRange(strRange,
-                                500 * 1024);
+                                channel.UploadResChunkSize // 500 * 1024
+                                );
                         }
 
                         // REDOWHOLESAVE:

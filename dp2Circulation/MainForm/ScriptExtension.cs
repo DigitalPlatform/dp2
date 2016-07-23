@@ -1066,14 +1066,18 @@ namespace dp2Circulation
             return ScriptManager.ResolveAssembly(args.Name, _dllPaths);
         }
 
+        // 注: Stop 的使用有 Bug 2016/6/28
         int RunScript(string strProjectName,
             string strProjectLocate,
             out string strError)
         {
             EnableControls(false);
 
+#if NO
+            // BUG!!!
             Stop = new DigitalPlatform.Stop();
             Stop.Register(stopManager, true);	// 和容器关联
+#endif
 
             this.Stop.OnStop += new StopEventHandler(this.DoStop);
             this.Stop.Initial("正在执行脚本 ...");
@@ -1131,11 +1135,15 @@ namespace dp2Circulation
 
                 this.AssemblyMain = null;
 
+#if NO
+                // BUG!!!
                 if (Stop != null) // 脱离关联
                 {
                     Stop.Unregister();	// 和容器关联
                     Stop = null;
                 }
+#endif
+
                 EnableControls(true);
                 AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }

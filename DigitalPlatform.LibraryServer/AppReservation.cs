@@ -1879,8 +1879,8 @@ namespace DigitalPlatform.LibraryServer
         int AddNotifyRecordToQueueDatabase(
             // RmsChannelCollection channels,
             RmsChannel channel,
-            string strItemBarcode,
-            string strRefID,
+            string strItemBarcodeParam,
+            string strRefIDParam,
             string strItemXml,
             bool bOnShelf,
             string strLibraryCode,
@@ -1906,7 +1906,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = 0;
             long lRet = 0;
 
-            if (String.IsNullOrEmpty(strItemBarcode) == true)
+            if (String.IsNullOrEmpty(strItemBarcodeParam) == true)
             {
                 // 如果检索用的册条码号为空，加上对命中结果数量不设限，那就会造成系统严重繁忙。
                 strError = "参数strItemBarcode中的册条码号不能为空。";
@@ -1934,7 +1934,7 @@ namespace DigitalPlatform.LibraryServer
             nRet = GetArrivedQueueRecXml(
                 // channels,
                 channel,
-                strItemBarcode,
+                strItemBarcodeParam,
                 out strNotifyXml,
                 out timestamp,
                 out strOutputPath,
@@ -1942,7 +1942,7 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1)
             {
                 // 写入错误日志?
-                this.WriteErrorLog("在还书操作中，检索册条码号为 " + strItemBarcode + " 的预约到书库记录时出错: " + strError);
+                this.WriteErrorLog("在还书操作中，检索册条码号为 " + strItemBarcodeParam + " 的预约到书库记录时出错: " + strError);
             }
             if (nRet >= 1)
             {
@@ -1979,7 +1979,7 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
             {
-                strError = "装载册记录 '" + strItemBarcode + "' 的 XML 进入 DOM 时发生错误: " + strError;
+                strError = "装载册记录 '" + strItemBarcodeParam + "' 的 XML 进入 DOM 时发生错误: " + strError;
                 return -1;
             }
 
@@ -2000,32 +2000,37 @@ namespace DigitalPlatform.LibraryServer
             if (bOnShelf == true)
                 DomUtil.SetAttr(nodeItemBarcode, "onShelf", "true");
 #endif
+            string strItemRefID = "";   // 计划存储纯粹的 refid
+            string strItemBarcode = strItemBarcodeParam;    // 计划存储纯粹的册条码号
+
             // 兼容 strItemBarcode 中含有前缀的用法
             string strHead = "@refID:";
-            if (StringUtil.HasHead(strItemBarcode, strHead, true) == true)
+            if (StringUtil.HasHead(strItemBarcodeParam, strHead, true) == true)
             {
-                strRefID = strItemBarcode.Substring(strHead.Length);
+                strItemRefID = strItemBarcodeParam.Substring(strHead.Length);
                 strItemBarcode = "";
             }
+
+            string strUnionItemBarcode = GetUnionBarcode(strItemBarcode, strItemRefID);
 
             if (this.ArrivedDbKeysContainsRefIDKey() == true)
             {
                 DomUtil.SetElementText(new_queue_dom.DocumentElement, "itemBarcode", strItemBarcode);
-                DomUtil.SetElementText(new_queue_dom.DocumentElement, "refID", strRefID);
+                DomUtil.SetElementText(new_queue_dom.DocumentElement, "refID", strItemRefID);
             }
             else
             {
                 if (string.IsNullOrEmpty(strItemBarcode) == true)
                 {
-                    if (string.IsNullOrEmpty(strRefID) == true)
+                    if (string.IsNullOrEmpty(strItemRefID) == true)
                     {
                         strError = "AddNotifyRecordToQueue() 函数当 strItemBarcode 参数为空的时候，必须让 strRefID 参数不为空";
                         return -1;
                     }
 
-                    Debug.Assert(string.IsNullOrEmpty(strRefID) == false, "");
+                    Debug.Assert(string.IsNullOrEmpty(strItemRefID) == false, "");
                     // 旧的用法。避免检索时候查不到
-                    DomUtil.SetElementText(new_queue_dom.DocumentElement, "itemBarcode", "@refID:" + strRefID);
+                    DomUtil.SetElementText(new_queue_dom.DocumentElement, "itemBarcode", "@refID:" + strItemRefID);
                 }
                 else
                     DomUtil.SetElementText(new_queue_dom.DocumentElement, "itemBarcode", strItemBarcode); // 2015/5/20 添加，修正 BUG
@@ -2077,7 +2082,7 @@ namespace DigitalPlatform.LibraryServer
             string strSummary = "";
             string strBiblioRecPath = "";
 
-            nRet = this.GetBiblioSummary(strItemBarcode,
+            nRet = this.GetBiblioSummary(strUnionItemBarcode,
                 "", //  strConfirmItemRecPath,
                 null,   //  strBiblioRecPathExclude,
                 25,
@@ -2165,11 +2170,11 @@ namespace DigitalPlatform.LibraryServer
                 %name% 读者姓名
                  * */
                 Hashtable table = new Hashtable();
-                table["%item%"] = "(册条码号为: " + strItemBarcode + " URL为: " + this.OpacServerUrl + "/book.aspx?barcode=" + strItemBarcode + " )";
+                table["%item%"] = "(册条码号为: " + strUnionItemBarcode + " URL为: " + this.OpacServerUrl + "/book.aspx?barcode=" + strUnionItemBarcode + " )";
                 table["%reservetime%"] = this.GetDisplayTimePeriodStringEx(this.ArrivedReserveTimeSpan);
                 table["%today%"] = DateTime.Now.ToString();
                 table["%summary%"] = strSummary;
-                table["%itembarcode%"] = strItemBarcode;
+                table["%itembarcode%"] = strUnionItemBarcode;
                 table["%name%"] = strName;
                 string strBody = "";
 
@@ -2225,13 +2230,13 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetElementText(dom.DocumentElement,
                     "itemBarcode", strItemBarcode);
                 DomUtil.SetElementText(dom.DocumentElement,
-                    "refID", strRefID);
+                    "refID", strItemRefID);
                 DomUtil.SetElementText(dom.DocumentElement,
                     "onShelf", bOnShelf ? "true" : "false");
 
                 DomUtil.SetElementText(dom.DocumentElement,
                     "opacURL", this.OpacServerUrl + "/book.aspx?barcode="
-                    + (string.IsNullOrEmpty(strItemBarcode) ? "@refID:" + strRefID : strItemBarcode));
+                    + strUnionItemBarcode);
                 DomUtil.SetElementText(dom.DocumentElement,
                     "reserveTime", this.GetDisplayTimePeriodStringEx(this.ArrivedReserveTimeSpan));
                 DomUtil.SetElementText(dom.DocumentElement,
@@ -2241,9 +2246,12 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetElementText(dom.DocumentElement,
                     "patronName", strName);
 
+                string strReaderRefID = "";
                 {
                     XmlDocument readerdom = new XmlDocument();
                     readerdom.LoadXml(strReaderXml);
+
+                    strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
 
                     XmlElement record = dom.CreateElement("patronRecord");
                     dom.DocumentElement.AppendChild(record);
@@ -2261,7 +2269,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 向 MSMQ 消息队列发送消息
                     nRet = ReadersMonitor.SendToQueue(queue,
-                        (string.IsNullOrEmpty(strRefID) ? strReaderBarcode : "!refID:" + strRefID)
+                        (string.IsNullOrEmpty(strReaderRefID) ? strReaderBarcode : "!refID:" + strReaderRefID)
                         + "@LUID:" + this.UID,
                         "xml",
                         dom.DocumentElement.OuterXml,
@@ -2305,11 +2313,11 @@ namespace DigitalPlatform.LibraryServer
                 %name% 读者姓名
                  * */
                 Hashtable table = new Hashtable();
-                table["%item%"] = "(册条码号为: " + strItemBarcode + " URL为: " + this.OpacServerUrl + "/book.aspx?barcode=" + strItemBarcode + " )";
+                table["%item%"] = "(册条码号为: " + strUnionItemBarcode + " URL为: " + this.OpacServerUrl + "/book.aspx?barcode=" + strUnionItemBarcode + " )";
                 table["%reservetime%"] = this.GetDisplayTimePeriodStringEx(this.ArrivedReserveTimeSpan);
                 table["%today%"] = DateTime.Now.ToString();
                 table["%summary%"] = strSummary;
-                table["%itembarcode%"] = strItemBarcode;
+                table["%itembarcode%"] = strUnionItemBarcode;
                 table["%name%"] = strName;
 
                 string strBody = "";
@@ -2372,11 +2380,11 @@ namespace DigitalPlatform.LibraryServer
                 %name% 读者姓名
                      * */
                     Hashtable table = new Hashtable();
-                    table["%item%"] = "(册条码号为: " + strItemBarcode + " URL为: " + this.OpacServerUrl + "/book.aspx?barcode=" + strItemBarcode + " )";
+                    table["%item%"] = "(册条码号为: " + strUnionItemBarcode + " URL为: " + this.OpacServerUrl + "/book.aspx?barcode=" + strUnionItemBarcode + " )";
                     table["%reservetime%"] = this.GetDisplayTimePeriodStringEx(this.ArrivedReserveTimeSpan);
                     table["%today%"] = DateTime.Now.ToString();
                     table["%summary%"] = strSummary;
-                    table["%itembarcode%"] = strItemBarcode;
+                    table["%itembarcode%"] = strUnionItemBarcode;
                     table["%name%"] = strName;
 
                     string strBody = "";
@@ -2671,6 +2679,13 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
+        }
+
+        public static string GetUnionBarcode(string strBarcode, string strRefID)
+        {
+            if (string.IsNullOrEmpty(strBarcode) == false)
+                return strBarcode;
+            return "@refID:" + strRefID;
         }
     }
 }

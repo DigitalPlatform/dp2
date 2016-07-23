@@ -22,6 +22,7 @@ using DigitalPlatform.Message;
 
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Net;
 
 namespace dp2Library
 {
@@ -411,6 +412,11 @@ namespace dp2Library
         // 获得版本号
         public LibraryServerResult GetVersion(out string uid)
         {
+#if NO
+            throw new WebFaultException<string>(
+     "测试 My error description.", HttpStatusCode.BadRequest); 
+#endif
+
             uid = "";
             LibraryServerResult result = this.PrepareEnvironment("GerVersion", false);
             if (result.Value == -1)
@@ -810,14 +816,20 @@ namespace dp2Library
                     {
                         sessioninfo.Account = null;
                         strError = "前端版本太旧，未达到 dp2library 服务器对前端版本的最低要求，登录失败。请立即升级前端程序到最新版本";
-                        goto ERROR1;
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.ClientVersionTooOld;
+                        return result;
                     }
                     // 参数值格式为 clientname|versionstring
                     strError = CheckClientVersion(strClientVersion);
                     if (string.IsNullOrEmpty(strError) == false)
                     {
                         sessioninfo.Account = null;
-                        goto ERROR1;
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.ClientVersionTooOld;
+                        return result;
                     }
                 }
 
@@ -860,7 +872,7 @@ namespace dp2Library
             strName = strName.ToLower();
             if (strName == "dp2circulation")
             {
-                if (version.CompareTo(new Version("2.14")) < 0)
+                if (version.CompareTo(new Version("2.14")) < 0) // 2.14
                     return "前端 dp2circulation (内务)版本太旧，登录失败。请立即升级到最新版本";
             }
 
@@ -7791,11 +7803,12 @@ namespace dp2Library
         //          3) 如果以"TP:"开头，表示利用电话号码进行检索
         //          4) 如果以"ID:"开头，表示利用身份证号进行检索
         //          5) 如果以"CN:"开头，表示利用证件号码进行检索
-        //          6) 否则用证条码号进行检索
+        //          6) 如果以"UN:"开头，表示利用用户名进行检索，意思就是工作人员的账户名了，不是针对读者绑定
+        //          7) 否则用证条码号进行检索
         //      strPassword     读者记录的密码
         //      strBindingID    要绑定的号码。格式如 email:xxxx 或 weixinid:xxxxx
         //      strStyle    风格。multiple/single。默认 single
-        //                  multiple 表示允许多次绑定同一类型号码；sigle 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除
+        //                  multiple 表示允许多次绑定同一类型号码；single 表示同一类型号码只能绑定一次，如果多次绑定以前的同类型号码会被清除
         //      strResultTypeList   结果类型数组 xml/html/text/calendar/advancexml/recpaths/summary
         //              其中calendar表示获得读者所关联的日历名；advancexml表示经过运算了的提供了丰富附加信息的xml，例如具有超期和停借期附加信息
         //              advancexml_borrow_bibliosummary/advancexml_overdue_bibliosummary/advancexml_history_bibliosummary
@@ -8630,6 +8643,9 @@ namespace dp2Library
         }
 
         // 获得用户
+        // parameters:
+        //      strAction   暂未使用。保持空即可。
+        //      strName     用户名。如果为空，表示希望列出全部用户信息
         // return:
         //      result.Value    -1 错误; 其他 返回总结果数量
         public LibraryServerResult GetUser(
@@ -9807,6 +9823,14 @@ namespace dp2Library
 
                 if (strCategory == "system")
                 {
+                    // 2016/6/25
+                    // MSMQ 队列名
+                    if (strName == "outgoingQueue")
+                    {
+                        strValue = app.OutgoingQueue;
+                        goto END1;
+                    }
+
                     // 2016/4/6
                     // 获得系统的临时文件目录
                     if (strName == "systemTempDir")
@@ -9840,7 +9864,6 @@ namespace dp2Library
 
                         StringUtil.RemoveDupNoSort(ref librarycodes);
                         strValue = StringUtil.MakePathList(librarycodes);
-
                         goto END1;
                     }
 

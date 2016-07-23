@@ -880,21 +880,32 @@ errorInfo);
 
         public GetUserResult GetUsers(string userName, int start, int count)
         {
+#if NO
             var task = HubProxy.Invoke<GetUserResult>("GetUsers",
                 userName,
                 start,
                 count);
             task.Wait();
             return task.Result;
+#endif
+            return HubProxy.Invoke<GetUserResult>("GetUsers",
+                userName,
+                start,
+                count).Result;
         }
 
-        public MessageResult SetUsers(string action, List<UserItem> users)
+        public MessageResult SetUsers(string action, List<User> users)
         {
+#if NO
             var task = HubProxy.Invoke<MessageResult>("SetUsers",
                 action,
                 users);
             task.Wait();
             return task.Result;
+#endif
+            return HubProxy.Invoke<MessageResult>("SetUsers",
+                action,
+                users).Result;
         }
 
 #if NO
@@ -1151,10 +1162,10 @@ request).Result;
 
     public class GetUserResult : MessageResult
     {
-        public List<UserItem> Users { get; set; }
+        public List<User> Users { get; set; }
     }
 
-    public class UserItem
+    public class User
     {
         public string id { get; set; }
 
@@ -1165,8 +1176,8 @@ request).Result;
         public string department { get; set; } // 部门名称
         public string tel { get; set; }  // 电话号码
         public string comment { get; set; }  // 注释
-        public string [] groups { get; set; }  
-
+        public string [] groups { get; set; }
+        public string binding { get; set; } // 绑定信息
     }
 
     public class SearchRequest

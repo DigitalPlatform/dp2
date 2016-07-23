@@ -4682,6 +4682,14 @@ out strError);
                 strStartDate = strStartDate.Insert(6, "-").Insert(4, "-");
                 strEndDate = strEndDate.Insert(6, "-").Insert(4, "-");
 
+                string strTimeCondition = " substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
+                     + " AND substr(item.createtime,1,10) <= '" + strEndDate + "' ";
+                if (strStartDate.Replace("-","") == "00010101")
+                    strTimeCondition = " ((substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
+                     + " AND substr(item.createtime,1,10) <= '" + strEndDate + "' )"
+                     + " OR item.createtime = '') ";
+
+
                 // 301 表 按照图书 *分类* 分类的图书册数表
                 strCommand = "select classhead, count(path1) as bcount, sum (icount) from ( "
                     // + "select substr(" + strDistinctClassTableName + ".class,1,1) as classhead, item.bibliorecpath as path1, count(item.itemrecpath) as icount "
@@ -4689,8 +4697,9 @@ out strError);
                      + " FROM item "
                      + " LEFT OUTER JOIN " + strDistinctClassTableName + " ON item.bibliorecpath <> '' AND " + strDistinctClassTableName + ".bibliorecpath = item.bibliorecpath "
                      + "     WHERE " + strLocationLike
-                     + " AND substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
-                     + " AND substr(item.createtime,1,10) <= '" + strEndDate + "' "  // 限定册记录创建的时间在 end 以前
+                     //+ " AND substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
+                     //+ " AND substr(item.createtime,1,10) <= '" + strEndDate + "' "  // 限定册记录创建的时间在 end 以前
+                     + " AND " + strTimeCondition
                      + " GROUP BY path1 "
                      + " ) group by classhead ORDER BY classhead ;";
                 // left outer join 是包含了左边找不到右边的那些行， 然后 class 列为 NULL
@@ -13307,7 +13316,8 @@ MessageBoxDefaultButton.Button1);
                 // 按照100K作为一个chunk
                 // TODO: 实现滑动窗口，根据速率来决定chunk尺寸
                 ranges = RangeList.ChunkRange(strRange,
-                    500 * 1024);
+                    channel.UploadResChunkSize // 500 * 1024
+                    );
             }
 
             if (timestamp == null)

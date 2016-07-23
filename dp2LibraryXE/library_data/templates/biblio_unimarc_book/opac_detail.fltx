@@ -639,7 +639,7 @@ using DigitalPlatform.LibraryServer;
         // 款目要素
 	if (Parent.s.Length > 0)
         Parent.s += "; ";	// 字段重复则前置"; "
-        Parent.s += "<a href='./search.aspx?dbname=";
+        Parent.s += "<a href='./searchbiblio.aspx?dbname=";
         Parent.s += HttpUtility.UrlEncode(Root.dbname);
         Parent.s += "&from=";
         Parent.s += HttpUtility.UrlEncode("主题词");
@@ -705,7 +705,7 @@ using DigitalPlatform.LibraryServer;
         // 款目要素
 	if (Parent.s.Length > 0)
         Parent.s += "; ";	// 字段重复则前置"; "
-        Parent.s += "<a href='./search.aspx?dbname=";
+        Parent.s += "<a href='./searchbiblio.aspx?dbname=";
         Parent.s += HttpUtility.UrlEncode(Root.dbname);
         Parent.s += "&from=";
         Parent.s += HttpUtility.UrlEncode("主题词");
@@ -756,7 +756,7 @@ using DigitalPlatform.LibraryServer;
         // 款目要素
 	if (Parent.s.Length > 0)
         Parent.s += "; ";	// 字段重复则前置"; "
-        Parent.s += "<a href='./search.aspx?dbname=";
+        Parent.s += "<a href='./searchbiblio.aspx?dbname=";
         Parent.s += HttpUtility.UrlEncode(Root.dbname);
         Parent.s += "&from=";
         Parent.s += HttpUtility.UrlEncode("主题词");
@@ -807,7 +807,7 @@ using DigitalPlatform.LibraryServer;
         // 款目要素
 	if (Parent.s.Length > 0)
         Parent.s += "; ";	// 字段重复则前置"; "
-        Parent.s += "<a href='./search.aspx?dbname=";
+        Parent.s += "<a href='./searchbiblio.aspx?dbname=";
         Parent.s += HttpUtility.UrlEncode(Root.dbname);
         Parent.s += "&from=";
         Parent.s += HttpUtility.UrlEncode("关键词");
@@ -837,7 +837,7 @@ using DigitalPlatform.LibraryServer;
 		Root.s23 += "<br/> ";	// 前置"<br/> "
 
 	// 增加中图分类法的根查询锚点
-        Parent.stemp += "<a href='./search.aspx?dbname=";
+        Parent.stemp += "<a href='./searchbiblio.aspx?dbname=";
         Parent.stemp += HttpUtility.UrlEncode(Root.dbname);
         Parent.stemp += "&from=";
         Parent.stemp += HttpUtility.UrlEncode("分类号");
@@ -864,7 +864,7 @@ using DigitalPlatform.LibraryServer;
 					Root.s23 += "<br/> ";	// 前置"<br/> "
 
 				// 增加科图分类法的根查询锚点
-        Parent.stemp += "<a href='./search.aspx?dbname=";
+        Parent.stemp += "<a href='./searchbiblio.aspx?dbname=";
         Parent.stemp += HttpUtility.UrlEncode(Root.dbname);
         Parent.stemp += "&from=";
         Parent.stemp += HttpUtility.UrlEncode("分类号");
@@ -891,7 +891,7 @@ using DigitalPlatform.LibraryServer;
 					Root.s23 += "<br/> ";	// 前置"<br/> "
 
 				// 增加人大分类法的根查询锚点
-        Parent.stemp += "<a href='./search.aspx?dbname=";
+        Parent.stemp += "<a href='./searchbiblio.aspx?dbname=";
         Parent.stemp += HttpUtility.UrlEncode(Root.dbname);
         Parent.stemp += "&from=";
         Parent.stemp += HttpUtility.UrlEncode("分类号");
@@ -909,7 +909,7 @@ using DigitalPlatform.LibraryServer;
         // 款目要素
 	if (Root.s24.Length > 0)
         Root.s24 += "; ";	// 字段重复则前置"; "
-        Root.s24 += "<a href='./search.aspx?dbname=";
+        Root.s24 += "<a href='./searchbiblio.aspx?dbname=";
         Root.s24 += HttpUtility.UrlEncode(Root.dbname);
         Root.s24 += "&from=";
         Root.s24 += HttpUtility.UrlEncode("责任者");
@@ -936,7 +936,7 @@ using DigitalPlatform.LibraryServer;
         // 款目要素
 	if (Root.s24.Length > 0)
         Root.s24 += "; ";	// 字段重复则前置"; "
-        Root.s24 += "<a href='./search.aspx?dbname=";
+        Root.s24 += "<a href='./searchbiblio.aspx?dbname=";
         Root.s24 += HttpUtility.UrlEncode(Root.dbname);
         Root.s24 += "&from=";
         Root.s24 += HttpUtility.UrlEncode("责任者");
@@ -953,7 +953,7 @@ using DigitalPlatform.LibraryServer;
         // 款目要素
 	if (Root.s24.Length > 0)
         Root.s24 += "; ";	// 字段重复则前置"; "
-        Root.s24 += "<a href='./search.aspx?dbname=";
+        Root.s24 += "<a href='./searchbiblio.aspx?dbname=";
         Root.s24 += HttpUtility.UrlEncode(Root.dbname);
         Root.s24 += "&from=";
         Root.s24 += HttpUtility.UrlEncode("责任者");
@@ -973,7 +973,7 @@ using DigitalPlatform.LibraryServer;
         // 款目要素
 	if (Root.s24.Length > 0)
         Root.s24 += "; ";	// 字段重复则前置"; "
-        Root.s24 += "<a href='./search.aspx?dbname=";
+        Root.s24 += "<a href='./searchbiblio.aspx?dbname=";
         Root.s24 += HttpUtility.UrlEncode(Root.dbname);
         Root.s24 += "&from=";
         Root.s24 += HttpUtility.UrlEncode("责任者");
@@ -1020,7 +1020,7 @@ using DigitalPlatform.LibraryServer;
         // 款目要素
 	if (Root.s24.Length > 0)
         Root.s24 += "; ";	// 字段重复则前置"; "
-        Root.s24 += "<a href='./search.aspx?dbname=";
+        Root.s24 += "<a href='./searchbiblio.aspx?dbname=";
         Root.s24 += HttpUtility.UrlEncode(Root.dbname);
         Root.s24 += "&from=";
         Root.s24 += HttpUtility.UrlEncode("责任者");
@@ -1067,7 +1067,7 @@ using DigitalPlatform.LibraryServer;
         // 款目要素
 	if (Root.s24.Length > 0)
         Root.s24 += "; ";	// 字段重复则前置"; "
-        Root.s24 += "<a href='./search.aspx?dbname=";
+        Root.s24 += "<a href='./searchbiblio.aspx?dbname=";
         Root.s24 += HttpUtility.UrlEncode(Root.dbname);
         Root.s24 += "&from=";
         Root.s24 += HttpUtility.UrlEncode("责任者");

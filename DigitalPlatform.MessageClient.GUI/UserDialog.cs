@@ -23,7 +23,7 @@ namespace DigitalPlatform.MessageClient
             InitializeComponent();
         }
 
-        public UserItem UserItem
+        public User UserItem
         {
             get;
             set;
@@ -42,12 +42,13 @@ namespace DigitalPlatform.MessageClient
             this.textBox_tel.Text = this.UserItem.tel;
             this.textBox_comment.Text = this.UserItem.comment;
             this.textBox_groups.Text = this.UserItem.groups == null? "" : string.Join("\r\n", this.UserItem.groups);
+            this.textBox_binding.Text = this.UserItem.binding;
         }
 
         void BuildUserItem()
         {
             if (this.UserItem == null)
-                this.UserItem = new UserItem();
+                this.UserItem = new User();
 
             this.UserItem.userName = this.textBox_userName.Text;
             this.UserItem.password = this.textBox_password.Text;
@@ -57,6 +58,7 @@ namespace DigitalPlatform.MessageClient
             this.UserItem.tel = this.textBox_tel.Text;
             this.UserItem.comment = this.textBox_comment.Text;
             this.UserItem.groups = this.textBox_groups.Text.Replace("\r\n", "\r").Split(new char[] {'\r'});
+            this.UserItem.binding = this.textBox_binding.Text;
         }
 
         private void UserDialog_Load(object sender, EventArgs e)
@@ -141,5 +143,6 @@ namespace DigitalPlatform.MessageClient
         {
             this.Changed = true;
         }
+
     }
 }

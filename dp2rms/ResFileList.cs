@@ -1215,7 +1215,8 @@ namespace dp2rms
 
 					// 按照100K作为一个chunk
 					ranges = RangeList.ChunkRange(strRange,
-						100*1024);
+                        100 * 1024
+                        );
 				}
 
 				byte [] timestamp = ByteArray.GetTimeStampByteArray(strTimeStamp);

@@ -858,7 +858,6 @@
     <Content Include="style\haidian\0\title_logo.gif" />
     <Content Include="style\haidian\0\total.jpg" />
     <Content Include="style\haidian\0\userinfoaspx.css" />
-    <Content Include="style\haidian\0\XMLFile.xml" />
     <Content Include="style\locked.gif" />
     <Content Include="style\nonePhoto.png" />
     <Content Include="style\rss.gif" />
