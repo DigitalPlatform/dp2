@@ -1308,6 +1308,22 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        // 2016/7/24
+        public static string CutSummary(string strSummary, int nMaxLength)
+        {
+            if (string.IsNullOrEmpty(strSummary))
+                return strSummary;
+
+            if (nMaxLength != -1)
+            {
+                // 截断
+                if (strSummary.Length > nMaxLength)
+                    return strSummary.Substring(0, nMaxLength) + "...";
+            }
+
+            return strSummary;
+        }
+
         // 根据册条码号获得它所从属的书目记录路径
         int GetBiblioRecPathByItemBarcode(SessionInfo sessioninfo,
             RmsChannel channel,
@@ -5059,7 +5075,7 @@ out strError);
                 cfg_target = GetBiblioDbCfg(strBiblioDbName);
                 if (cfg_target == null)
                 {
-                    strError = "GetBiblioDbCfg("+strBiblioDbName+") return null";
+                    strError = "GetBiblioDbCfg(" + strBiblioDbName + ") return null";
                     goto ERROR1;
                 }
                 Debug.Assert(cfg_target != null, "");
@@ -5104,7 +5120,7 @@ out strError);
 
                 if (cfg_target != null && cfg_source.BiblioDbSyntax != cfg_target.BiblioDbSyntax)
                 {
-                    strError = "源书目库的 MARC 格式("+cfg_source.BiblioDbSyntax+") 和目标书目库的 MARC 格式("+cfg_target.BiblioDbSyntax+") 不一致，无法进行复制或移动操作";
+                    strError = "源书目库的 MARC 格式(" + cfg_source.BiblioDbSyntax + ") 和目标书目库的 MARC 格式(" + cfg_target.BiblioDbSyntax + ") 不一致，无法进行复制或移动操作";
                     goto ERROR1;
                 }
 

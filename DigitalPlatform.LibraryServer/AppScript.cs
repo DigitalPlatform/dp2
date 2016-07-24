@@ -2430,7 +2430,7 @@ namespace DigitalPlatform.LibraryServer
                 nRet = this.App.GetBiblioSummary(strBarcode,
                     strConfirmItemRecPath,
                     null,   //  strBiblioRecPathExclude,
-                    25, // 10
+                    -1, // 25,
                     out strBiblioRecPath,
                     out strSummary,
                     out strError);
