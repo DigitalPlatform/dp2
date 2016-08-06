@@ -1,4 +1,5 @@
 ﻿using DigitalPlatform.Marc;
+using DigitalPlatform.Script;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +9,11 @@ namespace DigitalPlatform.LibraryServer
 {
     public static class MarcTable
     {
-        public static int ScriptUnimarc(string strMARC,
-    out List<NameValueLine> results,
-    out string strError)
+        public static int ScriptUnimarc(
+            string strRecPath,
+            string strMARC,
+            out List<NameValueLine> results,
+            out string strError)
         {
             strError = "";
             results = new List<NameValueLine>();
@@ -30,9 +33,11 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        public static int ScriptMarc21(string strMARC,
-    out List<NameValueLine> results,
-    out string strError)
+        public static int ScriptMarc21(
+            string strRecPath,
+            string strMARC,
+            out List<NameValueLine> results,
+            out string strError)
         {
             strError = "";
             results = new List<NameValueLine>();
@@ -41,6 +46,10 @@ namespace DigitalPlatform.LibraryServer
 
             if (record.ChildNodes.count == 0)
                 return 0;
+
+            string strImageUrl = ScriptUtil.GetCoverImageUrl(strMARC, "MediumImage");    // LargeImage
+            if (string.IsNullOrEmpty(strImageUrl) == false)
+                results.Add(new NameValueLine("_coverImage", strImageUrl));
 
             // LC control no.
             MarcNodeList nodes = record.select("field[@name='010']/subfield[@name='a']");

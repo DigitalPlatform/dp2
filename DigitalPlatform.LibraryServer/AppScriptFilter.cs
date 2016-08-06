@@ -677,9 +677,71 @@ namespace DigitalPlatform.LibraryServer
             else
                 strMarc = strBiblioXml;
 
+            {
+                string strFilterFileName = Path.Combine(this.DataDir, "cfgs/table_" + strSyntax + ".fltx");
+                if (File.Exists(strFilterFileName) == true)
+                {
+                    nRet = this.ConvertBiblioXmlToHtml(
+            strFilterFileName,
+            strBiblioXml,
+            null,
+            strRecPath,
+            out strBiblio,
+            out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+                else
+                {
+                    List<NameValueLine> results = null;
+                    if (strSyntax == "usmarc")
+                    {
+                        nRet = MarcTable.ScriptMarc21(
+                            strRecPath,
+                            strMarc,
+                            out results,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
+                    else if (strSyntax == "unimarc")
+                    {
+                        nRet = MarcTable.ScriptUnimarc(
+    strRecPath,
+    strMarc,
+    out results,
+    out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
+                    else
+                    {
+                        strError = "无法识别的 MARC 格式 '"+strSyntax+"'";
+                        return -1;
+                    }
 
+                    strBiblio = BuildTableXml(results);
+                    return 0;
+                }
+            }
 
             return 0;
+        }
+
+        // 创建 Table Xml
+        public static string BuildTableXml(List<NameValueLine> lines)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root />");
+            foreach (NameValueLine line in lines)
+            {
+                XmlElement new_line = dom.CreateElement("line");
+                dom.DocumentElement.AppendChild(new_line);
+                new_line.SetAttribute("name", line.Name);
+                new_line.SetAttribute("value", line.Value);
+            }
+
+            return dom.OuterXml;
         }
     }
 }
