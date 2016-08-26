@@ -47,7 +47,7 @@ namespace DigitalPlatform.LibraryServer
             if (record.ChildNodes.count == 0)
                 return 0;
 
-            string strImageUrl = ScriptUtil.GetCoverImageUrl(strMARC, "MediumImage");    // LargeImage
+            string strImageUrl = ScriptUtil.GetCoverImageUrl(strMARC, "LargeImage");    // LargeImage
             if (string.IsNullOrEmpty(strImageUrl) == false)
                 results.Add(new NameValueLine("_coverImage", strImageUrl));
 
