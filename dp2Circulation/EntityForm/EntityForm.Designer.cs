@@ -91,6 +91,7 @@ namespace dp2Circulation
             this.ToolStripMenuItem_viewMarcJidaoData = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_enableSaveAllButton = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_marcEditor_getKeys = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_marcEditor_getSummary = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_marcEditor_editMacroTable = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_marcEditor_saveTo = new System.Windows.Forms.ToolStripButton();
@@ -123,7 +124,7 @@ namespace dp2Circulation
             this.label3 = new System.Windows.Forms.Label();
             this.textBox_itemBarcode = new System.Windows.Forms.TextBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripButton_hideItemQuickImput = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_hideItemQuickInput = new System.Windows.Forms.ToolStripButton();
             this.imageList_itemType = new System.Windows.Forms.ImageList(this.components);
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.ToolStripMenuItem_removeCoverImage = new System.Windows.Forms.ToolStripMenuItem();
@@ -681,6 +682,7 @@ namespace dp2Circulation
             this.ToolStripMenuItem_viewMarcJidaoData,
             this.ToolStripMenuItem_enableSaveAllButton,
             this.MenuItem_marcEditor_getKeys,
+            this.MenuItem_marcEditor_getSummary,
             this.MenuItem_marcEditor_editMacroTable});
             this.toolStripDropDownButton_marcEditor_someFunc.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_marcEditor_someFunc.Image")));
             this.toolStripDropDownButton_marcEditor_someFunc.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -781,6 +783,13 @@ namespace dp2Circulation
             this.MenuItem_marcEditor_getKeys.Size = new System.Drawing.Size(257, 22);
             this.MenuItem_marcEditor_getKeys.Text = "查看书目记录的检索点(&K)";
             this.MenuItem_marcEditor_getKeys.Click += new System.EventHandler(this.MenuItem_marcEditor_getKeys_Click);
+            // 
+            // MenuItem_marcEditor_getSummary
+            // 
+            this.MenuItem_marcEditor_getSummary.Name = "MenuItem_marcEditor_getSummary";
+            this.MenuItem_marcEditor_getSummary.Size = new System.Drawing.Size(257, 22);
+            this.MenuItem_marcEditor_getSummary.Text = "查看书目记录摘要(&S)";
+            this.MenuItem_marcEditor_getSummary.Click += new System.EventHandler(this.MenuItem_marcEditor_getSummary_Click);
             // 
             // MenuItem_marcEditor_editMacroTable
             // 
@@ -1124,7 +1133,7 @@ namespace dp2Circulation
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip1.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton_hideItemQuickImput});
+            this.toolStripButton_hideItemQuickInput});
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.toolStrip1.Location = new System.Drawing.Point(1, 0);
             this.toolStrip1.Name = "toolStrip1";
@@ -1133,16 +1142,16 @@ namespace dp2Circulation
             this.toolStrip1.TabIndex = 8;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // toolStripButton_hideItemQuickImput
+            // toolStripButton_hideItemQuickInput
             // 
-            this.toolStripButton_hideItemQuickImput.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton_hideItemQuickImput.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_hideItemQuickImput.Image")));
-            this.toolStripButton_hideItemQuickImput.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
-            this.toolStripButton_hideItemQuickImput.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_hideItemQuickImput.Name = "toolStripButton_hideItemQuickImput";
-            this.toolStripButton_hideItemQuickImput.Size = new System.Drawing.Size(28, 28);
-            this.toolStripButton_hideItemQuickImput.Text = "隐藏册条码快速输入面板";
-            this.toolStripButton_hideItemQuickImput.Click += new System.EventHandler(this.toolStripButton_hideItemQuickImput_Click);
+            this.toolStripButton_hideItemQuickInput.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_hideItemQuickInput.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_hideItemQuickInput.Image")));
+            this.toolStripButton_hideItemQuickInput.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolStripButton_hideItemQuickInput.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_hideItemQuickInput.Name = "toolStripButton_hideItemQuickInput";
+            this.toolStripButton_hideItemQuickInput.Size = new System.Drawing.Size(28, 28);
+            this.toolStripButton_hideItemQuickInput.Text = "隐藏册条码快速输入面板";
+            this.toolStripButton_hideItemQuickInput.Click += new System.EventHandler(this.toolStripButton_hideItemQuickInput_Click);
             // 
             // imageList_itemType
             // 
@@ -1297,7 +1306,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripButton toolStripButton_saveAll;
         private System.Windows.Forms.ToolStripButton toolStripButton_verifyData;
         private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripButton toolStripButton_hideItemQuickImput;
+        private System.Windows.Forms.ToolStripButton toolStripButton_hideItemQuickInput;
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripButton toolStripButton_hideSearchPanel;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_enableSaveAllButton;
@@ -1312,6 +1321,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ComboBox comboBox_matchStyle;
         private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_biblioDbNames;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_marcEditor_getKeys;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_marcEditor_getSummary;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
         private System.Windows.Forms.TabPage tabPage_template;
         private DigitalPlatform.EasyMarc.EasyMarcControl easyMarcControl1;

@@ -11524,7 +11524,7 @@ value);
             this.QueryPanelVisibie = false;
         }
 
-        private void toolStripButton_hideItemQuickImput_Click(object sender, EventArgs e)
+        private void toolStripButton_hideItemQuickInput_Click(object sender, EventArgs e)
         {
             this.ItemQuickInputPanelVisibie = false;
         }
@@ -12794,6 +12794,79 @@ strMARC);
 
                 this.ReturnChannel(channel);
             }
+        }
+
+        private void MenuItem_marcEditor_getSummary_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (string.IsNullOrEmpty(this.BiblioRecPath))
+            {
+                strError = "当前书目记录为空，无法获得书目记录摘要";
+                goto ERROR1;
+            }
+
+            string strBiblioSummary = "";
+
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
+
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在获得书目记录摘要");
+            Progress.BeginLoop();
+
+            try
+            {
+                string[] formats = new string[1];
+                formats[0] = "summary";
+                string[] results = null;
+                byte[] timestamp = null;
+
+                long lRet = channel.GetBiblioInfos(
+                    stop,
+                    this.BiblioRecPath,
+                    "",
+                    formats,
+                    out results,
+                    out timestamp,
+                    out strError);
+                if (lRet == -1 || lRet == 0)
+                {
+                    if (lRet == 0 && String.IsNullOrEmpty(strError) == true)
+                        strError = "书目记录 '" + this.BiblioRecPath + "' 不存在";
+
+                    goto ERROR1;
+                }
+                else
+                {
+                    Debug.Assert(results != null && results.Length == 1, "results必须包含 1 个元素");
+                    strBiblioSummary = results[0];
+                }
+
+            }
+            finally
+            {
+                EnableControls(true);
+
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
+
+
+            HtmlViewerForm dlg = new HtmlViewerForm();
+
+            dlg.Text = "书目记录摘要";
+            dlg.HtmlString = strBiblioSummary;
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         bool _readOnly = false;

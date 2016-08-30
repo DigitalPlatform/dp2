@@ -847,6 +847,7 @@ namespace DigitalPlatform.LibraryServer
                         else
                             strSummary = "";
 
+                        // 注：这里并没有把产生好的摘要字符串写入 mongodb 缓存数据库
                         strBiblio = strSummary;
                     }
                 }
@@ -1193,6 +1194,12 @@ namespace DigitalPlatform.LibraryServer
                 result_strings.Add(strBiblio);
             } // end of for
 
+            // 2016/8/30
+            if (string.IsNullOrEmpty(strErrorText) == false && formats.Length <= 1)
+            {
+                strError = strErrorText;
+                return -1;
+            }
             return 0;
         }
 

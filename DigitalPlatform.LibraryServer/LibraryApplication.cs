@@ -1301,13 +1301,14 @@ namespace DigitalPlatform.LibraryServer
                                         MessageQueueAccessRights.FullControl);
                                 }
 
+                                app.WriteErrorLog("首次创建 MSMQ 队列 '" + this.OutgoingQueue + "' 成功");
                             }
                         }
                         catch (Exception ex)
                         {
                             app.HangupList.Add("MessageQueueCreateFail");
-                            app.WriteErrorLog("*** 创建 MSMQ 队列 '" + this.OutgoingQueue + "' 失败: " + ex.Message
-                                + " 系统被挂起。");
+                            app.WriteErrorLog("*** 创建 MSMQ 队列 '" + this.OutgoingQueue + "' 失败: " + ExceptionUtil.GetDebugText(ex)
+                                + " 系统已被挂起。");
                         }
                     }
                     else

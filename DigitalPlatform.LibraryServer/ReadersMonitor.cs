@@ -895,7 +895,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "发送消息到 MQ 失败: " + ex.Message;
+                strError = "发送消息到 MQ 出现异常: " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
         }
