@@ -85,8 +85,11 @@ namespace DigitalPlatform.LibraryServer
 
                 this._summaryCollection = db.GetCollection<SummaryItem>("summary");
                 if (_summaryCollection.GetIndexes().Count == 0)
-                    _summaryCollection.CreateIndex(new IndexKeysBuilder().Ascending("BiblioRecPath"),
-                        IndexOptions.SetUnique(true));
+                {
+                    //_summaryCollection.CreateIndex(new IndexKeysBuilder().Ascending("BiblioRecPath"),
+                    //    IndexOptions.SetUnique(true));
+                    CreateBiblioSummaryIndex();
+                }
             }
             return 0;
         }
@@ -149,6 +152,24 @@ namespace DigitalPlatform.LibraryServer
             var query = new QueryDocument("BiblioRecPath", strBiblioRecPath);
 
             return collection.FindOne(query);
+        }
+
+        // 清除集合内的全部内容
+        public void ClearBiblioSummaryDb()
+        {
+            MongoCollection<SummaryItem> collection = this.SummaryCollection;
+            if (collection == null)
+                return;
+
+            WriteConcernResult result = collection.RemoveAll();
+
+            CreateBiblioSummaryIndex();
+        }
+
+        public void CreateBiblioSummaryIndex()
+        {
+            _summaryCollection.CreateIndex(new IndexKeysBuilder().Ascending("BiblioRecPath"),
+    IndexOptions.SetUnique(true));
         }
     }
 

@@ -1832,7 +1832,7 @@ return result;
                 {
                     string strFilterFileName = strLocalPath;
                     nRet = this.ConvertBiblioXmlToHtml(
-                        strFilterFileName,
+                            strFilterFileName,
                             strMarc,    // strBiblioXml,
                             strMarcSyntax,
                             strBiblioRecPath,
