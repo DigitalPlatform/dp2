@@ -4208,6 +4208,8 @@ Value data: HEX 0x1
                 Page.Response.AddHeader("Expires", "0");
 
                 // FlushOutput flushdelegate = new FlushOutput(MyFlushOutput);
+                
+                Page.Response.BufferOutput = false; // 2016/8/31
 
                 image.Seek(0, SeekOrigin.Begin);
                 StreamUtil.DumpStream(image, Page.Response.OutputStream/*, flushdelegate*/);

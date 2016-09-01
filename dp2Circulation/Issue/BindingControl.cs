@@ -14288,7 +14288,8 @@ Color.FromArgb(100, color)
 
                 return EnsureVisible(rectCell, rectCaret);
             }
-            else if (result.Object is Cell)
+            else if (result.Object is Cell
+                || result.Object is IssueBindingItem)   // 2016/8/31
             {
                 RectangleF rectUpdate = GetViewRect(result.Object);
 
@@ -14308,7 +14309,7 @@ Color.FromArgb(100, color)
             }
             else
             {
-                throw new Exception("尚不支持IssueBindingItem/Cell/NullCell以外的其他类型");
+                throw new Exception("尚不支持IssueBindingItem/Cell/NullCell以外的其他类型 " + result.Object.GetType().ToString());
             }
 
         }

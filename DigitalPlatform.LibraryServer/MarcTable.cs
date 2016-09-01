@@ -1,14 +1,17 @@
-﻿using DigitalPlatform.Marc;
-using DigitalPlatform.Script;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
+using DigitalPlatform.Marc;
+using DigitalPlatform.Script;
 
 namespace DigitalPlatform.LibraryServer
 {
     public static class MarcTable
     {
+        static string CRLF = "\n";
+
         public static int ScriptUnimarc(
             string strRecPath,
             string strMARC,
@@ -90,7 +93,7 @@ namespace DigitalPlatform.LibraryServer
             fields = record.select("field[@name='245']");
             if (fields.count > 0)
             {
-                results.Add(new NameValueLine("Main title", BuildFields(fields)));
+                results.Add(new NameValueLine("Main title", BuildFields(fields), "title"));
             }
 #if NO
             foreach (MarcNode field in fields)
@@ -131,7 +134,7 @@ namespace DigitalPlatform.LibraryServer
                 nodes = field.select("subfield");
                 if (nodes.count > 0)
                 {
-                    results.Add(new NameValueLine("Published/Created", ConcatSubfields(nodes)));
+                    results.Add(new NameValueLine("Published / Created", ConcatSubfields(nodes)));  // 附加的空格便于在 HTML 中自然折行
                 }
             }
 
@@ -376,12 +379,14 @@ namespace DigitalPlatform.LibraryServer
                 results.Add(new NameValueLine("Quality code", BuildFields(fields)));
             }
 
+            /*
             // Links
             fields = record.select("field[@name='856'or @name='859']");
             if (fields.count > 0)
             {
                 results.Add(new NameValueLine("Links", BuildLinks(fields)));
             }
+             * */
 
             // Content type
             fields = record.select("field[@name='336']");
@@ -479,7 +484,7 @@ namespace DigitalPlatform.LibraryServer
                     if (temp.Length > 0)
                     {
                         if (i > 0)
-                            text.Append("|");
+                            text.Append(CRLF);
                         text.Append(temp.ToString().Trim());
                         i++;
                     }
@@ -500,7 +505,7 @@ namespace DigitalPlatform.LibraryServer
                 if (nodes.count > 0)
                 {
                     if (i > 0)
-                        text.Append("|");
+                        text.Append(CRLF);
 
                     bool bPrevContent = false;  // 前一个子字段是除了 x y z 以外的子字段
                     StringBuilder temp = new StringBuilder(4096);
@@ -569,7 +574,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     if (i > 0)
-                        text.Append("|");
+                        text.Append(CRLF);
 
                     StringBuilder temp = new StringBuilder(4096);
 
@@ -595,6 +600,7 @@ namespace DigitalPlatform.LibraryServer
     {
         public string Name = "";
         public string Value = "";
+        public string Type = "";
 
         public NameValueLine()
         {
@@ -604,6 +610,13 @@ namespace DigitalPlatform.LibraryServer
         {
             Name = strName;
             Value = strValue;
+        }
+
+        public NameValueLine(string strName, string strValue, string strType)
+        {
+            Name = strName;
+            Value = strValue;
+            Type = strType;
         }
     }
 

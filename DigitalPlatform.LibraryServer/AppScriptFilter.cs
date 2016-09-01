@@ -716,7 +716,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                     else
                     {
-                        strError = "无法识别的 MARC 格式 '"+strSyntax+"'";
+                        strError = "无法识别的 MARC 格式 '" + strSyntax + "'";
                         return -1;
                     }
 
@@ -739,6 +739,8 @@ namespace DigitalPlatform.LibraryServer
                 dom.DocumentElement.AppendChild(new_line);
                 new_line.SetAttribute("name", line.Name);
                 new_line.SetAttribute("value", line.Value);
+                if (string.IsNullOrEmpty(line.Type) == false)
+                    new_line.SetAttribute("type", line.Type);
             }
 
             return dom.OuterXml;
