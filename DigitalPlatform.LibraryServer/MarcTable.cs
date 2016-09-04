@@ -412,9 +412,13 @@ namespace DigitalPlatform.LibraryServer
             fields = record.select("field[@name='856' or @name='859']");
             if (fields.count > 0)
             {
-                var line = new NameValueLine("Digital Resource", "", "object");
-                line.Xml = ScriptUtil.BuildObjectXmlTable(strMARC);
-                results.Add(line);
+                string strXml = ScriptUtil.BuildObjectXmlTable(strMARC);
+                if (string.IsNullOrEmpty(strXml) == false)
+                {
+                    var line = new NameValueLine("Digital Resource", "", "object");
+                    line.Xml = strXml;
+                    results.Add(line);
+                }
             }
 
             return 0;

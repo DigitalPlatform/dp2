@@ -475,7 +475,5 @@ namespace DigitalPlatform.Script
 
             return dom.DocumentElement.OuterXml;
         }
-
-
     }
 }
