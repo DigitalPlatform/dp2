@@ -5257,6 +5257,18 @@ out strError);
 
                 // 构造读者记录的返回格式
                 DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+
+                // 2016/9/4
+                {
+                    string strLibraryCode = "";
+                    nRet = this.GetLibraryCode(strOutputPath,
+            out strLibraryCode,
+            out strError);
+                    if (nRet == -1)
+                        return -1;
+                    DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
+                }
+
                 nRet = BuildReaderResults(
         sessioninfo,
         readerdom,
