@@ -738,9 +738,15 @@ namespace DigitalPlatform.LibraryServer
                 XmlElement new_line = dom.CreateElement("line");
                 dom.DocumentElement.AppendChild(new_line);
                 new_line.SetAttribute("name", line.Name);
-                new_line.SetAttribute("value", line.Value);
+
+                if (string.IsNullOrEmpty(line.Value) == false)
+                    new_line.SetAttribute("value", line.Value);
+
                 if (string.IsNullOrEmpty(line.Type) == false)
                     new_line.SetAttribute("type", line.Type);
+
+                if (string.IsNullOrEmpty(line.Xml) == false)
+                    new_line.InnerXml = line.Xml;
             }
 
             return dom.OuterXml;

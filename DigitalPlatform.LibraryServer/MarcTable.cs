@@ -409,6 +409,14 @@ namespace DigitalPlatform.LibraryServer
                 results.Add(new NameValueLine("Carrier type", BuildFields(fields, "a")));
             }
 
+            fields = record.select("field[@name='856' or @name='859']");
+            if (fields.count > 0)
+            {
+                var line = new NameValueLine("Digital Resource", "", "object");
+                line.Xml = ScriptUtil.BuildObjectXmlTable(strMARC);
+                results.Add(line);
+            }
+
             return 0;
         }
 
@@ -601,6 +609,7 @@ namespace DigitalPlatform.LibraryServer
         public string Name = "";
         public string Value = "";
         public string Type = "";
+        public string Xml = "";
 
         public NameValueLine()
         {
