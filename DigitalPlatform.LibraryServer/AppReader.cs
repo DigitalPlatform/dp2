@@ -5005,16 +5005,19 @@ out strError);
                     if (nRet == -1 || nRet == 0)
                         return -1;
 
-                    nRet = LibraryServerUtil.MatchUserPassword(strPassword, account.Password, out strError);
-                    if (nRet == -1)
+                    if (strPassword != null)
                     {
-                        strError = "匹配过程出现错误";
-                        return -1;
-                    }
-                    if (nRet == 0)
-                    {
-                        strError = this.GetString("帐户不存在或密码不正确");
-                        return -1;
+                        nRet = LibraryServerUtil.MatchUserPassword(strPassword, account.Password, out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "匹配过程出现错误";
+                            return -1;
+                        }
+                        if (nRet == 0)
+                        {
+                            strError = this.GetString("帐户不存在或密码不正确");
+                            return -1;
+                        }
                     }
                 }
 
@@ -5254,6 +5257,18 @@ out strError);
 
                 // 构造读者记录的返回格式
                 DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+
+                // 2016/9/4
+                {
+                    string strLibraryCode = "";
+                    nRet = this.GetLibraryCode(strOutputPath,
+            out strLibraryCode,
+            out strError);
+                    if (nRet == -1)
+                        return -1;
+                    DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
+                }
+
                 nRet = BuildReaderResults(
         sessioninfo,
         readerdom,

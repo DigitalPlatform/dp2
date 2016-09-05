@@ -125,7 +125,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.80 (2016/6/13) ChangeReaderPassword() API，即便是工作人员身份，也可以通过 strReaderOldPassword 参数决定是否验证旧密码。null 表示不验证。
         //      2.81 (2016/6/25) SetUser() API 在创建新用户的时候允许 binding 字段使用 ip:[current] 表达自动绑定 IP 的要求
         //                      GetSystemParameter() API system/outgoingQueue 可以获得 MSMQ 队列路径
-        public static string Version = "2.81";
+        //      2.82 (2016/8/31) ManageDatabase() API 可以管理 _biblioSummary 类型的数据库。特殊类型名字改为前方以字符 _ 引导
+        public static string Version = "2.82";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -1301,13 +1302,14 @@ namespace DigitalPlatform.LibraryServer
                                         MessageQueueAccessRights.FullControl);
                                 }
 
+                                app.WriteErrorLog("首次创建 MSMQ 队列 '" + this.OutgoingQueue + "' 成功");
                             }
                         }
                         catch (Exception ex)
                         {
                             app.HangupList.Add("MessageQueueCreateFail");
-                            app.WriteErrorLog("*** 创建 MSMQ 队列 '" + this.OutgoingQueue + "' 失败: " + ex.Message
-                                + " 系统被挂起。");
+                            app.WriteErrorLog("*** 创建 MSMQ 队列 '" + this.OutgoingQueue + "' 失败: " + ExceptionUtil.GetDebugText(ex)
+                                + " 系统已被挂起。");
                         }
                     }
                     else

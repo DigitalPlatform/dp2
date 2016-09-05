@@ -8,6 +8,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
+using System.Xml;
 
 namespace DigitalPlatform.Script
 {
@@ -185,7 +186,7 @@ namespace DigitalPlatform.Script
         {
             None = 0,
             HttpUrlHitCount = 0x01,     // 是否对 http:// 地址进行访问计数
-            FromCover = 0x02,   // 是否包含封面图像事项
+            FrontCover = 0x02,   // 是否包含封面图像事项
         }
 
         // 创建 OPAC 详细页面中的对象资源显示局部 HTML。这是一个 <table> 片段
@@ -229,7 +230,7 @@ namespace DigitalPlatform.Script
                 string strType = (string)table["type"];
 
                 if (string.IsNullOrEmpty(strType) == false
-                    && (style & BuildObjectHtmlTableStyle.FromCover) == 0
+                    && (style & BuildObjectHtmlTableStyle.FrontCover) == 0
                     && (strType == "FrontCover" || strType.StartsWith("FrontCover.") == true))
                     continue;
 
@@ -240,7 +241,8 @@ namespace DigitalPlatform.Script
                 string strUri = MakeObjectUrl(strRecPath, u);
 
                 string strSaveAs = "";
-                if (StringUtil.MatchMIME(s_q, "text") == true
+                if (string.IsNullOrEmpty(s_q) == true
+                    || StringUtil.MatchMIME(s_q, "text") == true
                     || StringUtil.MatchMIME(s_q, "image") == true)
                 {
 
@@ -328,6 +330,152 @@ namespace DigitalPlatform.Script
             text.Append("</table>");
 
             return text.ToString();
+        }
+
+        // 创建 table 中的对象资源局部 XML。这是一个 <table> 片段
+        // 前导语 $3
+        // 链接文字 $y $f
+        // URL $u
+        // 格式类型 $q
+        // 对象ID $8
+        // 对象尺寸 $s
+        // 公开注释 $z
+        public static string BuildObjectXmlTable(string strMARC,
+            // string strRecPath,
+            BuildObjectHtmlTableStyle style = BuildObjectHtmlTableStyle.None)
+        {
+            // Debug.Assert(false, "");
+
+            MarcRecord record = new MarcRecord(strMARC);
+            MarcNodeList fields = record.select("field[@name='856']");
+
+            if (fields.count == 0)
+                return "";
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<table/>");
+
+            int nCount = 0;
+            foreach (MarcField field in fields)
+            {
+                string x = field.select("subfield[@name='x']").FirstContent;
+
+                Hashtable table = StringUtil.ParseParameters(x, ';', ':');
+                string strType = (string)table["type"];
+
+                if (string.IsNullOrEmpty(strType) == false
+                    && (style & BuildObjectHtmlTableStyle.FrontCover) == 0
+                    && (strType == "FrontCover" || strType.StartsWith("FrontCover.") == true))
+                    continue;
+
+                string strSize = (string)table["size"];
+                string s_q = field.select("subfield[@name='q']").FirstContent;  // 注意， FirstContent 可能会返回 null
+
+                string u = field.select("subfield[@name='u']").FirstContent;
+                // string strUri = MakeObjectUrl(strRecPath, u);
+
+                string strSaveAs = "";
+                if (string.IsNullOrEmpty(s_q) == true   // 2016/9/4
+                    || StringUtil.MatchMIME(s_q, "text") == true
+                    || StringUtil.MatchMIME(s_q, "image") == true)
+                {
+
+                }
+                else
+                {
+                    strSaveAs = "true";
+                }
+
+#if NO
+                string strObjectUrl = strUri;
+                if (StringUtil.HasHead(strUri, "http:") == false
+                    && StringUtil.HasHead(strUri, "https:") == false)
+                {
+                    // 内部对象
+                    strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
+                }
+                else
+                {
+                    // http: 或 https: 的情形，即外部 URL
+                    if ((style & BuildObjectHtmlTableStyle.HttpUrlHitCount) != 0)
+                    {
+                        strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs + "&biblioRecPath=" + HttpUtility.UrlEncode(strRecPath);
+                    }
+                }
+#endif
+
+                string y = field.select("subfield[@name='y']").FirstContent;
+                string f = field.select("subfield[@name='f']").FirstContent;
+
+                string urlLabel = "";
+                if (string.IsNullOrEmpty(y) == false)
+                    urlLabel = y;
+                else
+                    urlLabel = f;
+                if (string.IsNullOrEmpty(urlLabel) == true)
+                    urlLabel = strType;
+
+                // 2015/11/26
+                string s_z = field.select("subfield[@name='z']").FirstContent;
+                if (string.IsNullOrEmpty(urlLabel) == true
+                    && string.IsNullOrEmpty(s_z) == false)
+                {
+                    urlLabel = s_z;
+                    s_z = "";
+                }
+
+                if (string.IsNullOrEmpty(urlLabel) == true)
+                    urlLabel = u;
+
+#if NO
+                string urlTemp = "";
+                if (String.IsNullOrEmpty(strObjectUrl) == false)
+                {
+                    urlTemp += "<a href='" + strObjectUrl + "'>";
+                    urlTemp += urlLabel;
+                    urlTemp += "</a>";
+                }
+                else
+                    urlTemp = urlLabel;
+#endif
+
+                string s_3 = field.select("subfield[@name='3']").FirstContent;
+                string s_s = field.select("subfield[@name='s']").FirstContent;
+
+                XmlElement line = dom.CreateElement("line");
+                dom.DocumentElement.AppendChild(line);
+
+                string strTypeString = (s_3 + " " + strType).Trim();
+                if (string.IsNullOrEmpty(strTypeString) == false)
+                    line.SetAttribute("type", strTypeString);
+
+                if (string.IsNullOrEmpty(urlLabel) == false)
+                    line.SetAttribute("urlLabel", urlLabel);
+
+                if (string.IsNullOrEmpty(u) == false)
+                    line.SetAttribute("uri", u);
+
+                if (string.IsNullOrEmpty(s_q) == false)
+                    line.SetAttribute("mime", s_q);
+
+                if (string.IsNullOrEmpty(strSize) == false)
+                    line.SetAttribute("size", strSize);
+
+                if (string.IsNullOrEmpty(s_s) == false)
+                    line.SetAttribute("bytes", s_s);
+
+                if (string.IsNullOrEmpty(strSaveAs) == false)
+                    line.SetAttribute("saveAs", strSaveAs);
+
+                if (string.IsNullOrEmpty(s_z) == false)
+                    line.SetAttribute("comment", s_z);
+                nCount++;
+            }
+
+            if (nCount == 0)
+                return "";
+
+            return dom.DocumentElement.OuterXml;
         }
     }
 }

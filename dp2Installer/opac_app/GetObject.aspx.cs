@@ -171,7 +171,7 @@ ref sessioninfo) == false)
 
             // FlushOutput flushdelegate = new FlushOutput(MyFlushOutput);
 
-            this.Response.BufferOutput = false;
+            // this.Response.BufferOutput = false;
             this.Server.ScriptTimeout = 10 * 60 * 60;    // 10 个小时
 
             nRet = app.DownloadObject(

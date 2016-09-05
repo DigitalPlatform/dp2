@@ -2871,6 +2871,25 @@ namespace DigitalPlatform.LibraryServer
                     continue;
                 }
 
+                // 刷新书目摘要库
+                if (this.IsBiblioSummaryDbName(strName) == true)
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许刷新" + BiblioSummaryDbName + "库的定义";
+                        goto ERROR1;
+                    }
+
+                    if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
+                    {
+                        strError = "当前尚未启用 MongoDB 功能";
+                        return -1;
+                    }
+
+                    this.CreateBiblioSummaryIndex();
+                    continue;
+                }
+
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
                 goto ERROR1;
             }
@@ -2930,9 +2949,6 @@ namespace DigitalPlatform.LibraryServer
             }
             return -1;
         }
-
-
-
 
         // TODO: 如果当前任务正在运行, 需要把新的任务追加到末尾继续运行
         int StartRebuildKeysTask(string strDbNameList,
@@ -3403,6 +3419,26 @@ namespace DigitalPlatform.LibraryServer
                     continue;
                 }
 
+                // 初始化书目摘要库
+                if (this.IsBiblioSummaryDbName(strName))
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许初始化" + BiblioSummaryDbName + "库";
+                        return -1;
+                    }
+
+                    if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
+                    {
+                        strError = "当前尚未启用 MongoDB 功能";
+                        return -1;
+                    }
+
+                    // 初始化
+                    this.ClearBiblioSummaryDb();
+                    continue;
+                }
+
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
                 return -1;
             }
@@ -3447,6 +3483,14 @@ namespace DigitalPlatform.LibraryServer
         bool IsChargingHistoryDbName(string strName)
         {
             if (strName == ChargingHistoryDbName)
+                return true;
+            return false;
+        }
+
+        const string BiblioSummaryDbName = "书目摘要";
+        bool IsBiblioSummaryDbName(string strName)
+        {
+            if (strName == BiblioSummaryDbName)
                 return true;
             return false;
         }
@@ -5209,7 +5253,7 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
 
             if (String.IsNullOrEmpty(strDatabaseNames) == true)
-                strDatabaseNames = "#biblio,#reader,#arrived,#amerce,#invoice,#util,#message,#accessLog,#hitcount,#chargingOper";  // 注: #util 相当于 #zhongcihao,#publisher,#dictionary,#inventory
+                strDatabaseNames = "#biblio,#reader,#arrived,#amerce,#invoice,#util,#message,#_accessLog,#_hitcount,#_chargingOper,#_biblioSummary";  // 注: #util 相当于 #zhongcihao,#publisher,#dictionary,#inventory
 
             // 用于构造返回结果字符串的DOM
             XmlDocument dom = new XmlDocument();
@@ -5364,7 +5408,7 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 #endif
-                    else if (strName == "#accessLog")
+                    else if (strName == "#_accessLog")
                     {
                         // 2015/11/26
                         if (string.IsNullOrEmpty(this.MongoDbConnStr) == false
@@ -5373,11 +5417,11 @@ namespace DigitalPlatform.LibraryServer
                             XmlNode nodeDatabase = dom.CreateElement("database");
                             dom.DocumentElement.AppendChild(nodeDatabase);
 
-                            DomUtil.SetAttr(nodeDatabase, "type", "accessLog");
+                            DomUtil.SetAttr(nodeDatabase, "type", "_accessLog");
                             DomUtil.SetAttr(nodeDatabase, "name", AccessLogDbName);
                         }
                     }
-                    else if (strName == "#hitcount")
+                    else if (strName == "#_hitcount")
                     {
                         // 2015/11/26
                         if (string.IsNullOrEmpty(this.MongoDbConnStr) == false
@@ -5386,11 +5430,11 @@ namespace DigitalPlatform.LibraryServer
                             XmlNode nodeDatabase = dom.CreateElement("database");
                             dom.DocumentElement.AppendChild(nodeDatabase);
 
-                            DomUtil.SetAttr(nodeDatabase, "type", "hitcount");
+                            DomUtil.SetAttr(nodeDatabase, "type", "_hitcount");
                             DomUtil.SetAttr(nodeDatabase, "name", HitCountDbName);
                         }
                     }
-                    else if (strName == "#chargingOper")
+                    else if (strName == "#_chargingOper")
                     {
                         // 2016/1/10
                         if (string.IsNullOrEmpty(this.MongoDbConnStr) == false
@@ -5399,8 +5443,21 @@ namespace DigitalPlatform.LibraryServer
                             XmlNode nodeDatabase = dom.CreateElement("database");
                             dom.DocumentElement.AppendChild(nodeDatabase);
 
-                            DomUtil.SetAttr(nodeDatabase, "type", "chargingOper");
+                            DomUtil.SetAttr(nodeDatabase, "type", "_chargingOper");
                             DomUtil.SetAttr(nodeDatabase, "name", ChargingHistoryDbName);
+                        }
+                    }
+                    else if (strName == "#_biblioSummary")
+                    {
+                        // 2016/8/30
+                        if (string.IsNullOrEmpty(this.MongoDbConnStr) == false
+                            && this.SummaryCollection != null)
+                        {
+                            XmlNode nodeDatabase = dom.CreateElement("database");
+                            dom.DocumentElement.AppendChild(nodeDatabase);
+
+                            DomUtil.SetAttr(nodeDatabase, "type", "_biblioSummary");
+                            DomUtil.SetAttr(nodeDatabase, "name", BiblioSummaryDbName);
                         }
                     }
                     else
@@ -5499,7 +5556,6 @@ namespace DigitalPlatform.LibraryServer
                         string strInCirculation = cfg.InCirculation == true ? "true" : "false";
                         DomUtil.SetAttr(nodeDatabase, "inCirculation", strInCirculation);
 
-
                         goto CONTINUE;
                     }
                 }
@@ -5521,7 +5577,6 @@ namespace DigitalPlatform.LibraryServer
 
                         string strInCirculation = cfg.InCirculation == true ? "true" : "false";
                         DomUtil.SetAttr(nodeDatabase, "inCirculation", strInCirculation);
-
 
                         goto CONTINUE;
                     }
@@ -5764,7 +5819,6 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-
             if (String.IsNullOrEmpty(strError) == false)
                 return -1;
 
@@ -5841,9 +5895,7 @@ namespace DigitalPlatform.LibraryServer
                         strError += "删除小书目库 '" + strBiblioDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
                 }
-
             }
-
 
             // 读者库
             nodes = cfg_dom.DocumentElement.SelectNodes("readerdbgroup/database");
@@ -5862,7 +5914,6 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
             }
-
 
             // 预约到书队列库
             XmlNode arrived_node = cfg_dom.DocumentElement.SelectSingleNode("arrived");

@@ -5,7 +5,9 @@
 
 
 // USMARC格式图书 summary格式构造
-// (C)Copyright 2006 数字平台(北京)软件有限责任公司
+// (C)Copyright 2006-2015 数字平台(北京)软件有限责任公司
+// 修改历史：
+// 2016/8/30 去掉大项之间多余的 .。在子字段内容之间插入空格。
 
 using System;
 using System.IO;
@@ -56,19 +58,17 @@ using DigitalPlatform.LibraryServer;
       <subfield name="a">
         <![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s11 += "; "; // 前置"; "
-        Root.s11 += this.Content;
+        Root.s11 += ";"; // 前置"; "
+        Root.s11 += " ISBN " + this.Content;
         ]]>
       </subfield>
       <!-- 价格及相关 -->
       <subfield name="c">
-        Root.s11 += this.Content;
+        Root.s11 += " " + this.Content;
       </subfield>
       <!-- 错误的ISBN -->
       <subfield name="z">
-        if (this.DupCount > 1)
-        Root.s11 += "; ";
-        Root.s11 += this.Content;
+        Root.s11 += " ISBN " + this.Content;
         Root.s11 += "(错误)";
       </subfield>
     </field>
@@ -78,22 +78,20 @@ using DigitalPlatform.LibraryServer;
       <subfield name="a">
         <![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s12 += "; "; // 前置"; "
-        Root.s12 += this.Content;
+        Root.s12 += ";"; // 前置"; "
+        Root.s12 += " ISSN " + this.Content;
         ]]>
       </subfield>
       <!-- 错误的ISSN -->
       <subfield name="Y">
         if (this.DupCount > 1)
-        Root.s12 += "; ";
-        Root.s12 += this.Content;
+        Root.s12 += ";";
+        Root.s12 += " ISSN " + this.Content;
         Root.s12 += "(错误)";
       </subfield>
       <!-- 错误的ISSN -->
       <subfield name="Z">
-        if (this.DupCount > 1)
-        Root.s12 += "; ";
-        Root.s12 += this.Content;
+        Root.s12 += " ISSN " + this.Content;
         Root.s12 += "(废弃)";
       </subfield>
     </field>
@@ -124,8 +122,10 @@ using DigitalPlatform.LibraryServer;
       </subfield>
     </field>
     <!-- 100,110,111 责任者主要款目 -->
-    <field name="100">
-      <!-- 个人名称 -->
+    <field name="100110111">
+      <!-- 100 个人名称 -->
+      <!-- 110 团体名称 -->
+      <!-- 111 会议名称 -->
       <subfield name="a">
         Root.s02 += this.Content;
       </subfield>
@@ -141,108 +141,20 @@ using DigitalPlatform.LibraryServer;
       </subfield>
       <!-- 时间 -->
       <subfield name="d">
-        Root.s02 += this.Content;
-      </subfield>
-    </field>
-    <field name="110">
-      <!-- 团体名称 -->
-      <subfield name="a">
-        Root.s02 += this.Content;
-      </subfield>
-      <!-- 下属单位 -->
-      <subfield name="b">
-        if (this.DupCount > 1)
-        Root.s02 += "; ";
-        Root.s02 += this.Content;
-      </subfield>
-      <!-- 会议名称 -->
-      <subfield name="c">
-        Root.s02 += this.Content;
-      </subfield>
-    </field>
-    <field name="111">
-      <!-- 会议名称 -->
-      <subfield name="a">
-        Root.s02 += this.Content;
-      </subfield>
-      <!-- 会议地址 -->
-      <subfield name="c">
-        Root.s02 += this.Content;
-      </subfield>
-      <!-- 会议时间 -->
-      <subfield name="d">
-        Root.s02 += this.Content;
-      </subfield>
-      <!-- 会议届次 -->
-      <subfield name="n">
         Root.s02 += this.Content;
       </subfield>
     </field>
     <!-- 700,710,711 责任者附加款目 -->
-    <field name="700">
-      <!-- 个人名称 -->
+    <field name="700710711">
+      <!-- 700 个人名称 -->
+      <!-- 710 团体名称 -->
+      <!-- 711 会议名称 -->
       <subfield name="a">
         <![CDATA[
-        if (this.Parent.DupCount > 1)
-        Root.s02 += "; ";
-        Root.s02 += this.Content;
+        if (this.Name == "a" && this.Parent.DupCount > 1)
+        Root.s02 += ";";
+        Root.s02 += " " + this.Content;
         ]]>
-      </subfield>
-      <!-- 世次 -->
-      <subfield name="b">
-        Root.s02 += this.Content;
-      </subfield>
-      <!-- 称谓 -->
-      <subfield name="c">
-        Root.s02 += this.Content;
-      </subfield>
-      <!-- 时间 -->
-      <subfield name="d">
-        Root.s02 += this.Content;
-      </subfield>
-    </field>
-    <field name="710">
-      <!-- 团体名称 -->
-      <subfield name="a">
-        <![CDATA[
-        if (this.Parent.DupCount > 1)
-        Root.s02 += "; ";
-        Root.s02 += this.Content;
-        ]]>
-      </subfield>
-      <!-- 下属单位 -->
-      <subfield name="b">
-        if (this.DupCount > 1)
-        Root.s02 += "; ";
-        Root.s02 += this.Content;
-      </subfield>
-      <!-- 会议名称 -->
-      <subfield name="c">
-        Root.s02 += this.Content;
-      </subfield>
-    </field>
-    <field name="711">
-      <!-- 会议名称 -->
-      <subfield name="a">
-        <![CDATA[
-        if (this.Parent.DupCount > 1)
-        Root.s02 += "; ";
-        Root.s02 += this.Content;
-        ]]>
-      </subfield>
-      <!-- 会议地址 -->
-      <subfield name="c">
-        Root.s02 += this.Content;
-      </subfield>
-      <!-- 会议时间 -->
-      <subfield name="d">
-        Root.s02 += this.Content;
-      </subfield>
-      <!-- 会议届次 -->
-      <subfield name="n">
-        if (this.DupCount > 1)
-        Root.s02 += "; ";
-        Root.s02 += this.Content;
       </subfield>
     </field>
     <!--730,740题名附加款目-->
@@ -250,9 +162,9 @@ using DigitalPlatform.LibraryServer;
       <!-- 统一题名 -->
       <subfield name="*">
         <![CDATA[
-        if (this.Parent.DupCount > 1)
-        Root.s15 += "; ";
-        Root.s15 += this.Content;
+        if (this.Name == "a" && this.Parent.DupCount > 1)
+        Root.s15 += ";";
+        Root.s15 += " " + this.Content;
         ]]>
       </subfield>
     </field>
@@ -260,101 +172,49 @@ using DigitalPlatform.LibraryServer;
       <!-- 分析题名 -->
       <subfield name="*">
         <![CDATA[
-        if (this.Parent.DupCount > 1)
-        Root.s15 += "; ";
-        Root.s15 += this.Content;
+        if (this.Name == "a" && this.Parent.DupCount > 1)
+        Root.s15 += ";";
+        Root.s15 += " " + this.Content;
         ]]>
       </subfield>
     </field>
     <!-- 245 题名说明 -->
     <field name="245">
       <!-- 题名及附加题名 -->
-      <subfield name="a">
-        Root.s03 += this.Content;
-	      if (Root.s15.Length > 0)
+      <subfield name="*">
+              <![CDATA[
+        Root.s03 += " " + this.Content;
+	      if (this.Name == "a" && Root.s15.Length > 0)
         {
         Root.s03 += " ";
         Root.s03 += Root.s15;
         Root.s03 += "(题名附加)";
         }
-      </subfield>
-      <!-- 并列题名或其它提名信息 -->
-      <subfield name="b">
-        Root.s03 += this.Content;
-      </subfield>
-      <!-- 包含责任说明/转录题名页其余部分 -->
-      <subfield name="c">
-        Root.s03 += this.Content;
-      </subfield>
-      <!-- 分卷册标志 -->
-      <subfield name="n">
-        if (this.DupCount > 1)
-        Root.s03 += "; ";
-        Root.s03 += this.Content;
-      </subfield>
-      <!-- 分卷（册）题名 -->
-      <subfield name="p">
-        if (this.DupCount > 1)
-        Root.s03 += "; ";
-        Root.s03 += this.Content;
+                ]]>
       </subfield>
     </field>
     <!-- 250 版本说明 -->
     <field name="250">
       <subfield name="*">
-        Root.s04 += this.Content;
+        Root.s04 += " " + this.Content;
       </subfield>
     </field>
     <!-- 260 出版发行 -->
     <field name="260">
       <!-- 出版、发行地 -->
-      <subfield name="a">
+      <subfield name="*">
         <![CDATA[
-        if (this.Parent.DupCount > 1)
-        Root.s05 += "; ";
-        if (this.DupCount > 1)
-        Root.s05 += "; ";
-        Root.s05 += this.Content;
+        Root.s05 += " " + this.Content;
         ]]>
-      </subfield>
-      <!-- 出版、发行者 -->
-      <subfield name="b">
-        if (this.DupCount > 1)
-        Root.s05 += "; ";
-        Root.s05 += this.Content;
-      </subfield>
-      <!-- 出版、发行时间 -->
-      <subfield name="c">
-        if (this.DupCount > 1)
-        Root.s05 += "; ";
-        Root.s05 += this.Content;
       </subfield>
     </field>
     <!-- 300 载体形态 -->
     <field name="300">
       <!-- 篇幅 -->
-      <subfield name="a">
+      <subfield name="*">
         <![CDATA[
-        if (this.Parent.DupCount > 1)
-        Root.s06 += "; ";
-        if (this.DupCount > 1)
-        Root.s06 += "; ";
-        Root.s06 += this.Content;
+        Root.s06 += " " + this.Content;
         ]]>
-      </subfield>
-      <!-- 其它形态细节 -->
-      <subfield name="b">
-        Root.s06 += this.Content;
-      </subfield>
-      <!-- 尺寸 -->
-      <subfield name="c">
-        if (this.DupCount > 1)
-        Root.s06 += "; ";
-        Root.s06 += this.Content;
-      </subfield>
-      <!-- 附件 -->
-      <subfield name="e">
-        Root.s06 += this.Content;
       </subfield>
     </field>
     <!-- 440 丛编名 -->
@@ -460,12 +320,16 @@ using DigitalPlatform.LibraryServer;
   </record>
   <end>
     <![CDATA[
-			Host.ResultString += s03;	// 提名与责任者
+			Host.ResultString += s03.TrimStart();	// 题名与责任者
 			if (s04 != "")
-				Host.ResultString += ". -- " + s04;	// 版本项
-
+				Host.ResultString += " -- " + s04.TrimStart();	// 版本项
+                /*
+			if (s05 != "")
+				Host.ResultString += " -- " + s05.TrimStart();	// 出版发行项
+                */
+                
 			if (s11 != "")
-				Host.ResultString += ". -- " + s11;	// 获得方式
+				Host.ResultString += " -- " + s11.TrimStart() + s12.TrimStart();	// 获得方式
 
 		]]>
   </end>

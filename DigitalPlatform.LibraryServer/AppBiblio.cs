@@ -847,6 +847,7 @@ namespace DigitalPlatform.LibraryServer
                         else
                             strSummary = "";
 
+                        // 注：这里并没有把产生好的摘要字符串写入 mongodb 缓存数据库
                         strBiblio = strSummary;
                     }
                 }
@@ -1193,6 +1194,12 @@ namespace DigitalPlatform.LibraryServer
                 result_strings.Add(strBiblio);
             } // end of for
 
+            // 2016/8/30
+            if (string.IsNullOrEmpty(strErrorText) == false && formats.Length <= 1)
+            {
+                strError = strErrorText;
+                return -1;
+            }
             return 0;
         }
 
@@ -1306,6 +1313,22 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
+        }
+
+        // 2016/7/24
+        public static string CutSummary(string strSummary, int nMaxLength)
+        {
+            if (string.IsNullOrEmpty(strSummary))
+                return strSummary;
+
+            if (nMaxLength != -1)
+            {
+                // 截断
+                if (strSummary.Length > nMaxLength)
+                    return strSummary.Substring(0, nMaxLength) + "...";
+            }
+
+            return strSummary;
         }
 
         // 根据册条码号获得它所从属的书目记录路径
@@ -1809,7 +1832,7 @@ return result;
                 {
                     string strFilterFileName = strLocalPath;
                     nRet = this.ConvertBiblioXmlToHtml(
-                        strFilterFileName,
+                            strFilterFileName,
                             strMarc,    // strBiblioXml,
                             strMarcSyntax,
                             strBiblioRecPath,
@@ -5059,7 +5082,7 @@ out strError);
                 cfg_target = GetBiblioDbCfg(strBiblioDbName);
                 if (cfg_target == null)
                 {
-                    strError = "GetBiblioDbCfg("+strBiblioDbName+") return null";
+                    strError = "GetBiblioDbCfg(" + strBiblioDbName + ") return null";
                     goto ERROR1;
                 }
                 Debug.Assert(cfg_target != null, "");
@@ -5104,7 +5127,7 @@ out strError);
 
                 if (cfg_target != null && cfg_source.BiblioDbSyntax != cfg_target.BiblioDbSyntax)
                 {
-                    strError = "源书目库的 MARC 格式("+cfg_source.BiblioDbSyntax+") 和目标书目库的 MARC 格式("+cfg_target.BiblioDbSyntax+") 不一致，无法进行复制或移动操作";
+                    strError = "源书目库的 MARC 格式(" + cfg_source.BiblioDbSyntax + ") 和目标书目库的 MARC 格式(" + cfg_target.BiblioDbSyntax + ") 不一致，无法进行复制或移动操作";
                     goto ERROR1;
                 }
 

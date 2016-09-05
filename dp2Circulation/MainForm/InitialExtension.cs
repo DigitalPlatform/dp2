@@ -3611,7 +3611,8 @@ Culture=neutral, PublicKeyToken=null
                         // 暂时不处理 accessLog / hitcount / chargingOper 类型
                         if (prop.Type == "accessLog"
                             || prop.Type == "hitcount"
-                            || prop.Type == "chargingOper")
+                            || prop.Type == "chargingOper"
+                            || (prop.Type.Length > 0 && prop.Type[0] == '_'))
                             continue;
                         dbnames.Add(prop.DbName);
                     }

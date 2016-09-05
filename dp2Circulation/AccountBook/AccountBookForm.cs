@@ -3645,10 +3645,8 @@ MessageBoxDefaultButton.Button1);
             // string strError = "";
 
             EnableControls(false);
-
             try
             {
-
                 int nErrorCount = 0;
                 int nUncheckedCount = 0;
 
@@ -3667,7 +3665,6 @@ MessageBoxDefaultButton.Button1);
 
                 PrintList(this.comboBox_load_type.Text + " 全部事项清单", items);
                 return;
-
             }
             finally
             {

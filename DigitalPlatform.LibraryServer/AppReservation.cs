@@ -1668,6 +1668,7 @@ namespace DigitalPlatform.LibraryServer
                 /* 元素名
                  * type 消息类型。预约到书通知
                  * itemBarcode 册条码号
+                 * location 馆藏地 2016/9/5
                  * refID    参考 ID
                  * opacURL  图书在 OPAC 中的 URL。相对路径
                  * today 今天的日期
@@ -1679,6 +1680,8 @@ namespace DigitalPlatform.LibraryServer
 
                 DomUtil.SetElementText(dom.DocumentElement,
                     "itemBarcode", strItemBarcode);
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "location", strLocation);
                 DomUtil.SetElementText(dom.DocumentElement,
                     "refID", strRefID);
 
@@ -2079,13 +2082,14 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
 
             // 获得图书摘要信息
-            string strSummary = "";
+            string strSummary = "";     // 没有被截断的摘要字符串
+            string strShortSummary = "";    // 截断后的摘要字符串
             string strBiblioRecPath = "";
 
             nRet = this.GetBiblioSummary(strUnionItemBarcode,
                 "", //  strConfirmItemRecPath,
                 null,   //  strBiblioRecPathExclude,
-                25,
+                -1, // 25,
                 out strBiblioRecPath,
                 out strSummary,
                 out strError);
@@ -2093,6 +2097,11 @@ namespace DigitalPlatform.LibraryServer
             {
                 strSummary = "ERROR: " + strError;
             }
+            else
+            {
+                strShortSummary = LibraryApplication.CutSummary(strSummary, 25);
+            }
+
 #if NO
             // 临时的SessionInfo对象
             SessionInfo sessioninfo = new SessionInfo(this);
@@ -2173,7 +2182,7 @@ namespace DigitalPlatform.LibraryServer
                 table["%item%"] = "(册条码号为: " + strUnionItemBarcode + " URL为: " + this.OpacServerUrl + "/book.aspx?barcode=" + strUnionItemBarcode + " )";
                 table["%reservetime%"] = this.GetDisplayTimePeriodStringEx(this.ArrivedReserveTimeSpan);
                 table["%today%"] = DateTime.Now.ToString();
-                table["%summary%"] = strSummary;
+                table["%summary%"] = strShortSummary;
                 table["%itembarcode%"] = strUnionItemBarcode;
                 table["%name%"] = strName;
                 string strBody = "";
@@ -2216,6 +2225,7 @@ namespace DigitalPlatform.LibraryServer
                 /* 元素名
                  * type 消息类型。预约到书通知
                  * itemBarcode 册条码号
+                 * location 馆藏地 2016/9/5
                  * refID    参考 ID
                  * onShelf 是否在架。true/false
                  * opacURL  图书在 OPAC 中的 URL。相对路径
@@ -2229,6 +2239,8 @@ namespace DigitalPlatform.LibraryServer
 
                 DomUtil.SetElementText(dom.DocumentElement,
                     "itemBarcode", strItemBarcode);
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "location", strLocation);
                 DomUtil.SetElementText(dom.DocumentElement,
                     "refID", strItemRefID);
                 DomUtil.SetElementText(dom.DocumentElement,
@@ -2316,7 +2328,7 @@ namespace DigitalPlatform.LibraryServer
                 table["%item%"] = "(册条码号为: " + strUnionItemBarcode + " URL为: " + this.OpacServerUrl + "/book.aspx?barcode=" + strUnionItemBarcode + " )";
                 table["%reservetime%"] = this.GetDisplayTimePeriodStringEx(this.ArrivedReserveTimeSpan);
                 table["%today%"] = DateTime.Now.ToString();
-                table["%summary%"] = strSummary;
+                table["%summary%"] = strShortSummary;
                 table["%itembarcode%"] = strUnionItemBarcode;
                 table["%name%"] = strName;
 
@@ -2383,7 +2395,7 @@ namespace DigitalPlatform.LibraryServer
                     table["%item%"] = "(册条码号为: " + strUnionItemBarcode + " URL为: " + this.OpacServerUrl + "/book.aspx?barcode=" + strUnionItemBarcode + " )";
                     table["%reservetime%"] = this.GetDisplayTimePeriodStringEx(this.ArrivedReserveTimeSpan);
                     table["%today%"] = DateTime.Now.ToString();
-                    table["%summary%"] = strSummary;
+                    table["%summary%"] = strShortSummary;
                     table["%itembarcode%"] = strUnionItemBarcode;
                     table["%name%"] = strName;
 
