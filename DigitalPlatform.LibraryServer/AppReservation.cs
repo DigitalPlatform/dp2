@@ -1668,6 +1668,7 @@ namespace DigitalPlatform.LibraryServer
                 /* 元素名
                  * type 消息类型。预约到书通知
                  * itemBarcode 册条码号
+                 * location 馆藏地 2016/9/5
                  * refID    参考 ID
                  * opacURL  图书在 OPAC 中的 URL。相对路径
                  * today 今天的日期
@@ -1679,6 +1680,8 @@ namespace DigitalPlatform.LibraryServer
 
                 DomUtil.SetElementText(dom.DocumentElement,
                     "itemBarcode", strItemBarcode);
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "location", strLocation);
                 DomUtil.SetElementText(dom.DocumentElement,
                     "refID", strRefID);
 
@@ -2222,6 +2225,7 @@ namespace DigitalPlatform.LibraryServer
                 /* 元素名
                  * type 消息类型。预约到书通知
                  * itemBarcode 册条码号
+                 * location 馆藏地 2016/9/5
                  * refID    参考 ID
                  * onShelf 是否在架。true/false
                  * opacURL  图书在 OPAC 中的 URL。相对路径
@@ -2235,6 +2239,8 @@ namespace DigitalPlatform.LibraryServer
 
                 DomUtil.SetElementText(dom.DocumentElement,
                     "itemBarcode", strItemBarcode);
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "location", strLocation);
                 DomUtil.SetElementText(dom.DocumentElement,
                     "refID", strItemRefID);
                 DomUtil.SetElementText(dom.DocumentElement,

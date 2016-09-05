@@ -10857,6 +10857,8 @@ out string strError)
                 "itemBarcode");
             string strItemRecPath = DomUtil.GetElementText(dom.DocumentElement,
                 "itemRecPath");
+            string strLocation = DomUtil.GetElementText(dom.DocumentElement,
+                "location");
 
             strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
                 "readerBarcode");
@@ -10903,6 +10905,9 @@ out string strError)
             DomUtil.SetAttr(nodeOverdue, "barcode", strItemBarcode);
             if (String.IsNullOrEmpty(strItemRecPath) == false)
                 DomUtil.SetAttr(nodeOverdue, "recPath", strItemRecPath);
+            // 2016/9/5
+            if (String.IsNullOrEmpty(strLocation) == false)
+                DomUtil.SetAttr(nodeOverdue, "location", strLocation);
 
             DomUtil.SetAttr(nodeOverdue, "reason", strReason);
 
@@ -10969,9 +10974,10 @@ out string strError)
             strFinalPrice = "";
             int nRet = 0;
 
-
             string strItemBarcode = DomUtil.GetAttr(nodeOverdue, "barcode");
             string strItemRecPath = DomUtil.GetAttr(nodeOverdue, "recPath");
+            string strLocation = DomUtil.GetAttr(nodeOverdue, "location");
+
             string strReason = DomUtil.GetAttr(nodeOverdue, "reason");
 
             // 2007/12/17
@@ -11043,7 +11049,14 @@ out string strError)
             if (String.IsNullOrEmpty(strItemRecPath) == false)
             {
                 DomUtil.SetElementText(dom.DocumentElement,
-    "itemRecPath", strItemRecPath);
+                    "itemRecPath", strItemRecPath);
+            }
+
+            // 2016/9/5
+            if (String.IsNullOrEmpty(strLocation) == false)
+            {
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "location", strLocation);
             }
 
             DomUtil.SetElementText(dom.DocumentElement,
@@ -11160,9 +11173,7 @@ out string strError)
                     "pauseStart", strPauseStart);
             }
 
-
             strAmerceRecord = dom.OuterXml;
-
             return 0;
         }
 
@@ -12814,6 +12825,9 @@ out string strError)
                     tempdom.LoadXml("<overdue />");
                     DomUtil.SetAttr(tempdom.DocumentElement, "barcode", strItemBarcode);
 
+                    // 2016/9/5
+                    DomUtil.SetAttr(tempdom.DocumentElement, "location", strLocation);
+
                     if (bItemBarcodeDup == true)
                     {
                         // 若条码号足以定位，则不记载实体记录路径
@@ -12980,6 +12994,7 @@ out string strError)
                 XmlDocument tempdom = new XmlDocument();
                 tempdom.LoadXml("<overdue />");
                 DomUtil.SetAttr(tempdom.DocumentElement, "barcode", strItemBarcode);
+                DomUtil.SetAttr(tempdom.DocumentElement, "location", strLocation);
                 DomUtil.SetAttr(tempdom.DocumentElement, "reason", strReason);
                 DomUtil.SetAttr(tempdom.DocumentElement, "price", strLostPrice);
                 DomUtil.SetAttr(tempdom.DocumentElement, "borrowDate", strBorrowDate);

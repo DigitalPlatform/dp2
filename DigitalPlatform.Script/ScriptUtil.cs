@@ -241,7 +241,8 @@ namespace DigitalPlatform.Script
                 string strUri = MakeObjectUrl(strRecPath, u);
 
                 string strSaveAs = "";
-                if (StringUtil.MatchMIME(s_q, "text") == true
+                if (string.IsNullOrEmpty(s_q) == true
+                    || StringUtil.MatchMIME(s_q, "text") == true
                     || StringUtil.MatchMIME(s_q, "image") == true)
                 {
 
@@ -374,7 +375,8 @@ namespace DigitalPlatform.Script
                 // string strUri = MakeObjectUrl(strRecPath, u);
 
                 string strSaveAs = "";
-                if (StringUtil.MatchMIME(s_q, "text") == true
+                if (string.IsNullOrEmpty(s_q) == true   // 2016/9/4
+                    || StringUtil.MatchMIME(s_q, "text") == true
                     || StringUtil.MatchMIME(s_q, "image") == true)
                 {
 

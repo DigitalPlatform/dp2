@@ -416,6 +416,7 @@ namespace DigitalPlatform.LibraryServer
                     || node.Name == "amerceItems"
                     || node.Name == "amerceRecord")
                     continue;
+
                 DomUtil.SetElementText(bodydom.DocumentElement, node.Name, node.InnerText);
             }
 

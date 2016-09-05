@@ -2225,7 +2225,16 @@ namespace DigitalPlatform.LibraryServer
          ... 读者记录 XML 原始形态
         </record>
         <items overdueCount=已经到期册数 normalCount=即将到期册数 >
-            <item summary='书目摘要' timeReturning='应还时间' overdue='超期情况描述' overdueType='overdue/warning'>
+            <item 
+                barcode='...' 
+                location='...' 
+                refID='...' 
+                summary='书目摘要' 
+                borrowDate='借书日期' 
+                borrowPeriod='期限' 
+                timeReturning='应还时间' 
+                overdue='超期情况描述' 
+                overdueType='overdue/warning'>
         <items/>
         <text>纯文本描述</text>
 <root/>
@@ -2275,6 +2284,7 @@ namespace DigitalPlatform.LibraryServer
                 XmlNode node = nodes[i];
 
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
+                string strLocation = StringUtil.GetPureLocation(DomUtil.GetAttr(node, "location"));
                 string strRefID = DomUtil.GetAttr(node, "refID");
 
                 string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
@@ -2450,8 +2460,11 @@ namespace DigitalPlatform.LibraryServer
                     items.AppendChild(item);
 
                     item.SetAttribute("barcode", strBarcode);
+                    item.SetAttribute("location", strLocation); // 2016/9/5
                     item.SetAttribute("refID", strRefID);
                     item.SetAttribute("summary", strSummary);
+                    item.SetAttribute("borrowDate", strBorrowDate); // 2016/9/5
+                    item.SetAttribute("borrowPeriod", strPeriod);   // 2016/9/5
                     item.SetAttribute("timeReturning", timeReturning.ToString("d"));
                     item.SetAttribute("overdue", strOverDue);
                     if (bOverdue)
