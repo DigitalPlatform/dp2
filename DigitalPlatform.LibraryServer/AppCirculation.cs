@@ -1213,7 +1213,6 @@ namespace DigitalPlatform.LibraryServer
 
                     // ***
 
-
                     // 校验读者证条码号参数是否和XML记录中完全一致
 #if NO
                     string strTempReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement,
@@ -14144,6 +14143,10 @@ out string strError)
             string strItemBarcode = DomUtil.GetElementText(itemdom.DocumentElement,
                 "barcode");
 
+            string strLocation = DomUtil.GetElementText(itemdom.DocumentElement,
+    "location");
+            strLocation = StringUtil.GetPureLocation(strLocation);
+
             if (String.IsNullOrEmpty(strItemBarcode) == true)
             {
 #if NO
@@ -14267,6 +14270,8 @@ out string strError)
                 }
                 DomUtil.SetAttr(nodeBorrow, "biblioRecPath", strBiblioRecPath); // 2015/10/2
             }
+
+            DomUtil.SetAttr(nodeBorrow, "location", strLocation); // 2016/9/5
 
             // 加入借期字段
             // 读者记录中的借期字段，目的是为了查询方便，但注意没有法律效力。

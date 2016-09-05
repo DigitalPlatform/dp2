@@ -3970,6 +3970,7 @@ MessageBoxDefaultButton.Button2);
         // 安装/启用 IIS
         private void MenuItem_tools_enableIIS_Click(object sender, EventArgs e)
         {
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -4031,6 +4032,37 @@ MessageBoxDefaultButton.Button2);
                 this.Cursor = oldCursor;
                 this.Enabled = true;
             }
+
+            return;
+        ERROR1:
+            AppendString("出错: " + strError + "\r\n");
+            MessageBox.Show(this, strError);
+#endif
+            string strError = "";
+            int nRet = 0;
+
+            var featureNames = new[] 
+    {
+        "IIS-ApplicationDevelopment",
+        "IIS-CommonHttpFeatures",
+        "IIS-DefaultDocument",
+        "IIS-ISAPIExtensions",
+        "IIS-ISAPIFilter",
+        "IIS-ManagementConsole",
+        "IIS-NetFxExtensibility",
+        "IIS-RequestFiltering",
+        "IIS-Security",
+        "IIS-StaticContent",
+        "IIS-WebServer",
+        "IIS-WebServerRole",
+        "IIS-NetFxExtensibility45",
+        "IIS-ASPNET45",
+    };
+            nRet = EnableServerFeature("IIS",
+                featureNames,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
 
             return;
         ERROR1:
@@ -4568,5 +4600,81 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 "log_",
                 ".txt");
         }
+
+        // 启用 MSMQ
+        private void MenuItem_dp2library_enableMsmq_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            var featureNames = new[] 
+    {
+        "MSMQ-Container",
+        "MSMQ-Server",
+    };
+            nRet = EnableServerFeature("MSMQ",
+                featureNames,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            return;
+        ERROR1:
+            AppendString("出错: " + strError + "\r\n");
+            MessageBox.Show(this, strError);
+        }
+
+        int EnableServerFeature(string strName,
+            string[] featureNames,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // http://stackoverflow.com/questions/5936719/calling-dism-exe-from-system-diagnostics-process-fails
+            string strFileName = "%WINDIR%\\SysNative\\dism.exe";
+            strFileName = Environment.ExpandEnvironmentVariables(strFileName);
+
+            string strLine = string.Format(
+            "/NoRestart /Online /Enable-Feature {0}",
+            string.Join(
+                " ",
+                featureNames.Select(name => string.Format("/FeatureName:{0}", name))));
+
+            AppendSectionTitle("开始启用 " + strName);
+            AppendString("整个过程耗费的时间可能较长，请耐心等待 ...\r\n");
+            Application.DoEvents();
+
+            Cursor oldCursor = this.Cursor;
+            this.Cursor = Cursors.WaitCursor;
+            this.Enabled = false;
+            try
+            {
+                // parameters:
+                //      lines   若干行参数。每行执行一次
+                // return:
+                //      -1  出错
+                //      0   成功。strError 里面有运行输出的信息
+                nRet = InstallHelper.RunCmd(
+                    strFileName,
+                    new List<string> { strLine },
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                AppendString(strError);
+            }
+            finally
+            {
+                AppendSectionTitle("结束启用 " + strName);
+
+                this.Cursor = oldCursor;
+                this.Enabled = true;
+            }
+
+            return 0;
+        }
+
+
     }
 }
