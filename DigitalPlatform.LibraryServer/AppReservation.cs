@@ -1989,6 +1989,17 @@ namespace DigitalPlatform.LibraryServer
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
             strLocation = StringUtil.GetPureLocationString(strLocation);
 
+            /*
+  <reservations>
+        <request reader="R0000001" requestDate="Mon, 05 Sep 2016 16:57:47 +0800" operator="R0000001" /> 
+  </reservations>
+             * */
+            // 从册记录 reservations 元素下找第一个 request 元素，其 requestDate 属性
+            string strRequestDate = "";
+            XmlElement request = itemdom.DocumentElement.SelectSingleNode("reservations/request") as XmlElement;
+            if (request != null)
+                strRequestDate = request.GetAttribute("requestDate");
+
             // 创建预约到书记录
             XmlDocument new_queue_dom = new XmlDocument();
             new_queue_dom.LoadXml("<root />");
@@ -2226,9 +2237,10 @@ namespace DigitalPlatform.LibraryServer
                  * type 消息类型。预约到书通知
                  * itemBarcode 册条码号
                  * location 馆藏地 2016/9/5
-                 * refID    参考 ID
+                 * refID    册的参考 ID
                  * onShelf 是否在架。true/false
                  * opacURL  图书在 OPAC 中的 URL。相对路径
+                 * requestDate 预约请求创建时间 2016/9/5
                  * reserveTime 保留的时间
                  * today 今天的日期
                  * summary 书目摘要
@@ -2241,6 +2253,11 @@ namespace DigitalPlatform.LibraryServer
                     "itemBarcode", strItemBarcode);
                 DomUtil.SetElementText(dom.DocumentElement,
                     "location", strLocation);
+
+                // 2016/9/5
+                if (string.IsNullOrEmpty(strItemRefID))
+                    strItemRefID = DomUtil.GetElementText(itemdom.DocumentElement, "refID");
+
                 DomUtil.SetElementText(dom.DocumentElement,
                     "refID", strItemRefID);
                 DomUtil.SetElementText(dom.DocumentElement,
@@ -2249,6 +2266,8 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetElementText(dom.DocumentElement,
                     "opacURL", this.OpacServerUrl + "/book.aspx?barcode="
                     + strUnionItemBarcode);
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "requestDate", strRequestDate);
                 DomUtil.SetElementText(dom.DocumentElement,
                     "reserveTime", this.GetDisplayTimePeriodStringEx(this.ArrivedReserveTimeSpan));
                 DomUtil.SetElementText(dom.DocumentElement,
