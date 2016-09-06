@@ -4618,10 +4618,52 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             if (nRet == -1)
                 goto ERROR1;
 
+            /*
+
+1)
+C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MSMQ-Container /FeatureName:MSMQ-Server
+
+部署映像服务和管理工具
+版本: 10.0.10586.0
+
+映像版本: 10.0.10586.0
+
+启用一个或多个功能
+
+[                           0.1%                           ] 
+
+[==========================100.0%==========================] 
+操作成功完成。
+             * */
+
             return;
         ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
+        }
+
+        static string RemoveProgressText(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return "";
+
+            List<string> results = new List<string>();
+
+            string [] lines = strText.Replace("\r\n", "\r").Split(new char [] {'\r'});
+            foreach(string line in lines)
+            {
+                if (string.IsNullOrEmpty(line))
+                    continue;
+                string strLine = line.Trim();
+                if (string.IsNullOrEmpty(strLine))
+                    continue;
+
+                if (strLine[0] == '[' && strLine[strLine.Length - 1] == ']')
+                    continue;
+                results.Add(strLine);
+            }
+
+            return string.Join("\r\n", results.ToArray());
         }
 
         int EnableServerFeature(string strName,
@@ -4662,7 +4704,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     out strError);
                 if (nRet == -1)
                     return -1;
-                AppendString(strError);
+                AppendString(RemoveProgressText(strError));
             }
             finally
             {

@@ -77,6 +77,8 @@
             this.MenuItem_dp2library_installService = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_dp2library_uninstallService = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator15 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_dp2library_enableMsmq = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator16 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_dp2library_uninstall = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_dp2OPAC = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_dp2opac_install = new System.Windows.Forms.ToolStripMenuItem();
@@ -101,8 +103,6 @@
             this.toolStripDropDownButton_stopAll = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_stopAll = new System.Windows.Forms.ToolStripMenuItem();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_dp2library_enableMsmq = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator16 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -438,6 +438,18 @@
             this.toolStripSeparator15.Name = "toolStripSeparator15";
             this.toolStripSeparator15.Size = new System.Drawing.Size(199, 6);
             // 
+            // MenuItem_dp2library_enableMsmq
+            // 
+            this.MenuItem_dp2library_enableMsmq.Name = "MenuItem_dp2library_enableMsmq";
+            this.MenuItem_dp2library_enableMsmq.Size = new System.Drawing.Size(202, 22);
+            this.MenuItem_dp2library_enableMsmq.Text = "启用 MSMQ";
+            this.MenuItem_dp2library_enableMsmq.Click += new System.EventHandler(this.MenuItem_dp2library_enableMsmq_Click);
+            // 
+            // toolStripSeparator16
+            // 
+            this.toolStripSeparator16.Name = "toolStripSeparator16";
+            this.toolStripSeparator16.Size = new System.Drawing.Size(199, 6);
+            // 
             // MenuItem_dp2library_uninstall
             // 
             this.MenuItem_dp2library_uninstall.Name = "MenuItem_dp2library_uninstall";
@@ -506,7 +518,7 @@
             // MenuItem_tools_enableIIS
             // 
             this.MenuItem_tools_enableIIS.Name = "MenuItem_tools_enableIIS";
-            this.MenuItem_tools_enableIIS.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_tools_enableIIS.Size = new System.Drawing.Size(119, 22);
             this.MenuItem_tools_enableIIS.Text = "启用 IIS";
             this.MenuItem_tools_enableIIS.Click += new System.EventHandler(this.MenuItem_tools_enableIIS_Click);
             // 
@@ -630,18 +642,6 @@
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(578, 291);
             this.webBrowser1.TabIndex = 4;
-            // 
-            // MenuItem_dp2library_enableMsmq
-            // 
-            this.MenuItem_dp2library_enableMsmq.Name = "MenuItem_dp2library_enableMsmq";
-            this.MenuItem_dp2library_enableMsmq.Size = new System.Drawing.Size(202, 22);
-            this.MenuItem_dp2library_enableMsmq.Text = "启用 MSMQ";
-            this.MenuItem_dp2library_enableMsmq.Click += new System.EventHandler(this.MenuItem_dp2library_enableMsmq_Click);
-            // 
-            // toolStripSeparator16
-            // 
-            this.toolStripSeparator16.Name = "toolStripSeparator16";
-            this.toolStripSeparator16.Size = new System.Drawing.Size(199, 6);
             // 
             // MainForm
             // 
