@@ -1028,7 +1028,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 goto ERROR1;
 
-            // 重新启动一次 dp2library?
+            // 重新启动一次 dp2library? 没有必要，因为整个实例对话框进入以前，dp2library 已经暂停了。对话框退出后会重新启动。
 
             MessageBox.Show(this, "配置成功");
             return;
@@ -1074,7 +1074,9 @@ MessageBoxDefaultButton.Button1);
                 string strOldValue = message.GetAttribute("defaultQueue");
                 if (string.IsNullOrEmpty(strOldValue) == true)
                 {
-                    string strNewValue = ".\\private$\\dp2library_" + strInstanceName;
+                    string strNewValue = ".\\private$\\dp2library";
+                    if (string.IsNullOrEmpty(strInstanceName) == false)
+                        strNewValue += "_" + strInstanceName;
                     message.SetAttribute("defaultQueue", strNewValue);
                     bChanged = true;
                 }
