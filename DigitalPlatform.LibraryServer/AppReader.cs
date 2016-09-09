@@ -1375,6 +1375,12 @@ strLibraryCode);    // 读者所在的馆代码
 
                     this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
 
+                    // 2016/9/9
+                    if (bBarcodeChanged
+                        && this.ChargingOperDatabase != null
+                        && this.ChargingOperDatabase.Enabled)
+                        this.ChargingOperDatabase.ChangePatronBarcode(strOldBarcode, strNewBarcode);
+
                     strSavedRecPath = strRecPath;   // 保存过程不会改变记录路径
                 }
                 else if (strAction == "delete")

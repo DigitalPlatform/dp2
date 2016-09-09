@@ -658,7 +658,7 @@ out strError);
             return 1;
         }
 
-        bool _forceSave = false;
+        // bool _forceSave = false;
 
         // return:
         //      -2  时间戳不匹配
@@ -666,6 +666,7 @@ out strError);
         //      0   成功
         internal override int SaveRecord(string strRecPath,
             BiblioInfo info,
+            string strStyle,
             out byte[] baNewTimestamp,
             out string strError)
         {
@@ -680,7 +681,7 @@ out strError);
             // string strSavedPath = "";
             long lRet = Channel.SetReaderInfo(
 stop,
-_forceSave ? "changereaderbarcode" : "change",
+StringUtil.IsInList("force", strStyle) ? "changereaderbarcode" : "change",
 strRecPath,
 info.NewXml,
 info.OldXml,
@@ -5277,15 +5278,15 @@ out strFingerprint);
         // 保存选定事项的修改
         void menu_saveSelectedChangedRecords_Click(object sender, EventArgs e)
         {
-            this._forceSave = Control.ModifierKeys == Keys.Control;
-            SaveSelectedChangedRecords();
+            // this._forceSave = Control.ModifierKeys == Keys.Control;
+            SaveSelectedChangedRecords(Control.ModifierKeys == Keys.Control ? "force" : "");
         }
 
         // 保存全部修改事项
         void menu_saveAllChangedRecords_Click(object sender, EventArgs e)
         {
-            this._forceSave = Control.ModifierKeys == Keys.Control;
-            SaveAllChangedRecords();
+            // this._forceSave = Control.ModifierKeys == Keys.Control;
+            SaveAllChangedRecords(Control.ModifierKeys == Keys.Control ? "force" : "");
         }
 
 

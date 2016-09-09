@@ -298,6 +298,22 @@ namespace DigitalPlatform.LibraryServer
             return collection.Find(query);
             // return collection.Find(query).Count() > 0;
         }
+
+        public void ChangePatronBarcode(string strOldBarcode, string strNewBarcode)
+        {
+            if (strOldBarcode == strNewBarcode)
+                return; // 没有必要修改
+            MongoCollection<ChargingOperItem> collection = this._collection;
+            if (collection == null)
+                return;
+
+            var query = new QueryDocument("PatronBarcode", strOldBarcode);
+            var update = Update.Set("PatronBarcode", strNewBarcode);
+            collection.Update(
+    query,
+    update,
+    UpdateFlags.Multi);
+        }
     }
 
     public class ChargingOperItem
