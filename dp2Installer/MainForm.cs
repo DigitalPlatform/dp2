@@ -7,16 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.ServiceProcess;
-using System.Management;
 using System.IO;
 using System.Web;
 using System.Deployment.Application;
 using System.Diagnostics;
 using System.Threading;
-using System.DirectoryServices;
-using System.Configuration.Install;
-using System.Runtime.InteropServices;
-using System.Xml;
 
 using Microsoft.Win32;
 using Ionic.Zip;
@@ -27,7 +22,6 @@ using DigitalPlatform.Install;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.GUI;
-using DigitalPlatform.rms;
 using DigitalPlatform.OPAC;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
@@ -4798,6 +4792,8 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             }
 
             AppendString("MongoDB 安装配置成功\r\n");
+
+            Thread.Sleep(1000);
 
             {
                 AppendString("正在启动 MongoDB 服务 ...\r\n");
