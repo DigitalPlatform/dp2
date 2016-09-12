@@ -4725,7 +4725,9 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             }
 
             SetupMongoDbDialog dlg = new SetupMongoDbDialog();
+            GuiUtil.AutoSetDefaultFont(dlg);
 
+            dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.DataDir = "c:\\mongo_data";
 
             dlg.ShowDialog(this);
