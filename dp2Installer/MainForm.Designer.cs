@@ -103,6 +103,8 @@
             this.toolStripDropDownButton_stopAll = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_stopAll = new System.Windows.Forms.ToolStripMenuItem();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.MenuItem_dp2library_setupMongoDB = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator18 = new System.Windows.Forms.ToolStripSeparator();
             this.menuStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -393,6 +395,8 @@
             this.MenuItem_dp2library_installService,
             this.MenuItem_dp2library_uninstallService,
             this.toolStripSeparator15,
+            this.MenuItem_dp2library_setupMongoDB,
+            this.toolStripSeparator18,
             this.MenuItem_dp2library_enableMsmq,
             this.toolStripSeparator16,
             this.MenuItem_dp2library_uninstall});
@@ -643,6 +647,18 @@
             this.webBrowser1.Size = new System.Drawing.Size(578, 291);
             this.webBrowser1.TabIndex = 4;
             // 
+            // MenuItem_dp2library_setupMongoDB
+            // 
+            this.MenuItem_dp2library_setupMongoDB.Name = "MenuItem_dp2library_setupMongoDB";
+            this.MenuItem_dp2library_setupMongoDB.Size = new System.Drawing.Size(202, 22);
+            this.MenuItem_dp2library_setupMongoDB.Text = "安装 MongoDB ...";
+            this.MenuItem_dp2library_setupMongoDB.Click += new System.EventHandler(this.MenuItem_dp2library_setupMongoDB_Click);
+            // 
+            // toolStripSeparator18
+            // 
+            this.toolStripSeparator18.Name = "toolStripSeparator18";
+            this.toolStripSeparator18.Size = new System.Drawing.Size(199, 6);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -741,6 +757,8 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2library_uninstall;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2library_enableMsmq;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator16;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2library_setupMongoDB;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator18;
     }
 }
 
