@@ -4649,8 +4649,8 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
 
             List<string> results = new List<string>();
 
-            string [] lines = strText.Replace("\r\n", "\r").Split(new char [] {'\r'});
-            foreach(string line in lines)
+            string[] lines = strText.Replace("\r\n", "\r").Split(new char[] { '\r' });
+            foreach (string line in lines)
             {
                 if (string.IsNullOrEmpty(line))
                     continue;
@@ -4723,6 +4723,13 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             string strError = "";
             int nRet = 0;
 
+            string strExePath = GetPathOfService("MongoDB");
+            if (string.IsNullOrEmpty(strExePath) == false)
+            {
+                strError = "MongoDB 已经安装过了。(位于 " + strExePath + ")";
+                goto ERROR1;
+            }
+
             SetupMongoDbDialog dlg = new SetupMongoDbDialog();
 
             dlg.DataDir = "c:\\mongo_data";
@@ -4742,9 +4749,9 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             {
                 sw.WriteLine("systemLog:");
                 sw.WriteLine("    destination: file");
-                sw.WriteLine("    path: "+strDataDir+"\\log\\mongod.log");
+                sw.WriteLine("    path: " + strDataDir + "\\log\\mongod.log");
                 sw.WriteLine("storage:");
-                sw.WriteLine("    dbPath: "+strDataDir+"\\db");
+                sw.WriteLine("    dbPath: " + strDataDir + "\\db");
                 sw.WriteLine("net:");
                 sw.WriteLine("   bindIp: 127.0.0.1");
                 sw.WriteLine("   port: 27017");
@@ -4791,6 +4798,21 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             }
 
             AppendString("MongoDB 安装配置成功\r\n");
+
+            {
+                AppendString("正在启动 MongoDB 服务 ...\r\n");
+                nRet = StartService("MongoDB",
+    out strError);
+                if (nRet == -1)
+                {
+                    AppendString("MongoDB 服务启动失败: " + strError + "\r\n");
+                    goto ERROR1;
+                }
+                else
+                {
+                    AppendString("MongoDB 服务启动成功\r\n");
+                }
+            }
             return;
         ERROR1:
             MessageBox.Show(this, strError);
