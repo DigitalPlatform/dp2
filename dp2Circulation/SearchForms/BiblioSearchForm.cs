@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Xml;
 using System.Web;
 using System.Threading;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -28,7 +29,6 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {

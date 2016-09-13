@@ -1398,6 +1398,17 @@ out strError);
                 subMenuItem = new MenuItem("-");
                 menuItem.MenuItems.Add(subMenuItem);
 
+                subMenuItem = new MenuItem("删除读者记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
+                subMenuItem.Click += new System.EventHandler(this.menu_deleteSelectedRecords_Click);
+                if (this.listView_records.SelectedItems.Count == 0
+                    || this.InSearching == true)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
+                // ---
+                subMenuItem = new MenuItem("-");
+                menuItem.MenuItems.Add(subMenuItem);
+
                 subMenuItem = new MenuItem("宏定义 (&M)");
                 subMenuItem.Click += new System.EventHandler(this.menu_macroDef_Click);
                 menuItem.MenuItems.Add(subMenuItem);
@@ -1514,6 +1525,131 @@ out strError);
             contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
+        }
+
+        // 删除所选定的读者记录
+        void menu_deleteSelectedRecords_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+"确实要从数据库中删除所选定的 " + this.listView_records.SelectedItems.Count.ToString() + " 个读者记录?\r\n\r\n(警告：读者记录被删除后，无法恢复)\r\n\r\n(OK 删除；Cancel 取消)",
+"ReaderSearchForm",
+MessageBoxButtons.OKCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_records.SelectedItems)
+            {
+                items.Add(item);
+            }
+
+            string strError = "";
+            int nDeleteCount = 0;
+
+            // LibraryChannel channel = this.GetChannel();
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在删除读者记录 ...");
+            stop.BeginLoop();
+
+            this.EnableControls(false);
+            this.listView_records.Enabled = false;
+            try
+            {
+                stop.SetProgressRange(0, items.Count);
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "已中断";
+                        goto ERROR1;
+                    }
+
+                    ListViewItem item = items[i];
+                    string strRecPath = ListViewUtil.GetItemText(item, 0);
+
+                    string[] results = null;
+                    byte[] baTimestamp = null;
+                    string strOutputPath = "";
+
+
+                    stop.SetMessage("正在删除读者记录 " + strRecPath);
+
+                    long lRet = this.Channel.GetReaderInfo(
+                        stop,
+                        "@path:" + strRecPath,
+                        "",
+                        out results,
+                        out strOutputPath,
+                        out baTimestamp,
+                        out strError);
+                    if (lRet == 0)
+                        goto ERROR1;
+
+                    if (lRet == -1)
+                    {
+                        result = MessageBox.Show(this,
+    "在获得记录 '" + strRecPath + "' 的时间戳的过程中出现错误: " + strError + "。\r\n\r\n是否继续强行删除此记录? (Yes 强行删除；No 不删除；Cancel 放弃当前未完成的全部删除操作)",
+    "ReaderSearchForm",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                        if (result == System.Windows.Forms.DialogResult.Cancel)
+                            goto ERROR1;
+                        if (result == System.Windows.Forms.DialogResult.No)
+                            continue;
+                    }
+
+                    byte[] baNewTimestamp = null;
+                    string strExistingXml = "";
+                    string strSavedXml = "";
+                    ErrorCodeValue error_code = ErrorCodeValue.NoError;
+
+                    // channel.Timeout = new TimeSpan(0, 5, 0);
+                    lRet = this.Channel.SetReaderInfo(
+                        stop,
+                        "delete",
+                        strRecPath,
+                        "", // strNewXml
+                        "", // strOldXml,
+                        baTimestamp,
+                        out strExistingXml,
+                        out strSavedXml,
+                        out strOutputPath,
+                        out baNewTimestamp,
+                        out error_code,
+                        out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+
+                    nDeleteCount++;
+
+                    stop.SetProgressValue(i);
+
+                    this.listView_records.Items.Remove(item);
+                }
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                // this.ReturnChannel(channel);
+
+                this.EnableControls(true);
+                this.listView_records.Enabled = true;
+            }
+
+            MessageBox.Show(this, "成功删除读者记录 " + nDeleteCount + " 条");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         // 导出选择的行到 Excel 文件
