@@ -27,6 +27,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using System.Runtime.InteropServices;
 
 namespace dp2Installer
 {
@@ -4595,6 +4596,12 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 ".txt");
         }
 
+        [DllImport("shlwapi.dll", SetLastError = true, EntryPoint = "#437")]
+        static extern bool IsOS(int os);
+
+        const int OS_ANYSERVER = 29;
+        static bool isWindowsServer = IsOS(OS_ANYSERVER);
+
         // 启用 MSMQ
         private void MenuItem_dp2library_enableMsmq_Click(object sender, EventArgs e)
         {
@@ -4606,8 +4613,15 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         "MSMQ-Container",
         "MSMQ-Server",
     };
+            // Windows Server 2008, Windows Server 2012 的用法
+            var server_featureNames = new[] 
+    {
+        "MSMQ-Services",
+        "MSMQ-Server",
+    };
+
             nRet = EnableServerFeature("MSMQ",
-                featureNames,
+                isWindowsServer ? server_featureNames : featureNames,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
