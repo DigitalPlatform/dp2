@@ -104,7 +104,7 @@ namespace dp2Installer
             FolderBrowserDialog dir_dlg = new FolderBrowserDialog();
 
             dir_dlg.Description = "请指定 mongod.exe 所在目录:";
-            dir_dlg.RootFolder = Environment.SpecialFolder.ProgramFiles;
+            dir_dlg.RootFolder = Environment.SpecialFolder.MyComputer;
             dir_dlg.ShowNewFolderButton = false;
             dir_dlg.SelectedPath = this.textBox_binDir.Text;
 
