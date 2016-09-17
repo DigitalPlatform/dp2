@@ -37,6 +37,10 @@
             this.label1 = new System.Windows.Forms.Label();
             this.textBox_sjhm_source = new System.Windows.Forms.TextBox();
             this.tabPage_xmlEditor = new System.Windows.Forms.TabPage();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton_xmlEditor_replaceControlChar = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_xmlEditor_htmlEncode = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_xmlEditor_htmlDecode = new System.Windows.Forms.ToolStripButton();
             this.comboBox_xmlFile_encoding = new System.Windows.Forms.ComboBox();
             this.label4 = new System.Windows.Forms.Label();
             this.checkBox_xmlEditor_indent = new System.Windows.Forms.CheckBox();
@@ -103,13 +107,11 @@
             this.label13 = new System.Windows.Forms.Label();
             this.textBox_worToIso_worFilename = new System.Windows.Forms.TextBox();
             this.button_worToIso_findFileName = new System.Windows.Forms.Button();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripButton_xmlEditor_replaceControlChar = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton_xmlEditor_htmlEncode = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton_xmlEditor_htmlDecode = new System.Windows.Forms.ToolStripButton();
+            this.button_systemInfo_getClientIP = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_sjhm.SuspendLayout();
             this.tabPage_xmlEditor.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.tabPage_webCamera.SuspendLayout();
             this.tabPage_currency.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_currency)).BeginInit();
@@ -133,7 +135,6 @@
             this.tabPage_serverFileSystem.SuspendLayout();
             this.tabPage_systemInfo.SuspendLayout();
             this.tabPage_worToIso.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -164,7 +165,7 @@
             this.tabPage_sjhm.Controls.Add(this.textBox_sjhm_source);
             this.tabPage_sjhm.Location = new System.Drawing.Point(4, 22);
             this.tabPage_sjhm.Name = "tabPage_sjhm";
-            this.tabPage_sjhm.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage_sjhm.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage_sjhm.Size = new System.Drawing.Size(477, 333);
             this.tabPage_sjhm.TabIndex = 0;
             this.tabPage_sjhm.Text = "四角号码";
@@ -238,6 +239,49 @@
             this.tabPage_xmlEditor.TabIndex = 1;
             this.tabPage_xmlEditor.Text = "XML编辑器";
             this.tabPage_xmlEditor.UseVisualStyleBackColor = true;
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton_xmlEditor_replaceControlChar,
+            this.toolStripButton_xmlEditor_htmlEncode,
+            this.toolStripButton_xmlEditor_htmlDecode});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 308);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(477, 25);
+            this.toolStrip1.TabIndex = 9;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripButton_xmlEditor_replaceControlChar
+            // 
+            this.toolStripButton_xmlEditor_replaceControlChar.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_xmlEditor_replaceControlChar.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_xmlEditor_replaceControlChar.Image")));
+            this.toolStripButton_xmlEditor_replaceControlChar.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_xmlEditor_replaceControlChar.Name = "toolStripButton_xmlEditor_replaceControlChar";
+            this.toolStripButton_xmlEditor_replaceControlChar.Size = new System.Drawing.Size(84, 22);
+            this.toolStripButton_xmlEditor_replaceControlChar.Text = "替换非法字符";
+            this.toolStripButton_xmlEditor_replaceControlChar.Click += new System.EventHandler(this.toolStripButton_xmlEditor_replaceControlChar_Click);
+            // 
+            // toolStripButton_xmlEditor_htmlEncode
+            // 
+            this.toolStripButton_xmlEditor_htmlEncode.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_xmlEditor_htmlEncode.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_xmlEditor_htmlEncode.Image")));
+            this.toolStripButton_xmlEditor_htmlEncode.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_xmlEditor_htmlEncode.Name = "toolStripButton_xmlEditor_htmlEncode";
+            this.toolStripButton_xmlEditor_htmlEncode.Size = new System.Drawing.Size(93, 22);
+            this.toolStripButton_xmlEditor_htmlEncode.Text = "HTML Encode";
+            this.toolStripButton_xmlEditor_htmlEncode.Click += new System.EventHandler(this.toolStripButton_xmlEditor_htmlEncode_Click);
+            // 
+            // toolStripButton_xmlEditor_htmlDecode
+            // 
+            this.toolStripButton_xmlEditor_htmlDecode.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_xmlEditor_htmlDecode.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_xmlEditor_htmlDecode.Image")));
+            this.toolStripButton_xmlEditor_htmlDecode.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_xmlEditor_htmlDecode.Name = "toolStripButton_xmlEditor_htmlDecode";
+            this.toolStripButton_xmlEditor_htmlDecode.Size = new System.Drawing.Size(95, 22);
+            this.toolStripButton_xmlEditor_htmlDecode.Text = "HTML Decode";
+            this.toolStripButton_xmlEditor_htmlDecode.Click += new System.EventHandler(this.toolStripButton_xmlEditor_htmlDecode_Click);
             // 
             // comboBox_xmlFile_encoding
             // 
@@ -386,7 +430,7 @@
             this.tabPage_currency.Controls.Add(this.splitContainer_currency);
             this.tabPage_currency.Location = new System.Drawing.Point(4, 22);
             this.tabPage_currency.Name = "tabPage_currency";
-            this.tabPage_currency.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.tabPage_currency.Padding = new System.Windows.Forms.Padding(6);
             this.tabPage_currency.Size = new System.Drawing.Size(477, 333);
             this.tabPage_currency.TabIndex = 3;
             this.tabPage_currency.Text = "金额";
@@ -466,7 +510,7 @@
             this.textBox_currency_target.Multiline = true;
             this.textBox_currency_target.Name = "textBox_currency_target";
             this.textBox_currency_target.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_currency_target.Size = new System.Drawing.Size(172, 303);
+            this.textBox_currency_target.Size = new System.Drawing.Size(168, 303);
             this.textBox_currency_target.TabIndex = 2;
             // 
             // tabPage_textLines
@@ -563,7 +607,7 @@
             this.textBox_textLines_source2.Multiline = true;
             this.textBox_textLines_source2.Name = "textBox_textLines_source2";
             this.textBox_textLines_source2.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_textLines_source2.Size = new System.Drawing.Size(193, 144);
+            this.textBox_textLines_source2.Size = new System.Drawing.Size(189, 144);
             this.textBox_textLines_source2.TabIndex = 2;
             // 
             // tableLayoutPanel_textLines_down
@@ -876,6 +920,7 @@
             // 
             // tabPage_systemInfo
             // 
+            this.tabPage_systemInfo.Controls.Add(this.button_systemInfo_getClientIP);
             this.tabPage_systemInfo.Controls.Add(this.textBox_systemInfo_mac);
             this.tabPage_systemInfo.Controls.Add(this.label12);
             this.tabPage_systemInfo.Location = new System.Drawing.Point(4, 22);
@@ -991,48 +1036,17 @@
             this.button_worToIso_findFileName.Text = "...";
             this.button_worToIso_findFileName.Click += new System.EventHandler(this.button_worToIso_findWorFileName_Click);
             // 
-            // toolStrip1
+            // button_systemInfo_getClientIP
             // 
-            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton_xmlEditor_replaceControlChar,
-            this.toolStripButton_xmlEditor_htmlEncode,
-            this.toolStripButton_xmlEditor_htmlDecode});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 308);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(477, 25);
-            this.toolStrip1.TabIndex = 9;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // toolStripButton_xmlEditor_replaceControlChar
-            // 
-            this.toolStripButton_xmlEditor_replaceControlChar.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_xmlEditor_replaceControlChar.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_xmlEditor_replaceControlChar.Image")));
-            this.toolStripButton_xmlEditor_replaceControlChar.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_xmlEditor_replaceControlChar.Name = "toolStripButton_xmlEditor_replaceControlChar";
-            this.toolStripButton_xmlEditor_replaceControlChar.Size = new System.Drawing.Size(84, 22);
-            this.toolStripButton_xmlEditor_replaceControlChar.Text = "替换非法字符";
-            this.toolStripButton_xmlEditor_replaceControlChar.Click += new System.EventHandler(this.toolStripButton_xmlEditor_replaceControlChar_Click);
-            // 
-            // toolStripButton_xmlEditor_htmlEncode
-            // 
-            this.toolStripButton_xmlEditor_htmlEncode.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_xmlEditor_htmlEncode.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_xmlEditor_htmlEncode.Image")));
-            this.toolStripButton_xmlEditor_htmlEncode.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_xmlEditor_htmlEncode.Name = "toolStripButton_xmlEditor_htmlEncode";
-            this.toolStripButton_xmlEditor_htmlEncode.Size = new System.Drawing.Size(93, 22);
-            this.toolStripButton_xmlEditor_htmlEncode.Text = "HTML Encode";
-            this.toolStripButton_xmlEditor_htmlEncode.Click += new System.EventHandler(this.toolStripButton_xmlEditor_htmlEncode_Click);
-            // 
-            // toolStripButton_xmlEditor_htmlDecode
-            // 
-            this.toolStripButton_xmlEditor_htmlDecode.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_xmlEditor_htmlDecode.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_xmlEditor_htmlDecode.Image")));
-            this.toolStripButton_xmlEditor_htmlDecode.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_xmlEditor_htmlDecode.Name = "toolStripButton_xmlEditor_htmlDecode";
-            this.toolStripButton_xmlEditor_htmlDecode.Size = new System.Drawing.Size(95, 22);
-            this.toolStripButton_xmlEditor_htmlDecode.Text = "HTML Decode";
-            this.toolStripButton_xmlEditor_htmlDecode.Click += new System.EventHandler(this.toolStripButton_xmlEditor_htmlDecode_Click);
+            this.button_systemInfo_getClientIP.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_systemInfo_getClientIP.Location = new System.Drawing.Point(11, 52);
+            this.button_systemInfo_getClientIP.Name = "button_systemInfo_getClientIP";
+            this.button_systemInfo_getClientIP.Size = new System.Drawing.Size(458, 23);
+            this.button_systemInfo_getClientIP.TabIndex = 2;
+            this.button_systemInfo_getClientIP.Text = "显示本机(相对于 dp2library 服务器)的 IP 地址";
+            this.button_systemInfo_getClientIP.UseVisualStyleBackColor = true;
+            this.button_systemInfo_getClientIP.Click += new System.EventHandler(this.button_systemInfo_getClientIP_Click);
             // 
             // UtilityForm
             // 
@@ -1052,6 +1066,8 @@
             this.tabPage_sjhm.PerformLayout();
             this.tabPage_xmlEditor.ResumeLayout(false);
             this.tabPage_xmlEditor.PerformLayout();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.tabPage_webCamera.ResumeLayout(false);
             this.tabPage_currency.ResumeLayout(false);
             this.splitContainer_currency.Panel1.ResumeLayout(false);
@@ -1086,8 +1102,6 @@
             this.tabPage_systemInfo.PerformLayout();
             this.tabPage_worToIso.ResumeLayout(false);
             this.tabPage_worToIso.PerformLayout();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1172,5 +1186,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_xmlEditor_replaceControlChar;
         private System.Windows.Forms.ToolStripButton toolStripButton_xmlEditor_htmlEncode;
         private System.Windows.Forms.ToolStripButton toolStripButton_xmlEditor_htmlDecode;
+        private System.Windows.Forms.Button button_systemInfo_getClientIP;
     }
 }

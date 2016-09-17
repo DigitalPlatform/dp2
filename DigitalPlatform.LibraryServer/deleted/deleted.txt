@@ -980,3 +980,1178 @@
                 strError = "临时密码已通过短信方式发送到手机 " + strTelParam + "。请按照手机短信提示进行操作";
             return 1;
         }
+
+
+		~~~~~~~~~~~~~
+		        // 获得系统参数
+        // parameters:
+        //      strCategory 参数所在目录
+        //      strName 参数名
+        //      strValue    返回参数值
+        // rights:
+        //      需要 getsystemparameter 权限
+        // return:
+        //      result.Value    -1 错误；0 没有得到所要求的参数值；1 得到所要求的参数值
+        public LibraryServerResult GetSystemParameter(
+            string strCategory,
+            string strName,
+            out string strValue)
+        {
+            string strError = "";
+            strValue = "";
+
+            LibraryServerResult result = this.PrepareEnvironment("GetSystemParameter", true, true, true);
+            if (result.Value == -1)
+                return result;
+
+            // 2016/5/3
+            // 两个参数都为空的情况，可以用来迫使前端登录一次
+            if (string.IsNullOrEmpty(strCategory) == true
+                && string.IsNullOrEmpty(strName) == true)
+                return result;
+
+            app.LockForRead();
+            try
+            {
+                // 权限判断
+                if (StringUtil.IsInList("getsystemparameter", sessioninfo.RightsOrigin) == false
+                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "获得系统参数的操作被拒绝。不具备 order 或 getsystemparameter 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                int nRet = 1;
+
+                if (strCategory == "listUploadFileNames")
+                {
+                    try
+                    {
+                        string strDirectory = Path.Combine(app.DataDir, "upload/" + strName);
+
+                        strDirectory = strDirectory.Replace("\\", "/");
+                        if (strDirectory[strDirectory.Length - 1] != '/')
+                            strDirectory += "/";
+
+                        // 文件名之间的分隔符为 ||，文件名中，和最后修改时间用 | 间隔
+                        List<string> filenames = new List<string>();
+                        DirectoryInfo di = new DirectoryInfo(strDirectory);
+
+                        // 列出所有目录名
+                        DirectoryInfo[] subs = di.GetDirectories();
+                        for (int i = 0; i < subs.Length; i++)
+                        {
+                            DirectoryInfo sub = subs[i];
+                            filenames.Add(MakeFileName(sub));
+                            // filenames.AddRange(GetFilenames(sub.FullName, true, true));
+                        }
+
+                        // 列出所有文件名
+                        FileInfo[] fis = di.GetFiles();
+                        foreach (FileInfo fi in fis)
+                        {
+                            filenames.Add(MakeFileName(fi));
+                        }
+
+                        StringBuilder text = new StringBuilder(4096);
+                        string strHead = strDirectory;
+                        foreach (string strFilename in filenames)
+                        {
+                            if (text.Length > 0)
+                                text.Append("||");
+
+                            text.Append(strFilename);
+
+                            // 只取出相对部分
+                            // text.Append(strFilename.Substring(strHead.Length));
+                        }
+
+                        strValue = text.ToString();
+                        goto END1;
+                    }
+                    catch (DirectoryNotFoundException ex)
+                    {
+                        strError = "目录 '" + strName + "' 不存在";
+                        goto ERROR1;
+                    }
+                }
+
+                if (strCategory == "cfgs")
+                {
+                    // 2015/4/30
+                    if (strName == "getDataDir")
+                    {
+                        strValue = app.DataDir;
+                        goto END1;
+                    }
+                    if (strName == "listFileNames")
+                    {
+                        List<string> filenames = new List<string>();
+                        DirectoryInfo di = new DirectoryInfo(app.DataDir + "/cfgs");
+                        DirectoryInfo[] subs = di.GetDirectories();
+                        for (int i = 0; i < subs.Length; i++)
+                        {
+                            DirectoryInfo sub = subs[i];
+                            filenames.AddRange(GetFilenames(sub.FullName, false, true));
+                        }
+
+                        string strHead = app.DataDir + "/cfgs/";
+                        foreach (string strFilename in filenames)
+                        {
+                            if (string.IsNullOrEmpty(strValue) == false)
+                                strValue += ",";
+                            // 只取出相对部分
+                            strValue += strFilename.Substring(strHead.Length);
+                        }
+
+                        goto END1;
+                    }
+                    if (strName == "listFileNamesEx")
+                    {
+                        // 文件名之间的分隔符为 ||，文件名中，和最后修改时间用 | 间隔
+                        List<string> filenames = new List<string>();
+                        DirectoryInfo di = new DirectoryInfo(Path.Combine(app.DataDir, "cfgs"));
+                        DirectoryInfo[] subs = di.GetDirectories();
+                        for (int i = 0; i < subs.Length; i++)
+                        {
+                            DirectoryInfo sub = subs[i];
+                            filenames.AddRange(GetFilenames(sub.FullName, true, true));
+                        }
+
+                        StringBuilder text = new StringBuilder(4096);
+                        string strHead = Path.Combine(app.DataDir, "cfgs/");
+                        foreach (string strFilename in filenames)
+                        {
+                            if (text.Length > 0)
+                                text.Append("||");
+                            // 只取出相对部分
+                            text.Append(strFilename.Substring(strHead.Length));
+                        }
+
+                        strValue = text.ToString();
+                        goto END1;
+                    }
+#if NO
+                    // 取得文件内容
+                    if (StringUtil.HasHead(strName, "getfile:") == true)
+                    {
+                        string strFileName = strName.Substring("getfile:".Length);
+
+                        string strFilePath = app.DataDir + "/cfgs/" + strFileName;
+
+                        Encoding encoding = null;
+                        // return:
+                        //      -1  出错
+                        //      0   文件不存在
+                        //      1   文件存在
+                        //      2   读入的内容不是全部
+                        nRet = FileUtil.ReadTextFileContent(strFilePath,
+                            1024 * 1024,    // 1M
+                            out strValue,
+                            out encoding,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 0)
+                        {
+                            strError = "文件 '" + strFileName + "' 不存在";
+                            goto ERROR1;
+                        }
+                        if (nRet == 2)
+                        {
+                            strError = "文件 '" + strFileName + "' 尺寸太大";
+                            goto ERROR1;
+                        }
+
+                        nRet = 1;
+                    }
+#endif
+                }
+
+                // 获得内核配置文件的时间戳?
+                if (strCategory == "cfgs/get_res_timestamps")
+                {
+                    string[] filenames = strName.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries); // RemoveEmptyEntries 2013/12/12
+                    // TODO: 
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                    {
+                        strError = "get channel error";
+                        goto ERROR1;
+                    }
+                    StringBuilder text = new StringBuilder(4096);
+                    foreach (string filename in filenames)
+                    {
+                        string strXml = "";
+                        string strMetaData = "";
+                        byte[] timestamp = null;
+                        string strOutputPath = "";
+                        long lRet = channel.GetRes(filename,
+        "timestamp",
+        out strXml,
+        out strMetaData,
+        out timestamp,
+        out strOutputPath,
+        out strError);
+                        if (lRet == -1)
+                        {
+                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                                continue;
+                            goto ERROR1;
+                        }
+                        if (text.Length > 0)
+                            text.Append(",");
+                        text.Append(filename + "|" + ByteArray.GetHexTimeStampString(timestamp));
+                    }
+                    strValue = text.ToString();
+                    goto END1;
+                }
+
+                if (strCategory == "center")
+                {
+                    if (strName == "def")
+                    {
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("center");
+                        if (root == null)
+                        {
+                            strValue = "";
+                            nRet = 0;
+                        }
+                        else
+                        {
+                            // 将密码变成明文
+                            strValue = root.OuterXml;
+                            if (string.IsNullOrEmpty(strValue) == false)
+                            {
+                                XmlDocument temp = new XmlDocument();
+                                temp.LoadXml(strValue);
+                                XmlNodeList nodes = temp.DocumentElement.SelectNodes("//server");
+                                foreach (XmlNode node in nodes)
+                                {
+                                    string strPassword = DomUtil.GetAttr(node, "password");
+                                    strPassword = LibraryApplication.DecryptPassword(strPassword);
+                                    DomUtil.SetAttr(node, "password", strPassword);
+                                }
+                                strValue = temp.DocumentElement.OuterXml;
+                            }
+                        }
+
+                        goto END1;
+                    }
+
+                    strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                    goto NOTFOUND;
+                }
+
+                if (strCategory == "system")
+                {
+                    // 2016/6/25
+                    // MSMQ 队列名
+                    if (strName == "outgoingQueue")
+                    {
+                        strValue = app.OutgoingQueue;
+                        goto END1;
+                    }
+
+                    // 2016/4/6
+                    // 获得系统的临时文件目录
+                    if (strName == "systemTempDir")
+                    {
+                        string strTempFileName = Path.GetTempFileName();
+                        File.Delete(strTempFileName);
+                        strValue = Path.GetDirectoryName(strTempFileName);
+                        goto END1;
+                    }
+
+                    if (strName == "libraryCodes")
+                    {
+                        List<string> librarycodes = new List<string>();
+                        XmlNodeList nodes = app.LibraryCfgDom.DocumentElement.SelectNodes("readerdbgroup/database");
+                        foreach (XmlNode node in nodes)
+                        {
+                            string strLibraryCode = DomUtil.GetAttr(node, "libraryCode");
+                            if (string.IsNullOrEmpty(strLibraryCode) == true)
+                                continue;
+                            librarycodes.Add(strLibraryCode);
+                        }
+
+                        nodes = app.LibraryCfgDom.DocumentElement.SelectNodes("rightsTable/library");
+                        foreach (XmlNode node in nodes)
+                        {
+                            string strLibraryCode = DomUtil.GetAttr(node, "code");
+                            if (string.IsNullOrEmpty(strLibraryCode) == true)
+                                continue;
+                            librarycodes.Add(strLibraryCode);
+                        }
+
+                        StringUtil.RemoveDupNoSort(ref librarycodes);
+                        strValue = StringUtil.MakePathList(librarycodes);
+                        goto END1;
+                    }
+
+                    if (strName == "arrived")
+                    {
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("arrived");
+                        if (root == null)
+                        {
+                            strValue = "";
+                            nRet = 0;
+                        }
+                        else
+                            strValue = root.OuterXml;
+
+                        goto END1;
+                    }
+
+                    // 2009/10/23 
+                    // 获得<itemdbgroup>元素下级XML
+                    if (strName == "biblioDbGroup")
+                    {
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup");
+                        if (root == null)
+                        {
+                            strValue = "";
+                            nRet = 0;
+                            // 注: 返回值为0，字符串为空，错误码不是NotFound，表示想关节点找到了，但值为空
+                        }
+                        else
+                        {
+                            XmlDocument dom = new XmlDocument();
+                            try
+                            {
+                                dom.LoadXml(root.OuterXml);
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "<itemdbgroup>元素XML片段装入DOM时出错: " + ex.Message;
+                                goto ERROR1;
+                            }
+
+                            strError = EnsureKdbs(false);
+                            if (strError != null)
+                                goto ERROR1;
+
+                            // 将name属性名修改为itemDbName属性
+                            // TODO: 将来library.xml格式修改后，这部分可以免去了
+                            XmlNodeList nodes = dom.DocumentElement.SelectNodes("database");
+                            for (int i = 0; i < nodes.Count; i++)
+                            {
+                                XmlNode node = nodes[i];
+                                string strItemDbName = DomUtil.GetAttr(node, "name");
+                                DomUtil.SetAttr(node, "name", null);
+                                DomUtil.SetAttr(node, "itemDbName", strItemDbName);
+
+                                // 2012/7/2
+                                // 加入各个数据库的多语种名字
+
+                                // 实体库
+                                AppendCaptions(node, "itemDbName");
+
+                                // 订购库
+                                AppendCaptions(node, "orderDbName");
+
+                                // 期库
+                                AppendCaptions(node, "issueDbName");
+
+                                // 评注库
+                                AppendCaptions(node, "commentDbName");
+
+                                // 书目库
+                                AppendCaptions(node, "biblioDbName");
+                            }
+
+                            strValue = dom.DocumentElement.InnerXml;
+                        }
+
+                        goto END1;
+                    }
+
+                    // 2012/9/12
+                    // 获得<readerdbgroup>元素下级XML
+                    if (strName == "readerDbGroup")
+                    {
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup");
+                        if (root == null)
+                        {
+                            strValue = "";
+                            nRet = 0;
+                            // 注: 返回值为0，字符串为空，错误码不是NotFound，表示相关节点找到了，但值为空
+                            goto END1;
+                        }
+
+                        if (sessioninfo.GlobalUser == true)
+                            strValue = root.InnerXml;
+                        else
+                        {
+                            // 过滤掉当前用户不能管辖的读者库名
+                            XmlDocument dom = new XmlDocument();
+                            try
+                            {
+                                dom.LoadXml(root.OuterXml);
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "<readerdbgroup>元素XML片段装入DOM时出错: " + ex.Message;
+                                goto ERROR1;
+                            }
+
+                            XmlNodeList nodes = dom.DocumentElement.SelectNodes("database");
+                            for (int i = 0; i < nodes.Count; i++)
+                            {
+                                XmlNode node = nodes[i];
+                                string strLibraryCode = DomUtil.GetAttr(node, "libraryCode");
+
+                                if (StringUtil.IsInList(strLibraryCode, sessioninfo.LibraryCodeList) == false)
+                                {
+                                    node.ParentNode.RemoveChild(node);
+                                }
+                            }
+
+                            strValue = dom.DocumentElement.InnerXml;
+                        }
+
+                        goto END1;
+                    }
+
+                    strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                    goto NOTFOUND;
+                }
+
+                // OPAC检索
+                if (strCategory == "opac")
+                {
+                    // TODO: 和def重复了，需要合并
+                    // 获得<virtualDatabases>元素下级XML
+                    if (strName == "databases")
+                    {
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("virtualDatabases");
+                        if (root == null)
+                        {
+                            strValue = "";
+                            nRet = 0;
+                        }
+                        else
+                            strValue = root.InnerXml;
+
+                        goto END1;
+                    }
+
+                    // 获得<browseformats>元素下级XML
+                    if (strName == "browseformats")
+                    {
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("browseformats");
+                        if (root == null)
+                        {
+                            strValue = "";
+                            nRet = 0;
+                        }
+                        else
+                            strValue = root.InnerXml;
+
+                        goto END1;
+                    }
+
+                    // 2011/2/15
+                    if (strName == "serverDirectory")
+                    {
+                        /*
+                        XmlNode node = app.LibraryCfgDom.SelectSingleNode("//opacServer");
+                        if (node == null)
+                        {
+                            strValue = "";
+                            nRet = 0;
+                        }
+                        else
+                            strValue = DomUtil.GetAttr(node, "url");
+                        */
+                        strValue = app.OpacServerUrl;
+                        goto END1;
+                    }
+
+                    strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                    goto NOTFOUND;
+                }
+
+                if (strCategory == "circulation")
+                {
+                    // 2016/1/1
+                    if (strName == "chargingOperDatabase")
+                    {
+                        if (app.ChargingOperDatabase.Enabled == true)
+                            strValue = "enabled";
+                        else
+                            strValue = "";
+                        nRet = 1;
+                        goto END1;
+                    }
+
+                    // <clientFineInterface>元素内容
+                    // strValue中是OuterXml定义。
+                    if (strName == "clientFineInterface")
+                    {
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("clientFineInterface");
+                        if (root == null)
+                        {
+                            nRet = 0;
+                            goto END1;
+                        }
+
+                        strValue = root.OuterXml;
+                        nRet = 1;
+                        goto END1;
+                    }
+
+                    // <valueTables>元素内容
+                    // strValue中是下级片断定义，没有<valueTables>元素作为根。
+                    if (strName == "valueTables")
+                    {
+                        // 按照馆代码列表，返回<valueTables>内的适当片断
+                        nRet = app.GetValueTablesXml(
+                                sessioninfo.LibraryCodeList,
+                                out strValue,
+                                out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        nRet = 1;
+                        goto END1;
+                    }
+
+                    // <rightsTable>元素内容
+                    // strValue中是下级片断定义，没有<rightsTable>元素作为根。
+                    if (strName == "rightsTable")
+                    {
+#if NO
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("rightsTable");   // 0.02前为rightstable
+                        if (root == null)
+                        {
+                            nRet = 0;
+                            goto END1;
+                        }
+
+                        strValue = root.InnerXml;
+                        nRet = 1;
+                        goto END1;
+#endif
+                        // 按照馆代码列表，返回<rightsTable>内的适当片断
+                        nRet = app.GetRightsTableXml(
+                                sessioninfo.LibraryCodeList,
+                                out strValue,
+                                out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        nRet = 1;
+                        goto END1;
+                    }
+
+                    // (当前<rightsTable>)权限表的HTML形态
+                    if (strName == "rightsTableHtml")
+                    {
+                        nRet = app.GetRightTableHtml(
+                            "",
+                            sessioninfo.LibraryCodeList,
+                            out strValue,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        nRet = 1;
+                        goto END1;
+                    }
+
+                    /*
+                    // 2008/10/10 
+                    // <readertypes>元素内容
+                    // strValue中是下级片断定义，没有<readertypes>元素作为根。
+                    if (strName == "readerTypes")
+                    {
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("rightsTable/readerTypes");   // 0.02前为readertypes
+                        if (root == null)
+                        {
+                            nRet = 0;
+                            goto END1;
+                        }
+
+                        strValue = root.InnerXml;
+                        nRet = 1;
+                        goto END1;
+                    }
+
+                    // 2008/10/10 
+                    // <booktypes>元素内容
+                    // strValue中是下级片断定义，没有<booktypes>元素作为根。
+                    if (strName == "bookTypes")
+                    {
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("rightsTable/bookTypes"); // 0.02前为booktypes
+                        if (root == null)
+                        {
+                            nRet = 0;
+                            goto END1;
+                        }
+
+                        strValue = root.InnerXml;
+                        nRet = 1;
+                        goto END1;
+                    }*/
+
+                    // 2008/10/10 
+                    // <locationtypes>元素内容
+                    // strValue中是下级片断定义，没有<locationTypes>元素作为根。
+                    if (strName == "locationTypes")
+                    {
+#if NO
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("locationTypes"); // 0.02前为locationtypes
+                        if (root == null)
+                        {
+                            nRet = 0;
+                            goto END1;
+                        }
+
+                        strValue = root.InnerXml;
+                        nRet = 1;
+                        goto END1;
+#endif
+                        // 按照馆代码列表，返回<locationTypes>内的适当片断
+                        nRet = app.GetLocationTypesXml(
+                                sessioninfo.LibraryCodeList,
+                                out strValue,
+                                out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        nRet = 1;
+                        goto END1;
+                    }
+
+                    // 2008/10/12 
+                    // <zhongcihao>元素内容
+                    // strValue中是下级片断定义，没有<zhongcihao>元素作为根。
+                    if (strName == "zhongcihao")
+                    {
+                        // 分馆用户也能看到全部<zhongcihao>定义
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("zhongcihao");
+                        if (root == null)
+                        {
+                            nRet = 0;
+                            goto END1;
+                        }
+
+                        strValue = root.InnerXml;
+                        nRet = 1;
+                        goto END1;
+                    }
+
+                    // 2009/2/18 
+                    // <callNumber>元素内容
+                    // strValue中是下级片断定义，没有<callNumber>元素作为根。
+                    if (strName == "callNumber")
+                    {
+                        // 分馆用户可以看到全部定义
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("callNumber");
+                        if (root == null)
+                        {
+                            nRet = 0;
+                            goto END1;
+                        }
+
+                        strValue = root.InnerXml;
+                        nRet = 1;
+                        goto END1;
+                    }
+
+                    // 2009/3/9 
+                    // <dup>元素内容
+                    // strValue中是下级片断定义，没有<dup>元素作为根。
+                    if (strName == "dup")
+                    {
+                        // 分馆用户也能看到全部<dup>定义
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("dup");
+                        if (root == null)
+                        {
+                            nRet = 0;
+                            goto END1;
+                        }
+
+                        strValue = root.InnerXml;
+                        nRet = 1;
+                        goto END1;
+                    }
+
+                    // 2008/10/13 
+                    // <script>元素内容
+                    // strValue中是下级片断定义，没有<script>元素作为根。
+                    if (strName == "script")
+                    {
+                        // 分馆用户也能看到全部<script>定义
+                        XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode("script");
+                        if (root == null)
+                        {
+                            nRet = 0;
+                            goto END1;
+                        }
+
+                        strValue = root.InnerXml;
+                        nRet = 1;
+                        goto END1;
+                    }
+
+                    strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                    goto NOTFOUND;
+                    /*
+                    strError = "(strCategory为 '" + strCategory + "' 时)未知的strName值 '" + strName + "' ";
+                    goto ERROR1;
+                     * */
+                }
+
+                // 根据前端在strName参数中提供的rightstable xml字符串，立即创建rightsTableHtml字符串
+                if (strCategory == "instance_rightstable_html")
+                {
+                    nRet = app.GetRightTableHtml(
+                        strName,
+                        sessioninfo.LibraryCodeList,
+                        out strValue,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    nRet = 1;
+                    goto END1;
+                }
+
+                // 获得内核数据库原始定义
+                if (strCategory == "database_def")
+                {
+                    // strName参数不能为空。本功能只能得到一个数据库的定义，如果要得到全部数据库的定义，请使用ManageDatabase API的getinfo子功能
+                    nRet = app.vdbs.GetDatabaseDef(
+                        strName,
+                        out strValue,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    goto END1;
+                }
+
+                // 实用库
+                if (strCategory == "utilDb")
+                {
+                    switch (strName)
+                    {
+                        case "dbnames":
+                            {
+                                XmlNodeList nodes = app.LibraryCfgDom.DocumentElement.SelectNodes("//utilDb/database");
+                                for (int i = 0; i < nodes.Count; i++)
+                                {
+                                    string strDbName = DomUtil.GetAttr(nodes[i], "name");
+                                    if (i != 0)
+                                        strValue += ",";
+                                    strValue += strDbName;
+                                }
+                            }
+                            break;
+                        case "types":
+                            {
+                                XmlNodeList nodes = app.LibraryCfgDom.DocumentElement.SelectNodes("//utilDb/database");
+                                for (int i = 0; i < nodes.Count; i++)
+                                {
+                                    string strType = DomUtil.GetAttr(nodes[i], "type");
+                                    if (i != 0)
+                                        strValue += ",";
+                                    strValue += strType;
+                                }
+                            }
+                            break;
+                        default:
+                            /*
+                            nRet = 0;
+                            break;
+                             * */
+                            strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                            goto NOTFOUND;
+                    }
+
+                    // 2009/10/23 
+                    goto END1;
+                }
+
+                if (strCategory == "amerce")
+                {
+                    switch (strName)
+                    {
+                        case "dbname":
+                            strValue = app.AmerceDbName;
+                            break;
+                        case "overduestyle":
+                            strValue = app.OverdueStyle;
+                            break;
+                        default:
+                            /*
+                            nRet = 0;
+                            break;
+                             * */
+                            strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                            goto NOTFOUND;
+                    }
+                    // 2009/10/23 
+                    goto END1;
+                }
+
+                // 2015/6/13
+                if (strCategory == "arrived")
+                {
+                    switch (strName)
+                    {
+                        case "dbname":
+                            strValue = app.ArrivedDbName;
+                            break;
+                        default:
+                            strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                            goto NOTFOUND;
+                    }
+                    goto END1;
+                }
+
+                if (strCategory == "biblio")
+                {
+                    switch (strName)
+                    {
+                        case "dbnames":
+                            {
+                                for (int i = 0; i < app.ItemDbs.Count; i++)
+                                {
+                                    string strDbName = app.ItemDbs[i].BiblioDbName;
+
+                                    // 即便数据库名为空，逗号也不能省略。主要是为了准确对位
+
+                                    if (i != 0)
+                                        strValue += ",";
+                                    strValue += strDbName;
+                                }
+                            }
+                            break;
+                        case "syntaxs":
+                            {
+                                for (int i = 0; i < app.ItemDbs.Count; i++)
+                                {
+                                    string strSyntax = app.ItemDbs[i].BiblioDbSyntax;
+
+                                    // 即便strSyntax为空，逗号也不能省略。主要是为了准确对位
+
+
+                                    if (i != 0)
+                                        strValue += ",";
+                                    strValue += strSyntax;
+                                }
+                            }
+                            break;
+                        default:
+                            /*
+                            nRet = 0;
+                            break;
+                             * */
+                            strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                            goto NOTFOUND;
+                    }
+                    // 2009/10/23 
+                    goto END1;
+                }
+
+                if (strCategory == "virtual")
+                {
+                    switch (strName)
+                    {
+                        // 2011/1/21
+                        case "def":
+                            {
+                                /*
+                                // TODO: 把这个初始化放在正规的初始化中？
+                                nRet = app.InitialVdbs(sessioninfo.Channels,
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    strError = "InitialVdbs error : " + strError;
+                                    goto ERROR1;
+                                }
+                                 * */
+
+
+                                XmlNode root = app.LibraryCfgDom.DocumentElement.SelectSingleNode(
+                                    "virtualDatabases");
+                                if (root == null)
+                                {
+                                    strError = "尚未配置<virtualDatabases>元素";
+                                    goto ERROR1;
+                                }
+                                strValue = root.OuterXml;
+                            }
+                            break;
+                        case "dbnames":
+                            {
+                                /*
+                                // TODO: 把这个初始化放在正规的初始化中？
+                                nRet = app.InitialVdbs(sessioninfo.Channels,
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    strError = "InitialVdbs error : " + strError;
+                                    goto ERROR1;
+                                }
+                                 * */
+
+                                if (app.vdbs != null)
+                                {
+                                    for (int i = 0; i < app.vdbs.Count; i++)
+                                    {
+                                        VirtualDatabase vdb = app.vdbs[i];
+                                        if (vdb.IsVirtual == false)
+                                            continue;
+
+                                        if (String.IsNullOrEmpty(strValue) == false)
+                                            strValue += ",";
+                                        strValue += vdb.GetName("zh");
+                                    }
+                                }
+                            }
+                            break;
+                        default:
+                            /*
+                            nRet = 0;
+                            break;
+                             * */
+                            strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                            goto NOTFOUND;
+                    }
+                    // 2009/10/23 
+                    goto END1;
+                }
+
+
+                if (strCategory == "item")
+                {
+                    switch (strName)
+                    {
+                        case "dbnames":
+                            {
+                                for (int i = 0; i < app.ItemDbs.Count; i++)
+                                {
+                                    string strDbName = app.ItemDbs[i].DbName;
+
+                                    // 即便strDbName为空，逗号也不能省略。主要是为了准确对位
+
+                                    if (i != 0)
+                                        strValue += ",";
+                                    strValue += strDbName;
+                                }
+                            }
+                            break;
+                        default:
+                            /*
+                            nRet = 0;
+                            break;
+                             * */
+                            strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                            goto NOTFOUND;
+                    }
+                    // 2009/10/23 
+                    goto END1;
+                }
+
+                // 2007/10/19 
+                if (strCategory == "issue")
+                {
+                    switch (strName)
+                    {
+                        case "dbnames":
+                            {
+                                for (int i = 0; i < app.ItemDbs.Count; i++)
+                                {
+                                    string strDbName = app.ItemDbs[i].IssueDbName;
+
+                                    // 即便strDbName为空，逗号也不能省略。主要是为了准确对位
+
+                                    if (i != 0)
+                                        strValue += ",";
+                                    strValue += strDbName;
+                                }
+                            }
+                            break;
+                        default:
+                            /*
+                            nRet = 0;
+                            break;
+                             * */
+                            strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                            goto NOTFOUND;
+                    }
+                    // 2009/10/23 
+                    goto END1;
+                }
+
+                // 2007/11/30 
+                if (strCategory == "order")
+                {
+                    switch (strName)
+                    {
+                        case "dbnames":
+                            {
+                                for (int i = 0; i < app.ItemDbs.Count; i++)
+                                {
+                                    string strDbName = app.ItemDbs[i].OrderDbName;
+
+                                    // 即便strDbName为空，逗号也不能省略。主要是为了准确对位
+
+                                    if (i != 0)
+                                        strValue += ",";
+                                    strValue += strDbName;
+                                }
+                            }
+                            break;
+                        default:
+                            /*
+                            nRet = 0;
+                            break;
+                             * */
+                            strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                            goto NOTFOUND;
+                    }
+                    // 2009/10/23 
+                    goto END1;
+                }
+
+                if (strCategory == "reader")
+                {
+                    switch (strName)
+                    {
+                        case "dbnames":
+                            {
+#if NO
+                                for (int i = 0; i < app.ReaderDbs.Count; i++)
+                                {
+                                    string strDbName = app.ReaderDbs[i].DbName;
+                                    if (String.IsNullOrEmpty(strDbName) == true)
+                                        continue;
+
+                                    // 2012/9/7
+                                    if (string.IsNullOrEmpty(sessioninfo.LibraryCode) == false)
+                                    {
+                                        string strLibraryCode = app.ReaderDbs[i].LibraryCode;
+                                        // 匹配图书馆代码
+                                        // parameters:
+                                        //      strSingle   单个图书馆代码。空的总是不能匹配
+                                        //      strList     图书馆代码列表，例如"第一个,第二个"，或者"*"。空表示都匹配
+                                        // return:
+                                        //      false   没有匹配上
+                                        //      true    匹配上
+                                        if (LibraryApplication.MatchLibraryCode(strLibraryCode, sessioninfo.LibraryCode) == false)
+                                            continue;
+                                    }
+
+                                    if (String.IsNullOrEmpty(strValue) == false)
+                                        strValue += ",";
+                                    strValue += strDbName;
+                                }
+#endif
+                                List<string> dbnames = app.GetCurrentReaderDbNameList(sessioninfo.LibraryCodeList);
+                                strValue = StringUtil.MakePathList(dbnames);
+                            }
+                            break;
+                        default:
+                            /*
+                            nRet = 0;
+                            break;
+                             * */
+                            strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                            goto NOTFOUND;
+                    }
+                    // 2009/10/23 
+                    goto END1;
+                }
+
+                if (strCategory == "library")
+                {
+                    switch (strName)
+                    {
+                        case "name":
+                            {
+                                XmlNode node = app.LibraryCfgDom.SelectSingleNode("//libraryName");
+                                if (node == null)
+                                    strValue = "";
+                                else
+                                    strValue = node.InnerText;
+                            }
+                            break;
+                        /*
+                    case "serverDirectory":
+                        {
+                            XmlNode node = app.LibraryCfgDom.SelectSingleNode("//libraryserver");
+                            if (node == null)
+                                strValue = "";
+                            else
+                                strValue = DomUtil.GetAttr(node, "url");
+                        }
+                        break;
+                         * */
+                        default:
+                            /*
+                            nRet = 0;
+                            break;
+                             * */
+                            strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                            goto NOTFOUND;
+                    }
+                    // 2009/10/23 
+                    goto END1;
+                }
+
+            NOTFOUND:
+                result.Value = 0;
+                result.ErrorCode = ErrorCode.NotFound;  // 表示配置节点没有找到
+                if (String.IsNullOrEmpty(strError) == true)
+                    result.ErrorInfo = "未知的 category '" + strCategory + "' 和 name '" + strName + "'";
+                else
+                    result.ErrorInfo = strError;
+                return result;
+
+            END1:
+                result.Value = nRet;
+                return result;
+            ERROR1:
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library GetSystemParameter() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+            finally
+            {
+                app.UnlockForRead();
+            }
+        }
+
+
+		~~~
+
+		#if NO
+        // 2013/2/26
+        // 检查确保 kdbs != null
+        string EnsureKdbs(bool bThrowException = true)
+        {
+            if (app.kdbs == null)
+            {
+                app.ActivateManagerThreadForLoad();
+                string strError = "app.kdbs == null。故障原因请检查dp2Library日志，或稍后重试操作";
+                if (bThrowException == true)
+                    throw new Exception(strError);
+
+                return strError;
+            }
+
+            return null;    // 没有出错
+        }
+#endif

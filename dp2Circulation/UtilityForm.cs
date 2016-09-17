@@ -1375,5 +1375,56 @@ MessageBoxDefaultButton.Button2);
             this.textBox_xmlEditor_content.Text = HttpUtility.HtmlDecode(this.textBox_xmlEditor_content.Text);
         }
 
+        private void button_systemInfo_getClientIP_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            string strValue = "";
+
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.83") < 0)
+            {
+                strError = "当前连接的 dp2library 版本必须在 2.83 以上才能使用本功能 (但它是 "+this.MainForm.ServerVersion+")";
+                goto ERROR1;
+            }
+
+            EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在测算网络速度 ...");
+            stop.BeginLoop();
+
+            try
+            {
+                long lRet = this.Channel.GetSystemParameter(stop,
+                    "utility",
+                    "getClientIP",
+                    out strValue,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                // InputDlg.GetInput(this, "本机 IP 地址", "本机 IP 地址", strValue, this.Font);
+                bool bTemp = false;
+                MessageDlg.Show(this,
+    "本机 IP 地址为:\r\n" + strValue,
+    "dp2Circulation",
+    MessageBoxButtons.OK,
+    MessageBoxDefaultButton.Button1,
+    ref bTemp);
+
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+
+                EnableControls(true);
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
     }
 }

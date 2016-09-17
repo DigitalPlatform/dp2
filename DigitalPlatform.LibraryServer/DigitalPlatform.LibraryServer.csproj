@@ -101,6 +101,7 @@
     <Compile Include="AppFileSystem.cs" />
     <Compile Include="AppLoginCache.cs" />
     <Compile Include="AppScriptFilter.cs" />
+    <Compile Include="AppSystemParameter.cs" />
     <Compile Include="BiblioSummaryCache.cs" />
     <Compile Include="CachedRecord.cs" />
     <Compile Include="deleted\AppColumn.cs" />
