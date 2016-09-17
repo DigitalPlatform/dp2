@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -15,7 +16,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.LibraryClient.localhost;
-using System.IO;
 
 namespace dp2Circulation
 {
@@ -24,13 +24,14 @@ namespace dp2Circulation
     /// </summary>
     public partial class UserForm : MyForm
     {
-        const int COLUMN_LIBRARYCODE =  0;
-        const int COLUMN_USERNAME =     1;
-        const int COLUMN_TYPE =         2;
-        const int COLUMN_RIGHTS =       3;
-        const int COLUMN_CHANGED =      4;
-        const int COLUMN_ACCESSCODE =   5;
-        const int COLUMN_COMMENT =      6;
+        const int COLUMN_LIBRARYCODE = 0;
+        const int COLUMN_USERNAME = 1;
+        const int COLUMN_TYPE = 2;
+        const int COLUMN_RIGHTS = 3;
+        const int COLUMN_CHANGED = 4;
+        const int COLUMN_ACCESSCODE = 5;
+        const int COLUMN_BINDING = 6;
+        const int COLUMN_COMMENT = 7;
 
         const int WM_PREPARE = API.WM_USER + 200;
 
@@ -82,7 +83,7 @@ namespace dp2Circulation
             {
                 // 警告尚未保存
                 DialogResult result = MessageBox.Show(this,
-    "当前有 "+nChangedCount.ToString()+" 个用户信息修改后尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
+    "当前有 " + nChangedCount.ToString() + " 个用户信息修改后尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
     "UserForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -196,6 +197,7 @@ namespace dp2Circulation
             // this.textBox_libraryCode.Enabled = bEnable;
             this.checkedComboBox_libraryCode.Enabled = bEnable;
             this.textBox_access.Enabled = bEnable;
+            this.textBox_binding.Enabled = bEnable;
             this.textBox_comment.Enabled = bEnable;
             this.listView_users.Enabled = bEnable;
 
@@ -244,6 +246,7 @@ namespace dp2Circulation
             //this.textBox_libraryCode.Text = "";
             this.checkedComboBox_libraryCode.Text = "";
             this.textBox_access.Text = "";
+            this.textBox_binding.Text = "";
             this.textBox_comment.Text = "";
         }
 
@@ -355,6 +358,9 @@ namespace dp2Circulation
 
             ListViewUtil.ChangeItemText(item, COLUMN_ACCESSCODE,
                 item_info.UserInfo.Access);
+            ListViewUtil.ChangeItemText(item, COLUMN_BINDING,
+    item_info.UserInfo.Binding);
+
             ListViewUtil.ChangeItemText(item, COLUMN_COMMENT,
                 item_info.UserInfo.Comment);
 #if NO
@@ -420,6 +426,7 @@ namespace dp2Circulation
             item_info.UserInfo.Rights = this.textBox_userRights.Text;
             item_info.UserInfo.LibraryCode = this.checkedComboBox_libraryCode.Text; //  this.textBox_libraryCode.Text;
             item_info.UserInfo.Access = this.textBox_access.Text;
+            item_info.UserInfo.Binding = this.textBox_binding.Text;
             item_info.UserInfo.Comment = this.textBox_comment.Text;
             item_info.Changed = this.EditChanged;
 
@@ -452,8 +459,8 @@ namespace dp2Circulation
             // this.textBox_libraryCode.Text = info.LibraryCode;
             this.checkedComboBox_libraryCode.Text = info.LibraryCode;
             this.textBox_access.Text = info.Access;
+            this.textBox_binding.Text = info.Binding;
             this.textBox_comment.Text = info.Comment;
-
 
             // 故意造成两个密码不一样，防止无意中重设了密码
             this.textBox_password.Text = "1";
@@ -483,6 +490,7 @@ namespace dp2Circulation
             // this.textBox_libraryCode.Text = "";
             this.checkedComboBox_libraryCode.Text = "";
             this.textBox_access.Text = "";
+            this.textBox_binding.Text = "";
             this.textBox_comment.Text = "";
 
             this.textBox_password.Text = "";
@@ -535,7 +543,6 @@ namespace dp2Circulation
             return;
         ERROR1:
             MessageBox.Show(this, strError);
-
         }
 
         // 重设密码
@@ -753,6 +760,7 @@ namespace dp2Circulation
             info.Rights = this.textBox_userRights.Text;
             info.LibraryCode = this.checkedComboBox_libraryCode.Text;   //  this.textBox_libraryCode.Text;
             info.Access = this.textBox_access.Text;
+            info.Binding = this.textBox_binding.Text;
             info.Comment = this.textBox_comment.Text;
 
             if (this.checkBox_changePassword.Checked == true)
@@ -879,7 +887,6 @@ namespace dp2Circulation
             return;
         ERROR1:
             MessageBox.Show(this, strError);
-
         }
 
         private void checkBox_changePassword_CheckedChanged(object sender, EventArgs e)
@@ -927,6 +934,7 @@ namespace dp2Circulation
             info.Rights = this.textBox_userRights.Text;
             info.LibraryCode = this.checkedComboBox_libraryCode.Text;   //  this.textBox_libraryCode.Text;
             info.Access = this.textBox_access.Text;
+            info.Binding = this.textBox_binding.Text;
             info.Comment = this.textBox_comment.Text;
 
             if (this.checkBox_changePassword.Checked == true)
@@ -991,7 +999,6 @@ namespace dp2Circulation
             this.listView_users.ListViewItemSorter = new SortColumnsComparer(this.SortColumns);
 
             this.listView_users.ListViewItemSorter = null;
-
         }
 
         private void checkedComboBox_libraryCode_TextChanged(object sender, EventArgs e)
@@ -1003,7 +1010,7 @@ namespace dp2Circulation
         {
             if (this.checkedComboBox_libraryCode.Items.Count > 0)
                 return;
-            lock(this.checkedComboBox_libraryCode)
+            lock (this.checkedComboBox_libraryCode)
             {
                 List<string> librarycodes = null;
                 string strError = "";
@@ -1078,6 +1085,11 @@ namespace dp2Circulation
 
         private void tableLayoutPanel_userEdit_SizeChanged(object sender, EventArgs e)
         {
+        }
+
+        private void textBox_binding_TextChanged(object sender, EventArgs e)
+        {
+            this.EditChanged = true;
         }
 
 #if NO

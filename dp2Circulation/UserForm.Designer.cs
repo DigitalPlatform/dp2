@@ -44,6 +44,7 @@ namespace dp2Circulation
             this.label2 = new System.Windows.Forms.Label();
             this.textBox_userType = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.textBox_userRights = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.textBox_password = new System.Windows.Forms.TextBox();
             this.button_editUserRights = new System.Windows.Forms.Button();
@@ -53,15 +54,17 @@ namespace dp2Circulation
             this.button_resetPassword = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
+            this.textBox_access = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.checkedComboBox_libraryCode = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label8 = new System.Windows.Forms.Label();
+            this.textBox_comment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.button_save = new System.Windows.Forms.Button();
             this.button_delete = new System.Windows.Forms.Button();
             this.button_create = new System.Windows.Forms.Button();
             this.button_listAllUsers = new System.Windows.Forms.Button();
-            this.textBox_userRights = new DigitalPlatform.CommonControl.AutoHeightTextBox();
-            this.textBox_access = new DigitalPlatform.CommonControl.AutoHeightTextBox();
-            this.checkedComboBox_libraryCode = new DigitalPlatform.CommonControl.CheckedComboBox();
-            this.textBox_comment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.textBox_binding = new DigitalPlatform.CommonControl.AutoHeightTextBox();
+            this.columnHeader_binding = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
@@ -100,6 +103,7 @@ namespace dp2Circulation
             this.columnHeader_rights,
             this.columnHeader_changed,
             this.columnHeader_access,
+            this.columnHeader_binding,
             this.columnHeader_comment});
             this.listView_users.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_users.FullRowSelect = true;
@@ -164,24 +168,27 @@ namespace dp2Circulation
             this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_userType, 1, 1);
             this.tableLayoutPanel_userEdit.Controls.Add(this.label3, 0, 3);
             this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_userRights, 1, 3);
-            this.tableLayoutPanel_userEdit.Controls.Add(this.label4, 0, 7);
-            this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_password, 1, 7);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.label4, 0, 8);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_password, 1, 8);
             this.tableLayoutPanel_userEdit.Controls.Add(this.button_editUserRights, 2, 3);
-            this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_confirmPassword, 1, 8);
-            this.tableLayoutPanel_userEdit.Controls.Add(this.label5, 0, 8);
-            this.tableLayoutPanel_userEdit.Controls.Add(this.checkBox_changePassword, 0, 6);
-            this.tableLayoutPanel_userEdit.Controls.Add(this.button_resetPassword, 2, 8);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_confirmPassword, 1, 9);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.label5, 0, 9);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.checkBox_changePassword, 0, 7);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.button_resetPassword, 2, 9);
             this.tableLayoutPanel_userEdit.Controls.Add(this.label6, 0, 4);
             this.tableLayoutPanel_userEdit.Controls.Add(this.label7, 0, 5);
             this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_access, 1, 5);
             this.tableLayoutPanel_userEdit.Controls.Add(this.checkedComboBox_libraryCode, 1, 4);
             this.tableLayoutPanel_userEdit.Controls.Add(this.label8, 0, 2);
             this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_comment, 1, 2);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.label9, 0, 6);
+            this.tableLayoutPanel_userEdit.Controls.Add(this.textBox_binding, 1, 6);
             this.tableLayoutPanel_userEdit.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_userEdit.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel_userEdit.Margin = new System.Windows.Forms.Padding(2);
             this.tableLayoutPanel_userEdit.Name = "tableLayoutPanel_userEdit";
-            this.tableLayoutPanel_userEdit.RowCount = 10;
+            this.tableLayoutPanel_userEdit.RowCount = 11;
+            this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_userEdit.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -253,11 +260,24 @@ namespace dp2Circulation
             this.label3.Text = "权限(&R):";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // textBox_userRights
+            // 
+            this.textBox_userRights.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_userRights.Location = new System.Drawing.Point(107, 72);
+            this.textBox_userRights.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_userRights.MinimumSize = new System.Drawing.Size(38, 4);
+            this.textBox_userRights.Multiline = true;
+            this.textBox_userRights.Name = "textBox_userRights";
+            this.textBox_userRights.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBox_userRights.Size = new System.Drawing.Size(217, 17);
+            this.textBox_userRights.TabIndex = 5;
+            this.textBox_userRights.TextChanged += new System.EventHandler(this.textBox_userRights_TextChanged);
+            // 
             // label4
             // 
             this.label4.AutoSize = true;
             this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label4.Location = new System.Drawing.Point(2, 161);
+            this.label4.Location = new System.Drawing.Point(2, 181);
             this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(101, 25);
@@ -268,7 +288,7 @@ namespace dp2Circulation
             // textBox_password
             // 
             this.textBox_password.Enabled = false;
-            this.textBox_password.Location = new System.Drawing.Point(107, 163);
+            this.textBox_password.Location = new System.Drawing.Point(107, 183);
             this.textBox_password.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_password.Name = "textBox_password";
             this.textBox_password.PasswordChar = '*';
@@ -293,7 +313,7 @@ namespace dp2Circulation
             // textBox_confirmPassword
             // 
             this.textBox_confirmPassword.Enabled = false;
-            this.textBox_confirmPassword.Location = new System.Drawing.Point(107, 188);
+            this.textBox_confirmPassword.Location = new System.Drawing.Point(107, 208);
             this.textBox_confirmPassword.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_confirmPassword.Name = "textBox_confirmPassword";
             this.textBox_confirmPassword.PasswordChar = '*';
@@ -305,7 +325,7 @@ namespace dp2Circulation
             // 
             this.label5.AutoSize = true;
             this.label5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label5.Location = new System.Drawing.Point(2, 186);
+            this.label5.Location = new System.Drawing.Point(2, 206);
             this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(101, 26);
@@ -316,7 +336,7 @@ namespace dp2Circulation
             // checkBox_changePassword
             // 
             this.checkBox_changePassword.AutoSize = true;
-            this.checkBox_changePassword.Location = new System.Drawing.Point(2, 143);
+            this.checkBox_changePassword.Location = new System.Drawing.Point(2, 163);
             this.checkBox_changePassword.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_changePassword.Name = "checkBox_changePassword";
             this.checkBox_changePassword.Size = new System.Drawing.Size(72, 16);
@@ -329,7 +349,7 @@ namespace dp2Circulation
             // 
             this.button_resetPassword.AutoSize = true;
             this.button_resetPassword.Enabled = false;
-            this.button_resetPassword.Location = new System.Drawing.Point(328, 188);
+            this.button_resetPassword.Location = new System.Drawing.Point(328, 208);
             this.button_resetPassword.Margin = new System.Windows.Forms.Padding(2);
             this.button_resetPassword.Name = "button_resetPassword";
             this.button_resetPassword.Size = new System.Drawing.Size(105, 22);
@@ -362,6 +382,33 @@ namespace dp2Circulation
             this.label7.Text = "存取定义(&A):";
             this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // textBox_access
+            // 
+            this.textBox_access.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_access.Location = new System.Drawing.Point(107, 123);
+            this.textBox_access.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_access.MinimumSize = new System.Drawing.Size(38, 4);
+            this.textBox_access.Multiline = true;
+            this.textBox_access.Name = "textBox_access";
+            this.textBox_access.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBox_access.Size = new System.Drawing.Size(217, 16);
+            this.textBox_access.TabIndex = 16;
+            this.textBox_access.TextChanged += new System.EventHandler(this.textBox_access_TextChanged);
+            // 
+            // checkedComboBox_libraryCode
+            // 
+            this.checkedComboBox_libraryCode.BackColor = System.Drawing.SystemColors.Window;
+            this.checkedComboBox_libraryCode.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.checkedComboBox_libraryCode.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.checkedComboBox_libraryCode.Location = new System.Drawing.Point(109, 95);
+            this.checkedComboBox_libraryCode.Margin = new System.Windows.Forms.Padding(4);
+            this.checkedComboBox_libraryCode.Name = "checkedComboBox_libraryCode";
+            this.checkedComboBox_libraryCode.Padding = new System.Windows.Forms.Padding(4);
+            this.checkedComboBox_libraryCode.Size = new System.Drawing.Size(213, 22);
+            this.checkedComboBox_libraryCode.TabIndex = 17;
+            this.checkedComboBox_libraryCode.DropDown += new System.EventHandler(this.checkedComboBox_libraryCode_DropDown);
+            this.checkedComboBox_libraryCode.TextChanged += new System.EventHandler(this.checkedComboBox_libraryCode_TextChanged);
+            // 
             // label8
             // 
             this.label8.AutoSize = true;
@@ -373,6 +420,19 @@ namespace dp2Circulation
             this.label8.TabIndex = 18;
             this.label8.Text = "注释(&C):";
             this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // textBox_comment
+            // 
+            this.textBox_comment.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_comment.Location = new System.Drawing.Point(107, 52);
+            this.textBox_comment.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_comment.MinimumSize = new System.Drawing.Size(38, 4);
+            this.textBox_comment.Multiline = true;
+            this.textBox_comment.Name = "textBox_comment";
+            this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBox_comment.Size = new System.Drawing.Size(217, 16);
+            this.textBox_comment.TabIndex = 19;
+            this.textBox_comment.TextChanged += new System.EventHandler(this.textBox_comment_TextChanged);
             // 
             // button_save
             // 
@@ -422,58 +482,35 @@ namespace dp2Circulation
             this.button_listAllUsers.UseVisualStyleBackColor = true;
             this.button_listAllUsers.Click += new System.EventHandler(this.button_listAllUsers_Click);
             // 
-            // textBox_userRights
+            // label9
             // 
-            this.textBox_userRights.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_userRights.Location = new System.Drawing.Point(107, 72);
-            this.textBox_userRights.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox_userRights.MinimumSize = new System.Drawing.Size(38, 4);
-            this.textBox_userRights.Multiline = true;
-            this.textBox_userRights.Name = "textBox_userRights";
-            this.textBox_userRights.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_userRights.Size = new System.Drawing.Size(217, 17);
-            this.textBox_userRights.TabIndex = 5;
-            this.textBox_userRights.TextChanged += new System.EventHandler(this.textBox_userRights_TextChanged);
+            this.label9.AutoSize = true;
+            this.label9.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label9.Location = new System.Drawing.Point(2, 141);
+            this.label9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(101, 20);
+            this.label9.TabIndex = 20;
+            this.label9.Text = "绑定(&B):";
+            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // textBox_access
+            // textBox_binding
             // 
-            this.textBox_access.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_access.Location = new System.Drawing.Point(107, 123);
-            this.textBox_access.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox_access.MinimumSize = new System.Drawing.Size(38, 4);
-            this.textBox_access.Multiline = true;
-            this.textBox_access.Name = "textBox_access";
-            this.textBox_access.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_access.Size = new System.Drawing.Size(217, 16);
-            this.textBox_access.TabIndex = 16;
-            this.textBox_access.TextChanged += new System.EventHandler(this.textBox_access_TextChanged);
+            this.textBox_binding.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_binding.Location = new System.Drawing.Point(107, 143);
+            this.textBox_binding.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_binding.MinimumSize = new System.Drawing.Size(38, 4);
+            this.textBox_binding.Multiline = true;
+            this.textBox_binding.Name = "textBox_binding";
+            this.textBox_binding.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBox_binding.Size = new System.Drawing.Size(217, 16);
+            this.textBox_binding.TabIndex = 21;
+            this.textBox_binding.TextChanged += new System.EventHandler(this.textBox_binding_TextChanged);
             // 
-            // checkedComboBox_libraryCode
+            // columnHeader_binding
             // 
-            this.checkedComboBox_libraryCode.BackColor = System.Drawing.SystemColors.Window;
-            this.checkedComboBox_libraryCode.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.checkedComboBox_libraryCode.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkedComboBox_libraryCode.Location = new System.Drawing.Point(109, 95);
-            this.checkedComboBox_libraryCode.Margin = new System.Windows.Forms.Padding(4);
-            this.checkedComboBox_libraryCode.Name = "checkedComboBox_libraryCode";
-            this.checkedComboBox_libraryCode.Padding = new System.Windows.Forms.Padding(4);
-            this.checkedComboBox_libraryCode.Size = new System.Drawing.Size(213, 22);
-            this.checkedComboBox_libraryCode.TabIndex = 17;
-            this.checkedComboBox_libraryCode.DropDown += new System.EventHandler(this.checkedComboBox_libraryCode_DropDown);
-            this.checkedComboBox_libraryCode.TextChanged += new System.EventHandler(this.checkedComboBox_libraryCode_TextChanged);
-            // 
-            // textBox_comment
-            // 
-            this.textBox_comment.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_comment.Location = new System.Drawing.Point(107, 52);
-            this.textBox_comment.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox_comment.MinimumSize = new System.Drawing.Size(38, 4);
-            this.textBox_comment.Multiline = true;
-            this.textBox_comment.Name = "textBox_comment";
-            this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_comment.Size = new System.Drawing.Size(217, 16);
-            this.textBox_comment.TabIndex = 19;
-            this.textBox_comment.TextChanged += new System.EventHandler(this.textBox_comment_TextChanged);
+            this.columnHeader_binding.Text = "绑定";
+            this.columnHeader_binding.Width = 80;
             // 
             // UserForm
             // 
@@ -540,5 +577,8 @@ namespace dp2Circulation
         private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_comment;
         private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_userRights;
         private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_access;
+        private System.Windows.Forms.Label label9;
+        private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_binding;
+        private System.Windows.Forms.ColumnHeader columnHeader_binding;
     }
 }
