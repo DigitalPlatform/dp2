@@ -3132,7 +3132,7 @@ int nCount)
 #endif
                         List<string> names = BiblioError.GetFieldNames(errors);
                         if (names.Count > 0)
-                            this.easyMarcControl1.HideFields(names, true); // null, false 可显示全部隐藏字段
+                            this.easyMarcControl1.HideFields(names, false); // null, false 可显示全部隐藏字段
                     }
 
                     bool bTemp = false;
