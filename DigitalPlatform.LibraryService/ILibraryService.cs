@@ -308,7 +308,7 @@ namespace dp2Library
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult GetIssueInfo(
                     string strRefID,
-                    // string strBiblioRecPath,
+            // string strBiblioRecPath,
                     string strItemXml,
                     string strResultType,
                     out string strResult,
@@ -370,7 +370,7 @@ namespace dp2Library
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult GetOrderInfo(
                     string strRefID,
-                    // string strBiblioRecPath,
+            // string strBiblioRecPath,
                     string strItemXml,
                     string strResultType,
                     out string strResult,
@@ -705,7 +705,7 @@ namespace dp2Library
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult GetCommentInfo(
                     string strRefID,
-                    // string strBiblioRecPath,
+            // string strBiblioRecPath,
                     string strItemXml,
                     string strResultType,
                     out string strResult,
@@ -810,5 +810,16 @@ namespace dp2Library
     string strStyle,
     string strResultTypeList,
     out string[] results);
+
+        [OperationContract(IsInitiating = true, IsTerminating = false)]
+        LibraryServerResult Dir(string strResPath,
+        long lStart,
+        long lLength,
+        string strLang,
+        string strStyle,
+        out ResInfoItem[] items,
+        out DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode);
     }
+
+
 }

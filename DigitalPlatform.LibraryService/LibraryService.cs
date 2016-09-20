@@ -4207,7 +4207,7 @@ namespace dp2Library
                         && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "用户 '"+sessioninfo.UserID+"' 获取实体信息被拒绝。不具备order、getiteminfo或getentities权限。";
+                        result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取实体信息被拒绝。不具备order、getiteminfo或getentities权限。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -9559,7 +9559,7 @@ namespace dp2Library
 
                 nRet = app.GetSystemParameter(
                     sessioninfo,
-                    strCategory, 
+                    strCategory,
                     strName,
                     out strValue,
                     out strError);
@@ -11202,6 +11202,58 @@ namespace dp2Library
             }
         }
 
+        // 列出内核资源目录
+        public LibraryServerResult Dir(string strResPath,
+            long lStart,
+            long lLength,
+            string strLang,
+            string strStyle,
+            out ResInfoItem[] items,
+            out DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode)
+        {
+            items = null;
+            kernel_errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.NoError;
+
+            LibraryServerResult result = this.PrepareEnvironment("Dir", true, true, true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                if (channel == null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "get channel error";
+                    result.ErrorCode = ErrorCode.SystemError;
+                    return result;
+                }
+
+                string strError = "";
+                long lRet = channel.DoDir(
+                strResPath,
+                strLang,
+                strStyle,
+                out items,
+                out strError);
+                kernel_errorcode = channel.OriginErrorCode;
+                result.ErrorInfo = strError;
+                result.Value = lRet;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library Dir() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+
+        }
+
         // 获取资源
         // parameters:
         //      strResPath  资源的路径。一般数据库记录为"数据库名/1"形态；而数据库记录所属的对象资源，则为"数据库名/object/0"形态
@@ -11328,7 +11380,7 @@ namespace dp2Library
                 if (StringUtil.IsInList("getres", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "用户 "+sessioninfo.UserID+" 获取资源被拒绝。不具备 getres 权限。";
+                    result.ErrorInfo = "用户 " + sessioninfo.UserID + " 获取资源被拒绝。不具备 getres 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -13060,7 +13112,7 @@ out strError);
                     int nCount = 0;
                     if (Int32.TryParse(strCount, out nCount) == false)
                     {
-                        strError = "count 子参数 '"+strCount+"' 格式不正确。应该为纯数字";
+                        strError = "count 子参数 '" + strCount + "' 格式不正确。应该为纯数字";
                         goto ERROR1;
                     }
 
