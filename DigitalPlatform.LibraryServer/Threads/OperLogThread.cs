@@ -104,7 +104,7 @@ namespace DigitalPlatform.LibraryServer
         {
             if (strOperation == "borrow" || strOperation == "return")
                 return true;
-            if (strOperation == "amerce")
+            if (strOperation == "amerce" || strOperation == "setReaderInfo" || strOperation == "setUser")
                 return true;
 
             return false;
@@ -177,7 +177,11 @@ namespace DigitalPlatform.LibraryServer
                         this.App.WriteErrorLog("OperLogThread 写入 mongodb 日志库时出错: " + strError);
                 }
 
-                if ((strOperation == "borrow" || strOperation == "return" || strOperation == "amerce")
+                if ((strOperation == "borrow"
+                    || strOperation == "return"
+                    || strOperation == "amerce"
+                    || strOperation == "setReaderInfo"
+                    || strOperation == "setUser")
 #if NO
                     && string.IsNullOrEmpty(this.App.OutgoingQueue) == false
                     && StringUtil.IsInList("mq", this.App.CirculationNotifyTypes) == true
@@ -218,6 +222,16 @@ namespace DigitalPlatform.LibraryServer
                     out strReaderRefID);
                 else if (strOperation == "amerce")
                     BuildAmerceRecord(domOperLog,
+                    out strBodyXml,
+                    out strReaderBarcode,
+                    out strReaderRefID);
+                else if (strOperation == "setReaderInfo")
+                    BuildReaderChangedRecord(domOperLog,
+                    out strBodyXml,
+                    out strReaderBarcode,
+                    out strReaderRefID);
+                else if (strOperation == "setUser")
+                    BuildUserChangedRecord(domOperLog,
                     out strBodyXml,
                     out strReaderBarcode,
                     out strReaderRefID);
@@ -505,6 +519,145 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                     overdue.SetAttribute("summary", strSummary);
+            }
+
+            strBodyXml = bodydom.DocumentElement.OuterXml;
+        }
+
+        // 注：move 时候可能涉及到读者所从属的 libraryCode 发生变化，需要研究一下如何表达
+        // 一个方法是可以多发送一条 delete 动作的通知
+        void BuildReaderChangedRecord(XmlDocument domOperLog,
+    out string strBodyXml,
+    out string strReaderBarcode,
+    out string strReaderRefID)
+        {
+            strBodyXml = "";
+            strReaderBarcode = "";
+            strReaderRefID = "";
+
+#if NO
+            string strOperation = DomUtil.GetElementText(domOperLog.DocumentElement, "operation");
+            string strAction = DomUtil.GetElementText(domOperLog.DocumentElement, "action");
+#endif
+
+            string strLibraryCode = DomUtil.GetElementText(domOperLog.DocumentElement, "libraryCode");
+
+            string strReaderRecord = DomUtil.GetElementText(domOperLog.DocumentElement, "record");
+            XmlDocument readerdom = new XmlDocument();
+            if (string.IsNullOrEmpty(strReaderRecord) == false)
+                readerdom.LoadXml(strReaderRecord);
+            else
+                readerdom = null;
+
+#if NO
+            string strOldReaderRecord = DomUtil.GetElementText(domOperLog.DocumentElement, "oldRecord");
+            XmlDocument old_readerdom = new XmlDocument();
+            if (string.IsNullOrEmpty(strOldReaderRecord) == false)
+                old_readerdom.LoadXml(strOldReaderRecord);
+            else
+                old_readerdom = null;
+#endif
+
+#if NO
+            string strReaderRecPath = "";
+            XmlElement reader_record = domOperLog.DocumentElement.SelectSingleNode("record") as XmlElement;
+            if (reader_record != null)
+                strReaderRecPath = reader_record.GetAttribute("recPath");
+#endif
+
+            if (readerdom != null)
+            {
+                strReaderRefID = DomUtil.GetElementText(readerdom.DocumentElement, "refID");
+                strReaderBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+            }
+
+            // 构造内容
+            XmlDocument bodydom = new XmlDocument();
+            bodydom.LoadXml("<root />");
+
+            DomUtil.SetElementText(bodydom.DocumentElement, "type", "读者记录变动");
+
+            // 复制日志记录中的一级元素
+            XmlNodeList nodes = domOperLog.DocumentElement.SelectNodes("*");
+            foreach (XmlNode node in nodes)
+            {
+                if (node.Name == "record" || node.Name == "oldRecord"
+                    || node.Name == "changedEntityRecord")
+                    continue;
+
+                DomUtil.SetElementText(bodydom.DocumentElement, node.Name, node.InnerText);
+            }
+
+            if (readerdom != null)
+            {
+                XmlElement record = bodydom.CreateElement("patronRecord");
+                bodydom.DocumentElement.AppendChild(record);
+                record.InnerXml = readerdom.DocumentElement.InnerXml;
+
+                DomUtil.DeleteElement(record, "borrowHistory");
+                DomUtil.DeleteElement(record, "password");
+                DomUtil.DeleteElement(record, "fingerprint");
+
+                XmlElement library_code = record.SelectSingleNode("libraryCode") as XmlElement;
+                if (library_code == null)
+                    DomUtil.SetElementText(record, "libraryCode", strLibraryCode);
+            }
+
+#if NO
+            if (old_readerdom != null)
+            {
+                XmlElement record = bodydom.CreateElement("oldPatronRecord");
+                bodydom.DocumentElement.AppendChild(record);
+                record.InnerXml = old_readerdom.DocumentElement.InnerXml;
+
+                DomUtil.DeleteElement(record, "borrowHistory");
+                DomUtil.DeleteElement(record, "password");
+                DomUtil.DeleteElement(record, "fingerprint");
+            }
+#endif
+
+            strBodyXml = bodydom.DocumentElement.OuterXml;
+        }
+
+        void BuildUserChangedRecord(XmlDocument domOperLog,
+out string strBodyXml,
+out string strReaderBarcode,
+out string strReaderRefID)
+        {
+            strBodyXml = "";
+            strReaderBarcode = "";
+            strReaderRefID = "";
+
+#if NO
+            string strOperation = DomUtil.GetElementText(domOperLog.DocumentElement, "operation");
+            string strAction = DomUtil.GetElementText(domOperLog.DocumentElement, "action");
+
+            string strLibraryCode = DomUtil.GetElementText(domOperLog.DocumentElement, "libraryCode");
+#endif
+
+            // 构造内容
+            XmlDocument bodydom = new XmlDocument();
+            bodydom.LoadXml("<root />");
+
+            DomUtil.SetElementText(bodydom.DocumentElement, "type", "工作人员账户变动");
+
+            // 复制日志记录中的一级元素
+            {
+                XmlNodeList nodes = domOperLog.DocumentElement.SelectNodes("*");
+                foreach (XmlNode node in nodes)
+                {
+                    DomUtil.SetElementOuterXml(bodydom.DocumentElement, node.Name, node.OuterXml);
+                }
+            }
+
+            // 将 oldAccount 和 account 元素中的 password 属性删除
+            {
+                XmlNodeList nodes = bodydom.DocumentElement.SelectNodes("oldAccount | account");
+                foreach (XmlElement node in nodes)
+                {
+                    if (node.HasAttribute("password") == true)
+                        node.RemoveAttribute("password");
+                }
             }
 
             strBodyXml = bodydom.DocumentElement.OuterXml;
