@@ -8561,6 +8561,12 @@ namespace dp2Circulation
             if (this.tabControl_main.SelectedTab == this.tabPage_kernel
                 && _kernelInitialized == false)
             {
+                if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.84") < 0)
+                {
+                    this.ShowMessage("内核管理功能要求当前连接的 dp2library 服务器版本为 2.84 或以上 (而现在是 " + this.MainForm.ServerVersion + ")", "red", true);
+                    return;
+                }
+
                 if (this.kernelResTree1.Fill() == true)
                     _kernelInitialized = true;
             }
@@ -8620,6 +8626,7 @@ namespace dp2Circulation
             e.Channel = this.MainForm.GetChannel();
             if (e.BeginLoop == true)
             {
+                this.ShowMessage("正在访问服务器 ...");
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 // stop.Initial(" ...");
                 stop.BeginLoop();
@@ -8634,6 +8641,7 @@ namespace dp2Circulation
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+                this.ClearMessage();
             }
         }
 
