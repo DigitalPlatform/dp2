@@ -47,6 +47,7 @@
     <Compile Include="BiblioLoader.cs" />
     <Compile Include="BrowseLoader.cs" />
     <Compile Include="ChargingHistoryLoader.cs" />
+    <Compile Include="DirItemLoader.cs" />
     <Compile Include="ItemBarcodeLoader.cs" />
     <Compile Include="LibraryChannel.cs" />
     <Compile Include="LibraryChannelPool.cs" />

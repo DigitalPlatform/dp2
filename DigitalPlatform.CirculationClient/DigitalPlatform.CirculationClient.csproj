@@ -141,6 +141,18 @@
     <Compile Include="CirculationLoginDlg.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="KernelCfgFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="KernelCfgFileDialog.Designer.cs">
+      <DependentUpon>KernelCfgFileDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="KernelResTree.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="KernelResTree.Designer.cs">
+      <DependentUpon>KernelResTree.cs</DependentUpon>
+    </Compile>
     <Compile Include="LibraryChannel\LibraryChannelCollection.cs" />
     <Compile Include="LibraryChannel\LibraryChannelExtension.cs" />
     <Compile Include="LoanPolicy\EditableTextBlock.xaml.cs">
@@ -292,6 +304,12 @@
     <EmbeddedResource Include="GetDp2ResDlg.resx">
       <SubType>Designer</SubType>
       <DependentUpon>GetDp2ResDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="KernelCfgFileDialog.resx">
+      <DependentUpon>KernelCfgFileDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="KernelResTree.resx">
+      <DependentUpon>KernelResTree.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LocationCanBorrowDialog.resx">
       <SubType>Designer</SubType>

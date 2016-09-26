@@ -44,7 +44,7 @@ namespace DigitalPlatform.CirculationClient
         {
             string strError = "";
             // 取metadata值
-            Hashtable values = StringUtil.ParseMedaDataXml(this.Metadata,
+            Hashtable values = StringUtil.ParseMetaDataXml(this.Metadata,
                 out strError);
             if (values == null)
                 throw new Exception(strError);

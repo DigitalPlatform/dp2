@@ -13674,6 +13674,10 @@ strLibraryCode);    // 读者所在的馆代码
             strError = "";
             strLibraryCode = "";
 
+            // 2016/9/25
+            if (StringUtil.IsInList("managedatabase", strRights))
+                return 1;
+
             string strPath = strResPath;
 
             // 写入 dp2library 本地文件

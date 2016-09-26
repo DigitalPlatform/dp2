@@ -7596,19 +7596,21 @@ out strError);
             return 0;
         }
 
-        // 2009/11/24
+        // 2016/9/26 增加 if xxx != null 判断
         static string BuildMetadata(string strMime,
             string strLocalPath)
         {
             // string strMetadata = "<file mimetype='" + strMime + "' localpath='" + strLocalPath + "'/>";
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<file />");
-            dom.DocumentElement.SetAttribute(
-                "mimetype",
-                strMime);
-            dom.DocumentElement.SetAttribute(
-                "localpath",
-                strLocalPath);
+            if (strMime != null)
+                dom.DocumentElement.SetAttribute(
+                    "mimetype",
+                    strMime);
+            if (strLocalPath != null)
+                dom.DocumentElement.SetAttribute(
+                    "localpath",
+                    strLocalPath);
             return dom.DocumentElement.OuterXml;
         }
 

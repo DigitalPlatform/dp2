@@ -11549,7 +11549,7 @@ namespace dp2Library
                 {
                     string strClientAddress = StringUtil.GetStyleParam(strStyle, "clientAddress");
 
-                    Hashtable table = StringUtil.ParseMedaDataXml(strMetadata,
+                    Hashtable table = StringUtil.ParseMetaDataXml(strMetadata,
                         out strError);
                     if (table != null)
                     {

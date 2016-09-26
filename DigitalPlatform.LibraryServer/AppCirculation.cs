@@ -19094,7 +19094,7 @@ strBookPrice);    // 图书价格
                 return -1;
 
             // 取metadata中的mime类型信息
-            Hashtable values = StringUtil.ParseMedaDataXml(strMetaData,
+            Hashtable values = StringUtil.ParseMetaDataXml(strMetaData,
                 out strError);
 
             if (values == null)

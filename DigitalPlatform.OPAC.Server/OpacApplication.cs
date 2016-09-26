@@ -4009,7 +4009,7 @@ out strError);
                 return -1;
 
             // 取 metadata 中的 mime 类型信息
-            Hashtable values = StringUtil.ParseMedaDataXml(strMetaData,
+            Hashtable values = StringUtil.ParseMetaDataXml(strMetaData,
                 out strError);
             if (values == null)
             {

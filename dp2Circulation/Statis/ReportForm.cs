@@ -536,7 +536,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
 
                 {
                     // bOutputBiblioRecPath = true;
-                    strStyle = "id,cols,format:@coldef:*/barcode|*/location|*/accessNo|*/parent|*/state|*/operations/operation[@name='create']/@time|*/borrower|*/borrowDate|*/borrowPeriod|*/returningDate|*/price";
+                    strStyle = "id,cols,format:@coldef:*/barcode|*/location|*/accessNo|*/parent|*/state|*/operations/operation[@name='create']/@time|*/borrower|*/borrowDate|*/borrowPeriod|*/returningDate|*/price|*/refID";
                 }
 
                 // 实体库名 --> 书目库名
@@ -586,7 +586,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         // 检查事项状态。主动抛出异常，避免后面出现 index 异常
                         if (searchresult.Cols == null)
                             throw new Exception("浏览事项 Cols 为空: (lStart=" + lStart + " index=" + i + ")  " + DumpResultItem(searchresult));
-                        if (searchresult.Cols.Length < 11)
+                        if (searchresult.Cols.Length < 12)
                         {
                             // throw new Exception("浏览事项异常: (lStart=" + lStart + " index=" + i + ")  " + DumpResultItem(searchresult));
                             goto CONTINUE;   // 中途遇到服务器有人删除册记录，很常见的现象
@@ -595,6 +595,10 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         ItemLine line = new ItemLine();
                         line.ItemRecPath = searchresult.Path;
                         line.ItemBarcode = searchresult.Cols[0];
+                        // 2016/9/26
+                        if (string.IsNullOrEmpty(line.ItemBarcode))
+                            line.ItemBarcode = "@refID:" + searchresult.Cols[11];
+
                         line.Location = searchresult.Cols[1];
                         line.AccessNo = searchresult.Cols[2];
 
@@ -6428,7 +6432,6 @@ MessageBoxDefaultButton.Button2);
 
             try
             {
-
                 this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
 
                 // 初始化各种表，除了 operlogXXX 表以外
