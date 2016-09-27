@@ -10,6 +10,7 @@
 // 2011/9/5
 // 2011/9/7
 // 2013/12/25   this.App.MaxItemHistoryItems
+// 2016/9/27    能显示册二维码
 
 using System;
 using System.Xml;
@@ -41,8 +42,6 @@ public class MyConverter : ItemConverter
         + "<script type=\"text/javascript\" src=\"%mappeddir%/jquery-ui-1.8.7/js/jquery-1.4.4.min.js\"></script>"
         + "<script type=\"text/javascript\" src=\"%mappeddir%/jquery-ui-1.8.7/js/jquery-ui-1.8.7.min.js\"></script>"
         + "<script type='text/javascript' charset='UTF-8' src='%mappeddir%\\scripts\\getsummary.js" + "'></script>";
-
-
 
         strResult += "</head>";
         strResult += "<body>";
@@ -161,10 +160,22 @@ public class MyConverter : ItemConverter
 
             // 册记录路径
             strResult += GetOneTR("recpath", "册记录路径", e.RecPath);
+            
+            // 册二维码
+            string strCode = "39code:" + strItemBarcode;
+            if (string.IsNullOrEmpty(strItemBarcode))
+                strCode = "qrcode:@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
+                
+            strResult += "<tr class='content qrcode'>";
+            //strResult += "<td class='name qrcode' nowrap>";
+            //strResult += "二维码";
+            //strResult += "</td>";
+            strResult += "<td class='value qrcode' colspan='2' >";
+            strResult += "<img id='qrcode' class='pending' name='"+strCode+"' src='%mappeddir%\\images\\ajax-loader.gif' alt='册记录的二维码' ></img>";
+            strResult += "</td></tr>";
 
             strResult += "</table>";
         }
-
 
         // 借阅历史
         XmlNodeList nodes = dom.DocumentElement.SelectNodes("borrowHistory/borrower");
@@ -224,7 +235,6 @@ public class MyConverter : ItemConverter
             }
             strResult += "</table>\r\n";
         }
-
 
         strResult += "</body></html>";
 
