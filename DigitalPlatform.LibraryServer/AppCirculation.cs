@@ -416,7 +416,6 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             strReaderBarcode = "";
 
-
             if (string.IsNullOrEmpty(strCode) == true
                 || strCode.Length < "PQR:".Length
                 || StringUtil.HasHead(strCode, "PQR:") == false)

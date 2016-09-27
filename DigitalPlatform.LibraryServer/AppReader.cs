@@ -5082,6 +5082,38 @@ out strError);
                 return 0;
             }
 
+            // 2016/9/27 允许使用 PQR
+            {
+                string strOutputCode = "";
+                // 把二维码字符串转换为读者证条码号
+                // parameters:
+                //      strReaderBcode  [out]读者证条码号
+                // return:
+                //      -1      出错
+                //      0       所给出的字符串不是读者证号二维码
+                //      1       成功      
+                nRet = this.DecodeQrCode(strQueryWord,
+                    out strOutputCode,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                {
+                    // 对 strPassword 有要求
+                    // 要求提供一个 hash 字符串，增加一下使用这个方法的难度
+                    string strSHA1 = Cryptography.GetSHA1(strQueryWord);
+                    if (strPassword != strSHA1)
+                    {
+                        strError = "PQR 模式下，strPassword 参数不正确";
+                        return -1;
+                    }
+
+                    strPassword = null; // 后面不再检验读者密码
+
+                    strQueryWord = strOutputCode;
+                }
+            }
+
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {

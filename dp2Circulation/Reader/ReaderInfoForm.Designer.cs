@@ -46,6 +46,8 @@ namespace dp2Circulation
             this.webBrowser_xml = new System.Windows.Forms.WebBrowser();
             this.tabPage_objects = new System.Windows.Forms.TabPage();
             this.binaryResControl1 = new DigitalPlatform.CirculationClient.BinaryResControl();
+            this.tabPage_qrCode = new System.Windows.Forms.TabPage();
+            this.pictureBox_qrCode = new System.Windows.Forms.PictureBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_loadFromIdcard = new System.Windows.Forms.ToolStripButton();
@@ -88,6 +90,7 @@ namespace dp2Circulation
             this.toolStripTextBox_barcode = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripButton_load = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
+            this.textBox_pqr = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_normal)).BeginInit();
             this.splitContainer_normal.Panel1.SuspendLayout();
             this.splitContainer_normal.Panel2.SuspendLayout();
@@ -97,6 +100,8 @@ namespace dp2Circulation
             this.tabPage_borrowHistory.SuspendLayout();
             this.tabPage_xml.SuspendLayout();
             this.tabPage_objects.SuspendLayout();
+            this.tabPage_qrCode.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_qrCode)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.toolStrip_load.SuspendLayout();
             this.tableLayoutPanel_main.SuspendLayout();
@@ -178,19 +183,20 @@ namespace dp2Circulation
             // 
             // tabControl_readerInfo
             // 
-            this.tabControl_readerInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.tabControl_readerInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_readerInfo.Controls.Add(this.tabPage_normal);
             this.tabControl_readerInfo.Controls.Add(this.tabPage_borrowHistory);
             this.tabControl_readerInfo.Controls.Add(this.tabPage_xml);
             this.tabControl_readerInfo.Controls.Add(this.tabPage_objects);
+            this.tabControl_readerInfo.Controls.Add(this.tabPage_qrCode);
             this.tabControl_readerInfo.Location = new System.Drawing.Point(2, 27);
             this.tabControl_readerInfo.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl_readerInfo.Name = "tabControl_readerInfo";
             this.tabControl_readerInfo.SelectedIndex = 0;
             this.tabControl_readerInfo.Size = new System.Drawing.Size(606, 283);
-            this.tabControl_readerInfo.TabIndex = 3;
+            this.tabControl_readerInfo.TabIndex = 0;
             this.tabControl_readerInfo.SelectedIndexChanged += new System.EventHandler(this.tabControl_readerInfo_SelectedIndexChanged);
             // 
             // tabPage_normal
@@ -270,6 +276,28 @@ namespace dp2Circulation
             this.binaryResControl1.Size = new System.Drawing.Size(598, 257);
             this.binaryResControl1.TabIndex = 1;
             this.binaryResControl1.TempDir = null;
+            // 
+            // tabPage_qrCode
+            // 
+            this.tabPage_qrCode.Controls.Add(this.textBox_pqr);
+            this.tabPage_qrCode.Controls.Add(this.pictureBox_qrCode);
+            this.tabPage_qrCode.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_qrCode.Name = "tabPage_qrCode";
+            this.tabPage_qrCode.Size = new System.Drawing.Size(598, 257);
+            this.tabPage_qrCode.TabIndex = 4;
+            this.tabPage_qrCode.Text = "ЖўЮЌТы";
+            this.tabPage_qrCode.UseVisualStyleBackColor = true;
+            // 
+            // pictureBox_qrCode
+            // 
+            this.pictureBox_qrCode.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBox_qrCode.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox_qrCode.Name = "pictureBox_qrCode";
+            this.pictureBox_qrCode.Padding = new System.Windows.Forms.Padding(20);
+            this.pictureBox_qrCode.Size = new System.Drawing.Size(598, 257);
+            this.pictureBox_qrCode.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox_qrCode.TabIndex = 0;
+            this.pictureBox_qrCode.TabStop = false;
             // 
             // toolStrip1
             // 
@@ -674,6 +702,15 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(610, 337);
             this.tableLayoutPanel_main.TabIndex = 6;
             // 
+            // textBox_pqr
+            // 
+            this.textBox_pqr.Dock = System.Windows.Forms.DockStyle.Top;
+            this.textBox_pqr.Location = new System.Drawing.Point(0, 0);
+            this.textBox_pqr.Name = "textBox_pqr";
+            this.textBox_pqr.ReadOnly = true;
+            this.textBox_pqr.Size = new System.Drawing.Size(598, 21);
+            this.textBox_pqr.TabIndex = 0;
+            // 
             // ReaderInfoForm
             // 
             this.AllowDrop = true;
@@ -703,6 +740,9 @@ namespace dp2Circulation
             this.tabPage_borrowHistory.ResumeLayout(false);
             this.tabPage_xml.ResumeLayout(false);
             this.tabPage_objects.ResumeLayout(false);
+            this.tabPage_qrCode.ResumeLayout(false);
+            this.tabPage_qrCode.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_qrCode)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.toolStrip_load.ResumeLayout(false);
@@ -768,6 +808,9 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_exportDetailToExcelFile;
         private System.Windows.Forms.TabPage tabPage_borrowHistory;
         private System.Windows.Forms.WebBrowser webBrowser_borrowHistory;
+        private System.Windows.Forms.TabPage tabPage_qrCode;
+        private System.Windows.Forms.PictureBox pictureBox_qrCode;
+        private System.Windows.Forms.TextBox textBox_pqr;
 
     }
 }
