@@ -9,8 +9,9 @@ using System.Web.UI.WebControls;
 using System.Threading;
 using System.Resources;
 using System.Globalization;
-using DigitalPlatform.OPAC.Server;
 using System.Xml;
+
+using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.Xml;
 
 namespace DigitalPlatform.OPAC.Web
@@ -71,7 +72,7 @@ namespace DigitalPlatform.OPAC.Web
             }
         }
 
-        void GetCustomHtml(out string strLeftHtml, 
+        void GetCustomHtml(out string strLeftHtml,
             out string strRightHtml,
             out string strTopHtml,
             out string strBottomHtml)
@@ -165,7 +166,7 @@ namespace DigitalPlatform.OPAC.Web
 
             // 左
             NormalIndentor.Write(output);
-            output.Write("<td class='left'>"+strLeftHtml+"</td>");
+            output.Write("<td class='left'>" + strLeftHtml + "</td>");
 
             // 中
             NormalIndentor.Write(output);
@@ -177,12 +178,13 @@ namespace DigitalPlatform.OPAC.Web
                 + "</a>"
                 + "</td>");
 #endif
+            OpacApplication app = (OpacApplication)this.Page.Application["app"];
+
             output.Write("<td class='middle'>"
                 + strTopHtml
     + this.GetString("dp2图书馆集成系统")
     + " V2 - <a href='https://github.com/DigitalPlatform/dp2'>"
     + "开源的图书馆管理系统"
-    + "</a>"
     + strBottomHtml
     + "</td>");
 
@@ -205,6 +207,9 @@ namespace DigitalPlatform.OPAC.Web
             output.Write("</table>");
             NormalIndentor.Write(output);
             output.Write("<!-- FooterBarControl 结束 -->");
+
+            if (string.IsNullOrEmpty(app.OutgoingQueue) == false)
+                output.Write("<center><br/><br/><div><img src='" + MyWebPage.GetStylePath(app, "qrcode_ilovelibrary_258.jpg") + "'></img><br/><br/>用微信“扫一扫”，关注“我爱图书馆”公众号，可获得超期、借书还书等微信消息通知<br/><br/><br/><br/></div></center>");
 
             output.Indent -= nParentCount;
         }

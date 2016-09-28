@@ -3711,7 +3711,7 @@ MessageBoxDefaultButton.Button2);
             int nRet = _versionManager.GetFileVersion(Path.GetFileName(strZipFileName), out strOldTimestamp);
             string strNewTimestamp = File.GetLastWriteTime(strZipFileName).ToString();
 
-            if (bForce == true || CompareTimestamp(strOldTimestamp, strNewTimestamp) < 0)
+            if (bForce == true || CompareTimestamp(strOldTimestamp, strNewTimestamp) != 0)  // 2016/9/28 原来是 <
             {
                 if (bForce == false)
                     AppendSectionTitle("自动升级 dp2OPAC");

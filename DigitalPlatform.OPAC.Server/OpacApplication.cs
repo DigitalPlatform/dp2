@@ -53,6 +53,11 @@ namespace DigitalPlatform.OPAC.Server
             set;
         }
 
+        /// <summary>
+        /// dp2library 输出的 MSMQ 队列路径
+        /// </summary>
+        public string OutgoingQueue { get; set; }
+
         public LibraryChannelPool ChannelPool = new LibraryChannelPool();
 
         public double dp2LibraryVersion = 0;
@@ -1333,6 +1338,19 @@ namespace DigitalPlatform.OPAC.Server
                         this.ChargingHistoryType = strValue;
                     else
                         this.ChargingHistoryType = "";
+
+                    // 2016/9/28
+                    strValue = "";
+                    lRet = channel.GetSystemParameter(
+                        null,
+            "system",
+            "outgoingQueue",
+            out strValue,
+            out strError);
+                    if (lRet == 1)
+                        this.OutgoingQueue = strValue;
+                    else
+                        this.OutgoingQueue = "";
 
                     // 获取虚拟库定义
                     string strXml = "";
