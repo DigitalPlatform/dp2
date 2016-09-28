@@ -353,6 +353,14 @@ namespace DigitalPlatform.LibraryServer
                         goto END1;
                     }
 
+                    // 2016/6/25
+                    // dp2library 版本号
+                    if (strName == "version")
+                    {
+                        strValue = LibraryApplication.Version;
+                        goto END1;
+                    }
+
                     // 2016/4/6
                     // 获得系统的临时文件目录
                     if (strName == "systemTempDir")

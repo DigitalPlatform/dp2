@@ -128,7 +128,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.82 (2016/8/31) ManageDatabase() API 可以管理 _biblioSummary 类型的数据库。特殊类型名字改为前方以字符 _ 引导
         //      2.83 (2016/9/17) GetSystemParameter() API 增加 category=utility 里面的 getClientAddress 和 getClientIP 两个功能
         //      2.84 (2016/9/26) WriteRes() API 允许具备 managedatabase 权限的用户写入任何路径的对象，主要是用于修改内核数据库下属的配置文件
-        public static string Version = "2.84";
+        //      2.85 (2016/9/28) GetSystemParameter() API system/version 可以获得 dp2library 版本号
+        public static string Version = "2.85";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
