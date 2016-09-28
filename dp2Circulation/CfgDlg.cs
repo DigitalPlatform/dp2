@@ -13,6 +13,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
+using System.Diagnostics;
 
 namespace dp2Circulation
 {
@@ -94,7 +95,7 @@ namespace dp2Circulation
             this.textBox_message_dp2MServerUrl.Text =
                 ap.GetString("config",
                 "im_server_url",
-                "http://dp2003.com:8083/dp2MServer");
+                default_dp2mserver_url);
 
             // *** 缺省账户
 
@@ -1618,13 +1619,32 @@ MessageBoxDefaultButton.Button2);
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button2);
-                if (result != DialogResult.Yes)
+                if (result == DialogResult.No)
                 {
                     _disableShareBiblioChangedEvent++;
                     this.checkBox_message_shareBiblio.Checked = false;
                     _disableShareBiblioChangedEvent--;
                 }
+                else
+                {
+                    Debug.Assert(result == System.Windows.Forms.DialogResult.Yes, "");
+
+                    // 2016/9/28
+                    if (string.IsNullOrEmpty(this.textBox_message_dp2MServerUrl.Text) == true)
+                    {
+                        this.textBox_message_dp2MServerUrl.Text = default_dp2mserver_url;
+                        this.textBox_message_userName.Text = "";
+                        this.textBox_message_password.Text = "";
+                    }
+                }
             }
+        }
+
+        const string default_dp2mserver_url = "http://dp2003.com:8083/dp2MServer";
+
+        private void button_message_setDefaultUrl_Click(object sender, EventArgs e)
+        {
+            this.textBox_message_dp2MServerUrl.Text = default_dp2mserver_url;
         }
 
 

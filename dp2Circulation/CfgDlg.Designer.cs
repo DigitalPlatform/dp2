@@ -216,6 +216,7 @@ namespace dp2Circulation
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
+            this.button_message_setDefaultUrl = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -2255,7 +2256,7 @@ namespace dp2Circulation
             this.groupBox7.Controls.Add(this.textBox_fingerprint_readerUrl);
             this.groupBox7.Location = new System.Drawing.Point(3, 14);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(416, 84);
+            this.groupBox7.Size = new System.Drawing.Size(399, 84);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2263,7 +2264,7 @@ namespace dp2Circulation
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(305, 47);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(288, 47);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(105, 23);
             this.button_fingerprint_setDefaultValue.TabIndex = 1;
@@ -2277,7 +2278,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(6, 20);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(404, 21);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(387, 21);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2326,6 +2327,7 @@ namespace dp2Circulation
             // tabPage_message
             // 
             this.tabPage_message.AutoScroll = true;
+            this.tabPage_message.Controls.Add(this.button_message_setDefaultUrl);
             this.tabPage_message.Controls.Add(this.textBox_message_password);
             this.tabPage_message.Controls.Add(this.textBox_message_userName);
             this.tabPage_message.Controls.Add(this.label32);
@@ -2436,6 +2438,17 @@ namespace dp2Circulation
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
+            // 
+            // button_message_setDefaultUrl
+            // 
+            this.button_message_setDefaultUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_message_setDefaultUrl.Location = new System.Drawing.Point(383, 96);
+            this.button_message_setDefaultUrl.Name = "button_message_setDefaultUrl";
+            this.button_message_setDefaultUrl.Size = new System.Drawing.Size(98, 23);
+            this.button_message_setDefaultUrl.TabIndex = 23;
+            this.button_message_setDefaultUrl.Text = "设为常用值";
+            this.button_message_setDefaultUrl.UseVisualStyleBackColor = true;
+            this.button_message_setDefaultUrl.Click += new System.EventHandler(this.button_message_setDefaultUrl_Click);
             // 
             // CfgDlg
             // 
@@ -2718,5 +2731,6 @@ namespace dp2Circulation
         private System.Windows.Forms.ComboBox comboBox_quickCharging_stateSpeak;
         private System.Windows.Forms.Label label34;
         private System.Windows.Forms.ComboBox comboBox_quickCharging_displayFormat;
+        private System.Windows.Forms.Button button_message_setDefaultUrl;
     }
 }
