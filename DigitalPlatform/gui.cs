@@ -345,6 +345,21 @@ RectangleF rect)
             return true;
         }
 
+        public static bool PtInRect(float x,
+float y,
+RectangleF rect)
+        {
+            if (x < rect.X)
+                return false;
+            if (x >= rect.Right)
+                return false;
+            if (y < rect.Y)
+                return false;
+            if (y >= rect.Bottom)
+                return false;
+            return true;
+        }
+
         // 看看一个窗口句柄是不是MDI子窗口的句柄？
         // 如果是，则返回该MDI子窗口的Form对象
         public static Form IsMdiChildren(Form parent, IntPtr hwnd)

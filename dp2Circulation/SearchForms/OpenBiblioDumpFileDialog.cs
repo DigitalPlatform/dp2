@@ -114,8 +114,17 @@ namespace dp2Circulation
                 this.textBox_biblioDumpFileName.Text = dlg.FileName;
             }
 
-            if (string.IsNullOrEmpty(this.textBox_objectDirectoryName.Text))
-                this.textBox_objectDirectoryName.Text = this.textBox_biblioDumpFileName.Text + ".object";
+            AutoBuildObjectDirectoryName(false);
+        }
+
+        void AutoBuildObjectDirectoryName(bool bForce)
+        {
+            if (string.IsNullOrEmpty(this.textBox_objectDirectoryName.Text)
+                || bForce)
+            {
+                if (string.IsNullOrEmpty(this.textBox_biblioDumpFileName.Text) == false)
+                    this.textBox_objectDirectoryName.Text = this.textBox_biblioDumpFileName.Text + ".object";
+            }
         }
 
         private void button_getObjectDirectoryName_Click(object sender, EventArgs e)
@@ -230,6 +239,11 @@ namespace dp2Circulation
             {
                 this.checkBox_includeObjectFile.Checked = value;
             }
+        }
+
+        private void textBox_biblioDumpFileName_TextChanged(object sender, EventArgs e)
+        {
+            AutoBuildObjectDirectoryName(true);
         }
     }
 }
