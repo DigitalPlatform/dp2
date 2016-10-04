@@ -32,6 +32,7 @@ using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Drawing;
 
 namespace dp2Circulation
 {
@@ -12537,6 +12538,142 @@ strMARC);
             return true;
         }
 #endif
+
+        // 从摄像头插入封面图像
+        private void ToolStripMenuItem_insertCoverImageFromCamera_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            List<ListViewItem> deleted_items = this.binaryResControl1.FindAllMaskDeleteItem();
+            if (deleted_items.Count > 0)
+            {
+                strError = "当前有标记删除的对象尚未提交保存。请先提交这些保存后，再进行插入封面图像的操作";
+                goto ERROR1;
+            }
+
+            Image image = null;
+            this.MainForm.DisableCamera();
+            try
+            {
+                // 注： new CameraClipDialog() 可能会抛出异常
+                using (CameraClipDialog dlg = new CameraClipDialog())
+                {
+                    dlg.Font = this.Font;
+
+                    dlg.CurrentCamera = this.MainForm.AppInfo.GetString(
+                        "entityform",
+                        "current_camera",
+                        "");
+
+                    this.MainForm.AppInfo.LinkFormState(dlg, "CameraClipDialog_state");
+                    dlg.ShowDialog(this);
+                    this.MainForm.AppInfo.UnlinkFormState(dlg);
+
+                    this.MainForm.AppInfo.SetString(
+                        "entityform",
+                        "current_camera",
+                        dlg.CurrentCamera);
+
+                    if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                        return;
+
+                    image = dlg.Image;
+                }
+            }
+            finally
+            {
+                Application.DoEvents();
+
+                this.MainForm.EnableCamera();
+            }
+
+            {
+                CreateCoverImageDialog dlg = null;
+                try
+                {
+                    dlg = new CreateCoverImageDialog();
+
+                    MainForm.SetControlFont(dlg, this.Font, false);
+                    dlg.OriginImage = image;
+                    this.MainForm.AppInfo.LinkFormState(dlg, "entityform_CreateCoverImageDialog_state");
+                    dlg.ShowDialog(this);
+                    this.MainForm.AppInfo.UnlinkFormState(dlg);
+                    if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                        return;
+
+                }
+                finally
+                {
+                    if (image != null)
+                    {
+                        image.Dispose();
+                        image = null;
+                    }
+                }
+
+                this.SynchronizeMarc();
+
+                foreach (ImageType type in dlg.ResultImages)
+                {
+                    if (type.Image == null)
+                    {
+                        continue;
+                    }
+
+                    string strType = "FrontCover." + type.TypeName;
+                    string strSize = type.Image.Width.ToString() + "X" + type.Image.Height.ToString() + "px";
+
+                    // string strShrinkComment = "";
+                    string strID = "";
+                    nRet = SetImageObject(
+                        this.binaryResControl1,
+                        type.Image,
+                        strType,    // "coverimage",
+                        // out strShrinkComment,
+                        out strID,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    Field field_856 = null;
+                    List<Field> fields = DetailHost.Find856ByResID(this.m_marcEditor,
+                            strID);
+                    if (fields.Count == 1)
+                    {
+                        field_856 = fields[0];
+                        // TODO: 出现对话框
+                    }
+                    else if (fields.Count > 1)
+                    {
+                        DialogResult result = MessageBox.Show(this,
+                            "当前 MARC 编辑器中已经存在 " + fields.Count.ToString() + " 个 856 字段其 $" + DetailHost.LinkSubfieldName + " 子字段关联了对象 ID '" + strID + "' ，是否要编辑其中的第一个 856 字段?\r\n\r\n(注：可改在 MARC 编辑器中选中一个具体的 856 字段进行编辑)\r\n\r\n(OK: 编辑其中的第一个 856 字段; Cancel: 取消操作",
+                            "EntityForm",
+                            MessageBoxButtons.OKCancel,
+                            MessageBoxIcon.Question,
+                            MessageBoxDefaultButton.Button2);
+                        if (result == DialogResult.Cancel)
+                            return;
+                        field_856 = fields[0];
+                        // TODO: 出现对话框
+                    }
+                    else
+                        field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
+
+                    field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize + "$2dp2res").Replace('$', (char)31);
+                }
+            }
+
+            if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_template)
+                this.SynchronizeMarc();
+
+            MessageBox.Show(this, "封面图像和856字段已经成功创建。\r\n"
+                // + strShrinkComment
+                + "\r\n\r\n(但因当前记录还未保存，图像数据尚未提交到服务器)\r\n\r\n注意稍后保存当前记录。");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
 
         // 从剪贴板插入封面图像
         private void ToolStripMenuItem_insertCoverImageFromClipboard_Click(object sender, EventArgs e)

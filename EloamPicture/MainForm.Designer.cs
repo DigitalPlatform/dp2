@@ -63,7 +63,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.button_setting_openOutputFolder = new System.Windows.Forms.Button();
-            this.pictureBox_clip = new EloamPicture.ClipControl();
+            this.pictureBox_clip = new DigitalPlatform.Drawing.ClipControl();
             this.statusStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
             this.tabPage_preview.SuspendLayout();
@@ -499,7 +499,7 @@
         private System.Windows.Forms.CheckBox rectify;
         private System.Windows.Forms.CheckBox removeGround;
         private System.Windows.Forms.TabPage tabPage_clip;
-        private ClipControl pictureBox_clip;
+        private DigitalPlatform.Drawing.ClipControl pictureBox_clip;
         private System.Windows.Forms.ToolStrip toolStrip_preview;
         private System.Windows.Forms.ToolStripButton toolStripButton_preview_start;
         private System.Windows.Forms.ToolStripButton toolStripButton_preview_stop;

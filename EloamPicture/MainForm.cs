@@ -15,6 +15,7 @@ using EloamPicture.Properties;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform;
+using DigitalPlatform.Drawing;
 
 namespace EloamPicture
 {

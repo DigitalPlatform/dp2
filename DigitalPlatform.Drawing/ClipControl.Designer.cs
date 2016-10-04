@@ -1,4 +1,4 @@
-﻿namespace EloamPicture
+﻿namespace DigitalPlatform.Drawing
 {
     partial class ClipControl
     {

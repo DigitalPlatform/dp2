@@ -10,7 +10,7 @@ using System.Reflection;
 
 using DigitalPlatform.GUI;
 
-namespace EloamPicture
+namespace DigitalPlatform.Drawing
 {
     /// <summary>
     /// 用于手动设置和调整剪裁矩形的控件
@@ -313,7 +313,9 @@ namespace EloamPicture
             float angle,
             Rectangle rect)
         {
-            Graphics g = Graphics.FromImage(this.Image);
+            // Graphics g = Graphics.FromImage(this.Image);
+            Graphics g = Graphics.FromHwnd(this.Handle);
+
             List<Point> source_points = new List<Point>();
             source_points.Add(new Point(rect.X, rect.Y));
             source_points.Add(new Point(rect.X + rect.Width, rect.Y));

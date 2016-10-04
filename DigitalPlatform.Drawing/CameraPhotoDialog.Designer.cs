@@ -91,12 +91,11 @@
             // 
             // toolStripButton_ratate
             // 
-            this.toolStripButton_ratate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripButton_ratate.Enabled = false;
             this.toolStripButton_ratate.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_ratate.Image")));
             this.toolStripButton_ratate.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_ratate.Name = "toolStripButton_ratate";
-            this.toolStripButton_ratate.Size = new System.Drawing.Size(36, 26);
+            this.toolStripButton_ratate.Size = new System.Drawing.Size(52, 26);
             this.toolStripButton_ratate.Text = "旋转";
             this.toolStripButton_ratate.ToolTipText = "顺指针旋转 90 度 (冻结时可用)";
             this.toolStripButton_ratate.Click += new System.EventHandler(this.toolStripButton_ratate_Click);

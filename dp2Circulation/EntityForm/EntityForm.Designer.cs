@@ -108,6 +108,7 @@ namespace dp2Circulation
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSplitButton_insertCoverImage = new System.Windows.Forms.ToolStripSplitButton();
             this.ToolStripMenuItem_insertCoverImageFromClipboard = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_insertCoverImageFromCamera = new System.Windows.Forms.ToolStripMenuItem();
             this.tabControl_itemAndIssue = new System.Windows.Forms.TabControl();
             this.tabPage_item = new System.Windows.Forms.TabPage();
             this.entityControl1 = new dp2Circulation.EntityControl();
@@ -923,7 +924,8 @@ namespace dp2Circulation
             this.toolStripSplitButton_insertCoverImage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.toolStripSplitButton_insertCoverImage.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_insertCoverImageFromClipboard,
-            this.ToolStripMenuItem_removeCoverImage});
+            this.ToolStripMenuItem_removeCoverImage,
+            this.ToolStripMenuItem_insertCoverImageFromCamera});
             this.toolStripSplitButton_insertCoverImage.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_insertCoverImage.Image")));
             this.toolStripSplitButton_insertCoverImage.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripSplitButton_insertCoverImage.Name = "toolStripSplitButton_insertCoverImage";
@@ -937,6 +939,13 @@ namespace dp2Circulation
             this.ToolStripMenuItem_insertCoverImageFromClipboard.Size = new System.Drawing.Size(212, 22);
             this.ToolStripMenuItem_insertCoverImageFromClipboard.Text = "¥”ºÙÃ˘∞Â≤Â»Î∑‚√ÊÕºœÒ(&C)";
             this.ToolStripMenuItem_insertCoverImageFromClipboard.Click += new System.EventHandler(this.ToolStripMenuItem_insertCoverImageFromClipboard_Click);
+            // 
+            // ToolStripMenuItem_insertCoverImageFromCamera
+            // 
+            this.ToolStripMenuItem_insertCoverImageFromCamera.Name = "ToolStripMenuItem_insertCoverImageFromCamera";
+            this.ToolStripMenuItem_insertCoverImageFromCamera.Size = new System.Drawing.Size(212, 22);
+            this.ToolStripMenuItem_insertCoverImageFromCamera.Text = "¥”…„œÒÕ∑≤Â»Î∑‚√ÊÕºœÒ(&A)";
+            this.ToolStripMenuItem_insertCoverImageFromCamera.Click += new System.EventHandler(this.ToolStripMenuItem_insertCoverImageFromCamera_Click);
             // 
             // tabControl_itemAndIssue
             // 
@@ -1318,6 +1327,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_insertCoverImage;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_insertCoverImageFromClipboard;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_insertCoverImageFromCamera;
         private System.Windows.Forms.ComboBox comboBox_matchStyle;
         private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_biblioDbNames;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_marcEditor_getKeys;

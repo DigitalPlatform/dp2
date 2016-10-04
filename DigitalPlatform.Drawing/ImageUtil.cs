@@ -4,13 +4,13 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Drawing.Drawing2D;
 
 using AForge;
 using AForge.Imaging;
 using AForge.Imaging.Filters;
-using System.Drawing.Drawing2D;
 
-namespace EloamPicture
+namespace DigitalPlatform.Drawing
 {
     public class ImageUtil
     {

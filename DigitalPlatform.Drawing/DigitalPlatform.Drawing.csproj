@@ -154,12 +154,24 @@
     <Compile Include="AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CameraClipDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CameraClipDialog.Designer.cs">
+      <DependentUpon>CameraClipDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="CameraDevices.cs" />
     <Compile Include="CameraPhotoDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="CameraPhotoDialog.Designer.cs">
       <DependentUpon>CameraPhotoDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ClipControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ClipControl.Designer.cs">
+      <DependentUpon>ClipControl.cs</DependentUpon>
     </Compile>
     <Compile Include="ColorUtil.cs">
       <SubType>Code</SubType>
@@ -172,9 +184,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GrayscaleQuantizer.cs" />
+    <Compile Include="ImageUtil.cs" />
     <Compile Include="OctreeQuantizer.cs" />
     <Compile Include="PaletteQuantizer.cs" />
     <Compile Include="PrintUtil.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="QrRecognitionControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -201,8 +219,15 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="CameraClipDialog.resx">
+      <DependentUpon>CameraClipDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CameraPhotoDialog.resx">
       <DependentUpon>CameraPhotoDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="QrRecognitionControl.resx">
       <DependentUpon>QrRecognitionControl.cs</DependentUpon>
