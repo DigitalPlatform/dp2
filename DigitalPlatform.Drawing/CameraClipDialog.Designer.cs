@@ -17,6 +17,10 @@
             {
                 components.Dispose();
             }
+
+            if (this.qrRecognitionControl1 != null)
+                this.qrRecognitionControl1.Dispose();
+
             base.Dispose(disposing);
         }
 
@@ -32,20 +36,22 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_getAndClose = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_shoot = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton_clip_autoCorp = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_clip_output = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_ratate = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_copy = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_paste = new System.Windows.Forms.ToolStripButton();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_preview = new System.Windows.Forms.TabPage();
             this.panel1 = new System.Windows.Forms.Panel();
             this.tabPage_clip = new System.Windows.Forms.TabPage();
             this.tabPage_result = new System.Windows.Forms.TabPage();
-            this.toolStripButton_clip_output = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton_clip_autoCorp = new System.Windows.Forms.ToolStripButton();
             this.pictureBox_result = new System.Windows.Forms.PictureBox();
+            this.toolStripButton_cancel = new System.Windows.Forms.ToolStripButton();
             this.pictureBox_clip = new DigitalPlatform.Drawing.ClipControl();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripButton_copy = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton_paste = new System.Windows.Forms.ToolStripButton();
+            this.toolStripLabel_null = new System.Windows.Forms.ToolStripLabel();
             this.toolStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
             this.tabPage_preview.SuspendLayout();
@@ -57,9 +63,11 @@
             // 
             // toolStrip1
             // 
-            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.toolStrip1.Dock = System.Windows.Forms.DockStyle.Right;
             this.toolStrip1.Enabled = false;
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripLabel_null,
+            this.toolStripButton_cancel,
             this.toolStripButton_getAndClose,
             this.toolStripButton_shoot,
             this.toolStripSeparator1,
@@ -69,9 +77,9 @@
             this.toolStripButton_ratate,
             this.toolStripButton_copy,
             this.toolStripButton_paste});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 253);
+            this.toolStrip1.Location = new System.Drawing.Point(496, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(549, 29);
+            this.toolStrip1.Size = new System.Drawing.Size(53, 282);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -83,8 +91,8 @@
             this.toolStripButton_getAndClose.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_getAndClose.Image")));
             this.toolStripButton_getAndClose.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_getAndClose.Name = "toolStripButton_getAndClose";
-            this.toolStripButton_getAndClose.Size = new System.Drawing.Size(78, 26);
-            this.toolStripButton_getAndClose.Text = "获取图像";
+            this.toolStripButton_getAndClose.Size = new System.Drawing.Size(50, 26);
+            this.toolStripButton_getAndClose.Text = "确定";
             this.toolStripButton_getAndClose.ToolTipText = "获取图像，自动关闭对话框";
             this.toolStripButton_getAndClose.Click += new System.EventHandler(this.toolStripButton_getAndClose_Click);
             // 
@@ -95,9 +103,40 @@
             this.toolStripButton_shoot.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_shoot.Image")));
             this.toolStripButton_shoot.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_shoot.Name = "toolStripButton_shoot";
-            this.toolStripButton_shoot.Size = new System.Drawing.Size(46, 26);
+            this.toolStripButton_shoot.Size = new System.Drawing.Size(50, 26);
             this.toolStripButton_shoot.Text = "截图";
             this.toolStripButton_shoot.Click += new System.EventHandler(this.toolStripButton_shoot_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(50, 6);
+            // 
+            // toolStripButton_clip_autoCorp
+            // 
+            this.toolStripButton_clip_autoCorp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_clip_autoCorp.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_clip_autoCorp.Image")));
+            this.toolStripButton_clip_autoCorp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_clip_autoCorp.Name = "toolStripButton_clip_autoCorp";
+            this.toolStripButton_clip_autoCorp.Size = new System.Drawing.Size(50, 21);
+            this.toolStripButton_clip_autoCorp.Text = "探边";
+            this.toolStripButton_clip_autoCorp.Click += new System.EventHandler(this.toolStripButton_clip_autoCorp_Click);
+            // 
+            // toolStripButton_clip_output
+            // 
+            this.toolStripButton_clip_output.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_clip_output.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.toolStripButton_clip_output.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_clip_output.Image")));
+            this.toolStripButton_clip_output.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_clip_output.Name = "toolStripButton_clip_output";
+            this.toolStripButton_clip_output.Size = new System.Drawing.Size(50, 26);
+            this.toolStripButton_clip_output.Text = "输出";
+            this.toolStripButton_clip_output.Click += new System.EventHandler(this.toolStripButton_clip_output_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(50, 6);
             // 
             // toolStripButton_ratate
             // 
@@ -105,10 +144,30 @@
             this.toolStripButton_ratate.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_ratate.Image")));
             this.toolStripButton_ratate.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_ratate.Name = "toolStripButton_ratate";
-            this.toolStripButton_ratate.Size = new System.Drawing.Size(52, 26);
+            this.toolStripButton_ratate.Size = new System.Drawing.Size(50, 21);
             this.toolStripButton_ratate.Text = "旋转";
             this.toolStripButton_ratate.ToolTipText = "顺指针旋转 90 度 (冻结时可用)";
             this.toolStripButton_ratate.Click += new System.EventHandler(this.toolStripButton_ratate_Click);
+            // 
+            // toolStripButton_copy
+            // 
+            this.toolStripButton_copy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_copy.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_copy.Image")));
+            this.toolStripButton_copy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_copy.Name = "toolStripButton_copy";
+            this.toolStripButton_copy.Size = new System.Drawing.Size(50, 21);
+            this.toolStripButton_copy.Text = "复制";
+            this.toolStripButton_copy.Click += new System.EventHandler(this.toolStripButton_copy_Click);
+            // 
+            // toolStripButton_paste
+            // 
+            this.toolStripButton_paste.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_paste.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_paste.Image")));
+            this.toolStripButton_paste.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_paste.Name = "toolStripButton_paste";
+            this.toolStripButton_paste.Size = new System.Drawing.Size(50, 21);
+            this.toolStripButton_paste.Text = "粘贴";
+            this.toolStripButton_paste.Click += new System.EventHandler(this.toolStripButton_paste_Click);
             // 
             // tabControl_main
             // 
@@ -119,7 +178,7 @@
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(549, 253);
+            this.tabControl_main.Size = new System.Drawing.Size(496, 282);
             this.tabControl_main.TabIndex = 5;
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
             // 
@@ -129,7 +188,7 @@
             this.tabPage_preview.Location = new System.Drawing.Point(4, 22);
             this.tabPage_preview.Name = "tabPage_preview";
             this.tabPage_preview.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_preview.Size = new System.Drawing.Size(541, 227);
+            this.tabPage_preview.Size = new System.Drawing.Size(488, 256);
             this.tabPage_preview.TabIndex = 0;
             this.tabPage_preview.Text = "预览";
             this.tabPage_preview.UseVisualStyleBackColor = true;
@@ -140,7 +199,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(3, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(535, 221);
+            this.panel1.Size = new System.Drawing.Size(482, 250);
             this.panel1.TabIndex = 1;
             this.panel1.SizeChanged += new System.EventHandler(this.panel1_SizeChanged);
             // 
@@ -150,7 +209,7 @@
             this.tabPage_clip.Location = new System.Drawing.Point(4, 22);
             this.tabPage_clip.Name = "tabPage_clip";
             this.tabPage_clip.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_clip.Size = new System.Drawing.Size(541, 227);
+            this.tabPage_clip.Size = new System.Drawing.Size(488, 256);
             this.tabPage_clip.TabIndex = 1;
             this.tabPage_clip.Text = "裁切";
             this.tabPage_clip.UseVisualStyleBackColor = true;
@@ -160,81 +219,49 @@
             this.tabPage_result.Controls.Add(this.pictureBox_result);
             this.tabPage_result.Location = new System.Drawing.Point(4, 22);
             this.tabPage_result.Name = "tabPage_result";
-            this.tabPage_result.Size = new System.Drawing.Size(541, 227);
+            this.tabPage_result.Size = new System.Drawing.Size(488, 256);
             this.tabPage_result.TabIndex = 2;
             this.tabPage_result.Text = "结果";
             this.tabPage_result.UseVisualStyleBackColor = true;
-            // 
-            // toolStripButton_clip_output
-            // 
-            this.toolStripButton_clip_output.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_clip_output.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.toolStripButton_clip_output.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_clip_output.Image")));
-            this.toolStripButton_clip_output.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_clip_output.Name = "toolStripButton_clip_output";
-            this.toolStripButton_clip_output.Size = new System.Drawing.Size(46, 26);
-            this.toolStripButton_clip_output.Text = "输出";
-            this.toolStripButton_clip_output.Click += new System.EventHandler(this.toolStripButton_clip_output_Click);
-            // 
-            // toolStripButton_clip_autoCorp
-            // 
-            this.toolStripButton_clip_autoCorp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_clip_autoCorp.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_clip_autoCorp.Image")));
-            this.toolStripButton_clip_autoCorp.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_clip_autoCorp.Name = "toolStripButton_clip_autoCorp";
-            this.toolStripButton_clip_autoCorp.Size = new System.Drawing.Size(36, 26);
-            this.toolStripButton_clip_autoCorp.Text = "探边";
-            this.toolStripButton_clip_autoCorp.Click += new System.EventHandler(this.toolStripButton_clip_autoCorp_Click);
             // 
             // pictureBox_result
             // 
             this.pictureBox_result.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox_result.Location = new System.Drawing.Point(0, 0);
             this.pictureBox_result.Name = "pictureBox_result";
-            this.pictureBox_result.Size = new System.Drawing.Size(541, 227);
+            this.pictureBox_result.Size = new System.Drawing.Size(488, 256);
             this.pictureBox_result.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox_result.TabIndex = 1;
             this.pictureBox_result.TabStop = false;
+            // 
+            // toolStripButton_cancel
+            // 
+            this.toolStripButton_cancel.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripButton_cancel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_cancel.Font = new System.Drawing.Font("微软雅黑", 9F);
+            this.toolStripButton_cancel.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_cancel.Image")));
+            this.toolStripButton_cancel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_cancel.Name = "toolStripButton_cancel";
+            this.toolStripButton_cancel.Size = new System.Drawing.Size(50, 21);
+            this.toolStripButton_cancel.Text = "取消";
+            this.toolStripButton_cancel.Click += new System.EventHandler(this.toolStripButton_cancel_Click);
             // 
             // pictureBox_clip
             // 
             this.pictureBox_clip.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pictureBox_clip.Location = new System.Drawing.Point(3, 3);
             this.pictureBox_clip.Name = "pictureBox_clip";
-            this.pictureBox_clip.Size = new System.Drawing.Size(535, 221);
+            this.pictureBox_clip.Size = new System.Drawing.Size(482, 250);
             this.pictureBox_clip.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox_clip.TabIndex = 1;
             this.pictureBox_clip.TabStop = false;
             // 
-            // toolStripSeparator1
+            // toolStripLabel_null
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 29);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 29);
-            // 
-            // toolStripButton_copy
-            // 
-            this.toolStripButton_copy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_copy.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_copy.Image")));
-            this.toolStripButton_copy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_copy.Name = "toolStripButton_copy";
-            this.toolStripButton_copy.Size = new System.Drawing.Size(36, 26);
-            this.toolStripButton_copy.Text = "复制";
-            this.toolStripButton_copy.Click += new System.EventHandler(this.toolStripButton_copy_Click);
-            // 
-            // toolStripButton_paste
-            // 
-            this.toolStripButton_paste.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_paste.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_paste.Image")));
-            this.toolStripButton_paste.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_paste.Name = "toolStripButton_paste";
-            this.toolStripButton_paste.Size = new System.Drawing.Size(36, 26);
-            this.toolStripButton_paste.Text = "粘贴";
-            this.toolStripButton_paste.Click += new System.EventHandler(this.toolStripButton_paste_Click);
+            this.toolStripLabel_null.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel_null.Name = "toolStripLabel_null";
+            this.toolStripLabel_null.Size = new System.Drawing.Size(50, 17);
+            this.toolStripLabel_null.Text = " ";
             // 
             // CameraClipDialog
             // 
@@ -282,5 +309,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripButton toolStripButton_copy;
         private System.Windows.Forms.ToolStripButton toolStripButton_paste;
+        private System.Windows.Forms.ToolStripButton toolStripButton_cancel;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel_null;
     }
 }

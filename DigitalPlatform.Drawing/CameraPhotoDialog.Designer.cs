@@ -17,6 +17,10 @@
             {
                 components.Dispose();
             }
+
+            if (this.qrRecognitionControl1 != null)
+                this.qrRecognitionControl1.Dispose();
+
             base.Dispose(disposing);
         }
 

@@ -14,8 +14,16 @@ namespace DigitalPlatform.Drawing
 {
     public class ImageUtil
     {
-        public static System.Drawing.Image AforgeAutoCrop(Bitmap selectedImage)
+#if NO
+        public static System.Drawing.Image AforgeAutoCrop(Bitmap selectedImage,
+            DetectBorderParam param)
         {
+            // 一些参数的默认值
+            if (param.MinObjectWidth == 0)
+                param.MinObjectWidth = 500;
+            if (param.MinObjectHeight == 0)
+                param.MinObjectHeight = 500;
+
             Bitmap autoCropImage = null;
             try
             {
@@ -37,8 +45,8 @@ namespace DigitalPlatform.Drawing
                 new Threshold(100).ApplyInPlace(rotatedImage);
                 BlobCounter bc = new BlobCounter();
                 bc.FilterBlobs = true;
-                bc.MinWidth = 500;
-                bc.MinHeight = 500;
+                bc.MinWidth = param.MinObjectWidth; //  500;
+                bc.MinHeight = param.MinObjectHeight;   // 500;
                 bc.ProcessImage(rotatedImage);
                 Rectangle[] rects = bc.GetObjectsRectangles();
 
@@ -70,7 +78,7 @@ namespace DigitalPlatform.Drawing
 
             return autoCropImage;
         }
-
+#endif
 
         public static Bitmap Apply(Bitmap selectedImage,
             double angle,
@@ -96,9 +104,16 @@ namespace DigitalPlatform.Drawing
         }
 
         public static bool GetSkewParam(Bitmap selectedImage,
+            DetectBorderParam param,
             out double angle,
             out Rectangle rect)
         {
+            // 一些参数的默认值
+            if (param.MinObjectWidth == 0)
+                param.MinObjectWidth = 500;
+            if (param.MinObjectHeight == 0)
+                param.MinObjectHeight = 500;
+
             Bitmap autoCropImage = null;
             try
             {
@@ -126,8 +141,12 @@ namespace DigitalPlatform.Drawing
                 new Threshold(100).ApplyInPlace(rotatedImage);
                 BlobCounter bc = new BlobCounter();
                 bc.FilterBlobs = true;
+                bc.MinWidth = param.MinObjectWidth; //  500;
+                bc.MinHeight = param.MinObjectHeight;   // 500;
+#if NO
                 bc.MinWidth = 500;// grayImage.Width / 10;  // 500
                 bc.MinHeight = 500;// grayImage.Height / 10; // 500
+#endif
                 bc.ProcessImage(rotatedImage);
 
                 Rectangle[] rects = bc.GetObjectsRectangles();
@@ -221,7 +240,6 @@ namespace DigitalPlatform.Drawing
         }
 
         // 应该增补一次识别长条形的图像，也纳入合并的范围
-
         static List<System.Drawing.Point> GetFourPoints(Rectangle rect1)
         {
             List<System.Drawing.Point> points = new List<System.Drawing.Point>();
@@ -270,6 +288,8 @@ namespace DigitalPlatform.Drawing
             return new Rectangle(x_min, y_min, x_max - x_min, y_max - y_min);
         }
 
+        // 根据四个顶点，测算出四边形的长边和短边长度
+        // TODO: 需要根据梯形两平行边的差值，估算出平面倒伏的程度(角度)，测算出尽可能完美的边长
         static void GetWidthHeight(List<IntPoint> corners,
             out int width,
             out int height)
@@ -281,13 +301,29 @@ namespace DigitalPlatform.Drawing
             double x = corners[1].X - corners[0].X;
             double y = corners[1].Y- corners[0].Y;
 
-            width = (int)Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
+            int width1 = (int)Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
+
+            // 4 --> 3
+            x = corners[3].X - corners[2].X;
+            y = corners[3].Y - corners[2].Y;
+
+            int width2 = (int)Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
+
+            width = Math.Max(width1, width2);
 
             // 1 --> 4
             x = corners[3].X - corners[0].X;
             y = corners[3].Y - corners[0].Y;
 
-            height = (int)Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
+            int height1 = (int)Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
+
+            // 2 --> 3
+            x = corners[2].X - corners[1].X;
+            y = corners[2].Y - corners[1].Y;
+
+            int height2 = (int)Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2));
+
+            height = Math.Max(height1, height2);
         }
 
         public static Bitmap Clip(Bitmap source,
@@ -310,6 +346,22 @@ namespace DigitalPlatform.Drawing
                 new QuadrilateralTransformation(corners, width, height);
             // apply the filter
             return filter.Apply(source);
+        }
+    }
+
+    // 用于边界探测的一些参数
+    public class DetectBorderParam
+    {
+        // 最小物体的宽度、高度
+        public int MinObjectWidth { get; set; }
+        public int MinObjectHeight { get; set; }
+
+        public DetectBorderParam(System.Drawing.Image image)
+        {
+            // 宽除以 5， 或者高除以 4
+            int nShorter = Math.Min(image.Width, image.Height);
+            MinObjectWidth = nShorter / 4;
+            MinObjectHeight = MinObjectWidth;
         }
     }
 }

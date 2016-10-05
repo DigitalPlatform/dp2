@@ -566,10 +566,12 @@ namespace EloamPicture
             using (Bitmap bitmap = new Bitmap(this.pictureBox_clip.Image))
             {
                 // this.pictureBox1.Image = ImageUtil.AforgeAutoCrop(bitmap);
+                DetectBorderParam param = new DetectBorderParam(bitmap);
 
                 bool bRet = ImageUtil.GetSkewParam(bitmap,
-            out angle,
-            out rect);
+                    param,
+                    out angle,
+                    out rect);
                 if (bRet == false)
                 {
                     MessageBox.Show(this, "fail");

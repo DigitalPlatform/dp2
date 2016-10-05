@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -31,6 +33,8 @@ namespace DigitalPlatform.Drawing
         {
             InitializeComponent();
 
+            this.tabControl_main.Enabled = false;   // 刚开始的时候冻结
+
             this.qrRecognitionControl1 = new DigitalPlatform.Drawing.QrRecognitionControl();
             this.qrRecognitionControl1.PhotoMode = true;
 
@@ -48,17 +52,46 @@ namespace DigitalPlatform.Drawing
             this.qrRecognitionControl1.TabIndex = 0;
             this.qrRecognitionControl1.BackColor = Color.DarkGray; //System.Drawing.SystemColors.Window;
 
-            this.qrRecognitionControl1.FirstImageFilled += new EventHandler(qrRecognitionControl1_FirstImageFilled);
+            this.qrRecognitionControl1.FirstImageFilled += new FirstImageFilledEventHandler(qrRecognitionControl1_FirstImageFilled);
         }
 
-        void qrRecognitionControl1_FirstImageFilled(object sender, EventArgs e)
+        void qrRecognitionControl1_FirstImageFilled(object sender, FirstImageFilledEventArgs e)
         {
             // this.toolStripButton_getAndClose.Enabled = true;
             this.toolStrip1.Enabled = true;
+            this.tabControl_main.Enabled = true;
+
+            // this.qrRecognitionControl1.BeginInvoke(new Action<bool>(this.qrRecognitionControl1.DisplayImage), true);
+            if (e.Error)
+                this.qrRecognitionControl1.Image = null;
+        }
+
+        static Bitmap BuildTextImage(string strText,
+            Color color,
+            float fFontSize = 64,
+            int nWidth = 400)
+        {
+            // 文字图片
+            return ArtText.BuildArtText(
+                strText,
+                "Microsoft YaHei",  // "Consolas", // 
+                fFontSize,  // (float)16,
+                FontStyle.Regular,  // .Bold,
+                color,
+                Color.Transparent,
+                Color.Gray,
+                ArtEffect.None,
+                nWidth);
         }
 
         private void CameraClipDialog_Load(object sender, EventArgs e)
         {
+            // this.qrRecognitionControl1.BeginInvoke(new Action<string>(this.qrRecognitionControl1.DisplayText), "test");
+            this.qrRecognitionControl1.Image = BuildTextImage("正在初始化摄像头，请稍候 ...",
+                Color.Gray,
+                64,
+                2000);
+
             this.qrRecognitionControl1.CurrentCamera = m_strCurrentCamera;
 
             tabControl_main_SelectedIndexChanged(this, e);
@@ -126,10 +159,11 @@ namespace DigitalPlatform.Drawing
                 using (Bitmap bitmap = new Bitmap(this.pictureBox_clip.Image))
                 {
                     // this.pictureBox1.Image = ImageUtil.AforgeAutoCrop(bitmap);
-
+                    DetectBorderParam param = new DetectBorderParam(bitmap);
                     bool bRet = ImageUtil.GetSkewParam(bitmap,
-                out angle,
-                out rect);
+                        param,
+                        out angle,
+                        out rect);
                     if (bRet == false)
                     {
                         MessageBox.Show(this, "探测边框失败");
@@ -193,6 +227,13 @@ namespace DigitalPlatform.Drawing
             }
 
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.Close();
+        }
+
+
+        private void toolStripButton_cancel_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.Close();
         }
 
@@ -327,5 +368,6 @@ namespace DigitalPlatform.Drawing
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
     }
 }
