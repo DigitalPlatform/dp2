@@ -160,7 +160,7 @@ namespace DigitalPlatform.Drawing
                 {
                     // this.pictureBox1.Image = ImageUtil.AforgeAutoCrop(bitmap);
                     DetectBorderParam param = new DetectBorderParam(bitmap);
-                    bool bRet = ImageUtil.GetSkewParam(bitmap,
+                    bool bRet = AForgeImageUtil.GetSkewParam(bitmap,
                         param,
                         out angle,
                         out rect);
@@ -199,7 +199,7 @@ namespace DigitalPlatform.Drawing
 
             using (Bitmap bitmap = new Bitmap(this.pictureBox_clip.Image))
             {
-                this.pictureBox_result.Image = ImageUtil.Clip(bitmap,
+                this.pictureBox_result.Image = AForgeImageUtil.Clip(bitmap,
                     this.pictureBox_clip.GetCorners());
             }
 
@@ -221,7 +221,7 @@ namespace DigitalPlatform.Drawing
             {
                 using (Bitmap bitmap = new Bitmap(this.pictureBox_clip.Image))
                 {
-                    this.pictureBox_result.Image = ImageUtil.Clip(bitmap,
+                    this.pictureBox_result.Image = AForgeImageUtil.Clip(bitmap,
                         this.pictureBox_clip.GetCorners());
                 }
             }
@@ -328,6 +328,15 @@ namespace DigitalPlatform.Drawing
         {
             string strError = "";
 
+            // 从剪贴板中取得图像对象
+            List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
+            if (images == null)
+            {
+                strError = "。无法进行粘贴";
+                goto ERROR1;
+            }
+            Image image = images[0];
+#if NO
             Image image = null;
             IDataObject obj1 = Clipboard.GetDataObject();
             if (obj1.GetDataPresent(typeof(Bitmap)))
@@ -353,6 +362,7 @@ namespace DigitalPlatform.Drawing
                 strError = "当前 Windows 剪贴板中没有图形对象。无法进行粘贴";
                 goto ERROR1;
             }
+#endif
 
             if (this.tabControl_main.SelectedTab == this.tabPage_clip)
             {

@@ -568,7 +568,7 @@ namespace EloamPicture
                 // this.pictureBox1.Image = ImageUtil.AforgeAutoCrop(bitmap);
                 DetectBorderParam param = new DetectBorderParam(bitmap);
 
-                bool bRet = ImageUtil.GetSkewParam(bitmap,
+                bool bRet = AForgeImageUtil.GetSkewParam(bitmap,
                     param,
                     out angle,
                     out rect);
@@ -609,7 +609,7 @@ namespace EloamPicture
 
             using (Bitmap bitmap = new Bitmap(this.pictureBox_clip.Image))
             {
-                this.pictureBox_result.Image = ImageUtil.Clip(bitmap,
+                this.pictureBox_result.Image = AForgeImageUtil.Clip(bitmap,
                     this.pictureBox_clip.GetCorners());
             }
 

@@ -184,6 +184,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GrayscaleQuantizer.cs" />
+    <Compile Include="AForgeImageUtil.cs" />
     <Compile Include="ImageUtil.cs" />
     <Compile Include="OctreeQuantizer.cs" />
     <Compile Include="PaletteQuantizer.cs" />

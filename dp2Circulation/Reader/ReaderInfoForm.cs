@@ -3824,6 +3824,15 @@ MessageBoxDefaultButton.Button2);
             string strError = "";
             int nRet = 0;
 
+            // 从剪贴板中取得图像对象
+            List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
+            if (images == null)
+            {
+                strError = "。无法创建证件照片";
+                goto ERROR1;
+            }
+            Image image = images[0];
+#if NO
             Image image = null;
             IDataObject obj1 = Clipboard.GetDataObject();
             if (obj1.GetDataPresent(typeof(Bitmap)))
@@ -3849,6 +3858,7 @@ MessageBoxDefaultButton.Button2);
                 strError = "当前 Windows 剪贴板中没有图形对象。无法创建证件照片";
                 goto ERROR1;
             }
+#endif
 
             string strShrinkComment = "";
             using (image)

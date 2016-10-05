@@ -19,6 +19,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
+using DigitalPlatform.Drawing;
 
 namespace dp2Circulation
 {
@@ -5507,7 +5508,16 @@ namespace dp2Circulation
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // 从剪贴板插入封面图像
+            // 从摄像头插入封面图像
+            menuItem = new ToolStripMenuItem(" 从摄像头插入封面图像(&C)");
+            menuItem.Tag = point;
+            menuItem.Click += new EventHandler(menuItem_insertCoverImageFromCamera_Click);
+            if (bHasIssueSelected == false)
+                menuItem.Enabled = false;
+            contextMenu.Items.Add(menuItem);
+
+
+            // 删除封面图像
             menuItem = new ToolStripMenuItem(" 删除封面图像(&C)");
             menuItem.Tag = point;
             menuItem.Click += new EventHandler(menuItem_deleteCoverImage_Click);
@@ -9153,6 +9163,79 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
+        void menuItem_insertCoverImageFromCamera_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            List<IssueBindingItem> selected_issues = new List<IssueBindingItem>();
+            foreach (IssueBindingItem issue in this.SelectedIssues)
+            {
+                // 跳过自由期
+                if (String.IsNullOrEmpty(issue.PublishTime) == true)
+                    continue;
+
+                selected_issues.Add(issue);
+            }
+
+            List<Image> images = new List<Image>();
+            {
+                Image image = null;
+                Program.MainForm.DisableCamera();
+                try
+                {
+                    // 注： new CameraClipDialog() 可能会抛出异常
+                    using (CameraClipDialog dlg = new CameraClipDialog())
+                    {
+                        dlg.Font = this.Font;
+
+                        dlg.CurrentCamera = Program.MainForm.AppInfo.GetString(
+                            "bindingControl",
+                            "current_camera",
+                            "");
+
+                        Program.MainForm.AppInfo.LinkFormState(dlg, "CameraClipDialog_state");
+                        dlg.ShowDialog(this);
+                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
+
+                        Program.MainForm.AppInfo.SetString(
+                            "bindingControl",
+                            "current_camera",
+                            dlg.CurrentCamera);
+
+                        if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                            return;
+
+                        image = dlg.Image;
+                    }
+                }
+                finally
+                {
+                    Application.DoEvents();
+
+                    Program.MainForm.EnableCamera();
+                }
+
+                images.Add(image);
+            }
+
+            {
+                int i = 0;
+                foreach (IssueBindingItem issue in selected_issues)
+                {
+                    if (i >= images.Count)
+                        break;
+                    Image image = images[i];
+                    if (issue.SetCoverImage(image, out strError) == -1)
+                        goto ERROR1;
+
+                    i++;
+                }
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
 
         void menuItem_insertCoverImageFromClipboard_Click(object sender, EventArgs e)
         {
@@ -9168,6 +9251,15 @@ MessageBoxDefaultButton.Button2);
                 selected_issues.Add(issue);
             }
 
+            // 从剪贴板中取得图像对象
+            List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
+            if (images == null)
+            {
+                strError = "。无法创建封面图像";
+                goto ERROR1;
+            }
+
+#if NO
             // 从剪贴板中取得图像对象
             List<Image> images = new List<Image>();
             IDataObject obj1 = Clipboard.GetDataObject();
@@ -9196,6 +9288,7 @@ MessageBoxDefaultButton.Button2);
                 strError = "当前 Windows 剪贴板中没有图形对象。无法创建封面图像";
                 goto ERROR1;
             }
+#endif
 
             {
                 int i = 0;

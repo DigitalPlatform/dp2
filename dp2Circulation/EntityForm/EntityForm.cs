@@ -12688,6 +12688,15 @@ strMARC);
                 goto ERROR1;
             }
 
+            // 从剪贴板中取得图像对象
+            List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
+            if (images == null)
+            {
+                strError = "。无法创建封面图像";
+                goto ERROR1;
+            }
+            Image image = images[0];
+#if NO
             Image image = null;
             IDataObject obj1 = Clipboard.GetDataObject();
             if (obj1.GetDataPresent(typeof(Bitmap)))
@@ -12713,6 +12722,7 @@ strMARC);
                 strError = "当前 Windows 剪贴板中没有图形对象。无法创建封面图像";
                 goto ERROR1;
             }
+#endif
 
             CreateCoverImageDialog dlg = null;
             try
