@@ -20,6 +20,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
 using DigitalPlatform.Drawing;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -2232,7 +2233,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(issue.PublishTime) == true)
                     continue;
 
-                string strYearPart = IssueUtil.GetYearPart(issue.PublishTime);
+                string strYearPart = dp2StringUtil.GetYearPart(issue.PublishTime);
 
                 // 检查出版时间
                 if (strYearPart != info.Year)
@@ -6207,7 +6208,7 @@ namespace dp2Circulation
             // 修改全部下属格子的volume string和publish time
             string strNewVolumeString =
     VolumeInfo.BuildItemVolumeString(
-    IssueUtil.GetYearPart(issue.PublishTime),
+    dp2StringUtil.GetYearPart(issue.PublishTime),
     issue.Issue,
 issue.Zong,
 issue.Volume);
@@ -6927,8 +6928,8 @@ issue.Volume);
                         strNextIssue = "1";
                         // 2010/3/16
                         // 如果预测的下一期出版时间不是参考期的后一年的时间，则需要强制修改
-                        string strNextYear = IssueUtil.GetYearPart(strNextPublishTime);
-                        string strRefYear = IssueUtil.GetYearPart(ref_issue.PublishTime);
+                        string strNextYear = dp2StringUtil.GetYearPart(strNextPublishTime);
+                        string strRefYear = dp2StringUtil.GetYearPart(ref_issue.PublishTime);
 
                         // 2012/5/14
                         // 如果参考期所在年份的各期之间已经跨年，则不必作修正
@@ -6937,7 +6938,7 @@ issue.Volume);
                         IssueBindingItem year_first_issue = GetYearFirstIssue(ref_issue);
                         if (year_first_issue != null)
                         {
-                            strRefFirstYear = IssueUtil.GetYearPart(year_first_issue.PublishTime);
+                            strRefFirstYear = dp2StringUtil.GetYearPart(year_first_issue.PublishTime);
                         }
 
                         if (string.Compare(strNextYear, strRefYear) <= 0
@@ -7466,8 +7467,8 @@ issue.Volume);
 
                     // 2010/3/16
                     // 如果预测的下一期出版时间不是参考期的后一年的时间，则需要强制修改
-                    string strNextYear = IssueUtil.GetYearPart(strNextPublishTime);
-                    string strRefYear = IssueUtil.GetYearPart(ref_issue.PublishTime);
+                    string strNextYear = dp2StringUtil.GetYearPart(strNextPublishTime);
+                    string strRefYear = dp2StringUtil.GetYearPart(ref_issue.PublishTime);
 
                     // 2012/5/14
                     // 如果参考期所在年份的各期之间已经跨年，则不必作修正
@@ -7476,7 +7477,7 @@ issue.Volume);
                     IssueBindingItem year_first_issue = GetYearFirstIssue(ref_issue);
                     if (year_first_issue != null)
                     {
-                        strRefFirstYear = IssueUtil.GetYearPart(year_first_issue.PublishTime);
+                        strRefFirstYear = dp2StringUtil.GetYearPart(year_first_issue.PublishTime);
                     }
 
                     if (string.Compare(strNextYear, strRefYear) <= 0
@@ -8143,7 +8144,7 @@ issue.Volume);
                 return -1;
             }
 
-            string strCurYear = IssueUtil.GetYearPart(strPublishTime);
+            string strCurYear = dp2StringUtil.GetYearPart(strPublishTime);
 
             for (int i = 0; i < this.Issues.Count; i++)
             {
@@ -8166,7 +8167,7 @@ issue.Volume);
 
                 // 在当年范围内检查当年期号、在其他年范围内检查卷号
                 {
-                    string strYear = IssueUtil.GetYearPart(issue.PublishTime);
+                    string strYear = dp2StringUtil.GetYearPart(issue.PublishTime);
                     if (strYear == strCurYear)
                     {
                         if (strIssue == issue.Issue
@@ -11170,13 +11171,13 @@ MessageBoxDefaultButton.Button2);
 
             string strOldVolumeString =
                 VolumeInfo.BuildItemVolumeString(
-                IssueUtil.GetYearPart(source_issue.PublishTime),
+                dp2StringUtil.GetYearPart(source_issue.PublishTime),
                 source_issue.Issue,
                         source_issue.Zong,
                         source_issue.Volume);
             string strNewVolumeString =
                 VolumeInfo.BuildItemVolumeString(
-                IssueUtil.GetYearPart(target_issue.PublishTime),
+                dp2StringUtil.GetYearPart(target_issue.PublishTime),
                 target_issue.Issue,
             target_issue.Zong,
             target_issue.Volume);
@@ -14930,8 +14931,8 @@ Color.FromArgb(100, color)
                 return true;
 
             IssueBindingItem prev_issue = this.Issues[index - 1];
-            string strThisYear = IssueUtil.GetYearPart(issue.PublishTime);
-            string strPrevYear = IssueUtil.GetYearPart(prev_issue.PublishTime);
+            string strThisYear = dp2StringUtil.GetYearPart(issue.PublishTime);
+            string strPrevYear = dp2StringUtil.GetYearPart(prev_issue.PublishTime);
 
             if (String.Compare(strThisYear, strPrevYear) > 0)
                 return true;

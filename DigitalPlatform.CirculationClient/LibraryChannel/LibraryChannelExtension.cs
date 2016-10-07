@@ -295,6 +295,5 @@ namespace DigitalPlatform.CirculationClient
 
             return lRet;
         }
-
     }
 }

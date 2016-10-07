@@ -15,15 +15,11 @@ using System.Drawing;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.OPAC.Web;
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 
 public partial class GetObject : MyWebPage
 {
-    //OpacApplication app = null;
-    //SessionInfo sessioninfo = null;
-
     protected void Page_Load(object sender, EventArgs e)
     {
         if (WebUtil.PrepareEnvironment(this,

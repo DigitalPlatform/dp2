@@ -2500,6 +2500,7 @@ out strError);
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分
         //      strStyle    "onlygetpath"   仅返回每个路径(OldRecPath)
         //                  "getfirstxml"   是对onlygetpath的补充，仅获得第一个元素的XML记录，其余的依然只返回路径
+        //                  "@query:父记录+期号|..." 使用特定的检索途径和检索词。...部分表示检索词，例如 1|2005|1|，默认前方一致
         //      items 返回的事项信息数组
         // 权限：权限要在API外面判断(需要有get...s权限)。
         // return:
@@ -2556,12 +2557,26 @@ out strError);
                 goto ERROR1;
             }
 
+            // 2016/10/6
+            // 从style字符串中得到 format:XXXX子串
+            string strQueryParam = StringUtil.GetStyleParam(strStyle, "query");
+            string strFrom = "父记录";
+            string strWord = strBiblioRecId;
+            string strMatchStyle = "exact";
+            if (string.IsNullOrEmpty(strQueryParam) == false)
+            {
+                List<string> parts = StringUtil.ParseTwoPart(strQueryParam, "|");
+                strFrom = parts[0];
+                strWord = parts[1];
+                strMatchStyle = "left";
+            }
+
             // 检索事项库中全部从属于特定id的记录
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14
+                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + strFrom)       // 2007/9/14
                 + "'><item><word>"
-                + strBiblioRecId
-                + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
+                + strWord
+                + "</word><match>"+strMatchStyle+"</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
             long lRet = channel.DoSearch(strQueryXml,
                 this.DefaultResultsetName,
                 "", // strOuputStyle

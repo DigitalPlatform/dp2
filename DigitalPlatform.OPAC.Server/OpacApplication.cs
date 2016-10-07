@@ -4019,7 +4019,7 @@ out strError);
                     return -1;
                 }
 
-                strError = "GetRes() (for metadata) Error : " + strError;
+                strError = "GetRes() '" + strPath + "' (for metadata) Error : " + strError;
                 return -1;
             }
 

@@ -21,12 +21,12 @@ using System.IdentityModel.Claims;
 using System.IdentityModel.Selectors;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections;
+using System.ServiceModel.Description;
+using System.Web;
 
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
-using System.ServiceModel.Description;
-using System.Web;
 
 namespace DigitalPlatform.LibraryClient
 {

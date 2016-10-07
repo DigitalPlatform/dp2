@@ -18,6 +18,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -2021,7 +2022,7 @@ e);
                 // 2010/4/1
                 cell.item.PublishTime = issue.PublishTime;
                 cell.item.Volume = VolumeInfo.BuildItemVolumeString(
-                    IssueUtil.GetYearPart(issue.PublishTime),
+                    dp2StringUtil.GetYearPart(issue.PublishTime),
                     issue.Issue,
                     issue.Zong,
                     issue.Volume);

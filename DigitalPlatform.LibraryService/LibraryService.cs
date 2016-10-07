@@ -5246,10 +5246,10 @@ namespace dp2Library
         // 权限：需要有getissueinfo权限(兼容getissues权限)
         public LibraryServerResult GetIssues(
             string strBiblioRecPath,
-                   long lStart,
-                   long lCount,
-                   string strStyle,
-                   string strLang,
+            long lStart,
+            long lCount,
+            string strStyle,
+            string strLang,
             out EntityInfo[] issueinfos)
         {
             issueinfos = null;

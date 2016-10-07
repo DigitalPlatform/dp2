@@ -624,7 +624,7 @@ strDbName2);
                 return 0;
             }
 
-            FOUND:
+        FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -663,7 +663,7 @@ strDbName2);
                 return 0;
             }
 
-            FOUND:
+        FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -702,7 +702,7 @@ strDbName2);
                 return 0;
             }
 
-            FOUND:
+        FOUND:
             strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
             return 1;
         }
@@ -762,12 +762,12 @@ strDbName2);
             // 2012/7/6
             string strCfgBiblioDbName = GetCfgBiblioDbName(strBiblioDbName);
             if (String.IsNullOrEmpty(strCfgBiblioDbName) == true)
-                return 0; 
-            
+                return 0;
+
             XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//biblioDbGroup/database[@biblioDbName='" + strCfgBiblioDbName + "']");
 
             if (node == null)
-                    return 0;
+                return 0;
 
             strIssueDbName = DomUtil.GetAttr(node, "issueDbName");
             return 1;   // 注意有时虽然找到了书目库，但是issueDbName属性缺省或者为空
@@ -793,7 +793,7 @@ strDbName2);
             XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//biblioDbGroup/database[@biblioDbName='" + strCfgBiblioDbName + "']");
 
             if (node == null)
-                    return 0;
+                return 0;
 
             strOrderDbName = DomUtil.GetAttr(node, "orderDbName");
             return 1;   // 注意有时虽然找到了书目库，但是orderDbName属性缺省或者为空
@@ -815,7 +815,7 @@ strDbName2);
             string strLang = "";
 
             // 2012/7/6
-            string strCfgBiblioDbName = GetCfgBiblioDbName(strBiblioDbName,out strLang);
+            string strCfgBiblioDbName = GetCfgBiblioDbName(strBiblioDbName, out strLang);
             if (String.IsNullOrEmpty(strCfgBiblioDbName) == true)
                 return 0;
 
@@ -829,7 +829,7 @@ strDbName2);
             else
             {
                 // 2012/7/9
-                XmlNode nodeCaption = node.SelectSingleNode("commentDbName/caption[@lang='"+strLang+"']");
+                XmlNode nodeCaption = node.SelectSingleNode("commentDbName/caption[@lang='" + strLang + "']");
                 if (nodeCaption == null)
                     strCommentDbName = DomUtil.GetAttr(node, "commentDbName");
                 else

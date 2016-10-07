@@ -157,6 +157,7 @@
     <Compile Include="DigitalPlatform.Text.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="dp2StringUtil.cs" />
     <Compile Include="ParamList.cs" />
     <Compile Include="PriceUtil.cs" />
     <Compile Include="QuickList.cs" />

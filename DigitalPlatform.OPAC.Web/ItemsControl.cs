@@ -20,6 +20,7 @@ using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Script;
 
 namespace DigitalPlatform.OPAC.Web
 {
@@ -818,7 +819,6 @@ namespace DigitalPlatform.OPAC.Web
             literal.Text = "</td></tr>";
             line.Controls.Add(literal);
 
-
             return line;
         }
 
@@ -877,6 +877,10 @@ namespace DigitalPlatform.OPAC.Web
             this.Controls.Add(resultinfo);
              * */
 
+            // 期刊封面图片区
+            PlaceHolder coverline = new PlaceHolder();
+            coverline.ID = "coverline";
+            this.Controls.Add(coverline);
 
             // 标题行
             PlaceHolder titleline = new PlaceHolder();
@@ -884,7 +888,6 @@ namespace DigitalPlatform.OPAC.Web
             this.Controls.Add(titleline);
 
             CreateTitleLine(titleline, null);
-
 
             // 每一行一个占位控件
             for (int i = 0; i < this.LineCount; i++)
@@ -1075,9 +1078,7 @@ namespace DigitalPlatform.OPAC.Web
 
                     Debug.Assert(string.IsNullOrEmpty(strBiblioRecPath) == false, "");
                     this.BiblioRecPath = strBiblioRecPath;
-
                 }
-
 
                 if ((this.ItemDispStyle & ItemDispStyle.Items) == ItemDispStyle.Items)
                 {
@@ -1169,6 +1170,8 @@ namespace DigitalPlatform.OPAC.Web
 
                     this.ItemBarcodes = this.tempItemBarcodes;
                 }
+
+                FillCoverImage(channel);
 
                 if (String.IsNullOrEmpty(this.WarningText) == false)
                     SetDebugInfo(this.WarningText);
@@ -1297,6 +1300,98 @@ namespace DigitalPlatform.OPAC.Web
             }
         }
 
+        string GetIssueDbName(
+            OpacApplication app,
+            string strItemRecPath)
+        {
+            string strError = "";
+            string strItemDbName = StringUtil.GetDbName(strItemRecPath);
+            string strBiblioDbName = "";
+
+            // 根据实体库名, 找到对应的书目库名
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            int nRet = app.GetBiblioDbNameByItemDbName(strItemDbName,
+                out strBiblioDbName,
+                out strError);
+            if (nRet != 1)
+                return "";
+
+            string strIssueDbName = "";
+            // 根据书目库名, 找到对应的期库名
+            // return:
+            //      -1  出错
+            //      0   没有找到(书目库)
+            //      1   找到
+            nRet = app.GetIssueDbName(strBiblioDbName,
+                out strIssueDbName,
+                out strError);
+            if (nRet == 1)
+                return strIssueDbName;
+            return "";
+        }
+
+        void FillCoverImage(LibraryChannel channel)
+        {
+            if (_issue_query_strings.Count == 0)
+                return;
+            PlaceHolder line = (PlaceHolder)this.FindControl("coverline");
+            if (line == null)
+                return;
+
+            string strPrefferSize = "LargeImage";   // "MediumImage", // "LargeImage",
+
+            StringBuilder text = new StringBuilder();
+            foreach (IssueString s in _issue_query_strings)
+            {
+                string strUri = "";
+                string strError = "";
+
+                // 获得指定一期的封面图片 URI
+                // parameters:
+                //      strBiblioPath   书目记录路径
+                //      strQueryString  检索词。例如 “2005|1|1000|50”。格式为 年|期号|总期号|卷号。一般为 年|期号| 即可。
+                int nRet = channel.GetIssueCoverImageUri(null,
+                    this.BiblioRecPath,
+                    s.Query,
+                    strPrefferSize,
+                    out strUri,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "(用户 '" + channel.UserName + "') " + strError;
+                    text.Append("<div>" + HttpUtility.HtmlEncode(strError) + "</div>");
+                    continue;
+                }
+
+                OpacApplication app = (OpacApplication)this.Page.Application["app"];
+
+                string strUrl = "";
+
+                if (string.IsNullOrEmpty(strUri))
+                {
+                    if (strPrefferSize == "LargeImage")
+                        strUrl = MyWebPage.GetStylePath(app, "blankcover_large.png");
+                    else
+                        strUrl = MyWebPage.GetStylePath(app, "blankcover_medium.png");
+
+                }
+                else
+                    strUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri);
+
+                text.Append("<div class='issue_cover' ><img src='" + strUrl + "' alt='封面图像' ></img><div class='issue_no'>" + HttpUtility.HtmlEncode(s.Volume) + "</div></div>");
+            }
+
+            LiteralControl literal = new LiteralControl();
+            literal.ID = "";
+            literal.Text = "<div class='issue_cover_frame' >" + text.ToString() + "</div>";
+            line.Controls.Add(literal);
+
+            _issue_query_strings.Clear();
+        }
+
         List<string> m_hidecolumns = null;
 
         void SessionInfo_ItemLoad(object sender, ItemLoadEventArgs e)
@@ -1351,7 +1446,6 @@ namespace DigitalPlatform.OPAC.Web
             LiteralControl left = (LiteralControl)line.FindControl("line" + Convert.ToString(e.Index) + "left");
             CheckBox checkbox = (CheckBox)line.FindControl("line" + Convert.ToString(e.Index) + "checkbox");
             LiteralControl right = (LiteralControl)line.FindControl("line" + Convert.ToString(e.Index) + "right");
-
 
             string strResult = "";
 
@@ -1612,6 +1706,23 @@ namespace DigitalPlatform.OPAC.Web
             string strVolume = DomUtil.GetElementText(dom.DocumentElement, "volume");
             if (this.m_hidecolumns.IndexOf("volume") == -1)
                 strResult += "<td class='volume'>" + (strVolume == "" ? "&nbsp;" : strVolume) + "</td>";
+
+            // 累积期定位字符串
+            if (string.IsNullOrEmpty(strVolume) == false)
+            {
+                string strIssueDbName = GetIssueDbName(
+                    app,
+                    e.Path);
+                if (string.IsNullOrEmpty(strIssueDbName) == false)
+                {
+                    List<IssueString> query_strings = ScriptUtil.GetIssueQueryStringFromItemXml(dom);
+                    foreach (IssueString s in query_strings)
+                    {
+                        if (IndexOf(_issue_query_strings, s.Query) == -1)
+                            _issue_query_strings.Add(s);
+                    }
+                }
+            }
 
             // 价格
             string strPrice = DomUtil.GetElementText(dom.DocumentElement, "price");
@@ -1950,11 +2061,27 @@ namespace DigitalPlatform.OPAC.Web
             strResult += "</tr>";
 
             right.Text = strResult;
-
             return;
         ERROR1:
             // tempOutput += strError;
             this.Page.Response.Write(strError);
+        }
+
+        // 出现过的期 检索字符串
+        // 格式为 年份|期号|...
+        List<IssueString> _issue_query_strings = new List<IssueString>();
+
+        static int IndexOf(List<IssueString> strings, string query)
+        {
+            int i = 0;
+            foreach (IssueString s in strings)
+            {
+                if (s.Query == query)
+                    return i;
+                i++;
+            }
+
+            return -1;
         }
 
         public static string GetDisplayPublishTime(string strPublishTime)

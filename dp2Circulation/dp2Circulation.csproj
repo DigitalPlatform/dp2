@@ -915,7 +915,6 @@
     <Compile Include="Issue\TestJidaoForm.Designer.cs">
       <DependentUpon>TestJidaoForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Issue\VolumeInfo.cs" />
     <Compile Include="ItemHandOver\SelectTargetBiblioDbNameDialog.cs">
       <SubType>Form</SubType>
     </Compile>

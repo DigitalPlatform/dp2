@@ -19085,7 +19085,7 @@ strBookPrice);    // 图书价格
                 out strError);
             if (lRet == -1)
             {
-                strError = "GetRes() (for metadata) Error : " + strError;
+                strError = "GetRes() '"+strPath+"' (for metadata) Error : " + strError;
                 return -1;
             }
 

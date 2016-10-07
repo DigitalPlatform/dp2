@@ -2763,7 +2763,7 @@ namespace dp2Circulation
                 if (bMissing == true)
                 {
                     // 年
-                    string strYear = IssueUtil.GetYearPart(strPublishTime);
+                    string strYear = dp2StringUtil.GetYearPart(strPublishTime);
                     missing_volumes.Add("y." + strYear + "," + strVolumeString);
                 }
 

@@ -3042,7 +3042,7 @@ namespace dp2Circulation
 
                         // volume 其实是当年期号、总期号、卷号在一起的一个字符串
                         string strVolume = VolumeInfo.BuildItemVolumeString(
-                            IssueUtil.GetYearPart(issue_item.PublishTime),
+                            dp2StringUtil.GetYearPart(issue_item.PublishTime),
                             issue_item.Issue,
                             issue_item.Zong,
                             issue_item.Volume);
