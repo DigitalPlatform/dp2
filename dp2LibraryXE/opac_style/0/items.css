@@ -195,6 +195,8 @@ DIV.issue_cover
     padding: 0.07em;
     margin: 0.25em;
     background-color: #e0e0e0;
+
+    text-align: center;
 }
 
 DIV.issue_cover div.issue_no

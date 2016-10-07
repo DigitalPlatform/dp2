@@ -1341,7 +1341,8 @@ namespace DigitalPlatform.OPAC.Web
             if (line == null)
                 return;
 
-            string strPrefferSize = "LargeImage";   // "MediumImage", // "LargeImage",
+            bool displayBlank = this.DisplayBlankIssueCover;
+            string strPrefferSize = this.IssueCoverSize;    //  "MediumImage"; // "LargeImage",
 
             StringBuilder text = new StringBuilder();
             foreach (IssueString s in _issue_query_strings)
@@ -1372,11 +1373,13 @@ namespace DigitalPlatform.OPAC.Web
 
                 if (string.IsNullOrEmpty(strUri))
                 {
+                    if (displayBlank == false)
+                        continue;
+
                     if (strPrefferSize == "LargeImage")
                         strUrl = MyWebPage.GetStylePath(app, "blankcover_large.png");
                     else
                         strUrl = MyWebPage.GetStylePath(app, "blankcover_medium.png");
-
                 }
                 else
                     strUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri);
@@ -2112,6 +2115,44 @@ namespace DigitalPlatform.OPAC.Web
                 strPublishTime = strPublishTime.Insert(4, "-");
 
             return strPublishTime;
+        }
+
+        bool DisplayBlankIssueCover
+        {
+            get
+            {
+                bool bDefault = true;
+                OpacApplication app = (OpacApplication)this.Page.Application["app"];
+                if (app == null)
+                    return bDefault;
+
+                return DomUtil.GetBooleanParam(
+                    app.WebUiDom.DocumentElement,
+                    "itemsControl",
+                    "displayBlankIssueCover",
+                    bDefault);
+            }
+        }
+
+        string IssueCoverSize
+        {
+            get
+            {
+                string strDefaultValue = "LargeImage";
+                OpacApplication app = (OpacApplication)this.Page.Application["app"];
+                if (app == null)
+                    return strDefaultValue;
+
+                XmlNode node = app.WebUiDom.DocumentElement.SelectSingleNode(
+    "itemsControl/@issueCoverSize");
+                if (node == null)
+                    return strDefaultValue;
+
+                string strValue = node.Value;
+                if (string.IsNullOrEmpty(strValue) == true)
+                    return strDefaultValue;
+                return strValue;
+            }
         }
 
         // 是否要显示空的表格？
