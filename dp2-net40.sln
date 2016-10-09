@@ -172,6 +172,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpgradeDt1000ToDp2", "Upgra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EloamPicture", "EloamPicture\EloamPicture.csproj", "{F1A2D12A-C627-4406-B6BC-D1824F38BA5B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.DataMining", "DigitalPlatform.DataMining\DigitalPlatform.DataMining.csproj", "{6D057A41-DF66-4986-925A-4C59DE86A1DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -1322,6 +1324,21 @@ Global
 		{F1A2D12A-C627-4406-B6BC-D1824F38BA5B}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{F1A2D12A-C627-4406-B6BC-D1824F38BA5B}.Test|Mixed Platforms.Build.0 = Release|Any CPU
 		{F1A2D12A-C627-4406-B6BC-D1824F38BA5B}.Test|x86.ActiveCfg = Release|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Release|x86.ActiveCfg = Release|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Test|Any CPU.ActiveCfg = Release|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Test|Any CPU.Build.0 = Release|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Test|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Test|Mixed Platforms.Build.0 = Release|Any CPU
+		{6D057A41-DF66-4986-925A-4C59DE86A1DC}.Test|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

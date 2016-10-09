@@ -640,6 +640,9 @@ namespace dp2Circulation
             this.issueControl1.GenerateData -= new GenerateDataEventHandler(entityControl1_GenerateData);
             this.issueControl1.GenerateData += new GenerateDataEventHandler(entityControl1_GenerateData);
 
+            this.issueControl1.GetBiblio -= issueControl1_GetBiblio;
+            this.issueControl1.GetBiblio += issueControl1_GetBiblio;
+
             ////this.issueControl1.Channel = this.Channel;
             this.issueControl1.Stop = this.Progress;
             this.issueControl1.MainForm = this.MainForm;
@@ -820,6 +823,12 @@ true);
                 selected_templates.Build(strSelectedTemplates);
             }
 
+        }
+
+        void issueControl1_GetBiblio(object sender, GetBiblioEventArgs e)
+        {
+            e.Data = this.MarcEditor.Marc;
+            e.Syntax = this.MarcSyntax;
         }
 
         void binaryResControl1_ReturnChannel(object sender, ReturnChannelEventArgs e)

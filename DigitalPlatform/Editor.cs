@@ -40,4 +40,18 @@ namespace DigitalPlatform
         public bool Handled = false;
     }
 
+    //
+
+    // 获得书目信息
+    public delegate void GetBiblioEventHandler(object sender,
+        GetBiblioEventArgs e);
+
+    public class GetBiblioEventArgs : EventArgs
+    {
+        // 数据记录
+        public string Data { get; set; }
+        // 格式。unimarc/usmarc/xml
+        public string Syntax { get; set; }
+    }
+
 }

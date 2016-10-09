@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-using DigitalPlatform.Text;
-
-namespace DigitalPlatform.LibraryClient
+namespace DigitalPlatform.Text
 {
     // 期刊业务
     // 一个具体的卷期信息

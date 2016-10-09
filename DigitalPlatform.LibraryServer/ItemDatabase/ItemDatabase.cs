@@ -2500,7 +2500,7 @@ out strError);
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分
         //      strStyle    "onlygetpath"   仅返回每个路径(OldRecPath)
         //                  "getfirstxml"   是对onlygetpath的补充，仅获得第一个元素的XML记录，其余的依然只返回路径
-        //                  "@query:父记录+期号|..." 使用特定的检索途径和检索词。...部分表示检索词，例如 1|2005|1|，默认前方一致
+        //                  "query:父记录+期号|..." 使用特定的检索途径和检索词。...部分表示检索词，例如 1|2005|1|，默认前方一致
         //      items 返回的事项信息数组
         // 权限：权限要在API外面判断(需要有get...s权限)。
         // return:

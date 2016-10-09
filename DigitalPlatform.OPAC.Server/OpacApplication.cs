@@ -1317,7 +1317,7 @@ namespace DigitalPlatform.OPAC.Server
                         this.dp2LibraryVersion = value;
                         this.dp2LibraryUID = strUID;
 
-                        double base_version = 2.40; // 2.18
+                        double base_version = 2.86; // 2.18
                         if (value < base_version)
                         {
                             strError = "当前 dp2OPAC 版本需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 '" + strVersion + "' )。请立即升级 dp2Library 到最新版本。";

@@ -21,6 +21,9 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.DataMining;
+using DigitalPlatform.Marc;
+using System.IO;
 
 namespace dp2Circulation
 {
@@ -29,6 +32,9 @@ namespace dp2Circulation
     /// </summary>
     internal partial class BindingControl : Control
     {
+        // 2016/10/8
+        public event GetBiblioEventHandler GetBiblio = null;
+
         // 封面图像 图像管理器
         public ImageManager ImageManager { get; set; }
 
@@ -5501,30 +5507,45 @@ namespace dp2Circulation
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // 从剪贴板插入封面图像
-            menuItem = new ToolStripMenuItem(" 从剪贴板插入封面图像(&C)");
-            menuItem.Tag = point;
-            menuItem.Click += new EventHandler(menuItem_insertCoverImageFromClipboard_Click);
-            if (bHasIssueSelected == false)
-                menuItem.Enabled = false;
+            // 封面图像
+            menuItem = new ToolStripMenuItem(" 封面图像");
             contextMenu.Items.Add(menuItem);
 
-            // 从摄像头插入封面图像
-            menuItem = new ToolStripMenuItem(" 从摄像头插入封面图像(&C)");
-            menuItem.Tag = point;
-            menuItem.Click += new EventHandler(menuItem_insertCoverImageFromCamera_Click);
-            if (bHasIssueSelected == false)
-                menuItem.Enabled = false;
-            contextMenu.Items.Add(menuItem);
+            {
+                // 从剪贴板插入封面图像
+                ToolStripMenuItem subMenuItem = new ToolStripMenuItem();
+                subMenuItem = new ToolStripMenuItem(" 从剪贴板插入(&C)");
+                subMenuItem.Tag = point;
+                subMenuItem.Click += new EventHandler(menuItem_insertCoverImageFromClipboard_Click);
+                if (bHasIssueSelected == false)
+                    subMenuItem.Enabled = false;
+                menuItem.DropDown.Items.Add(subMenuItem);
+
+                // 从摄像头插入封面图像
+                subMenuItem = new ToolStripMenuItem(" 从摄像头插入(&A)");
+                subMenuItem.Tag = point;
+                subMenuItem.Click += new EventHandler(menuItem_insertCoverImageFromCamera_Click);
+                if (bHasIssueSelected == false)
+                    subMenuItem.Enabled = false;
+                menuItem.DropDown.Items.Add(subMenuItem);
+
+                // 从龙源期刊插入封面图像
+                subMenuItem = new ToolStripMenuItem(" 从龙源期刊插入(&A)");
+                subMenuItem.Tag = point;
+                subMenuItem.Click += new EventHandler(menuItem_insertCoverImageFromLongyuanQikan_Click);
+                if (bHasIssueSelected == false)
+                    subMenuItem.Enabled = false;
+                menuItem.DropDown.Items.Add(subMenuItem);
 
 
-            // 删除封面图像
-            menuItem = new ToolStripMenuItem(" 删除封面图像(&C)");
-            menuItem.Tag = point;
-            menuItem.Click += new EventHandler(menuItem_deleteCoverImage_Click);
-            if (bHasIssueSelected == false)
-                menuItem.Enabled = false;
-            contextMenu.Items.Add(menuItem);
+                // 删除封面图像
+                subMenuItem = new ToolStripMenuItem(" 删除(&D)");
+                subMenuItem.Tag = point;
+                subMenuItem.Click += new EventHandler(menuItem_deleteCoverImage_Click);
+                if (bHasIssueSelected == false)
+                    subMenuItem.Enabled = false;
+                menuItem.DropDown.Items.Add(subMenuItem);
+            }
 
             // 切换期布局
             menuItem = new ToolStripMenuItem(" 切换布局(&S)");
@@ -9308,6 +9329,106 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        void menuItem_insertCoverImageFromLongyuanQikan_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            List<IssueBindingItem> selected_issues = new List<IssueBindingItem>();
+            foreach (IssueBindingItem issue in this.SelectedIssues)
+            {
+                // 跳过自由期
+                if (String.IsNullOrEmpty(issue.PublishTime) == true)
+                    continue;
+
+                selected_issues.Add(issue);
+            }
+
+#if NO
+            // 从剪贴板中取得图像对象
+            List<Image> images = null;
+            if (images == null)
+            {
+                strError = "。无法创建封面图像";
+                goto ERROR1;
+            }
+#endif
+            string strISSN = GetIssn();
+            if (string.IsNullOrEmpty(strISSN))
+            {
+                strError = "本刊书目记录中缺乏 ISSN 号，因此无法获取封面图像";
+                goto ERROR1;
+            }
+
+            {
+                int i = 0;
+                foreach (IssueBindingItem issue in selected_issues)
+                {
+                    string strImageUrl = "";
+                    int nRet = LongyuanQikan.GetCoverImageUrl(
+                        this,
+                        strISSN,
+                        dp2StringUtil.GetYearPart(issue.PublishTime),
+                        issue.Issue,
+                        out strImageUrl,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    string strLocalFileName = Path.GetTempFileName();
+                    try
+                    {
+                        // return:
+                        //      -1  出错
+                        //      0   没有找到
+                        //      1   找到
+                        nRet = LongyuanQikan.DownloadImageFile(strImageUrl,
+                            strLocalFileName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 0)
+                        {
+                            strError = "图像 " + strImageUrl + " 没有找到";
+                            goto ERROR1;
+                        }
+                        using (Image image = Image.FromFile(strLocalFileName))
+                        {
+                            if (issue.SetCoverImage(image, out strError) == -1)
+                                goto ERROR1;
+                        }
+                    }
+                    finally
+                    {
+                        File.Delete(strLocalFileName);
+                    }
+
+                    i++;
+                }
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        string GetIssn()
+        {
+            var func = this.GetBiblio;
+            if (func != null)
+            {
+                GetBiblioEventArgs e = new GetBiblioEventArgs();
+                func(this, e);
+                if (string.IsNullOrEmpty(e.Data))
+                    return "";
+                MarcRecord record = new MarcRecord(e.Data);
+                if (e.Syntax == "unimarc")
+                    return record.select("field[@name='011']/subfield[@name='a']").FirstContent;
+                if (e.Syntax == "usmarc")
+                    return record.select("field[@name='020']/subfield[@name='a']").FirstContent;
+            }
+            return "";
         }
 
         // 恢复若干个期记录

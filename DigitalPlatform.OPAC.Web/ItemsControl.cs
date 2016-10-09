@@ -1718,7 +1718,7 @@ namespace DigitalPlatform.OPAC.Web
                     e.Path);
                 if (string.IsNullOrEmpty(strIssueDbName) == false)
                 {
-                    List<IssueString> query_strings = ScriptUtil.GetIssueQueryStringFromItemXml(dom);
+                    List<IssueString> query_strings = dp2StringUtil.GetIssueQueryStringFromItemXml(dom);
                     foreach (IssueString s in query_strings)
                     {
                         if (IndexOf(_issue_query_strings, s.Query) == -1)

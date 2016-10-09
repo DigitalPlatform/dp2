@@ -5242,6 +5242,7 @@ namespace dp2Library
         //      lCount  总共返回几个。0和-1都表示全部返回(0是为了兼容旧API)
         //      strStyle    "onlygetpath"   仅返回每个路径(OldRecPath)
         //                  "getfirstxml"   是对onlygetpath的补充，仅获得第一个元素的XML记录，其余的依然只返回路径
+        //                  "query:父记录+期号|..." 使用特定的检索途径和检索词。...部分表示检索词，例如 1|2005|1|，默认前方一致
         //      issueinfos 返回的期信息数组
         // 权限：需要有getissueinfo权限(兼容getissues权限)
         public LibraryServerResult GetIssues(

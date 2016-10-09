@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>100</ApplicationRevision>
+    <ApplicationRevision>101</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -2756,6 +2756,10 @@
     <ProjectReference Include="..\DigitalPlatform.CommonDialog\DigitalPlatform.CommonDialog.csproj">
       <Project>{3DCFCA4D-0205-4684-A9A6-1DB8640CD579}</Project>
       <Name>DigitalPlatform.CommonDialog</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.DataMining\DigitalPlatform.DataMining.csproj">
+      <Project>{6d057a41-df66-4986-925a-4c59de86a1dc}</Project>
+      <Name>DigitalPlatform.DataMining</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.dp2.Statis\DigitalPlatform.dp2.Statis.csproj">
       <Project>{060DD22D-8C7A-4D17-AC72-06B45AE65174}</Project>
