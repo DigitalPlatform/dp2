@@ -23,6 +23,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonDialog;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -311,7 +312,7 @@ namespace dp2Circulation
                     strZongAndVolume += "总." + this.Zong;
                 }
 
-                string strYear = IssueUtil.GetYearPart(this.PublishTime);
+                string strYear = dp2StringUtil.GetYearPart(this.PublishTime);
                 return strYear + "年第" + this.Issue + "期"
                     + (String.IsNullOrEmpty(strZongAndVolume) == false ?
                         "(" + strZongAndVolume + ")" : "");
@@ -1167,7 +1168,7 @@ namespace dp2Circulation
 
             string strVolumeString =
     VolumeInfo.BuildItemVolumeString(
-    IssueUtil.GetYearPart(this.PublishTime),
+    dp2StringUtil.GetYearPart(this.PublishTime),
     this.Issue,
             this.Zong,
             this.Volume);
@@ -4009,7 +4010,7 @@ namespace dp2Circulation
                     {
                         string strVolumeString =
 VolumeInfo.BuildItemVolumeString(
-IssueUtil.GetYearPart(this.PublishTime),
+dp2StringUtil.GetYearPart(this.PublishTime),
 this.Issue,
 this.Zong,
 this.Volume);
@@ -5401,7 +5402,7 @@ rectFrame);
                     }
                     else
                     {
-                        strYear = IssueUtil.GetYearPart(strPublishTime);
+                        strYear = dp2StringUtil.GetYearPart(strPublishTime);
                         strNo = this.Issue;
                     }
 
@@ -6532,7 +6533,7 @@ rectFrame);
 
             // volume 其实是当年期号、总期号、卷号在一起的一个字符串
             string strVolume = VolumeInfo.BuildItemVolumeString(
-                IssueUtil.GetYearPart(issue.PublishTime),
+                dp2StringUtil.GetYearPart(issue.PublishTime),
                 issue.Issue,
                 issue.Zong,
                 issue.Volume);
@@ -6766,7 +6767,7 @@ rectFrame);
                     && String.IsNullOrEmpty(issue.PublishTime) == false)
                 {
                     string strTempVolumeString = VolumeInfo.BuildItemVolumeString(
-                        IssueUtil.GetYearPart(issue.PublishTime),
+                        dp2StringUtil.GetYearPart(issue.PublishTime),
                         issue.Issue,
                         issue.Zong,
                         issue.Volume);
@@ -6833,7 +6834,7 @@ rectFrame);
                 }
 
                 Debug.Assert(String.IsNullOrEmpty(issue.PublishTime) == false, "");
-                string strYear = IssueUtil.GetYearPart(issue.PublishTime);
+                string strYear = dp2StringUtil.GetYearPart(issue.PublishTime);
 
                 List<string> no_list = (List<string>)no_list_table[strYear];
                 if (no_list == null)
@@ -7032,7 +7033,7 @@ rectFrame);
                     DomUtil.SetAttr(node, "publishTime", cell.Container.PublishTime);
 
                     string strVolume = VolumeInfo.BuildItemVolumeString(
-                        IssueUtil.GetYearPart(cell.Container.PublishTime),
+                        dp2StringUtil.GetYearPart(cell.Container.PublishTime),
                         cell.Container.Issue,
                         cell.Container.Zong,
                         cell.Container.Volume);

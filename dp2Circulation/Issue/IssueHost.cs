@@ -13,6 +13,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 // using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 
 /*
  * 1) 需要输出一个纯文本文件，里面详细描述了每种期刊的期分布情况，和探测出缺期的原理，便于调试。要区分已经建立的期节点和(根据订购信息)预测的期节点
@@ -2355,8 +2356,8 @@ out strError);
 
             // 2012/9/1
             {
-                string strXYearPart = IssueUtil.GetYearPart(x.PublishTime);
-                string strYYearPart = IssueUtil.GetYearPart(y.PublishTime);
+                string strXYearPart = dp2StringUtil.GetYearPart(x.PublishTime);
+                string strYYearPart = dp2StringUtil.GetYearPart(y.PublishTime);
 
                 /*
                 int nMaxWidth = Math.Max(x.Issue.Length, y.Issue.Length);
@@ -2399,8 +2400,8 @@ out strError);
         int IComparer<OneIssue>.Compare(OneIssue x, OneIssue y)
         {
             {
-                string strXYearPart = IssueUtil.GetYearPart(x.PublishTime);
-                string strYYearPart = IssueUtil.GetYearPart(y.PublishTime);
+                string strXYearPart = dp2StringUtil.GetYearPart(x.PublishTime);
+                string strYYearPart = dp2StringUtil.GetYearPart(y.PublishTime);
 
                 /*
                 int nMaxWidth = Math.Max(x.Issue.Length, y.Issue.Length);

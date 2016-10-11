@@ -21,12 +21,12 @@ using System.IdentityModel.Claims;
 using System.IdentityModel.Selectors;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections;
+using System.ServiceModel.Description;
+using System.Web;
 
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
-using System.ServiceModel.Description;
-using System.Web;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -7596,19 +7596,21 @@ out strError);
             return 0;
         }
 
-        // 2009/11/24
+        // 2016/9/26 增加 if xxx != null 判断
         static string BuildMetadata(string strMime,
             string strLocalPath)
         {
             // string strMetadata = "<file mimetype='" + strMime + "' localpath='" + strLocalPath + "'/>";
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<file />");
-            dom.DocumentElement.SetAttribute(
-                "mimetype",
-                strMime);
-            dom.DocumentElement.SetAttribute(
-                "localpath",
-                strLocalPath);
+            if (strMime != null)
+                dom.DocumentElement.SetAttribute(
+                    "mimetype",
+                    strMime);
+            if (strLocalPath != null)
+                dom.DocumentElement.SetAttribute(
+                    "localpath",
+                    strLocalPath);
             return dom.DocumentElement.OuterXml;
         }
 
@@ -9534,6 +9536,70 @@ out strError);
             finally
             {
                 this.EndSearch();
+            }
+        }
+
+        // 2016/9/19
+        public long Dir(string strResPath,
+    long lStart,
+    long lLength,
+    string strLang,
+    string strStyle,
+    out ResInfoItem[] items,
+    out ErrorCodeValue kernel_errorcode,
+            out string strError)
+        {
+            strError = "";
+            items = null;
+            kernel_errorcode = ErrorCodeValue.NoError;
+
+        REDO:
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginDir(
+                    strResPath,
+                    lStart,
+                    lLength,
+                    strLang,
+                    strStyle,
+                    null,
+                    null);
+
+                for (; ; )
+                {
+                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+
+                    if (soapresult.IsCompleted)
+                        break;
+                }
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndDir(
+                    out items,
+                    out kernel_errorcode,
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
             }
         }
 

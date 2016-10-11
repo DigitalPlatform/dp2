@@ -830,5 +830,15 @@ SessionMode = SessionMode.NotAllowed)]
     string strStyle,
     string strResultTypeList,
     out string[] results);
+
+        [OperationContract]
+        LibraryServerResult Dir(string strResPath,
+        long lStart,
+        long lLength,
+        string strLang,
+        string strStyle,
+        out ResInfoItem[] items,
+        out DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode);
+
     }
 }

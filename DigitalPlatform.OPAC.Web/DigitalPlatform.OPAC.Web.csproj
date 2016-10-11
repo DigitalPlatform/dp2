@@ -118,6 +118,10 @@
       <Project>{86E0817D-79A4-4769-B450-C8352D0D1907}</Project>
       <Name>DigitalPlatform.ResultSet</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Script\DigitalPlatform.Script.csproj">
+      <Project>{5107de16-dda1-4606-b3a3-840b24428329}</Project>
+      <Name>DigitalPlatform.Script</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
       <Name>DigitalPlatform.Text</Name>

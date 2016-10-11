@@ -19,6 +19,11 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
+using DigitalPlatform.Drawing;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.DataMining;
+using DigitalPlatform.Marc;
+using System.IO;
 
 namespace dp2Circulation
 {
@@ -27,6 +32,9 @@ namespace dp2Circulation
     /// </summary>
     internal partial class BindingControl : Control
     {
+        // 2016/10/8
+        public event GetBiblioEventHandler GetBiblio = null;
+
         // 封面图像 图像管理器
         public ImageManager ImageManager { get; set; }
 
@@ -2231,7 +2239,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(issue.PublishTime) == true)
                     continue;
 
-                string strYearPart = IssueUtil.GetYearPart(issue.PublishTime);
+                string strYearPart = dp2StringUtil.GetYearPart(issue.PublishTime);
 
                 // 检查出版时间
                 if (strYearPart != info.Year)
@@ -5499,21 +5507,45 @@ namespace dp2Circulation
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // 从剪贴板插入封面图像
-            menuItem = new ToolStripMenuItem(" 从剪贴板插入封面图像(&C)");
-            menuItem.Tag = point;
-            menuItem.Click += new EventHandler(menuItem_insertCoverImageFromClipboard_Click);
-            if (bHasIssueSelected == false)
-                menuItem.Enabled = false;
+            // 封面图像
+            menuItem = new ToolStripMenuItem(" 封面图像");
             contextMenu.Items.Add(menuItem);
 
-            // 从剪贴板插入封面图像
-            menuItem = new ToolStripMenuItem(" 删除封面图像(&C)");
-            menuItem.Tag = point;
-            menuItem.Click += new EventHandler(menuItem_deleteCoverImage_Click);
-            if (bHasIssueSelected == false)
-                menuItem.Enabled = false;
-            contextMenu.Items.Add(menuItem);
+            {
+                // 从剪贴板插入封面图像
+                ToolStripMenuItem subMenuItem = new ToolStripMenuItem();
+                subMenuItem = new ToolStripMenuItem(" 从剪贴板插入(&C)");
+                subMenuItem.Tag = point;
+                subMenuItem.Click += new EventHandler(menuItem_insertCoverImageFromClipboard_Click);
+                if (bHasIssueSelected == false)
+                    subMenuItem.Enabled = false;
+                menuItem.DropDown.Items.Add(subMenuItem);
+
+                // 从摄像头插入封面图像
+                subMenuItem = new ToolStripMenuItem(" 从摄像头插入(&A)");
+                subMenuItem.Tag = point;
+                subMenuItem.Click += new EventHandler(menuItem_insertCoverImageFromCamera_Click);
+                if (bHasIssueSelected == false)
+                    subMenuItem.Enabled = false;
+                menuItem.DropDown.Items.Add(subMenuItem);
+
+                // 从龙源期刊插入封面图像
+                subMenuItem = new ToolStripMenuItem(" 从龙源期刊插入(&A)");
+                subMenuItem.Tag = point;
+                subMenuItem.Click += new EventHandler(menuItem_insertCoverImageFromLongyuanQikan_Click);
+                if (bHasIssueSelected == false)
+                    subMenuItem.Enabled = false;
+                menuItem.DropDown.Items.Add(subMenuItem);
+
+
+                // 删除封面图像
+                subMenuItem = new ToolStripMenuItem(" 删除(&D)");
+                subMenuItem.Tag = point;
+                subMenuItem.Click += new EventHandler(menuItem_deleteCoverImage_Click);
+                if (bHasIssueSelected == false)
+                    subMenuItem.Enabled = false;
+                menuItem.DropDown.Items.Add(subMenuItem);
+            }
 
             // 切换期布局
             menuItem = new ToolStripMenuItem(" 切换布局(&S)");
@@ -6197,7 +6229,7 @@ namespace dp2Circulation
             // 修改全部下属格子的volume string和publish time
             string strNewVolumeString =
     VolumeInfo.BuildItemVolumeString(
-    IssueUtil.GetYearPart(issue.PublishTime),
+    dp2StringUtil.GetYearPart(issue.PublishTime),
     issue.Issue,
 issue.Zong,
 issue.Volume);
@@ -6917,8 +6949,8 @@ issue.Volume);
                         strNextIssue = "1";
                         // 2010/3/16
                         // 如果预测的下一期出版时间不是参考期的后一年的时间，则需要强制修改
-                        string strNextYear = IssueUtil.GetYearPart(strNextPublishTime);
-                        string strRefYear = IssueUtil.GetYearPart(ref_issue.PublishTime);
+                        string strNextYear = dp2StringUtil.GetYearPart(strNextPublishTime);
+                        string strRefYear = dp2StringUtil.GetYearPart(ref_issue.PublishTime);
 
                         // 2012/5/14
                         // 如果参考期所在年份的各期之间已经跨年，则不必作修正
@@ -6927,7 +6959,7 @@ issue.Volume);
                         IssueBindingItem year_first_issue = GetYearFirstIssue(ref_issue);
                         if (year_first_issue != null)
                         {
-                            strRefFirstYear = IssueUtil.GetYearPart(year_first_issue.PublishTime);
+                            strRefFirstYear = dp2StringUtil.GetYearPart(year_first_issue.PublishTime);
                         }
 
                         if (string.Compare(strNextYear, strRefYear) <= 0
@@ -7456,8 +7488,8 @@ issue.Volume);
 
                     // 2010/3/16
                     // 如果预测的下一期出版时间不是参考期的后一年的时间，则需要强制修改
-                    string strNextYear = IssueUtil.GetYearPart(strNextPublishTime);
-                    string strRefYear = IssueUtil.GetYearPart(ref_issue.PublishTime);
+                    string strNextYear = dp2StringUtil.GetYearPart(strNextPublishTime);
+                    string strRefYear = dp2StringUtil.GetYearPart(ref_issue.PublishTime);
 
                     // 2012/5/14
                     // 如果参考期所在年份的各期之间已经跨年，则不必作修正
@@ -7466,7 +7498,7 @@ issue.Volume);
                     IssueBindingItem year_first_issue = GetYearFirstIssue(ref_issue);
                     if (year_first_issue != null)
                     {
-                        strRefFirstYear = IssueUtil.GetYearPart(year_first_issue.PublishTime);
+                        strRefFirstYear = dp2StringUtil.GetYearPart(year_first_issue.PublishTime);
                     }
 
                     if (string.Compare(strNextYear, strRefYear) <= 0
@@ -8133,7 +8165,7 @@ issue.Volume);
                 return -1;
             }
 
-            string strCurYear = IssueUtil.GetYearPart(strPublishTime);
+            string strCurYear = dp2StringUtil.GetYearPart(strPublishTime);
 
             for (int i = 0; i < this.Issues.Count; i++)
             {
@@ -8156,7 +8188,7 @@ issue.Volume);
 
                 // 在当年范围内检查当年期号、在其他年范围内检查卷号
                 {
-                    string strYear = IssueUtil.GetYearPart(issue.PublishTime);
+                    string strYear = dp2StringUtil.GetYearPart(issue.PublishTime);
                     if (strYear == strCurYear)
                     {
                         if (strIssue == issue.Issue
@@ -9153,6 +9185,79 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
+        void menuItem_insertCoverImageFromCamera_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            List<IssueBindingItem> selected_issues = new List<IssueBindingItem>();
+            foreach (IssueBindingItem issue in this.SelectedIssues)
+            {
+                // 跳过自由期
+                if (String.IsNullOrEmpty(issue.PublishTime) == true)
+                    continue;
+
+                selected_issues.Add(issue);
+            }
+
+            List<Image> images = new List<Image>();
+            {
+                Image image = null;
+                Program.MainForm.DisableCamera();
+                try
+                {
+                    // 注： new CameraClipDialog() 可能会抛出异常
+                    using (CameraClipDialog dlg = new CameraClipDialog())
+                    {
+                        dlg.Font = this.Font;
+
+                        dlg.CurrentCamera = Program.MainForm.AppInfo.GetString(
+                            "bindingControl",
+                            "current_camera",
+                            "");
+
+                        Program.MainForm.AppInfo.LinkFormState(dlg, "CameraClipDialog_state");
+                        dlg.ShowDialog(this);
+                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
+
+                        Program.MainForm.AppInfo.SetString(
+                            "bindingControl",
+                            "current_camera",
+                            dlg.CurrentCamera);
+
+                        if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                            return;
+
+                        image = dlg.Image;
+                    }
+                }
+                finally
+                {
+                    Application.DoEvents();
+
+                    Program.MainForm.EnableCamera();
+                }
+
+                images.Add(image);
+            }
+
+            {
+                int i = 0;
+                foreach (IssueBindingItem issue in selected_issues)
+                {
+                    if (i >= images.Count)
+                        break;
+                    Image image = images[i];
+                    if (issue.SetCoverImage(image, out strError) == -1)
+                        goto ERROR1;
+
+                    i++;
+                }
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
 
         void menuItem_insertCoverImageFromClipboard_Click(object sender, EventArgs e)
         {
@@ -9168,6 +9273,15 @@ MessageBoxDefaultButton.Button2);
                 selected_issues.Add(issue);
             }
 
+            // 从剪贴板中取得图像对象
+            List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
+            if (images == null)
+            {
+                strError = "。无法创建封面图像";
+                goto ERROR1;
+            }
+
+#if NO
             // 从剪贴板中取得图像对象
             List<Image> images = new List<Image>();
             IDataObject obj1 = Clipboard.GetDataObject();
@@ -9196,6 +9310,7 @@ MessageBoxDefaultButton.Button2);
                 strError = "当前 Windows 剪贴板中没有图形对象。无法创建封面图像";
                 goto ERROR1;
             }
+#endif
 
             {
                 int i = 0;
@@ -9214,6 +9329,106 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        void menuItem_insertCoverImageFromLongyuanQikan_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            List<IssueBindingItem> selected_issues = new List<IssueBindingItem>();
+            foreach (IssueBindingItem issue in this.SelectedIssues)
+            {
+                // 跳过自由期
+                if (String.IsNullOrEmpty(issue.PublishTime) == true)
+                    continue;
+
+                selected_issues.Add(issue);
+            }
+
+#if NO
+            // 从剪贴板中取得图像对象
+            List<Image> images = null;
+            if (images == null)
+            {
+                strError = "。无法创建封面图像";
+                goto ERROR1;
+            }
+#endif
+            string strISSN = GetIssn();
+            if (string.IsNullOrEmpty(strISSN))
+            {
+                strError = "本刊书目记录中缺乏 ISSN 号，因此无法获取封面图像";
+                goto ERROR1;
+            }
+
+            {
+                int i = 0;
+                foreach (IssueBindingItem issue in selected_issues)
+                {
+                    string strImageUrl = "";
+                    int nRet = LongyuanQikan.GetCoverImageUrl(
+                        this,
+                        strISSN,
+                        dp2StringUtil.GetYearPart(issue.PublishTime),
+                        issue.Issue,
+                        out strImageUrl,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    string strLocalFileName = Path.GetTempFileName();
+                    try
+                    {
+                        // return:
+                        //      -1  出错
+                        //      0   没有找到
+                        //      1   找到
+                        nRet = LongyuanQikan.DownloadImageFile(strImageUrl,
+                            strLocalFileName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 0)
+                        {
+                            strError = "图像 " + strImageUrl + " 没有找到";
+                            goto ERROR1;
+                        }
+                        using (Image image = Image.FromFile(strLocalFileName))
+                        {
+                            if (issue.SetCoverImage(image, out strError) == -1)
+                                goto ERROR1;
+                        }
+                    }
+                    finally
+                    {
+                        File.Delete(strLocalFileName);
+                    }
+
+                    i++;
+                }
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        string GetIssn()
+        {
+            var func = this.GetBiblio;
+            if (func != null)
+            {
+                GetBiblioEventArgs e = new GetBiblioEventArgs();
+                func(this, e);
+                if (string.IsNullOrEmpty(e.Data))
+                    return "";
+                MarcRecord record = new MarcRecord(e.Data);
+                if (e.Syntax == "unimarc")
+                    return record.select("field[@name='011']/subfield[@name='a']").FirstContent;
+                if (e.Syntax == "usmarc")
+                    return record.select("field[@name='020']/subfield[@name='a']").FirstContent;
+            }
+            return "";
         }
 
         // 恢复若干个期记录
@@ -11077,13 +11292,13 @@ MessageBoxDefaultButton.Button2);
 
             string strOldVolumeString =
                 VolumeInfo.BuildItemVolumeString(
-                IssueUtil.GetYearPart(source_issue.PublishTime),
+                dp2StringUtil.GetYearPart(source_issue.PublishTime),
                 source_issue.Issue,
                         source_issue.Zong,
                         source_issue.Volume);
             string strNewVolumeString =
                 VolumeInfo.BuildItemVolumeString(
-                IssueUtil.GetYearPart(target_issue.PublishTime),
+                dp2StringUtil.GetYearPart(target_issue.PublishTime),
                 target_issue.Issue,
             target_issue.Zong,
             target_issue.Volume);
@@ -14837,8 +15052,8 @@ Color.FromArgb(100, color)
                 return true;
 
             IssueBindingItem prev_issue = this.Issues[index - 1];
-            string strThisYear = IssueUtil.GetYearPart(issue.PublishTime);
-            string strPrevYear = IssueUtil.GetYearPart(prev_issue.PublishTime);
+            string strThisYear = dp2StringUtil.GetYearPart(issue.PublishTime);
+            string strPrevYear = dp2StringUtil.GetYearPart(prev_issue.PublishTime);
 
             if (String.Compare(strThisYear, strPrevYear) > 0)
                 return true;

@@ -228,6 +228,63 @@ namespace DigitalPlatform.Drawing
             }
         }
 
+        // 2016/10/5 改造为利用下级 Bitmap 函数
+        // parameters:
+        //      nWidth  控制折行的位置
+        public static MemoryStream BuildArtText(
+            string strText,
+            string strFontFace,
+            float fFontSize,
+            FontStyle fontstyle,
+            Color colorText,
+            Color colorBack,
+            Color colorShadow,
+            ArtEffect effect,
+            ImageFormat imageformat,
+            int nWidth = 500)
+        {
+            // 正式的图像
+            using (Bitmap bitmapDest = BuildArtText(strText,
+                strFontFace,
+                fFontSize,
+                fontstyle,
+                colorText,
+                colorBack,
+                colorShadow,
+                effect,
+                nWidth))
+            {
+                MemoryStream stream = new MemoryStream();
+
+                if (imageformat == ImageFormat.Png
+                    && colorBack == Color.Transparent)
+                {
+                    bitmapDest.MakeTransparent(colorBack);
+                }
+
+                if (imageformat == ImageFormat.Gif)
+                {
+                    bitmapDest.MakeTransparent(
+                    colorBack);
+
+                    OctreeQuantizer quantizer = new OctreeQuantizer(255, 8);
+                    quantizer.TransparentColor = colorBack;
+
+                    using (Bitmap quantized = quantizer.Quantize(bitmapDest))
+                    {
+                        quantized.Save(stream, imageformat);
+                    }
+                }
+                else
+                {
+                    bitmapDest.Save(stream, imageformat);   // System.Drawing.Imaging.ImageFormat.Jpeg
+                }
+
+                return stream;
+            }
+        }
+
+#if NO
         // parameters:
         //      nWidth  控制折行的位置
         public static MemoryStream BuildArtText(
@@ -346,6 +403,8 @@ namespace DigitalPlatform.Drawing
                 }
             }
         }
+
+#endif
 
         //根据#XXXXXX格式字符串得到Color
         public static Color ColorFromHexString(string strColor)
@@ -556,6 +615,92 @@ namespace DigitalPlatform.Drawing
             return palette;             // Send the palette back
         }
 
+        // parameters:
+        //      nWidth  控制折行的位置
+        public static Bitmap BuildArtText(
+            string strText,
+            string strFontFace,
+            float fFontSize,
+            FontStyle fontstyle,
+            Color colorText,
+            Color colorBack,
+            Color colorShadow,
+            ArtEffect effect,
+            // ImageFormat imageformat,
+            int nWidth = 500)
+        {
+            Bitmap bitmapDest = null;
 
+            SizeF size;
+            using (Font font = new Font(strFontFace, fFontSize, fontstyle))
+            {
+                using (Bitmap bitmapTemp = new Bitmap(1, 1))
+                {
+                    using (Graphics graphicsTemp = Graphics.FromImage(bitmapTemp))
+                    {
+                        size = graphicsTemp.MeasureString(
+                            strText,
+                            font,
+                            nWidth);
+
+                        if ((effect & ArtEffect.Shadow) == ArtEffect.Shadow)
+                        {
+                            size.Height += 2;
+                            size.Width += 2;
+                        }
+                    }
+                }
+
+                // 正式的图像
+                bitmapDest = new Bitmap((int)size.Width + 1, (int)size.Height + 1, PixelFormat.Format64bppPArgb);
+
+                using (Graphics objGraphics = Graphics.FromImage(bitmapDest))
+                {
+                    // colorBack = Color.FromArgb(0, colorBack);
+                    objGraphics.Clear(colorBack);// Color.Transparent
+
+                    // 
+                    objGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
+                    // System.Drawing.Text.TextRenderingHint oldrenderhint = objGraphics.TextRenderingHint;
+                    //设置高质量,低速度呈现平滑程度 
+                    objGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                    objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                    // objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+
+                    StringFormat stringFormat = new StringFormat();
+                    stringFormat.Alignment = StringAlignment.Near;
+                    stringFormat.LineAlignment = StringAlignment.Center;    // 2016/5/24
+
+                    // Color.FromArgb(128, 100, 100, 100)
+                    using (Brush objBrush = new SolidBrush(colorText)) // 透明颜色 ' Color.Black
+                    {
+                        RectangleF rect = new RectangleF(0, 0, size.Width, size.Height);
+
+                        if ((effect & ArtEffect.Shadow) == ArtEffect.Shadow)
+                        {
+                            using (Brush objBrushShadow = new SolidBrush(colorShadow))
+                            {
+                                RectangleF rectShadow = new RectangleF(rect.X,
+                                    rect.Y, rect.Width, rect.Height);
+                                rectShadow.Offset(2, 2);
+                                objGraphics.DrawString(strText,
+                                    font,
+                                    objBrushShadow,
+                                    rectShadow,
+                                    stringFormat);
+                            }
+                        }
+
+                        objGraphics.DrawString(strText,
+                            font,
+                            objBrush,
+                            rect,
+                            stringFormat);
+                    }
+                }
+            }
+
+            return bitmapDest;
+        }
     }
 }

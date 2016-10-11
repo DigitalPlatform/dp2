@@ -20,7 +20,8 @@
 // 2014/11/8    读者照片加入 img 元素加入 pending class 
 // 2014/12/27	BC:xxxxx 借阅信息列表中摘要包含图书封面
 // 2015/10/2    借阅列表和借阅历史表格中，BC:xxxx 中增加了第三段 | 书目记录路径
-// 2015/1018    this.Formats 中可以包含 style_dark 这样的风格名称。注意多个子串之间是用 ',' 分隔的
+// 2015/10/18    this.Formats 中可以包含 style_dark 这样的风格名称。注意多个子串之间是用 ',' 分隔的
+// 2016/9/11    增加微信绑定标志 icon
 
 using System;
 using System.Collections.Generic;
@@ -100,6 +101,10 @@ public class MyConverter : ReaderConverter
         string strPersonName = DomUtil.GetElementText(dom.DocumentElement, "name");
 
         string strFingerprint = DomUtil.GetElementText(dom.DocumentElement, "fingerprint");
+        
+        string strWeixinBinding = StringUtil.GetParameterByPrefix(DomUtil.GetElementText(dom.DocumentElement, "email"),
+    "weixinid",
+    ":");
 
         string strPhotoPath = "";
         if (this.RecPath != "?")
@@ -109,10 +114,16 @@ public class MyConverter : ReaderConverter
         strResult.Append("<img id='cardphoto' class='pending' name='"
             + (this.RecPath == "?" ? "?" : "object-path:" + strPhotoPath) // 这里直接用读者证条码号也可以,只不过前端处理速度稍慢
             + "' src='%mappeddir%\\images\\ajax-loader.gif' alt='" + HttpUtility.HtmlEncode(strPersonName) + " 的照片'></img>");
+            
+        string strIcons = "";    
         if (string.IsNullOrEmpty(strFingerprint) == false)
-        {
-            strResult.Append("<img src='%mappeddir%\\images\\fingerprint.png' alt='有指纹信息'>");
-        }
+            strIcons += "<img src='%mappeddir%\\images\\fingerprint.png' style='background-color:#ffffff;' alt='有指纹信息'>";
+        if (string.IsNullOrEmpty(strWeixinBinding) == false)
+            strIcons += "<img src='%mappeddir%\\images\\wechat_16.png' alt='有微信绑定信息'>";
+
+        if (string.IsNullOrEmpty(strIcons) == false)
+            strResult.Append("<br/>" + strIcons);
+            
         strResult.Append("</td>");
         strResult.Append("<td class='warning' id='insertpoint'></td>");
 

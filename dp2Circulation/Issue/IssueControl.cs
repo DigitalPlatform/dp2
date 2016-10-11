@@ -25,6 +25,7 @@ namespace dp2Circulation
     /// </summary>
     public partial class IssueControl : IssueControlBase
     {
+        public event GetBiblioEventHandler GetBiblio = null;
         // 
         /// <summary>
         /// 准备验收
@@ -1861,6 +1862,8 @@ namespace dp2Circulation
                 dlg.GenerateData -= new GenerateDataEventHandler(dlg_GenerateData);
                 dlg.GenerateData += new GenerateDataEventHandler(dlg_GenerateData);
 
+                dlg.GetBiblio -= dlg_GetBiblio;
+                dlg.GetBiblio += dlg_GetBiblio;
                 // TODO: 如果册listview中有标记删除的对象？要求先提交，才能进行装订
 
                 // 汇集全部册信息
@@ -2143,6 +2146,13 @@ namespace dp2Circulation
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        void dlg_GetBiblio(object sender, GetBiblioEventArgs e)
+        {
+            var func = this.GetBiblio;
+            if (func != null)
+                func(sender, e);
         }
 
         // 给期记录 XML 中增加 recPath 元素
@@ -3042,7 +3052,7 @@ namespace dp2Circulation
 
                         // volume 其实是当年期号、总期号、卷号在一起的一个字符串
                         string strVolume = VolumeInfo.BuildItemVolumeString(
-                            IssueUtil.GetYearPart(issue_item.PublishTime),
+                            dp2StringUtil.GetYearPart(issue_item.PublishTime),
                             issue_item.Issue,
                             issue_item.Zong,
                             issue_item.Volume);

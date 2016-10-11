@@ -1057,10 +1057,7 @@ namespace dp2Kernel
                 if (PrepareUser(ref result) == -1)
                     return result;
 
-
                 string strError = "";
-
-
 
                 // DateTime time = DateTime.Now;
 
@@ -1096,7 +1093,6 @@ namespace dp2Kernel
                 }
 
                 result.Value = nTotalLength;
-
                 return result;
             }
             catch (Exception ex)
@@ -1310,7 +1306,7 @@ namespace dp2Kernel
                     {
                         result.Value = -1;
                         result.ErrorCode = ErrorCodeValue.NotFound;
-                        result.ErrorString = "结果集 '"+strResultSetName+"' 不存在";
+                        result.ErrorString = "结果集 '" + strResultSetName + "' 不存在";
                         return result;
                     }
                 }
@@ -1803,7 +1799,7 @@ namespace dp2Kernel
                     {
                         if (KernelApplication.IsGlobalResultSetName(strNewName) == false)
                         {
-                            strError = "strStyle '"+strStyle+"' 中 newname 参数值 '"+strNewName+"' 应该和 oldname 一致，为全局结果集名称形态";
+                            strError = "strStyle '" + strStyle + "' 中 newname 参数值 '" + strNewName + "' 应该和 oldname 一致，为全局结果集名称形态";
                             throw new ArgumentException(strError);
                         }
 

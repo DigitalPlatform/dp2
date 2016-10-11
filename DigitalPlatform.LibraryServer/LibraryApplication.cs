@@ -126,7 +126,11 @@ namespace DigitalPlatform.LibraryServer
         //      2.81 (2016/6/25) SetUser() API 在创建新用户的时候允许 binding 字段使用 ip:[current] 表达自动绑定 IP 的要求
         //                      GetSystemParameter() API system/outgoingQueue 可以获得 MSMQ 队列路径
         //      2.82 (2016/8/31) ManageDatabase() API 可以管理 _biblioSummary 类型的数据库。特殊类型名字改为前方以字符 _ 引导
-        public static string Version = "2.82";
+        //      2.83 (2016/9/17) GetSystemParameter() API 增加 category=utility 里面的 getClientAddress 和 getClientIP 两个功能
+        //      2.84 (2016/9/26) WriteRes() API 允许具备 managedatabase 权限的用户写入任何路径的对象，主要是用于修改内核数据库下属的配置文件
+        //      2.85 (2016/9/28) GetSystemParameter() API system/version 可以获得 dp2library 版本号。BindPatron() API 可以使用 PQR:xxxx 方式进行绑定
+        //      2.86 (2016/10/7) GetIssues() API 允许在 strStyle 中使用 query:xxx 参数，实现仅对某一期的期记录的获取。
+        public static string Version = "2.86";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -13648,8 +13652,6 @@ strLibraryCode);    // 读者所在的馆代码
                 out strError);
         }
 
-
-
         // 检查用户使用 WriteRes API 的权限
         // 注： 
         //      writetemplate 写入模板配置文件 template 所需要的权限; 
@@ -13672,6 +13674,10 @@ strLibraryCode);    // 读者所在的馆代码
         {
             strError = "";
             strLibraryCode = "";
+
+            // 2016/9/25
+            if (StringUtil.IsInList("managedatabase", strRights))
+                return 1;
 
             string strPath = strResPath;
 

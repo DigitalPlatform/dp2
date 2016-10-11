@@ -5,10 +5,13 @@ using System.Text;
 using System.Collections;
 using System.Web;
 using System.Diagnostics;
+using System.Xml;
 
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
-using System.Xml;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Xml;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace DigitalPlatform.Script
 {
@@ -17,6 +20,7 @@ namespace DigitalPlatform.Script
     /// </summary>
     public class ScriptUtil
     {
+
         /// <summary>
         /// 从路径中取出库名部分
         /// </summary>
@@ -477,5 +481,72 @@ namespace DigitalPlatform.Script
 
             return dom.DocumentElement.OuterXml;
         }
+    }
+
+    /// <summary>
+    /// 对 LibraryChannel 的扩展
+    /// </summary>
+    public static class LibraryChannelExtension2
+    {
+        // 获得指定一期的封面图片 URI
+        // parameters:
+        //      strBiblioPath   书目记录路径
+        //      strQueryString  检索词。例如 “2005|1|1000|50”。格式为 年|期号|总期号|卷号。一般为 年|期号| 即可。
+        public static int GetIssueCoverImageUri(this LibraryChannel channel,
+            DigitalPlatform.Stop stop,
+            string strBiblioRecPath,
+            string strQueryString,
+            string strPreferredType,
+            out string strUri,
+            out string strError)
+        {
+            strUri = "";
+            strError = "";
+
+            string strBiblioRecordID = StringUtil.GetRecordId(strBiblioRecPath);
+            string strStyle = "query:父记录+期号|" + strBiblioRecordID + "|" + strQueryString;
+            DigitalPlatform.LibraryClient.localhost.EntityInfo[] issueinfos = null;
+            long lRet = channel.GetIssues(stop,
+                strBiblioRecPath,
+                0,
+                1,
+                strStyle,
+                channel.Lang,
+                out issueinfos,
+                out strError);
+            if (lRet == -1)
+                return -1;
+            if (lRet == 0)
+                return 0;   // not found
+
+            EntityInfo info = issueinfos[0]; 
+            string strXml = info.OldRecord;
+            string strIssueRecordPath = info.OldRecPath;
+
+            if (string.IsNullOrEmpty(strXml))
+            {
+                strError = "期记录 '"+strIssueRecordPath+"' 的 strXml 为空";
+                return -1;
+            }
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch(Exception ex)
+            {
+                strError = "期记录 '" + strIssueRecordPath + "' XML 装入 DOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            string strObjectID = dp2StringUtil.GetCoverImageIDFromIssueRecord(dom, strPreferredType);
+            if (string.IsNullOrEmpty(strObjectID))
+                return 0;
+
+            strUri = strIssueRecordPath + "/object/" + strObjectID;
+            return 1;
+        }
+
     }
 }

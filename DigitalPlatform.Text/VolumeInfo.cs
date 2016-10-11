@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-using DigitalPlatform.Text;
-
-namespace dp2Circulation
+namespace DigitalPlatform.Text
 {
+    // 期刊业务
     // 一个具体的卷期信息
-    internal class VolumeInfo
+    public class VolumeInfo
     {
         public string Year = "";
         public string IssueNo = "";
@@ -392,20 +391,36 @@ namespace dp2Circulation
             return 0;
         }
 
-    }
-
-    internal class IssueUtil
-    {
-        // 获得出版日期的年份部分
-        public static string GetYearPart(string strPublishTime)
+        // 如果出现等号，优先用等号，逗号就被当作缺期的中断符号了
+        // 2016,no.1-3,5=总.100-102,104=v.10*4
+        // 需要直接用 BuildVolumeInfos() 函数
+        public static void ParseItemVolumeString(string strVolumeString,
+            out string strYear,
+    out string strIssue,
+    out string strZong,
+    out string strVolume)
         {
-            if (String.IsNullOrEmpty(strPublishTime) == true)
-                return strPublishTime;
+            strYear = "";
+            strIssue = "";
+            strZong = "";
+            strVolume = "";
 
-            if (strPublishTime.Length <= 4)
-                return strPublishTime;
+            string[] segments = strVolumeString.Split(new char[] { ';', ',', '=', '；', '，', '＝' });    // ',','='为2010/2/24新增
+            for (int i = 0; i < segments.Length; i++)
+            {
+                string strSegment = segments[i].Trim();
 
-            return strPublishTime.Substring(0, 4);
+                if (StringUtil.HasHead(strSegment, "no.") == true)
+                    strIssue = strSegment.Substring(3).Trim();
+                else if (StringUtil.HasHead(strSegment, "总.") == true)
+                    strZong = strSegment.Substring(2).Trim();
+                else if (StringUtil.HasHead(strSegment, "v.") == true)
+                    strVolume = strSegment.Substring(2).Trim();
+                else if (StringUtil.HasHead(strSegment, "y.") == true)
+                    strYear = strSegment.Substring(2).Trim();
+                else if ( i == 0 )  // 只有第一个没有前缀的字符串才会被当作年份。因为后面还会出现逗号
+                    strYear = strSegment.Trim();
+            }
         }
     }
 }

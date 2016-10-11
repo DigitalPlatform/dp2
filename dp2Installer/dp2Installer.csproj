@@ -34,7 +34,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>168</ApplicationRevision>
+    <ApplicationRevision>180</ApplicationRevision>
     <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -109,6 +109,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SetupMongoDbDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SetupMongoDbDialog.Designer.cs">
+      <DependentUpon>SetupMongoDbDialog.cs</DependentUpon>
+    </Compile>
     <Content Include="setup-v.ico" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -123,6 +129,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SetupMongoDbDialog.resx">
+      <DependentUpon>SetupMongoDbDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.config" />
     <Content Include="deleted.txt" />
     <Content Include="library_data.zip">

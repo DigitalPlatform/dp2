@@ -344,7 +344,7 @@ namespace DigitalPlatform.CirculationClient
                             //Debug.Assert(baMetadataTimestamp != null, "");
 
                             // 取metadata值
-                            Hashtable values = StringUtil.ParseMedaDataXml(strMetadataXml,
+                            Hashtable values = StringUtil.ParseMetaDataXml(strMetadataXml,
                                 out strError);
                             if (values == null)
                             {
@@ -416,7 +416,7 @@ namespace DigitalPlatform.CirculationClient
                         }
 
                         // 取metadata值
-                        Hashtable values = StringUtil.ParseMedaDataXml(strMetadataXml,
+                        Hashtable values = StringUtil.ParseMetaDataXml(strMetadataXml,
                             out strError);
                         if (values == null)
                         {

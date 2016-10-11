@@ -96,6 +96,7 @@ namespace DigitalPlatform.rms.Client
                 if (lStart >= lHitCount)
                     yield break;
             }
+            // ???
         ERROR1:
             throw new Exception(strError);
         }

@@ -12,6 +12,11 @@ using System.Threading;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Ipc;
+using System.Web;
+
+using ZXing;
+using ZXing.QrCode;
+using ZXing.QrCode.Internal;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -25,10 +30,8 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Web;
 
 namespace dp2Circulation
 {
@@ -169,6 +172,7 @@ namespace dp2Circulation
             LoadExternalFields();
 
             ClearBorrowHistoryPage();
+            ClearQrCodePage();
 
             API.PostMessage(this.Handle, WM_SET_FOCUS, 0, 0);
         }
@@ -516,6 +520,7 @@ MessageBoxDefaultButton.Button2);
                 this.binaryResControl1.Clear();
 
                 this.ClearBorrowHistoryPage();
+                this.ClearQrCodePage();
 
                 try
                 {
@@ -814,7 +819,7 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 this.ClearBorrowHistoryPage();
-
+                this.ClearQrCodePage();
                 try
                 {
                     byte[] baTimestamp = null;
@@ -3819,6 +3824,15 @@ MessageBoxDefaultButton.Button2);
             string strError = "";
             int nRet = 0;
 
+            // 从剪贴板中取得图像对象
+            List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
+            if (images == null)
+            {
+                strError = "。无法创建证件照片";
+                goto ERROR1;
+            }
+            Image image = images[0];
+#if NO
             Image image = null;
             IDataObject obj1 = Clipboard.GetDataObject();
             if (obj1.GetDataPresent(typeof(Bitmap)))
@@ -3844,6 +3858,7 @@ MessageBoxDefaultButton.Button2);
                 strError = "当前 Windows 剪贴板中没有图形对象。无法创建证件照片";
                 goto ERROR1;
             }
+#endif
 
             string strShrinkComment = "";
             using (image)
@@ -5795,6 +5810,14 @@ MessageBoxDefaultButton.Button1);
             _borrowHistoryLoaded = false;
         }
 
+        void ClearQrCodePage()
+        {
+            _qrCodeLoaded = false;
+
+            this.pictureBox_qrCode.Image = null;
+            this.textBox_pqr.Text = "";
+        }
+
         int _currentPageNo = 0;
         int _pageCount = 0;
 
@@ -5965,6 +5988,7 @@ MessageBoxDefaultButton.Button1);
         }
 
         bool _borrowHistoryLoaded = false;
+        bool _qrCodeLoaded = false;
 
         private void tabControl_readerInfo_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -5976,6 +6000,106 @@ MessageBoxDefaultButton.Button1);
                     _borrowHistoryLoaded = true;
                 }
             }
+
+            if (this.tabControl_readerInfo.SelectedTab == this.tabPage_qrCode)
+            {
+                if (_qrCodeLoaded == false)
+                {
+                    this.BeginInvoke(new Action(LoadQrCode));
+                    _qrCodeLoaded = true;
+                }
+            }
         }
+
+        void LoadQrCode()
+        {
+            string strError = "";
+            string strCode = "";
+
+            this.pictureBox_qrCode.Image = null;
+            this.textBox_pqr.Text = "";
+
+            if (string.IsNullOrEmpty(this.ReaderBarcode) == true)
+                return;
+
+            int nRet = GetPatronTempId(
+                this.ReaderBarcode,
+                out strCode,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            this.textBox_pqr.Text = strCode;
+
+            string strCharset = "ISO-8859-1";
+            bool bDisableECI = false;
+
+            var writer = new BarcodeWriter
+            {
+                Format = BarcodeFormat.QR_CODE,
+                // Options = new EncodingOptions
+                Options = new QrCodeEncodingOptions
+                {
+                    Height = 400,
+                    Width = 400,
+                    DisableECI = bDisableECI,
+                    ErrorCorrection = ErrorCorrectionLevel.L,
+                    CharacterSet = strCharset // "UTF-8"
+                }
+            };
+
+#if NO
+            using (var bitmap = writer.Write(strCode))
+            {
+                this.pictureBox_qrCode.Image = bitmap;
+            }
+#endif
+            this.pictureBox_qrCode.Image = writer.Write(strCode);
+            return;
+        ERROR1:
+            this.ShowMessage(strError, "red", true);
+        }
+
+        // 获得读者证号二维码字符串
+        public int GetPatronTempId(
+            string strReaderBarcode,
+            out string strCode,
+            out string strError)
+        {
+            strError = "";
+            strCode = "";
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在获得读者二维码 ...");
+            stop.BeginLoop();
+
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+
+                // 读入读者记录
+                long lRet = channel.VerifyReaderPassword(stop,
+                    "!getpatrontempid:" + strReaderBarcode,
+                    null,
+                    out strError);
+                if (lRet == -1 || lRet == 0)
+                {
+                    strError = "获得读者证号二维码时发生错误: " + strError;
+                    return -1;
+                }
+
+                strCode = strError;
+                return 0;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+            }
+        }
+
     }
 }

@@ -47,6 +47,7 @@
     <Compile Include="BiblioLoader.cs" />
     <Compile Include="BrowseLoader.cs" />
     <Compile Include="ChargingHistoryLoader.cs" />
+    <Compile Include="DirItemLoader.cs" />
     <Compile Include="ItemBarcodeLoader.cs" />
     <Compile Include="LibraryChannel.cs" />
     <Compile Include="LibraryChannelPool.cs" />
@@ -117,6 +118,9 @@
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
     <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.Record.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.ResInfoItem.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
     <None Include="Service References\localhost\DigitalPlatform.LibraryClient.localhost.ReturnInfo.datasource">

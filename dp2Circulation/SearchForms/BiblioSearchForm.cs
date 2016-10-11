@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Xml;
 using System.Web;
 using System.Threading;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -28,7 +29,6 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -1396,7 +1396,7 @@ Keys keyData)
             int nRet = this.MainForm.MessageHub.BeginSearchBiblio(
                 "*",
                 new SearchRequest(strSearchID,
-                    "searchBiblio",
+                "searchBiblio",
                 "<全部>",
 strQueryWord,
 strFromStyle,
@@ -2408,7 +2408,7 @@ out strError);
 
             int nCount = 0;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) 
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                 + " 开始进行书目记录校验</div>");
 
             LibraryChannel channel = this.GetChannel();
@@ -6312,6 +6312,17 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
+        static bool ExistFiles(string strDirectoryName)
+        {
+            if (Directory.Exists(strDirectoryName) == false)
+                return false;
+            DirectoryInfo di = new DirectoryInfo(strDirectoryName);
+            FileInfo[] fis = di.GetFiles("*.*");
+            if (fis != null & fis.Length > 0)
+                return true;
+            return false;
+        }
+
         // 导出到书目转储文件
         void menu_saveToBiblioDumpFile_Click(object sender, EventArgs e)
         {
@@ -6350,6 +6361,24 @@ MessageBoxDefaultButton.Button2);
 
             if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
                 return;
+
+            // 观察对象目录中是否已经存在文件
+            if (dlg.IncludeObjectFile)
+            {
+                if (ExistFiles(dlg.ObjectDirectoryName) == true)
+                {
+                    DialogResult result = MessageBox.Show(this,
+    "您选定的对象文件夹 " + dlg.ObjectDirectoryName + " 内已经存在一些文件。若用它来保存对象文件，则新旧文件会混杂在一起。\r\n\r\n要继续处理么? (是：继续; 否: 放弃处理)",
+    "BiblioSearchForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                    if (result == System.Windows.Forms.DialogResult.No)
+                        return;
+                }
+            }
+
+            int nProcessRemoteRecord = 0;   // 0: 本变量尚未使用; 1: 处理外部记录; -1: 跳过外部记录
 
             this.EnableControls(false);
 
@@ -6441,7 +6470,26 @@ MessageBoxDefaultButton.Button2);
                     if (biblio_dom.DocumentElement == null)
                         goto CONTINUE;
 
-                    if (dlg.IncludeObjectFile)
+                    // 是否为外部记录
+                    bool bRemote = info.RecPath.IndexOf("@") != -1;
+                    if (bRemote == true && nProcessRemoteRecord == 0)
+                    {
+                        DialogResult temp_result = MessageBox.Show(this,
+"发现一些书目记录是来自共享检索的外部书目记录，是否要处理它们? (是: 处理它们; 否: 跳过它们)",
+"BiblioSearchForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                        if (temp_result == System.Windows.Forms.DialogResult.Yes)
+                            nProcessRemoteRecord = 1;
+                        else
+                            nProcessRemoteRecord = -1;
+                    }
+
+                    if (bRemote == true && nProcessRemoteRecord == -1)
+                        goto CONTINUE;
+
+                    if (dlg.IncludeObjectFile && bRemote == false)
                     {
                         // 将书目记录中的对象资源写入外部文件
                         nRet = WriteObjectFiles(stop,
@@ -6470,77 +6518,82 @@ MessageBoxDefaultButton.Button1);
                         // 写入 dprms:biblio 元素
                         writer.WriteStartElement("dprms", "biblio", DpNs.dprms);
 
-                        writer.WriteAttributeString("path", this.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);
+                        if (bRemote == true)
+                            writer.WriteAttributeString("path", item.BiblioInfo.RecPath);
+                        else
+                            writer.WriteAttributeString("path", this.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);
                         writer.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));
 
                         biblio_dom.DocumentElement.WriteTo(writer);
                         writer.WriteEndElement();
                     }
 
+                    if (bRemote == false)
+                    {
+                        string strBiblioDbName = StringUtil.GetDbName(item.BiblioInfo.RecPath);
+                        BiblioDbProperty prop = this.MainForm.GetBiblioDbProperty(strBiblioDbName);
+                        if (prop == null)
+                        {
+                            strError = "数据库名 '" + strBiblioDbName + "' 没有找到属性定义";
+                            goto ERROR1;
+                        }
 
-                    string strBiblioDbName = StringUtil.GetDbName(item.BiblioInfo.RecPath);
-                    BiblioDbProperty prop = this.MainForm.GetBiblioDbProperty(strBiblioDbName);
-                    if (prop == null)
-                    {
-                        strError = "数据库名 '" + strBiblioDbName + "' 没有找到属性定义";
-                        goto ERROR1;
+                        if (string.IsNullOrEmpty(prop.OrderDbName) == false)
+                        {
+                            // dprms:orderCollection
+                            nRet = OutputEntities(
+                                stop,
+                                channel,
+                                item.BiblioInfo.RecPath,
+                                "order",
+                                writer,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+                        if (string.IsNullOrEmpty(prop.IssueDbName) == false)
+                        {
+                            // dprms:issueCollection
+                            nRet = OutputEntities(
+                                stop,
+                                channel,
+                                item.BiblioInfo.RecPath,
+                                "issue",
+                                writer,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+                        if (string.IsNullOrEmpty(prop.ItemDbName) == false)
+                        {
+                            // dprms:itemCollection
+                            nRet = OutputEntities(
+                                stop,
+                                channel,
+                                item.BiblioInfo.RecPath,
+                                "item",
+                                writer,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+                        if (string.IsNullOrEmpty(prop.CommentDbName) == false)
+                        {
+                            // dprms:commentCollection
+                            nRet = OutputEntities(
+                                stop,
+                                channel,
+                                item.BiblioInfo.RecPath,
+                                "comment",
+                                writer,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
                     }
 
-                    if (string.IsNullOrEmpty(prop.OrderDbName) == false)
-                    {
-                        // dprms:orderCollection
-                        nRet = OutputEntities(
-                            stop,
-                            channel,
-                            item.BiblioInfo.RecPath,
-                            "order",
-                            writer,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                    }
-                    if (string.IsNullOrEmpty(prop.IssueDbName) == false)
-                    {
-                        // dprms:issueCollection
-                        nRet = OutputEntities(
-                            stop,
-                            channel,
-                            item.BiblioInfo.RecPath,
-                            "issue",
-                            writer,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                    }
-                    if (string.IsNullOrEmpty(prop.ItemDbName) == false)
-                    {
-                        // dprms:itemCollection
-                        nRet = OutputEntities(
-                            stop,
-                            channel,
-                            item.BiblioInfo.RecPath,
-                            "item",
-                            writer,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                    }
-                    if (string.IsNullOrEmpty(prop.CommentDbName) == false)
-                    {
-                        // dprms:commentCollection
-                        nRet = OutputEntities(
-                            stop,
-                            channel,
-                            item.BiblioInfo.RecPath,
-                            "comment",
-                            writer,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                    }
                     // 收尾 dprms:record 元素
                     writer.WriteEndElement();
-
                 CONTINUE:
                     stop.SetProgressValue(++i);
                 }

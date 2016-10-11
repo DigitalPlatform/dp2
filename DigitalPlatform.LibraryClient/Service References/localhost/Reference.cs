@@ -1276,6 +1276,131 @@ namespace DigitalPlatform.LibraryClient.localhost {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ResInfoItem", Namespace="http://dp2003.com/dp2kernel/")]
+    [System.SerializableAttribute()]
+    public partial class ResInfoItem : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private bool HasChildrenField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string NameField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string[] NamesField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private int StyleField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private int TypeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string TypeStringField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public bool HasChildren {
+            get {
+                return this.HasChildrenField;
+            }
+            set {
+                if ((this.HasChildrenField.Equals(value) != true)) {
+                    this.HasChildrenField = value;
+                    this.RaisePropertyChanged("HasChildren");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Name {
+            get {
+                return this.NameField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.NameField, value) != true)) {
+                    this.NameField = value;
+                    this.RaisePropertyChanged("Name");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string[] Names {
+            get {
+                return this.NamesField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.NamesField, value) != true)) {
+                    this.NamesField = value;
+                    this.RaisePropertyChanged("Names");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int Style {
+            get {
+                return this.StyleField;
+            }
+            set {
+                if ((this.StyleField.Equals(value) != true)) {
+                    this.StyleField = value;
+                    this.RaisePropertyChanged("Style");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int Type {
+            get {
+                return this.TypeField;
+            }
+            set {
+                if ((this.TypeField.Equals(value) != true)) {
+                    this.TypeField = value;
+                    this.RaisePropertyChanged("Type");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string TypeString {
+            get {
+                return this.TypeStringField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.TypeStringField, value) != true)) {
+                    this.TypeStringField = value;
+                    this.RaisePropertyChanged("TypeString");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="Record", Namespace="http://dp2003.com/dp2kernel/")]
     [System.SerializableAttribute()]
     public partial class Record : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -3320,6 +3445,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBindPatron(out string[] results, System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Dir", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/DirResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Dir(out DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strResPath, long lStart, long lLength, string strLang, string strStyle);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Dir", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/DirResponse")]
+        System.IAsyncResult BeginDir(string strResPath, long lStart, long lLength, string strLang, string strStyle, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndDir(out DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersionResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -4429,6 +4562,39 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class DirCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public DirCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.ResInfoItem[])(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.ErrorCodeValue)(this.results[1]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -6901,6 +7067,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onBindPatronCompletedDelegate;
         
+        private BeginOperationDelegate onBeginDirDelegate;
+        
+        private EndOperationDelegate onEndDirDelegate;
+        
+        private System.Threading.SendOrPostCallback onDirCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -7457,6 +7629,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<SearchChargingCompletedEventArgs> SearchChargingCompleted;
         
         public event System.EventHandler<BindPatronCompletedEventArgs> BindPatronCompleted;
+        
+        public event System.EventHandler<DirCompletedEventArgs> DirCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs> GetVersionCompleted;
         
@@ -8450,6 +8624,68 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strBindingID,
                         strStyle,
                         strResultTypeList}, this.onEndBindPatronDelegate, this.onBindPatronCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Dir(out DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strResPath, long lStart, long lLength, string strLang, string strStyle) {
+            return base.Channel.Dir(out items, out kernel_errorcode, strResPath, lStart, lLength, strLang, strStyle);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginDir(string strResPath, long lStart, long lLength, string strLang, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginDir(strResPath, lStart, lLength, strLang, strStyle, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndDir(out DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result) {
+            return base.Channel.EndDir(out items, out kernel_errorcode, result);
+        }
+        
+        private System.IAsyncResult OnBeginDir(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strResPath = ((string)(inValues[0]));
+            long lStart = ((long)(inValues[1]));
+            long lLength = ((long)(inValues[2]));
+            string strLang = ((string)(inValues[3]));
+            string strStyle = ((string)(inValues[4]));
+            return this.BeginDir(strResPath, lStart, lLength, strLang, strStyle, callback, asyncState);
+        }
+        
+        private object[] OnEndDir(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ResInfoItem[]>();
+            DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ErrorCodeValue>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndDir(out items, out kernel_errorcode, result);
+            return new object[] {
+                    items,
+                    kernel_errorcode,
+                    retVal};
+        }
+        
+        private void OnDirCompleted(object state) {
+            if ((this.DirCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.DirCompleted(this, new DirCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void DirAsync(string strResPath, long lStart, long lLength, string strLang, string strStyle) {
+            this.DirAsync(strResPath, lStart, lLength, strLang, strStyle, null);
+        }
+        
+        public void DirAsync(string strResPath, long lStart, long lLength, string strLang, string strStyle, object userState) {
+            if ((this.onBeginDirDelegate == null)) {
+                this.onBeginDirDelegate = new BeginOperationDelegate(this.OnBeginDir);
+            }
+            if ((this.onEndDirDelegate == null)) {
+                this.onEndDirDelegate = new EndOperationDelegate(this.OnEndDir);
+            }
+            if ((this.onDirCompletedDelegate == null)) {
+                this.onDirCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnDirCompleted);
+            }
+            base.InvokeAsync(this.onBeginDirDelegate, new object[] {
+                        strResPath,
+                        lStart,
+                        lLength,
+                        strLang,
+                        strStyle}, this.onEndDirDelegate, this.onDirCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {
@@ -13520,6 +13756,14 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndBindPatron(out string[] results, System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Dir", ReplyAction="http://dp2003.com/dp2library/dp2library/DirResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult Dir(out DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strResPath, long lStart, long lLength, string strLang, string strStyle);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/Dir", ReplyAction="http://dp2003.com/dp2library/dp2library/DirResponse")]
+        System.IAsyncResult BeginDir(string strResPath, long lStart, long lLength, string strLang, string strStyle, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndDir(out DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetVersion", ReplyAction="http://dp2003.com/dp2library/dp2library/GetVersionResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -14623,6 +14867,39 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results1[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class DirCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public DirCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.ResInfoItem[])(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.ErrorCodeValue)(this.results[1]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
             }
         }
     }
@@ -17095,6 +17372,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onBindPatronCompletedDelegate;
         
+        private BeginOperationDelegate onBeginDirDelegate;
+        
+        private EndOperationDelegate onEndDirDelegate;
+        
+        private System.Threading.SendOrPostCallback onDirCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -17651,6 +17934,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<SearchChargingCompletedEventArgs1> SearchChargingCompleted;
         
         public event System.EventHandler<BindPatronCompletedEventArgs1> BindPatronCompleted;
+        
+        public event System.EventHandler<DirCompletedEventArgs1> DirCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs1> GetVersionCompleted;
         
@@ -18644,6 +18929,68 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strBindingID,
                         strStyle,
                         strResultTypeList}, this.onEndBindPatronDelegate, this.onBindPatronCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Dir(out DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, string strResPath, long lStart, long lLength, string strLang, string strStyle) {
+            return base.Channel.Dir(out items, out kernel_errorcode, strResPath, lStart, lLength, strLang, strStyle);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginDir(string strResPath, long lStart, long lLength, string strLang, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginDir(strResPath, lStart, lLength, strLang, strStyle, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndDir(out DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result) {
+            return base.Channel.EndDir(out items, out kernel_errorcode, result);
+        }
+        
+        private System.IAsyncResult OnBeginDir(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strResPath = ((string)(inValues[0]));
+            long lStart = ((long)(inValues[1]));
+            long lLength = ((long)(inValues[2]));
+            string strLang = ((string)(inValues[3]));
+            string strStyle = ((string)(inValues[4]));
+            return this.BeginDir(strResPath, lStart, lLength, strLang, strStyle, callback, asyncState);
+        }
+        
+        private object[] OnEndDir(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ResInfoItem[]>();
+            DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.ErrorCodeValue>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndDir(out items, out kernel_errorcode, result);
+            return new object[] {
+                    items,
+                    kernel_errorcode,
+                    retVal};
+        }
+        
+        private void OnDirCompleted(object state) {
+            if ((this.DirCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.DirCompleted(this, new DirCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void DirAsync(string strResPath, long lStart, long lLength, string strLang, string strStyle) {
+            this.DirAsync(strResPath, lStart, lLength, strLang, strStyle, null);
+        }
+        
+        public void DirAsync(string strResPath, long lStart, long lLength, string strLang, string strStyle, object userState) {
+            if ((this.onBeginDirDelegate == null)) {
+                this.onBeginDirDelegate = new BeginOperationDelegate(this.OnBeginDir);
+            }
+            if ((this.onEndDirDelegate == null)) {
+                this.onEndDirDelegate = new EndOperationDelegate(this.OnEndDir);
+            }
+            if ((this.onDirCompletedDelegate == null)) {
+                this.onDirCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnDirCompleted);
+            }
+            base.InvokeAsync(this.onBeginDirDelegate, new object[] {
+                        strResPath,
+                        lStart,
+                        lLength,
+                        strLang,
+                        strStyle}, this.onEndDirDelegate, this.onDirCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {

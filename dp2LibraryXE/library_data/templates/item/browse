@@ -39,4 +39,7 @@
   <col title="书目记录" type="parent_id">
     <xpath>*/parent</xpath>
   </col>
+  <col title="操作日期" convert="rfc1123tolocaltimeu" type="operTime">
+    <xpath>*/operations/operation[last()]/@time</xpath>
+  </col>
 </root>

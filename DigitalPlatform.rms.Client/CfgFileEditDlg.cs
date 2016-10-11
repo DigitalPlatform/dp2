@@ -388,7 +388,7 @@ namespace DigitalPlatform.rms.Client
 
                 // 观察mime
                 // 取metadata
-                values = StringUtil.ParseMedaDataXml(strMetaData,
+                values = StringUtil.ParseMetaDataXml(strMetaData,
                     out strError);
                 if (values == null)
                 {
@@ -503,7 +503,7 @@ namespace DigitalPlatform.rms.Client
 
             // 观察mime
             // 取metadata
-            values = StringUtil.ParseMedaDataXml(strMetaData,
+            values = StringUtil.ParseMetaDataXml(strMetaData,
                 out strError);
             if (values == null)
             {
@@ -603,7 +603,7 @@ namespace DigitalPlatform.rms.Client
                     }
                 }
 
-                ExportUtil.ChangeMetaData(ref strMetaData,
+                StringUtil.ChangeMetaData(ref strMetaData,
                     null,	// string strID,
                     this.LocalPath,	// string strLocalPath,
                     this.Mime,	// string strMimeType,
@@ -668,7 +668,7 @@ namespace DigitalPlatform.rms.Client
             }
 
 
-            ExportUtil.ChangeMetaData(ref strMetaData,
+            StringUtil.ChangeMetaData(ref strMetaData,
                 null,	// string strID,
                 this.LocalPath,	// string strLocalPath,
                 this.Mime,	// string strMimeType,

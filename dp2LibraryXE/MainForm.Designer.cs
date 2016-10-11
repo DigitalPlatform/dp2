@@ -40,6 +40,9 @@
             this.MenuItem_installDp2Opac = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_updateDp2Opac = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_enableWindowsMsmq = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_configLibraryXmlMq = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_setupKernelDataDir = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_setupLibraryDataDir = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_setupOpacDataAppDir = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,6 +61,7 @@
             this.MenuItem_getSqllocaldbexePath = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_restartDp2library = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_restartDp2Kernel = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -77,7 +81,6 @@
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_restartDp2Kernel = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -116,6 +119,9 @@
             this.MenuItem_installDp2Opac,
             this.MenuItem_updateDp2Opac,
             this.toolStripSeparator7,
+            this.MenuItem_enableWindowsMsmq,
+            this.MenuItem_configLibraryXmlMq,
+            this.toolStripSeparator9,
             this.MenuItem_setupKernelDataDir,
             this.MenuItem_setupLibraryDataDir,
             this.MenuItem_setupOpacDataAppDir,
@@ -157,6 +163,25 @@
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
             this.toolStripSeparator7.Size = new System.Drawing.Size(317, 6);
+            // 
+            // MenuItem_enableWindowsMsmq
+            // 
+            this.MenuItem_enableWindowsMsmq.Name = "MenuItem_enableWindowsMsmq";
+            this.MenuItem_enableWindowsMsmq.Size = new System.Drawing.Size(320, 22);
+            this.MenuItem_enableWindowsMsmq.Text = "为 Windows 启用 MSMQ";
+            this.MenuItem_enableWindowsMsmq.Click += new System.EventHandler(this.MenuItem_enableWindowsMsmq_Click);
+            // 
+            // MenuItem_configLibraryXmlMq
+            // 
+            this.MenuItem_configLibraryXmlMq.Name = "MenuItem_configLibraryXmlMq";
+            this.MenuItem_configLibraryXmlMq.Size = new System.Drawing.Size(320, 22);
+            this.MenuItem_configLibraryXmlMq.Text = "为 library.xml 首次配置 MQ 参数";
+            this.MenuItem_configLibraryXmlMq.Click += new System.EventHandler(this.MenuItem_configLibraryXmlMq_Click);
+            // 
+            // toolStripSeparator9
+            // 
+            this.toolStripSeparator9.Name = "toolStripSeparator9";
+            this.toolStripSeparator9.Size = new System.Drawing.Size(317, 6);
             // 
             // MenuItem_setupKernelDataDir
             // 
@@ -275,6 +300,13 @@
             this.MenuItem_restartDp2library.Size = new System.Drawing.Size(320, 22);
             this.MenuItem_restartDp2library.Text = "重新启动 dp2Library";
             this.MenuItem_restartDp2library.Click += new System.EventHandler(this.MenuItem_restartDp2library_Click);
+            // 
+            // MenuItem_restartDp2Kernel
+            // 
+            this.MenuItem_restartDp2Kernel.Name = "MenuItem_restartDp2Kernel";
+            this.MenuItem_restartDp2Kernel.Size = new System.Drawing.Size(320, 22);
+            this.MenuItem_restartDp2Kernel.Text = "重新启动 dp2Kernel";
+            this.MenuItem_restartDp2Kernel.Click += new System.EventHandler(this.MenuItem_restartDp2Kernel_Click);
             // 
             // MenuItem_help
             // 
@@ -439,13 +471,6 @@
             this.webBrowser1.Size = new System.Drawing.Size(372, 229);
             this.webBrowser1.TabIndex = 7;
             // 
-            // MenuItem_restartDp2Kernel
-            // 
-            this.MenuItem_restartDp2Kernel.Name = "MenuItem_restartDp2Kernel";
-            this.MenuItem_restartDp2Kernel.Size = new System.Drawing.Size(320, 22);
-            this.MenuItem_restartDp2Kernel.Text = "重新启动 dp2Kernel";
-            this.MenuItem_restartDp2Kernel.Click += new System.EventHandler(this.MenuItem_restartDp2Kernel_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -522,6 +547,9 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_restartDp2library;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_restartDp2Kernel;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_enableWindowsMsmq;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_configLibraryXmlMq;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
     }
 }
 

@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.18.*")]  // "2.4.*"
-[assembly: AssemblyFileVersion("2.18.0.0")]
+[assembly: AssemblyVersion("2.21.*")]  // "2.4.*"
+[assembly: AssemblyFileVersion("2.21.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -47,3 +47,7 @@ using System.Runtime.InteropServices;
 // V2.16 2016/5/6 报表窗 operlogxxx 表结构修改，增加 librarycode 字段。212 表统计时候可以显示没有分类号的事项，这可能是册记录删除造成的结果。
 // V2.17 2016/5/8 报表窗的长操作改为用单独的线程实现。修正 202 表创建时的一个 Bug
 // V2.18 2016/6/7 将 dp2circulation.xml 配置文件从绿色安装目录或者 ClickOnce 数据目录挪动到用户目录了
+// V2.19 2016/9/8 为实体查询窗增加强制保存全部修改的功能(按住 Ctrl 键)。比如一册图书有借阅信息的时候一般是不让修改馆藏地的，强制修改则允许这样
+// V2.20 2016/9/26 系统管理窗增加“内核”属性页，允许管理内核配置文件。报表窗改掉了没有册条码号的册记录在首次创建本地存储和以后同步修改过程中的 bug
+// V2.21 2016/10/7 期刊记到界面可以从摄像头获取封面图像
+

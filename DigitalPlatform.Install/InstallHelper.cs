@@ -28,6 +28,182 @@ namespace DigitalPlatform.Install
 {
     public class InstallHelper
     {
+        [DllImport("shlwapi.dll", SetLastError = true, EntryPoint = "#437")]
+        static extern bool IsOS(int os);
+
+        const int OS_ANYSERVER = 29;
+        public static bool isWindowsServer = IsOS(OS_ANYSERVER);
+
+        // 为 dp2library 的 library.xml 文件增配 MSMQ 相关参数。这之前要确保在 Windows 上启用了 Message Queue Service。
+        // parameters:
+        //      bAdd    是否添加配置？如果为 false，表示移除 MSMQ 配置
+        // return:
+        //      -1  出错
+        //      0   没有修改
+        //      1   发生了修改
+        public static int SetupMessageQueue(
+            string strLibraryXmlFileName,
+            string strInstanceName,
+            bool bAdd,
+            out string strError)
+        {
+            strError = "";
+
+            if (File.Exists(strLibraryXmlFileName) == false)
+            {
+                strError = "配置文件 '" + strLibraryXmlFileName + "' 不存在，无法进行关于 MSMQ 的参数配置";
+                return -1;
+            }
+
+            XmlDocument dom = new XmlDocument();
+            dom.Load(strLibraryXmlFileName);
+
+            bool bChanged = false;
+
+            // message 元素 defaultQueue 属性
+            {
+                XmlElement message = dom.DocumentElement.SelectSingleNode("message") as XmlElement;
+                if (message == null)
+                {
+                    message = dom.CreateElement("message");
+                    dom.DocumentElement.AppendChild(message);
+                    bChanged = true;
+                }
+
+                string strOldValue = message.GetAttribute("defaultQueue");
+
+                if (bAdd == true)
+                {
+                    // 添加
+                    if (string.IsNullOrEmpty(strOldValue) == true)
+                    {
+                        string strNewValue = ".\\private$\\dp2library";
+                        if (string.IsNullOrEmpty(strInstanceName) == false)
+                            strNewValue += "_" + strInstanceName;
+                        message.SetAttribute("defaultQueue", strNewValue);
+                        bChanged = true;
+                    }
+                }
+                else
+                {
+                    // 移除
+                    if (string.IsNullOrEmpty(strOldValue) == false)
+                    {
+                        string strNewValue = ".\\private$\\dp2library";
+                        if (string.IsNullOrEmpty(strInstanceName) == false)
+                            strNewValue += "_" + strInstanceName;
+                        // TODO: 从 strOldValue 中移除 strNewValue 部分
+                        // 现在先简单实现为直接清除整个值
+                        // message.SetAttribute("defaultQueue", strNewValue);
+                        message.RemoveAttribute("defaultQueue");
+                        bChanged = true;
+                    }
+                }
+            }
+
+            if (bAdd == true)
+            {
+                // arrived 元素的 notifyTypes 属性
+                {
+                    XmlElement arrived = dom.DocumentElement.SelectSingleNode("arrived") as XmlElement;
+                    if (arrived == null)
+                    {
+                        arrived = dom.CreateElement("arrived");
+                        dom.DocumentElement.AppendChild(arrived);
+                        bChanged = true;
+                    }
+
+                    string strOldValue = arrived.GetAttribute("notifyTypes");
+                    if (string.IsNullOrEmpty(strOldValue) == true)
+                    {
+                        string strNewValue = "dpmail,mail,mq";
+                        arrived.SetAttribute("notifyTypes", strNewValue);
+                        bChanged = true;
+                    }
+                    else
+                    {
+                        // 增加 mq
+                        string strNewValue = strOldValue;
+                        StringUtil.SetInList(ref strNewValue, "mq", true);
+                        if (strNewValue != strOldValue)
+                        {
+                            arrived.SetAttribute("notifyTypes", strNewValue);
+                            bChanged = true;
+                        }
+                    }
+                }
+
+                // monitors/readersMonitor 元素的 types 元素
+                {
+                    XmlElement readersMonitor = dom.DocumentElement.SelectSingleNode("monitors/readersMonitor") as XmlElement;
+                    if (readersMonitor != null)
+                    {
+                        string strOldValue = readersMonitor.GetAttribute("types");
+                        if (string.IsNullOrEmpty(strOldValue) == true)
+                        {
+                            string strNewValue = "mq";
+                            readersMonitor.SetAttribute("types", strNewValue);
+                            bChanged = true;
+                        }
+                        else
+                        {
+                            // 增加 mq
+                            string strNewValue = strOldValue;
+                            StringUtil.SetInList(ref strNewValue, "mq", true);
+                            if (strNewValue != strOldValue)
+                            {
+                                readersMonitor.SetAttribute("types", strNewValue);
+                                bChanged = true;
+                            }
+                        }
+                    }
+                }
+
+                // circulation 元素的 notifyTypes 属性
+                {
+                    XmlElement circulation = dom.DocumentElement.SelectSingleNode("circulation") as XmlElement;
+                    if (circulation == null)
+                    {
+                        circulation = dom.CreateElement("circulation");
+                        dom.DocumentElement.AppendChild(circulation);
+                        bChanged = true;
+                    }
+
+                    string strOldValue = circulation.GetAttribute("notifyTypes");
+                    if (string.IsNullOrEmpty(strOldValue) == true)
+                    {
+                        string strNewValue = "mq";
+                        circulation.SetAttribute("notifyTypes", strNewValue);
+                        bChanged = true;
+                    }
+                    else
+                    {
+                        // 增加 mq
+                        string strNewValue = strOldValue;
+                        StringUtil.SetInList(ref strNewValue, "mq", true);
+                        if (strNewValue != strOldValue)
+                        {
+                            circulation.SetAttribute("notifyTypes", strNewValue);
+                            bChanged = true;
+                        }
+                    }
+                }
+            }
+
+            if (bChanged == true)
+            {
+                // 提前备份一个原来文件，避免保存中途出错造成 0 bytes 的文件
+                string strDataDir = Path.GetDirectoryName(strLibraryXmlFileName);
+                string strBackupFileName = Path.Combine(strDataDir, "library.xml.config.save");
+                File.Copy(strLibraryXmlFileName, strBackupFileName, true);
+
+                dom.Save(strLibraryXmlFileName);
+                return 1;   // 发生了修改
+            }
+
+            return 0;   // 没有发生修改
+        }
+
         public static int InstallService(string fullFileName,
 bool bInstall,
 out string strError)

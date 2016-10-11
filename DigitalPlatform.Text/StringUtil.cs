@@ -327,7 +327,7 @@ namespace DigitalPlatform.Text
             return results;
         }
 
-        public static Hashtable ParseMedaDataXml(string strXml,
+        public static Hashtable ParseMetaDataXml(string strXml,
     out string strError)
         {
             strError = "";
@@ -366,6 +366,42 @@ namespace DigitalPlatform.Text
 #endif
 
             return result;
+        }
+
+        public static void ChangeMetaData(ref string strMetaData,
+string strID,
+string strLocalPath,
+string strMimeType,
+string strLastModified,
+string strPath,
+string strTimestamp)
+        {
+            XmlDocument dom = new XmlDocument();
+
+            if (strMetaData == "")
+                strMetaData = "<file/>";
+
+            dom.LoadXml(strMetaData);
+
+            if (strID != null)
+                dom.DocumentElement.SetAttribute("id", strID);
+
+            if (strLocalPath != null)
+                dom.DocumentElement.SetAttribute("localpath", strLocalPath);
+
+            if (strMimeType != null)
+                dom.DocumentElement.SetAttribute("mimetype", strMimeType);
+
+            if (strLastModified != null)
+                dom.DocumentElement.SetAttribute("lastmodified", strLastModified);
+
+            if (strPath != null)
+                dom.DocumentElement.SetAttribute("path", strPath);
+
+            if (strTimestamp != null)
+                dom.DocumentElement.SetAttribute("timestamp", strTimestamp);
+
+            strMetaData = dom.OuterXml;
         }
 
         // 解析对象路径

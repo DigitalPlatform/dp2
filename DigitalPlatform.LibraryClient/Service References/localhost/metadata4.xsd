@@ -111,6 +111,23 @@
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="ErrorCodeValue" nillable="true" type="tns:ErrorCodeValue" />
+  <xs:complexType name="ArrayOfResInfoItem">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="ResInfoItem" nillable="true" type="tns:ResInfoItem" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfResInfoItem" nillable="true" type="tns:ArrayOfResInfoItem" />
+  <xs:complexType name="ResInfoItem">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="HasChildren" type="xs:boolean" />
+      <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
+      <xs:element xmlns:q1="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="Names" nillable="true" type="q1:ArrayOfstring" />
+      <xs:element minOccurs="0" name="Style" type="xs:int" />
+      <xs:element minOccurs="0" name="Type" type="xs:int" />
+      <xs:element minOccurs="0" name="TypeString" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ResInfoItem" nillable="true" type="tns:ResInfoItem" />
   <xs:complexType name="ArrayOfRecord">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="Record" nillable="true" type="tns:Record" />
@@ -119,7 +136,7 @@
   <xs:element name="ArrayOfRecord" nillable="true" type="tns:ArrayOfRecord" />
   <xs:complexType name="Record">
     <xs:sequence>
-      <xs:element xmlns:q1="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="Cols" nillable="true" type="q1:ArrayOfstring" />
+      <xs:element xmlns:q2="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="Cols" nillable="true" type="q2:ArrayOfstring" />
       <xs:element minOccurs="0" name="Keys" nillable="true" type="tns:ArrayOfKeyFrom" />
       <xs:element minOccurs="0" name="Path" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="RecordBody" nillable="true" type="tns:RecordBody" />

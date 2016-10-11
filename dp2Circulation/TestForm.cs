@@ -1767,5 +1767,39 @@ dlg.UiState);
             out strError);
         }
 
+        private void button_kernelResTree_fill_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+#if NO
+            LibraryChannel channel = this.MainForm.GetChannel();
+            try
+            {
+                int nRet = this.kernelResTree1.Fill(channel, out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                this.MainForm.ReturnChannel(channel);
+            }
+#endif
+            this.kernelResTree1.Fill();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void kernelResTree1_GetChannel(object sender, GetChannelEventArgs e)
+        {
+            e.Channel = this.MainForm.GetChannel();
+
+        }
+
+        private void kernelResTree1_ReturnChannel(object sender, ReturnChannelEventArgs e)
+        {
+            this.MainForm.ReturnChannel(e.Channel);
+        }
+
     }
 }

@@ -183,3 +183,24 @@ TABLE.items TR.content.repairing
     color: #bbbbbb;
 	text-decoration:line-through;
 }
+
+div.issue_cover_frame
+{
+    width: 100%;
+}
+
+DIV.issue_cover
+{
+	float:left;
+    padding: 0.07em;
+    margin: 0.25em;
+    background-color: #e0e0e0;
+
+    text-align: center;
+}
+
+DIV.issue_cover div.issue_no
+{
+	text-align: center;
+    padding: 0.20em;
+}

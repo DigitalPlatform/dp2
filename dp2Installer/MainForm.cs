@@ -7,16 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.ServiceProcess;
-using System.Management;
 using System.IO;
 using System.Web;
 using System.Deployment.Application;
 using System.Diagnostics;
 using System.Threading;
-using System.DirectoryServices;
-using System.Configuration.Install;
-using System.Runtime.InteropServices;
-using System.Xml;
 
 using Microsoft.Win32;
 using Ionic.Zip;
@@ -27,12 +22,12 @@ using DigitalPlatform.Install;
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.GUI;
-using DigitalPlatform.rms;
 using DigitalPlatform.OPAC;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using System.Runtime.InteropServices;
 
 namespace dp2Installer
 {
@@ -4612,16 +4607,65 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         "MSMQ-Container",
         "MSMQ-Server",
     };
+            // Windows Server 2008, Windows Server 2012 的用法
+            var server_featureNames = new[] 
+    {
+        "MSMQ-Services",
+        "MSMQ-Server",
+    };
+
             nRet = EnableServerFeature("MSMQ",
-                featureNames,
+                InstallHelper.isWindowsServer ? server_featureNames : featureNames,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+
+            /*
+
+1)
+C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MSMQ-Container /FeatureName:MSMQ-Server
+
+部署映像服务和管理工具
+版本: 10.0.10586.0
+
+映像版本: 10.0.10586.0
+
+启用一个或多个功能
+
+[                           0.1%                           ] 
+
+[==========================100.0%==========================] 
+操作成功完成。
+             * */
 
             return;
         ERROR1:
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
+        }
+
+        static string RemoveProgressText(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return "";
+
+            List<string> results = new List<string>();
+
+            string[] lines = strText.Replace("\r\n", "\r").Split(new char[] { '\r' });
+            foreach (string line in lines)
+            {
+                if (string.IsNullOrEmpty(line))
+                    continue;
+                string strLine = line.Trim();
+                if (string.IsNullOrEmpty(strLine))
+                    continue;
+
+                if (strLine[0] == '[' && strLine[strLine.Length - 1] == ']')
+                    continue;
+                results.Add(strLine);
+            }
+
+            return string.Join("\r\n", results.ToArray());
         }
 
         int EnableServerFeature(string strName,
@@ -4662,7 +4706,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     out strError);
                 if (nRet == -1)
                     return -1;
-                AppendString(strError);
+                AppendString(RemoveProgressText(strError));
             }
             finally
             {
@@ -4675,6 +4719,109 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             return 0;
         }
 
+        // 安装 MongoDB
+        private void MenuItem_dp2library_setupMongoDB_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
 
+            string strExePath = GetPathOfService("MongoDB");
+            if (string.IsNullOrEmpty(strExePath) == false)
+            {
+                strError = "MongoDB 已经安装过了。(位于 " + strExePath + ")";
+                goto ERROR1;
+            }
+
+            SetupMongoDbDialog dlg = new SetupMongoDbDialog();
+            GuiUtil.AutoSetDefaultFont(dlg);
+
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.DataDir = "c:\\mongo_data";
+
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            // 创建目录和 mongod.cfg 文件
+            string strDataDir = dlg.DataDir;
+            string strConfigFileName = Path.Combine(strDataDir, "mongod.cfg");
+
+            PathUtil.CreateDirIfNeed(Path.Combine(strDataDir, "db"));
+            PathUtil.CreateDirIfNeed(Path.Combine(strDataDir, "log"));
+
+            using (StreamWriter sw = new StreamWriter(strConfigFileName, false))
+            {
+                sw.WriteLine("systemLog:");
+                sw.WriteLine("    destination: file");
+                sw.WriteLine("    path: " + strDataDir + "\\log\\mongod.log");
+                sw.WriteLine("storage:");
+                sw.WriteLine("    dbPath: " + strDataDir + "\\db");
+                sw.WriteLine("net:");
+                sw.WriteLine("   bindIp: 127.0.0.1");
+                sw.WriteLine("   port: 27017");
+                sw.WriteLine("");
+                sw.WriteLine("");
+                sw.WriteLine("");
+            }
+
+            // 
+            // 在 mongod.exe 所在目录执行：
+            // "C:\mongodb\bin\mongod.exe" --config "C:\mongodb\mongod.cfg" –install
+
+            string strFileName = Path.Combine(dlg.BinDir, "mongod.exe");
+            string strLine = " --config " + strConfigFileName + " --install";
+
+            AppendSectionTitle("开始启用 MongoDB");
+            Application.DoEvents();
+
+            Cursor oldCursor = this.Cursor;
+            this.Cursor = Cursors.WaitCursor;
+            this.Enabled = false;
+            try
+            {
+                // parameters:
+                //      lines   若干行参数。每行执行一次
+                // return:
+                //      -1  出错
+                //      0   成功。strError 里面有运行输出的信息
+                nRet = InstallHelper.RunCmd(
+                    strFileName,
+                    new List<string> { strLine },
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                AppendString(RemoveProgressText(strError));
+            }
+            finally
+            {
+                AppendSectionTitle("结束启用 MongoDB");
+
+                this.Cursor = oldCursor;
+                this.Enabled = true;
+            }
+
+            AppendString("MongoDB 安装配置成功\r\n");
+
+            Thread.Sleep(1000);
+
+            {
+                AppendString("正在启动 MongoDB 服务 ...\r\n");
+                nRet = StartService("MongoDB",
+    out strError);
+                if (nRet == -1)
+                {
+                    AppendString("MongoDB 服务启动失败: " + strError + "\r\n");
+                    goto ERROR1;
+                }
+                else
+                {
+                    AppendString("MongoDB 服务启动成功\r\n");
+                }
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 }

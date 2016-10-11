@@ -7481,12 +7481,15 @@ out strError);
 
         // 保存一条记录
         // 保存成功后， info.Timestamp 会被更新
+        // parameters:
+        //      strStyle force/空
         // return:
         //      -2  时间戳不匹配
         //      -1  出错
         //      0   成功
         internal override int SaveRecord(string strRecPath,
             BiblioInfo info,
+            string strStyle,
             out byte[] baNewTimestamp,
             out string strError)
         {
@@ -7498,9 +7501,14 @@ out strError);
             {
                 EntityInfo item_info = new EntityInfo();
 
-
                 item_info.OldRecPath = strRecPath;
-                item_info.Action = "change";
+
+                // 2016/9/7
+                if (StringUtil.IsInList("force", strStyle))
+                    item_info.Action = "forcechange";
+                else
+                    item_info.Action = "change";
+
                 item_info.NewRecPath = strRecPath;
 
                 item_info.NewRecord = info.NewXml;
@@ -7585,7 +7593,8 @@ out strError);
                 strError += errorinfos[i].RefID + "在提交保存过程中发生错误 -- " + errorinfos[i].ErrorInfo + "\r\n";
             }
 
-            info.Timestamp = baNewTimestamp;    // 2013/10/17
+            if (baNewTimestamp != null) // 2016/9/3
+                info.Timestamp = baNewTimestamp;    // 2013/10/17
 
             if (String.IsNullOrEmpty(strError) == false)
                 return -1;
@@ -7623,13 +7632,13 @@ out strError);
         // 保存选定事项的修改
         void menu_saveSelectedChangedRecords_Click(object sender, EventArgs e)
         {
-            SaveSelectedChangedRecords();
+            SaveSelectedChangedRecords(Control.ModifierKeys == Keys.Control ? "force" : "");
         }
 
         // 保存全部修改事项
         void menu_saveAllChangedRecords_Click(object sender, EventArgs e)
         {
-            SaveAllChangedRecords();
+            SaveAllChangedRecords(Control.ModifierKeys == Keys.Control ? "force" : "");
         }
 
         // 创建一个新的 C# 脚本文件

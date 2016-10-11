@@ -3711,7 +3711,7 @@ MessageBoxDefaultButton.Button2);
             int nRet = _versionManager.GetFileVersion(Path.GetFileName(strZipFileName), out strOldTimestamp);
             string strNewTimestamp = File.GetLastWriteTime(strZipFileName).ToString();
 
-            if (bForce == true || CompareTimestamp(strOldTimestamp, strNewTimestamp) < 0)
+            if (bForce == true || CompareTimestamp(strOldTimestamp, strNewTimestamp) != 0)  // 2016/9/28 原来是 <
             {
                 if (bForce == false)
                     AppendSectionTitle("自动升级 dp2OPAC");
@@ -4789,6 +4789,160 @@ Stack:
         private void MenuItem_restartDp2Kernel_Click(object sender, EventArgs e)
         {
             RestartDp2kernelIfNeed();
+        }
+
+        private void MenuItem_enableWindowsMsmq_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            var featureNames = new[] 
+    {
+        "MSMQ-Container",
+        "MSMQ-Server",
+    };
+            // Windows Server 2008, Windows Server 2012 的用法
+            var server_featureNames = new[] 
+    {
+        "MSMQ-Services",
+        "MSMQ-Server",
+    };
+
+            nRet = EnableServerFeature("MSMQ",
+                InstallHelper.isWindowsServer ? server_featureNames : featureNames,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            /*
+
+1)
+C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MSMQ-Container /FeatureName:MSMQ-Server
+
+部署映像服务和管理工具
+版本: 10.0.10586.0
+
+映像版本: 10.0.10586.0
+
+启用一个或多个功能
+
+[                           0.1%                           ] 
+
+[==========================100.0%==========================] 
+操作成功完成。
+             * */
+
+            return;
+        ERROR1:
+            AppendString("出错: " + strError + "\r\n");
+            MessageBox.Show(this, strError);
+        }
+
+        int EnableServerFeature(string strName,
+    string[] featureNames,
+    out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // http://stackoverflow.com/questions/5936719/calling-dism-exe-from-system-diagnostics-process-fails
+            string strFileName = "%WINDIR%\\SysNative\\dism.exe";
+            strFileName = Environment.ExpandEnvironmentVariables(strFileName);
+
+            string strLine = string.Format(
+            "/NoRestart /Online /Enable-Feature {0}",
+            string.Join(
+                " ",
+                featureNames.Select(name => string.Format("/FeatureName:{0}", name))));
+
+            AppendSectionTitle("开始启用 " + strName);
+            AppendString("整个过程耗费的时间可能较长，请耐心等待 ...\r\n");
+            Application.DoEvents();
+
+            Cursor oldCursor = this.Cursor;
+            this.Cursor = Cursors.WaitCursor;
+            this.Enabled = false;
+            try
+            {
+                // parameters:
+                //      lines   若干行参数。每行执行一次
+                // return:
+                //      -1  出错
+                //      0   成功。strError 里面有运行输出的信息
+                nRet = InstallHelper.RunCmd(
+                    strFileName,
+                    new List<string> { strLine },
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                AppendString(RemoveProgressText(strError));
+            }
+            finally
+            {
+                AppendSectionTitle("结束启用 " + strName);
+
+                this.Cursor = oldCursor;
+                this.Enabled = true;
+            }
+
+            return 0;
+        }
+
+        static string RemoveProgressText(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return "";
+
+            List<string> results = new List<string>();
+
+            string[] lines = strText.Replace("\r\n", "\r").Split(new char[] { '\r' });
+            foreach (string line in lines)
+            {
+                if (string.IsNullOrEmpty(line))
+                    continue;
+                string strLine = line.Trim();
+                if (string.IsNullOrEmpty(strLine))
+                    continue;
+
+                if (strLine[0] == '[' && strLine[strLine.Length - 1] == ']')
+                    continue;
+                results.Add(strLine);
+            }
+
+            return string.Join("\r\n", results.ToArray());
+        }
+
+
+        private void MenuItem_configLibraryXmlMq_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            string strLibraryXmlFileName = PathUtil.MergePath(this.LibraryDataDir, "library.xml");
+            if (File.Exists(strLibraryXmlFileName) == false)
+            {
+                strError = "单机版 dp2Library 模块 尚未安装。请先安装 dp2Library 模块";
+                goto ERROR1;
+            }
+            // 为 dp2library 的 library.xml 文件增配 MSMQ 相关参数。这之前要确保在 Windows 上启用了 Message Queue Service。
+            // return:
+            //      -1  出错
+            //      0   没有修改
+            //      1   发生了修改
+            int nRet = InstallHelper.SetupMessageQueue(
+                strLibraryXmlFileName,
+                "xe",
+                Control.ModifierKeys == Keys.Control ? false : true,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (nRet == 1)
+                MessageBox.Show(this, "添加参数成功");
+            else
+                MessageBox.Show(this, "配置文件本次操作后没有发生变化 (先前已经配置过 MQ 参数了)");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
     }
 

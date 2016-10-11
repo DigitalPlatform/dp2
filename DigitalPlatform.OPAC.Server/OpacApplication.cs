@@ -53,6 +53,11 @@ namespace DigitalPlatform.OPAC.Server
             set;
         }
 
+        /// <summary>
+        /// dp2library 输出的 MSMQ 队列路径
+        /// </summary>
+        public string OutgoingQueue { get; set; }
+
         public LibraryChannelPool ChannelPool = new LibraryChannelPool();
 
         public double dp2LibraryVersion = 0;
@@ -1312,7 +1317,7 @@ namespace DigitalPlatform.OPAC.Server
                         this.dp2LibraryVersion = value;
                         this.dp2LibraryUID = strUID;
 
-                        double base_version = 2.40; // 2.18
+                        double base_version = 2.86; // 2.18
                         if (value < base_version)
                         {
                             strError = "当前 dp2OPAC 版本需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 '" + strVersion + "' )。请立即升级 dp2Library 到最新版本。";
@@ -1333,6 +1338,19 @@ namespace DigitalPlatform.OPAC.Server
                         this.ChargingHistoryType = strValue;
                     else
                         this.ChargingHistoryType = "";
+
+                    // 2016/9/28
+                    strValue = "";
+                    lRet = channel.GetSystemParameter(
+                        null,
+            "system",
+            "outgoingQueue",
+            out strValue,
+            out strError);
+                    if (lRet == 1)
+                        this.OutgoingQueue = strValue;
+                    else
+                        this.OutgoingQueue = "";
 
                     // 获取虚拟库定义
                     string strXml = "";
@@ -4001,7 +4019,7 @@ out strError);
                     return -1;
                 }
 
-                strError = "GetRes() (for metadata) Error : " + strError;
+                strError = "GetRes() '" + strPath + "' (for metadata) Error : " + strError;
                 return -1;
             }
 
@@ -4009,7 +4027,7 @@ out strError);
                 return -1;
 
             // 取 metadata 中的 mime 类型信息
-            Hashtable values = StringUtil.ParseMedaDataXml(strMetaData,
+            Hashtable values = StringUtil.ParseMetaDataXml(strMetaData,
                 out strError);
             if (values == null)
             {

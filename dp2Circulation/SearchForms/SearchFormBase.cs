@@ -335,12 +335,15 @@ out strError);
 
         // 保存一条记录
         // 保存成功后， info.Timestamp 会被更新
+        // parameters:
+        //      strStyle force/空
         // return:
         //      -2  时间戳不匹配
         //      -1  出错
         //      0   成功
         internal virtual int SaveRecord(string strRecPath,
             BiblioInfo info,
+            string strStyle,
             out byte[] baNewTimestamp,
             out string strError)
         {
@@ -720,6 +723,7 @@ out strError);
                     items.Add(item);
                     recpaths.Add(item.Text);
 
+                    // TODO: 对出错状态的行不要清除修改状态
                     ClearOneChange(item, true);
                 }
 
@@ -757,6 +761,7 @@ out strError);
 
                     ListViewItem item = items[i];
 
+                    // TODO: 注意保护好事项的背景色?
                     // TODO: 注意处理好 record.RecordBody.Result 带有出错信息的情形
                     RefreshOneLine(item, record.Cols, bClearRestColumns);
 
@@ -989,11 +994,10 @@ out strError);
             DoViewComment(false);
         }
 
-        // 
-        /// <summary>
-        /// 保存选定事项的修改
-        /// </summary>
-        public void SaveSelectedChangedRecords()
+        // 保存选定事项的修改
+        // parameters:
+        //      strStyle force/空
+        public void SaveSelectedChangedRecords(string strStyle)
         {
             // TODO: 确实要?
 
@@ -1019,6 +1023,7 @@ out strError);
             }
 
             int nRet = SaveChangedRecords(items,
+                strStyle,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -1034,7 +1039,7 @@ out strError);
         /// <summary>
         /// 保存全部修改事项
         /// </summary>
-        public void SaveAllChangedRecords()
+        public void SaveAllChangedRecords(string strStyle)
         {
             // TODO: 确实要?
 
@@ -1060,6 +1065,7 @@ out strError);
             }
 
             int nRet = SaveChangedRecords(items,
+                strStyle,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -1075,13 +1081,18 @@ out strError);
         /// 保存对指定事项的修改
         /// </summary>
         /// <param name="items">事项集合</param>
+        /// <param name="strStyle">处理风格。force/空</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
         public int SaveChangedRecords(List<ListViewItem> items,
+            string strStyle,
             out string strError)
         {
             strError = "";
             int nRet = 0;
+
+            // 保存过程中发生了错误的那些事项
+            List<ListViewItem> error_items = new List<ListViewItem>();
 
             int nReloadCount = 0;
             int nSavedCount = 0;
@@ -1134,6 +1145,7 @@ out strError);
                     //      0   成功
                     nRet = SaveRecord(strRecPath,
                         info,
+                        strStyle,
                         out baNewTimestamp,
                         out strError);
 #if NO
@@ -1166,6 +1178,7 @@ MessageBoxDefaultButton.Button1);
                             goto REDO_SAVE;
                         if (result == System.Windows.Forms.DialogResult.Cancel)
                             return -1;
+                        error_items.Add(item);
                         goto CONTINUE;
                     }
 
@@ -1249,11 +1262,17 @@ MessageBoxDefaultButton.Button1);
                 // this._listviewRecords.Enabled = true;
             }
 
+            // 从 items 中去掉那些已经报错的
+            foreach(ListViewItem item in error_items)
+            {
+                items.Remove(item);
+            }
+
             // 2013/10/22
             nRet = RefreshListViewLines(items,
                 "",
                 true,
-                    true,
+                true,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -1269,7 +1288,12 @@ MessageBoxDefaultButton.Button1);
                     strError += " ; ";
                 strError += "有 " + nReloadCount + " 条" + this.DbTypeCaption + "记录因为时间戳不匹配而重新装载旧记录部分(请观察后重新保存)";
             }
-
+            if (error_items.Count > 0)
+            {
+                if (string.IsNullOrEmpty(strError) == false)
+                    strError += " ; ";
+                strError += "有 " + error_items.Count + " 条" + this.DbTypeCaption + "记录在保存时出错(可排除故障后后重新保存)";
+            }
             return 0;
         }
 
@@ -1485,7 +1509,6 @@ dlg.UiState);
                     }
 
                     string strDebugInfo = "";
-
 
                     // 修改一个订购记录 XmlDocument
                     // return:

@@ -570,7 +570,7 @@ namespace dp2rms
 				}
 
 				// 取metadata
-				Hashtable values = StringUtil.ParseMedaDataXml(strMetaData,
+				Hashtable values = StringUtil.ParseMetaDataXml(strMetaData,
 					out strError);
 				if (values == null)
 				{

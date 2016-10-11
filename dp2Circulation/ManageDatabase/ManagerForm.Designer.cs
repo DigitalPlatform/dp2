@@ -109,6 +109,7 @@ namespace dp2Circulation
             this.columnHeader_location_libraryCode = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_location_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_location_canBorrow = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_location_itemBarcodeNullable = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.textBox_location_comment = new System.Windows.Forms.TextBox();
             this.toolStrip_location = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_location_save = new System.Windows.Forms.ToolStripButton();
@@ -200,11 +201,12 @@ namespace dp2Circulation
             this.toolStripButton_calendar_new = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_calendar_modify = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_calendar_delete = new System.Windows.Forms.ToolStripButton();
+            this.tabPage_kernel = new System.Windows.Forms.TabPage();
+            this.kernelResTree1 = new DigitalPlatform.CirculationClient.KernelResTree();
             this.imageList_opacBrowseFormatType = new System.Windows.Forms.ImageList(this.components);
             this.imageList_opacDatabaseType = new System.Windows.Forms.ImageList(this.components);
             this.imageList_zhongcihao = new System.Windows.Forms.ImageList(this.components);
             this.imageList_arrangement = new System.Windows.Forms.ImageList(this.components);
-            this.columnHeader_location_itemBarcodeNullable = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControl_main.SuspendLayout();
             this.tabPage_databases.SuspendLayout();
             this.toolStrip_databases.SuspendLayout();
@@ -254,6 +256,7 @@ namespace dp2Circulation
             this.toolStrip_newLoanPolicy.SuspendLayout();
             this.tabPage_calendar.SuspendLayout();
             this.toolStrip_calendar.SuspendLayout();
+            this.tabPage_kernel.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -272,6 +275,7 @@ namespace dp2Circulation
             this.tabControl_main.Controls.Add(this.tabPage_center);
             this.tabControl_main.Controls.Add(this.tabPage_newLoanPolicy);
             this.tabControl_main.Controls.Add(this.tabPage_calendar);
+            this.tabControl_main.Controls.Add(this.tabPage_kernel);
             this.tabControl_main.Location = new System.Drawing.Point(0, 10);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl_main.Name = "tabControl_main";
@@ -1110,6 +1114,11 @@ namespace dp2Circulation
             // 
             this.columnHeader_location_canBorrow.Text = "允许外借";
             this.columnHeader_location_canBorrow.Width = 94;
+            // 
+            // columnHeader_location_itemBarcodeNullable
+            // 
+            this.columnHeader_location_itemBarcodeNullable.Text = "册条码号可为空";
+            this.columnHeader_location_itemBarcodeNullable.Width = 100;
             // 
             // textBox_location_comment
             // 
@@ -2109,6 +2118,30 @@ namespace dp2Circulation
             this.toolStripButton_calendar_delete.Text = "删除";
             this.toolStripButton_calendar_delete.Click += new System.EventHandler(this.toolStripButton_calendar_delete_Click);
             // 
+            // tabPage_kernel
+            // 
+            this.tabPage_kernel.Controls.Add(this.kernelResTree1);
+            this.tabPage_kernel.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_kernel.Name = "tabPage_kernel";
+            this.tabPage_kernel.Size = new System.Drawing.Size(532, 260);
+            this.tabPage_kernel.TabIndex = 12;
+            this.tabPage_kernel.Text = "内核";
+            this.tabPage_kernel.UseVisualStyleBackColor = true;
+            // 
+            // kernelResTree1
+            // 
+            this.kernelResTree1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.kernelResTree1.HideSelection = false;
+            this.kernelResTree1.ImageIndex = 0;
+            this.kernelResTree1.Lang = null;
+            this.kernelResTree1.Location = new System.Drawing.Point(0, 0);
+            this.kernelResTree1.Name = "kernelResTree1";
+            this.kernelResTree1.SelectedImageIndex = 0;
+            this.kernelResTree1.Size = new System.Drawing.Size(532, 260);
+            this.kernelResTree1.TabIndex = 0;
+            this.kernelResTree1.GetChannel += new DigitalPlatform.LibraryClient.GetChannelEventHandler(this.kernelResTree1_GetChannel);
+            this.kernelResTree1.ReturnChannel += new DigitalPlatform.LibraryClient.ReturnChannelEventHandler(this.kernelResTree1_ReturnChannel);
+            // 
             // imageList_opacBrowseFormatType
             // 
             this.imageList_opacBrowseFormatType.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList_opacBrowseFormatType.ImageStream")));
@@ -2141,11 +2174,6 @@ namespace dp2Circulation
             this.imageList_arrangement.Images.SetKeyName(0, "group.ico");
             this.imageList_arrangement.Images.SetKeyName(1, "database.bmp");
             this.imageList_arrangement.Images.SetKeyName(2, "error_entity.bmp");
-            // 
-            // columnHeader_location_itemBarcodeNullable
-            // 
-            this.columnHeader_location_itemBarcodeNullable.Text = "册条码号可为空";
-            this.columnHeader_location_itemBarcodeNullable.Width = 100;
             // 
             // ManagerForm
             // 
@@ -2241,6 +2269,7 @@ namespace dp2Circulation
             this.tabPage_calendar.PerformLayout();
             this.toolStrip_calendar.ResumeLayout(false);
             this.toolStrip_calendar.PerformLayout();
+            this.tabPage_kernel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -2419,5 +2448,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ColumnHeader columnHeader_calendar_content;
         private System.Windows.Forms.ImageList imageList_itemType;
         private System.Windows.Forms.ColumnHeader columnHeader_location_itemBarcodeNullable;
+        private System.Windows.Forms.TabPage tabPage_kernel;
+        private DigitalPlatform.CirculationClient.KernelResTree kernelResTree1;
     }
 }

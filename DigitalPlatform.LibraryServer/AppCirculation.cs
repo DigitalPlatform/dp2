@@ -416,7 +416,6 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             strReaderBarcode = "";
 
-
             if (string.IsNullOrEmpty(strCode) == true
                 || strCode.Length < "PQR:".Length
                 || StringUtil.HasHead(strCode, "PQR:") == false)
@@ -19086,7 +19085,7 @@ strBookPrice);    // 图书价格
                 out strError);
             if (lRet == -1)
             {
-                strError = "GetRes() (for metadata) Error : " + strError;
+                strError = "GetRes() '"+strPath+"' (for metadata) Error : " + strError;
                 return -1;
             }
 
@@ -19094,7 +19093,7 @@ strBookPrice);    // 图书价格
                 return -1;
 
             // 取metadata中的mime类型信息
-            Hashtable values = StringUtil.ParseMedaDataXml(strMetaData,
+            Hashtable values = StringUtil.ParseMetaDataXml(strMetaData,
                 out strError);
 
             if (values == null)

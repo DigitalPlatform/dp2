@@ -25,6 +25,8 @@ namespace dp2Circulation
         /// </summary>
         public event GenerateDataEventHandler GenerateData = null;
 
+        public event GetBiblioEventHandler GetBiblio = null;
+
         const int WM_ENSURE_VISIBLE = API.WM_USER + 200;
 
         /// <summary>
@@ -65,6 +67,15 @@ namespace dp2Circulation
         public BindingForm()
         {
             InitializeComponent();
+
+            this.bindingControl1.GetBiblio += bindingControl1_GetBiblio;
+        }
+
+        void bindingControl1_GetBiblio(object sender, GetBiblioEventArgs e)
+        {
+            var func = this.GetBiblio;
+            if (func != null)
+                func(sender, e);
         }
 
         private void BindingForm_Load(object sender, EventArgs e)

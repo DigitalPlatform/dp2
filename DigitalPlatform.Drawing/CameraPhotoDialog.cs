@@ -49,10 +49,10 @@ namespace DigitalPlatform.Drawing
             this.qrRecognitionControl1.TabIndex = 0;
             this.qrRecognitionControl1.BackColor = Color.DarkGray; //System.Drawing.SystemColors.Window;
 
-            this.qrRecognitionControl1.FirstImageFilled += new EventHandler(qrRecognitionControl1_FirstImageFilled);
+            this.qrRecognitionControl1.FirstImageFilled += new FirstImageFilledEventHandler(qrRecognitionControl1_FirstImageFilled);
         }
 
-        void qrRecognitionControl1_FirstImageFilled(object sender, EventArgs e)
+        void qrRecognitionControl1_FirstImageFilled(object sender, FirstImageFilledEventArgs e)
         {
             this.toolStripButton_getAndClose.Enabled = true;
         }

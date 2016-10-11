@@ -1335,7 +1335,11 @@ value);
             // REDOWHOLESAVE:
             string strWarning = "";
 
+            bool bCharRedo = false; // 是否正在击键重做的过程中
+
             TimeSpan old_timeout = channel.Timeout;
+
+            channel.Timeout = TimeSpan.FromSeconds(10);
 
             int nCursorLeft = Console.CursorLeft;
             int nCursorTop = Console.CursorTop;
@@ -1422,8 +1426,28 @@ value);
                             nRedoCount++;
                             goto REDO;
                         }
+
+                        if (channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch
+                            && bCharRedo == true)
+                        {
+                            bCharRedo = false;
+                            goto REDO;
+                        }
+
+                        Console.WriteLine("出错: " + strError + "\r\n\r\n是否重试? (Y/N)");
+                        ConsoleKeyInfo info = Console.ReadKey();
+                        if (info.KeyChar == 'y' || info.KeyChar == 'Y')
+                        {
+                            Console.WriteLine();
+                            nCursorLeft = Console.CursorLeft;
+                            nCursorTop = Console.CursorTop + 2;
+                            bCharRedo = true;
+                            goto REDO;
+                        }
                         goto ERROR1;
                     }
+
+                    bCharRedo = false;
                 }
             }
             finally

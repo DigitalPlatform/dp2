@@ -3666,11 +3666,11 @@ false);
             int nAppendCount = 0;
             foreach (IssueInfo other_info in other_series.IssueInfos)
             {
-                string strOtherYearPart = IssueUtil.GetYearPart(other_info.PublishTime);
+                string strOtherYearPart = dp2StringUtil.GetYearPart(other_info.PublishTime);
                 bool bFound = false;
                 foreach (IssueInfo info in this.IssueInfos)
                 {
-                    if (strOtherYearPart == IssueUtil.GetYearPart(info.PublishTime)
+                    if (strOtherYearPart == dp2StringUtil.GetYearPart(info.PublishTime)
                         && other_info.Issue == info.Issue)
                     {
                         info.OrderCount = Add(info.OrderCount, other_info.OrderCount);

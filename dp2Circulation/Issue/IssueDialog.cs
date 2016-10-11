@@ -7,6 +7,8 @@ using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform.LibraryServer;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {

@@ -1,6 +1,33 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
 
+  <script>
+    <![CDATA[
+
+using System;
+using System.Xml;
+using System.Text;
+using DigitalPlatform.rms;
+using DigitalPlatform.IO;
+using DigitalPlatform.Text;
+
+public class MyKeysHost : KeysHost
+{
+    // 2016/10/6
+	public void getParentIssue()
+	{
+        this.ResultString = dp2StringUtil.GetParentIssue(this.DataDom);
+        return;
+	}
+}
+
+]]><refs>
+      <ref>system.dll</ref>
+      <ref>system.xml.dll</ref>
+      <ref>%bindir%\digitalplatform.io.dll</ref>
+    </refs>
+  </script>
+
   <key>
     <xpath>*/publishTime</xpath>
     <from>publishTime</from>
@@ -162,6 +189,22 @@
     </convertquery>
     <caption lang="zh-CN">订单号</caption>
     <caption lang="en">Order ID</caption>
+  </table>
+  
+  <key>
+    <xpath scripting="on">getParentIssue</xpath>
+    <from>parentissue</from>
+    <table ref="parentissue" />
+  </key>
+  <table name="parentissue" id="30">
+    <convert>
+      <string style="" />
+    </convert>
+    <convertquery>
+      <string style="" />
+    </convertquery>
+    <caption lang="zh-CN">父记录+期号</caption>
+    <caption lang="en">Parent+Issue</caption>
   </table>
 
   <!-- ******************配置非用字**************************************** -->

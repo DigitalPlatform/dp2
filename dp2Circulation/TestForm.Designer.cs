@@ -28,7 +28,7 @@ namespace dp2Circulation
         /// </summary>
         private void InitializeComponent()
         {
-            DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle1 = new DigitalPlatform.CirculationClient.PatronCardStyle();
+            DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle2 = new DigitalPlatform.CirculationClient.PatronCardStyle();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_diskSpace = new System.Windows.Forms.TabPage();
             this.button_test = new System.Windows.Forms.Button();
@@ -199,10 +199,13 @@ namespace dp2Circulation
             this.tabPage_amazonSearch = new System.Windows.Forms.TabPage();
             this.button_amazonSearch_openDialog = new System.Windows.Forms.Button();
             this.tabPage_test = new System.Windows.Forms.TabPage();
+            this.button_testRelationDialog = new System.Windows.Forms.Button();
             this.button_openWindowsUpdateDialog = new System.Windows.Forms.Button();
             this.button_testGetMergeStyleDialog = new System.Windows.Forms.Button();
             this.button_test_detectInstallation = new System.Windows.Forms.Button();
-            this.button_testRelationDialog = new System.Windows.Forms.Button();
+            this.tabPage_kernelResTree = new System.Windows.Forms.TabPage();
+            this.button_kernelResTree_fill = new System.Windows.Forms.Button();
+            this.kernelResTree1 = new DigitalPlatform.CirculationClient.KernelResTree();
             this.tabControl_main.SuspendLayout();
             this.tabPage_diskSpace.SuspendLayout();
             this.tabPage_windowsEventLog.SuspendLayout();
@@ -235,6 +238,7 @@ namespace dp2Circulation
             this.tabPage_entityRegisterControl.SuspendLayout();
             this.tabPage_amazonSearch.SuspendLayout();
             this.tabPage_test.SuspendLayout();
+            this.tabPage_kernelResTree.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -271,6 +275,7 @@ namespace dp2Circulation
             this.tabControl_main.Controls.Add(this.tabPage_entityRegisterControl);
             this.tabControl_main.Controls.Add(this.tabPage_amazonSearch);
             this.tabControl_main.Controls.Add(this.tabPage_test);
+            this.tabControl_main.Controls.Add(this.tabPage_kernelResTree);
             this.tabControl_main.Location = new System.Drawing.Point(9, 11);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl_main.Name = "tabControl_main";
@@ -674,10 +679,10 @@ namespace dp2Circulation
             this.locationEditControl1.Location = new System.Drawing.Point(11, 108);
             this.locationEditControl1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.locationEditControl1.MaximumSize = new System.Drawing.Size(0, 24);
-            this.locationEditControl1.MinimumSize = new System.Drawing.Size(262, 30);
+            this.locationEditControl1.MinimumSize = new System.Drawing.Size(276, 30);
             this.locationEditControl1.Name = "locationEditControl1";
             this.locationEditControl1.ReadOnly = false;
-            this.locationEditControl1.Size = new System.Drawing.Size(262, 30);
+            this.locationEditControl1.Size = new System.Drawing.Size(276, 30);
             this.locationEditControl1.TabIndex = 0;
             this.locationEditControl1.Value = "";
             // 
@@ -1924,7 +1929,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.patronCardControl1.Location = new System.Drawing.Point(4, 45);
             this.patronCardControl1.Name = "patronCardControl1";
-            this.patronCardControl1.PatronCardStyle = patronCardStyle1;
+            this.patronCardControl1.PatronCardStyle = patronCardStyle2;
             this.patronCardControl1.Size = new System.Drawing.Size(156, 119);
             this.patronCardControl1.TabIndex = 0;
             this.patronCardControl1.Text = "patronCardControl1";
@@ -2180,6 +2185,16 @@ namespace dp2Circulation
             this.tabPage_test.Text = "‘”œÓ";
             this.tabPage_test.UseVisualStyleBackColor = true;
             // 
+            // button_testRelationDialog
+            // 
+            this.button_testRelationDialog.Location = new System.Drawing.Point(4, 123);
+            this.button_testRelationDialog.Name = "button_testRelationDialog";
+            this.button_testRelationDialog.Size = new System.Drawing.Size(220, 23);
+            this.button_testRelationDialog.TabIndex = 3;
+            this.button_testRelationDialog.Text = "≤‚ ‘ Relation Dialog ...";
+            this.button_testRelationDialog.UseVisualStyleBackColor = true;
+            this.button_testRelationDialog.Click += new System.EventHandler(this.button_testRelationDialog_Click);
+            // 
             // button_openWindowsUpdateDialog
             // 
             this.button_openWindowsUpdateDialog.Location = new System.Drawing.Point(4, 84);
@@ -2210,15 +2225,40 @@ namespace dp2Circulation
             this.button_test_detectInstallation.UseVisualStyleBackColor = true;
             this.button_test_detectInstallation.Click += new System.EventHandler(this.button_test_detectInstallation_Click);
             // 
-            // button_testRelationDialog
+            // tabPage_kernelResTree
             // 
-            this.button_testRelationDialog.Location = new System.Drawing.Point(4, 123);
-            this.button_testRelationDialog.Name = "button_testRelationDialog";
-            this.button_testRelationDialog.Size = new System.Drawing.Size(220, 23);
-            this.button_testRelationDialog.TabIndex = 3;
-            this.button_testRelationDialog.Text = "≤‚ ‘ Relation Dialog ...";
-            this.button_testRelationDialog.UseVisualStyleBackColor = true;
-            this.button_testRelationDialog.Click += new System.EventHandler(this.button_testRelationDialog_Click);
+            this.tabPage_kernelResTree.Controls.Add(this.button_kernelResTree_fill);
+            this.tabPage_kernelResTree.Controls.Add(this.kernelResTree1);
+            this.tabPage_kernelResTree.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_kernelResTree.Name = "tabPage_kernelResTree";
+            this.tabPage_kernelResTree.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_kernelResTree.TabIndex = 29;
+            this.tabPage_kernelResTree.Text = "KernelResTree";
+            this.tabPage_kernelResTree.UseVisualStyleBackColor = true;
+            // 
+            // button_kernelResTree_fill
+            // 
+            this.button_kernelResTree_fill.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_kernelResTree_fill.Location = new System.Drawing.Point(3, 199);
+            this.button_kernelResTree_fill.Name = "button_kernelResTree_fill";
+            this.button_kernelResTree_fill.Size = new System.Drawing.Size(131, 23);
+            this.button_kernelResTree_fill.TabIndex = 1;
+            this.button_kernelResTree_fill.Text = "Fill";
+            this.button_kernelResTree_fill.UseVisualStyleBackColor = true;
+            this.button_kernelResTree_fill.Click += new System.EventHandler(this.button_kernelResTree_fill_Click);
+            // 
+            // kernelResTree1
+            // 
+            this.kernelResTree1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.kernelResTree1.Lang = null;
+            this.kernelResTree1.Location = new System.Drawing.Point(3, 3);
+            this.kernelResTree1.Name = "kernelResTree1";
+            this.kernelResTree1.Size = new System.Drawing.Size(333, 193);
+            this.kernelResTree1.TabIndex = 0;
+            this.kernelResTree1.GetChannel += new DigitalPlatform.LibraryClient.GetChannelEventHandler(this.kernelResTree1_GetChannel);
+            this.kernelResTree1.ReturnChannel += new DigitalPlatform.LibraryClient.ReturnChannelEventHandler(this.kernelResTree1_ReturnChannel);
             // 
             // TestForm
             // 
@@ -2282,6 +2322,7 @@ namespace dp2Circulation
             this.tabPage_entityRegisterControl.ResumeLayout(false);
             this.tabPage_amazonSearch.ResumeLayout(false);
             this.tabPage_test.ResumeLayout(false);
+            this.tabPage_kernelResTree.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -2462,5 +2503,8 @@ namespace dp2Circulation
         private System.Windows.Forms.Button button_testThrow;
         private System.Windows.Forms.Button button_openWindowsUpdateDialog;
         private System.Windows.Forms.Button button_testRelationDialog;
+        private System.Windows.Forms.TabPage tabPage_kernelResTree;
+        private System.Windows.Forms.Button button_kernelResTree_fill;
+        private DigitalPlatform.CirculationClient.KernelResTree kernelResTree1;
     }
 }

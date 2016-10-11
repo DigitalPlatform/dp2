@@ -60,6 +60,7 @@
             this.textBox_biblioDumpFileName.Name = "textBox_biblioDumpFileName";
             this.textBox_biblioDumpFileName.Size = new System.Drawing.Size(380, 21);
             this.textBox_biblioDumpFileName.TabIndex = 1;
+            this.textBox_biblioDumpFileName.TextChanged += new System.EventHandler(this.textBox_biblioDumpFileName_TextChanged);
             // 
             // button_getBiblioDumpFileName
             // 

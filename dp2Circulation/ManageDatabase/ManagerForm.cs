@@ -124,6 +124,8 @@ namespace dp2Circulation
             ListViewProperty prop1 = new ListViewProperty();
             this.listView_location_list.Tag = prop1;
 
+            this.kernelResTree1.AppInfo = Program.MainForm.AppInfo;
+            this.kernelResTree1.HideIndices = new int[] { KernelResTree.RESTYPE_FROM };
         }
 
         void prop_CompareColumn(object sender, CompareEventArgs e)
@@ -268,7 +270,6 @@ namespace dp2Circulation
             {
                 MessageBox.Show(this, strError);
             }
-
         }
 
 #if NO
@@ -8553,8 +8554,23 @@ namespace dp2Circulation
             }
         }
 
+        bool _kernelInitialized = false;
+
         private void tabControl_main_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (this.tabControl_main.SelectedTab == this.tabPage_kernel
+                && _kernelInitialized == false)
+            {
+                if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.84") < 0)
+                {
+                    this.ShowMessage("内核管理功能要求当前连接的 dp2library 服务器版本为 2.84 或以上 (而现在是 " + this.MainForm.ServerVersion + ")", "red", true);
+                    return;
+                }
+
+                if (this.kernelResTree1.Fill() == true)
+                    _kernelInitialized = true;
+            }
+
             if (this.tabControl_main.SelectedTab == this.tabPage_newLoanPolicy)
             {
                 // 同步日历名列表
@@ -8604,6 +8620,30 @@ namespace dp2Circulation
         }
 
         #endregion
+
+        private void kernelResTree1_GetChannel(object sender, DigitalPlatform.LibraryClient.GetChannelEventArgs e)
+        {
+            e.Channel = this.MainForm.GetChannel();
+            if (e.BeginLoop == true)
+            {
+                this.ShowMessage("正在访问服务器 ...");
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                // stop.Initial(" ...");
+                stop.BeginLoop();
+            }
+        }
+
+        private void kernelResTree1_ReturnChannel(object sender, DigitalPlatform.LibraryClient.ReturnChannelEventArgs e)
+        {
+            this.MainForm.ReturnChannel(e.Channel);
+            if (e.EndLoop == true)
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                this.ClearMessage();
+            }
+        }
 
 
     }

@@ -9,6 +9,7 @@ using System.Xml;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -265,44 +266,6 @@ namespace DigitalPlatform.rms.Client
             return 0;
         }
 
-        public static void ChangeMetaData(ref string strMetaData,
-string strID,
-string strLocalPath,
-string strMimeType,
-string strLastModified,
-string strPath,
-string strTimestamp)
-        {
-            XmlDocument dom = new XmlDocument();
-
-            if (strMetaData == "")
-                strMetaData = "<file/>";
-
-            dom.LoadXml(strMetaData);
-
-            if (strID != null)
-                DomUtil.SetAttr(dom.DocumentElement, "id", strID);
-
-            if (strLocalPath != null)
-                DomUtil.SetAttr(dom.DocumentElement, "localpath", strLocalPath);
-
-            if (strMimeType != null)
-                DomUtil.SetAttr(dom.DocumentElement, "mimetype", strMimeType);
-
-            if (strLastModified != null)
-                DomUtil.SetAttr(dom.DocumentElement, "lastmodified", strLastModified);
-
-            if (strPath != null)
-                DomUtil.SetAttr(dom.DocumentElement, "path", strPath);
-
-            if (strTimestamp != null)
-                DomUtil.SetAttr(dom.DocumentElement, "timestamp", strTimestamp);
-
-
-            strMetaData = dom.OuterXml;
-        }
-
-
         #region 写入 .dp2bak 文件
 
         // 将主记录和相关资源写入备份文件
@@ -338,7 +301,7 @@ string strTimestamp)
                 respath.Path = strPath;
 
                 // 加工元数据
-                ChangeMetaData(ref strMetaData,
+                StringUtil.ChangeMetaData(ref strMetaData,
                     null,
                     null,
                     null,
@@ -507,7 +470,7 @@ string strTimestamp)
                 respath.Path = strOutputPath;	// strResPath;
 
                 // strMetaData还要加入资源id?
-                ChangeMetaData(ref strMetaData,
+                StringUtil.ChangeMetaData(ref strMetaData,
                     strID,
                     null,
                     null,
