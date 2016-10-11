@@ -1024,7 +1024,9 @@ MessageBoxDefaultButton.Button1);
         {
             string strError = "";
 
-            int nRet = ConfigMq(out strError);
+            int nRet = ConfigMq(
+                Control.ModifierKeys == Keys.Control ? false : true,
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
 
@@ -1036,7 +1038,8 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-        int ConfigMq(out string strError)
+        int ConfigMq(bool bAdd,
+            out string strError)
         {
             strError = "";
 
@@ -1056,6 +1059,12 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
+            return InstallHelper.SetupMessageQueue(
+                strLibraryXmlFileName,
+                strInstanceName,
+                bAdd,
+                out strError);
+#if NO
             XmlDocument dom = new XmlDocument();
             dom.Load(strLibraryXmlFileName);
 
@@ -1179,6 +1188,8 @@ MessageBoxDefaultButton.Button1);
             }
 
             return 0;   // 没有发生修改
+#endif
         }
+
     }
 }

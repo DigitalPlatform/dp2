@@ -210,7 +210,7 @@
     <comment>AppReservation.cs</comment>
   </data>
   <data name="册s的馆藏地点为s，按规定此册不允许外借" xml:space="preserve">
-    <value>册 {0} 的馆藏地点为 {1}，按规定(&lt;locationTypes&gt;配置)此册不允许外借。</value>
+    <value>册 {0} 的馆藏地点为 '{1}'，按规定(&lt;locationTypes&gt;配置)此册不允许外借。</value>
     <comment>AppCirculation.cs</comment>
   </data>
   <data name="册条码号s不存在" xml:space="preserve">

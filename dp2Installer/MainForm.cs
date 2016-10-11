@@ -4596,12 +4596,6 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 ".txt");
         }
 
-        [DllImport("shlwapi.dll", SetLastError = true, EntryPoint = "#437")]
-        static extern bool IsOS(int os);
-
-        const int OS_ANYSERVER = 29;
-        static bool isWindowsServer = IsOS(OS_ANYSERVER);
-
         // 启用 MSMQ
         private void MenuItem_dp2library_enableMsmq_Click(object sender, EventArgs e)
         {
@@ -4621,7 +4615,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
     };
 
             nRet = EnableServerFeature("MSMQ",
-                isWindowsServer ? server_featureNames : featureNames,
+                InstallHelper.isWindowsServer ? server_featureNames : featureNames,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
