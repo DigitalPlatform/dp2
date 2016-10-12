@@ -111,6 +111,11 @@ namespace DigitalPlatform.Script
             SetObjectItem(strPath, item);
         }
 
+        public void Clear(string strPath)
+        {
+            SetObjectItem(strPath, null);
+        }
+
         public void Clear()
         {
             this._lock.EnterWriteLock();

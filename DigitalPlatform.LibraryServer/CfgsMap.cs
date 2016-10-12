@@ -29,6 +29,7 @@ namespace DigitalPlatform.LibraryServer
 
         }
 
+        // 清除全部本地缓存的配置文件
         public void Clear()
         {
             try
@@ -42,13 +43,47 @@ namespace DigitalPlatform.LibraryServer
             PathUtil.CreateDirIfNeed(this.RootDir);
         }
 
+        // 清除一个本地缓存的配置文件
+        // parameters:
+        //      strPath 这是配置文件路径，例如 cfgs/summary.fltx
+        // return:
+        //      返回本地文件名
+        public string Clear(string strPath)
+        {
+            string strLocalPath = this.RootDir + "/" + strPath;
+
+            this.locks.LockForRead(strLocalPath);
+            try
+            {
+                // 看看物理文件是否存在
+                FileInfo fi = new FileInfo(strLocalPath);
+                if (fi.Exists == true)
+                {
+                    try
+                    {
+                        // TODO: 注意安全性风险，要限制在 this.RootDir 以下的位置
+                        File.Delete(strLocalPath);
+                    }
+                    catch(Exception ex)
+                    {
+                        string strText = ex.Message;
+                    }
+                }
+            }
+            finally
+            {
+                this.locks.UnlockForRead(strLocalPath);
+            }
+
+            return strLocalPath;
+        }
+
         // 将内核网络配置文件映射到本地
         // return:
         //      -1  出错
         //      0   不存在
         //      1   找到
         public int MapFileToLocal(
-            // RmsChannelCollection Channels,
             RmsChannel channel,
             string strPath,
             out string strLocalPath,

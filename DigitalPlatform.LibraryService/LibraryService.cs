@@ -11924,6 +11924,9 @@ namespace dp2Library
                     result.Value = lRet;
                     result.ErrorInfo = strError;
 
+                    // 2016/10/12
+                    app.ClearCacheCfgs(strResPath);
+
                     // 做错误码的翻译工作
                     // 2008/7/28
                     // result.ErrorCode = ConvertKernelErrorCode(channel.ErrorCode);

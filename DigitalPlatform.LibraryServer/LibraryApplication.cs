@@ -13652,6 +13652,24 @@ strLibraryCode);    // 读者所在的馆代码
                 out strError);
         }
 
+        public bool ClearCacheCfgs(string strResPath)
+        {
+            string strPath = strResPath;
+
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+            string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+            if (strDbName == "cfgs" || strFirstPart == "cfgs")
+            {
+                string strLocalPath = this.CfgsMap.Clear(strResPath);
+                this.Filters.ClearFilter(strLocalPath);
+                this.AssemblyCache.Clear(strLocalPath);
+                return true;
+            }
+
+            return false;
+        }
+
         // 检查用户使用 WriteRes API 的权限
         // 注： 
         //      writetemplate 写入模板配置文件 template 所需要的权限; 
