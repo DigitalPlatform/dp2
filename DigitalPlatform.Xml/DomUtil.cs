@@ -505,6 +505,65 @@ namespace DigitalPlatform.Xml
         }
 
 
+        // 2016/10/13
+        // 包装版本
+        public static string GetStringParam(XmlElement node,
+            string strParamName,
+            string strDefaultValue)
+        {
+            string strValue = strDefaultValue;
+            string strError = "";
+            GetStringParam(node,
+                strParamName,
+                strDefaultValue,
+                out strValue,
+                out strError);
+            return strValue;
+        }
+
+        // 2016/10/13
+        // 包装后的版本。不用事先获得元素的 Node
+        public static string GetStringParam(
+            XmlNode root,
+            string strElementPath,
+            string strParamName,
+            string strDefaultValue)
+        {
+            XmlElement node = root.SelectSingleNode(strElementPath) as XmlElement;
+            if (node == null)
+                return strDefaultValue;
+            return GetStringParam(node,
+                strParamName,
+                strDefaultValue);
+        }
+
+        // 2016/10/13
+        // 获得字符串的属性参数值
+        // 注：属性节点不具备的时候，返回 strDefaultValue。否则，就要返回属性值，哪怕属性值为 ""
+        // return:
+        //      -1  出错。但是nValue中已经有了nDefaultValue值，可以不加警告而直接使用
+        //      0   正常获得明确定义的参数值
+        //      1   参数没有定义，因此代替以缺省参数值返回
+        public static int GetStringParam(XmlElement node,
+            string strParamName,
+            string strDefaultValue,
+            out string strValue,
+            out string strError)
+        {
+            strError = "";
+
+            XmlAttribute attr = node.GetAttributeNode(strParamName);
+            if (attr == null)
+            {
+                strValue = strDefaultValue;
+                return 1;
+            }
+            strValue = attr.Value;
+            if (string.IsNullOrEmpty(strValue) == false)
+                strValue = strValue.Trim();
+
+            return 0;
+        }
 
         // 获得整数型的属性参数值
         // return:
@@ -593,7 +652,6 @@ namespace DigitalPlatform.Xml
             nValue = nDefaultValue;
 
             string strValue = DomUtil.GetAttr(node, strParamName);
-
 
             if (String.IsNullOrEmpty(strValue) == true)
             {

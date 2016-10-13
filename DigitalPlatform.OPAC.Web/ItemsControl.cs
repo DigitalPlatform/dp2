@@ -318,7 +318,6 @@ namespace DigitalPlatform.OPAC.Web
             reservationreaderbarcode.ID = "reservationreaderbarcode";
             reservationreaderbarcode_holder.Controls.Add(reservationreaderbarcode);
 
-
             Button reservationbutton = new Button();
             reservationbutton.ID = "reservationbutton";
             reservationbutton.Text = this.GetString("加入预约列表");
@@ -339,7 +338,6 @@ namespace DigitalPlatform.OPAC.Web
             pageswitcher.Controls.Add(new LiteralControl(
                 "<div class='pager'> -- "
             ));
-
 
             LiteralControl resultinfo = new LiteralControl();
             resultinfo.ID = "resultinfo";
@@ -1341,9 +1339,10 @@ namespace DigitalPlatform.OPAC.Web
             if (line == null)
                 return;
 
-            bool displayBlank = this.DisplayBlankIssueCover;
+            string displayBlank = this.DisplayBlankIssueCover;  // 缺省 "displayBlank,hideWhenAllBlank"
             string strPrefferSize = this.IssueCoverSize;    //  "MediumImage"; // "LargeImage",
 
+            int nNotBlankCount = 0;
             StringBuilder text = new StringBuilder();
             foreach (IssueString s in _issue_query_strings)
             {
@@ -1373,7 +1372,7 @@ namespace DigitalPlatform.OPAC.Web
 
                 if (string.IsNullOrEmpty(strUri))
                 {
-                    if (displayBlank == false)
+                    if (StringUtil.IsInList("displayBlank", displayBlank) == false)
                         continue;
 
                     if (strPrefferSize == "LargeImage")
@@ -1382,15 +1381,26 @@ namespace DigitalPlatform.OPAC.Web
                         strUrl = MyWebPage.GetStylePath(app, "blankcover_medium.png");
                 }
                 else
+                {
                     strUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri);
+                    nNotBlankCount++;
+                }
 
                 text.Append("<div class='issue_cover' ><img src='" + strUrl + "' alt='封面图像' ></img><div class='issue_no'>" + HttpUtility.HtmlEncode(s.Volume) + "</div></div>");
             }
 
-            LiteralControl literal = new LiteralControl();
-            literal.ID = "";
-            literal.Text = "<div class='issue_cover_frame' >" + text.ToString() + "</div>";
-            line.Controls.Add(literal);
+            if (StringUtil.IsInList("hideWhenAllBlank", displayBlank) == true
+                && nNotBlankCount == 0)
+            {
+
+            }
+            else
+            {
+                LiteralControl literal = new LiteralControl();
+                literal.ID = "";
+                literal.Text = "<div class='issue_cover_frame' >" + text.ToString() + "</div>";
+                line.Controls.Add(literal);
+            }
 
             _issue_query_strings.Clear();
         }
@@ -2117,20 +2127,20 @@ namespace DigitalPlatform.OPAC.Web
             return strPublishTime;
         }
 
-        bool DisplayBlankIssueCover
+        string DisplayBlankIssueCover
         {
             get
             {
-                bool bDefault = true;
+                string strDefault = "displayBlank,hideWhenAllBlank";
                 OpacApplication app = (OpacApplication)this.Page.Application["app"];
                 if (app == null)
-                    return bDefault;
+                    return strDefault;
 
-                return DomUtil.GetBooleanParam(
+                return DomUtil.GetStringParam(
                     app.WebUiDom.DocumentElement,
                     "itemsControl",
                     "displayBlankIssueCover",
-                    bDefault);
+                    strDefault);
             }
         }
 
