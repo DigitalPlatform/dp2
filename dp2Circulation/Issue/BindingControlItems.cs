@@ -37,14 +37,22 @@ namespace dp2Circulation
 
         public string ObjectXml
         {
+#if NO
             get
             {
                 return _objects.ToXml();
             }
+#endif
             set
             {
                 _objects = ObjectInfoCollection.FromXml(value);
             }
+        }
+
+        public string GetObjectXml(string strHostRecPath)
+        {
+            _objects.HostRecPath = strHostRecPath;
+            return _objects.ToXml();
         }
 
         public bool ObjectChanged

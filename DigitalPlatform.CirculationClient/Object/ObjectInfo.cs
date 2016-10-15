@@ -389,6 +389,7 @@ namespace DigitalPlatform.CirculationClient
         public int Save(
             LibraryChannel channel,
             Stop stop,
+            string strHostRecPath,
             string dp2library_version,
             out string strError)
         {
@@ -397,11 +398,14 @@ namespace DigitalPlatform.CirculationClient
             if (this.Count == 0)
                 return 0;
 
+            this.HostRecPath = strHostRecPath;  // 2016/10/15
+#if NO
             if (String.IsNullOrEmpty(this.HostRecPath) == true)
             {
                 strError = "尚未指定 BiblioRecPath";
                 return -1;
             }
+#endif
 
             if (IsNewPath(this.HostRecPath) == true)
             {
