@@ -24,6 +24,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.DataMining;
 using DigitalPlatform.Marc;
 using System.IO;
+using System.Net;
 
 namespace dp2Circulation
 {
@@ -9362,21 +9363,34 @@ MessageBoxDefaultButton.Button2);
             }
 
             {
+                CookieContainer cookie = new CookieContainer();
                 int i = 0;
                 foreach (IssueBindingItem issue in selected_issues)
                 {
+#if NO
                     string strImageUrl = "";
                     int nRet = LongyuanQikan.GetCoverImageUrl(
                         this,
                         strISSN,
                         dp2StringUtil.GetYearPart(issue.PublishTime),
                         issue.Issue,
+                        ref cookie,
                         out strImageUrl,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+#endif
+                    int nRet = LongyuanQikan.GetCoverImageToClipboard(
+    this,
+    strISSN,
+    dp2StringUtil.GetYearPart(issue.PublishTime),
+    issue.Issue,
+    out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
 
-                    string strLocalFileName = Path.GetTempFileName();
+ #if NO
+                   string strLocalFileName = Path.GetTempFileName();
                     try
                     {
                         // return:
@@ -9385,6 +9399,7 @@ MessageBoxDefaultButton.Button2);
                         //      1   找到
                         nRet = LongyuanQikan.DownloadImageFile(strImageUrl,
                             strLocalFileName,
+                            ref cookie,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -9393,6 +9408,7 @@ MessageBoxDefaultButton.Button2);
                             strError = "图像 " + strImageUrl + " 没有找到";
                             goto ERROR1;
                         }
+
                         using (Image image = Image.FromFile(strLocalFileName))
                         {
                             if (issue.SetCoverImage(image, out strError) == -1)
@@ -9403,7 +9419,19 @@ MessageBoxDefaultButton.Button2);
                     {
                         File.Delete(strLocalFileName);
                     }
-
+#endif
+                    // 从剪贴板中取得图像对象
+                    List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
+                    if (images == null)
+                    {
+                        strError = "。无法创建封面图像";
+                        goto ERROR1;
+                    }
+                    if (images.Count > 0)
+                    {
+                        if (issue.SetCoverImage(images[0], out strError) == -1)
+                            goto ERROR1;
+                    }
                     i++;
                 }
             }

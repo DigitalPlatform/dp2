@@ -1,4 +1,5 @@
-﻿using System;
+﻿using mshtml;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -59,6 +60,26 @@ namespace DigitalPlatform.DataMining
         private void BrowserDialog_FormClosed(object sender, FormClosedEventArgs e)
         {
 
+        }
+
+        public bool CopyImageToClipboard()
+        {
+            IHTMLDocument2 doc = (IHTMLDocument2)webBrowser1.Document.DomDocument;
+            IHTMLControlRange imgRange = (IHTMLControlRange)((HTMLBody)doc.body).createControlRange();
+
+            foreach (IHTMLImgElement img in doc.images)
+            {
+                string alt = img.alt;
+                if (alt.IndexOf("期") != -1)
+                {
+                    imgRange.add(img as IHTMLControlElement);
+
+                    imgRange.execCommand("Copy", false, null);
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
