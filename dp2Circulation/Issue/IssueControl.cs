@@ -2097,7 +2097,7 @@ namespace dp2Circulation
                             // 根据refid找到这个期对象，并兑现修改
                             // 如果没有找到，则创建之
                             Xmls.Add(issue_item.Xml);
-                            ObjectXmls.Add(issue_item.GetObjectXml(this.BiblioRecPath));
+                            ObjectXmls.Add(issue_item.ObjectXml);
                         }
                     }
 
