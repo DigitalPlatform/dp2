@@ -3033,11 +3033,21 @@ out strError);
 
             if (textType == ItemType.Field)
             {
+#if NO
                 if (strText.Length < 3)
                     return -1;	// 字段内容长度不足3字符
 
                 if (strText.Length == 3)
                     return 0;	// 不存在任何子字段内容
+#endif
+                if (strText.Length < 3)
+                    return -1;	// 字段内容长度不足3字符
+
+                if (strText.Length <= 5)
+                    return 0;	// 不存在任何子字段内容
+
+                // 2016/10/16
+                strText = strText.Substring(5);
             }
             if (textType == ItemType.Group)
             {
@@ -3047,7 +3057,6 @@ out strError);
                 if (strText.Length == 1)
                     return 0;	// 不存在任何子字段内容
             }
-
 
             if (strSubfieldName != null)
             {

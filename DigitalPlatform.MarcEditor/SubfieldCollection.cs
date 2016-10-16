@@ -105,7 +105,7 @@ namespace DigitalPlatform.Marc
             }
 
         }
-        
+
         // parameters:
         //      strName 子字段名
         //      nDupIndex   第几个
@@ -150,7 +150,6 @@ namespace DigitalPlatform.Marc
                 string strSubfield = "";
                 string strNextSubfieldName = "";
 
-
                 // 从字段或子字段组中得到一个子字段
                 // parameters:
                 //		strText		字段内容，或者子字段组内容。
@@ -164,7 +163,8 @@ namespace DigitalPlatform.Marc
                 //		-1	出错
                 //		0	所指定的子字段没有找到
                 //		1	找到。找到的子字段返回在strSubfield参数中
-                int nRet = MarcUtil.GetSubfield(strField,
+                int nRet = MarcUtil.GetSubfield(
+                    strField,
                     ItemType.Field,
                     null,
                     i,
@@ -181,7 +181,6 @@ namespace DigitalPlatform.Marc
             }
 
             subfields.Container = container;
-
             return subfields;
         }
 
