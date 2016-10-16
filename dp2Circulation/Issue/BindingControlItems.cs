@@ -24,6 +24,7 @@ using DigitalPlatform.Script;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CommonDialog;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Drawing;
 
 namespace dp2Circulation
 {
@@ -4803,58 +4804,51 @@ this.Volume);
         }
 
         // 设置封面图像
-        public int SetCoverImage(Image image,
+        public int SetCoverImage(ImageInfo info,
             out string strError)
         {
             strError = "";
-
-            CreateCoverImageDialog dlg = null;
-            try
+            using (CreateCoverImageDialog dlg = new CreateCoverImageDialog())
             {
-                dlg = new CreateCoverImageDialog();
-
                 MainForm.SetControlFont(dlg, this.Container.Font, false);
-                dlg.OriginImage = image;
+                dlg.ImageInfo = info;
                 Program.MainForm.AppInfo.LinkFormState(dlg, "issue_CreateCoverImageDialog_state");
                 dlg.ShowDialog(this.Container);
                 Program.MainForm.AppInfo.UnlinkFormState(dlg);
                 if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                     return 0;
-            }
-            finally
-            {
-                if (image != null)
+
+                // 先删除全部和封面有关的图像
+                this._objects.MaskDeleteCoverImageObject();
+
+                foreach (ImageType type in dlg.ResultImages)
                 {
-                    image.Dispose();
-                    image = null;
+                    if (type.Image == null)
+                    {
+                        continue;
+                    }
+
+                    string strType = "FrontCover." + type.TypeName;
+                    string strSize = type.Image.Width.ToString() + "X" + type.Image.Height.ToString() + "px";
+
+                    string strTempFilePath = FileUtil.NewTempFileName(
+                        Program.MainForm.UserTempDir,
+        "~temp_make_pic_",
+        ".png");
+
+                    type.Image.Save(strTempFilePath, System.Drawing.Imaging.ImageFormat.Png);
+
+                    // TODO: clip 指令存储在何处?
+                    string strID = "";
+                    int nRet = this._objects.SetObjectByUsage(
+                        strTempFilePath,
+                        strType,    // "coverimage",
+                        type.ClipCommand,
+                        out strID,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
                 }
-            }
-
-            foreach (ImageType type in dlg.ResultImages)
-            {
-                if (type.Image == null)
-                {
-                    continue;
-                }
-
-                string strType = "FrontCover." + type.TypeName;
-                string strSize = type.Image.Width.ToString() + "X" + type.Image.Height.ToString() + "px";
-
-                string strTempFilePath = FileUtil.NewTempFileName(
-                    Program.MainForm.UserTempDir,
-    "~temp_make_pic_",
-    ".png");
-
-                type.Image.Save(strTempFilePath, System.Drawing.Imaging.ImageFormat.Png);
-
-                string strID = "";
-                int nRet = this._objects.SetObjectByUsage(
-                    strTempFilePath,
-                    strType,    // "coverimage",
-                    out strID,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
             }
 
             // 刷新封面区域的显示
@@ -5271,9 +5265,9 @@ this.Volume);
                         int nMaxSourceWidth = (int)(ratio * (double)nWidth);
                         int nSourceWidth = Math.Min(nMaxSourceWidth, image.Width);
 
-                        Rectangle source = new Rectangle(0, 0, 
-                            nSourceWidth, 
-                            image.Height); 
+                        Rectangle source = new Rectangle(0, 0,
+                            nSourceWidth,
+                            image.Height);
                         Rectangle target = new Rectangle(start_x + 1, start_y + 1,
                             (int)((double)nSourceWidth / ratio) - 2,
                             this.Height - 2);

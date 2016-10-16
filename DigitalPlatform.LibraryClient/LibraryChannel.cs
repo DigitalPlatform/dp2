@@ -7674,6 +7674,87 @@ out strError);
             return 0;
         }
 
+        // 2016/10/16
+        public long SaveResObject(
+    DigitalPlatform.Stop stop,
+    string strPath,
+    string strObjectFileName,  // 该参数代表存放对象数据的文件名
+    string strMetadata,
+    string strRange,
+    bool bTailHint,
+    byte[] timestamp,
+    out byte[] output_timestamp,
+    out string strError)
+        {
+            strError = "";
+            output_timestamp = null;
+            long lRet = 0;
+
+            byte[] baTotal = null;
+            long lTotalLength = 0;
+            if (string.IsNullOrEmpty(strObjectFileName) == false)
+            {
+                FileInfo fi = new FileInfo(strObjectFileName);
+                if (fi.Exists == false)
+                {
+                    strError = "文件 '" + strObjectFileName + "'不存在...";
+                    return -1;
+                }
+
+                lRet = RangeList.CopyFragment(
+                    strObjectFileName,
+                    strRange,
+                    out baTotal,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                lTotalLength = fi.Length;
+            }
+            else
+                lTotalLength = -1;
+
+            // string strOutputPath = "";
+
+            //int nOldTimeout = -1;
+            if (bTailHint == true)
+            {
+                /*
+                nOldTimeout = this.Timeout;
+                // TODO: 建议通过文件尺寸来估算
+                this.Timeout = 40 * 60 * 1000;  // 40分钟
+                 * */
+            }
+
+            // 
+            string strOutputResPath = "";
+
+            // 写入资源
+            lRet = WriteRes(
+                stop,
+                strPath,
+                strRange,
+                lTotalLength,   // fi.Length,	// 这是整个包尺寸，不是本次chunk的尺寸。因为服务器显然可以从baChunk中看出其尺寸，不必再专门用一个参数表示这个尺寸了
+                baTotal,
+                strMetadata,
+                "", // strStyle,
+                timestamp,
+                out strOutputResPath,
+                out output_timestamp,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            if (bTailHint == true)
+            {
+                /*
+                this.Timeout = nOldTimeout;
+                 * */
+            }
+
+            return 0;
+        }
+
         // 保存资源记录
         // parameters:
         //		strPath	格式: 库名/记录号/object/对象xpath

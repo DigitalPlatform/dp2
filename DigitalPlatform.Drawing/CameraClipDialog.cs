@@ -237,6 +237,7 @@ namespace DigitalPlatform.Drawing
             this.Close();
         }
 
+        // 结果图像。也就是经过剪裁的最终图像
         public Image Image
         {
             get
@@ -246,6 +247,39 @@ namespace DigitalPlatform.Drawing
             set
             {
                 this.pictureBox_result.Image = value;
+            }
+        }
+
+        // 拍摄后的原始图像。未经剪裁的图像
+        public Image BackupImage
+        {
+            get
+            {
+                return this.pictureBox_clip.Image;
+            }
+            set
+            {
+                this.pictureBox_clip.Image = value;
+            }
+        }
+
+        public string ClipCommand
+        {
+            get
+            {
+                return this.pictureBox_clip.ClipCommand;
+            }
+        }
+
+        public ImageInfo ImageInfo
+        {
+            get
+            {
+                ImageInfo info = new ImageInfo();
+                info.Image = this.Image;
+                info.BackupImage = this.BackupImage;
+                info.ClipCommand = this.ClipCommand;
+                return info;
             }
         }
 
@@ -271,6 +305,7 @@ namespace DigitalPlatform.Drawing
                 this.toolStripButton_clip_autoCorp.Enabled = false;
                 this.toolStripButton_clip_output.Enabled = false;
                 this.toolStripButton_paste.Enabled = false;
+                this.toolStripButton_selectAll.Enabled = false;
             }
             if (this.tabControl_main.SelectedTab == this.tabPage_clip)
             {
@@ -278,6 +313,7 @@ namespace DigitalPlatform.Drawing
                 this.toolStripButton_clip_autoCorp.Enabled = true;
                 this.toolStripButton_clip_output.Enabled = true;
                 this.toolStripButton_paste.Enabled = true;
+                this.toolStripButton_selectAll.Enabled = true;
             }
             if (this.tabControl_main.SelectedTab == this.tabPage_result)
             {
@@ -285,8 +321,8 @@ namespace DigitalPlatform.Drawing
                 this.toolStripButton_clip_autoCorp.Enabled = false;
                 this.toolStripButton_clip_output.Enabled = false;
                 this.toolStripButton_paste.Enabled = true;
+                this.toolStripButton_selectAll.Enabled = false;
             }
-
         }
 
         private void toolStripButton_copy_Click(object sender, EventArgs e)
@@ -377,6 +413,15 @@ namespace DigitalPlatform.Drawing
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 全选，剪裁区。等于不加剪裁
+        private void toolStripButton_selectAll_Click(object sender, EventArgs e)
+        {
+            if (this.tabControl_main.SelectedTab == this.tabPage_clip)
+            {
+                this.pictureBox_clip.SelectAll();
+            }
         }
 
     }

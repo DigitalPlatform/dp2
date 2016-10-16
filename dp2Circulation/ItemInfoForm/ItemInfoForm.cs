@@ -2313,7 +2313,9 @@ out strError);
                 dlg = new CreateCoverImageDialog();
 
                 MainForm.SetControlFont(dlg, this.Font, false);
-                dlg.OriginImage = image;
+                ImageInfo info = new ImageInfo();
+                info.Image = image;
+                dlg.ImageInfo = info;
                 this.MainForm.AppInfo.LinkFormState(dlg, "entityform_CreateCoverImageDialog_state");
                 dlg.ShowDialog(this);
                 this.MainForm.AppInfo.UnlinkFormState(dlg);

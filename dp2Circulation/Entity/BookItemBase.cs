@@ -333,9 +333,11 @@ namespace dp2Circulation
             strError = "";
             if (this._objects == null)
                 return 0;
-            return this._objects.Save(channel, stop, 
+            return this._objects.Save(channel, 
+                stop, 
                 this.RecPath,
-                dp2library_version, out strError);
+                dp2library_version, 
+                out strError);
         }
 
         /// <summary>

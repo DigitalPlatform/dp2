@@ -420,6 +420,42 @@ namespace DigitalPlatform.Drawing
 
             this._points = results;
         }
+
+        public void SelectAll()
+        {
+            if (this.Image == null)
+                return;
+
+            Rectangle rect = new Rectangle(0, 0, this.Image.Width, this.Image.Height);
+
+            List<Point> source_points = new List<Point>();
+            source_points.Add(new Point(rect.X, rect.Y));
+            source_points.Add(new Point(rect.X + rect.Width, rect.Y));
+            source_points.Add(new Point(rect.X + rect.Width, rect.Y + rect.Height));
+            source_points.Add(new Point(rect.X, rect.Y + rect.Height));
+            this._points = source_points;
+            this.Invalidate();
+        }
+
+        // 剪裁指令。格式为 s:(?,?);c:(?,?)(?,?)(?,?)(?,?)
+        // s 表示尺寸，顺序为宽高；c 表示四个顶点，分别是左上 右上 右下 左下
+        public string ClipCommand
+        {
+            get
+            {
+                if (_points.Count == 0 || this.Image == null)
+                    return "";
+
+                StringBuilder text = new StringBuilder();
+                text.Append(string.Format("s:({0},{1});c:", this.Image.Width, this.Image.Height));
+                foreach(Point p in _points)
+                {
+                    text.Append(string.Format("({0},{1})", p.X, p.Y));
+                }
+
+                return text.ToString();
+            }
+        }
     }
 
     enum CornerType

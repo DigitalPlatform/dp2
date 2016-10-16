@@ -9200,61 +9200,74 @@ MessageBoxDefaultButton.Button2);
                 selected_issues.Add(issue);
             }
 
-            List<Image> images = new List<Image>();
+            List<ImageInfo> infos = new List<ImageInfo>();
+            try
             {
-                Image image = null;
-                Program.MainForm.DisableCamera();
-                try
                 {
-                    // 注： new CameraClipDialog() 可能会抛出异常
-                    using (CameraClipDialog dlg = new CameraClipDialog())
+                    ImageInfo info = new ImageInfo();
+
+                    Program.MainForm.DisableCamera();
+                    try
                     {
-                        dlg.Font = this.Font;
+                        // 注： new CameraClipDialog() 可能会抛出异常
+                        using (CameraClipDialog dlg = new CameraClipDialog())
+                        {
+                            dlg.Font = this.Font;
 
-                        dlg.CurrentCamera = Program.MainForm.AppInfo.GetString(
-                            "bindingControl",
-                            "current_camera",
-                            "");
+                            dlg.CurrentCamera = Program.MainForm.AppInfo.GetString(
+                                "bindingControl",
+                                "current_camera",
+                                "");
 
-                        Program.MainForm.AppInfo.LinkFormState(dlg, "CameraClipDialog_state");
-                        dlg.ShowDialog(this);
-                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
+                            Program.MainForm.AppInfo.LinkFormState(dlg, "CameraClipDialog_state");
+                            dlg.ShowDialog(this);
+                            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
-                        Program.MainForm.AppInfo.SetString(
-                            "bindingControl",
-                            "current_camera",
-                            dlg.CurrentCamera);
+                            Program.MainForm.AppInfo.SetString(
+                                "bindingControl",
+                                "current_camera",
+                                dlg.CurrentCamera);
 
-                        if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                            return;
+                            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                                return;
 
-                        image = dlg.Image;
+                            info.Image = dlg.Image;
+                            info.BackupImage = dlg.BackupImage;
+                            info.ClipCommand = dlg.ClipCommand;
+                        }
+                    }
+                    finally
+                    {
+                        Application.DoEvents();
+
+                        Program.MainForm.EnableCamera();
+                    }
+
+                    infos.Add(info);
+                }
+
+                {
+                    int i = 0;
+                    foreach (IssueBindingItem issue in selected_issues)
+                    {
+                        if (i >= infos.Count)
+                            break;
+                        ImageInfo info = infos[i];
+                        if (issue.SetCoverImage(info, out strError) == -1)
+                            goto ERROR1;
+
+                        i++;
                     }
                 }
-                finally
-                {
-                    Application.DoEvents();
 
-                    Program.MainForm.EnableCamera();
-                }
-
-                images.Add(image);
             }
-
+            finally
             {
-                int i = 0;
-                foreach (IssueBindingItem issue in selected_issues)
+                foreach (ImageInfo info in infos)
                 {
-                    if (i >= images.Count)
-                        break;
-                    Image image = images[i];
-                    if (issue.SetCoverImage(image, out strError) == -1)
-                        goto ERROR1;
-
-                    i++;
+                    info.Dispose();
                 }
             }
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -9320,7 +9333,9 @@ MessageBoxDefaultButton.Button2);
                     if (i >= images.Count)
                         break;
                     Image image = images[i];
-                    if (issue.SetCoverImage(image, out strError) == -1)
+                    ImageInfo info = new ImageInfo();
+                    info.Image = image;
+                    if (issue.SetCoverImage(info, out strError) == -1)
                         goto ERROR1;
 
                     i++;
@@ -9429,8 +9444,20 @@ MessageBoxDefaultButton.Button2);
                     }
                     if (images.Count > 0)
                     {
-                        if (issue.SetCoverImage(images[0], out strError) == -1)
-                            goto ERROR1;
+                        try
+                        {
+                            ImageInfo info = new ImageInfo();
+                            info.Image = images[0];
+                            if (issue.SetCoverImage(info, out strError) == -1)
+                                goto ERROR1;
+                        }
+                        finally
+                        {
+                            foreach(Image image in images)
+                            {
+                                image.Dispose();
+                            }
+                        }
                     }
                     i++;
                 }

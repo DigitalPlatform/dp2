@@ -9598,7 +9598,6 @@ namespace dp2Library
             }
         }
 
-
         string EnsureKdbs(bool bThrowException = true)
         {
             return this.app.EnsureKdbs(bThrowException);

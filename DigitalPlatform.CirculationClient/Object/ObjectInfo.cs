@@ -99,6 +99,7 @@ namespace DigitalPlatform.CirculationClient
                 SetMetadataField("mime", value);
             }
         }
+
         public string Timestamp
         {
             get
@@ -108,6 +109,18 @@ namespace DigitalPlatform.CirculationClient
             set
             {
                 SetMetadataField("timestamp", value);
+            }
+        }
+
+        public string ClipCommand
+        {
+            get
+            {
+                return GetMetadataField("clipCommand");
+            }
+            set
+            {
+                SetMetadataField("clipCommand", value);
             }
         }
 
@@ -479,8 +492,9 @@ namespace DigitalPlatform.CirculationClient
     stop,
     strResPath,
     "",
-    obj.FileName,
-    obj.Mime,
+    // obj.FileName,
+    // obj.Mime,
+    obj.Metadata,
     "", // range
     true,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
     timestamp,
@@ -564,8 +578,9 @@ namespace DigitalPlatform.CirculationClient
                                     stop,
                                     strResPath,
                                     obj.FileName,
-                                    obj.FileName,
-                                    obj.Mime,
+                                    //obj.FileName,
+                                    //obj.Mime,
+                                    obj.Metadata,
                                     ranges[j],
                                     j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
                                     timestamp,
@@ -742,6 +757,7 @@ namespace DigitalPlatform.CirculationClient
     string strObjectFilePath,
     string strUsage,
     string strRights,
+            string strClipCommand,
     out ObjectInfo info,
     out string strError)
         {
@@ -759,16 +775,19 @@ namespace DigitalPlatform.CirculationClient
             info.Size = Convert.ToString(fileInfo.Length);
             info.Usage = strUsage;
             info.Rights = strRights;
+            info.ClipCommand = strClipCommand;
             this.Add(info);
 
             this.Changed = true;
             return 0;
         }
 
+        // 几个参数都是 != null 才起作用
         public int ChangeObjectFile(ObjectInfo info,
     string strObjectFilePath,
     string strUsage,
     string strRights,
+            string strClipCommand,
     out string strError)
         {
             strError = "";
@@ -779,11 +798,13 @@ namespace DigitalPlatform.CirculationClient
                 return -1;
             }
 
+#if NO
             if (info.LineState == LineState.Deleted)
             {
                 strError = "对已经标记删除的对象不能进行修改...";
                 return -1;
             }
+#endif
 
             LineState old_state = info.LineState;
             string strOldUsage = info.Usage;
@@ -798,6 +819,9 @@ namespace DigitalPlatform.CirculationClient
             if (strRights != null)
                 info.Rights = strRights;
             // info.Timestamp = null;   // 以前的时间戳不要修改
+
+            if (strClipCommand != null)
+                info.ClipCommand = strClipCommand;
 
             if (old_state != LineState.New)
             {
@@ -817,10 +841,11 @@ namespace DigitalPlatform.CirculationClient
         }
 
         public int SetObjectByUsage(
-    string strFileName,
-    string strUsage,
-    out string strID,
-    out string strError)
+            string strFileName,
+            string strUsage,
+            string strClipCommand,
+            out string strID,
+            out string strError)
         {
             strError = "";
             strID = "";
@@ -834,6 +859,7 @@ namespace DigitalPlatform.CirculationClient
                     strFileName,
                     strUsage,
                     null, // rights
+                    strClipCommand,
                     out info,
                     out strError);
             }
@@ -845,6 +871,7 @@ namespace DigitalPlatform.CirculationClient
                     strFileName,
                     strUsage,
                     null,
+                    strClipCommand,
                     out strError);
             }
             if (nRet == -1)

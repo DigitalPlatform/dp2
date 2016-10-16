@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.Drawing;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,7 +15,15 @@ namespace DigitalPlatform.CommonDialog
     /// </summary>
     public partial class CreateCoverImageDialog : Form
     {
-        public Image OriginImage = null;
+        public ImageInfo ImageInfo { get; set; }
+
+#if NO
+        public Image OriginImage = null;    // 初始图像。本对话框用它创建出三种不同尺寸的封面图像
+
+        public Image BackupImage = null;    // 用于备份的原始图像，一般是没有经过旋转和剪裁的，刚刚扫描的图像
+
+        public string ClipCommand { get; set; } // BackupImage 的剪裁指令
+#endif
 
         List<ImageType> _defaultTypes = new List<ImageType>();
 
@@ -85,13 +94,12 @@ namespace DigitalPlatform.CommonDialog
             }
         }
 
-
         // 根据原始的 Image，创建三个不同尺寸的 Image
         int CreateImages(out string strMessage)
         {
             strMessage = "";
 
-            if (this.OriginImage == null)
+            if (this.ImageInfo == null || this.ImageInfo.Image == null)
                 return 0;
 
             int nMediumWidth = 0;
@@ -108,16 +116,21 @@ namespace DigitalPlatform.CommonDialog
             {
                 Image result = null;
 
-                if (this.OriginImage.Width >= type.Width)
+                if (type.Width == -1)
                 {
-                    result = CreateImage(this.OriginImage, type.Width);
+                    result = this.ImageInfo.BackupImage;
+                    type.ClipCommand = this.ImageInfo.ClipCommand;
+                }
+                else if (this.ImageInfo.Image.Width >= type.Width)
+                {
+                    result = CreateImage(this.ImageInfo.Image, type.Width);
                 }
                 else
                 {
                     if (type.TypeName == "LargeImage" && nMediumWidth != 0
-                        && this.OriginImage.Width > nMediumWidth)
+                        && this.ImageInfo.Image.Width > nMediumWidth)
                     {
-                        result = new Bitmap(this.OriginImage);
+                        result = new Bitmap(this.ImageInfo.Image);
                     }
                     else
                     {
@@ -125,7 +138,6 @@ namespace DigitalPlatform.CommonDialog
                         continue;
                     }
                 }
-
 
                 PictureBox box = new PictureBox();
                 box.SizeMode = PictureBoxSizeMode.AutoSize;
@@ -152,6 +164,9 @@ namespace DigitalPlatform.CommonDialog
         Image CreateImage(Image image, int nWidth)
         {
             Image result = null;
+
+            if (nWidth == -1)
+                return image;
 
             int nOldWidth = image.Width;
             if (nOldWidth == nWidth)
@@ -201,6 +216,14 @@ namespace DigitalPlatform.CommonDialog
             type.Width = 408;
             type.TypeName = "LargeImage";
             _defaultTypes.Add(type);
+
+            if (this.ImageInfo != null && this.ImageInfo.BackupImage != null)
+            {
+                type = new ImageType();
+                type.Width = -1;
+                type.TypeName = "BackupImage";
+                _defaultTypes.Add(type);
+            }
         }
 
         ImageType GetImageType(string strTypeName)
@@ -227,8 +250,9 @@ namespace DigitalPlatform.CommonDialog
 
     public class ImageType
     {
-        public string TypeName = "";    // LargeImage / MediumImage / SmallImage
+        public string TypeName = "";    // LargeImage / MediumImage / SmallImage / BackupImage
         public int Width = 0;
         public Image Image = null;
+        public string ClipCommand = "";    // 剪裁指令
     }
 }

@@ -48,4 +48,25 @@ namespace DigitalPlatform.Drawing
             return images;
         }
     }
+
+    public class ImageInfo
+    {
+        public Image Image { get; set; }
+        public Image BackupImage { get; set; }
+        public string ClipCommand { get; set; }
+
+        public void Dispose()
+        {
+            if (this.Image != null)
+            {
+                this.Image.Dispose();
+                this.Image = null;
+            }
+            if (this.BackupImage != null)
+            {
+                this.BackupImage.Dispose();
+                this.BackupImage = null;
+            }
+        }
+    }
 }

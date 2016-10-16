@@ -12561,7 +12561,7 @@ strMARC);
                 goto ERROR1;
             }
 
-            Image image = null;
+            ImageInfo info = new ImageInfo();
             this.MainForm.DisableCamera();
             try
             {
@@ -12587,7 +12587,7 @@ strMARC);
                     if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                         return;
 
-                    image = dlg.Image;
+                    info = dlg.ImageInfo;
                 }
             }
             finally
@@ -12604,21 +12604,24 @@ strMARC);
                     dlg = new CreateCoverImageDialog();
 
                     MainForm.SetControlFont(dlg, this.Font, false);
-                    dlg.OriginImage = image;
+                    dlg.ImageInfo = info;
                     this.MainForm.AppInfo.LinkFormState(dlg, "entityform_CreateCoverImageDialog_state");
                     dlg.ShowDialog(this);
                     this.MainForm.AppInfo.UnlinkFormState(dlg);
                     if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                         return;
-
                 }
                 finally
                 {
+#if NO
                     if (image != null)
                     {
                         image.Dispose();
                         image = null;
                     }
+#endif
+                    if (info != null)
+                        info.Dispose();
                 }
 
                 this.SynchronizeMarc();
@@ -12669,7 +12672,9 @@ strMARC);
                     else
                         field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
 
-                    field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize + "$2dp2res").Replace('$', (char)31);
+                    field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize
+                        + (string.IsNullOrEmpty(type.ClipCommand) == true ? "" : ";clip:" + StringUtil.EscapeString(type.ClipCommand, ";:"))
+                        + "$2dp2res").Replace('$', (char)31);
                 }
             }
 
@@ -12739,7 +12744,9 @@ strMARC);
                 dlg = new CreateCoverImageDialog();
 
                 MainForm.SetControlFont(dlg, this.Font, false);
-                dlg.OriginImage = image;
+                ImageInfo info = new ImageInfo();
+                info.Image = image;
+                dlg.ImageInfo = info;
                 this.MainForm.AppInfo.LinkFormState(dlg, "entityform_CreateCoverImageDialog_state");
                 dlg.ShowDialog(this);
                 this.MainForm.AppInfo.UnlinkFormState(dlg);

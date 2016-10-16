@@ -508,7 +508,8 @@ namespace DigitalPlatform.LibraryServer
             int nRet = 0;
             LibraryApplication app = this;  // new CirculationApplication();
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
 
@@ -1749,7 +1750,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
         // 2008/10/13 
         ERROR1:
@@ -2117,7 +2119,8 @@ namespace DigitalPlatform.LibraryServer
             RmsChannelCollection Channels,
             out string strError)
         {
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
 #if NO
@@ -2169,7 +2172,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
         }
 
@@ -2200,7 +2204,8 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
                 return 0;
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
                 try
@@ -2273,7 +2278,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
         }
 
@@ -2952,7 +2958,8 @@ namespace DigitalPlatform.LibraryServer
         public void Save(string strFileName,
             bool bFlush)
         {
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
 
@@ -3408,7 +3415,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
 
         }
@@ -3566,7 +3574,8 @@ namespace DigitalPlatform.LibraryServer
             if (this.vdbs != null)
                 return 0;   // 优化
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
                 XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode(
@@ -3603,7 +3612,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
         }
 
