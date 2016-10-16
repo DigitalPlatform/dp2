@@ -47,6 +47,12 @@ namespace dp2Circulation
         /// </summary>
         public IssueControl IssueControl = null;
 #endif
+        /* 一定要放到倒数第二个 PerformLayout()
+            this.tableLayoutPanel_main.ResumeLayout(false);
+            this.tableLayoutPanel_main.PerformLayout();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+         * */
 
         /// <summary>
         /// 构造函数
