@@ -199,7 +199,7 @@ namespace DigitalPlatform.Drawing
 
             using (Bitmap bitmap = new Bitmap(this.pictureBox_clip.Image))
             {
-                this.pictureBox_result.Image = AForgeImageUtil.Clip(bitmap,
+                this.Image = AForgeImageUtil.Clip(bitmap,
                     this.pictureBox_clip.GetCorners());
             }
 
@@ -215,13 +215,13 @@ namespace DigitalPlatform.Drawing
         {
             if (this.tabControl_main.SelectedTab == this.tabPage_preview)
             {
-                this.pictureBox_result.Image = this.qrRecognitionControl1.Image;
+                this.Image = this.qrRecognitionControl1.Image;
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_clip)
             {
                 using (Bitmap bitmap = new Bitmap(this.pictureBox_clip.Image))
                 {
-                    this.pictureBox_result.Image = AForgeImageUtil.Clip(bitmap,
+                    this.Image = AForgeImageUtil.Clip(bitmap,
                         this.pictureBox_clip.GetCorners());
                 }
             }
@@ -247,6 +247,7 @@ namespace DigitalPlatform.Drawing
             set
             {
                 this.pictureBox_result.Image = value;
+                _resultRotateAngle = 0;
             }
         }
 
@@ -263,11 +264,20 @@ namespace DigitalPlatform.Drawing
             }
         }
 
-        public string ClipCommand
+        // 图像处理指令。由剪裁指令，和旋转指令组合而成
+        public string ProcessCommand
         {
             get
             {
-                return this.pictureBox_clip.ClipCommand;
+                StringBuilder text = new StringBuilder();
+                text.Append(this.pictureBox_clip.ClipCommand);
+                if (this.ResultRotateAngle != 0)
+                {
+                    if (text.Length > 0)
+                        text.Append(";");
+                    text.Append(string.Format("r:{0}", this.ResultRotateAngle));
+                }
+                return text.ToString();
             }
         }
 
@@ -278,8 +288,19 @@ namespace DigitalPlatform.Drawing
                 ImageInfo info = new ImageInfo();
                 info.Image = this.Image;
                 info.BackupImage = this.BackupImage;
-                info.ClipCommand = this.ClipCommand;
+                info.ProcessCommand = this.ProcessCommand;
                 return info;
+            }
+        }
+
+        int _resultRotateAngle = 0;
+
+        // 结果图像相对原始图像曾转动过的角度
+        public int ResultRotateAngle
+        {
+            get
+            {
+                return this._resultRotateAngle;
             }
         }
 
@@ -294,6 +315,10 @@ namespace DigitalPlatform.Drawing
                 Image image = this.pictureBox_result.Image;
                 image.RotateFlip(RotateFlipType.Rotate90FlipNone);
                 this.pictureBox_result.Image = image;
+
+                _resultRotateAngle += 90;
+                if (_resultRotateAngle == 360)
+                    _resultRotateAngle = 0;
             }
         }
 
@@ -407,7 +432,7 @@ namespace DigitalPlatform.Drawing
             }
             if (this.tabControl_main.SelectedTab == this.tabPage_result)
             {
-                this.pictureBox_result.Image = image;
+                this.Image = image;
             }
 
             return;

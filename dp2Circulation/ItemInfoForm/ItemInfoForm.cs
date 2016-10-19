@@ -2391,15 +2391,16 @@ out strError);
 
         private void ToolStripMenuItem_clearCoverImage_Click(object sender, EventArgs e)
         {
-            string[] types = new string[] {
-                "FrontCover.SmallImage",
-                "FrontCover.MediumImage",
-                "FrontCover.LargeImage"};
 
             if (this.tabControl_item.SelectedTab != this.tabPage_object)
                 this.tabControl_item.SelectedTab = this.tabPage_object;
 
             bool bChanged = false;
+#if NO
+            string[] types = new string[] {
+                "FrontCover.SmallImage",
+                "FrontCover.MediumImage",
+                "FrontCover.LargeImage"};
             foreach (string type in types)
             {
                 // TODO: 最好支持 CoverImage.* 通配符匹配。或者用正则表达式
@@ -2410,6 +2411,8 @@ out strError);
                     bChanged = true;
                 }
             }
+#endif
+            bChanged = this.binaryResControl1.MaskDeleteCoverImageObject();
 
             if (bChanged == true)
                 MessageBox.Show(this, "封面图像对象已经成功标记删除。\r\n"

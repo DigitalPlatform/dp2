@@ -53,7 +53,7 @@ namespace DigitalPlatform.Drawing
     {
         public Image Image { get; set; }
         public Image BackupImage { get; set; }
-        public string ClipCommand { get; set; }
+        public string ProcessCommand { get; set; }
 
         public void Dispose()
         {
@@ -67,6 +67,17 @@ namespace DigitalPlatform.Drawing
                 this.BackupImage.Dispose();
                 this.BackupImage = null;
             }
+        }
+
+        // 清除原始图像和处理指令
+        public void ClearBackupImage()
+        {
+            if (this.BackupImage != null)
+            {
+                this.BackupImage.Dispose();
+                this.BackupImage = null;
+            }
+            this.ProcessCommand = "";
         }
     }
 }

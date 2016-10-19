@@ -15,14 +15,11 @@ namespace DigitalPlatform.CommonDialog
     /// </summary>
     public partial class CreateCoverImageDialog : Form
     {
+        // 注：这里面包含的 Image 对象，为 ImageInfo 赋予者自行管理生命周期，本对话框不负责释放
         public ImageInfo ImageInfo { get; set; }
 
 #if NO
         public Image OriginImage = null;    // 初始图像。本对话框用它创建出三种不同尺寸的封面图像
-
-        public Image BackupImage = null;    // 用于备份的原始图像，一般是没有经过旋转和剪裁的，刚刚扫描的图像
-
-        public string ClipCommand { get; set; } // BackupImage 的剪裁指令
 #endif
 
         List<ImageType> _defaultTypes = new List<ImageType>();
@@ -119,7 +116,7 @@ namespace DigitalPlatform.CommonDialog
                 if (type.Width == -1)
                 {
                     result = this.ImageInfo.BackupImage;
-                    type.ClipCommand = this.ImageInfo.ClipCommand;
+                    type.ProcessCommand = this.ImageInfo.ProcessCommand;
                 }
                 else if (this.ImageInfo.Image.Width >= type.Width)
                 {
@@ -195,12 +192,35 @@ namespace DigitalPlatform.CommonDialog
             return result;
         }
 
+        void ClearDefaultTypes()
+        {
+            foreach(ImageType type in _defaultTypes)
+            {
+                // 不要 Dispose() this.ImageInfo 管辖的两个图像对象
+                if (this.ImageInfo != null)
+                {
+                    if (type.Image == this.ImageInfo.Image)
+                        continue;
+                    if (type.Image == this.ImageInfo.BackupImage)
+                        continue;
+                }
+
+                if (type.Image != null)
+                {
+                    type.Image.Dispose();
+                    type.Image = null;
+                }
+            }
+
+            _defaultTypes.Clear();
+        }
+
         // 三个尺寸的宽度
         // public static readonly int[] widths = new int[] { 61, 131, 408 };
 
         void InitialDefaultTypes()
         {
-            _defaultTypes.Clear();
+            ClearDefaultTypes();
 
             ImageType type = new ImageType();
             type.Width = 61;
@@ -253,6 +273,6 @@ namespace DigitalPlatform.CommonDialog
         public string TypeName = "";    // LargeImage / MediumImage / SmallImage / BackupImage
         public int Width = 0;
         public Image Image = null;
-        public string ClipCommand = "";    // 剪裁指令
+        public string ProcessCommand = "";    // 剪裁指令
     }
 }

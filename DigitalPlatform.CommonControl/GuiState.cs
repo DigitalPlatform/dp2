@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
+using System.Drawing;
 
 namespace DigitalPlatform.CommonControl
 {
@@ -474,6 +475,41 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        static void SetFormState(Form form, string strText)
+        {
+            string strState = "";
+            if (IsType(strText, form, out strState) == false)
+                return;
+
+            if (string.IsNullOrEmpty(strState) == false)
+            {
+                Hashtable table = StringUtil.ParseParameters(strState);
+
+                string s_w = (string)table["w"];
+                string s_h = (string)table["h"];
+                string s_x = (string)table["x"];
+                string s_y = (string)table["y"];
+                string s_s = (string)table["s"];
+
+                int w = 0;
+                int.TryParse(s_w, out w);
+                int h = 0;
+                int.TryParse(s_h, out h);
+                int x = 0;
+                int.TryParse(s_x, out x);
+                int y = 0;
+                int.TryParse(s_y, out y);
+
+                form.Size = new Size(w, h);
+                form.Location = new Point(x, y);
+                if (String.IsNullOrEmpty(s_s) == false)
+                {
+                    form.WindowState = (FormWindowState)Enum.Parse(typeof(FormWindowState),
+                        s_s);
+                }
+            }
+        }
+
         static string GetSplitContainerState(SplitContainer splitContainer)
         {
             Hashtable table = new Hashtable();
@@ -482,6 +518,28 @@ namespace DigitalPlatform.CommonControl
             return splitContainer.GetType().ToString() + ":" + StringUtil.BuildParameterString(table);
         }
 
+        static string GetFormState(Form form)
+        {
+            Hashtable table = new Hashtable();
+
+            Size size = form.Size;
+            Point location = form.Location;
+
+            if (form.WindowState != FormWindowState.Normal)
+            {
+                size = form.RestoreBounds.Size;
+                location = form.RestoreBounds.Location;
+            }
+
+            table["w"] = size.Width.ToString();
+            table["h"] = size.Height.ToString();
+            table["x"] = location.X.ToString();
+            table["y"] = location.Y.ToString();
+            if (form.WindowState != FormWindowState.Normal)
+                table["s"] = Enum.GetName(typeof(FormWindowState),
+                    form.WindowState);
+            return form.GetType().ToString() + ":" + StringUtil.BuildParameterString(table);
+        }
 
         static void SetToolStripButtonState(ToolStripButton button, string strText)
         {
@@ -602,6 +660,10 @@ namespace DigitalPlatform.CommonControl
                 {
                     SetRadioButtonState(control as RadioButton, strState);
                 }
+                else if (control is Form)
+                {
+                    SetFormState(control as Form, strState);
+                }
                 else
                     throw new ArgumentException("不支持的类型 " + control.GetType().ToString());
 
@@ -715,17 +777,16 @@ GetTextBoxState(control as TextBox)
                     GetRadioButtonState(control as RadioButton)
     );
                 }
+                else if (control is Form)
+                    text.Append(
+GetFormState(control as Form)
+);
                 else
                     throw new ArgumentException("不支持的类型 " + control.GetType().ToString());
             }
 
             return text.ToString();
         }
-
-
-
-
-
     }
 
     public class ComboBoxText

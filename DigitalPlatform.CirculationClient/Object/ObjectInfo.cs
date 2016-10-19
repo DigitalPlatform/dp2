@@ -112,15 +112,15 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-        public string ClipCommand
+        public string ProcessCommand
         {
             get
             {
-                return GetMetadataField("clipCommand");
+                return GetMetadataField("command");
             }
             set
             {
-                SetMetadataField("clipCommand", value);
+                SetMetadataField("command", value);
             }
         }
 
@@ -698,7 +698,7 @@ namespace DigitalPlatform.CirculationClient
 
         public int MaskDeleteObjects(List<ObjectInfo> infos)
         {
-            bool bRemoved = false;   // 是否发生过物理删除listview item的情况
+            // bool bRemoved = false;   // 是否发生过物理删除listview item的情况
             int nMaskDeleteCount = 0;
             foreach (ObjectInfo info in infos)
             {
@@ -709,7 +709,7 @@ namespace DigitalPlatform.CirculationClient
                 // 如果本来就是新增事项，那么彻底从listview中移除
                 if (info.LineState == LineState.New)
                 {
-                    bRemoved = true;
+                    // bRemoved = true;
                     this.Remove(info);
                     nMaskDeleteCount++;
                     continue;
@@ -757,7 +757,7 @@ namespace DigitalPlatform.CirculationClient
     string strObjectFilePath,
     string strUsage,
     string strRights,
-            string strClipCommand,
+            string strProcessCommand,
     out ObjectInfo info,
     out string strError)
         {
@@ -775,7 +775,7 @@ namespace DigitalPlatform.CirculationClient
             info.Size = Convert.ToString(fileInfo.Length);
             info.Usage = strUsage;
             info.Rights = strRights;
-            info.ClipCommand = strClipCommand;
+            info.ProcessCommand = strProcessCommand;
             this.Add(info);
 
             this.Changed = true;
@@ -787,7 +787,7 @@ namespace DigitalPlatform.CirculationClient
     string strObjectFilePath,
     string strUsage,
     string strRights,
-            string strClipCommand,
+            string strProcessCommand,
     out string strError)
         {
             strError = "";
@@ -820,8 +820,8 @@ namespace DigitalPlatform.CirculationClient
                 info.Rights = strRights;
             // info.Timestamp = null;   // 以前的时间戳不要修改
 
-            if (strClipCommand != null)
-                info.ClipCommand = strClipCommand;
+            if (strProcessCommand != null)
+                info.ProcessCommand = strProcessCommand;
 
             if (old_state != LineState.New)
             {
@@ -843,7 +843,7 @@ namespace DigitalPlatform.CirculationClient
         public int SetObjectByUsage(
             string strFileName,
             string strUsage,
-            string strClipCommand,
+            string strProcessCommand,
             out string strID,
             out string strError)
         {
@@ -859,7 +859,7 @@ namespace DigitalPlatform.CirculationClient
                     strFileName,
                     strUsage,
                     null, // rights
-                    strClipCommand,
+                    strProcessCommand,
                     out info,
                     out strError);
             }
@@ -871,7 +871,7 @@ namespace DigitalPlatform.CirculationClient
                     strFileName,
                     strUsage,
                     null,
-                    strClipCommand,
+                    strProcessCommand,
                     out strError);
             }
             if (nRet == -1)
@@ -881,7 +881,7 @@ namespace DigitalPlatform.CirculationClient
             return 0;
         }
 
-        public void MaskDeleteCoverImageObject()
+        public bool MaskDeleteCoverImageObject()
         {
             List<ObjectInfo> infos = new List<ObjectInfo>();
             foreach (ObjectInfo info in this)
@@ -893,7 +893,12 @@ namespace DigitalPlatform.CirculationClient
             }
 
             if (infos.Count > 0)
+            {
                 MaskDeleteObjects(infos);
+                return true;
+            }
+
+            return false;
         }
 
         // 获得特定的数字对象

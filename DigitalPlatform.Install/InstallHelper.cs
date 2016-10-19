@@ -22,7 +22,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 
 namespace DigitalPlatform.Install
 {

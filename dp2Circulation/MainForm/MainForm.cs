@@ -48,7 +48,7 @@ namespace dp2Circulation
     /// <summary>
     /// 框架窗口
     /// </summary>
-    public partial class MainForm : Form
+    public partial class MainForm : Form, IChannelManager
     {
         internal ImageManager _imageManager = null;
 
@@ -2692,13 +2692,6 @@ Stack:
                 "username",
                 "");
             }
-        }
-
-        [Flags]
-        public enum GetChannelStyle
-        {
-            None = 0x0, // 
-            GUI = 0x01, // Idle 里面做 Application.DoEvents()
         }
 
         // parameters:
@@ -6947,6 +6940,26 @@ out strError);
                     false);
             }
         }
+
+        // 保存封面扫描的原始图像
+        public bool SaveOriginCoverImage
+        {
+            get
+            {
+                return this.AppInfo.GetBoolean(
+                    "global",
+                    "save_orign_cover_image",
+                    false);
+            }
+            set
+            {
+                this.AppInfo.SetBoolean(
+                    "global",
+                    "save_orign_cover_image",
+                    value);
+            }
+        }
+
 
         // 初始化指纹缓存
         private void MenuItem_initFingerprintCache_Click(object sender, EventArgs e)

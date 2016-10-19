@@ -17,6 +17,9 @@
             {
                 components.Dispose();
             }
+
+            this.ClearDefaultTypes();
+
             base.Dispose(disposing);
         }
 

@@ -6445,9 +6445,9 @@ namespace DigitalPlatform.rms
                                         DomUtil.SetAttr(fileNode, "__size", (string)values["size"]);
 
                                         // 2016/10/16
-                                        string strClipCommand = (string)values["clipCommand"];
-                                        if (string.IsNullOrEmpty(strClipCommand) == false)
-                                            DomUtil.SetAttr(fileNode, "__clipCommand", strClipCommand);
+                                        string strProcessCommand = (string)values["command"];
+                                        if (string.IsNullOrEmpty(strProcessCommand) == false)
+                                            DomUtil.SetAttr(fileNode, "__command", strProcessCommand);
 
                                         // 2007/12/13 
                                         string strLastModifyTime = (string)values["lastmodifytime"];

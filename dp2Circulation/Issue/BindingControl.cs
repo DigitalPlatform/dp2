@@ -9200,15 +9200,18 @@ MessageBoxDefaultButton.Button2);
                 selected_issues.Add(issue);
             }
 
-            List<ImageInfo> infos = new List<ImageInfo>();
+            Program.MainForm.DisableCamera();
             try
             {
+                int i = 0;
+                foreach (IssueBindingItem issue in selected_issues)
                 {
                     ImageInfo info = new ImageInfo();
 
-                    Program.MainForm.DisableCamera();
                     try
                     {
+                        // TODO: 为对话框增加关于即将扫描的期，期号的说明提示
+
                         // 注： new CameraClipDialog() 可能会抛出异常
                         using (CameraClipDialog dlg = new CameraClipDialog())
                         {
@@ -9231,43 +9234,30 @@ MessageBoxDefaultButton.Button2);
                             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                                 return;
 
-                            info.Image = dlg.Image;
-                            info.BackupImage = dlg.BackupImage;
-                            info.ClipCommand = dlg.ClipCommand;
+                            info = dlg.ImageInfo;
+                            if (Program.MainForm.SaveOriginCoverImage == false)
+                                info.ClearBackupImage();
                         }
+
+                        if (issue.SetCoverImage(info, out strError) == -1)
+                            goto ERROR1;
                     }
                     finally
                     {
-                        Application.DoEvents();
-
-                        Program.MainForm.EnableCamera();
+                        if (info != null)
+                            info.Dispose();
                     }
 
-                    infos.Add(info);
+                    i++;
                 }
-
-                {
-                    int i = 0;
-                    foreach (IssueBindingItem issue in selected_issues)
-                    {
-                        if (i >= infos.Count)
-                            break;
-                        ImageInfo info = infos[i];
-                        if (issue.SetCoverImage(info, out strError) == -1)
-                            goto ERROR1;
-
-                        i++;
-                    }
-                }
-
             }
             finally
             {
-                foreach (ImageInfo info in infos)
-                {
-                    info.Dispose();
-                }
+                Application.DoEvents();
+
+                Program.MainForm.EnableCamera();
             }
+
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -9404,7 +9394,7 @@ MessageBoxDefaultButton.Button2);
                     if (nRet == -1)
                         goto ERROR1;
 
- #if NO
+#if NO
                    string strLocalFileName = Path.GetTempFileName();
                     try
                     {
@@ -9453,7 +9443,7 @@ MessageBoxDefaultButton.Button2);
                         }
                         finally
                         {
-                            foreach(Image image in images)
+                            foreach (Image image in images)
                             {
                                 image.Dispose();
                             }

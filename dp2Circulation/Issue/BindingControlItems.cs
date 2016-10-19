@@ -4843,7 +4843,7 @@ this.Volume);
                     int nRet = this._objects.SetObjectByUsage(
                         strTempFilePath,
                         strType,    // "coverimage",
-                        type.ClipCommand,
+                        type.ProcessCommand,
                         out strID,
                         out strError);
                     if (nRet == -1)

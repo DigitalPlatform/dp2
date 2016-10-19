@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Net;
 
 using Ionic.Zip;
+using AsyncPluggableProtocol;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -1034,6 +1035,8 @@ MessageBoxDefaultButton.Button1);
             return false;
         }
 
+        public event StreamProgressChangedEventHandler StreamProgressChanged = null;
+
         // 程序启动时候需要执行的初始化操作
         // 这些操作只需要执行一次。也就是说，和登录和连接的服务器无关。如果有关，则要放在 InitialProperties() 中
         // FormLoad() 中的许多操作应当移动到这里来，以便尽早显示出框架窗口
@@ -1303,6 +1306,21 @@ MessageBoxDefaultButton.Button1);
                 // this._imageManager.GetObjectComplete += new GetObjectCompleteEventHandler(_imageManager_GetObjectComplete);
                 this._imageManager.BeginThread();
             }
+
+            ProtocolFactory.Register("dpres",
+                () => new ResourceProtocol(this, (path, current, length) =>
+                {
+                    var func = this.StreamProgressChanged;
+                    if (func != null)
+                    {
+                        DigitalPlatform.CirculationClient.StreamProgressChangedEventArgs e = new DigitalPlatform.CirculationClient.StreamProgressChangedEventArgs();
+                        e.Path = path;
+                        e.Current = current;
+                        e.Length = length;
+                        func(this, e);
+                    }
+                })
+                );
 
             // 设置窗口尺寸状态
             if (AppInfo != null)

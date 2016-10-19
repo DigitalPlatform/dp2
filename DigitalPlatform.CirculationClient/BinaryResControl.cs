@@ -854,6 +854,19 @@ bool bChanged)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            //
+            string strMime = "";
+
+            if (this.ListView.SelectedItems.Count > 0)
+                strMime = ListViewUtil.GetItemText(this.ListView.SelectedItems[0], COLUMN_MIME);
+
+            menuItem = new MenuItem("查看(&V)");
+            menuItem.Click += new System.EventHandler(this.menu_view_Click);
+            if (this.ListView.SelectedItems.Count == 0 || StringUtil.MatchMIME(strMime, "image") == false)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+
             // TODO: 这两个菜单项其实可以由 EntityForm 负责追加，处理函数也写在 EntityForm 中
             if (this.GenerateData != null)
             {
@@ -1180,6 +1193,29 @@ bool bChanged)
             }
 
             return results;
+        }
+
+        // 2016/10/17
+        public bool MaskDeleteCoverImageObject()
+        {
+            List<ListViewItem> results = new List<ListViewItem>();
+            foreach (ListViewItem item in this.ListView.Items)
+            {
+                string strCurrentUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
+
+                // . 分隔 FrontCover.MediumImage
+                if (StringUtil.HasHead(strCurrentUsage, "FrontCover.") == true
+                    || strCurrentUsage == "FrontCover")
+                    results.Add(item);
+            }
+
+            if (results.Count > 0)
+            {
+                this.MaskDelete(results);
+                return true;
+            }
+
+            return false;
         }
 
         // TODO: findItemByRights 可以用一个或者多个 right 值进行搜寻
@@ -1609,6 +1645,62 @@ bool bChanged)
             e.Channel = channel;
             e.EndLoop = bEndLoop;
             this.ReturnChannel(this, e);
+        }
+
+        ObjectViewerDialog _dlg = null;
+
+        public void TriggerStreamProgressChanged(string path, long current, long length)
+        {
+            if (_dlg != null)
+                _dlg.TriggerStreamProgressChanged(path, current, length);
+        }
+
+        string _uiState = "";
+
+        // 查看图片对象
+        void menu_view_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.ListView.SelectedItems.Count == 0)
+            {
+                strError = "尚未选择要查看的行...";
+                goto ERROR1;
+            }
+
+            ListViewItem item = this.ListView.SelectedItems[0];
+
+            string strID = ListViewUtil.GetItemText(item, COLUMN_ID);
+
+            string strResPath = this.BiblioRecPath + "/object/" + strID;
+            strResPath = strResPath.Replace(":", "/");
+
+            // var html = @"<html><body style=""background-image: url(dpres:"+strResPath+@")""></body></html>";
+            var html = @"<html><body><img src='dpres:" + strResPath + "' alt='image'></img></body></html>";
+
+            try
+            {
+                using (ObjectViewerDialog dlg = new ObjectViewerDialog())
+                {
+                    _dlg = dlg;
+                    dlg.Text = "查看图像 " + strResPath;
+                    dlg.HtmlString = html;
+                    dlg.UiState = _uiState;
+
+                    if (string.IsNullOrEmpty(_uiState))
+                        dlg.StartPosition = FormStartPosition.CenterScreen;
+                    dlg.ShowDialog(this);
+
+                    _uiState = dlg.UiState;
+                }
+            }
+            finally
+            {
+                _dlg = null;
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         // 导出对象到文件

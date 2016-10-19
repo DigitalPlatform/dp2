@@ -1728,7 +1728,7 @@ namespace DigitalPlatform.LibraryServer
 #endif
                     }
 
-                    if (DateTime.Now > new DateTime(2016, 11, 1))
+                    if (DateTime.Now > new DateTime(2017, 3, 1))    // 上一个版本是 2016/11/1
                     {
                         // 通知系统挂起
                         // this.HangupReason = HangupReason.Expire;
