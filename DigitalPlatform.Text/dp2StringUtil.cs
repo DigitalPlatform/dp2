@@ -83,11 +83,13 @@ namespace DigitalPlatform.Text
   </binding>
              * 
              * */
+            bool bAttr = false;  // 是否用属性方式存储字段
             List<XmlElement> items = new List<XmlElement>();
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("binding/item");
             if (nodes.Count == 0)
             {
                 items.Add(dom.DocumentElement);
+                bAttr = false;
             }
             else
             {
@@ -95,15 +97,13 @@ namespace DigitalPlatform.Text
                 {
                     items.Add(item);
                 }
+                bAttr = true;
             }
 
             List<IssueString> results = new List<IssueString>();
             foreach (XmlElement item in items)
             {
-                XmlNode node = item.SelectSingleNode("volume/text()");
-                string strVolumeString = "";
-                if (node != null)
-                    strVolumeString = node.Value;
+                string strVolumeString = GetField(item, "volume", bAttr);
 
                 if (string.IsNullOrEmpty(strVolumeString) == true)
                     continue;
@@ -123,11 +123,7 @@ namespace DigitalPlatform.Text
                 // 若 volume 元素中不包含年份，则从 publishTime 元素中取
                 if (string.IsNullOrEmpty(strYear))
                 {
-                    node = dom.DocumentElement.SelectSingleNode("publishTime/text()");
-
-                    string strPublishTime = "";
-                    if (node != null)
-                        strPublishTime = node.Value;
+                    string strPublishTime = GetField(item, "publishTime", bAttr);
                     strYear = dp2StringUtil.GetYearPart(strPublishTime);
                 }
 
@@ -135,6 +131,19 @@ namespace DigitalPlatform.Text
             }
 
             return results;
+        }
+
+        static string GetField(XmlElement item, string fieldName, bool bAttr)
+        {
+            if (bAttr)
+                return item.GetAttribute(fieldName);
+            {
+                XmlNode node = item.SelectSingleNode("volume/text()");
+                if (node != null)
+                    return node.Value;
+
+                return "";
+            }
         }
 
         public static string GetCoverImageIDFromIssueRecord(XmlDocument dom,
