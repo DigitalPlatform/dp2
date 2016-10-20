@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
+using System.Web;
 using System.Windows.Forms;
 
 namespace DigitalPlatform.DataMining
@@ -14,6 +16,67 @@ namespace DigitalPlatform.DataMining
     /// </summary>
     public class LongyuanQikan
     {
+                public static int GetCoverImageToClipboard(
+            IWin32Window owner,
+string strISSN,
+string strYear,
+string strIssueNo,
+out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            using (BrowserDialog dlg = new BrowserDialog())
+            {
+                dlg.Show(owner);
+
+#if NO
+                int nRet = dlg.LoadPage("http://xxdy.qikan.com/", out strError);
+                if (nRet == -1)
+                    return -1;
+
+                MessageBox.Show(owner, "homepage OK");
+#endif
+
+                //         http://www.qikan.com.cn/searchmagazine.html?k=%e4%b8%89%e8%81%94%e7%94%9f%e6%b4%bb%e5%91%a8%e5%88%8a&t=0
+                // string strUrl = "http://xxdy.qikan.com/MagInfo.aspx?issn=1674-3121&year=2015&periodNum=1";
+                string strUrl = "http://www.qikan.com.cn/searchmagazine.html?k=" + HttpUtility.UrlEncode(strISSN) + "&t=0";
+                nRet = dlg.LoadPage(strUrl, out strError);
+                if (nRet == -1)
+                    return -1;
+
+#if NO
+                for(int i=0;i<1000;i++)
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(1);
+                }
+#endif
+
+                string guid = dlg.GetQikanGuid();
+                if (string.IsNullOrEmpty(guid))
+                {
+                    strError = "没有找到期刊 GUID";
+                    return -1;
+                }
+
+                strUrl = "http://www.qikan.com.cn/magdetails/" +guid + "/" + strYear + "/" + strIssueNo + ".html";
+                nRet = dlg.LoadPage(strUrl, out strError);
+                if (nRet == -1)
+                    return -1;
+
+                // MessageBox.Show(owner, "detail url OK");
+
+                if (dlg.CopyImageToClipboard1() == false)
+                {
+                    strError = "没有找到 img 对象";
+                    return -1;
+                }
+                return 1;
+            }
+        }
+
+#if NO
         public static int GetCoverImageToClipboard(
             IWin32Window owner,
 string strISSN,
@@ -51,6 +114,9 @@ out string strError)
                 return 1;
             }
         }
+
+#endif
+
 
         public static int GetCoverImageUrl(
             IWin32Window owner,

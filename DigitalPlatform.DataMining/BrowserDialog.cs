@@ -23,7 +23,7 @@ namespace DigitalPlatform.DataMining
 
         }
 
-        ManualResetEvent _doc_complete = new ManualResetEvent(false); 
+        ManualResetEvent _doc_complete = new ManualResetEvent(false);
 
         public int LoadPage(string url, out string strError)
         {
@@ -36,7 +36,7 @@ namespace DigitalPlatform.DataMining
 #endif
             this._complete = false;
             this.webBrowser1.Navigate(url);
-            while(_complete == false)
+            while (_complete == false)
             {
                 Application.DoEvents();
                 Thread.Sleep(100);
@@ -62,6 +62,36 @@ namespace DigitalPlatform.DataMining
 
         }
 
+        public string GetQikanGuid()
+        {
+            IHTMLDocument2 doc = (IHTMLDocument2)webBrowser1.Document.DomDocument;
+            IHTMLControlRange imgRange = (IHTMLControlRange)((HTMLBody)doc.body).createControlRange();
+
+            string html = webBrowser1.DocumentText;
+
+            foreach (IHTMLElement ele in doc.all)
+            {
+                if (!(ele is IHTMLAnchorElement))
+                    continue;
+                IHTMLAnchorElement anchor = ele as IHTMLAnchorElement;
+                string href = anchor.href;
+                if (string.IsNullOrEmpty(href) == false && href.IndexOf("magdetails") != -1)
+                {
+                    string word = "magdetails/";
+                    int index = href.IndexOf(word);
+                    if (index == -1)
+                        return null;
+                    string result = href.Substring(index + word.Length);
+                    index = result.IndexOf("/");
+                    if (index == -1)
+                        return null;
+                    return result.Substring(0, index);
+                }
+            }
+
+            return null;
+        }
+
         public bool CopyImageToClipboard()
         {
             IHTMLDocument2 doc = (IHTMLDocument2)webBrowser1.Document.DomDocument;
@@ -81,5 +111,27 @@ namespace DigitalPlatform.DataMining
 
             return false;
         }
+
+        public bool CopyImageToClipboard1()
+        {
+            IHTMLDocument2 doc = (IHTMLDocument2)webBrowser1.Document.DomDocument;
+            IHTMLControlRange imgRange = (IHTMLControlRange)((HTMLBody)doc.body).createControlRange();
+
+            foreach (IHTMLImgElement img in doc.images)
+            {
+                IHTMLElement parent = ((IHTMLElement)img).parentElement;
+                if (parent.className != "magazine-info-img")
+                    continue;
+                {
+                    imgRange.add(img as IHTMLControlElement);
+
+                    imgRange.execCommand("Copy", false, null);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
     }
 }

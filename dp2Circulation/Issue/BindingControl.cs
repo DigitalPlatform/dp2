@@ -5515,7 +5515,7 @@ namespace dp2Circulation
             {
                 // 从剪贴板插入封面图像
                 ToolStripMenuItem subMenuItem = new ToolStripMenuItem();
-                subMenuItem = new ToolStripMenuItem(" 从剪贴板插入(&C)");
+                subMenuItem = new ToolStripMenuItem(" 从剪贴板(&C) ...");
                 subMenuItem.Tag = point;
                 subMenuItem.Click += new EventHandler(menuItem_insertCoverImageFromClipboard_Click);
                 if (bHasIssueSelected == false)
@@ -5523,7 +5523,7 @@ namespace dp2Circulation
                 menuItem.DropDown.Items.Add(subMenuItem);
 
                 // 从摄像头插入封面图像
-                subMenuItem = new ToolStripMenuItem(" 从摄像头插入(&A)");
+                subMenuItem = new ToolStripMenuItem(" 从摄像头(&A) ...");
                 subMenuItem.Tag = point;
                 subMenuItem.Click += new EventHandler(menuItem_insertCoverImageFromCamera_Click);
                 if (bHasIssueSelected == false)
@@ -5531,7 +5531,7 @@ namespace dp2Circulation
                 menuItem.DropDown.Items.Add(subMenuItem);
 
                 // 从龙源期刊插入封面图像
-                subMenuItem = new ToolStripMenuItem(" 从龙源期刊插入(&A)");
+                subMenuItem = new ToolStripMenuItem(" 从龙源期刊(&A) ...");
                 subMenuItem.Tag = point;
                 subMenuItem.Click += new EventHandler(menuItem_insertCoverImageFromLongyuanQikan_Click);
                 if (bHasIssueSelected == false)
@@ -9360,7 +9360,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 #endif
-            string strISSN = GetIssn();
+            string strISSN = GetTitle();
             if (string.IsNullOrEmpty(strISSN))
             {
                 strError = "本刊书目记录中缺乏 ISSN 号，因此无法获取封面图像";
@@ -9472,6 +9472,24 @@ MessageBoxDefaultButton.Button2);
                     return record.select("field[@name='011']/subfield[@name='a']").FirstContent;
                 if (e.Syntax == "usmarc")
                     return record.select("field[@name='020']/subfield[@name='a']").FirstContent;
+            }
+            return "";
+        }
+
+        string GetTitle()
+        {
+            var func = this.GetBiblio;
+            if (func != null)
+            {
+                GetBiblioEventArgs e = new GetBiblioEventArgs();
+                func(this, e);
+                if (string.IsNullOrEmpty(e.Data))
+                    return "";
+                MarcRecord record = new MarcRecord(e.Data);
+                if (e.Syntax == "unimarc")
+                    return record.select("field[@name='200']/subfield[@name='a']").FirstContent;
+                if (e.Syntax == "usmarc")
+                    return record.select("field[@name='245']/subfield[@name='a']").FirstContent;
             }
             return "";
         }

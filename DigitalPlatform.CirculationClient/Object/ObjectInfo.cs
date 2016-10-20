@@ -92,11 +92,11 @@ namespace DigitalPlatform.CirculationClient
         {
             get
             {
-                return GetMetadataField("mime");
+                return GetMetadataField("mimetype");
             }
             set
             {
-                SetMetadataField("mime", value);
+                SetMetadataField("mimetype", value);
             }
         }
 
@@ -143,7 +143,7 @@ namespace DigitalPlatform.CirculationClient
 #if NO
             root.SetAttribute("fileName", this.FileName);
             root.SetAttribute("size", this.Size);
-            root.SetAttribute("mime", this.Mime);
+            root.SetAttribute("mimetype", this.Mime);
             root.SetAttribute("timestamp", this.Timestamp);
 #endif
 
@@ -492,8 +492,8 @@ namespace DigitalPlatform.CirculationClient
     stop,
     strResPath,
     "",
-    // obj.FileName,
-    // obj.Mime,
+                            // obj.FileName,
+                            // obj.Mime,
     obj.Metadata,
     "", // range
     true,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
