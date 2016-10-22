@@ -59,7 +59,10 @@ namespace DigitalPlatform.CirculationClient
             else
                 dom.LoadXml(this.Metadata);
 
-            dom.DocumentElement.SetAttribute(name, value);
+            if (string.IsNullOrEmpty(value))
+                dom.DocumentElement.RemoveAttribute(name);
+            else
+                dom.DocumentElement.SetAttribute(name, value);
             this.Metadata = dom.DocumentElement.OuterXml;
         }
 

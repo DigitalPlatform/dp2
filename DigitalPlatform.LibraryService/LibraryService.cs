@@ -570,6 +570,7 @@ namespace dp2Library
                 if (strType.ToLower() == "reader")
                     bReader = true;
 
+#if NO
                 bool bSimulateLogin = false;
                 string strSimulate = (string)parameters["simulate"];
                 if (strSimulate == null)
@@ -578,7 +579,9 @@ namespace dp2Library
                 if (strSimulate == "yes" || strSimulate == "on"
                 || strSimulate == "1" || strSimulate == "true")
                     bSimulateLogin = true;
-
+#endif
+                bool bSimulateLogin = StringUtil.GetBooleanValue((string)parameters["simulate"], false);
+                string strFinalRights = "";
                 if (bReader == false)
                 {
                     if (bSimulateLogin == true)
@@ -599,8 +602,13 @@ namespace dp2Library
 
                         if (string.IsNullOrEmpty(info.UserToken) == true)
                         {
+#if NO
                             strError = "simulate 状态下登录(模拟工作人员帐户)时，strPassword 参数内必须提供被模拟帐户的 token 参数";
                             goto ERROR1;
+#endif
+                            // 2016/10/21
+                            // 令第二阶段不要进行密码判断
+                            strPassword = null;
                         }
                         else
                         {
@@ -639,6 +647,10 @@ namespace dp2Library
                                 goto ERROR1;
                             }
 
+                            // 这种情况下使用代理者的权限
+                            if (strPassword == null)
+                                strFinalRights = sessioninfo.Rights;
+
                             // 检查工作人员帐户是否具备 simulateworker 权限
                             if (StringUtil.IsInList("simulateworker", strRights) == false)
                             {
@@ -668,6 +680,16 @@ namespace dp2Library
                          out strLibraryCode,
                          out strError);
                     strOutputUserName = strUserName;
+
+                    // 2016/10/21
+                    if (string.IsNullOrEmpty(strFinalRights) == false)
+                    {
+                        if (sessioninfo.Account != null)
+                        {
+                            strRights = strFinalRights;
+                            sessioninfo.Account.Rights = strFinalRights;
+                        }
+                    }
                 }
                 else
                 {
