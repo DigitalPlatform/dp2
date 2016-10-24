@@ -190,7 +190,8 @@ namespace DigitalPlatform.LibraryServer
             out UserInfo[] userinfos,
             out string strError)
         {
-            this.m_lock.AcquireReaderLock(m_nLockTimeout);
+            // this.m_lock.AcquireReaderLock(m_nLockTimeout);
+            this.LockForRead();    // 2016/10/16
             try
             {
                 strError = "";
@@ -257,7 +258,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseReaderLock();
+                // this.m_lock.ReleaseReaderLock();
+                this.UnlockForRead();
             }
         }
 
@@ -377,7 +379,8 @@ namespace DigitalPlatform.LibraryServer
         SKIP_VERIFY:
             XmlElement nodeAccount = null;
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
                 // 查重
@@ -444,7 +447,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
 
             // 写入日志
@@ -512,7 +516,8 @@ namespace DigitalPlatform.LibraryServer
         // 对用户名查重
         public bool SearchUserNameDup(string strUserName)
         {
-            this.m_lock.AcquireReaderLock(m_nLockTimeout);
+            // this.m_lock.AcquireReaderLock(m_nLockTimeout);
+            this.LockForRead();    // 2016/10/16
             try
             {
                 // 查重
@@ -524,7 +529,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseReaderLock();
+                // this.m_lock.ReleaseReaderLock();
+                this.UnlockForRead();
             }
         }
 
@@ -548,7 +554,8 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
                 // 查重
@@ -626,7 +633,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
 
             // return 0;
@@ -1035,7 +1043,8 @@ namespace DigitalPlatform.LibraryServer
             XmlNode nodeAccount = null;
             string strOldOuterXml = "";
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
                 // 查重
@@ -1106,7 +1115,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
 
             // 写入日志
@@ -1199,7 +1209,8 @@ namespace DigitalPlatform.LibraryServer
             XmlNode nodeAccount = null;
             string strHashedPassword = "";
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
                 // 查重
@@ -1240,7 +1251,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
 
             {
@@ -1293,7 +1305,8 @@ namespace DigitalPlatform.LibraryServer
             XmlNode nodeAccount = null;
             string strOldOuterXml = "";
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
                 // 查重
@@ -1329,7 +1342,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
 
             {

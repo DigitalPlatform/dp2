@@ -370,7 +370,7 @@ namespace dp2Circulation
 
             // 在listview中滚动到可见范围
             new_item.HilightListViewItem(true);
-            this.Text = "册信息";
+            // this.Text = "册信息";   // ??
             return;
         ERROR1:
             MessageBox.Show(this, strError);

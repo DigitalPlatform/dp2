@@ -637,6 +637,27 @@ namespace DigitalPlatform.OPAC.Server
             return;
         }
 
+        /*
+ASP.NET 4.0.30319.0 	Error 	2016/10/14 17:06:02
+发生了未经处理的异常，已终止进程。
+
+Application ID: /LM/W3SVC/1/ROOT/dp2OPAC
+
+Process ID: 15760
+
+Exception: System.ObjectDisposedException
+
+Message: 已关闭 Safe handle
+
+StackTrace:    在 System.Runtime.InteropServices.SafeHandle.DangerousAddRef(Boolean& success)
+   在 Microsoft.Win32.Win32Native.SetEvent(SafeWaitHandle handle)
+   在 System.Threading.EventWaitHandle.Set()
+   在 DigitalPlatform.OPAC.Server.BatchTask.ThreadMain()
+   在 System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
+   在 System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
+   在 System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
+   在 System.Threading.ThreadHelper.ThreadStart()
+         * */
         // 工作线程
         public virtual void ThreadMain()
         {
@@ -705,7 +726,14 @@ namespace DigitalPlatform.OPAC.Server
             finally
             {
                 // 2009/7/16 移动到这里
-                eventFinished.Set();
+                try
+                {
+                    eventFinished.Set();
+                }
+                catch(ObjectDisposedException)  // 2016/10/15
+                {
+
+                }
 
                 // 2009/7/16 新增
                 this.m_bClosed = true;

@@ -206,6 +206,7 @@ namespace dp2Circulation
             this.comboBox_labelPrint_accessNoSource = new System.Windows.Forms.ComboBox();
             this.label28 = new System.Windows.Forms.Label();
             this.tabPage_message = new System.Windows.Forms.TabPage();
+            this.button_message_setDefaultUrl = new System.Windows.Forms.Button();
             this.textBox_message_password = new System.Windows.Forms.TextBox();
             this.textBox_message_userName = new System.Windows.Forms.TextBox();
             this.label32 = new System.Windows.Forms.Label();
@@ -216,7 +217,7 @@ namespace dp2Circulation
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.button_message_setDefaultUrl = new System.Windows.Forms.Button();
+            this.checkBox_global_saveOriginCoverImage = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -2149,6 +2150,7 @@ namespace dp2Circulation
             // 
             // tabPage_global
             // 
+            this.tabPage_global.Controls.Add(this.checkBox_global_saveOriginCoverImage);
             this.tabPage_global.Controls.Add(this.label26);
             this.tabPage_global.Controls.Add(this.checkBox_global_autoSelPinyin);
             this.tabPage_global.Controls.Add(this.checkBox_global_displayScriptErrorDialog);
@@ -2256,7 +2258,7 @@ namespace dp2Circulation
             this.groupBox7.Controls.Add(this.textBox_fingerprint_readerUrl);
             this.groupBox7.Location = new System.Drawing.Point(3, 14);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(399, 84);
+            this.groupBox7.Size = new System.Drawing.Size(382, 84);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2264,7 +2266,7 @@ namespace dp2Circulation
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(288, 47);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(271, 47);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(105, 23);
             this.button_fingerprint_setDefaultValue.TabIndex = 1;
@@ -2278,7 +2280,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(6, 20);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(387, 21);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(370, 21);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2342,6 +2344,17 @@ namespace dp2Circulation
             this.tabPage_message.TabIndex = 19;
             this.tabPage_message.Text = "消息";
             this.tabPage_message.UseVisualStyleBackColor = true;
+            // 
+            // button_message_setDefaultUrl
+            // 
+            this.button_message_setDefaultUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_message_setDefaultUrl.Location = new System.Drawing.Point(383, 96);
+            this.button_message_setDefaultUrl.Name = "button_message_setDefaultUrl";
+            this.button_message_setDefaultUrl.Size = new System.Drawing.Size(98, 23);
+            this.button_message_setDefaultUrl.TabIndex = 23;
+            this.button_message_setDefaultUrl.Text = "设为常用值";
+            this.button_message_setDefaultUrl.UseVisualStyleBackColor = true;
+            this.button_message_setDefaultUrl.Click += new System.EventHandler(this.button_message_setDefaultUrl_Click);
             // 
             // textBox_message_password
             // 
@@ -2439,16 +2452,15 @@ namespace dp2Circulation
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // button_message_setDefaultUrl
+            // checkBox_global_saveOriginCoverImage
             // 
-            this.button_message_setDefaultUrl.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_message_setDefaultUrl.Location = new System.Drawing.Point(383, 96);
-            this.button_message_setDefaultUrl.Name = "button_message_setDefaultUrl";
-            this.button_message_setDefaultUrl.Size = new System.Drawing.Size(98, 23);
-            this.button_message_setDefaultUrl.TabIndex = 23;
-            this.button_message_setDefaultUrl.Text = "设为常用值";
-            this.button_message_setDefaultUrl.UseVisualStyleBackColor = true;
-            this.button_message_setDefaultUrl.Click += new System.EventHandler(this.button_message_setDefaultUrl_Click);
+            this.checkBox_global_saveOriginCoverImage.AutoSize = true;
+            this.checkBox_global_saveOriginCoverImage.Location = new System.Drawing.Point(3, 90);
+            this.checkBox_global_saveOriginCoverImage.Name = "checkBox_global_saveOriginCoverImage";
+            this.checkBox_global_saveOriginCoverImage.Size = new System.Drawing.Size(162, 16);
+            this.checkBox_global_saveOriginCoverImage.TabIndex = 17;
+            this.checkBox_global_saveOriginCoverImage.Text = "保存封面扫描原始图像(&O)";
+            this.checkBox_global_saveOriginCoverImage.UseVisualStyleBackColor = true;
             // 
             // CfgDlg
             // 
@@ -2732,5 +2744,6 @@ namespace dp2Circulation
         private System.Windows.Forms.Label label34;
         private System.Windows.Forms.ComboBox comboBox_quickCharging_displayFormat;
         private System.Windows.Forms.Button button_message_setDefaultUrl;
+        private System.Windows.Forms.CheckBox checkBox_global_saveOriginCoverImage;
     }
 }

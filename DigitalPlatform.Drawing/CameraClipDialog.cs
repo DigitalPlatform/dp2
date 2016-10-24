@@ -199,7 +199,7 @@ namespace DigitalPlatform.Drawing
 
             using (Bitmap bitmap = new Bitmap(this.pictureBox_clip.Image))
             {
-                this.pictureBox_result.Image = AForgeImageUtil.Clip(bitmap,
+                this.Image = AForgeImageUtil.Clip(bitmap,
                     this.pictureBox_clip.GetCorners());
             }
 
@@ -215,13 +215,13 @@ namespace DigitalPlatform.Drawing
         {
             if (this.tabControl_main.SelectedTab == this.tabPage_preview)
             {
-                this.pictureBox_result.Image = this.qrRecognitionControl1.Image;
+                this.Image = this.qrRecognitionControl1.Image;
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_clip)
             {
                 using (Bitmap bitmap = new Bitmap(this.pictureBox_clip.Image))
                 {
-                    this.pictureBox_result.Image = AForgeImageUtil.Clip(bitmap,
+                    this.Image = AForgeImageUtil.Clip(bitmap,
                         this.pictureBox_clip.GetCorners());
                 }
             }
@@ -237,6 +237,7 @@ namespace DigitalPlatform.Drawing
             this.Close();
         }
 
+        // 结果图像。也就是经过剪裁的最终图像
         public Image Image
         {
             get
@@ -246,6 +247,60 @@ namespace DigitalPlatform.Drawing
             set
             {
                 this.pictureBox_result.Image = value;
+                _resultRotateAngle = 0;
+            }
+        }
+
+        // 拍摄后的原始图像。未经剪裁的图像
+        public Image BackupImage
+        {
+            get
+            {
+                return this.pictureBox_clip.Image;
+            }
+            set
+            {
+                this.pictureBox_clip.Image = value;
+            }
+        }
+
+        // 图像处理指令。由剪裁指令，和旋转指令组合而成
+        public string ProcessCommand
+        {
+            get
+            {
+                StringBuilder text = new StringBuilder();
+                text.Append(this.pictureBox_clip.ClipCommand);
+                if (this.ResultRotateAngle != 0)
+                {
+                    if (text.Length > 0)
+                        text.Append(";");
+                    text.Append(string.Format("r:{0}", this.ResultRotateAngle));
+                }
+                return text.ToString();
+            }
+        }
+
+        public ImageInfo ImageInfo
+        {
+            get
+            {
+                ImageInfo info = new ImageInfo();
+                info.Image = this.Image;
+                info.BackupImage = this.BackupImage;
+                info.ProcessCommand = this.ProcessCommand;
+                return info;
+            }
+        }
+
+        int _resultRotateAngle = 0;
+
+        // 结果图像相对原始图像曾转动过的角度
+        public int ResultRotateAngle
+        {
+            get
+            {
+                return this._resultRotateAngle;
             }
         }
 
@@ -260,6 +315,10 @@ namespace DigitalPlatform.Drawing
                 Image image = this.pictureBox_result.Image;
                 image.RotateFlip(RotateFlipType.Rotate90FlipNone);
                 this.pictureBox_result.Image = image;
+
+                _resultRotateAngle += 90;
+                if (_resultRotateAngle == 360)
+                    _resultRotateAngle = 0;
             }
         }
 
@@ -271,6 +330,7 @@ namespace DigitalPlatform.Drawing
                 this.toolStripButton_clip_autoCorp.Enabled = false;
                 this.toolStripButton_clip_output.Enabled = false;
                 this.toolStripButton_paste.Enabled = false;
+                this.toolStripButton_selectAll.Enabled = false;
             }
             if (this.tabControl_main.SelectedTab == this.tabPage_clip)
             {
@@ -278,6 +338,7 @@ namespace DigitalPlatform.Drawing
                 this.toolStripButton_clip_autoCorp.Enabled = true;
                 this.toolStripButton_clip_output.Enabled = true;
                 this.toolStripButton_paste.Enabled = true;
+                this.toolStripButton_selectAll.Enabled = true;
             }
             if (this.tabControl_main.SelectedTab == this.tabPage_result)
             {
@@ -285,8 +346,8 @@ namespace DigitalPlatform.Drawing
                 this.toolStripButton_clip_autoCorp.Enabled = false;
                 this.toolStripButton_clip_output.Enabled = false;
                 this.toolStripButton_paste.Enabled = true;
+                this.toolStripButton_selectAll.Enabled = false;
             }
-
         }
 
         private void toolStripButton_copy_Click(object sender, EventArgs e)
@@ -371,12 +432,21 @@ namespace DigitalPlatform.Drawing
             }
             if (this.tabControl_main.SelectedTab == this.tabPage_result)
             {
-                this.pictureBox_result.Image = image;
+                this.Image = image;
             }
 
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 全选，剪裁区。等于不加剪裁
+        private void toolStripButton_selectAll_Click(object sender, EventArgs e)
+        {
+            if (this.tabControl_main.SelectedTab == this.tabPage_clip)
+            {
+                this.pictureBox_clip.SelectAll();
+            }
         }
 
     }

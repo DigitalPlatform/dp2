@@ -32,5 +32,7 @@ using System.Runtime.InteropServices;
 // 可以指定所有这些值，也可以使用“内部版本号”和“修订号”的默认值，
 // 方法是按如下所示使用“*”:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.*")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.2.*")]
+[assembly: AssemblyFileVersion("1.2.0.0")]
+
+// V1.2 (2016/10/11) 在面板上可以为 Windows 启用 MSMQ，可以为 library.xml 配置 MQ 参数

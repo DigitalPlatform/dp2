@@ -620,6 +620,13 @@ false);
                 "auto_select_pinyin",
                 false);
 
+            // 保存封面扫描的原始图像
+            this.checkBox_global_saveOriginCoverImage.Checked =
+                ap.GetBoolean(
+                "global",
+                "save_orign_cover_image",
+                false);
+
             // *** 标签打印
             // 从何处获取索取号
             this.comboBox_labelPrint_accessNoSource.Text = ap.GetString(
@@ -1200,6 +1207,12 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "global",
                 "auto_select_pinyin",
                 this.checkBox_global_autoSelPinyin.Checked);
+
+            // 保存封面扫描的原始图像
+            ap.SetBoolean(
+                "global",
+                "save_orign_cover_image",
+                this.checkBox_global_saveOriginCoverImage.Checked);
 
             // *** 标签打印
             // 从何处获取索取号

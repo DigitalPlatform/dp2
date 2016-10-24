@@ -59,7 +59,10 @@ namespace DigitalPlatform.CirculationClient
             else
                 dom.LoadXml(this.Metadata);
 
-            dom.DocumentElement.SetAttribute(name, value);
+            if (string.IsNullOrEmpty(value))
+                dom.DocumentElement.RemoveAttribute(name);
+            else
+                dom.DocumentElement.SetAttribute(name, value);
             this.Metadata = dom.DocumentElement.OuterXml;
         }
 
@@ -92,13 +95,14 @@ namespace DigitalPlatform.CirculationClient
         {
             get
             {
-                return GetMetadataField("mime");
+                return GetMetadataField("mimetype");
             }
             set
             {
-                SetMetadataField("mime", value);
+                SetMetadataField("mimetype", value);
             }
         }
+
         public string Timestamp
         {
             get
@@ -108,6 +112,18 @@ namespace DigitalPlatform.CirculationClient
             set
             {
                 SetMetadataField("timestamp", value);
+            }
+        }
+
+        public string ProcessCommand
+        {
+            get
+            {
+                return GetMetadataField("command");
+            }
+            set
+            {
+                SetMetadataField("command", value);
             }
         }
 
@@ -130,7 +146,7 @@ namespace DigitalPlatform.CirculationClient
 #if NO
             root.SetAttribute("fileName", this.FileName);
             root.SetAttribute("size", this.Size);
-            root.SetAttribute("mime", this.Mime);
+            root.SetAttribute("mimetype", this.Mime);
             root.SetAttribute("timestamp", this.Timestamp);
 #endif
 
@@ -389,6 +405,7 @@ namespace DigitalPlatform.CirculationClient
         public int Save(
             LibraryChannel channel,
             Stop stop,
+            string strHostRecPath,
             string dp2library_version,
             out string strError)
         {
@@ -397,11 +414,14 @@ namespace DigitalPlatform.CirculationClient
             if (this.Count == 0)
                 return 0;
 
+            this.HostRecPath = strHostRecPath;  // 2016/10/15
+#if NO
             if (String.IsNullOrEmpty(this.HostRecPath) == true)
             {
                 strError = "尚未指定 BiblioRecPath";
                 return -1;
             }
+#endif
 
             if (IsNewPath(this.HostRecPath) == true)
             {
@@ -475,8 +495,9 @@ namespace DigitalPlatform.CirculationClient
     stop,
     strResPath,
     "",
-    obj.FileName,
-    obj.Mime,
+                            // obj.FileName,
+                            // obj.Mime,
+    obj.Metadata,
     "", // range
     true,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
     timestamp,
@@ -560,8 +581,9 @@ namespace DigitalPlatform.CirculationClient
                                     stop,
                                     strResPath,
                                     obj.FileName,
-                                    obj.FileName,
-                                    obj.Mime,
+                                    //obj.FileName,
+                                    //obj.Mime,
+                                    obj.Metadata,
                                     ranges[j],
                                     j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
                                     timestamp,
@@ -679,7 +701,7 @@ namespace DigitalPlatform.CirculationClient
 
         public int MaskDeleteObjects(List<ObjectInfo> infos)
         {
-            bool bRemoved = false;   // 是否发生过物理删除listview item的情况
+            // bool bRemoved = false;   // 是否发生过物理删除listview item的情况
             int nMaskDeleteCount = 0;
             foreach (ObjectInfo info in infos)
             {
@@ -690,7 +712,7 @@ namespace DigitalPlatform.CirculationClient
                 // 如果本来就是新增事项，那么彻底从listview中移除
                 if (info.LineState == LineState.New)
                 {
-                    bRemoved = true;
+                    // bRemoved = true;
                     this.Remove(info);
                     nMaskDeleteCount++;
                     continue;
@@ -738,6 +760,7 @@ namespace DigitalPlatform.CirculationClient
     string strObjectFilePath,
     string strUsage,
     string strRights,
+            string strProcessCommand,
     out ObjectInfo info,
     out string strError)
         {
@@ -755,16 +778,19 @@ namespace DigitalPlatform.CirculationClient
             info.Size = Convert.ToString(fileInfo.Length);
             info.Usage = strUsage;
             info.Rights = strRights;
+            info.ProcessCommand = strProcessCommand;
             this.Add(info);
 
             this.Changed = true;
             return 0;
         }
 
+        // 几个参数都是 != null 才起作用
         public int ChangeObjectFile(ObjectInfo info,
     string strObjectFilePath,
     string strUsage,
     string strRights,
+            string strProcessCommand,
     out string strError)
         {
             strError = "";
@@ -775,11 +801,13 @@ namespace DigitalPlatform.CirculationClient
                 return -1;
             }
 
+#if NO
             if (info.LineState == LineState.Deleted)
             {
                 strError = "对已经标记删除的对象不能进行修改...";
                 return -1;
             }
+#endif
 
             LineState old_state = info.LineState;
             string strOldUsage = info.Usage;
@@ -794,6 +822,9 @@ namespace DigitalPlatform.CirculationClient
             if (strRights != null)
                 info.Rights = strRights;
             // info.Timestamp = null;   // 以前的时间戳不要修改
+
+            if (strProcessCommand != null)
+                info.ProcessCommand = strProcessCommand;
 
             if (old_state != LineState.New)
             {
@@ -813,10 +844,11 @@ namespace DigitalPlatform.CirculationClient
         }
 
         public int SetObjectByUsage(
-    string strFileName,
-    string strUsage,
-    out string strID,
-    out string strError)
+            string strFileName,
+            string strUsage,
+            string strProcessCommand,
+            out string strID,
+            out string strError)
         {
             strError = "";
             strID = "";
@@ -830,6 +862,7 @@ namespace DigitalPlatform.CirculationClient
                     strFileName,
                     strUsage,
                     null, // rights
+                    strProcessCommand,
                     out info,
                     out strError);
             }
@@ -841,6 +874,7 @@ namespace DigitalPlatform.CirculationClient
                     strFileName,
                     strUsage,
                     null,
+                    strProcessCommand,
                     out strError);
             }
             if (nRet == -1)
@@ -850,7 +884,7 @@ namespace DigitalPlatform.CirculationClient
             return 0;
         }
 
-        public void MaskDeleteCoverImageObject()
+        public bool MaskDeleteCoverImageObject()
         {
             List<ObjectInfo> infos = new List<ObjectInfo>();
             foreach (ObjectInfo info in this)
@@ -862,7 +896,12 @@ namespace DigitalPlatform.CirculationClient
             }
 
             if (infos.Count > 0)
+            {
                 MaskDeleteObjects(infos);
+                return true;
+            }
+
+            return false;
         }
 
         // 获得特定的数字对象

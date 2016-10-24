@@ -742,6 +742,7 @@ namespace dp2Circulation
             // 初始化对象控件
             if (this.Cataloging == true)
             {
+                Program.MainForm.StreamProgressChanged += MainForm_StreamProgressChanged;
 
                 this.binaryResControl1.ContentChanged -= new ContentChangedEventHandler(binaryResControl1_ContentChanged);
                 this.binaryResControl1.ContentChanged += new ContentChangedEventHandler(binaryResControl1_ContentChanged);
@@ -823,6 +824,11 @@ true);
                 selected_templates.Build(strSelectedTemplates);
             }
 
+        }
+
+        void MainForm_StreamProgressChanged(object sender, StreamProgressChangedEventArgs e)
+        {
+            this.binaryResControl1.TriggerStreamProgressChanged(e.Path, e.Current, e.Length);
         }
 
         void issueControl1_GetBiblio(object sender, GetBiblioEventArgs e)
@@ -2438,28 +2444,10 @@ true);
 
         private void EntityForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-#if NO
-            if (Stop != null) // 脱离关联
-            {
-                Stop.Unregister();	// 和容器关联
-                Stop = null;
-            }
-#endif
-
-            /*
-            if (m_scriptDomain != null)
-            {
-                AppDomain.Unload(m_scriptDomain);
-                m_scriptDomain = null;
-            }
-             * */
+            Program.MainForm.StreamProgressChanged -= MainForm_StreamProgressChanged;
 
             if (this.m_webExternalHost_biblio != null)
                 this.m_webExternalHost_biblio.Destroy();
-            /*
-            if (this.m_webExternalHost_comment != null)
-                this.m_webExternalHost_comment.Destroy();
-             * */
 
             if (this.m_verifyViewer != null)
                 this.m_verifyViewer.Close();
@@ -12561,116 +12549,114 @@ strMARC);
                 goto ERROR1;
             }
 
-            Image image = null;
-            this.MainForm.DisableCamera();
+            ImageInfo info = new ImageInfo();
             try
             {
-                // 注： new CameraClipDialog() 可能会抛出异常
-                using (CameraClipDialog dlg = new CameraClipDialog())
+                this.MainForm.DisableCamera();
+                try
                 {
-                    dlg.Font = this.Font;
+                    // 注： new CameraClipDialog() 可能会抛出异常
+                    using (CameraClipDialog dlg = new CameraClipDialog())
+                    {
+                        dlg.Font = this.Font;
 
-                    dlg.CurrentCamera = this.MainForm.AppInfo.GetString(
-                        "entityform",
-                        "current_camera",
-                        "");
+                        dlg.CurrentCamera = this.MainForm.AppInfo.GetString(
+                            "entityform",
+                            "current_camera",
+                            "");
 
-                    this.MainForm.AppInfo.LinkFormState(dlg, "CameraClipDialog_state");
-                    dlg.ShowDialog(this);
-                    this.MainForm.AppInfo.UnlinkFormState(dlg);
+                        this.MainForm.AppInfo.LinkFormState(dlg, "CameraClipDialog_state");
+                        dlg.ShowDialog(this);
+                        this.MainForm.AppInfo.UnlinkFormState(dlg);
 
-                    this.MainForm.AppInfo.SetString(
-                        "entityform",
-                        "current_camera",
-                        dlg.CurrentCamera);
+                        this.MainForm.AppInfo.SetString(
+                            "entityform",
+                            "current_camera",
+                            dlg.CurrentCamera);
 
-                    if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                        if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                            return;
+
+                        info = dlg.ImageInfo;
+                        if (this.MainForm.SaveOriginCoverImage == false)
+                            info.ClearBackupImage();
+                    }
+                }
+                finally
+                {
+                    Application.DoEvents();
+
+                    this.MainForm.EnableCamera();
+                }
+
+                using (CreateCoverImageDialog cover_dlg = new CreateCoverImageDialog())
+                {
+                    MainForm.SetControlFont(cover_dlg, this.Font, false);
+                    cover_dlg.ImageInfo = info;
+                    this.MainForm.AppInfo.LinkFormState(cover_dlg, "entityform_CreateCoverImageDialog_state");
+                    cover_dlg.ShowDialog(this);
+                    this.MainForm.AppInfo.UnlinkFormState(cover_dlg);
+                    if (cover_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                         return;
 
-                    image = dlg.Image;
+                    this.SynchronizeMarc();
+
+                    foreach (ImageType type in cover_dlg.ResultImages)
+                    {
+                        if (type.Image == null)
+                        {
+                            continue;
+                        }
+
+                        string strType = "FrontCover." + type.TypeName;
+                        string strSize = type.Image.Width.ToString() + "X" + type.Image.Height.ToString() + "px";
+
+                        // string strShrinkComment = "";
+                        string strID = "";
+                        nRet = SetImageObject(
+                            this.binaryResControl1,
+                            type.Image,
+                            strType,    // "coverimage",
+                            // out strShrinkComment,
+                            out strID,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        Field field_856 = null;
+                        List<Field> fields = DetailHost.Find856ByResID(this.m_marcEditor,
+                                strID);
+                        if (fields.Count == 1)
+                        {
+                            field_856 = fields[0];
+                            // TODO: 出现对话框
+                        }
+                        else if (fields.Count > 1)
+                        {
+                            DialogResult result = MessageBox.Show(this,
+                                "当前 MARC 编辑器中已经存在 " + fields.Count.ToString() + " 个 856 字段其 $" + DetailHost.LinkSubfieldName + " 子字段关联了对象 ID '" + strID + "' ，是否要编辑其中的第一个 856 字段?\r\n\r\n(注：可改在 MARC 编辑器中选中一个具体的 856 字段进行编辑)\r\n\r\n(OK: 编辑其中的第一个 856 字段; Cancel: 取消操作",
+                                "EntityForm",
+                                MessageBoxButtons.OKCancel,
+                                MessageBoxIcon.Question,
+                                MessageBoxDefaultButton.Button2);
+                            if (result == DialogResult.Cancel)
+                                return;
+                            field_856 = fields[0];
+                            // TODO: 出现对话框
+                        }
+                        else
+                            field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
+
+                        field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize
+                            + (string.IsNullOrEmpty(type.ProcessCommand) == true ? "" : ";clip:" + StringUtil.EscapeString(type.ProcessCommand, ";:"))
+                            + "$2dp2res").Replace('$', (char)31);
+                    }
                 }
             }
             finally
             {
-                Application.DoEvents();
-
-                this.MainForm.EnableCamera();
-            }
-
-            {
-                CreateCoverImageDialog dlg = null;
-                try
-                {
-                    dlg = new CreateCoverImageDialog();
-
-                    MainForm.SetControlFont(dlg, this.Font, false);
-                    dlg.OriginImage = image;
-                    this.MainForm.AppInfo.LinkFormState(dlg, "entityform_CreateCoverImageDialog_state");
-                    dlg.ShowDialog(this);
-                    this.MainForm.AppInfo.UnlinkFormState(dlg);
-                    if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                        return;
-
-                }
-                finally
-                {
-                    if (image != null)
-                    {
-                        image.Dispose();
-                        image = null;
-                    }
-                }
-
-                this.SynchronizeMarc();
-
-                foreach (ImageType type in dlg.ResultImages)
-                {
-                    if (type.Image == null)
-                    {
-                        continue;
-                    }
-
-                    string strType = "FrontCover." + type.TypeName;
-                    string strSize = type.Image.Width.ToString() + "X" + type.Image.Height.ToString() + "px";
-
-                    // string strShrinkComment = "";
-                    string strID = "";
-                    nRet = SetImageObject(
-                        this.binaryResControl1,
-                        type.Image,
-                        strType,    // "coverimage",
-                        // out strShrinkComment,
-                        out strID,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    Field field_856 = null;
-                    List<Field> fields = DetailHost.Find856ByResID(this.m_marcEditor,
-                            strID);
-                    if (fields.Count == 1)
-                    {
-                        field_856 = fields[0];
-                        // TODO: 出现对话框
-                    }
-                    else if (fields.Count > 1)
-                    {
-                        DialogResult result = MessageBox.Show(this,
-                            "当前 MARC 编辑器中已经存在 " + fields.Count.ToString() + " 个 856 字段其 $" + DetailHost.LinkSubfieldName + " 子字段关联了对象 ID '" + strID + "' ，是否要编辑其中的第一个 856 字段?\r\n\r\n(注：可改在 MARC 编辑器中选中一个具体的 856 字段进行编辑)\r\n\r\n(OK: 编辑其中的第一个 856 字段; Cancel: 取消操作",
-                            "EntityForm",
-                            MessageBoxButtons.OKCancel,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2);
-                        if (result == DialogResult.Cancel)
-                            return;
-                        field_856 = fields[0];
-                        // TODO: 出现对话框
-                    }
-                    else
-                        field_856 = this.m_marcEditor.Record.Fields.Add("856", "  ", "", true);
-
-                    field_856.IndicatorAndValue = ("72$3Cover Image$" + DetailHost.LinkSubfieldName + "uri:" + strID + "$xtype:" + strType + ";size:" + strSize + "$2dp2res").Replace('$', (char)31);
-                }
+                if (info != null)
+                    info.Dispose();
             }
 
             if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_template)
@@ -12739,7 +12725,9 @@ strMARC);
                 dlg = new CreateCoverImageDialog();
 
                 MainForm.SetControlFont(dlg, this.Font, false);
-                dlg.OriginImage = image;
+                ImageInfo info = new ImageInfo();
+                info.Image = image;
+                dlg.ImageInfo = info;
                 this.MainForm.AppInfo.LinkFormState(dlg, "entityform_CreateCoverImageDialog_state");
                 dlg.ShowDialog(this);
                 this.MainForm.AppInfo.UnlinkFormState(dlg);

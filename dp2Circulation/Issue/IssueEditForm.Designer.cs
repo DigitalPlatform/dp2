@@ -66,12 +66,12 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.Controls.Add(this.textBox_message, 0, 0);
             this.tableLayoutPanel_main.Controls.Add(this.splitContainer_main, 0, 1);
             this.tableLayoutPanel_main.Location = new System.Drawing.Point(9, 10);
-            this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(2);
             this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
             this.tableLayoutPanel_main.RowCount = 2;
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_main.Size = new System.Drawing.Size(417, 269);
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(408, 263);
             this.tableLayoutPanel_main.TabIndex = 4;
             // 
             // textBox_message
@@ -82,19 +82,19 @@ namespace dp2Circulation
             this.textBox_message.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_message.ForeColor = System.Drawing.SystemColors.InfoText;
             this.textBox_message.Location = new System.Drawing.Point(2, 2);
-            this.textBox_message.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox_message.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_message.Multiline = true;
             this.textBox_message.Name = "textBox_message";
             this.textBox_message.ReadOnly = true;
             this.textBox_message.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_message.Size = new System.Drawing.Size(413, 52);
+            this.textBox_message.Size = new System.Drawing.Size(404, 52);
             this.textBox_message.TabIndex = 0;
             // 
             // splitContainer_main
             // 
             this.splitContainer_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer_main.Location = new System.Drawing.Point(2, 58);
-            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(2);
             this.splitContainer_main.Name = "splitContainer_main";
             // 
             // splitContainer_main.Panel1
@@ -104,8 +104,8 @@ namespace dp2Circulation
             // splitContainer_main.Panel2
             // 
             this.splitContainer_main.Panel2.Controls.Add(this.tableLayoutPanel_editing);
-            this.splitContainer_main.Size = new System.Drawing.Size(413, 209);
-            this.splitContainer_main.SplitterDistance = 201;
+            this.splitContainer_main.Size = new System.Drawing.Size(404, 203);
+            this.splitContainer_main.SplitterDistance = 196;
             this.splitContainer_main.SplitterWidth = 3;
             this.splitContainer_main.TabIndex = 5;
             // 
@@ -118,13 +118,13 @@ namespace dp2Circulation
             this.tableLayoutPanel_existing.Controls.Add(this.button_existing_undoMaskDelete, 0, 2);
             this.tableLayoutPanel_existing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_existing.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_existing.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tableLayoutPanel_existing.Margin = new System.Windows.Forms.Padding(2);
             this.tableLayoutPanel_existing.Name = "tableLayoutPanel_existing";
             this.tableLayoutPanel_existing.RowCount = 3;
             this.tableLayoutPanel_existing.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_existing.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_existing.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_existing.Size = new System.Drawing.Size(201, 209);
+            this.tableLayoutPanel_existing.Size = new System.Drawing.Size(196, 203);
             this.tableLayoutPanel_existing.TabIndex = 0;
             // 
             // label1
@@ -142,6 +142,7 @@ namespace dp2Circulation
             this.issueEditControl_existing.BatchNo = "";
             this.issueEditControl_existing.Changed = false;
             this.issueEditControl_existing.Comment = "";
+            this.issueEditControl_existing.CreateState = dp2Circulation.ItemDisplayState.Normal;
             this.issueEditControl_existing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.issueEditControl_existing.Initializing = true;
             this.issueEditControl_existing.Issue = "";
@@ -154,7 +155,7 @@ namespace dp2Circulation
             this.issueEditControl_existing.PublishTime = "";
             this.issueEditControl_existing.RecPath = "";
             this.issueEditControl_existing.RefID = "";
-            this.issueEditControl_existing.Size = new System.Drawing.Size(197, 167);
+            this.issueEditControl_existing.Size = new System.Drawing.Size(192, 161);
             this.issueEditControl_existing.State = "";
             this.issueEditControl_existing.TabIndex = 1;
             this.issueEditControl_existing.Volume = "";
@@ -162,8 +163,8 @@ namespace dp2Circulation
             // 
             // button_existing_undoMaskDelete
             // 
-            this.button_existing_undoMaskDelete.Location = new System.Drawing.Point(2, 185);
-            this.button_existing_undoMaskDelete.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_existing_undoMaskDelete.Location = new System.Drawing.Point(2, 179);
+            this.button_existing_undoMaskDelete.Margin = new System.Windows.Forms.Padding(2);
             this.button_existing_undoMaskDelete.Name = "button_existing_undoMaskDelete";
             this.button_existing_undoMaskDelete.Size = new System.Drawing.Size(122, 22);
             this.button_existing_undoMaskDelete.TabIndex = 2;
@@ -180,19 +181,19 @@ namespace dp2Circulation
             this.tableLayoutPanel_editing.Controls.Add(this.panel_editing, 0, 1);
             this.tableLayoutPanel_editing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_editing.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_editing.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tableLayoutPanel_editing.Margin = new System.Windows.Forms.Padding(2);
             this.tableLayoutPanel_editing.Name = "tableLayoutPanel_editing";
             this.tableLayoutPanel_editing.RowCount = 3;
             this.tableLayoutPanel_editing.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_editing.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel_editing.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_editing.Size = new System.Drawing.Size(209, 209);
+            this.tableLayoutPanel_editing.Size = new System.Drawing.Size(205, 203);
             this.tableLayoutPanel_editing.TabIndex = 0;
             // 
             // button_editing_undoMaskDelete
             // 
-            this.button_editing_undoMaskDelete.Location = new System.Drawing.Point(2, 185);
-            this.button_editing_undoMaskDelete.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_editing_undoMaskDelete.Location = new System.Drawing.Point(2, 179);
+            this.button_editing_undoMaskDelete.Margin = new System.Windows.Forms.Padding(2);
             this.button_editing_undoMaskDelete.Name = "button_editing_undoMaskDelete";
             this.button_editing_undoMaskDelete.Size = new System.Drawing.Size(122, 22);
             this.button_editing_undoMaskDelete.TabIndex = 1;
@@ -217,9 +218,9 @@ namespace dp2Circulation
             this.panel_editing.Controls.Add(this.issueEditControl_editing);
             this.panel_editing.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_editing.Location = new System.Drawing.Point(2, 14);
-            this.panel_editing.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.panel_editing.Margin = new System.Windows.Forms.Padding(2);
             this.panel_editing.Name = "panel_editing";
-            this.panel_editing.Size = new System.Drawing.Size(205, 167);
+            this.panel_editing.Size = new System.Drawing.Size(201, 161);
             this.panel_editing.TabIndex = 8;
             // 
             // button_editing_nextRecord
@@ -227,8 +228,8 @@ namespace dp2Circulation
             this.button_editing_nextRecord.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_editing_nextRecord.Enabled = false;
             this.button_editing_nextRecord.Image = ((System.Drawing.Image)(resources.GetObject("button_editing_nextRecord.Image")));
-            this.button_editing_nextRecord.Location = new System.Drawing.Point(183, 144);
-            this.button_editing_nextRecord.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_editing_nextRecord.Location = new System.Drawing.Point(179, 138);
+            this.button_editing_nextRecord.Margin = new System.Windows.Forms.Padding(2);
             this.button_editing_nextRecord.Name = "button_editing_nextRecord";
             this.button_editing_nextRecord.Size = new System.Drawing.Size(22, 22);
             this.button_editing_nextRecord.TabIndex = 2;
@@ -240,8 +241,8 @@ namespace dp2Circulation
             this.button_editing_prevRecord.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_editing_prevRecord.Enabled = false;
             this.button_editing_prevRecord.Image = ((System.Drawing.Image)(resources.GetObject("button_editing_prevRecord.Image")));
-            this.button_editing_prevRecord.Location = new System.Drawing.Point(183, 117);
-            this.button_editing_prevRecord.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_editing_prevRecord.Location = new System.Drawing.Point(179, 111);
+            this.button_editing_prevRecord.Margin = new System.Windows.Forms.Padding(2);
             this.button_editing_prevRecord.Name = "button_editing_prevRecord";
             this.button_editing_prevRecord.Size = new System.Drawing.Size(22, 22);
             this.button_editing_prevRecord.TabIndex = 1;
@@ -256,6 +257,7 @@ namespace dp2Circulation
             this.issueEditControl_editing.BatchNo = "";
             this.issueEditControl_editing.Changed = false;
             this.issueEditControl_editing.Comment = "";
+            this.issueEditControl_editing.CreateState = dp2Circulation.ItemDisplayState.Normal;
             this.issueEditControl_editing.Initializing = true;
             this.issueEditControl_editing.Issue = "";
             this.issueEditControl_editing.Location = new System.Drawing.Point(0, 0);
@@ -267,7 +269,7 @@ namespace dp2Circulation
             this.issueEditControl_editing.PublishTime = "";
             this.issueEditControl_editing.RecPath = "";
             this.issueEditControl_editing.RefID = "";
-            this.issueEditControl_editing.Size = new System.Drawing.Size(178, 167);
+            this.issueEditControl_editing.Size = new System.Drawing.Size(174, 161);
             this.issueEditControl_editing.State = "";
             this.issueEditControl_editing.TabIndex = 0;
             this.issueEditControl_editing.Volume = "";
@@ -281,8 +283,8 @@ namespace dp2Circulation
             this.checkBox_autoSearchDup.AutoSize = true;
             this.checkBox_autoSearchDup.Checked = true;
             this.checkBox_autoSearchDup.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_autoSearchDup.Location = new System.Drawing.Point(10, 282);
-            this.checkBox_autoSearchDup.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.checkBox_autoSearchDup.Location = new System.Drawing.Point(10, 276);
+            this.checkBox_autoSearchDup.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_autoSearchDup.Name = "checkBox_autoSearchDup";
             this.checkBox_autoSearchDup.Size = new System.Drawing.Size(162, 16);
             this.checkBox_autoSearchDup.TabIndex = 5;
@@ -293,8 +295,8 @@ namespace dp2Circulation
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(370, 306);
-            this.button_Cancel.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_Cancel.Location = new System.Drawing.Point(361, 300);
+            this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(56, 22);
             this.button_Cancel.TabIndex = 7;
@@ -306,8 +308,8 @@ namespace dp2Circulation
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.Enabled = false;
-            this.button_OK.Location = new System.Drawing.Point(309, 306);
-            this.button_OK.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_OK.Location = new System.Drawing.Point(300, 300);
+            this.button_OK.Margin = new System.Windows.Forms.Padding(2);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(56, 22);
             this.button_OK.TabIndex = 6;
@@ -321,20 +323,18 @@ namespace dp2Circulation
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(435, 338);
+            this.ClientSize = new System.Drawing.Size(426, 332);
             this.Controls.Add(this.tableLayoutPanel_main);
             this.Controls.Add(this.checkBox_autoSearchDup);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "IssueEditForm";
             this.ShowInTaskbar = false;
             this.Text = "ÆÚÐÅÏ¢";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.IssueEditForm_FormClosed);
             this.Load += new System.EventHandler(this.IssueEditForm_Load);
-            this.tableLayoutPanel_main.ResumeLayout(false);
-            this.tableLayoutPanel_main.PerformLayout();
             this.splitContainer_main.Panel1.ResumeLayout(false);
             this.splitContainer_main.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).EndInit();
@@ -344,6 +344,8 @@ namespace dp2Circulation
             this.tableLayoutPanel_editing.ResumeLayout(false);
             this.tableLayoutPanel_editing.PerformLayout();
             this.panel_editing.ResumeLayout(false);
+            this.tableLayoutPanel_main.ResumeLayout(false);
+            this.tableLayoutPanel_main.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 

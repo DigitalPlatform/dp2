@@ -34,6 +34,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CameraClipDialog));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripLabel_null = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripButton_cancel = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_getAndClose = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_shoot = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -47,18 +49,17 @@
             this.tabPage_preview = new System.Windows.Forms.TabPage();
             this.panel1 = new System.Windows.Forms.Panel();
             this.tabPage_clip = new System.Windows.Forms.TabPage();
+            this.pictureBox_clip = new DigitalPlatform.Drawing.ClipControl();
             this.tabPage_result = new System.Windows.Forms.TabPage();
             this.pictureBox_result = new System.Windows.Forms.PictureBox();
-            this.toolStripButton_cancel = new System.Windows.Forms.ToolStripButton();
-            this.pictureBox_clip = new DigitalPlatform.Drawing.ClipControl();
-            this.toolStripLabel_null = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripButton_selectAll = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.tabControl_main.SuspendLayout();
             this.tabPage_preview.SuspendLayout();
             this.tabPage_clip.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_clip)).BeginInit();
             this.tabPage_result.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_result)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_clip)).BeginInit();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -76,12 +77,32 @@
             this.toolStripSeparator2,
             this.toolStripButton_ratate,
             this.toolStripButton_copy,
-            this.toolStripButton_paste});
+            this.toolStripButton_paste,
+            this.toolStripButton_selectAll});
             this.toolStrip1.Location = new System.Drawing.Point(496, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(53, 282);
+            this.toolStrip1.Size = new System.Drawing.Size(53, 307);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripLabel_null
+            // 
+            this.toolStripLabel_null.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel_null.Name = "toolStripLabel_null";
+            this.toolStripLabel_null.Size = new System.Drawing.Size(50, 17);
+            this.toolStripLabel_null.Text = " ";
+            // 
+            // toolStripButton_cancel
+            // 
+            this.toolStripButton_cancel.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripButton_cancel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_cancel.Font = new System.Drawing.Font("微软雅黑", 9F);
+            this.toolStripButton_cancel.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_cancel.Image")));
+            this.toolStripButton_cancel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_cancel.Name = "toolStripButton_cancel";
+            this.toolStripButton_cancel.Size = new System.Drawing.Size(50, 21);
+            this.toolStripButton_cancel.Text = "取消";
+            this.toolStripButton_cancel.Click += new System.EventHandler(this.toolStripButton_cancel_Click);
             // 
             // toolStripButton_getAndClose
             // 
@@ -178,7 +199,7 @@
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(496, 282);
+            this.tabControl_main.Size = new System.Drawing.Size(496, 307);
             this.tabControl_main.TabIndex = 5;
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
             // 
@@ -188,7 +209,7 @@
             this.tabPage_preview.Location = new System.Drawing.Point(4, 22);
             this.tabPage_preview.Name = "tabPage_preview";
             this.tabPage_preview.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_preview.Size = new System.Drawing.Size(488, 256);
+            this.tabPage_preview.Size = new System.Drawing.Size(488, 281);
             this.tabPage_preview.TabIndex = 0;
             this.tabPage_preview.Text = "预览";
             this.tabPage_preview.UseVisualStyleBackColor = true;
@@ -199,7 +220,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(3, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(482, 250);
+            this.panel1.Size = new System.Drawing.Size(482, 275);
             this.panel1.TabIndex = 1;
             this.panel1.SizeChanged += new System.EventHandler(this.panel1_SizeChanged);
             // 
@@ -213,6 +234,16 @@
             this.tabPage_clip.TabIndex = 1;
             this.tabPage_clip.Text = "裁切";
             this.tabPage_clip.UseVisualStyleBackColor = true;
+            // 
+            // pictureBox_clip
+            // 
+            this.pictureBox_clip.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBox_clip.Location = new System.Drawing.Point(3, 3);
+            this.pictureBox_clip.Name = "pictureBox_clip";
+            this.pictureBox_clip.Size = new System.Drawing.Size(482, 250);
+            this.pictureBox_clip.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox_clip.TabIndex = 1;
+            this.pictureBox_clip.TabStop = false;
             // 
             // tabPage_result
             // 
@@ -234,40 +265,21 @@
             this.pictureBox_result.TabIndex = 1;
             this.pictureBox_result.TabStop = false;
             // 
-            // toolStripButton_cancel
+            // toolStripButton_selectAll
             // 
-            this.toolStripButton_cancel.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripButton_cancel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_cancel.Font = new System.Drawing.Font("微软雅黑", 9F);
-            this.toolStripButton_cancel.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_cancel.Image")));
-            this.toolStripButton_cancel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_cancel.Name = "toolStripButton_cancel";
-            this.toolStripButton_cancel.Size = new System.Drawing.Size(50, 21);
-            this.toolStripButton_cancel.Text = "取消";
-            this.toolStripButton_cancel.Click += new System.EventHandler(this.toolStripButton_cancel_Click);
-            // 
-            // pictureBox_clip
-            // 
-            this.pictureBox_clip.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pictureBox_clip.Location = new System.Drawing.Point(3, 3);
-            this.pictureBox_clip.Name = "pictureBox_clip";
-            this.pictureBox_clip.Size = new System.Drawing.Size(482, 250);
-            this.pictureBox_clip.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox_clip.TabIndex = 1;
-            this.pictureBox_clip.TabStop = false;
-            // 
-            // toolStripLabel_null
-            // 
-            this.toolStripLabel_null.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel_null.Name = "toolStripLabel_null";
-            this.toolStripLabel_null.Size = new System.Drawing.Size(50, 17);
-            this.toolStripLabel_null.Text = " ";
+            this.toolStripButton_selectAll.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_selectAll.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_selectAll.Image")));
+            this.toolStripButton_selectAll.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_selectAll.Name = "toolStripButton_selectAll";
+            this.toolStripButton_selectAll.Size = new System.Drawing.Size(50, 21);
+            this.toolStripButton_selectAll.Text = "全选";
+            this.toolStripButton_selectAll.Click += new System.EventHandler(this.toolStripButton_selectAll_Click);
             // 
             // CameraClipDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(549, 282);
+            this.ClientSize = new System.Drawing.Size(549, 307);
             this.Controls.Add(this.tabControl_main);
             this.Controls.Add(this.toolStrip1);
             this.Name = "CameraClipDialog";
@@ -282,9 +294,9 @@
             this.tabControl_main.ResumeLayout(false);
             this.tabPage_preview.ResumeLayout(false);
             this.tabPage_clip.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_clip)).EndInit();
             this.tabPage_result.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_result)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_clip)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -311,5 +323,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_paste;
         private System.Windows.Forms.ToolStripButton toolStripButton_cancel;
         private System.Windows.Forms.ToolStripLabel toolStripLabel_null;
+        private System.Windows.Forms.ToolStripButton toolStripButton_selectAll;
     }
 }

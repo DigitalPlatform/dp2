@@ -118,6 +118,10 @@
     <Reference Include="System.Xml">
       <Name>System.XML</Name>
     </Reference>
+    <ProjectReference Include="..\DigitalPlatform.Drawing\DigitalPlatform.Drawing.csproj">
+      <Project>{c2468f93-69ac-4bba-94ae-678ed5c21542}</Project>
+      <Name>DigitalPlatform.Drawing</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Range\DigitalPlatform.Range.csproj">
       <Project>{AA6C5E6A-252B-4E2A-A883-0E4E739F8701}</Project>
       <Name>DigitalPlatform.Range</Name>

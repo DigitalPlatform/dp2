@@ -24,6 +24,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.DataMining;
 using DigitalPlatform.Marc;
 using System.IO;
+using System.Net;
 
 namespace dp2Circulation
 {
@@ -5514,7 +5515,7 @@ namespace dp2Circulation
             {
                 // 从剪贴板插入封面图像
                 ToolStripMenuItem subMenuItem = new ToolStripMenuItem();
-                subMenuItem = new ToolStripMenuItem(" 从剪贴板插入(&C)");
+                subMenuItem = new ToolStripMenuItem(" 从剪贴板(&C) ...");
                 subMenuItem.Tag = point;
                 subMenuItem.Click += new EventHandler(menuItem_insertCoverImageFromClipboard_Click);
                 if (bHasIssueSelected == false)
@@ -5522,7 +5523,7 @@ namespace dp2Circulation
                 menuItem.DropDown.Items.Add(subMenuItem);
 
                 // 从摄像头插入封面图像
-                subMenuItem = new ToolStripMenuItem(" 从摄像头插入(&A)");
+                subMenuItem = new ToolStripMenuItem(" 从摄像头(&A) ...");
                 subMenuItem.Tag = point;
                 subMenuItem.Click += new EventHandler(menuItem_insertCoverImageFromCamera_Click);
                 if (bHasIssueSelected == false)
@@ -5530,7 +5531,7 @@ namespace dp2Circulation
                 menuItem.DropDown.Items.Add(subMenuItem);
 
                 // 从龙源期刊插入封面图像
-                subMenuItem = new ToolStripMenuItem(" 从龙源期刊插入(&A)");
+                subMenuItem = new ToolStripMenuItem(" 从龙源期刊(&A) ...");
                 subMenuItem.Tag = point;
                 subMenuItem.Click += new EventHandler(menuItem_insertCoverImageFromLongyuanQikan_Click);
                 if (bHasIssueSelected == false)
@@ -9199,59 +9200,62 @@ MessageBoxDefaultButton.Button2);
                 selected_issues.Add(issue);
             }
 
-            List<Image> images = new List<Image>();
-            {
-                Image image = null;
-                Program.MainForm.DisableCamera();
-                try
-                {
-                    // 注： new CameraClipDialog() 可能会抛出异常
-                    using (CameraClipDialog dlg = new CameraClipDialog())
-                    {
-                        dlg.Font = this.Font;
-
-                        dlg.CurrentCamera = Program.MainForm.AppInfo.GetString(
-                            "bindingControl",
-                            "current_camera",
-                            "");
-
-                        Program.MainForm.AppInfo.LinkFormState(dlg, "CameraClipDialog_state");
-                        dlg.ShowDialog(this);
-                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
-
-                        Program.MainForm.AppInfo.SetString(
-                            "bindingControl",
-                            "current_camera",
-                            dlg.CurrentCamera);
-
-                        if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                            return;
-
-                        image = dlg.Image;
-                    }
-                }
-                finally
-                {
-                    Application.DoEvents();
-
-                    Program.MainForm.EnableCamera();
-                }
-
-                images.Add(image);
-            }
-
+            Program.MainForm.DisableCamera();
+            try
             {
                 int i = 0;
                 foreach (IssueBindingItem issue in selected_issues)
                 {
-                    if (i >= images.Count)
-                        break;
-                    Image image = images[i];
-                    if (issue.SetCoverImage(image, out strError) == -1)
-                        goto ERROR1;
+                    ImageInfo info = new ImageInfo();
+
+                    try
+                    {
+                        // TODO: 为对话框增加关于即将扫描的期，期号的说明提示
+
+                        // 注： new CameraClipDialog() 可能会抛出异常
+                        using (CameraClipDialog dlg = new CameraClipDialog())
+                        {
+                            dlg.Font = this.Font;
+
+                            dlg.CurrentCamera = Program.MainForm.AppInfo.GetString(
+                                "bindingControl",
+                                "current_camera",
+                                "");
+
+                            Program.MainForm.AppInfo.LinkFormState(dlg, "CameraClipDialog_state");
+                            dlg.ShowDialog(this);
+                            Program.MainForm.AppInfo.UnlinkFormState(dlg);
+
+                            Program.MainForm.AppInfo.SetString(
+                                "bindingControl",
+                                "current_camera",
+                                dlg.CurrentCamera);
+
+                            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                                return;
+
+                            info = dlg.ImageInfo;
+                            if (Program.MainForm.SaveOriginCoverImage == false)
+                                info.ClearBackupImage();
+                        }
+
+                        if (issue.SetCoverImage(info, out strError) == -1)
+                            goto ERROR1;
+                    }
+                    finally
+                    {
+                        if (info != null)
+                            info.Dispose();
+                    }
 
                     i++;
                 }
+            }
+            finally
+            {
+                Application.DoEvents();
+
+                Program.MainForm.EnableCamera();
             }
 
             return;
@@ -9319,7 +9323,9 @@ MessageBoxDefaultButton.Button2);
                     if (i >= images.Count)
                         break;
                     Image image = images[i];
-                    if (issue.SetCoverImage(image, out strError) == -1)
+                    ImageInfo info = new ImageInfo();
+                    info.Image = image;
+                    if (issue.SetCoverImage(info, out strError) == -1)
                         goto ERROR1;
 
                     i++;
@@ -9354,7 +9360,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 #endif
-            string strISSN = GetIssn();
+            string strISSN = GetTitle();
             if (string.IsNullOrEmpty(strISSN))
             {
                 strError = "本刊书目记录中缺乏 ISSN 号，因此无法获取封面图像";
@@ -9362,21 +9368,34 @@ MessageBoxDefaultButton.Button2);
             }
 
             {
+                CookieContainer cookie = new CookieContainer();
                 int i = 0;
                 foreach (IssueBindingItem issue in selected_issues)
                 {
+#if NO
                     string strImageUrl = "";
                     int nRet = LongyuanQikan.GetCoverImageUrl(
                         this,
                         strISSN,
                         dp2StringUtil.GetYearPart(issue.PublishTime),
                         issue.Issue,
+                        ref cookie,
                         out strImageUrl,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+#endif
+                    int nRet = LongyuanQikan.GetCoverImageToClipboard(
+    this,
+    strISSN,
+    dp2StringUtil.GetYearPart(issue.PublishTime),
+    issue.Issue,
+    out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
 
-                    string strLocalFileName = Path.GetTempFileName();
+#if NO
+                   string strLocalFileName = Path.GetTempFileName();
                     try
                     {
                         // return:
@@ -9385,6 +9404,7 @@ MessageBoxDefaultButton.Button2);
                         //      1   找到
                         nRet = LongyuanQikan.DownloadImageFile(strImageUrl,
                             strLocalFileName,
+                            ref cookie,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -9393,6 +9413,7 @@ MessageBoxDefaultButton.Button2);
                             strError = "图像 " + strImageUrl + " 没有找到";
                             goto ERROR1;
                         }
+
                         using (Image image = Image.FromFile(strLocalFileName))
                         {
                             if (issue.SetCoverImage(image, out strError) == -1)
@@ -9403,7 +9424,31 @@ MessageBoxDefaultButton.Button2);
                     {
                         File.Delete(strLocalFileName);
                     }
-
+#endif
+                    // 从剪贴板中取得图像对象
+                    List<Image> images = ImageUtil.GetImagesFromClipboard(out strError);
+                    if (images == null)
+                    {
+                        strError = "。无法创建封面图像";
+                        goto ERROR1;
+                    }
+                    if (images.Count > 0)
+                    {
+                        try
+                        {
+                            ImageInfo info = new ImageInfo();
+                            info.Image = images[0];
+                            if (issue.SetCoverImage(info, out strError) == -1)
+                                goto ERROR1;
+                        }
+                        finally
+                        {
+                            foreach (Image image in images)
+                            {
+                                image.Dispose();
+                            }
+                        }
+                    }
                     i++;
                 }
             }
@@ -9427,6 +9472,24 @@ MessageBoxDefaultButton.Button2);
                     return record.select("field[@name='011']/subfield[@name='a']").FirstContent;
                 if (e.Syntax == "usmarc")
                     return record.select("field[@name='020']/subfield[@name='a']").FirstContent;
+            }
+            return "";
+        }
+
+        string GetTitle()
+        {
+            var func = this.GetBiblio;
+            if (func != null)
+            {
+                GetBiblioEventArgs e = new GetBiblioEventArgs();
+                func(this, e);
+                if (string.IsNullOrEmpty(e.Data))
+                    return "";
+                MarcRecord record = new MarcRecord(e.Data);
+                if (e.Syntax == "unimarc")
+                    return record.select("field[@name='200']/subfield[@name='a']").FirstContent;
+                if (e.Syntax == "usmarc")
+                    return record.select("field[@name='245']/subfield[@name='a']").FirstContent;
             }
             return "";
         }

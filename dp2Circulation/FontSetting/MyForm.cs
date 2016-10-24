@@ -349,7 +349,7 @@ namespace dp2Circulation
         //      strStyle    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
         public LibraryChannel GetChannel(string strServerUrl = ".",
             string strUserName = ".",
-            MainForm.GetChannelStyle style = MainForm.GetChannelStyle.GUI)
+            GetChannelStyle style = GetChannelStyle.GUI)
         {
             LibraryChannel channel = this.MainForm.GetChannel(strServerUrl, strUserName, style);
             _channelList.Add(channel);

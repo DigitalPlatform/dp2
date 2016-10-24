@@ -61,6 +61,8 @@
             this.Controls.Add(this.webBrowser1);
             this.Controls.Add(this.textBox_url);
             this.Name = "BrowserDialog";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.Text = "BrowserDialog";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.BrowserDialog_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.BrowserDialog_FormClosed);

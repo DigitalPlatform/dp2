@@ -164,7 +164,7 @@ false);
 
         public LibraryChannel GetChannel(string strServerUrl,
             string strUserName,
-            dp2Circulation.MainForm.GetChannelStyle style = dp2Circulation.MainForm.GetChannelStyle.GUI)
+            GetChannelStyle style = GetChannelStyle.GUI)
         {
             if (EntityRegisterBase.IsDot(strServerUrl) == true)
                 strServerUrl = this.MainForm.LibraryServerUrl;
@@ -172,7 +172,7 @@ false);
                 strUserName = this.MainForm.DefaultUserName;
 
             LibraryChannel channel =  this._channelPool.GetChannel(strServerUrl, strUserName);
-            if ((style & dp2Circulation.MainForm.GetChannelStyle.GUI) != 0)
+            if ((style & GetChannelStyle.GUI) != 0)
                 channel.Idle += channel_Idle;
             return channel;
         }

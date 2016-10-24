@@ -130,7 +130,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.84 (2016/9/26) WriteRes() API 允许具备 managedatabase 权限的用户写入任何路径的对象，主要是用于修改内核数据库下属的配置文件
         //      2.85 (2016/9/28) GetSystemParameter() API system/version 可以获得 dp2library 版本号。BindPatron() API 可以使用 PQR:xxxx 方式进行绑定
         //      2.86 (2016/10/7) GetIssues() API 允许在 strStyle 中使用 query:xxx 参数，实现仅对某一期的期记录的获取。
-        public static string Version = "2.86";
+        //      2.87 (2016/10/22) Login() API 允许工作人员代理工作人员登录而不使用 token 字符串。这时通道使用的是代理账户的权限。
+        public static string Version = "2.87";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -508,7 +509,8 @@ namespace DigitalPlatform.LibraryServer
             int nRet = 0;
             LibraryApplication app = this;  // new CirculationApplication();
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
 
@@ -1727,7 +1729,7 @@ namespace DigitalPlatform.LibraryServer
 #endif
                     }
 
-                    if (DateTime.Now > new DateTime(2016, 11, 1))
+                    if (DateTime.Now > new DateTime(2017, 3, 1))    // 上一个版本是 2016/11/1
                     {
                         // 通知系统挂起
                         // this.HangupReason = HangupReason.Expire;
@@ -1749,7 +1751,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
         // 2008/10/13 
         ERROR1:
@@ -2117,7 +2120,8 @@ namespace DigitalPlatform.LibraryServer
             RmsChannelCollection Channels,
             out string strError)
         {
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
 #if NO
@@ -2169,7 +2173,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
         }
 
@@ -2200,7 +2205,8 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(this.MongoDbConnStr) == true)
                 return 0;
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
                 try
@@ -2273,7 +2279,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
         }
 
@@ -2952,7 +2959,8 @@ namespace DigitalPlatform.LibraryServer
         public void Save(string strFileName,
             bool bFlush)
         {
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
 
@@ -3408,7 +3416,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
 
         }
@@ -3566,7 +3575,8 @@ namespace DigitalPlatform.LibraryServer
             if (this.vdbs != null)
                 return 0;   // 优化
 
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            // this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            this.LockForWrite();    // 2016/10/16
             try
             {
                 XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode(
@@ -3603,7 +3613,8 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                this.m_lock.ReleaseWriterLock();
+                // this.m_lock.ReleaseWriterLock();
+                this.UnlockForWrite();
             }
         }
 
@@ -13650,6 +13661,24 @@ strLibraryCode);    // 读者所在的馆代码
                 librarycodes,
                 out strResult,
                 out strError);
+        }
+
+        public bool ClearCacheCfgs(string strResPath)
+        {
+            string strPath = strResPath;
+
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+            string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+            if (strDbName == "cfgs" || strFirstPart == "cfgs")
+            {
+                string strLocalPath = this.CfgsMap.Clear(strResPath);
+                this.Filters.ClearFilter(strLocalPath);
+                this.AssemblyCache.Clear(strLocalPath);
+                return true;
+            }
+
+            return false;
         }
 
         // 检查用户使用 WriteRes API 的权限

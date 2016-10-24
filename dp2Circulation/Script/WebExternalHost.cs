@@ -653,7 +653,10 @@ namespace dp2Circulation
 
             BarcodeFormat format = BarcodeFormat.QR_CODE;
             if (strType == "39")
+            {
                 format = BarcodeFormat.CODE_39;
+                strCode = strCode.ToUpper();    // 小写字符会无法编码
+            }
 
             EncodingOptions options = new QrCodeEncodingOptions
                 {

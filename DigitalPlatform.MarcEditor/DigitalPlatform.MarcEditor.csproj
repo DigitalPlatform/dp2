@@ -295,6 +295,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="log\ve-279.tmp" />
   </ItemGroup>
   <ItemGroup>

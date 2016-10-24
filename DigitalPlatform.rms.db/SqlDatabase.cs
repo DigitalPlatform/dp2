@@ -6439,9 +6439,15 @@ namespace DigitalPlatform.rms
 
                                         string strObjectTimestamp = ByteArray.GetHexTimeStampString(baObjectOutputTimestamp);
 
+                                        // TODO: 这几个属性值似乎可以用原属性名加上 __ 构成，不必一句一句写了。以后新增 metadata 参数名就能自动适应
                                         DomUtil.SetAttr(fileNode, "__mime", (string)values["mimetype"]);
                                         DomUtil.SetAttr(fileNode, "__localpath", (string)values["localpath"]);
                                         DomUtil.SetAttr(fileNode, "__size", (string)values["size"]);
+
+                                        // 2016/10/16
+                                        string strProcessCommand = (string)values["command"];
+                                        if (string.IsNullOrEmpty(strProcessCommand) == false)
+                                            DomUtil.SetAttr(fileNode, "__command", strProcessCommand);
 
                                         // 2007/12/13 
                                         string strLastModifyTime = (string)values["lastmodifytime"];
