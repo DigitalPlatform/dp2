@@ -707,6 +707,9 @@ namespace DigitalPlatform.LibraryServer
                     // return result;
                 }
 
+#if NO
+                // 延迟到后面判断。因为 strReaderBarcode 可能是 PQR:xxxx 形态
+
                 // 对读者身份的附加判断
                 // 注：具有个人书斋的，还可以继续向后执行
                 if (sessioninfo.UserType == "reader"
@@ -715,10 +718,12 @@ namespace DigitalPlatform.LibraryServer
                 {
                     result.Value = -1;
                     // text-level: 用户提示
-                    result.ErrorInfo = this.GetString("续借操作被拒绝。作为读者不能代他人进行续借操作。");  // "续借操作被拒绝。作为读者不能代他人进行续借操作。"
+                    // result.ErrorInfo = this.GetString("续借操作被拒绝。作为读者不能代他人进行续借操作。");  // "续借操作被拒绝。作为读者不能代他人进行续借操作。"
+                    result.ErrorInfo = string.Format("续借操作被拒绝。作为读者 '{0}' 不能代他人 '{1}' 进行续借操作。", sessioninfo.Account.Barcode, strReaderBarcode);
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
+#endif
             }
 
             // 如果没有普通的权限，需要预检查存取权限
@@ -775,6 +780,23 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // 因为 strReaderBarcode 可能是 PQR:xxxx 形态，需要替换为真正的证条码号以后才能参与判断，所以放到这里判断
+            if (bRenew == true)
+            {
+                // 对读者身份的附加判断
+                // 注：具有个人书斋的，还可以继续向后执行
+                if (sessioninfo.UserType == "reader"
+                    && sessioninfo.Account != null && strReaderBarcode != sessioninfo.Account.Barcode
+                    && string.IsNullOrEmpty(strPersonalLibrary) == true)
+                {
+                    result.Value = -1;
+                    // text-level: 用户提示
+                    // result.ErrorInfo = this.GetString("续借操作被拒绝。作为读者不能代他人进行续借操作。");  // "续借操作被拒绝。作为读者不能代他人进行续借操作。"
+                    result.ErrorInfo = string.Format("续借操作被拒绝。作为读者 '{0}' 不能代他人 '{1}' 进行续借操作。", sessioninfo.Account.Barcode, strReaderBarcode);  // TODO: 测试验证完成后需要改回用上一句
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
 
             int nRedoCount = 0; // 因为时间戳冲突, 重试的次数
             string strLockReaderBarcode = strReaderBarcode; // 加锁专用字符串，不怕后面被修改了
