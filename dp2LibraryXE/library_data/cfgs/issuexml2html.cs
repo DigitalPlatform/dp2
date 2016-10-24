@@ -4,9 +4,11 @@
 
 // 修改历史：
 // 2011/9/7
+// 2016/10/24 增加显示封面图像的功能
 
 using System;
 using System.Xml;
+using System.Web;
 
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Xml;
@@ -112,6 +114,28 @@ public class MyConverter : ItemConverter
             }
             strResult += "</table>\r\n";
         }
+        
+        {
+            strResult += "<div class='cover_container'>";
+                    
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            XmlNodeList files = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            foreach (XmlElement file in files)
+            {
+                string id = file.GetAttribute("id");
+                string usage = file.GetAttribute("usage");
+                if (usage.StartsWith("FrontCover") == false)
+                    continue;
+                    
+                string path = e.RecPath + "/object/" + id;
+                strResult += "<img class='cover' src='dpres:"+path+"' alt='"+HttpUtility.HtmlEncode(usage)+"'></img>";    
+            }
+            
+            strResult += "</div>";
+        }
+
 
         strResult += "</body></html>";
 

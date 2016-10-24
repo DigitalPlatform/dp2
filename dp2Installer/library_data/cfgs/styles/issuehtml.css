@@ -128,3 +128,8 @@ IMG.biblio
 	margin-right: 4px;
 	max-width: 70px;
 }
+
+img.cover
+{
+    margin: 8pt;
+}
