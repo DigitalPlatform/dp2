@@ -478,6 +478,17 @@ namespace dp2Circulation
             this.Issues.Clear();
         }
 
+        public const int SPLITTER_WIDTH = 4;
+
+        // 2016/10/24
+        void ChangeCoverImageColumnWidth(int delta)
+        {
+            this.m_nCoverImageWidth += delta;
+            if (this.m_nCoverImageWidth < SPLITTER_WIDTH)
+                this.m_nCoverImageWidth = SPLITTER_WIDTH;
+            AfterWidthChanged(true);
+        }
+
         public void StartGetCoverImage(IssueBindingItem issue,
             string strObjectPath)
         {
@@ -3649,7 +3660,6 @@ namespace dp2Circulation
         // 内容宽度要变化
         void AfterWidthChanged(bool bAlwaysInvalidate)
         {
-
             int nOldMaxCells = this.m_nMaxItemCountOfOneIssue;
             bool bChanged = false;
 
@@ -3823,7 +3833,6 @@ namespace dp2Circulation
 
         protected override void OnSizeChanged(System.EventArgs e)
         {
-
             try
             {
                 SetScrollBars(ScrollBarMember.Both);
@@ -3832,11 +3841,9 @@ namespace dp2Circulation
             {
             }
 
-
             // 如果client区域足够大，调整org，避免看不见某部分
             DocumentOrgY = DocumentOrgY;
             DocumentOrgX = DocumentOrgX;
-
 
             base.OnSizeChanged(e);
         }
@@ -3947,6 +3954,22 @@ namespace dp2Circulation
             this.Cursor = Cursors.Arrow;
         }
 
+        bool _changingCoverImageWidth = false;
+        int _endX = 0;
+        int _startX = 0;
+
+        void BeginChangeCoverImageWidth()
+        {
+            _changingCoverImageWidth = true;
+            this.Cursor = Cursors.SizeWE;
+        }
+
+        void EndChangeCoverImageWidth()
+        {
+            _changingCoverImageWidth = false;
+            this.Cursor = Cursors.Arrow;
+        }
+
         protected override void OnMouseDown(MouseEventArgs e)
         {
             if (m_bRectSelecting == true)
@@ -3987,6 +4010,14 @@ namespace dp2Circulation
                     // 拖拽对象，而不是rect围选
                     this.BeginDraging();
                     this.DragStartObject = (Cell)result.Object;
+                    goto END1;
+                }
+
+                if (result.AreaPortion == AreaPortion.CoverImageEdge)
+                {
+                    this.BeginChangeCoverImageWidth();
+                    this._startX = e.X;
+                    this._endX = e.X;
                     goto END1;
                 }
 
@@ -4150,6 +4181,9 @@ namespace dp2Circulation
             if (m_bRectSelecting == true)
                 return;
 
+            if (this._changingCoverImageWidth == true)
+                return;
+
             HitTestResult result = null;
 
             Point p = this.PointToClient(Control.MousePosition);
@@ -4166,6 +4200,11 @@ namespace dp2Circulation
                 out result);
             if (result == null)
                 goto END1;
+
+            if (result.AreaPortion == AreaPortion.CoverImageEdge)
+                this.Cursor = Cursors.SizeWE;
+            else
+                this.Cursor = Cursors.Arrow;
 
             // 只关注Cell类型
             if (result.Object != null)
@@ -4232,46 +4271,13 @@ namespace dp2Circulation
                     {
                         result.Object = null;
                     }
-
-
                 }
-
             }
 
             if (this.m_bDraging == true)
                 return;
 
             this.HoverObject = (Cell)result.Object;
-
-            /*
-
-            // 仍在上次的hover对象上
-            if (this.m_lastHoverObj == result.Object)
-                goto END1;
-
-            // 在不同的hover对象上，以前的hover对象需要off
-            if (this.m_lastHoverObj != null)
-            {
-                if (this.m_lastHoverObj.m_bHover != false)
-                {
-                    this.m_lastHoverObj.m_bHover = false;
-                    UpdateObjectHover(this.m_lastHoverObj);
-                }
-            }
-
-            this.m_lastHoverObj = (Cell)result.Object;
-
-            if (this.m_lastHoverObj == null)
-                goto END1;
-
-            // 本次的hover对象需要on
-            if (this.m_lastHoverObj.m_bHover != true)
-            {
-                this.m_lastHoverObj.m_bHover = true;
-                UpdateObjectHover(this.m_lastHoverObj);
-            }
-            */
-
         END1:
             base.OnMouseHover(e);
         }
@@ -4442,6 +4448,13 @@ namespace dp2Circulation
         {
             OnMouseHover(null);
 
+            if (this._changingCoverImageWidth == true
+                && e.Button == System.Windows.Forms.MouseButtons.Left)
+            {
+                this._endX = e.X;
+                goto END1;
+            }
+
             // 拖动时可以自动卷滚
             if (this.m_bDraging == true
                 && this.Capture == true
@@ -4549,7 +4562,6 @@ namespace dp2Circulation
                             // 重画
                             DrawSelectRect(true);
                         }
-
 
                         if (result.Object.GetType() != typeof(Cell)
                             && result.Object.GetType() != typeof(NullCell))
@@ -4751,7 +4763,16 @@ namespace dp2Circulation
 
             this.timer_dragScroll.Stop();
 
-            //
+            // 修改封面图像栏宽度的结束处理
+            if (this._changingCoverImageWidth == true
+                && e.Button == MouseButtons.Left)
+            {
+                this.EndChangeCoverImageWidth();
+                this._endX = e.X;
+                int delta = this._endX - this._startX;
+                ChangeCoverImageColumnWidth(delta);
+                goto END1;
+            }
 
             // 拖拽的结束处理
             if (this.m_bDraging == true
@@ -15979,7 +16000,7 @@ Color.FromArgb(100, color)
         Grab = 9,   // moving grab handle
         CheckBox = 10,  // 格子中央的checkbox
 
-        // NullCell = 10,  // 潜在格子位置
+        CoverImageEdge = 11,   // 封面图像列右侧的可修改大小的竖线位置
     }
 
     // 选择一个对象的动作

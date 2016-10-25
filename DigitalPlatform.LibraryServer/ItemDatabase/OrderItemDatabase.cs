@@ -1184,7 +1184,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数 '" + "VerifyOrder" + "' 时出错：" + ex.Message;
+                strError = "执行脚本函数 '" + "VerifyOrder" + "' 时出错：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
 

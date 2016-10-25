@@ -4946,6 +4946,17 @@ this.Volume);
                 return;
             }
 
+            // 封面图片位置右边的(竖向)分割条
+            if (p_x >= this.Container.m_nCoverImageWidth - BindingControl.SPLITTER_WIDTH
+                && p_x <= this.Container.m_nCoverImageWidth)
+            {
+                result.AreaPortion = AreaPortion.CoverImageEdge;
+                result.X = p_x;
+                result.Y = p_y;
+                result.Object = this;
+                return;
+            }
+
             if (p_x < this.Container.m_nCoverImageWidth)
             {
                 result.AreaPortion = AreaPortion.CoverImage;

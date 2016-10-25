@@ -161,6 +161,15 @@ namespace dp2Library
             {
             }
             strVia = prop.Via.ToString();
+
+            // 如果是 rest.http 协议类型，其 Via 的字符串要多出一截。多出来 API Name。需要截掉。
+            if (prop.Encoder != null
+                && prop.Encoder.MediaType == "application/json")
+            {
+                int nRet = strVia.LastIndexOf("/");
+                if (nRet != -1)
+                    strVia = strVia.Substring(0, nRet);
+            }
         }
 
         // return:
@@ -549,6 +558,8 @@ namespace dp2Library
                 }
 
                 string strLocation = (string)parameters["location"];
+                if (strLocation == null)
+                    strLocation = "";   // 2016/10/25 添加。防范 library.xml 中脚本函数 ItemCanBorrow() 或者 ItemCanReturn() 中使用 account.Location.IndexOf() 时抛出异常
                 string strLibraryCodeList = (string)parameters["libraryCode"];
                 if (string.IsNullOrEmpty(strLibraryCodeList) == false)
                     strLibraryCodeList = strLibraryCodeList.Replace("|", ",");
