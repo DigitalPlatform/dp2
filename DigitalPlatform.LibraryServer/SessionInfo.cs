@@ -46,8 +46,10 @@ namespace DigitalPlatform.LibraryServer
             set;
         }
 
+        public string RouterClientIP = null;  // 访问 dp2Router 的前端 IP 地址。null 表示请求中没有 _dp2router_clientip 头字段；"" 表示有这个头字段，但 value 为 ""
         public string ClientIP = "";  // 前端 IP 地址
         public string Via = ""; // 经由什么协议
+
         public string SessionID = "";   // Session 唯一的 ID
 
         public bool NeedAutoClean = true;   // 是否需要自动清除
@@ -226,8 +228,9 @@ namespace DigitalPlatform.LibraryServer
 
         public SessionInfo(LibraryApplication app,
             string strSessionID = "",
-            string strIP = "",
-            string strVia = "")
+            List<RemoteAddress> address_list = null
+            /*string strIP = "",
+            string strVia = ""*/)
         {
             this.App = app;
             this.Channels.GUI = false;
@@ -239,10 +242,20 @@ namespace DigitalPlatform.LibraryServer
             this.m_strTempDir = PathUtil.MergePath(app.SessionDir, this.GetHashCode().ToString());
 
             this.SessionID = strSessionID;
-            this.ClientIP = strIP;
-            this.Via = strVia;
-        }
 
+            RemoteAddress nearest = RemoteAddress.FindClientAddress(address_list, "");
+            if (nearest != null)
+            {
+                this.ClientIP = nearest.ClientIP;
+                this.Via = nearest.Via;
+            }
+
+            RemoteAddress router = RemoteAddress.FindClientAddress(address_list, "dp2Router");
+            if (router != null)
+                this.RouterClientIP = router.ClientIP;
+            else
+                this.RouterClientIP = null;
+        }
 
         public string GetTempDir()
         {
@@ -306,6 +319,7 @@ namespace DigitalPlatform.LibraryServer
             string strLocation,
             bool bPublicError,  // 是否模糊用户名和密码不匹配提示?
             string strClientIP,
+            string strRouterClientIP,   // 2016/10/30
             string strGetToken,
             out string strRights,
             out string strLibraryCode,
@@ -324,7 +338,7 @@ namespace DigitalPlatform.LibraryServer
             Account account = null;
 
             int nRet = this.App.GetAccount(strUserID,
-                out account, 
+                out account,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -333,6 +347,18 @@ namespace DigitalPlatform.LibraryServer
                 if (bPublicError == true)
                     strError = this.App.GetString("帐户不存在或密码不正确");
                 return 0;
+            }
+
+            // 匹配 IP 地址
+            if (account.MatchClientIP(strClientIP, out strError) == false)
+                return -1;
+
+            // 星号表示不进行 router client ip 检查
+            if (strRouterClientIP != "*")
+            {
+                // 匹配 dp2Router 前端的 IP 地址
+                if (account.MatchRouterClientIP(strRouterClientIP, out strError) == false)
+                    return -1;
             }
 
             if (strPassword != null)
@@ -1009,10 +1035,12 @@ SetStartEventArgs e);
         }
 #endif
 
+        // TODO: 不知此函数为何被跳过 2016/10/29
         public void IncNullIpCount(string strIP, int nDelta)
         {
             return;
 
+#if NO
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
                 throw new ApplicationException("锁定尝试中超时");
             try
@@ -1023,6 +1051,7 @@ SetStartEventArgs e);
             {
                 this.m_lock.ExitWriteLock();
             }
+#endif
         }
 
 
@@ -1093,8 +1122,9 @@ SetStartEventArgs e);
 
         public SessionInfo PrepareSession(LibraryApplication app,
             string strSessionID,
-            string strIP,
-            string strVia)
+            List<RemoteAddress> address_list
+            /*string strIP,
+            string strVia*/)
         {
             SessionInfo sessioninfo = null;
 
@@ -1131,7 +1161,7 @@ SetStartEventArgs e);
             if (this.Count > _nMaxCount)
                 throw new ApplicationException("Session 数量超过 " + _nMaxCount.ToString());
 
-            sessioninfo = new SessionInfo(app, strSessionID, strIP, strVia);
+            sessioninfo = new SessionInfo(app, strSessionID, address_list);
             sessioninfo.SessionTime = new SessionTime();
 #if NO
             sessioninfo.SessionTime.SessionID = strSessionID;
@@ -1141,6 +1171,11 @@ SetStartEventArgs e);
                 throw new ApplicationException("锁定尝试中超时");
             try
             {
+                string strIP = "";
+                RemoteAddress address = RemoteAddress.FindClientAddress(address_list, "");
+                if (address != null)
+                    strIP = address.ClientIP;
+
                 long v = _incIpCount(strIP, 1);
 
                 int nMax = this.MaxSessionsPerIp;
@@ -1549,7 +1584,7 @@ SetStartEventArgs e);
             foreach (string ip in ips)
             {
                 ChannelInfo info = infos[i];
-                foreach(ChannelInfo result in results)
+                foreach (ChannelInfo result in results)
                 {
                     if (result.ClientIP == ip)
                     {
@@ -1585,29 +1620,29 @@ SetStartEventArgs e);
             try
             {
 #endif
-                foreach (string sessionid in this.Keys)
-                {
-                    SessionInfo session = (SessionInfo)this[sessionid];
-                    if (session == null)
-                        continue;
+            foreach (string sessionid in this.Keys)
+            {
+                SessionInfo session = (SessionInfo)this[sessionid];
+                if (session == null)
+                    continue;
 
-                    if (ips.IndexOf(session.ClientIP) == -1)
-                        continue;
+                if (ips.IndexOf(session.ClientIP) == -1)
+                    continue;
 
-                    ChannelInfo info = new ChannelInfo();
-                    info.SessionID = session.SessionID;
-                    info.ClientIP = session.ClientIP;
-                    info.UserName = session.UserID;
-                    info.LibraryCode = session.LibraryCodeList;
-                    info.Via = session.Via;
-                    info.Count = 1;
-                    info.CallCount = session.CallCount;
-                    info.Lang = session.Lang;
-                    if (session.Account != null)
-                        info.Location = session.Account.Location;
+                ChannelInfo info = new ChannelInfo();
+                info.SessionID = session.SessionID;
+                info.ClientIP = session.ClientIP;
+                info.UserName = session.UserID;
+                info.LibraryCode = session.LibraryCodeList;
+                info.Via = session.Via;
+                info.Count = 1;
+                info.CallCount = session.CallCount;
+                info.Lang = session.Lang;
+                if (session.Account != null)
+                    info.Location = session.Account.Location;
 
-                    infos.Add(info);
-                }
+                infos.Add(info);
+            }
 #if NO
             }
             finally

@@ -15,7 +15,7 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public class HitCountDatabase
     {
-        MongoClient m_mongoClient = null;
+        // MongoClient m_mongoClient = null;
 
         string m_strHitCountDatabaseName = "";
         MongoCollection<HitCountItem> _hitCountCollection = null;

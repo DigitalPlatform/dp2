@@ -4888,6 +4888,9 @@ namespace DigitalPlatform.LibraryServer
             account.Access = DomUtil.GetAttr(node, "access");
             account.RmsUserName = DomUtil.GetAttr(node, "rmsUserName");
 
+            // 2016/10/26
+            account.Binding = node.GetAttribute("binding");
+
             try
             {
                 strText = DomUtil.GetAttr(node, "rmsPassword");
@@ -9937,6 +9940,20 @@ out strError);
 
             if (nRet == 0)
                 accountref = null;
+            else
+            {
+                // 匹配 IP 地址
+                if (accountref.MatchClientIP(sessioninfo.ClientIP, out strError) == false)
+                    return -1;
+
+                // 星号表示不进行 router client ip 检查
+                if (sessioninfo.RouterClientIP != "*")
+                {
+                    // 匹配 dp2Router 前端的 IP 地址
+                    if (accountref.MatchRouterClientIP(sessioninfo.RouterClientIP, out strError) == false)
+                        return -1;
+                }
+            }
 
             Account account = new Account();
             account.LoginName = strLoginName;
@@ -14501,6 +14518,7 @@ strLibraryCode);    // 读者所在的馆代码
 
         public string RmsUserName = "";
         public string RmsPassword = "";
+        public string Binding = ""; // 2016/10/26
 
         public string Barcode = ""; // 证条码号。对于读者型的帐户有意义
 
@@ -14534,6 +14552,64 @@ strLibraryCode);    // 读者所在的馆代码
             {
                 return LibraryApplication.ExpandRightString(this.Rights);
             }
+        }
+
+        // 匹配 IP 地址
+        // return:
+        //      true    允许
+        //      false   禁止
+        public bool MatchClientIP(string strClientIP, out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(this.Binding) == true)
+                return true;
+            string list = StringUtil.GetParameterByPrefix(this.Binding, "ip");
+            if (string.IsNullOrEmpty(list))
+                return true;    // 没有绑定 ip: ，表示不进行任何 IP 限制
+
+            if (StringUtil.MatchIpAddressList(list, strClientIP) == false)
+            {
+                strError = "前端 IP 地址 " + strClientIP + " 不在当前账户的 ip: 白名单中，访问被拒绝";
+                return false;
+            }
+
+            return true;
+        }
+
+        // 匹配 dp2Router 的前端 IP 地址
+        // return:
+        //      true    允许
+        //      false   禁止
+        public bool MatchRouterClientIP(string strRouterClientIP, out string strError)
+        {
+            strError = "";
+
+            if (strRouterClientIP == null)
+                return true;
+
+            if (string.IsNullOrEmpty(this.Binding) == true)
+            {
+                strError = "当前账户未绑定 router_ip，不允许前端经由 dp2Router 访问";
+                return false;
+            }
+
+            string list = StringUtil.GetParameterByPrefix(this.Binding, "router_ip");
+            if (string.IsNullOrEmpty(list))
+            {
+                strError = "当前账户未绑定 router_ip，不允许前端经由 dp2Router 访问 .";
+                return false;
+            }
+
+            if (list == "*")
+                return true;
+            if (StringUtil.MatchIpAddressList(list, strRouterClientIP) == false)
+            {
+                strError = "前端 IP 地址 " + strRouterClientIP + " 不在当前账户的 router_ip: 白名单中，访问被拒绝";
+                return false;
+            }
+
+            return true;
         }
     }
 
@@ -14762,4 +14838,37 @@ strLibraryCode);    // 读者所在的馆代码
         [DataMember]
         public long Size = 0;   // 尺寸。-1 表示这是目录对象
     }
+
+    public class RemoteAddress
+    {
+        public string ClientIP { get; set; }
+        public string Via { get; set; }
+        public string Type { get; set; }
+
+        public RemoteAddress()
+        {
+
+        }
+
+        public RemoteAddress(string ip, string via, string type)
+        {
+            this.ClientIP = ip;
+            this.Via = via;
+            this.Type = type;
+        }
+
+        public static RemoteAddress FindClientAddress(List<RemoteAddress> list, string type)
+        {
+            if (list == null)
+                return null;
+            foreach(RemoteAddress address in list)
+            {
+                if (address.Type == type)
+                    return address;
+            }
+
+            return null;
+        }
+    }
+
 }

@@ -139,18 +139,34 @@ namespace dp2Library
             return 0;
         }
 
-        public static void GetClientAddress(out string strIP, out string strVia)
+        public static List<RemoteAddress> GetClientAddress()
         {
-            strIP = "";
+            List<RemoteAddress> results = new List<RemoteAddress>();
+
+            if (OperationContext.Current.IncomingMessageProperties.ContainsKey("httpRequest"))
+            {
+                var headers = OperationContext.Current.IncomingMessageProperties["httpRequest"];
+                var ip = ((HttpRequestMessageProperty)headers).Headers["_dp2router_clientip"];
+                if (string.IsNullOrEmpty(ip) == false)
+                    results.Add(new RemoteAddress(ip, "", "dp2Router"));
+            }
+
+            results.Add(GetNearestClientAddress());
+            return results;
+        }
+
+        public static RemoteAddress GetNearestClientAddress()
+        {
+            string strIP = "";
             MessageProperties prop = OperationContext.Current.IncomingMessageProperties;
 
-            strVia = prop.Via.ToString();
+            string strVia = prop.Via.ToString();
 
             if (prop.Via.Scheme == "net.pipe")
             {
                 // 没有 IP
                 strIP = "::1";  // "localhost";
-                return;
+                return new RemoteAddress(strIP, strVia, "");
             }
             try
             {
@@ -170,6 +186,8 @@ namespace dp2Library
                 if (nRet != -1)
                     strVia = strVia.Substring(0, nRet);
             }
+
+            return new RemoteAddress(strIP, strVia, "");
         }
 
         // return:
@@ -180,23 +198,24 @@ namespace dp2Library
         {
             strError = "";
 
-            string strIP = "";
-            string strVia = "";
-            GetClientAddress(out strIP, out strVia);
+            List<RemoteAddress> address_list = GetClientAddress();
             try
             {
 
                 // sessioninfo = new SessionInfo(app, GetClientAddress());
                 this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
     OperationContext.Current.SessionId,
-    strIP,
-    strVia);
+    address_list);
             }
             catch (OutofSessionException ex)
             {
+                RemoteAddress address = RemoteAddress.FindClientAddress(address_list, "");
+
                 // TODO: 注意防止错误日志文件耗费太多空间
                 // TODO: 这里适合对现有通道做一些清理。由于 IP 相同并不意味着就是来自同一台电脑，因此需要 MAC 地址、账户名等其他信息辅助判断
-                this.WriteDebugInfo("*** 前端 '" + strIP + "@" + strVia + "' 新分配通道的请求被拒绝:" + ex.Message);
+                this.WriteDebugInfo("*** 前端 '" 
+                    + (address == null ? "" : address.ClientIP + "@" + address.Via)
+                    + "' 新分配通道的请求被拒绝:" + ex.Message);
                 // OperationContext.Current.InstanceContext.ReleaseServiceInstance();
 
                 // 为了防止攻击，需要立即切断通道。否则 1000 个通道很快会被耗尽
@@ -291,15 +310,12 @@ namespace dp2Library
 
                     // TODO: 需要按照前端 IP 地址对 sessionid 个数进行管理。如果超过一定数目则限制这个 IP 创建新的 sessionid，但不影响到其他 IP 创建新的 sessionid
 
-                    string strIP = "";
-                    string strVia = "";
-                    GetClientAddress(out strIP, out strVia);
+                    List<RemoteAddress> address_list = GetClientAddress();
                     try
                     {
                         this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
                             strSessionID,
-                            strIP,
-                            strVia);
+                            address_list);
                     }
 #if NO
                     catch (OutofSessionException ex)
@@ -317,9 +333,13 @@ namespace dp2Library
                         result.ErrorInfo = "dp2Library 初始化通道失败: " + ex.Message;
                         if (ex is OutofSessionException)
                         {
+                            RemoteAddress address = RemoteAddress.FindClientAddress(address_list, "");
+
                             // TODO: 注意防止错误日志文件耗费太多空间
                             // TODO: 这里适合对现有通道做一些清理。由于 IP 相同并不意味着就是来自同一台电脑，因此需要 MAC 地址、账户名等其他信息辅助判断
-                            this.WriteDebugInfo("*** 前端 '" + strIP + "@" + strVia + "' 新分配通道的请求被拒绝:" + ex.Message);
+                            this.WriteDebugInfo("*** 前端 '" 
+                                + (address == null ? "" : address.ClientIP + "@" + address.Via)
+                                + "' 新分配通道的请求被拒绝:" + ex.Message);
 
                             result.ErrorCode = ErrorCode.OutofSession;
                             // OperationContext.Current.InstanceContext.ReleaseServiceInstance();
@@ -379,11 +399,9 @@ namespace dp2Library
             {
                 // 增量 NullIpTable，以便管理配额
 
-                string strIP = "";
-                string strVia = "";
-                GetClientAddress(out strIP, out strVia);
-                this._ip = strIP;
-                this.app.SessionTable.IncNullIpCount(strIP, 1);
+                RemoteAddress address = GetNearestClientAddress();
+                this._ip = address.ClientIP;
+                this.app.SessionTable.IncNullIpCount(address.ClientIP, 1);
             }
 
             if (bCheckHangup == true)
@@ -640,6 +658,7 @@ namespace dp2Library
                                  "#simulate",
                                  false,
                                  null,
+                                 "*",
                                  null,
                                  out strRights,
                                  out strTemp,
@@ -686,6 +705,7 @@ namespace dp2Library
                          strLocation,
                          StringUtil.HasHead(strLocation, "#opac") == true || strLocation == "@web" ? true : false,  // todo: 判断 #opac 或者 #opac_xxxx
                          sessioninfo.ClientIP,
+                         sessioninfo.RouterClientIP,
                          strGetToken,
                          out strRights,
                          out strLibraryCode,
@@ -748,6 +768,7 @@ namespace dp2Library
                                  "#simulate",
                                  false,
                                  null,
+                                 "*",
                                  null,
                                  out strRights,
                                  out strTemp,
@@ -2090,11 +2111,13 @@ namespace dp2Library
                 results = infos.ToArray();
                 result.Value = totalCount;
                 return result;
+#if NO
             ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
                 return result;
+#endif
             }
             catch (Exception ex)
             {
@@ -2984,11 +3007,13 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+#if NO
         ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+#endif
         }
 
         void WriteDebugInfo(string strTitle)
@@ -4581,7 +4606,7 @@ namespace dp2Library
 
 #endif
 
-            GET_OTHERINFO:
+                // GET_OTHERINFO:
 
                 // 过滤<borrower>元素
                 // XmlDocument itemdom = null;

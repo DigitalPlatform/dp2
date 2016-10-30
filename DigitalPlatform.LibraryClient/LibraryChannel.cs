@@ -7591,7 +7591,6 @@ out strError);
 
                 strPath = strOutputPath;	// 如果第一次的strPath中包含'?'id, 必须用outputpath才能正确继续
                 baInputTimeStamp = output_timestamp;	//baOutputTimeStamp;
-
             } // end of for
             return 0;
         }

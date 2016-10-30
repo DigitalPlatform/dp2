@@ -974,7 +974,7 @@ namespace DigitalPlatform.IO
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception /*ex*/)
             {
                 return false;
             }
