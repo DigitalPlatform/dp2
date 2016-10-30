@@ -620,17 +620,20 @@ namespace DigitalPlatform.OPAC.Web
 
                 SetResultInfo(nRet);
 
-                for (int i = 0; i < this.PageMaxLines; i++)
+                if (results != null)    // 2016/10/30
                 {
-                    if (i >= results.Count)
+                    for (int i = 0; i < this.PageMaxLines; i++)
                     {
-                        infos.Add(new LineInfo());
-                    }
-                    else
-                    {
-                        ChargingItemWrapper wrapper = results[i];
-                        LineInfo info = new LineInfo(wrapper);
-                        infos.Add(info);
+                        if (i >= results.Count)
+                        {
+                            infos.Add(new LineInfo());
+                        }
+                        else
+                        {
+                            ChargingItemWrapper wrapper = results[i];
+                            LineInfo info = new LineInfo(wrapper);
+                            infos.Add(info);
+                        }
                     }
                 }
             }

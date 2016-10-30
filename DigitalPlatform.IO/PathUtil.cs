@@ -980,6 +980,16 @@ namespace DigitalPlatform.IO
             }
         }
 
+        // 是否为纯文件名？
+        public static bool IsPureFileName(string strText)
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return false;
+            if (strText.IndexOfAny(new char[] { '/', '\\', ':' }) == -1)
+                return false;
+            return true;
+        }
+
         // 获得纯文件名部分
         public static string PureName(string strPath)
         {

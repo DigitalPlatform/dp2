@@ -5692,6 +5692,7 @@ dlg.UiState);
                             // summary_loader.RecPaths = biblio_recpaths;
 
                             // 输出借阅历史表格
+                            // 可能会抛出异常，例如权限不够
                             OutputBorrowHistory(sheet,
                     dom,
                     history_loader,
@@ -6195,6 +6196,11 @@ dlg.UiState);
 
                 return nReaderIndex;    // 实际处理的读者记录数
             }
+            catch (Exception ex)
+            {
+                strError = "ProcessPatrons() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                return -1;
+            }
             finally
             {
                 EnableControls(true);
@@ -6666,6 +6672,7 @@ dlg.UiState);
                                 // summary_loader.RecPaths = biblio_recpaths;
 
                                 // 输出借阅历史表格
+                                // 可能会抛出异常，例如权限不够
                                 OutputBorrowHistory(sheet,
                         dom,
                         history_loader,
@@ -6729,6 +6736,11 @@ dlg.UiState);
                 }
 
                 this.ShowMessage("共导出读者记录 " + nReaderIndex + " 个", "green", true);
+            }
+            catch (Exception ex)
+            {
+                strError = "CreateDetailExcelFile() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                return -1;
             }
             finally
             {
@@ -6836,13 +6848,13 @@ dlg.UiState);
             ref List<int> column_max_chars)
         {
             string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
-    "barcode");
+                "barcode");
             string strName = DomUtil.GetElementText(dom.DocumentElement,
                 "name");
             string strDepartment = DomUtil.GetElementText(dom.DocumentElement,
-"department");
+                "department");
             string strState = DomUtil.GetElementText(dom.DocumentElement,
-    "state");
+                "state");
             string strCreateDate = ToLocalTime(DomUtil.GetElementText(dom.DocumentElement,
                 "createDate"), "yyyy/MM/dd");
             string strExpireDate = ToLocalTime(DomUtil.GetElementText(dom.DocumentElement,
@@ -6908,7 +6920,6 @@ dlg.UiState);
                 subcols.Add(strDepartment);
                 subcols.Add(GetContactString(dom));
 
-
                 for (int line = 0; line < subtitles.Count; line++)
                 {
                     nColIndex = 3;
@@ -6950,8 +6961,6 @@ dlg.UiState);
 
                 //var rngData = sheet.Range(cells[0], cells[cells.Count - 1]);
                 //rngData.Style.Border.OutsideBorder = XLBorderStyleValues.Thick;
-
-
             }
 
             nRowIndex = nFirstRow;
@@ -7058,9 +7067,6 @@ XLColor.DarkGreen,
                 }
                 nRowIndex++;
             }
-
-
-
 
             List<string> item_barcodes = new List<string>();
             List<Point> points = new List<Point>();

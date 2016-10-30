@@ -221,7 +221,7 @@ namespace dp2OPAC
 
             string strText = ExceptionUtil.GetDebugText(ex)
                 + "\r\n"
-                + "\r\nUserHostAddres=" + HttpContext.Current.Request.UserHostAddress
+                + "\r\nUserHostAddress=" + HttpContext.Current.Request.UserHostAddress
                 + "\r\nRequest.RawUrl=" + HttpContext.Current.Request.RawUrl
                 + "\r\nForm Data=" + HttpContext.Current.Request.Form.ToString()
                 + "\r\nForm Data(Decoded)=" + HttpUtility.UrlDecode(HttpContext.Current.Request.Form.ToString())
