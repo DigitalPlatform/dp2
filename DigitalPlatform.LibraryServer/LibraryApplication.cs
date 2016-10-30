@@ -131,7 +131,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.85 (2016/9/28) GetSystemParameter() API system/version 可以获得 dp2library 版本号。BindPatron() API 可以使用 PQR:xxxx 方式进行绑定
         //      2.86 (2016/10/7) GetIssues() API 允许在 strStyle 中使用 query:xxx 参数，实现仅对某一期的期记录的获取。
         //      2.87 (2016/10/22) Login() API 允许工作人员代理工作人员登录而不使用 token 字符串。这时通道使用的是代理账户的权限。
-        public static string Version = "2.87";
+        //      2.88 (2016/10/30) 为登录过程首次实现 ip: router_ip: 筛选功能
+        public static string Version = "2.88";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

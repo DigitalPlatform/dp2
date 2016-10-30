@@ -39,7 +39,6 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.MessageClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -4740,6 +4739,23 @@ Stack:
 #endif
                 if (procEnableControls != null)
                     procEnableControls(true);
+            }
+        }
+
+        public void SetServerName(string strUrl, string strServerName)
+        {
+            string value = AppInfo.GetString("login",
+        "used_list",
+        "");
+
+            if (CirculationLoginDlg.SetServerName(ref value,
+                strUrl,
+                strServerName,
+                true) == true)
+            {
+                AppInfo.SetString("login",
+                    "used_list",
+                        value);
             }
         }
 

@@ -3438,6 +3438,8 @@ Culture=neutral, PublicKeyToken=null
 
                 this.LibraryName = strValue;
 
+                this.SetServerName(channel.Url, this.LibraryName);
+
                 /*
                 lRet = Channel.GetSystemParameter(Stop,
                     "library",

@@ -27,10 +27,9 @@ namespace DigitalPlatform.CommonControl
             {
                 this.m_leftFontStyle = value;
             }
-
         }
-        FontStyle m_leftFontStyle = FontStyle.Regular;
 
+        FontStyle m_leftFontStyle = FontStyle.Regular;
 
         [Category("Appearance")]
         [DescriptionAttribute("Right Part FontStyle")]
@@ -49,9 +48,9 @@ namespace DigitalPlatform.CommonControl
 
         FontStyle m_rightFontStyle = FontStyle.Regular;
 
-        public bool RemoveRightPartAtTextBox = true;    // 在textbox域中删除文字的右边部分(也就是'\t'右边的部分，包括'\t')
+        public bool RemoveRightPartAtTextBox = true;    // 在 textbox 域中删除文字的右边部分(也就是'\t'右边的部分，包括'\t')
 
-        const int WM_CHANGED = API.WM_USER + 300;
+        // const int WM_CHANGED = API.WM_USER + 300;
 
         public TabComboBox()
         {
@@ -126,7 +125,10 @@ namespace DigitalPlatform.CommonControl
         private void TabComboBox_TextChanged(object sender, EventArgs e)
         {
             if (RemoveRightPartAtTextBox == true)
-                API.PostMessage(this.Handle, WM_CHANGED, 0, 0);
+            {
+                // API.PostMessage(this.Handle, WM_CHANGED, 0, 0);
+                this.BeginInvoke(new Action(RemoveRightPart));
+            }
         }
 
         public static string GetLeftPart(string strText)
@@ -147,6 +149,7 @@ namespace DigitalPlatform.CommonControl
                 this.Text = strText.Substring(0, nRet);
         }
 
+#if NO
         /// <summary>
         /// 缺省窗口过程
         /// </summary>
@@ -164,5 +167,7 @@ namespace DigitalPlatform.CommonControl
 
             base.DefWndProc(ref m);
         }
+#endif
+
     }
 }

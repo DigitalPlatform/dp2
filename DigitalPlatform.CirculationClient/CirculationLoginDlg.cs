@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Drawing.Drawing2D;
 
 using Newtonsoft.Json;
 
@@ -12,28 +13,28 @@ using DigitalPlatform.CommonControl;
 
 namespace DigitalPlatform.CirculationClient
 {
-	/// <summary>
-	/// Summary description for LoginDlg.
-	/// </summary>
-	public class CirculationLoginDlg : System.Windows.Forms.Form
-	{
-		public System.Windows.Forms.CheckBox checkBox_savePasswordShort;
-		public System.Windows.Forms.TextBox textBox_password;
-		public System.Windows.Forms.TextBox textBox_userName;
-		private System.Windows.Forms.Button button_cancel;
-		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Label label_userName;
-		private System.Windows.Forms.Label label1;
+    /// <summary>
+    /// Summary description for LoginDlg.
+    /// </summary>
+    public class CirculationLoginDlg : System.Windows.Forms.Form
+    {
+        public System.Windows.Forms.CheckBox checkBox_savePasswordShort;
+        public System.Windows.Forms.TextBox textBox_password;
+        public System.Windows.Forms.TextBox textBox_userName;
+        private System.Windows.Forms.Button button_cancel;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label_userName;
+        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button_OK;
-		public System.Windows.Forms.TextBox textBox_comment;
+        public System.Windows.Forms.TextBox textBox_comment;
         public TextBox textBox_location;
         private Label label4;
         private CheckBox checkBox_isReader;
         private CheckBox checkBox_savePasswordLong;
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		private System.ComponentModel.Container components = null;
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.Container components = null;
 
         const int WM_MOVE_FOCUS = API.WM_USER + 201;
 
@@ -46,43 +47,44 @@ namespace DigitalPlatform.CirculationClient
         private ToolStripSeparator toolStripSeparator1;
 
         public bool SetDefaultMode = false;
-        private ComboBox comboBox_serverAddr; // 是否为 设置缺省帐户 状态？ 第一次进入程序时候是这个状态，其他登录失败后重新输入以便登录的时候不是这个状态
+        private ComboBox comboBox_serverAddr;
+        private ToolStripButton toolStripButton_deleteFromList; // 是否为 设置缺省帐户 状态？ 第一次进入程序时候是这个状态，其他登录失败后重新输入以便登录的时候不是这个状态
 
         public bool SupervisorMode = false; // 是否为 supervisor 模式。也就是管理员模式。在这个模式下， 无法修改 URL ，无法选择读者类型，不出现 红泥巴数字平台服务器按钮
 
-		public CirculationLoginDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public CirculationLoginDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
             // http://stackoverflow.com/questions/1918247/how-to-disable-the-line-under-tool-strip-in-winform-c
             this.toolStrip_server.Renderer = new TransparentToolStripRenderer(this.toolStrip_server);
-		}
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CirculationLoginDlg));
             this.checkBox_savePasswordShort = new System.Windows.Forms.CheckBox();
             this.textBox_password = new System.Windows.Forms.TextBox();
@@ -102,6 +104,7 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_server_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
             this.comboBox_serverAddr = new System.Windows.Forms.ComboBox();
+            this.toolStripButton_deleteFromList = new System.Windows.Forms.ToolStripButton();
             this.toolStrip_server.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -278,7 +281,8 @@ namespace DigitalPlatform.CirculationClient
             this.toolStrip_server.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_server_setXeServer,
             this.toolStripSeparator1,
-            this.toolStripButton_server_setHongnibaServer});
+            this.toolStripButton_server_setHongnibaServer,
+            this.toolStripButton_deleteFromList});
             this.toolStrip_server.Location = new System.Drawing.Point(12, 184);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
@@ -319,15 +323,30 @@ namespace DigitalPlatform.CirculationClient
             this.comboBox_serverAddr.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.comboBox_serverAddr.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.comboBox_serverAddr.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable;
+            this.comboBox_serverAddr.DropDownHeight = 260;
             this.comboBox_serverAddr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_serverAddr.ForeColor = System.Drawing.SystemColors.ControlText;
             this.comboBox_serverAddr.FormattingEnabled = true;
+            this.comboBox_serverAddr.IntegralHeight = false;
             this.comboBox_serverAddr.Location = new System.Drawing.Point(12, 164);
             this.comboBox_serverAddr.Name = "comboBox_serverAddr";
-            this.comboBox_serverAddr.Size = new System.Drawing.Size(414, 20);
+            this.comboBox_serverAddr.Size = new System.Drawing.Size(414, 22);
             this.comboBox_serverAddr.TabIndex = 27;
+            this.comboBox_serverAddr.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.comboBox_serverAddr_DrawItem);
+            this.comboBox_serverAddr.MeasureItem += new System.Windows.Forms.MeasureItemEventHandler(this.comboBox_serverAddr_MeasureItem);
             this.comboBox_serverAddr.SelectedIndexChanged += new System.EventHandler(this.comboBox_serverAddr_SelectedIndexChanged);
             this.comboBox_serverAddr.Click += new System.EventHandler(this.controls_Click);
+            // 
+            // toolStripButton_deleteFromList
+            // 
+            this.toolStripButton_deleteFromList.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_deleteFromList.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_deleteFromList.Image")));
+            this.toolStripButton_deleteFromList.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
+            this.toolStripButton_deleteFromList.Name = "toolStripButton_deleteFromList";
+            this.toolStripButton_deleteFromList.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton_deleteFromList.Text = "从列表中删除此项";
+            this.toolStripButton_deleteFromList.Click += new System.EventHandler(this.toolStripButton_deleteFromList_Click);
             // 
             // CirculationLoginDlg
             // 
@@ -361,8 +380,8 @@ namespace DigitalPlatform.CirculationClient
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
         bool _serverAddrEnabled = true;
         public bool ServerAddrEnabled
@@ -378,37 +397,37 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-            if (comboBox_serverAddr.Text == "" 
-				// && textBox_serverAddr.Enabled == true
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            if (comboBox_serverAddr.Text == ""
+                // && textBox_serverAddr.Enabled == true
                 && this.ServerAddrEnabled == true)
-			{
-				MessageBox.Show(this, "尚未输入服务器地址");
-				return;
-			}
-			if (textBox_userName.Text == "")
-			{
-				MessageBox.Show(this, "尚未输入用户名");
-				return;
-			}
+            {
+                MessageBox.Show(this, "尚未输入服务器地址");
+                return;
+            }
+            if (textBox_userName.Text == "")
+            {
+                MessageBox.Show(this, "尚未输入用户名");
+                return;
+            }
 
             this.SavePannel();
 
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
 
-		private void button_cancel_Click(object sender, System.EventArgs e)
-		{
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-		}
+        private void button_cancel_Click(object sender, System.EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
 
-		private void LoginDlg_Load(object sender, System.EventArgs e)
-		{
-			if (textBox_comment.Text == "")
-				textBox_comment.Visible = false;
+        private void LoginDlg_Load(object sender, System.EventArgs e)
+        {
+            if (textBox_comment.Text == "")
+                textBox_comment.Visible = false;
 
             if (this.SupervisorMode == true)
             {
@@ -418,7 +437,7 @@ namespace DigitalPlatform.CirculationClient
             }
 
             API.PostMessage(this.Handle, WM_MOVE_FOCUS, 0, 0);
-		}
+        }
 
         /// <summary>
         /// 缺省窗口过程
@@ -714,6 +733,35 @@ Keys keyData)
 
         }
 
+        // 为 urlList 添加服务器名
+        public static bool SetServerName(ref string value,
+            string strUrl,
+            string strServerName,
+            bool bOverwrite = false)
+        {
+            List<OneUrl> urlList = JsonConvert.DeserializeObject<List<OneUrl>>(value);
+            if (urlList == null)
+                urlList = new List<OneUrl>();
+
+            bool bChanged = false;
+            foreach (OneUrl url in urlList)
+            {
+                if (url.Url == strUrl)
+                {
+                    if (string.IsNullOrEmpty(url.Name) == true || bOverwrite == true)
+                    {
+                        url.Name = strServerName;
+                        bChanged = true;
+                    }
+                }
+            }
+
+            if (bChanged == true)
+                value = JsonConvert.SerializeObject(urlList);
+
+            return bChanged;
+        }
+
         List<OneUrl> _urlList = new List<OneUrl>();
 
         public string UsedList
@@ -736,9 +784,9 @@ Keys keyData)
         void FillList(List<OneUrl> urlList)
         {
             this.comboBox_serverAddr.Items.Clear();
-            foreach(OneUrl url in urlList)
+            foreach (OneUrl url in urlList)
             {
-                this.comboBox_serverAddr.Items.Add(url.Url);
+                this.comboBox_serverAddr.Items.Add(url.Url);    // url.Url
             }
         }
 
@@ -811,7 +859,7 @@ Keys keyData)
 
         OneUrl FindUrl(string strURL)
         {
-            foreach(OneUrl url in this._urlList)
+            foreach (OneUrl url in this._urlList)
             {
                 if (url.Url == strURL)
                     return url;
@@ -824,11 +872,103 @@ Keys keyData)
         {
             SetPanel(this.comboBox_serverAddr.Text);
         }
-	}
 
+        private void comboBox_serverAddr_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            using (Brush brushBack = new SolidBrush(e.BackColor))
+            {
+                e.Graphics.FillRectangle(brushBack, e.Bounds);
+            }
+
+            string strText = (string)this.comboBox_serverAddr.Items[e.Index];
+            string strName = "";
+            {
+                OneUrl url = FindUrl(strText);
+                if (url != null)
+                    strName = url.Name;
+            }
+
+            int height = this.comboBox_serverAddr.Font.Height;
+            // 绘制 URL 行
+            using (Brush brush = new SolidBrush(ControlPaint.Light(e.ForeColor)))
+            {
+                Rectangle rect = new Rectangle(e.Bounds.X,
+                    e.Bounds.Y,
+                    e.Bounds.Width,
+                    height);
+                e.Graphics.DrawString(strText,
+                    this.comboBox_serverAddr.Font,
+                    brush,
+                    rect);
+            }
+
+            if (string.IsNullOrEmpty(strName) == false)
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+
+                // 绘制 名字 行
+                using (Brush brush = new SolidBrush(e.ForeColor))
+                using (Font font = new Font(this.comboBox_serverAddr.Font.FontFamily, this.comboBox_serverAddr.Font.Size * 1.5f, this.comboBox_serverAddr.Font.Unit))
+                {
+                    Rectangle rect = new Rectangle(e.Bounds.X,
+                        e.Bounds.Y + height,
+                        e.Bounds.Width,
+                        height * 2);
+                    e.Graphics.DrawString(strName,
+                        font,
+                        brush,
+                        rect);
+                }
+            }
+
+#if NO
+            using(Pen pen = new Pen(ControlPaint.Dark(e.BackColor)))
+            {
+                Point pt1 = new Point(e.Bounds.X, e.Bounds.Y + e.Bounds.Height - 1);
+                Point pt2 = new Point(e.Bounds.X + e.Bounds.Width, e.Bounds.Y + e.Bounds.Height - 1);
+                e.Graphics.DrawLine(pen, pt1, pt2);
+            }
+#endif
+        }
+
+        private void comboBox_serverAddr_MeasureItem(object sender, MeasureItemEventArgs e)
+        {
+            string strText = (string)this.comboBox_serverAddr.Items[e.Index];
+            OneUrl url = FindUrl(strText);
+
+            if (url == null || string.IsNullOrEmpty(url.Name) == true)
+                e.ItemHeight = this.comboBox_serverAddr.Font.Height;
+            else
+                e.ItemHeight = this.comboBox_serverAddr.Font.Height * 3;
+        }
+
+        private void toolStripButton_deleteFromList_Click(object sender, EventArgs e)
+        {
+            OneUrl url = this.FindUrl(this.comboBox_serverAddr.Text);
+            if (url != null)
+            {
+                this._urlList.Remove(url);
+                FillList(this._urlList);
+            }
+
+            if (this.comboBox_serverAddr.Items.Count == 0)
+                this.comboBox_serverAddr.Text = "";
+            else
+                this.comboBox_serverAddr.Text = this.comboBox_serverAddr.Items[0] as string;
+        }
+    }
+
+    // 一个 URL 事项
     class OneUrl
     {
         public string Url = "";
+
+        // 登录对话框对应于此 URL 时的状态，包含用户名和密码等
         public string UiState = "";
+
+        // 图书馆名字 2016/10/30
+        public string Name = "";
     }
 }
