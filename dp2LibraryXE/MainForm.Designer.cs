@@ -40,9 +40,6 @@
             this.MenuItem_installDp2Opac = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_updateDp2Opac = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
-            this.MenuItem_enableWindowsMsmq = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_configLibraryXmlMq = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_setupKernelDataDir = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_setupLibraryDataDir = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_setupOpacDataAppDir = new System.Windows.Forms.ToolStripMenuItem();
@@ -52,16 +49,20 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_updateDateDir = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
-            this.MenuItem_startIISExpress = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_iisExpressVersion = new System.Windows.Forms.ToolStripMenuItem();
-            this.MenuItem_registerWebApp = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_test = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDp2OPACHomePage = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_getSqllocaldbexePath = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_restartDp2library = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_restartDp2Kernel = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_tools = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_enableWindowsMsmq = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_configLibraryXmlMq = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_startIISExpress = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_iisExpressVersion = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_registerWebApp = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -81,6 +82,9 @@
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_configLibraryXmlMongoDB = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2library_setupMongoDB = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -91,6 +95,7 @@
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_file,
             this.MenuItem_management1,
+            this.MenuItem_tools,
             this.MenuItem_help});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -119,9 +124,6 @@
             this.MenuItem_installDp2Opac,
             this.MenuItem_updateDp2Opac,
             this.toolStripSeparator7,
-            this.MenuItem_enableWindowsMsmq,
-            this.MenuItem_configLibraryXmlMq,
-            this.toolStripSeparator9,
             this.MenuItem_setupKernelDataDir,
             this.MenuItem_setupLibraryDataDir,
             this.MenuItem_setupOpacDataAppDir,
@@ -131,10 +133,6 @@
             this.toolStripSeparator1,
             this.MenuItem_updateDateDir,
             this.toolStripSeparator5,
-            this.MenuItem_startIISExpress,
-            this.MenuItem_iisExpressVersion,
-            this.MenuItem_registerWebApp,
-            this.toolStripSeparator6,
             this.MenuItem_test,
             this.MenuItem_openDp2OPACHomePage,
             this.MenuItem_getSqllocaldbexePath,
@@ -163,25 +161,6 @@
             // 
             this.toolStripSeparator7.Name = "toolStripSeparator7";
             this.toolStripSeparator7.Size = new System.Drawing.Size(317, 6);
-            // 
-            // MenuItem_enableWindowsMsmq
-            // 
-            this.MenuItem_enableWindowsMsmq.Name = "MenuItem_enableWindowsMsmq";
-            this.MenuItem_enableWindowsMsmq.Size = new System.Drawing.Size(320, 22);
-            this.MenuItem_enableWindowsMsmq.Text = "为 Windows 启用 MSMQ";
-            this.MenuItem_enableWindowsMsmq.Click += new System.EventHandler(this.MenuItem_enableWindowsMsmq_Click);
-            // 
-            // MenuItem_configLibraryXmlMq
-            // 
-            this.MenuItem_configLibraryXmlMq.Name = "MenuItem_configLibraryXmlMq";
-            this.MenuItem_configLibraryXmlMq.Size = new System.Drawing.Size(320, 22);
-            this.MenuItem_configLibraryXmlMq.Text = "为 library.xml 首次配置 MQ 参数";
-            this.MenuItem_configLibraryXmlMq.Click += new System.EventHandler(this.MenuItem_configLibraryXmlMq_Click);
-            // 
-            // toolStripSeparator9
-            // 
-            this.toolStripSeparator9.Name = "toolStripSeparator9";
-            this.toolStripSeparator9.Size = new System.Drawing.Size(317, 6);
             // 
             // MenuItem_setupKernelDataDir
             // 
@@ -240,32 +219,6 @@
             this.toolStripSeparator5.Name = "toolStripSeparator5";
             this.toolStripSeparator5.Size = new System.Drawing.Size(317, 6);
             // 
-            // MenuItem_startIISExpress
-            // 
-            this.MenuItem_startIISExpress.Name = "MenuItem_startIISExpress";
-            this.MenuItem_startIISExpress.Size = new System.Drawing.Size(320, 22);
-            this.MenuItem_startIISExpress.Text = "启动 IIS Express";
-            this.MenuItem_startIISExpress.Click += new System.EventHandler(this.MenuItem_startIISExpress_Click);
-            // 
-            // MenuItem_iisExpressVersion
-            // 
-            this.MenuItem_iisExpressVersion.Name = "MenuItem_iisExpressVersion";
-            this.MenuItem_iisExpressVersion.Size = new System.Drawing.Size(320, 22);
-            this.MenuItem_iisExpressVersion.Text = "察看 IIS Express 版本";
-            this.MenuItem_iisExpressVersion.Click += new System.EventHandler(this.MenuItem_iisExpressVersion_Click);
-            // 
-            // MenuItem_registerWebApp
-            // 
-            this.MenuItem_registerWebApp.Name = "MenuItem_registerWebApp";
-            this.MenuItem_registerWebApp.Size = new System.Drawing.Size(320, 22);
-            this.MenuItem_registerWebApp.Text = "注册 dp2OPAC 为 WebApp";
-            this.MenuItem_registerWebApp.Click += new System.EventHandler(this.MenuItem_registerWebApp_Click);
-            // 
-            // toolStripSeparator6
-            // 
-            this.toolStripSeparator6.Name = "toolStripSeparator6";
-            this.toolStripSeparator6.Size = new System.Drawing.Size(317, 6);
-            // 
             // MenuItem_test
             // 
             this.MenuItem_test.Name = "MenuItem_test";
@@ -307,6 +260,68 @@
             this.MenuItem_restartDp2Kernel.Size = new System.Drawing.Size(320, 22);
             this.MenuItem_restartDp2Kernel.Text = "重新启动 dp2Kernel";
             this.MenuItem_restartDp2Kernel.Click += new System.EventHandler(this.MenuItem_restartDp2Kernel_Click);
+            // 
+            // MenuItem_tools
+            // 
+            this.MenuItem_tools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_enableWindowsMsmq,
+            this.MenuItem_configLibraryXmlMq,
+            this.toolStripSeparator10,
+            this.MenuItem_dp2library_setupMongoDB,
+            this.MenuItem_configLibraryXmlMongoDB,
+            this.toolStripSeparator9,
+            this.MenuItem_startIISExpress,
+            this.MenuItem_iisExpressVersion,
+            this.MenuItem_registerWebApp,
+            this.toolStripSeparator6});
+            this.MenuItem_tools.Name = "MenuItem_tools";
+            this.MenuItem_tools.Size = new System.Drawing.Size(59, 21);
+            this.MenuItem_tools.Text = "工具(&T)";
+            // 
+            // MenuItem_enableWindowsMsmq
+            // 
+            this.MenuItem_enableWindowsMsmq.Name = "MenuItem_enableWindowsMsmq";
+            this.MenuItem_enableWindowsMsmq.Size = new System.Drawing.Size(296, 22);
+            this.MenuItem_enableWindowsMsmq.Text = "为 Windows 启用 MSMQ";
+            this.MenuItem_enableWindowsMsmq.Click += new System.EventHandler(this.MenuItem_enableWindowsMsmq_Click);
+            // 
+            // MenuItem_configLibraryXmlMq
+            // 
+            this.MenuItem_configLibraryXmlMq.Name = "MenuItem_configLibraryXmlMq";
+            this.MenuItem_configLibraryXmlMq.Size = new System.Drawing.Size(296, 22);
+            this.MenuItem_configLibraryXmlMq.Text = "为 library.xml 首次配置 MQ 参数";
+            this.MenuItem_configLibraryXmlMq.Click += new System.EventHandler(this.MenuItem_configLibraryXmlMq_Click);
+            // 
+            // toolStripSeparator9
+            // 
+            this.toolStripSeparator9.Name = "toolStripSeparator9";
+            this.toolStripSeparator9.Size = new System.Drawing.Size(293, 6);
+            // 
+            // MenuItem_startIISExpress
+            // 
+            this.MenuItem_startIISExpress.Name = "MenuItem_startIISExpress";
+            this.MenuItem_startIISExpress.Size = new System.Drawing.Size(296, 22);
+            this.MenuItem_startIISExpress.Text = "启动 IIS Express";
+            this.MenuItem_startIISExpress.Click += new System.EventHandler(this.MenuItem_startIISExpress_Click);
+            // 
+            // MenuItem_iisExpressVersion
+            // 
+            this.MenuItem_iisExpressVersion.Name = "MenuItem_iisExpressVersion";
+            this.MenuItem_iisExpressVersion.Size = new System.Drawing.Size(296, 22);
+            this.MenuItem_iisExpressVersion.Text = "察看 IIS Express 版本";
+            this.MenuItem_iisExpressVersion.Click += new System.EventHandler(this.MenuItem_iisExpressVersion_Click);
+            // 
+            // MenuItem_registerWebApp
+            // 
+            this.MenuItem_registerWebApp.Name = "MenuItem_registerWebApp";
+            this.MenuItem_registerWebApp.Size = new System.Drawing.Size(296, 22);
+            this.MenuItem_registerWebApp.Text = "注册 dp2OPAC 为 WebApp";
+            this.MenuItem_registerWebApp.Click += new System.EventHandler(this.MenuItem_registerWebApp_Click);
+            // 
+            // toolStripSeparator6
+            // 
+            this.toolStripSeparator6.Name = "toolStripSeparator6";
+            this.toolStripSeparator6.Size = new System.Drawing.Size(293, 6);
             // 
             // MenuItem_help
             // 
@@ -471,6 +486,25 @@
             this.webBrowser1.Size = new System.Drawing.Size(372, 229);
             this.webBrowser1.TabIndex = 7;
             // 
+            // toolStripSeparator10
+            // 
+            this.toolStripSeparator10.Name = "toolStripSeparator10";
+            this.toolStripSeparator10.Size = new System.Drawing.Size(293, 6);
+            // 
+            // MenuItem_configLibraryXmlMongoDB
+            // 
+            this.MenuItem_configLibraryXmlMongoDB.Name = "MenuItem_configLibraryXmlMongoDB";
+            this.MenuItem_configLibraryXmlMongoDB.Size = new System.Drawing.Size(296, 22);
+            this.MenuItem_configLibraryXmlMongoDB.Text = "为 library.xml 首次配置 MongoDB 参数";
+            this.MenuItem_configLibraryXmlMongoDB.Click += new System.EventHandler(this.MenuItem_configLibraryXmlMongoDB_Click);
+            // 
+            // MenuItem_dp2library_setupMongoDB
+            // 
+            this.MenuItem_dp2library_setupMongoDB.Name = "MenuItem_dp2library_setupMongoDB";
+            this.MenuItem_dp2library_setupMongoDB.Size = new System.Drawing.Size(296, 22);
+            this.MenuItem_dp2library_setupMongoDB.Text = "安装 MongoDB ...";
+            this.MenuItem_dp2library_setupMongoDB.Click += new System.EventHandler(this.MenuItem_dp2library_setupMongoDB_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -531,25 +565,29 @@
         private System.Windows.Forms.ToolStripMenuItem MenuItem_updateDateDir;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_setupOpacDataAppDir;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_startIISExpress;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_registerWebApp;
-        private System.Windows.Forms.ToolStripMenuItem MenuItem_iisExpressVersion;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_installDp2Opac;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_file;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_exit;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
         private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_test;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openDp2OPACHomePage;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_updateDp2Opac;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_getSqllocaldbexePath;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_restartDp2library;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_restartDp2Kernel;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_tools;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_enableWindowsMsmq;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_configLibraryXmlMq;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator9;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_startIISExpress;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_iisExpressVersion;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_registerWebApp;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator10;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_configLibraryXmlMongoDB;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2library_setupMongoDB;
     }
 }
 

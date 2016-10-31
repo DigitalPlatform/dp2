@@ -14853,7 +14853,7 @@ strLibraryCode);    // 读者所在的馆代码
 
         public RemoteAddress(string ip, string via, string type)
         {
-            this.ClientIP = ip;
+            this.ClientIP = StringUtil.CanonicalizeIP(ip);
             this.Via = via;
             this.Type = type;
         }

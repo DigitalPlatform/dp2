@@ -1,4 +1,4 @@
-﻿namespace dp2Installer
+﻿namespace DigitalPlatform.Install
 {
     partial class SetupMongoDbDialog
     {

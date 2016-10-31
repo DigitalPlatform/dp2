@@ -252,7 +252,12 @@ namespace DigitalPlatform.LibraryServer
 
             RemoteAddress router = RemoteAddress.FindClientAddress(address_list, "dp2Router");
             if (router != null)
+            {
+                // dp2Router 的 Via 放在前面；原有 IP 和 Via 放在后面，构成新的 Via
+                this.Via = router.ClientIP + "@dp2Router; " + this.ClientIP + "@" + this.Via;
+
                 this.RouterClientIP = router.ClientIP;
+            }
             else
                 this.RouterClientIP = null;
         }
