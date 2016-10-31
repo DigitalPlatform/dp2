@@ -50,7 +50,7 @@ namespace DigitalPlatform.CommonControl
 
         public bool RemoveRightPartAtTextBox = true;    // 在 textbox 域中删除文字的右边部分(也就是'\t'右边的部分，包括'\t')
 
-        // const int WM_CHANGED = API.WM_USER + 300;
+        const int WM_CHANGED = API.WM_USER + 300;
 
         public TabComboBox()
         {
@@ -126,8 +126,8 @@ namespace DigitalPlatform.CommonControl
         {
             if (RemoveRightPartAtTextBox == true)
             {
-                // API.PostMessage(this.Handle, WM_CHANGED, 0, 0);
-                this.BeginInvoke(new Action(RemoveRightPart));
+                // 此处不应用 this.BeginInvoke() 代替，因为 this 窗口可能还没有创建。
+                API.PostMessage(this.Handle, WM_CHANGED, 0, 0);
             }
         }
 
@@ -149,7 +149,6 @@ namespace DigitalPlatform.CommonControl
                 this.Text = strText.Substring(0, nRet);
         }
 
-#if NO
         /// <summary>
         /// 缺省窗口过程
         /// </summary>
@@ -164,10 +163,8 @@ namespace DigitalPlatform.CommonControl
             }
 
             // Debug.WriteLine(m.Msg.ToString());
-
             base.DefWndProc(ref m);
         }
-#endif
 
     }
 }
