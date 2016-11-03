@@ -10,7 +10,7 @@ using System.Diagnostics;
 using System.Threading;
 
 using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryClient;
 

@@ -908,7 +908,8 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
             if (string.IsNullOrEmpty(strSerialCode) == true
-                || strSerialCode == "community")
+                || strSerialCode == "community"
+                || strSerialCode == "*")
             {
                 // MessageBox.Show(this, "序列号为空，将按照最多 5 个前端方式运行");
                 this.LineInfo.SerialNumber = strSerialCode;

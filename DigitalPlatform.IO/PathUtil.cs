@@ -986,8 +986,8 @@ namespace DigitalPlatform.IO
             if (string.IsNullOrEmpty(strText) == true)
                 return false;
             if (strText.IndexOfAny(new char[] { '/', '\\', ':' }) == -1)
-                return false;
-            return true;
+                return true;
+            return false;
         }
 
         // 获得纯文件名部分

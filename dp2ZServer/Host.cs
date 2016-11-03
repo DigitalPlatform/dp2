@@ -20,7 +20,6 @@ using Microsoft.Win32;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 namespace dp2ZServer
@@ -403,30 +402,21 @@ EventLogEntryType.Information);
                 strError = "";
                 int nRet = 0;
 
-                /*
-                string strDir = Directory.GetCurrentDirectory();
-
-                strDir = PathUtil.MergePath(strDir, "dp2zserver");
-                 * */
                 string strCurrentDir = System.Reflection.Assembly.GetExecutingAssembly().Location;   //  Environment.CurrentDirectory;
+                strCurrentDir = Path.GetDirectoryName(strCurrentDir);
 
-                strCurrentDir = PathUtil.PathPart(strCurrentDir);
-
-
-                string strFileName = PathUtil.MergePath(strCurrentDir, "dp2zserver.xml");
+                string strFileName = Path.Combine(strCurrentDir, "dp2zserver.xml");
 
                 this.CfgDom = new XmlDocument();
-
                 try
                 {
                     this.CfgDom.Load(strFileName);
                 }
                 catch (Exception ex)
                 {
-                    strError = "将配置文件 '" + strFileName + "' 装载到DOM时出错: " + ex.Message;
+                    strError = "将配置文件 '" + strFileName + "' 装载到 DOM 时出错: " + ex.Message;
                     return -1;
                 }
-
 
                 // 取得网络参数
                 XmlNode nodeNetwork = this.CfgDom.DocumentElement.SelectSingleNode("//network");
@@ -467,7 +457,6 @@ EventLogEntryType.Information);
                         strError = "<network>元素" + strError;
                         return -1;
                     }
-
                 }
 
                 // 取出一些常用的指标
@@ -497,7 +486,6 @@ EventLogEntryType.Information);
                     this.AnonymousUserName = "";
                     this.AnonymousPassword = "";
                 }
-
 
                 // 准备通道
                 this.Channel.Url = this.LibraryServerUrl;
@@ -949,7 +937,6 @@ EventLogEntryType.Information);
                     this.BiblioDbProperties[i].ItemDbName = itemdbnames[i];
                 }
 
-
                 // 获得虚拟数据库名
                 lRet = Channel.GetSystemParameter(null,
                     "virtual",
@@ -970,8 +957,6 @@ EventLogEntryType.Information);
                     property.IsVirtual = true;
                     this.BiblioDbProperties.Add(property);
                 }
-
-
             }
             finally
             {
@@ -1042,7 +1027,6 @@ EventLogEntryType.Information);
                     return -1;
                 }
             }
-
 
             return 0;
         }

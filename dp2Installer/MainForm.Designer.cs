@@ -91,6 +91,26 @@
             this.toolStripSeparator17 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_tools_enableIIS = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2zserver = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2ZServer_install = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2ZServer_upgrade = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator19 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_dp2ZServer_openDataDir = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2ZServer_openAppDir = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator20 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_dp2ZServer_instanceManagement = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator21 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_dp2ZServer_upgradeCfgs = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2lZServer_verifySerialNumbers = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator22 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_dp2ZServer_tools = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2ZServer_startService = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2ZServer_stopService = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator23 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_dp2ZServer_installService = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_dp2ZServer_uninstallService = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator26 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_dp2ZServer_uninstall = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -117,6 +137,7 @@
             this.MenuItem_dp2Kernel,
             this.dp2LibraryToolStripMenuItem,
             this.MenuItem_dp2OPAC,
+            this.MenuItem_dp2zserver,
             this.MenuItem_help});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -538,6 +559,154 @@
             this.MenuItem_tools_enableIIS.Text = "启用 IIS";
             this.MenuItem_tools_enableIIS.Click += new System.EventHandler(this.MenuItem_tools_enableIIS_Click);
             // 
+            // MenuItem_dp2zserver
+            // 
+            this.MenuItem_dp2zserver.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_dp2ZServer_install,
+            this.MenuItem_dp2ZServer_upgrade,
+            this.toolStripSeparator19,
+            this.MenuItem_dp2ZServer_openDataDir,
+            this.MenuItem_dp2ZServer_openAppDir,
+            this.toolStripSeparator20,
+            this.MenuItem_dp2ZServer_instanceManagement,
+            this.toolStripSeparator21,
+            this.MenuItem_dp2ZServer_upgradeCfgs,
+            this.MenuItem_dp2lZServer_verifySerialNumbers,
+            this.toolStripSeparator22,
+            this.MenuItem_dp2ZServer_tools});
+            this.MenuItem_dp2zserver.Name = "MenuItem_dp2zserver";
+            this.MenuItem_dp2zserver.Size = new System.Drawing.Size(87, 21);
+            this.MenuItem_dp2zserver.Text = "dp2ZServer";
+            // 
+            // MenuItem_dp2ZServer_install
+            // 
+            this.MenuItem_dp2ZServer_install.Name = "MenuItem_dp2ZServer_install";
+            this.MenuItem_dp2ZServer_install.Size = new System.Drawing.Size(208, 22);
+            this.MenuItem_dp2ZServer_install.Text = "安装 dp2ZServer";
+            this.MenuItem_dp2ZServer_install.Click += new System.EventHandler(this.MenuItem_dp2ZServer_install_Click);
+            // 
+            // MenuItem_dp2ZServer_upgrade
+            // 
+            this.MenuItem_dp2ZServer_upgrade.Name = "MenuItem_dp2ZServer_upgrade";
+            this.MenuItem_dp2ZServer_upgrade.Size = new System.Drawing.Size(208, 22);
+            this.MenuItem_dp2ZServer_upgrade.Text = "升级 dp2ZServer";
+            this.MenuItem_dp2ZServer_upgrade.Click += new System.EventHandler(this.MenuItem_dp2ZServer_upgrade_Click);
+            // 
+            // toolStripSeparator19
+            // 
+            this.toolStripSeparator19.Name = "toolStripSeparator19";
+            this.toolStripSeparator19.Size = new System.Drawing.Size(205, 6);
+            // 
+            // MenuItem_dp2ZServer_openDataDir
+            // 
+            this.MenuItem_dp2ZServer_openDataDir.Name = "MenuItem_dp2ZServer_openDataDir";
+            this.MenuItem_dp2ZServer_openDataDir.Size = new System.Drawing.Size(208, 22);
+            this.MenuItem_dp2ZServer_openDataDir.Text = "打开数据文件夹";
+            // 
+            // MenuItem_dp2ZServer_openAppDir
+            // 
+            this.MenuItem_dp2ZServer_openAppDir.Name = "MenuItem_dp2ZServer_openAppDir";
+            this.MenuItem_dp2ZServer_openAppDir.Size = new System.Drawing.Size(208, 22);
+            this.MenuItem_dp2ZServer_openAppDir.Text = "打开程序文件夹";
+            this.MenuItem_dp2ZServer_openAppDir.Click += new System.EventHandler(this.MenuItem_dp2ZServer_openAppDir_Click);
+            // 
+            // toolStripSeparator20
+            // 
+            this.toolStripSeparator20.Name = "toolStripSeparator20";
+            this.toolStripSeparator20.Size = new System.Drawing.Size(205, 6);
+            // 
+            // MenuItem_dp2ZServer_instanceManagement
+            // 
+            this.MenuItem_dp2ZServer_instanceManagement.Name = "MenuItem_dp2ZServer_instanceManagement";
+            this.MenuItem_dp2ZServer_instanceManagement.Size = new System.Drawing.Size(208, 22);
+            this.MenuItem_dp2ZServer_instanceManagement.Text = "配置实例";
+            this.MenuItem_dp2ZServer_instanceManagement.Click += new System.EventHandler(this.MenuItem_dp2ZServer_instanceManagement_Click);
+            // 
+            // toolStripSeparator21
+            // 
+            this.toolStripSeparator21.Name = "toolStripSeparator21";
+            this.toolStripSeparator21.Size = new System.Drawing.Size(205, 6);
+            this.toolStripSeparator21.Visible = false;
+            // 
+            // MenuItem_dp2ZServer_upgradeCfgs
+            // 
+            this.MenuItem_dp2ZServer_upgradeCfgs.Name = "MenuItem_dp2ZServer_upgradeCfgs";
+            this.MenuItem_dp2ZServer_upgradeCfgs.Size = new System.Drawing.Size(208, 22);
+            this.MenuItem_dp2ZServer_upgradeCfgs.Text = "更新数据目录的配置文件";
+            this.MenuItem_dp2ZServer_upgradeCfgs.Visible = false;
+            // 
+            // MenuItem_dp2lZServer_verifySerialNumbers
+            // 
+            this.MenuItem_dp2lZServer_verifySerialNumbers.Name = "MenuItem_dp2lZServer_verifySerialNumbers";
+            this.MenuItem_dp2lZServer_verifySerialNumbers.Size = new System.Drawing.Size(208, 22);
+            this.MenuItem_dp2lZServer_verifySerialNumbers.Text = "检查序列号(&S)";
+            this.MenuItem_dp2lZServer_verifySerialNumbers.Visible = false;
+            // 
+            // toolStripSeparator22
+            // 
+            this.toolStripSeparator22.Name = "toolStripSeparator22";
+            this.toolStripSeparator22.Size = new System.Drawing.Size(205, 6);
+            this.toolStripSeparator22.Visible = false;
+            // 
+            // MenuItem_dp2ZServer_tools
+            // 
+            this.MenuItem_dp2ZServer_tools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.MenuItem_dp2ZServer_startService,
+            this.MenuItem_dp2ZServer_stopService,
+            this.toolStripSeparator23,
+            this.MenuItem_dp2ZServer_installService,
+            this.MenuItem_dp2ZServer_uninstallService,
+            this.toolStripSeparator26,
+            this.MenuItem_dp2ZServer_uninstall});
+            this.MenuItem_dp2ZServer_tools.Name = "MenuItem_dp2ZServer_tools";
+            this.MenuItem_dp2ZServer_tools.Size = new System.Drawing.Size(208, 22);
+            this.MenuItem_dp2ZServer_tools.Text = "工具";
+            // 
+            // MenuItem_dp2ZServer_startService
+            // 
+            this.MenuItem_dp2ZServer_startService.Name = "MenuItem_dp2ZServer_startService";
+            this.MenuItem_dp2ZServer_startService.Size = new System.Drawing.Size(202, 22);
+            this.MenuItem_dp2ZServer_startService.Text = "启动 Windows Service";
+            this.MenuItem_dp2ZServer_startService.Click += new System.EventHandler(this.MenuItem_dp2ZServer_startService_Click);
+            // 
+            // MenuItem_dp2ZServer_stopService
+            // 
+            this.MenuItem_dp2ZServer_stopService.Name = "MenuItem_dp2ZServer_stopService";
+            this.MenuItem_dp2ZServer_stopService.Size = new System.Drawing.Size(202, 22);
+            this.MenuItem_dp2ZServer_stopService.Text = "停止 Windows Service";
+            this.MenuItem_dp2ZServer_stopService.Click += new System.EventHandler(this.MenuItem_dp2ZServer_stopService_Click);
+            // 
+            // toolStripSeparator23
+            // 
+            this.toolStripSeparator23.Name = "toolStripSeparator23";
+            this.toolStripSeparator23.Size = new System.Drawing.Size(199, 6);
+            // 
+            // MenuItem_dp2ZServer_installService
+            // 
+            this.MenuItem_dp2ZServer_installService.Name = "MenuItem_dp2ZServer_installService";
+            this.MenuItem_dp2ZServer_installService.Size = new System.Drawing.Size(202, 22);
+            this.MenuItem_dp2ZServer_installService.Text = "注册 Windows Service";
+            this.MenuItem_dp2ZServer_installService.Click += new System.EventHandler(this.MenuItem_dp2ZServer_installService_Click);
+            // 
+            // MenuItem_dp2ZServer_uninstallService
+            // 
+            this.MenuItem_dp2ZServer_uninstallService.Name = "MenuItem_dp2ZServer_uninstallService";
+            this.MenuItem_dp2ZServer_uninstallService.Size = new System.Drawing.Size(202, 22);
+            this.MenuItem_dp2ZServer_uninstallService.Text = "注销 Windows Service";
+            this.MenuItem_dp2ZServer_uninstallService.Click += new System.EventHandler(this.MenuItem_dp2ZServer_uninstallService_Click);
+            // 
+            // toolStripSeparator26
+            // 
+            this.toolStripSeparator26.Name = "toolStripSeparator26";
+            this.toolStripSeparator26.Size = new System.Drawing.Size(199, 6);
+            // 
+            // MenuItem_dp2ZServer_uninstall
+            // 
+            this.MenuItem_dp2ZServer_uninstall.Name = "MenuItem_dp2ZServer_uninstall";
+            this.MenuItem_dp2ZServer_uninstall.Size = new System.Drawing.Size(202, 22);
+            this.MenuItem_dp2ZServer_uninstall.Text = "卸载 dp2ZServer";
+            this.MenuItem_dp2ZServer_uninstall.Click += new System.EventHandler(this.MenuItem_dp2ZServer_uninstall_Click);
+            // 
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -759,6 +928,26 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator16;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2library_setupMongoDB;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator18;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2zserver;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_install;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_upgrade;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator19;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_openDataDir;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_openAppDir;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator20;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_instanceManagement;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator21;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_upgradeCfgs;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2lZServer_verifySerialNumbers;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator22;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_tools;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_startService;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_stopService;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator23;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_installService;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_uninstallService;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator26;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_dp2ZServer_uninstall;
     }
 }
 

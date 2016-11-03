@@ -374,6 +374,10 @@ namespace dp2Library
                 {
                     nMaxClients = SessionInfo.DEFAULT_MAX_CLIENTS;
                 }
+                else if (strSerialNumber == "*")
+                {
+                    nMaxClients = 255;
+                }
                 else
                 {
                     string strDebugInfo = "";

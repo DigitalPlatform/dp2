@@ -2431,14 +2431,11 @@ namespace dp2Circulation
         </database>
              * */
 
-
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("database | virtualDatabase");
-            for (int i = 0; i < nodes.Count; i++)
+            foreach (XmlElement node in nodes)
             {
-                XmlNode node = nodes[i];
-
-
-                string strName = DomUtil.GetAttr(node, "name");
+                string strName = node.GetAttribute("name");
+                string strAlias = node.GetAttribute("alias");
                 string strType = node.Name;
 
                 // 对于<virtualDatabase>元素，要选出<caption>里面的中文名称
@@ -2450,7 +2447,9 @@ namespace dp2Circulation
                     nImageIndex = 1;
 
                 ListViewItem item = new ListViewItem(strName, nImageIndex);
-                item.SubItems.Add(GetOpacDatabaseTypeDisplayString(strType));
+                ListViewUtil.ChangeItemText(item, COLUMN_OPAC_TYPE, GetOpacDatabaseTypeDisplayString(strType));
+                // item.SubItems.Add(GetOpacDatabaseTypeDisplayString(strType));
+                ListViewUtil.ChangeItemText(item, COLUMN_OPAC_ALIAS, strAlias);
                 item.Tag = node.OuterXml;   // 记载XML定义片断
 
                 this.listView_opacDatabases.Items.Add(item);
@@ -2458,6 +2457,11 @@ namespace dp2Circulation
 
             return 0;
         }
+
+        const int COLUMN_OPAC_NAME = 0;
+        const int COLUMN_OPAC_TYPE = 1;
+        const int COLUMN_OPAC_ALIAS = 2;
+        const int COLUMN_OPAC_COMMENT = 3;
 
         // 获得OPAC数据库类型的显示字符串
         // 所谓显示字符串，就是“虚拟库” “普通库”
@@ -2494,7 +2498,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在获取全部OPAC数据库定义 ...");
+            stop.Initial("正在获取全部 OPAC 数据库定义 ...");
             stop.BeginLoop();
 
             this.Update();
@@ -2919,7 +2923,6 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView_opacDatabases, new Point(e.X, e.Y));
-
         }
 
         void menu_opacDatabase_up_Click(object sender, EventArgs e)
@@ -2931,7 +2934,6 @@ namespace dp2Circulation
         {
             MoveOpacDatabaseItemUpDown(false);
         }
-
 
         void MoveOpacDatabaseItemUpDown(bool bUp)
         {
@@ -3025,7 +3027,6 @@ namespace dp2Circulation
             if (this.listView_opacDatabases.SelectedItems.Count > 1)
                 strXml = "<virtualDatabases>" + strXml + "</virtualDatabases>";
 
-
             XmlViewerForm dlg = new XmlViewerForm();
 
             dlg.Text = "OPAC数据库  " + strDbNameList + " 的定义";
@@ -3036,7 +3037,6 @@ namespace dp2Circulation
             this.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_viewXml_state");
             dlg.ShowDialog(this);
             this.MainForm.AppInfo.UnlinkFormState(dlg);
-
             return;
         }
 
@@ -3126,7 +3126,6 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
 
-
                 // 观察这个刚修改的虚拟库的成员库，如果还没有具备OPAC显示格式定义，则提醒自动加入
                 List<string> newly_biblio_dbnames = new List<string>();
                 List<string> member_dbnames = dlg.MemberDatabaseNames;
@@ -3186,17 +3185,24 @@ namespace dp2Circulation
                 dlg.Text = "普通库名";
                 dlg.ManagerForm = this;
                 dlg.DatabaseName = DomUtil.GetAttr(dom.DocumentElement, "name");
+                dlg.DatabaseAlias = dom.DocumentElement.GetAttribute("alias");
+
                 this.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_OpacNormalDatabaseDialog_state");
                 dlg.ShowDialog(this);
                 this.MainForm.AppInfo.UnlinkFormState(dlg);
-
 
                 if (dlg.DialogResult != DialogResult.OK)
                     return;
 
                 DomUtil.SetAttr(dom.DocumentElement, "name", dlg.DatabaseName);
 
-                item.Text = dlg.DatabaseName;
+                ListViewUtil.ChangeItemText(item, COLUMN_OPAC_NAME, dlg.DatabaseName);
+                // 注: type 不会修改
+                if (string.IsNullOrEmpty(dlg.DatabaseAlias))
+                    dom.DocumentElement.RemoveAttribute("alias");
+                else
+                    dom.DocumentElement.SetAttribute("alias", dlg.DatabaseAlias);
+                ListViewUtil.ChangeItemText(item, COLUMN_OPAC_ALIAS, dlg.DatabaseAlias);
                 item.Tag = dom.DocumentElement.OuterXml;   // 记载XML定义片断
 
                 // 需要立即向服务器提交修改
@@ -3206,7 +3212,6 @@ namespace dp2Circulation
                     item.ImageIndex = 2;    // 表示未能提交的修改请求
                     goto ERROR1;
                 }
-
             }
 
             return;
@@ -3228,9 +3233,9 @@ namespace dp2Circulation
 
             // 已经存在的库名
             List<string> existing_dbnames = new List<string>();
-            for (int i = 0; i < this.listView_opacDatabases.Items.Count; i++)
+            foreach (ListViewItem item in this.listView_opacDatabases.Items)
             {
-                existing_dbnames.Add(this.listView_opacDatabases.Items[i].Text);
+                existing_dbnames.Add(item.Text);
             }
 
             OpacNormalDatabaseDialog dlg = new OpacNormalDatabaseDialog();
@@ -3249,25 +3254,40 @@ namespace dp2Circulation
 
             List<ListViewItem> items = new List<ListViewItem>();
             List<string> dbnames = StringUtil.SplitList(dlg.DatabaseName);
+            List<string> aliases = StringUtil.SplitList(dlg.DatabaseAlias);
 
-            foreach (string strName in dbnames)
             {
-                XmlDocument dom = new XmlDocument();
-                dom.LoadXml("<database name='' />");
-                // 从<virtualDatabase>元素下的若干<caption>中，选出符合当前工作语言的一个名字字符串
-                // 从一个元素的下级<caption>元素中, 提取语言符合的文字值
-                //// string strName = dlg.DatabaseName;
-                string strType = "database";
+                int i = 0;
+                foreach (string strName in dbnames)
+                {
+                    // 别名
+                    string alias = "";
+                    if (i < aliases.Count)
+                        alias = aliases[i];
 
-                DomUtil.SetAttr(dom.DocumentElement, "name", strName);
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml("<database name='' />");
+                    // 从<virtualDatabase>元素下的若干<caption>中，选出符合当前工作语言的一个名字字符串
+                    // 从一个元素的下级<caption>元素中, 提取语言符合的文字值
+                    //// string strName = dlg.DatabaseName;
+                    string strType = "database";
 
-                ListViewItem item = new ListViewItem(strName, 0);
-                item.SubItems.Add(GetOpacDatabaseTypeDisplayString(strType));
-                item.Tag = dom.DocumentElement.OuterXml;   // 记载XML定义片断
+                    DomUtil.SetAttr(dom.DocumentElement, "name", strName);
+                    ListViewItem item = new ListViewItem(strName, 0);
+                    ListViewUtil.ChangeItemText(item, COLUMN_OPAC_TYPE, GetOpacDatabaseTypeDisplayString(strType));
 
-                this.listView_opacDatabases.Items.Add(item);
+                    if (string.IsNullOrEmpty(alias) == false)
+                        dom.DocumentElement.SetAttribute("alias", alias);
+                    ListViewUtil.ChangeItemText(item, COLUMN_OPAC_ALIAS, alias);
 
-                items.Add(item);
+                    item.Tag = dom.DocumentElement.OuterXml;   // 记载XML定义片断
+
+                    this.listView_opacDatabases.Items.Add(item);
+
+                    items.Add(item);
+
+                    i++;
+                }
             }
 
             // 需要立即向服务器提交修改

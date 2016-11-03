@@ -12,7 +12,7 @@ using DigitalPlatform.Z3950;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 
-using DigitalPlatform.CirculationClient;
+// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 

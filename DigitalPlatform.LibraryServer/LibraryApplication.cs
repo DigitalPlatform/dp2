@@ -132,7 +132,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.86 (2016/10/7) GetIssues() API 允许在 strStyle 中使用 query:xxx 参数，实现仅对某一期的期记录的获取。
         //      2.87 (2016/10/22) Login() API 允许工作人员代理工作人员登录而不使用 token 字符串。这时通道使用的是代理账户的权限。
         //      2.88 (2016/10/30) 为登录过程首次实现 ip: router_ip: 筛选功能。通道显示的 Via 合并了两类 Via 和 IP 地址。
-        public static string Version = "2.88";
+        //      2.89 (2016/11/3) dp2library 可以使用 * 作为序列号，这样最大通道数为 255，而且永不失效。
+        public static string Version = "2.89";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -1730,13 +1731,26 @@ namespace DigitalPlatform.LibraryServer
 #endif
                     }
 
-                    if (DateTime.Now > new DateTime(2017, 3, 1))    // 上一个版本是 2016/11/1
+                    if (this.MaxClients != 255) // 255 通道情况下不再检查版本失效日期 2016/11/3
                     {
-                        // 通知系统挂起
-                        // this.HangupReason = HangupReason.Expire;
-                        app.HangupList.Add("Expire");
-                        this.WriteErrorLog("*** 当前 dp2library 版本因为长期没有升级，已经失效。系统被挂起。请立即升级 dp2library 到最新版本");
+                        DateTime expire = new DateTime(2017, 3, 1); // 上一个版本是 2016/11/1
+                        if (DateTime.Now > expire)
+                        {
+                            if (this.MaxClients == 255)
+                            {
+                                this.WriteErrorLog("*** 当前 dp2library 版本已于 " + expire.ToLongDateString() + " 失效。请系统管理员注意主动升级 dp2library");
+                            }
+                            else
+                            {
+                                // 通知系统挂起
+                                // this.HangupReason = HangupReason.Expire;
+                                app.HangupList.Add("Expire");
+                                this.WriteErrorLog("*** 当前 dp2library 版本因为长期没有升级，已经失效。系统被挂起。请立即升级 dp2library 到最新版本");
+                            }
+                        }
                     }
+                    else
+                        this.WriteErrorLog("*** 特殊版本不检查失效日期。请系统管理员注意每隔半年主动升级一次 dp2library");
 
                     // 2013/4/10
                     if (this.Changed == true)
@@ -9944,8 +9958,11 @@ out strError);
             else
             {
                 // 匹配 IP 地址
-                if (accountref.MatchClientIP(sessioninfo.ClientIP, out strError) == false)
-                    return -1;
+                if (string.IsNullOrEmpty(sessioninfo.ClientIP) == false)    // 2016/11/2
+                {
+                    if (accountref.MatchClientIP(sessioninfo.ClientIP, out strError) == false)
+                        return -1;
+                }
 
                 // 星号表示不进行 router client ip 检查
                 if (sessioninfo.RouterClientIP != "*")
@@ -14571,7 +14588,7 @@ strLibraryCode);    // 读者所在的馆代码
 
             if (StringUtil.MatchIpAddressList(list, strClientIP) == false)
             {
-                strError = "前端 IP 地址 " + strClientIP + " 不在当前账户的 ip: 白名单中，访问被拒绝";
+                strError = "前端 IP 地址 '" + strClientIP + "' 不在当前账户的 ip: 白名单中，访问被拒绝";
                 return false;
             }
 
@@ -14606,7 +14623,7 @@ strLibraryCode);    // 读者所在的馆代码
                 return true;
             if (StringUtil.MatchIpAddressList(list, strRouterClientIP) == false)
             {
-                strError = "前端 IP 地址 " + strRouterClientIP + " 不在当前账户的 router_ip: 白名单中，访问被拒绝";
+                strError = "前端 IP 地址 '" + strRouterClientIP + "' 不在当前账户的 router_ip: 白名单中，访问被拒绝";
                 return false;
             }
 
@@ -14862,7 +14879,7 @@ strLibraryCode);    // 读者所在的馆代码
         {
             if (list == null)
                 return null;
-            foreach(RemoteAddress address in list)
+            foreach (RemoteAddress address in list)
             {
                 if (address.Type == type)
                     return address;

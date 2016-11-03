@@ -1856,7 +1856,7 @@ http://github.com/digitalplatform/dp2"
             if (string.IsNullOrEmpty(this._floatingMessage.Text) == false)
                 this._floatingMessage.Text = "正在创建基本数据库，可能需要几分钟时间 ...";
 
-            // 创建缺省的几个数据库
+            // 创建默认的几个数据库
             nRet = CreateDefaultDatabases(out strError);
             if (nRet == -1)
             {

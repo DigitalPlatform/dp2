@@ -112,6 +112,12 @@ namespace dp2Library
             lock (info.LockObject)
             {
                 info.App = new LibraryApplication();
+
+                info.App.TestMode = info.TestMode;
+                info.App.MaxClients = info.MaxClients;
+                info.App.LicenseType = info.LicenseType;
+                info.App.Function = info.Function;
+
                 // parameter:
                 //		strDataDir	data目录
                 //		strError	out参数，返回出错信息
@@ -129,17 +135,13 @@ namespace dp2Library
                 nRet = info.App.Verify(out strError);
                 if (nRet == -1)
                     return -1;
-                info.App.TestMode = info.TestMode;
-                info.App.MaxClients = info.MaxClients;
-                info.App.LicenseType = info.LicenseType;
-                info.App.Function = info.Function;
             }
 
             this.app = info.App;
             return 0;
         }
 
-        public static List<RemoteAddress> GetClientAddress()
+        public List<RemoteAddress> GetClientAddress()
         {
             List<RemoteAddress> results = new List<RemoteAddress>();
 
@@ -155,7 +157,7 @@ namespace dp2Library
             return results;
         }
 
-        public static RemoteAddress GetNearestClientAddress()
+        public RemoteAddress GetNearestClientAddress()
         {
             string strIP = "";
             MessageProperties prop = OperationContext.Current.IncomingMessageProperties;
@@ -172,11 +174,16 @@ namespace dp2Library
             {
                 RemoteEndpointMessageProperty endpoint = prop[RemoteEndpointMessageProperty.Name] as RemoteEndpointMessageProperty;
                 strIP = endpoint.Address;
+                if (string.IsNullOrEmpty(strIP))
+                    throw new Exception("endpoint.Address 为空");
             }
-            catch
+            catch(Exception ex)
             {
+                strIP = "";
+                // 2016/11/2
+                this.app.WriteErrorLog("GetNearestClientAddress() 中出现异常(strVia='"+strVia+"'): " + ExceptionUtil.GetDebugText(ex));
             }
-            strVia = prop.Via.ToString();
+            // strVia = prop.Via.ToString();
 
             // 如果是 rest.http 协议类型，其 Via 的字符串要多出一截。多出来 API Name。需要截掉。
             if (prop.Encoder != null
@@ -201,7 +208,6 @@ namespace dp2Library
             List<RemoteAddress> address_list = GetClientAddress();
             try
             {
-
                 // sessioninfo = new SessionInfo(app, GetClientAddress());
                 this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
     OperationContext.Current.SessionId,

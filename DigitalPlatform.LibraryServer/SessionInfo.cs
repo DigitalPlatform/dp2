@@ -355,8 +355,11 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 匹配 IP 地址
-            if (account.MatchClientIP(strClientIP, out strError) == false)
-                return -1;
+            if (string.IsNullOrEmpty(strClientIP) == false) // 2016/11/2
+            {
+                if (account.MatchClientIP(strClientIP, out strError) == false)
+                    return -1;
+            }
 
             // 星号表示不进行 router client ip 检查
             if (strRouterClientIP != "*")

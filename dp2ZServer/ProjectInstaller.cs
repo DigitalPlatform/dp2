@@ -21,8 +21,7 @@ namespace dp2ZServer
     [RunInstaller(true)]
     public partial class ProjectInstaller : Installer
     {
-        string EncryptKey = "dp2zserver_password_key";
-
+        // string EncryptKey = "dp2zserver_password_key";
 
         private System.ServiceProcess.ServiceProcessInstaller ServiceProcessInstaller1;
         private System.ServiceProcess.ServiceInstaller serviceInstaller1;
@@ -88,6 +87,7 @@ namespace dp2ZServer
         {
             base.Install(stateSaver);
 
+#if NO
             string strRootDir = UnQuote(this.Context.Parameters["rootdir"]);
 
             string strDataDir = "";
@@ -194,7 +194,6 @@ namespace dp2ZServer
 
                 existing_urls = binding_dlg.Urls;
 
-
                 // 检查和其他产品的bindings是否冲突
                 // return:
                 //      -1  出错
@@ -239,7 +238,7 @@ namespace dp2ZServer
 
                     bDialogOpened = true;
                 }
-                // 写入sp2zserver.xml文件
+                // 写入dp2zserver.xml文件
                 // return:
                 //      -1  error, install faild
                 //      0   succeed
@@ -252,8 +251,10 @@ namespace dp2ZServer
                     throw new Exception(strError);
                 }
             }
+#endif
         }
 
+#if NO
         // 创建unioncatalog.xml文件
         // return:
         //      -1  error, install faild
@@ -338,6 +339,9 @@ namespace dp2ZServer
             return 0;
         }
 
+#endif
+
+#if NO
         // 从XML文件中装载已有的信息到对话框
         // return:
         //      -1  error
@@ -424,6 +428,7 @@ namespace dp2ZServer
 
             return 1;
         }
+#endif
 
         public override void Commit(System.Collections.IDictionary savedState)
         {
@@ -431,7 +436,7 @@ namespace dp2ZServer
 
             string strRootDir = UnQuote(this.Context.Parameters["rootdir"]);
 
-#if NO
+#if NO1111111111111
             // 创建dp2zserver.xml文件内容
 
             int nRet = 0;
@@ -465,13 +470,12 @@ namespace dp2ZServer
                 EventLog.CreateEventSource("dp2ZServer", "DigitalPlatform");
             }
 
-
             EventLog Log = new EventLog();
             Log.Source = "dp2ZServer";
             Log.WriteEntry("dp2ZServer安装成功。", EventLogEntryType.Information);
-
         }
 
+#if NO
         // 写入sp2zserver.xml文件
         // return:
         //      -1  error, install faild
@@ -548,7 +552,7 @@ namespace dp2ZServer
 
             Debug.Assert(node != null, "");
 
-#if NO
+#if NO1111111111111
             string strUserName = DomUtil.GetAttr(node, "username");
             string strPassword = DomUtil.GetAttr(node, "password");
             strPassword = DecryptPasssword(strPassword);
@@ -606,9 +610,10 @@ namespace dp2ZServer
 
             return 0;
         }
+#endif
 
 
-#if NO
+#if NO111111111111
         // 写入XML文件
         // return:
         //      -1  error, install faild
@@ -748,6 +753,7 @@ namespace dp2ZServer
 
 #endif
 
+#if NO
         public string DecryptPasssword(string strEncryptedText)
         {
             if (String.IsNullOrEmpty(strEncryptedText) == false)
@@ -773,5 +779,6 @@ namespace dp2ZServer
         {
             return Cryptography.Encrypt(strPlainText, this.EncryptKey);
         }
+#endif
     }
 }

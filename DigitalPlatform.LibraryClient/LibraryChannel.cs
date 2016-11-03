@@ -9890,8 +9890,10 @@ Stack:
         {
             if (this.m_ws is localhost.dp2libraryClient)
                 (this.m_ws as localhost.dp2libraryClient).InnerChannel.OperationTimeout = timeout;
+#if BASIC_HTTP
             else if (this.m_ws is localhost.dp2libraryRESTClient)
                 (this.m_ws as localhost.dp2libraryRESTClient).InnerChannel.OperationTimeout = timeout;
+#endif
             else
             {
                 // http://stackoverflow.com/questions/4695656/add-operationtimeout-to-channel-implemented-in-code
@@ -9903,8 +9905,10 @@ Stack:
         {
             if (this.m_ws is localhost.dp2libraryClient)
                 return (this.m_ws as localhost.dp2libraryClient).InnerChannel.OperationTimeout;
+#if BASIC_HTTP
             else if (this.m_ws is localhost.dp2libraryRESTClient)
                 return (this.m_ws as localhost.dp2libraryRESTClient).InnerChannel.OperationTimeout;
+#endif
 
             return ((IContextChannel)this.m_ws).OperationTimeout;
         }

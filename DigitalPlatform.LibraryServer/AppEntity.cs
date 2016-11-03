@@ -2559,6 +2559,17 @@ namespace DigitalPlatform.LibraryServer
                                 }
                                 else if (info.Action == "change")
                                 {
+                                    if (info.NewRecPath != info.OldRecPath)
+                                    {
+                                        strError = "参数不正确。SetEntities() 当操作类型为 change 时，info.NewRecPath('"+info.NewRecPath+"') 应当和 info.OldRecPath('"+info.OldRecPath+"') 值相同";
+
+                                        EntityInfo error = new EntityInfo(info);
+                                        error.ErrorInfo = strError;
+                                        error.ErrorCode = ErrorCodeValue.CommonError;
+                                        ErrorInfos.Add(error);
+                                        continue;
+                                    }
+
                                     Debug.Assert(info.NewRecPath == info.OldRecPath, "当操作类型为change时，info.NewRecPath应当和info.OldRecPath相同");
                                     if (aPath[0] == info.OldRecPath) // 正好是自己
                                         bDup = false;
