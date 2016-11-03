@@ -12,7 +12,6 @@ using DigitalPlatform.Z3950;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -21,83 +20,85 @@ namespace dp2ZServer
     public class Session : IDisposable
     {
         // private Socket m_clientSocket = null;    // Referance to client Socket.
-        TcpClient client = null;
+        TcpClient _client = null;
 
-        private Service m_service = null;    // 
-        private string m_SessionID = "";      // Holds session ID.
-        private DateTime m_SessionStartTime;    // Session创建的时间
-        private DateTime m_ActivateTime;    // 最近一次使用过的时间
+        private Service _service = null;    // 
+
+        private string _sessionID = "";      // Holds session ID.
+
+        private DateTime _sessionStartTime;    // Session创建的时间
+
+        private DateTime _activateTime;    // 最近一次使用过的时间
 
         public DateTime ActivateTime
         {
             get
             {
-                return this.m_ActivateTime;
+                return this._activateTime;
             }
         }
 
-        LibraryChannel Channel = new LibraryChannel(); 
+        LibraryChannel _channel = new LibraryChannel();
 
-        string strGroupId = "";
-        string strUserName = "";
-        string strPassword = "";
-
+        string _groupId = "";
+        string _userName = "";
+        string _password = "";
 
         // 检索词的编码方式
-        Encoding SearchTermEncoding = Encoding.GetEncoding(936);    // 缺省为GB2312编码方式
+        Encoding _searchTermEncoding = Encoding.GetEncoding(936);    // 缺省为GB2312编码方式
         // MARC记录的编码方式
-        Encoding MarcRecordEncoding = Encoding.GetEncoding(936);    // 缺省为GB2312编码方式
+        Encoding _marcRecordEncoding = Encoding.GetEncoding(936);    // 缺省为GB2312编码方式
 
-        bool m_bInitialized = false;    // 是否被Initial初始化成功。如果为false，则Initial()后续的请求都要被拒绝。
-        long m_lPreferredMessageSize = 500 * 1024;
-        long m_lExceptionalRecordSize = 500 * 1024;
+        bool _bInitialized = false;    // 是否被Initial初始化成功。如果为false，则Initial()后续的请求都要被拒绝。
+        long _lPreferredMessageSize = 500 * 1024;
+        long _lExceptionalRecordSize = 500 * 1024;
 
         const long MaxPreferredMessageSize = 1024 * 1024;
         const long MaxExceptionalRecordSize = 1024 * 1024;
 
         public void Dispose()
         {
-            if (this.client != null)
+            if (this._client != null)
             {
                 try
                 {
-                    this.client.Close();
+                    this._client.Close();
                 }
                 catch
                 {
                 }
-                this.client = null;
+                this._client = null;
             }
 
-            if (this.Channel != null)
+            if (this._channel != null)
             {
-                this.Channel.Close();
-                this.Channel = null;
+                this._channel.Close();
+                this._channel = null;
             }
         }
 
         internal Session(TcpClient client,
-			Service server,
-			string sessionID)
-		{			
-			this.client    = client;
-			m_service     = server;
-			m_SessionID        = sessionID;
-			m_SessionStartTime = DateTime.Now;
-            m_ActivateTime = m_SessionStartTime;
+            Service server,
+            string sessionID)
+        {
+            this._client = client;
+            _service = server;
+            _sessionID = sessionID;
+            _sessionStartTime = DateTime.Now;
+            _activateTime = _sessionStartTime;
 
-            this.Channel.Url = m_service.LibraryServerUrl;
+            this._channel.Url = _service.LibraryServerUrl;
 
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-		}
+            this._channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
+            this._channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
+        }
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
             if (e.FirstTry == true)
             {
-                e.UserName = this.strUserName;
-                e.Password = this.strPassword;
+                e.UserName = this._userName;
+                e.Password = this._password;
                 e.Parameters = "location=z39.50 server, type=worker,client=dp2ZServer|0.01";
                 /*
                 e.IsReader = false;
@@ -122,10 +123,9 @@ namespace dp2ZServer
         {
             get
             {
-                return m_SessionID;
+                return _sessionID;
             }
         }
-
 
         // 接收请求包
         public int RecvTcpPackage(out byte[] baPackage,
@@ -138,7 +138,7 @@ namespace dp2ZServer
             int wRet = 0;
             bool bInitialLen = false;
 
-            Debug.Assert(client != null, "client为空");
+            Debug.Assert(_client != null, "client为空");
 
             baPackage = new byte[4096];
             nInLen = 0;
@@ -148,7 +148,7 @@ namespace dp2ZServer
 
             while (nInLen < nLen)
             {
-                if (client == null)
+                if (_client == null)
                 {
                     strError = "通讯中断";
                     goto ERROR1;
@@ -156,11 +156,9 @@ namespace dp2ZServer
 
                 try
                 {
-
-                    wRet = client.GetStream().Read(baPackage,
+                    wRet = _client.GetStream().Read(baPackage,
                         nInLen,
                         baPackage.Length - nInLen);
-
                 }
                 catch (SocketException ex)
                 {
@@ -236,7 +234,6 @@ namespace dp2ZServer
             return -1;
         }
 
-
         // 发出响应包
         // return:
         //      -1  出错
@@ -248,7 +245,7 @@ namespace dp2ZServer
         {
             strError = "";
 
-            if (client == null)
+            if (_client == null)
             {
                 strError = "client尚未初始化";
                 return -1;
@@ -256,7 +253,7 @@ namespace dp2ZServer
 
             // DoIdle();
 
-            if (this.client == null)
+            if (this._client == null)
             {
                 strError = "用户中断";
                 return -1;
@@ -265,7 +262,7 @@ namespace dp2ZServer
             try
             {
 
-                NetworkStream stream = client.GetStream();
+                NetworkStream stream = _client.GetStream();
 
                 if (stream.DataAvailable == true)
                 {
@@ -297,44 +294,44 @@ namespace dp2ZServer
 
         public void CloseSocket()
         {
-            if (client != null)
+            if (_client != null)
             {
 
                 try
                 {
-                    NetworkStream stream = client.GetStream();
+                    NetworkStream stream = _client.GetStream();
                     stream.Close();
                 }
                 catch { }
                 try
                 {
-                    client.Close();
+                    _client.Close();
                 }
                 catch { }
 
-                client = null;
+                _client = null;
             }
 
             // this.m_bInitialized = false;
         }
-		
-		/// <summary>
-		/// Session处理轮回
-		/// </summary>
-		public void Processing()
-		{
-            int nRet = 0;			
+
+        /// <summary>
+        /// Session处理轮回
+        /// </summary>
+        public void Processing()
+        {
+            int nRet = 0;
             string strError = "";
 
-			try
-			{
-                byte [] baPackage = null;
+            try
+            {
+                byte[] baPackage = null;
                 int nLen = 0;
                 byte[] baResponsePackage = null;
 
                 for (; ; )
                 {
-                    m_ActivateTime = DateTime.Now;
+                    _activateTime = DateTime.Now;
                     // 接收前端请求
                     nRet = RecvTcpPackage(out baPackage,
                         out nLen,
@@ -376,15 +373,15 @@ namespace dp2ZServer
                                 if (String.IsNullOrEmpty(info.m_strID) == true)
                                 {
                                     // 如果定义了允许匿名登录
-                                    if (String.IsNullOrEmpty(this.m_service.AnonymousUserName) == false)
+                                    if (String.IsNullOrEmpty(this._service.AnonymousUserName) == false)
                                     {
-                                        info.m_strID = this.m_service.AnonymousUserName;
-                                        info.m_strPassword = this.m_service.AnonymousPassword;
+                                        info.m_strID = this._service.AnonymousUserName;
+                                        info.m_strPassword = this._service.AnonymousPassword;
                                     }
                                     else
                                     {
                                         response_info.m_nResult = 0;
-                                        this.m_bInitialized = false;
+                                        this._bInitialized = false;
 
                                         SetInitResponseUserInfo(response_info,
                                             "", // string strOID,
@@ -406,7 +403,7 @@ namespace dp2ZServer
                                 if (nRet == -1 || nRet == 0)
                                 {
                                     response_info.m_nResult = 0;
-                                    this.m_bInitialized = false;
+                                    this._bInitialized = false;
 
                                     SetInitResponseUserInfo(response_info,
                                         "", // string strOID,
@@ -416,7 +413,7 @@ namespace dp2ZServer
                                 else
                                 {
                                     response_info.m_nResult = 1;
-                                    this.m_bInitialized = true;
+                                    this._bInitialized = true;
                                 }
 
                             DO_RESPONSE:
@@ -424,18 +421,18 @@ namespace dp2ZServer
                                 response_info.m_strReferenceId = info.m_strReferenceId;  // .m_strID; BUG!!! 2007/11/2
 
                                 if (info.m_lPreferredMessageSize != 0)
-                                    this.m_lPreferredMessageSize = info.m_lPreferredMessageSize;
+                                    this._lPreferredMessageSize = info.m_lPreferredMessageSize;
                                 // 极限
-                                if (this.m_lPreferredMessageSize > MaxPreferredMessageSize)
-                                    this.m_lPreferredMessageSize = MaxPreferredMessageSize;
-                                response_info.m_lPreferredMessageSize = this.m_lPreferredMessageSize;
+                                if (this._lPreferredMessageSize > MaxPreferredMessageSize)
+                                    this._lPreferredMessageSize = MaxPreferredMessageSize;
+                                response_info.m_lPreferredMessageSize = this._lPreferredMessageSize;
 
                                 if (info.m_lExceptionalRecordSize != 0)
-                                    this.m_lExceptionalRecordSize = info.m_lExceptionalRecordSize;
+                                    this._lExceptionalRecordSize = info.m_lExceptionalRecordSize;
                                 // 极限
-                                if (this.m_lExceptionalRecordSize > MaxExceptionalRecordSize)
-                                    this.m_lExceptionalRecordSize = MaxExceptionalRecordSize;
-                                response_info.m_lExceptionalRecordSize = this.m_lExceptionalRecordSize;
+                                if (this._lExceptionalRecordSize > MaxExceptionalRecordSize)
+                                    this._lExceptionalRecordSize = MaxExceptionalRecordSize;
+                                response_info.m_lExceptionalRecordSize = this._lExceptionalRecordSize;
 
                                 response_info.m_strImplementationId = "Digital Platform";
                                 response_info.m_strImplementationName = "dp2ZServer";
@@ -475,12 +472,12 @@ namedResultSets        (14)
                                             17,
                                             true);
                                         response_info.m_charNego = info.m_charNego;
-                                        this.SearchTermEncoding = Encoding.UTF8;
+                                        this._searchTermEncoding = Encoding.UTF8;
                                         if (info.m_charNego.RecordsInSelectedCharsets != -1)
                                         {
                                             response_info.m_charNego.RecordsInSelectedCharsets = info.m_charNego.RecordsInSelectedCharsets; // 依从前端的请求
                                             if (response_info.m_charNego.RecordsInSelectedCharsets == 1)
-                                                this.MarcRecordEncoding = Encoding.UTF8;
+                                                this._marcRecordEncoding = Encoding.UTF8;
                                         }
                                     }
                                 }
@@ -511,7 +508,7 @@ namedResultSets        (14)
                                 if (nRet == -1)
                                     goto ERROR1;
 
-                                if (m_bInitialized == false)
+                                if (_bInitialized == false)
                                     goto ERROR_NOT_LOG;
 
 
@@ -536,7 +533,7 @@ namedResultSets        (14)
                                 if (nRet == -1)
                                     goto ERROR1;
 
-                                if (m_bInitialized == false)
+                                if (_bInitialized == false)
                                     goto ERROR_NOT_LOG;
 
                                 // 编码Present响应包
@@ -564,13 +561,13 @@ namedResultSets        (14)
                         goto ERROR_NOT_LOG;
                 }
 
-			}
-			catch(ThreadInterruptedException)
-			{
-				// string dummy = e.Message;     // Needed for to remove compile warning
-			}
-			catch(Exception x)
-			{
+            }
+            catch (ThreadInterruptedException)
+            {
+                // string dummy = e.Message;     // Needed for to remove compile warning
+            }
+            catch (Exception x)
+            {
                 /*
 				if(m_clientSocket.Connected)
 				{
@@ -585,21 +582,21 @@ namedResultSets        (14)
                  * */
                 strError = "Session Processing()俘获异常: " + ExceptionUtil.GetDebugText(x);
                 goto ERROR1;
-			}
-			finally
-			{				
-				m_service.RemoveSession(this.SessionID);
+            }
+            finally
+            {
+                _service.RemoveSession(this.SessionID);
                 this.CloseSocket();
-			}
+            }
             return;
         ERROR1:
             // 将strError写入日志
-            this.m_service.Log.WriteEntry(strError, EventLogEntryType.Error);
+            this._service.Log.WriteEntry(strError, EventLogEntryType.Error);
             return;
         ERROR_NOT_LOG:
             // 不写入日志
             return;
-		}
+        }
 
         void SetInitResponseUserInfo(InitResponseInfo response_info,
             string strOID,
@@ -633,7 +630,7 @@ namedResultSets        (14)
             //      -1  error
             //      0   登录未成功
             //      1   登录成功
-            long lRet = this.Channel.Login(strUserName,
+            long lRet = this._channel.Login(strUserName,
                 strPassword,
                 "location=z39.50 server,type=worker,client=dp2ZServer|0.01",
                 /*
@@ -645,14 +642,12 @@ namedResultSets        (14)
                 return -1;
 
             // 记忆下来，供以后使用
-            this.strGroupId = strGroupId;
-            this.strUserName = strUserName;
-            this.strPassword = strPassword;
-            
+            this._groupId = strGroupId;
+            this._userName = strUserName;
+            this._password = strPassword;
 
             return (int)lRet;
         }
-
 
         #region BER包处理
 
@@ -749,7 +744,6 @@ namedResultSets        (14)
 
             return 0;
         }
-
 
         // 解码Search请求包
         public static int Decode_SearchRequest(
@@ -874,7 +868,7 @@ namedResultSets        (14)
 
             if (diag == null)
             {
-                lRet = Channel.Search(null,
+                lRet = _channel.Search(null,
                     strQueryXml,
                     strResultSetName,
                     "", // strOutputStyle
@@ -929,7 +923,6 @@ namedResultSets        (14)
             root.NewChildIntegerNode(BerTree.z3950_NextResultSetPosition, // 25
                 BerNode.ASN1_CONTEXT,   // ASNI_PRIMITIVE BUG!!!!
                 BitConverter.GetBytes((long)1/*info.m_lNextResultSetPosition*/));
-
 
             // 2007/11/7 原来本项位置不对，现在移动到这里
             // bool
@@ -1044,7 +1037,7 @@ namedResultSets        (14)
             string strError = "";
 
             DiagFormat diag = null;
-            
+
             BerTree tree = new BerTree();
             BerNode root = null;
 
@@ -1069,7 +1062,7 @@ namedResultSets        (14)
             {
                 DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
-                long lRet = this.Channel.GetSearchResult(
+                long lRet = this._channel.GetSearchResult(
                     null,   // stop,
                     strResultSetName,   // strResultSetName
                     lOffset,
@@ -1122,8 +1115,8 @@ namedResultSets        (14)
                 && diag == null)
             {
                 strError = "start参数值 "
-                    +info.m_lResultSetStartPoint
-                    +" 超过结果集中记录总数 "
+                    + info.m_lResultSetStartPoint
+                    + " 超过结果集中记录总数 "
                     + lHitCount;
                 // return -1;  // 如果表示错误状态？
                 SetPresentDiagRecord(ref diag,
@@ -1205,7 +1198,7 @@ namedResultSets        (14)
                     record.m_strDatabaseName = strDbName;
 
                     // 根据书目库名获得书目库属性对象
-                    BiblioDbProperty prop = this.m_service.GetDbProperty(
+                    BiblioDbProperty prop = this._service.GetDbProperty(
                         strDbName,
                         false);
 
@@ -1256,19 +1249,19 @@ namedResultSets        (14)
                     if (i == 0)
                     {
                         // 连一条记录也放不下
-                        if (nSize > this.m_lExceptionalRecordSize)
+                        if (nSize > this._lExceptionalRecordSize)
                         {
                             Debug.Assert(diag == null, "");
                             SetPresentDiagRecord(ref diag,
                                 17, // record exceeds Exceptional_record_size
-                                "记录尺寸 " + nSize.ToString() + " 超过 Exceptional_record_size " + this.m_lExceptionalRecordSize.ToString());
+                                "记录尺寸 " + nSize.ToString() + " 超过 Exceptional_record_size " + this._lExceptionalRecordSize.ToString());
                             lNumber = 0;
                             break;
                         }
                     }
                     else
                     {
-                        if (nSize >= this.m_lPreferredMessageSize)
+                        if (nSize >= this._lPreferredMessageSize)
                         {
                             // 调整返回的记录数
                             lNumber = i;
@@ -1288,7 +1281,7 @@ namedResultSets        (14)
 
             if (diag != null)
                 nPresentStatus = 5;
-            else 
+            else
                 nPresentStatus = 0;
 
             // nextResultSetPosition
@@ -1373,7 +1366,7 @@ namedResultSets        (14)
 
         string GetMarcSyntaxOID(string strBiblioDbName)
         {
-            string strSyntax = this.m_service.GetMarcSyntax(strBiblioDbName);
+            string strSyntax = this._service.GetMarcSyntax(strBiblioDbName);
             if (strSyntax == null)
                 return null;
             if (strSyntax == "unimarc")
@@ -1401,11 +1394,11 @@ namedResultSets        (14)
             strError = "";
 
             string strXml = "";
-            byte [] timestamp = null;
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   found
+            byte[] timestamp = null;
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
             int nRet = GetMarcXml(strPath,
                 out strXml,
                 out timestamp,
@@ -1465,12 +1458,11 @@ namedResultSets        (14)
             nRet = MarcUtil.CvtJineiToISO2709(
                 strMarc,
                 strOutMarcSyntax,
-                this.MarcRecordEncoding,
+                this._marcRecordEncoding,
                 out baMARC,
                 out strError);
             if (nRet == -1)
                 return -1;
-
 
             return 1;
         }
@@ -1497,7 +1489,7 @@ namedResultSets        (14)
 
                 string[] results = null;
 
-                long lRet = Channel.GetBiblioInfos(
+                long lRet = _channel.GetBiblioInfos(
                     null,
                     strBiblioRecPath,
                     "",
@@ -1607,7 +1599,7 @@ namedResultSets        (14)
             out List<string> dbnames,
             out string strError)
         {
-            dbnames  = new List<string>();
+            dbnames = new List<string>();
             strError = "";
 
             for (int i = 0; i < root.ChildrenCollection.Count; i++)
@@ -1616,8 +1608,8 @@ namedResultSets        (14)
                 if (node.m_uTag == 105)
                 {
                     dbnames.Add(node.GetCharNodeData());
-        		}
-	        }
+                }
+            }
 
             return 0;
         }
@@ -1679,13 +1671,9 @@ namedResultSets        (14)
                     case BerNode.ASN1_GENERALSTRING:
                         nAuthentType = 0; //  "SIMPLE";
                         strOpen = node.GetCharNodeData();
-
                         break;
-
-
                 }
             }
-
 
             if (nAuthentType == 0)
             {
@@ -1723,7 +1711,6 @@ namedResultSets        (14)
                 strError = "node == null";
                 return -1;
             }
-
 
             if (pNode.ChildrenCollection.Count < 2) //attriblist + term
             {
@@ -1776,7 +1763,6 @@ namedResultSets        (14)
 
             // get term
             strTerm = pTerm.GetCharNodeData(term_encoding);
-
 
             if (-1 == lAttributeType
                 || -1 == lAttributeValue
@@ -1845,7 +1831,7 @@ namedResultSets        (14)
             {
                 string strDbName = dbnames[i];
 
-                BiblioDbProperty prop = this.m_service.GetDbProperty(strDbName,
+                BiblioDbProperty prop = this._service.GetDbProperty(strDbName,
                     true);
                 if (prop == null)
                 {
@@ -1893,7 +1879,7 @@ namedResultSets        (14)
                         nMaxResultCount = prop.MaxResultCount;  // 只取第一个prop的值即可
 
                     string strOutputDbName = "";
-                    string strFrom = this.m_service.GetFromName(strDbName,
+                    string strFrom = this._service.GetFromName(strDbName,
                         lAttritueValue,
                         out strOutputDbName,
                         out strError);
@@ -2079,7 +2065,6 @@ namedResultSets        (14)
                 return -1;
             }
 
-
             if (0 == node.m_uTag)
             {
                 // operand node
@@ -2101,7 +2086,7 @@ namedResultSets        (14)
                     string strTerm = "";
 
                     nRet = DecodeAttributeAndTerm(
-                        this.SearchTermEncoding,
+                        this._searchTermEncoding,
                         pChild,
                         out nAttributeType,
                         out nAttributeValue,
@@ -2264,7 +2249,6 @@ namedResultSets        (14)
                 BerNode.ASN1_CONTEXT,
                 info.m_strOptions);    // "110000000000001"
 
-
             root.NewChildIntegerNode(BerTree.z3950_PreferredMessageSize,    // 5
                 BerNode.ASN1_CONTEXT,
                 BitConverter.GetBytes((long)info.m_lPreferredMessageSize));
@@ -2311,7 +2295,6 @@ namedResultSets        (14)
 
             return 0;
         }
-
     }
 
     // Init请求信息结构
@@ -2388,8 +2371,7 @@ namedResultSets        (14)
         public long m_lSearchStatus = 0;
     }
 
-
-        // Present请求信息结构
+    // Present请求信息结构
     public class PresentRequestInfo
     {
         public string m_strReferenceId = "";

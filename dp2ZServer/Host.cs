@@ -106,7 +106,7 @@ namespace dp2ZServer
         {
             this.Log.WriteEntry("dp2ZServer OnStart() begin",
     EventLogEntryType.Information);
-            
+
             try
             {
                 if (!this.DesignMode)
@@ -122,7 +122,7 @@ namespace dp2ZServer
             }
             catch (Exception x)
             {
-                Log.WriteEntry("dp2ZServer OnStart() error : " + x.Message, 
+                Log.WriteEntry("dp2ZServer OnStart() error : " + x.Message,
                     EventLogEntryType.Error);
             }
             /*
@@ -213,7 +213,7 @@ EventLogEntryType.Error);
             if (string.IsNullOrEmpty(strHttpHostUrl) == true)
             {
                 string strUrls = string.Join(";", existing_urls);
-                this.Log.WriteEntry("dp2ZServer OnStart() 时发生错误: 协议绑定 '"+strUrls+"' 中，没有包含http协议，因此没有启动UnionCatalogService",
+                this.Log.WriteEntry("dp2ZServer OnStart() 时发生错误: 协议绑定 '" + strUrls + "' 中，没有包含http协议，因此没有启动UnionCatalogService",
 EventLogEntryType.Error);
                 return;
             }
@@ -606,7 +606,7 @@ EventLogEntryType.Information);
 
         private void ManagerRun()
         {
-            REDO:
+        REDO:
             try
             {
                 WaitHandle[] events = new WaitHandle[2];
@@ -722,7 +722,7 @@ EventLogEntryType.Information);
                     Log.WriteEntry("ERR001 首次初始化信息失败(系统不再重试): " + strError,
                         EventLogEntryType.Error);
                     return;
-                } 
+                }
                 if (nRet == -2)
                 {
                     Log.WriteEntry("ERR002 首次初始化信息失败(系统将定期重试): " + strError,
@@ -988,7 +988,7 @@ EventLogEntryType.Information);
 
                 string strDbName = prop.DbName;
 
-                XmlNode nodeDatabase = this.CfgDom.DocumentElement.SelectSingleNode("//databases/database[@name='"+strDbName+"']");
+                XmlNode nodeDatabase = this.CfgDom.DocumentElement.SelectSingleNode("//databases/database[@name='" + strDbName + "']");
                 if (nodeDatabase == null)
                     continue;
 
@@ -1109,14 +1109,14 @@ EventLogEntryType.Information);
                 strError = "名字为 '" + strOutputDbName + "' 的数据库不存在";
             }
 
-            XmlNode nodeUse = nodeDatabase.SelectSingleNode("use[@value='"+lAttributeValue.ToString()+"']");
+            XmlNode nodeUse = nodeDatabase.SelectSingleNode("use[@value='" + lAttributeValue.ToString() + "']");
             if (nodeUse == null)
             {
                 strError = "数据库 '" + strDbNameOrAlias + "' 中没有找到关于 '" + lAttributeValue.ToString() + "' 的检索途径定义";
                 return null;
             }
 
-            string strFrom =  DomUtil.GetAttr(nodeUse, "from");
+            string strFrom = DomUtil.GetAttr(nodeUse, "from");
             if (String.IsNullOrEmpty(strFrom) == true)
             {
                 strError = "数据库 '" + strDbNameOrAlias + "' <database>元素中关于 '" + lAttributeValue.ToString() + "' 的<use>配置缺乏from属性值";
