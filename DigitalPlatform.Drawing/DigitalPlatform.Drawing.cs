@@ -131,36 +131,5 @@ namespace DigitalPlatform.Drawing
 		}
 
 
-        // 从URI获取图像对象
-        // parameters:
-        //      strUrl  图像路径
-        //      image   out参数，返回Image对象
-        //      strError    out参数，返回出错信息
-        // return:
-        //      -1  出错
-        //      0   成功
-        public static int GetImageFormUrl(string strUrl,
-            out Image image,
-            out string strError)
-        {
-            strError = "";
-            image = null;
-
-            try
-            {
-                // 通过URL获得图像文件的过程可以优化， 可以为Editor建立一个文件cache
-                WebRequest request = WebRequest.Create(strUrl);
-                WebResponse response = request.GetResponse();
-
-                // Create image.
-                image = Image.FromStream(response.GetResponseStream());//.FromFile("SampImag.jpg");
-                return 0;
-            }
-            catch(Exception ex)
-            {
-                strError = "从'" + strUrl + "'获取图像出错，原因：" + ex.Message;
-                return -1;
-            }
-        }
 	}
 }

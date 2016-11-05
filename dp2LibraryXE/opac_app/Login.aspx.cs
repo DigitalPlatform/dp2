@@ -323,17 +323,17 @@ ref this.sessioninfo) == false)
             {
                 this.LoginControl1.LoginStyle = LoginStyle.None;
 
-                bool bChanged = false;
+                // bool bChanged = false;
                 if (StringUtil.IsInList("librarian", this.Request["loginstyle"], true) == true)
                 {
                     this.LoginControl1.LoginStyle |= LoginStyle.Librarian;
-                    bChanged = true;
+                    // bChanged = true;
                 }
 
                 if (StringUtil.IsInList("reader", this.Request["loginstyle"], true) == true)
                 {
                     this.LoginControl1.LoginStyle |= LoginStyle.Reader;
-                    bChanged = true;
+                    // bChanged = true;
                 }
 
 #if NO

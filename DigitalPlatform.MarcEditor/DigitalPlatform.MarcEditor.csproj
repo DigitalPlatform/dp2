@@ -120,11 +120,6 @@
       <Project>{334E1B2B-5373-4C80-A971-BFF213FF304B}</Project>
       <Name>DigitalPlatform.CommonControl</Name>
     </ProjectReference>
-    <ProjectReference Include="..\DigitalPlatform.Drawing\DigitalPlatform.Drawing.csproj">
-      <Name>DigitalPlatform.Drawing</Name>
-      <Project>{C2468F93-69AC-4BBA-94AE-678ED5C21542}</Project>
-      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
-    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
       <Name>DigitalPlatform.IO</Name>
       <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>

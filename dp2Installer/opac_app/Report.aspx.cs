@@ -638,7 +638,7 @@ DIV.createtime
     void DisplayTreeStruct(string strStart)
     {
         string strError = "";
-        int nRet = 0;
+        // int nRet = 0;
 
         if (string.IsNullOrEmpty(app.ReportDir) == true)
         {
@@ -877,7 +877,7 @@ DIV.createtime
     void GetTreeData(string strStart)
     {
         string strError = "";
-        int nRet = 0;
+        // int nRet = 0;
 
         this.Response.ContentEncoding = Encoding.UTF8;
         this.Response.ContentType = "application/json; charset=utf-8";

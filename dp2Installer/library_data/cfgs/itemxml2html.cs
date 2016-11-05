@@ -11,10 +11,13 @@
 // 2011/9/7
 // 2013/12/25   this.App.MaxItemHistoryItems
 // 2016/9/27    能显示册二维码
+// 2016/11/5    册二维码或者一维码改用 barcode: 协议显示
 
 using System;
 using System.Xml;
+using System.Web;
 
+using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.Xml;
 
@@ -162,16 +165,19 @@ public class MyConverter : ItemConverter
             strResult += GetOneTR("recpath", "册记录路径", e.RecPath);
             
             // 册二维码
+            /*
             string strCode = "39code:" + strItemBarcode;
             if (string.IsNullOrEmpty(strItemBarcode))
                 strCode = "qrcode:@refID:" + DomUtil.GetElementText(dom.DocumentElement, "refID");
+                */
+            string strCode = "code="+HttpUtility.UrlEncode(strItemBarcode)+",type=code_39,width=300,height=80";
+            if (string.IsNullOrEmpty(strItemBarcode))
+                strCode = "code=@refID:" + HttpUtility.UrlEncode(DomUtil.GetElementText(dom.DocumentElement, "refID"))+",type=qr_code,width=200,height=200";
                 
             strResult += "<tr class='content qrcode'>";
-            //strResult += "<td class='name qrcode' nowrap>";
-            //strResult += "二维码";
-            //strResult += "</td>";
             strResult += "<td class='value qrcode' colspan='2' >";
-            strResult += "<img id='qrcode' class='pending' name='"+strCode+"' src='%mappeddir%\\images\\ajax-loader.gif' alt='册记录的二维码' ></img>";
+            // strResult += "<img id='qrcode' class='pending' name='"+strCode+"' src='%mappeddir%\\images\\ajax-loader.gif' alt='册记录的二维码' ></img>";
+            strResult += "<img id='qrcode' src='barcode:"+strCode+"' alt='册记录的二维码' ></img>";
             strResult += "</td></tr>";
 
             strResult += "</table>";

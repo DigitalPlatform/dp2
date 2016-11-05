@@ -12,10 +12,10 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Install;
-using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
+using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.LibraryServer

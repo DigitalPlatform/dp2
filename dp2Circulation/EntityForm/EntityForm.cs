@@ -12190,13 +12190,14 @@ merge_dlg.UiState);
             }
 
             // 2015/1/3
-            string strImageFragment = BiblioSearchForm.GetImageHtmlFragment(
+            string strCoverImageFragment = BiblioSearchForm.GetCoverImageHtmlFragment(
 this.BiblioRecPath,
 strMARC);
+            string strIsbnImageFragment = BiblioSearchForm.GetIsbnImageHtmlFragment(strMARC, this.MarcSyntax);
 
             strHtml = MarcUtil.GetHtmlOfMarc(strMARC,
                 strFragmentXml,
-                strImageFragment,
+                strCoverImageFragment + strIsbnImageFragment,
                 false);
             string strFilterTitle = "";
             if (this.m_strActiveCatalogingRules != "<不过滤>")

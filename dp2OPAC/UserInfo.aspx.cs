@@ -134,12 +134,12 @@ ref sessioninfo) == false)
                     }
                     strReaderXml = results[0];
 
-                CONTINUE1:
+                // CONTINUE1:
                     if (nRet == 0)
                         strBarcode = strDisplayName;
                 }
 
-            SEARCH_BARCODE:
+            // SEARCH_BARCODE:
                 if (nRet == 0 && String.IsNullOrEmpty(strBarcode) == false)
                 {
                     strReaderXml = "";

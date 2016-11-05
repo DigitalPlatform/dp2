@@ -1530,9 +1530,7 @@ namespace DigitalPlatform.Xml
             string strOuterXml)
         {
             if (nodeRoot == null)
-            {
-                throw (new Exception("nodeRoot参数不能为null"));
-            }
+                throw new ArgumentException("nodeRoot 参数值不应为空", "nodeRoot");
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
             if (nodeFound == null)
@@ -1546,15 +1544,24 @@ namespace DigitalPlatform.Xml
                 throw (new Exception("SetElementOuterXml() CreateNode error"));
             }
 
-            XmlDocumentFragment fragment = nodeFound.OwnerDocument.CreateDocumentFragment();
-            fragment.InnerXml = strOuterXml;
+            if (string.IsNullOrEmpty(strOuterXml) == false)
+            {
+                XmlDocumentFragment fragment = nodeFound.OwnerDocument.CreateDocumentFragment();
+                fragment.InnerXml = strOuterXml;
 
-            nodeFound.ParentNode.InsertAfter(fragment, nodeFound);
+                nodeFound.ParentNode.InsertAfter(fragment, nodeFound);
 
-            nodeFound.ParentNode.RemoveChild(nodeFound);
+                nodeFound.ParentNode.RemoveChild(nodeFound);
 
-            nodeFound = nodeRoot.SelectSingleNode(strXpath);
-            return nodeFound;
+                nodeFound = nodeRoot.SelectSingleNode(strXpath);
+                return nodeFound;
+            }
+            else
+            {
+                // 2016/11/5
+                nodeFound.ParentNode.RemoveChild(nodeFound);
+                return null;
+            }
         }
 
         // 2009/10/31

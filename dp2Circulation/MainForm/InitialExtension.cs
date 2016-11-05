@@ -28,6 +28,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Drawing;
 
 namespace dp2Circulation
 {
@@ -1307,6 +1308,7 @@ MessageBoxDefaultButton.Button1);
                 this._imageManager.BeginThread();
             }
 
+            // 用于在 WebControl 中展示 dp2 对象资源的协议
             ProtocolFactory.Register("dpres",
                 () => new ResourceProtocol(this, (path, current, length) =>
                 {
@@ -1321,6 +1323,9 @@ MessageBoxDefaultButton.Button1);
                     }
                 })
                 );
+
+            // 用于在 WebControl 中显示条码图像的协议
+            ProtocolFactory.Register("barcode", () => new BarcodeProtocol());
 
             // 设置窗口尺寸状态
             if (AppInfo != null)
