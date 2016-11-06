@@ -59,6 +59,9 @@ namespace DigitalPlatform.LibraryClient
                 if (lRet == -1)
                     goto ERROR1;
 
+                if (items == null || items.Length == 0)
+                    yield break;
+
                 if (items != null)
                 {
                     foreach (ResInfoItem item in items)

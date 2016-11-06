@@ -58,7 +58,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "open file '" +strFileName+ "' error : " + ex.Message;
+                strError = "open file '" + strFileName + "' error : " + ex.Message;
                 return -1;
             }
 
@@ -146,6 +146,13 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.PauseBatchTask = false;
 
+                // 2016/11/6
+                if (this.BatchTasks == null)
+                {
+                    strError = "this.BatchTasks == null";
+                    return -1;
+                }
+
                 // 2013/11/23
                 foreach (BatchTask current_task in this.BatchTasks)
                 {
@@ -172,7 +179,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (this.BatchTasks == null)
             {
-                strError = "this.AppTasks == null";
+                strError = "this.BatchTasks == null";
                 return -1;
             }
 
@@ -288,6 +295,13 @@ namespace DigitalPlatform.LibraryServer
                 return 1;
             }
 
+            // 2016/11/6
+            if (this.BatchTasks == null)
+            {
+                strError = "this.BatchTasks == null";
+                return -1;
+            }
+
             BatchTask task = this.BatchTasks.GetBatchTask(strName);
 
             // 任务本来就不存在
@@ -312,6 +326,13 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
             info = null;
+
+            // 2016/11/6
+            if (this.BatchTasks == null)
+            {
+                strError = "this.BatchTasks == null";
+                return -1;
+            }
 
             BatchTask task = this.BatchTasks.GetBatchTask(strName);
 
@@ -363,7 +384,7 @@ namespace DigitalPlatform.LibraryServer
         {
             BatchTaskStartInfo info = new BatchTaskStartInfo();
             Hashtable table = StringUtil.ParseParameters(strText, ',', ':');
-            info.Param = (string)table["Param"] ;
+            info.Param = (string)table["Param"];
             info.BreakPoint = (string)table["BreakPoint"];
             info.Start = (string)table["Start"];
             info.Count = (string)table["Count"];
@@ -402,5 +423,25 @@ namespace DigitalPlatform.LibraryServer
 
         [DataMember]
         public long ResultVersion = 0;  // 信息文件版本
+
+        public string Dump()
+        {
+            StringBuilder text = new StringBuilder();
+            if (this.Name != null)
+                text.Append("Name=" + this.Name + "\r\n");
+            if (this.State != null)
+                text.Append("State=" + this.State + "\r\n");
+            if (this.ProgressText != null)
+                text.Append("ProgressText=" + this.ProgressText + "\r\n");
+            text.Append("MaxResultBytes=" + this.MaxResultBytes + "\r\n");
+            text.Append("ResultText=" + ByteArray.GetHexTimeStampString(this.ResultText) + "\r\n");
+            text.Append("ResultOffset=" + this.ResultOffset + "\r\n");
+            text.Append("ResultTotalLength=" + this.ResultTotalLength + "\r\n");
+            if (this.StartInfo != null)
+                text.Append("StartInfo=" + this.StartInfo.ToString() + "\r\n");
+            text.Append("ResultVersion=" + this.ResultVersion + "\r\n");
+
+            return text.ToString();
+        }
     }
 }

@@ -199,6 +199,9 @@ namespace DigitalPlatform.LibraryServer
                     this.App.WriteErrorLog(strErrorText);
                 }
             }
+
+            // 2016/11/6
+            this.App.InitialMsmq();
         }
 
         public void ClearRetryDelay()

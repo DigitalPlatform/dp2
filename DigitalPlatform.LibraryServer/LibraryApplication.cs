@@ -13,10 +13,10 @@ using System.Diagnostics;
 using System.Web;
 using System.Drawing;
 using System.Runtime.Serialization;
+using System.Messaging;
+using System.Security.Principal;
 
 using MongoDB.Driver;
-
-// using DigitalPlatform.Drawing;
 
 using DigitalPlatform;	// Stop类
 using DigitalPlatform.rms.Client;
@@ -25,14 +25,11 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.MarcDom;
-// using DigitalPlatform.Library;  // LoanFilterDocument
 using DigitalPlatform.Marc;
 using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Messaging;
-using System.Security.Principal;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -168,10 +165,23 @@ namespace DigitalPlatform.LibraryServer
         /// </summary>
         public bool CheckClientVersion = false;
 
+        string _outgoingQueue = "";
+
         /// <summary>
         /// dp2library 用于输出消息的队列路径。
         /// </summary>
-        public string OutgoingQueue = "";
+        public string OutgoingQueue
+        {
+            get
+            {
+                return this._outgoingQueue;
+            }
+            set
+            {
+                this._outgoingQueue = value;
+                this.MsmqInitialized = false;   // 迫使重新执行 InitialMsmq()
+            }
+        }
 
         // 存储各种参数信息
         // 为C#脚本所准备
@@ -482,6 +492,14 @@ namespace DigitalPlatform.LibraryServer
                 */
             }
             disposed = true;
+        }
+
+        // TODO: 是否需要锁定?
+        public void AddHangup(string strText)
+        {
+            if (ContainsHangup(strText) == true)
+                return;
+            this.HangupList.Add(strText);
         }
 
         public bool ContainsHangup(string strText)
@@ -1254,84 +1272,15 @@ namespace DigitalPlatform.LibraryServer
                     app.WriteErrorLog("INFO: Message Queue");
 #endif
 
-                    if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
-                    {
-                        try
-                        {
-#if NO
-                            if (MessageQueue.Exists(this.OutgoingQueue))
-                            {
-                                MessageQueue.Delete(this.OutgoingQueue);
-                            }
-#endif
-
-                            if (!MessageQueue.Exists(this.OutgoingQueue))
-                            {
-                                MessageQueue queue = MessageQueue.Create(this.OutgoingQueue);
-
-#if NO
-                                // Create an AccessControlList.
-                                AccessControlList list = new AccessControlList();
-
-                                // Create a new trustee to represent the "Everyone" user group.
-                                Trustee tr = new Trustee("Everyone");
-
-                                // Create an AccessControlEntry, granting the trustee read access to
-                                // the queue.
-                                AccessControlEntry entry = new AccessControlEntry(
-                                    tr, GenericAccessRights.Read,
-                         StandardAccessRights.Read,
-                                    AccessControlEntryType.Allow);
-
-                                // Add the AccessControlEntry to the AccessControlList.
-                                list.Add(entry);
-
-
-                                // Apply the AccessControlList to the queue.
-                                queue.SetPermissions(list);
-#endif
-
-                                var wi = WindowsIdentity.GetCurrent();
-                                if (wi.IsSystem == true)
-                                {
-                                    // 当前用户已经是 LocalSystem 了，需要额外给 Everyone 添加权限，以便让 dp2Capo 的控制台方式运行能访问这个 Queue
-                                    queue.SetPermissions(@"Everyone",
-                MessageQueueAccessRights.ReceiveMessage
-                | MessageQueueAccessRights.DeleteMessage
-                | MessageQueueAccessRights.PeekMessage
-                | MessageQueueAccessRights.GenericRead);
-                                }
-
-                                // 如果当前是 Administrator，表示可能是 dp2libraryxe 启动的方式，那么需要专门给 LocalSystem 操作 Queue 的权限，以便 Windows Service 方式的 dp2Capo 能访问 Queue
-                                var wp = new WindowsPrincipal(wi);
-                                if (wp.IsInRole(WindowsBuiltInRole.Administrator))
-                                {
-                                    queue.SetPermissions(@"NT AUTHORITY\System",
-                                        MessageQueueAccessRights.FullControl);
-                                }
-
-                                app.WriteErrorLog("首次创建 MSMQ 队列 '" + this.OutgoingQueue + "' 成功");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            app.HangupList.Add("MessageQueueCreateFail");
-                            app.WriteErrorLog("*** 创建 MSMQ 队列 '" + this.OutgoingQueue + "' 失败: " + ExceptionUtil.GetDebugText(ex)
-                                + " 系统已被挂起。");
-                        }
-                    }
-                    else
-                    {
-
-                    }
-
+                    ///
+                    app.InitialMsmq();
 
                     // 初始化 mongodb 相关对象
                     nRet = InitialMongoDatabases(out strError);
                     if (nRet == -1)
                     {
                         // app.HangupReason = LibraryServer.HangupReason.StartingError;
-                        app.HangupList.Add("ERR002");
+                        app.AddHangup("ERR002");
                         app.WriteErrorLog("ERR002 首次初始化 mongodb database 失败: " + strError);
                     }
 
@@ -1744,7 +1693,7 @@ namespace DigitalPlatform.LibraryServer
                             {
                                 // 通知系统挂起
                                 // this.HangupReason = HangupReason.Expire;
-                                app.HangupList.Add("Expire");
+                                app.AddHangup("Expire");
                                 this.WriteErrorLog("*** 当前 dp2library 版本因为长期没有升级，已经失效。系统被挂起。请立即升级 dp2library 到最新版本");
                             }
                         }
@@ -1796,7 +1745,7 @@ namespace DigitalPlatform.LibraryServer
             else
             {
                 // app.HangupReason = LibraryServer.HangupReason.StartingError;
-                app.HangupList.Add("StartingError");
+                app.AddHangup("StartingError");
                 app.WriteErrorLog("library application初始化过程发生严重错误 [" + strError + "]，当前此服务处于残缺状态，请及时排除故障后重新启动");
             }
             return -1;
@@ -2190,6 +2139,107 @@ namespace DigitalPlatform.LibraryServer
             {
                 // this.m_lock.ReleaseWriterLock();
                 this.UnlockForWrite();
+            }
+        }
+
+        // MSMQ 环境是否初始化成功过至少一次
+        internal bool MsmqInitialized = false;
+
+        // 尝试初始化 MSMQ 环境
+        public void InitialMsmq()
+        {
+            if (MsmqInitialized == true)
+                return;
+
+            if (string.IsNullOrEmpty(this.OutgoingQueue) == true)
+            {
+                // 清除 Hangup 状态
+                if (this.ContainsHangup("MessageQueueCreateFail") == true)
+                {
+                    this.ClearHangup("MessageQueueCreateFail");
+                    this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
+                } 
+                return;
+            }
+
+            try
+            {
+#if NO
+                            if (MessageQueue.Exists(this.OutgoingQueue))
+                            {
+                                MessageQueue.Delete(this.OutgoingQueue);
+                            }
+#endif
+
+                if (!MessageQueue.Exists(this.OutgoingQueue))
+                {
+                    MessageQueue queue = MessageQueue.Create(this.OutgoingQueue);
+
+#if NO
+                                // Create an AccessControlList.
+                                AccessControlList list = new AccessControlList();
+
+                                // Create a new trustee to represent the "Everyone" user group.
+                                Trustee tr = new Trustee("Everyone");
+
+                                // Create an AccessControlEntry, granting the trustee read access to
+                                // the queue.
+                                AccessControlEntry entry = new AccessControlEntry(
+                                    tr, GenericAccessRights.Read,
+                         StandardAccessRights.Read,
+                                    AccessControlEntryType.Allow);
+
+                                // Add the AccessControlEntry to the AccessControlList.
+                                list.Add(entry);
+
+
+                                // Apply the AccessControlList to the queue.
+                                queue.SetPermissions(list);
+#endif
+
+                    var wi = WindowsIdentity.GetCurrent();
+                    if (wi.IsSystem == true)
+                    {
+                        // 当前用户已经是 LocalSystem 了，需要额外给 Everyone 添加权限，以便让 dp2Capo 的控制台方式运行能访问这个 Queue
+                        queue.SetPermissions(@"Everyone",
+    MessageQueueAccessRights.ReceiveMessage
+    | MessageQueueAccessRights.DeleteMessage
+    | MessageQueueAccessRights.PeekMessage
+    | MessageQueueAccessRights.GenericRead);
+                    }
+
+                    // 如果当前是 Administrator，表示可能是 dp2libraryxe 启动的方式，那么需要专门给 LocalSystem 操作 Queue 的权限，以便 Windows Service 方式的 dp2Capo 能访问 Queue
+                    var wp = new WindowsPrincipal(wi);
+                    if (wp.IsInRole(WindowsBuiltInRole.Administrator))
+                    {
+                        queue.SetPermissions(@"NT AUTHORITY\System",
+                            MessageQueueAccessRights.FullControl);
+                    }
+
+                    this.WriteErrorLog("首次创建 MSMQ 队列 '" + this.OutgoingQueue + "' 成功");
+                }
+
+                MsmqInitialized = true;
+                // 清除 Hangup 状态
+                if (this.ContainsHangup("MessageQueueCreateFail") == true)
+                {
+                    this.ClearHangup("MessageQueueCreateFail");
+                    this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (this.ContainsHangup("MessageQueueCreateFail") == true)
+                {
+                    this.WriteErrorLog("*** 重试探测和尝试创建 MSMQ 队列 '" + this.OutgoingQueue + "' 失败: " + ExceptionUtil.GetExceptionMessage(ex)
+    + " 系统仍处于挂起状态。");
+                }
+                else
+                {
+                    this.AddHangup("MessageQueueCreateFail");
+                    this.WriteErrorLog("*** 探测和尝试创建 MSMQ 队列 '" + this.OutgoingQueue + "' 时出现异常: " + ExceptionUtil.GetDebugText(ex)
+                        + " 系统已被挂起。");
+                }
             }
         }
 
@@ -3524,7 +3574,7 @@ namespace DigitalPlatform.LibraryServer
             this.EndWather();
 
             //this.HangupReason = LibraryServer.HangupReason.Exit;    // 阻止后继 API 访问
-            this.HangupList.Add("Exit");
+            this.AddHangup("Exit");
 
             this.WriteErrorLog("LibraryApplication 开始下降");
 
@@ -14064,11 +14114,15 @@ strLibraryCode);    // 读者所在的馆代码
 
                 // 注意： strPath 中的斜杠应该是 '/'
                 string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
-                if (string.Compare(strFirstLevel, "upload", true) != 0)
+                if (StringUtil.IsInList("managedatabase", strRights) == false)
                 {
-                    strError = "第一级目录名必须为 'upload'";
-                    return -1;
+                    if (string.Compare(strFirstLevel, "upload", true) != 0)
+                    {
+                        strError = "第一级目录名必须为 'upload'";
+                        return -1;
+                    }
                 }
+
                 if (StringUtil.IsInList("download", strRights) == false)
                 {
                     strError = "读取文件 " + strResPath + " 被拒绝。不具备 download 权限";

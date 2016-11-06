@@ -177,11 +177,11 @@ namespace dp2Library
                 if (string.IsNullOrEmpty(strIP))
                     throw new Exception("endpoint.Address 为空");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 strIP = "";
                 // 2016/11/2
-                this.app.WriteErrorLog("GetNearestClientAddress() 中出现异常(strVia='"+strVia+"'): " + ExceptionUtil.GetDebugText(ex));
+                this.app.WriteErrorLog("GetNearestClientAddress() 中出现异常(strVia='" + strVia + "'): " + ExceptionUtil.GetDebugText(ex));
             }
             // strVia = prop.Via.ToString();
 
@@ -219,7 +219,7 @@ namespace dp2Library
 
                 // TODO: 注意防止错误日志文件耗费太多空间
                 // TODO: 这里适合对现有通道做一些清理。由于 IP 相同并不意味着就是来自同一台电脑，因此需要 MAC 地址、账户名等其他信息辅助判断
-                this.WriteDebugInfo("*** 前端 '" 
+                this.WriteDebugInfo("*** 前端 '"
                     + (address == null ? "" : address.ClientIP + "@" + address.Via)
                     + "' 新分配通道的请求被拒绝:" + ex.Message);
                 // OperationContext.Current.InstanceContext.ReleaseServiceInstance();
@@ -343,7 +343,7 @@ namespace dp2Library
 
                             // TODO: 注意防止错误日志文件耗费太多空间
                             // TODO: 这里适合对现有通道做一些清理。由于 IP 相同并不意味着就是来自同一台电脑，因此需要 MAC 地址、账户名等其他信息辅助判断
-                            this.WriteDebugInfo("*** 前端 '" 
+                            this.WriteDebugInfo("*** 前端 '"
                                 + (address == null ? "" : address.ClientIP + "@" + address.Via)
                                 + "' 新分配通道的请求被拒绝:" + ex.Message);
 
@@ -8459,6 +8459,13 @@ namespace dp2Library
             }
         }
 
+        /*
+2016/11/6 9:16:39 dp2Library BatchTask() API出现异常: Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+   在 DigitalPlatform.LibraryServer.LibraryApplication.GetBatchTaskInfo(String strName, BatchTaskInfo param, BatchTaskInfo& info, String& strError)
+   在 dp2Library.LibraryService.BatchTask(String strName, String strAction, BatchTaskInfo info, BatchTaskInfo& resultInfo)
+         * */
         // 操作一个批处理任务
         public LibraryServerResult BatchTask(
             string strName,
@@ -8558,7 +8565,12 @@ namespace dp2Library
             }
             catch (Exception ex)
             {
-                string strErrorText = "dp2Library BatchTask() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "dp2Library BatchTask() API出现异常: "
+                    + ExceptionUtil.GetDebugText(ex)
+                    + string.Format("\r\nstrName='{0}', strAction='{1}', info='{2}'",
+                    strName,
+                    strAction,
+                    info == null ? "(null)" : info.Dump().Replace("\r\n", ";"));
                 app.WriteErrorLog(strErrorText);
 
                 result.Value = -1;
@@ -9242,7 +9254,6 @@ namespace dp2Library
             }
         }
 
-
         // 列出文件目录，转移当前目录，删除文件和目录
         // parameters:
         //      strAction   可用值 list/cd/delete
@@ -9312,7 +9323,14 @@ namespace dp2Library
 
                 if (string.IsNullOrEmpty(strCategory) == false && strCategory[0] == '!')
                 {
+                    // TODO: 可否根据不同的权限限定不同的 root 起点?
                     string strRoot = Path.Combine(app.DataDir, "upload");
+                    if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == true)
+                    {
+                        strRoot = app.DataDir.Replace("/", "\\");  // 权力很大，能看到数据目录下的全部文件和目录了
+                        if (strRoot.EndsWith("\\") == false)
+                            strRoot += "\\";
+                    }
 
                     string strCurrentDirectory = Path.Combine(app.DataDir, strCategory.Substring(1));
 
@@ -11266,7 +11284,7 @@ namespace dp2Library
             }
         }
 
-        // 列出内核资源目录
+        // 列出内核资源目录，或列出 dp2library 本地文件和目录
         public LibraryServerResult Dir(string strResPath,
             long lStart,
             long lLength,
@@ -11294,16 +11312,70 @@ namespace dp2Library
                 }
 
                 string strError = "";
-                long lRet = channel.DoDir(
-                strResPath,
-                strLang,
-                strStyle,
-                out items,
-                out strError);
-                kernel_errorcode = channel.OriginErrorCode;
-                result.ErrorInfo = strError;
-                result.Value = lRet;
-                return result;
+
+                if (string.IsNullOrEmpty(strResPath) == false
+                    && strResPath.StartsWith("!"))
+                {
+                    // 2016/11/6
+                    // 列出本地文件目录
+                    List<FileItemInfo> infos = null;
+                    result = ListFile("list",
+                        strResPath,
+                        "", // pattern
+                        lStart,
+                        lLength,
+                        out infos);
+                    if (result.Value == -1)
+                    {
+                        return result;
+                    }
+                    List<ResInfoItem> item_list = new List<ResInfoItem>();
+                    foreach (FileItemInfo info in infos)
+                    {
+                        ResInfoItem item = new ResInfoItem();
+                        string name = info.Name.Substring(strResPath.Length-1);
+                        // 去掉第一个字符的 \ 或者 /
+                        if (string.IsNullOrEmpty(name) == false
+                            && (name[0] == '\\' || name[0]== '/'))
+                            name = name.Substring(1);
+
+                        item.Name = name;
+                        /*
+        public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
+                        // TODO: 将此定义移动到 DigitalPlatform.rms 中
+                         * */
+                        if (info.Size == -1)
+                        {
+                            item.Type = 4;
+                            item.HasChildren = true;
+                        }
+                        else
+                        {
+                            item.Type = 5;
+                            item.HasChildren = false;
+                            item.TypeString = "size:" + info.Size.ToString();
+                        }
+
+                        item_list.Add(item);
+                    }
+                    items = item_list.ToArray();
+                    return result;
+                }
+                else
+                {
+                    long lRet = channel.DoDir(
+                        strResPath,
+                        (int)lStart,
+                        (int)lLength,
+                        strLang,
+                        strStyle,
+                        out items,
+                        out strError);
+                    kernel_errorcode = channel.OriginErrorCode;
+                    result.ErrorInfo = strError;
+                    result.Value = lRet;
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -11315,7 +11387,6 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
-
         }
 
         // 获取资源
@@ -11361,6 +11432,7 @@ namespace dp2Library
                 string strError = "";
                 long lRet = 0;
 
+                // '!' 前缀表示获取 dp2library 管辖的本地文件。
                 if (string.IsNullOrEmpty(strResPath) == false
     && strResPath[0] == '!')
                 {
@@ -11514,7 +11586,7 @@ namespace dp2Library
                             if (type == DigitalPlatform.LibraryServer.LibraryApplication.ResPathType.Record || type == DigitalPlatform.LibraryServer.LibraryApplication.ResPathType.CfgFile)
                             {
                                 result.Value = -1;
-                                result.ErrorInfo = "读者身份不被允许用GetRes()来获得读者记录或数据库配置文件";
+                                result.ErrorInfo = "读者身份不被允许用 GetRes() 来获得读者记录或数据库配置文件";
                                 result.ErrorCode = ErrorCode.SystemError;
                                 return result;
                             }

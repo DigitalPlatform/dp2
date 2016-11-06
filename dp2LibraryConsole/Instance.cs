@@ -12,7 +12,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 
@@ -1081,7 +1080,6 @@ value);
 
             try
             {
-
                 FileItemInfo[] infos = null;
 
                 long lStart = 0;
@@ -1550,7 +1548,6 @@ value);
     out strError);
                     if (nRet == -1)
                         return -1;
-
 
                     nRet = DownloadFiles(
                         Path.Combine(strRemoteBase, strDelta),

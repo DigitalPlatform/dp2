@@ -8,7 +8,6 @@ using System.Xml;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
-// using System.ServiceProcess;
 using System.ServiceModel.Channels;
 
 using DigitalPlatform;

@@ -254,7 +254,6 @@ namespace DigitalPlatform.rms.Client
 			return obj;
 		}
 
-
 		// 构造一个目录类型的对象
 		public static DatabaseObject BuildDirObject(
 			string strName)

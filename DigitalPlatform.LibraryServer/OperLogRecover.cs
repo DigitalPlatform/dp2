@@ -153,13 +153,12 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-
         // 一次操作循环
         public override void Worker()
         {
             // 把系统挂起
             // this.App.HangupReason = HangupReason.LogRecover;
-            this.App.HangupList.Add("LogRecover");
+            this.App.AddHangup("LogRecover");
             try
             {
                 string strError = "";

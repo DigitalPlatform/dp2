@@ -6376,7 +6376,7 @@ dp2LibraryXE 版本: dp2LibraryXE, Version=1.1.5939.41661, Culture=neutral, Publ
     public class ResInfoItem
     {
         [DataMember]
-        public int Type;	// 类型,0 库，1 途径,4 cfgs,5 file
+        public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
         [DataMember]
         public string Name;	// 库名或途径名
         [DataMember]
