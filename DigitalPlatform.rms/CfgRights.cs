@@ -108,6 +108,8 @@ namespace DigitalPlatform.rms
                 strResType = "leaf";
             else if (resType == ResType.Record)
                 strResType = "record";
+            else if (resType == ResType.Server)
+                strResType = "server";  // 2015/11/7
             else
                 strResType = "leaf";
 
@@ -151,7 +153,6 @@ namespace DigitalPlatform.rms
                         strExistRights = strExistRights + ",";
                     strExistRights += strPureRights;
                 }
-
 
                 // 检查当前权限字符串中是否存在指定的权限,加，减都返回
                 resultType = this.CheckRights(strQueryRights,
@@ -284,7 +285,15 @@ namespace DigitalPlatform.rms
             if (strAllRights == "")
                 return ResultType.None;
 
+            // 2016/11/7 不做宏替换前先匹配一次
+            ResultType result = MatchOne(strAllRights, strRights);
+            if (result != ResultType.None)
+                return result;
+
             strAllRights = this.CanonicalizeRightString(strAllRights);
+
+            return MatchOne(strAllRights, strRights);
+#if NO
 
             string[] rights = strAllRights.Split(new char[] { ',' });
             for (int i = rights.Length - 1; i >= 0; i--)
@@ -311,6 +320,36 @@ namespace DigitalPlatform.rms
                 }
             }
 
+            return ResultType.None;
+#endif 
+        }
+
+        static ResultType MatchOne(string strAllRights, string strRights)
+        {
+            string[] rights = strAllRights.Split(new char[] { ',' });
+            for (int i = rights.Length - 1; i >= 0; i--)
+            {
+                string strOneRight = rights[i];
+                if (strOneRight == "")
+                    continue;
+
+                string strFirstChar = strOneRight.Substring(0, 1);
+
+                // 前面有+ , - 号的情况
+                if (strFirstChar == "+" || strFirstChar == "-")
+                {
+                    strOneRight = strOneRight.Substring(1);
+                }
+
+                if (String.Compare(strRights, strOneRight, true) == 0
+                    || strOneRight == "*")
+                {
+                    if (strFirstChar == "-")
+                        return ResultType.Minus;
+                    else
+                        return ResultType.Plus;
+                }
+            }
             return ResultType.None;
         }
 

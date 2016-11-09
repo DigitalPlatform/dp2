@@ -318,6 +318,10 @@
       <Project>{AA6C5E6A-252B-4E2A-A883-0E4E739F8701}</Project>
       <Name>DigitalPlatform.Range</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.rms\DigitalPlatform.rms.csproj">
+      <Project>{1a7544ab-30d7-4920-928e-26925b86274d}</Project>
+      <Name>DigitalPlatform.rms</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
       <Name>DigitalPlatform.Text</Name>

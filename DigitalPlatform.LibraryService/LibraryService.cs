@@ -11333,10 +11333,10 @@ Stack:
                     foreach (FileItemInfo info in infos)
                     {
                         ResInfoItem item = new ResInfoItem();
-                        string name = info.Name.Substring(strResPath.Length-1);
+                        string name = info.Name.Substring(strResPath.Length - 1);
                         // 去掉第一个字符的 \ 或者 /
                         if (string.IsNullOrEmpty(name) == false
-                            && (name[0] == '\\' || name[0]== '/'))
+                            && (name[0] == '\\' || name[0] == '/'))
                             name = name.Substring(1);
 
                         item.Name = name;
@@ -11432,6 +11432,20 @@ Stack:
                 string strError = "";
                 long lRet = 0;
 
+                /*
+2016/11/7 13:35:12 dp2Library GetRes() API出现异常: Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+   在 DigitalPlatform.rms.Client.ResPath.GetDbName(String strLongPath)
+   在 dp2Library.LibraryService.GetRes(String strResPath, Int64 nStart, Int32 nLength, String strStyle, Byte[]& baContent, String& strMetadata, String& strOutputResPath, Byte[]& baOutputTimestamp)
+                 * */
+                // 2016/11/7
+                if (string.IsNullOrEmpty(strResPath))
+                {
+                    strError = "strResPath 参数值不应为空";
+                    goto ERROR1;
+                }
+
                 // '!' 前缀表示获取 dp2library 管辖的本地文件。
                 if (string.IsNullOrEmpty(strResPath) == false
     && strResPath[0] == '!')
@@ -11452,7 +11466,6 @@ Stack:
                         out strLibraryCode,
                         out strFilePath,
                         out strError);
-
                     if (nRet == 0)
                     {
                         result.Value = -1;
@@ -11461,12 +11474,7 @@ Stack:
                         return result;
                     }
                     if (nRet == -1)
-                    {
-                        result.Value = -1;
-                        result.ErrorInfo = strError;
-                        result.ErrorCode = ErrorCode.SystemError;
-                        return result;
-                    }
+                        goto ERROR1;
 #if NO
                     if (StringUtil.IsInList("download", sessioninfo.RightsOrigin) == false)
                     {
@@ -11547,21 +11555,14 @@ Stack:
                         return result;
                     }
                     if (nRet == -1)
-                    {
-                        result.Value = -1;
-                        result.ErrorInfo = strError;
-                        result.ErrorCode = ErrorCode.SystemError;
-                        return result;
-                    }
+                        goto ERROR1;
                 }
 
                 RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                 if (channel == null)
                 {
-                    result.Value = -1;
-                    result.ErrorInfo = "get channel error";
-                    result.ErrorCode = ErrorCode.SystemError;
-                    return result;
+                    strError = "get channel error";
+                    goto ERROR1;
                 }
 
                 bool bIsReaderDb = false;
@@ -11585,10 +11586,8 @@ Stack:
                             DigitalPlatform.LibraryServer.LibraryApplication.ResPathType type = LibraryApplication.GetResPathType(strResPath);
                             if (type == DigitalPlatform.LibraryServer.LibraryApplication.ResPathType.Record || type == DigitalPlatform.LibraryServer.LibraryApplication.ResPathType.CfgFile)
                             {
-                                result.Value = -1;
-                                result.ErrorInfo = "读者身份不被允许用 GetRes() 来获得读者记录或数据库配置文件";
-                                result.ErrorCode = ErrorCode.SystemError;
-                                return result;
+                                strError = "读者身份不被允许用 GetRes() 来获得读者记录或数据库配置文件";
+                                goto ERROR1;
                             }
 
                             // TODO: 对于获取对象的请求，要看读者是否具有管辖的其他读者，或者好友。否则只能获取自己的读者记录的对象
@@ -11599,10 +11598,8 @@ Stack:
                         if (app.IsCurrentChangeableReaderPath(strDbName + "/?",
                 sessioninfo.LibraryCodeList) == false)
                         {
-                            result.Value = -1;
-                            result.ErrorInfo = "读者库 '" + strDbName + "' 不在当前用户管辖范围内";
-                            result.ErrorCode = ErrorCode.SystemError;
-                            return result;
+                            strError = "读者库 '" + strDbName + "' 不在当前用户管辖范围内";
+                            goto ERROR1;
                         }
                     }
                     else if (app.AmerceDbName == strDbName)
@@ -11617,15 +11614,11 @@ Stack:
                         {
                             if (bIsReader == true)
                             {
-                                result.Value = -1;
-                                result.ErrorInfo = "读者身份不被允许用GetRes()来获得违约金记录";
-                                result.ErrorCode = ErrorCode.SystemError;
-                                return result;
+                                strError = "读者身份不被允许用GetRes()来获得违约金记录";
+                                goto ERROR1;
                             }
-                            result.Value = -1;
-                            result.ErrorInfo = "不被允许用GetRes()来获得违约金记录";
-                            result.ErrorCode = ErrorCode.SystemError;
-                            return result;
+                            strError = "不被允许用GetRes()来获得违约金记录";
+                            goto ERROR1;
                         }
                     }
                 }
@@ -11753,10 +11746,7 @@ Stack:
                             if (bClearMetadata == true)
                                 strMetadata = "";
                             strError = "GetRes() API 写入日志时发生错误: " + strError;
-                            result.Value = -1;
-                            result.ErrorCode = ErrorCode.SystemError;
-                            result.ErrorInfo = strError;
-                            return result;
+                            goto ERROR1;
                         }
                     }
                 }
@@ -11764,6 +11754,11 @@ Stack:
                 if (bClearMetadata == true)
                     strMetadata = "";
 
+                return result;
+            ERROR1:
+                result.Value = -1;
+                result.ErrorInfo = strError;
+                result.ErrorCode = ErrorCode.SystemError;
                 return result;
             }
             catch (Exception ex)

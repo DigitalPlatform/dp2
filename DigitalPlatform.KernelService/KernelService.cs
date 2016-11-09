@@ -1044,7 +1044,6 @@ namespace dp2Kernel
 
             try
             {
-
                 if (this.sessioninfo.UserName == "")
                 {
                     result.Value = -1;

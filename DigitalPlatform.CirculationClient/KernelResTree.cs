@@ -98,8 +98,13 @@ namespace DigitalPlatform.CirculationClient
             string result = StringUtil.MakePathList(levels, "/");
 
             // 针对 '!/cfgs' 情况，修正为 '!cfgs'
-            if (result.StartsWith("!/") == true)
-                result = "!" + result.Substring(2);
+            if (result.StartsWith(DigitalPlatform.LibraryServer.LibraryServerUtil.LOCAL_PREFIX + "/") == true)
+                result = DigitalPlatform.LibraryServer.LibraryServerUtil.LOCAL_PREFIX + result.Substring(DigitalPlatform.LibraryServer.LibraryServerUtil.LOCAL_PREFIX.Length + 1);
+
+            // 针对 '~/cfgs' 情况，修正为 '~cfgs'
+            if (result.StartsWith(DigitalPlatform.rms.KernelServerUtil.LOCAL_PREFIX + "/") == true)
+                result = DigitalPlatform.rms.KernelServerUtil.LOCAL_PREFIX + result.Substring(DigitalPlatform.rms.KernelServerUtil.LOCAL_PREFIX.Length + 1);
+
             return result;
         }
 
@@ -143,6 +148,8 @@ namespace DigitalPlatform.CirculationClient
                 old_timeout = channel.Timeout;
                 channel.Timeout = new TimeSpan(0, 5, 0);
             }
+
+            bool restoreLoading = IsLoading(node);
 
             try
             {
@@ -202,7 +209,14 @@ namespace DigitalPlatform.CirculationClient
                     else
                         children.Add(nodeNew);
                 }
+
+                restoreLoading = false;  // 防止 finally 复原
                 return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = "Fill() 过程出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                return -1;
             }
             finally
             {
@@ -211,6 +225,13 @@ namespace DigitalPlatform.CirculationClient
                     channel.Timeout = old_timeout;
 
                     this.CallReturnChannel(channel, true);
+                }
+
+                if (restoreLoading)
+                {
+                    SetLoading(node);
+                    if (node != null)
+                        node.Collapse();
                 }
             }
         }
@@ -231,6 +252,9 @@ namespace DigitalPlatform.CirculationClient
         // 下级是否包含loading...?
         public static bool IsLoading(TreeNode node)
         {
+            if (node == null)
+                return false;
+
             if (node.Nodes.Count == 0)
                 return false;
 

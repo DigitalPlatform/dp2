@@ -130,7 +130,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.87 (2016/10/22) Login() API 允许工作人员代理工作人员登录而不使用 token 字符串。这时通道使用的是代理账户的权限。
         //      2.88 (2016/10/30) 为登录过程首次实现 ip: router_ip: 筛选功能。通道显示的 Via 合并了两类 Via 和 IP 地址。
         //      2.89 (2016/11/3) dp2library 可以使用 * 作为序列号，这样最大通道数为 255，而且永不失效。
-        public static string Version = "2.89";
+        //      2.90 (2016/11/6) 消除 首次初始化 MSMQ 队列文件遇到异常然后挂起，但再也不会重试消除挂起状态 的 Bug。尝试将 Dir() API 和 ListFile() API 连接起来
+        public static string Version = "2.90";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -3758,6 +3759,10 @@ namespace DigitalPlatform.LibraryServer
         {
             IsInCirculation = false;
             strLibraryCode = "";
+
+            // 2016/11/7
+            if (string.IsNullOrEmpty(strReaderDbName))
+                return false;
 
             for (int i = 0; i < this.ReaderDbs.Count; i++)
             {

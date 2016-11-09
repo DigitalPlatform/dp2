@@ -1364,6 +1364,7 @@ namespace DigitalPlatform.LibraryServer
                     byte[] output_timestamp = null;
                     string strOutputPath = "";
 
+                    StringBuilder debugInfo = null;
                     // 检查借阅权限
                     // return:
                     //      -1  配置参数错误
@@ -1375,9 +1376,10 @@ namespace DigitalPlatform.LibraryServer
                         bRenew,
                         strLibraryCode, // 读者记录所在读者库的馆代码
                         strAccessParameters,
-                        ref  readerdom,
-                        ref  itemdom,
-                        out  strError);
+                        ref readerdom,
+                        ref itemdom,
+                        ref debugInfo,
+                        out strError);
                     if (nRet == -1 || nRet == 0)
                     {
                         // 如果有必要保存回读者记录(因前面刷新了以停代金数据)
@@ -2841,6 +2843,7 @@ start_time_1,
             string strAccessParameters,
             ref XmlDocument readerdom,
             ref XmlDocument itemdom,
+            ref StringBuilder debugInfo,
             out string strError)
         {
             strError = "";
@@ -3006,6 +3009,10 @@ start_time_1,
             {
                 // 如果没有配置脚本函数，就根据馆藏地点察看地点允许配置来决定是否允许借阅
                 List<string> locations = app.GetLocationTypes(strLibraryCode, true);
+
+                if (debugInfo != null)
+                    debugInfo.Append("获得馆代码 '"+strLibraryCode+"' 的可以借阅的馆藏地列表为: '" + StringUtil.MakePathList(locations) + "'\r\n");
+
                 if (locations.IndexOf(strRoom) == -1)
                 {
                     // text-level: 用户提示
@@ -3014,8 +3021,15 @@ start_time_1,
                         strLocation);
 
                     // "册 " + strItemBarcode + " 的馆藏地点为 " + strLocation + "，按规定(<locationTypes>配置)此册不允许外借。";
+
+                    if (debugInfo != null)
+                        debugInfo.Append("在列表 '" + StringUtil.MakePathList(locations) + "' 中没有匹配上 '"+strRoom+"'\r\n");
+
                     return 0;
                 }
+
+                if (debugInfo != null)
+                    debugInfo.Append("在列表 '" + StringUtil.MakePathList(locations) + "' 中匹配上了 '" + strRoom + "'\r\n");
             }
             else
             {
@@ -7943,12 +7957,15 @@ out string strError)
                     result.Add(item.InnerText.Trim());
             }
 
+#if NO
+            // 这一段不知所云，估计是 bug 原因 2016/11/9
             for (int i = 0; i < nodes.Count; i++)
             {
                 XmlNode node = nodes[i];
 
                 result.Add(node.InnerText);
             }
+#endif
 
             // 兼容原来的习惯。找到那些不属于<library>元素后代的<item>元素
             if (string.IsNullOrEmpty(strLibraryCode) == true)

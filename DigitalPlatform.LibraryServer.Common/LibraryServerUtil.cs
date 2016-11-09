@@ -2,16 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using DigitalPlatform.Text;
 using System.Text.RegularExpressions;
-using DigitalPlatform.IO;
 using System.Xml;
 using System.Collections;
+
+using DigitalPlatform.Text;
+using DigitalPlatform.IO;
 
 namespace DigitalPlatform.LibraryServer
 {
     public class LibraryServerUtil
     {
+        // 本地文件目录的虚拟前缀字符串
+        public static string LOCAL_PREFIX = "!";
+
         public static string GetLibraryXmlUid(XmlDocument dom)
         {
             if (dom.DocumentElement == null)

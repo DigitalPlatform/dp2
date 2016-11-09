@@ -1132,6 +1132,7 @@ namespace DigitalPlatform.IO
             if (strPath1 == strPath2)
                 return true;
 
+            // TODO: new DirecotryInfo() 对一个文件操作时候会怎样？会抛出异常么? 需要测试一下 2016/11/6
             FileSystemInfo fi1 = new DirectoryInfo(strPath1);
             FileSystemInfo fi2 = new DirectoryInfo(strPath2);
 

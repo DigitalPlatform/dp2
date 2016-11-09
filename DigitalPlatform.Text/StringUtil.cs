@@ -2028,6 +2028,10 @@ string strTimestamp)
         // 构造路径列表字符串，逗号分隔
         public static string MakePathList(List<string> aPath)
         {
+            // 2016/11/9
+            if (aPath == null)
+                return "";
+
             // 2012/9/7
             if (aPath.Count == 0)
                 return "";

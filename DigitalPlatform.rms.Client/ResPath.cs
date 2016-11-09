@@ -70,6 +70,10 @@ namespace DigitalPlatform.rms.Client
 		// 从一个纯路径(不含url部分)中截取库名部分
 		public static string GetDbName(string strLongPath)
 		{
+            // 2016/11/7
+            if (string.IsNullOrEmpty(strLongPath))
+                return "";
+
 			int nRet = strLongPath.IndexOf("/");
 			if (nRet == -1)
 				return strLongPath;
