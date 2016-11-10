@@ -93,6 +93,10 @@
       <Project>{D63FAE14-7CD6-4BD3-90D7-7DBBCDF8EEEF}</Project>
       <Name>DigitalPlatform.rms.Client</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.rms\DigitalPlatform.rms.csproj">
+      <Project>{1a7544ab-30d7-4920-928e-26925b86274d}</Project>
+      <Name>DigitalPlatform.rms</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
       <Name>DigitalPlatform.Text</Name>

@@ -23,6 +23,7 @@ using DigitalPlatform.Message;
 
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.rms;
 
 namespace dp2Library
 {
@@ -11363,6 +11364,15 @@ Stack:
                 }
                 else
                 {
+                    if (strResPath.StartsWith(KernelServerUtil.LOCAL_PREFIX) == true
+                        && StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "不具备 managedatabase 权限，无法列出内核数据目录和文件";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+
                     long lRet = channel.DoDir(
                         strResPath,
                         (int)lStart,

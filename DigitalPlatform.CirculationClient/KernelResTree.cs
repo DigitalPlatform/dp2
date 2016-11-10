@@ -213,6 +213,20 @@ namespace DigitalPlatform.CirculationClient
                 restoreLoading = false;  // 防止 finally 复原
                 return 0;
             }
+            catch(ChannelException ex)
+            {
+                strError = ex.Message;
+                return -1;
+#if NO
+                if (ex.ErrorCode == ErrorCode.AccessDenied)
+                {
+                    strError = ex.Message;
+                    return -1;
+                }
+                strError = "Fill() 过程出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                return -1;
+#endif
+            }
             catch (Exception ex)
             {
                 strError = "Fill() 过程出现异常: " + ExceptionUtil.GetExceptionText(ex);

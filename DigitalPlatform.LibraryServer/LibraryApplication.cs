@@ -14123,7 +14123,7 @@ strLibraryCode);    // 读者所在的馆代码
                 {
                     if (string.Compare(strFirstLevel, "upload", true) != 0)
                     {
-                        strError = "第一级目录名必须为 'upload'";
+                        strError = "因当前用户不具备权限 managedatabase，能列出的第一级目录名被限定为 'upload'";
                         return -1;
                     }
                 }

@@ -52,12 +52,17 @@ namespace DigitalPlatform.LibraryClient
                     nStart,
                     nPerCount,
                     this.Lang,
-        this.Style,
-        out items,
-        out kernel_errorcode,
-        out strError);
+                    this.Style,
+                    out items,
+                    out kernel_errorcode,
+                    out strError);
                 if (lRet == -1)
+                {
+                    if (this.Channel.ErrorCode != ErrorCode.NoError)
+                        throw new ChannelException(Channel.ErrorCode, strError);
+
                     goto ERROR1;
+                }
 
                 if (items == null || items.Length == 0)
                     yield break;

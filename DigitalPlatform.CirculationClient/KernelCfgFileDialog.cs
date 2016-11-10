@@ -39,7 +39,7 @@ namespace DigitalPlatform.CirculationClient
         private void KernelCfgFileDialog_Load(object sender, EventArgs e)
         {
             this.Changed = false;
-
+            this.BeginInvoke(new Action(FocusEdit));
         }
 
         private void KernelCfgFileDialog_FormClosing(object sender, FormClosingEventArgs e)
@@ -164,6 +164,12 @@ namespace DigitalPlatform.CirculationClient
                 MessageBox.Show(strError);
             else
                 this.textBox_content.Text = strOutXml;
+        }
+
+        void FocusEdit()
+        {
+            this.textBox_content.Select(0, 0);
+            this.textBox_content.Focus();
         }
     }
 }
