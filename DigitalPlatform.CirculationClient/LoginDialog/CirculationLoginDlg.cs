@@ -14,7 +14,7 @@ using DigitalPlatform.CommonControl;
 namespace DigitalPlatform.CirculationClient
 {
     /// <summary>
-    /// Summary description for LoginDlg.
+    /// dp2library 前端登录的对话框
     /// </summary>
     public class CirculationLoginDlg : System.Windows.Forms.Form
     {
@@ -48,7 +48,11 @@ namespace DigitalPlatform.CirculationClient
 
         public bool SetDefaultMode = false;
         private ComboBox comboBox_serverAddr;
-        private ToolStripButton toolStripButton_deleteFromList; // 是否为 设置缺省帐户 状态？ 第一次进入程序时候是这个状态，其他登录失败后重新输入以便登录的时候不是这个状态
+        private ToolStripButton toolStripButton_deleteFromList;
+        public TextBox textBox_phoneNumber;
+        private Label label_phoneNumber;
+        public TextBox textBox_tempCode;
+        private Label label_tempCode; // 是否为 设置缺省帐户 状态？ 第一次进入程序时候是这个状态，其他登录失败后重新输入以便登录的时候不是这个状态
 
         public bool SupervisorMode = false; // 是否为 supervisor 模式。也就是管理员模式。在这个模式下， 无法修改 URL ，无法选择读者类型，不出现 红泥巴数字平台服务器按钮
 
@@ -103,8 +107,12 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripButton_server_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_server_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
-            this.comboBox_serverAddr = new System.Windows.Forms.ComboBox();
             this.toolStripButton_deleteFromList = new System.Windows.Forms.ToolStripButton();
+            this.comboBox_serverAddr = new System.Windows.Forms.ComboBox();
+            this.textBox_phoneNumber = new System.Windows.Forms.TextBox();
+            this.label_phoneNumber = new System.Windows.Forms.Label();
+            this.textBox_tempCode = new System.Windows.Forms.TextBox();
+            this.label_tempCode = new System.Windows.Forms.Label();
             this.toolStrip_server.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -113,10 +121,11 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_savePasswordShort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_savePasswordShort.AutoSize = true;
             this.checkBox_savePasswordShort.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_savePasswordShort.Location = new System.Drawing.Point(120, 290);
+            this.checkBox_savePasswordShort.Location = new System.Drawing.Point(120, 242);
+            this.checkBox_savePasswordShort.Margin = new System.Windows.Forms.Padding(0);
             this.checkBox_savePasswordShort.Name = "checkBox_savePasswordShort";
             this.checkBox_savePasswordShort.Size = new System.Drawing.Size(111, 16);
-            this.checkBox_savePasswordShort.TabIndex = 7;
+            this.checkBox_savePasswordShort.TabIndex = 9;
             this.checkBox_savePasswordShort.Text = "短期保持密码(&S)";
             this.checkBox_savePasswordShort.CheckedChanged += new System.EventHandler(this.checkBox_savePasswordShort_CheckedChanged);
             this.checkBox_savePasswordShort.Click += new System.EventHandler(this.controls_Click);
@@ -128,11 +137,11 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_password.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_password.ForeColor = System.Drawing.SystemColors.ControlText;
             this.textBox_password.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_password.Location = new System.Drawing.Point(120, 266);
+            this.textBox_password.Location = new System.Drawing.Point(120, 221);
             this.textBox_password.Name = "textBox_password";
             this.textBox_password.PasswordChar = '*';
             this.textBox_password.Size = new System.Drawing.Size(156, 21);
-            this.textBox_password.TabIndex = 6;
+            this.textBox_password.TabIndex = 8;
             this.textBox_password.Click += new System.EventHandler(this.controls_Click);
             this.textBox_password.TextChanged += new System.EventHandler(this.textBox_password_TextChanged);
             // 
@@ -143,10 +152,10 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_userName.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_userName.ForeColor = System.Drawing.SystemColors.ControlText;
             this.textBox_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_userName.Location = new System.Drawing.Point(120, 221);
+            this.textBox_userName.Location = new System.Drawing.Point(120, 179);
             this.textBox_userName.Name = "textBox_userName";
             this.textBox_userName.Size = new System.Drawing.Size(156, 21);
-            this.textBox_userName.TabIndex = 3;
+            this.textBox_userName.TabIndex = 5;
             this.textBox_userName.Click += new System.EventHandler(this.controls_Click);
             // 
             // button_cancel
@@ -157,7 +166,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_cancel.Location = new System.Drawing.Point(348, 340);
             this.button_cancel.Name = "button_cancel";
             this.button_cancel.Size = new System.Drawing.Size(78, 24);
-            this.button_cancel.TabIndex = 11;
+            this.button_cancel.TabIndex = 18;
             this.button_cancel.Text = "取消";
             this.button_cancel.Click += new System.EventHandler(this.button_cancel_Click);
             // 
@@ -165,27 +174,27 @@ namespace DigitalPlatform.CirculationClient
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(10, 268);
+            this.label3.Location = new System.Drawing.Point(11, 223);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(53, 12);
-            this.label3.TabIndex = 5;
+            this.label3.TabIndex = 7;
             this.label3.Text = "密码(&P):";
             // 
             // label_userName
             // 
             this.label_userName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label_userName.AutoSize = true;
-            this.label_userName.Location = new System.Drawing.Point(10, 223);
+            this.label_userName.Location = new System.Drawing.Point(10, 181);
             this.label_userName.Name = "label_userName";
             this.label_userName.Size = new System.Drawing.Size(65, 12);
-            this.label_userName.TabIndex = 2;
+            this.label_userName.TabIndex = 4;
             this.label_userName.Text = "用户名(&U):";
             // 
             // label1
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(10, 149);
+            this.label1.Location = new System.Drawing.Point(10, 107);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(149, 12);
             this.label1.TabIndex = 1;
@@ -198,7 +207,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_OK.Location = new System.Drawing.Point(348, 310);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(78, 24);
-            this.button_OK.TabIndex = 10;
+            this.button_OK.TabIndex = 17;
             this.button_OK.Text = "确定";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
@@ -216,7 +225,7 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_comment.Name = "textBox_comment";
             this.textBox_comment.ReadOnly = true;
             this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_comment.Size = new System.Drawing.Size(414, 126);
+            this.textBox_comment.Size = new System.Drawing.Size(414, 92);
             this.textBox_comment.TabIndex = 0;
             this.textBox_comment.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -227,20 +236,20 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_location.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_location.ForeColor = System.Drawing.SystemColors.ControlText;
             this.textBox_location.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_location.Location = new System.Drawing.Point(120, 312);
+            this.textBox_location.Location = new System.Drawing.Point(120, 265);
             this.textBox_location.Name = "textBox_location";
             this.textBox_location.Size = new System.Drawing.Size(156, 21);
-            this.textBox_location.TabIndex = 9;
+            this.textBox_location.TabIndex = 11;
             this.textBox_location.Click += new System.EventHandler(this.controls_Click);
             // 
             // label4
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(10, 314);
+            this.label4.Location = new System.Drawing.Point(11, 267);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(77, 12);
-            this.label4.TabIndex = 8;
+            this.label4.TabIndex = 10;
             this.label4.Text = "工作台号(&W):";
             // 
             // checkBox_isReader
@@ -248,10 +257,11 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_isReader.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_isReader.AutoSize = true;
             this.checkBox_isReader.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_isReader.Location = new System.Drawing.Point(120, 244);
+            this.checkBox_isReader.Location = new System.Drawing.Point(120, 200);
+            this.checkBox_isReader.Margin = new System.Windows.Forms.Padding(0);
             this.checkBox_isReader.Name = "checkBox_isReader";
             this.checkBox_isReader.Size = new System.Drawing.Size(63, 16);
-            this.checkBox_isReader.TabIndex = 4;
+            this.checkBox_isReader.TabIndex = 6;
             this.checkBox_isReader.Text = "读者(&R)";
             this.checkBox_isReader.UseVisualStyleBackColor = true;
             this.checkBox_isReader.CheckedChanged += new System.EventHandler(this.checkBox_isReader_CheckedChanged);
@@ -262,7 +272,7 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_savePasswordLong.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_savePasswordLong.AutoSize = true;
             this.checkBox_savePasswordLong.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_savePasswordLong.Location = new System.Drawing.Point(12, 348);
+            this.checkBox_savePasswordLong.Location = new System.Drawing.Point(13, 292);
             this.checkBox_savePasswordLong.Name = "checkBox_savePasswordLong";
             this.checkBox_savePasswordLong.Size = new System.Drawing.Size(111, 16);
             this.checkBox_savePasswordLong.TabIndex = 12;
@@ -283,11 +293,11 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripSeparator1,
             this.toolStripButton_server_setHongnibaServer,
             this.toolStripButton_deleteFromList});
-            this.toolStrip_server.Location = new System.Drawing.Point(12, 184);
+            this.toolStrip_server.Location = new System.Drawing.Point(12, 142);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.toolStrip_server.Size = new System.Drawing.Size(414, 25);
-            this.toolStrip_server.TabIndex = 26;
+            this.toolStrip_server.TabIndex = 3;
             this.toolStrip_server.Text = "toolStrip1";
             // 
             // toolStripButton_server_setXeServer
@@ -318,6 +328,16 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripButton_server_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             this.toolStripButton_server_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_server_setHongnibaServer_Click);
             // 
+            // toolStripButton_deleteFromList
+            // 
+            this.toolStripButton_deleteFromList.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton_deleteFromList.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_deleteFromList.Image")));
+            this.toolStripButton_deleteFromList.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
+            this.toolStripButton_deleteFromList.Name = "toolStripButton_deleteFromList";
+            this.toolStripButton_deleteFromList.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton_deleteFromList.Text = "从列表中删除此项";
+            this.toolStripButton_deleteFromList.Click += new System.EventHandler(this.toolStripButton_deleteFromList_Click);
+            // 
             // comboBox_serverAddr
             // 
             this.comboBox_serverAddr.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
@@ -329,24 +349,60 @@ namespace DigitalPlatform.CirculationClient
             this.comboBox_serverAddr.ForeColor = System.Drawing.SystemColors.ControlText;
             this.comboBox_serverAddr.FormattingEnabled = true;
             this.comboBox_serverAddr.IntegralHeight = false;
-            this.comboBox_serverAddr.Location = new System.Drawing.Point(12, 164);
+            this.comboBox_serverAddr.Location = new System.Drawing.Point(12, 122);
             this.comboBox_serverAddr.Name = "comboBox_serverAddr";
             this.comboBox_serverAddr.Size = new System.Drawing.Size(414, 22);
-            this.comboBox_serverAddr.TabIndex = 27;
+            this.comboBox_serverAddr.TabIndex = 2;
             this.comboBox_serverAddr.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.comboBox_serverAddr_DrawItem);
             this.comboBox_serverAddr.MeasureItem += new System.Windows.Forms.MeasureItemEventHandler(this.comboBox_serverAddr_MeasureItem);
             this.comboBox_serverAddr.SelectedIndexChanged += new System.EventHandler(this.comboBox_serverAddr_SelectedIndexChanged);
             this.comboBox_serverAddr.Click += new System.EventHandler(this.controls_Click);
             // 
-            // toolStripButton_deleteFromList
+            // textBox_phoneNumber
             // 
-            this.toolStripButton_deleteFromList.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton_deleteFromList.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_deleteFromList.Image")));
-            this.toolStripButton_deleteFromList.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
-            this.toolStripButton_deleteFromList.Name = "toolStripButton_deleteFromList";
-            this.toolStripButton_deleteFromList.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton_deleteFromList.Text = "从列表中删除此项";
-            this.toolStripButton_deleteFromList.Click += new System.EventHandler(this.toolStripButton_deleteFromList_Click);
+            this.textBox_phoneNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textBox_phoneNumber.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.textBox_phoneNumber.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBox_phoneNumber.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.textBox_phoneNumber.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_phoneNumber.Location = new System.Drawing.Point(120, 314);
+            this.textBox_phoneNumber.Name = "textBox_phoneNumber";
+            this.textBox_phoneNumber.Size = new System.Drawing.Size(156, 21);
+            this.textBox_phoneNumber.TabIndex = 14;
+            // 
+            // label_phoneNumber
+            // 
+            this.label_phoneNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_phoneNumber.AutoSize = true;
+            this.label_phoneNumber.Location = new System.Drawing.Point(10, 316);
+            this.label_phoneNumber.Name = "label_phoneNumber";
+            this.label_phoneNumber.Size = new System.Drawing.Size(65, 12);
+            this.label_phoneNumber.TabIndex = 13;
+            this.label_phoneNumber.Text = "手机号(&P):";
+            // 
+            // textBox_tempCode
+            // 
+            this.textBox_tempCode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.textBox_tempCode.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.textBox_tempCode.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.textBox_tempCode.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.textBox_tempCode.ImeMode = System.Windows.Forms.ImeMode.Off;
+            this.textBox_tempCode.Location = new System.Drawing.Point(120, 337);
+            this.textBox_tempCode.Name = "textBox_tempCode";
+            this.textBox_tempCode.Size = new System.Drawing.Size(156, 21);
+            this.textBox_tempCode.TabIndex = 16;
+            this.textBox_tempCode.Visible = false;
+            // 
+            // label_tempCode
+            // 
+            this.label_tempCode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_tempCode.AutoSize = true;
+            this.label_tempCode.Location = new System.Drawing.Point(10, 339);
+            this.label_tempCode.Name = "label_tempCode";
+            this.label_tempCode.Size = new System.Drawing.Size(65, 12);
+            this.label_tempCode.TabIndex = 15;
+            this.label_tempCode.Text = "验证码(&S):";
+            this.label_tempCode.Visible = false;
             // 
             // CirculationLoginDlg
             // 
@@ -355,6 +411,10 @@ namespace DigitalPlatform.CirculationClient
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
             this.ClientSize = new System.Drawing.Size(438, 376);
+            this.Controls.Add(this.textBox_tempCode);
+            this.Controls.Add(this.label_tempCode);
+            this.Controls.Add(this.textBox_phoneNumber);
+            this.Controls.Add(this.label_phoneNumber);
             this.Controls.Add(this.comboBox_serverAddr);
             this.Controls.Add(this.checkBox_savePasswordLong);
             this.Controls.Add(this.checkBox_isReader);
@@ -399,23 +459,49 @@ namespace DigitalPlatform.CirculationClient
 
         private void button_OK_Click(object sender, System.EventArgs e)
         {
+            string strError = "";
+
             if (comboBox_serverAddr.Text == ""
                 // && textBox_serverAddr.Enabled == true
                 && this.ServerAddrEnabled == true)
             {
-                MessageBox.Show(this, "尚未输入服务器地址");
-                return;
+                strError = "尚未输入服务器地址";
+                goto ERROR1;
             }
             if (textBox_userName.Text == "")
             {
-                MessageBox.Show(this, "尚未输入用户名");
-                return;
+                strError = "尚未输入用户名";
+                goto ERROR1;
+            }
+
+            if (this.RetryLogin && string.IsNullOrEmpty(this.textBox_phoneNumber.Text) == false)
+            {
+#if NO
+                InputTempPasswordDialog dlg = new InputTempPasswordDialog();
+                GuiUtil.AutoSetDefaultFont(dlg);
+                // dlg.Font = this.Font;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                {
+                    MessageBox.Show(this, "放弃以手机验证码方式登录。(若要用其他方式登录，请清除“手机短信验证”复选框再点“登录”按钮)");
+                    return;
+                }
+                this._tempCode = dlg.TempPassword;
+#endif
+                if (string.IsNullOrEmpty(this.TempCode))
+                {
+                    strError = "请输入您收到的手机短信中的验证码";
+                    goto ERROR1;
+                }
             }
 
             this.SavePannel();
-
             this.DialogResult = DialogResult.OK;
             this.Close();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void button_cancel_Click(object sender, System.EventArgs e)
@@ -460,6 +546,7 @@ namespace DigitalPlatform.CirculationClient
                     if (AutoShowShortSavePasswordTip == true)
                         ShowShortSavePasswordTip();
 
+                    SetFocus();
                     return;
             }
             base.DefWndProc(ref m);
@@ -843,6 +930,7 @@ Keys keyData)
                 SavePassword save = new SavePassword(this.textBox_password, this.checkBox_savePasswordLong);
                 controls.Add(save);
                 controls.Add(this.checkBox_savePasswordShort);
+                controls.Add(this.textBox_phoneNumber);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -853,6 +941,7 @@ Keys keyData)
                 SavePassword save = new SavePassword(this.textBox_password, this.checkBox_savePasswordLong);
                 controls.Add(save);
                 controls.Add(this.checkBox_savePasswordShort);
+                controls.Add(this.textBox_phoneNumber);
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -958,6 +1047,130 @@ Keys keyData)
             else
                 this.comboBox_serverAddr.Text = this.comboBox_serverAddr.Items[0] as string;
         }
+
+        // 用于接收验证短信的手机号码
+        public string PhoneNumber
+        {
+            get
+            {
+                return this.textBox_phoneNumber.Text;
+            }
+            set
+            {
+                this.textBox_phoneNumber.Text = value;
+            }
+        }
+
+#if NO
+        // 是否以验证码方式登录
+        public bool SmsPassword
+        {
+            get
+            {
+                return this.checkBox_smsPassword.Checked;
+            }
+            set
+            {
+                this.checkBox_smsPassword.Checked = value;
+            }
+        }
+#endif
+
+        bool _retryLogin = false;
+        public bool RetryLogin
+        {
+            get
+            {
+                return _retryLogin;
+            }
+            set
+            {
+                _retryLogin = value;
+                TempCodeVisible = value;
+            }
+        }
+
+        // string _tempCode = "";
+
+        // 验证码
+        public string TempCode
+        {
+            get
+            {
+                return this.textBox_tempCode.Text;
+            }
+            set
+            {
+                this.textBox_tempCode.Text = value;
+            }
+        }
+
+        bool _tempCodeVisible = false;
+        public bool TempCodeVisible
+        {
+            get
+            {
+                return this._tempCodeVisible;
+            }
+            set
+            {
+                this._tempCodeVisible = value;
+                this.label_tempCode.Visible = value;
+                this.textBox_tempCode.Visible = value;
+            }
+        }
+
+        bool _phoneNumberActivated = false;
+        public void ActivatePhoneNumber()
+        {
+            int nOldWidth = this.textBox_phoneNumber.Width;
+            int nOldHeight = this.textBox_phoneNumber.Height;
+
+            // 将字体放大一倍
+            this.textBox_phoneNumber.Font = new Font(this.Font.FontFamily, 
+                this.Font.Size * 2);
+            this.label_phoneNumber.Font = this.textBox_phoneNumber.Font;
+
+            int nHeightDelta = this.textBox_phoneNumber.Height - nOldHeight;
+
+            // 保持原有的宽度
+            this.textBox_phoneNumber.Width = nOldWidth;
+
+            _phoneNumberActivated = true;
+#if NO
+            // 向上移动一点
+            this.textBox_phoneNumber.Location = new Point(this.textBox_phoneNumber.Location.X, this.textBox_phoneNumber.Location.Y - nHeightDelta);
+            this.label_phoneNumber.Location = new Point(this.label_phoneNumber.Location.X, this.label_phoneNumber.Location.Y - nHeightDelta);
+#endif
+        }
+
+        bool _tempCodeActivated = false;
+        public void ActivateTempCode()
+        {
+            int nOldWidth = this.textBox_tempCode.Width;
+            int nOldHeight = this.textBox_tempCode.Height;
+
+            // 将字体放大一倍
+            this.textBox_tempCode.Font = new Font(this.Font.FontFamily,
+                this.Font.Size * 2);
+            this.label_tempCode.Font = this.textBox_tempCode.Font;
+
+            int nHeightDelta = this.textBox_tempCode.Height - nOldHeight;
+
+            // 保持原有的宽度
+            this.textBox_tempCode.Width = nOldWidth;
+
+            _tempCodeActivated = true;
+        }
+
+        void SetFocus()
+        {
+            if (_phoneNumberActivated)
+                this.textBox_phoneNumber.Focus();
+            else if (_tempCodeActivated)
+                this.textBox_tempCode.Focus();
+        }
+
     }
 
     // 一个 URL 事项

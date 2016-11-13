@@ -52,6 +52,12 @@ namespace DigitalPlatform.LibraryClient
         /// 前端版本太旧
         /// </summary>
         ClientVersionTooOld = 3,    // 前端版本太旧
+
+        NeedSmsLogin = 4,
+
+        RetryLogin = 5,
+
+        TempCodeMismatch = 6,
     }
 
     /// <summary>
@@ -2359,7 +2365,7 @@ out strError);
                     ea.Password,
                     ea.Parameters,
                     out strError);
-                if (lRet == -1 || lRet == 0)
+                if (lRet != 1)   // lRet == -1 || lRet == 0 || lRet == 2
                 {
                     if (this.ErrorCode == localhost.ErrorCode.ClientVersionTooOld)
                         return -1;
@@ -2370,7 +2376,14 @@ out strError);
                         ea.ErrorInfo = "";
                     ea.ErrorInfo += strError;
                     ea.FirstTry = false;
-                    ea.LoginFailCondition = LoginFailCondition.PasswordError;
+                    if (this.ErrorCode == localhost.ErrorCode.RetryLogin)
+                        ea.LoginFailCondition = LoginFailCondition.RetryLogin;
+                    else if (this.ErrorCode == localhost.ErrorCode.NeedSmsLogin)
+                        ea.LoginFailCondition = LoginFailCondition.NeedSmsLogin;
+                    else if (this.ErrorCode == localhost.ErrorCode.TempCodeMismatch)
+                        ea.LoginFailCondition = LoginFailCondition.TempCodeMismatch;
+                    else
+                        ea.LoginFailCondition = LoginFailCondition.PasswordError;
                     goto REDOLOGIN;
                 }
 

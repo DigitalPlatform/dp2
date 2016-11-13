@@ -314,6 +314,7 @@ namespace DigitalPlatform.LibraryServer
         // TODO: 多文种提示
         // parameters:
         //      strPassword 如果为null，表示不验证密码。因此需要格外注意，即便是空密码，如果要验证也需要使用""
+        //      alter_type_list 返回替代的绑定类型。本函数返回登录成功后，如果此参数返回了值，调用者还需要进一步判断，附加约束类型
         // return:
         //      -1  error
         //      0   user not found, or password error
@@ -326,6 +327,7 @@ namespace DigitalPlatform.LibraryServer
             string strClientIP,
             string strRouterClientIP,   // 2016/10/30
             string strGetToken,
+            out List<string> alter_type_list,
             out string strRights,
             out string strLibraryCode,
             out string strError)
@@ -333,6 +335,7 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             strRights = "";
             strLibraryCode = "";
+            alter_type_list = new List<string>();
 
             if (this.App == null)
             {
@@ -357,16 +360,38 @@ namespace DigitalPlatform.LibraryServer
             // 匹配 IP 地址
             if (string.IsNullOrEmpty(strClientIP) == false) // 2016/11/2
             {
-                if (account.MatchClientIP(strClientIP, out strError) == false)
-                    return -1;
+                List<string> temp = new List<string>();
+                bool bRet = account.MatchClientIP(strClientIP,
+                    ref temp,
+                    out strError);
+                if (bRet == false)
+                {
+                    if (temp.Count == 0)
+                        return -1;
+
+                    // 否则继续完成登录
+                    alter_type_list.AddRange(temp);
+                }
             }
 
             // 星号表示不进行 router client ip 检查
-            if (strRouterClientIP != "*")
+            if (strRouterClientIP != "*"
+                && alter_type_list.Count == 0)
             {
+                List<string> temp = new List<string>();
+
                 // 匹配 dp2Router 前端的 IP 地址
-                if (account.MatchRouterClientIP(strRouterClientIP, out strError) == false)
-                    return -1;
+                bool bRet = account.MatchRouterClientIP(strRouterClientIP,
+                    ref temp,
+                    out strError);
+                if (bRet == false)
+                {
+                    if (temp.Count == 0)
+                        return -1;
+
+                    // 否则继续完成登录
+                    alter_type_list.AddRange(temp);
+                }
             }
 
             if (strPassword != null)

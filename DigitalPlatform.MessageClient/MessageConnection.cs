@@ -140,7 +140,7 @@ namespace DigitalPlatform.MessageClient
 
         #endregion
 
-        StreamWriter _writer = null;
+        // StreamWriter _writer = null;
 
         // 连接 server
         // 要求调用前设置好 this.ServerUrl this.UserName this.Password this.Parameters

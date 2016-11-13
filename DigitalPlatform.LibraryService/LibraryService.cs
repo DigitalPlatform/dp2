@@ -606,6 +606,8 @@ namespace dp2Library
                 if (strType.ToLower() == "reader")
                     bReader = true;
 
+                List<string> alter_type_list = null;
+
 #if NO
                 bool bSimulateLogin = false;
                 string strSimulate = (string)parameters["simulate"];
@@ -659,6 +661,7 @@ namespace dp2Library
                         try
                         {
                             string strTemp = "";
+                            List<string> temp_list = null;
                             // 工作人员登录(代理者登录)
                             nRet = sessioninfo.Login(info.ManagerUserName,
                                  info.ManagerPassword,
@@ -667,6 +670,7 @@ namespace dp2Library
                                  null,
                                  "*",
                                  null,
+                                 out temp_list,
                                  out strRights,
                                  out strTemp,
                                  out strError);
@@ -714,6 +718,7 @@ namespace dp2Library
                          sessioninfo.ClientIP,
                          sessioninfo.RouterClientIP,
                          strGetToken,
+                         out alter_type_list,
                          out strRights,
                          out strLibraryCode,
                          out strError);
@@ -769,6 +774,8 @@ namespace dp2Library
                         try
                         {
                             string strTemp = "";
+                            List<string> temp_list = null;
+
                             // 工作人员登录
                             nRet = sessioninfo.Login(info.ManagerUserName,
                                  info.ManagerPassword,
@@ -777,6 +784,7 @@ namespace dp2Library
                                  null,
                                  "*",
                                  null,
+                                 out temp_list,
                                  out strRights,
                                  out strTemp,
                                  out strError);
@@ -836,6 +844,7 @@ namespace dp2Library
                         strLibraryCodeList,
                         nIndex, // -1,
                         strGetToken,
+                        out alter_type_list,
                         out strOutputUserName,
                         out strRights,
                         out strLibraryCode,
@@ -894,6 +903,16 @@ namespace dp2Library
                     }
                 }
 
+                /// 处理短信验证码登录有关的流程
+                if (nRet == 1)
+                {
+                    if (DoSmsCheck(sessioninfo,
+                parameters,
+                alter_type_list,
+                result) == true)
+                        return result;
+                }
+
                 // END1:
                 result.Value = nRet;
                 result.ErrorInfo = strError;
@@ -919,6 +938,146 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+        }
+
+        // return:
+        //      true    本函数返回后立即结束
+        //      false   继续
+        bool DoSmsCheck(SessionInfo sessioninfo,
+            Hashtable parameters,
+            List<string> alter_type_list,
+            LibraryServerResult result)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            // 用于构造验证码名称的 IP 地址
+            string strClientIP = sessioninfo.ClientIP;
+            if (string.IsNullOrEmpty(sessioninfo.RouterClientIP) == false)
+                strClientIP = "r:" + sessioninfo.RouterClientIP;
+
+            string strPhoneNumber = (string)parameters["phoneNumber"];
+            string strTempCode = (string)parameters["tempCode"];
+            if (string.IsNullOrEmpty(strTempCode) == false)
+            {
+                // 准备手机短信验证登录的第二阶段：匹配验证码
+                if (sessioninfo.Account == null)
+                {
+                    strError = "手机短信验证方式登录时，sessioninfo.Account 不应为 null";
+                    goto ERROR1;
+                }
+
+                if (string.IsNullOrEmpty(strPhoneNumber))
+                {
+                    strError = "当包含 tempCode 参数时，也要包含 phoneNumber 参数";
+                    goto ERROR1;
+                }
+
+                if (sessioninfo.Account.MatchTempPassword(app.TempCodeTable,
+                    strPhoneNumber,
+                    strClientIP,
+                    strTempCode,
+                    out strError) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = strError;
+                    result.ErrorCode = ErrorCode.TempCodeMismatch;
+                    return true;
+                }
+            }
+            else
+            {
+                bool bAlterSms = false;
+                if (alter_type_list != null && alter_type_list.IndexOf("sms") != -1)
+                    bAlterSms = true;
+
+                // 竖线间隔的手机号码列表
+                // return:
+                //      null    没有找到前缀
+                //      ""      找到了前缀，并且值部分为空
+                //      其他     返回值部分
+                string strSmsBinding = sessioninfo.Account == null ? "" : sessioninfo.Account.GetPhoneNumberBindingString();
+
+                // TODO: 如果 strSmsBinding 里面包含了 *ip，而 IP 检查已经进行过了，就可以不用要求验证码了
+
+                if ((bAlterSms == true || string.IsNullOrEmpty(strSmsBinding) == false)
+                    && string.IsNullOrEmpty(strPhoneNumber) == true)
+                {
+                    sessioninfo.Account = null;
+                    result.Value = 0;
+                    result.ErrorInfo = "此账户当前无法用传统方式登录。可改用手机号+验证码方式登录";
+                    result.ErrorCode = ErrorCode.NeedSmsLogin;
+                    return true;
+                }
+
+                if (string.IsNullOrEmpty(strPhoneNumber) == false)
+                {
+                    // 准备手机短信验证登录的第一阶段：产生验证码
+
+                    if (sessioninfo.Account == null)
+                    {
+                        strError = "手机短信验证方式登录时，sessioninfo.Account 不应为 null";
+                        goto ERROR1;
+                    }
+
+                    // 
+                    TempCode code = null;
+
+                    // return:
+                    //      -1  出错
+                    //      0   沿用以前的验证码
+                    //      1   用新的验证码
+                    int nPasswordRet = sessioninfo.Account.PrepareTempPassword(
+                        app.TempCodeTable,
+                        strClientIP,
+                        strPhoneNumber,
+                        out code,
+                        out strError);
+                    if (nPasswordRet == -1)
+                        goto ERROR1;
+
+                    // 通过 MSMQ 发送手机短信
+                    // parameters:
+                    //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
+                    nRet = app.SendSms(
+                        sessioninfo.Account.UserID,
+                        strPhoneNumber,
+                        "登录验证码为 " + code.Code + "。十分钟以后失效",
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        // 清除已经存储的验证码
+                        app.TempCodeTable.Remove(code.Key);
+                        goto ERROR1;
+                    }
+
+                    // 返回 0 并且 ErrorCode 为 RetryLogin，表示已经发出短信，需要再次登录(携带刚收到的验证码)
+                    sessioninfo.Account = null;
+                    result.Value = 0;
+#if NO
+                        if (nPasswordRet == 0)
+                            result.ErrorInfo = "请使用手机 " + strPhoneNumber + " 早先收到过的短信验证码再次提交登录";
+                        else
+                            result.ErrorInfo = "验证短信已经发送给手机 " + strPhoneNumber + "。请使用收到的短信验证码再次提交登录";
+#endif
+
+
+                    if (nPasswordRet == 0)
+                        result.ErrorInfo = "请使用手机号 " + strPhoneNumber + "(" + code.Code + ") 早先收到过的验证码再次提交登录";
+                    else
+                        result.ErrorInfo = "验证短信已经发送给手机号 " + strPhoneNumber + "(" + code.Code + ")。请使用收到的验证码再次提交登录";
+
+                    result.ErrorCode = ErrorCode.RetryLogin;
+                    return true;
+                }
+            }
+
+            return false;
+        ERROR1:
+            result.Value = -1;
+            result.ErrorInfo = strError;
+            result.ErrorCode = ErrorCode.SystemError;
+            return true;
         }
 
         static string CheckClientVersion(string strText)
@@ -9233,9 +9392,7 @@ Stack:
                 }*/
                 // 2009/2/23 
                 result.ErrorInfo = strError;
-
                 result.Value = nResultValue;
-
                 return result;
             ERROR1:
                 result.Value = -1;

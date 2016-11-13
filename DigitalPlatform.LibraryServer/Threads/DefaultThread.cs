@@ -47,7 +47,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 每隔 24 小时自动启动执行一次
                 // TODO: 有可能每次都在每天的同一小时开始执行，如果这正好是每日繁忙时段就不理想了。一个办法是可以定义每日定时时间；另外一个做法是增加一点随机性，不是正好 24 小时间隔
-                if (DateTime.Now - _locationResultsetLastTime > new TimeSpan(25,0,0)
+                if (DateTime.Now - _locationResultsetLastTime > new TimeSpan(25, 0, 0)
                     || this.App.NeedRebuildResultset() == true)
                 {
                     this.App.StartCreateLocationResultset("");
@@ -201,7 +201,29 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 2016/11/6
-            this.App.InitialMsmq();
+            try
+            {
+                this.App.InitialMsmq();
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "DefaultTread中 InitialMsmq() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.App.WriteErrorLog(strErrorText);
+            }
+
+            // 2016/11/13
+            if (this.App.TempCodeTable != null)
+            {
+                try
+                {
+                    this.App.TempCodeTable.CleanExpireItems();
+                }
+                catch (Exception ex)
+                {
+                    string strErrorText = "DefaultTread中 清除验证码集合 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.App.WriteErrorLog(strErrorText);
+                }
+            }
         }
 
         public void ClearRetryDelay()

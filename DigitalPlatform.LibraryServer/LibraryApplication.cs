@@ -156,6 +156,9 @@ namespace DigitalPlatform.LibraryServer
 #endif
         public const string qrkey = "dpqrhello";
 
+        // (登录用的手机短信)验证码存储数组
+        public TempCodeCollection TempCodeTable = new TempCodeCollection();
+
         /// <summary>
         /// 是否为评估状态
         /// </summary>
@@ -2159,7 +2162,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     this.ClearHangup("MessageQueueCreateFail");
                     this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
-                } 
+                }
                 return;
             }
 
@@ -9843,6 +9846,7 @@ out strError);
             string strLibraryCodeList,
             int nIndex,
             string strGetToken,
+            out List<string> alter_type_list,
             out string strOutputUserName,
             out string strRights,
             out string strLibraryCode,
@@ -9856,6 +9860,7 @@ out strError);
             strRights = "";
             strOutputUserName = "";
             strLibraryCode = "";
+            alter_type_list = new List<string>();
 
             // 2009/9/22 
             if (String.IsNullOrEmpty(strLoginName) == true)
@@ -10015,16 +10020,41 @@ out strError);
                 // 匹配 IP 地址
                 if (string.IsNullOrEmpty(sessioninfo.ClientIP) == false)    // 2016/11/2
                 {
-                    if (accountref.MatchClientIP(sessioninfo.ClientIP, out strError) == false)
-                        return -1;
+                    List<string> temp = new List<string>();
+
+                    bool bRet = accountref.MatchClientIP(sessioninfo.ClientIP,
+                        ref temp,
+                        out strError);
+                    if (bRet == false)
+                    {
+                        if (temp.Count == 0)
+                            return -1;
+
+                        // 有替代的验证方式，先继续完成登录
+                        alter_type_list.AddRange(temp);
+                    }
                 }
 
                 // 星号表示不进行 router client ip 检查
-                if (sessioninfo.RouterClientIP != "*")
+                if (sessioninfo.RouterClientIP != "*"
+                    && alter_type_list.Count == 0)
                 {
+                    List<string> temp = new List<string>();
+
                     // 匹配 dp2Router 前端的 IP 地址
-                    if (accountref.MatchRouterClientIP(sessioninfo.RouterClientIP, out strError) == false)
-                        return -1;
+                    bool bRet = accountref.MatchRouterClientIP(sessioninfo.RouterClientIP,
+                        ref temp,
+                        out strError);
+                    if (bRet == false)
+                    {
+                        if (temp.Count == 0)
+                            return -1;
+
+                        // 否则继续完成登录
+                        alter_type_list.AddRange(temp);
+                    }
+
+
                 }
             }
 
@@ -14465,6 +14495,55 @@ strLibraryCode);    // 读者所在的馆代码
 
             return ResPathType.None;
         }
+
+        // 通过 MSMQ 发送手机短信
+        // parameters:
+        //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
+        public int SendSms(
+            string strUserName,
+            string strPhoneNumber,
+            string strText,
+            out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                MessageQueue queue = new MessageQueue(this.OutgoingQueue);
+
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml("<root />");
+                /* 元素名
+ * type 消息类型。登录验证码
+ * userName 用户名
+ * phoneNumber 手机号码
+ * text 短信消息内容
+ */
+                DomUtil.SetElementText(dom.DocumentElement, "type", "登录验证码");
+                DomUtil.SetElementText(dom.DocumentElement, "userName", strUserName);
+                DomUtil.SetElementText(dom.DocumentElement, "phoneNumber", strPhoneNumber);
+                DomUtil.SetElementText(dom.DocumentElement, "text", strText);
+
+                // 向 MSMQ 消息队列发送消息
+                int nRet = ReadersMonitor.SendToQueue(queue,
+                    strUserName + "@LUID:" + this.UID,
+                    "xml",
+                    dom.DocumentElement.OuterXml,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "发送 MQ 消息时出错: " + strError;
+                    return -1;
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError += "创建路径为 '" + this.OutgoingQueue + "' 的 MessageQueue 对象失败: " + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
+        }
     }
 
 #if NO
@@ -14514,6 +14593,9 @@ strLibraryCode);    // 读者所在的馆代码
         OutofSession = 26,   // 通道达到配额上限
         InvalidReaderBarcode = 27,  // 读者证条码号不合法
         InvalidItemBarcode = 28,    // 册条码号不合法
+        NeedSmsLogin = 29,  // 需要改用短信验证码方式登录
+        RetryLogin = 30,    // 需要补充验证码再次登录
+        TempCodeMismatch = 31,  // 验证码不匹配
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容
@@ -14614,6 +14696,141 @@ strLibraryCode);    // 读者所在的馆代码
         public DateTime ReaderDomLastTime = new DateTime((long)0);  // 最近装载的时间
         public bool ReaderDomChanged = false;
 
+        #region 手机短信验证码
+
+        // 竖线间隔的手机号码列表
+        // return:
+        //      null    没有找到前缀
+        //      ""      找到了前缀，并且值部分为空
+        //      其他     返回值部分
+        public string GetPhoneNumberBindingString()
+        {
+            // 看看绑定信息里面是否有对应的手机号码
+            // 注: email 元素内容，现在是存储 email 和微信号等多种绑定途径 2016/4/16
+            // return:
+            //      null    没有找到前缀
+            //      ""      找到了前缀，并且值部分为空
+            //      其他     返回值部分
+            return StringUtil.GetParameterByPrefix(this.Binding,
+    "sms",
+    ":");
+        }
+
+        // 验证码多长时间过期
+        static TimeSpan _expireLength = TimeSpan.FromMinutes(10);   // 10 分钟
+
+        // 准备手机短信验证登录的第一阶段：产生验证码
+        // return:
+        //      -1  出错
+        //      0   沿用以前的验证码
+        //      1   用新的验证码
+        public int PrepareTempPassword(
+            TempCodeCollection table,
+            string strClientIP,
+            string strPhoneNumber,
+            out TempCode code,
+            out string strError)
+        {
+            strError = "";
+            code = null;
+
+            if (string.IsNullOrEmpty(strPhoneNumber))
+            {
+                strError = "strPhoneNumber 参数值不应为空";
+                return -1;
+            }
+
+            strPhoneNumber = strPhoneNumber.Trim();
+            if (string.IsNullOrEmpty(strPhoneNumber))
+            {
+                strError = "strPhoneNumber 参数值不应为空(1)";
+                return -1;
+            }
+
+            string strList = GetPhoneNumberBindingString();
+            if (string.IsNullOrEmpty(strList))
+            {
+                strError = "当前账号未曾做过手机短信方式(sms:)绑定";
+                return -1;   // 没有做过 sms: 绑定
+            }
+
+            List<string> list = StringUtil.SplitList(strList, '|');
+            if (list.IndexOf(strPhoneNumber) == -1)
+            {
+                strError = "所提供的电话号码 '" + strPhoneNumber + "' 不在手机绑定号码列表中";
+                return -1;   // 电话号码没有在列表中
+            }
+
+            // 检索看看是否有已经存在的密码
+            bool bExist = false;
+            DateTime now = DateTime.Now;
+            string strKey = this.UserID + "|" + strPhoneNumber + "|" + strClientIP;
+            code = table.FindTempCode(strKey);
+            if (code != null)
+            {
+                if (code.ExpireTime < now)
+                    code = null;    // 迫使重新取号
+                else
+                {
+                    // 失效期还没有到。主动延长一次失效期
+                    code.ExpireTime = DateTime.Now + _expireLength;
+                    bExist = true;
+                }
+            }
+
+            if (code == null)
+            {
+                // 重新设定一个密码
+                Random rnd = new Random();
+                code = new TempCode();
+                code.Key = strKey;
+                code.Code = rnd.Next(1, 999999).ToString();
+                code.ExpireTime = DateTime.Now + _expireLength;
+            }
+
+            table.SetTempCode(code.Key, code);
+            // strTempCode = code.Code;
+            if (bExist)
+                return 0;
+            return 1;
+        }
+
+        // 准备手机短信验证登录的第二阶段：匹配验证码
+        public bool MatchTempPassword(
+            TempCodeCollection table,
+            string strPhoneNumber,
+            string strClientIP,
+            string strPassword,
+            out string strError)
+        {
+            strError = "";
+
+            string strKey = this.UserID + "|" + strPhoneNumber + "|" + strClientIP;
+
+            TempCode code = table.FindTempCode(strKey);
+            if (code == null)
+            {
+                strError = "当前用户的验证码尚未初始化";
+                return false;
+            }
+
+            if (DateTime.Now > code.ExpireTime)
+            {
+                strError = "验证码已经过期失效";
+                return false;
+            }
+
+            if (strPassword != code.Code)
+            {
+                strError = "验证码匹配失败";
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
+
         public Account()
         {
             Random random = new Random(unchecked((int)DateTime.Now.Ticks));
@@ -14632,10 +14849,14 @@ strLibraryCode);    // 读者所在的馆代码
         }
 
         // 匹配 IP 地址
+        // parameters:
+        //      alter_type_list 返回替代类型列表。只有当 alter_type_list != null 并且没有匹配上真实 IP 地址时，才在本参数中返回值
         // return:
         //      true    允许
         //      false   禁止
-        public bool MatchClientIP(string strClientIP, out string strError)
+        public bool MatchClientIP(string strClientIP,
+            ref List<string> alter_type_list,
+            out string strError)
         {
             strError = "";
 
@@ -14647,6 +14868,9 @@ strLibraryCode);    // 读者所在的馆代码
 
             if (StringUtil.MatchIpAddressList(list, strClientIP) == false)
             {
+                if (alter_type_list != null)
+                    alter_type_list.AddRange(GetAlterBinding(list));
+
                 strError = "前端 IP 地址 '" + strClientIP + "' 不在当前账户的 ip: 白名单中，访问被拒绝";
                 return false;
             }
@@ -14655,10 +14879,14 @@ strLibraryCode);    // 读者所在的馆代码
         }
 
         // 匹配 dp2Router 的前端 IP 地址
+        // parameters:
+        //      alter_type_list 返回替代类型列表。只有当 alter_type_list != null 并且没有匹配上真实 IP 地址时，才在本参数中返回值
         // return:
         //      true    允许
         //      false   禁止
-        public bool MatchRouterClientIP(string strRouterClientIP, out string strError)
+        public bool MatchRouterClientIP(string strRouterClientIP,
+            ref List<string> alter_type_list,
+            out string strError)
         {
             strError = "";
 
@@ -14682,11 +14910,33 @@ strLibraryCode);    // 读者所在的馆代码
                 return true;
             if (StringUtil.MatchIpAddressList(list, strRouterClientIP) == false)
             {
+                if (alter_type_list != null)
+                    alter_type_list.AddRange(GetAlterBinding(list));
+
                 strError = "前端 IP 地址 '" + strRouterClientIP + "' 不在当前账户的 router_ip: 白名单中，访问被拒绝";
                 return false;
             }
 
             return true;
+        }
+
+        // 从 IP 列表中获得替代绑定类型列表
+        // '192.168.0.1|*sms' 中 sms 就是替代绑定类型。
+        static List<string> GetAlterBinding(string strText)
+        {
+            List<string> results = new List<string>();
+            List<string> list = StringUtil.SplitList(strText, '|');
+            foreach (string s in list)
+            {
+                if (string.IsNullOrEmpty(s) == false && s[0] == '*')
+                {
+                    string name = s.Substring(1);
+                    if (string.IsNullOrEmpty(name) == false)
+                        results.Add(name);
+                }
+            }
+
+            return results;
         }
     }
 
