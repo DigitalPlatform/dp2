@@ -1054,18 +1054,18 @@ namespace dp2Library
                     // 返回 0 并且 ErrorCode 为 RetryLogin，表示已经发出短信，需要再次登录(携带刚收到的验证码)
                     sessioninfo.Account = null;
                     result.Value = 0;
-#if NO
                         if (nPasswordRet == 0)
                             result.ErrorInfo = "请使用手机 " + strPhoneNumber + " 早先收到过的短信验证码再次提交登录";
                         else
                             result.ErrorInfo = "验证短信已经发送给手机 " + strPhoneNumber + "。请使用收到的短信验证码再次提交登录";
-#endif
 
 
+#if NO
                     if (nPasswordRet == 0)
                         result.ErrorInfo = "请使用手机号 " + strPhoneNumber + "(" + code.Code + ") 早先收到过的验证码再次提交登录";
                     else
                         result.ErrorInfo = "验证短信已经发送给手机号 " + strPhoneNumber + "(" + code.Code + ")。请使用收到的验证码再次提交登录";
+#endif
 
                     result.ErrorCode = ErrorCode.RetryLogin;
                     return true;
