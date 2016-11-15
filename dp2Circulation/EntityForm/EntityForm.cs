@@ -391,10 +391,12 @@ namespace dp2Circulation
                 this.tabControl_itemAndIssue,
                 this.tabPage_item);
 
+#if NO
             // 2014/9/5
             // 禁止或者允许册条码号输入域
             this.textBox_itemBarcode.Enabled = bEnable;
             this.button_register.Enabled = bEnable;
+#endif
         }
 
         void EnableObjectsPage(bool bEnable)

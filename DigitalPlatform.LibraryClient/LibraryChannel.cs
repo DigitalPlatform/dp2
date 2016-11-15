@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading;
 using System.Net;
 using System.Xml;
-// using System.Windows.Forms;
 using System.Diagnostics;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -533,6 +532,11 @@ out strError);
 #else
                             throw new Exception("当前条件编译版本不支持 basic.http 协议方式");
 #endif
+                        {
+                            HttpUserAgentEndpointBehavior behavior = new HttpUserAgentEndpointBehavior("dp2LibraryClient");
+                            this.m_ws.Endpoint.Behaviors.Add(behavior);
+                        }
+
 
                     }
                     else if (uri.Scheme.ToLower() == "rest.http")
@@ -551,6 +555,21 @@ out strError);
                             behavior.HelpEnabled = true;
                             factory.Endpoint.Behaviors.Add(behavior);
                         }
+
+                        {
+                            HttpUserAgentEndpointBehavior behavior = new HttpUserAgentEndpointBehavior("dp2LibraryClient");
+                            factory.Endpoint.Behaviors.Add(behavior);
+                        }
+
+#if NO
+                        {
+                            var eab = new EndpointAddressBuilder(factory.Endpoint.Address);
+                            eab.Headers.Add(AddressHeader.CreateAddressHeader("ClientIdentification",  // Header Name
+                                                                                string.Empty,           // Namespace
+                                                                                "JabberwockyClient"));  // Header Value
+                            factory.Endpoint.Address = eab.ToEndpointAddress();
+                        }
+#endif
 
 #if BASIC_HTTP
                         this.m_ws = factory.CreateChannel();
