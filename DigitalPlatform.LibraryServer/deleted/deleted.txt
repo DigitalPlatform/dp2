@@ -2376,3 +2376,213 @@
         ERROR1:
             return -1;
         }
+
+
+		        // TODO: 是否检查流通信息，需要可以通过参数控制
+        // 检索书目记录下属的事项记录，返回少量必要的信息，可以提供后面实做删除时使用
+        // parameters:
+        //      strStyle    return_record_xml 要在DeleteEntityInfo结构中返回OldRecord内容
+        //                  check_circulation_info 检查是否具有流通信息。如果具有则会报错 2012/12/19 把缺省行为变为此参数
+        // return:
+        //      -1  error
+        //      0   not exist item dbname
+        //      1   exist item dbname
+        public int SearchChildItems(RmsChannel channel,
+            string strBiblioRecPath,
+            string strStyle,
+            DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord procCheckRecord,
+            object param,
+            out long lHitCount,
+            out List<DeleteEntityInfo> entityinfos,
+            out string strError)
+        {
+            strError = "";
+            lHitCount = 0;
+            entityinfos = new List<DeleteEntityInfo>();
+
+            int nRet = 0;
+
+            bool bReturnRecordXml = StringUtil.IsInList("return_record_xml", strStyle);
+            bool bCheckCirculationInfo = StringUtil.IsInList("check_circulation_info", strStyle);
+            bool bOnlyGetCount = StringUtil.IsInList("only_getcount", strStyle);
+
+            string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
+            string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
+
+            // 获得书目库对应的事项库名
+            string strItemDbName = "";
+            nRet = this.GetItemDbName(strBiblioDbName,
+                 out strItemDbName,
+                 out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            if (String.IsNullOrEmpty(strItemDbName) == true)
+                return 0;
+
+            // 检索实体库中全部从属于特定id的记录
+
+            string strQueryXml = "<target list='"
+                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")
+                + "'><item><word>"
+                + strBiblioRecId
+                + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
+
+            long lRet = channel.DoSearch(strQueryXml,
+                "entities",
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            if (lRet == 0)
+            {
+                strError = "没有找到属于书目记录 '" + strBiblioRecPath + "' 的任何" + this.ItemName + "记录";
+                return 0;
+            }
+
+            lHitCount = lRet;
+
+            // 仅返回命中条数
+            if (bOnlyGetCount == true)
+                return 0;
+
+            int nResultCount = (int)lRet;
+            int nMaxCount = 10000;
+            if (nResultCount > nMaxCount)
+            {
+                strError = "命中" + this.ItemName + "记录数 " + nResultCount.ToString() + " 超过 " + nMaxCount.ToString() + ", 暂时不支持针对它们的删除操作";
+                goto ERROR1;
+            }
+
+            int nStart = 0;
+            int nPerCount = 100;
+            for (; ; )
+            {
+                List<string> aPath = null;
+                lRet = channel.DoGetSearchResult(
+                    "entities",
+                    nStart,
+                    nPerCount,
+                    "zh",
+                    null,
+                    out aPath,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                if (aPath.Count == 0)
+                {
+                    strError = "aPath.Count == 0";
+                    goto ERROR1;
+                }
+
+                // 获得每条记录
+                for (int i = 0; i < aPath.Count; i++)
+                {
+                    string strMetaData = "";
+                    string strXml = "";
+                    byte[] timestamp = null;
+                    string strOutputPath = "";
+
+                    // TODO: 这里需要改造为直接从结果集中获取 xml,timestamp
+                    lRet = channel.GetRes(aPath[i],
+                        out strXml,
+                        out strMetaData,
+                        out timestamp,
+                        out strOutputPath,
+                        out strError);
+                    DeleteEntityInfo entityinfo = new DeleteEntityInfo();
+
+                    if (lRet == -1)
+                    {
+                        /*
+                        entityinfo.RecPath = aPath[i];
+                        entityinfo.ErrorCode = channel.OriginErrorCode;
+                        entityinfo.ErrorInfo = channel.ErrorInfo;
+
+                        entityinfo.OldRecord = "";
+                        entityinfo.OldTimestamp = null;
+                        entityinfo.NewRecord = "";
+                        entityinfo.NewTimestamp = null;
+                        entityinfo.Action = "";
+                         * */
+                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                            continue;
+
+                        strError = "获取" + this.ItemName + "记录 '" + aPath[i] + "' 时发生错误: " + strError;
+                        goto ERROR1;
+                        // goto CONTINUE;
+                    }
+
+                    entityinfo.RecPath = strOutputPath;
+                    entityinfo.OldTimestamp = timestamp;
+                    if (bReturnRecordXml == true)
+                        entityinfo.OldRecord = strXml;
+
+                    if (bCheckCirculationInfo == true
+                        || procCheckRecord != null)
+                    {
+                        // 检查是否有借阅信息
+                        // 把记录装入DOM
+                        XmlDocument domExist = new XmlDocument();
+
+                        try
+                        {
+                            domExist.LoadXml(strXml);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = this.ItemName + "记录 '" + aPath[i] + "' 装载进入DOM时发生错误: " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        // 2016/11/15
+                        if (procCheckRecord != null)
+                        {
+                            nRet = procCheckRecord(
+                                nStart + i,
+                                strOutputPath,
+                                domExist,
+                                timestamp,
+                                param,
+                                out strError);
+                            if (nRet != 0)
+                                return nRet;
+                        }
+
+                        /*
+                        entityinfo.ItemBarcode = DomUtil.GetElementText(domExist.DocumentElement,
+                            "barcode");
+                         * */
+
+                        // TODO: 在日志恢复阶段调用本函数时，是否还有必要检查是否具有流通信息？似乎这时应强制删除为好
+
+                        // 观察已经存在的记录是否有流通信息
+                        // return:
+                        //      -1  出错
+                        //      0   没有
+                        //      1   有。报错信息在strError中
+                        nRet = this.HasCirculationInfo(domExist, out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 1)
+                        {
+                            strError = "拟删除的" + this.ItemName + "记录 '" + entityinfo.RecPath + "' 中" + strError + "(此种情况可能不限于这一条)，不能删除。因此全部删除操作均被放弃。";
+                            goto ERROR1;
+                        }
+                    }
+
+                    // CONTINUE:
+                    entityinfos.Add(entityinfo);
+                }
+
+                nStart += aPath.Count;
+                if (nStart >= nResultCount)
+                    break;
+            }
+
+            return 1;
+        ERROR1:
+            return -1;
+        }

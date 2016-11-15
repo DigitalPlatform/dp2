@@ -396,7 +396,7 @@ namespace DigitalPlatform.LibraryServer
         public static string BuildQrCode(string strReaderBarcode,
             string strLibraryUid)
         {
-            DateTime now = DateTime.UtcNow;
+            DateTime now = DateTime.Now; // 原来是 .UtcNow ， bug， 和解码位置的 .Now 不一样 2016/11/16 发现和修改
             // 时效字符串 20130101
             string strDateString = DateTimeUtil.DateTimeToString8(now);
             string strSalt = strDateString + "|" + strReaderBarcode + "|" + GetLibLocCode(strLibraryUid);

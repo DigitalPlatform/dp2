@@ -954,7 +954,7 @@ namespace DigitalPlatform.LibraryServer
                             if (StringUtil.IsInList("getotherlibraryitem", strSubType))
                                 strLibraryCodeParam = "";
 
-                            string strStyle = bSubCount ? "only_getcount" : "return_record_xml";
+                            string strStyle = bSubCount ? "only_getcount" : "return_record_xml,limit:10";
                             if (string.IsNullOrEmpty(strLibraryCodeParam) == false)
                                 strStyle += ",libraryCodes:" + strLibraryCodeParam.Replace(",", "|");
 
@@ -966,7 +966,8 @@ namespace DigitalPlatform.LibraryServer
                             nRet = SearchChildEntities(channel,
                                 strCurrentBiblioRecPath,
                                 strStyle,
-                                bSubCount ? (Delegate_checkRecord)null : CountItemRecord,
+                                // bSubCount ? (Delegate_checkRecord)null : CountItemRecord,
+                                (Delegate_checkRecord)null,
                                 null,
                                 out lTemp,
                                 out entityinfos,
@@ -1016,8 +1017,8 @@ namespace DigitalPlatform.LibraryServer
                             //      1   exist entity dbname
                             nRet = this.OrderItemDatabase.SearchChildItems(channel,
                                 strCurrentBiblioRecPath,
-                                bSubCount ? "only_getcount" : "return_record_xml",
-                                bSubCount ? (Delegate_checkRecord)null : CountItemRecord,
+                                bSubCount ? "only_getcount" : "return_record_xml,limit:10",
+                                (Delegate_checkRecord)null,
                                 null,
                                 out lTemp,
                                 out orderinfos,
@@ -1066,8 +1067,8 @@ namespace DigitalPlatform.LibraryServer
                             //      1   exist entity dbname
                             nRet = this.IssueItemDatabase.SearchChildItems(channel,
                                 strCurrentBiblioRecPath,
-                                bSubCount ? "only_getcount" : "return_record_xml",
-                                bSubCount ? (Delegate_checkRecord)null : CountItemRecord,
+                                bSubCount ? "only_getcount" : "return_record_xml,limit:10",
+                                (Delegate_checkRecord)null,
                                 null,
                                 out lTemp,
                                 out issueinfos,
@@ -1116,8 +1117,8 @@ namespace DigitalPlatform.LibraryServer
                             //      1   exist entity dbname
                             nRet = this.CommentItemDatabase.SearchChildItems(channel,
                                 strCurrentBiblioRecPath,
-                                bSubCount ? "only_getcount" : "return_record_xml",
-                                bSubCount ? (Delegate_checkRecord)null : CountItemRecord,
+                                bSubCount ? "only_getcount" : "return_record_xml,limit:10",
+                                (Delegate_checkRecord)null,
                                 null,
                                 out lTemp,
                                 out commentinfos,
@@ -1342,6 +1343,7 @@ namespace DigitalPlatform.LibraryServer
             dom.DocumentElement.SetAttribute(strItemElementName + "TotalCount", lHitCount.ToString());
         }
 
+#if NO
         // 不让超过 10 条
         int CountItemRecord(
     int index,
@@ -1356,6 +1358,7 @@ namespace DigitalPlatform.LibraryServer
                 return 1;
             return 0;
         }
+#endif
 
         public int GetKeys(SessionInfo sessioninfo,
             string strRecPath,

@@ -3021,8 +3021,6 @@ true);
                 results.Add(info);
             }
 
-            if (results.Count == 0)
-                return null;
             return results.ToArray();
         }
 

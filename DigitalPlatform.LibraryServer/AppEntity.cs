@@ -110,7 +110,7 @@ namespace DigitalPlatform.LibraryServer
             }
             // 兑现新记录中的 dprms:file 元素
             nodes = domNew.DocumentElement.SelectNodes("//dprms:file", nsmgr);
-            foreach(XmlElement node in nodes)
+            foreach (XmlElement node in nodes)
             {
                 XmlDocumentFragment frag = domExist.CreateDocumentFragment();
                 frag.InnerXml = node.OuterXml;
@@ -175,6 +175,7 @@ namespace DigitalPlatform.LibraryServer
         //                  当包含 check_borrow_info 时，发现第一个流通信息，本函数就立即返回-1
         //                  当包含 count_borrow_info 时，函数要统计全部流通信息的个数
         //                  当包含 libraryCodes: 时，表示仅获得所列分馆代码的册记录。注意多个馆代码之间用竖线分隔
+        //                  当包含 limit: 时，定义最多取得记录的个数。例如希望最多取得 10 条，可以定义 limit:10
         // return:
         //      -2  not exist entity dbname
         //      -1  error
@@ -207,6 +208,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             string strLibraryCodeParam = StringUtil.GetParameterByPrefix(strStyle, "libraryCodes", ":");
+            string strLimit = StringUtil.GetParameterByPrefix(strStyle, "limit", ":");
 
             string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
             string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
@@ -287,10 +289,17 @@ namespace DigitalPlatform.LibraryServer
 
             string strColumnStyle = "id,xml,timestamp";
 
+            int nLimit = -1;
+            if (string.IsNullOrEmpty(strLimit) == false)
+                Int32.TryParse(strLimit, out nLimit);
+
             int nBorrowInfoCount = 0;
 
             int nStart = 0;
             int nPerCount = 100;
+
+            if (nLimit != -1 && nPerCount > nLimit)
+                nPerCount = nLimit;
             for (; ; )
             {
 #if NO
@@ -341,8 +350,8 @@ namespace DigitalPlatform.LibraryServer
                 int i = 0;
                 foreach (Record record in searchresults)
                 {
-                    EntityInfo info = new EntityInfo();
-                    info.OldRecPath = record.Path;
+                    // EntityInfo info = new EntityInfo();
+                    // info.OldRecPath = record.Path;
 
                     string strMetaData = "";
                     string strXml = "";
@@ -441,6 +450,8 @@ namespace DigitalPlatform.LibraryServer
 
                 nStart += searchresults.Length;
                 if (nStart >= nResultCount)
+                    break;
+                if (nLimit != -1 && nStart >= nLimit)
                     break;
             }
 
@@ -2625,7 +2636,7 @@ namespace DigitalPlatform.LibraryServer
                                 {
                                     if (info.NewRecPath != info.OldRecPath)
                                     {
-                                        strError = "参数不正确。SetEntities() 当操作类型为 change 时，info.NewRecPath('"+info.NewRecPath+"') 应当和 info.OldRecPath('"+info.OldRecPath+"') 值相同";
+                                        strError = "参数不正确。SetEntities() 当操作类型为 change 时，info.NewRecPath('" + info.NewRecPath + "') 应当和 info.OldRecPath('" + info.OldRecPath + "') 值相同";
 
                                         EntityInfo error = new EntityInfo(info);
                                         error.ErrorInfo = strError;

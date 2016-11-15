@@ -696,6 +696,9 @@ namespace dp2Circulation
         {
             strError = "";
 
+            if (entities.Length == 0)
+                return 0;
+
             this.m_listView.BeginUpdate();
             try
             {
