@@ -2861,6 +2861,8 @@ out strError);
         public int SearchChildItems(RmsChannel channel,
             string strBiblioRecPath,
             string strStyle,
+            DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord procCheckRecord,
+            object param,
             out long lHitCount,
             out List<DeleteEntityInfo> entityinfos,
             out string strError)
@@ -2989,7 +2991,8 @@ out strError);
                     if (bReturnRecordXml == true)
                         entityinfo.OldRecord = strXml;
 
-                    if (bCheckCirculationInfo == true)
+                    if (bCheckCirculationInfo == true
+                        || procCheckRecord != null)
                     {
                         // 检查是否有借阅信息
                         // 把记录装入DOM
@@ -3003,6 +3006,20 @@ out strError);
                         {
                             strError = this.ItemName + "记录 '" + aPath[i] + "' 装载进入DOM时发生错误: " + ex.Message;
                             goto ERROR1;
+                        }
+
+                        // 2016/11/15
+                        if (procCheckRecord != null)
+                        {
+                            nRet = procCheckRecord(
+                                nStart + i,
+                                strOutputPath,
+                                domExist,
+                                timestamp,
+                                param,
+                                out strError);
+                            if (nRet != 0)
+                                return nRet;
                         }
 
                         /*
@@ -3025,7 +3042,6 @@ out strError);
                             strError = "拟删除的" + this.ItemName + "记录 '" + entityinfo.RecPath + "' 中" + strError + "(此种情况可能不限于这一条)，不能删除。因此全部删除操作均被放弃。";
                             goto ERROR1;
                         }
-
                     }
 
                     // CONTINUE:
@@ -3435,6 +3451,8 @@ out strError);
             int nRet = SearchChildItems(channel,
                 strBiblioRecPath,
                 "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
+                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                null,
                 out lHitCount,
                 out entityinfos,
                 out strError);

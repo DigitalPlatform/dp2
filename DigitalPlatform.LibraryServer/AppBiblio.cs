@@ -895,14 +895,24 @@ namespace DigitalPlatform.LibraryServer
                     strBiblio = strResultXml;
                 }
                 // 2014/3/17
-                else if (IsResultType(strBiblioType, "subcount") == true)
+                else if (IsResultType(strBiblioType, "subcount") == true
+                    || IsResultType(strBiblioType, "subrecords") == true)
                 {
+                    bool bSubCount = IsResultType(strBiblioType, "subcount");
+
                     string strType = "";
                     string strSubType = "";
                     StringUtil.ParseTwoPart(strBiblioType,
                         ":",
                         out strType,
                         out strSubType);
+
+                    {
+                        if (strSubType == null)
+                            strSubType = "";
+
+                        strSubType = strSubType.Replace("|", ",");
+                    }
 
 #if NO
                     RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
@@ -915,131 +925,231 @@ namespace DigitalPlatform.LibraryServer
                         goto CONTINUE;
                     }
 #endif
+                    XmlDocument collection_dom = new XmlDocument();
+                    collection_dom.LoadXml("<collection />");
 
                     long lTotalCount = 0;
-                    if (strSubType == "item" || string.IsNullOrEmpty(strSubType) == true
-                        || strSubType == "all")
+                    if (StringUtil.IsInList("item", strSubType)
+                        || string.IsNullOrEmpty(strSubType) == true
+                        || StringUtil.IsInList("all", strSubType))
                     {
-                        // 探测书目记录有没有下属的实体记录(也顺便看看实体记录里面是否有流通信息)?
                         List<DeleteEntityInfo> entityinfos = null;
                         long lTemp = 0;
-                        // return:
-                        // return:
-                        //      -2  not exist entity dbname
-                        //      -1  error
-                        //      >=0 含有流通信息的实体记录个数, 当strStyle包含count_borrow_info时。
-                        nRet = SearchChildEntities(channel,
-                            strCurrentBiblioRecPath,
-                            "only_getcount",
-                            (Delegate_checkRecord)null,
-                            null,
-                            out lTemp,
-                            out entityinfos,
-                            out strError);
-                        if (nRet == -1)
+
+                        // 权限字符串
+                        if (StringUtil.IsInList("getiteminfo", sessioninfo.RightsOrigin) == false
+                            && StringUtil.IsInList("getentities", sessioninfo.RightsOrigin) == false   // 2009/10/18 
+                            && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                         {
-                            strBiblio = strError;
-                            goto CONTINUE;
+                            lTemp = -1;
+                        }
+                        else
+                        {
+                            // 探测书目记录有没有下属的实体记录(也顺便看看实体记录里面是否有流通信息)?
+
+                            string strLibraryCodeParam = "";
+                            if (sessioninfo.GlobalUser == false)
+                                strLibraryCodeParam = sessioninfo.LibraryCodeList;
+
+                            if (StringUtil.IsInList("getotherlibraryitem", strSubType))
+                                strLibraryCodeParam = "";
+
+                            string strStyle = bSubCount ? "only_getcount" : "return_record_xml";
+                            if (string.IsNullOrEmpty(strLibraryCodeParam) == false)
+                                strStyle += ",libraryCodes:" + strLibraryCodeParam.Replace(",", "|");
+
+                            //                  当包含 libraryCodes: 时，表示仅获得所列分馆代码的册记录。注意多个馆代码之间用竖线分隔
+                            // return:
+                            //      -2  not exist entity dbname
+                            //      -1  error
+                            //      >=0 含有流通信息的实体记录个数, 当strStyle包含count_borrow_info时。
+                            nRet = SearchChildEntities(channel,
+                                strCurrentBiblioRecPath,
+                                strStyle,
+                                bSubCount ? (Delegate_checkRecord)null : CountItemRecord,
+                                null,
+                                out lTemp,
+                                out entityinfos,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strBiblio = strError;
+                                goto CONTINUE;
+                            }
+
+                            if (nRet == -2)
+                            {
+                                Debug.Assert(entityinfos.Count == 0, "");
+                            }
+
+                            lTotalCount += lTemp;
                         }
 
-                        if (nRet == -2)
+                        if (bSubCount == false)
                         {
-                            Debug.Assert(entityinfos.Count == 0, "");
+                            AddSubXml(
+                collection_dom,
+                entityinfos,
+                "item",
+                lTemp);
                         }
-
-                        lTotalCount += lTemp;
                     }
-                    if (strSubType == "order"
+                    if (StringUtil.IsInList("order", strSubType)
                         || string.IsNullOrEmpty(strSubType) == true
-                        || strSubType == "all")
+                        || StringUtil.IsInList("all", strSubType))
                     {
                         // 探测书目记录有没有下属的订购记录
                         List<DeleteEntityInfo> orderinfos = null;
                         long lTemp = 0;
-                        // return:
-                        //      -1  error
-                        //      0   not exist entity dbname
-                        //      1   exist entity dbname
-                        nRet = this.OrderItemDatabase.SearchChildItems(channel,
-                            strCurrentBiblioRecPath,
-                            "only_getcount",
-                            out lTemp,
-                            out orderinfos,
-                            out strError);
-                        if (nRet == -1)
+
+                        // 权限字符串
+                        if (StringUtil.IsInList("getorderinfo", sessioninfo.RightsOrigin) == false
+                            && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                         {
-                            strBiblio = strError;
-                            goto CONTINUE;
+                            lTemp = -1;
+                        }
+                        else
+                        {
+                            // return:
+                            //      -1  error
+                            //      0   not exist entity dbname
+                            //      1   exist entity dbname
+                            nRet = this.OrderItemDatabase.SearchChildItems(channel,
+                                strCurrentBiblioRecPath,
+                                bSubCount ? "only_getcount" : "return_record_xml",
+                                bSubCount ? (Delegate_checkRecord)null : CountItemRecord,
+                                null,
+                                out lTemp,
+                                out orderinfos,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strBiblio = strError;
+                                goto CONTINUE;
+                            }
+
+                            if (nRet == 0)
+                            {
+                                Debug.Assert(orderinfos.Count == 0, "");
+                            }
+                            lTotalCount += lTemp;
                         }
 
-                        if (nRet == 0)
+                        if (bSubCount == false)
                         {
-                            Debug.Assert(orderinfos.Count == 0, "");
+                            AddSubXml(
+                collection_dom,
+                orderinfos,
+                "order",
+                lTemp);
                         }
-                        lTotalCount += lTemp;
                     }
-                    if (strSubType == "issue"
+                    if (StringUtil.IsInList("issue", strSubType)
     || string.IsNullOrEmpty(strSubType) == true
-    || strSubType == "all")
+    || StringUtil.IsInList("all", strSubType))
                     {
                         // 探测书目记录有没有下属的期记录
                         List<DeleteEntityInfo> issueinfos = null;
                         long lTemp = 0;
 
-                        // return:
-                        //      -1  error
-                        //      0   not exist entity dbname
-                        //      1   exist entity dbname
-                        nRet = this.IssueItemDatabase.SearchChildItems(channel,
-                            strCurrentBiblioRecPath,
-                            "only_getcount",
-                            out lTemp,
-                            out issueinfos,
-                            out strError);
-                        if (nRet == -1)
+                        // 权限字符串
+                        if (StringUtil.IsInList("getissueinfo", sessioninfo.RightsOrigin) == false
+                            && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                         {
-                            strBiblio = strError;
-                            goto CONTINUE;
+                            lTemp = -1;
+                        }
+                        else
+                        {
+                            // return:
+                            //      -1  error
+                            //      0   not exist entity dbname
+                            //      1   exist entity dbname
+                            nRet = this.IssueItemDatabase.SearchChildItems(channel,
+                                strCurrentBiblioRecPath,
+                                bSubCount ? "only_getcount" : "return_record_xml",
+                                bSubCount ? (Delegate_checkRecord)null : CountItemRecord,
+                                null,
+                                out lTemp,
+                                out issueinfos,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strBiblio = strError;
+                                goto CONTINUE;
+                            }
+
+                            if (nRet == 0)
+                            {
+                                Debug.Assert(issueinfos.Count == 0, "");
+                            }
+                            lTotalCount += lTemp;
                         }
 
-                        if (nRet == 0)
+                        if (bSubCount == false)
                         {
-                            Debug.Assert(issueinfos.Count == 0, "");
+                            AddSubXml(
+                collection_dom,
+                issueinfos,
+                "issue",
+                lTemp);
                         }
-                        lTotalCount += lTemp;
                     }
-                    if (strSubType == "comment"
+                    if (StringUtil.IsInList("comment", strSubType)
     || string.IsNullOrEmpty(strSubType) == true
-    || strSubType == "all")
+    || StringUtil.IsInList("all", strSubType))
                     {
                         // 探测书目记录有没有下属的评注记录
                         List<DeleteEntityInfo> commentinfos = null;
                         long lTemp = 0;
-                        // return:
-                        //      -1  error
-                        //      0   not exist entity dbname
-                        //      1   exist entity dbname
-                        nRet = this.CommentItemDatabase.SearchChildItems(channel,
-                            strCurrentBiblioRecPath,
-                            "only_getcount",
-                            out lTemp,
-                            out commentinfos,
-                            out strError);
-                        if (nRet == -1)
+
+                        // 权限字符串
+                        if (StringUtil.IsInList("getcommentinfo", sessioninfo.RightsOrigin) == false
+                            && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                         {
-                            strBiblio = strError;
-                            goto CONTINUE;
+                            lTemp = -1;
+                        }
+                        else
+                        {
+                            // return:
+                            //      -1  error
+                            //      0   not exist entity dbname
+                            //      1   exist entity dbname
+                            nRet = this.CommentItemDatabase.SearchChildItems(channel,
+                                strCurrentBiblioRecPath,
+                                bSubCount ? "only_getcount" : "return_record_xml",
+                                bSubCount ? (Delegate_checkRecord)null : CountItemRecord,
+                                null,
+                                out lTemp,
+                                out commentinfos,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strBiblio = strError;
+                                goto CONTINUE;
+                            }
+
+                            if (nRet == 0)
+                            {
+                                Debug.Assert(commentinfos.Count == 0, "");
+                            }
+
+                            lTotalCount += lTemp;
                         }
 
-                        if (nRet == 0)
+                        if (bSubCount == false)
                         {
-                            Debug.Assert(commentinfos.Count == 0, "");
+                            AddSubXml(
+                collection_dom,
+                commentinfos,
+                "comment",
+                lTemp);
                         }
-
-                        lTotalCount += lTemp;
                     }
 
-                    strBiblio = lTotalCount.ToString();
+                    if (bSubCount)
+                        strBiblio = lTotalCount.ToString();
+                    else
+                        strBiblio = collection_dom.DocumentElement.OuterXml;
                 }
                 else if (String.Compare(strBiblioType, "outputpath", true) == 0)
                 {
@@ -1200,6 +1310,50 @@ namespace DigitalPlatform.LibraryServer
                 strError = strErrorText;
                 return -1;
             }
+            return 0;
+        }
+
+        static void AddSubXml(
+            XmlDocument dom,
+            List<DeleteEntityInfo> entityinfos,
+            string strItemElementName,
+            long lHitCount)
+        {
+            if (lHitCount != -1)
+            {
+                foreach (DeleteEntityInfo entity in entityinfos)
+                {
+                    XmlElement item = dom.CreateElement(strItemElementName);
+                    dom.DocumentElement.AppendChild(item);
+                    item.SetAttribute("recPath", entity.RecPath);
+                    item.SetAttribute("timestamp", ByteArray.GetHexTimeStampString(entity.OldTimestamp));
+
+                    if (string.IsNullOrEmpty(entity.OldRecord) == false)
+                    {
+                        // TODO: 这里如果抛出异常怎么办?
+                        XmlDocument item_dom = new XmlDocument();
+                        item_dom.LoadXml(entity.OldRecord);
+                        item.InnerXml = item_dom.DocumentElement.InnerXml;
+                    }
+                }
+            }
+
+            // itemTotalCount=-1 表示 AccessDenied
+            dom.DocumentElement.SetAttribute(strItemElementName + "TotalCount", lHitCount.ToString());
+        }
+
+        // 不让超过 10 条
+        int CountItemRecord(
+    int index,
+    string strRecPath,
+    XmlDocument dom,
+    byte[] baTimestamp,
+    object param,
+    out string strError)
+        {
+            strError = "";
+            if (index >= 10)
+                return 1;
             return 0;
         }
 
@@ -3046,6 +3200,8 @@ nsmgr);
             nRet = this.CommentItemDatabase.SearchChildItems(channel,
                 strBiblioRecPath,
                 "return_record_xml", // 在DeleteEntityInfo结构中返回OldRecord内容， 并且不要检查流通信息
+                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                null,
                 out lHitCount,
                 out commentinfos,
                 out strError);
@@ -4608,6 +4764,8 @@ out strError);
                 nRet = this.OrderItemDatabase.SearchChildItems(channel,
                     strBiblioRecPath,
                     "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
+                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                null,
                     out lHitCount,
                     out orderinfos,
                     out strError);
@@ -4658,6 +4816,8 @@ out strError);
                 nRet = this.IssueItemDatabase.SearchChildItems(channel,
                     strBiblioRecPath,
                     "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
+                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                null,
                     out lHitCount,
                     out issueinfos,
                     out strError);
@@ -4703,6 +4863,8 @@ out strError);
                 nRet = this.CommentItemDatabase.SearchChildItems(channel,
                     strBiblioRecPath,
                     "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
+                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                null,
                     out lHitCount,
                     out commentinfos,
                     out strError);
@@ -4939,7 +5101,9 @@ out strError);
         }
 
         // 如果返回值不是0，就中断循环并返回
-        int CheckItemRecord(string strRecPath,
+        int CheckItemRecord(
+            int index,
+            string strRecPath,
             XmlDocument dom,
             byte[] baTimestamp,
             object param,
@@ -5567,6 +5731,8 @@ out strError);
             nRet = this.OrderItemDatabase.SearchChildItems(channel,
                 strBiblioRecPath,
                 "return_record_xml,check_circulation_info",
+                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                null,
                 out lHitCount,
                 out orderinfos,
                 out strError);
@@ -5603,6 +5769,8 @@ out strError);
             nRet = this.IssueItemDatabase.SearchChildItems(channel,
                 strBiblioRecPath,
                 "return_record_xml,check_circulation_info",
+                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                null,
                 out lHitCount,
                 out issueinfos,
                 out strError);
@@ -5637,6 +5805,8 @@ out strError);
             nRet = this.CommentItemDatabase.SearchChildItems(channel,
                 strBiblioRecPath,
                 "return_record_xml,check_circulation_info",
+                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                null,
                 out lHitCount,
                 out commentinfos,
                 out strError);

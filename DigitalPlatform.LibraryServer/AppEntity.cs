@@ -160,18 +160,21 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 如果返回值不是0，就中断循环并返回
-        public delegate int Delegate_checkRecord(string strRecPath,
+        public delegate int Delegate_checkRecord(
+            int index,
+            string strRecPath,
             XmlDocument dom,
             byte[] baTimestamp,
             object param,
             out string strError);
 
-
+        // 2016/11/15 改造为不用 GetRes() 获取记录
         // 检索书目记录下属的实体记录，返回少量必要的信息，可以提供后面实做删除时使用
         // parameters:
         //      strStyle    check_borrow_info,count_borrow_info,return_record_xml
         //                  当包含 check_borrow_info 时，发现第一个流通信息，本函数就立即返回-1
         //                  当包含 count_borrow_info 时，函数要统计全部流通信息的个数
+        //                  当包含 libraryCodes: 时，表示仅获得所列分馆代码的册记录。注意多个馆代码之间用竖线分隔
         // return:
         //      -2  not exist entity dbname
         //      -1  error
@@ -203,6 +206,8 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            string strLibraryCodeParam = StringUtil.GetParameterByPrefix(strStyle, "libraryCodes", ":");
+
             string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
             string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
 
@@ -218,14 +223,40 @@ namespace DigitalPlatform.LibraryServer
             if (String.IsNullOrEmpty(strItemDbName) == true)
                 return 0;
 
-
             // 检索实体库中全部从属于特定id的记录
+            string strQueryXml = "";
+            if (string.IsNullOrEmpty(strLibraryCodeParam) == true)
+            {
+                strQueryXml = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14 
+                    + "'><item><word>"
+                    + strBiblioRecId
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
+            }
+            else
+            {
+                // 仅仅取得当前用户管辖的分馆的册记录
+                List<string> codes = StringUtil.SplitList(strLibraryCodeParam, '|'); // sessioninfo.LibraryCodeList
+                foreach (string strCode in codes)
+                {
+                    string strOneQueryXml = "<target list='"
+         + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录+馆藏地点")
+         + "'><item><word>"
+         + StringUtil.GetXmlStringSimple(strBiblioRecId + "|" + strCode + "/")
+         + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
+                    if (string.IsNullOrEmpty(strQueryXml) == false)
+                    {
+                        Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                        strQueryXml += "<operator value='OR'/>";
+                    }
 
-            string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14 
-                + "'><item><word>"
-                + strBiblioRecId
-                + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
+                    strQueryXml += strOneQueryXml;
+                }
+                if (codes.Count > 0)
+                {
+                    strQueryXml = "<group>" + strQueryXml + "</group>";
+                }
+            }
 
             long lRet = channel.DoSearch(strQueryXml,
                 "entities",
@@ -254,12 +285,15 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
+            string strColumnStyle = "id,xml,timestamp";
+
             int nBorrowInfoCount = 0;
 
             int nStart = 0;
             int nPerCount = 100;
             for (; ; )
             {
+#if NO
                 List<string> aPath = null;
                 lRet = channel.DoGetSearchResult(
                     "entities",
@@ -277,42 +311,69 @@ namespace DigitalPlatform.LibraryServer
                     strError = "aPath.Count == 0";
                     goto ERROR1;
                 }
+#endif
+                Record[] searchresults = null;
+                lRet = channel.DoGetSearchResult(
+    "entities",
+    nStart,
+    nPerCount,
+    strColumnStyle,
+    "zh",
+    null,
+    out searchresults,
+    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+                if (searchresults == null)
+                {
+                    strError = "searchresults == null";
+                    goto ERROR1;
+                }
+                if (searchresults.Length == 0)
+                {
+                    strError = "searchresults.Length == 0";
+                    goto ERROR1;
+                }
+
 
                 // 获得每条记录
-                for (int i = 0; i < aPath.Count; i++)
+                // for (int i = 0; i < aPath.Count; i++)
+                int i = 0;
+                foreach (Record record in searchresults)
                 {
+                    EntityInfo info = new EntityInfo();
+                    info.OldRecPath = record.Path;
+
                     string strMetaData = "";
                     string strXml = "";
                     byte[] timestamp = null;
                     string strOutputPath = "";
 
-                    lRet = channel.GetRes(aPath[i],
-                        out strXml,
-                        out strMetaData,
-                        out timestamp,
-                        out strOutputPath,
-                        out strError);
                     DeleteEntityInfo entityinfo = new DeleteEntityInfo();
 
-                    if (lRet == -1)
+                    if (record.RecordBody == null || string.IsNullOrEmpty(record.RecordBody.Xml) == true)
                     {
-                        /*
-                        entityinfo.RecPath = aPath[i];
-                        entityinfo.ErrorCode = channel.OriginErrorCode;
-                        entityinfo.ErrorInfo = channel.ErrorInfo;
+                        lRet = channel.GetRes(record.Path,
+                            out strXml,
+                            out strMetaData,
+                            out timestamp,
+                            out strOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                                continue;
 
-                        entityinfo.OldRecord = "";
-                        entityinfo.OldTimestamp = null;
-                        entityinfo.NewRecord = "";
-                        entityinfo.NewTimestamp = null;
-                        entityinfo.Action = "";
-                         * */
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
-                            continue;
+                            strError = "获取实体记录 '" + record.Path + "' 时发生错误: " + strError;
+                            goto ERROR1;
+                        }
 
-                        strError = "获取实体记录 '" + aPath[i] + "' 时发生错误: " + strError;
-                        goto ERROR1;
-                        // goto CONTINUE;
+                    }
+                    else
+                    {
+                        strXml = record.RecordBody.Xml;
+                        strOutputPath = record.Path;
+                        timestamp = record.RecordBody.Timestamp;
                     }
 
                     entityinfo.RecPath = strOutputPath;
@@ -334,13 +395,15 @@ namespace DigitalPlatform.LibraryServer
                         }
                         catch (Exception ex)
                         {
-                            strError = "实体记录 '" + aPath[i] + "' 装载进入DOM时发生错误: " + ex.Message;
+                            strError = "实体记录 '" + strOutputPath + "' 装载进入DOM时发生错误: " + ex.Message;
                             goto ERROR1;
                         }
 
                         if (procCheckRecord != null)
                         {
-                            nRet = procCheckRecord(strOutputPath,
+                            nRet = procCheckRecord(
+                                nStart + i,
+                                strOutputPath,
                                 domExist,
                                 timestamp,
                                 param,
@@ -358,7 +421,6 @@ namespace DigitalPlatform.LibraryServer
                         string strDetail = "";
                         bool bHasCirculationInfo = IsEntityHasCirculationInfo(domExist, out strDetail);
 
-
                         if (bHasCirculationInfo == true)
                         {
                             if (bCheckBorrowInfo == true)
@@ -373,9 +435,11 @@ namespace DigitalPlatform.LibraryServer
 
                     // CONTINUE:
                     entityinfos.Add(entityinfo);
+
+                    i++;
                 }
 
-                nStart += aPath.Count;
+                nStart += searchresults.Length;
                 if (nStart >= nResultCount)
                     break;
             }

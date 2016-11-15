@@ -1888,6 +1888,7 @@ true);
                         nRet = form.CommentControl.LoadItemRecords(
                             channel,
                             form.BiblioRecPath,
+                            null,
                             "",
                             out strError);
                         if (nRet == -1)
@@ -2976,6 +2977,55 @@ true);
             return nRet;
         }
 
+        static bool IsAccessDenied(XmlDocument collection_dom,
+    string strElementName)
+        {
+            if (collection_dom.DocumentElement == null)
+                return false;
+            string strTotalCount = collection_dom.DocumentElement.GetAttribute(strElementName + "TotalCount");
+            if (strTotalCount == "-1")
+                return true;
+            return false;
+        }
+
+        // 从 collection 下级元素中获得指定元素名的部分
+        static EntityInfo[] GetItems(XmlDocument collection_dom,
+            string strElementName)
+        {
+            if (collection_dom.DocumentElement == null)
+                return null;
+            string strTotalCount = collection_dom.DocumentElement.GetAttribute(strElementName + "TotalCount");
+            if (string.IsNullOrEmpty(strTotalCount))
+                return null;
+            int nTotalCount = 0;
+            Int32.TryParse(strTotalCount, out nTotalCount);
+            XmlNodeList nodes = collection_dom.DocumentElement.SelectNodes(strElementName);
+            if (nodes.Count < nTotalCount)
+                return null;    // 迫使后面重新获取
+
+            List<EntityInfo> results = new List<EntityInfo>();
+            foreach (XmlElement node in nodes)
+            {
+                XmlDocument item_dom = new XmlDocument();
+                item_dom.LoadXml(node.OuterXml);
+
+                EntityInfo info = new EntityInfo();
+
+                info.OldRecPath = node.GetAttribute("recPath");
+                node.RemoveAttribute("recPath");
+
+                info.OldTimestamp = ByteArray.GetTimeStampByteArray(node.GetAttribute("timestamp"));
+                node.RemoveAttribute("timestamp");
+
+                info.OldRecord = node.OuterXml;
+                results.Add(info);
+            }
+
+            if (results.Count == 0)
+                return null;
+            return results.ToArray();
+        }
+
         // TODO: 有这样一种情况：虽然书目记录和下属的记录都不存在，但是窗口内容被改变了，已然不是以前的内容。如果这时保存记录，会有意外发生，例如本来就有的册信息被清空了。
         // 要想办法在这种情况下保持窗口内全部信息不变；或者，既然已经改变，索性把MARC窗内的记录全部清除，书目记录路径也清楚，避免误会
         // parameters:
@@ -3081,14 +3131,22 @@ true);
                 if (this.m_commentViewer != null)
                     this.m_commentViewer.Clear();
 
+                bool bLoadSubrecords = true;
+                if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.91") < 0)
+                    bLoadSubrecords = false;
+
+
                 string strXml = "";
+                string strSubRecords = "";
                 int nRet = this.LoadBiblioRecord(
                     channel,
                     strBiblioRecPath,
                     strPrevNextStyle,
                     false,
+                    bLoadSubrecords,
                     out strOutputBiblioRecPath,
                     out strXml,
+                    out strSubRecords,
                     out strError);
                 if (nRet == -1)
                 {
@@ -3180,6 +3238,10 @@ true);
 
                 bSubrecordListCleared = true;
 
+                XmlDocument collection_dom = new XmlDocument();
+                if (string.IsNullOrEmpty(strSubRecords) == false)
+                    collection_dom.LoadXml(strSubRecords);
+
                 if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
                 {
                     string strBiblioDbName = "";
@@ -3201,34 +3263,40 @@ true);
                     {
                         this.EnableItemsPage(true);
 
-                        nRet = this.entityControl1.LoadItemRecords(
-                            channel,
-                            strOutputBiblioRecPath,    // 2008/11/2 new changed
-                            // this.DisplayOtherLibraryItem,
-                            this.DisplayOtherLibraryItem == true ? "getotherlibraryitem" : "",
-                            out strError);
-                        if (nRet == -1)
+                        if (IsAccessDenied(collection_dom, "item"))
+                            this.entityControl1.ErrorInfo = "权限不足，获取实体信息被拒绝";
+                        else
                         {
-                            strError = "装载册记录时出错: " + strError;
-                            if (channel.ErrorCode == ErrorCode.AccessDenied)
+                            nRet = this.entityControl1.LoadItemRecords(
+                                channel,
+                                strOutputBiblioRecPath,    // 2008/11/2 new changed
+                                GetItems(collection_dom, "item"),
+                                // this.DisplayOtherLibraryItem,
+                                this.DisplayOtherLibraryItem == true ? "getotherlibraryitem" : "",
+                                out strError);
+                            if (nRet == -1)
                             {
-                                // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
-                                this.entityControl1.ErrorInfo = strError;
-                            }
-                            else
-                            {
-                                // MessageBox.Show(this, strError);
-                                if (String.IsNullOrEmpty(strTotalError) == false)
-                                    strTotalError += "\r\n";
-                                strTotalError += strError;
+                                strError = "装载册记录时出错: " + strError;
+                                if (channel.ErrorCode == ErrorCode.AccessDenied)
+                                {
+                                    // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                    this.entityControl1.ErrorInfo = strError;
+                                }
+                                else
+                                {
+                                    // MessageBox.Show(this, strError);
+                                    if (String.IsNullOrEmpty(strTotalError) == false)
+                                        strTotalError += "\r\n";
+                                    strTotalError += strError;
 
-                                bError = true;
-                                // return -1;
+                                    bError = true;
+                                    // return -1;
+                                }
                             }
+
+                            if (nRet == 1)
+                                bSubrecordExist = true;
                         }
-
-                        if (nRet == 1)
-                            bSubrecordExist = true;
                     }
                     else
                     {
@@ -3241,33 +3309,40 @@ true);
                     {
                         this.EnableIssuesPage(true);
 
-                        nRet = this.issueControl1.LoadItemRecords(
-                            channel,
-                            strOutputBiblioRecPath,  // 2008/11/2 changed
-                            "",
-                            out strError);
-                        if (nRet == -1)
+                        if (IsAccessDenied(collection_dom, "issue"))
+                            this.issueControl1.ErrorInfo = "权限不足，获取期信息被拒绝";
+                        else
                         {
-                            strError = "装载期记录时出错: " + strError;
-                            if (channel.ErrorCode == ErrorCode.AccessDenied)
-                            {
-                                // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
-                                this.issueControl1.ErrorInfo = strError;
-                            }
-                            else
-                            {
-                                // MessageBox.Show(this, strError);
-                                if (String.IsNullOrEmpty(strTotalError) == false)
-                                    strTotalError += "\r\n";
-                                strTotalError += strError;
 
-                                bError = true;
-                                // return -1;
+                            nRet = this.issueControl1.LoadItemRecords(
+                                channel,
+                                strOutputBiblioRecPath,  // 2008/11/2 changed
+                                GetItems(collection_dom, "issue"),
+                                "",
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = "装载期记录时出错: " + strError;
+                                if (channel.ErrorCode == ErrorCode.AccessDenied)
+                                {
+                                    // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                    this.issueControl1.ErrorInfo = strError;
+                                }
+                                else
+                                {
+                                    // MessageBox.Show(this, strError);
+                                    if (String.IsNullOrEmpty(strTotalError) == false)
+                                        strTotalError += "\r\n";
+                                    strTotalError += strError;
+
+                                    bError = true;
+                                    // return -1;
+                                }
                             }
+
+                            if (nRet == 1)
+                                bSubrecordExist = true;
                         }
-
-                        if (nRet == 1)
-                            bSubrecordExist = true;
                     }
                     else
                     {
@@ -3284,33 +3359,41 @@ true);
                             this.orderControl1.SeriesMode = false;
 
                         this.EnableOrdersPage(true);
-                        nRet = this.orderControl1.LoadItemRecords(
-                            channel,
-                            strOutputBiblioRecPath,  // 2008/11/2 changed
-                            "",
-                            out strError);
-                        if (nRet == -1)
+
+                        if (IsAccessDenied(collection_dom, "order"))
+                            this.orderControl1.ErrorInfo = "权限不足，获取订购信息被拒绝";
+                        else
                         {
-                            strError = "装载订购记录时出错: " + strError;
-                            if (channel.ErrorCode == ErrorCode.AccessDenied)
-                            {
-                                // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
-                                this.orderControl1.ErrorInfo = strError;
-                            }
-                            else
-                            {
-                                // MessageBox.Show(this, strError);
-                                if (String.IsNullOrEmpty(strTotalError) == false)
-                                    strTotalError += "\r\n";
-                                strTotalError += strError;
 
-                                bError = true;
-                                // return -1;
+                            nRet = this.orderControl1.LoadItemRecords(
+                                channel,
+                                strOutputBiblioRecPath,  // 2008/11/2 changed
+                                GetItems(collection_dom, "order"),
+                                "",
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = "装载订购记录时出错: " + strError;
+                                if (channel.ErrorCode == ErrorCode.AccessDenied)
+                                {
+                                    // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                    this.orderControl1.ErrorInfo = strError;
+                                }
+                                else
+                                {
+                                    // MessageBox.Show(this, strError);
+                                    if (String.IsNullOrEmpty(strTotalError) == false)
+                                        strTotalError += "\r\n";
+                                    strTotalError += strError;
+
+                                    bError = true;
+                                    // return -1;
+                                }
                             }
+
+                            if (nRet == 1)
+                                bSubrecordExist = true;
                         }
-
-                        if (nRet == 1)
-                            bSubrecordExist = true;
                     }
                     else
                     {
@@ -3322,31 +3405,39 @@ true);
                     if (String.IsNullOrEmpty(strCommentDbName) == false) // 仅在当前书目库有对应的采购库时，才装入采购记录
                     {
                         this.EnableCommentsPage(true);
-                        nRet = this.commentControl1.LoadItemRecords(
-                            channel,
-                            strOutputBiblioRecPath,
-                            "",
-                            out strError);
-                        if (nRet == -1)
+
+                        if (IsAccessDenied(collection_dom, "comment"))
+                            this.commentControl1.ErrorInfo = "权限不足，获取评注信息被拒绝";
+                        else
                         {
-                            strError = "装载评注记录时出错: " + strError;
-                            if (channel.ErrorCode == ErrorCode.AccessDenied)
-                            {
-                                // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
-                                this.commentControl1.ErrorInfo = strError;
-                            }
-                            else
-                            {
-                                if (String.IsNullOrEmpty(strTotalError) == false)
-                                    strTotalError += "\r\n";
-                                strTotalError += strError;
 
-                                bError = true;
+                            nRet = this.commentControl1.LoadItemRecords(
+                                channel,
+                                strOutputBiblioRecPath,
+                                GetItems(collection_dom, "comment"),
+                                "",
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = "装载评注记录时出错: " + strError;
+                                if (channel.ErrorCode == ErrorCode.AccessDenied)
+                                {
+                                    // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                    this.commentControl1.ErrorInfo = strError;
+                                }
+                                else
+                                {
+                                    if (String.IsNullOrEmpty(strTotalError) == false)
+                                        strTotalError += "\r\n";
+                                    strTotalError += strError;
+
+                                    bError = true;
+                                }
                             }
+
+                            if (nRet == 1)
+                                bSubrecordExist = true;
                         }
-
-                        if (nRet == 1)
-                            bSubrecordExist = true;
                     }
                     else
                     {
@@ -3664,11 +3755,14 @@ true);
             string strBiblioRecPath,
             string strDirectionStyle,
             bool bWarningNotSaved,
+            bool bLoadSubrecords,
             out string strOutputBiblioRecPath,
             out string strXml,
+            out string strSubRecords,
             out string strError)
         {
             strXml = "";
+            strSubRecords = "";
             strOutputBiblioRecPath = "";
 
             // 2008/6/24 
@@ -3733,20 +3827,17 @@ true);
                     out strHtml,
                     out strError);
                  * */
-                string[] formats = null;
-
+                List<string> format_list = new List<string>();
+                format_list.Add("outputpath");
+                format_list.Add("html");
                 if (bCataloging == true)
                 {
-                    formats = new string[3];
-                    formats[0] = "outputpath";
-                    formats[1] = "html";
-                    formats[2] = "xml";
+                    format_list.Add("xml");
                 }
-                else
+                if (bLoadSubrecords)
                 {
-                    formats = new string[2];
-                    formats[0] = "outputpath";
-                    formats[1] = "html";
+                    format_list.Add("subrecords:all" 
+                        + (this.DisplayOtherLibraryItem == true ? "|getotherlibraryitem" : ""));
                 }
 
                 string[] results = null;
@@ -3756,7 +3847,7 @@ true);
                     Progress,
                     strBiblioRecPath,
                     "",
-                    formats,
+                    format_list.ToArray(),
                     out results,
                     out baTimestamp,
                     out strError);
@@ -3802,7 +3893,7 @@ true);
                         strError = "results == null";
                         goto ERROR1;
                     }
-                    if (results.Length != formats.Length)
+                    if (results.Length != format_list.Count)
                     {
                         strError = "result.Length != formats.Length";
                         goto ERROR1;
@@ -3823,10 +3914,22 @@ true);
                 // 如果没有修改BiblioRecPath，就不能把MARC编辑器中的书目记录修改，否则因BiblioChanged已经为true，可能会导致后面在原有书目记录上作错误的自动保存的副作用
                 this.BiblioRecPath = strOutputBiblioRecPath; // 2008/6/24 
 
+                {
+                    // subrecords 后面可能带有冒号。需要前方一致匹配
+                    int index = IndexOfFormat(format_list, "subrecords");
+                    if (index != -1)
+                    {
+                        if (results != null && results.Length > index)
+                            strSubRecords = results[index];
+                    }
+                }
+
                 if (bCataloging == true)
                 {
-                    if (results != null && results.Length >= 3)
-                        strXml = results[2];
+                    int index = format_list.IndexOf("xml");
+                    Debug.Assert(index != -1, "");
+                    if (results != null && results.Length > index)
+                        strXml = results[index];
 
                     if (bError == false)    // 2008/6/24 
                     {
@@ -3896,6 +3999,18 @@ true);
 
             return 1;
         ERROR1:
+            return -1;
+        }
+
+        static int IndexOfFormat(List<string> formats, string format)
+        {
+            int i = 0;
+            foreach(string s in formats)
+            {
+                if (s.StartsWith(format))
+                    return i;
+                i++;
+            }
             return -1;
         }
 
@@ -7249,6 +7364,7 @@ MessageBoxDefaultButton.Button2);
                     nRet = this.entityControl1.LoadItemRecords(
                         channel,
                         this.BiblioRecPath,
+                        null,
                         // this.DisplayOtherLibraryItem,
                         this.DisplayOtherLibraryItem == true ? "getotherlibraryitem" : "",
                         out strError);
@@ -7350,6 +7466,7 @@ MessageBoxDefaultButton.Button2);
                         {
                             string strOutputBiblioRecPath = "";
                             string strXml = "";
+                            string strSubRecords = "";
                             // 将实际保存的记录装入 MARC 编辑器
                             // return:
                             //      -1  error
@@ -7360,8 +7477,10 @@ MessageBoxDefaultButton.Button2);
                                 strOutputPath,
                                 "",
                                 false,
+                                false,
                                 out strOutputBiblioRecPath,
                                 out strXml,
+                                out strSubRecords,
                                 out strError);
                             if (nRet == -1)
                             {

@@ -131,7 +131,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.88 (2016/10/30) 为登录过程首次实现 ip: router_ip: 筛选功能。通道显示的 Via 合并了两类 Via 和 IP 地址。
         //      2.89 (2016/11/3) dp2library 可以使用 * 作为序列号，这样最大通道数为 255，而且永不失效。
         //      2.90 (2016/11/6) 消除 首次初始化 MSMQ 队列文件遇到异常然后挂起，但再也不会重试消除挂起状态 的 Bug。尝试将 Dir() API 和 ListFile() API 连接起来
-        public static string Version = "2.90";
+        //      2.91 (2016/11/15) GetBiblioInfos() API 增加了一种 subrecords format，可以用于同时返回下级记录的 XML。返回的最多每种下级记录不超过 10 条
+        public static string Version = "2.91";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

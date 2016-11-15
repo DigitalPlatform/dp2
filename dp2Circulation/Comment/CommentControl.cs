@@ -434,12 +434,14 @@ namespace dp2Circulation
         /// </summary>
         /// <param name="channel">通讯通道</param>
         /// <param name="strBiblioRecPath">书目记录路径</param>
+        /// <param name="preload_entities">预先装载好的事项集合</param>
         /// <param name="strStyle">装载风格</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 没有装载; 1: 已经装载</returns>
         public override int LoadItemRecords(
             LibraryChannel channel,
             string strBiblioRecPath,
+            EntityInfo[] preload_entities,
             // bool bDisplayOtherLibraryItem,
             string strStyle,
             out string strError)
@@ -447,6 +449,7 @@ namespace dp2Circulation
             int nRet = base.LoadItemRecords(
                 channel,
                 strBiblioRecPath,
+                preload_entities,
                 strStyle,
                 out strError);
             if (nRet == -1)

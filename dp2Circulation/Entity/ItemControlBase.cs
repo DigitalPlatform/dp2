@@ -514,12 +514,14 @@ namespace dp2Circulation
         /// </summary>
         /// <param name="channel_param">通讯通道。如果为 null，表示函数内使用自动获得的通道</param>
         /// <param name="strBiblioRecPath">书目记录路径</param>
+        /// <param name="preload_entities">预先装载好的事项集合</param>
         /// <param name="strStyle">装载风格</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 没有装载; 1: 已经装载</returns>
         public virtual int LoadItemRecords(
             LibraryChannel channel_param,
             string strBiblioRecPath,
+            EntityInfo[] preload_entities,
             // bool bDisplayOtherLibraryItem,
             string strStyle,
             out string strError)
@@ -534,7 +536,10 @@ namespace dp2Circulation
             Stop.Initial("正在装入"+this.ItemTypeName+"信息 ...");
             Stop.BeginLoop();
 #endif
-            Stop.Initial("正在装入" + this.ItemTypeName + "信息 ...");
+            if (preload_entities != null)
+                Stop.Initial("正在填充" + this.ItemTypeName + "信息 ...");
+            else
+                Stop.Initial("正在装入" + this.ItemTypeName + "信息 ...");
 
             try
             {
@@ -544,155 +549,123 @@ namespace dp2Circulation
                 this.ClearItems();
                 this.ErrorInfo = "";
 
-                long lPerCount = 100; // 每批获得多少个
-                long lStart = 0;
-                long lResultCount = 0;
-                long lCount = -1;
-                for (; ; )
+                if (preload_entities != null)
                 {
-                    EntityInfo[] entities = null;
+                    // 
+                    int nRet = FillEntities(
+                        channel,
+                        preload_entities,
+                        ref errors,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+                else
+                {
 
-                    // ? Thread.Sleep(500);
-
-                    if (lCount > 0)
-                        Stop.SetMessage("正在装入册信息 " + lStart.ToString() + "-" + (lStart + lCount - 1).ToString() + " ...");
-
-                    long lRet = 0;
-
-                    if (this.ItemType == "item")
+                    long lPerCount = 100; // 每批获得多少个
+                    long lStart = 0;
+                    long lResultCount = 0;
+                    long lCount = -1;
+                    for (; ; )
                     {
-                        lRet = channel.GetEntities(
-                             Stop,
-                             strBiblioRecPath,
-                             lStart,
-                             lCount,
-                             strStyle,  // bDisplayOtherLibraryItem == true ? "getotherlibraryitem" : "",
-                             "zh",
-                             out entities,
-                             out strError);
-                        if (lRet == -1)
-                            return -1;
-                    }
-                    else if (this.ItemType == "order")
-                    {
-                        lRet = channel.GetOrders(
-    Stop,
-    strBiblioRecPath,
-    lStart,
-    lCount,
-    "",
-    "zh",
-    out entities,
-    out strError);
-                        if (lRet == -1)
-                            return -1;
-                    }
-                    else if (this.ItemType == "issue")
-                    {
-                        lRet = channel.GetIssues(
-            Stop,
-    strBiblioRecPath,
+                        EntityInfo[] entities = null;
+
+                        // ? Thread.Sleep(500);
+
+                        if (lCount > 0)
+                            Stop.SetMessage("正在装入册信息 " + lStart.ToString() + "-" + (lStart + lCount - 1).ToString() + " ...");
+
+                        long lRet = 0;
+
+                        if (this.ItemType == "item")
+                        {
+                            lRet = channel.GetEntities(
+                                 Stop,
+                                 strBiblioRecPath,
+                                 lStart,
+                                 lCount,
+                                 strStyle,  // bDisplayOtherLibraryItem == true ? "getotherlibraryitem" : "",
+                                 "zh",
+                                 out entities,
+                                 out strError);
+                            if (lRet == -1)
+                                return -1;
+                        }
+                        else if (this.ItemType == "order")
+                        {
+                            lRet = channel.GetOrders(
+        Stop,
+        strBiblioRecPath,
         lStart,
         lCount,
         "",
         "zh",
-    out entities,
-    out strError);
-                        if (lRet == -1)
-                            return -1;
-                    }
-                    else if (this.ItemType == "comment")
-                    {
-                        lRet = channel.GetComments(
-    Stop,
-    strBiblioRecPath,
-    lStart,
-    lCount,
-    "",
-    "zh",
-    out entities,
-    out strError);
-                        if (lRet == -1)
-                            return -1;
-                    }
-                    else
-                    {
-                        strError = "未知的事项类型 '" + this.ItemType + "'";
-                        return -1;
-                    }
-
-                    lResultCount = lRet;
-
-                    if (lRet == 0)
-                        return 0;
-
-                    Debug.Assert(entities != null, "");
-
-                    this.m_listView.BeginUpdate();
-                    try
-                    {
-                        foreach (EntityInfo entity in entities)
-                        {
-                            if (entity.ErrorCode != ErrorCodeValue.NoError)
-                            {
-                                strError = "路径为 '" + entity.OldRecPath + "' 的" + this.ItemTypeName + "记录装载中发生错误: " + entity.ErrorInfo;  // NewRecPath
+        out entities,
+        out strError);
+                            if (lRet == -1)
                                 return -1;
-                            }
-
-                            // 所返回的记录有可能是被过滤掉的
-                            if (string.IsNullOrEmpty(entity.OldRecord) == true)
-                                continue;
-
-                            // 剖析一个册的xml记录，取出有关信息放入listview中
-                            T bookitem = new T();
-
-                            int nRet = bookitem.SetData(entity.OldRecPath, // NewRecPath
-                                     entity.OldRecord,
-                                     entity.OldTimestamp,
-                                     out strError);
-                            if (nRet == -1)
-                                return -1;
-
-                            if (entity.ErrorCode == ErrorCodeValue.NoError)
-                                bookitem.Error = null;
-                            else
-                                bookitem.Error = entity;
-
-                            // 装载对象信息
-                            if (this.ItemType == "issue")   // 优化，只让期记录处理对象信息
-                            {
-                                nRet = bookitem.LoadObjects(
-                                    channel,
-                                    this.Stop,
-                                    Program.MainForm.ServerVersion,
-                                    entity.OldRecPath,
-                                    entity.OldRecord,
-                                    out strError);
-                                if (nRet == -1)
-                                {
-                                    errors.Add(strError);
-                                }
-                            }
-
-                            this.Items.Add(bookitem);
-
-                            bookitem.AddToListView(this.m_listView);
                         }
+                        else if (this.ItemType == "issue")
+                        {
+                            lRet = channel.GetIssues(
+                Stop,
+        strBiblioRecPath,
+            lStart,
+            lCount,
+            "",
+            "zh",
+        out entities,
+        out strError);
+                            if (lRet == -1)
+                                return -1;
+                        }
+                        else if (this.ItemType == "comment")
+                        {
+                            lRet = channel.GetComments(
+        Stop,
+        strBiblioRecPath,
+        lStart,
+        lCount,
+        "",
+        "zh",
+        out entities,
+        out strError);
+                            if (lRet == -1)
+                                return -1;
+                        }
+                        else
+                        {
+                            strError = "未知的事项类型 '" + this.ItemType + "'";
+                            return -1;
+                        }
+
+                        lResultCount = lRet;
+
+                        if (lRet == 0)
+                            return 0;
+
+                        Debug.Assert(entities != null, "");
+
+                        // 
+                        int nRet = FillEntities(
+                            channel,
+                            entities,
+                            ref errors,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+
+                        lStart += entities.Length;
+                        if (lStart >= lResultCount)
+                            break;
+
+                        if (lCount == -1)
+                            lCount = lPerCount;
+
+                        if (lStart + lCount > lResultCount)
+                            lCount = lResultCount - lStart;
                     }
-                    finally
-                    {
-                        this.m_listView.EndUpdate();
-                    }
-
-                    lStart += entities.Length;
-                    if (lStart >= lResultCount)
-                        break;
-
-                    if (lCount == -1)
-                        lCount = lPerCount;
-
-                    if (lStart + lCount > lResultCount)
-                        lCount = lResultCount - lStart;
                 }
 
                 if (errors.Count > 0)
@@ -712,6 +685,73 @@ namespace dp2Circulation
                 Stop.Initial("");
 #endif
                 Stop.Initial("");
+            }
+        }
+
+        int FillEntities(
+            LibraryChannel channel,
+            EntityInfo[] entities,
+            ref List<string> errors,
+            out string strError)
+        {
+            strError = "";
+
+            this.m_listView.BeginUpdate();
+            try
+            {
+                foreach (EntityInfo entity in entities)
+                {
+                    if (entity.ErrorCode != ErrorCodeValue.NoError)
+                    {
+                        strError = "路径为 '" + entity.OldRecPath + "' 的" + this.ItemTypeName + "记录装载中发生错误: " + entity.ErrorInfo;  // NewRecPath
+                        return -1;
+                    }
+
+                    // 所返回的记录有可能是被过滤掉的
+                    if (string.IsNullOrEmpty(entity.OldRecord) == true)
+                        continue;
+
+                    // 剖析一个册的xml记录，取出有关信息放入listview中
+                    T bookitem = new T();
+
+                    int nRet = bookitem.SetData(entity.OldRecPath, // NewRecPath
+                             entity.OldRecord,
+                             entity.OldTimestamp,
+                             out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    if (entity.ErrorCode == ErrorCodeValue.NoError)
+                        bookitem.Error = null;
+                    else
+                        bookitem.Error = entity;
+
+                    // 装载对象信息
+                    if (this.ItemType == "issue")   // 优化，只让期记录处理对象信息
+                    {
+                        nRet = bookitem.LoadObjects(
+                            channel,
+                            this.Stop,
+                            Program.MainForm.ServerVersion,
+                            entity.OldRecPath,
+                            entity.OldRecord,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            errors.Add(strError);
+                        }
+                    }
+
+                    this.Items.Add(bookitem);
+
+                    bookitem.AddToListView(this.m_listView);
+                }
+
+                return 0;
+            }
+            finally
+            {
+                this.m_listView.EndUpdate();
             }
         }
 

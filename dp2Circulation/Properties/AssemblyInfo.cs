@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.23.*")]  // "2.4.*"
-[assembly: AssemblyFileVersion("2.23.0.0")]
+[assembly: AssemblyVersion("2.24.*")]  // "2.4.*"
+[assembly: AssemblyFileVersion("2.24.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -52,4 +52,5 @@ using System.Runtime.InteropServices;
 // V2.21 2016/10/7 期刊记到界面可以从摄像头获取封面图像
 // 2.22 2016/10/15 增加从龙源期刊获取封面的功能。ClickOnce 安装包中包含了 microsoft.mshtml.dll 文件
 // 2.23 2016/11/3 系统管理窗 OPAC 属性页，可以为每个数据库定义一个别名。这样 dp2installer 安装 dp2ZServer 的时候可以从这里导入数据库定义。
+// 2.24 2016/11/16 种册窗采用新版 GetBiblioInfos() API 一次性同时获得十条以内的册、订购、期、评注记录。此功能需要和 dp2library 2.91 版和以上版本配套使用才具备
 

@@ -12,9 +12,12 @@ using System.Web;
 using System.Deployment.Application;
 using System.Diagnostics;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 using Microsoft.Win32;
 using Ionic.Zip;
+
+using dp2ZServer.Install;
 
 using DigitalPlatform;
 using DigitalPlatform.IO;
@@ -27,8 +30,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
-using System.Runtime.InteropServices;
-using dp2ZServer.Install;
 
 namespace dp2Installer
 {

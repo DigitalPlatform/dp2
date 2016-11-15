@@ -1633,6 +1633,8 @@ namespace DigitalPlatform.LibraryServer
             nRet = this.App.OrderItemDatabase.SearchChildItems(channel,
                 strBiblioRecPath,
                 "return_record_xml", // "return_record_xml,check_circulation_info",
+                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                null,
                 out lHitCount,
                 out orderinfos,
                 out strError);
@@ -1655,6 +1657,8 @@ namespace DigitalPlatform.LibraryServer
             nRet = this.App.IssueItemDatabase.SearchChildItems(channel,
                 strBiblioRecPath,
                 "return_record_xml", // "return_record_xml,check_circulation_info",
+                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                null,
                 out lHitCount,
                 out issueinfos,
                 out strError);
@@ -1676,6 +1680,8 @@ namespace DigitalPlatform.LibraryServer
             nRet = this.App.CommentItemDatabase.SearchChildItems(channel,
                 strBiblioRecPath,
                 "return_record_xml", // "return_record_xml,check_circulation_info",
+                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                null,
                 out lHitCount,
                 out commentinfos,
                 out strError);
