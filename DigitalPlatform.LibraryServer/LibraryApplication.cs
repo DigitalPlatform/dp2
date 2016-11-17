@@ -232,6 +232,19 @@ namespace DigitalPlatform.LibraryServer
             set;
         }
 
+        public string LibraryName
+        {
+            get
+            {
+                if (this.LibraryCfgDom == null || this.LibraryCfgDom.DocumentElement == null)
+                    return "";
+                XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("libraryInfo/libraryName");
+                if (node == null)
+                    return "";
+                return node.InnerText.Trim();
+            }
+        }
+
         /// <summary>
         /// 失效的前端 MAC 地址集合
         /// Key 为 MAC 地址。大写。如果 Key 在 Hashtable 中已经存在，则表示这个 MAC 地址已经失效了
@@ -9834,6 +9847,7 @@ out strError);
         //      nIndex  如果有多个匹配的读者记录，此参数表示要选择其中哪一个。
         //              如果为-1，表示首次调用此函数，还不知如何选择。如此时命中多个，函数会返回>1的值
         //      strGetToken 是否要获得 token ，和有效期。 空 / day / month / year
+        //      alter_type_list 已经实施的绑定验证类型和尚未实施的类型列表
         //      strOutputUserName   返回读者证条码号
         // return:
         //      -1  error
@@ -10031,9 +10045,15 @@ out strError);
                         if (temp.Count == 0)
                             return -1;
 
+                        // 不允许，又没有可以替代的方式，就要返回出错了
+                        if (Account.HasAlterBindingType(temp) == false)
+                            return -1;
+
                         // 有替代的验证方式，先继续完成登录
                         alter_type_list.AddRange(temp);
                     }
+                    else
+                        alter_type_list.Add("ip");
                 }
 
                 // 星号表示不进行 router client ip 检查
@@ -10051,11 +10071,15 @@ out strError);
                         if (temp.Count == 0)
                             return -1;
 
+                        // 不允许，又没有可以替代的方式，就要返回出错了
+                        if (Account.HasAlterBindingType(temp) == false)
+                            return -1;
+
                         // 否则继续完成登录
                         alter_type_list.AddRange(temp);
                     }
-
-
+                    else
+                        alter_type_list.Add("router_ip");
                 }
             }
 
@@ -14851,7 +14875,7 @@ strLibraryCode);    // 读者所在的馆代码
 
         // 匹配 IP 地址
         // parameters:
-        //      alter_type_list 返回替代类型列表。只有当 alter_type_list != null 并且没有匹配上真实 IP 地址时，才在本参数中返回值
+        //      alter_type_list 返回处理结果列表。只有当 alter_type_list != null 并且没有匹配上真实 IP 地址时，才在本参数中返回值
         // return:
         //      true    允许
         //      false   禁止
@@ -14870,12 +14894,17 @@ strLibraryCode);    // 读者所在的馆代码
             if (StringUtil.MatchIpAddressList(list, strClientIP) == false)
             {
                 if (alter_type_list != null)
+                {
+                    alter_type_list.Add("!ip"); // 表示虽然处理了，但是没有匹配
                     alter_type_list.AddRange(GetAlterBinding(list));
+                }
 
                 strError = "前端 IP 地址 '" + strClientIP + "' 不在当前账户的 ip: 白名单中，访问被拒绝";
                 return false;
             }
 
+            if (alter_type_list != null)
+                alter_type_list.Add("ip"); // 表示已经验证了 ip: 绑定
             return true;
         }
 
@@ -14912,17 +14941,99 @@ strLibraryCode);    // 读者所在的馆代码
             if (StringUtil.MatchIpAddressList(list, strRouterClientIP) == false)
             {
                 if (alter_type_list != null)
-                    alter_type_list.AddRange(GetAlterBinding(list));
+                {
+                    alter_type_list.Add("!router_ip"); // 表示虽然处理了，但是没有匹配
+                    alter_type_list.AddRange(GetAlterBinding(list));    // 加入替代的绑定类型
+                }
 
                 strError = "前端 IP 地址 '" + strRouterClientIP + "' 不在当前账户的 router_ip: 白名单中，访问被拒绝";
                 return false;
             }
 
+            if (alter_type_list != null)
+                alter_type_list.Add("router_ip"); // 表示已经验证了 router_ip: 绑定
             return true;
         }
 
-        // 从 IP 列表中获得替代绑定类型列表
-        // '192.168.0.1|*sms' 中 sms 就是替代绑定类型。
+        // 合并抵消带有星号和和不带星号的同类 type。返回剩下的(曾经)带有星号的类型。这样可以报错给用户，说哪些绑定类型不满足
+        // 注: 返回的时候已经去掉了星号
+        public static List<string> MergeBindingType(List<string> alter_type_list)
+        {
+            List<string> results = new List<string>();
+
+            List<string> type_list1 = new List<string>();   // 没有星号的
+            List<string> type_list2 = new List<string>();   // 有星号的
+
+            // 取出没有星号和有星号的两个 list
+            foreach (string name in alter_type_list)
+            {
+                if (string.IsNullOrEmpty(name))
+                    continue;
+                if (name[0] == '!')
+                    continue;
+                if (name[0] == '*')
+                    type_list2.Add(name.Substring(1));
+                else
+                    type_list1.Add(name);
+            }
+
+            if (type_list2.Count == 0)
+                return results;
+
+            StringUtil.RemoveDup(ref type_list1);
+            StringUtil.RemoveDup(ref type_list2);
+
+            foreach (string name in type_list1)
+            {
+                // name 为没有星号的类型
+
+                if (type_list2.IndexOf(name) != -1)
+                    type_list2.Remove(name);
+            }
+
+            return type_list2;
+        }
+
+        public static bool RemoveAlertBindingType(ref List<string> alter_type_list,
+            string type)
+        {
+            if (alter_type_list == null)
+                return false;
+
+            bool bChanged = false;
+            for (int i = 0; i < alter_type_list.Count; i++)
+            {
+                string name = alter_type_list[i];
+                if (string.IsNullOrEmpty(name))
+                    continue;
+                if (name[0] != '*')
+                    continue;
+                if (name.Substring(1) == type)
+                {
+                    alter_type_list.RemoveAt(i);
+                    i--;
+                    bChanged = true;
+                }
+            }
+
+            return bChanged;
+        }
+
+        public static bool HasAlterBindingType(List<string> alter_type_list)
+        {
+            if (alter_type_list == null)
+                return false;
+            foreach (string s in alter_type_list)
+            {
+                if (string.IsNullOrEmpty(s) == false && s[0] == '*')
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 从 IP 列表中获得(不满足时)替代绑定类型列表。注意第一字符为 *
+        // '192.168.0.1|*sms' 中 *sms 就是替代绑定类型。
         static List<string> GetAlterBinding(string strText)
         {
             List<string> results = new List<string>();
@@ -14931,13 +15042,118 @@ strLibraryCode);    // 读者所在的馆代码
             {
                 if (string.IsNullOrEmpty(s) == false && s[0] == '*')
                 {
+#if NO
                     string name = s.Substring(1);
                     if (string.IsNullOrEmpty(name) == false)
                         results.Add(name);
+#endif
+                    results.Add(s); // 注意第一字符为 *
                 }
             }
 
             return results;
+        }
+
+        // 从绑定字符串中解析出所有需要登录时候验证的绑定类型
+        public static List<string> GetBindingTypes(string strText)
+        {
+            List<string> results = new List<string>();
+            List<string> list = StringUtil.SplitList(strText, ',');
+            foreach (string s in list)
+            {
+                List<string> parts = StringUtil.ParseTwoPart(s, ":");
+                string type = parts[0];
+                if (type == "ip" || type == "router_ip" || type == "sms")
+                    results.Add(type);
+            }
+
+            return results;
+        }
+
+        // 从 list1 中减去 list2
+        public static List<string> Sub(List<string> list1, List<string> list2)
+        {
+            List<string> results = new List<string>();
+            foreach (string s in list1)
+            {
+                if (list2.IndexOf(s) == -1)
+                    results.Add(s);
+            }
+
+            return results;
+        }
+
+        // 获得处理过的元素。也就是 !ip 和 ip 这样的类型。(即，不是 *ip 这样的类型)
+        public static List<string> GetProcessed(List<string> list)
+        {
+            List<string> results = new List<string>();
+            foreach (string s in list)
+            {
+                if (string.IsNullOrEmpty(s))
+                    continue;
+                if (s[0] != '*')
+                {
+                    if (s[0] == '!')
+                        results.Add(s.Substring(1));
+                    else
+                        results.Add(s);
+                }
+            }
+
+            return results;
+        }
+
+        // 获得匹配过的元素。也就是 ip 这样的类型。(即，不是 *ip !ip 这样的类型)
+        public static List<string> GetMatched(List<string> list)
+        {
+            List<string> results = new List<string>();
+            foreach (string s in list)
+            {
+                if (string.IsNullOrEmpty(s))
+                    continue;
+                if (s[0] != '*' && s[0] != '!')
+                    results.Add(s);
+            }
+
+            return results;
+        }
+
+        // 从 types 列表中移走那些验证过的可以替代的类型
+        // parameters:
+        //      types   需要检查的类型
+        //      matched   已经验证过的类型
+        public static void RemoveAlterTypes(ref List<string> types,
+            List<string> matched,
+            string strBinding)
+        {
+            if (matched.Count == 0)
+                return;
+            List<string> results = new List<string>();
+            foreach (string type in types)
+            {
+                string list = StringUtil.GetParameterByPrefix(strBinding, type);
+                if (string.IsNullOrEmpty(list))
+                    continue;
+                {
+                    List<string> alters = GetAlterBinding(list);
+                    foreach (string alter in alters)
+                    {
+                        string name = alter;
+                        if (string.IsNullOrEmpty(alter) == false && alter[0] == '*')
+                            name = alter.Substring(1);
+                        if (matched.IndexOf(name) != -1)
+                            goto FOUND;
+                    }
+                }
+
+                results.Add(type);  // 没有替代
+                continue;
+            FOUND:
+                // 发现了可以替代的
+                continue;
+            }
+
+            types = results;
         }
     }
 

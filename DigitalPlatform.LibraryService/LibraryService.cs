@@ -956,6 +956,7 @@ namespace dp2Library
             if (string.IsNullOrEmpty(sessioninfo.RouterClientIP) == false)
                 strClientIP = "r:" + sessioninfo.RouterClientIP;
 
+            List<string> rest_list = null;
             string strPhoneNumber = (string)parameters["phoneNumber"];
             string strTempCode = (string)parameters["tempCode"];
             if (string.IsNullOrEmpty(strTempCode) == false)
@@ -984,13 +985,25 @@ namespace dp2Library
                     result.ErrorCode = ErrorCode.TempCodeMismatch;
                     return true;
                 }
+
+                alter_type_list.Add("sms"); // 表示验证过了
+
+                // 未处理的、和需要补做的类型
+                rest_list = GetRest(sessioninfo, alter_type_list);
+
             }
             else
             {
+#if NO
                 bool bAlterSms = false;
                 if (alter_type_list != null && alter_type_list.IndexOf("sms") != -1)
                     bAlterSms = true;
+#endif
 
+                // 未处理的、和需要补做的类型
+                rest_list = GetRest(sessioninfo, alter_type_list);
+
+#if NO
                 // 竖线间隔的手机号码列表
                 // return:
                 //      null    没有找到前缀
@@ -1002,6 +1015,11 @@ namespace dp2Library
 
                 if ((bAlterSms == true || string.IsNullOrEmpty(strSmsBinding) == false)
                     && string.IsNullOrEmpty(strPhoneNumber) == true)
+
+#endif
+
+                if (rest_list.Count == 1 && rest_list.IndexOf("sms") != -1
+                    && string.IsNullOrEmpty(strPhoneNumber) == true)
                 {
                     sessioninfo.Account = null;
                     result.Value = 0;
@@ -1009,6 +1027,8 @@ namespace dp2Library
                     result.ErrorCode = ErrorCode.NeedSmsLogin;
                     return true;
                 }
+
+                // TODO: 走到这里。如果有多种类型没有验证，只要里面有 ip 和 router_ip 就不必提示 sms 没有通过验证了。因为确实没有给 sms 验证的机会(这样也不必要，因为即便通过 sms 验证也无法通过全部验证)
 
                 if (string.IsNullOrEmpty(strPhoneNumber) == false)
                 {
@@ -1036,29 +1056,38 @@ namespace dp2Library
                     if (nPasswordRet == -1)
                         goto ERROR1;
 
-                    // 通过 MSMQ 发送手机短信
-                    // parameters:
-                    //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
-                    nRet = app.SendSms(
-                        sessioninfo.Account.UserID,
-                        strPhoneNumber,
-                        "登录验证码为 " + code.Code + "。十分钟以后失效",
-                        out strError);
-                    if (nRet == -1)
+                    if (nPasswordRet == 1)
                     {
-                        // 清除已经存储的验证码
-                        app.TempCodeTable.Remove(code.Key);
-                        goto ERROR1;
+                        string strMessage = "登录验证码为 " + code.Code + "。(用户 " + sessioninfo.Account.UserID + ") 十分钟以后失效";
+                        string strLibraryName = app.LibraryName;
+                        if (string.IsNullOrEmpty(strLibraryName) == false)
+                        {
+                            strMessage = "登录验证码为 " + code.Code + "。(用户 " + sessioninfo.Account.UserID + " " + strLibraryName + ") 十分钟以后失效";
+                        }
+
+                        // 通过 MSMQ 发送手机短信
+                        // parameters:
+                        //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
+                        nRet = app.SendSms(
+                            sessioninfo.Account.UserID,
+                            strPhoneNumber,
+                            strMessage,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            // 出错后，清除已经存储的验证码
+                            app.TempCodeTable.Remove(code.Key);
+                            goto ERROR1;
+                        }
                     }
 
                     // 返回 0 并且 ErrorCode 为 RetryLogin，表示已经发出短信，需要再次登录(携带刚收到的验证码)
                     sessioninfo.Account = null;
                     result.Value = 0;
-                        if (nPasswordRet == 0)
-                            result.ErrorInfo = "请使用手机 " + strPhoneNumber + " 早先收到过的短信验证码再次提交登录";
-                        else
-                            result.ErrorInfo = "验证短信已经发送给手机 " + strPhoneNumber + "。请使用收到的短信验证码再次提交登录";
-
+                    if (nPasswordRet == 0)
+                        result.ErrorInfo = "请使用手机 " + strPhoneNumber + " 早先收到过的短信验证码再次提交登录";
+                    else
+                        result.ErrorInfo = "验证短信已经发送给手机 " + strPhoneNumber + "。请使用收到的短信验证码再次提交登录";
 
 #if NO
                     if (nPasswordRet == 0)
@@ -1072,12 +1101,53 @@ namespace dp2Library
                 }
             }
 
+            // 最后看看是否还有剩余的未能验证的
+            {
+                if (rest_list.Count > 0)
+                {
+                    sessioninfo.Account = null;
+                    result.Value = 0;
+                    result.ErrorInfo = "登录失败。方式 " + StringUtil.MakePathList(rest_list) + " 未通过验证";
+                    result.ErrorCode = ErrorCode.NotFound;  // TODO: 需要一个新的错误码 VerifyFail
+                    return true;
+                }
+            }
+
             return false;
         ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return true;
+        }
+
+        static List<string> GetRest(SessionInfo sessioninfo, List<string> alter_type_list)
+        {
+            // 所有绑定类型
+            List<string> types = Account.GetBindingTypes(sessioninfo.Account.Binding);
+            if (sessioninfo.RouterClientIP == null)
+                types.Remove("router_ip");
+
+            // 没有处理过的类型
+            List<string> not_process = Account.Sub(types, Account.GetProcessed(alter_type_list));
+
+            // 需要补做的类型
+            List<string> rest_list = Account.MergeBindingType(alter_type_list);
+
+            // 合并两个数组
+            rest_list.AddRange(not_process);
+            StringUtil.RemoveDupNoSort(ref rest_list);
+
+            // 对于剩下的类型，要检查是否有已经验证过的类型可以替代
+            // 从 types 列表中移走那些验证过的可以替代的类型
+            // parameters:
+            //      types   需要检查的类型
+            //      processed   已经验证过的类型
+            Account.RemoveAlterTypes(ref rest_list,
+                Account.GetMatched(alter_type_list),
+                sessioninfo.Account.Binding);
+
+            return rest_list;
         }
 
         static string CheckClientVersion(string strText)
@@ -5216,10 +5286,10 @@ namespace dp2Library
         //      strConfirmItemRecPath  册记录路径。在册条码号重复的情况下，才需要使用这个参数，平时为null即可
         //      saBorrowedItemBarcode   同一读者先前已经借阅成功的册条码号集合。用于在返回的读者html中显示出特定的颜色而已。
         //      strStyle    操作风格。"item"表示将返回册记录；"reader"表示将返回读者记录
-        //      strItemFormat   规定strItemRecord参数所返回的数据格式
-        //      strItemRecord   返回册记录
-        //      strReaderFormat 规定strReaderRecord参数所返回的数据格式
-        //      strReaderRecord 返回读者记录
+        //      strItemFormatList   规定strItemRecord参数所返回的数据格式
+        //      item_records   返回册记录
+        //      strReaderFormatList 规定strReaderRecord参数所返回的数据格式
+        //      reader_records 返回读者记录
         //      aDupPath    如果发生条码号重复，这里返回了相关册记录的路径
         // 权限：无论工作人员还是读者，首先应具备borrow或renew权限。
         //      对于读者，还需要他进行的借阅(续借)操作是针对自己的，即strReaderBarcode必须和账户信息中的证条码号一致。
@@ -9273,7 +9343,6 @@ Stack:
                     result.Value = nRet;
                     return result;
                 }
-
 
                 // 权限判断
 

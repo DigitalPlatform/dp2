@@ -314,7 +314,7 @@ namespace DigitalPlatform.LibraryServer
         // TODO: 多文种提示
         // parameters:
         //      strPassword 如果为null，表示不验证密码。因此需要格外注意，即便是空密码，如果要验证也需要使用""
-        //      alter_type_list 返回替代的绑定类型。本函数返回登录成功后，如果此参数返回了值，调用者还需要进一步判断，附加约束类型
+        //      alter_type_list 已经实施的绑定验证类型和尚未实施的类型列表
         // return:
         //      -1  error
         //      0   user not found, or password error
@@ -369,14 +369,21 @@ namespace DigitalPlatform.LibraryServer
                     if (temp.Count == 0)
                         return -1;
 
-                    // 否则继续完成登录
+                    // 不允许，又没有可以替代的方式，就要返回出错了
+                    if (Account.HasAlterBindingType(temp) == false)
+                        return -1;
+
+                    // 有替代的验证方式，先继续完成登录
                     alter_type_list.AddRange(temp);
                 }
+                else
+                    alter_type_list.AddRange(temp);
+
             }
 
             // 星号表示不进行 router client ip 检查
-            if (strRouterClientIP != "*"
-                && alter_type_list.Count == 0)
+            // == null 表示当前前端不是通过 dp2Router 访问的，因而也就没有必要验证 router_ip 绑定了
+            if (strRouterClientIP != null && strRouterClientIP != "*")
             {
                 List<string> temp = new List<string>();
 
@@ -389,9 +396,16 @@ namespace DigitalPlatform.LibraryServer
                     if (temp.Count == 0)
                         return -1;
 
+                    // 不允许，又没有可以替代的方式，就要返回出错了
+                    if (Account.HasAlterBindingType(temp) == false)
+                        return -1;
+
                     // 否则继续完成登录
                     alter_type_list.AddRange(temp);
                 }
+                else
+                    alter_type_list.AddRange(temp);
+
             }
 
             if (strPassword != null)

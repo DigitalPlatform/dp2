@@ -4971,6 +4971,14 @@ out strError);
                     strError = "strBindID 参数值 '" + strBindingID + "' 不合法。应为 xxxx:xxxx 形态";
                     return -1;
                 }
+
+                // 2016/11/17
+                strLeft = strLeft.ToLower();
+                if (strLeft == "ip" || strLeft == "router_ip" || strLeft == "sms")
+                {
+                    strError = "strBindID 参数值 '" + strBindingID + "' 不合法。冒号左边的名称部分不能使用 '"+strLeft+"'，因为这是系统保留的绑定方式";
+                    return -1;
+                }
             }
 
             // 绑定工作人员账户
