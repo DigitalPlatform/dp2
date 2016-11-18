@@ -383,7 +383,9 @@ namespace DigitalPlatform.LibraryServer
 
             // 星号表示不进行 router client ip 检查
             // == null 表示当前前端不是通过 dp2Router 访问的，因而也就没有必要验证 router_ip 绑定了
-            if (strRouterClientIP != null && strRouterClientIP != "*")
+            if (strRouterClientIP != null
+                && strRouterClientIP != "*"
+                )
             {
                 List<string> temp = new List<string>();
 

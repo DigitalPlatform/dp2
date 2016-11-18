@@ -10058,7 +10058,8 @@ out strError);
 
                 // 星号表示不进行 router client ip 检查
                 if (sessioninfo.RouterClientIP != "*"
-                    && alter_type_list.Count == 0)
+                    // && alter_type_list.Count == 0
+                    )
                 {
                     List<string> temp = new List<string>();
 
@@ -14937,8 +14938,8 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             if (list == "*")
-                return true;
-            if (StringUtil.MatchIpAddressList(list, strRouterClientIP) == false)
+                goto END1;
+            if (strRouterClientIP != "*" && StringUtil.MatchIpAddressList(list, strRouterClientIP) == false)
             {
                 if (alter_type_list != null)
                 {
@@ -14950,6 +14951,7 @@ strLibraryCode);    // 读者所在的馆代码
                 return false;
             }
 
+        END1:
             if (alter_type_list != null)
                 alter_type_list.Add("router_ip"); // 表示已经验证了 router_ip: 绑定
             return true;
