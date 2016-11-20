@@ -298,7 +298,6 @@ namespace dp2Circulation
                 m_strMaxNumber = value;
             }
         }
-
  
         /// <summary>
         /// 尾号
@@ -324,7 +323,6 @@ namespace dp2Circulation
 
                 }
                 return m_strTailNumber;
-
             }
             set
             {

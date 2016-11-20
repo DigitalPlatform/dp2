@@ -9912,6 +9912,20 @@ Stack:
 
         void WsClose()
         {
+            // 2016/11/19
+            // rest 和 basic 协议，都要明确 Logout()，才不会在 dp2library 一侧残留通道
+            if (this.m_ws != null && this.m_ws is localhost.dp2libraryRESTClient)
+            {
+                try
+                {
+                    IAsyncResult soapresult = this.ws.BeginLogout(null, null);
+                    Thread.Sleep(100);
+                }
+                catch
+                {
+                }
+            }
+
             if (this.m_ws is IClientChannel)
                 ((IClientChannel)this.m_ws).Close();
             else

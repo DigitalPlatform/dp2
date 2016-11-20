@@ -63,6 +63,9 @@
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="imdict">
+      <HintPath>.\imdict.dll</HintPath>
+    </Reference>
     <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Ionic.Zip.dll</HintPath>
@@ -70,6 +73,9 @@
     <Reference Include="Jurassic, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Jurassic.2.2.1\lib\net35\Jurassic.dll</HintPath>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="Lucene.Net">
+      <HintPath>.\Lucene.Net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
@@ -118,6 +124,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppAuthorNumber.cs" />
     <Compile Include="AppBatchTask.cs" />
     <Compile Include="AppBiblio.cs" />
     <Compile Include="AppCallNumber.cs" />
@@ -194,6 +201,7 @@
     <Compile Include="RecordConverter.cs" />
     <Compile Include="deleted\RightsTableControl.cs" />
     <Compile Include="SessionInfo.cs" />
+    <Compile Include="Smart.cs" />
     <Compile Include="Statis.cs" />
     <Compile Include="deleted\TestControl1.cs" />
     <Compile Include="deleted\TestControl2.cs" />

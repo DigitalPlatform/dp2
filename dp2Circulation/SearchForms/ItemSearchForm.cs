@@ -2759,7 +2759,7 @@ out strError);
             {
                 if (node.NodeType == XmlNodeType.Element)
                 {
-                    XmlNodeList nodes = dom.DocumentElement.SelectNodes("node.Name");
+                    XmlNodeList nodes = dom.DocumentElement.SelectNodes(node.Name); // 2016/11/18 修改 bug
                     if (nodes.Count > 1)
                     {
                         errors.Add("根元素下的 " + node.Name + " 元素出现了多次 " + nodes.Count);

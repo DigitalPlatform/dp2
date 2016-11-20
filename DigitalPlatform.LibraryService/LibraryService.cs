@@ -14053,6 +14053,205 @@ out strError);
                 return result;
             }
         }
+
+        // parameters:
+        //		strAuthor	著者字符串
+        //		strNumber	返回号码
+        //		strError	出错信息
+        // return:
+        //		-3	需要回答问题
+        //      -2  strID验证失败
+        //      -1  出错
+        //      0   成功
+        public LibraryServerResult GetAuthorNumber(
+            string strID,   // 验证身份用的ID
+            string strAuthor,
+            bool bSelectPinyin,
+            bool bSelectEntry,
+            bool bOutputDebugInfo,
+            ref QuestionCollection questions,
+            out string strNumber,
+            out string strDebugInfo)
+        {
+            string strError = "";
+            strNumber = "";
+            strDebugInfo = "";
+
+            LibraryServerResult result = this.PrepareEnvironment("GetAuthorNumber", true,
+    true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+
+                int nStep = 0;
+
+                if (questions == null)
+                {
+                    questions = new QuestionCollection();
+                }
+
+                // TODO: 验证身份
+                StringBuilder debug_info = null;
+                // return:
+                //		-3	需要回答问题
+                //      -1  出错
+                //      0   成功
+                int nRet = app.GetNumberInternal(
+                    sessioninfo,
+                    ref nStep,
+                    strAuthor,
+                    bSelectPinyin,
+                    bSelectEntry,
+                    bOutputDebugInfo,
+                    ref questions,
+                    out strNumber,
+                    out debug_info,
+                    out strError);
+                if (debug_info != null)
+                    strDebugInfo = debug_info.ToString();
+                result.Value = nRet;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library GetAuthorNumber() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+
+        // return:
+        //      -2  strID验证失败
+        //      -1  出错
+        //      0   成功
+        public LibraryServerResult GetPinyin(
+string strID,
+string strText,
+out string strPinyinXml)
+        {
+            string strError = "";
+            strPinyinXml = "";
+
+            LibraryServerResult result = this.PrepareEnvironment("GetAuthorNumber", true,
+    true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                // return:
+                //		-3	需要回答问题
+                //      -1  出错
+                //      0   成功
+                int nRet = app.GetPinyinInternal(
+                    sessioninfo,
+                    strText,
+                    out strPinyinXml,
+                    out strError);
+                result.Value = nRet;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library GetPinyin() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+
+        }
+
+        // return:
+        //      -2  strID验证失败
+        //      -1  出错
+        //      0   成功
+        public LibraryServerResult SetPinyin(
+string strID,
+string strPinyinXml)
+        {
+            string strError = "";
+
+            LibraryServerResult result = this.PrepareEnvironment("GetAuthorNumber", true,
+true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                // return:
+                //		-3	需要回答问题
+                //      -1  出错
+                //      0   成功
+                int nRet = app.SetPinyinInternal(
+                    sessioninfo,
+                    strPinyinXml,
+                    out strError);
+                result.Value = nRet;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library SetPinyin() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+
+        // 分词
+        // return:
+        //      -2  strID验证失败
+        //      -1  出错
+        //      0   成功
+        public LibraryServerResult SplitHanzi(
+            string strID,
+            string strText,
+            out List<string> tokens)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            tokens = null;
+
+            LibraryServerResult result = this.PrepareEnvironment("GetAuthorNumber", true,
+true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                tokens = LibraryApplication.SplitText(strText);
+
+                result.Value = 0;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library SplitHanzi() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
     }
 
     [DataContract(Namespace = "http://dp2003.com/dp2library/")]
