@@ -1511,8 +1511,6 @@ namespace DigitalPlatform.rms.Client
                 if (lRet == -1)
                     return -1;
 
-
-
                 if (items == null)
                     return 0;
 

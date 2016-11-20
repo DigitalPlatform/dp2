@@ -1033,7 +1033,7 @@ namespace DigitalPlatform.rms
                             return -1;
                         }
 
-                        string strDebugInfo;
+                        // string strDebugInfo;
 
                         //OR,AND,SUB运算都是调的DpResultSetManager.Merge()函数，
                         //注意参数的使用

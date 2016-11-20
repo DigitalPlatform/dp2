@@ -23,7 +23,7 @@ namespace DigitalPlatform.Xml
 
 		Hashtable titleTable = null;
 
-		bool m_bFirstMdiOpened = false;
+		// bool m_bFirstMdiOpened = false;
 
         public event EventHandler LoadMdiSize = null;
         public event EventHandler SaveMdiSize = null;

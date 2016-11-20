@@ -8,7 +8,6 @@ using System.Text;
 using System.Threading;
 using System.Net;
 using System.Xml;
-// using System.Windows.Forms;
 using System.Diagnostics;
 using System.ServiceModel;
 using System.ServiceModel.Channels;
@@ -52,6 +51,12 @@ namespace DigitalPlatform.LibraryClient
         /// 前端版本太旧
         /// </summary>
         ClientVersionTooOld = 3,    // 前端版本太旧
+
+        NeedSmsLogin = 4,
+
+        RetryLogin = 5,
+
+        TempCodeMismatch = 6,
     }
 
     /// <summary>
@@ -527,6 +532,11 @@ out strError);
 #else
                             throw new Exception("当前条件编译版本不支持 basic.http 协议方式");
 #endif
+                        {
+                            HttpUserAgentEndpointBehavior behavior = new HttpUserAgentEndpointBehavior("dp2LibraryClient");
+                            this.m_ws.Endpoint.Behaviors.Add(behavior);
+                        }
+
 
                     }
                     else if (uri.Scheme.ToLower() == "rest.http")
@@ -545,6 +555,21 @@ out strError);
                             behavior.HelpEnabled = true;
                             factory.Endpoint.Behaviors.Add(behavior);
                         }
+
+                        {
+                            HttpUserAgentEndpointBehavior behavior = new HttpUserAgentEndpointBehavior("dp2LibraryClient");
+                            factory.Endpoint.Behaviors.Add(behavior);
+                        }
+
+#if NO
+                        {
+                            var eab = new EndpointAddressBuilder(factory.Endpoint.Address);
+                            eab.Headers.Add(AddressHeader.CreateAddressHeader("ClientIdentification",  // Header Name
+                                                                                string.Empty,           // Namespace
+                                                                                "JabberwockyClient"));  // Header Value
+                            factory.Endpoint.Address = eab.ToEndpointAddress();
+                        }
+#endif
 
 #if BASIC_HTTP
                         this.m_ws = factory.CreateChannel();
@@ -2359,7 +2384,7 @@ out strError);
                     ea.Password,
                     ea.Parameters,
                     out strError);
-                if (lRet == -1 || lRet == 0)
+                if (lRet != 1)   // lRet == -1 || lRet == 0 || lRet == 2
                 {
                     if (this.ErrorCode == localhost.ErrorCode.ClientVersionTooOld)
                         return -1;
@@ -2370,7 +2395,14 @@ out strError);
                         ea.ErrorInfo = "";
                     ea.ErrorInfo += strError;
                     ea.FirstTry = false;
-                    ea.LoginFailCondition = LoginFailCondition.PasswordError;
+                    if (this.ErrorCode == localhost.ErrorCode.RetryLogin)
+                        ea.LoginFailCondition = LoginFailCondition.RetryLogin;
+                    else if (this.ErrorCode == localhost.ErrorCode.NeedSmsLogin)
+                        ea.LoginFailCondition = LoginFailCondition.NeedSmsLogin;
+                    else if (this.ErrorCode == localhost.ErrorCode.TempCodeMismatch)
+                        ea.LoginFailCondition = LoginFailCondition.TempCodeMismatch;
+                    else
+                        ea.LoginFailCondition = LoginFailCondition.PasswordError;
                     goto REDOLOGIN;
                 }
 
@@ -7591,7 +7623,6 @@ out strError);
 
                 strPath = strOutputPath;	// 如果第一次的strPath中包含'?'id, 必须用outputpath才能正确继续
                 baInputTimeStamp = output_timestamp;	//baOutputTimeStamp;
-
             } // end of for
             return 0;
         }
@@ -9881,6 +9912,20 @@ Stack:
 
         void WsClose()
         {
+            // 2016/11/19
+            // rest 和 basic 协议，都要明确 Logout()，才不会在 dp2library 一侧残留通道
+            if (this.m_ws != null && this.m_ws is localhost.dp2libraryRESTClient)
+            {
+                try
+                {
+                    IAsyncResult soapresult = this.ws.BeginLogout(null, null);
+                    Thread.Sleep(100);
+                }
+                catch
+                {
+                }
+            }
+
             if (this.m_ws is IClientChannel)
                 ((IClientChannel)this.m_ws).Close();
             else
@@ -9891,8 +9936,10 @@ Stack:
         {
             if (this.m_ws is localhost.dp2libraryClient)
                 (this.m_ws as localhost.dp2libraryClient).InnerChannel.OperationTimeout = timeout;
+#if BASIC_HTTP
             else if (this.m_ws is localhost.dp2libraryRESTClient)
                 (this.m_ws as localhost.dp2libraryRESTClient).InnerChannel.OperationTimeout = timeout;
+#endif
             else
             {
                 // http://stackoverflow.com/questions/4695656/add-operationtimeout-to-channel-implemented-in-code
@@ -9904,8 +9951,10 @@ Stack:
         {
             if (this.m_ws is localhost.dp2libraryClient)
                 return (this.m_ws as localhost.dp2libraryClient).InnerChannel.OperationTimeout;
+#if BASIC_HTTP
             else if (this.m_ws is localhost.dp2libraryRESTClient)
                 return (this.m_ws as localhost.dp2libraryRESTClient).InnerChannel.OperationTimeout;
+#endif
 
             return ((IContextChannel)this.m_ws).OperationTimeout;
         }

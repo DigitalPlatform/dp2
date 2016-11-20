@@ -565,7 +565,7 @@ namespace DigitalPlatform.rms
         public bool NextResult()
         {
             throw new Exception("not implememt");
-            return false;
+            // return false;
         }
 
         Hashtable m_currentData = null;

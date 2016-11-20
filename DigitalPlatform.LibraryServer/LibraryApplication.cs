@@ -13,10 +13,10 @@ using System.Diagnostics;
 using System.Web;
 using System.Drawing;
 using System.Runtime.Serialization;
+using System.Messaging;
+using System.Security.Principal;
 
 using MongoDB.Driver;
-
-// using DigitalPlatform.Drawing;
 
 using DigitalPlatform;	// Stop类
 using DigitalPlatform.rms.Client;
@@ -25,14 +25,11 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.MarcDom;
-// using DigitalPlatform.Library;  // LoanFilterDocument
 using DigitalPlatform.Marc;
 using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Messaging;
-using System.Security.Principal;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -131,7 +128,11 @@ namespace DigitalPlatform.LibraryServer
         //      2.85 (2016/9/28) GetSystemParameter() API system/version 可以获得 dp2library 版本号。BindPatron() API 可以使用 PQR:xxxx 方式进行绑定
         //      2.86 (2016/10/7) GetIssues() API 允许在 strStyle 中使用 query:xxx 参数，实现仅对某一期的期记录的获取。
         //      2.87 (2016/10/22) Login() API 允许工作人员代理工作人员登录而不使用 token 字符串。这时通道使用的是代理账户的权限。
-        public static string Version = "2.87";
+        //      2.88 (2016/10/30) 为登录过程首次实现 ip: router_ip: 筛选功能。通道显示的 Via 合并了两类 Via 和 IP 地址。
+        //      2.89 (2016/11/3) dp2library 可以使用 * 作为序列号，这样最大通道数为 255，而且永不失效。
+        //      2.90 (2016/11/6) 消除 首次初始化 MSMQ 队列文件遇到异常然后挂起，但再也不会重试消除挂起状态 的 Bug。尝试将 Dir() API 和 ListFile() API 连接起来
+        //      2.91 (2016/11/15) GetBiblioInfos() API 增加了一种 subrecords format，可以用于同时返回下级记录的 XML。返回的最多每种下级记录不超过 10 条
+        public static string Version = "2.91";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -156,6 +157,9 @@ namespace DigitalPlatform.LibraryServer
 #endif
         public const string qrkey = "dpqrhello";
 
+        // (登录用的手机短信)验证码存储数组
+        public TempCodeCollection TempCodeTable = new TempCodeCollection();
+
         /// <summary>
         /// 是否为评估状态
         /// </summary>
@@ -166,10 +170,23 @@ namespace DigitalPlatform.LibraryServer
         /// </summary>
         public bool CheckClientVersion = false;
 
+        string _outgoingQueue = "";
+
         /// <summary>
         /// dp2library 用于输出消息的队列路径。
         /// </summary>
-        public string OutgoingQueue = "";
+        public string OutgoingQueue
+        {
+            get
+            {
+                return this._outgoingQueue;
+            }
+            set
+            {
+                this._outgoingQueue = value;
+                this.MsmqInitialized = false;   // 迫使重新执行 InitialMsmq()
+            }
+        }
 
         // 存储各种参数信息
         // 为C#脚本所准备
@@ -213,6 +230,19 @@ namespace DigitalPlatform.LibraryServer
         {
             get;
             set;
+        }
+
+        public string LibraryName
+        {
+            get
+            {
+                if (this.LibraryCfgDom == null || this.LibraryCfgDom.DocumentElement == null)
+                    return "";
+                XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("libraryInfo/libraryName");
+                if (node == null)
+                    return "";
+                return node.InnerText.Trim();
+            }
         }
 
         /// <summary>
@@ -480,6 +510,14 @@ namespace DigitalPlatform.LibraryServer
                 */
             }
             disposed = true;
+        }
+
+        // TODO: 是否需要锁定?
+        public void AddHangup(string strText)
+        {
+            if (ContainsHangup(strText) == true)
+                return;
+            this.HangupList.Add(strText);
         }
 
         public bool ContainsHangup(string strText)
@@ -1252,84 +1290,15 @@ namespace DigitalPlatform.LibraryServer
                     app.WriteErrorLog("INFO: Message Queue");
 #endif
 
-                    if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
-                    {
-                        try
-                        {
-#if NO
-                            if (MessageQueue.Exists(this.OutgoingQueue))
-                            {
-                                MessageQueue.Delete(this.OutgoingQueue);
-                            }
-#endif
-
-                            if (!MessageQueue.Exists(this.OutgoingQueue))
-                            {
-                                MessageQueue queue = MessageQueue.Create(this.OutgoingQueue);
-
-#if NO
-                                // Create an AccessControlList.
-                                AccessControlList list = new AccessControlList();
-
-                                // Create a new trustee to represent the "Everyone" user group.
-                                Trustee tr = new Trustee("Everyone");
-
-                                // Create an AccessControlEntry, granting the trustee read access to
-                                // the queue.
-                                AccessControlEntry entry = new AccessControlEntry(
-                                    tr, GenericAccessRights.Read,
-                         StandardAccessRights.Read,
-                                    AccessControlEntryType.Allow);
-
-                                // Add the AccessControlEntry to the AccessControlList.
-                                list.Add(entry);
-
-
-                                // Apply the AccessControlList to the queue.
-                                queue.SetPermissions(list);
-#endif
-
-                                var wi = WindowsIdentity.GetCurrent();
-                                if (wi.IsSystem == true)
-                                {
-                                    // 当前用户已经是 LocalSystem 了，需要额外给 Everyone 添加权限，以便让 dp2Capo 的控制台方式运行能访问这个 Queue
-                                    queue.SetPermissions(@"Everyone",
-                MessageQueueAccessRights.ReceiveMessage
-                | MessageQueueAccessRights.DeleteMessage
-                | MessageQueueAccessRights.PeekMessage
-                | MessageQueueAccessRights.GenericRead);
-                                }
-
-                                // 如果当前是 Administrator，表示可能是 dp2libraryxe 启动的方式，那么需要专门给 LocalSystem 操作 Queue 的权限，以便 Windows Service 方式的 dp2Capo 能访问 Queue
-                                var wp = new WindowsPrincipal(wi);
-                                if (wp.IsInRole(WindowsBuiltInRole.Administrator))
-                                {
-                                    queue.SetPermissions(@"NT AUTHORITY\System",
-                                        MessageQueueAccessRights.FullControl);
-                                }
-
-                                app.WriteErrorLog("首次创建 MSMQ 队列 '" + this.OutgoingQueue + "' 成功");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            app.HangupList.Add("MessageQueueCreateFail");
-                            app.WriteErrorLog("*** 创建 MSMQ 队列 '" + this.OutgoingQueue + "' 失败: " + ExceptionUtil.GetDebugText(ex)
-                                + " 系统已被挂起。");
-                        }
-                    }
-                    else
-                    {
-
-                    }
-
+                    ///
+                    app.InitialMsmq();
 
                     // 初始化 mongodb 相关对象
                     nRet = InitialMongoDatabases(out strError);
                     if (nRet == -1)
                     {
                         // app.HangupReason = LibraryServer.HangupReason.StartingError;
-                        app.HangupList.Add("ERR002");
+                        app.AddHangup("ERR002");
                         app.WriteErrorLog("ERR002 首次初始化 mongodb database 失败: " + strError);
                     }
 
@@ -1729,13 +1698,26 @@ namespace DigitalPlatform.LibraryServer
 #endif
                     }
 
-                    if (DateTime.Now > new DateTime(2017, 3, 1))    // 上一个版本是 2016/11/1
+                    if (this.MaxClients != 255) // 255 通道情况下不再检查版本失效日期 2016/11/3
                     {
-                        // 通知系统挂起
-                        // this.HangupReason = HangupReason.Expire;
-                        app.HangupList.Add("Expire");
-                        this.WriteErrorLog("*** 当前 dp2library 版本因为长期没有升级，已经失效。系统被挂起。请立即升级 dp2library 到最新版本");
+                        DateTime expire = new DateTime(2017, 3, 1); // 上一个版本是 2016/11/1
+                        if (DateTime.Now > expire)
+                        {
+                            if (this.MaxClients == 255)
+                            {
+                                this.WriteErrorLog("*** 当前 dp2library 版本已于 " + expire.ToLongDateString() + " 失效。请系统管理员注意主动升级 dp2library");
+                            }
+                            else
+                            {
+                                // 通知系统挂起
+                                // this.HangupReason = HangupReason.Expire;
+                                app.AddHangup("Expire");
+                                this.WriteErrorLog("*** 当前 dp2library 版本因为长期没有升级，已经失效。系统被挂起。请立即升级 dp2library 到最新版本");
+                            }
+                        }
                     }
+                    else
+                        this.WriteErrorLog("*** 特殊版本不检查失效日期。请系统管理员注意每隔半年主动升级一次 dp2library");
 
                     // 2013/4/10
                     if (this.Changed == true)
@@ -1781,7 +1763,7 @@ namespace DigitalPlatform.LibraryServer
             else
             {
                 // app.HangupReason = LibraryServer.HangupReason.StartingError;
-                app.HangupList.Add("StartingError");
+                app.AddHangup("StartingError");
                 app.WriteErrorLog("library application初始化过程发生严重错误 [" + strError + "]，当前此服务处于残缺状态，请及时排除故障后重新启动");
             }
             return -1;
@@ -2175,6 +2157,107 @@ namespace DigitalPlatform.LibraryServer
             {
                 // this.m_lock.ReleaseWriterLock();
                 this.UnlockForWrite();
+            }
+        }
+
+        // MSMQ 环境是否初始化成功过至少一次
+        internal bool MsmqInitialized = false;
+
+        // 尝试初始化 MSMQ 环境
+        public void InitialMsmq()
+        {
+            if (MsmqInitialized == true)
+                return;
+
+            if (string.IsNullOrEmpty(this.OutgoingQueue) == true)
+            {
+                // 清除 Hangup 状态
+                if (this.ContainsHangup("MessageQueueCreateFail") == true)
+                {
+                    this.ClearHangup("MessageQueueCreateFail");
+                    this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
+                }
+                return;
+            }
+
+            try
+            {
+#if NO
+                            if (MessageQueue.Exists(this.OutgoingQueue))
+                            {
+                                MessageQueue.Delete(this.OutgoingQueue);
+                            }
+#endif
+
+                if (!MessageQueue.Exists(this.OutgoingQueue))
+                {
+                    MessageQueue queue = MessageQueue.Create(this.OutgoingQueue);
+
+#if NO
+                                // Create an AccessControlList.
+                                AccessControlList list = new AccessControlList();
+
+                                // Create a new trustee to represent the "Everyone" user group.
+                                Trustee tr = new Trustee("Everyone");
+
+                                // Create an AccessControlEntry, granting the trustee read access to
+                                // the queue.
+                                AccessControlEntry entry = new AccessControlEntry(
+                                    tr, GenericAccessRights.Read,
+                         StandardAccessRights.Read,
+                                    AccessControlEntryType.Allow);
+
+                                // Add the AccessControlEntry to the AccessControlList.
+                                list.Add(entry);
+
+
+                                // Apply the AccessControlList to the queue.
+                                queue.SetPermissions(list);
+#endif
+
+                    var wi = WindowsIdentity.GetCurrent();
+                    if (wi.IsSystem == true)
+                    {
+                        // 当前用户已经是 LocalSystem 了，需要额外给 Everyone 添加权限，以便让 dp2Capo 的控制台方式运行能访问这个 Queue
+                        queue.SetPermissions(@"Everyone",
+    MessageQueueAccessRights.ReceiveMessage
+    | MessageQueueAccessRights.DeleteMessage
+    | MessageQueueAccessRights.PeekMessage
+    | MessageQueueAccessRights.GenericRead);
+                    }
+
+                    // 如果当前是 Administrator，表示可能是 dp2libraryxe 启动的方式，那么需要专门给 LocalSystem 操作 Queue 的权限，以便 Windows Service 方式的 dp2Capo 能访问 Queue
+                    var wp = new WindowsPrincipal(wi);
+                    if (wp.IsInRole(WindowsBuiltInRole.Administrator))
+                    {
+                        queue.SetPermissions(@"NT AUTHORITY\System",
+                            MessageQueueAccessRights.FullControl);
+                    }
+
+                    this.WriteErrorLog("首次创建 MSMQ 队列 '" + this.OutgoingQueue + "' 成功");
+                }
+
+                MsmqInitialized = true;
+                // 清除 Hangup 状态
+                if (this.ContainsHangup("MessageQueueCreateFail") == true)
+                {
+                    this.ClearHangup("MessageQueueCreateFail");
+                    this.WriteErrorLog("*** 系统已解除 MessageQueueCreateFail 挂起状态");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (this.ContainsHangup("MessageQueueCreateFail") == true)
+                {
+                    this.WriteErrorLog("*** 重试探测和尝试创建 MSMQ 队列 '" + this.OutgoingQueue + "' 失败: " + ExceptionUtil.GetExceptionMessage(ex)
+    + " 系统仍处于挂起状态。");
+                }
+                else
+                {
+                    this.AddHangup("MessageQueueCreateFail");
+                    this.WriteErrorLog("*** 探测和尝试创建 MSMQ 队列 '" + this.OutgoingQueue + "' 时出现异常: " + ExceptionUtil.GetDebugText(ex)
+                        + " 系统已被挂起。");
+                }
             }
         }
 
@@ -3509,7 +3592,7 @@ namespace DigitalPlatform.LibraryServer
             this.EndWather();
 
             //this.HangupReason = LibraryServer.HangupReason.Exit;    // 阻止后继 API 访问
-            this.HangupList.Add("Exit");
+            this.AddHangup("Exit");
 
             this.WriteErrorLog("LibraryApplication 开始下降");
 
@@ -3693,6 +3776,10 @@ namespace DigitalPlatform.LibraryServer
         {
             IsInCirculation = false;
             strLibraryCode = "";
+
+            // 2016/11/7
+            if (string.IsNullOrEmpty(strReaderDbName))
+                return false;
 
             for (int i = 0; i < this.ReaderDbs.Count; i++)
             {
@@ -4887,6 +4974,9 @@ namespace DigitalPlatform.LibraryServer
 
             account.Access = DomUtil.GetAttr(node, "access");
             account.RmsUserName = DomUtil.GetAttr(node, "rmsUserName");
+
+            // 2016/10/26
+            account.Binding = node.GetAttribute("binding");
 
             try
             {
@@ -9757,6 +9847,7 @@ out strError);
         //      nIndex  如果有多个匹配的读者记录，此参数表示要选择其中哪一个。
         //              如果为-1，表示首次调用此函数，还不知如何选择。如此时命中多个，函数会返回>1的值
         //      strGetToken 是否要获得 token ，和有效期。 空 / day / month / year
+        //      alter_type_list 已经实施的绑定验证类型和尚未实施的类型列表
         //      strOutputUserName   返回读者证条码号
         // return:
         //      -1  error
@@ -9770,6 +9861,7 @@ out strError);
             string strLibraryCodeList,
             int nIndex,
             string strGetToken,
+            out List<string> alter_type_list,
             out string strOutputUserName,
             out string strRights,
             out string strLibraryCode,
@@ -9783,6 +9875,7 @@ out strError);
             strRights = "";
             strOutputUserName = "";
             strLibraryCode = "";
+            alter_type_list = new List<string>();
 
             // 2009/9/22 
             if (String.IsNullOrEmpty(strLoginName) == true)
@@ -9937,6 +10030,59 @@ out strError);
 
             if (nRet == 0)
                 accountref = null;
+            else
+            {
+                // 匹配 IP 地址
+                if (string.IsNullOrEmpty(sessioninfo.ClientIP) == false)    // 2016/11/2
+                {
+                    List<string> temp = new List<string>();
+
+                    bool bRet = accountref.MatchClientIP(sessioninfo.ClientIP,
+                        ref temp,
+                        out strError);
+                    if (bRet == false)
+                    {
+                        if (temp.Count == 0)
+                            return -1;
+
+                        // 不允许，又没有可以替代的方式，就要返回出错了
+                        if (Account.HasAlterBindingType(temp) == false)
+                            return -1;
+
+                        // 有替代的验证方式，先继续完成登录
+                        alter_type_list.AddRange(temp);
+                    }
+                    else
+                        alter_type_list.Add("ip");
+                }
+
+                // 星号表示不进行 router client ip 检查
+                if (sessioninfo.RouterClientIP != "*"
+                    // && alter_type_list.Count == 0
+                    )
+                {
+                    List<string> temp = new List<string>();
+
+                    // 匹配 dp2Router 前端的 IP 地址
+                    bool bRet = accountref.MatchRouterClientIP(sessioninfo.RouterClientIP,
+                        ref temp,
+                        out strError);
+                    if (bRet == false)
+                    {
+                        if (temp.Count == 0)
+                            return -1;
+
+                        // 不允许，又没有可以替代的方式，就要返回出错了
+                        if (Account.HasAlterBindingType(temp) == false)
+                            return -1;
+
+                        // 否则继续完成登录
+                        alter_type_list.AddRange(temp);
+                    }
+                    else
+                        alter_type_list.Add("router_ip");
+                }
+            }
 
             Account account = new Account();
             account.LoginName = strLoginName;
@@ -14029,11 +14175,15 @@ strLibraryCode);    // 读者所在的馆代码
 
                 // 注意： strPath 中的斜杠应该是 '/'
                 string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
-                if (string.Compare(strFirstLevel, "upload", true) != 0)
+                if (StringUtil.IsInList("managedatabase", strRights) == false)
                 {
-                    strError = "第一级目录名必须为 'upload'";
-                    return -1;
+                    if (string.Compare(strFirstLevel, "upload", true) != 0)
+                    {
+                        strError = "因当前用户不具备权限 managedatabase，能列出的第一级目录名被限定为 'upload'";
+                        return -1;
+                    }
                 }
+
                 if (StringUtil.IsInList("download", strRights) == false)
                 {
                     strError = "读取文件 " + strResPath + " 被拒绝。不具备 download 权限";
@@ -14371,6 +14521,55 @@ strLibraryCode);    // 读者所在的馆代码
 
             return ResPathType.None;
         }
+
+        // 通过 MSMQ 发送手机短信
+        // parameters:
+        //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
+        public int SendSms(
+            string strUserName,
+            string strPhoneNumber,
+            string strText,
+            out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                MessageQueue queue = new MessageQueue(this.OutgoingQueue);
+
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml("<root />");
+                /* 元素名
+ * type 消息类型。登录验证码
+ * userName 用户名
+ * phoneNumber 手机号码
+ * text 短信消息内容
+ */
+                DomUtil.SetElementText(dom.DocumentElement, "type", "登录验证码");
+                DomUtil.SetElementText(dom.DocumentElement, "userName", strUserName);
+                DomUtil.SetElementText(dom.DocumentElement, "phoneNumber", strPhoneNumber);
+                DomUtil.SetElementText(dom.DocumentElement, "text", strText);
+
+                // 向 MSMQ 消息队列发送消息
+                int nRet = ReadersMonitor.SendToQueue(queue,
+                    strUserName + "@LUID:" + this.UID,
+                    "xml",
+                    dom.DocumentElement.OuterXml,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "发送 MQ 消息时出错: " + strError;
+                    return -1;
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError += "创建路径为 '" + this.OutgoingQueue + "' 的 MessageQueue 对象失败: " + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
+        }
     }
 
 #if NO
@@ -14420,6 +14619,9 @@ strLibraryCode);    // 读者所在的馆代码
         OutofSession = 26,   // 通道达到配额上限
         InvalidReaderBarcode = 27,  // 读者证条码号不合法
         InvalidItemBarcode = 28,    // 册条码号不合法
+        NeedSmsLogin = 29,  // 需要改用短信验证码方式登录
+        RetryLogin = 30,    // 需要补充验证码再次登录
+        TempCodeMismatch = 31,  // 验证码不匹配
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容
@@ -14501,6 +14703,7 @@ strLibraryCode);    // 读者所在的馆代码
 
         public string RmsUserName = "";
         public string RmsPassword = "";
+        public string Binding = ""; // 2016/10/26
 
         public string Barcode = ""; // 证条码号。对于读者型的帐户有意义
 
@@ -14519,6 +14722,141 @@ strLibraryCode);    // 读者所在的馆代码
         public DateTime ReaderDomLastTime = new DateTime((long)0);  // 最近装载的时间
         public bool ReaderDomChanged = false;
 
+        #region 手机短信验证码
+
+        // 竖线间隔的手机号码列表
+        // return:
+        //      null    没有找到前缀
+        //      ""      找到了前缀，并且值部分为空
+        //      其他     返回值部分
+        public string GetPhoneNumberBindingString()
+        {
+            // 看看绑定信息里面是否有对应的手机号码
+            // 注: email 元素内容，现在是存储 email 和微信号等多种绑定途径 2016/4/16
+            // return:
+            //      null    没有找到前缀
+            //      ""      找到了前缀，并且值部分为空
+            //      其他     返回值部分
+            return StringUtil.GetParameterByPrefix(this.Binding,
+    "sms",
+    ":");
+        }
+
+        // 验证码多长时间过期
+        static TimeSpan _expireLength = TimeSpan.FromMinutes(10);   // 10 分钟
+
+        // 准备手机短信验证登录的第一阶段：产生验证码
+        // return:
+        //      -1  出错
+        //      0   沿用以前的验证码
+        //      1   用新的验证码
+        public int PrepareTempPassword(
+            TempCodeCollection table,
+            string strClientIP,
+            string strPhoneNumber,
+            out TempCode code,
+            out string strError)
+        {
+            strError = "";
+            code = null;
+
+            if (string.IsNullOrEmpty(strPhoneNumber))
+            {
+                strError = "strPhoneNumber 参数值不应为空";
+                return -1;
+            }
+
+            strPhoneNumber = strPhoneNumber.Trim();
+            if (string.IsNullOrEmpty(strPhoneNumber))
+            {
+                strError = "strPhoneNumber 参数值不应为空(1)";
+                return -1;
+            }
+
+            string strList = GetPhoneNumberBindingString();
+            if (string.IsNullOrEmpty(strList))
+            {
+                strError = "当前账号未曾做过手机短信方式(sms:)绑定";
+                return -1;   // 没有做过 sms: 绑定
+            }
+
+            List<string> list = StringUtil.SplitList(strList, '|');
+            if (list.IndexOf(strPhoneNumber) == -1)
+            {
+                strError = "所提供的电话号码 '" + strPhoneNumber + "' 不在手机绑定号码列表中";
+                return -1;   // 电话号码没有在列表中
+            }
+
+            // 检索看看是否有已经存在的密码
+            bool bExist = false;
+            DateTime now = DateTime.Now;
+            string strKey = this.UserID + "|" + strPhoneNumber + "|" + strClientIP;
+            code = table.FindTempCode(strKey);
+            if (code != null)
+            {
+                if (code.ExpireTime < now)
+                    code = null;    // 迫使重新取号
+                else
+                {
+                    // 失效期还没有到。主动延长一次失效期
+                    code.ExpireTime = DateTime.Now + _expireLength;
+                    bExist = true;
+                }
+            }
+
+            if (code == null)
+            {
+                // 重新设定一个密码
+                Random rnd = new Random();
+                code = new TempCode();
+                code.Key = strKey;
+                code.Code = rnd.Next(1, 999999).ToString();
+                code.ExpireTime = DateTime.Now + _expireLength;
+            }
+
+            table.SetTempCode(code.Key, code);
+            // strTempCode = code.Code;
+            if (bExist)
+                return 0;
+            return 1;
+        }
+
+        // 准备手机短信验证登录的第二阶段：匹配验证码
+        public bool MatchTempPassword(
+            TempCodeCollection table,
+            string strPhoneNumber,
+            string strClientIP,
+            string strPassword,
+            out string strError)
+        {
+            strError = "";
+
+            string strKey = this.UserID + "|" + strPhoneNumber + "|" + strClientIP;
+
+            TempCode code = table.FindTempCode(strKey);
+            if (code == null)
+            {
+                strError = "当前用户的验证码尚未初始化";
+                return false;
+            }
+
+            if (DateTime.Now > code.ExpireTime)
+            {
+                strError = "验证码已经过期失效";
+                return false;
+            }
+
+            if (strPassword != code.Code)
+            {
+                strError = "验证码匹配失败";
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
+
         public Account()
         {
             Random random = new Random(unchecked((int)DateTime.Now.Ticks));
@@ -14534,6 +14872,290 @@ strLibraryCode);    // 读者所在的馆代码
             {
                 return LibraryApplication.ExpandRightString(this.Rights);
             }
+        }
+
+        // 匹配 IP 地址
+        // parameters:
+        //      alter_type_list 返回处理结果列表。只有当 alter_type_list != null 并且没有匹配上真实 IP 地址时，才在本参数中返回值
+        // return:
+        //      true    允许
+        //      false   禁止
+        public bool MatchClientIP(string strClientIP,
+            ref List<string> alter_type_list,
+            out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(this.Binding) == true)
+                return true;
+            string list = StringUtil.GetParameterByPrefix(this.Binding, "ip");
+            if (string.IsNullOrEmpty(list))
+                return true;    // 没有绑定 ip: ，表示不进行任何 IP 限制
+
+            if (StringUtil.MatchIpAddressList(list, strClientIP) == false)
+            {
+                if (alter_type_list != null)
+                {
+                    alter_type_list.Add("!ip"); // 表示虽然处理了，但是没有匹配
+                    alter_type_list.AddRange(GetAlterBinding(list));
+                }
+
+                strError = "前端 IP 地址 '" + strClientIP + "' 不在当前账户的 ip: 白名单中，访问被拒绝";
+                return false;
+            }
+
+            if (alter_type_list != null)
+                alter_type_list.Add("ip"); // 表示已经验证了 ip: 绑定
+            return true;
+        }
+
+        // 匹配 dp2Router 的前端 IP 地址
+        // parameters:
+        //      alter_type_list 返回替代类型列表。只有当 alter_type_list != null 并且没有匹配上真实 IP 地址时，才在本参数中返回值
+        // return:
+        //      true    允许
+        //      false   禁止
+        public bool MatchRouterClientIP(string strRouterClientIP,
+            ref List<string> alter_type_list,
+            out string strError)
+        {
+            strError = "";
+
+            if (strRouterClientIP == null)
+                return true;
+
+            if (string.IsNullOrEmpty(this.Binding) == true)
+            {
+                strError = "当前账户未绑定 router_ip，不允许前端经由 dp2Router 访问";
+                return false;
+            }
+
+            string list = StringUtil.GetParameterByPrefix(this.Binding, "router_ip");
+            if (string.IsNullOrEmpty(list))
+            {
+                strError = "当前账户未绑定 router_ip，不允许前端经由 dp2Router 访问 .";
+                return false;
+            }
+
+            if (list == "*")
+                goto END1;
+            if (strRouterClientIP != "*" && StringUtil.MatchIpAddressList(list, strRouterClientIP) == false)
+            {
+                if (alter_type_list != null)
+                {
+                    alter_type_list.Add("!router_ip"); // 表示虽然处理了，但是没有匹配
+                    alter_type_list.AddRange(GetAlterBinding(list));    // 加入替代的绑定类型
+                }
+
+                strError = "前端 IP 地址 '" + strRouterClientIP + "' 不在当前账户的 router_ip: 白名单中，访问被拒绝";
+                return false;
+            }
+
+        END1:
+            if (alter_type_list != null)
+                alter_type_list.Add("router_ip"); // 表示已经验证了 router_ip: 绑定
+            return true;
+        }
+
+        // 合并抵消带有星号和和不带星号的同类 type。返回剩下的(曾经)带有星号的类型。这样可以报错给用户，说哪些绑定类型不满足
+        // 注: 返回的时候已经去掉了星号
+        public static List<string> MergeBindingType(List<string> alter_type_list)
+        {
+            List<string> results = new List<string>();
+
+            List<string> type_list1 = new List<string>();   // 没有星号的
+            List<string> type_list2 = new List<string>();   // 有星号的
+
+            // 取出没有星号和有星号的两个 list
+            foreach (string name in alter_type_list)
+            {
+                if (string.IsNullOrEmpty(name))
+                    continue;
+                if (name[0] == '!')
+                    continue;
+                if (name[0] == '*')
+                    type_list2.Add(name.Substring(1));
+                else
+                    type_list1.Add(name);
+            }
+
+            if (type_list2.Count == 0)
+                return results;
+
+            StringUtil.RemoveDup(ref type_list1);
+            StringUtil.RemoveDup(ref type_list2);
+
+            foreach (string name in type_list1)
+            {
+                // name 为没有星号的类型
+
+                if (type_list2.IndexOf(name) != -1)
+                    type_list2.Remove(name);
+            }
+
+            return type_list2;
+        }
+
+        public static bool RemoveAlertBindingType(ref List<string> alter_type_list,
+            string type)
+        {
+            if (alter_type_list == null)
+                return false;
+
+            bool bChanged = false;
+            for (int i = 0; i < alter_type_list.Count; i++)
+            {
+                string name = alter_type_list[i];
+                if (string.IsNullOrEmpty(name))
+                    continue;
+                if (name[0] != '*')
+                    continue;
+                if (name.Substring(1) == type)
+                {
+                    alter_type_list.RemoveAt(i);
+                    i--;
+                    bChanged = true;
+                }
+            }
+
+            return bChanged;
+        }
+
+        public static bool HasAlterBindingType(List<string> alter_type_list)
+        {
+            if (alter_type_list == null)
+                return false;
+            foreach (string s in alter_type_list)
+            {
+                if (string.IsNullOrEmpty(s) == false && s[0] == '*')
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 从 IP 列表中获得(不满足时)替代绑定类型列表。注意第一字符为 *
+        // '192.168.0.1|*sms' 中 *sms 就是替代绑定类型。
+        static List<string> GetAlterBinding(string strText)
+        {
+            List<string> results = new List<string>();
+            List<string> list = StringUtil.SplitList(strText, '|');
+            foreach (string s in list)
+            {
+                if (string.IsNullOrEmpty(s) == false && s[0] == '*')
+                {
+#if NO
+                    string name = s.Substring(1);
+                    if (string.IsNullOrEmpty(name) == false)
+                        results.Add(name);
+#endif
+                    results.Add(s); // 注意第一字符为 *
+                }
+            }
+
+            return results;
+        }
+
+        // 从绑定字符串中解析出所有需要登录时候验证的绑定类型
+        public static List<string> GetBindingTypes(string strText)
+        {
+            List<string> results = new List<string>();
+            List<string> list = StringUtil.SplitList(strText, ',');
+            foreach (string s in list)
+            {
+                List<string> parts = StringUtil.ParseTwoPart(s, ":");
+                string type = parts[0];
+                if (type == "ip" || type == "router_ip" || type == "sms")
+                    results.Add(type);
+            }
+
+            return results;
+        }
+
+        // 从 list1 中减去 list2
+        public static List<string> Sub(List<string> list1, List<string> list2)
+        {
+            List<string> results = new List<string>();
+            foreach (string s in list1)
+            {
+                if (list2.IndexOf(s) == -1)
+                    results.Add(s);
+            }
+
+            return results;
+        }
+
+        // 获得处理过的元素。也就是 !ip 和 ip 这样的类型。(即，不是 *ip 这样的类型)
+        public static List<string> GetProcessed(List<string> list)
+        {
+            List<string> results = new List<string>();
+            foreach (string s in list)
+            {
+                if (string.IsNullOrEmpty(s))
+                    continue;
+                if (s[0] != '*')
+                {
+                    if (s[0] == '!')
+                        results.Add(s.Substring(1));
+                    else
+                        results.Add(s);
+                }
+            }
+
+            return results;
+        }
+
+        // 获得匹配过的元素。也就是 ip 这样的类型。(即，不是 *ip !ip 这样的类型)
+        public static List<string> GetMatched(List<string> list)
+        {
+            List<string> results = new List<string>();
+            foreach (string s in list)
+            {
+                if (string.IsNullOrEmpty(s))
+                    continue;
+                if (s[0] != '*' && s[0] != '!')
+                    results.Add(s);
+            }
+
+            return results;
+        }
+
+        // 从 types 列表中移走那些验证过的可以替代的类型
+        // parameters:
+        //      types   需要检查的类型
+        //      matched   已经验证过的类型
+        public static void RemoveAlterTypes(ref List<string> types,
+            List<string> matched,
+            string strBinding)
+        {
+            if (matched.Count == 0)
+                return;
+            List<string> results = new List<string>();
+            foreach (string type in types)
+            {
+                string list = StringUtil.GetParameterByPrefix(strBinding, type);
+                if (string.IsNullOrEmpty(list))
+                    continue;
+                {
+                    List<string> alters = GetAlterBinding(list);
+                    foreach (string alter in alters)
+                    {
+                        string name = alter;
+                        if (string.IsNullOrEmpty(alter) == false && alter[0] == '*')
+                            name = alter.Substring(1);
+                        if (matched.IndexOf(name) != -1)
+                            goto FOUND;
+                    }
+                }
+
+                results.Add(type);  // 没有替代
+                continue;
+            FOUND:
+                // 发现了可以替代的
+                continue;
+            }
+
+            types = results;
         }
     }
 
@@ -14762,4 +15384,37 @@ strLibraryCode);    // 读者所在的馆代码
         [DataMember]
         public long Size = 0;   // 尺寸。-1 表示这是目录对象
     }
+
+    public class RemoteAddress
+    {
+        public string ClientIP { get; set; }
+        public string Via { get; set; }
+        public string Type { get; set; }
+
+        public RemoteAddress()
+        {
+
+        }
+
+        public RemoteAddress(string ip, string via, string type)
+        {
+            this.ClientIP = StringUtil.CanonicalizeIP(ip);
+            this.Via = via;
+            this.Type = type;
+        }
+
+        public static RemoteAddress FindClientAddress(List<RemoteAddress> list, string type)
+        {
+            if (list == null)
+                return null;
+            foreach (RemoteAddress address in list)
+            {
+                if (address.Type == type)
+                    return address;
+            }
+
+            return null;
+        }
+    }
+
 }

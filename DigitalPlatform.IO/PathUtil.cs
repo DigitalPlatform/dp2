@@ -974,10 +974,20 @@ namespace DigitalPlatform.IO
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception /*ex*/)
             {
                 return false;
             }
+        }
+
+        // 是否为纯文件名？
+        public static bool IsPureFileName(string strText)
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return false;
+            if (strText.IndexOfAny(new char[] { '/', '\\', ':' }) == -1)
+                return true;
+            return false;
         }
 
         // 获得纯文件名部分
@@ -1122,6 +1132,7 @@ namespace DigitalPlatform.IO
             if (strPath1 == strPath2)
                 return true;
 
+            // TODO: new DirecotryInfo() 对一个文件操作时候会怎样？会抛出异常么? 需要测试一下 2016/11/6
             FileSystemInfo fi1 = new DirectoryInfo(strPath1);
             FileSystemInfo fi2 = new DirectoryInfo(strPath2);
 

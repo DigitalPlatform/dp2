@@ -33,7 +33,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.textBox_mime = new System.Windows.Forms.TextBox();
             this.textBox_path = new System.Windows.Forms.TextBox();
-            this.textBox_content = new DigitalPlatform.GUI.NoHasSelTextBox();
+            this.textBox_content = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.button_Cancel = new System.Windows.Forms.Button();
@@ -191,7 +191,7 @@
             this.toolStripButton_formatXml});
             this.toolStrip1.Location = new System.Drawing.Point(12, 375);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(109, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(78, 25);
             this.toolStrip1.TabIndex = 28;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -241,7 +241,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBox_mime;
         public System.Windows.Forms.TextBox textBox_path;
-        public GUI.NoHasSelTextBox textBox_content;
+        public System.Windows.Forms.TextBox textBox_content;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button_Cancel;

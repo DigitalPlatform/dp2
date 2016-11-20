@@ -50,6 +50,7 @@
             this.checkBox_updateCfgsDir = new System.Windows.Forms.CheckBox();
             this.button_setSerialNumber = new System.Windows.Forms.Button();
             this.button_configMq = new System.Windows.Forms.Button();
+            this.button_configMongoDB = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -100,7 +101,7 @@
             this.textBox_bindings.Multiline = true;
             this.textBox_bindings.Name = "textBox_bindings";
             this.textBox_bindings.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_bindings.Size = new System.Drawing.Size(226, 87);
+            this.textBox_bindings.Size = new System.Drawing.Size(226, 84);
             this.textBox_bindings.TabIndex = 11;
             // 
             // label3
@@ -127,7 +128,7 @@
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(358, 355);
+            this.button_Cancel.Location = new System.Drawing.Point(358, 371);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
             this.button_Cancel.TabIndex = 17;
@@ -138,7 +139,7 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(277, 355);
+            this.button_OK.Location = new System.Drawing.Point(277, 371);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 16;
@@ -210,7 +211,7 @@
             // 
             this.textBox_libraryName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_libraryName.Location = new System.Drawing.Point(155, 283);
+            this.textBox_libraryName.Location = new System.Drawing.Point(155, 280);
             this.textBox_libraryName.Name = "textBox_libraryName";
             this.textBox_libraryName.Size = new System.Drawing.Size(226, 21);
             this.textBox_libraryName.TabIndex = 14;
@@ -219,7 +220,7 @@
             // 
             this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 286);
+            this.label6.Location = new System.Drawing.Point(12, 283);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(77, 12);
             this.label6.TabIndex = 13;
@@ -228,7 +229,7 @@
             // button_certificate
             // 
             this.button_certificate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_certificate.Location = new System.Drawing.Point(12, 355);
+            this.button_certificate.Location = new System.Drawing.Point(12, 371);
             this.button_certificate.Name = "button_certificate";
             this.button_certificate.Size = new System.Drawing.Size(85, 23);
             this.button_certificate.TabIndex = 15;
@@ -249,7 +250,7 @@
             // button_setSerialNumber
             // 
             this.button_setSerialNumber.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_setSerialNumber.Location = new System.Drawing.Point(103, 355);
+            this.button_setSerialNumber.Location = new System.Drawing.Point(103, 371);
             this.button_setSerialNumber.Name = "button_setSerialNumber";
             this.button_setSerialNumber.Size = new System.Drawing.Size(95, 23);
             this.button_setSerialNumber.TabIndex = 19;
@@ -261,7 +262,7 @@
             // 
             this.button_configMq.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_configMq.Location = new System.Drawing.Point(155, 310);
+            this.button_configMq.Location = new System.Drawing.Point(155, 307);
             this.button_configMq.Name = "button_configMq";
             this.button_configMq.Size = new System.Drawing.Size(226, 23);
             this.button_configMq.TabIndex = 20;
@@ -269,13 +270,26 @@
             this.button_configMq.UseVisualStyleBackColor = true;
             this.button_configMq.Click += new System.EventHandler(this.button_configMq_Click);
             // 
+            // button_configMongoDB
+            // 
+            this.button_configMongoDB.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_configMongoDB.Location = new System.Drawing.Point(155, 336);
+            this.button_configMongoDB.Name = "button_configMongoDB";
+            this.button_configMongoDB.Size = new System.Drawing.Size(277, 23);
+            this.button_configMongoDB.TabIndex = 21;
+            this.button_configMongoDB.Text = "为 library.xml 自动配置 MongoDB 参数";
+            this.button_configMongoDB.UseVisualStyleBackColor = true;
+            this.button_configMongoDB.Click += new System.EventHandler(this.button_configMongoDB_Click);
+            // 
             // OneInstanceDialog
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(445, 390);
+            this.ClientSize = new System.Drawing.Size(445, 406);
+            this.Controls.Add(this.button_configMongoDB);
             this.Controls.Add(this.button_configMq);
             this.Controls.Add(this.button_setSerialNumber);
             this.Controls.Add(this.checkBox_updateCfgsDir);
@@ -330,5 +344,6 @@
         private System.Windows.Forms.CheckBox checkBox_updateCfgsDir;
         private System.Windows.Forms.Button button_setSerialNumber;
         private System.Windows.Forms.Button button_configMq;
+        private System.Windows.Forms.Button button_configMongoDB;
     }
 }

@@ -23,6 +23,7 @@ using DigitalPlatform.Message;
 
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.rms;
 
 namespace dp2Library
 {
@@ -112,6 +113,12 @@ namespace dp2Library
             lock (info.LockObject)
             {
                 info.App = new LibraryApplication();
+
+                info.App.TestMode = info.TestMode;
+                info.App.MaxClients = info.MaxClients;
+                info.App.LicenseType = info.LicenseType;
+                info.App.Function = info.Function;
+
                 // parameter:
                 //		strDataDir	data目录
                 //		strError	out参数，返回出错信息
@@ -129,38 +136,66 @@ namespace dp2Library
                 nRet = info.App.Verify(out strError);
                 if (nRet == -1)
                     return -1;
-                info.App.TestMode = info.TestMode;
-                info.App.MaxClients = info.MaxClients;
-                info.App.LicenseType = info.LicenseType;
-                info.App.Function = info.Function;
             }
 
             this.app = info.App;
             return 0;
         }
 
-        public static void GetClientAddress(out string strIP, out string strVia)
+        public List<RemoteAddress> GetClientAddress()
         {
-            strIP = "";
+            List<RemoteAddress> results = new List<RemoteAddress>();
+
+            if (OperationContext.Current.IncomingMessageProperties.ContainsKey("httpRequest"))
+            {
+                var headers = OperationContext.Current.IncomingMessageProperties["httpRequest"];
+                var ip = ((HttpRequestMessageProperty)headers).Headers["_dp2router_clientip"];
+                if (string.IsNullOrEmpty(ip) == false)
+                    results.Add(new RemoteAddress(ip, "", "dp2Router"));
+            }
+
+            results.Add(GetNearestClientAddress());
+            return results;
+        }
+
+        public RemoteAddress GetNearestClientAddress()
+        {
+            string strIP = "";
             MessageProperties prop = OperationContext.Current.IncomingMessageProperties;
 
-            strVia = prop.Via.ToString();
+            string strVia = prop.Via.ToString();
 
             if (prop.Via.Scheme == "net.pipe")
             {
                 // 没有 IP
                 strIP = "::1";  // "localhost";
-                return;
+                return new RemoteAddress(strIP, strVia, "");
             }
             try
             {
                 RemoteEndpointMessageProperty endpoint = prop[RemoteEndpointMessageProperty.Name] as RemoteEndpointMessageProperty;
                 strIP = endpoint.Address;
+                if (string.IsNullOrEmpty(strIP))
+                    throw new Exception("endpoint.Address 为空");
             }
-            catch
+            catch (Exception ex)
             {
+                strIP = "";
+                // 2016/11/2
+                this.app.WriteErrorLog("GetNearestClientAddress() 中出现异常(strVia='" + strVia + "'): " + ExceptionUtil.GetDebugText(ex));
             }
-            strVia = prop.Via.ToString();
+            // strVia = prop.Via.ToString();
+
+            // 如果是 rest.http 协议类型，其 Via 的字符串要多出一截。多出来 API Name。需要截掉。
+            if (prop.Encoder != null
+                && prop.Encoder.MediaType == "application/json")
+            {
+                int nRet = strVia.LastIndexOf("/");
+                if (nRet != -1)
+                    strVia = strVia.Substring(0, nRet);
+            }
+
+            return new RemoteAddress(strIP, strVia, "");
         }
 
         // return:
@@ -171,23 +206,23 @@ namespace dp2Library
         {
             strError = "";
 
-            string strIP = "";
-            string strVia = "";
-            GetClientAddress(out strIP, out strVia);
+            List<RemoteAddress> address_list = GetClientAddress();
             try
             {
-
                 // sessioninfo = new SessionInfo(app, GetClientAddress());
                 this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
     OperationContext.Current.SessionId,
-    strIP,
-    strVia);
+    address_list);
             }
             catch (OutofSessionException ex)
             {
+                RemoteAddress address = RemoteAddress.FindClientAddress(address_list, "");
+
                 // TODO: 注意防止错误日志文件耗费太多空间
                 // TODO: 这里适合对现有通道做一些清理。由于 IP 相同并不意味着就是来自同一台电脑，因此需要 MAC 地址、账户名等其他信息辅助判断
-                this.WriteDebugInfo("*** 前端 '" + strIP + "@" + strVia + "' 新分配通道的请求被拒绝:" + ex.Message);
+                this.WriteDebugInfo("*** 前端 '"
+                    + (address == null ? "" : address.ClientIP + "@" + address.Via)
+                    + "' 新分配通道的请求被拒绝:" + ex.Message);
                 // OperationContext.Current.InstanceContext.ReleaseServiceInstance();
 
                 // 为了防止攻击，需要立即切断通道。否则 1000 个通道很快会被耗尽
@@ -282,15 +317,12 @@ namespace dp2Library
 
                     // TODO: 需要按照前端 IP 地址对 sessionid 个数进行管理。如果超过一定数目则限制这个 IP 创建新的 sessionid，但不影响到其他 IP 创建新的 sessionid
 
-                    string strIP = "";
-                    string strVia = "";
-                    GetClientAddress(out strIP, out strVia);
+                    List<RemoteAddress> address_list = GetClientAddress();
                     try
                     {
                         this.sessioninfo = this.app.SessionTable.PrepareSession(this.app,
                             strSessionID,
-                            strIP,
-                            strVia);
+                            address_list);
                     }
 #if NO
                     catch (OutofSessionException ex)
@@ -308,9 +340,13 @@ namespace dp2Library
                         result.ErrorInfo = "dp2Library 初始化通道失败: " + ex.Message;
                         if (ex is OutofSessionException)
                         {
+                            RemoteAddress address = RemoteAddress.FindClientAddress(address_list, "");
+
                             // TODO: 注意防止错误日志文件耗费太多空间
                             // TODO: 这里适合对现有通道做一些清理。由于 IP 相同并不意味着就是来自同一台电脑，因此需要 MAC 地址、账户名等其他信息辅助判断
-                            this.WriteDebugInfo("*** 前端 '" + strIP + "@" + strVia + "' 新分配通道的请求被拒绝:" + ex.Message);
+                            this.WriteDebugInfo("*** 前端 '"
+                                + (address == null ? "" : address.ClientIP + "@" + address.Via)
+                                + "' 新分配通道的请求被拒绝:" + ex.Message);
 
                             result.ErrorCode = ErrorCode.OutofSession;
                             // OperationContext.Current.InstanceContext.ReleaseServiceInstance();
@@ -370,11 +406,9 @@ namespace dp2Library
             {
                 // 增量 NullIpTable，以便管理配额
 
-                string strIP = "";
-                string strVia = "";
-                GetClientAddress(out strIP, out strVia);
-                this._ip = strIP;
-                this.app.SessionTable.IncNullIpCount(strIP, 1);
+                RemoteAddress address = GetNearestClientAddress();
+                this._ip = address.ClientIP;
+                this.app.SessionTable.IncNullIpCount(address.ClientIP, 1);
             }
 
             if (bCheckHangup == true)
@@ -549,6 +583,8 @@ namespace dp2Library
                 }
 
                 string strLocation = (string)parameters["location"];
+                if (strLocation == null)
+                    strLocation = "";   // 2016/10/25 添加。防范 library.xml 中脚本函数 ItemCanBorrow() 或者 ItemCanReturn() 中使用 account.Location.IndexOf() 时抛出异常
                 string strLibraryCodeList = (string)parameters["libraryCode"];
                 if (string.IsNullOrEmpty(strLibraryCodeList) == false)
                     strLibraryCodeList = strLibraryCodeList.Replace("|", ",");
@@ -569,6 +605,8 @@ namespace dp2Library
                     strType = "";
                 if (strType.ToLower() == "reader")
                     bReader = true;
+
+                List<string> alter_type_list = null;
 
 #if NO
                 bool bSimulateLogin = false;
@@ -623,13 +661,16 @@ namespace dp2Library
                         try
                         {
                             string strTemp = "";
+                            List<string> temp_list = null;
                             // 工作人员登录(代理者登录)
                             nRet = sessioninfo.Login(info.ManagerUserName,
                                  info.ManagerPassword,
                                  "#simulate",
                                  false,
                                  null,
+                                 "*",
                                  null,
+                                 out temp_list,
                                  out strRights,
                                  out strTemp,
                                  out strError);
@@ -675,7 +716,9 @@ namespace dp2Library
                          strLocation,
                          StringUtil.HasHead(strLocation, "#opac") == true || strLocation == "@web" ? true : false,  // todo: 判断 #opac 或者 #opac_xxxx
                          sessioninfo.ClientIP,
+                         sessioninfo.RouterClientIP,
                          strGetToken,
+                         out alter_type_list,
                          out strRights,
                          out strLibraryCode,
                          out strError);
@@ -731,13 +774,17 @@ namespace dp2Library
                         try
                         {
                             string strTemp = "";
+                            List<string> temp_list = null;
+
                             // 工作人员登录
                             nRet = sessioninfo.Login(info.ManagerUserName,
                                  info.ManagerPassword,
                                  "#simulate",
                                  false,
                                  null,
+                                 "*",
                                  null,
+                                 out temp_list,
                                  out strRights,
                                  out strTemp,
                                  out strError);
@@ -797,6 +844,7 @@ namespace dp2Library
                         strLibraryCodeList,
                         nIndex, // -1,
                         strGetToken,
+                        out alter_type_list,
                         out strOutputUserName,
                         out strRights,
                         out strLibraryCode,
@@ -855,6 +903,16 @@ namespace dp2Library
                     }
                 }
 
+                /// 处理短信验证码登录有关的流程
+                if (nRet == 1)
+                {
+                    if (DoSmsCheck(sessioninfo,
+                parameters,
+                alter_type_list,
+                result) == true)
+                        return result;
+                }
+
                 // END1:
                 result.Value = nRet;
                 result.ErrorInfo = strError;
@@ -880,6 +938,216 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+        }
+
+        // return:
+        //      true    本函数返回后立即结束
+        //      false   继续
+        bool DoSmsCheck(SessionInfo sessioninfo,
+            Hashtable parameters,
+            List<string> alter_type_list,
+            LibraryServerResult result)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            // 用于构造验证码名称的 IP 地址
+            string strClientIP = sessioninfo.ClientIP;
+            if (string.IsNullOrEmpty(sessioninfo.RouterClientIP) == false)
+                strClientIP = "r:" + sessioninfo.RouterClientIP;
+
+            List<string> rest_list = null;
+            string strPhoneNumber = (string)parameters["phoneNumber"];
+            string strTempCode = (string)parameters["tempCode"];
+            if (string.IsNullOrEmpty(strTempCode) == false)
+            {
+                // 准备手机短信验证登录的第二阶段：匹配验证码
+                if (sessioninfo.Account == null)
+                {
+                    strError = "手机短信验证方式登录时，sessioninfo.Account 不应为 null";
+                    goto ERROR1;
+                }
+
+                if (string.IsNullOrEmpty(strPhoneNumber))
+                {
+                    strError = "当包含 tempCode 参数时，也要包含 phoneNumber 参数";
+                    goto ERROR1;
+                }
+
+                if (sessioninfo.Account.MatchTempPassword(app.TempCodeTable,
+                    strPhoneNumber,
+                    strClientIP,
+                    strTempCode,
+                    out strError) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = strError;
+                    result.ErrorCode = ErrorCode.TempCodeMismatch;
+                    return true;
+                }
+
+                alter_type_list.Add("sms"); // 表示验证过了
+
+                // 未处理的、和需要补做的类型
+                rest_list = GetRest(sessioninfo, alter_type_list);
+
+            }
+            else
+            {
+#if NO
+                bool bAlterSms = false;
+                if (alter_type_list != null && alter_type_list.IndexOf("sms") != -1)
+                    bAlterSms = true;
+#endif
+
+                // 未处理的、和需要补做的类型
+                rest_list = GetRest(sessioninfo, alter_type_list);
+
+#if NO
+                // 竖线间隔的手机号码列表
+                // return:
+                //      null    没有找到前缀
+                //      ""      找到了前缀，并且值部分为空
+                //      其他     返回值部分
+                string strSmsBinding = sessioninfo.Account == null ? "" : sessioninfo.Account.GetPhoneNumberBindingString();
+
+                // TODO: 如果 strSmsBinding 里面包含了 *ip，而 IP 检查已经进行过了，就可以不用要求验证码了
+
+                if ((bAlterSms == true || string.IsNullOrEmpty(strSmsBinding) == false)
+                    && string.IsNullOrEmpty(strPhoneNumber) == true)
+
+#endif
+
+                if (rest_list.Count == 1 && rest_list.IndexOf("sms") != -1
+                    && string.IsNullOrEmpty(strPhoneNumber) == true)
+                {
+                    sessioninfo.Account = null;
+                    result.Value = 0;
+                    result.ErrorInfo = "此账户当前无法用传统方式登录。可改用手机号+验证码方式登录";
+                    result.ErrorCode = ErrorCode.NeedSmsLogin;
+                    return true;
+                }
+
+                // TODO: 走到这里。如果有多种类型没有验证，只要里面有 ip 和 router_ip 就不必提示 sms 没有通过验证了。因为确实没有给 sms 验证的机会(这样也不必要，因为即便通过 sms 验证也无法通过全部验证)
+
+                if (string.IsNullOrEmpty(strPhoneNumber) == false)
+                {
+                    // 准备手机短信验证登录的第一阶段：产生验证码
+
+                    if (sessioninfo.Account == null)
+                    {
+                        strError = "手机短信验证方式登录时，sessioninfo.Account 不应为 null";
+                        goto ERROR1;
+                    }
+
+                    // 
+                    TempCode code = null;
+
+                    // return:
+                    //      -1  出错
+                    //      0   沿用以前的验证码
+                    //      1   用新的验证码
+                    int nPasswordRet = sessioninfo.Account.PrepareTempPassword(
+                        app.TempCodeTable,
+                        strClientIP,
+                        strPhoneNumber,
+                        out code,
+                        out strError);
+                    if (nPasswordRet == -1)
+                        goto ERROR1;
+
+                    if (nPasswordRet == 1)
+                    {
+                        string strMessage = "登录验证码为 " + code.Code + "。(用户 " + sessioninfo.Account.UserID + ") 十分钟以后失效";
+                        string strLibraryName = app.LibraryName;
+                        if (string.IsNullOrEmpty(strLibraryName) == false)
+                        {
+                            strMessage = "登录验证码为 " + code.Code + "。(用户 " + sessioninfo.Account.UserID + " " + strLibraryName + ") 十分钟以后失效";
+                        }
+
+                        // 通过 MSMQ 发送手机短信
+                        // parameters:
+                        //      strUserName 账户名，或者读者证件条码号，或者 "@refID:xxxx"
+                        nRet = app.SendSms(
+                            sessioninfo.Account.UserID,
+                            strPhoneNumber,
+                            strMessage,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            // 出错后，清除已经存储的验证码
+                            app.TempCodeTable.Remove(code.Key);
+                            goto ERROR1;
+                        }
+                    }
+
+                    // 返回 0 并且 ErrorCode 为 RetryLogin，表示已经发出短信，需要再次登录(携带刚收到的验证码)
+                    sessioninfo.Account = null;
+                    result.Value = 0;
+                    if (nPasswordRet == 0)
+                        result.ErrorInfo = "请使用手机 " + strPhoneNumber + " 早先收到过的短信验证码再次提交登录";
+                    else
+                        result.ErrorInfo = "验证短信已经发送给手机 " + strPhoneNumber + "。请使用收到的短信验证码再次提交登录";
+
+#if NO
+                    if (nPasswordRet == 0)
+                        result.ErrorInfo = "请使用手机号 " + strPhoneNumber + "(" + code.Code + ") 早先收到过的验证码再次提交登录";
+                    else
+                        result.ErrorInfo = "验证短信已经发送给手机号 " + strPhoneNumber + "(" + code.Code + ")。请使用收到的验证码再次提交登录";
+#endif
+
+                    result.ErrorCode = ErrorCode.RetryLogin;
+                    return true;
+                }
+            }
+
+            // 最后看看是否还有剩余的未能验证的
+            {
+                if (rest_list.Count > 0)
+                {
+                    sessioninfo.Account = null;
+                    result.Value = 0;
+                    result.ErrorInfo = "登录失败。方式 " + StringUtil.MakePathList(rest_list) + " 未通过验证";
+                    result.ErrorCode = ErrorCode.NotFound;  // TODO: 需要一个新的错误码 VerifyFail
+                    return true;
+                }
+            }
+
+            return false;
+        ERROR1:
+            result.Value = -1;
+            result.ErrorInfo = strError;
+            result.ErrorCode = ErrorCode.SystemError;
+            return true;
+        }
+
+        static List<string> GetRest(SessionInfo sessioninfo, List<string> alter_type_list)
+        {
+            // 所有绑定类型
+            List<string> types = Account.GetBindingTypes(sessioninfo.Account.Binding);
+            if (sessioninfo.RouterClientIP == null)
+                types.Remove("router_ip");
+
+            // 没有处理过的类型
+            List<string> not_process = Account.Sub(types, Account.GetProcessed(alter_type_list));
+
+            // 需要补做的类型
+            List<string> rest_list = Account.MergeBindingType(alter_type_list);
+
+            // 合并两个数组
+            rest_list.AddRange(not_process);
+            StringUtil.RemoveDupNoSort(ref rest_list);
+
+            // 对于剩下的类型，要检查是否有已经验证过的类型可以替代
+            // 从 types 列表中移走那些验证过的可以替代的类型
+            // parameters:
+            //      types   需要检查的类型
+            //      processed   已经验证过的类型
+            Account.RemoveAlterTypes(ref rest_list,
+                Account.GetMatched(alter_type_list),
+                sessioninfo.Account.Binding);
+
+            return rest_list;
         }
 
         static string CheckClientVersion(string strText)
@@ -2079,11 +2347,13 @@ namespace dp2Library
                 results = infos.ToArray();
                 result.Value = totalCount;
                 return result;
+#if NO
             ERROR1:
                 result.Value = -1;
                 result.ErrorInfo = strError;
                 result.ErrorCode = ErrorCode.SystemError;
                 return result;
+#endif
             }
             catch (Exception ex)
             {
@@ -2973,11 +3243,13 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
+#if NO
         ERROR1:
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+#endif
         }
 
         void WriteDebugInfo(string strTitle)
@@ -4570,7 +4842,7 @@ namespace dp2Library
 
 #endif
 
-            GET_OTHERINFO:
+                // GET_OTHERINFO:
 
                 // 过滤<borrower>元素
                 // XmlDocument itemdom = null;
@@ -5014,10 +5286,10 @@ namespace dp2Library
         //      strConfirmItemRecPath  册记录路径。在册条码号重复的情况下，才需要使用这个参数，平时为null即可
         //      saBorrowedItemBarcode   同一读者先前已经借阅成功的册条码号集合。用于在返回的读者html中显示出特定的颜色而已。
         //      strStyle    操作风格。"item"表示将返回册记录；"reader"表示将返回读者记录
-        //      strItemFormat   规定strItemRecord参数所返回的数据格式
-        //      strItemRecord   返回册记录
-        //      strReaderFormat 规定strReaderRecord参数所返回的数据格式
-        //      strReaderRecord 返回读者记录
+        //      strItemFormatList   规定strItemRecord参数所返回的数据格式
+        //      item_records   返回册记录
+        //      strReaderFormatList 规定strReaderRecord参数所返回的数据格式
+        //      reader_records 返回读者记录
         //      aDupPath    如果发生条码号重复，这里返回了相关册记录的路径
         // 权限：无论工作人员还是读者，首先应具备borrow或renew权限。
         //      对于读者，还需要他进行的借阅(续借)操作是针对自己的，即strReaderBarcode必须和账户信息中的证条码号一致。
@@ -8417,6 +8689,13 @@ namespace dp2Library
             }
         }
 
+        /*
+2016/11/6 9:16:39 dp2Library BatchTask() API出现异常: Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+   在 DigitalPlatform.LibraryServer.LibraryApplication.GetBatchTaskInfo(String strName, BatchTaskInfo param, BatchTaskInfo& info, String& strError)
+   在 dp2Library.LibraryService.BatchTask(String strName, String strAction, BatchTaskInfo info, BatchTaskInfo& resultInfo)
+         * */
         // 操作一个批处理任务
         public LibraryServerResult BatchTask(
             string strName,
@@ -8516,7 +8795,12 @@ namespace dp2Library
             }
             catch (Exception ex)
             {
-                string strErrorText = "dp2Library BatchTask() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "dp2Library BatchTask() API出现异常: "
+                    + ExceptionUtil.GetDebugText(ex)
+                    + string.Format("\r\nstrName='{0}', strAction='{1}', info='{2}'",
+                    strName,
+                    strAction,
+                    info == null ? "(null)" : info.Dump().Replace("\r\n", ";"));
                 app.WriteErrorLog(strErrorText);
 
                 result.Value = -1;
@@ -9060,7 +9344,6 @@ namespace dp2Library
                     return result;
                 }
 
-
                 // 权限判断
 
                 // 只能自己修改自己的密码
@@ -9178,9 +9461,7 @@ namespace dp2Library
                 }*/
                 // 2009/2/23 
                 result.ErrorInfo = strError;
-
                 result.Value = nResultValue;
-
                 return result;
             ERROR1:
                 result.Value = -1;
@@ -9199,7 +9480,6 @@ namespace dp2Library
                 return result;
             }
         }
-
 
         // 列出文件目录，转移当前目录，删除文件和目录
         // parameters:
@@ -9270,7 +9550,14 @@ namespace dp2Library
 
                 if (string.IsNullOrEmpty(strCategory) == false && strCategory[0] == '!')
                 {
+                    // TODO: 可否根据不同的权限限定不同的 root 起点?
                     string strRoot = Path.Combine(app.DataDir, "upload");
+                    if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == true)
+                    {
+                        strRoot = app.DataDir.Replace("/", "\\");  // 权力很大，能看到数据目录下的全部文件和目录了
+                        if (strRoot.EndsWith("\\") == false)
+                            strRoot += "\\";
+                    }
 
                     string strCurrentDirectory = Path.Combine(app.DataDir, strCategory.Substring(1));
 
@@ -11224,7 +11511,7 @@ namespace dp2Library
             }
         }
 
-        // 列出内核资源目录
+        // 列出内核资源目录，或列出 dp2library 本地文件和目录
         public LibraryServerResult Dir(string strResPath,
             long lStart,
             long lLength,
@@ -11252,16 +11539,79 @@ namespace dp2Library
                 }
 
                 string strError = "";
-                long lRet = channel.DoDir(
-                strResPath,
-                strLang,
-                strStyle,
-                out items,
-                out strError);
-                kernel_errorcode = channel.OriginErrorCode;
-                result.ErrorInfo = strError;
-                result.Value = lRet;
-                return result;
+
+                if (string.IsNullOrEmpty(strResPath) == false
+                    && strResPath.StartsWith("!"))
+                {
+                    // 2016/11/6
+                    // 列出本地文件目录
+                    List<FileItemInfo> infos = null;
+                    result = ListFile("list",
+                        strResPath,
+                        "", // pattern
+                        lStart,
+                        lLength,
+                        out infos);
+                    if (result.Value == -1)
+                    {
+                        return result;
+                    }
+                    List<ResInfoItem> item_list = new List<ResInfoItem>();
+                    foreach (FileItemInfo info in infos)
+                    {
+                        ResInfoItem item = new ResInfoItem();
+                        string name = info.Name.Substring(strResPath.Length - 1);
+                        // 去掉第一个字符的 \ 或者 /
+                        if (string.IsNullOrEmpty(name) == false
+                            && (name[0] == '\\' || name[0] == '/'))
+                            name = name.Substring(1);
+
+                        item.Name = name;
+                        /*
+        public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
+                        // TODO: 将此定义移动到 DigitalPlatform.rms 中
+                         * */
+                        if (info.Size == -1)
+                        {
+                            item.Type = 4;
+                            item.HasChildren = true;
+                        }
+                        else
+                        {
+                            item.Type = 5;
+                            item.HasChildren = false;
+                            item.TypeString = "size:" + info.Size.ToString();
+                        }
+
+                        item_list.Add(item);
+                    }
+                    items = item_list.ToArray();
+                    return result;
+                }
+                else
+                {
+                    if (strResPath.StartsWith(KernelServerUtil.LOCAL_PREFIX) == true
+                        && StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "不具备 managedatabase 权限，无法列出内核数据目录和文件";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+
+                    long lRet = channel.DoDir(
+                        strResPath,
+                        (int)lStart,
+                        (int)lLength,
+                        strLang,
+                        strStyle,
+                        out items,
+                        out strError);
+                    kernel_errorcode = channel.OriginErrorCode;
+                    result.ErrorInfo = strError;
+                    result.Value = lRet;
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -11273,7 +11623,6 @@ namespace dp2Library
                 result.ErrorInfo = strErrorText;
                 return result;
             }
-
         }
 
         // 获取资源
@@ -11319,6 +11668,21 @@ namespace dp2Library
                 string strError = "";
                 long lRet = 0;
 
+                /*
+2016/11/7 13:35:12 dp2Library GetRes() API出现异常: Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+   在 DigitalPlatform.rms.Client.ResPath.GetDbName(String strLongPath)
+   在 dp2Library.LibraryService.GetRes(String strResPath, Int64 nStart, Int32 nLength, String strStyle, Byte[]& baContent, String& strMetadata, String& strOutputResPath, Byte[]& baOutputTimestamp)
+                 * */
+                // 2016/11/7
+                if (string.IsNullOrEmpty(strResPath))
+                {
+                    strError = "strResPath 参数值不应为空";
+                    goto ERROR1;
+                }
+
+                // '!' 前缀表示获取 dp2library 管辖的本地文件。
                 if (string.IsNullOrEmpty(strResPath) == false
     && strResPath[0] == '!')
                 {
@@ -11338,7 +11702,6 @@ namespace dp2Library
                         out strLibraryCode,
                         out strFilePath,
                         out strError);
-
                     if (nRet == 0)
                     {
                         result.Value = -1;
@@ -11347,12 +11710,7 @@ namespace dp2Library
                         return result;
                     }
                     if (nRet == -1)
-                    {
-                        result.Value = -1;
-                        result.ErrorInfo = strError;
-                        result.ErrorCode = ErrorCode.SystemError;
-                        return result;
-                    }
+                        goto ERROR1;
 #if NO
                     if (StringUtil.IsInList("download", sessioninfo.RightsOrigin) == false)
                     {
@@ -11433,21 +11791,14 @@ namespace dp2Library
                         return result;
                     }
                     if (nRet == -1)
-                    {
-                        result.Value = -1;
-                        result.ErrorInfo = strError;
-                        result.ErrorCode = ErrorCode.SystemError;
-                        return result;
-                    }
+                        goto ERROR1;
                 }
 
                 RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                 if (channel == null)
                 {
-                    result.Value = -1;
-                    result.ErrorInfo = "get channel error";
-                    result.ErrorCode = ErrorCode.SystemError;
-                    return result;
+                    strError = "get channel error";
+                    goto ERROR1;
                 }
 
                 bool bIsReaderDb = false;
@@ -11471,10 +11822,8 @@ namespace dp2Library
                             DigitalPlatform.LibraryServer.LibraryApplication.ResPathType type = LibraryApplication.GetResPathType(strResPath);
                             if (type == DigitalPlatform.LibraryServer.LibraryApplication.ResPathType.Record || type == DigitalPlatform.LibraryServer.LibraryApplication.ResPathType.CfgFile)
                             {
-                                result.Value = -1;
-                                result.ErrorInfo = "读者身份不被允许用GetRes()来获得读者记录或数据库配置文件";
-                                result.ErrorCode = ErrorCode.SystemError;
-                                return result;
+                                strError = "读者身份不被允许用 GetRes() 来获得读者记录或数据库配置文件";
+                                goto ERROR1;
                             }
 
                             // TODO: 对于获取对象的请求，要看读者是否具有管辖的其他读者，或者好友。否则只能获取自己的读者记录的对象
@@ -11485,10 +11834,8 @@ namespace dp2Library
                         if (app.IsCurrentChangeableReaderPath(strDbName + "/?",
                 sessioninfo.LibraryCodeList) == false)
                         {
-                            result.Value = -1;
-                            result.ErrorInfo = "读者库 '" + strDbName + "' 不在当前用户管辖范围内";
-                            result.ErrorCode = ErrorCode.SystemError;
-                            return result;
+                            strError = "读者库 '" + strDbName + "' 不在当前用户管辖范围内";
+                            goto ERROR1;
                         }
                     }
                     else if (app.AmerceDbName == strDbName)
@@ -11503,15 +11850,11 @@ namespace dp2Library
                         {
                             if (bIsReader == true)
                             {
-                                result.Value = -1;
-                                result.ErrorInfo = "读者身份不被允许用GetRes()来获得违约金记录";
-                                result.ErrorCode = ErrorCode.SystemError;
-                                return result;
+                                strError = "读者身份不被允许用GetRes()来获得违约金记录";
+                                goto ERROR1;
                             }
-                            result.Value = -1;
-                            result.ErrorInfo = "不被允许用GetRes()来获得违约金记录";
-                            result.ErrorCode = ErrorCode.SystemError;
-                            return result;
+                            strError = "不被允许用GetRes()来获得违约金记录";
+                            goto ERROR1;
                         }
                     }
                 }
@@ -11639,10 +11982,7 @@ namespace dp2Library
                             if (bClearMetadata == true)
                                 strMetadata = "";
                             strError = "GetRes() API 写入日志时发生错误: " + strError;
-                            result.Value = -1;
-                            result.ErrorCode = ErrorCode.SystemError;
-                            result.ErrorInfo = strError;
-                            return result;
+                            goto ERROR1;
                         }
                     }
                 }
@@ -11650,6 +11990,11 @@ namespace dp2Library
                 if (bClearMetadata == true)
                     strMetadata = "";
 
+                return result;
+            ERROR1:
+                result.Value = -1;
+                result.ErrorInfo = strError;
+                result.ErrorCode = ErrorCode.SystemError;
                 return result;
             }
             catch (Exception ex)
@@ -13700,6 +14045,205 @@ out strError);
             catch (Exception ex)
             {
                 string strErrorText = "dp2Library HitCounter() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+
+        // parameters:
+        //		strAuthor	著者字符串
+        //		strNumber	返回号码
+        //		strError	出错信息
+        // return:
+        //		-3	需要回答问题
+        //      -2  strID验证失败
+        //      -1  出错
+        //      0   成功
+        public LibraryServerResult GetAuthorNumber(
+            string strID,   // 验证身份用的ID
+            string strAuthor,
+            bool bSelectPinyin,
+            bool bSelectEntry,
+            bool bOutputDebugInfo,
+            ref QuestionCollection questions,
+            out string strNumber,
+            out string strDebugInfo)
+        {
+            string strError = "";
+            strNumber = "";
+            strDebugInfo = "";
+
+            LibraryServerResult result = this.PrepareEnvironment("GetAuthorNumber", true,
+    true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+
+                int nStep = 0;
+
+                if (questions == null)
+                {
+                    questions = new QuestionCollection();
+                }
+
+                // TODO: 验证身份
+                StringBuilder debug_info = null;
+                // return:
+                //		-3	需要回答问题
+                //      -1  出错
+                //      0   成功
+                int nRet = app.GetNumberInternal(
+                    sessioninfo,
+                    ref nStep,
+                    strAuthor,
+                    bSelectPinyin,
+                    bSelectEntry,
+                    bOutputDebugInfo,
+                    ref questions,
+                    out strNumber,
+                    out debug_info,
+                    out strError);
+                if (debug_info != null)
+                    strDebugInfo = debug_info.ToString();
+                result.Value = nRet;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library GetAuthorNumber() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+
+        // return:
+        //      -2  strID验证失败
+        //      -1  出错
+        //      0   成功
+        public LibraryServerResult GetPinyin(
+string strID,
+string strText,
+out string strPinyinXml)
+        {
+            string strError = "";
+            strPinyinXml = "";
+
+            LibraryServerResult result = this.PrepareEnvironment("GetAuthorNumber", true,
+    true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                // return:
+                //		-3	需要回答问题
+                //      -1  出错
+                //      0   成功
+                int nRet = app.GetPinyinInternal(
+                    sessioninfo,
+                    strText,
+                    out strPinyinXml,
+                    out strError);
+                result.Value = nRet;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library GetPinyin() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+
+        }
+
+        // return:
+        //      -2  strID验证失败
+        //      -1  出错
+        //      0   成功
+        public LibraryServerResult SetPinyin(
+string strID,
+string strPinyinXml)
+        {
+            string strError = "";
+
+            LibraryServerResult result = this.PrepareEnvironment("GetAuthorNumber", true,
+true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                // return:
+                //		-3	需要回答问题
+                //      -1  出错
+                //      0   成功
+                int nRet = app.SetPinyinInternal(
+                    sessioninfo,
+                    strPinyinXml,
+                    out strError);
+                result.Value = nRet;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library SetPinyin() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+
+        // 分词
+        // return:
+        //      -2  strID验证失败
+        //      -1  出错
+        //      0   成功
+        public LibraryServerResult SplitHanzi(
+            string strID,
+            string strText,
+            out List<string> tokens)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            tokens = null;
+
+            LibraryServerResult result = this.PrepareEnvironment("GetAuthorNumber", true,
+true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                tokens = LibraryApplication.SplitText(strText);
+
+                result.Value = 0;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library SplitHanzi() API出现异常: " + ExceptionUtil.GetDebugText(ex);
                 app.WriteErrorLog(strErrorText);
 
                 result.Value = -1;

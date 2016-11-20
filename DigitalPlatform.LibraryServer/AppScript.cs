@@ -309,7 +309,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "CreateAssemblyFile() 出错 " + ex.Message;
+                strError = "CreateAssemblyFile() 出错 " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
 
@@ -480,7 +480,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数'" + "VerifyBarcode" + "'出错：" + ex.Message;
+                strError = "执行脚本函数'" + "VerifyBarcode" + "'出错：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
 
@@ -504,6 +504,9 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             strMessage = "";
             bResultValue = false;
+
+            // test 2016/10/25
+            // account.Location = null;
 
             if (this.m_strAssemblyLibraryHostError != "")
             {
@@ -568,7 +571,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数'" + "ItemCanBorrow" + "'出错：" + ex.Message;
+                strError = "执行脚本函数'" + "ItemCanBorrow" + "'出错：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
 
@@ -654,7 +657,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数'" + "ItemCanReturn" + "'出错：" + ex.Message;
+                strError = "执行脚本函数'" + "ItemCanReturn" + "'出错：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
 
@@ -771,7 +774,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数'" + "NotifyReader" + "'出错：" + ex.Message;
+                strError = "执行脚本函数'" + "NotifyReader" + "'出错：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
              * */
@@ -867,7 +870,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数'" + strFuncName + "'出错：" + ex.Message;
+                strError = "执行脚本函数'" + strFuncName + "'出错：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
 
@@ -964,7 +967,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数'" + strFuncName + "'出错：" + ex.Message;
+                strError = "执行脚本函数'" + strFuncName + "'出错：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
 
@@ -1064,7 +1067,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数'" + strFuncName + "'出错：" + ex.Message;
+                strError = "执行脚本函数'" + strFuncName + "'出错：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
 
@@ -1152,7 +1155,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数'" + strFuncName + "'出错：" + ex.Message;
+                strError = "执行脚本函数'" + strFuncName + "'出错：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
 
@@ -1242,7 +1245,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数 '" + "VerifyItem" + "' 出错：" + ex.Message;
+                strError = "执行脚本函数 '" + "VerifyItem" + "' 出错：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
         }
@@ -1309,7 +1312,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数 '" + "VerifyReader" + "' 出错：" + ex.Message;
+                strError = "执行脚本函数 '" + "VerifyReader" + "' 出错：" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
         }

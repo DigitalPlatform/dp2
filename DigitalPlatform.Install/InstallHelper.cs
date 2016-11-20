@@ -14,6 +14,7 @@ using System.Data;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Configuration.Install;
+using System.ServiceProcess;
 
 using Microsoft.Win32;
 
@@ -22,12 +23,218 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
+using System.ComponentModel;
 // using DigitalPlatform.CirculationClient;
 
 namespace DigitalPlatform.Install
 {
     public class InstallHelper
     {
+        // 1056 调用前已经启动了
+        // 1060 service 尚未安装
+        // 1062 调用前已经停止了
+        public static int GetNativeErrorCode(Exception ex0)
+        {
+            if (ex0 is InvalidOperationException)
+            {
+                InvalidOperationException ex = ex0 as InvalidOperationException;
+
+                if (ex0.InnerException != null && ex0.InnerException is Win32Exception)
+                {
+                    Win32Exception ex1 = ex0.InnerException as Win32Exception;
+                    return ex1.NativeErrorCode;
+                }
+            }
+
+            return 0;
+        }
+
+        public static int StartService(string strServiceName,
+out string strError)
+        {
+            strError = "";
+
+            ServiceController service = new ServiceController(strServiceName);
+            try
+            {
+                TimeSpan timeout = TimeSpan.FromMinutes(2);
+
+                service.Start();
+                service.WaitForStatus(ServiceControllerStatus.Running, timeout);
+            }
+            catch (Exception ex)
+            {
+                if (GetNativeErrorCode(ex) == 1060)
+                {
+                    strError = "服务不存在";
+                    return -1;
+                }
+
+                else if (GetNativeErrorCode(ex) == 1056)
+                {
+                    strError = "调用前已经启动了";
+                    return 0;
+                }
+                else
+                {
+                    strError = ExceptionUtil.GetAutoText(ex);
+                    return -1;
+                }
+            }
+
+            return 1;
+        }
+
+        public static int StopService(string strServiceName,
+            out string strError)
+        {
+            strError = "";
+
+            ServiceController service = new ServiceController(strServiceName);
+            try
+            {
+                TimeSpan timeout = TimeSpan.FromMinutes(2);
+
+                service.Stop();
+
+                service.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
+            }
+            catch (Exception ex)
+            {
+                if (GetNativeErrorCode(ex) == 1060)
+                {
+                    strError = "服务不存在";
+                    return -1;
+                }
+
+                else if (GetNativeErrorCode(ex) == 1062)
+                {
+                    strError = "调用前已经停止了";
+                    return 0;
+                }
+                else
+                {
+                    strError = ExceptionUtil.GetAutoText(ex);
+                    return -1;
+                }
+            }
+
+            return 1;
+        }
+
+        public static string GetPathOfService(string serviceName)
+        {
+            using (RegistryKey service = Registry.LocalMachine.CreateSubKey("System\\CurrentControlSet\\Services"))
+            {
+                // 2015/11/23 增加 using 部分
+                using (RegistryKey path = service.OpenSubKey(serviceName))
+                {
+                    if (path == null)
+                        return null;   // not found
+                    return (string)path.GetValue("ImagePath");
+                }
+            }
+        }
+
+        // 为 dp2library 的 library.xml 文件增配 MongoDB 相关参数。这之前要确保在 Windows 上安装了 MongoDB。
+        // parameters:
+        //      bAdd    是否添加配置？如果为 false，表示移除 MongoDB 配置
+        // return:
+        //      -1  出错
+        //      0   没有修改
+        //      1   发生了修改
+        public static int SetupMongoDB(
+            string strLibraryXmlFileName,
+            string strInstanceName,
+            bool bAdd,
+            out string strError)
+        {
+            strError = "";
+
+            if (File.Exists(strLibraryXmlFileName) == false)
+            {
+                strError = "配置文件 '" + strLibraryXmlFileName + "' 不存在，无法进行关于 MongoDB 的参数配置";
+                return -1;
+            }
+
+            XmlDocument dom = new XmlDocument();
+            dom.Load(strLibraryXmlFileName);
+
+            bool bChanged = false;
+
+            // mongoDB 元素 connectionString 和 instancePrefix 属性
+            {
+                XmlElement mongoDB = dom.DocumentElement.SelectSingleNode("mongoDB") as XmlElement;
+                if (mongoDB == null)
+                {
+                    mongoDB = dom.CreateElement("mongoDB");
+                    dom.DocumentElement.AppendChild(mongoDB);
+                    bChanged = true;
+                }
+
+                {
+                    string strOldValue = mongoDB.GetAttribute("connectionString");
+
+                    if (bAdd == true)
+                    {
+                        // 添加
+                        if (string.IsNullOrEmpty(strOldValue) == true)
+                        {
+                            string strNewValue = "mongodb://localhost";
+                            mongoDB.SetAttribute("connectionString", strNewValue);
+                            bChanged = true;
+                        }
+                    }
+                    else
+                    {
+                        // 移除
+                        if (string.IsNullOrEmpty(strOldValue) == false)
+                        {
+                            mongoDB.RemoveAttribute("connectionString");
+                            bChanged = true;
+                        }
+                    }
+                }
+
+                {
+                    string strOldValue = mongoDB.GetAttribute("instancePrefix");
+
+                    if (bAdd == true)
+                    {
+                        // 添加
+                        if (string.IsNullOrEmpty(strOldValue) == true)
+                        {
+                            string strNewValue = strInstanceName;
+                            mongoDB.SetAttribute("instancePrefix", strNewValue);
+                            bChanged = true;
+                        }
+                    }
+                    else
+                    {
+                        // 移除
+                        if (string.IsNullOrEmpty(strOldValue) == false)
+                        {
+                            mongoDB.RemoveAttribute("instancePrefix");
+                            bChanged = true;
+                        }
+                    }
+                }
+            }
+
+            if (bChanged == true)
+            {
+                // 提前备份一个原来文件，避免保存中途出错造成 0 bytes 的文件
+                string strDataDir = Path.GetDirectoryName(strLibraryXmlFileName);
+                string strBackupFileName = Path.Combine(strDataDir, "library.xml.config.save");
+                File.Copy(strLibraryXmlFileName, strBackupFileName, true);
+
+                dom.Save(strLibraryXmlFileName);
+                return 1;   // 发生了修改
+            }
+
+            return 0;   // 没有发生修改
+        }
+
         [DllImport("shlwapi.dll", SetLastError = true, EntryPoint = "#437")]
         static extern bool IsOS(int os);
 

@@ -165,7 +165,7 @@
     <Compile Include="GetDp2ResDlg.Designer.cs">
       <DependentUpon>GetDp2ResDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="CirculationLoginDlg.cs">
+    <Compile Include="LoginDialog\CirculationLoginDlg.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="KernelCfgFileDialog.cs">
@@ -200,6 +200,18 @@
     <Compile Include="LocationItemDialog.Designer.cs">
       <DependentUpon>LocationItemDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="LoginDialog\InputPhoneNumberDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoginDialog\InputPhoneNumberDialog.Designer.cs">
+      <DependentUpon>InputPhoneNumberDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LoginDialog\InputTempPasswordDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoginDialog\InputTempPasswordDialog.Designer.cs">
+      <DependentUpon>InputTempPasswordDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="ManageHelper.cs" />
     <Compile Include="ObjectViewerDialog.cs">
       <SubType>Form</SubType>
@@ -221,6 +233,11 @@
       <DependentUpon>LoanPolicyControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
@@ -313,6 +330,10 @@
       <Project>{AA6C5E6A-252B-4E2A-A883-0E4E739F8701}</Project>
       <Name>DigitalPlatform.Range</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.rms\DigitalPlatform.rms.csproj">
+      <Project>{1a7544ab-30d7-4920-928e-26925b86274d}</Project>
+      <Name>DigitalPlatform.rms</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
       <Name>DigitalPlatform.Text</Name>
@@ -331,7 +352,7 @@
       <SubType>Designer</SubType>
       <DependentUpon>BinaryResControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CirculationLoginDlg.resx">
+    <EmbeddedResource Include="LoginDialog\CirculationLoginDlg.resx">
       <DependentUpon>CirculationLoginDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -357,8 +378,18 @@
       <DependentUpon>LocationItemDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="LoginDialog\InputPhoneNumberDialog.resx">
+      <DependentUpon>InputPhoneNumberDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoginDialog\InputTempPasswordDialog.resx">
+      <DependentUpon>InputTempPasswordDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="ObjectViewerDialog.resx">
       <DependentUpon>ObjectViewerDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="ResObjectDlg.resx">
       <SubType>Designer</SubType>

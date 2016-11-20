@@ -7,6 +7,10 @@ using System.Text;
 using System.Threading;
 using System.Xml;
 using System.Data;
+using System.IO;
+using System.Diagnostics;
+using System.Web;
+using System.Runtime.Serialization;
 
 using System.Data.SqlClient;
 using System.Data.SQLite;
@@ -16,11 +20,6 @@ using MySql.Data.MySqlClient;
 
 using Oracle.ManagedDataAccess.Client;
 using Oracle.ManagedDataAccess.Types;
-
-using System.IO;
-using System.Diagnostics;
-using System.Web;
-using System.Runtime.Serialization;
 
 using DigitalPlatform;
 using DigitalPlatform.ResultSet;
@@ -32,6 +31,7 @@ using DigitalPlatform.Range;
 namespace DigitalPlatform.rms
 {
     // 数据库集合
+    // TODO: 全局 static 使用
     public class DatabaseCollection : List<Database>
     {
         public DelayTableCollection DelayTables = null;
@@ -74,7 +74,6 @@ namespace DigitalPlatform.rms
         }
 
         public KernelApplication KernelApplication = null;
-
 
         public void ActivateCommit()
         {
@@ -3007,7 +3006,7 @@ namespace DigitalPlatform.rms
             }
         }
 
-        int m_testCount = 0;
+        // int m_testCount = 0;
 
         // 写入若干 XML 记录
         public int API_WriteRecords(
@@ -3326,6 +3325,12 @@ namespace DigitalPlatform.rms
                 //------------------------------------------------
                 //分析出资源的类型
                 //---------------------------------------------------
+                if (string.IsNullOrEmpty(strResPath) == false
+                    && strResPath.StartsWith(KernelServerUtil.LOCAL_PREFIX) == true)
+                {
+                    strError = "dp2Kernel 目前不支持修改本地文件或者目录";
+                    return -6;
+                }
 
                 bool bRecordPath = IsRecordPath(strResPath);
                 if (bRecordPath == false)
@@ -4363,6 +4368,7 @@ namespace DigitalPlatform.rms
         {
             public string OriginPath = "";
 
+            public bool IsLocalPath = false;    // 是否为本地文件或目录路径? 2016/11/7
             public bool IsConfigFilePath = false;   // 是否为配置文件路径?
 
             public string DbName = "";
@@ -4407,6 +4413,13 @@ namespace DigitalPlatform.rms
 
             info.OriginPath = strResPath;
 
+            if (string.IsNullOrEmpty(strResPath) == false
+                && strResPath.StartsWith(KernelServerUtil.LOCAL_PREFIX) == true)
+            {
+                info.IsLocalPath = true;
+                return 0;
+            }
+
             bool bRecordPath = IsRecordPath(strResPath);
             if (bRecordPath == false)
             {
@@ -4434,7 +4447,7 @@ namespace DigitalPlatform.rms
                 return -5;
             }
 
-            bool bObject = false;
+            // bool bObject = false;
             string strRecordID = "";
             string strObjectID = "";
             string strXPath = "";
@@ -4447,7 +4460,7 @@ namespace DigitalPlatform.rms
             // 只到记录号层的路径
             if (strPath == "")
             {
-                bObject = false;
+                // bObject = false;
                 info.DbName = strDbName;
                 info.RecordID = strRecordID;
                 return 0;
@@ -4471,12 +4484,12 @@ namespace DigitalPlatform.rms
             if (strFirstPart == "object")
             {
                 strObjectID = strPath;
-                bObject = true;
+                // bObject = true;
             }
             else
             {
                 strXPath = strPath;
-                bObject = false;
+                // bObject = false;
             }
 
             info.DbName = strDbName;
@@ -4608,6 +4621,40 @@ namespace DigitalPlatform.rms
     out strError);
                 if (nRet < 0)
                     return nRet;
+
+                if (info.IsLocalPath == true)
+                {
+                    if (IsServerManager(user) == false)
+                    {
+                        strError = "必须是对 Server 有 management 权限的用户才能获得 " + KernelServerUtil.LOCAL_PREFIX + " 下级对象的内容";
+                        return -6;
+                    }
+                    string strPhysicalPath = Path.Combine(this.DataDir, strResPath.Substring(KernelServerUtil.LOCAL_PREFIX.Length));
+
+                    // 限制 strPhysicalPath 不要越过 this.DataDir
+                    if (PathUtil.IsChildOrEqual(strPhysicalPath, this.DataDir) == false)
+                    {
+                        strError = "路径 '" + strResPath + "' 越过许可范围";
+                        return -7;
+                    }
+
+                    lRet = GetFile(
+    strPhysicalPath,
+    lStart,
+    nLength,
+    nMaxLength,
+    strStyle,
+    out baData,
+                        // out strMetadata,
+    out baOutputTimestamp,
+    out strError);
+                    if (StringUtil.IsInList("outputpath", strStyle) == true)
+                    {
+                        strOutputResPath = strResPath;
+                    }
+                    return lRet;
+                }
+
                 if (info.IsConfigFilePath == true)
                 {
                     //当配置事项处理
@@ -4732,11 +4779,11 @@ namespace DigitalPlatform.rms
                     }
 
 #endif
-            ///////////////////////////////////
-            ///开始做事情
-            //////////////////////////////////////////
+                ///////////////////////////////////
+                ///开始做事情
+                //////////////////////////////////////////
 
-            DOGET:
+                // DOGET:
                 // 检查对数据库中记录的权限
                 string strExistRights = "";
                 bool bHasRight = user.HasRights(info.DbName + "/" + info.RecordID,
@@ -5560,7 +5607,7 @@ namespace DigitalPlatform.rms
             items = new ResInfoItem[0];
             nTotalLength = 0;
 
-            ArrayList aItem = new ArrayList();
+            List<ResInfoItem> aItem = new List<ResInfoItem>();
             strError = "";
             int nRet = 0;
             //******************加库集合加读锁******
@@ -5571,8 +5618,7 @@ namespace DigitalPlatform.rms
 #endif
             try
             {
-
-                if (strResPath == "" || strResPath == null)
+                if (string.IsNullOrEmpty(strResPath))
                 {
                     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                     // 1.取服务器下的数据库
@@ -5613,15 +5659,48 @@ namespace DigitalPlatform.rms
                         }
                     }
 
-                    // return:
-                    //		-1	出错
-                    //		0	成功
-                    nRet = this.DirCfgItem(user,
-                        strResPath,
-                        out aItem,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
+                    if (strResPath.StartsWith(KernelServerUtil.LOCAL_PREFIX))
+                    {
+                        if (IsServerManager(user) == false)
+                        {
+                            strError = "必须是对 Server 有 management 权限的用户才能列出 " + KernelServerUtil.LOCAL_PREFIX + " 下级对象";
+                            return -6;
+                        }
+                        string strPhysicalPath = Path.Combine(this.DataDir, strResPath.Substring(KernelServerUtil.LOCAL_PREFIX.Length));
+
+                        // 限制 strPhysicalPath 不要越过 this.DataDir
+                        if (PathUtil.IsChildOrEqual(strPhysicalPath, this.DataDir) == false)
+                        {
+                            strError = "路径 '" + strResPath + "' 越过许可范围";
+                            return -7;
+                        }
+
+                        // return:
+                        //      -1  出错
+                        //      其他  列出的事项总数。注意，不是 lLength 所指出的本次返回数
+                        nRet = ListFile(
+                            this.DataDir,   // TODO: 可以根据账户权限不同控制起点的不同
+                            strPhysicalPath,
+                            "",
+                            lStart,
+                            lLength,
+                            out aItem,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
+                    else
+                    {
+                        // return:
+                        //		-1	出错
+                        //		0	成功
+                        nRet = this.DirCfgItem(user,
+                            strResPath,
+                            out aItem,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
                 }
 
             }
@@ -5633,7 +5712,6 @@ namespace DigitalPlatform.rms
 				this.WriteDebugInfo("Dir()，对库集合解读锁。");
 #endif
             }
-
 
         END1:
             // 列出实际需要的项
@@ -5654,12 +5732,22 @@ namespace DigitalPlatform.rms
             items = new ResInfoItem[(int)lOutputLength];
             for (int i = 0; i < items.Length; i++)
             {
-                items[i] = (ResInfoItem)(aItem[i + (int)lStart]);
+                items[i] = aItem[i + (int)lStart];
             }
 
             return 0;
         }
 
+        bool IsServerManager(User user)
+        {
+            // 检查当前帐户是否有写权限
+            string strExistRights = "";
+            bool bHasRight = user.HasRights("",
+                ResType.Server,
+                "management",
+                out strExistRights);
+            return bHasRight;
+        }
 
         // 得到某一指定路径strPath的可以显示的下级
         // parameters:
@@ -5674,11 +5762,11 @@ namespace DigitalPlatform.rms
         //		0	成功
         private int DirCfgItem(User user,
             string strCfgItemPath,
-            out ArrayList aItem,
+            out List<ResInfoItem> aItem,
             out string strError)
         {
             strError = "";
-            aItem = new ArrayList();
+            aItem = new List<ResInfoItem>();
 
             if (this.NodeDbs == null)
             {
@@ -5695,7 +5783,7 @@ namespace DigitalPlatform.rms
 
             if (list.Count > 1)
             {
-                strError = "服务器端总配置文件不合法，检查到路径为'" + strCfgItemPath + "'对应的节点有'" + Convert.ToString(list.Count) + "'个，有且只能有一个。";
+                strError = "服务器端总配置文件不合法，检查到路径为'" + strCfgItemPath + "'对应的节点有'" + list.Count + "'个，有且只能有一个。";
                 return -1;
             }
             XmlNode node = list[0];
@@ -5710,7 +5798,6 @@ namespace DigitalPlatform.rms
                 string strTempPath = strCfgItemPath + "/" + strChildName;
                 string strExistRights;
                 bool bHasRight = false;
-
 
                 ResInfoItem resInfoItem = new ResInfoItem();
                 resInfoItem.Name = strChildName;
@@ -5747,6 +5834,190 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        // parameters:
+        //      strCurrentDirectory 当前路径。物理路径
+        // return:
+        //      -1  出错
+        //      其他  列出的事项总数。注意，不是 lLength 所指出的本次返回数
+        public static int ListFile(
+            string strRootPath,
+            string strCurrentDirectory,
+            string strPattern,
+            long lStart,
+            long lLength,
+            out List<ResInfoItem> infos,
+            out string strError)
+        {
+            strError = "";
+            infos = new List<ResInfoItem>();
+
+            int MAX_ITEMS = 100;    // 一次 API 最多返回的事项数量
+
+            try
+            {
+                FileSystemLoader loader = new FileSystemLoader(strCurrentDirectory, strPattern);
+
+                int i = 0;
+                int count = 0;
+                foreach (FileSystemInfo si in loader)
+                {
+                    // 检查文件或目录必须在根以下。防止漏洞
+                    if (PathUtil.IsChildOrEqual(si.FullName, strRootPath) == false)
+                        continue;
+
+                    // 列文件自己的特性，这个功能不需要了
+                    if (PathUtil.IsEqualEx(si.FullName, strCurrentDirectory) == true)
+                        continue;
+
+                    if (i < lStart)
+                        goto CONTINUE;
+                    if (lLength != -1 && count > lLength)
+                        goto CONTINUE;
+
+                    if (count >= MAX_ITEMS)
+                        goto CONTINUE;
+
+                    ResInfoItem info = new ResInfoItem();
+                    infos.Add(info);
+                    info.Name = si.Name;
+                    info.TypeString = "createTime:" + si.CreationTime.ToString("u");
+
+                    if (si is DirectoryInfo)
+                    {
+                        info.HasChildren = true;
+                        info.Type = 4;
+                    }
+
+                    if (si is FileInfo)
+                    {
+                        info.HasChildren = false;
+                        info.Type = 5;
+
+                        FileInfo fi = si as FileInfo;
+                        info.TypeString += ",size:" + fi.Length;
+                    }
+
+                    count++;
+
+                CONTINUE:
+                    i++;
+                }
+
+                return i;
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+        }
+
+        // 下载本地文件
+        // TODO: 限制 nMaxLength 最大值
+        // return:
+        //      -2      文件不存在
+        //		-1      出错
+        //		>= 0	成功，返回最大长度
+        public static long GetFile(
+            string strFilePath,
+            long lStart,
+            int nLength,
+            int nMaxLength,
+            string strStyle,
+            out byte[] destBuffer,
+            out byte[] outputTimestamp,
+            out string strError)
+        {
+            destBuffer = null;
+            outputTimestamp = null;
+            strError = "";
+
+            long lTotalLength = 0;
+            FileInfo file = new FileInfo(strFilePath);
+            if (file.Exists == false)
+            {
+                strError = " dp2Library 服务器不存在物理路径为 '" + strFilePath + "' 的文件";
+                return -2;
+            }
+
+            // 1.取时间戳
+            if (StringUtil.IsInList("timestamp", strStyle) == true)
+            {
+                outputTimestamp = FileUtil.GetFileTimestamp(strFilePath);
+            }
+
+#if NO
+            // 2.取元数据
+            if (StringUtil.IsInList("metadata", strStyle) == true)
+            {
+                string strMetadataFileName = DatabaseUtil.GetMetadataFileName(strFilePath);
+                if (File.Exists(strMetadataFileName) == true)
+                {
+                    strMetadata = FileUtil.File2StringE(strMetadataFileName);
+                }
+            }
+#endif
+
+#if NO
+            // 3.取range
+            if (StringUtil.IsInList("range", strStyle) == true)
+            {
+                string strRangeFileName = GetRangeFileName(strFilePath);
+                if (File.Exists(strRangeFileName) == true)
+                {
+                    string strText = FileUtil.File2StringE(strRangeFileName);
+                    string strTotalLength = "";
+                    string strRange = "";
+                    StringUtil.ParseTwoPart(strText, "|", out strRange, out strTotalLength);
+                }
+            }
+#endif
+
+            // 4.长度
+            lTotalLength = file.Length;
+
+            // 5.有data风格时,才会取数据
+            if (StringUtil.IsInList("data", strStyle) == true)
+            {
+                if (nLength == 0)  // 取0长度
+                {
+                    destBuffer = new byte[0];
+                    return lTotalLength;
+                }
+                // 检查范围是否合法
+                long lOutputLength;
+                // return:
+                //		-1  出错
+                //		0   成功
+                int nRet = ConvertUtil.GetRealLength(lStart,
+                    nLength,
+                    lTotalLength,
+                    nMaxLength,
+                    out lOutputLength,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                using (FileStream s = new FileStream(strFilePath,
+                    FileMode.Open))
+                {
+                    destBuffer = new byte[lOutputLength];
+
+                    Debug.Assert(lStart >= 0, "");
+
+                    s.Seek(lStart, SeekOrigin.Begin);
+                    s.Read(destBuffer,
+                        0,
+                        (int)lOutputLength);
+                }
+            }
+            return lTotalLength;
+        }
+
         // 列出服务器下当前帐户有显示权限的数据库
         // 线：不安全的
         // parameters:
@@ -5754,16 +6025,27 @@ namespace DigitalPlatform.rms
         public int GetDirableChildren(User user,
             string strLang,
             string strStyle,
-            out ArrayList aItem,
+            out List<ResInfoItem> aItem,
             out string strError)
         {
-            aItem = new ArrayList();
+            aItem = new List<ResInfoItem>();
             strError = "";
 
             if (this.NodeDbs == null)
             {
-                strError = "服装器配置文件不合法，未定义<dbs>元素";
+                strError = "服务器配置文件不合法，未定义<dbs>元素";
                 return -1;
+            }
+
+            // TODO: 可否增加返回一个 item，表示本地文件的根目录?
+            {
+                ResInfoItem resInfoItem = new ResInfoItem();
+                resInfoItem.HasChildren = true;
+                resInfoItem.Type = 4;   // 目录
+                resInfoItem.Name = KernelServerUtil.LOCAL_PREFIX;
+
+                resInfoItem.TypeString = "";
+                aItem.Add(resInfoItem);
             }
 
             foreach (XmlNode child in this.NodeDbs.ChildNodes)
@@ -5851,6 +6133,7 @@ namespace DigitalPlatform.rms
                 }
                 aItem.Add(resInfoItem);
             }
+
             return 0;
         }
 
@@ -6376,7 +6659,7 @@ dp2LibraryXE 版本: dp2LibraryXE, Version=1.1.5939.41661, Culture=neutral, Publ
     public class ResInfoItem
     {
         [DataMember]
-        public int Type;	// 类型,0 库，1 途径,4 cfgs,5 file
+        public int Type;	// 类型：0 库 / 1 途径 / 4 cfgs / 5 file
         [DataMember]
         public string Name;	// 库名或途径名
         [DataMember]

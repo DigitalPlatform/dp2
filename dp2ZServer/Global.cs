@@ -32,6 +32,5 @@ namespace dp2ZServer
 
             return strPath.Substring(nRet + 1).Trim();
         }
-
     }
 }

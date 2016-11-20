@@ -12,9 +12,12 @@ using System.Web;
 using System.Deployment.Application;
 using System.Diagnostics;
 using System.Threading;
+using System.Runtime.InteropServices;
 
 using Microsoft.Win32;
 using Ionic.Zip;
+
+using dp2ZServer.Install;
 
 using DigitalPlatform;
 using DigitalPlatform.IO;
@@ -27,7 +30,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
-using System.Runtime.InteropServices;
 
 namespace dp2Installer
 {
@@ -173,6 +175,7 @@ FormWindowState.Normal);
 
             Refresh_dp2kernel_MenuItems();
             Refresh_dp2library_MenuItems();
+            Refresh_dp2ZServer_MenuItems();
 
             this.BeginInvoke(new Action<object, EventArgs>(MenuItem_autoUpgrade_Click), this, new EventArgs());
         }
@@ -347,6 +350,7 @@ FormWindowState.Normal);
             }
         }
 
+#if NO
         private void button_start_Click(object sender, EventArgs e)
         {
             ServiceController service = new ServiceController("dp2LibraryService");
@@ -394,25 +398,7 @@ FormWindowState.Normal);
 
             MessageBox.Show(this, "OK");
         }
-
-        // 1056 调用前已经启动了
-        // 1060 service 尚未安装
-        // 1062 调用前已经停止了
-        static int GetNativeErrorCode(Exception ex0)
-        {
-            if (ex0 is InvalidOperationException)
-            {
-                InvalidOperationException ex = ex0 as InvalidOperationException;
-
-                if (ex0.InnerException != null && ex0.InnerException is Win32Exception)
-                {
-                    Win32Exception ex1 = ex0.InnerException as Win32Exception;
-                    return ex1.NativeErrorCode;
-                }
-            }
-
-            return 0;
-        }
+#endif
 
         private void MenuItem_exit_Click(object sender, EventArgs e)
         {
@@ -450,7 +436,7 @@ FormWindowState.Normal);
 
                 Application.DoEvents();
 
-                string strExePath = GetPathOfService("dp2LibraryService");
+                string strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
                 if (string.IsNullOrEmpty(strExePath) == true)
                 {
                     strError = "dp2library 未曾安装过";
@@ -459,7 +445,7 @@ FormWindowState.Normal);
                 strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
                 AppendString("正在停止 dp2library 服务 ...\r\n");
-                nRet = StopService("dp2LibraryService",
+                nRet = InstallHelper.StopService("dp2LibraryService",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -491,12 +477,12 @@ FormWindowState.Normal);
                 AppendString("检查序列号 ...\r\n");
 
                 // 检查和设置各个实例的序列号
-                nRet = VerifySerialNumbers(false, out strError);
+                nRet = VerifyDp2librarySerialNumbers(false, out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
                 AppendString("正在重新启动 dp2library 服务 ...\r\n");
-                nRet = StartService("dp2LibraryService",
+                nRet = InstallHelper.StartService("dp2LibraryService",
         out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -514,79 +500,6 @@ FormWindowState.Normal);
             MessageBox.Show(this, strError);
         }
 
-        static int StartService(string strServiceName,
-    out string strError)
-        {
-            strError = "";
-
-            ServiceController service = new ServiceController(strServiceName);
-            try
-            {
-                TimeSpan timeout = TimeSpan.FromMinutes(2);
-
-                service.Start();
-                service.WaitForStatus(ServiceControllerStatus.Running, timeout);
-            }
-            catch (Exception ex)
-            {
-                if (GetNativeErrorCode(ex) == 1060)
-                {
-                    strError = "服务不存在";
-                    return -1;
-                }
-
-                else if (GetNativeErrorCode(ex) == 1056)
-                {
-                    strError = "调用前已经启动了";
-                    return 0;
-                }
-                else
-                {
-                    strError = ExceptionUtil.GetAutoText(ex);
-                    return -1;
-                }
-            }
-
-            return 1;
-        }
-
-        static int StopService(string strServiceName,
-            out string strError)
-        {
-            strError = "";
-
-            ServiceController service = new ServiceController(strServiceName);
-            try
-            {
-                TimeSpan timeout = TimeSpan.FromMinutes(2);
-
-                service.Stop();
-
-                service.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
-            }
-            catch (Exception ex)
-            {
-                if (GetNativeErrorCode(ex) == 1060)
-                {
-                    strError = "服务不存在";
-                    return -1;
-                }
-
-                else if (GetNativeErrorCode(ex) == 1062)
-                {
-                    strError = "调用前已经停止了";
-                    return 0;
-                }
-                else
-                {
-                    strError = ExceptionUtil.GetAutoText(ex);
-                    return -1;
-                }
-            }
-
-            return 1;
-        }
-
         private void button_listServices_Click(object sender, EventArgs e)
         {
 #if NO
@@ -601,7 +514,7 @@ FormWindowState.Normal);
             }
 #endif
 
-            MessageBox.Show(this, GetPathOfService("dp2LibraryService"));
+            MessageBox.Show(this, InstallHelper.GetPathOfService("dp2LibraryService"));
         }
 
 #if NO
@@ -620,20 +533,6 @@ FormWindowState.Normal);
             return null;
         }
 #endif
-
-        public static string GetPathOfService(string serviceName)
-        {
-            using (RegistryKey service = Registry.LocalMachine.CreateSubKey("System\\CurrentControlSet\\Services"))
-            {
-                // 2015/11/23 增加 using 部分
-                using (RegistryKey path = service.OpenSubKey(serviceName))
-                {
-                    if (path == null)
-                        return null;   // not found
-                    return (string)path.GetValue("ImagePath");
-                }
-            }
-        }
 
         bool DetectChange(List<OpacAppInfo> infos,
             string strStyleZipFileName)
@@ -849,7 +748,7 @@ MessageBoxDefaultButton.Button2);
 
                 Application.DoEvents();
 
-                string strExePath = GetPathOfService("dp2LibraryService");
+                string strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
                 if (string.IsNullOrEmpty(strExePath) == true)
                 {
                     if (bControl == false)
@@ -869,7 +768,7 @@ MessageBoxDefaultButton.Button2);
                 {
                     AppendString("正在停止 dp2library 服务 ...\r\n");
 
-                    nRet = StopService("dp2LibraryService",
+                    nRet = InstallHelper.StopService("dp2LibraryService",
             out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -907,13 +806,14 @@ MessageBoxDefaultButton.Button2);
                 {
                     if (bInstalled == true)
                     {
+                        string strError1 = "";
                         AppendString("正在重新启动 dp2library 服务 ...\r\n");
-                        nRet = StartService("dp2LibraryService",
-        out strError);
+                        nRet = InstallHelper.StartService("dp2LibraryService",
+        out strError1);
                         if (nRet == -1)
                         {
-                            AppendString("dp2library 服务启动失败: " + strError + "\r\n");
-                            MessageBox.Show(this, strError);
+                            AppendString("dp2library 服务启动失败: " + strError1 + "\r\n");
+                            MessageBox.Show(this, strError1);
                         }
                         else
                         {
@@ -1203,7 +1103,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        // 去掉第一级路经
+        // 去掉第一级路径
         static string GetSubPath(string strPath)
         {
             int nRet = strPath.IndexOfAny(new char[] { '/', '\\' }, 0);
@@ -1407,7 +1307,7 @@ MessageBoxDefaultButton.Button2);
         // return:
         //      -1  出错
         //      其他  返回重设过的序列号个数
-        int VerifySerialNumbers(bool bDisplaySectionTitle,
+        int VerifyDp2librarySerialNumbers(bool bDisplaySectionTitle,
             out string strError)
         {
             strError = "";
@@ -1446,7 +1346,8 @@ MessageBoxDefaultButton.Button2);
                 AppendString("*** 检查实例 " + (i + 1) + " '" + strInstanceName + "' 的序列号 '" + strSerialCode + "' ...\r\n");
 
                 if (string.IsNullOrEmpty(strSerialCode) == true
-                    || strSerialCode == "community")
+                    || strSerialCode == "community"
+                    || strSerialCode == "*")
                     continue;
 
                 if ( // String.IsNullOrEmpty(strSerialCode) == true || 
@@ -1511,7 +1412,7 @@ MessageBoxDefaultButton.Button2);
             // return:
             //      -1  出错
             //      其他  返回重设过的序列号个数
-            nRet = VerifySerialNumbers(
+            nRet = VerifyDp2librarySerialNumbers(
                 true,
                 out strError);
             if (nRet == -1)
@@ -1520,11 +1421,11 @@ MessageBoxDefaultButton.Button2);
             if (nRet > 0)
             {
                 AppendString("因重设了 " + nRet + " 个序列号， 正在自动重启 dp2library 服务 ...\r\n");
-                nRet = StopService("dp2LibraryService",
+                nRet = InstallHelper.StopService("dp2LibraryService",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
-                nRet = StartService("dp2LibraryService",
+                nRet = InstallHelper.StartService("dp2LibraryService",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1552,7 +1453,7 @@ MessageBoxDefaultButton.Button2);
 
                 Application.DoEvents();
 
-                string strExePath = GetPathOfService("dp2KernelService");
+                string strExePath = InstallHelper.GetPathOfService("dp2KernelService");
                 if (string.IsNullOrEmpty(strExePath) == true)
                 {
                     strError = "dp2kernel 未曾安装过";
@@ -1561,7 +1462,7 @@ MessageBoxDefaultButton.Button2);
                 strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
                 AppendString("正在停止 dp2kernel 服务 ...\r\n");
-                nRet = StopService("dp2KernelService",
+                nRet = InstallHelper.StopService("dp2KernelService",
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1586,7 +1487,7 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
 
                 AppendString("正在重新启动 dp2kernel 服务 ...\r\n");
-                nRet = StartService("dp2KernelService",
+                nRet = InstallHelper.StartService("dp2KernelService",
         out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1691,7 +1592,7 @@ MessageBoxDefaultButton.Button2);
             string strExePath = "";
 
             // ---
-            strExePath = GetPathOfService("dp2KernelService");
+            strExePath = InstallHelper.GetPathOfService("dp2KernelService");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
                 strZipFileName = Path.Combine(this.DataDir, "kernel_app.zip");
@@ -1700,7 +1601,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             // ---
-            strExePath = GetPathOfService("dp2LibraryService");
+            strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
                 strZipFileName = Path.Combine(this.DataDir, "library_app.zip");
@@ -1730,6 +1631,18 @@ MessageBoxDefaultButton.Button2);
                     names.Add("dp2OPAC");
             }
 
+            // ---
+            strExePath = InstallHelper.GetPathOfService("dp2ZService");
+            if (string.IsNullOrEmpty(strExePath) == false)
+            {
+                strZipFileName = Path.Combine(this.DataDir, "zserver_app.zip");
+
+                // string strDataZipFileName = Path.Combine(this.DataDir, "zserver_data.zip");
+                if (DetectChange(strZipFileName) == true
+                    /*|| DetectChange(strDataZipFileName) == true*/)
+                    names.Add("dp2ZServer");
+            }
+
             if (names.Count > 0)
             {
                 DialogResult result = MessageBox.Show(this,
@@ -1748,6 +1661,8 @@ MessageBoxDefaultButton.Button1);
                         MenuItem_dp2library_upgrade_Click(this, new EventArgs());
                     else if (name == "dp2OPAC")
                         MenuItem_dp2opac_upgrade_Click(this, new EventArgs());
+                    else if (name == "dp2ZServer")
+                        MenuItem_dp2ZServer_upgrade_Click(this, new EventArgs());
                 }
             }
             else
@@ -1866,6 +1781,22 @@ MessageBoxDefaultButton.Button1);
                 return;
             }
 
+            if (strProductName == "dp2ZServer")
+            {
+                string strDataDir = "";
+                string strExePath = InstallHelper.GetPathOfService("dp2ZService");
+                if (string.IsNullOrEmpty(strExePath) == false)
+                {
+                    strExePath = StringUtil.Unquote(strExePath, "\"\"");
+                    strDataDir = Path.GetDirectoryName(strExePath);
+                    ToolStripMenuItem subItem = new ToolStripMenuItem(strDataDir);
+                    subItem.Tag = strProductName + "|" + strDataDir;
+                    subItem.Click += new EventHandler(subItem_Click);
+                    menuItem.DropDownItems.Add(subItem);
+                }
+                return;
+            }
+
             for (int i = 0; ; i++)
             {
                 string strInstanceName = "";
@@ -1885,7 +1816,6 @@ MessageBoxDefaultButton.Button1);
                 subItem.Tag = strProductName + "|" + strDataDir;
                 subItem.Click += new EventHandler(subItem_Click);
                 menuItem.DropDownItems.Add(subItem);
-
             }
 
             if (menuItem.DropDownItems.Count > 0)
@@ -1918,7 +1848,7 @@ MessageBoxDefaultButton.Button1);
 
         private void MenuItem_dp2library_openAppDir_Click(object sender, EventArgs e)
         {
-            string strExePath = GetPathOfService("dp2LibraryService");
+            string strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
                 strExePath = StringUtil.Unquote(strExePath, "\"\"");
@@ -1939,7 +1869,7 @@ MessageBoxDefaultButton.Button1);
 
         private void MenuItem_dp2kernel_openAppDir_Click(object sender, EventArgs e)
         {
-            string strExePath = GetPathOfService("dp2KernelService");
+            string strExePath = InstallHelper.GetPathOfService("dp2KernelService");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
                 strExePath = StringUtil.Unquote(strExePath, "\"\"");
@@ -2786,7 +2716,7 @@ MessageBoxDefaultButton.Button1);
             text.Append("IIS 版本号:\t" + GetIisVersion().ToString() + "\r\n");
 
             // *** dp2library
-            string strExePath = GetPathOfService("dp2LibraryService");
+            string strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
                 strExePath = StringUtil.Unquote(strExePath, "\"\"");
@@ -2823,7 +2753,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             // *** dp2kernel
-            strExePath = GetPathOfService("dp2KernelService");
+            strExePath = InstallHelper.GetPathOfService("dp2KernelService");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
                 strExePath = StringUtil.Unquote(strExePath, "\"\"");
@@ -2919,7 +2849,7 @@ MessageBoxDefaultButton.Button1);
 
                 Application.DoEvents();
 
-                string strExePath = GetPathOfService("dp2KernelService");
+                string strExePath = InstallHelper.GetPathOfService("dp2KernelService");
                 if (string.IsNullOrEmpty(strExePath) == true)
                 {
                     if (bControl == false)
@@ -2939,7 +2869,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     AppendString("正在停止 dp2kernel 服务 ...\r\n");
 
-                    nRet = StopService("dp2KernelService",
+                    nRet = InstallHelper.StopService("dp2KernelService",
             out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -2977,13 +2907,14 @@ MessageBoxDefaultButton.Button1);
 
                     if (bInstalled == true)
                     {
+                        string strError1 = "";
                         AppendString("正在重新启动 dp2kernel 服务 ...\r\n");
-                        nRet = StartService("dp2KernelService",
-        out strError);
+                        nRet = InstallHelper.StartService("dp2KernelService",
+        out strError1);
                         if (nRet == -1)
                         {
-                            AppendString("dp2kernel 服务启动失败: " + strError + "\r\n");
-                            MessageBox.Show(this, strError);
+                            AppendString("dp2kernel 服务启动失败: " + strError1 + "\r\n");
+                            MessageBox.Show(this, strError1);
                         }
                         else
                         {
@@ -3008,7 +2939,7 @@ MessageBoxDefaultButton.Button1);
         // 刷新菜单状态
         void Refresh_dp2kernel_MenuItems()
         {
-            string strExePath = GetPathOfService("dp2KernelService");
+            string strExePath = InstallHelper.GetPathOfService("dp2KernelService");
             if (string.IsNullOrEmpty(strExePath) == true)
             {
                 this.MenuItem_dp2kernel_install.Enabled = true;
@@ -3028,7 +2959,7 @@ MessageBoxDefaultButton.Button1);
         // 刷新菜单状态
         void Refresh_dp2library_MenuItems()
         {
-            string strExePath = GetPathOfService("dp2LibraryService");
+            string strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
             if (string.IsNullOrEmpty(strExePath) == true)
             {
                 this.MenuItem_dp2library_install.Enabled = true;
@@ -3042,6 +2973,25 @@ MessageBoxDefaultButton.Button1);
 
             this.MenuItem_dp2library_openDataDir.DropDownItems.Clear();
             AddMenuItem(MenuItem_dp2library_openDataDir, "dp2Library");
+        }
+
+        // 刷新菜单状态
+        void Refresh_dp2ZServer_MenuItems()
+        {
+            string strExePath = InstallHelper.GetPathOfService("dp2ZService");
+            if (string.IsNullOrEmpty(strExePath) == true)
+            {
+                this.MenuItem_dp2ZServer_install.Enabled = true;
+                this.MenuItem_dp2ZServer_upgrade.Enabled = false;
+            }
+            else
+            {
+                this.MenuItem_dp2ZServer_install.Enabled = false;
+                this.MenuItem_dp2ZServer_upgrade.Enabled = true;
+            }
+
+            this.MenuItem_dp2ZServer_openDataDir.DropDownItems.Clear();
+            AddMenuItem(MenuItem_dp2ZServer_openDataDir, "dp2ZServer");
         }
 
         // 获得 dpkernel 或 dp2library 的程序存储目录
@@ -3077,7 +3027,7 @@ MessageBoxDefaultButton.Button1);
 
                 Application.DoEvents();
 
-                string strExePath = GetPathOfService("dp2KernelService");
+                string strExePath = InstallHelper.GetPathOfService("dp2KernelService");
                 if (string.IsNullOrEmpty(strExePath) == false)
                 {
                     strError = "dp2kernel 已经安装过了，不能重复安装";
@@ -3198,7 +3148,7 @@ MessageBoxDefaultButton.Button1);
 
             Application.DoEvents();
 
-            string strExePath = GetPathOfService("dp2KernelService");
+            string strExePath = InstallHelper.GetPathOfService("dp2KernelService");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
                 strError = "dp2kernel 已经注册为 Windows Service，无法重复进行注册";
@@ -3250,7 +3200,7 @@ MessageBoxDefaultButton.Button1);
 
             Application.DoEvents();
 
-            string strExePath = GetPathOfService("dp2KernelService");
+            string strExePath = InstallHelper.GetPathOfService("dp2KernelService");
             if (string.IsNullOrEmpty(strExePath) == true)
             {
                 strError = "dp2kernel 尚未安装和注册为 Windows Service，无法进行注销";
@@ -3294,7 +3244,7 @@ MessageBoxDefaultButton.Button1);
 
             Application.DoEvents();
 
-            string strExePath = GetPathOfService("dp2KernelService");
+            string strExePath = InstallHelper.GetPathOfService("dp2KernelService");
             if (string.IsNullOrEmpty(strExePath) == true)
             {
                 strError = "dp2kernel 未曾安装过";
@@ -3305,7 +3255,7 @@ MessageBoxDefaultButton.Button1);
             AppendString("正在启动 dp2kernel 服务 ...\r\n");
             Application.DoEvents();
 
-            nRet = StartService("dp2KernelService",
+            nRet = InstallHelper.StartService("dp2KernelService",
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -3324,7 +3274,7 @@ MessageBoxDefaultButton.Button1);
 
             Application.DoEvents();
 
-            string strExePath = GetPathOfService("dp2KernelService");
+            string strExePath = InstallHelper.GetPathOfService("dp2KernelService");
             if (string.IsNullOrEmpty(strExePath) == true)
             {
                 strError = "dp2kernel 未曾安装过";
@@ -3335,7 +3285,7 @@ MessageBoxDefaultButton.Button1);
             AppendString("正在停止 dp2kernel 服务 ...\r\n");
             Application.DoEvents();
 
-            nRet = StopService("dp2KernelService",
+            nRet = InstallHelper.StopService("dp2KernelService",
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -3381,7 +3331,7 @@ out string strError)
 
                 Application.DoEvents();
 
-                string strExePath = GetPathOfService("dp2LibraryService");
+                string strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
                 if (string.IsNullOrEmpty(strExePath) == false)
                 {
                     strError = "dp2library 已经安装过了，不能重复安装";
@@ -3541,7 +3491,7 @@ out string strError)
 
             Application.DoEvents();
 
-            string strExePath = GetPathOfService("dp2LibraryService");
+            string strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
             if (string.IsNullOrEmpty(strExePath) == true)
             {
                 strError = "dp2library 未曾安装过";
@@ -3552,7 +3502,7 @@ out string strError)
             AppendString("正在启动 dp2library 服务 ...\r\n");
             Application.DoEvents();
 
-            nRet = StartService("dp2LibraryService",
+            nRet = InstallHelper.StartService("dp2LibraryService",
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -3571,7 +3521,7 @@ out string strError)
 
             Application.DoEvents();
 
-            string strExePath = GetPathOfService("dp2LibraryService");
+            string strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
             if (string.IsNullOrEmpty(strExePath) == true)
             {
                 strError = "dp2library 未曾安装过";
@@ -3582,7 +3532,7 @@ out string strError)
             AppendString("正在停止 dp2library 服务 ...\r\n");
             Application.DoEvents();
 
-            nRet = StopService("dp2LibraryService",
+            nRet = InstallHelper.StopService("dp2LibraryService",
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -3601,7 +3551,7 @@ out string strError)
 
             Application.DoEvents();
 
-            string strExePath = GetPathOfService("dp2LibraryService");
+            string strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
                 strError = "dp2library 已经注册为 Windows Service，无法重复进行注册";
@@ -3641,7 +3591,7 @@ out string strError)
 
             Application.DoEvents();
 
-            string strExePath = GetPathOfService("dp2LibraryService");
+            string strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
             if (string.IsNullOrEmpty(strExePath) == true)
             {
                 strError = "dp2library 尚未安装和注册为 Windows Service，无法进行注销";
@@ -3681,7 +3631,7 @@ out string strError)
 
                 Application.DoEvents();
 
-                string strExePath = GetPathOfService("dp2KernelService");
+                string strExePath = InstallHelper.GetPathOfService("dp2KernelService");
                 if (string.IsNullOrEmpty(strExePath) == true)
                 {
                     strError = "dp2kernel 尚未安装和注册为 Windows Service，无法进行注销";
@@ -3692,7 +3642,7 @@ out string strError)
                 {
                     AppendString("正在停止 dp2kernel 服务 ...\r\n");
 
-                    nRet = StopService("dp2KernelService",
+                    nRet = InstallHelper.StopService("dp2KernelService",
             out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4144,7 +4094,7 @@ MessageBoxDefaultButton.Button1);
             AppendString("为标记 library.xml 文件，正在停止 dp2library 服务 ...\r\n");
             Application.DoEvents();
 
-            nRet = StopService("dp2LibraryService",
+            nRet = InstallHelper.StopService("dp2LibraryService",
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
@@ -4165,7 +4115,7 @@ MessageBoxDefaultButton.Button1);
             AppendString("正在启动 dp2library 服务 ...\r\n");
             Application.DoEvents();
 
-            nRet = StartService("dp2LibraryService",
+            nRet = InstallHelper.StartService("dp2LibraryService",
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
@@ -4490,7 +4440,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                 Application.DoEvents();
 
-                string strExePath = GetPathOfService("dp2LibraryService");
+                string strExePath = InstallHelper.GetPathOfService("dp2LibraryService");
                 if (string.IsNullOrEmpty(strExePath) == true)
                 {
                     strError = "dp2library 未曾安装过";
@@ -4501,7 +4451,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 {
                     AppendString("正在停止 dp2library 服务 ...\r\n");
 
-                    nRet = StopService("dp2LibraryService",
+                    nRet = InstallHelper.StopService("dp2LibraryService",
             out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4725,7 +4675,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             string strError = "";
             int nRet = 0;
 
-            string strExePath = GetPathOfService("MongoDB");
+            string strExePath = InstallHelper.GetPathOfService("MongoDB");
             if (string.IsNullOrEmpty(strExePath) == false)
             {
                 strError = "MongoDB 已经安装过了。(位于 " + strExePath + ")";
@@ -4807,7 +4757,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
 
             {
                 AppendString("正在启动 MongoDB 服务 ...\r\n");
-                nRet = StartService("MongoDB",
+                nRet = InstallHelper.StartService("MongoDB",
     out strError);
                 if (nRet == -1)
                 {
@@ -4821,6 +4771,583 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             }
             return;
         ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 首次安装 dp2ZServer
+        private void MenuItem_dp2ZServer_install_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            this._floatingMessage.Text = "正在安装 dp2ZServer - Z39.50 服务器 ...";
+            try
+            {
+
+                AppendSectionTitle("安装 dp2ZServer 开始");
+
+                AppendString("正在获得可执行文件目录 ...\r\n");
+
+                Application.DoEvents();
+
+                string strExePath = InstallHelper.GetPathOfService("dp2ZService");
+                if (string.IsNullOrEmpty(strExePath) == false)
+                {
+                    strError = "dp2ZServer 已经安装过了，不能重复安装";
+                    goto ERROR1;
+                }
+                // strExePath = Unquote(strExePath);
+
+                // program files (x86)/digitalplatform/dp2library
+                string strProgramDir = GetProductDirectory("dp2zserver");
+
+                PathUtil.CreateDirIfNeed(strProgramDir);
+
+                string strZipFileName = Path.Combine(this.DataDir, "zserver_app.zip");
+
+                AppendString("安装可执行文件 ...\r\n");
+
+                // 更新可执行目录
+                // return:
+                //      -1  出错
+                //      0   没有必要刷新
+                //      1   已经刷新
+                nRet = RefreshBinFiles(
+                    false,
+                    strZipFileName,
+                    strProgramDir,
+                    null,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+#if NO
+                // 还需要把 zserver_data.zip 的内容都展开到程序目录的 temp 子目录中，以兼容以前的 Installer 功能
+                string strTempDir = Path.Combine(strProgramDir, "temp");
+                PathUtil.CreateDirIfNeed(strTempDir);
+                nRet = dp2Library_extractPartDir(strTempDir,
+        "cfgs,templates,other",
+        out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+#endif
+                // 展开 zserver_data.zip 到程序目录
+                string strDataZipFileName = Path.Combine(this.DataDir, "zserver_data.zip");
+                nRet = ExtractDataFile(strDataZipFileName, strProgramDir, out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 创建 dp2zserver.xml
+                {
+                    string strXmlFileName = Path.Combine(strProgramDir, "dp2zserver.xml");
+
+                    InstallZServerDlg param_dlg = new InstallZServerDlg();
+                    GuiUtil.AutoSetDefaultFont(param_dlg);
+                    // 从XML文件中装载已有的信息到对话框
+                    // return:
+                    //      -1  error
+                    //      0   not load
+                    //      1   loaded
+                    nRet = InstallZServerUtil.LoadInfoFromDp2zserverXmlFile(
+                        strXmlFileName,
+                        param_dlg,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    param_dlg.ShowDialog(this);
+                    if (param_dlg.DialogResult == DialogResult.Cancel)
+                    {
+                        strError = "安装被放弃 ...";
+                        goto ERROR1;
+                    }
+
+                    // 写入dp2zserver.xml文件
+                    // return:
+                    //      -1  error, install faild
+                    //      0   succeed
+                    nRet = InstallZServerUtil.WriteDp2zserverXmlFile(
+            param_dlg,
+            strXmlFileName,
+            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+
+                // 注册为 Windows Service
+                strExePath = Path.Combine(strProgramDir, "dp2zserver.exe");
+
+                AppendString("注册 Windows Service ...\r\n");
+
+                nRet = InstallService(strExePath,
+        true,
+        out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                AppendSectionTitle("安装 dp2ZServer 结束");
+                Refresh_dp2ZServer_MenuItems();
+            }
+            finally
+            {
+                this._floatingMessage.Text = "";
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        int ExtractDataFile(string strZipFileName,
+            string strDataDir,
+            out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                using (ZipFile zip = ZipFile.Read(strZipFileName))
+                {
+                    for (int i = 0; i < zip.Count; i++)
+                    {
+                        ZipEntry e1 = zip[i];
+
+                        string strPart = GetSubPath(e1.FileName);
+                        string strFullPath = Path.Combine(strDataDir, strPart);
+
+                        e1.FileName = strPart;
+
+                        e1.Extract(strDataDir, ExtractExistingFileAction.OverwriteSilently);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+
+            return 0;
+        }
+
+        private void MenuItem_dp2ZServer_uninstall_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            DialogResult result = MessageBox.Show(this,
+"确实要卸载 dp2ZServer?\r\n\r\n注意: 卸载后程序文件和配置文件将被删除，且不可恢复",
+"dp2Install",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;   // cancelled
+
+            this._floatingMessage.Text = "正在卸载 dp2ZServer - Z39.50 服务器 ...";
+            try
+            {
+                AppendSectionTitle("卸载 dp2ZServer 开始");
+
+                AppendString("正在获得可执行文件目录 ...\r\n");
+
+                Application.DoEvents();
+
+                string strExePath = InstallHelper.GetPathOfService("dp2ZService");
+                if (string.IsNullOrEmpty(strExePath) == true)
+                {
+                    strError = "dp2ZServer 未曾安装过";
+                    goto ERROR1;
+                }
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
+
+                {
+                    AppendString("正在停止 dp2ZServer 服务 ...\r\n");
+
+                    nRet = InstallHelper.StopService("dp2ZService",
+            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    AppendString("dp2ZServer 服务已经停止\r\n");
+                }
+
+                AppendString("注销 Windows Service 开始\r\n");
+
+                Application.DoEvents();
+
+                // 注销 Windows Service
+                nRet = InstallService(strExePath,
+        false,
+        out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                AppendString("注销 Windows Service 结束\r\n");
+
+                // 删除程序目录
+            REDO_DELETE_PROGRAMDIR:
+                try
+                {
+                    PathUtil.DeleteDirectory(Path.GetDirectoryName(strExePath));
+                }
+                catch (Exception ex)
+                {
+                    DialogResult temp_result = MessageBox.Show(this,
+    "删除程序目录 '" + Path.GetDirectoryName(strExePath) + "' 出错：" + ex.Message + "\r\n\r\n是否重试?\r\n\r\n(Retry: 重试; Cancel: 不重试，继续后续卸载过程)",
+    "卸载 dp2ZServer",
+    MessageBoxButtons.RetryCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                    if (temp_result == DialogResult.Retry)
+                        goto REDO_DELETE_PROGRAMDIR;
+                }
+
+                AppendSectionTitle("卸载 dp2ZServer 结束");
+                Refresh_dp2ZServer_MenuItems();
+            }
+            finally
+            {
+                this._floatingMessage.Text = "";
+            }
+            return;
+        ERROR1:
+            AppendString("出错: " + strError + "\r\n");
+            MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_dp2ZServer_upgrade_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            this._floatingMessage.Text = "正在升级 dp2ZServer - Z39.50 服务器 ...";
+
+            try
+            {
+                AppendSectionTitle("升级 dp2ZServer 开始");
+
+                AppendString("正在获得可执行文件目录 ...\r\n");
+
+                Application.DoEvents();
+
+                string strExePath = InstallHelper.GetPathOfService("dp2ZService");
+                if (string.IsNullOrEmpty(strExePath) == true)
+                {
+                    strError = "dp2ZServer 未曾安装过";
+                    goto ERROR1;
+                }
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
+
+                AppendString("正在停止 dp2ZServer 服务 ...\r\n");
+                nRet = InstallHelper.StopService("dp2ZService",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                AppendString("dp2ZServer 服务已经停止\r\n");
+
+                string strZipFileName = Path.Combine(this.DataDir, "zserver_app.zip");
+
+                AppendString("更新可执行文件 ...\r\n");
+
+                // 更新可执行目录
+                // return:
+                //      -1  出错
+                //      0   没有必要刷新
+                //      1   已经刷新
+                nRet = RefreshBinFiles(
+                    false,
+                    strZipFileName,
+                    Path.GetDirectoryName(strExePath),
+                    null,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                AppendString("正在重新启动 dp2ZServer 服务 ...\r\n");
+                nRet = InstallHelper.StartService("dp2ZService",
+        out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                AppendString("dp2ZServer 服务启动成功\r\n");
+
+                AppendSectionTitle("升级 dp2ZServer 结束");
+            }
+            finally
+            {
+                this._floatingMessage.Text = "";
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_dp2ZServer_openAppDir_Click(object sender, EventArgs e)
+        {
+            string strExePath = InstallHelper.GetPathOfService("dp2ZService");
+            if (string.IsNullOrEmpty(strExePath) == false)
+            {
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
+                try
+                {
+                    System.Diagnostics.Process.Start(Path.GetDirectoryName(strExePath));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+                }
+            }
+            else
+            {
+                MessageBox.Show(this, "dp2ZServer 未曾安装过");
+            }
+
+        }
+
+        private void MenuItem_dp2ZServer_startService_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            AppendString("正在获得可执行文件目录 ...\r\n");
+
+            Application.DoEvents();
+
+            string strExePath = InstallHelper.GetPathOfService("dp2ZService");
+            if (string.IsNullOrEmpty(strExePath) == true)
+            {
+                strError = "dp2ZServer 未曾安装过";
+                goto ERROR1;
+            }
+            strExePath = StringUtil.Unquote(strExePath, "\"\"");
+
+            AppendString("正在启动 dp2ZServer 服务 ...\r\n");
+            Application.DoEvents();
+
+            nRet = InstallHelper.StartService("dp2ZService",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            AppendString("dp2ZServer 服务成功启动\r\n");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+
+        }
+
+        private void MenuItem_dp2ZServer_stopService_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            AppendString("正在获得可执行文件目录 ...\r\n");
+
+            Application.DoEvents();
+
+            string strExePath = InstallHelper.GetPathOfService("dp2ZService");
+            if (string.IsNullOrEmpty(strExePath) == true)
+            {
+                strError = "dp2ZServer 未曾安装过";
+                goto ERROR1;
+            }
+            strExePath = StringUtil.Unquote(strExePath, "\"\"");
+
+            AppendString("正在停止 dp2ZServer 服务 ...\r\n");
+            Application.DoEvents();
+
+            nRet = InstallHelper.StopService("dp2ZService",
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            AppendString("dp2ZServer 服务已经停止\r\n");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_dp2ZServer_installService_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            AppendSectionTitle("注册 Windows Service 开始");
+
+            Application.DoEvents();
+
+            string strExePath = InstallHelper.GetPathOfService("dp2ZService");
+            if (string.IsNullOrEmpty(strExePath) == false)
+            {
+                strError = "dp2ZServer 已经注册为 Windows Service，无法重复进行注册";
+                goto ERROR1;
+            }
+
+            string strProgramDir = GetProductDirectory("dp2zserver");
+            strExePath = Path.Combine(strProgramDir, "dp2zserver.exe");
+
+            if (File.Exists(strExePath) == false)
+            {
+                strError = "dp2zserver.exe 尚未复制到目标位置，无法进行注册";
+                goto ERROR1;
+            }
+
+            // 注册 Windows Service
+            nRet = InstallService(strExePath,
+                true,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            AppendSectionTitle("注册 Windows Service 结束");
+
+            this.Refresh_dp2ZServer_MenuItems();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_dp2ZServer_uninstallService_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            AppendSectionTitle("注销 Windows Service 开始");
+
+            Application.DoEvents();
+
+            string strExePath = InstallHelper.GetPathOfService("dp2ZService");
+            if (string.IsNullOrEmpty(strExePath) == true)
+            {
+                strError = "dp2ZServer 尚未安装和注册为 Windows Service，无法进行注销";
+                goto ERROR1;
+            }
+            strExePath = StringUtil.Unquote(strExePath, "\"\"");
+
+            // 注销 Windows Service
+            nRet = InstallService(strExePath,
+    false,
+    out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            AppendSectionTitle("注销 Windows Service 结束");
+
+            this.Refresh_dp2ZServer_MenuItems();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_dp2ZServer_instanceManagement_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            bool bControl = Control.ModifierKeys == Keys.Control;
+            bool bInstalled = true;
+
+            this._floatingMessage.Text = "正在配置 dp2ZServer 实例 ...";
+
+            try
+            {
+                AppendSectionTitle("配置实例开始");
+
+                AppendString("正在获得可执行文件目录 ...\r\n");
+
+                Application.DoEvents();
+
+                string strExePath = InstallHelper.GetPathOfService("dp2ZService");
+                if (string.IsNullOrEmpty(strExePath) == true)
+                {
+                    if (bControl == false)
+                    {
+                        strError = "dp2ZServer 未曾安装过";
+                        goto ERROR1;
+                    }
+                    bInstalled = false;
+                }
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
+
+                if (bInstalled == true)
+                {
+                    AppendString("正在停止 dp2ZServer 服务 ...\r\n");
+
+                    nRet = InstallHelper.StopService("dp2ZService",
+            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    AppendString("dp2ZServer 服务已经停止\r\n");
+                }
+
+                try
+                {
+                    // 修改 dp2zserver.xml
+                    {
+                        string strXmlFileName = Path.Combine(Path.GetDirectoryName(strExePath), "dp2zserver.xml");
+
+                        InstallZServerDlg param_dlg = new InstallZServerDlg();
+                        GuiUtil.AutoSetDefaultFont(param_dlg);
+                        // 从XML文件中装载已有的信息到对话框
+                        // return:
+                        //      -1  error
+                        //      0   not load
+                        //      1   loaded
+                        nRet = InstallZServerUtil.LoadInfoFromDp2zserverXmlFile(
+                            strXmlFileName,
+                            param_dlg,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        param_dlg.ShowDialog(this);
+                        if (param_dlg.DialogResult == DialogResult.Cancel)
+                        {
+                            strError = "配置实例被放弃 ...";
+                            goto ERROR1;
+                        }
+
+                        // 写入dp2zserver.xml文件
+                        // return:
+                        //      -1  error, install faild
+                        //      0   succeed
+                        nRet = InstallZServerUtil.WriteDp2zserverXmlFile(
+                param_dlg,
+                strXmlFileName,
+                out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+
+                }
+                finally
+                {
+                    if (bInstalled == true)
+                    {
+                        string strError1 = "";
+                        AppendString("正在重新启动 dp2ZServer 服务 ...\r\n");
+                        nRet = InstallHelper.StartService("dp2ZService",
+        out strError1);
+                        if (nRet == -1)
+                        {
+                            AppendString("dp2ZServer 服务启动失败: " + strError1 + "\r\n");
+                            MessageBox.Show(this, strError1);
+                        }
+                        else
+                        {
+                            AppendString("dp2ZServer 服务启动成功\r\n");
+                        }
+                    }
+
+                    AppendSectionTitle("配置实例结束");
+                }
+            }
+            finally
+            {
+                this._floatingMessage.Text = "";
+            }
+            return;
+        ERROR1:
+            AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
     }

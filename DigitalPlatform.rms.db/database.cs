@@ -2684,10 +2684,10 @@ namespace DigitalPlatform.rms
         public int GetDirableChildren(User user,
             string strLang,
             string strStyle,
-            out ArrayList aItem,
+            out List<ResInfoItem> aItem,
             out string strError)
         {
-            aItem = new ArrayList();
+            aItem = new List<ResInfoItem>();
             strError = "";
 
             //**********对数据库加读锁**************

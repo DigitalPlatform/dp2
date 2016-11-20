@@ -190,8 +190,10 @@ namespace DigitalPlatform.Drawing
             objBitmap.Dispose();
             objBitmap = BitmapDest;
             return 1;	//  成功保存
+            /*
         ERROR1:
             return -1;
+             * */
         NONEED:
             return 0;
         }

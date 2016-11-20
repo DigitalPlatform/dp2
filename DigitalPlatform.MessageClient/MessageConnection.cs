@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define TIMER
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,7 +34,9 @@ namespace DigitalPlatform.MessageClient
             set;
         }
 
+#if TIMER
         System.Timers.Timer _timer = new System.Timers.Timer();
+#endif
 
         bool _exiting = false;  // 是否处在正在退出过程
 
@@ -63,8 +67,10 @@ namespace DigitalPlatform.MessageClient
 
         public virtual void Initial()
         {
+#if TIMER
             _timer.Interval = 1000 * 30;
             _timer.Elapsed += _timer_Elapsed;
+#endif
 
             if (string.IsNullOrEmpty(this.dp2MServerUrl) == false)
             {
@@ -110,7 +116,9 @@ namespace DigitalPlatform.MessageClient
 
         public virtual void Destroy()
         {
+#if TIMER
             _timer.Stop();
+#endif
             _exiting = true;
             CloseConnection();
         }
@@ -140,7 +148,7 @@ namespace DigitalPlatform.MessageClient
 
         #endregion
 
-        StreamWriter _writer = null;
+        // StreamWriter _writer = null;
 
         // 连接 server
         // 要求调用前设置好 this.ServerUrl this.UserName this.Password this.Parameters
@@ -236,8 +244,10 @@ namespace DigitalPlatform.MessageClient
                             AddErrorLine(GetExceptionText(antecendent.Exception));
                             return;
                         }
+#if TIMER
                         AddInfoLine("停止 Timer");
                         _timer.Stop();
+#endif
                         AddInfoLine("成功连接到 " + this.dp2MServerUrl);
                         // Login();
                         TriggerConnectionStateChange("Connected");
@@ -292,8 +302,10 @@ namespace DigitalPlatform.MessageClient
 
             if (_exiting == false)
             {
+#if TIMER
                 AddInfoLine("开启 Timer");
                 _timer.Start();
+#endif
             }
 
             TriggerConnectionStateChange("Closed");

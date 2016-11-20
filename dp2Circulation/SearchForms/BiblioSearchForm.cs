@@ -8912,10 +8912,10 @@ out strError);
             if (string.IsNullOrEmpty(strOldMARC) == false
                 && string.IsNullOrEmpty(strNewMARC) == false)
             {
-                string strOldImageFragment = GetImageHtmlFragment(
+                string strOldImageFragment = GetCoverImageHtmlFragment(
     info.RecPath,
     strOldMARC);
-                string strNewImageFragment = GetImageHtmlFragment(
+                string strNewImageFragment = GetCoverImageHtmlFragment(
 info.RecPath,
 strNewMARC);
 
@@ -8938,7 +8938,7 @@ strNewMARC);
             else if (string.IsNullOrEmpty(strOldMARC) == false
     && string.IsNullOrEmpty(strNewMARC) == true)
             {
-                string strImageFragment = GetImageHtmlFragment(
+                string strImageFragment = GetCoverImageHtmlFragment(
                     info.RecPath,
                     strOldMARC);
                 strHtml2 = MarcUtil.GetHtmlOfMarc(strOldMARC,
@@ -8949,7 +8949,7 @@ strNewMARC);
             else if (string.IsNullOrEmpty(strOldMARC) == true
                 && string.IsNullOrEmpty(strNewMARC) == false)
             {
-                string strImageFragment = GetImageHtmlFragment(
+                string strImageFragment = GetCoverImageHtmlFragment(
     info.RecPath,
     strNewMARC);
                 strHtml2 = MarcUtil.GetHtmlOfMarc(strNewMARC,
@@ -8960,7 +8960,43 @@ strNewMARC);
             return 0;
         }
 
-        public static string GetImageHtmlFragment(
+        public static string GetIsbnImageHtmlFragment(string strMARC,
+            string strMarcSyntax)
+        {
+            List<string> isbns = new List<string>();
+            MarcRecord record = new MarcRecord(strMARC);
+            if (strMarcSyntax == "usmarc")
+            {
+
+            }
+            else
+            {
+                // unimarc
+
+                MarcNodeList subfields = record.select("field[@name='010']/subfield[@name='a']");
+                foreach(MarcSubfield subfield in subfields)
+                {
+                    if (string.IsNullOrEmpty(subfield.Content) == false)
+                        isbns.Add(IsbnSplitter.GetISBnBarcode(subfield.Content));   // 如果必要，转换为 13 位
+                }
+            }
+
+            StringBuilder text = new StringBuilder();
+            foreach(string isbn in isbns)
+            {
+                Hashtable table = new Hashtable();
+                table["code"] = isbn;
+                table["type"] = "ean_13";
+                table["width"] = "300";
+                table["height"] = "80";
+                string path = StringUtil.BuildParameterString(table, ',','=', "url");
+                text.Append("<img src='barcode:" + path + "'></img><br/>");
+            }
+
+            return text.ToString();
+        }
+
+        public static string GetCoverImageHtmlFragment(
             string strBiblioRecPath,
             string strMARC)
         {

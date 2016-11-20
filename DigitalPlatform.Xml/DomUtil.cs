@@ -1530,9 +1530,7 @@ namespace DigitalPlatform.Xml
             string strOuterXml)
         {
             if (nodeRoot == null)
-            {
-                throw (new Exception("nodeRoot参数不能为null"));
-            }
+                throw new ArgumentException("nodeRoot 参数值不应为空", "nodeRoot");
 
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
             if (nodeFound == null)
@@ -1546,38 +1544,52 @@ namespace DigitalPlatform.Xml
                 throw (new Exception("SetElementOuterXml() CreateNode error"));
             }
 
-            XmlDocumentFragment fragment = nodeFound.OwnerDocument.CreateDocumentFragment();
-            fragment.InnerXml = strOuterXml;
+            if (string.IsNullOrEmpty(strOuterXml) == false)
+            {
+                XmlDocumentFragment fragment = nodeFound.OwnerDocument.CreateDocumentFragment();
+                fragment.InnerXml = strOuterXml;
 
-            nodeFound.ParentNode.InsertAfter(fragment, nodeFound);
+                nodeFound.ParentNode.InsertAfter(fragment, nodeFound);
 
-            nodeFound.ParentNode.RemoveChild(nodeFound);
+                nodeFound.ParentNode.RemoveChild(nodeFound);
 
-            nodeFound = nodeRoot.SelectSingleNode(strXpath);
-            return nodeFound;
+                nodeFound = nodeRoot.SelectSingleNode(strXpath);
+                return nodeFound;
+            }
+            else
+            {
+                // 2016/11/5
+                nodeFound.ParentNode.RemoveChild(nodeFound);
+                return null;
+            }
         }
 
         // 2009/10/31
-        // 写入一个元素的OuterXml
+        // 2016/11/3 允许 strOuterXml 为空。这时候的效果是删除 node 元素
+        // 写入一个元素的 OuterXml
+        // exception:
+        //      可能会因为 strOuterXml 格式不正确而抛出异常
         // return:
-        //      返回变动后该元素的XmlNode
+        //      返回变动后该元素的 XmlNode
         public static XmlNode SetElementOuterXml(XmlNode node,
             string strOuterXml)
         {
             if (node == null)
             {
-                throw (new Exception("node参数不能为null"));
+                throw new ArgumentException("node 参数值不应为空", "node");
             }
 
-            XmlDocumentFragment fragment = node.OwnerDocument.CreateDocumentFragment();
-            fragment.InnerXml = strOuterXml;
+            XmlNode new_node = null;
+            if (string.IsNullOrEmpty(strOuterXml) == false)
+            {
+                XmlDocumentFragment fragment = node.OwnerDocument.CreateDocumentFragment();
+                fragment.InnerXml = strOuterXml;
 
-            node.ParentNode.InsertAfter(fragment, node);
+                node.ParentNode.InsertAfter(fragment, node);
 
-            XmlNode new_node = node.NextSibling;    // 2012/12/12 新增加
-
+                new_node = node.NextSibling;    // 2012/12/12 新增加
+            }
             node.ParentNode.RemoveChild(node);
-
             return new_node;
         }
 

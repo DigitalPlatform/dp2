@@ -2400,10 +2400,10 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 if (string.IsNullOrEmpty(strOldMarc) == false
                     && string.IsNullOrEmpty(strNewMarc) == false)
                 {
-                    string strOldImageFragment = BiblioSearchForm.GetImageHtmlFragment(
+                    string strOldImageFragment = BiblioSearchForm.GetCoverImageHtmlFragment(
 strBiblioRecPath,
 strOldMarc);
-                    string strNewImageFragment = BiblioSearchForm.GetImageHtmlFragment(
+                    string strNewImageFragment = BiblioSearchForm.GetCoverImageHtmlFragment(
 strBiblioRecPath,
     strNewMarc);
                     // 创建展示两个 MARC 记录差异的 HTML 字符串
@@ -2425,7 +2425,7 @@ strBiblioRecPath,
                 else if (string.IsNullOrEmpty(strOldMarc) == false
         && string.IsNullOrEmpty(strNewMarc) == true)
                 {
-                    string strOldImageFragment = BiblioSearchForm.GetImageHtmlFragment(
+                    string strOldImageFragment = BiblioSearchForm.GetCoverImageHtmlFragment(
 strBiblioRecPath,
 strOldMarc);
                     if (string.IsNullOrEmpty(strNewFragmentXml) == false)
@@ -2452,9 +2452,9 @@ strOldMarc);
                 else if (string.IsNullOrEmpty(strOldMarc) == true
                     && string.IsNullOrEmpty(strNewMarc) == false)
                 {
-                    string strNewImageFragment = BiblioSearchForm.GetImageHtmlFragment(
-strBiblioRecPath,
-    strNewMarc);
+                    string strNewImageFragment = BiblioSearchForm.GetCoverImageHtmlFragment(
+                        strBiblioRecPath,
+                        strNewMarc);
                     if (string.IsNullOrEmpty(strOldFragmentXml) == false)
                     {
                         nRet = MarcDiff.DiffHtml(
@@ -2517,7 +2517,7 @@ strBiblioRecPath,
             else
             {
                 // 2015/1/3
-                string strImageFragment = BiblioSearchForm.GetImageHtmlFragment(
+                string strImageFragment = BiblioSearchForm.GetCoverImageHtmlFragment(
     strBiblioRecPath,
     strMarc);
 

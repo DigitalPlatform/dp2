@@ -39,7 +39,6 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.MessageClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -2542,6 +2541,11 @@ Stack:
                     "");
                 e.Password = this.DecryptPasssword(e.Password);
 
+                string strPhoneNumber = AppInfo.GetString(
+    "default_account",
+    "phoneNumber",
+    "");
+
                 bool bIsReader =
                     AppInfo.GetBoolean(
                     "default_account",
@@ -2572,6 +2576,10 @@ Stack:
 
                 e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
 
+                // 以手机短信验证方式登录
+                if (string.IsNullOrEmpty(strPhoneNumber) == false)
+                    e.Parameters += ",phoneNumber=" + strPhoneNumber;
+
                 if (String.IsNullOrEmpty(e.UserName) == false)
                     return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
             }
@@ -2595,7 +2603,6 @@ Stack:
                 e.Cancel = true;
                 return;
             }
-
 
             e.UserName = dlg.UserName;
             e.Password = dlg.Password;
@@ -2621,6 +2628,13 @@ Stack:
                 e.Parameters += ",testmode=true";
 
             e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
+
+            if (string.IsNullOrEmpty(dlg.TempCode) == false)
+                e.Parameters += ",tempCode=" + dlg.TempCode;
+
+            // 以手机短信验证方式登录
+            if (string.IsNullOrEmpty(dlg.PhoneNumber) == false)
+                e.Parameters += ",phoneNumber=" + dlg.PhoneNumber;
 
             e.SavePasswordLong = dlg.SavePasswordLong;
             if (e.LibraryServerUrl != dlg.ServerUrl)
@@ -4743,6 +4757,23 @@ Stack:
             }
         }
 
+        public void SetServerName(string strUrl, string strServerName)
+        {
+            string value = AppInfo.GetString("login",
+        "used_list",
+        "");
+
+            if (CirculationLoginDlg.SetServerName(ref value,
+                strUrl,
+                strServerName,
+                true) == true)
+            {
+                AppInfo.SetString("login",
+                    "used_list",
+                        value);
+            }
+        }
+
         // parameters:
         //      bLogin  是否在对话框后立即登录？如果为false，表示只是设置缺省帐户，并不直接登录
         CirculationLoginDlg SetDefaultAccount(
@@ -4821,6 +4852,13 @@ Stack:
                 "location",
                 "");
 
+            // 2016/11/11
+            if (dlg.SavePasswordShort == true || dlg.SavePasswordLong == true)
+                dlg.PhoneNumber = AppInfo.GetString(
+"default_account",
+"phoneNumber",
+"");
+
             this.AppInfo.LinkFormState(dlg,
                 "logindlg_state");
 
@@ -4828,6 +4866,21 @@ Stack:
                 && dlg.SavePasswordShort == false
                 && dlg.SavePasswordLong == false)
                 dlg.AutoShowShortSavePasswordTip = true;
+
+
+
+            if (fail_contidion == LoginFailCondition.RetryLogin)
+            {
+                dlg.ActivateTempCode();
+                dlg.RetryLogin = true;
+            }
+            if (fail_contidion == LoginFailCondition.TempCodeMismatch)
+            {
+                dlg.ActivateTempCode();
+                dlg.RetryLogin = true;  // 尝试再次登录
+            }
+            if (fail_contidion == LoginFailCondition.NeedSmsLogin)
+                dlg.ActivatePhoneNumber();
 
             dlg.ShowDialog(owner);
 
@@ -4875,12 +4928,17 @@ dlg.UsedList);
                 "location",
                 dlg.OperLocation);
 
-
             // 2006/12/30 
             AppInfo.SetString(
                 "config",
                 "circulation_server_url",
                 dlg.ServerUrl);
+
+            // 2016/11/11
+            AppInfo.SetString(
+    "default_account",
+    "phoneNumber",
+    dlg.PhoneNumber);
 
             return dlg;
         }

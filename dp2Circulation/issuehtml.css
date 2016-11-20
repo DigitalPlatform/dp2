@@ -122,3 +122,8 @@ TABLE.operationhistory TR.content TD.time
 	font-size: 6pt;
 }
 
+img.cover
+{
+    margin: 8pt;
+}
+

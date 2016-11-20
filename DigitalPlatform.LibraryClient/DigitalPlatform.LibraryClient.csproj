@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Behavior.cs" />
     <Compile Include="BiblioLoader.cs" />
     <Compile Include="BrowseLoader.cs" />
     <Compile Include="ChargingHistoryLoader.cs" />

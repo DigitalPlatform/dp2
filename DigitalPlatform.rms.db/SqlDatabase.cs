@@ -725,7 +725,7 @@ namespace DigitalPlatform.rms
                                 {
                                     command.ExecuteNonQuery();
                                 }
-                                catch (Exception ex)
+                                catch (Exception /*ex*/)
                                 {
 #if NO
                                     strError = "删除 SQL 库出错.\r\n"
@@ -11279,7 +11279,7 @@ out strError);
         // 是否为追加方式的路径?
         static bool IsAppend(string strPath)
         {
-            bool bObject = false;
+            // bool bObject = false;
             string strObjectID = "";
             string strXPath = "";
 
@@ -11290,7 +11290,7 @@ out strError);
             // 只到记录号层的路径
             if (strPath == "")
             {
-                bObject = false;
+                // bObject = false;
             }
             else
             {
@@ -11315,12 +11315,12 @@ out strError);
                 if (strFirstPart == "object")
                 {
                     strObjectID = strPath;
-                    bObject = true;
+                    // bObject = true;
                 }
                 else
                 {
                     strXPath = strPath;
-                    bObject = false;
+                    // bObject = false;
                 }
             }
 
@@ -17509,7 +17509,7 @@ bool bTempObject)
                 return -1;
             }
 
-            return 0;
+            // return 0;
         }
 
         static object GetValue(object obj)

@@ -4108,8 +4108,6 @@ namespace DigitalPlatform.rms.Client
                                 + ((lTotalCount == -1) ? "?" : Convert.ToString(lTotalCount)));
                         }
 
-
-
                         KeyInfo keyInfo = keys[i];
 
                         dlg.NewLine(keyInfo);
@@ -4130,13 +4128,11 @@ namespace DigitalPlatform.rms.Client
                         return -1;
                     goto REDO;
                 }
-
             }
 
             this.ClearRedoCount();
             return 0;
         }
-
 
         // 列目录。返回字符串数组的简化版本
         // parameters:
@@ -4177,6 +4173,7 @@ namespace DigitalPlatform.rms.Client
         }
 
         // 列资源目录
+        // 注意，此函数内部会进行循环，直到把全部事项都获取到了以后再返回。但这样可能会无限制地使用内存，需要引起注意
         public long DoDir(string strPath,
             string strLang,
             string strStyle,
@@ -4210,8 +4207,6 @@ namespace DigitalPlatform.rms.Client
                         strStyle,
                         null,
                         null);
-
-
                     for (; ; )
                     {
                         DoIdle(); // 出让控制权，避免CPU资源耗费过度
@@ -4291,6 +4286,81 @@ namespace DigitalPlatform.rms.Client
             return 0;
         }
 
+        // 2016/11/6
+        // 浅包装版本
+        public long DoDir(string strPath,
+            int nStart,
+            int nCount,
+            string strLang,
+            string strStyle,
+            out ResInfoItem[] results,
+            out string strError)
+        {
+            strError = "";
+            results = null;
+
+        REDO:
+            try
+            {
+            REDODIR:
+                IAsyncResult soapresult = this.ws.BeginDir(strPath,
+                    nStart,
+                    nCount,
+                    strLang,
+                    strStyle,
+                    null,
+                    null);
+                for (; ; )
+                {
+                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                    bool bRet = soapresult.AsyncWaitHandle.WaitOne(100, false);
+                    if (bRet == true)
+                        break;
+                }
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = ChannelErrorCode.RequestCanceled;
+                    return -1;
+                }
+                Result result = this.ws.EndDir(
+                    out results, soapresult);
+
+                if (result.Value == -1)
+                {
+                    if (result.ErrorCode == ErrorCodeValue.NotLogin
+                        && this.Container != null)
+                    {
+                        // return:
+                        //		-1	error
+                        //		0	login failed
+                        //		1	login succeed
+                        int nRet = this.UiLogin(strPath,
+                            out strError);
+                        if (nRet == -1 || nRet == 0)
+                        {
+                            return -1;
+                        }
+
+                        goto REDODIR;
+                    }
+
+                    ConvertErrorCode(result);
+                    strError = result.ErrorString;
+                    return -1;
+                }
+
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+        }
 
         // 写入资源。原始版本。2007/5/27
         public long WriteRes(string strResPath,

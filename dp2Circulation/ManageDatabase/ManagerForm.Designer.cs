@@ -59,9 +59,9 @@ namespace dp2Circulation
             this.splitContainer_opac = new System.Windows.Forms.SplitContainer();
             this.tableLayoutPanel_opac_up = new System.Windows.Forms.TableLayoutPanel();
             this.listView_opacDatabases = new DigitalPlatform.GUI.ListViewNF();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_opac_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_opac_type = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_opac_comment = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStrip_opacDatabases = new System.Windows.Forms.ToolStrip();
             this.toolStripDropDownButton_insertOpacDatabase = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStripMenuItem_insertOpacDatabase_normal = new System.Windows.Forms.ToolStripMenuItem();
@@ -207,6 +207,7 @@ namespace dp2Circulation
             this.imageList_opacDatabaseType = new System.Windows.Forms.ImageList(this.components);
             this.imageList_zhongcihao = new System.Windows.Forms.ImageList(this.components);
             this.imageList_arrangement = new System.Windows.Forms.ImageList(this.components);
+            this.columnHeader_opac_alias = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabControl_main.SuspendLayout();
             this.tabPage_databases.SuspendLayout();
             this.toolStrip_databases.SuspendLayout();
@@ -544,9 +545,10 @@ namespace dp2Circulation
             // 
             this.listView_opacDatabases.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listView_opacDatabases.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3});
+            this.columnHeader_opac_name,
+            this.columnHeader_opac_type,
+            this.columnHeader_opac_alias,
+            this.columnHeader_opac_comment});
             this.listView_opacDatabases.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_opacDatabases.FullRowSelect = true;
             this.listView_opacDatabases.HideSelection = false;
@@ -561,20 +563,20 @@ namespace dp2Circulation
             this.listView_opacDatabases.DoubleClick += new System.EventHandler(this.listView_opacDatabases_DoubleClick);
             this.listView_opacDatabases.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_opacDatabases_MouseUp);
             // 
-            // columnHeader1
+            // columnHeader_opac_name
             // 
-            this.columnHeader1.Text = "数据库名";
-            this.columnHeader1.Width = 150;
+            this.columnHeader_opac_name.Text = "数据库名";
+            this.columnHeader_opac_name.Width = 150;
             // 
-            // columnHeader2
+            // columnHeader_opac_type
             // 
-            this.columnHeader2.Text = "类型";
-            this.columnHeader2.Width = 80;
+            this.columnHeader_opac_type.Text = "类型";
+            this.columnHeader_opac_type.Width = 80;
             // 
-            // columnHeader3
+            // columnHeader_opac_comment
             // 
-            this.columnHeader3.Text = "说明";
-            this.columnHeader3.Width = 300;
+            this.columnHeader_opac_comment.Text = "说明";
+            this.columnHeader_opac_comment.Width = 300;
             // 
             // toolStrip_opacDatabases
             // 
@@ -2175,6 +2177,11 @@ namespace dp2Circulation
             this.imageList_arrangement.Images.SetKeyName(1, "database.bmp");
             this.imageList_arrangement.Images.SetKeyName(2, "error_entity.bmp");
             // 
+            // columnHeader_opac_alias
+            // 
+            this.columnHeader_opac_alias.Text = "别名";
+            this.columnHeader_opac_alias.Width = 100;
+            // 
             // ManagerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -2296,9 +2303,9 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripButton toolStripButton_refresh;
         private System.Windows.Forms.TabPage tabPage_opacDatabases;
         private DigitalPlatform.GUI.ListViewNF listView_opacDatabases;
-        private System.Windows.Forms.ColumnHeader columnHeader1;
-        private System.Windows.Forms.ColumnHeader columnHeader2;
-        private System.Windows.Forms.ColumnHeader columnHeader3;
+        private System.Windows.Forms.ColumnHeader columnHeader_opac_name;
+        private System.Windows.Forms.ColumnHeader columnHeader_opac_type;
+        private System.Windows.Forms.ColumnHeader columnHeader_opac_comment;
         private System.Windows.Forms.ToolStrip toolStrip_opacDatabases;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_insertOpacDatabase;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_insertOpacDatabase_normal;
@@ -2450,5 +2457,6 @@ namespace dp2Circulation
         private System.Windows.Forms.ColumnHeader columnHeader_location_itemBarcodeNullable;
         private System.Windows.Forms.TabPage tabPage_kernel;
         private DigitalPlatform.CirculationClient.KernelResTree kernelResTree1;
+        private System.Windows.Forms.ColumnHeader columnHeader_opac_alias;
     }
 }

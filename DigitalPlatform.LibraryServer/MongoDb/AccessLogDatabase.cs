@@ -17,7 +17,7 @@ namespace DigitalPlatform.LibraryServer
 {
     public class AccessLogDatabase
     {
-        MongoClient _mongoClient = null;
+        // MongoClient _mongoClient = null;
 
         string _logDatabaseName = "";
 

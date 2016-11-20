@@ -94,7 +94,18 @@ namespace DigitalPlatform.CirculationClient
                 levels.Insert(0, node.Text);
                 node = node.Parent;
             }
-            return StringUtil.MakePathList(levels, "/");
+
+            string result = StringUtil.MakePathList(levels, "/");
+
+            // 针对 '!/cfgs' 情况，修正为 '!cfgs'
+            if (result.StartsWith(DigitalPlatform.LibraryServer.LibraryServerUtil.LOCAL_PREFIX + "/") == true)
+                result = DigitalPlatform.LibraryServer.LibraryServerUtil.LOCAL_PREFIX + result.Substring(DigitalPlatform.LibraryServer.LibraryServerUtil.LOCAL_PREFIX.Length + 1);
+
+            // 针对 '~/cfgs' 情况，修正为 '~cfgs'
+            if (result.StartsWith(DigitalPlatform.rms.KernelServerUtil.LOCAL_PREFIX + "/") == true)
+                result = DigitalPlatform.rms.KernelServerUtil.LOCAL_PREFIX + result.Substring(DigitalPlatform.rms.KernelServerUtil.LOCAL_PREFIX.Length + 1);
+
+            return result;
         }
 
         public bool Fill(TreeNode node = null)
@@ -138,18 +149,49 @@ namespace DigitalPlatform.CirculationClient
                 channel.Timeout = new TimeSpan(0, 5, 0);
             }
 
+            bool restoreLoading = IsLoading(node);
+
             try
             {
-                DirItemLoader loader = new DirItemLoader(channel,
-                    null,
-                    GetNodePath(node),
-                    "",
-                    this.Lang);
+                string start_path = GetNodePath(node);
 
-                children.Clear();
-
-                foreach (ResInfoItem item in loader)
                 {
+                    DirItemLoader loader = new DirItemLoader(channel,
+                        null,
+                        start_path,
+                        "",
+                        this.Lang);
+
+                    children.Clear();
+
+                    foreach (ResInfoItem item in loader)
+                    {
+                        TreeNode nodeNew = new TreeNode(item.Name, item.Type, item.Type);
+
+                        nodeNew.Tag = item;
+                        if (item.HasChildren)
+                            SetLoading(nodeNew);
+
+                        if (EnabledIndices != null
+                            && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+                            nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
+
+                        if (HideIndices != null
+                            && StringUtil.IsInList(nodeNew.ImageIndex, HideIndices) == true)
+                            continue;
+
+                        children.Add(nodeNew);
+                    }
+                }
+
+                // 在根级追加 '!' 下的 dp2library 本地文件或目录
+                if (string.IsNullOrEmpty(start_path))
+                {
+                    ResInfoItem item = new ResInfoItem();
+                    item.Name = "!";
+                    item.Type = 4;
+                    item.HasChildren = true;
+
                     TreeNode nodeNew = new TreeNode(item.Name, item.Type, item.Type);
 
                     nodeNew.Tag = item;
@@ -157,17 +199,38 @@ namespace DigitalPlatform.CirculationClient
                         SetLoading(nodeNew);
 
                     if (EnabledIndices != null
-                        && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+    && StringUtil.IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
                         nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
 
                     if (HideIndices != null
                         && StringUtil.IsInList(nodeNew.ImageIndex, HideIndices) == true)
-                        continue;
-
-                    children.Add(nodeNew);
+                    {
+                    }
+                    else
+                        children.Add(nodeNew);
                 }
 
+                restoreLoading = false;  // 防止 finally 复原
                 return 0;
+            }
+            catch(ChannelException ex)
+            {
+                strError = ex.Message;
+                return -1;
+#if NO
+                if (ex.ErrorCode == ErrorCode.AccessDenied)
+                {
+                    strError = ex.Message;
+                    return -1;
+                }
+                strError = "Fill() 过程出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                return -1;
+#endif
+            }
+            catch (Exception ex)
+            {
+                strError = "Fill() 过程出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                return -1;
             }
             finally
             {
@@ -176,6 +239,13 @@ namespace DigitalPlatform.CirculationClient
                     channel.Timeout = old_timeout;
 
                     this.CallReturnChannel(channel, true);
+                }
+
+                if (restoreLoading)
+                {
+                    SetLoading(node);
+                    if (node != null)
+                        node.Collapse();
                 }
             }
         }
@@ -196,6 +266,9 @@ namespace DigitalPlatform.CirculationClient
         // 下级是否包含loading...?
         public static bool IsLoading(TreeNode node)
         {
+            if (node == null)
+                return false;
+
             if (node.Nodes.Count == 0)
                 return false;
 

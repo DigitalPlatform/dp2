@@ -121,7 +121,6 @@ namespace DigitalPlatform.Marc
         {
             StringBuilder strResult = new StringBuilder("\r\n<table class='marc'>", 4096);
 
-
             for (int i = 0; ; i++)
             {
                 string strField = "";

@@ -137,10 +137,12 @@ namespace DigitalPlatform.rms
             }
 
             return;
+            /*
         ERROR1:
             AppendResultText("RebuildKeysTask thread error : " + strError + "\r\n");
         this.App.WriteErrorLog("RebuildKeysTask thread error : " + strError + "\r\n");
             return;
+             * */
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
+using System.Diagnostics;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -133,6 +134,7 @@ namespace DigitalPlatform.CirculationClient
             database_dom.LoadXml("<root />");
 
             List<string> biblio_dbnames = new List<string>();
+            List<string> biblio_aliases = new List<string>();
 
             // 创建书目库
             {
@@ -146,6 +148,7 @@ namespace DigitalPlatform.CirculationClient
                     "unimarc",
                     true);
                 biblio_dbnames.Add("中文图书");
+                biblio_aliases.Add("cbook");
 
                 CreateBiblioDatabaseNode(database_dom,
     "中文期刊",
@@ -154,6 +157,7 @@ namespace DigitalPlatform.CirculationClient
     "unimarc",
     true);
                 biblio_dbnames.Add("中文期刊");
+                biblio_aliases.Add("cseries");
 
                 CreateBiblioDatabaseNode(database_dom,
     "西文图书",
@@ -162,6 +166,7 @@ namespace DigitalPlatform.CirculationClient
     "usmarc",
     true);
                 biblio_dbnames.Add("西文图书");
+                biblio_aliases.Add("ebook");
 
                 CreateBiblioDatabaseNode(database_dom,
     "西文期刊",
@@ -170,7 +175,7 @@ namespace DigitalPlatform.CirculationClient
     "usmarc",
     true);
                 biblio_dbnames.Add("西文期刊");
-
+                biblio_aliases.Add("eseries");
             }
 
             // 创建读者库
@@ -203,11 +208,18 @@ namespace DigitalPlatform.CirculationClient
             XmlDocument opac_dom = new XmlDocument();
             opac_dom.LoadXml("<virtualDatabases />");
 
+            Debug.Assert(biblio_aliases.Count == biblio_dbnames.Count, "");
+
+            int i = 0;
             foreach (string dbname in biblio_dbnames)
             {
+                string alias = biblio_aliases[i];
+
                 XmlElement node = opac_dom.CreateElement("database");
                 opac_dom.DocumentElement.AppendChild(node);
                 node.SetAttribute("name", dbname);
+                node.SetAttribute("alias", alias);
+                i++;
             }
 
             // 浏览格式

@@ -130,6 +130,7 @@
     </Compile>
     <Compile Include="BrowseCfg.cs" />
     <Compile Include="CfgRights.cs" />
+    <Compile Include="KernelServerUtil.cs" />
     <Compile Include="DigitalPlatform.rms.cs">
       <SubType>Code</SubType>
     </Compile>

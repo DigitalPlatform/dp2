@@ -1989,6 +1989,8 @@ namespace DigitalPlatform.LibraryServer
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
             strLocation = StringUtil.GetPureLocationString(strLocation);
 
+            string strAccessNo = DomUtil.GetElementText(itemdom.DocumentElement, "accessNo");
+
             /*
   <reservations>
         <request reader="R0000001" requestDate="Mon, 05 Sep 2016 16:57:47 +0800" operator="R0000001" /> 
@@ -2253,6 +2255,9 @@ namespace DigitalPlatform.LibraryServer
                     "itemBarcode", strItemBarcode);
                 DomUtil.SetElementText(dom.DocumentElement,
                     "location", strLocation);
+                // 2016/11/15
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "accessNo", strAccessNo);
 
                 // 2016/9/5
                 if (string.IsNullOrEmpty(strItemRefID))

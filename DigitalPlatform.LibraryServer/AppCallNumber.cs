@@ -143,8 +143,10 @@ namespace DigitalPlatform.LibraryServer
                 XmlNode node = nodes[i];
                 string strLocationName = DomUtil.GetAttr(node, "name");
 
+#if NO          // 馆藏地点名允许为空，这里需要去掉 2016/10/31
                 if (String.IsNullOrEmpty(strLocationName) == true)
                     continue;
+#endif
 
                 if (nCount > 0)
                 {
@@ -164,6 +166,12 @@ namespace DigitalPlatform.LibraryServer
     + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang>";
 
                 nCount++;
+            }
+
+            if (nCount == 0)
+            {
+                strError = "strArrangeGroupName '" + strArrangeGroupName + "' strClass '" + strClass + "' 没有匹配上任何检索目标";
+                goto ERROR1;
             }
 
             strQueryXml = "<target list='"

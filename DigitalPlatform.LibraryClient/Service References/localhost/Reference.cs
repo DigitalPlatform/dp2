@@ -449,6 +449,15 @@ namespace DigitalPlatform.LibraryClient.localhost {
         InvalidItemBarcode = 28,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        NeedSmsLogin = 29,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RetryLogin = 30,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        TempCodeMismatch = 31,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         AlreadyExist = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]

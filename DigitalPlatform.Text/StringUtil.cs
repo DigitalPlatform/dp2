@@ -17,6 +17,47 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        #region IP 地址匹配
+
+        // 匹配 ip 地址列表
+        // parameters:
+        //      strList IP 地址列表。例如 localhost|192.168.1.1|192.168.*.*
+        //      strIP   要检测的一个 IP 地址
+        public static bool MatchIpAddressList(string strList, string strIP)
+        {
+            if (strList == null)
+                return false;
+
+            string[] list = strList.Split(new char[] { '|' });
+            foreach (string pattern in list)
+            {
+                if (MatchIpAddress(pattern, strIP) == true)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool MatchIpAddress(string pattern, string ip)
+        {
+            ip = CanonicalizeIP(ip);
+            pattern = CanonicalizeIP(pattern);
+
+            if (pattern == ip)
+                return true;
+            return false;
+        }
+
+        // 正规化 IP 地址
+        public static string CanonicalizeIP(string ip)
+        {
+            if (ip == "::1" || ip == "127.0.0.1")
+                return "localhost";
+            return ip;
+        }
+
+        #endregion
+
         public static string GetMd5(string strText)
         {
             MD5 hasher = MD5.Create();
@@ -1987,6 +2028,10 @@ string strTimestamp)
         // 构造路径列表字符串，逗号分隔
         public static string MakePathList(List<string> aPath)
         {
+            // 2016/11/9
+            if (aPath == null)
+                return "";
+
             // 2012/9/7
             if (aPath.Count == 0)
                 return "";

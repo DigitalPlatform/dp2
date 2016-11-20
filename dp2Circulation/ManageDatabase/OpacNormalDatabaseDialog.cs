@@ -79,5 +79,18 @@ namespace dp2Circulation
                 this.textBox_databaseName.Text = value;
             }
         }
+
+        // 允许输入多个别名，逗号间隔
+        public string DatabaseAlias
+        {
+            get
+            {
+                return this.textBox_databaseAlias.Text;
+            }
+            set
+            {
+                this.textBox_databaseAlias.Text = value;
+            }
+        }
     }
 }

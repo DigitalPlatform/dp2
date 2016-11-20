@@ -22,6 +22,7 @@ using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using System.Text.RegularExpressions;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -4970,6 +4971,14 @@ out strError);
                     strError = "strBindID 参数值 '" + strBindingID + "' 不合法。应为 xxxx:xxxx 形态";
                     return -1;
                 }
+
+                // 2016/11/17
+                strLeft = strLeft.ToLower();
+                if (strLeft == "ip" || strLeft == "router_ip" || strLeft == "sms")
+                {
+                    strError = "strBindID 参数值 '" + strBindingID + "' 不合法。冒号左边的名称部分不能使用 '"+strLeft+"'，因为这是系统保留的绑定方式";
+                    return -1;
+                }
             }
 
             // 绑定工作人员账户
@@ -5437,12 +5446,39 @@ out strError);
                 string strLine = s.Trim();
                 if (string.IsNullOrEmpty(strLine))
                     continue;
-                if (strLine == strBinding)
+                if (MatchBindingString(strLine, strBinding) == true)
                     continue;   // 忽视发现的号码
+
+                // 2016/11/14
+                if (string.IsNullOrEmpty(strBinding) == false && strBinding[0]=='@')
+                {
+                    if (StringUtil.RegexCompare(strBinding.Substring(1),
+    RegexOptions.None,
+    strLine) == true)
+                        continue;
+                }
+
                 results.Add(strLine);
             }
 
             return StringUtil.MakePathList(results);
+        }
+
+        // strText -- weixinid:12345678@单位名称
+        // strPattern -- weixinid:12345678@*
+        static bool MatchBindingString(string strText, string strPattern)
+        {
+            if (strText == strPattern)
+                return true;
+
+            if (string.IsNullOrEmpty(strPattern) == false && strPattern.EndsWith("*"))
+            {
+                string head = strPattern.Substring(0, strPattern.Length - 1);
+                if (strText.StartsWith(head))
+                    return true;
+            }
+
+            return false;
         }
 
     }

@@ -2575,7 +2575,7 @@ out strError);
                 + StringUtil.GetXmlStringSimple(strItemDbName + ":" + strFrom)       // 2007/9/14
                 + "'><item><word>"
                 + strWord
-                + "</word><match>"+strMatchStyle+"</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
+                + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
             long lRet = channel.DoSearch(strQueryXml,
                 this.DefaultResultsetName,
                 "", // strOuputStyle
@@ -2854,6 +2854,7 @@ out strError);
         // parameters:
         //      strStyle    return_record_xml 要在DeleteEntityInfo结构中返回OldRecord内容
         //                  check_circulation_info 检查是否具有流通信息。如果具有则会报错 2012/12/19 把缺省行为变为此参数
+        //                  当包含 limit: 时，定义最多取得记录的个数。例如希望最多取得 10 条，可以定义 limit:10
         // return:
         //      -1  error
         //      0   not exist item dbname
@@ -2861,6 +2862,8 @@ out strError);
         public int SearchChildItems(RmsChannel channel,
             string strBiblioRecPath,
             string strStyle,
+            DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord procCheckRecord,
+            object param,
             out long lHitCount,
             out List<DeleteEntityInfo> entityinfos,
             out string strError)
@@ -2874,6 +2877,8 @@ out strError);
             bool bReturnRecordXml = StringUtil.IsInList("return_record_xml", strStyle);
             bool bCheckCirculationInfo = StringUtil.IsInList("check_circulation_info", strStyle);
             bool bOnlyGetCount = StringUtil.IsInList("only_getcount", strStyle);
+
+            string strLimit = StringUtil.GetParameterByPrefix(strStyle, "limit", ":");
 
             string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
             string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
@@ -2924,10 +2929,21 @@ out strError);
                 goto ERROR1;
             }
 
+            string strColumnStyle = "id,xml,timestamp";
+
+            int nLimit = -1;
+            if (string.IsNullOrEmpty(strLimit) == false)
+                Int32.TryParse(strLimit, out nLimit);
+
             int nStart = 0;
             int nPerCount = 100;
+
+            if (nLimit != -1 && nPerCount > nLimit)
+                nPerCount = nLimit;
+
             for (; ; )
             {
+#if NO
                 List<string> aPath = null;
                 lRet = channel.DoGetSearchResult(
                     "entities",
@@ -2945,43 +2961,67 @@ out strError);
                     strError = "aPath.Count == 0";
                     goto ERROR1;
                 }
+#endif
+                Record[] searchresults = null;
+                lRet = channel.DoGetSearchResult(
+    "entities",
+    nStart,
+    nPerCount,
+    strColumnStyle,
+    "zh",
+    null,
+    out searchresults,
+    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+                if (searchresults == null)
+                {
+                    strError = "searchresults == null";
+                    goto ERROR1;
+                }
+                if (searchresults.Length == 0)
+                {
+                    strError = "searchresults.Length == 0";
+                    goto ERROR1;
+                }
 
                 // 获得每条记录
-                for (int i = 0; i < aPath.Count; i++)
+                // for (int i = 0; i < aPath.Count; i++)
+                int i = 0;
+                foreach (Record record in searchresults)
                 {
                     string strMetaData = "";
                     string strXml = "";
                     byte[] timestamp = null;
                     string strOutputPath = "";
 
-                    // TODO: 这里需要改造为直接从结果集中获取 xml,timestamp
-                    lRet = channel.GetRes(aPath[i],
-                        out strXml,
-                        out strMetaData,
-                        out timestamp,
-                        out strOutputPath,
-                        out strError);
                     DeleteEntityInfo entityinfo = new DeleteEntityInfo();
 
-                    if (lRet == -1)
+                    if (record.RecordBody == null || string.IsNullOrEmpty(record.RecordBody.Xml) == true)
                     {
-                        /*
-                        entityinfo.RecPath = aPath[i];
-                        entityinfo.ErrorCode = channel.OriginErrorCode;
-                        entityinfo.ErrorInfo = channel.ErrorInfo;
+                        // TODO: 这里需要改造为直接从结果集中获取 xml,timestamp
+                        lRet = channel.GetRes(record.Path,
+                            out strXml,
+                            out strMetaData,
+                            out timestamp,
+                            out strOutputPath,
+                            out strError);
 
-                        entityinfo.OldRecord = "";
-                        entityinfo.OldTimestamp = null;
-                        entityinfo.NewRecord = "";
-                        entityinfo.NewTimestamp = null;
-                        entityinfo.Action = "";
-                         * */
-                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
-                            continue;
+                        if (lRet == -1)
+                        {
+                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                                continue;
 
-                        strError = "获取" + this.ItemName + "记录 '" + aPath[i] + "' 时发生错误: " + strError;
-                        goto ERROR1;
-                        // goto CONTINUE;
+                            strError = "获取" + this.ItemName + "记录 '" + record.Path + "' 时发生错误: " + strError;
+                            goto ERROR1;
+                            // goto CONTINUE;
+                        }
+                    }
+                    else
+                    {
+                        strXml = record.RecordBody.Xml;
+                        strOutputPath = record.Path;
+                        timestamp = record.RecordBody.Timestamp;
                     }
 
                     entityinfo.RecPath = strOutputPath;
@@ -2989,7 +3029,8 @@ out strError);
                     if (bReturnRecordXml == true)
                         entityinfo.OldRecord = strXml;
 
-                    if (bCheckCirculationInfo == true)
+                    if (bCheckCirculationInfo == true
+                        || procCheckRecord != null)
                     {
                         // 检查是否有借阅信息
                         // 把记录装入DOM
@@ -3001,8 +3042,22 @@ out strError);
                         }
                         catch (Exception ex)
                         {
-                            strError = this.ItemName + "记录 '" + aPath[i] + "' 装载进入DOM时发生错误: " + ex.Message;
+                            strError = this.ItemName + "记录 '" + record.Path + "' 装载进入DOM时发生错误: " + ex.Message;
                             goto ERROR1;
+                        }
+
+                        // 2016/11/15
+                        if (procCheckRecord != null)
+                        {
+                            nRet = procCheckRecord(
+                                nStart + i,
+                                strOutputPath,
+                                domExist,
+                                timestamp,
+                                param,
+                                out strError);
+                            if (nRet != 0)
+                                return nRet;
                         }
 
                         /*
@@ -3025,15 +3080,18 @@ out strError);
                             strError = "拟删除的" + this.ItemName + "记录 '" + entityinfo.RecPath + "' 中" + strError + "(此种情况可能不限于这一条)，不能删除。因此全部删除操作均被放弃。";
                             goto ERROR1;
                         }
-
                     }
 
                     // CONTINUE:
                     entityinfos.Add(entityinfo);
+
+                    i++;
                 }
 
-                nStart += aPath.Count;
+                nStart += searchresults.Length;
                 if (nStart >= nResultCount)
+                    break;
+                if (nLimit != -1 && nStart >= nLimit)
                     break;
             }
 
@@ -3435,6 +3493,8 @@ out strError);
             int nRet = SearchChildItems(channel,
                 strBiblioRecPath,
                 "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
+                (DigitalPlatform.LibraryServer.LibraryApplication.Delegate_checkRecord)null,
+                null,
                 out lHitCount,
                 out entityinfos,
                 out strError);

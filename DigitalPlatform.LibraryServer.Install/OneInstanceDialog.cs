@@ -908,7 +908,8 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
             if (string.IsNullOrEmpty(strSerialCode) == true
-                || strSerialCode == "community")
+                || strSerialCode == "community"
+                || strSerialCode == "*")
             {
                 // MessageBox.Show(this, "序列号为空，将按照最多 5 个前端方式运行");
                 this.LineInfo.SerialNumber = strSerialCode;
@@ -1191,5 +1192,51 @@ MessageBoxDefaultButton.Button1);
 #endif
         }
 
+        private void button_configMongoDB_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            int nRet = ConfigMongoDB(
+                Control.ModifierKeys == Keys.Control ? false : true,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // 重新启动一次 dp2library? 没有必要，因为整个实例对话框进入以前，dp2library 已经暂停了。对话框退出后会重新启动。
+
+            MessageBox.Show(this, "配置成功");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+
+        }
+
+        int ConfigMongoDB(bool bAdd,
+    out string strError)
+        {
+            strError = "";
+
+            string strDataDir = this.textBox_dataDir.Text;
+            string strInstanceName = this.textBox_instanceName.Text;
+
+            if (string.IsNullOrEmpty(strDataDir))
+            {
+                strError = "尚未指定数据目录";
+                return -1;
+            }
+
+            string strLibraryXmlFileName = Path.Combine(strDataDir, "library.xml");
+            if (File.Exists(strLibraryXmlFileName) == false)
+            {
+                strError = "配置文件 '" + strLibraryXmlFileName + "' 不存在，无法进行进一步配置";
+                return -1;
+            }
+
+            return InstallHelper.SetupMongoDB(
+                strLibraryXmlFileName,
+                strInstanceName,
+                bAdd,
+                out strError);
+        }
     }
 }

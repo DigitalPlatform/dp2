@@ -110,6 +110,20 @@ ref sessioninfo) == false)
 
         if (String.IsNullOrEmpty(strDataFileName) == true)
             strDataFileName = "browse.xml";
+        else
+        {
+            // 要对这个字符串进行检查，以防被攻击 2016/10/30
+            if (PathUtil.IsPureFileName(strDataFileName) == false)
+            {
+                string strError = "datafile 参数值 '" + strDataFileName + "' 不合法";
+                this.app.WriteErrorLog(strError);
+                this.Response.ContentType = "text/plain";
+                this.Response.StatusCode = 500;
+                this.Response.Write(strError);
+                this.Response.End();
+                return;
+            }
+        }
 
         string strAction = this.Request["action"];
         if (strAction == null)
@@ -226,7 +240,7 @@ ref sessioninfo) == false)
 
     static bool IsParentPath(string strShortPath, string strLongPath)
     {
-        string[] parts1 = strShortPath.Split(new char[] {'_'});
+        string[] parts1 = strShortPath.Split(new char[] { '_' });
         string[] parts2 = strLongPath.Split(new char[] { '_' });
 
         if (parts1.Length >= parts2.Length)
@@ -313,13 +327,13 @@ ref sessioninfo) == false)
 
         string strFormatParam = "";
 
-            if (string.IsNullOrEmpty(this.BrowseSearchResultControl1.CurrentFormat) == false)
-                strFormatParam = "&format=" + HttpUtility.UrlEncode(this.BrowseSearchResultControl1.CurrentFormat);
-            else if (string.IsNullOrEmpty(this.BrowseSearchResultControl1.FormatName) == false)
-                strFormatParam = "&format=" + HttpUtility.UrlEncode(this.BrowseSearchResultControl1.FormatName);
+        if (string.IsNullOrEmpty(this.BrowseSearchResultControl1.CurrentFormat) == false)
+            strFormatParam = "&format=" + HttpUtility.UrlEncode(this.BrowseSearchResultControl1.CurrentFormat);
+        else if (string.IsNullOrEmpty(this.BrowseSearchResultControl1.FormatName) == false)
+            strFormatParam = "&format=" + HttpUtility.UrlEncode(this.BrowseSearchResultControl1.FormatName);
 
 
-        e.Url = "./browse.aspx?datafile="+HttpUtility.UrlEncode(strDataFile)+ strSideBarParam + "&node=" + strNodePath + strFormatParam;
+        e.Url = "./browse.aspx?datafile=" + HttpUtility.UrlEncode(strDataFile) + strSideBarParam + "&node=" + strNodePath + strFormatParam;
 
         if (e.Node == e.Node.OwnerDocument.DocumentElement
             || IsParentPath(strNodePath, this.SelectingNodePath) == true)
@@ -492,7 +506,7 @@ ref sessioninfo) == false)
                     this.BrowseSearchResultControl1.ResultCount = (int)lHitCount;
                     this.BrowseSearchResultControl1.StartIndex = 0;
                     this.CreateRssLink(strPureCaption, strRssNavigateUrl);
-                    this.Page.Title = strPureCaption; 
+                    this.Page.Title = strPureCaption;
                     // this.SelectedNodeCaption = strPureCaption + "(" + lHitCount.ToString() + ")";
                     this.TreeView1.SelectedNodePath = strNodePath;
                     return;
@@ -564,7 +578,7 @@ ref sessioninfo) == false)
         if (string.IsNullOrEmpty(strRssNavigateUrl) == true)
             return;
 
-        this.BrowseSearchResultControl1.Title = "<div class='resulttitle'><div class='text'>" + strTitle + "</div>" + "<div class='rss'><a class='rss' href='" + strRssNavigateUrl + "' title='RSS订阅'><img src='"+MyWebPage.GetStylePath(app, "rss.gif") + "'></img></a></div><div class='clear'></div>" + "</div>";
+        this.BrowseSearchResultControl1.Title = "<div class='resulttitle'><div class='text'>" + strTitle + "</div>" + "<div class='rss'><a class='rss' href='" + strRssNavigateUrl + "' title='RSS订阅'><img src='" + MyWebPage.GetStylePath(app, "rss.gif") + "'></img></a></div><div class='clear'></div>" + "</div>";
 
         HtmlLink link = new HtmlLink();
         link.Href = strRssNavigateUrl;
@@ -636,7 +650,7 @@ ref sessioninfo) == false)
         this.SetErrorInfo("刷新成功。共创建了" + nRet.ToString() + "  个新队列事项");
 
         // this.SelectedNodeCaption = "";
-        
+
         // app.ClearBrowseNodeCount(strDataFileName, strNodePath);
 
         {

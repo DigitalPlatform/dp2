@@ -1856,7 +1856,7 @@ http://github.com/digitalplatform/dp2"
             if (string.IsNullOrEmpty(this._floatingMessage.Text) == false)
                 this._floatingMessage.Text = "正在创建基本数据库，可能需要几分钟时间 ...";
 
-            // 创建缺省的几个数据库
+            // 创建默认的几个数据库
             nRet = CreateDefaultDatabases(out strError);
             if (nRet == -1)
             {
@@ -4944,6 +4944,142 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        private void MenuItem_configLibraryXmlMongoDB_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            string strLibraryXmlFileName = PathUtil.MergePath(this.LibraryDataDir, "library.xml");
+            if (File.Exists(strLibraryXmlFileName) == false)
+            {
+                strError = "单机版 dp2Library 模块 尚未安装。请先安装 dp2Library 模块";
+                goto ERROR1;
+            }
+            // 为 dp2library 的 library.xml 文件增配 MSMQ 相关参数。这之前要确保在 Windows 上启用了 Message Queue Service。
+            // return:
+            //      -1  出错
+            //      0   没有修改
+            //      1   发生了修改
+            int nRet = InstallHelper.SetupMongoDB(
+                strLibraryXmlFileName,
+                "xe",
+                Control.ModifierKeys == Keys.Control ? false : true,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (nRet == 1)
+                MessageBox.Show(this, "添加参数成功");
+            else
+                MessageBox.Show(this, "配置文件本次操作后没有发生变化 (先前已经配置过 MongoDB 参数了)");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_dp2library_setupMongoDB_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            string strExePath = InstallHelper.GetPathOfService("MongoDB");
+            if (string.IsNullOrEmpty(strExePath) == false)
+            {
+                strError = "MongoDB 已经安装过了。(位于 " + strExePath + ")";
+                goto ERROR1;
+            }
+
+            SetupMongoDbDialog dlg = new SetupMongoDbDialog();
+            GuiUtil.AutoSetDefaultFont(dlg);
+
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.DataDir = "c:\\mongo_data";
+
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            // 创建目录和 mongod.cfg 文件
+            string strDataDir = dlg.DataDir;
+            string strConfigFileName = Path.Combine(strDataDir, "mongod.cfg");
+
+            PathUtil.CreateDirIfNeed(Path.Combine(strDataDir, "db"));
+            PathUtil.CreateDirIfNeed(Path.Combine(strDataDir, "log"));
+
+            using (StreamWriter sw = new StreamWriter(strConfigFileName, false))
+            {
+                sw.WriteLine("systemLog:");
+                sw.WriteLine("    destination: file");
+                sw.WriteLine("    path: " + strDataDir + "\\log\\mongod.log");
+                sw.WriteLine("storage:");
+                sw.WriteLine("    dbPath: " + strDataDir + "\\db");
+                sw.WriteLine("net:");
+                sw.WriteLine("   bindIp: 127.0.0.1");
+                sw.WriteLine("   port: 27017");
+                sw.WriteLine("");
+                sw.WriteLine("");
+                sw.WriteLine("");
+            }
+
+            // 
+            // 在 mongod.exe 所在目录执行：
+            // "C:\mongodb\bin\mongod.exe" --config "C:\mongodb\mongod.cfg" –install
+
+            string strFileName = Path.Combine(dlg.BinDir, "mongod.exe");
+            string strLine = " --config " + strConfigFileName + " --install";
+
+            AppendSectionTitle("开始启用 MongoDB");
+            Application.DoEvents();
+
+            Cursor oldCursor = this.Cursor;
+            this.Cursor = Cursors.WaitCursor;
+            this.Enabled = false;
+            try
+            {
+                // parameters:
+                //      lines   若干行参数。每行执行一次
+                // return:
+                //      -1  出错
+                //      0   成功。strError 里面有运行输出的信息
+                nRet = InstallHelper.RunCmd(
+                    strFileName,
+                    new List<string> { strLine },
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                AppendString(RemoveProgressText(strError));
+            }
+            finally
+            {
+                AppendSectionTitle("结束启用 MongoDB");
+
+                this.Cursor = oldCursor;
+                this.Enabled = true;
+            }
+
+            AppendString("MongoDB 安装配置成功\r\n");
+
+            Thread.Sleep(1000);
+
+            {
+                AppendString("正在启动 MongoDB 服务 ...\r\n");
+                nRet = InstallHelper.StartService("MongoDB",
+    out strError);
+                if (nRet == -1)
+                {
+                    AppendString("MongoDB 服务启动失败: " + strError + "\r\n");
+                    goto ERROR1;
+                }
+                else
+                {
+                    AppendString("MongoDB 服务启动成功\r\n");
+                }
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
     }
 
     /*
