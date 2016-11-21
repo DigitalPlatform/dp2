@@ -18,8 +18,10 @@ namespace dp2Catalog
                 components.Dispose();
             }
 
+#if OLD_CHANNEL
             if (this.Channels != null)
                 this.Channels.Dispose();
+#endif
 
             this.EventLoadFinish.Dispose();
 

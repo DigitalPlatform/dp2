@@ -1123,6 +1123,45 @@ namespace DigitalPlatform.LibraryServer
                         app.InvoiceDbName = "";
                     }
 
+                    // 拼音
+                    // 元素<pinyin>
+                    // 属性dbname
+                    node = dom.DocumentElement.SelectSingleNode("pinyin") as XmlElement;
+                    if (node != null)
+                    {
+                        app.PinyinDbName = DomUtil.GetAttr(node, "dbname");
+                    }
+                    else
+                    {
+                        app.PinyinDbName = "";
+                    }
+
+                    // GCAT
+                    // 元素<gcat>
+                    // 属性dbname
+                    node = dom.DocumentElement.SelectSingleNode("gcat") as XmlElement;
+                    if (node != null)
+                    {
+                        app.GcatDbName = DomUtil.GetAttr(node, "dbname");
+                    }
+                    else
+                    {
+                        app.GcatDbName = "";
+                    }
+
+                    // 词
+                    // 元素<word>
+                    // 属性dbname
+                    node = dom.DocumentElement.SelectSingleNode("word") as XmlElement;
+                    if (node != null)
+                    {
+                        app.WordDbName = DomUtil.GetAttr(node, "dbname");
+                    }
+                    else
+                    {
+                        app.WordDbName = "";
+                    }
+
                     // *** 进入内存的参数结束
 
                     // bin dir
@@ -3202,6 +3241,27 @@ namespace DigitalPlatform.LibraryServer
                     writer.WriteAttributeString("reserveTimeSpan", this.MessageReserveTimeSpan);    // 2007/11/5 
                     if (string.IsNullOrEmpty(this.OutgoingQueue) == false)
                         writer.WriteAttributeString("defaultQueue", this.OutgoingQueue);
+                    writer.WriteEndElement();
+
+                    // 拼音
+                    // 元素<pinyin>
+                    // 属性dbname
+                    writer.WriteStartElement("pinyin");
+                    writer.WriteAttributeString("dbname", this.PinyinDbName);
+                    writer.WriteEndElement();
+
+                    // GCAT
+                    // 元素<gcat>
+                    // 属性dbname
+                    writer.WriteStartElement("gcat");
+                    writer.WriteAttributeString("dbname", this.GcatDbName);
+                    writer.WriteEndElement();
+
+                    // 词
+                    // 元素<word>
+                    // 属性dbname
+                    writer.WriteStartElement("word");
+                    writer.WriteAttributeString("dbname", this.WordDbName);
                     writer.WriteEndElement();
 
                     /*

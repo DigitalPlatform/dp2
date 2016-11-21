@@ -34,16 +34,21 @@ namespace DigitalPlatform.CirculationClient
         public string Lang = "zh";
 
         public dp2ServerCollection Servers = null;	// 引用
+#if OLD_CHANNEL
         public LibraryChannelCollection Channels = null;    // 引用
+#endif
+        public IChannelManager ChannelManager = null;   // 引用
 
         public bool TestMode = false;   // 是否为评估模式
 
         public DigitalPlatform.StopManager stopManager = null;
 
+#if OLD_CHANNEL
         /// <summary>
         /// 通讯通道。引用外面的对象
         /// </summary>
         LibraryChannel channel = null;
+#endif
 
         public int[] EnabledIndices = null;	// null表示全部发黑。如果对象存在，但是元素个数为0，表示全部发灰
 
@@ -63,6 +68,7 @@ namespace DigitalPlatform.CirculationClient
             InitializeComponent();
         }
 
+#if OLD_CHANNEL
         // 2011/11/23
         // 当前用户名
         // 最后一次使用过Channel的当前用户名
@@ -75,6 +81,7 @@ namespace DigitalPlatform.CirculationClient
                 return this.channel.UserName;
             }
         }
+#endif
 
         // 刷新风格
         [Flags]
@@ -384,7 +391,7 @@ namespace DigitalPlatform.CirculationClient
             if (String.IsNullOrEmpty(strText) == true)
                 return table;
 
-            string[] parts = strText.Split(new char[] {';'});
+            string[] parts = strText.Split(new char[] { ';' });
             foreach (string part in parts)
             {
                 string strName = "";
@@ -406,8 +413,12 @@ namespace DigitalPlatform.CirculationClient
 
         void DoStop(object sender, StopEventArgs e)
         {
+#if OLD_CHANNEL
             if (this.channel != null)
                 this.channel.Abort();
+#endif
+            if (this.ChannelManager != null)
+                this.ChannelManager.DoStop(sender, e);
         }
 
         // 根据路径逐步展开
@@ -687,16 +698,23 @@ namespace DigitalPlatform.CirculationClient
             int nRet = 0;
             properties = new List<NormalDbProperty>();
 
+#if OLD_CHANNEL
             if (this.Channels == null)
             {
                 strError = "this.Channels == null";
                 return -1;
             }
-
-            this.channel = this.Channels.GetChannel(strServerUrl);
-            if (this.channel == null)
+#endif
+            if (this.ChannelManager == null)
             {
-                strError = "GetChannel() error. strServerUrl '"+strServerUrl+"'";
+                strError = "this.ChannelManager == null";
+                return -1;
+            }
+
+            LibraryChannel channel = this.ChannelManager.GetChannel(strServerUrl);
+            if (channel == null)
+            {
+                strError = "GetChannel() error. strServerUrl '" + strServerUrl + "'";
                 return -1;
             }
 
@@ -707,7 +725,7 @@ namespace DigitalPlatform.CirculationClient
                 stop.Register(this.stopManager, true);	// 和容器关联
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在获得服务器 "+strServerUrl+" 的库名列表 ...");
+                stop.Initial("正在获得服务器 " + strServerUrl + " 的库名列表 ...");
                 stop.BeginLoop();
 
                 this.m_current_stop = stop;
@@ -746,7 +764,7 @@ namespace DigitalPlatform.CirculationClient
                 //      0   dp2Library的版本号过低。警告信息在strError中
                 //      1   dp2Library版本号符合要求
                 nRet = LibraryChannel.GetServerVersion(
-                    this.channel,
+                    channel,
                     stop,
                     out version,
                     out strError);
@@ -769,14 +787,14 @@ namespace DigitalPlatform.CirculationClient
                 }
 
                 string strValue = "";
-                long lRet = this.channel.GetSystemParameter(stop,
+                long lRet = channel.GetSystemParameter(stop,
                     "system",
                     "biblioDbGroup",
                     out strValue,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + this.channel.Url + " 获得编目库配置信息的过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 获得编目库配置信息的过程发生错误：" + strError;
                     return -1;
                 }
 
@@ -827,7 +845,7 @@ namespace DigitalPlatform.CirculationClient
                     //      -1  出错，不希望继续以后的操作
                     //      0   成功
                     nRet = GetBrowseColumns(
-                        this.channel,
+                        channel,
                         stop,
                         ref properties,
                         out strError);
@@ -847,6 +865,8 @@ namespace DigitalPlatform.CirculationClient
 
                     stop.Unregister();	// 和容器脱离关联
                 }
+
+                this.ChannelManager.ReturnChannel(channel);
             }
 
             // this.channel = null;
@@ -916,7 +936,7 @@ namespace DigitalPlatform.CirculationClient
                     string strColumnType = DomUtil.GetAttr(node, "type");
                     // 2013/10/23
                     string strColumnTitle = GetColumnTitle(node,
-                        this.Lang); 
+                        this.Lang);
                     // normal.ColumnNames.Add(strColumnTitle);
                     normal.ColumnNames.Add(strColumnTitle, strColumnType);
                 }
@@ -977,20 +997,20 @@ namespace DigitalPlatform.CirculationClient
             TreeNode server_node = FindServer(strServerName);
             if (server_node == null)
             {
-                throw new Exception("没有找到名为 '"+strServerName+"' 的服务器节点");
+                throw new Exception("没有找到名为 '" + strServerName + "' 的服务器节点");
             }
 
             // 需要展开
             if (IsLoading(server_node) == true)
             {
                 string strError = "";
-                int nRet = Fill(server_node,out strError);
+                int nRet = Fill(server_node, out strError);
                 if (nRet == -1)
                 {
                     throw new Exception(strError);
                 }
-            } 
-            
+            }
+
             List<string> results = new List<string>();
 
             Debug.Assert(server_node != null, "");
@@ -1174,25 +1194,25 @@ namespace DigitalPlatform.CirculationClient
                 long lRet = 0;
 
                 if (this.cfgCache != null)
-                lRet = Channel.GetRes(stop,
-                    this.cfgCache,
-                    strPath,
-                    strStyle,
-                    null,
-                    out strContent,
-                    out strMetaData,
-                    out baOutputTimestamp,
-                    out strOutputPath,
-                    out strError);
+                    lRet = Channel.GetRes(stop,
+                        this.cfgCache,
+                        strPath,
+                        strStyle,
+                        null,
+                        out strContent,
+                        out strMetaData,
+                        out baOutputTimestamp,
+                        out strOutputPath,
+                        out strError);
                 else
-                lRet = Channel.GetRes(stop,
-    strPath,
-    strStyle,
-    out strContent,
-    out strMetaData,
-    out baOutputTimestamp,
-    out strOutputPath,
-    out strError);
+                    lRet = Channel.GetRes(stop,
+        strPath,
+        strStyle,
+        out strContent,
+        out strMetaData,
+        out baOutputTimestamp,
+        out strOutputPath,
+        out strError);
                 if (lRet == -1)
                     goto ERROR1;
 
@@ -1230,8 +1250,8 @@ namespace DigitalPlatform.CirculationClient
 
             // Debug.Assert(false, "");
 
-            this.channel = this.Channels.GetChannel(strServerUrl);
-            Debug.Assert(this.channel != null, "");
+            LibraryChannel channel = this.ChannelManager.GetChannel(strServerUrl);
+            Debug.Assert(channel != null, "");
 
             DigitalPlatform.Stop stop = null;
             if (this.stopManager != null)
@@ -1240,7 +1260,7 @@ namespace DigitalPlatform.CirculationClient
                 stop.Register(this.stopManager, true);	// 和容器关联
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在获得库 "+strDbName+" 的检索途径列表 ...");
+                stop.Initial("正在获得库 " + strDbName + " 的检索途径列表 ...");
                 stop.BeginLoop();
                 this.m_current_stop = stop;
             }
@@ -1249,14 +1269,14 @@ namespace DigitalPlatform.CirculationClient
             {
                 BiblioDbFromInfo[] infos = null;
 
-                long lRet = this.channel.ListDbFroms(stop,
+                long lRet = channel.ListDbFroms(stop,
                     "biblio",
                     this.Lang,
                     out infos,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + this.channel.Url + " 列出书目库检索途径过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 列出书目库检索途径过程发生错误：" + strError;
                     return -1;
                 }
 
@@ -1277,9 +1297,9 @@ namespace DigitalPlatform.CirculationClient
 
                     stop.Unregister();	// 和容器脱离关联
                 }
-            }
 
-            // this.channel = null;
+                this.ChannelManager.ReturnChannel(channel);
+            }
 
             return 0;
         }
@@ -1463,7 +1483,7 @@ namespace DigitalPlatform.CirculationClient
             contextMenu.MenuItems.Add(menuItem);
 
 
-            contextMenu.Show(this, new Point(e.X, e.Y));	
+            contextMenu.Show(this, new Point(e.X, e.Y));
         }
 
         // 刷新
@@ -1760,7 +1780,7 @@ false);
 
                 if (nDbCount == 0)
                 {
-                    strError = "需在服务器 '" + nodeServer .Text+ "' 节点下级勾选一个或者多个数据库节点，检索方可进行。如果不希望检索此服务器节点，则需清除其勾选状态。";
+                    strError = "需在服务器 '" + nodeServer.Text + "' 节点下级勾选一个或者多个数据库节点，检索方可进行。如果不希望检索此服务器节点，则需清除其勾选状态。";
                     return -1;
                 }
 
@@ -1839,7 +1859,7 @@ false);
         public static List<string> ParseDbNamesInTargetString(string strTargetString)
         {
             List<string> results = new List<string>();
-            string[] parts = strTargetString.Split(new char[] {';'});
+            string[] parts = strTargetString.Split(new char[] { ';' });
             foreach (string strPart in parts)
             {
                 string strText = strPart.Trim();
@@ -2216,7 +2236,7 @@ false);
         public string DbName = "";
         // public List<string> ColumnNames = new List<string>();
         public ColumnPropertyCollection ColumnNames = new ColumnPropertyCollection();
-        
+
         public string Syntax = "";  // 格式语法
         public string ItemDbName = "";  // 对应的实体库名
 

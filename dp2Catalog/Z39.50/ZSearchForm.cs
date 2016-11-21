@@ -4489,7 +4489,9 @@ MessageBoxDefaultButton.Button1);
         {
             dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
 
+#if OLD_CHANNEL
             e.dp2Channels = dp2_searchform.Channels;
+#endif
             e.MainForm = this.MainForm;
         }
 

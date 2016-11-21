@@ -1236,7 +1236,7 @@ SetStartEventArgs e);
                 {
                     // 注意 Session 是否 Dispose() ?
                     _incIpCount(strIP, -1);
-                    throw new OutofSessionException("Session 资源不足，超过配额 " + this.MaxSessionsPerIp.ToString());
+                    throw new OutofSessionException("Session 资源不足，通道创建失败。(配额值 " + nMax.ToString() + ")");
                 }
 
                 // 没有超过配额的才加入

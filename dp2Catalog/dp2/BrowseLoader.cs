@@ -38,11 +38,14 @@ namespace dp2Catalog
             set;
         }
 
+#if OLD_CHANNEL
         public LibraryChannelCollection Channels
         {
             get;
             set;
         }
+#endif
+        public IChannelManager ChannelManager { get; set; }
 
         public dp2ServerCollection Servers
         {
@@ -106,73 +109,82 @@ namespace dp2Catalog
                 }
                 string strServerUrl = server.Url;
 
-                LibraryChannel channel = this.Channels.GetChannel(strServerUrl);
+                LibraryChannel channel = this.ChannelManager.GetChannel(strServerUrl);
 
-                List<string> batch = new List<string>();
-                for (; batch.Count > 0 || temp.Count > 0; )
+                try
                 {
-
-                    if (batch.Count == 0)
+                    List<string> batch = new List<string>();
+                    for (; batch.Count > 0 || temp.Count > 0; )
                     {
-                        for (int i = 0; i < Math.Min(temp.Count, 100); i++)
+
+                        if (batch.Count == 0)
                         {
-                            batch.Add(temp[i]);
+                            for (int i = 0; i < Math.Min(temp.Count, 100); i++)
+                            {
+                                batch.Add(temp[i]);
+                            }
+                            temp.RemoveRange(0, batch.Count);
                         }
-                        temp.RemoveRange(0, batch.Count);
+
+                        // 每100个一批
+                        if (batch.Count > 0)
+                        {
+                        REDO:
+                            string[] paths = new string[batch.Count];
+                            batch.CopyTo(paths);
+
+                            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
+                            string strError = "";
+
+                            long lRet = channel.GetBrowseRecords(
+                                this.Stop,
+                                paths,
+                                "id,cols",
+                                out searchresults,
+                                out strError);
+                            if (lRet == -1)
+                                throw new Exception(strError);
+
+
+                            if (searchresults == null)
+                            {
+                                strError = "searchresults == null";
+                                throw new Exception(strError);
+                            }
+
+                            for (int i = 0; i < searchresults.Length; i++)
+                            {
+                                DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
+                                Debug.Assert(batch[i] == record.Path, "");
+
+                                // 包含服务器名
+                                record.Path = record.Path + "@" + temp.ServerName;
+                                yield return record;
+
+                            }
+
+                        CONTINUE:
+                            if (batch.Count > searchresults.Length)
+                            {
+                                // 有本次没有获取到的记录
+                                batch.RemoveRange(0, searchresults.Length);
+                                /*
+                                if (index == m_recpaths.Count - 1)
+                                    goto REDO;  // 当前已经是最后一轮了，需要继续做完
+                                 * */
+
+                                // 否则可以留给下一轮处理
+                            }
+                            else
+                                batch.Clear();
+                        }
                     }
 
-                    // 每100个一批
-                    if (batch.Count > 0)
-                    {
-                    REDO:
-                        string[] paths = new string[batch.Count];
-                        batch.CopyTo(paths);
-
-                        DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
-                        string strError = "";
-
-                        long lRet = channel.GetBrowseRecords(
-                            this.Stop,
-                            paths,
-                            "id,cols",
-                            out searchresults,
-                            out strError);
-                        if (lRet == -1)
-                            throw new Exception(strError);
-
-
-                        if (searchresults == null)
-                        {
-                            strError = "searchresults == null";
-                            throw new Exception(strError);
-                        }
-
-                        for (int i = 0; i < searchresults.Length; i++)
-                        {
-                            DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
-                            Debug.Assert(batch[i] == record.Path, "");
-
-                            // 包含服务器名
-                            record.Path = record.Path + "@" + temp.ServerName;
-                            yield return record;
-
-                        }
-
-                    CONTINUE:
-                        if (batch.Count > searchresults.Length)
-                        {
-                            // 有本次没有获取到的记录
-                            batch.RemoveRange(0, searchresults.Length);
-                            /*
-                            if (index == m_recpaths.Count - 1)
-                                goto REDO;  // 当前已经是最后一轮了，需要继续做完
-                             * */
-
-                            // 否则可以留给下一轮处理
-                        }
-                        else
-                            batch.Clear();
-                    }
+                    // 
+                }
+                finally
+                {
+                    Program.MainForm.ReturnChannel(channel);
                 }
             }
         }

@@ -16,6 +16,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GUI;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Catalog
 {
@@ -599,12 +600,18 @@ namespace dp2Catalog
 
                 // 接着装入对象资源
                 {
+
+                    LibraryChannel channel = Program.MainForm.GetChannel(dp2_searchform.GetServerUrl(strServerName));
+
                     EnableStateCollection save = this.MainForm.DisableToolButtons();
                     try
                     {
                         // this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
                         nRet = this.binaryResControl1.LoadObject(
+#if OLD_CHANNEL
                             dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
+#endif
+                            channel,
                             strLocalPath,
                             strRecordXml,
                             "0",  // TODO
@@ -618,6 +625,8 @@ namespace dp2Catalog
                     finally
                     {
                         save.RestoreAll();
+
+                        Program.MainForm.ReturnChannel(channel);
                     }
                 }
             }
@@ -811,27 +820,35 @@ namespace dp2Catalog
             // 接着装入对象资源
             if (bLoadResObject == true)
             {
-                // this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
-                nRet = this.binaryResControl1.LoadObject(
-                    dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
-                    strLocalPath,
-                    strRecordXml,
-                    "0",  // TODO
-                    out strError);
-                if (nRet == -1)
+                LibraryChannel channel = Program.MainForm.GetChannel(dp2_searchform.GetServerUrl(strServerName));
+
+                try
                 {
-                    MessageBox.Show(this, strError);
-                    return -1;
+                    // this.binaryResControl1.Channel = dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName));
+                    nRet = this.binaryResControl1.LoadObject(
+#if OLD_CHANNEL
+                    dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
+#endif
+                        channel,
+                        strLocalPath,
+                        strRecordXml,
+                        "0",  // TODO
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        MessageBox.Show(this, strError);
+                        return -1;
+                    }
+                }
+                finally
+                {
+                    Program.MainForm.ReturnChannel(channel);
                 }
             }
-
-
-
 
             // TODO: 再次装入的时候有问题
             // 装入DC编辑器
             this.DcEditor.Xml = strRecordXml;
-
 
             this.CurrentRecord = record;
 
@@ -1041,7 +1058,11 @@ namespace dp2Catalog
                     GuiUtil.SetControlFont(dlg, this.Font);
 
                     dlg.Text = "请指定一个dp2library数据库，以作为模拟的查重起点";
+#if OLD_CHANNEL
                     dlg.dp2Channels = dp2_searchform.Channels;
+#endif
+                    dlg.ChannelManager = Program.MainForm;
+
                     dlg.Servers = this.MainForm.Servers;
                     dlg.EnabledIndices = new int[] { dp2ResTree.RESTYPE_DB };
                     dlg.Path = strDefaultStartPath;  // 采用遗留的上次用过的路径
@@ -1317,19 +1338,28 @@ namespace dp2Catalog
                         this.binaryResControl1.BiblioRecPath = strLocalPath;
                     }
 
-                    // 提交对象保存请求
-                    // return:
-                    //		-1	error
-                    //		>=0 实际上载的资源对象数
-                    nRet = this.binaryResControl1.Save(
-                        dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
-                        "0",   // TODO: 要替换为 server_version
-                        out strError);
-                    if (nRet == -1)
-                        MessageBox.Show(this, strError);
-                    else
+                    LibraryChannel channel = Program.MainForm.GetChannel(dp2_searchform.GetServerUrl(strServerName));
+                    try
                     {
-                        MessageBox.Show(this, "保存成功");
+                        // 提交对象保存请求
+                        // return:
+                        //		-1	error
+                        //		>=0 实际上载的资源对象数
+                        nRet = this.binaryResControl1.Save(
+#if OLD_CHANNEL
+                        dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
+#endif
+                            channel,
+                            "0",   // TODO: 要替换为 server_version
+                            out strError);
+                        if (nRet == -1)
+                            MessageBox.Show(this, strError);
+                        else
+                            MessageBox.Show(this, "保存成功");
+                    }
+                    finally
+                    {
+                        Program.MainForm.ReturnChannel(channel);
                     }
 
                     if (nRet >= 1)
@@ -1446,7 +1476,9 @@ namespace dp2Catalog
         {
             dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
 
+#if OLD_CHANNEL
             e.dp2Channels = dp2_searchform.Channels;
+#endif
             e.MainForm = this.MainForm;
         }
 
@@ -1717,7 +1749,11 @@ namespace dp2Catalog
             GuiUtil.SetControlFont(dlg, this.Font);
 
             dlg.Text = "请选择目标数据库";
+#if OLD_CHANNEL
             dlg.dp2Channels = dp2_searchform.Channels;
+#endif
+            dlg.ChannelManager = Program.MainForm;
+
             dlg.Servers = this.MainForm.Servers;
             dlg.EnabledIndices = new int[] { dp2ResTree.RESTYPE_DB };
             dlg.Path = strStartPath;
@@ -1924,7 +1960,11 @@ namespace dp2Catalog
             GuiUtil.SetControlFont(dlg, this.Font);
 
             dlg.Text = "请选择目标数据库";
+#if OLD_CHANNEL
             dlg.dp2Channels = dp2_searchform.Channels;
+#endif
+            dlg.ChannelManager = Program.MainForm;
+
             dlg.Servers = this.MainForm.Servers;
             dlg.EnabledIndices = new int[] { dp2ResTree.RESTYPE_DB };
             dlg.Path = strStartPath;

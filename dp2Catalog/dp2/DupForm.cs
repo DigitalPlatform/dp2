@@ -1304,7 +1304,11 @@ namespace dp2Catalog
             GuiUtil.SetControlFont(dlg, this.Font);
 
             dlg.Text = "请指定一个作为查重目标的 dp2library 服务器";
+#if OLD_CHANNEL
             dlg.dp2Channels = this.Channels;
+#endif
+            dlg.ChannelManager = Program.MainForm;
+
             dlg.Servers = this.MainForm.Servers;
             dlg.EnabledIndices = new int[] { dp2ResTree.RESTYPE_SERVER };
             dlg.Path = this.textBox_serverName.Text;

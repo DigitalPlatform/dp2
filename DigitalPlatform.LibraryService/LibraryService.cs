@@ -14064,12 +14064,11 @@ out strError);
         //      -1  出错
         //      0   成功
         public LibraryServerResult GetAuthorNumber(
-            string strID,   // 验证身份用的ID
             string strAuthor,
             bool bSelectPinyin,
             bool bSelectEntry,
             bool bOutputDebugInfo,
-            ref QuestionCollection questions,
+            ref List<Question> questions,
             out string strNumber,
             out string strDebugInfo)
         {
@@ -14089,7 +14088,7 @@ out strError);
 
                 if (questions == null)
                 {
-                    questions = new QuestionCollection();
+                    questions = new List<Question>();
                 }
 
                 // TODO: 验证身份
@@ -14132,7 +14131,6 @@ out strError);
         //      -1  出错
         //      0   成功
         public LibraryServerResult GetPinyin(
-string strID,
 string strText,
 out string strPinyinXml)
         {
@@ -14177,7 +14175,6 @@ out string strPinyinXml)
         //      -1  出错
         //      0   成功
         public LibraryServerResult SetPinyin(
-string strID,
 string strPinyinXml)
         {
             string strError = "";

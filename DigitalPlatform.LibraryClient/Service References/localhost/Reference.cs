@@ -1410,6 +1410,67 @@ namespace DigitalPlatform.LibraryClient.localhost {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="Question", Namespace="http://dp2003.com/dp2library/")]
+    [System.SerializableAttribute()]
+    public partial class Question : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string AnswerField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string TextField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Answer {
+            get {
+                return this.AnswerField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.AnswerField, value) != true)) {
+                    this.AnswerField = value;
+                    this.RaisePropertyChanged("Answer");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Text {
+            get {
+                return this.TextField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.TextField, value) != true)) {
+                    this.TextField = value;
+                    this.RaisePropertyChanged("Text");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="Record", Namespace="http://dp2003.com/dp2kernel/")]
     [System.SerializableAttribute()]
     public partial class Record : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -3462,6 +3523,30 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndDir(out DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetAuthorNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetAuthorNumberResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetAuthorNumber(string strAuthor, bool bSelectPinyin, bool bSelectEntry, bool bOutputDebugInfo, ref DigitalPlatform.LibraryClient.localhost.Question[] questions, out string strNumber, out string strDebugInfo);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetAuthorNumber", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetAuthorNumberResponse")]
+        System.IAsyncResult BeginGetAuthorNumber(string strAuthor, bool bSelectPinyin, bool bSelectEntry, bool bOutputDebugInfo, ref DigitalPlatform.LibraryClient.localhost.Question[] questions, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetAuthorNumber(ref DigitalPlatform.LibraryClient.localhost.Question[] questions, out string strNumber, out string strDebugInfo, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetPinyin", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetPinyinResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetPinyin(out string strPinyinXml, string strText);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetPinyin", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetPinyinResponse")]
+        System.IAsyncResult BeginGetPinyin(string strText, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetPinyin(out string strPinyinXml, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetPinyin", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetPinyinResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetPinyin(string strPinyinXml);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetPinyin", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetPinyinResponse")]
+        System.IAsyncResult BeginSetPinyin(string strPinyinXml, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetPinyin(System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersionResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -4604,6 +4689,91 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetAuthorNumberCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetAuthorNumberCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.Question[] questions {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.Question[])(this.results[0]));
+            }
+        }
+        
+        public string strNumber {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[1]));
+            }
+        }
+        
+        public string strDebugInfo {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[2]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[3]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetPinyinCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetPinyinCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strPinyinXml {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SetPinyinCompletedEventArgs : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SetPinyinCompletedEventArgs(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -7082,6 +7252,24 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onDirCompletedDelegate;
         
+        private BeginOperationDelegate onBeginGetAuthorNumberDelegate;
+        
+        private EndOperationDelegate onEndGetAuthorNumberDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetAuthorNumberCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetPinyinDelegate;
+        
+        private EndOperationDelegate onEndGetPinyinDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetPinyinCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSetPinyinDelegate;
+        
+        private EndOperationDelegate onEndSetPinyinDelegate;
+        
+        private System.Threading.SendOrPostCallback onSetPinyinCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -7640,6 +7828,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<BindPatronCompletedEventArgs> BindPatronCompleted;
         
         public event System.EventHandler<DirCompletedEventArgs> DirCompleted;
+        
+        public event System.EventHandler<GetAuthorNumberCompletedEventArgs> GetAuthorNumberCompleted;
+        
+        public event System.EventHandler<GetPinyinCompletedEventArgs> GetPinyinCompleted;
+        
+        public event System.EventHandler<SetPinyinCompletedEventArgs> SetPinyinCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs> GetVersionCompleted;
         
@@ -8695,6 +8889,172 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         lLength,
                         strLang,
                         strStyle}, this.onEndDirDelegate, this.onDirCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetAuthorNumber(string strAuthor, bool bSelectPinyin, bool bSelectEntry, bool bOutputDebugInfo, ref DigitalPlatform.LibraryClient.localhost.Question[] questions, out string strNumber, out string strDebugInfo) {
+            return base.Channel.GetAuthorNumber(strAuthor, bSelectPinyin, bSelectEntry, bOutputDebugInfo, ref questions, out strNumber, out strDebugInfo);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetAuthorNumber(string strAuthor, bool bSelectPinyin, bool bSelectEntry, bool bOutputDebugInfo, ref DigitalPlatform.LibraryClient.localhost.Question[] questions, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetAuthorNumber(strAuthor, bSelectPinyin, bSelectEntry, bOutputDebugInfo, ref questions, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetAuthorNumber(ref DigitalPlatform.LibraryClient.localhost.Question[] questions, out string strNumber, out string strDebugInfo, System.IAsyncResult result) {
+            return base.Channel.EndGetAuthorNumber(ref questions, out strNumber, out strDebugInfo, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetAuthorNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAuthor = ((string)(inValues[0]));
+            bool bSelectPinyin = ((bool)(inValues[1]));
+            bool bSelectEntry = ((bool)(inValues[2]));
+            bool bOutputDebugInfo = ((bool)(inValues[3]));
+            DigitalPlatform.LibraryClient.localhost.Question[] questions = ((DigitalPlatform.LibraryClient.localhost.Question[])(inValues[4]));
+            return this.BeginGetAuthorNumber(strAuthor, bSelectPinyin, bSelectEntry, bOutputDebugInfo, ref questions, callback, asyncState);
+        }
+        
+        private object[] OnEndGetAuthorNumber(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.Question[] questions = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.Question[]>();
+            string strNumber = this.GetDefaultValueForInitialization<string>();
+            string strDebugInfo = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetAuthorNumber(ref questions, out strNumber, out strDebugInfo, result);
+            return new object[] {
+                    questions,
+                    strNumber,
+                    strDebugInfo,
+                    retVal};
+        }
+        
+        private void OnGetAuthorNumberCompleted(object state) {
+            if ((this.GetAuthorNumberCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetAuthorNumberCompleted(this, new GetAuthorNumberCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetAuthorNumberAsync(string strAuthor, bool bSelectPinyin, bool bSelectEntry, bool bOutputDebugInfo, DigitalPlatform.LibraryClient.localhost.Question[] questions) {
+            this.GetAuthorNumberAsync(strAuthor, bSelectPinyin, bSelectEntry, bOutputDebugInfo, questions, null);
+        }
+        
+        public void GetAuthorNumberAsync(string strAuthor, bool bSelectPinyin, bool bSelectEntry, bool bOutputDebugInfo, DigitalPlatform.LibraryClient.localhost.Question[] questions, object userState) {
+            if ((this.onBeginGetAuthorNumberDelegate == null)) {
+                this.onBeginGetAuthorNumberDelegate = new BeginOperationDelegate(this.OnBeginGetAuthorNumber);
+            }
+            if ((this.onEndGetAuthorNumberDelegate == null)) {
+                this.onEndGetAuthorNumberDelegate = new EndOperationDelegate(this.OnEndGetAuthorNumber);
+            }
+            if ((this.onGetAuthorNumberCompletedDelegate == null)) {
+                this.onGetAuthorNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetAuthorNumberCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetAuthorNumberDelegate, new object[] {
+                        strAuthor,
+                        bSelectPinyin,
+                        bSelectEntry,
+                        bOutputDebugInfo,
+                        questions}, this.onEndGetAuthorNumberDelegate, this.onGetAuthorNumberCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetPinyin(out string strPinyinXml, string strText) {
+            return base.Channel.GetPinyin(out strPinyinXml, strText);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetPinyin(string strText, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetPinyin(strText, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetPinyin(out string strPinyinXml, System.IAsyncResult result) {
+            return base.Channel.EndGetPinyin(out strPinyinXml, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetPinyin(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strText = ((string)(inValues[0]));
+            return this.BeginGetPinyin(strText, callback, asyncState);
+        }
+        
+        private object[] OnEndGetPinyin(System.IAsyncResult result) {
+            string strPinyinXml = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetPinyin(out strPinyinXml, result);
+            return new object[] {
+                    strPinyinXml,
+                    retVal};
+        }
+        
+        private void OnGetPinyinCompleted(object state) {
+            if ((this.GetPinyinCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetPinyinCompleted(this, new GetPinyinCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetPinyinAsync(string strText) {
+            this.GetPinyinAsync(strText, null);
+        }
+        
+        public void GetPinyinAsync(string strText, object userState) {
+            if ((this.onBeginGetPinyinDelegate == null)) {
+                this.onBeginGetPinyinDelegate = new BeginOperationDelegate(this.OnBeginGetPinyin);
+            }
+            if ((this.onEndGetPinyinDelegate == null)) {
+                this.onEndGetPinyinDelegate = new EndOperationDelegate(this.OnEndGetPinyin);
+            }
+            if ((this.onGetPinyinCompletedDelegate == null)) {
+                this.onGetPinyinCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetPinyinCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetPinyinDelegate, new object[] {
+                        strText}, this.onEndGetPinyinDelegate, this.onGetPinyinCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetPinyin(string strPinyinXml) {
+            return base.Channel.SetPinyin(strPinyinXml);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSetPinyin(string strPinyinXml, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetPinyin(strPinyinXml, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetPinyin(System.IAsyncResult result) {
+            return base.Channel.EndSetPinyin(result);
+        }
+        
+        private System.IAsyncResult OnBeginSetPinyin(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strPinyinXml = ((string)(inValues[0]));
+            return this.BeginSetPinyin(strPinyinXml, callback, asyncState);
+        }
+        
+        private object[] OnEndSetPinyin(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetPinyin(result);
+            return new object[] {
+                    retVal};
+        }
+        
+        private void OnSetPinyinCompleted(object state) {
+            if ((this.SetPinyinCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SetPinyinCompleted(this, new SetPinyinCompletedEventArgs(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SetPinyinAsync(string strPinyinXml) {
+            this.SetPinyinAsync(strPinyinXml, null);
+        }
+        
+        public void SetPinyinAsync(string strPinyinXml, object userState) {
+            if ((this.onBeginSetPinyinDelegate == null)) {
+                this.onBeginSetPinyinDelegate = new BeginOperationDelegate(this.OnBeginSetPinyin);
+            }
+            if ((this.onEndSetPinyinDelegate == null)) {
+                this.onEndSetPinyinDelegate = new EndOperationDelegate(this.OnEndSetPinyin);
+            }
+            if ((this.onSetPinyinCompletedDelegate == null)) {
+                this.onSetPinyinCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetPinyinCompleted);
+            }
+            base.InvokeAsync(this.onBeginSetPinyinDelegate, new object[] {
+                        strPinyinXml}, this.onEndSetPinyinDelegate, this.onSetPinyinCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {
@@ -13773,6 +14133,30 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndDir(out DigitalPlatform.LibraryClient.localhost.ResInfoItem[] items, out DigitalPlatform.LibraryClient.localhost.ErrorCodeValue kernel_errorcode, System.IAsyncResult result);
         
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetAuthorNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetAuthorNumberResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetAuthorNumber(string strAuthor, bool bSelectPinyin, bool bSelectEntry, bool bOutputDebugInfo, ref DigitalPlatform.LibraryClient.localhost.Question[] questions, out string strNumber, out string strDebugInfo);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetAuthorNumber", ReplyAction="http://dp2003.com/dp2library/dp2library/GetAuthorNumberResponse")]
+        System.IAsyncResult BeginGetAuthorNumber(string strAuthor, bool bSelectPinyin, bool bSelectEntry, bool bOutputDebugInfo, ref DigitalPlatform.LibraryClient.localhost.Question[] questions, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetAuthorNumber(ref DigitalPlatform.LibraryClient.localhost.Question[] questions, out string strNumber, out string strDebugInfo, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetPinyin", ReplyAction="http://dp2003.com/dp2library/dp2library/GetPinyinResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetPinyin(out string strPinyinXml, string strText);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetPinyin", ReplyAction="http://dp2003.com/dp2library/dp2library/GetPinyinResponse")]
+        System.IAsyncResult BeginGetPinyin(string strText, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetPinyin(out string strPinyinXml, System.IAsyncResult result);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetPinyin", ReplyAction="http://dp2003.com/dp2library/dp2library/SetPinyinResponse")]
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetPinyin(string strPinyinXml);
+        
+        [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetPinyin", ReplyAction="http://dp2003.com/dp2library/dp2library/SetPinyinResponse")]
+        System.IAsyncResult BeginSetPinyin(string strPinyinXml, System.AsyncCallback callback, object asyncState);
+        
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetPinyin(System.IAsyncResult result);
+        
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetVersion", ReplyAction="http://dp2003.com/dp2library/dp2library/GetVersionResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid);
         
@@ -14909,6 +15293,91 @@ namespace DigitalPlatform.LibraryClient.localhost {
             get {
                 base.RaiseExceptionIfNecessary();
                 return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[2]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetAuthorNumberCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetAuthorNumberCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.Question[] questions {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.Question[])(this.results[0]));
+            }
+        }
+        
+        public string strNumber {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[1]));
+            }
+        }
+        
+        public string strDebugInfo {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[2]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[3]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class GetPinyinCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public GetPinyinCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public string strPinyinXml {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public partial class SetPinyinCompletedEventArgs1 : System.ComponentModel.AsyncCompletedEventArgs {
+        
+        private object[] results;
+        
+        public SetPinyinCompletedEventArgs1(object[] results, System.Exception exception, bool cancelled, object userState) : 
+                base(exception, cancelled, userState) {
+            this.results = results;
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
             }
         }
     }
@@ -17387,6 +17856,24 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         private System.Threading.SendOrPostCallback onDirCompletedDelegate;
         
+        private BeginOperationDelegate onBeginGetAuthorNumberDelegate;
+        
+        private EndOperationDelegate onEndGetAuthorNumberDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetAuthorNumberCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginGetPinyinDelegate;
+        
+        private EndOperationDelegate onEndGetPinyinDelegate;
+        
+        private System.Threading.SendOrPostCallback onGetPinyinCompletedDelegate;
+        
+        private BeginOperationDelegate onBeginSetPinyinDelegate;
+        
+        private EndOperationDelegate onEndSetPinyinDelegate;
+        
+        private System.Threading.SendOrPostCallback onSetPinyinCompletedDelegate;
+        
         private BeginOperationDelegate onBeginGetVersionDelegate;
         
         private EndOperationDelegate onEndGetVersionDelegate;
@@ -17945,6 +18432,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         public event System.EventHandler<BindPatronCompletedEventArgs1> BindPatronCompleted;
         
         public event System.EventHandler<DirCompletedEventArgs1> DirCompleted;
+        
+        public event System.EventHandler<GetAuthorNumberCompletedEventArgs1> GetAuthorNumberCompleted;
+        
+        public event System.EventHandler<GetPinyinCompletedEventArgs1> GetPinyinCompleted;
+        
+        public event System.EventHandler<SetPinyinCompletedEventArgs1> SetPinyinCompleted;
         
         public event System.EventHandler<GetVersionCompletedEventArgs1> GetVersionCompleted;
         
@@ -19000,6 +19493,172 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         lLength,
                         strLang,
                         strStyle}, this.onEndDirDelegate, this.onDirCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetAuthorNumber(string strAuthor, bool bSelectPinyin, bool bSelectEntry, bool bOutputDebugInfo, ref DigitalPlatform.LibraryClient.localhost.Question[] questions, out string strNumber, out string strDebugInfo) {
+            return base.Channel.GetAuthorNumber(strAuthor, bSelectPinyin, bSelectEntry, bOutputDebugInfo, ref questions, out strNumber, out strDebugInfo);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetAuthorNumber(string strAuthor, bool bSelectPinyin, bool bSelectEntry, bool bOutputDebugInfo, ref DigitalPlatform.LibraryClient.localhost.Question[] questions, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetAuthorNumber(strAuthor, bSelectPinyin, bSelectEntry, bOutputDebugInfo, ref questions, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetAuthorNumber(ref DigitalPlatform.LibraryClient.localhost.Question[] questions, out string strNumber, out string strDebugInfo, System.IAsyncResult result) {
+            return base.Channel.EndGetAuthorNumber(ref questions, out strNumber, out strDebugInfo, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetAuthorNumber(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strAuthor = ((string)(inValues[0]));
+            bool bSelectPinyin = ((bool)(inValues[1]));
+            bool bSelectEntry = ((bool)(inValues[2]));
+            bool bOutputDebugInfo = ((bool)(inValues[3]));
+            DigitalPlatform.LibraryClient.localhost.Question[] questions = ((DigitalPlatform.LibraryClient.localhost.Question[])(inValues[4]));
+            return this.BeginGetAuthorNumber(strAuthor, bSelectPinyin, bSelectEntry, bOutputDebugInfo, ref questions, callback, asyncState);
+        }
+        
+        private object[] OnEndGetAuthorNumber(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.Question[] questions = this.GetDefaultValueForInitialization<DigitalPlatform.LibraryClient.localhost.Question[]>();
+            string strNumber = this.GetDefaultValueForInitialization<string>();
+            string strDebugInfo = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetAuthorNumber(ref questions, out strNumber, out strDebugInfo, result);
+            return new object[] {
+                    questions,
+                    strNumber,
+                    strDebugInfo,
+                    retVal};
+        }
+        
+        private void OnGetAuthorNumberCompleted(object state) {
+            if ((this.GetAuthorNumberCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetAuthorNumberCompleted(this, new GetAuthorNumberCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetAuthorNumberAsync(string strAuthor, bool bSelectPinyin, bool bSelectEntry, bool bOutputDebugInfo, DigitalPlatform.LibraryClient.localhost.Question[] questions) {
+            this.GetAuthorNumberAsync(strAuthor, bSelectPinyin, bSelectEntry, bOutputDebugInfo, questions, null);
+        }
+        
+        public void GetAuthorNumberAsync(string strAuthor, bool bSelectPinyin, bool bSelectEntry, bool bOutputDebugInfo, DigitalPlatform.LibraryClient.localhost.Question[] questions, object userState) {
+            if ((this.onBeginGetAuthorNumberDelegate == null)) {
+                this.onBeginGetAuthorNumberDelegate = new BeginOperationDelegate(this.OnBeginGetAuthorNumber);
+            }
+            if ((this.onEndGetAuthorNumberDelegate == null)) {
+                this.onEndGetAuthorNumberDelegate = new EndOperationDelegate(this.OnEndGetAuthorNumber);
+            }
+            if ((this.onGetAuthorNumberCompletedDelegate == null)) {
+                this.onGetAuthorNumberCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetAuthorNumberCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetAuthorNumberDelegate, new object[] {
+                        strAuthor,
+                        bSelectPinyin,
+                        bSelectEntry,
+                        bOutputDebugInfo,
+                        questions}, this.onEndGetAuthorNumberDelegate, this.onGetAuthorNumberCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetPinyin(out string strPinyinXml, string strText) {
+            return base.Channel.GetPinyin(out strPinyinXml, strText);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginGetPinyin(string strText, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetPinyin(strText, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetPinyin(out string strPinyinXml, System.IAsyncResult result) {
+            return base.Channel.EndGetPinyin(out strPinyinXml, result);
+        }
+        
+        private System.IAsyncResult OnBeginGetPinyin(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strText = ((string)(inValues[0]));
+            return this.BeginGetPinyin(strText, callback, asyncState);
+        }
+        
+        private object[] OnEndGetPinyin(System.IAsyncResult result) {
+            string strPinyinXml = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndGetPinyin(out strPinyinXml, result);
+            return new object[] {
+                    strPinyinXml,
+                    retVal};
+        }
+        
+        private void OnGetPinyinCompleted(object state) {
+            if ((this.GetPinyinCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.GetPinyinCompleted(this, new GetPinyinCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void GetPinyinAsync(string strText) {
+            this.GetPinyinAsync(strText, null);
+        }
+        
+        public void GetPinyinAsync(string strText, object userState) {
+            if ((this.onBeginGetPinyinDelegate == null)) {
+                this.onBeginGetPinyinDelegate = new BeginOperationDelegate(this.OnBeginGetPinyin);
+            }
+            if ((this.onEndGetPinyinDelegate == null)) {
+                this.onEndGetPinyinDelegate = new EndOperationDelegate(this.OnEndGetPinyin);
+            }
+            if ((this.onGetPinyinCompletedDelegate == null)) {
+                this.onGetPinyinCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnGetPinyinCompleted);
+            }
+            base.InvokeAsync(this.onBeginGetPinyinDelegate, new object[] {
+                        strText}, this.onEndGetPinyinDelegate, this.onGetPinyinCompletedDelegate, userState);
+        }
+        
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetPinyin(string strPinyinXml) {
+            return base.Channel.SetPinyin(strPinyinXml);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.IAsyncResult BeginSetPinyin(string strPinyinXml, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetPinyin(strPinyinXml, callback, asyncState);
+        }
+        
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetPinyin(System.IAsyncResult result) {
+            return base.Channel.EndSetPinyin(result);
+        }
+        
+        private System.IAsyncResult OnBeginSetPinyin(object[] inValues, System.AsyncCallback callback, object asyncState) {
+            string strPinyinXml = ((string)(inValues[0]));
+            return this.BeginSetPinyin(strPinyinXml, callback, asyncState);
+        }
+        
+        private object[] OnEndSetPinyin(System.IAsyncResult result) {
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndSetPinyin(result);
+            return new object[] {
+                    retVal};
+        }
+        
+        private void OnSetPinyinCompleted(object state) {
+            if ((this.SetPinyinCompleted != null)) {
+                InvokeAsyncCompletedEventArgs e = ((InvokeAsyncCompletedEventArgs)(state));
+                this.SetPinyinCompleted(this, new SetPinyinCompletedEventArgs1(e.Results, e.Error, e.Cancelled, e.UserState));
+            }
+        }
+        
+        public void SetPinyinAsync(string strPinyinXml) {
+            this.SetPinyinAsync(strPinyinXml, null);
+        }
+        
+        public void SetPinyinAsync(string strPinyinXml, object userState) {
+            if ((this.onBeginSetPinyinDelegate == null)) {
+                this.onBeginSetPinyinDelegate = new BeginOperationDelegate(this.OnBeginSetPinyin);
+            }
+            if ((this.onEndSetPinyinDelegate == null)) {
+                this.onEndSetPinyinDelegate = new EndOperationDelegate(this.OnEndSetPinyin);
+            }
+            if ((this.onSetPinyinCompletedDelegate == null)) {
+                this.onSetPinyinCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnSetPinyinCompleted);
+            }
+            base.InvokeAsync(this.onBeginSetPinyinDelegate, new object[] {
+                        strPinyinXml}, this.onEndSetPinyinDelegate, this.onSetPinyinCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetVersion(out string uid) {

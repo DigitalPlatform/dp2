@@ -35,8 +35,8 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>7299EA63B9EEEE0C56BACB6EF3EF2D8C12CC17FE</ManifestCertificateThumbprint>
-    <ManifestKeyFile>dp2Batch_7_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>125445C39C4C2289404D885AC4E85C18A3EEABE3</ManifestCertificateThumbprint>
+    <ManifestKeyFile>dp2Batch_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -331,7 +331,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="dp2Batch_7_TemporaryKey.pfx" />
+    <None Include="dp2Batch_TemporaryKey.pfx" />
     <None Include="Properties\app.manifest" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

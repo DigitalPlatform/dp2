@@ -5,6 +5,7 @@ using System.Text;
 using System.Reflection;
 using System.Xml;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
@@ -17,6 +18,8 @@ using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GUI;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Catalog
 {
@@ -510,7 +513,7 @@ namespace dp2Catalog
                     EndGcatLoop();
                 }
             }
-            else
+            else if (strGcatWebServiceUrl.Contains("gcat"))
             {
                 // 新的WebService
 
@@ -586,6 +589,137 @@ namespace dp2Catalog
                     EndGcatLoop();
                 }
             }
+                        else // dp2library 服务器
+            {
+                Hashtable question_table = (Hashtable)Program.MainForm.ParamTable["question_table"];
+                if (question_table == null)
+                    question_table = new Hashtable();
+
+                string strDebugInfo = "";
+
+                BeginGcatLoop("正在获取 '" + strAuthor + "' 的著者号，从 " + strGcatWebServiceUrl + " ...");
+                try
+                {
+                    // return:
+                    //      -1  error
+                    //      0   canceled
+                    //      1   succeed
+                    long nRet = GetAuthorNumber(
+                        ref question_table,
+                        this.DetailForm.Progress,
+                        this.DetailForm,
+                        strGcatWebServiceUrl,
+                        strAuthor,
+                        true,	// bSelectPinyin
+                        true,	// bSelectEntry
+                        true,	// bOutputDebugInfo
+                        out strAuthorNumber,
+                        out strDebugInfo,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "取 著者 '" + strAuthor + "' 之号码时出错 : " + strError;
+                        return -1;
+                    }
+                    Program.MainForm.ParamTable["question_table"] = question_table;
+                    return (int)nRet;
+                }
+                finally
+                {
+                    EndGcatLoop();
+                }
+            }
+
+        }
+
+        // 外部调用
+        // 特殊版本，具有缓存问题和答案的功能
+        // return:
+        //      -2  strID验证失败
+        //      -1  error
+        //      0   canceled
+        //      1   succeed
+        public static int GetAuthorNumber(
+            ref Hashtable question_table,
+            Stop stop,
+            System.Windows.Forms.IWin32Window parent,
+            string strUrl,
+            string strAuthor,
+            bool bSelectPinyin,
+            bool bSelectEntry,
+            bool bOutputDebugInfo,
+            out string strNumber,
+            out string strDebugInfo,
+            out string strError)
+        {
+            strError = "";
+            strDebugInfo = "";
+            strNumber = "";
+
+            long nRet = 0;
+
+            Question[] questions = (Question[])question_table[strAuthor];
+            if (questions == null)
+                questions = new Question[0];
+
+            for (; ; )
+            {
+                LibraryChannel channel = Program.MainForm.GetChannel(strUrl, "public");
+                try
+                {
+                    // 这个函数具有catch 通讯中 exeption的能力
+                    // return:
+                    //		-3	需要回答问题
+                    //      -2  strID验证失败
+                    //      -1  出错
+                    //      0   成功
+                    nRet = channel.GetAuthorNumber(
+                        strAuthor,
+                        bSelectPinyin,
+                        bSelectEntry,
+                        bOutputDebugInfo,
+                        ref questions,
+                        out strNumber,
+                        out strDebugInfo,
+                        out strError);
+                    if (nRet != -3)
+                        break;
+
+                    Debug.Assert(nRet == -3, "");
+                }
+                finally
+                {
+                    Program.MainForm.ReturnChannel(channel);
+                }
+
+                string strTitle = strError;
+
+                string strQuestion = questions[questions.Length - 1].Text;
+
+                QuestionDlg dlg = new QuestionDlg();
+                GuiUtil.AutoSetDefaultFont(dlg);
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.label_messageTitle.Text = strTitle;
+                dlg.textBox_question.Text = strQuestion.Replace("\n", "\r\n");
+                dlg.ShowDialog(parent);
+
+                if (dlg.DialogResult != DialogResult.OK)
+                {
+                    strError = "放弃";
+                    return 0;
+                }
+
+                questions[questions.Length - 1].Answer = dlg.textBox_result.Text;
+
+                question_table[strAuthor] = questions;  // 保存
+            }
+
+            if (nRet == -1)
+                return -1;
+            if (nRet == -2)
+                return -2;  // strID验证失败
+
+            return 1;
         }
 
         // GCAT通道登录 旧的方式

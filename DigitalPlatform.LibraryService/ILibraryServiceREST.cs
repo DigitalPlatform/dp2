@@ -840,5 +840,23 @@ SessionMode = SessionMode.NotAllowed)]
         out ResInfoItem[] items,
         out DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode);
 
+        [OperationContract]
+        LibraryServerResult GetAuthorNumber(
+    string strAuthor,
+    bool bSelectPinyin,
+    bool bSelectEntry,
+    bool bOutputDebugInfo,
+    ref List<Question> questions,
+    out string strNumber,
+    out string strDebugInfo);
+
+        [OperationContract]
+        LibraryServerResult GetPinyin(
+string strText,
+out string strPinyinXml);
+
+        [OperationContract]
+        LibraryServerResult SetPinyin(
+string strPinyinXml);
     }
 }

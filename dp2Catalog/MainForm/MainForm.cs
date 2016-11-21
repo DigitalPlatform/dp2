@@ -30,10 +30,11 @@ using DigitalPlatform.GcatClient.gcat_new_ws;
 using DigitalPlatform.GcatClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Catalog
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Form, IChannelManager
     {
         // MarcFilter对象缓冲池
         public FilterCollection Filters = new FilterCollection();
@@ -110,6 +111,9 @@ namespace dp2Catalog
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channels_BeforeLogin);
+            this._channelPool.AfterLogin += new AfterLoginEventHandle(Channels_AfterLogin);
+
             int nRet = 0;
             string strError = "";
 
@@ -461,6 +465,13 @@ namespace dp2Catalog
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            if (this._channelPool != null)
+            {
+                this._channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channels_BeforeLogin);
+                this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channels_AfterLogin);
+                this._channelPool.Close();
+            }
+
             this.Servers.ServerChanged -= new dp2ServerChangedEventHandle(Servers_ServerChanged);
 
             // 保存到文件
@@ -520,7 +531,6 @@ namespace dp2Catalog
             int nRet = cfgCache.Save(null, out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
-
 
             //记住save,保存信息XML文件
             AppInfo.Save();
@@ -861,7 +871,6 @@ namespace dp2Catalog
         private void toolButton_stop_Click(object sender, EventArgs e)
         {
             stopManager.DoStopActive();
-
         }
 
         private void toolButton_prev_Click(object sender, EventArgs e)
@@ -4448,6 +4457,259 @@ out string strError)
                 detailform.CopyMarcToFixed();
             }
         }
+
+        List<LibraryChannel> _channelList = new List<LibraryChannel>();
+        public void DoStop(object sender, StopEventArgs e)
+        {
+            foreach (LibraryChannel channel in _channelList)
+            {
+                if (channel != null)
+                    channel.Abort();
+            }
+        }
+
+        #region dp2library 通道
+
+        public LibraryChannelPool _channelPool = new LibraryChannelPool();
+
+        // parameters:
+        //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
+        public LibraryChannel GetChannel(string strServerUrl,
+            string strUserName = ".",
+            GetChannelStyle style = GetChannelStyle.GUI)
+        {
+            dp2Server server = this.Servers[strServerUrl];
+            if (server == null)
+                throw new Exception("没有找到 URL 为 " + strServerUrl + " 的服务器对象");
+
+            if (strUserName == ".")
+                strUserName = server.DefaultUserName;
+
+            LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
+            if ((style & GetChannelStyle.GUI) != 0)
+                channel.Idle += channel_Idle;
+            _channelList.Add(channel);
+            // TODO: 检查数组是否溢出
+            return channel;
+        }
+
+        void channel_Idle(object sender, IdleEventArgs e)
+        {
+            Application.DoEvents();
+        }
+
+        public void ReturnChannel(LibraryChannel channel)
+        {
+            channel.Idle -= channel_Idle;
+
+            this._channelPool.ReturnChannel(channel);
+            _channelList.Remove(channel);
+        }
+
+        void Channels_BeforeLogin(object sender, DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
+        {
+            LibraryChannel channel = (LibraryChannel)sender;
+
+            dp2Server server = this.Servers[channel.Url];
+            if (server == null)
+            {
+                e.ErrorInfo = "没有找到 URL 为 " + channel.Url + " 的服务器对象";
+                e.Failed = true;
+                e.Cancel = true;
+                return;
+            }
+
+            if (e.FirstTry == true)
+            {
+                e.UserName = server.DefaultUserName;
+                e.Password = server.DefaultPassword;
+                e.Parameters = "location=dp2Catalog,type=worker";
+
+                /*
+                e.IsReader = false;
+                e.Location = "dp2Catalog";
+                 * */
+                // 2014/9/13
+                e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
+
+#if SN
+                // 从序列号中获得 expire= 参数值
+                string strExpire = this.GetExpireParam();
+                if (string.IsNullOrEmpty(strExpire) == false)
+                    e.Parameters += ",expire=" + strExpire;
+#endif
+
+                // 2014/11/10
+                if (this.TestMode == true)
+                    e.Parameters += ",testmode=true";
+
+                e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
+
+                if (String.IsNullOrEmpty(e.UserName) == false)
+                    return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
+            }
+
+            // 
+            IWin32Window owner = this;
+
+            ServerDlg dlg = SetDefaultAccount(
+                e.LibraryServerUrl,
+                null,
+                e.ErrorInfo,
+                owner);
+            if (dlg == null)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            e.UserName = dlg.UserName;
+            e.Password = dlg.Password;
+            e.SavePasswordShort = false;
+            e.Parameters = "location=dp2Catalog,type=worker";
+
+            // 2014/11/10
+            e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
+
+#if SN
+            {
+                // 从序列号中获得 expire= 参数值
+                string strExpire = this.GetExpireParam();
+                if (string.IsNullOrEmpty(strExpire) == false)
+                    e.Parameters += ",expire=" + strExpire;
+            }
+#endif
+
+            // 2014/11/10
+            if (this.TestMode == true)
+                e.Parameters += ",testmode=true";
+
+            e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
+
+            e.SavePasswordLong = true;
+            e.LibraryServerUrl = dlg.ServerUrl;
+        }
+
+        ServerDlg SetDefaultAccount(
+            string strServerUrl,
+            string strTitle,
+            string strComment,
+            IWin32Window owner)
+        {
+            dp2Server server = this.Servers[strServerUrl];
+
+            ServerDlg dlg = new ServerDlg();
+            GuiUtil.SetControlFont(dlg, this.Font);
+
+            if (String.IsNullOrEmpty(strServerUrl) == true)
+            {
+            }
+            else
+            {
+                dlg.ServerUrl = strServerUrl;
+            }
+
+            if (owner == null)
+                owner = this;
+
+
+            if (String.IsNullOrEmpty(strTitle) == false)
+                dlg.Text = strTitle;
+
+            dlg.Comment = strComment;
+            dlg.UserName = server.DefaultUserName;
+
+            this.AppInfo.LinkFormState(dlg,
+                "dp2_logindlg_state");
+            this.Activate();    // 让 MDI 子窗口翻出来到前面
+            dlg.ShowDialog(owner);
+
+            this.AppInfo.UnlinkFormState(dlg);
+
+
+            if (dlg.DialogResult == DialogResult.Cancel)
+            {
+                return null;
+            }
+
+            bool bChanged = false;
+
+            if (server.DefaultUserName != dlg.UserName)
+            {
+                server.DefaultUserName = dlg.UserName;
+                bChanged = true;
+            }
+
+            string strNewPassword = (dlg.SavePassword == true) ?
+            dlg.Password : "";
+            if (server.DefaultPassword != strNewPassword)
+            {
+                server.DefaultPassword = strNewPassword;
+                bChanged = true;
+            }
+
+            if (server.SavePassword != dlg.SavePassword)
+            {
+                server.SavePassword = dlg.SavePassword;
+                bChanged = true;
+            }
+
+            if (server.Url != dlg.ServerUrl)
+            {
+                server.Url = dlg.ServerUrl;
+                bChanged = true;
+            }
+
+            if (bChanged == true)
+                this.Servers.Changed = true;
+
+            return dlg;
+        }
+
+        public string CurrentUserName { get; set; }
+
+        void Channels_AfterLogin(object sender, AfterLoginEventArgs e)
+        {
+            LibraryChannel channel = (LibraryChannel)sender;
+
+            this.CurrentUserName = channel.UserName;
+
+            dp2Server server = this.Servers[channel.Url];
+            if (server == null)
+            {
+                e.ErrorInfo = "没有找到 URL 为 " + channel.Url + " 的服务器对象";
+                return;
+            }
+
+#if SN
+            if (server.Verified == false && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
+            {
+                string strError = "";
+                string strTitle = "dp2 检索窗需要先设置序列号才能访问服务器 " + server.Name + " " + server.Url;
+                int nRet = this.VerifySerialCode(strTitle,
+                    "",
+                    true,
+                    out strError);
+                if (nRet == -1)
+                {
+                    channel.Close();
+                    e.ErrorInfo = strTitle;
+#if NO
+                    MessageBox.Show(this.MainForm, "dp2 检索窗需要先设置序列号才能使用");
+                    MainForm.AppInfo.SetString(
+    "dp2_search_simple_query",
+    "resdirpath",
+    "");
+                    API.PostMessage(this.Handle, API.WM_CLOSE, 0, 0);
+#endif
+                    return;
+                }
+            }
+#endif
+            server.Verified = true;
+        }
+
+        #endregion
     }
 
     public class EnableState

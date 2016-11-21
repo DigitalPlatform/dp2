@@ -100,6 +100,24 @@
   <wsdl:message name="dp2libraryREST_Dir_OutputMessage">
     <wsdl:part name="parameters" element="tns:DirResponse" />
   </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetAuthorNumber_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetAuthorNumber" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetAuthorNumber_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetAuthorNumberResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetPinyin_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetPinyin" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_GetPinyin_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetPinyinResponse" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SetPinyin_InputMessage">
+    <wsdl:part name="parameters" element="tns:SetPinyin" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_SetPinyin_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SetPinyinResponse" />
+  </wsdl:message>
   <wsdl:message name="dp2libraryREST_GetVersion_InputMessage">
     <wsdl:part name="parameters" element="tns:GetVersion" />
   </wsdl:message>
@@ -667,6 +685,18 @@
     <wsdl:operation name="Dir">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Dir" message="tns:dp2libraryREST_Dir_InputMessage" />
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/DirResponse" message="tns:dp2libraryREST_Dir_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAuthorNumber">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetAuthorNumber" message="tns:dp2libraryREST_GetAuthorNumber_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetAuthorNumberResponse" message="tns:dp2libraryREST_GetAuthorNumber_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetPinyin">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetPinyin" message="tns:dp2libraryREST_GetPinyin_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetPinyinResponse" message="tns:dp2libraryREST_GetPinyin_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SetPinyin">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetPinyin" message="tns:dp2libraryREST_SetPinyin_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetPinyinResponse" message="tns:dp2libraryREST_SetPinyin_OutputMessage" />
     </wsdl:operation>
     <wsdl:operation name="GetVersion">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion" message="tns:dp2libraryREST_GetVersion_InputMessage" />

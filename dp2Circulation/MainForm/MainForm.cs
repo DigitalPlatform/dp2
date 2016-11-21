@@ -792,10 +792,12 @@ Stack:
                         "");
                 }
 
+#if GCAT_SERVER
                 if (this.m_bSavePinyinGcatID == false)
                     this.m_strPinyinGcatID = "";
                 this.AppInfo.SetString("entity_form", "gcat_pinyin_api_id", this.m_strPinyinGcatID);
                 this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", this.m_bSavePinyinGcatID);
+#endif
 
                 //记住save,保存信息XML文件
                 AppInfo.Save();
@@ -3202,7 +3204,7 @@ Stack:
         }
 #endif
         List<LibraryChannel> _channelList = new List<LibraryChannel>();
-        void DoStop(object sender, StopEventArgs e)
+        public void DoStop(object sender, StopEventArgs e)
         {
             foreach (LibraryChannel channel in _channelList)
             {

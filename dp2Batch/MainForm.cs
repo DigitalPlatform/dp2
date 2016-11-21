@@ -187,6 +187,7 @@ namespace dp2Batch
             this.tabPage_range = new System.Windows.Forms.TabPage();
             this.panel_range = new System.Windows.Forms.Panel();
             this.panel_resdirtree = new System.Windows.Forms.Panel();
+            this.treeView_rangeRes = new DigitalPlatform.rms.Client.ResTree();
             this.splitter_range = new System.Windows.Forms.Splitter();
             this.panel_rangeParams = new System.Windows.Forms.Panel();
             this.checkBox_export_fastMode = new System.Windows.Forms.CheckBox();
@@ -220,7 +221,6 @@ namespace dp2Batch
             this.statusStrip_main = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
-            this.treeView_rangeRes = new DigitalPlatform.rms.Client.ResTree();
             this.tabControl_main.SuspendLayout();
             this.tabPage_range.SuspendLayout();
             this.panel_range.SuspendLayout();
@@ -377,6 +377,20 @@ namespace dp2Batch
             this.panel_resdirtree.Size = new System.Drawing.Size(297, 234);
             this.panel_resdirtree.TabIndex = 6;
             // 
+            // treeView_rangeRes
+            // 
+            this.treeView_rangeRes.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeView_rangeRes.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.treeView_rangeRes.HideSelection = false;
+            this.treeView_rangeRes.ImageIndex = 0;
+            this.treeView_rangeRes.Location = new System.Drawing.Point(0, 4);
+            this.treeView_rangeRes.Name = "treeView_rangeRes";
+            this.treeView_rangeRes.SelectedImageIndex = 0;
+            this.treeView_rangeRes.Size = new System.Drawing.Size(293, 226);
+            this.treeView_rangeRes.TabIndex = 0;
+            this.treeView_rangeRes.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.treeView_rangeRes_AfterCheck);
+            this.treeView_rangeRes.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_rangeRes_AfterSelect);
+            // 
             // splitter_range
             // 
             this.splitter_range.Location = new System.Drawing.Point(309, 0);
@@ -430,7 +444,7 @@ namespace dp2Batch
             // 
             // textBox_dbPath
             // 
-            this.textBox_dbPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_dbPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_dbPath.Location = new System.Drawing.Point(75, 6);
             this.textBox_dbPath.Name = "textBox_dbPath";
@@ -449,7 +463,7 @@ namespace dp2Batch
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.textBox_endNo);
             this.groupBox1.Controls.Add(this.label3);
@@ -466,7 +480,7 @@ namespace dp2Batch
             // 
             // textBox_endNo
             // 
-            this.textBox_endNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_endNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_endNo.Location = new System.Drawing.Point(165, 95);
             this.textBox_endNo.Name = "textBox_endNo";
@@ -484,7 +498,7 @@ namespace dp2Batch
             // 
             // textBox_startNo
             // 
-            this.textBox_startNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_startNo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_startNo.Location = new System.Drawing.Point(165, 63);
             this.textBox_startNo.Name = "textBox_startNo";
@@ -502,7 +516,7 @@ namespace dp2Batch
             // 
             // radioButton_startEnd
             // 
-            this.radioButton_startEnd.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.radioButton_startEnd.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.radioButton_startEnd.Checked = true;
             this.radioButton_startEnd.Location = new System.Drawing.Point(21, 38);
@@ -514,7 +528,7 @@ namespace dp2Batch
             // 
             // radioButton_all
             // 
-            this.radioButton_all.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.radioButton_all.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.radioButton_all.Location = new System.Drawing.Point(21, 19);
             this.radioButton_all.Name = "radioButton_all";
@@ -536,7 +550,7 @@ namespace dp2Batch
             this.tabPage_resultset.BackColor = System.Drawing.Color.Transparent;
             this.tabPage_resultset.Location = new System.Drawing.Point(4, 23);
             this.tabPage_resultset.Name = "tabPage_resultset";
-            this.tabPage_resultset.Size = new System.Drawing.Size(626, 98);
+            this.tabPage_resultset.Size = new System.Drawing.Size(626, 246);
             this.tabPage_resultset.TabIndex = 1;
             this.tabPage_resultset.Text = "按结果集导出";
             this.tabPage_resultset.UseVisualStyleBackColor = true;
@@ -557,7 +571,7 @@ namespace dp2Batch
             this.tabPage_import.Controls.Add(this.label4);
             this.tabPage_import.Location = new System.Drawing.Point(4, 23);
             this.tabPage_import.Name = "tabPage_import";
-            this.tabPage_import.Size = new System.Drawing.Size(626, 98);
+            this.tabPage_import.Size = new System.Drawing.Size(626, 246);
             this.tabPage_import.TabIndex = 2;
             this.tabPage_import.Text = "导入";
             this.tabPage_import.UseVisualStyleBackColor = true;
@@ -574,7 +588,7 @@ namespace dp2Batch
             // 
             // textBox_import_range
             // 
-            this.textBox_import_range.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_import_range.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_import_range.Location = new System.Drawing.Point(119, 33);
             this.textBox_import_range.Name = "textBox_import_range";
@@ -602,7 +616,7 @@ namespace dp2Batch
             // 
             // textBox_import_fileName
             // 
-            this.textBox_import_fileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_import_fileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_import_fileName.Location = new System.Drawing.Point(119, 8);
             this.textBox_import_fileName.Name = "textBox_import_fileName";
@@ -630,14 +644,14 @@ namespace dp2Batch
             // 
             // textBox_import_dbMap
             // 
-            this.textBox_import_dbMap.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_import_dbMap.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_import_dbMap.Location = new System.Drawing.Point(12, 104);
             this.textBox_import_dbMap.Multiline = true;
             this.textBox_import_dbMap.Name = "textBox_import_dbMap";
             this.textBox_import_dbMap.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_import_dbMap.Size = new System.Drawing.Size(489, 110);
+            this.textBox_import_dbMap.Size = new System.Drawing.Size(489, 139);
             this.textBox_import_dbMap.TabIndex = 1;
             // 
             // label4
@@ -707,20 +721,6 @@ namespace dp2Batch
             // 
             this.toolStripProgressBar_main.Name = "toolStripProgressBar_main";
             this.toolStripProgressBar_main.Size = new System.Drawing.Size(172, 16);
-            // 
-            // treeView_rangeRes
-            // 
-            this.treeView_rangeRes.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView_rangeRes.Font = new System.Drawing.Font("Tahoma", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.treeView_rangeRes.HideSelection = false;
-            this.treeView_rangeRes.ImageIndex = 0;
-            this.treeView_rangeRes.Location = new System.Drawing.Point(0, 4);
-            this.treeView_rangeRes.Name = "treeView_rangeRes";
-            this.treeView_rangeRes.SelectedImageIndex = 0;
-            this.treeView_rangeRes.Size = new System.Drawing.Size(293, 226);
-            this.treeView_rangeRes.TabIndex = 0;
-            this.treeView_rangeRes.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.treeView_rangeRes_AfterCheck);
-            this.treeView_rangeRes.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_rangeRes_AfterSelect);
             // 
             // MainForm
             // 
@@ -5070,7 +5070,7 @@ this.checkBox_import_fastMode.Checked);
             respath.Path = strPath;
 
             // 加工元数据
-            ExportUtil.ChangeMetaData(ref strMetaData,
+            StringUtil.ChangeMetaData(ref strMetaData,
                 null,
                 null,
                 null,
@@ -5232,7 +5232,7 @@ this.checkBox_import_fastMode.Checked);
                 respath.Path = strOutputPath;	// strResPath;
 
                 // strMetaData还要加入资源id?
-                ExportUtil.ChangeMetaData(ref strMetaData,
+                StringUtil.ChangeMetaData(ref strMetaData,
                     strID,
                     null,
                     null,

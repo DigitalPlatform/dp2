@@ -2370,7 +2370,7 @@ namespace dp2rms
                 ResPath respath = new ResPath(textBox_recPath.Text);
 
                 // 向backup文件中保存第一个 res
-                ExportUtil.ChangeMetaData(ref this.m_strMetaData, // ResFileList
+                StringUtil.ChangeMetaData(ref this.m_strMetaData, // ResFileList
                     null,
                     null,
                     null,

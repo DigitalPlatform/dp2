@@ -57,7 +57,7 @@ namespace DigitalPlatform.LibraryServer
             bool bSelectPinyin,
             bool bSelectEntry,
             bool bOutputDebugInfo,
-            ref QuestionCollection questions,
+            ref List<Question> questions,
             out string strNumber,
             out StringBuilder debug_info,
             out string strError)
@@ -201,7 +201,7 @@ namespace DigitalPlatform.LibraryServer
                 // 如果命中多个记录
                 if (aPath.Count > 1 && bSelectEntry == true)
                 {
-                    Question q = questions.GetQuestion(nStep);
+                    Question q = GetQuestion(questions, nStep);
                     if (q == null)
                     {
                         string strNameList = BuildNameList(
@@ -213,7 +213,8 @@ namespace DigitalPlatform.LibraryServer
                         string strAskText = "名称 '" + strPart + "' 存在多个条目: \r\n---\r\n"
                             + strNameList
                             + "---\r\n\r\n请选择一个。(输入序号，从1开始计数)";
-                        q = questions.NewQuestion(nStep,
+                        q = NewQuestion(questions,
+                            nStep,
                             strAskText);
                         Debug.Assert(q != null, "");
                         strError = "请回答问题，以便为 '" + strAuthor + "' 确定适当的号码表条目。";
@@ -801,7 +802,7 @@ namespace DigitalPlatform.LibraryServer
         //		0	没有找到
         //		1	找到
         int GetPinyin(
-            ref QuestionCollection questions,
+            ref List<Question> questions,
             ref int nStep,
             string strAuthor,
             RmsChannel channel,
@@ -896,13 +897,14 @@ namespace DigitalPlatform.LibraryServer
 
                     return 1;
                 }
-                Question q = questions.GetQuestion(nStep);
+                Question q = GetQuestion(questions, nStep);
                 if (q == null)
                 {
                     string strAskText = "汉字 '" + strHanzi + "' 的拼音如下: \r\n---\r\n"
                         + BuildPinyinList(strPinyin)
                         + "---\r\n\r\n请选择一个。(输入序号，从1开始计数)";
-                    q = questions.NewQuestion(nStep,
+                    q = NewQuestion(questions,
+                        nStep,
                         strAskText);
                     Debug.Assert(q != null, "");
                     strError = "请回答问题，以便为 '" + strAuthor + "' 中的多音字确定读音。";
@@ -2219,8 +2221,45 @@ out string strError)
         }
 
         #endregion
+
+        public static Question GetQuestion(List<Question> questions, int index)
+        {
+            if (index >= questions.Count)
+                return null;
+            return questions[index];
+        }
+
+        public static Question NewQuestion(List<Question> questions,
+            int index,
+            string strText)
+        {
+            Question result = null;
+
+            for (; ; )
+            {
+                if (index >= questions.Count)
+                {
+                    result = new Question();
+                    questions.Add(result);
+                }
+                else
+                    break;
+            }
+
+            if (index < questions.Count)
+            {
+                result = questions[index];
+                result.Text = strText;
+                result.Answer = "";
+                return result;
+            }
+
+            Debug.Assert(false, "");	// 不可能走到这里
+            return null;
+        }
     }
 
+#if NO
     public class QuestionCollection : List<Question>
     {
         // public string Name = "";
@@ -2260,8 +2299,9 @@ out string strError)
             return null;
         }
     }
+#endif
 
-    [DataContract(Namespace = "http://dp2003.com/gcat/")]
+    [DataContract(Namespace = "http://dp2003.com/dp2library/")]
     public class Question
     {
         [DataMember]

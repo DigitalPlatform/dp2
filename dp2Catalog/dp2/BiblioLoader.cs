@@ -38,11 +38,14 @@ namespace dp2Catalog
             set;
         }
 
+#if OLD_CHANNEL
         public LibraryChannelCollection Channels
         {
             get;
             set;
         }
+#endif
+        public IChannelManager ChannelManager { get; set; }
 
         public dp2ServerCollection Servers
         {
@@ -132,107 +135,115 @@ namespace dp2Catalog
                 }
                 string strServerUrl = server.Url;
 
-                LibraryChannel channel = this.Channels.GetChannel(strServerUrl);
-
-                List<string> batch = new List<string>();
-                for (; batch.Count > 0 || temp.Count > 0; )
+                LibraryChannel channel = this.ChannelManager.GetChannel(strServerUrl);
+                try
                 {
-
-                    if (batch.Count == 0)
+                    List<string> batch = new List<string>();
+                    for (; batch.Count > 0 || temp.Count > 0; )
                     {
-                        for (int i = 0; i < Math.Min(temp.Count, 100); i++)
+
+                        if (batch.Count == 0)
                         {
-                            batch.Add(temp[i]);
+                            for (int i = 0; i < Math.Min(temp.Count, 100); i++)
+                            {
+                                batch.Add(temp[i]);
+                            }
+                            temp.RemoveRange(0, batch.Count);
                         }
-                        temp.RemoveRange(0, batch.Count);
-                    }
 
-                    // 每100个一批
-                    if (batch.Count > 0)
-                    {
-                    REDO:
-                        string strCommand = "@path-list:" + StringUtil.MakePathList(batch);
-
-                        string[] results = null;
-                        byte[] timestamp = null;
-                        string strError = "";
-                        long lRet = channel.GetBiblioInfos(
-                            this.Stop,
-                            strCommand,
-                            "",
-                            formats,
-                            out results,
-                            out timestamp,
-                            out strError);
-                        if (lRet == -1)
-                            throw new Exception(strError);
-                        if (lRet == 0)
+                        // 每100个一批
+                        if (batch.Count > 0)
                         {
-                            if (lRet == 0 && String.IsNullOrEmpty(strError) == true)
+                        REDO:
+                            string strCommand = "@path-list:" + StringUtil.MakePathList(batch);
+
+                            string[] results = null;
+                            byte[] timestamp = null;
+                            string strError = "";
+                            long lRet = channel.GetBiblioInfos(
+                                this.Stop,
+                                strCommand,
+                                "",
+                                formats,
+                                out results,
+                                out timestamp,
+                                out strError);
+                            if (lRet == -1)
+                                throw new Exception(strError);
+                            if (lRet == 0)
                             {
-                                foreach (string path in batch)
+                                if (lRet == 0 && String.IsNullOrEmpty(strError) == true)
                                 {
-                                    BiblioItem item = new BiblioItem();
-                                    item.RecPath = path + "@" + temp.ServerName;
-                                    item.ErrorCode = ErrorCode.NotFound;
-                                    item.ErrorInfo = "书目记录 '" + path + "' 不存在";
-                                    yield return item;
+                                    foreach (string path in batch)
+                                    {
+                                        BiblioItem item = new BiblioItem();
+                                        item.RecPath = path + "@" + temp.ServerName;
+                                        item.ErrorCode = ErrorCode.NotFound;
+                                        item.ErrorInfo = "书目记录 '" + path + "' 不存在";
+                                        yield return item;
+                                    }
+                                    goto CONTINUE;
                                 }
-                                goto CONTINUE;
-                            }
 
 
-                            // 如果results.Length表现正常，其实还可以继续处理
-                            if (results != null && results.Length > 0)
-                            {
+                                // 如果results.Length表现正常，其实还可以继续处理
+                                if (results != null && results.Length > 0)
+                                {
+                                }
+                                else
+                                {
+                                    strError = "获得书目记录 '" + StringUtil.MakePathList(batch) + "' 时发生错误: " + strError;
+                                    throw new Exception(strError);
+                                }
                             }
-                            else
+
+                            if (results == null)
                             {
-                                strError = "获得书目记录 '" + StringUtil.MakePathList(batch) + "' 时发生错误: " + strError;
+                                strError = "results == null";
                                 throw new Exception(strError);
                             }
-                        }
 
-                        if (results == null)
-                        {
-                            strError = "results == null";
-                            throw new Exception(strError);
-                        }
-
-                        for (int i = 0; i < results.Length / formats.Length; i++)
-                        {
-                            BiblioItem item = new BiblioItem();
-                            item.RecPath = batch[i] + "@" + temp.ServerName;
-                            if (nContentIndex != -1)
-                                item.Content = results[i * formats.Length + nContentIndex];
-                            if (nTimestampIndex != -1)
-                                item.Timestamp = ByteArray.GetTimeStampByteArray(results[i * formats.Length + nTimestampIndex]);
-                            if (nMetadataIndex != -1)
-                                item.Metadata = results[i * formats.Length + nMetadataIndex];
-                            if (string.IsNullOrEmpty(item.Content) == true)
+                            for (int i = 0; i < results.Length / formats.Length; i++)
                             {
-                                item.ErrorCode = ErrorCode.NotFound;
-                                item.ErrorInfo = "书目记录 '" + item.RecPath + "' 不存在";
+                                BiblioItem item = new BiblioItem();
+                                item.RecPath = batch[i] + "@" + temp.ServerName;
+                                if (nContentIndex != -1)
+                                    item.Content = results[i * formats.Length + nContentIndex];
+                                if (nTimestampIndex != -1)
+                                    item.Timestamp = ByteArray.GetTimeStampByteArray(results[i * formats.Length + nTimestampIndex]);
+                                if (nMetadataIndex != -1)
+                                    item.Metadata = results[i * formats.Length + nMetadataIndex];
+                                if (string.IsNullOrEmpty(item.Content) == true)
+                                {
+                                    item.ErrorCode = ErrorCode.NotFound;
+                                    item.ErrorInfo = "书目记录 '" + item.RecPath + "' 不存在";
+                                }
+                                yield return item;
+
                             }
-                            yield return item;
 
+                        CONTINUE:
+                            if (batch.Count > results.Length / formats.Length)
+                            {
+                                // 有本次没有获取到的记录
+                                batch.RemoveRange(0, results.Length / formats.Length);
+                                /*
+                                if (index == m_recpaths.Count - 1)
+                                    goto REDO;  // 当前已经是最后一轮了，需要继续做完
+                                 * */
+
+                                // 否则可以留给下一轮处理
+                            }
+                            else
+                                batch.Clear();
                         }
-
-                    CONTINUE:
-                        if (batch.Count > results.Length / formats.Length)
-                        {
-                            // 有本次没有获取到的记录
-                            batch.RemoveRange(0, results.Length / formats.Length);
-                            /*
-                            if (index == m_recpaths.Count - 1)
-                                goto REDO;  // 当前已经是最后一轮了，需要继续做完
-                             * */
-
-                            // 否则可以留给下一轮处理
-                        }
-                        else
-                            batch.Clear();
                     }
+
+                    // 
+                }
+                finally
+                {
+                    Program.MainForm.ReturnChannel(channel);
                 }
             }
 

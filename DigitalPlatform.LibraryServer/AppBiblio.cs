@@ -875,6 +875,29 @@ namespace DigitalPlatform.LibraryServer
                 {
                     strBiblio = strBiblioXml;
                 }
+                else if (IsResultType(strBiblioType, "iso2709") == true)
+                {
+                    List<string> parts = StringUtil.ParseTwoPart(strBiblioType, ":");
+                    string strEncoding = parts[1];
+                    if (string.IsNullOrEmpty(strEncoding))
+                        strEncoding = "utf-8";
+
+                    byte [] result = null;
+                    Encoding targetEncoding = Encoding.GetEncoding(strEncoding);
+                    nRet = GetIso2709(strBiblioXml,
+                        targetEncoding,
+                        out result,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        if (String.IsNullOrEmpty(strErrorText) == false)
+                            strErrorText += ";\r\n";
+                        strErrorText += strError;
+                        goto CONTINUE;
+                    }
+                    strBiblio = Convert.ToBase64String(result);
+
+                }
                 // 模拟创建检索点
                 else if (String.Compare(strBiblioType, "keys", true) == 0)
                 {
@@ -1311,6 +1334,52 @@ namespace DigitalPlatform.LibraryServer
                 strError = strErrorText;
                 return -1;
             }
+            return 0;
+        }
+
+        static int GetIso2709(string strXml, 
+            Encoding targetEncoding,
+            out byte [] result,
+            out string strError)
+        {
+            strError = "";
+            result = null;
+            int nRet = 0;
+
+            string strMARC = "";
+            string strMarcSyntax = "";
+            // 将XML格式转换为MARC格式
+            // 自动从数据记录中获得MARC语法
+            nRet = MarcUtil.Xml2Marc(strXml,
+                true,
+                null,
+                out strMarcSyntax,
+                out strMARC,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "XML转换到MARC记录时出错: " + strError;
+                return -1;
+            }
+
+            // 将MARC机内格式转换为ISO2709格式
+            // parameters:
+            //      strSourceMARC   [in]机内格式MARC记录。
+            //      strMarcSyntax   [in]为"unimarc"或"usmarc"
+            //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
+            //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
+            // return:
+            //      -1  出错
+            //      0   成功
+            nRet = MarcUtil.CvtJineiToISO2709(
+                strMARC,
+                strMarcSyntax,
+                targetEncoding,
+                out result,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
             return 0;
         }
 

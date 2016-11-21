@@ -1522,7 +1522,9 @@ namespace dp2Catalog
             {
                 info = this.MainForm.ServerInfos.GetServerInfo(stop,
                     false,
+#if OLD_CHANNEL
                     this.Channels,
+#endif
                     strServerName,
                     strServerUrl,
                     this.MainForm.TestMode,
@@ -1864,7 +1866,11 @@ namespace dp2Catalog
             GetDp2ResDlg dlg = new GetDp2ResDlg();
             GuiUtil.SetControlFont(dlg, this.Font);
 
+#if OLD_CHANNEL
             dlg.dp2Channels = this.Channels;
+#endif
+            dlg.ChannelManager = Program.MainForm;
+
             dlg.Servers = this.MainForm.Servers;
             dlg.EnabledIndices = new int[] { dp2ResTree.RESTYPE_SERVER };
             dlg.Path = this.textBox_serverName.Text;
