@@ -211,23 +211,22 @@ out string strError)
             new_stop.OnStop += new StopEventHandler(new_stop_OnStop);
             new_stop.Initial("正在获得 '" + strText + "' 的拼音信息 (从服务器 " + this.PinyinServerUrl + ")...");
             new_stop.BeginLoop();
+
+            m_gcatClient = null;
 #else
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在获得拼音信息 ...");
             Stop.BeginLoop();
 #endif
 
-#if GCAT_SERVER
-            m_gcatClient = null;
-#endif
             try
             {
 
 #if GCAT_SERVER
                 m_gcatClient = GcatNew.CreateChannel(this.PinyinServerUrl);
+            REDO_GETPINYIN:
 #endif
 
-            REDO_GETPINYIN:
                 //int nStatus = -1;	// 前面一个字符的类型 -1:前面没有字符 0:普通英文字母 1:空格 2:汉字
                 string strPinyinXml = "";
 #if GCAT_SERVER

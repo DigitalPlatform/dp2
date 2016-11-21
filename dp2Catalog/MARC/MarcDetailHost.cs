@@ -216,7 +216,7 @@ namespace dp2Catalog
             PinyinStyle style,  // = PinyinStyle.None,
             string strPrefix,
             string strDuoyinStyle)
-            // bool bAutoSel = false)
+        // bool bAutoSel = false)
         {
             string strError = "";
             XmlDocument cfg_dom = new XmlDocument();
@@ -589,7 +589,7 @@ namespace dp2Catalog
                     EndGcatLoop();
                 }
             }
-                        else // dp2library 服务器
+            else // dp2library 服务器
             {
                 Hashtable question_table = (Hashtable)Program.MainForm.ParamTable["question_table"];
                 if (question_table == null)
@@ -606,7 +606,7 @@ namespace dp2Catalog
                     //      1   succeed
                     long nRet = GetAuthorNumber(
                         ref question_table,
-                        this.DetailForm.Progress,
+                        this.DetailForm.stop,
                         this.DetailForm,
                         strGcatWebServiceUrl,
                         strAuthor,

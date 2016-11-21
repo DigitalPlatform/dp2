@@ -17,6 +17,11 @@ using System.Xml;
 using System.IO;
 using System.Net;   // for WebClient class
 
+#if GCAT_SERVER
+using DigitalPlatform.GcatClient.gcat_new_ws;
+using DigitalPlatform.GcatClient;
+#endif
+
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
@@ -26,8 +31,6 @@ using DigitalPlatform.Script;   // QuickPinyin IsbnSplitter
 using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.GcatClient.gcat_new_ws;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 using DigitalPlatform.LibraryClient;
@@ -349,8 +352,10 @@ namespace dp2Catalog
 
             StartPrepareNames(true);
 
+#if GCAT_SERVER
             this.m_strPinyinGcatID = this.AppInfo.GetString("entity_form", "gcat_pinyin_api_id", "");
             this.m_bSavePinyinGcatID = this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", false);
+#endif
         }
 
         public void StartPrepareNames(bool bFullInitial)
@@ -520,10 +525,12 @@ namespace dp2Catalog
                 AppInfo.SaveFormStates(this,
                     "mainformstate");
 
+#if GCAT_SERVER
                 if (this.m_bSavePinyinGcatID == false)
                     this.m_strPinyinGcatID = "";
                 this.AppInfo.SetString("entity_form", "gcat_pinyin_api_id", this.m_strPinyinGcatID);
                 this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", this.m_bSavePinyinGcatID);
+#endif
             }
 
             // cfgcache
@@ -3139,9 +3146,11 @@ out string strError)
             return 1;   // 正常结束
         }
 
+#if GCAT_SERVER
         GcatServiceClient m_gcatClient = null;
         string m_strPinyinGcatID = "";
         bool m_bSavePinyinGcatID = false;
+#endif
 
         // 包装后的版本
         public int SmartHanziTextToPinyin(
@@ -3188,6 +3197,17 @@ out string strError)
 
             bool bNotFoundPinyin = false;   // 是否出现过没有找到拼音、只能把汉字放入结果字符串的情况
 
+#if !GCAT_SERVER
+            string strPinyinServerUrl = this.PinyinServerUrl;
+            if (string.IsNullOrEmpty(strPinyinServerUrl) == false
+                && strPinyinServerUrl.Contains("gcat"))
+            {
+                strError = "请重新配置拼音服务器 URL。当前的配置 '" + strPinyinServerUrl + "' 已过时";
+                return -1;
+            }
+            LibraryChannel channel = this.GetChannel(strPinyinServerUrl, "public");
+#endif
+#if GCAT_SERVER
             Stop new_stop = new DigitalPlatform.Stop();
             new_stop.Register(this.stopManager, true);	// 和容器关联
             new_stop.OnStop += new StopEventHandler(new_stop_OnStop);
@@ -3195,14 +3215,24 @@ out string strError)
             new_stop.BeginLoop();
 
             m_gcatClient = null;
+#else
+            Stop new_stop = new DigitalPlatform.Stop();
+            new_stop.Register(this.stopManager, true);	// 和容器关联
+            new_stop.OnStop += new StopEventHandler(this.DoStop);
+            new_stop.Initial("正在获得 '" + strText + "' 的拼音信息 (从服务器 " + strPinyinServerUrl + ")...");
+            new_stop.BeginLoop();
+#endif
+
             try
             {
-
+#if GCAT_SERVER
                 m_gcatClient = GcatNew.CreateChannel(this.PinyinServerUrl);
-
             REDO_GETPINYIN:
+#endif
+
                 int nStatus = -1;	// 前面一个字符的类型 -1:前面没有字符 0:普通英文字母 1:空格 2:汉字
                 string strPinyinXml = "";
+#if GCAT_SERVER
                 // return:
                 //      -2  strID验证失败
                 //      -1  出错
@@ -3214,10 +3244,22 @@ out string strError)
                     strText,
                     out strPinyinXml,
                     out strError);
-                if (nRet == -1)
+#else
+                // return:
+                //      -2  strID验证失败
+                //      -1  出错
+                //      0   成功
+                long lRet = channel.GetPinyin(
+                    strText,
+                    out strPinyinXml,
+                    out strError);
+#endif
+                if (lRet == -1)
                 {
+#if GCAT_SERVER
                     if (new_stop != null && new_stop.State != 0)
                         return 0;
+#endif
 
                     DialogResult result = MessageBox.Show(this,
     "从服务器 '" + this.PinyinServerUrl + "' 获取拼音的过程出错:\r\n" + strError + "\r\n\r\n是否要临时改为使用本机加拼音功能? \r\n\r\n(注：临时改用本机拼音的状态在程序退出时不会保留。如果要永久改用本机拼音方式，请使用主菜单的“参数配置”命令，将“服务器”属性页的“拼音服务器URL”内容清空)",
@@ -3235,7 +3277,8 @@ out string strError)
                     return -1;
                 }
 
-                if (nRet == -2)
+#if GCAT_SERVER
+                if (lRet == -2)
                 {
                     IdLoginDialog login_dlg = new IdLoginDialog();
                     GuiUtil.SetControlFont(login_dlg, this.Font);
@@ -3253,6 +3296,7 @@ out string strError)
                     this.m_bSavePinyinGcatID = login_dlg.SaveID;
                     goto REDO_GETPINYIN;
                 }
+#endif
 
                 XmlDocument dom = new XmlDocument();
                 try
@@ -3282,7 +3326,7 @@ out string strError)
                         strWordPinyin = strWordPinyin.Trim();
 
                     // 目前只取多套读音的第一套
-                    nRet = strWordPinyin.IndexOf(";");
+                    int nRet = strWordPinyin.IndexOf(";");
                     if (nRet != -1)
                         strWordPinyin = strWordPinyin.Substring(0, nRet).Trim();
 
@@ -3456,6 +3500,7 @@ out string strError)
 
                 if (dom.DocumentElement.ChildNodes.Count > 0)
                 {
+#if GCAT_SERVER
                     // return:
                     //      -2  strID验证失败
                     //      -1  出错
@@ -3473,6 +3518,16 @@ out string strError)
 
                         return -1;
                     }
+#else
+                    // return:
+                    //      -1  出错
+                    //      0   成功
+                    lRet = channel.SetPinyin(
+                        dom.DocumentElement.OuterXml,
+                        out strError);
+                    if (lRet == -1)
+                        return -1;
+#endif
                 }
 #endif
 
@@ -3483,6 +3538,16 @@ out string strError)
             }
             finally
             {
+#if !GCAT_SERVER
+                this.ReturnChannel(channel);
+
+                new_stop.EndLoop();
+                new_stop.OnStop += new StopEventHandler(this.DoStop);
+                new_stop.Initial("");
+                new_stop.Unregister();
+#endif
+
+#if GCAT_SERVER
                 new_stop.EndLoop();
                 new_stop.OnStop -= new StopEventHandler(new_stop_OnStop);
                 new_stop.Initial("");
@@ -3492,9 +3557,11 @@ out string strError)
                     m_gcatClient.Close();
                     m_gcatClient = null;
                 }
+#endif
             }
         }
 
+        #if GCAT_SERVER
         void new_stop_OnStop(object sender, StopEventArgs e)
         {
             if (this.m_gcatClient != null)
@@ -3502,6 +3569,7 @@ out string strError)
                 this.m_gcatClient.Abort();
             }
         }
+#endif
 
         // parameters:
         //      strIndicator    字段指示符。如果用null调用，则表示不对指示符进行筛选
