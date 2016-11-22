@@ -55,7 +55,12 @@ namespace dp2Circulation
 
         internal CommentViewerForm m_commentViewer = null;
 
+        // 主要的通道池，用于当前服务器
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
+
+        // 次要的通道池，用于著者号码和拼音
+        public LibraryChannelPool _channelPoolExt = new LibraryChannelPool();
+
 
         // 2014/10/3
         // MarcFilter对象缓冲池
@@ -388,6 +393,9 @@ namespace dp2Circulation
         {
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
+
+            this._channelPoolExt.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(ChannelExt_BeforeLogin);
+            this._channelPoolExt.AfterLogin += new AfterLoginEventHandle(ChannelExt_AfterLogin);
 
             this.BeginInvoke(new Action(FirstInitial));
         }
@@ -816,6 +824,14 @@ Stack:
                 this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
                 this._channelPool.Close();
             }
+
+            if (this._channelPoolExt != null)
+            {
+                this._channelPoolExt.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(ChannelExt_BeforeLogin);
+                this._channelPoolExt.AfterLogin -= new AfterLoginEventHandle(ChannelExt_AfterLogin);
+                this._channelPoolExt.Close();
+            }
+
 #if NO
             if (this.Channel != null)
                 this.Channel.Close();   // TODO: 最好限制一个时间，超过这个时间则Abort()
@@ -2530,37 +2546,40 @@ Stack:
                 }
             }
 #endif
-
             if (e.FirstTry == true)
             {
-                e.UserName = AppInfo.GetString(
+                string strPhoneNumber = "";
+
+                {
+                    e.UserName = AppInfo.GetString(
+                        "default_account",
+                        "username",
+                        "");
+                    e.Password = AppInfo.GetString(
+                        "default_account",
+                        "password",
+                        "");
+                    e.Password = this.DecryptPasssword(e.Password);
+
+                    strPhoneNumber = AppInfo.GetString(
+        "default_account",
+        "phoneNumber",
+        "");
+
+                    bool bIsReader =
+                        AppInfo.GetBoolean(
+                        "default_account",
+                        "isreader",
+                        false);
+
+                    string strLocation = AppInfo.GetString(
                     "default_account",
-                    "username",
+                    "location",
                     "");
-                e.Password = AppInfo.GetString(
-                    "default_account",
-                    "password",
-                    "");
-                e.Password = this.DecryptPasssword(e.Password);
-
-                string strPhoneNumber = AppInfo.GetString(
-    "default_account",
-    "phoneNumber",
-    "");
-
-                bool bIsReader =
-                    AppInfo.GetBoolean(
-                    "default_account",
-                    "isreader",
-                    false);
-
-                string strLocation = AppInfo.GetString(
-                "default_account",
-                "location",
-                "");
-                e.Parameters = "location=" + strLocation;
-                if (bIsReader == true)
-                    e.Parameters += ",type=reader";
+                    e.Parameters = "location=" + strLocation;
+                    if (bIsReader == true)
+                        e.Parameters += ",type=reader";
+                }
 
                 // 2014/9/13
                 e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
@@ -4776,6 +4795,7 @@ Stack:
             }
         }
 
+        // TODO: 对于外部 URL 如何做到不记载到 dp2circulation.xml 中?
         // parameters:
         //      bLogin  是否在对话框后立即登录？如果为false，表示只是设置缺省帐户，并不直接登录
         CirculationLoginDlg SetDefaultAccount(
@@ -4868,8 +4888,6 @@ Stack:
                 && dlg.SavePasswordShort == false
                 && dlg.SavePasswordLong == false)
                 dlg.AutoShowShortSavePasswordTip = true;
-
-
 
             if (fail_contidion == LoginFailCondition.RetryLogin)
             {

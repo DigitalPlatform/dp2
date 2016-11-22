@@ -2040,7 +2040,7 @@ namespace dp2Circulation
 
             for (; ; )
             {
-                LibraryChannel channel = Program.MainForm.GetChannel(strUrl, "public");
+                LibraryChannel channel = Program.MainForm.GetExtChannel(strUrl, "public");
                 try
                 {
                     // 这个函数具有catch 通讯中 exeption的能力
@@ -2065,7 +2065,7 @@ namespace dp2Circulation
                 }
                 finally
                 {
-                    Program.MainForm.ReturnChannel(channel);
+                    Program.MainForm.ReturnExtChannel(channel);
                 }
 
                 string strTitle = strError;

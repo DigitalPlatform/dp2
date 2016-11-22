@@ -13,6 +13,7 @@ using Lucene.Net.Analysis.Tokenattributes;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -151,7 +152,7 @@ namespace DigitalPlatform.LibraryServer
 
                 List<string> aPath = null;
                 lRet = channel.DoGetSearchResult(
-                "default",
+                    "default",
                     1000,
                     "zh",
                     null,	// stop,
@@ -783,7 +784,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 string strHanzi = dom.DocumentElement.GetAttribute("h");
-                string strPinyin = dom.DocumentElement.GetAttribute( "p");
+                string strPinyin = dom.DocumentElement.GetAttribute("p");
                 string strComment = dom.DocumentElement.GetAttribute("c");
 
                 if (strComment != "")
@@ -820,6 +821,7 @@ namespace DigitalPlatform.LibraryServer
                 + StringUtil.GetXmlStringSimple(strHanzi)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>10</maxCount></item><lang>zh</lang></target>";
 
+#if NO
             // TODO: 最好是连检索带获取命中的第一条记录
             long lRet = channel.DoSearch(strQueryXml,
                 "default",
@@ -875,6 +877,27 @@ namespace DigitalPlatform.LibraryServer
                 strError = "检索 '" + strPath + "' 记录体时出错: " + strError;
                 return -1;
             }
+
+#endif
+
+            Record[] records = null;
+            long lRet = channel.DoSearchEx(strQueryXml,
+                "default",
+                "", // strOutputStyle
+                1,
+                "zh",
+                "id,xml",
+                out records,
+                out strError);
+            if (lRet == -1)
+            {
+                strError = "检索拼音库时出错: " + strError;
+                return -1;
+            }
+            if (lRet == 0)
+                return 0;	// not found
+
+            string strXml = records[0].RecordBody.Xml;
 
             XmlDocument dom = new XmlDocument();
             try
@@ -1744,6 +1767,7 @@ out string strError)
                          + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
                 }
 
+#if NO
                 long lRet = channel.DoSearch(strQueryXml,
                     "default",
                     "", // strOutputStyle
@@ -1779,7 +1803,7 @@ out string strError)
                     return -1;
                 }
 
-                for (int i = 0; i < aPath.Count; i++)
+                                for (int i = 0; i < aPath.Count; i++)
                 {
                     string strPath = (string)aPath[i];
                     // 取记录
@@ -1838,7 +1862,66 @@ out string strError)
                     return 1;
                 }
 
-                return 0;
+#endif
+                Record[] records = null;
+                long lRet = channel.DoSearchEx(strQueryXml,
+    "default",
+    "", // strOutputStyle
+    1,
+    "zh",
+    "id,xml",
+    out records,
+    out strError);
+                if (lRet == -1)
+                {
+                    if (strHanzi.Length == 1)
+                    {
+                        strError = "检索库 " + this.PinyinDbName + " 时出错: " + strError;
+                    }
+                    else
+                    {
+                        strError = "检索库 " + this.WordDbName + " 时出错: " + strError;
+                    }
+                    return -1;
+                }
+                if (lRet == 0)
+                    return 0;
+
+                string strXml = records[0].RecordBody.Xml;
+
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.LoadXml(strXml);
+                }
+                catch (Exception ex)
+                {
+                    strError = "装载路径为 '" + records[0].Path + "' 的 XML 记录到 DOM 时出错: " + ex.Message;
+                    return -1;
+                }
+
+                if (strHanzi.Length == 1)
+                    strPinyin = DomUtil.GetAttr(dom.DocumentElement, "p");
+                else
+                {
+                    XmlNodeList nodes = dom.DocumentElement.SelectNodes("pinyin");
+
+                    // 排序。使用频率高的在前
+                    List<XmlNode> node_array = new List<XmlNode>();
+                    foreach (XmlNode node in nodes)
+                    {
+                        node_array.Add(node);
+                    }
+                    node_array.Sort(new HitCountComparer());
+
+                    foreach (XmlNode node in node_array)
+                    {
+                        if (string.IsNullOrEmpty(strPinyin) == false)
+                            strPinyin += ";";
+                        strPinyin += node.InnerText;
+                    }
+                }
+                return 1;
             }
             finally
             {

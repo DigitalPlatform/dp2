@@ -24,6 +24,68 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm
     {
+        #region 次要通道池
+
+        internal void ChannelExt_BeforeLogin(object sender,
+    DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
+        {
+            LibraryChannel channel = sender as LibraryChannel;
+
+            if (e.FirstTry == true)
+            {
+                if (channel != null)
+                {
+                    e.UserName = channel.UserName;
+                    e.Password = channel.Password;
+                }
+
+                // 2014/9/13
+                e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
+
+                e.Parameters += ",client=dp2circulation|" + Program.ClientVersion;
+
+                if (String.IsNullOrEmpty(e.UserName) == false)
+                    return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
+            }
+
+            e.ErrorInfo = "不允许再次登录";
+            e.Cancel = true;
+        }
+
+        internal void ChannelExt_AfterLogin(object sender, AfterLoginEventArgs e)
+        {
+            // LibraryChannel channel = sender as LibraryChannel;
+        }
+
+        // parameters:
+        //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
+        public LibraryChannel GetExtChannel(string strServerUrl,
+            string strUserName,
+            GetChannelStyle style = GetChannelStyle.GUI)
+        {
+            LibraryChannel channel = this._channelPoolExt.GetChannel(strServerUrl, strUserName);
+            if ((style & GetChannelStyle.GUI) != 0)
+                channel.Idle += channelExt_Idle;
+            _channelList.Add(channel);
+            // TODO: 检查数组是否溢出
+            return channel;
+        }
+
+        void channelExt_Idle(object sender, IdleEventArgs e)
+        {
+            Application.DoEvents();
+        }
+
+        public void ReturnExtChannel(LibraryChannel channel)
+        {
+            channel.Idle -= channel_Idle;
+
+            this._channelPoolExt.ReturnChannel(channel);
+            _channelList.Remove(channel);
+        }
+
+        #endregion
+
         #region 为汉字加拼音相关功能
 
         // 把字符串中的汉字转换为四角号码
@@ -196,27 +258,27 @@ out string strError)
 
 #if !GCAT_SERVER
             string strPinyinServerUrl = this.PinyinServerUrl;
-            if (string.IsNullOrEmpty(strPinyinServerUrl) == false 
-                &&strPinyinServerUrl.Contains("gcat"))
+            if (string.IsNullOrEmpty(strPinyinServerUrl) == false
+                && strPinyinServerUrl.Contains("gcat"))
             {
-                strError = "请重新配置拼音服务器 URL。当前的配置 '"+strPinyinServerUrl+"' 已过时";
+                strError = "请重新配置拼音服务器 URL。当前的配置 '" + strPinyinServerUrl + "' 已过时";
                 return -1;
             }
-            LibraryChannel channel = this.GetChannel(strPinyinServerUrl, "public");
+            LibraryChannel channel = this.GetExtChannel(strPinyinServerUrl, "public");
 #endif
 
-#if GCAT_SERVER
             Stop new_stop = new DigitalPlatform.Stop();
             new_stop.Register(this.stopManager, true);	// 和容器关联
+#if GCAT_SERVER
             new_stop.OnStop += new StopEventHandler(new_stop_OnStop);
+#else
+            new_stop.OnStop += new StopEventHandler(this.DoStop);
+#endif
             new_stop.Initial("正在获得 '" + strText + "' 的拼音信息 (从服务器 " + this.PinyinServerUrl + ")...");
             new_stop.BeginLoop();
 
+#if GCAT_SERVER
             m_gcatClient = null;
-#else
-            Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("正在获得拼音信息 ...");
-            Stop.BeginLoop();
 #endif
 
             try
@@ -550,21 +612,17 @@ out string strError)
             finally
             {
 #if !GCAT_SERVER
-                this.ReturnChannel(channel);
-
-                Stop.EndLoop();
-                Stop.OnStop -= new StopEventHandler(this.DoStop);
-                Stop.Initial("");
-
+                this.ReturnExtChannel(channel);
 #endif
-
-
-#if GCAT_SERVER
                 new_stop.EndLoop();
+#if GCAT_SERVER
                 new_stop.OnStop -= new StopEventHandler(new_stop_OnStop);
+#else
+                new_stop.OnStop -= new StopEventHandler(this.DoStop);
+#endif
                 new_stop.Initial("");
                 new_stop.Unregister();
-
+#if GCAT_SERVER
                 if (m_gcatClient != null)
                 {
                     m_gcatClient.Close();
