@@ -261,7 +261,7 @@ out string strError)
             if (string.IsNullOrEmpty(strPinyinServerUrl) == false
                 && strPinyinServerUrl.Contains("gcat"))
             {
-                strError = "请重新配置拼音服务器 URL。当前的配置 '" + strPinyinServerUrl + "' 已过时";
+                strError = "请重新配置拼音服务器 URL。当前的配置 '" + strPinyinServerUrl + "' 已过时。可配置为 http://dp2003.com/dp2library";
                 return -1;
             }
             LibraryChannel channel = this.GetExtChannel(strPinyinServerUrl, "public");

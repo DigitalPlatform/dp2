@@ -3202,7 +3202,7 @@ out string strError)
             if (string.IsNullOrEmpty(strPinyinServerUrl) == false
                 && strPinyinServerUrl.Contains("gcat"))
             {
-                strError = "请重新配置拼音服务器 URL。当前的配置 '" + strPinyinServerUrl + "' 已过时";
+                strError = "请重新配置拼音服务器 URL。当前的配置 '" + strPinyinServerUrl + "' 已过时。可配置为 http://dp2003.com/dp2library";
                 return -1;
             }
             LibraryChannel channel = this.GetChannel(strPinyinServerUrl, "public");
@@ -3561,7 +3561,7 @@ out string strError)
             }
         }
 
-        #if GCAT_SERVER
+#if GCAT_SERVER
         void new_stop_OnStop(object sender, StopEventArgs e)
         {
             if (this.m_gcatClient != null)
@@ -4546,12 +4546,15 @@ out string strError)
             string strUserName = ".",
             GetChannelStyle style = GetChannelStyle.GUI)
         {
-            dp2Server server = this.Servers[strServerUrl];
-            if (server == null)
-                throw new Exception("没有找到 URL 为 " + strServerUrl + " 的服务器对象");
-
             if (strUserName == ".")
-                strUserName = server.DefaultUserName;
+            {
+                dp2Server server = this.Servers[strServerUrl];
+                if (server == null)
+                    throw new Exception("没有找到 URL 为 " + strServerUrl + " 的服务器对象(为寻找默认用户名 . 阶段)");
+
+                if (strUserName == ".")
+                    strUserName = server.DefaultUserName;
+            }
 
             LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
             if ((style & GetChannelStyle.GUI) != 0)
@@ -4578,7 +4581,10 @@ out string strError)
         {
             LibraryChannel channel = (LibraryChannel)sender;
 
-            dp2Server server = this.Servers[channel.Url];
+            if (e.FirstTry == true)
+            {
+                dp2Server server = this.Servers[channel.Url];
+#if NO
             if (server == null)
             {
                 e.ErrorInfo = "没有找到 URL 为 " + channel.Url + " 的服务器对象";
@@ -4586,11 +4592,29 @@ out string strError)
                 e.Cancel = true;
                 return;
             }
+#endif
 
-            if (e.FirstTry == true)
-            {
-                e.UserName = server.DefaultUserName;
-                e.Password = server.DefaultPassword;
+                if (server != null)
+                {
+                    e.UserName = server.DefaultUserName;
+                    e.Password = server.DefaultPassword;
+                }
+                else
+                {
+                    if (channel != null)
+                    {
+                        e.UserName = channel.UserName;
+                        e.Password = channel.Password;
+                    }
+                    else
+                    {
+                        e.ErrorInfo = "没有找到 URL 为 " + channel.Url + " 的服务器对象";
+                        e.Failed = true;
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+
                 e.Parameters = "location=dp2Catalog,type=worker";
 
                 /*
@@ -4743,38 +4767,35 @@ out string strError)
             this.CurrentUserName = channel.UserName;
 
             dp2Server server = this.Servers[channel.Url];
+#if NO
             if (server == null)
             {
                 e.ErrorInfo = "没有找到 URL 为 " + channel.Url + " 的服务器对象";
                 return;
             }
+#endif
 
-#if SN
-            if (server.Verified == false && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
+            if (server != null)
             {
-                string strError = "";
-                string strTitle = "dp2 检索窗需要先设置序列号才能访问服务器 " + server.Name + " " + server.Url;
-                int nRet = this.VerifySerialCode(strTitle,
-                    "",
-                    true,
-                    out strError);
-                if (nRet == -1)
+#if SN
+                if (server.Verified == false && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
                 {
-                    channel.Close();
-                    e.ErrorInfo = strTitle;
-#if NO
-                    MessageBox.Show(this.MainForm, "dp2 检索窗需要先设置序列号才能使用");
-                    MainForm.AppInfo.SetString(
-    "dp2_search_simple_query",
-    "resdirpath",
-    "");
-                    API.PostMessage(this.Handle, API.WM_CLOSE, 0, 0);
-#endif
-                    return;
+                    string strError = "";
+                    string strTitle = "dp2 检索窗需要先设置序列号才能访问服务器 " + server.Name + " " + server.Url;
+                    int nRet = this.VerifySerialCode(strTitle,
+                        "",
+                        true,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        channel.Close();
+                        e.ErrorInfo = strTitle;
+                        return;
+                    }
                 }
-            }
 #endif
-            server.Verified = true;
+                server.Verified = true;
+            }
         }
 
         #endregion

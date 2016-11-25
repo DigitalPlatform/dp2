@@ -4271,7 +4271,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                 // 122 表 按照读者 *姓名* 没有借书的读者
                 strCommand =
                      "create temp table tt as select operlogcircu.readerbarcode "
-                     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+                     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode AND reader.state = '' "    // 2016/11/24 增加对 state 字段的判断
                      + " WHERE operlogcircu.operation = 'borrow' and operlogcircu.action = 'borrow' "
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "';"
@@ -4288,7 +4288,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                 // 9122 表 按照读者 *姓名* 没有阅读的读者
                 strCommand =
                      "create temp table tt as select operlogcircu.readerbarcode "
-                     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+                     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode AND reader.state = '' "    // 2016/11/24 增加对 state 字段的判断
                      + " WHERE operlogcircu.operation = 'return' and operlogcircu.action = 'read' "
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "';"

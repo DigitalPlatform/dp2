@@ -1525,6 +1525,12 @@ ref bHideMessageBox);
                 List<object> controls = new List<object>();
                 controls.Add(this.tabControl_main);
                 controls.Add(this.textBox_marcTemplate_marc);
+
+                controls.Add(this.textBox_setBiblioInfo_action);
+                controls.Add(this.textBox_setBiblioInfo_biblioRecPath);
+                controls.Add(this.textBox_setBiblioInfo_biblioType);
+                controls.Add(this.textBox_setBiblioInfo_content);
+
                 return GuiState.GetUiState(controls);
             }
             set
@@ -1532,6 +1538,12 @@ ref bHideMessageBox);
                 List<object> controls = new List<object>();
                 controls.Add(this.tabControl_main);
                 controls.Add(this.textBox_marcTemplate_marc);
+
+                controls.Add(this.textBox_setBiblioInfo_action);
+                controls.Add(this.textBox_setBiblioInfo_biblioRecPath);
+                controls.Add(this.textBox_setBiblioInfo_biblioType);
+                controls.Add(this.textBox_setBiblioInfo_content);
+
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -1799,6 +1811,63 @@ dlg.UiState);
         private void kernelResTree1_ReturnChannel(object sender, ReturnChannelEventArgs e)
         {
             this.MainForm.ReturnChannel(e.Channel);
+        }
+
+        private void button_setBiblioInfo_request_Click(object sender, EventArgs e)
+        {
+            LibraryChannel channel = Program.MainForm.GetChannel();
+            try
+            {
+                byte[] baTimestamp = null;
+                string strComment = "";
+                string strOutputBiblioRecPath = "";
+                byte[] baOutputTimestamp = null;
+                string strError = "";
+                long lRet = channel.SetBiblioInfo(null,
+                    this.textBox_setBiblioInfo_action.Text,
+                    this.textBox_setBiblioInfo_biblioRecPath.Text,
+                    this.textBox_setBiblioInfo_biblioType.Text,
+                    this.textBox_setBiblioInfo_content.Text,
+                    baTimestamp,
+                    strComment,
+                    out strOutputBiblioRecPath,
+                    out baOutputTimestamp,
+                    out strError);
+                MessageBox.Show(this, "lRet="+lRet.ToString()+" , strOutputBiblioRecPath="+strOutputBiblioRecPath+", strError=" + strError);
+            }
+            finally
+            {
+                Program.MainForm.ReturnChannel(channel);
+            }
+        }
+
+        private void button_setBiblioInfo_getContentFromIso2709_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            OpenMarcFileDlg dlg = new OpenMarcFileDlg();
+            GuiUtil.SetControlFont(dlg, this.Font);
+            dlg.IsOutput = false;
+
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            using (Stream s = File.OpenRead(dlg.FileName))
+            {
+                byte[] baRecord = null;
+                int nRet = MarcUtil.ReadMarcRecord(s,
+                    dlg.Encoding,
+                    true, 
+                    out baRecord, 
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                this.textBox_setBiblioInfo_content.Text = Convert.ToBase64String(baRecord);
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
     }

@@ -882,7 +882,7 @@ namespace DigitalPlatform.LibraryServer
                     if (string.IsNullOrEmpty(strEncoding))
                         strEncoding = "utf-8";
 
-                    byte [] result = null;
+                    byte[] result = null;
                     Encoding targetEncoding = Encoding.GetEncoding(strEncoding);
                     nRet = GetIso2709(strBiblioXml,
                         targetEncoding,
@@ -896,7 +896,6 @@ namespace DigitalPlatform.LibraryServer
                         goto CONTINUE;
                     }
                     strBiblio = Convert.ToBase64String(result);
-
                 }
                 // 模拟创建检索点
                 else if (String.Compare(strBiblioType, "keys", true) == 0)
@@ -1337,9 +1336,9 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        static int GetIso2709(string strXml, 
+        static int GetIso2709(string strXml,
             Encoding targetEncoding,
-            out byte [] result,
+            out byte[] result,
             out string strError)
         {
             strError = "";
@@ -3947,9 +3946,34 @@ nsmgr);
             }
 
             strBiblioType = strBiblioType.ToLower();
-            if (strBiblioType != "xml")
+
+            string strFormat = "";
+            Encoding encoding = Encoding.UTF8;
+
+            if (strBiblioType == "xml")
+                strFormat = strBiblioType;
+            else if (IsResultType(strBiblioType, "iso2709") == true)
             {
-                strError = "strBiblioType必须为\"xml\"";
+                List<string> parts = StringUtil.ParseTwoPart(strBiblioType, ":");
+                string strEncoding = parts[1];
+                if (string.IsNullOrEmpty(strEncoding))
+                    strEncoding = "utf-8";
+
+                try
+                {
+                    encoding = Encoding.GetEncoding(strEncoding);
+                }
+                catch (Exception ex)
+                {
+                    strError = "strBiblioType 参数值中的编码方式 '" + strEncoding + "' 不合法: " + ex.Message;
+                    goto ERROR1;
+                }
+
+                strFormat = parts[0];
+            }
+            else
+            {
+                strError = "strBiblioType参数值必须为\"xml\" \"iso2709\" 之一";
                 goto ERROR1;
             }
 
@@ -4008,6 +4032,11 @@ nsmgr);
 #endif
 
                 cfg = GetBiblioDbCfg(strBiblioDbName);
+                if (cfg == null)
+                {
+                    strError = "获得书目库 '" + strBiblioDbName + "' 的配置信息时出错";
+                    goto ERROR1;
+                }
                 Debug.Assert(cfg != null, "");
                 strUnionCatalogStyle = cfg.UnionCatalogStyle;
 
@@ -4101,33 +4130,79 @@ nsmgr);
             // 看看所保存的数据MARC格式是不是这个数据库要求的格式
             if (strAction == "new" || strAction == "change")
             {
-                string strMarcSyntax = "";
-                // 获得 MARCXML 字符串的 MARC 格式类型
-                // return:
-                //      -1  出错
-                //      0   无法探测
-                //      1   成功探测
-                nRet = MarcUtil.GetMarcSyntax(strBiblio,
-    out strMarcSyntax,
+                // 2016/11/23
+                if (strFormat == "iso2709")
+                {
+                    try
+                    {
+                        string strMARC = "";
+                        byte[] baRecord = Convert.FromBase64String(strBiblio);
+                        // return:
+                        //		-2	MARC格式错
+                        //		-1	一般错误
+                        //		0	正常
+                        nRet = MarcUtil.ConvertByteArrayToMarcRecord(baRecord,
+                            encoding,
+                            true,
+                            out strMARC,
+                            out strError);
+                        if (nRet != 0)
+                        {
+                            strError = "strBiblio 参数中的 ISO2709 格式记录不合法: " + strError;
+                            goto ERROR1;
+                        }
+
+                        if (cfg == null)
+                        {
+                            strError = "cfg == null";
+                            goto ERROR1;
+                        }
+
+                        string strBiblioXml = "";
+                        nRet = MarcUtil.Marc2XmlEx(strMARC,
+    cfg.BiblioDbSyntax,
+    ref strBiblioXml,
     out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (nRet == 0)
-                {
-                    strError = "无法获得 strBiblio 参数值中 MARC 记录的 MARC 格式";
-                    goto ERROR1;
+                        if (nRet == -1)
+                            goto ERROR1;
+                        strBiblio = strBiblioXml;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "将 strBiblio 参数值转换为 MARC 或 MARCXML 格式过程中出现异常: " + ex.Message;
+                        goto ERROR1;
+                    }
                 }
-
-                if (cfg == null)
+                else
                 {
-                    strError = "cfg == null";
-                    goto ERROR1;
-                }
+                    string strMarcSyntax = "";
+                    // 获得 MARCXML 字符串的 MARC 格式类型
+                    // return:
+                    //      -1  出错
+                    //      0   无法探测
+                    //      1   成功探测
+                    nRet = MarcUtil.GetMarcSyntax(strBiblio,
+        out strMarcSyntax,
+        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        strError = "无法获得 strBiblio 参数值中 MARC 记录的 MARC 格式";
+                        goto ERROR1;
+                    }
 
-                if (cfg.BiblioDbSyntax != strMarcSyntax)
-                {
-                    strError = "所提交保存的 MARC 格式为 '" + strMarcSyntax + "'，和书目库 '" + strBiblioDbName + "' 的 MARC 格式 '" + cfg.BiblioDbSyntax + "' 不符合";
-                    goto ERROR1;
+                    if (cfg == null)
+                    {
+                        strError = "cfg == null";
+                        goto ERROR1;
+                    }
+
+                    if (cfg.BiblioDbSyntax != strMarcSyntax)
+                    {
+                        strError = "所提交保存的 MARC 格式为 '" + strMarcSyntax + "'，和书目库 '" + strBiblioDbName + "' 的 MARC 格式 '" + cfg.BiblioDbSyntax + "' 不符合";
+                        goto ERROR1;
+                    }
                 }
             }
 
@@ -4301,7 +4376,7 @@ nsmgr);
                 if (strTargetRecId == "?" || String.IsNullOrEmpty(strTargetRecId) == true)
                 {
                     if (String.IsNullOrEmpty(strTargetRecId) == true)
-                        strBiblioRecPath += "/?";
+                        strBiblioRecPath = ResPath.GetDbName(strBiblioRecPath) + "/?";  // 这样做主要是防范输入 "中文图书/" 这样的字符串造成 "中文图书//?" 的结果 2016/11/24
                 }
                 else
                 {

@@ -7928,6 +7928,12 @@ MessageBoxDefaultButton.Button1);
                 {
                     strWarning = "书目记录 '" + strPath + "' 保存成功，但所提交的字段部分被拒绝 (" + strError + ")。请留意刷新窗口，检查实际保存的效果";
                 }
+
+                // 2016/11/24
+                // 书目记录修改后，唯恐书目摘要也发生变化，所以这里清除本地全部书目摘要缓存
+                // 盖因精确清除某一条书目记录的缓存比较困难，这里就笼统地全部清除
+                Program.MainForm.SummaryCache.RemoveAll();
+
             }
             finally
             {

@@ -3627,18 +3627,6 @@ namespace dp2Library
                        strBiblioType);
                 }
 
-                /*
-                // 权限字符串
-                if (StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
-                {
-                    result.Value = -1;
-                    result.ErrorInfo = "设置书目信息被拒绝。不具备order或setbiblioinfo权限。";
-                    result.ErrorCode = ErrorCode.AccessDenied;
-                    return result;
-                }
-                 * */
-
                 return app.SetBiblioInfo(
                     sessioninfo,
                     strAction,
