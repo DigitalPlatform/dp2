@@ -266,6 +266,11 @@ TABLE.reservation TR.content.active
 	background-color: #99ff99;
 }
 
+TABLE.reservation TR.content.boxing
+{
+	background-color: #9999ff;
+}
+
 TABLE.reservation .deleted
 {
     text-decoration: line-through;

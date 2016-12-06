@@ -65,14 +65,12 @@ function GetSummary() {
         if (external.IsInLoop == false)
             return;
 
-
-        var oo = $("TD.pending:first");
+        var oo = $(".pending:first");   // TD
         if (oo.length == 0) {
             return;
         }
 
         o = oo[0];
-
 
         var path = o.innerText;
 

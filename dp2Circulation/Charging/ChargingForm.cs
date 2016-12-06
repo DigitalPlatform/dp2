@@ -3406,6 +3406,11 @@ Keys keyData)
         /// 读过
         /// </summary>
         Read = 11,  // 读过 2016/1/8
+
+        /// <summary>
+        /// 配书
+        /// </summary>
+        Boxing = 12,    // 配书 2016/12/3
     }
 
     /*public*/

@@ -164,6 +164,10 @@ namespace dp2Circulation
             {
                 strText = GetOperText("读过");
             }
+            else if (this.Action == "boxing")
+            {
+                strText = GetOperText("配书");
+            }
 
             if (string.IsNullOrEmpty(this.ErrorInfo) == false)
                 strText += "\r\n===\r\n" + this.ErrorInfo;
@@ -352,7 +356,8 @@ namespace dp2Circulation
                             || task.Action == "lost"
                             || task.Action == "verify_lost"
                             || task.Action == "inventory"
-                            || task.Action == "read")
+                            || task.Action == "read"
+                            || task.Action == "boxing")
                         {
                             Return(task);
                         }
@@ -947,6 +952,16 @@ end_time);
 
                 strOperText = task.ReaderBarcode + " 读过 " + task.ItemBarcode;
             }
+            else if (task.Action == "boxing")
+            {
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.92") < 0)
+                {
+                    task.ErrorInfo = "操作未能进行。“配书”功能要求 dp2library 版本在 2.92 或以上";
+                    goto ERROR1;
+                }
+
+                strOperText = task.ReaderBarcode + " 配书 " + task.ItemBarcode;
+            }
             else
                 strOperText = task.ReaderBarcode + " 还 " + task.ItemBarcode;
 
@@ -1010,6 +1025,7 @@ end_time);
             {
                 strReaderBarcode = "";
             }
+
             //REDO:
             string[] aDupPath = null;
             string[] item_records = null;

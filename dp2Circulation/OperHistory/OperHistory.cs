@@ -1289,6 +1289,8 @@ out strError);
                 strOperName = "盘点";
             else if (strAction == "read")
                 strOperName = "读过";
+            else if (strAction == "boxing")
+                strOperName = "配书";
 
             string strError = "";
             string strSummary = "";

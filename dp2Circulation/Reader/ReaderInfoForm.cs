@@ -5836,6 +5836,8 @@ MessageBoxDefaultButton.Button1);
                 return "借过(丢失)";
             if (strAction == "read")
                 return "读过";
+            if (strAction == "boxing")
+                return "配书";
             return strAction;
         }
 

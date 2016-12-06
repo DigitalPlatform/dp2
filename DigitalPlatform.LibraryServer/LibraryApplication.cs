@@ -132,7 +132,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.89 (2016/11/3) dp2library 可以使用 * 作为序列号，这样最大通道数为 255，而且永不失效。
         //      2.90 (2016/11/6) 消除 首次初始化 MSMQ 队列文件遇到异常然后挂起，但再也不会重试消除挂起状态 的 Bug。尝试将 Dir() API 和 ListFile() API 连接起来
         //      2.91 (2016/11/15) GetBiblioInfos() API 增加了一种 subrecords format，可以用于同时返回下级记录的 XML。返回的最多每种下级记录不超过 10 条
-        public static string Version = "2.91";
+        //      2.92 (2016/12/3) Return() API 增加了 boxing 功能
+        public static string Version = "2.92";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -5062,7 +5063,9 @@ namespace DigitalPlatform.LibraryServer
         // TODO：判断strItemBarcode是否为空
         // 获得预约到书队列记录
         // parameters:
-        //      strItemBarcodeParam  册条码号。可以使用 @refID: 前缀
+        //      strItemBarcodeParam  册条码号。可以使用 @itemRefID: 前缀表示册参考ID。
+        //                          @notifyID: 是通知记录本身的参考ID
+        //                          @patronRefID: 是读者记录的参考ID
         // return:
         //      -1  error
         //      0   not found
@@ -5082,14 +5085,18 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             timestamp = null;
 
+            // 2016/12/4
+            // 兼容以前的用法。以前曾经有一段 @refID: 表示册参考ID
+            strItemBarcodeParam = strItemBarcodeParam.Replace("@refID:", "@itemRefID:");
+
             LibraryApplication app = this;
             string strFrom = "册条码";
 
-            // 注：旧的，也就是 2015/5/7 以前的 预约到书队列库里面并没有 参考ID 检索点，所以直接用带着 @refID 前缀的字符串进行检索即可。
+            // 注：旧的，也就是 2015/5/7 以前的 预约到书队列库里面并没有 册参考ID 检索点，所以直接用带着 @refID 前缀的字符串进行检索即可。
             // 等队列库普遍刷新检索点以后，改为使用下面一段代码
             if (this.ArrivedDbKeysContainsRefIDKey() == true)
             {
-                string strHead = "@refID:";
+                string strHead = "@itemRefID:";
 
                 if (StringUtil.HasHead(strItemBarcodeParam, strHead, true) == true)
                 {
@@ -5101,6 +5108,17 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     }
                 }
+            }
+
+            if (strItemBarcodeParam.StartsWith("@notifyID:"))
+            {
+                strFrom = "参考ID";
+                strItemBarcodeParam = strItemBarcodeParam.Substring("@notifyID:".Length);
+            }
+            else if (strItemBarcodeParam.StartsWith("@patronRefID:"))
+            {
+                strFrom = "读者参考ID";
+                strItemBarcodeParam = strItemBarcodeParam.Substring("@patronRefID:".Length);
             }
 
             // 构造检索式

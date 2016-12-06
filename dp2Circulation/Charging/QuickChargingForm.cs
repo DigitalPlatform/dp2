@@ -595,6 +595,13 @@ namespace dp2Circulation
                 dlg.VerifyBorrower = this._taskList.CurrentReaderBarcode;
                 dlg.Text = "请选择要读过的册";
             }
+            else if (func == dp2Circulation.FuncState.Boxing)
+            {
+                dlg.FunctionType = "boxing";
+                dlg.VerifyBorrower = this._taskList.CurrentReaderBarcode;
+                dlg.Text = "请选择要配书的册";
+            }
+
 
             dlg.AutoOperSingleItem = this.AutoOperSingleItem;
             dlg.AutoSearch = true;
@@ -1734,6 +1741,12 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 task.ItemBarcode = strText;
                 task.Action = "read";
             }
+            else if (func == dp2Circulation.FuncState.Boxing)
+            {
+                task.ItemBarcode = strText;
+                task.Action = "boxing";
+                task.Parameters = strParameters;
+            }
 
             this.textBox_input.SelectAll();
 
@@ -2061,6 +2074,7 @@ false);
                 this.toolStripMenuItem_continueBorrow.Checked = false;
                 this.toolStripMenuItem_inventoryBook.Checked = false;
                 this.toolStripMenuItem_read.Checked = false;
+                this.toolStripMenuItem_boxing.Checked = false;
 
                 if (this.AutoClearTextbox == true)
                 {
@@ -2128,6 +2142,13 @@ false);
                 {
                     this.toolStripMenuItem_read.Checked = true;
                 }
+                else if (_funcstate == FuncState.Boxing)
+                {
+                    this.toolStripMenuItem_boxing.Checked = true;
+
+                    WillLoadReaderInfo = false;
+                }
+
                 // SetInputMessage();
             }
         }
@@ -3408,6 +3429,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 strText = "盘";
             else if (_funcstate == FuncState.Read)
                 strText = "读";
+            else if (_funcstate == FuncState.Boxing)
+                strText = "配";
             else
                 strText = "?";
 
@@ -3589,6 +3612,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                     "simulate_reservation_arrive");
             else
                 MessageBox.Show(this, "此功能必须和还书、丢失功能配套使用");
+        }
+
+        private void ToolStripMenuItem_boxing_Click(object sender, EventArgs e)
+        {
+            this.FuncState = FuncState.Boxing;
         }
     }
 

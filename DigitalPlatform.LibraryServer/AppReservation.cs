@@ -549,6 +549,7 @@ namespace DigitalPlatform.LibraryServer
                         strItemBarcode,
                         true,   // 在普通架
                         true,   // 需要修改当前册记录的<request>元素state属性
+                        "",
                         out DeletedNotifyRecPaths,
                         out strError);
                     if (nRet == -1)
@@ -875,6 +876,8 @@ namespace DigitalPlatform.LibraryServer
                         string strQueueRecPath = "";
 
                         // 获得预约到书队列记录
+                        // parameters:
+                        //      strItemBarcodeParam  册条码号。可以使用 @itemRefID: 前缀
                         // return:
                         //      -1  error
                         //      0   not found
@@ -883,7 +886,7 @@ namespace DigitalPlatform.LibraryServer
                         int nRet = GetArrivedQueueRecXml(
                             // channels,
                             channel,
-                            strItemBarcode,
+                            strItemBarcode.Replace("@refID:", "@itemRefID:"),
                             out strQueueRecXml,
                             out baQueueRecTimestamp,
                             out strQueueRecPath,
@@ -1174,6 +1177,7 @@ namespace DigitalPlatform.LibraryServer
         // 注：本函数可能要删除部分通知记录
         // parameters:
         //      strItemBarcodeParam  册条码号。可以使用 "@refID:" 前缀
+        //      bOnShelf    是否为在架预约情况。在架预约就是书已经立即可以来取了
         // return:
         //      -1  error
         //      0   没有找到<request>元素
@@ -1186,6 +1190,7 @@ namespace DigitalPlatform.LibraryServer
             string strItemBarcodeParam,
             bool bOnShelf,
             bool bModifyItemRecord,
+            string strNotifyID,
             out List<string> DeletedNotifyRecPaths,
             out string strError)
         {
@@ -1199,6 +1204,8 @@ namespace DigitalPlatform.LibraryServer
             string strOutputReaderRecPath = "";
 
             string strItemXml = "";
+
+            // string strNotifyID = Guid.NewGuid().ToString();
 
             // 加读者记录锁
             if (bNeedLockReader == true)
@@ -1264,11 +1271,11 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
                 XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("reservations/request");
-                XmlNode readerRequestNode = null;
+                XmlElement readerRequestNode = null;
                 string strItems = "";
                 for (int i = 0; i < nodes.Count; i++)
                 {
-                    readerRequestNode = nodes[i];
+                    readerRequestNode = nodes[i] as XmlElement;
                     strItems = DomUtil.GetAttr(readerRequestNode, "items");
                     if (IsInBarcodeList(strItemBarcodeParam, strItems) == true)
                         goto FOUND;
@@ -1359,6 +1366,7 @@ namespace DigitalPlatform.LibraryServer
                             bOnShelf,   // 当册现在还在架上的时候，册记录的 <location> 就没有 #reservation。这样在借书环节检查册是否被预约的时候，就不能只看 <location> 了
                             ref itemdom,
                             out strTempReservationReaderBarcode,
+                            out strNotifyID,
                             out strError);
                         if (nRet == -1)
                         {
@@ -1410,6 +1418,29 @@ namespace DigitalPlatform.LibraryServer
                 // 实际到达的一个册条码号 2007/1/18 
                 DomUtil.SetAttr(readerRequestNode, "arrivedItemBarcode", strItemBarcodeParam);
 
+                // 2016/12/4
+                readerRequestNode.SetAttribute("notifyID", strNotifyID);
+
+                // 2016/12/4
+                // 确保 strItemXml 有值
+                nRet = EnsureGetItemXml(
+            records,
+            channel,
+            strItemBarcodeParam,
+            ref strItemXml,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+
+                // 增补两个属性值
+                {
+                    XmlDocument itemdom = new XmlDocument();
+                    itemdom.LoadXml(strItemXml);
+
+                    readerRequestNode.SetAttribute("accessNo", DomUtil.GetElementText(itemdom.DocumentElement, "accessNo"));
+                    readerRequestNode.SetAttribute("location", DomUtil.GetElementText(itemdom.DocumentElement, "location"));
+                }
+
                 if (reader_record == null)
                 {
                     // 写回读者记录
@@ -1447,6 +1478,7 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1)
                 return -1;
 
+#if NO
             if (string.IsNullOrEmpty(strItemXml) == true)
             {
                 // 读入册记录
@@ -1483,6 +1515,8 @@ namespace DigitalPlatform.LibraryServer
                     strItemXml = temp_record.Dom.DocumentElement.OuterXml;
             }
 
+#endif
+
             // 构造一个XML记录, 加入"预约到书"库
             // 加入记录预约到书库的目的，是为了让工作线程可以监控读者是否来取书，如果超过保留期限，要转而通知下一个预约了此册的读者。
             // 兼有email通知功能
@@ -1496,6 +1530,7 @@ namespace DigitalPlatform.LibraryServer
                 strLibraryCode,
                 strReservationReaderBarcode,
                 strReaderXml,
+                strNotifyID,
                 out DeletedNotifyRecPaths,
                 out strError);
             if (nRet == -1)
@@ -1510,7 +1545,55 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
-        // 探测当前的到书队列库是否具备 参考ID 这个检索点
+        int EnsureGetItemXml(
+            CachedRecordCollection records,
+            RmsChannel channel,
+            string strItemBarcodeParam,
+            ref string strItemXml, 
+            out string strError)
+        {
+            strError = "";
+            if (string.IsNullOrEmpty(strItemXml) == true)
+            {
+                // 读入册记录
+                string strOutputItemRecPath = "";
+                // 获得册记录
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   命中1条
+                //      >1  命中多于1条
+                int nRet = this.GetItemRecXml(
+                    channel,
+                    strItemBarcodeParam,
+                    out strItemXml,
+                    out strOutputItemRecPath,
+                    out strError);
+                if (nRet == 0)
+                {
+                    strError = "册条码号 '" + strItemBarcodeParam + "' 不存在";
+                    return -1;
+                }
+                if (nRet == -1)
+                {
+                    strError = "读入册记录 '" + strItemBarcodeParam + "' 时发生错误: " + strError;
+                    return -1;
+                }
+
+                CachedRecord temp_record = null;
+                if (records != null)
+                    temp_record = records.Find(strOutputItemRecPath);
+
+                if (temp_record != null
+                    && temp_record.Dom != null
+                    && temp_record.Dom.DocumentElement != null)
+                    strItemXml = temp_record.Dom.DocumentElement.OuterXml;
+            }
+
+            return 0;
+        }
+
+        // 探测当前的到书队列库是否具备 册参考ID 这个检索点
         bool ArrivedDbKeysContainsRefIDKey()
         {
             if (this.ArrivedDbFroms == null || this.ArrivedDbFroms.Length == 0)
@@ -1880,7 +1963,6 @@ namespace DigitalPlatform.LibraryServer
         //      strLibraryCode  读者所在的馆代码
         //      strReaderXml    预约了图书的读者的XML记录。用于消息通知接口
         int AddNotifyRecordToQueueDatabase(
-            // RmsChannelCollection channels,
             RmsChannel channel,
             string strItemBarcodeParam,
             string strRefIDParam,
@@ -1889,6 +1971,7 @@ namespace DigitalPlatform.LibraryServer
             string strLibraryCode,
             string strReaderBarcode,
             string strReaderXml,
+            string strNotifyID,
             out List<string> DeletedNotifyRecPaths,
             out string strError)
         {
@@ -1929,6 +2012,8 @@ namespace DigitalPlatform.LibraryServer
             // 如果队列中已经存在同册条码号的记录, 要先删除
             string strNotifyXml = "";
             // 获得预约到书队列记录
+            // parameters:
+            //      strItemBarcodeParam  册条码号。可以使用 @itemRefID: 前缀
             // return:
             //      -1  error
             //      0   not found
@@ -1937,7 +2022,7 @@ namespace DigitalPlatform.LibraryServer
             nRet = GetArrivedQueueRecXml(
                 // channels,
                 channel,
-                strItemBarcodeParam,
+                strItemBarcodeParam.Replace("@refID:", "@itemRefID:"),
                 out strNotifyXml,
                 out timestamp,
                 out strOutputPath,
@@ -2006,6 +2091,8 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument new_queue_dom = new XmlDocument();
             new_queue_dom.LoadXml("<root />");
 
+            DomUtil.SetElementText(new_queue_dom.DocumentElement, "state", "arrived");
+
             // TODO: 以后增加 <refID> 元素，存储册记录的参考ID
 
 #if NO
@@ -2032,7 +2119,7 @@ namespace DigitalPlatform.LibraryServer
             if (this.ArrivedDbKeysContainsRefIDKey() == true)
             {
                 DomUtil.SetElementText(new_queue_dom.DocumentElement, "itemBarcode", strItemBarcode);
-                DomUtil.SetElementText(new_queue_dom.DocumentElement, "refID", strItemRefID);
+                DomUtil.SetElementText(new_queue_dom.DocumentElement, "itemRefID", strItemRefID);  // 原来元素名是 "refID"，2016/12/4 修改为 itemRefID
             }
             else
             {
@@ -2040,7 +2127,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (string.IsNullOrEmpty(strItemRefID) == true)
                     {
-                        strError = "AddNotifyRecordToQueue() 函数当 strItemBarcode 参数为空的时候，必须让 strRefID 参数不为空";
+                        strError = "AddNotifyRecordToQueue() 函数当 strItemBarcode 参数为空的时候，必须让 strItemRefID 参数不为空";
                         return -1;
                     }
 
@@ -2055,6 +2142,8 @@ namespace DigitalPlatform.LibraryServer
             // 改为存储在元素中 2015/5/7
             if (bOnShelf == true)
                 DomUtil.SetElementText(new_queue_dom.DocumentElement, "onShelf", "true");
+            else
+                DomUtil.SetElementText(new_queue_dom.DocumentElement, "box", "#reservation");   // 表示在保留大架，混合存放
 
             // 2012/10/26
             DomUtil.SetElementText(new_queue_dom.DocumentElement, "libraryCode", strLibraryCode);
@@ -2062,8 +2151,14 @@ namespace DigitalPlatform.LibraryServer
             DomUtil.SetElementText(new_queue_dom.DocumentElement, "readerBarcode", strReaderBarcode);
             DomUtil.SetElementText(new_queue_dom.DocumentElement, "notifyDate", this.Clock.GetClock());
 
+            // 2016/12/4
+            // 预约到书记录的参考 ID
+            DomUtil.SetElementText(new_queue_dom.DocumentElement, "refID", strNotifyID);
+
             // 2015/6/13
             DomUtil.SetElementText(new_queue_dom.DocumentElement, "location", strLocation);
+            // 2016/12/4
+            DomUtil.SetElementText(new_queue_dom.DocumentElement, "accessNo", strAccessNo);
 
             string strPath = this.ArrivedDbName + "/?";
 
@@ -2239,7 +2334,8 @@ namespace DigitalPlatform.LibraryServer
                  * type 消息类型。预约到书通知
                  * itemBarcode 册条码号
                  * location 馆藏地 2016/9/5
-                 * refID    册的参考 ID
+                 * itemRefID    册的参考 ID
+                 * notifyID     预约到书通知记录的 ID
                  * onShelf 是否在架。true/false
                  * opacURL  图书在 OPAC 中的 URL。相对路径
                  * requestDate 预约请求创建时间 2016/9/5
@@ -2264,7 +2360,12 @@ namespace DigitalPlatform.LibraryServer
                     strItemRefID = DomUtil.GetElementText(itemdom.DocumentElement, "refID");
 
                 DomUtil.SetElementText(dom.DocumentElement,
-                    "refID", strItemRefID);
+                    "itemRefID", strItemRefID); // 以前为 refID。2016/12/4 修改为 itemRefID
+                // 2016/12/4
+                if (string.IsNullOrEmpty(strNotifyID) == false)
+                    DomUtil.SetElementText(dom.DocumentElement,
+                        "notifyID", strNotifyID);
+
                 DomUtil.SetElementText(dom.DocumentElement,
                     "onShelf", bOnShelf ? "true" : "false");
 
@@ -2567,8 +2668,8 @@ namespace DigitalPlatform.LibraryServer
             // RmsChannel channel = null;
             byte[] output_timestamp = null;
 
-            string strState = DomUtil.GetElementText(queue_rec_dom.DocumentElement,
-                "state");
+            //string strState = DomUtil.GetElementText(queue_rec_dom.DocumentElement,
+            //    "state");
 
             string strNotifyDate = DomUtil.GetElementText(queue_rec_dom.DocumentElement,
                 "notifyDate");
@@ -2612,6 +2713,7 @@ namespace DigitalPlatform.LibraryServer
             // 要通知下一位预约者
 
             string strReservationReaderBarcode = "";
+            string strNotifyID = "";
 
             // 清除读者和册记录中的已到预约事项，并提取下一个预约读者证条码号
             // 本函数还负责清除册记录中以前残留的state=arrived的<request>元素
@@ -2622,6 +2724,7 @@ namespace DigitalPlatform.LibraryServer
                 strItemBarcode,
                 bOnShelf,
                 out strReservationReaderBarcode,
+                out strNotifyID,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -2646,6 +2749,7 @@ namespace DigitalPlatform.LibraryServer
                     strItemBarcode,
                     bOnShelf,
                     false,   // 不要修改当前册记录的<request> state属性，因为前面ClearArrivedInfo()中已经调用了DoItemReturnReservationCheck(), 修改了当前册的<request> state属性。
+                    strNotifyID,
                     out DeletedNotifyRecPaths,
                     out strError);
                 if (nRet == -1)

@@ -56,11 +56,12 @@
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_loadPatronInfo = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_inventoryBook = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_boxing = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItem_read = new System.Windows.Forms.ToolStripMenuItem();
             this.dpColumn_color = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn_state = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn_content = new DigitalPlatform.CommonControl.DpColumn();
-            this.imageList_func_large = new System.Windows.Forms.ImageList(this.components);
             this.imageList_progress = new System.Windows.Forms.ImageList(this.components);
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
             this.webBrowser_reader = new System.Windows.Forms.WebBrowser();
@@ -69,6 +70,8 @@
             this.colorSummaryControl1 = new dp2Circulation.ColorSummaryControl();
             this.textBox_input = new System.Windows.Forms.TextBox();
             this.label_barcode_type = new System.Windows.Forms.Label();
+            this.contextMenuStrip_testFunction = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem_test_simulateReservationArrive = new System.Windows.Forms.ToolStripMenuItem();
             this.label_input_message = new System.Windows.Forms.Label();
             this.pictureBox_action = new System.Windows.Forms.PictureBox();
             this.dpTable_tasks = new DigitalPlatform.CommonControl.DpTable();
@@ -79,10 +82,8 @@
             this.toolStripButton_upperInput = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_selectItem = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
-            this.ToolStripMenuItem_inventoryFromFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_inventoryFromFile = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton_selectLibraryCode = new System.Windows.Forms.ToolStripDropDownButton();
-            this.contextMenuStrip_testFunction = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.toolStripMenuItem_test_simulateReservationArrive = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_selectFunc.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -90,9 +91,9 @@
             this.splitContainer_main.SuspendLayout();
             this.tableLayoutPanel_right.SuspendLayout();
             this.panel_input.SuspendLayout();
+            this.contextMenuStrip_testFunction.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_action)).BeginInit();
             this.toolStrip_main.SuspendLayout();
-            this.contextMenuStrip_testFunction.SuspendLayout();
             this.SuspendLayout();
             // 
             // imageList_barcodeType
@@ -119,9 +120,11 @@
             this.toolStripSeparator4,
             this.toolStripMenuItem_loadPatronInfo,
             this.toolStripMenuItem_inventoryBook,
+            this.toolStripMenuItem_boxing,
+            this.toolStripSeparator5,
             this.toolStripMenuItem_read});
             this.contextMenuStrip_selectFunc.Name = "contextMenuStrip_selectFunc";
-            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(149, 270);
+            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(149, 298);
             this.contextMenuStrip_selectFunc.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_selectFunc_Opening);
             // 
             // toolStripMenuItem_borrow
@@ -214,6 +217,18 @@
             this.toolStripMenuItem_inventoryBook.Text = "盘点图书";
             this.toolStripMenuItem_inventoryBook.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryBook_Click);
             // 
+            // ToolStripMenuItem_boxing
+            // 
+            this.toolStripMenuItem_boxing.Name = "ToolStripMenuItem_boxing";
+            this.toolStripMenuItem_boxing.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_boxing.Text = "配书";
+            this.toolStripMenuItem_boxing.Click += new System.EventHandler(this.ToolStripMenuItem_boxing_Click);
+            // 
+            // toolStripSeparator5
+            // 
+            this.toolStripSeparator5.Name = "toolStripSeparator5";
+            this.toolStripSeparator5.Size = new System.Drawing.Size(145, 6);
+            // 
             // toolStripMenuItem_read
             // 
             this.toolStripMenuItem_read.Name = "toolStripMenuItem_read";
@@ -249,16 +264,6 @@
             this.dpColumn_content.LineAlignment = System.Drawing.StringAlignment.Near;
             this.dpColumn_content.Text = "内容";
             this.dpColumn_content.Width = 250;
-            // 
-            // imageList_func_large
-            // 
-            this.imageList_func_large.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList_func_large.ImageStream")));
-            this.imageList_func_large.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList_func_large.Images.SetKeyName(0, "jie.bmp");
-            this.imageList_func_large.Images.SetKeyName(1, "huan.bmp");
-            this.imageList_func_large.Images.SetKeyName(2, "xu.bmp");
-            this.imageList_func_large.Images.SetKeyName(3, "diu.bmp");
-            this.imageList_func_large.Images.SetKeyName(4, "ren.bmp");
             // 
             // imageList_progress
             // 
@@ -365,6 +370,20 @@
             this.label_barcode_type.Name = "label_barcode_type";
             this.label_barcode_type.Size = new System.Drawing.Size(26, 20);
             this.label_barcode_type.TabIndex = 4;
+            // 
+            // contextMenuStrip_testFunction
+            // 
+            this.contextMenuStrip_testFunction.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem_test_simulateReservationArrive});
+            this.contextMenuStrip_testFunction.Name = "contextMenuStrip_testFunction";
+            this.contextMenuStrip_testFunction.Size = new System.Drawing.Size(149, 26);
+            // 
+            // toolStripMenuItem_test_simulateReservationArrive
+            // 
+            this.toolStripMenuItem_test_simulateReservationArrive.Name = "toolStripMenuItem_test_simulateReservationArrive";
+            this.toolStripMenuItem_test_simulateReservationArrive.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_test_simulateReservationArrive.Text = "模拟预约到书";
+            this.toolStripMenuItem_test_simulateReservationArrive.Click += new System.EventHandler(this.toolStripMenuItem_test_simulateReservationArrive_Click);
             // 
             // label_input_message
             // 
@@ -499,7 +518,7 @@
             // 
             this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolStripMenuItem_inventoryFromFile});
+            this.toolStripMenuItem_inventoryFromFile});
             this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
             this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
@@ -508,10 +527,10 @@
             // 
             // ToolStripMenuItem_inventoryFromFile
             // 
-            this.ToolStripMenuItem_inventoryFromFile.Name = "ToolStripMenuItem_inventoryFromFile";
-            this.ToolStripMenuItem_inventoryFromFile.Size = new System.Drawing.Size(173, 22);
-            this.ToolStripMenuItem_inventoryFromFile.Text = "从文件导入盘点 ...";
-            this.ToolStripMenuItem_inventoryFromFile.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryFromFile_Click);
+            this.toolStripMenuItem_inventoryFromFile.Name = "ToolStripMenuItem_inventoryFromFile";
+            this.toolStripMenuItem_inventoryFromFile.Size = new System.Drawing.Size(173, 22);
+            this.toolStripMenuItem_inventoryFromFile.Text = "从文件导入盘点 ...";
+            this.toolStripMenuItem_inventoryFromFile.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryFromFile_Click);
             // 
             // toolStripDropDownButton_selectLibraryCode
             // 
@@ -523,20 +542,6 @@
             this.toolStripDropDownButton_selectLibraryCode.Text = "选择分馆";
             this.toolStripDropDownButton_selectLibraryCode.ToolTipText = "选择当前操作所针对的分馆";
             this.toolStripDropDownButton_selectLibraryCode.Visible = false;
-            // 
-            // contextMenuStrip_testFunction
-            // 
-            this.contextMenuStrip_testFunction.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem_test_simulateReservationArrive});
-            this.contextMenuStrip_testFunction.Name = "contextMenuStrip_testFunction";
-            this.contextMenuStrip_testFunction.Size = new System.Drawing.Size(153, 48);
-            // 
-            // toolStripMenuItem_test_simulateReservationArrive
-            // 
-            this.toolStripMenuItem_test_simulateReservationArrive.Name = "toolStripMenuItem_test_simulateReservationArrive";
-            this.toolStripMenuItem_test_simulateReservationArrive.Size = new System.Drawing.Size(152, 22);
-            this.toolStripMenuItem_test_simulateReservationArrive.Text = "模拟预约到书";
-            this.toolStripMenuItem_test_simulateReservationArrive.Click += new System.EventHandler(this.toolStripMenuItem_test_simulateReservationArrive_Click);
             // 
             // QuickChargingForm
             // 
@@ -563,10 +568,10 @@
             this.tableLayoutPanel_right.PerformLayout();
             this.panel_input.ResumeLayout(false);
             this.panel_input.PerformLayout();
+            this.contextMenuStrip_testFunction.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_action)).EndInit();
             this.toolStrip_main.ResumeLayout(false);
             this.toolStrip_main.PerformLayout();
-            this.contextMenuStrip_testFunction.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -587,7 +592,6 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_return;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_verifyRenew;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_lost;
-        private System.Windows.Forms.ImageList imageList_func_large;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_loadPatronInfo;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_verifyReturn;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_verifyLost;
@@ -611,10 +615,12 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_upperInput;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_inventoryBook;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
-        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_inventoryFromFile;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_inventoryFromFile;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_read;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_selectLibraryCode;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_testFunction;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_test_simulateReservationArrive;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_boxing;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
     }
 }

@@ -775,6 +775,18 @@ out strError);
             if (nRet == -1)
                 return -1;
 
+            // 创建 EventLog 2016/11/26
+            {
+                // 创建事件日志目录
+                if (!EventLog.SourceExists("dp2opac"))
+                    EventLog.CreateEventSource("dp2opac", "DigitalPlatform");
+
+                EventLog Log = new EventLog();
+                Log.Source = "dp2opac";
+
+                Log.WriteEntry("dp2OPAC 安装成功。", EventLogEntryType.Information);
+            }
+
             return 0;
         }
 

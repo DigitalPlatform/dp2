@@ -4014,8 +4014,8 @@ namespace DigitalPlatform.LibraryServer
                 nRet = CheckItemLibraryCode(domExist,
                     sessioninfo,
                     // sessioninfo.LibraryCodeList,
-                            out strSourceLibraryCode,
-                            out strError);
+                    out strSourceLibraryCode,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
@@ -4146,6 +4146,7 @@ namespace DigitalPlatform.LibraryServer
                         && IncludeStateProcessing(strOldState) == true && IncludeStateProcessing(strNewState) == false)
                     {
                         string strReservationReaderBarcode = "";
+                        string strNotifyID = "";
 
                         // 察看本册预约情况, 并进行初步处理
                         // TODO: 如果为注销处理，需要通知等待者，书已经注销了，不用再等待
@@ -4157,6 +4158,7 @@ namespace DigitalPlatform.LibraryServer
                             false,
                             ref domNew,
                             out strReservationReaderBarcode,
+                            out strNotifyID,
                             out strError);
                         if (nRet == -1)
                         {
@@ -4180,6 +4182,7 @@ namespace DigitalPlatform.LibraryServer
                                 strNewBarcode,
                                 false,  // 不在大架
                                 false,  // 不需要再修改当前册记录，因为前面已经修改过了
+                                strNotifyID,
                                 out DeletedNotifyRecPaths,
                                 out strError);
                             if (nRet == -1)
