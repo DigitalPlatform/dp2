@@ -7475,7 +7475,7 @@ XLColor.DarkGreen,
         }
 
         // 计算一个字符串的“西文字符宽度”。汉字相当于两个西文字符宽度
-        static int GetCharWidth(string strText)
+        public static int GetCharWidth(string strText)
         {
             int result = 0;
             foreach (char c in strText)
@@ -7486,7 +7486,7 @@ XLColor.DarkGreen,
             return result;
         }
 
-        static void SetMaxChars(ref List<int> column_max_chars, int index, int chars)
+        public static void SetMaxChars(ref List<int> column_max_chars, int index, int chars)
         {
             // 确保空间足够
             while (column_max_chars.Count < index + 1)

@@ -29,6 +29,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using ClosedXML.Excel;
 
 namespace dp2Circulation
 {
@@ -294,6 +295,7 @@ namespace dp2Circulation
     lines,
     this.MainForm.OperLogLevel,
     strStyle,
+    this.textBox_filter.Text,
     this.MainForm.OperLogCacheDir,
     null,   // param,
     DoRecord,
@@ -3727,6 +3729,7 @@ FileShare.ReadWrite))
                     lines,
                     this.MainForm.OperLogLevel,
                     strStyle,
+                    this.textBox_filter.Text,
                     this.MainForm.OperLogCacheDir,
                     null,   // param,
                     DoRecord,
@@ -4046,8 +4049,8 @@ FileShare.ReadWrite))
             stop.BeginLoop();
 
 
-            this.Update();
-            this.MainForm.Update();
+            //this.Update();
+            //this.MainForm.Update();
 
 #if NO
             this.listView_records.Items.Clear();
@@ -4099,6 +4102,7 @@ FileShare.ReadWrite))
     lines,
     this.MainForm.OperLogLevel,
     strStyle,
+    this.textBox_filter.Text,
     this.MainForm.OperLogCacheDir,
     null,   // param,
     DoRecord,
@@ -5191,6 +5195,13 @@ FileShare.ReadWrite))
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("导出 amerce 操作信息到 Excel 文件(&E) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
+            menuItem.Click += new System.EventHandler(this.menu_exportAmerceExcel_Click);
+            if (this.listView_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+
             // ---
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
@@ -5257,6 +5268,381 @@ FileShare.ReadWrite))
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 导出 amerce 操作到 Excel 文件
+        void menu_exportAmerceExcel_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要创建的 Excel 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = "";
+            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            XLWorkbook doc = null;
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "OperLogForm new XLWorkbook() exception: " + ExceptionUtil.GetAutoText(ex);
+                goto ERROR1;
+            }
+
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("表格");
+
+#if NO
+            SumLine sum_amerce = new SumLine();
+            SumLine sum_undo = new SumLine();
+            SumLine sum_modify = new SumLine();
+#endif
+            Hashtable sum_table = new Hashtable();  // action --> SumLine
+
+            bool bLaunchExcel = true;
+            int nRowIndex = 1;
+            int nItemIndex = 0;
+            List<int> column_max_chars = new List<int>();
+
+            List<IXLCell> cells = new List<IXLCell>();
+            List<string> titles = new List<string>();
+            titles.Add("总序号");
+            titles.Add("日期");
+            titles.Add("action");
+            titles.Add("index");
+            titles.Add("sub_index");
+            titles.Add("册条码号");
+            titles.Add("书目摘要");
+            titles.Add("证条码号");
+            titles.Add("说明");
+            titles.Add("金额");
+            titles.Add("ID");
+            titles.Add("调试信息");
+
+            int nColIndex = 2;
+            foreach (string s in titles)
+            {
+                IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(s);
+                cell.Style.Alignment.WrapText = true;
+                cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                cell.Style.Font.Bold = true;
+                cell.Style.Font.FontColor = XLColor.DarkGray;
+                nColIndex++;
+                cells.Add(cell);
+            }
+            nRowIndex++;
+
+            try
+            {
+                int nRet = ProcessSelectedRecords((date, index, dom, timestamp) =>
+                        {
+                            if (dom.DocumentElement != null)
+                            {
+                                string action = DomUtil.GetElementText(dom.DocumentElement, "action");
+                                List<OperLogLineBase> lines = DoOneRecord(dom,
+    date.Substring(0, 8),
+    index,
+    out strError);
+                                if (lines == null)
+                                    return true;
+
+                                foreach (AmerceOperLogLine line in lines)
+                                {
+                                    List<string> cols = new List<string>();
+                                    cols.Add((nItemIndex + 1).ToString());
+                                    cols.Add(date.Substring(0, 8));
+                                    cols.Add(line.Action);
+                                    cols.Add(index.ToString());
+                                    cols.Add(line.SubNo.ToString());
+                                    cols.Add(line.ItemBarcode);
+                                    cols.Add("");
+                                    cols.Add(line.ReaderBarcode);
+                                    cols.Add(line.Reason);
+                                    cols.Add(line.Price.ToString());
+                                    cols.Add(line.ID);
+                                    cols.Add(strError);
+                                    strError = "";  // 只有第一行有调试信息
+
+                                    {
+                                        SumLine sum_line = sum_table[line.Action] as SumLine;
+                                        if (sum_line == null)
+                                        {
+                                            sum_line = new SumLine();
+                                            sum_table[line.Action] = sum_line;
+                                        }
+                                        sum_line.Count++;
+                                        sum_line.Value += line.Price;
+                                    }
+
+#if NO
+                                    if (line.Action == "modifyprice")
+                                    {
+                                        sum_modify.Count++;
+                                        sum_modify.Value += line.Price;
+                                    }
+                                    else if (line.Action == "amerce")
+                                    {
+                                        sum_amerce.Count++;
+                                        sum_amerce.Value += line.Price;
+                                    }
+                                    else if (line.Action == "undo")
+                                    {
+                                        sum_undo.Count++;
+                                        sum_undo.Value += line.Price;
+                                    }
+#endif
+
+                                    WriteLine(
+                                        sheet,
+                                        cols,
+                                        cells,
+                                        ref nItemIndex,
+                                        ref nRowIndex,
+                                        ref column_max_chars);
+                                }
+                            }
+
+                            return true;
+                        },
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+
+                foreach (string action in sum_table.Keys)
+                {
+                    SumLine sum_amerce = sum_table[action] as SumLine;
+                    List<string> cols = new List<string>();
+                    cols.Add("合计");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add(action);
+                    cols.Add("次 " + sum_amerce.Count.ToString());
+                    cols.Add(sum_amerce.Value.ToString());
+                    cols.Add("");
+                    cols.Add("");
+
+                    WriteLine(
+        sheet,
+        cols,
+        cells,
+        ref nItemIndex,
+        ref nRowIndex,
+        ref column_max_chars);
+                }
+#if NO
+                // 合计行
+                {
+                    List<string> cols = new List<string>();
+                    cols.Add("合计");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("交费");
+                    cols.Add("次 " + sum_amerce.Count.ToString());
+                    cols.Add(sum_amerce.Value.ToString());
+                    cols.Add("");
+                    cols.Add("");
+
+                    WriteLine(
+        sheet,
+        cols,
+        cells,
+        ref nItemIndex,
+        ref nRowIndex,
+        ref column_max_chars);
+                }
+
+                // 合计行
+                {
+                    List<string> cols = new List<string>();
+                    cols.Add("合计");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("撤销交费");
+                    cols.Add("次 " + sum_undo.Count.ToString());
+                    cols.Add(sum_undo.Value.ToString());
+                    cols.Add("");
+                    cols.Add("");
+
+                    WriteLine(
+        sheet,
+        cols,
+        cells,
+        ref nItemIndex,
+        ref nRowIndex,
+        ref column_max_chars);
+                }
+
+                // 合计行
+                {
+                    List<string> cols = new List<string>();
+                    cols.Add("合计");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("修改金额");
+                    cols.Add("次 " + sum_modify.Count.ToString());
+                    cols.Add(sum_modify.Value.ToString());
+                    cols.Add("");
+                    cols.Add("");
+
+                    WriteLine(
+        sheet,
+        cols,
+        cells,
+        ref nItemIndex,
+        ref nRowIndex,
+        ref column_max_chars);
+                }
+#endif
+
+                // 字符数太多的列不要做 width auto adjust
+                foreach (IXLColumn column in sheet.Columns())
+                {
+                    int MAX_CHARS = 50;   // 60
+
+                    int nIndex = column.FirstCell().Address.ColumnNumber - 1;
+                    if (nIndex >= column_max_chars.Count)
+                        break;
+                    int nChars = column_max_chars[nIndex];
+
+                    if (nIndex == 1)
+                    {
+                        column.Width = 10;
+                        continue;
+                    }
+
+                    if (nIndex == 3)
+                        MAX_CHARS = 50;
+                    else
+                        MAX_CHARS = 24;
+
+                    if (nChars < MAX_CHARS)
+                        column.AdjustToContents();
+                    else
+                        column.Width = Math.Min(MAX_CHARS, nChars);
+                }
+            }
+            finally
+            {
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.FileName);
+                    doc.Dispose();
+                }
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(dlg.FileName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void WriteLine(
+            IXLWorksheet sheet,
+            List<string> cols,
+            List<IXLCell> cells,
+            ref int nItemIndex,
+            ref int nRowIndex,
+            ref List<int> column_max_chars)
+        {
+            int nColIndex = 2;
+            foreach (string s in cols)
+            {
+                // 统计最大字符数
+                ReaderSearchForm.SetMaxChars(ref column_max_chars, nColIndex - 1, ReaderSearchForm.GetCharWidth(s));
+
+                IXLCell cell = null;
+                cell = sheet.Cell(nRowIndex, nColIndex).SetValue(s);
+                if (nColIndex == 2)
+                {
+                    // cell = sheet.Cell(nRowIndex, nColIndex).SetValue(nItemIndex + 1);
+                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                }
+
+                cell.Style.Alignment.WrapText = true;
+                cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                nColIndex++;
+                cells.Add(cell);
+            }
+
+            nItemIndex++;
+            nRowIndex++;
+        }
+
+        class SumLine
+        {
+            public long Count { get; set; }
+            public long Value { get; set; }
+        }
+
+        List<OperLogLineBase> DoOneRecord(XmlDocument dom,
+            string strDate,
+            long lIndex,
+            out string strError)
+        {
+            strError = "";
+
+            List<OperLogLineBase> lines = null;
+
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+            string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
+#if NO
+            if (strAction == "expire")
+                return new List<OperLogLineBase>();
+#endif
+
+            AmerceOperLogLine line = new AmerceOperLogLine();
+            int nRet = line.SetData(dom,
+        strDate,
+        lIndex,
+        out lines,
+        out strError);
+            if (nRet == -1)
+                return null;
+
+            if (lines == null)
+                lines = new List<OperLogLineBase>();
+
+            lines.Insert(0, line);
+            return lines;
         }
 
         void menu_selectAllLines_Click(object sender, EventArgs e)
@@ -5870,6 +6256,7 @@ Keys keyData)
             List<string> filenames,
             int nLevel,
             string strStyle,
+            string strFilter,
             string strCacheDir,
             object param,
             Delegate_doRecord procDoRecord,
@@ -6088,6 +6475,7 @@ Keys keyData)
                     sizes[i],
                     strRange,
                     strStyle,
+                    strFilter,
                     strCacheDir,
                     param,
                     procDoRecord,
@@ -6669,6 +7057,7 @@ FileShare.ReadWrite);
             long lServerFileSize,
             string strRange,
             string strStyle,
+            string strFilter,   // 2016/12/6
             string strCacheDir,
             object param,
             Delegate_doRecord procDoRecord,
@@ -6854,7 +7243,7 @@ FileShare.ReadWrite);
                                     lHint,
                                     nCount,
                                     strTempStyle,
-                                    "", // strFilter
+                                    strFilter,
                                     out records,
                                     out strError);
                                 if (lRet == -1)
@@ -7015,6 +7404,7 @@ MessageBoxDefaultButton.Button1);
                 controls.Add(this.textBox_repair_sourceFilename);
                 controls.Add(this.textBox_repair_targetFilename);
                 controls.Add(this.textBox_repair_verifyFolderName);
+                controls.Add(this.textBox_filter);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -7026,6 +7416,7 @@ MessageBoxDefaultButton.Button1);
                 controls.Add(this.textBox_repair_sourceFilename);
                 controls.Add(this.textBox_repair_targetFilename);
                 controls.Add(this.textBox_repair_verifyFolderName);
+                controls.Add(this.textBox_filter);
                 GuiState.SetUiState(controls, value);
             }
         }

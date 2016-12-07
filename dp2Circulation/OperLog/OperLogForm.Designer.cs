@@ -79,6 +79,8 @@ namespace dp2Circulation
             this.button_repair_findSourceFilename = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox_repair_sourceFilename = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.textBox_filter = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_logRecords)).BeginInit();
             this.splitContainer_logRecords.Panel1.SuspendLayout();
             this.splitContainer_logRecords.Panel2.SuspendLayout();
@@ -107,7 +109,7 @@ namespace dp2Circulation
             // 
             // textBox_logFileName
             // 
-            this.textBox_logFileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_logFileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_logFileName.Location = new System.Drawing.Point(92, 10);
             this.textBox_logFileName.Margin = new System.Windows.Forms.Padding(2);
@@ -290,7 +292,7 @@ namespace dp2Circulation
             // 
             // button_loadFromSingleFile
             // 
-            this.button_loadFromSingleFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            this.button_loadFromSingleFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.button_loadFromSingleFile.Location = new System.Drawing.Point(4, 210);
             this.button_loadFromSingleFile.Margin = new System.Windows.Forms.Padding(2);
@@ -303,8 +305,8 @@ namespace dp2Circulation
             // 
             // tabControl_main
             // 
-            this.tabControl_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.tabControl_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_main.Controls.Add(this.tabPage_selectFile);
             this.tabControl_main.Controls.Add(this.tabPage_selectFiles);
@@ -319,6 +321,8 @@ namespace dp2Circulation
             // 
             // tabPage_selectFile
             // 
+            this.tabPage_selectFile.Controls.Add(this.label7);
+            this.tabPage_selectFile.Controls.Add(this.textBox_filter);
             this.tabPage_selectFile.Controls.Add(this.button_getTodayFilename);
             this.tabPage_selectFile.Controls.Add(this.button_getSingleLogFilename);
             this.tabPage_selectFile.Controls.Add(this.label1);
@@ -412,7 +416,7 @@ namespace dp2Circulation
             // 
             // button_loadFilenams
             // 
-            this.button_loadFilenams.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.button_loadFilenams.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.button_loadFilenams.Location = new System.Drawing.Point(4, 5);
             this.button_loadFilenams.Margin = new System.Windows.Forms.Padding(2);
@@ -425,7 +429,7 @@ namespace dp2Circulation
             // 
             // button_loadLogRecords
             // 
-            this.button_loadLogRecords.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            this.button_loadLogRecords.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.button_loadLogRecords.Enabled = false;
             this.button_loadLogRecords.Location = new System.Drawing.Point(4, 210);
@@ -440,8 +444,8 @@ namespace dp2Circulation
             // textBox_filenames
             // 
             this.textBox_filenames.AcceptsReturn = true;
-            this.textBox_filenames.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_filenames.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_filenames.HideSelection = false;
             this.textBox_filenames.Location = new System.Drawing.Point(4, 72);
@@ -490,7 +494,7 @@ namespace dp2Circulation
             // 
             // groupBox1
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Location = new System.Drawing.Point(8, 123);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
@@ -535,7 +539,7 @@ namespace dp2Circulation
             // 
             // textBox_repair_verifyFolderName
             // 
-            this.textBox_repair_verifyFolderName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_repair_verifyFolderName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_repair_verifyFolderName.Location = new System.Drawing.Point(142, 142);
             this.textBox_repair_verifyFolderName.Margin = new System.Windows.Forms.Padding(2);
@@ -578,7 +582,7 @@ namespace dp2Circulation
             // 
             // textBox_repair_targetFilename
             // 
-            this.textBox_repair_targetFilename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_repair_targetFilename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_repair_targetFilename.Location = new System.Drawing.Point(142, 38);
             this.textBox_repair_targetFilename.Margin = new System.Windows.Forms.Padding(2);
@@ -610,13 +614,33 @@ namespace dp2Circulation
             // 
             // textBox_repair_sourceFilename
             // 
-            this.textBox_repair_sourceFilename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_repair_sourceFilename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_repair_sourceFilename.Location = new System.Drawing.Point(142, 13);
             this.textBox_repair_sourceFilename.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_repair_sourceFilename.Name = "textBox_repair_sourceFilename";
             this.textBox_repair_sourceFilename.Size = new System.Drawing.Size(183, 21);
             this.textBox_repair_sourceFilename.TabIndex = 4;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(2, 38);
+            this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(77, 12);
+            this.label7.TabIndex = 5;
+            this.label7.Text = "日志类型(&F):";
+            // 
+            // textBox_filter
+            // 
+            this.textBox_filter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_filter.Location = new System.Drawing.Point(92, 35);
+            this.textBox_filter.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_filter.Name = "textBox_filter";
+            this.textBox_filter.Size = new System.Drawing.Size(183, 21);
+            this.textBox_filter.TabIndex = 6;
             // 
             // OperLogForm
             // 
@@ -704,5 +728,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStrip toolStrip_panelFixed;
         private System.Windows.Forms.ToolStripButton toolStripButton_closeDownPanel;
         private System.Windows.Forms.ColumnHeader columnHeader_seconds;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox textBox_filter;
     }
 }
