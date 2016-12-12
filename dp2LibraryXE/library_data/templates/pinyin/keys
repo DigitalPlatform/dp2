@@ -1,0 +1,17 @@
+﻿<root>
+    <key>
+        <xpath>/p/@h</xpath>
+        <from>hanzi</from>
+        <table ref="hanzi" />
+    </key>
+    <table name="hanzi" id="5">
+        <convert>
+            <string style="" />
+        </convert>
+        <convertquery>
+            <string style="" />
+        </convertquery>
+        <caption lang="chi">汉字</caption>
+        <caption lang="eng">hanzi</caption>
+    </table>
+</root>

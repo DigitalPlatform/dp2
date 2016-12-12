@@ -814,9 +814,11 @@ namespace DigitalPlatform.rms
             if (strID == "?")
                 strID = "-1";
 
+            bool bSimulate = StringUtil.IsInList("simulate", strStyle);
+
             // 确保ID,并且给返回值赋值
             bool bPushTailNo = false;
-            bPushTailNo = this.EnsureID(ref strID);
+            bPushTailNo = this.EnsureID(ref strID, bSimulate);
             if (oUser != null)
             {
                 string strTempRecordPath = this.GetCaption("zh-CN") + "/" + strID;

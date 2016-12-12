@@ -5937,7 +5937,8 @@ MessageBoxDefaultButton.Button2);
         // 0.08 (2014/11/6) reader 表增加了 state 字段 
         // 0.09 (2015/7/14) 增加了 operlogpassgate 和 operloggetres 表
         // 0.10 (2016/5/5) 给每个 operlogxxx 表增加了 librarycode 字段
-        static string _local_version = "0.10";
+        // 0.11 (2016/12/8) 以前版本 operlogamerce 中 action 为 undo 的行，price 字段内容都为空，会导致 472 报表中统计出来的实收金额偏大，这个版本修正了这个 bug
+        static string _local_version = "0.11";
 
         // TODO: 最好把第一次初始化本地 sql 表的动作也纳入 XML 文件中，这样做单项任务的时候，就不会毁掉其他的表
         // 创建批处理计划

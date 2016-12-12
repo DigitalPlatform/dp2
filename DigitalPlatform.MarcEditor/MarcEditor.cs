@@ -4745,7 +4745,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 #if NOOOOOOOOOOOOOOOOOO
         // 设置当前位置的缺省值
         // parameters:
-        //      bSumulate   如果==true，表示模拟获得缺省值，但是并不在当前位置插入值。注意，某些对种子号有推动作用的宏，这里只能取当前值而不能增量。
+        //      bSimulate   如果==true，表示模拟获得缺省值，但是并不在当前位置插入值。注意，某些对种子号有推动作用的宏，这里只能取当前值而不能增量。
         public string SetCurDefaultValue(bool bSimulate)
         {
             if (this.SelectedFieldIndices.Count > 1)
@@ -4924,7 +4924,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         // 警告：因为本函数无法让宏真正执行，所以废弃不用
         // 设置当前位置的缺省值。只取缺省值的第一个
         // parameters:
-        //      bSumulate   如果==true，表示模拟获得缺省值，但是并不在当前位置插入值。注意，某些对种子号有推动作用的宏，这里只能取当前值而不能增量。
+        //      bSimulate   如果==true，表示模拟获得缺省值，但是并不在当前位置插入值。注意，某些对种子号有推动作用的宏，这里只能取当前值而不能增量。
         void SetCurrentDefaultValue(string strValue)
         {
             Debug.Assert(false, "本函数已经被废弃");
@@ -5026,7 +5026,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
         // 设置当前位置的缺省值。只取缺省值的第一个
         // parameters:
-        //      bSumulate   如果==true，表示模拟获得缺省值，但是并不在当前位置插入值。注意，某些对种子号有推动作用的宏，这里只能取当前值而不能增量。
+        //      bSimulate   如果==true，表示模拟获得缺省值，但是并不在当前位置插入值。注意，某些对种子号有推动作用的宏，这里只能取当前值而不能增量。
         //      index   如果有多个值，这里指定要设置的值的下标。必须在bSimulate == false时使用。如果bSimulate == true，则此参数应当使用-1，以明确表示不用它
         /// <summary>
         /// 设置当前位置的缺省值。

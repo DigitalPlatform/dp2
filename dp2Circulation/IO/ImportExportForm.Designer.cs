@@ -41,13 +41,20 @@
             this.checkBox_subRecords_issue = new System.Windows.Forms.CheckBox();
             this.checkBox_subRecords_order = new System.Windows.Forms.CheckBox();
             this.checkBox_subRecords_entity = new System.Windows.Forms.CheckBox();
+            this.tabPage_convert = new System.Windows.Forms.TabPage();
+            this.panel_map = new System.Windows.Forms.Panel();
+            this.button_convert_initialMapString = new System.Windows.Forms.Button();
+            this.checkBox_target_newRefID = new System.Windows.Forms.CheckBox();
+            this.checkBox_target_randomItemBarcode = new System.Windows.Forms.CheckBox();
             this.tabPage_target = new System.Windows.Forms.TabPage();
+            this.button_target_simulateImport = new System.Windows.Forms.Button();
             this.comboBox_target_targetBiblioDbName = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.button_next = new System.Windows.Forms.Button();
             this.tabPage_run = new System.Windows.Forms.TabPage();
+            this.button_next = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_source.SuspendLayout();
+            this.tabPage_convert.SuspendLayout();
             this.tabPage_target.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -57,6 +64,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_main.Controls.Add(this.tabPage_source);
+            this.tabControl_main.Controls.Add(this.tabPage_convert);
             this.tabControl_main.Controls.Add(this.tabPage_target);
             this.tabControl_main.Controls.Add(this.tabPage_run);
             this.tabControl_main.Location = new System.Drawing.Point(13, 13);
@@ -64,6 +72,7 @@
             this.tabControl_main.SelectedIndex = 0;
             this.tabControl_main.Size = new System.Drawing.Size(443, 283);
             this.tabControl_main.TabIndex = 0;
+            this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
             // 
             // tabPage_source
             // 
@@ -206,9 +215,63 @@
             this.checkBox_subRecords_entity.Text = "册(&E)";
             this.checkBox_subRecords_entity.UseVisualStyleBackColor = true;
             // 
+            // tabPage_convert
+            // 
+            this.tabPage_convert.AutoScroll = true;
+            this.tabPage_convert.Controls.Add(this.panel_map);
+            this.tabPage_convert.Controls.Add(this.button_convert_initialMapString);
+            this.tabPage_convert.Controls.Add(this.checkBox_target_newRefID);
+            this.tabPage_convert.Controls.Add(this.checkBox_target_randomItemBarcode);
+            this.tabPage_convert.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_convert.Name = "tabPage_convert";
+            this.tabPage_convert.Size = new System.Drawing.Size(435, 257);
+            this.tabPage_convert.TabIndex = 3;
+            this.tabPage_convert.Text = "转换";
+            this.tabPage_convert.UseVisualStyleBackColor = true;
+            // 
+            // panel_map
+            // 
+            this.panel_map.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel_map.Location = new System.Drawing.Point(3, 105);
+            this.panel_map.Name = "panel_map";
+            this.panel_map.Size = new System.Drawing.Size(429, 133);
+            this.panel_map.TabIndex = 12;
+            // 
+            // button_convert_initialMapString
+            // 
+            this.button_convert_initialMapString.Location = new System.Drawing.Point(3, 76);
+            this.button_convert_initialMapString.Name = "button_convert_initialMapString";
+            this.button_convert_initialMapString.Size = new System.Drawing.Size(286, 23);
+            this.button_convert_initialMapString.TabIndex = 10;
+            this.button_convert_initialMapString.Text = "从数据中获取馆藏地，初始化馆藏地转换表 ...";
+            this.button_convert_initialMapString.UseVisualStyleBackColor = true;
+            this.button_convert_initialMapString.Click += new System.EventHandler(this.button_convert_initialMapString_Click);
+            // 
+            // checkBox_target_newRefID
+            // 
+            this.checkBox_target_newRefID.AutoSize = true;
+            this.checkBox_target_newRefID.Location = new System.Drawing.Point(3, 38);
+            this.checkBox_target_newRefID.Name = "checkBox_target_newRefID";
+            this.checkBox_target_newRefID.Size = new System.Drawing.Size(108, 16);
+            this.checkBox_target_newRefID.TabIndex = 9;
+            this.checkBox_target_newRefID.Text = "重新生成参考ID";
+            this.checkBox_target_newRefID.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_target_randomItemBarcode
+            // 
+            this.checkBox_target_randomItemBarcode.AutoSize = true;
+            this.checkBox_target_randomItemBarcode.Location = new System.Drawing.Point(3, 16);
+            this.checkBox_target_randomItemBarcode.Name = "checkBox_target_randomItemBarcode";
+            this.checkBox_target_randomItemBarcode.Size = new System.Drawing.Size(360, 16);
+            this.checkBox_target_randomItemBarcode.TabIndex = 8;
+            this.checkBox_target_randomItemBarcode.Text = "为册条码号增加随机后缀(以避免转入的册条码号和系统内重复)";
+            this.checkBox_target_randomItemBarcode.UseVisualStyleBackColor = true;
+            // 
             // tabPage_target
             // 
             this.tabPage_target.AutoScroll = true;
+            this.tabPage_target.Controls.Add(this.button_target_simulateImport);
             this.tabPage_target.Controls.Add(this.comboBox_target_targetBiblioDbName);
             this.tabPage_target.Controls.Add(this.label1);
             this.tabPage_target.Location = new System.Drawing.Point(4, 22);
@@ -218,6 +281,16 @@
             this.tabPage_target.TabIndex = 0;
             this.tabPage_target.Text = "目标库";
             this.tabPage_target.UseVisualStyleBackColor = true;
+            // 
+            // button_target_simulateImport
+            // 
+            this.button_target_simulateImport.Location = new System.Drawing.Point(9, 193);
+            this.button_target_simulateImport.Name = "button_target_simulateImport";
+            this.button_target_simulateImport.Size = new System.Drawing.Size(113, 23);
+            this.button_target_simulateImport.TabIndex = 5;
+            this.button_target_simulateImport.Text = "模拟导入";
+            this.button_target_simulateImport.UseVisualStyleBackColor = true;
+            this.button_target_simulateImport.Click += new System.EventHandler(this.button_target_simulateImport_Click);
             // 
             // comboBox_target_targetBiblioDbName
             // 
@@ -237,6 +310,15 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "目标书目库名(&B):";
             // 
+            // tabPage_run
+            // 
+            this.tabPage_run.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_run.Name = "tabPage_run";
+            this.tabPage_run.Size = new System.Drawing.Size(435, 257);
+            this.tabPage_run.TabIndex = 2;
+            this.tabPage_run.Text = "导入";
+            this.tabPage_run.UseVisualStyleBackColor = true;
+            // 
             // button_next
             // 
             this.button_next.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -249,15 +331,6 @@
             this.button_next.Text = "下一步(&N)";
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
-            // 
-            // tabPage_run
-            // 
-            this.tabPage_run.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_run.Name = "tabPage_run";
-            this.tabPage_run.Size = new System.Drawing.Size(435, 257);
-            this.tabPage_run.TabIndex = 2;
-            this.tabPage_run.Text = "导入";
-            this.tabPage_run.UseVisualStyleBackColor = true;
             // 
             // ImportExportForm
             // 
@@ -276,6 +349,8 @@
             this.tabControl_main.ResumeLayout(false);
             this.tabPage_source.ResumeLayout(false);
             this.tabPage_source.PerformLayout();
+            this.tabPage_convert.ResumeLayout(false);
+            this.tabPage_convert.PerformLayout();
             this.tabPage_target.ResumeLayout(false);
             this.tabPage_target.PerformLayout();
             this.ResumeLayout(false);
@@ -302,5 +377,11 @@
         private System.Windows.Forms.TextBox textBox_objectDirectoryName;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TabPage tabPage_run;
+        private System.Windows.Forms.Button button_target_simulateImport;
+        private System.Windows.Forms.TabPage tabPage_convert;
+        private System.Windows.Forms.Button button_convert_initialMapString;
+        private System.Windows.Forms.CheckBox checkBox_target_newRefID;
+        private System.Windows.Forms.CheckBox checkBox_target_randomItemBarcode;
+        private System.Windows.Forms.Panel panel_map;
     }
 }

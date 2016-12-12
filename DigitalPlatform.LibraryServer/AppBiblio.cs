@@ -3941,7 +3941,7 @@ nsmgr);
                 && strAction != "onlydeletebiblio"
                 && strAction != "onlydeletesubrecord")
             {
-                strError = "strAction参数值应当为new change delete onlydeletebiblio onlydeletesubrecord之一";
+                strError = "strAction参数值应当为new change delete onlydeletebiblio onlydeletesubrecord之一  (然而当前为 '"+strAction+"')";
                 goto ERROR1;
             }
 
@@ -4403,6 +4403,7 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
+#if NO
                 if (bSimulate)
                 {
                     // 模拟创建新记录的操作
@@ -4410,11 +4411,13 @@ out strError);
                     strOutputBiblioRecPath = strBiblioRecPath;  // 路径中 ID 依然为问号，没有被处理
                 }
                 else
+#endif
+
                 {
                     lRet = channel.DoSaveTextRes(strBiblioRecPath,
                         strBiblio,
                         false,
-                        "content", // ,ignorechecktimestamp
+                        "content" + (bSimulate ? ",simulate" : ""),
                         baTimestamp,
                         out baOutputTimestamp,
                         out strOutputBiblioRecPath,
@@ -4493,6 +4496,7 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
+#if NO
                 if (bSimulate)
                 {
                     // 模拟修改记录的操作
@@ -4500,6 +4504,8 @@ out strError);
                     strOutputBiblioRecPath = strBiblioRecPath;
                 }
                 else
+#endif
+
                 {
                     // 需要判断路径是否为具备最末一级索引号的形式？
 
@@ -4510,7 +4516,7 @@ out strError);
                         lRet = channel.DoSaveTextRes(strBiblioRecPath,
                             strBiblio,
                             false,
-                            "content", // ,ignorechecktimestamp
+                            "content" + (bSimulate ? ",simulate" : ""),
                             baTimestamp,
                             out baOutputTimestamp,
                             out strOutputBiblioRecPath,

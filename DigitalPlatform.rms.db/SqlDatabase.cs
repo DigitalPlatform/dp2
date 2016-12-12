@@ -10904,6 +10904,7 @@ out strError);
         // 写入一批 XML 记录；或者刷新一批记录的检索点
         // parameters:
         //      strStyle    rebuildkeys/deletekeys/fastmode/ifnotexist
+        //                  simulate 模拟写入记录
         // return:
         //      -1  出错。注意，即便没有返回 -1，但 outputs 数组中也有可能有元素具有返回的错误信息
         //      >=0 如果是 rebuildkeys，则返回总共处理的 keys 行数
@@ -11006,9 +11007,11 @@ out strError);
                     continue;
                 }
 
+                bool bSimulate = StringUtil.IsInList("simulate", strStyle);
+
                 bool bPushTailNo = false;
                 // 对 ？ 创建尾记录号
-                bPushTailNo = this.EnsureID(ref strRecordID);
+                bPushTailNo = this.EnsureID(ref strRecordID, bSimulate);
 
                 // bPushed == true 说明没有必要 select 获取原有 records 行
 
@@ -11437,7 +11440,6 @@ out strError);
             string strRanges,
             long lTotalLength,
             byte[] baSource,
-            // Stream streamSource,
             string strMetadata,
             string strStyle,
             byte[] inputTimestamp,
@@ -11464,8 +11466,10 @@ out strError);
             if (strID == "?")
                 strID = "-1";
 
+            bool bSimulate = StringUtil.IsInList("simulate", strStyle);
+
             bool bPushTailNo = false;
-            bPushTailNo = this.EnsureID(ref strID);
+            bPushTailNo = this.EnsureID(ref strID, bSimulate);
             if (oUser != null)
             {
                 DateTime start_time_1 = DateTime.Now;
@@ -11505,6 +11509,14 @@ out strError);
             }
 
             strOutputID = DbPath.GetCompressedID(strID);
+
+            if (bSimulate)
+            {
+                // 注：目前暂不支持 AddInteger 或 AppendString 方式返回 strOutputValue
+                outputTimestamp = ByteArray.GetTimeStampByteArray(CreateTimestampForDb());
+                return 0;
+            }
+
             int nRet = 0;
 
             bool bFull = false;

@@ -180,7 +180,7 @@ out string strError)
                         // 添加
                         if (string.IsNullOrEmpty(strOldValue) == true)
                         {
-                            string strNewValue = "mongodb://localhost";
+                            string strNewValue = "mongodb://127.0.0.1"; // 2016/12/8 修改为 127.0.0.1 // "mongodb://localhost";
                             mongoDB.SetAttribute("connectionString", strNewValue);
                             bChanged = true;
                         }

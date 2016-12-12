@@ -4976,8 +4976,76 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             MessageBox.Show(this, strError);
         }
 
+        static string GetExePath(string command_line)
+        {
+            int nRet = command_line.IndexOf(".exe");
+            if (nRet == -1)
+                return command_line;
+            if (command_line[nRet + ".exe".Length] == '\"')
+                return command_line.Substring(0, nRet + ".exe".Length + 1);
+            return command_line.Substring(0, nRet + ".exe".Length);
+        }
+
+        void RemoveMongoDBService()
+        {
+            string strError = "";
+            int nRet = 0;
+
+            string strCommandLine = InstallHelper.GetPathOfService("MongoDB");
+            if (string.IsNullOrEmpty(strCommandLine) == true)
+            {
+                strError = "MongoDB 先前并未注册为 Windows Service。所以无法 Remove";
+                goto ERROR1;
+            }
+
+            string strFileName = GetExePath(strCommandLine);    // Path.Combine(dlg.BinDir, "mongod.exe");
+            // strFileName = StringUtil.Unquote(strFileName, "\"\"");
+            string strLine = " --remove";
+
+            AppendSectionTitle("开始移走 MongoDB");
+            Application.DoEvents();
+
+            Cursor oldCursor = this.Cursor;
+            this.Cursor = Cursors.WaitCursor;
+            this.Enabled = false;
+            try
+            {
+                // parameters:
+                //      lines   若干行参数。每行执行一次
+                // return:
+                //      -1  出错
+                //      0   成功。strError 里面有运行输出的信息
+                nRet = InstallHelper.RunCmd(
+                    strFileName,
+                    new List<string> { strLine },
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                AppendString(RemoveProgressText(strError));
+            }
+            finally
+            {
+                AppendSectionTitle("结束移走 MongoDB");
+
+                this.Cursor = oldCursor;
+                this.Enabled = true;
+            }
+
+            AppendString("MongoDB 移走成功\r\n");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
         private void MenuItem_dp2library_setupMongoDB_Click(object sender, EventArgs e)
         {
+            if (Control.ModifierKeys == Keys.Control)
+            {
+                RemoveMongoDBService();
+                return;
+            }
+
             string strError = "";
             int nRet = 0;
 

@@ -218,6 +218,7 @@
     <Compile Include="SessionInfo.cs" />
     <Compile Include="SqlDatabase.cs" />
     <Compile Include="SqliteBulkCopy.cs" />
+    <Compile Include="TailNumberManager.cs" />
     <Compile Include="TestReaderWriterLock.cs" />
     <Compile Include="user.cs">
       <SubType>Code</SubType>

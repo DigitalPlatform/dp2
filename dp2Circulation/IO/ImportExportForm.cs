@@ -17,19 +17,42 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
+using Newtonsoft.Json;
 
 namespace dp2Circulation
 {
     public partial class ImportExportForm : MyForm
     {
+        StringMapDialog _mapDialog = new StringMapDialog();
+
         public ImportExportForm()
         {
             InitializeComponent();
+
+            this.panel_map.Controls.Add(_mapDialog.ListView);
+            _mapDialog.ListView.Dock = DockStyle.Fill;
         }
 
         private void ImportExportForm_Load(object sender, EventArgs e)
         {
             FillBiblioDbNameList();
+
+            this.UiState = Program.MainForm.AppInfo.GetString(
+        "ImportExportForm",
+        "uiState",
+        "");
+
+            {
+                string strStringTable = Program.MainForm.AppInfo.GetString(
+            "ImportExportForm",
+            "stringTable",
+            "");
+                this._mapDialog.StringTable = JsonConvert.DeserializeObject<List<TwoString>>(strStringTable);
+            }
+
+            this._mapDialog.Show();  // 有了此句对话框的 xxx_load 才能被执行
+            this._mapDialog.Hide();  // 有了此句可避免主窗口背后显示一个空对话框窗口
         }
 
         private void ImportExportForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -39,7 +62,21 @@ namespace dp2Circulation
 
         private void ImportExportForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            Program.MainForm.AppInfo.SetString(
+"ImportExportForm",
+"uiState",
+this.UiState);
 
+            {
+                string strStringTable = JsonConvert.SerializeObject(this._mapDialog.StringTable);
+
+                Program.MainForm.AppInfo.SetString(
+"ImportExportForm",
+"stringTable",
+strStringTable);
+            }
+
+            this._mapDialog.Close();
         }
 
         /// <summary>
@@ -67,6 +104,10 @@ namespace dp2Circulation
             // string strError = "";
 
             if (this.tabControl_main.SelectedTab == this.tabPage_source)
+            {
+                this.button_next.Enabled = true;
+            }
+            else if (this.tabControl_main.SelectedTab == this.tabPage_convert)
             {
                 this.button_next.Enabled = true;
             }
@@ -104,9 +145,14 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
 
-                this.tabControl_main.SelectedTab = this.tabPage_target;
+                this.tabControl_main.SelectedTab = this.tabPage_convert;
                 this.button_next.Enabled = true;
                 this.comboBox_target_targetBiblioDbName.Focus();
+            }
+            else if (this.tabControl_main.SelectedTab == this.tabPage_convert)
+            {
+                this.tabControl_main.SelectedTab = this.tabPage_target;
+                this.button_next.Enabled = true;
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_target)
             {
@@ -118,7 +164,7 @@ namespace dp2Circulation
 
                 this.tabControl_main.SelectedTab = this.tabPage_run;
                 this.button_next.Enabled = false;
-                Task.Factory.StartNew(() => DoImport());
+                Task.Factory.StartNew(() => DoImport(""));
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_run)
             {
@@ -145,10 +191,14 @@ namespace dp2Circulation
          ...
          * */
         // 在一个单独的线程中运行
-        void DoImport()
+        // parameters:
+        //      strStyle    空/simulate/collect 之一
+        void DoImport(string strStyle)
         {
             string strError = "";
             bool bRet = false;
+
+            this._locationTable.Clear();
 
             this.Invoke((Action)(() =>
                 EnableControls(false)
@@ -166,6 +216,29 @@ namespace dp2Circulation
             {
                 return this.comboBox_target_targetBiblioDbName.Text;
             }));
+            info.RandomItemBarcode = (bool)this.Invoke(new Func<bool>(() =>
+            {
+                return checkBox_target_randomItemBarcode.Checked;
+            }));
+#if NO
+            info.Simulate = (bool)this.Invoke(new Func<bool>(() =>
+            {
+                return this.checkBox_target_simulate.Checked;
+            }));
+#endif
+            if (strStyle == "collect")
+            {
+                info.Collect = true;
+
+                info.LocationMapTable = new List<TwoString>();  // 不适用转换表
+            }
+            else
+            {
+                if (strStyle == "simulate")
+                    info.Simulate = true;
+
+                info.LocationMapTable = this._mapDialog.StringTable;
+            }
 
             TimeSpan old_timeout = info.Channel.Timeout;
             info.Channel.Timeout = new TimeSpan(0, 2, 0);
@@ -181,7 +254,6 @@ namespace dp2Circulation
                 using (FileStream file = File.Open(strSourceFileName,
     FileMode.Open,
     FileAccess.Read))
-
                 using (XmlTextReader reader = new XmlTextReader(file))
                 {
                     if (stop != null)
@@ -216,18 +288,29 @@ namespace dp2Circulation
                             break;	// 结束
 
                         DoRecord(reader, info);
+                        if (stop != null)
+                            stop.SetProgressValue(file.Position);
                     }
                 }
 
+                string strOperName = "导入";
+                if (info.Collect)
+                {
+                    strOperName = "搜集数据";
+                    // GetLocationList(this._locationTable);
+                }
+                else if (info.Simulate)
+                    strOperName = "模拟导入";
+
                 if (info.ItemErrorCount > 0)
                 {
-                    strError = "导入完成。共发生 " + info.ItemErrorCount + " 次错误。详情请见固定面板的操作历史属性页";
+                    strError = strOperName + "完成。共发生 " + info.ItemErrorCount + " 次错误。详情请见固定面板的操作历史属性页";
                     this.Invoke((Action)(() =>
                     this.MainForm.ActivateFixPage("history")
                         ));
                     goto ERROR1;
                 }
-                this.ShowMessage("导入完成", "green", true);
+                this.ShowMessage(strOperName + "完成", "green", true);
                 return;
             }
             catch (Exception ex)
@@ -323,6 +406,7 @@ namespace dp2Circulation
          * */
         void DoBiblio(XmlTextReader reader, ProcessInfo info)
         {
+#if NO
             // info.ItemRefIDTable.Clear();
             string strOldPath = reader.GetAttribute("path");
             string strTimestamp = reader.GetAttribute("timestamp");
@@ -344,6 +428,15 @@ namespace dp2Circulation
 
             string strBiblioXml = reader.ReadOuterXml();
             reader.ReadEndElement();    // 位置已经到了 dprms:biblio 后面的一个同级元素
+#endif
+            XmlDocument dom = new XmlDocument();
+            XmlElement root = dom.ReadNode(reader) as XmlElement;
+            string strOldPath = root.GetAttribute("path");
+            string strTimestamp = root.GetAttribute("timestamp");
+
+            string strBiblioXml = root.InnerXml;
+
+            info.SourceBiblioRecPath = strOldPath;
 
             // TODO: 检查 MARC 格式是否和目标书目库吻合
 
@@ -367,35 +460,43 @@ namespace dp2Circulation
             }
 
             string strMessage = strOldPath + "-->" + strPath;
+            if (info.Collect)
+                strMessage = strOldPath;
+            if (info.Simulate)
+                strMessage = "模拟导入 " + strOldPath + "-->" + strPath;
+
             this.ShowMessage(strMessage);
             this.OutputText(strMessage, 0);
 
-            // 创建或者覆盖书目记录
-            string strError = "";
-            string strOutputPath = "";
-            byte[] baNewTimestamp = null;
-            long lRet = info.Channel.SetBiblioInfo(
-    info.stop,
-    strAction,
-    strPath,
-    "xml",
-    strBiblioXml,
-    ByteArray.GetTimeStampByteArray(strTimestamp),
-    "",
-    out strOutputPath,
-    out baNewTimestamp,
-    out strError);
-            if (lRet == -1)
+            if (info.Collect == false)
             {
-                if (info.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch)
+                // 创建或者覆盖书目记录
+                string strError = "";
+                string strOutputPath = "";
+                byte[] baNewTimestamp = null;
+                long lRet = info.Channel.SetBiblioInfo(
+        info.stop,
+        info.Simulate ? "simulate_" + strAction : strAction,
+        strPath,
+        "xml",
+        strBiblioXml,
+        ByteArray.GetTimeStampByteArray(strTimestamp),
+        "",
+        out strOutputPath,
+        out baNewTimestamp,
+        out strError);
+                if (lRet == -1)
                 {
-                    // 提示是否强行覆盖?
+                    if (info.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch)
+                    {
+                        // 提示是否强行覆盖?
+                    }
+                    strError = "保存书目记录 '" + strPath + "' 时出错: " + strError;
+                    throw new Exception(strError);
                 }
-                strError = "保存书目记录 '" + strPath + "' 时出错: " + strError;
-                throw new Exception(strError);
-            }
 
-            info.BiblioRecPath = strOutputPath;
+                info.BiblioRecPath = strOutputPath;
+            }
         }
 
         void DoItemCollection(XmlTextReader reader, ProcessInfo info)
@@ -473,6 +574,18 @@ namespace dp2Circulation
             }
         }
 
+        static void RandomItemBarcode(XmlDocument dom)
+        {
+            string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
+                "barcode");
+            if (string.IsNullOrEmpty(strItemBarcode) == false)
+                DomUtil.SetElementText(dom.DocumentElement,
+                    "barcode",
+                    strItemBarcode + "_" + Guid.NewGuid().ToString());
+        }
+
+        Hashtable _locationTable = new Hashtable(); // location string --> count
+
         void DoItems(List<string> item_xmls, ProcessInfo info)
         {
             string strError = "";
@@ -499,6 +612,38 @@ namespace dp2Circulation
                 if (strRootElementName == "item")
                 {
                     RefreshRefID(info.ItemRefIDTable, ref strRefID);
+
+                    if (info.RandomItemBarcode)
+                        RandomItemBarcode(item_dom);
+
+                    string strLocation1 = DomUtil.GetElementText(item_dom.DocumentElement, "location");
+
+                    string strPureLocation = StringUtil.GetPureLocation(strLocation1);
+
+                    if (info.Collect)
+                    {
+                        object o = _locationTable[strPureLocation];
+                        if (o == null)
+                            _locationTable[strPureLocation] = 1;
+                        else
+                        {
+                            int v = (int)o;
+                            v++;
+                            _locationTable[strPureLocation] = v;
+                        }
+                    }
+
+                    if (info.Collect == false)
+                    {
+                        bool bRet = ConvertLocation(info.LocationMapTable, ref strPureLocation);
+                        if (bRet == true)
+                        {
+                            DomUtil.SetElementText(item_dom.DocumentElement,
+                                "location",
+                                StringUtil.SetLocationString(strLocation1, strPureLocation));
+                        }
+                    }
+
                 }
                 else if (strRootElementName == "order")
                 {
@@ -536,6 +681,9 @@ namespace dp2Circulation
 
                 item.Action = "new";
 
+                if (info.Simulate)
+                    item.Style = "simulate";
+
                 item.NewRecord = strXml;
                 item.NewTimestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
 
@@ -545,77 +693,99 @@ namespace dp2Circulation
                 entityArray.Add(item);
             }
 
-            info.stop.SetMessage("正在为书目记录 '" + info.BiblioRecPath + "' 上传 "+info.UploadedSubItems+"+" + entityArray.Count + " 个下属 " + strRootElementName + " 记录 ...");
+            if (info.Collect)
+                info.stop.SetMessage("正在为书目记录 '" + info.SourceBiblioRecPath + "' 搜集 " + info.UploadedSubItems + "+" + entityArray.Count + " 个下属 " + strRootElementName + " 记录的信息 ...");
+            else
+                info.stop.SetMessage("正在为书目记录 '" + info.BiblioRecPath + "' " +
+                    (info.Simulate ? "模拟" : "") +
+                    "上传 " + info.UploadedSubItems + "+" + entityArray.Count + " 个下属 " + strRootElementName + " 记录 ...");
 
             info.UploadedSubItems += entityArray.Count;
 
-            EntityInfo[] errorinfos = null;
-
-            long lRet = 0;
-
-            if (strRootElementName == "item")
-                lRet = info.Channel.SetEntities(
-                     info.stop,
-                     info.BiblioRecPath,
-                     entityArray.ToArray(),
-                     out errorinfos,
-                     out strError);
-            else if (strRootElementName == "order")
-                lRet = info.Channel.SetOrders(
-                     info.stop,
-                     info.BiblioRecPath,
-                     entityArray.ToArray(),
-                     out errorinfos,
-                     out strError);
-            else if (strRootElementName == "issue")
-                lRet = info.Channel.SetIssues(
-                     info.stop,
-                     info.BiblioRecPath,
-                     entityArray.ToArray(),
-                     out errorinfos,
-                     out strError);
-            else if (strRootElementName == "comment")
-                lRet = info.Channel.SetComments(
-                     info.stop,
-                     info.BiblioRecPath,
-                     entityArray.ToArray(),
-                     out errorinfos,
-                     out strError);
-            else
+            if (info.Collect == false)
             {
-                strError = "未知的 strRootElementName '" + strRootElementName + "'";
-                throw new Exception(strError);
-            }
-            if (lRet == -1)
-                throw new Exception(strError);
+                EntityInfo[] errorinfos = null;
 
-            if (errorinfos == null || errorinfos.Length == 0)
-                return;
+                long lRet = 0;
 
-            StringBuilder text = new StringBuilder();
-            foreach (EntityInfo error in errorinfos)
-            {
-                if (String.IsNullOrEmpty(error.RefID) == true)
-                    throw new Exception("服务器返回的EntityInfo结构中RefID为空");
-
-                // 正常信息处理
-                if (error.ErrorCode == ErrorCodeValue.NoError)
-                    continue;
-
-                text.Append(error.RefID + "在提交保存过程中发生错误 -- " + error.ErrorInfo + "\r\n");
-                info.ItemErrorCount++;
-            }
-
-            if (text.Length > 0)
-            {
-                strError = "在为书目记录 '" + info.BiblioRecPath + "' 导入下属 '" + strRootElementName + "' 记录的阶段出现错误:\r\n" + text.ToString();
-
-                this.OutputText(strError, 2);
-
-                // 询问是否忽略错误继续向后处理? 此后全部忽略?
-                if (AskContinue(info, strError) == false)
+                if (strRootElementName == "item")
+                    lRet = info.Channel.SetEntities(
+                         info.stop,
+                         info.BiblioRecPath,
+                         entityArray.ToArray(),
+                         out errorinfos,
+                         out strError);
+                else if (strRootElementName == "order")
+                    lRet = info.Channel.SetOrders(
+                         info.stop,
+                         info.BiblioRecPath,
+                         entityArray.ToArray(),
+                         out errorinfos,
+                         out strError);
+                else if (strRootElementName == "issue")
+                    lRet = info.Channel.SetIssues(
+                         info.stop,
+                         info.BiblioRecPath,
+                         entityArray.ToArray(),
+                         out errorinfos,
+                         out strError);
+                else if (strRootElementName == "comment")
+                    lRet = info.Channel.SetComments(
+                         info.stop,
+                         info.BiblioRecPath,
+                         entityArray.ToArray(),
+                         out errorinfos,
+                         out strError);
+                else
+                {
+                    strError = "未知的 strRootElementName '" + strRootElementName + "'";
                     throw new Exception(strError);
+                }
+                if (lRet == -1)
+                    throw new Exception(strError);
+
+                if (errorinfos == null || errorinfos.Length == 0)
+                    return;
+
+                StringBuilder text = new StringBuilder();
+                foreach (EntityInfo error in errorinfos)
+                {
+                    if (String.IsNullOrEmpty(error.RefID) == true)
+                        throw new Exception("服务器返回的EntityInfo结构中RefID为空");
+
+                    // 正常信息处理
+                    if (error.ErrorCode == ErrorCodeValue.NoError)
+                        continue;
+
+                    text.Append(error.RefID + "在提交保存过程中发生错误 -- " + error.ErrorInfo + "\r\n");
+                    info.ItemErrorCount++;
+                }
+
+                if (text.Length > 0)
+                {
+                    strError = "在为书目记录 '" + info.BiblioRecPath + "' 导入下属 '" + strRootElementName + "' 记录的阶段出现错误:\r\n" + text.ToString();
+
+                    this.OutputText(strError, 2);
+
+                    // 询问是否忽略错误继续向后处理? 此后全部忽略?
+                    if (AskContinue(info, strError) == false)
+                        throw new Exception(strError);
+                }
             }
+        }
+
+        static bool ConvertLocation(List<TwoString> table, ref string location)
+        {
+            foreach (TwoString s in table)
+            {
+                if (s.Source == location)
+                {
+                    location = s.Target;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // return:
@@ -650,6 +820,15 @@ new string[] { "继续", "中断" });
 
         class ProcessInfo
         {
+            // 是否为模拟导入
+            public bool Simulate = false;
+
+            // 是否为搜集数据
+            public bool Collect = false;    // 搜集数据时，不向 dp2library 发出请求
+
+            // 是否为册条码号加上随机的后缀字符串
+            public bool RandomItemBarcode = false;
+
             // 是否覆盖书目记录。false 表示为追加
             public bool OverwriteBiblio = false;
             public string TargetBiblioDbName = "";  // 目标书目库名
@@ -661,12 +840,16 @@ new string[] { "继续", "中断" });
             public LibraryChannel Channel = null;
             public Stop stop = null;
 
+            public string SourceBiblioRecPath = ""; // 数据中的书目记录路径
+
             public string BiblioRecPath = "";   // 当前已经创建或者修改的书目记录路径
 
             public Hashtable ItemRefIDTable = new Hashtable();  // 册记录 refID 替换情况表。旧 refID --> 新 refID 
             public Hashtable OrderRefIDTable = new Hashtable();  // 订购记录 refID 替换情况表。旧 refID --> 新 refID 
 
             public int UploadedSubItems = 0;    // 当前书目记录累计已经上传的子记录个数
+
+            public List<TwoString> LocationMapTable = new List<TwoString>(); // 馆藏地转换表
 
             // 每次要处理新的一条书目记录以前，进行清除
             public void Clear()
@@ -742,5 +925,100 @@ new string[] { "继续", "中断" });
 
             this.comboBox_target_targetBiblioDbName.Items.Add("<使用文件中的原书目库名>");
         }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.textBox_source_fileName);
+                controls.Add(this.textBox_objectDirectoryName);
+                controls.Add(this.comboBox_target_targetBiblioDbName);
+                controls.Add(this.checkBox_target_randomItemBarcode);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.textBox_source_fileName);
+                controls.Add(this.textBox_objectDirectoryName);
+                controls.Add(this.comboBox_target_targetBiblioDbName);
+                controls.Add(this.checkBox_target_randomItemBarcode);
+                GuiState.SetUiState(controls, value);
+            }
+        }
+
+        private void tabControl_main_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            this.SetNextButtonEnable();
+        }
+
+        private void button_target_simulateImport_Click(object sender, EventArgs e)
+        {
+            Task.Factory.StartNew(() => DoImport("simulate"));
+        }
+
+#if NO
+        List<TwoString> _map = null;
+
+        private async void button_target_mapString_Click(object sender, EventArgs e)
+        {
+            // 按住 Ctrl 键可迫使重新创建对照表
+            if (_map == null || (Control.ModifierKeys == Keys.Control))
+            {
+                await Task.Factory.StartNew(() => DoImport("collect"));
+
+                _map = GetStringMap(this._locationTable);
+            }
+
+            StringMapDialog dlg = new StringMapDialog();
+            dlg.StringTable = _map;
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            this._map = dlg.StringTable;
+        }
+#endif
+
+        // 从数据中获取数据，创建馆藏地转换表
+        private async void button_convert_initialMapString_Click(object sender, EventArgs e)
+        {
+            await Task.Factory.StartNew(() => DoImport("collect"));
+
+            this._mapDialog.StringTable = GetStringMap(this._locationTable);
+        }
+
+        static List<string> GetLocationList(Hashtable locationTable)
+        {
+            List<string> lines = new List<string>();
+            foreach (string key in locationTable.Keys)
+            {
+                lines.Add(key);
+            }
+            lines.Sort();
+            return lines;
+        }
+
+        static List<TwoString> GetStringMap(Hashtable locationTable)
+        {
+            List<TwoString> results = new List<TwoString>();
+            foreach (string key in locationTable.Keys)
+            {
+                TwoString item = new TwoString();
+                item.Source = key;
+                item.Target = key;  // 让源和目标一致，是预防用户使用空的目标造成意料之外的变换效果
+                results.Add(item);
+            }
+
+            return results;
+        }
+
+#if NO
+        private void button_target_collect_Click(object sender, EventArgs e)
+        {
+            Task.Factory.StartNew(() => DoImport("collect"));
+        }
+#endif
     }
 }
