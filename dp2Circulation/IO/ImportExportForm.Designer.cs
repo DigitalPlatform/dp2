@@ -51,11 +51,14 @@
             this.comboBox_target_targetBiblioDbName = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage_run = new System.Windows.Forms.TabPage();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.button_next = new System.Windows.Forms.Button();
+            this.checkBox_convert_addBiblioToItem = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_source.SuspendLayout();
             this.tabPage_convert.SuspendLayout();
             this.tabPage_target.SuspendLayout();
+            this.tabPage_run.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -218,6 +221,7 @@
             // tabPage_convert
             // 
             this.tabPage_convert.AutoScroll = true;
+            this.tabPage_convert.Controls.Add(this.checkBox_convert_addBiblioToItem);
             this.tabPage_convert.Controls.Add(this.panel_map);
             this.tabPage_convert.Controls.Add(this.button_convert_initialMapString);
             this.tabPage_convert.Controls.Add(this.checkBox_target_newRefID);
@@ -233,14 +237,14 @@
             // 
             this.panel_map.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel_map.Location = new System.Drawing.Point(3, 105);
+            this.panel_map.Location = new System.Drawing.Point(3, 127);
             this.panel_map.Name = "panel_map";
-            this.panel_map.Size = new System.Drawing.Size(429, 133);
+            this.panel_map.Size = new System.Drawing.Size(412, 133);
             this.panel_map.TabIndex = 12;
             // 
             // button_convert_initialMapString
             // 
-            this.button_convert_initialMapString.Location = new System.Drawing.Point(3, 76);
+            this.button_convert_initialMapString.Location = new System.Drawing.Point(3, 98);
             this.button_convert_initialMapString.Name = "button_convert_initialMapString";
             this.button_convert_initialMapString.Size = new System.Drawing.Size(286, 23);
             this.button_convert_initialMapString.TabIndex = 10;
@@ -251,12 +255,15 @@
             // checkBox_target_newRefID
             // 
             this.checkBox_target_newRefID.AutoSize = true;
-            this.checkBox_target_newRefID.Location = new System.Drawing.Point(3, 38);
+            this.checkBox_target_newRefID.Checked = true;
+            this.checkBox_target_newRefID.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_target_newRefID.Location = new System.Drawing.Point(3, 60);
             this.checkBox_target_newRefID.Name = "checkBox_target_newRefID";
             this.checkBox_target_newRefID.Size = new System.Drawing.Size(108, 16);
             this.checkBox_target_newRefID.TabIndex = 9;
             this.checkBox_target_newRefID.Text = "重新生成参考ID";
             this.checkBox_target_newRefID.UseVisualStyleBackColor = true;
+            this.checkBox_target_newRefID.Visible = false;
             // 
             // checkBox_target_randomItemBarcode
             // 
@@ -312,12 +319,22 @@
             // 
             // tabPage_run
             // 
+            this.tabPage_run.Controls.Add(this.webBrowser1);
             this.tabPage_run.Location = new System.Drawing.Point(4, 22);
             this.tabPage_run.Name = "tabPage_run";
             this.tabPage_run.Size = new System.Drawing.Size(435, 257);
             this.tabPage_run.TabIndex = 2;
             this.tabPage_run.Text = "导入";
             this.tabPage_run.UseVisualStyleBackColor = true;
+            // 
+            // webBrowser1
+            // 
+            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser1.Location = new System.Drawing.Point(0, 0);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser1.Name = "webBrowser1";
+            this.webBrowser1.Size = new System.Drawing.Size(435, 257);
+            this.webBrowser1.TabIndex = 0;
             // 
             // button_next
             // 
@@ -331,6 +348,16 @@
             this.button_next.Text = "下一步(&N)";
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
+            // 
+            // checkBox_convert_addBiblioToItem
+            // 
+            this.checkBox_convert_addBiblioToItem.AutoSize = true;
+            this.checkBox_convert_addBiblioToItem.Location = new System.Drawing.Point(3, 38);
+            this.checkBox_convert_addBiblioToItem.Name = "checkBox_convert_addBiblioToItem";
+            this.checkBox_convert_addBiblioToItem.Size = new System.Drawing.Size(168, 16);
+            this.checkBox_convert_addBiblioToItem.TabIndex = 13;
+            this.checkBox_convert_addBiblioToItem.Text = "为册记录添加书目信息元素";
+            this.checkBox_convert_addBiblioToItem.UseVisualStyleBackColor = true;
             // 
             // ImportExportForm
             // 
@@ -353,6 +380,7 @@
             this.tabPage_convert.PerformLayout();
             this.tabPage_target.ResumeLayout(false);
             this.tabPage_target.PerformLayout();
+            this.tabPage_run.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -383,5 +411,7 @@
         private System.Windows.Forms.CheckBox checkBox_target_newRefID;
         private System.Windows.Forms.CheckBox checkBox_target_randomItemBarcode;
         private System.Windows.Forms.Panel panel_map;
+        private System.Windows.Forms.WebBrowser webBrowser1;
+        private System.Windows.Forms.CheckBox checkBox_convert_addBiblioToItem;
     }
 }

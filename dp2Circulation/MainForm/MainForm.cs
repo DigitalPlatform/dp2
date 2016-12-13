@@ -7291,6 +7291,12 @@ out strError);
 
         private void MenuItem_importExport_Click(object sender, EventArgs e)
         {
+            if (StringUtil.CompareVersion(this.ServerVersion, "2.93") < 0)
+            {
+                MessageBox.Show(this, "dp2library 2.93 及以上版本才能使用 从书目转储文件导入窗");
+                return;
+            }
+
             OpenWindow<ImportExportForm>();
         }
 

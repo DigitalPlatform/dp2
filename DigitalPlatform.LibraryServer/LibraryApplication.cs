@@ -133,7 +133,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.90 (2016/11/6) 消除 首次初始化 MSMQ 队列文件遇到异常然后挂起，但再也不会重试消除挂起状态 的 Bug。尝试将 Dir() API 和 ListFile() API 连接起来
         //      2.91 (2016/11/15) GetBiblioInfos() API 增加了一种 subrecords format，可以用于同时返回下级记录的 XML。返回的最多每种下级记录不超过 10 条
         //      2.92 (2016/12/3) Return() API 增加了 boxing 功能
-        public static string Version = "2.92";
+        //      2.93 (2016/12/13) SetBiblioInfo() 和 SetEntities() SetOrders() 等 API 支持 simulate 风格，或者增强原有对 simulate 的支持。内务模拟导入 .bdf 文件功能要用到这些新特性
+        public static string Version = "2.93";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -1852,7 +1853,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 Version version = new Version(strVersion);
-                Version base_version = new Version("2.65");
+                Version base_version = new Version("2.66");
                 if (version.CompareTo(base_version) < 0)
                 {
                     strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + version + ")。请立即升级 dp2Kernel 到最新版本。";

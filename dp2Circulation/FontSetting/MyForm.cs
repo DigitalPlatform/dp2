@@ -850,7 +850,7 @@ namespace dp2Circulation
         /// </summary>
         /// <param name="strText">要输出的纯文本字符串</param>
         /// <param name="nWarningLevel">警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)</param>
-        public void OutputText(string strText, int nWarningLevel = 0)
+        public virtual void OutputText(string strText, int nWarningLevel = 0)
         {
             string strClass = "normal";
             if (nWarningLevel == 1)

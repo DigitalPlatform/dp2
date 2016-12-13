@@ -84,13 +84,25 @@ strStringTable);
         /// </summary>
         public string BiblioDumpFilePath { get; set; }
 
+        public static void EnableTabPage(TabPage page, bool bEnable)
+        {
+            foreach(Control control in page.Controls)
+            {
+                control.Enabled = bEnable;
+            }
+        }
+
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.tabControl_main.Enabled = bEnable;
+            // this.tabControl_main.Enabled = bEnable;
+            EnableTabPage(this.tabPage_source, bEnable);
+            EnableTabPage(this.tabPage_convert, bEnable);
+            EnableTabPage(this.tabPage_target, bEnable);
+            // tabPage_run 不要禁止
 
             // next button
             if (bEnable == true)
@@ -198,47 +210,80 @@ strStringTable);
             string strError = "";
             bool bRet = false;
 
-            this._locationTable.Clear();
-
-            this.Invoke((Action)(() =>
-                EnableControls(false)
-                ));
-
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在从书目转储文件导入数据 ...");
-            stop.BeginLoop();
-
             ProcessInfo info = new ProcessInfo();
-            info.Channel = this.GetChannel();
-            info.stop = stop;
-            info.OverwriteBiblio = false;
-            info.TargetBiblioDbName = (string)this.Invoke(new Func<string>(() =>
             {
-                return this.comboBox_target_targetBiblioDbName.Text;
-            }));
-            info.RandomItemBarcode = (bool)this.Invoke(new Func<bool>(() =>
-            {
-                return checkBox_target_randomItemBarcode.Checked;
-            }));
+                info.Channel = this.GetChannel();
+                info.stop = stop;
+                info.OverwriteBiblio = false;
+                info.TargetBiblioDbName = (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.comboBox_target_targetBiblioDbName.Text;
+                }));
+                info.RandomItemBarcode = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return checkBox_target_randomItemBarcode.Checked;
+                }));
+                info.AddBiblioToItem = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_convert_addBiblioToItem.Checked;
+                }));
 #if NO
             info.Simulate = (bool)this.Invoke(new Func<bool>(() =>
             {
                 return this.checkBox_target_simulate.Checked;
             }));
 #endif
-            if (strStyle == "collect")
-            {
-                info.Collect = true;
+                if (strStyle == "collect")
+                {
+                    info.Collect = true;
 
-                info.LocationMapTable = new List<TwoString>();  // 不适用转换表
-            }
-            else
-            {
-                if (strStyle == "simulate")
-                    info.Simulate = true;
+                    info.LocationMapTable = new List<TwoString>();  // 不适用转换表
+                }
+                else
+                {
+                    if (strStyle == "simulate")
+                        info.Simulate = true;
 
-                info.LocationMapTable = this._mapDialog.StringTable;
+                    this.Invoke((Action)(() =>
+                    info.LocationMapTable = this._mapDialog.StringTable
+                    ));
+                }
+
             }
+
+            this._locationTable.Clear();
+            this._itemBarcodeTable.Clear();
+
+            this.ClearHtml();
+
+            // 自动切换到信息显示页
+            if (info.Collect == false)
+            {
+                this.Invoke((Action)(() =>
+        this.tabControl_main.SelectedTab = this.tabPage_run
+        ));
+            }
+
+            this.Invoke((Action)(() =>
+this.MainForm.ActivateFixPage("history")
+    ));
+
+            this.Invoke((Action)(() =>
+                EnableControls(false)
+                ));
+
+            string strText = "正在从书目转储文件导入数据 ...";
+            if (info.Simulate)
+                strText = ("正在从书目转储文件模拟导入数据 ...");
+            else if (info.Collect)
+                strText = ("正在从书目转储文件搜集信息 ...");
+
+            WriteHtml(strText + "\r\n");
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial(strText);
+            stop.BeginLoop();
 
             TimeSpan old_timeout = info.Channel.Timeout;
             info.Channel.Timeout = new TimeSpan(0, 2, 0);
@@ -274,6 +319,12 @@ strStringTable);
 
                     for (; ; )
                     {
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
                         // 到下一个 record 元素
                         while (true)
                         {
@@ -324,6 +375,7 @@ strStringTable);
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+                stop.Style = StopStyle.None;
 
                 info.Channel.Timeout = old_timeout;
                 this.ReturnChannel(info.Channel);
@@ -434,7 +486,7 @@ strStringTable);
             string strOldPath = root.GetAttribute("path");
             string strTimestamp = root.GetAttribute("timestamp");
 
-            string strBiblioXml = root.InnerXml;
+            info.BiblioXml = root.InnerXml;
 
             info.SourceBiblioRecPath = strOldPath;
 
@@ -459,16 +511,25 @@ strStringTable);
                     strPath = info.TargetBiblioDbName + "/?";
             }
 
+#if NO
             string strMessage = strOldPath + "-->" + strPath;
             if (info.Collect)
                 strMessage = strOldPath;
             if (info.Simulate)
                 strMessage = "模拟导入 " + strOldPath + "-->" + strPath;
+#endif
 
-            this.ShowMessage(strMessage);
-            this.OutputText(strMessage, 0);
+            // WriteHtml(strMessage + "\r\n");
 
-            if (info.Collect == false)
+
+            if (info.Collect == true)
+            {
+                string strMessage = strOldPath;
+
+                this.ShowMessage(strMessage);
+                this.OutputText(strMessage, 0);
+            }
+            else
             {
                 // 创建或者覆盖书目记录
                 string strError = "";
@@ -479,7 +540,7 @@ strStringTable);
         info.Simulate ? "simulate_" + strAction : strAction,
         strPath,
         "xml",
-        strBiblioXml,
+        info.BiblioXml,
         ByteArray.GetTimeStampByteArray(strTimestamp),
         "",
         out strOutputPath,
@@ -496,8 +557,17 @@ strStringTable);
                 }
 
                 info.BiblioRecPath = strOutputPath;
+
+                string strMessage = strOldPath + "-->" + info.BiblioRecPath;
+                if (info.Simulate)
+                    strMessage = "模拟导入 " + strOldPath + "-->" + info.BiblioRecPath;
+
+                this.ShowMessage(strMessage);
+                this.OutputText(strMessage, 0);
             }
         }
+
+        static int ITEM_BATCH_SIZE = 10;
 
         void DoItemCollection(XmlTextReader reader, ProcessInfo info)
         {
@@ -527,7 +597,7 @@ strStringTable);
                         && reader.NamespaceURI == DpNs.dprms)
                     {
                         item_xmls.Add(reader.ReadOuterXml());
-                        if (item_xmls.Count >= 10)
+                        if (item_xmls.Count >= ITEM_BATCH_SIZE)
                         {
                             DoItems(item_xmls, info);
                             item_xmls.Clear();
@@ -574,14 +644,26 @@ strStringTable);
             }
         }
 
-        static void RandomItemBarcode(XmlDocument dom)
+        static void RandomItemBarcode(XmlDocument item_dom)
         {
-            string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
+            string strItemBarcode = DomUtil.GetElementText(item_dom.DocumentElement,
                 "barcode");
             if (string.IsNullOrEmpty(strItemBarcode) == false)
-                DomUtil.SetElementText(dom.DocumentElement,
+                DomUtil.SetElementText(item_dom.DocumentElement,
                     "barcode",
                     strItemBarcode + "_" + Guid.NewGuid().ToString());
+        }
+
+        static void AddBiblioToItem(XmlDocument item_dom, string strBiblioXml)
+        {
+            if (string.IsNullOrEmpty(strBiblioXml))
+                throw new ArgumentException("strBiblioXml 值不应为空", "strBiblioXml");
+
+            XmlElement biblio = item_dom.DocumentElement.SelectSingleNode("biblio") as XmlElement;
+            if (biblio != null)
+                return;
+            biblio = item_dom.CreateElement("biblio");
+            biblio.InnerXml = strBiblioXml;
         }
 
         Hashtable _locationTable = new Hashtable(); // location string --> count
@@ -589,6 +671,8 @@ strStringTable);
         void DoItems(List<string> item_xmls, ProcessInfo info)
         {
             string strError = "";
+
+            StringBuilder dupInfo = new StringBuilder();
 
             List<EntityInfo> entityArray = new List<EntityInfo>();
             string strRootElementName = "";
@@ -615,6 +699,11 @@ strStringTable);
 
                     if (info.RandomItemBarcode)
                         RandomItemBarcode(item_dom);
+                    else
+                    {
+                        // 针对册条码号进行文件空间内查重
+                        SearchDupOnFileScope(item_dom, dupInfo);
+                    }
 
                     string strLocation1 = DomUtil.GetElementText(item_dom.DocumentElement, "location");
 
@@ -643,6 +732,9 @@ strStringTable);
                                 StringUtil.SetLocationString(strLocation1, strPureLocation));
                         }
                     }
+
+                    if (info.AddBiblioToItem)
+                        AddBiblioToItem(item_dom, info.BiblioXml);
 
                 }
                 else if (strRootElementName == "order")
@@ -772,6 +864,43 @@ strStringTable);
                         throw new Exception(strError);
                 }
             }
+
+            if (dupInfo.Length > 0)
+            {
+                strError = info.SourceBiblioRecPath + ":\r\n" + dupInfo.ToString();
+                this.OutputText(strError, 2);
+
+                if (AskContinue(info, strError) == false)
+                    throw new Exception(strError);
+            }
+        }
+
+        public override void OutputText(string strText, int nWarningLevel = 0)
+        {
+            base.OutputText(strText, nWarningLevel);
+            if (nWarningLevel == 2)
+                WriteHtml(strText + "\r\n");
+        }
+
+        Hashtable _itemBarcodeTable = new Hashtable();  // itemBarcode --> count
+
+        void SearchDupOnFileScope(XmlDocument item_dom, StringBuilder errorInfo)
+        {
+            string strItemBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
+            if (string.IsNullOrEmpty(strItemBarcode) == true)
+                return;
+            object o = _itemBarcodeTable[strItemBarcode];
+            if (o == null)
+            {
+                _itemBarcodeTable[strItemBarcode] = 1;
+                return;
+            }
+
+            int v = (int)o;
+            v++;
+            _itemBarcodeTable[strItemBarcode] = v;
+
+            errorInfo.Append("册条码号 '" + strItemBarcode + "' 在源文件中发生重复(出现 " + v + " 次)");
         }
 
         static bool ConvertLocation(List<TwoString> table, ref string location)
@@ -829,6 +958,9 @@ new string[] { "继续", "中断" });
             // 是否为册条码号加上随机的后缀字符串
             public bool RandomItemBarcode = false;
 
+            // 是否为册记录自动添加书目元素。(注：如果册记录中本来有了这个元素就不添加了)
+            public bool AddBiblioToItem = false;
+
             // 是否覆盖书目记录。false 表示为追加
             public bool OverwriteBiblio = false;
             public string TargetBiblioDbName = "";  // 目标书目库名
@@ -843,6 +975,8 @@ new string[] { "继续", "中断" });
             public string SourceBiblioRecPath = ""; // 数据中的书目记录路径
 
             public string BiblioRecPath = "";   // 当前已经创建或者修改的书目记录路径
+
+            public string BiblioXml { get; set; }   // 书目记录 XML
 
             public Hashtable ItemRefIDTable = new Hashtable();  // 册记录 refID 替换情况表。旧 refID --> 新 refID 
             public Hashtable OrderRefIDTable = new Hashtable();  // 订购记录 refID 替换情况表。旧 refID --> 新 refID 
@@ -1012,6 +1146,28 @@ new string[] { "继续", "中断" });
             }
 
             return results;
+        }
+
+        /// <summary>
+        /// 写入 HTML 字符串
+        /// </summary>
+        /// <param name="strHtml">HTML 字符串</param>
+        public void WriteHtml(string strHtml)
+        {
+            this.Invoke((Action)(() =>
+            {
+                Global.WriteHtml(this.webBrowser1,
+                    strHtml);
+                webBrowser1.ScrollToEnd();
+            }));
+        }
+
+        public void ClearHtml()
+        {
+            this.Invoke((Action)(() =>
+            {
+                Global.ClearForPureTextOutputing(this.webBrowser1);
+            }));
         }
 
 #if NO
