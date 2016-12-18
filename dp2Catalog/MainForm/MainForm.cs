@@ -1322,7 +1322,6 @@ namespace dp2Catalog
             }
         }
 
-
         // 当前顶层的DcForm
         public DcForm TopDcForm
         {

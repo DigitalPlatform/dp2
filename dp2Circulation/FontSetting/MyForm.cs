@@ -79,10 +79,20 @@ namespace dp2Circulation
         }
 
         /// <summary>
+        /// 窗口是否为固定窗口。所谓固定窗口就是固定在某一侧的窗口
+        /// </summary>
+        public virtual bool Fixed
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// 界面语言
         /// </summary>
         public string Lang = "zh";
 
+#if NO
         MainForm m_mainForm = null;
 
         /// <summary>
@@ -100,6 +110,21 @@ namespace dp2Circulation
             {
                 // 为了让脚本代码能兼容
                 this.m_mainForm = value;
+            }
+        }
+#endif
+        /// <summary>
+        /// 当前窗口所从属的框架窗口
+        /// </summary>
+        public virtual MainForm MainForm
+        {
+            get
+            {
+                return Program.MainForm;
+            }
+            set
+            {
+                // 为了让脚本代码能兼容
             }
         }
 

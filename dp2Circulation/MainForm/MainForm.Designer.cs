@@ -183,6 +183,7 @@ namespace dp2Circulation
             this.menuItem_updateDp2circulation = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_createGreenApplication = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_upgradeFromDisk = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_refreshLibraryUID = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator31 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_copyright = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip_main = new System.Windows.Forms.StatusStrip();
@@ -234,7 +235,7 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.MenuItem_refreshLibraryUID = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabPage_browse = new System.Windows.Forms.TabPage();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -1299,6 +1300,13 @@ namespace dp2Circulation
             this.MenuItem_upgradeFromDisk.Text = "´Ó´ÅÅÌÉý¼¶(&U) ...";
             this.MenuItem_upgradeFromDisk.Click += new System.EventHandler(this.MenuItem_upgradeFromDisk_Click);
             // 
+            // MenuItem_refreshLibraryUID
+            // 
+            this.MenuItem_refreshLibraryUID.Name = "MenuItem_refreshLibraryUID";
+            this.MenuItem_refreshLibraryUID.Size = new System.Drawing.Size(196, 22);
+            this.MenuItem_refreshLibraryUID.Text = "Ë¢ÐÂ LibraryUID";
+            this.MenuItem_refreshLibraryUID.Click += new System.EventHandler(this.MenuItem_refreshLibraryUID_Click);
+            // 
             // toolStripSeparator31
             // 
             this.toolStripSeparator31.Name = "toolStripSeparator31";
@@ -1615,6 +1623,7 @@ namespace dp2Circulation
             this.tabControl_panelFixed.Controls.Add(this.tabPage_camera);
             this.tabControl_panelFixed.Controls.Add(this.tabPage_accept);
             this.tabControl_panelFixed.Controls.Add(this.tabPage_share);
+            this.tabControl_panelFixed.Controls.Add(this.tabPage_browse);
             this.tabControl_panelFixed.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_panelFixed.Location = new System.Drawing.Point(0, 25);
             this.tabControl_panelFixed.Margin = new System.Windows.Forms.Padding(0);
@@ -1815,12 +1824,14 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // MenuItem_refreshLibraryUID
+            // tabPage_browse
             // 
-            this.MenuItem_refreshLibraryUID.Name = "MenuItem_refreshLibraryUID";
-            this.MenuItem_refreshLibraryUID.Size = new System.Drawing.Size(196, 22);
-            this.MenuItem_refreshLibraryUID.Text = "Ë¢ÐÂ LibraryUID";
-            this.MenuItem_refreshLibraryUID.Click += new System.EventHandler(this.MenuItem_refreshLibraryUID_Click);
+            this.tabPage_browse.Location = new System.Drawing.Point(4, 29);
+            this.tabPage_browse.Name = "tabPage_browse";
+            this.tabPage_browse.Size = new System.Drawing.Size(199, 236);
+            this.tabPage_browse.TabIndex = 7;
+            this.tabPage_browse.Text = "ä¯ÀÀ";
+            this.tabPage_browse.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -2054,6 +2065,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem MenuItem_importExport;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_selectLibraryCode;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_refreshLibraryUID;
+        private System.Windows.Forms.TabPage tabPage_browse;
     }
 }
 

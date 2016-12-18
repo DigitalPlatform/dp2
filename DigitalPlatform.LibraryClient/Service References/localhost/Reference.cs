@@ -458,6 +458,15 @@ namespace DigitalPlatform.LibraryClient.localhost {
         TempCodeMismatch = 31,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        BiblioDup = 32,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Borrowing = 33,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ClientVersionTooOld = 34,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         AlreadyExist = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
@@ -495,12 +504,6 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
         TimestampMismatch = 113,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        Borrowing = 114,
-        
-        [System.Runtime.Serialization.EnumMemberAttribute()]
-        ClientVersionTooOld = 115,
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]

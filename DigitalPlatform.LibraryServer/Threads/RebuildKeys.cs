@@ -12,6 +12,7 @@ namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
     /// 重建 dp2kernel 检索点的批处理任务
+    /// 也兼做创建和更新书目记录查重键、查重码的批处理任务
     /// </summary>
     public class RebuildKeys : BatchTask
     {
@@ -70,19 +71,19 @@ namespace DigitalPlatform.LibraryServer
 
         // 解析通用启动参数
         public static int ParseTaskParam(string strParam,
-            out string strLevel,
+            out string strFunction,
             out bool bClearFirst,
             out string strError)
         {
             strError = "";
             bClearFirst = false;
-            strLevel = "";
+            strFunction = "";
 
             if (String.IsNullOrEmpty(strParam) == true)
                 return 0;
 
             Hashtable table = StringUtil.ParseParameters(strParam);
-            strLevel = (string)table["level"];
+            strFunction = (string)table["function"];
 
             string strClearFirst = (string)table["clear_first"];
             if (strClearFirst.ToLower() == "yes"
@@ -95,11 +96,11 @@ namespace DigitalPlatform.LibraryServer
         }
 
         static string BuildTaskParam(
-            string strLevel,
+            string strFunction,
             bool bClearFirst)
         {
             Hashtable table = new Hashtable();
-            table["level"] = strLevel;
+            table["function"] = strFunction;
             table["clear_first"] = bClearFirst ? "yes" : "no";
             return StringUtil.BuildParameterString(table);
         }
@@ -116,7 +117,7 @@ namespace DigitalPlatform.LibraryServer
             if (this.App.PauseBatchTask == true)
                 return;
 
-            REDO_TASK:
+        REDO_TASK:
             try
             {
                 string strError = "";
@@ -143,10 +144,10 @@ namespace DigitalPlatform.LibraryServer
                 startinfo.Start = "";
 
                 //
-                string strRecoverLevel = "";
+                string strFunction = "";
                 bool bClearFirst = false;
                 nRet = ParseTaskParam(startinfo.Param,
-                    out strRecoverLevel,
+                    out strFunction,
                     out bClearFirst,
                     out strError);
                 if (nRet == -1)
@@ -155,9 +156,9 @@ namespace DigitalPlatform.LibraryServer
                     return;
                 }
 
+#if NO
                 // 下一次 loop 进入的时候什么动作有没有，避免重复前一次的清除数据库动作
                 startinfo.Param = "";
-
 
                 if (bClearFirst == true)
                 {
@@ -165,6 +166,7 @@ namespace DigitalPlatform.LibraryServer
                     // 清除全部同步的本地库
 
                 }
+#endif
 
                 if (String.IsNullOrEmpty(strDbNameList) == true)
                 {
@@ -217,8 +219,17 @@ namespace DigitalPlatform.LibraryServer
                 {
                     BreakPointInfo info = breakpoints[i];
 
-                    nRet = RebuildDatabase(info,
-            out strError);
+                    if (strFunction == "重建查重键")
+                        nRet = RebuildUniformKeyDatabase(info,
+                            out strError);
+                    else if (strFunction == "重建检索点" || string.IsNullOrEmpty(strFunction))
+                        nRet = RebuildKeyDatabase(info,
+                            out strError);
+                    else
+                    {
+                        strError = "未能识别的 strFunction 参数值 '" + strFunction + "'";
+                        goto ERROR1;
+                    }
                     if (nRet == -1)
                     {
                         // 保存断点文件
@@ -390,8 +401,8 @@ out strError);
         static List<BatchTaskStartInfo> FromString(string strText)
         {
             List<BatchTaskStartInfo> results = new List<BatchTaskStartInfo>();
-            string[] segments = strText.Split(new char[] {';'}, StringSplitOptions.RemoveEmptyEntries);
-            foreach(string segment in segments)
+            string[] segments = strText.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string segment in segments)
             {
                 BatchTaskStartInfo info = BatchTaskStartInfo.FromString(segment);
                 results.Add(info);
@@ -412,7 +423,7 @@ out strError);
             foreach (BatchTaskStartInfo info in start_infos)
             {
                 if (text.Length > 0)
-                    text.Append("\r\n"); 
+                    text.Append("\r\n");
                 text.Append((i + 1).ToString() + ") " + GetSummary(info));
             }
 
@@ -478,8 +489,505 @@ out strError);
                 this.StartInfos = new List<BatchTaskStartInfo>();   // 避免残余信息对后一轮运行发生影响
         }
 
+        delegate int Delegate_beginLoop(RmsChannel channel,
+            BreakPointInfo info,
+            out string strError);
+
+        // return:
+        //      -1  出错
+        //      0   结束
+        //      1   继续
+        delegate int Delegate_processRecord(RmsChannel channel,
+            ref bool bFirst,
+            string strRecPath,
+            out string strNextRecPath,
+            out string strError);
+
         int m_nRecordCount = 0;
 
+        #region 重建检索点
+
+        int beginLoop(
+            RmsChannel channel,
+            BreakPointInfo info,
+            out string strError)
+        {
+            // Refresh数据库定义
+            long lRet = channel.DoRefreshDB(
+                "begin",
+                info.DbName,
+                false,  // bClearKeysAtBegin == true ? true : false,
+                out strError);
+            if (lRet == -1)
+                return -1;
+            return 0;
+        }
+
+        int processRecord(RmsChannel channel,
+            ref bool bFirst,
+            string strRecPath,
+            out string strNextRecPath,
+            out string strError)
+        {
+            strNextRecPath = "";
+            strError = "";
+
+            string strStyle = "";
+
+            strStyle = "timestamp,outputpath";	// 优化
+
+            strStyle += ",forcedeleteoldkeys";
+
+            if (bFirst == true)
+            {
+                // 注：如果不校验首号，只有强制循环的情况下，才能不需要next风格
+            }
+            else
+            {
+                strStyle += ",next";
+            }
+
+            // string strOutputPath = "";
+
+            bool bFoundRecord = false;
+
+            bool bNeedRetry = true;
+
+            int nRedoCount = 0;
+        REDO_REBUILD:
+            // 获得资源
+            // return:
+            //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
+            //		0	成功
+            long lRet = channel.DoRebuildResKeys(strRecPath,
+                strStyle,
+                out strNextRecPath,
+                out strError);
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                {
+                    if (bFirst == true)
+                    {
+                        // 如果不要强制循环，此时也不能结束，否则会让用户以为数据库里面根本没有数据
+                        // AutoCloseMessageBox.Show(this, "您为数据库 " + info.DbName + " 指定的首记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n(注：为避免出现此提示，可在操作前勾选“校准首尾ID”)\r\n\r\n按 确认 继续向后找...");
+                        bFirst = false;
+                        return 1;
+                    }
+                    else
+                    {
+                        Debug.Assert(bFirst == false, "");
+
+                        if (bFirst == true)
+                        {
+                            strError = "记录 " + strRecPath + "(后一条) 不存在。处理结束。";
+                        }
+                        else
+                        {
+                            strError = "记录 " + strRecPath + " 是最末一条记录。处理结束。";
+                        }
+
+                        return 0;
+                    }
+
+                }
+                else if (channel.ErrorCode == ChannelErrorCode.EmptyRecord)
+                {
+                    bFirst = false;
+                    return 1;
+                }
+
+                // 允许重试
+                if (bNeedRetry == true)
+                {
+                    if (nRedoCount < 10)
+                    {
+                        nRedoCount++;
+                        goto REDO_REBUILD;
+                    }
+                }
+                else
+                    return -1;
+            } // end of nRet == -1
+
+            bFirst = false;
+
+            bFoundRecord = true;
+            if (bFoundRecord == true)
+                m_nRecordCount++;
+            return 1;
+        }
+
+        int RebuildKeyDatabase(BreakPointInfo info,
+    out string strError)
+        {
+            strError = "";
+
+            return ProcessDatabase(info,
+                beginLoop,
+                processRecord,
+                out strError);
+        }
+
+        #endregion
+
+        #region 重建查重键
+
+        int beginLoop1(
+    RmsChannel channel,
+    BreakPointInfo info,
+    out string strError)
+        {
+            strError = "";
+            // 检查 info.DbName 是否为书目库
+            return 0;
+        }
+
+        int processBiblioRecord(RmsChannel channel,
+    ref bool bFirst,
+    string strRecPath,
+    out string strNextRecPath,
+    out string strError)
+        {
+            strNextRecPath = "";
+            strError = "";
+
+            string strStyle = "";
+
+            //  "content,data,metadata,timestamp,outputpath",
+
+            strStyle = "content,data,timestamp,outputpath";	// 优化
+            if (bFirst == true)
+            {
+                // 注：如果不校验首号，只有强制循环的情况下，才能不需要next风格
+            }
+            else
+            {
+                strStyle += ",next";
+            }
+
+            // string strOutputPath = "";
+
+            bool bFoundRecord = false;
+
+            bool bNeedRetry = true;
+
+            int nRedoCount = 0;
+        REDO_REBUILD:
+            string strResult = "";
+            string strMetaData = "";
+            byte[] timestamp = null;
+            // 获得资源
+            // return:
+            //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
+            //		0	成功
+            long lRet = channel.GetRes(strRecPath,
+                strStyle,
+                out strResult,
+                out strMetaData,
+                out timestamp,
+                out strNextRecPath,
+                out strError);
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                {
+                    if (bFirst == true)
+                    {
+                        // 如果不要强制循环，此时也不能结束，否则会让用户以为数据库里面根本没有数据
+                        // AutoCloseMessageBox.Show(this, "您为数据库 " + info.DbName + " 指定的首记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n(注：为避免出现此提示，可在操作前勾选“校准首尾ID”)\r\n\r\n按 确认 继续向后找...");
+                        bFirst = false;
+                        return 1;
+                    }
+                    else
+                    {
+                        Debug.Assert(bFirst == false, "");
+
+                        if (bFirst == true)
+                        {
+                            strError = "记录 " + strRecPath + "(后一条) 不存在。处理结束。";
+                        }
+                        else
+                        {
+                            strError = "记录 " + strRecPath + " 是最末一条记录。处理结束。";
+                        }
+
+                        return 0;
+                    }
+
+                }
+                else if (channel.ErrorCode == ChannelErrorCode.EmptyRecord)
+                {
+                    bFirst = false;
+                    return 1;
+                }
+
+                // 允许重试
+                if (bNeedRetry == true)
+                {
+                    if (nRedoCount < 10)
+                    {
+                        nRedoCount++;
+                        goto REDO_REBUILD;
+                    }
+                }
+                else
+                    return -1;
+            } // end of nRet == -1
+
+            bFirst = false;
+
+            bFoundRecord = true;
+            if (bFoundRecord == true)
+                m_nRecordCount++;
+
+            return 1;
+        }
+
+        int RebuildUniformKeyDatabase(BreakPointInfo info,
+out string strError)
+        {
+            strError = "";
+
+            return ProcessDatabase(info,
+                beginLoop1,
+                processBiblioRecord,
+                out strError);
+        }
+
+
+        #endregion
+
+        // TODO: 用两个回调函数嵌入
+        int ProcessDatabase(BreakPointInfo info,
+            Delegate_beginLoop procBeginLoop,
+            Delegate_processRecord procProcessRecord,
+            out string strError)
+        {
+            strError = "";
+
+            RmsChannel channel = RmsChannels.GetChannel(this.App.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            // 恢复为最大范围
+            string strStartNo = "1";
+            string strEndNo = "9999999999";
+
+            string strOutputStartNo = "";
+            string strOutputEndNo = "";
+
+            if (string.IsNullOrEmpty(info.RecID) == false)
+                strStartNo = info.RecID;
+
+            // 校验起止号
+            // return:
+            //      0   不存在记录
+            //      1   存在记录
+            int nRet = VerifyRange(channel,
+                info.DbName,
+                strStartNo,
+                strEndNo,
+                out strOutputStartNo,
+                out strOutputEndNo,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (nRet == 0)
+                return 0;
+
+            strStartNo = strOutputStartNo;
+            strEndNo = strOutputEndNo;
+
+            Int64 nStart;
+            Int64 nEnd;
+            Int64 nCur;
+
+            if (Int64.TryParse(strStartNo, out nStart) == false)
+            {
+                strError = "数据库 '" + info.DbName + "' 起始记录 ID '" + strStartNo + "' 不合法";
+                return -1;
+            }
+            if (Int64.TryParse(strEndNo, out nEnd) == false)
+            {
+                strError = "数据库 '" + info.DbName + "' 结束记录 ID '" + strEndNo + "' 不合法";
+                return -1;
+            }
+
+#if NO
+            // Refresh数据库定义
+            long lRet = channel.DoRefreshDB(
+                "begin",
+                info.DbName,
+                false,  // bClearKeysAtBegin == true ? true : false,
+                out strError);
+            if (lRet == -1)
+                return -1;
+#endif
+            if (procBeginLoop != null)
+            {
+                nRet = procBeginLoop(channel, info, out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            string strID = strStartNo;
+
+            bool bFirst = true;	// 是否为第一次取记录
+
+            // 循环
+            for (; ; )
+            {
+                if (this.Stopped == true)
+                {
+                    strError = "中断";
+                    return -1;
+                }
+
+                string strPath = info.DbName + "/" + strID;
+                string strOutputPath = "";
+
+                nRet = procProcessRecord(channel, ref bFirst, strPath, out strOutputPath, out strError);
+                //if (nRet == 1)
+                //    goto CONTINUE;
+                if (nRet == 0)
+                    return 0;
+                if (nRet == -1)
+                    return -1;
+#if NO
+                    // string strDirectionComment = "";
+
+                    string strStyle = "";
+
+                    strStyle = "timestamp,outputpath";	// 优化
+
+                    strStyle += ",forcedeleteoldkeys";
+
+                    if (bFirst == true)
+                    {
+                        // 注：如果不校验首号，只有强制循环的情况下，才能不需要next风格
+                        strStyle += "";
+                    }
+                    else
+                    {
+
+                        strStyle += ",next";
+                        // strDirectionComment = "的后一条记录";
+                    }
+
+                    string strPath = info.DbName + "/" + strID;
+                    string strOutputPath = "";
+
+                    bool bFoundRecord = false;
+
+                    bool bNeedRetry = true;
+
+                    int nRedoCount = 0;
+                REDO_REBUILD:
+                    // 获得资源
+                    // return:
+                    //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
+                    //		0	成功
+                    lRet = channel.DoRebuildResKeys(strPath,
+                        strStyle,
+                        out strOutputPath,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        {
+                            if (bFirst == true)
+                            {
+                                // 如果不要强制循环，此时也不能结束，否则会让用户以为数据库里面根本没有数据
+                                // AutoCloseMessageBox.Show(this, "您为数据库 " + info.DbName + " 指定的首记录 " + strID + strDirectionComment + " 不存在。\r\n\r\n(注：为避免出现此提示，可在操作前勾选“校准首尾ID”)\r\n\r\n按 确认 继续向后找...");
+                                bFirst = false;
+                                goto CONTINUE;
+                            }
+                            else
+                            {
+                                Debug.Assert(bFirst == false, "");
+
+                                if (bFirst == true)
+                                {
+                                    strError = "记录 " + strID + "(后一条) 不存在。处理结束。";
+                                }
+                                else
+                                {
+                                    strError = "记录 " + strID + " 是最末一条记录。处理结束。";
+                                }
+
+                                return 0;
+                            }
+
+                        }
+                        else if (channel.ErrorCode == ChannelErrorCode.EmptyRecord)
+                        {
+                            bFirst = false;
+                            // bFoundRecord = false;
+                            // 把id解析出来
+                            strID = ResPath.GetRecordId(strOutputPath);
+                            goto CONTINUE;
+
+                        }
+
+                        // 允许重试
+                        if (bNeedRetry == true)
+                        {
+                            if (nRedoCount < 10)
+                            {
+                                nRedoCount++;
+                                goto REDO_REBUILD;
+                            }
+                        }
+                        else
+                            return -1;
+
+                    } // end of nRet == -1
+
+                    bFirst = false;
+
+                    bFoundRecord = true;
+#endif
+
+                // 把id解析出来
+                strID = ResPath.GetRecordId(strOutputPath);
+
+                info.RecID = strID; // 记忆
+
+                // 每 100 条显示一行
+                if ((m_nRecordCount % 100) == 0)
+                    this.AppendResultText("已重建检索点 记录 " + strOutputPath + "  " + (m_nRecordCount + 1).ToString() + "\r\n");
+
+            CONTINUE:
+
+                // 是否超过循环范围
+                if (Int64.TryParse(strID, out nCur) == false)
+                {
+                    strError = "数据库 '" + info.DbName + "' 当前记录 ID '" + strID + "' 不合法";
+                    return -1;
+                }
+                if (nCur > nEnd)
+                    break;
+
+                //if (bFoundRecord == true)
+                //    m_nRecordCount++;
+
+                SetProgressText((nCur - nStart + 1).ToString());
+
+                // 对已经作过的进行判断
+                if (nCur >= nEnd)
+                    break;
+            }
+
+            return 0;
+        }
+
+#if NO
+        // TODO: 用两个回调函数嵌入
         int RebuildDatabase(BreakPointInfo info,
             out string strError)
         {
@@ -501,6 +1009,7 @@ out strError);
 
             if (string.IsNullOrEmpty(info.RecID) == false)
                 strStartNo = info.RecID;
+
             // 校验起止号
             // return:
             //      0   不存在记录
@@ -535,6 +1044,7 @@ out strError);
                 strError = "数据库 '" + info.DbName + "' 结束记录 ID '" + strEndNo + "' 不合法";
                 return -1;
             }
+
             // Refresh数据库定义
             long lRet = channel.DoRefreshDB(
                 "begin",
@@ -643,7 +1153,6 @@ out strError);
                             }
                         }
                         else
-
                             return -1;
 
                     } // end of nRet == -1
@@ -727,6 +1236,7 @@ out strError);
 
             return 0;
         }
+#endif
 
         // 校验起止号
         // return:

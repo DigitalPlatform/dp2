@@ -3581,6 +3581,7 @@ namespace dp2Library
             }
         }
 
+        // TODO: 需要增加返回保存后记录 XML 的参数。因为保存过程中，可能会略微修改前端提交的记录，比如增加一些字段
         // 设置书目信息(目前只能xml一种格式)
         // 权限:   需要具有setbiblioinfo权限
         // parameters:
@@ -3588,8 +3589,9 @@ namespace dp2Library
         //      strBiblioType   目前只允许xml一种
         //      baTimestamp 时间戳。如果为新创建记录，可以为null 
         //      strOutputBiblioRecPath 输出的书目记录路径。当strBiblioRecPath中末级为问号，表示追加保存书目记录的时候，本参数返回实际保存的书目记录路径
+        //                      此参数也用于，当保存前查重时发现了重复的书目记录，这里返回这些书目记录的路径
         //      baOutputTimestamp   操作完成后，新的时间戳
-        // Result.Value -1出错 0成功
+        // Result.Value -1出错 0成功 >0 表示查重发现了重复的书目记录，保存被拒绝
         public LibraryServerResult SetBiblioInfo(
             string strAction,
             string strBiblioRecPath,

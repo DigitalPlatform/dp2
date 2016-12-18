@@ -3495,6 +3495,14 @@ namespace DigitalPlatform.LibraryServer
                             node.WriteTo(writer);
                         }
 
+                        // 2016/12/14
+                        // <unique>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("unique");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
                         // <utilDb>
                         node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb");
                         if (node != null)
@@ -14676,7 +14684,7 @@ strLibraryCode);    // 读者所在的馆代码
         ItemBarcodeNotFound = 4,  // 册条码号不存在
         Overdue = 5,    // 还书过程发现有超期情况（已经按还书处理完毕，并且已经将超期信息记载到读者记录中，但是需要提醒读者及时履行超期违约金等手续）
         NotLogin = 6,   // 尚未登录
-        DupItemBarcode = 7, // 预约中本次提交的某些册条码号被本读者先前曾预约过
+        DupItemBarcode = 7, // 预约中本次提交的某些册条码号被本读者先前曾预约过 TODO: 这个和 ItemBarcodeDup 是否要合并?
         InvalidParameter = 8,   // 不合法的参数
         ReturnReservation = 9,    // 还书操作成功, 因属于被预约图书, 请放入预约保留架
         BorrowReservationDenied = 10,    // 借书操作失败, 因属于被预约(到书)保留的图书, 非当前预约者不能借阅
@@ -14701,6 +14709,9 @@ strLibraryCode);    // 读者所在的馆代码
         NeedSmsLogin = 29,  // 需要改用短信验证码方式登录
         RetryLogin = 30,    // 需要补充验证码再次登录
         TempCodeMismatch = 31,  // 验证码不匹配
+        BiblioDup = 32,     // 书目记录发生重复
+        Borrowing = 33,    // 图书尚未还回(盘点前需修正此问题)
+        ClientVersionTooOld = 34, // 前端版本太旧
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容
@@ -14717,8 +14728,6 @@ strLibraryCode);    // 读者所在的馆代码
         RequestError = 111,
         RequestTimeOut = 112,
         TimestampMismatch = 113,
-        Borrowing = 114,    // 图书尚未还回(盘点前需修正此问题)
-        ClientVersionTooOld = 115, // 前端版本太旧
     }
 
     // API函数结果

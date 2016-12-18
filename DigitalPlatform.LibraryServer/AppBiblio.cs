@@ -2231,7 +2231,6 @@ return result;
 
             try
             {
-
                 if (string.IsNullOrEmpty(strFieldNameList) == false
                     || !(StringUtil.IsInList("writeres", strRights) == true || StringUtil.IsInList("writeobject", strRights) == true)
                     )
@@ -2256,6 +2255,16 @@ return result;
                     }
 
                     strError = "";
+                }
+
+                // 2016/12/14
+                if (String.IsNullOrEmpty(strNewBiblioXml) == false)
+                {
+                    int nRet = CreateUniformKey(
+ref strNewBiblioXml,
+out strError);
+                    if (nRet == -1)
+                        return -1;
                 }
 
                 XmlDocument domNew = new XmlDocument();
@@ -2645,6 +2654,159 @@ return result;
             }
 
             return 0;
+        }
+
+
+        static int CreateUniformKey(
+    ref string strBiblioXml,
+    out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (string.IsNullOrEmpty(strBiblioXml) == true)
+                return 0;
+
+            string strMarcSyntax = "";
+            string strMarc = "";
+
+            // 将MARCXML格式的xml记录转换为marc机内格式字符串
+            // parameters:
+            //		bWarning	== true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+            //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+            //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+            nRet = MarcUtil.Xml2Marc(strBiblioXml,
+                true,
+                "", // this.CurMarcSyntax,
+                out strMarcSyntax,
+                out strMarc,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (string.IsNullOrEmpty(strMarcSyntax) == true)
+                return 0;   // 不是 MARC 格式
+
+            string strKey = "";
+            string strCode = "";
+            nRet = CreateUniformKey(ref strMarc,
+                strMarcSyntax,
+                out strKey,
+                out strCode,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            nRet = MarcUtil.Marc2XmlEx(strMarc,
+                strMarcSyntax,
+                ref strBiblioXml,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            return 1;
+        }
+
+
+        // 创建查重键字段
+        // 要创建的字段名和 MARC 格式无关，都是 997 字段。但要提取的书名等信息在什么字段，和具体的 MARC 格式有关
+        public static int CreateUniformKey(ref string strMARC,
+            string strMarcSyntax,
+            out string strKey,
+            out string strCode,
+            out string strError)
+        {
+            strError = "";
+            strKey = "";
+            strCode = "";
+
+            MarcRecord record = new MarcRecord(strMARC);
+            List<string> segments = new List<string>();
+            if (strMarcSyntax == "unimarc")
+            {
+                // isbn
+                {
+                    List<string> isbns = record.select("field[@name='010']/subfield[@name='a']").Contents;
+
+                    // 统一变换为 13 位形态
+                    for (int i = 0; i < isbns.Count; i++)
+                    {
+                        isbns[i] = IsbnSplitter.GetISBnBarcode(isbns[i]);
+                    }
+                    Sort(isbns);
+                    segments.Add(StringUtil.MakePathList(isbns));
+                }
+
+                // title
+                {
+                    List<string> titles = record.select("field[@name='200']/subfield[@name='a']").Contents;
+
+                    Sort(titles);
+
+                    List<string> his = record.select("field[@name='200']/subfield[@name='h' or @name='i']").Contents;
+
+                    if (his.Count > 0)
+                    {
+                        // h 和 i 里面的数字等要归一化
+                        // h 和 i 要根据内容排序
+                        Sort(his);
+                        titles.AddRange(his);
+                    }
+
+                    segments.Add(StringUtil.MakePathList(titles));
+                }
+
+                // author
+                {
+                    List<string> authors = record.select("field[@name='701' or @name='711']/subfield[@name='a']").Contents;
+
+                    // 要按照内容排序
+                    Sort(authors);
+                    segments.Add(StringUtil.MakePathList(authors));
+                }
+
+                // publisher
+                {
+                    // 210 $c $d
+                    List<string> publishers = record.select("field[@name='210']/subfield[@name='c']").Contents;
+                    Sort(publishers);
+
+                    List<string> dates = record.select("field[@name='210']/subfield[@name='d']").Contents;
+                    // TODO: 需要归一化为 年、月 形态
+                    Sort(dates);
+                    segments.Add(StringUtil.MakePathList(publishers) + "," + StringUtil.MakePathList(dates));
+
+                }
+
+                // pages
+                // size
+                {
+                    List<string> pages = record.select("field[@name='215']/subfield[@name='a']").Contents;
+                    // TODO: 需要归一化为纯数字
+                    Sort(pages);
+
+                    List<string> sizes = record.select("field[@name='215']/subfield[@name='d']").Contents;
+
+                    // TODO: 需要归一化为纯粹厘米数字
+                    Sort(sizes);
+                    segments.Add(StringUtil.MakePathList(pages) + "," + StringUtil.MakePathList(sizes));
+                }
+
+                strKey = StringUtil.MakePathList(segments, "|");
+                strCode = StringUtil.GetMd5(strKey);
+
+                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v0.01");
+
+                strMARC = record.Text;
+            }
+
+            return 0;
+        }
+
+        static void Sort(List<string> titles)
+        {
+            StringUtil.RemoveBlank(ref titles);
+            titles.Sort();
         }
 
         // 根据允许的字段名列表，合并新旧两条书目记录
@@ -3941,7 +4103,7 @@ nsmgr);
                 && strAction != "onlydeletebiblio"
                 && strAction != "onlydeletesubrecord")
             {
-                strError = "strAction参数值应当为new change delete onlydeletebiblio onlydeletesubrecord之一  (然而当前为 '"+strAction+"')";
+                strError = "strAction参数值应当为new change delete onlydeletebiblio onlydeletesubrecord之一  (然而当前为 '" + strAction + "')";
                 goto ERROR1;
             }
 
@@ -4370,6 +4532,27 @@ nsmgr);
                         strDeniedComment += " " + strError;
                 }
 
+                // return:
+                //      -1  出错
+                //      0   没有命中
+                //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                nRet = SearchBiblioDup(
+                    sessioninfo,
+                    strBiblioRecPath,
+                    strBiblio,
+                    "setbiblio", // strResultSetName,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet > 0)
+                {
+                    strOutputBiblioRecPath = strError;
+                    result.Value = -1;
+                    result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作被拒绝";
+                    result.ErrorCode = ErrorCode.BiblioDup;
+                    return result;
+                }
+
                 // 2009/11/2 
                 // 需要判断路径最后一级是否为问号？
                 string strTargetRecId = ResPath.GetRecordId(strBiblioRecPath);
@@ -4484,6 +4667,27 @@ out strError);
                         strDeniedComment += " " + strError;
                 }
 
+                // return:
+                //      -1  出错
+                //      0   没有命中
+                //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                nRet = SearchBiblioDup(
+                    sessioninfo,
+                    strBiblioRecPath,
+                    strBiblio,
+                    "setbiblio", // strResultSetName,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet > 0)
+                {
+                    strOutputBiblioRecPath = strError;
+                    result.Value = -1;
+                    result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作被拒绝";
+                    result.ErrorCode = ErrorCode.BiblioDup;
+                    return result;
+                }
+
                 // 2011/11/30
                 nRet = this.SetOperation(
 ref strBiblio,
@@ -4584,6 +4788,7 @@ out strError);
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
                     if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
                         strDeniedComment += " " + strError;
 
@@ -4697,6 +4902,7 @@ out strError);
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
                     if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
                         strDeniedComment += " " + strError;
 
@@ -5642,6 +5848,37 @@ out strError);
                             goto ERROR1;
                         if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
                             strDeniedComment += " " + strError;
+
+                        // 查重
+                        if (string.IsNullOrEmpty(strNewBiblio) == false)
+                        {
+                            // return:
+                            //      -1  出错
+                            //      0   没有命中
+                            //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                            nRet = SearchBiblioDup(
+                                sessioninfo,
+                                strNewBiblioRecPath,
+                                strNewBiblio,
+                                "copybiblio", // strResultSetName,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet > 0)
+                            {
+                                strOutputBiblioRecPath = strError;
+                                result.Value = -1;
+                                result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作("+strAction+")被拒绝";
+                                result.ErrorCode = ErrorCode.BiblioDup;
+                                return result;
+                            }
+                        }
+                        else
+                        {
+                            // 如果当前配置了要查重，则复制行为要看源和目标是否都在同一个 space 内，如果是，则必然会造成重复，那就要拒绝执行
+                            // 如果不在同一个 space 内，则要用 strSourceBiblio 对 strTargetBiblioRecPath 所在空间进行查重
+                        }
+
                         /*
                         // 2011/11/30
                         nRet = this.SetOperation(
@@ -6161,7 +6398,6 @@ out strError);
                 bAppendStyle = true;
             }
 
-
             string strOutputPath = "";
             string strMetaData = "";
 
@@ -6315,6 +6551,160 @@ out strError);
             return 0;
         ERROR1:
             return -1;
+        }
+
+        /*
+    <unique>
+        <space dbnames="中文图书,中文编目" />
+    </unique>
+         * * */
+        // 获得一个书目库所从属的查重空间的所有书目库名字
+        List<string> GetUniqueSpaceDbNames(string strBiblioDbName)
+        {
+            List<string> results = new List<string>();
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("unique/space");
+            foreach (XmlElement space in nodes)
+            {
+                string list = space.GetAttribute("dbnames");
+
+                string[] names = list.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (Array.IndexOf(names, strBiblioDbName) != -1)
+                    results.AddRange(names);
+            }
+
+            StringUtil.RemoveDup(ref results);
+            return results;
+        }
+
+        static string Get997a(string strBiblioXml, out string strError)
+        {
+            strError = "";
+
+            string strMarcSyntax = "";
+            string strMarc = "";
+            int nRet = MarcUtil.Xml2Marc(strBiblioXml,
+    true,
+    "", // this.CurMarcSyntax,
+    out strMarcSyntax,
+    out strMarc,
+    out strError);
+            if (nRet == -1)
+                return null;
+
+            MarcRecord record = new MarcRecord(strMarc);
+            string strKey = record.select("field[@name='997']/subfield[@name='a']").FirstContent;
+            if (string.IsNullOrEmpty(strKey))
+            {
+                strError = "MARC 记录中不存在 997$a";
+                return null;
+            }
+
+            return strKey;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   没有命中
+        //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+        int SearchBiblioDup(
+            SessionInfo sessioninfo,
+            string strBiblioRecPath,
+            string strBiblioXml,
+            string strResultSetName,
+            out string strError)
+        {
+            strError = "";
+
+            string strKey = Get997a(strBiblioXml, out strError);
+            if (strKey == null)
+                return -1;
+
+            string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
+
+            // 一个书目库同时处在多个 space 中怎么办？
+            List<string> dbnames = GetUniqueSpaceDbNames(strBiblioDbName);
+
+            string strQueryXml = "";
+            // 构造检索书目库的 XML 检索式
+            // return:
+            //      -2  没有找到指定风格的检索途径
+            //      -1  出错
+            //      0   没有发现任何书目库定义
+            //      1   成功
+            int nRet = this.BuildSearchBiblioQuery(
+        StringUtil.MakePathList(dbnames),
+        strKey,
+        100,
+        "ukey",
+        "exact",
+        "zh",
+        "", // strSearchStyle,
+        out strQueryXml,
+                out strError);
+            if (nRet == -1 || nRet == 0)
+                return -1;
+            if (nRet == -2)
+            {
+#if NO
+                    result.Value = -1;
+                    result.ErrorInfo = strError;
+                    result.ErrorCode = ErrorCode.FromNotFound;
+                    return result;
+#endif
+                return -1;
+            }
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "GetChannel() return null";
+                return -1;
+            }
+
+#if NO
+            long lRet = channel.DoSearch(strQueryXml,
+                strResultSetName,   // "default",
+                "", // strOutputStyle,
+                out strError);
+            if (lRet == -1)
+                return -1;
+            if (lRet == 0)
+                return 0;   // not found
+#endif
+            Record[] records = null;
+            long lRet = channel.DoSearchEx(strQueryXml,
+    strResultSetName,   // "default",
+    "", // strOutputStyle,
+    1000,
+            "zh",
+            "id",
+            out records,
+            out strError);
+            if (lRet == -1)
+                return -1;
+            if (lRet == 0)
+                return 0;   // not found
+
+            // 如果命中 1 条，则需要提取出来看看是否为 strBiblioRecPath 自己
+            if (lRet == 1)
+            {
+                if (records == null || records.Length < 1)
+                {
+                    strError = "records == null || records.Length < 1";
+                    return -1;
+                }
+                if (records[0].Path == strBiblioRecPath)
+                    return 0;
+            }
+
+            List<string> recpaths = new List<string>();
+            foreach (Record record in records)
+            {
+                recpaths.Add(record.Path);
+            }
+
+            strError = StringUtil.MakePathList(recpaths);
+            return (int)lRet;
         }
 
         /*

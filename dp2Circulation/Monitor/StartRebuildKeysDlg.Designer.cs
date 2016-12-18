@@ -34,16 +34,18 @@
             this.label2 = new System.Windows.Forms.Label();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
+            this.comboBox_function = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // checkBox_startAtServerBreakPoint
             // 
             this.checkBox_startAtServerBreakPoint.AutoSize = true;
-            this.checkBox_startAtServerBreakPoint.Location = new System.Drawing.Point(8, 10);
+            this.checkBox_startAtServerBreakPoint.Location = new System.Drawing.Point(8, 41);
             this.checkBox_startAtServerBreakPoint.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_startAtServerBreakPoint.Name = "checkBox_startAtServerBreakPoint";
             this.checkBox_startAtServerBreakPoint.Size = new System.Drawing.Size(198, 16);
-            this.checkBox_startAtServerBreakPoint.TabIndex = 16;
+            this.checkBox_startAtServerBreakPoint.TabIndex = 2;
             this.checkBox_startAtServerBreakPoint.Text = "从服务器保留的断点开始处理(&S)";
             this.checkBox_startAtServerBreakPoint.UseVisualStyleBackColor = true;
             // 
@@ -52,33 +54,33 @@
             this.textBox_dbNameList.AcceptsReturn = true;
             this.textBox_dbNameList.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_dbNameList.Location = new System.Drawing.Point(8, 53);
+            this.textBox_dbNameList.Location = new System.Drawing.Point(8, 84);
             this.textBox_dbNameList.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_dbNameList.Multiline = true;
             this.textBox_dbNameList.Name = "textBox_dbNameList";
             this.textBox_dbNameList.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_dbNameList.Size = new System.Drawing.Size(307, 100);
-            this.textBox_dbNameList.TabIndex = 3;
+            this.textBox_dbNameList.TabIndex = 4;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(6, 39);
+            this.label2.Location = new System.Drawing.Point(6, 70);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(143, 12);
-            this.label2.TabIndex = 2;
+            this.label2.TabIndex = 3;
             this.label2.Text = "数据库名(&D) [每行一个]:";
             // 
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(261, 157);
+            this.button_Cancel.Location = new System.Drawing.Point(261, 214);
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(56, 22);
-            this.button_Cancel.TabIndex = 19;
+            this.button_Cancel.TabIndex = 6;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
@@ -86,14 +88,37 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(200, 157);
+            this.button_OK.Location = new System.Drawing.Point(200, 214);
             this.button_OK.Margin = new System.Windows.Forms.Padding(2);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(56, 22);
-            this.button_OK.TabIndex = 18;
+            this.button_OK.TabIndex = 5;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
+            // 
+            // comboBox_function
+            // 
+            this.comboBox_function.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_function.FormattingEnabled = true;
+            this.comboBox_function.Items.AddRange(new object[] {
+            "重建检索点",
+            "重建查重键"});
+            this.comboBox_function.Location = new System.Drawing.Point(47, 13);
+            this.comboBox_function.Name = "comboBox_function";
+            this.comboBox_function.Size = new System.Drawing.Size(267, 20);
+            this.comboBox_function.TabIndex = 1;
+            this.comboBox_function.Text = "重建检索点";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 16);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(35, 12);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "功能:";
             // 
             // StartRebuildKeysDlg
             // 
@@ -101,7 +126,9 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(326, 189);
+            this.ClientSize = new System.Drawing.Size(326, 246);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.comboBox_function);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBox_dbNameList);
             this.Controls.Add(this.checkBox_startAtServerBreakPoint);
@@ -126,5 +153,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.ComboBox comboBox_function;
+        private System.Windows.Forms.Label label1;
     }
 }

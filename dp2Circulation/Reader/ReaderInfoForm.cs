@@ -5864,7 +5864,7 @@ MessageBoxDefaultButton.Button1);
                 + "<script type='text/javascript' charset='UTF-8' src='" + strSummaryJs + "'></script>";
             string strStyle = @"<style type='text/css'>
 </style>";
-            text.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">"
+            text.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head>"
                 + strLink
                 + strScriptHead.Replace("%bindir%", strBinDir)
                 + strStyle

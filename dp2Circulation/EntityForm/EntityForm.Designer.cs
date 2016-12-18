@@ -93,6 +93,7 @@ namespace dp2Circulation
             this.MenuItem_marcEditor_getKeys = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_marcEditor_getSummary = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_marcEditor_editMacroTable = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_marcEditor_fixed = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_marcEditor_saveTo = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_setTargetRecord = new System.Windows.Forms.ToolStripButton();
@@ -684,7 +685,8 @@ namespace dp2Circulation
             this.ToolStripMenuItem_enableSaveAllButton,
             this.MenuItem_marcEditor_getKeys,
             this.MenuItem_marcEditor_getSummary,
-            this.MenuItem_marcEditor_editMacroTable});
+            this.MenuItem_marcEditor_editMacroTable,
+            this.MenuItem_marcEditor_fixed});
             this.toolStripDropDownButton_marcEditor_someFunc.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_marcEditor_someFunc.Image")));
             this.toolStripDropDownButton_marcEditor_someFunc.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_marcEditor_someFunc.Name = "toolStripDropDownButton_marcEditor_someFunc";
@@ -798,6 +800,13 @@ namespace dp2Circulation
             this.MenuItem_marcEditor_editMacroTable.Size = new System.Drawing.Size(257, 22);
             this.MenuItem_marcEditor_editMacroTable.Text = "宏定义(&M)...";
             this.MenuItem_marcEditor_editMacroTable.Click += new System.EventHandler(this.MenuItem_marcEditor_editMacroTable_Click);
+            // 
+            // MenuItem_marcEditor_fixed
+            // 
+            this.MenuItem_marcEditor_fixed.Name = "MenuItem_marcEditor_fixed";
+            this.MenuItem_marcEditor_fixed.Size = new System.Drawing.Size(257, 22);
+            this.MenuItem_marcEditor_fixed.Text = "固定到左侧(&L)";
+            this.MenuItem_marcEditor_fixed.Click += new System.EventHandler(this.MenuItem_marcEditor_toggleFixed_Click);
             // 
             // toolStripSeparator2
             // 
@@ -1337,5 +1346,6 @@ namespace dp2Circulation
         private DigitalPlatform.EasyMarc.EasyMarcControl easyMarcControl1;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_marcEditor_editMacroTable;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_removeCoverImage;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_marcEditor_fixed;
     }
 }

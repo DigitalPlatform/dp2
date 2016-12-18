@@ -25,7 +25,6 @@ using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.MessageClient;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
@@ -1120,7 +1119,10 @@ Keys keyData)
                 stop.Style = StopStyle.EnableHalfStop;
 
                 long lStart = 0;
-                long lPerCount = Math.Min(50, lHitCount);
+                long lPerCount = Math.Min(100, lHitCount);  // 50
+                if (bQuickLoad)
+                    lPerCount = 1000; // 2016/12/18
+
                 DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
                 bool bPushFillingBrowse = this.PushFillingBrowse;
@@ -1685,6 +1687,62 @@ out strError);
 #endif
         }
 
+        // 2016/12/16
+        // 新开一个 EntityForm
+        EntityForm OpenEntityForm(bool bAuto, bool bFixed)
+        {
+            EntityForm form = null;
+            EntityForm exist_fixed = Program.MainForm.FixedEntityForm;
+
+            if (bFixed == true && exist_fixed != null)
+                form = exist_fixed;
+            else
+            {
+                if (bAuto == true && this.LoadToExistDetailWindow == true)
+                    form = MainForm.GetTopChildWindow<EntityForm>();
+            }
+
+            if (form != null)
+                Global.Activate(form);
+            else
+            {
+                form = new EntityForm();
+
+                form.MdiParent = this.MainForm;
+                form.MainForm = this.MainForm;
+                if (bFixed)
+                {
+                    form.Fixed = true;
+                    form.SupressSizeSetting = true;
+                    Program.MainForm.SetMdiToNormal();
+                }
+                else
+                {
+                    // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+                    if (exist_fixed != null)
+                    {
+                        form.SupressSizeSetting = true;
+                        Program.MainForm.SetMdiToNormal();
+                    }
+                }
+
+                form.Show();
+                if (bFixed)
+                    Program.MainForm.SetFixedPosition(form, "left");
+                else
+                {
+                    // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+                    if (exist_fixed != null)
+                    {
+                        Program.MainForm.SetFixedPosition(form, "right");
+                    }
+                }
+            }
+
+            Debug.Assert(form != null, "");
+            return form;
+        }
+
         private void listView_records_DoubleClick(object sender, EventArgs e)
         {
             string strError = "";
@@ -1699,7 +1757,9 @@ out strError);
 
             if (String.IsNullOrEmpty(strPath) == false)
             {
+#if NO
                 EntityForm form = null;
+                EntityForm exist_fixed = Program.MainForm.FixedEntityForm;
 
                 if (this.LoadToExistDetailWindow == true)
                 {
@@ -1717,8 +1777,19 @@ out strError);
 
                     form.MainForm = this.MainForm;
                     form.Show();
+                    if (strStyle == "fixed")
+                        Program.MainForm.SetFixedPosition(form, "left");
+                    else
+                    {
+                        // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+                        if (exist_fixed != null)
+                        {
+                            Program.MainForm.SetFixedPosition(form, "right");
+                        }
+                    }
                 }
-
+#endif
+                EntityForm form = OpenEntityForm(true, false);
                 Debug.Assert(form != null, "");
 
                 if (strPath.IndexOf("@") == -1)
@@ -1744,9 +1815,7 @@ out strError);
                         out strError);
                     if (nRet != 1)
                         goto ERROR1;
-
                 }
-
             }
             else
             {
@@ -1772,6 +1841,22 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
+        // 装入左侧固定的种册窗
+        void menu_loadToLeftEntityForm_Click(object sender, EventArgs e)
+        {
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                MessageBox.Show(this, "尚未选定要装入左侧实体窗的事项");
+                return;
+            }
+            string strPath = this.listView_records.SelectedItems[0].SubItems[0].Text;
+
+            EntityForm form = OpenEntityForm(false, true);    // fixed
+
+            Debug.Assert(form != null, "");
+            form.LoadRecordOld(strPath, "", true);
+        }
+
         void menu_loadToOpenedEntityForm_Click(object sender, EventArgs e)
         {
             if (this.listView_records.SelectedItems.Count == 0)
@@ -1789,11 +1874,14 @@ out strError);
 
             if (form == null)
             {
+#if NO
                 form = new EntityForm();
 
                 form.MdiParent = this.MainForm;
                 form.MainForm = this.MainForm;
                 form.Show();
+#endif
+                form = OpenEntityForm(false, false);    // 新开一个窗口，普通窗口(不是左侧)
             }
 
             Debug.Assert(form != null, "");
@@ -1814,11 +1902,14 @@ out strError);
 
             if (form == null)
             {
+#if NO
                 form = new EntityForm();
 
                 form.MdiParent = this.MainForm;
                 form.MainForm = this.MainForm;
                 form.Show();
+#endif
+                form = OpenEntityForm(false, false);    // 新开一个窗口，普通窗口(不是左侧)
             }
 
             Debug.Assert(form != null, "");
@@ -1960,7 +2051,7 @@ out strError);
                 strFirstColumn = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 0);
             }
 
-            menuItem = new MenuItem("装入已打开的种册窗(&L)");
+            menuItem = new MenuItem("装入已打开的种册窗(&E)");
             if (this.LoadToExistDetailWindow == true
                 && this.MainForm.GetTopChildWindow<EntityForm>() != null)
                 menuItem.DefaultItem = true;
@@ -1971,7 +2062,7 @@ out strError);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("装入新开的种册窗(&L)");
+            menuItem = new MenuItem("装入新开的种册窗(&N)");
             if (this.LoadToExistDetailWindow == false
                 || this.MainForm.GetTopChildWindow<EntityForm>() == null)
                 menuItem.DefaultItem = true;
@@ -1981,6 +2072,26 @@ out strError);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("装入左侧固定种册窗(&L)");
+            menuItem.Click += new System.EventHandler(this.menu_loadToLeftEntityForm_Click);
+            if (this.listView_records.SelectedItems.Count == 0
+                || String.IsNullOrEmpty(strFirstColumn) == true)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("停靠 (&D)");
+            if (this.Docked)
+                menuItem.Checked = true;
+            menuItem.Click += new System.EventHandler(this.menu_toggleDock_Click);
+            contextMenu.MenuItems.Add(menuItem);
 
             if (String.IsNullOrEmpty(strFirstColumn) == true
     && nSelectedItemCount > 0)
@@ -1995,7 +2106,6 @@ out strError);
                 menuItem = new MenuItem("在新开的书目查询窗内 检索 '" + strKey + "' (&N)");
                 menuItem.Click += new System.EventHandler(this.listView_searchKeysAtNewWindow_Click);
                 contextMenu.MenuItems.Add(menuItem);
-
             }
 
             // ---
@@ -2052,7 +2162,6 @@ out strError);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-
             menuItem = new MenuItem("全选(&A)");
             menuItem.Click += new System.EventHandler(this.menu_selectAllLines_Click);
             contextMenu.MenuItems.Add(menuItem);
@@ -2063,7 +2172,6 @@ out strError);
 
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
-
 
             menuItem = new MenuItem("移除所选择的 " + this.listView_records.SelectedItems.Count.ToString() + " 个事项(&R)");
             menuItem.Click += new System.EventHandler(this.menu_removeSelectedItems_Click);
@@ -2096,7 +2204,6 @@ out strError);
                     )
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
-
             }
 
 
@@ -2278,7 +2385,6 @@ out strError);
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-
                 subMenuItem = new MenuItem("实体查询窗");
                 subMenuItem.Click += new System.EventHandler(this.menu_exportToItemSearchForm_Click);
                 if (this.listView_records.SelectedItems.Count == 0)
@@ -2339,7 +2445,6 @@ out strError);
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
             }
-
 
             // 导入
             {
@@ -2434,7 +2539,7 @@ out strError);
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
-                    this.m_biblioTable);
+                    items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
@@ -3539,7 +3644,7 @@ MessageBoxDefaultButton.Button1);
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
-                    this.m_biblioTable);
+                    items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
@@ -4155,7 +4260,7 @@ MessageBoxDefaultButton.Button1);
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
-                    this.m_biblioTable);
+                    items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
@@ -5059,7 +5164,7 @@ MessageBoxDefaultButton.Button1);
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
     stop,
     items,
-    this.m_biblioTable);
+    items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
@@ -5938,6 +6043,8 @@ MessageBoxDefaultButton.Button1);
             this.Cursor = Cursors.WaitCursor;
             try
             {
+                this.listView_records.SelectedIndexChanged -= new System.EventHandler(this.listView_records_SelectedIndexChanged);
+
                 foreach (ListViewItem item in this.ListViewRecords.Items)
                 {
                     if (item.Selected == true)
@@ -5945,6 +6052,9 @@ MessageBoxDefaultButton.Button1);
                     else
                         item.Selected = true;
                 }
+
+                this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
+                listView_records_SelectedIndexChanged(null, null);
             }
             finally
             {
@@ -5958,7 +6068,12 @@ MessageBoxDefaultButton.Button1);
             this.Cursor = Cursors.WaitCursor;
             try
             {
+                this.listView_records.SelectedIndexChanged -= new System.EventHandler(this.listView_records_SelectedIndexChanged);
+
                 ListViewUtil.SelectAllLines(this.listView_records);
+
+                this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
+                listView_records_SelectedIndexChanged(null, null);
             }
             finally
             {
@@ -6323,6 +6438,8 @@ MessageBoxDefaultButton.Button2);
             return false;
         }
 
+        static int MAX_CACHE_ITEMS = 10000; // 批处理中，缓存最多的事项数。多于这个数，就不再使用缓存
+
         // 导出到书目转储文件
         void menu_saveToBiblioDumpFile_Click(object sender, EventArgs e)
         {
@@ -6428,7 +6545,7 @@ MessageBoxDefaultButton.Button2);
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
-                    this.m_biblioTable);
+                    items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
@@ -6500,6 +6617,9 @@ MessageBoxDefaultButton.Button1);
                 out strError);
                         if (nRet == -1)
                         {
+                            if (stop != null && stop.State != 0)
+                                goto ERROR1;
+
                             DialogResult temp_result = MessageBox.Show(this,
 strError + "\r\n\r\n是否继续处理?",
 "BiblioSearchForm",
@@ -6538,6 +6658,7 @@ MessageBoxDefaultButton.Button1);
                             goto ERROR1;
                         }
 
+                        nRet = 0;
                         if (string.IsNullOrEmpty(prop.OrderDbName) == false)
                         {
                             // dprms:orderCollection
@@ -6548,8 +6669,6 @@ MessageBoxDefaultButton.Button1);
                                 "order",
                                 writer,
                                 out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
                         }
                         if (string.IsNullOrEmpty(prop.IssueDbName) == false)
                         {
@@ -6561,8 +6680,6 @@ MessageBoxDefaultButton.Button1);
                                 "issue",
                                 writer,
                                 out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
                         }
                         if (string.IsNullOrEmpty(prop.ItemDbName) == false)
                         {
@@ -6574,8 +6691,6 @@ MessageBoxDefaultButton.Button1);
                                 "item",
                                 writer,
                                 out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
                         }
                         if (string.IsNullOrEmpty(prop.CommentDbName) == false)
                         {
@@ -6587,7 +6702,20 @@ MessageBoxDefaultButton.Button1);
                                 "comment",
                                 writer,
                                 out strError);
-                            if (nRet == -1)
+                        }
+
+                        if (nRet == -1)
+                        {
+                            if (stop != null && stop.State != 0)
+                                goto ERROR1;
+
+                            DialogResult temp_result = MessageBox.Show(this,
+strError + "\r\n\r\n是否继续处理?",
+"BiblioSearchForm",
+MessageBoxButtons.OKCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                            if (temp_result == DialogResult.Cancel)
                                 goto ERROR1;
                         }
                     }
@@ -7052,7 +7180,7 @@ MessageBoxDefaultButton.Button1);
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
-                    this.m_biblioTable);
+                    items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
@@ -7622,7 +7750,7 @@ MessageBoxDefaultButton.Button1);
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
-                    this.m_biblioTable);
+                    items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
@@ -8974,7 +9102,7 @@ strNewMARC);
                 // unimarc
 
                 MarcNodeList subfields = record.select("field[@name='010']/subfield[@name='a']");
-                foreach(MarcSubfield subfield in subfields)
+                foreach (MarcSubfield subfield in subfields)
                 {
                     if (string.IsNullOrEmpty(subfield.Content) == false)
                         isbns.Add(IsbnSplitter.GetISBnBarcode(subfield.Content));   // 如果必要，转换为 13 位
@@ -8982,14 +9110,14 @@ strNewMARC);
             }
 
             StringBuilder text = new StringBuilder();
-            foreach(string isbn in isbns)
+            foreach (string isbn in isbns)
             {
                 Hashtable table = new Hashtable();
                 table["code"] = isbn;
                 table["type"] = "ean_13";
                 table["width"] = "300";
                 table["height"] = "80";
-                string path = StringUtil.BuildParameterString(table, ',','=', "url");
+                string path = StringUtil.BuildParameterString(table, ',', '=', "url");
                 text.Append("<img src='barcode:" + path + "'></img><br/>");
             }
 
@@ -9149,6 +9277,83 @@ MessageBoxDefaultButton.Button1);
             if (bRet == false)
                 return null;
             return this.listView_records.SelectedItems[0];
+        }
+
+        #region 停靠
+
+        List<Control> _freeControls = new List<Control>();
+
+        public bool Docked { get; set; }
+
+        void menu_toggleDock_Click(object sender, EventArgs e)
+        {
+            if (this.Docked == false)
+                DoDock(true);
+            else
+                UnDock();
+        }
+
+        /// <summary>
+        /// 进行停靠
+        /// </summary>
+        /// <param name="bShowFixedPanel">是否同时促成显示固定面板</param>
+        public void DoDock(bool bShowFixedPanel)
+        {
+            // 已有 Dock 的 BiblioSearchForm
+            if (Program.MainForm.CurrentBrowseControl != null)
+            {
+                BiblioSearchForm exist = Program.MainForm.GetOwnerBiblioSearchForm(Program.MainForm.CurrentBrowseControl);
+                if (exist == this)
+                    return;
+                if (exist != null)
+                    exist.UnDock();
+            }
+
+            if (Program.MainForm.CurrentBrowseControl != this.listView_records)
+            {
+                Program.MainForm.CurrentBrowseControl = this.listView_records;
+                // 防止内存泄漏
+                ControlExtention.AddFreeControl(_freeControls, this.listView_records);
+            }
+
+            if (bShowFixedPanel == true
+                && Program.MainForm.PanelFixedVisible == false)
+                Program.MainForm.PanelFixedVisible = true;
+
+            Program.MainForm.ActivateFixPage("browse");
+
+            this.Docked = true;
+            this.Visible = false;
+            this.MainForm = Program.MainForm;   //
+            this.MdiParent = null;
+            Debug.Assert(this.MainForm != null, "");
+
+            Program.MainForm._dockedBiblioSearchForm = this;
+        }
+
+        public void UnDock()
+        {
+            Program.MainForm.CurrentBrowseControl = null;
+            // 防止内存泄漏
+            ControlExtention.RemoveFreeControl(_freeControls, this.listView_records);
+            //this.Controls.Add(this.listView_records);
+            this.Docked = false;
+            this.MdiParent = Program.MainForm;
+            this.Visible = true;
+            Debug.Assert(this.MainForm != null, "");
+
+            this.splitContainer_main.Panel2.Controls.Add(this.listView_records);
+            //this.listView_records.ResumeLayout(false);
+            //this.listView_records.PerformLayout();
+            Program.MainForm._dockedBiblioSearchForm = null;
+        }
+
+        #endregion
+
+        private void BiblioSearchForm_VisibleChanged(object sender, EventArgs e)
+        {
+            int i = 0;
+            i++;
         }
     }
 
@@ -9312,11 +9517,14 @@ MessageBoxDefaultButton.Button1);
 
                 if (dup_table.ContainsKey(strRecPath) == true)
                     continue;
-                BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];
-                if (info == null || string.IsNullOrEmpty(info.OldXml) == true)
+                if (this.CacheTable != null)
                 {
-                    recpaths.Add(strRecPath);
-                    dup_table[strRecPath] = true;
+                    BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];
+                    if (info == null || string.IsNullOrEmpty(info.OldXml) == true)
+                    {
+                        recpaths.Add(strRecPath);
+                        dup_table[strRecPath] = true;
+                    }
                 }
             }
 
@@ -9332,7 +9540,9 @@ MessageBoxDefaultButton.Button1);
                 string strRecPath = item.Text;
                 Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
 
-                BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];
+                BiblioInfo info = null;
+                if (this.CacheTable != null)
+                    info = (BiblioInfo)this.CacheTable[strRecPath];
                 if (info == null || string.IsNullOrEmpty(info.OldXml) == true)
                 {
                     if (m_loader.Stop != null)
@@ -9358,7 +9568,8 @@ MessageBoxDefaultButton.Button1);
                     }
                     info.OldXml = biblio.Content;
                     info.Timestamp = biblio.Timestamp;
-                    this.CacheTable[strRecPath] = info;
+                    if (this.CacheTable != null)
+                        this.CacheTable[strRecPath] = info;
                     yield return new LoaderItem(info, item);
                 }
                 else

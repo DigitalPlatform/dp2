@@ -5646,6 +5646,7 @@ dlg.UiState);
                         OutputReaderInfo(sheet,
                 dom,
                 nReaderIndex,
+                dlg.PrintReaderBarcodeLabel ? "barcode" : "",
                 ref nRowIndex,
                 ref column_max_chars);
                     }
@@ -6627,6 +6628,7 @@ dlg.UiState);
                             OutputReaderInfo(sheet,
                     dom,
                     nReaderIndex,
+                    dlg.PrintReaderBarcodeLabel ? "barcode" : "",
                     ref nRowIndex,
                     ref column_max_chars);
                         }
@@ -6844,9 +6846,12 @@ dlg.UiState);
         static void OutputReaderInfo(IXLWorksheet sheet,
             XmlDocument dom,
             int nReaderIndex,
+            string strStyle,
             ref int nRowIndex,
             ref List<int> column_max_chars)
         {
+            bool bBarcode = StringUtil.IsInList("barcode", strStyle);
+
             string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
                 "barcode");
             string strName = DomUtil.GetElementText(dom.DocumentElement,
@@ -6916,7 +6921,10 @@ dlg.UiState);
 
                 List<string> subcols = new List<string>();
                 subcols.Add(strName);
-                subcols.Add(strReaderBarcode);
+                if (bBarcode)
+                    subcols.Add("*" + strReaderBarcode + "*");
+                else
+                    subcols.Add(strReaderBarcode);
                 subcols.Add(strDepartment);
                 subcols.Add(GetContactString(dom));
 
@@ -6950,6 +6958,11 @@ dlg.UiState);
                         {
                             cell.Style.Font.FontName = "微软雅黑";
                             cell.Style.Font.FontSize = 20;
+                        }
+                        else if (bBarcode && line == 1)
+                        {
+                            cell.Style.Font.FontName = "C39HrP24DhTt";
+                            cell.Style.Font.FontSize = 40;
                         }
                         nColIndex++;
                         cells.Add(cell);

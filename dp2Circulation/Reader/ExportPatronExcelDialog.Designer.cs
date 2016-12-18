@@ -44,6 +44,7 @@
             this.textBox_chargingHistory_dateRange = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.checkBox_chargingHistory = new System.Windows.Forms.CheckBox();
+            this.checkBox_readerBarcodeLabel = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_normal.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -58,7 +59,7 @@
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
-            this.button_Cancel.TabIndex = 9;
+            this.button_Cancel.TabIndex = 2;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
@@ -70,7 +71,7 @@
             this.button_OK.Margin = new System.Windows.Forms.Padding(2);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
-            this.button_OK.TabIndex = 8;
+            this.button_OK.TabIndex = 1;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
@@ -86,7 +87,7 @@
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
             this.tabControl_main.Size = new System.Drawing.Size(349, 259);
-            this.tabControl_main.TabIndex = 10;
+            this.tabControl_main.TabIndex = 0;
             // 
             // tabPage_normal
             // 
@@ -104,13 +105,14 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.checkBox_readerBarcodeLabel);
             this.groupBox1.Controls.Add(this.checkBox_overdueInfo);
             this.groupBox1.Controls.Add(this.checkBox_readerInfo);
             this.groupBox1.Controls.Add(this.checkBox_borrowInfo);
             this.groupBox1.Location = new System.Drawing.Point(8, 79);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(228, 117);
-            this.groupBox1.TabIndex = 8;
+            this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = " 输出 ";
             // 
@@ -120,7 +122,7 @@
             this.checkBox_overdueInfo.Location = new System.Drawing.Point(27, 77);
             this.checkBox_overdueInfo.Name = "checkBox_overdueInfo";
             this.checkBox_overdueInfo.Size = new System.Drawing.Size(72, 16);
-            this.checkBox_overdueInfo.TabIndex = 2;
+            this.checkBox_overdueInfo.TabIndex = 3;
             this.checkBox_overdueInfo.Text = "违约信息";
             this.checkBox_overdueInfo.UseVisualStyleBackColor = true;
             this.checkBox_overdueInfo.CheckedChanged += new System.EventHandler(this.checkBox_readerInfo_CheckedChanged);
@@ -142,7 +144,7 @@
             this.checkBox_borrowInfo.Location = new System.Drawing.Point(27, 55);
             this.checkBox_borrowInfo.Name = "checkBox_borrowInfo";
             this.checkBox_borrowInfo.Size = new System.Drawing.Size(72, 16);
-            this.checkBox_borrowInfo.TabIndex = 1;
+            this.checkBox_borrowInfo.TabIndex = 2;
             this.checkBox_borrowInfo.Text = "在借信息";
             this.checkBox_borrowInfo.UseVisualStyleBackColor = true;
             this.checkBox_borrowInfo.CheckedChanged += new System.EventHandler(this.checkBox_readerInfo_CheckedChanged);
@@ -153,7 +155,7 @@
             this.label2.Location = new System.Drawing.Point(6, 19);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(101, 12);
-            this.label2.TabIndex = 7;
+            this.label2.TabIndex = 0;
             this.label2.Text = "Excel 文件名(&F):";
             // 
             // button_getOutputExcelFileName
@@ -162,7 +164,7 @@
             this.button_getOutputExcelFileName.Location = new System.Drawing.Point(291, 32);
             this.button_getOutputExcelFileName.Name = "button_getOutputExcelFileName";
             this.button_getOutputExcelFileName.Size = new System.Drawing.Size(44, 23);
-            this.button_getOutputExcelFileName.TabIndex = 6;
+            this.button_getOutputExcelFileName.TabIndex = 2;
             this.button_getOutputExcelFileName.Text = "...";
             this.button_getOutputExcelFileName.UseVisualStyleBackColor = true;
             this.button_getOutputExcelFileName.Click += new System.EventHandler(this.button_getOutputExcelFileName_Click);
@@ -174,7 +176,7 @@
             this.textBox_outputExcelFileName.Location = new System.Drawing.Point(8, 34);
             this.textBox_outputExcelFileName.Name = "textBox_outputExcelFileName";
             this.textBox_outputExcelFileName.Size = new System.Drawing.Size(277, 21);
-            this.textBox_outputExcelFileName.TabIndex = 5;
+            this.textBox_outputExcelFileName.TabIndex = 1;
             // 
             // tabPage_chargingHistory
             // 
@@ -232,6 +234,16 @@
             this.checkBox_chargingHistory.UseVisualStyleBackColor = true;
             this.checkBox_chargingHistory.CheckedChanged += new System.EventHandler(this.checkBox_borrowHistory_CheckedChanged);
             // 
+            // checkBox_readerBarcodeLabel
+            // 
+            this.checkBox_readerBarcodeLabel.AutoSize = true;
+            this.checkBox_readerBarcodeLabel.Location = new System.Drawing.Point(124, 33);
+            this.checkBox_readerBarcodeLabel.Name = "checkBox_readerBarcodeLabel";
+            this.checkBox_readerBarcodeLabel.Size = new System.Drawing.Size(72, 16);
+            this.checkBox_readerBarcodeLabel.TabIndex = 1;
+            this.checkBox_readerBarcodeLabel.Text = "条码标签";
+            this.checkBox_readerBarcodeLabel.UseVisualStyleBackColor = true;
+            // 
             // ExportPatronExcelDialog
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -275,5 +287,6 @@
         private System.Windows.Forms.Button button_getOutputExcelFileName;
         private System.Windows.Forms.TextBox textBox_outputExcelFileName;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.CheckBox checkBox_readerBarcodeLabel;
     }
 }

@@ -2108,24 +2108,6 @@ out strError);
             }
         }
 
-#if NO
-        public override MainForm MainForm
-        {
-            get
-            {
-                return base.MainForm;
-            }
-            set
-            {
-                base.MainForm = value;
-                if (value != null && this._imageManager != null)
-                {
-                    this._imageManager.TempFileDir = value.UserTempDir;
-                }
-            }
-        }
-#endif
-
         internal ImageManager _imageManager = null;
 
         internal void AsyncGetImageFile(object sender,

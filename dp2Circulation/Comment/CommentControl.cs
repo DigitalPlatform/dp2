@@ -1739,7 +1739,6 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
-
             bool bNew = false;
             if (this.m_commentViewer == null
                 || (bOpenWindow == true && this.m_commentViewer.Visible == false))

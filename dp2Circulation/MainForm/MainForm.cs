@@ -2289,6 +2289,7 @@ Stack:
         // 
         /// <summary>
         /// 得到特定类型的顶层 MDI 子窗口
+        /// 注：不算 Fixed 窗口
         /// </summary>
         /// <typeparam name="T">子窗口类型</typeparam>
         /// <returns>子窗口对象</returns>
@@ -2311,7 +2312,7 @@ Stack:
                 //      null    不是 MDI 子窗口o
                 //      其他      返回这个句柄对应的 Form 对象
                 child = IsChildHwnd(hwnd);
-                if (child != null)
+                if (child != null && IsFixedMyForm(child) == false)  // 2016/12/16 跳过固定于左侧的 MyForm
                 {
                     // if (child is T)
                     if (child.GetType().Equals(typeof(T)) == true)
@@ -2333,7 +2334,20 @@ Stack:
             return default(T);
         }
 
+        // 是否为固定于左侧的 MyForm?
+        static bool IsFixedMyForm(Form child)
+        {
+            if (child is MyForm)
+            {
+                if (((MyForm)child).Fixed)
+                    return true;
+            }
+
+            return false;
+        }
+
         // 判断一个窗口句柄，是否为 MDI 子窗口？
+        // 注：不处理 Visible == false 的窗口。因为取 Handle 会导致 Visible 变成 true
         // return:
         //      null    不是 MDI 子窗口o
         //      其他      返回这个句柄对应的 Form 对象
@@ -2341,13 +2355,14 @@ Stack:
         {
             foreach (Form child in this.MdiChildren)
             {
-                if (hwnd == child.Handle)
+                if (child.Visible == true && hwnd == child.Handle)
                     return child;
             }
 
             return null;
         }
 
+#if NO
         // 得到特定类型的顶层MDI窗口
         Form GetTopChildWindow(Type type)
         {
@@ -2388,8 +2403,58 @@ Stack:
             return null;
         }
 
-        // 得到顶层MDI窗口
+#endif
+
+        // 得到特定类型的顶层MDI窗口。注，会忽略 fixed 类型的窗口
+        Form GetTopChildWindow(Type type)
+        {
+            if (ActiveMdiChild == null)
+                return null;
+
+            // 得到顶层的MDI Child
+            IntPtr hwnd = this.ActiveMdiChild.Handle;
+
+            if (hwnd == IntPtr.Zero)
+                return null;
+
+            for (; ; )
+            {
+                if (hwnd == IntPtr.Zero)
+                    break;
+
+                Form child = null;
+                foreach (Form form in this.MdiChildren)
+                {
+                    if (form.Visible == true && hwnd == form.Handle)
+                    {
+                        child = form;
+                        goto FOUND;
+                    }
+                }
+
+                goto CONTINUE;
+            FOUND:
+
+                if (child.GetType().Equals(type) == true)
+                {
+                    if (child is MyForm)
+                    {
+                        if (((MyForm)child).Fixed)
+                            goto CONTINUE;
+                    }
+                    return child;
+                }
+
+            CONTINUE:
+                hwnd = API.GetWindow(hwnd, API.GW_HWNDNEXT);
+            }
+
+            return null;
+        }
+
+        // 得到顶层 MDI 窗口
         // 注： this.ActiveMdiChild 不一定在最顶层
+        // 注：不算 Fixed 窗口和 Visible == false 的窗口
         Form GetTopChildWindow()
         {
             if (this.MdiChildren.Length == 0)
@@ -2397,7 +2462,8 @@ Stack:
             List<IntPtr> handles = new List<IntPtr>();
             foreach (Form mdi in this.MdiChildren)
             {
-                handles.Add(mdi.Handle);
+                if (IsFixedMyForm(mdi) == false)    // 2016/12/16 跳过固定于左侧的 MyForm
+                    handles.Add(mdi.Handle);
             }
 
             IntPtr hwnd = this.ActiveMdiChild.Handle;
@@ -2412,7 +2478,7 @@ Stack:
 
             foreach (Form mdi in this.MdiChildren)
             {
-                if (mdi.Handle == top)
+                if (mdi.Visible == true && mdi.Handle == top)
                     return mdi;
             }
 
@@ -4129,7 +4195,8 @@ Stack:
                 ItemSearchForm form = top as ItemSearchForm;
                 form.Activate();
                 List<string> barcodes = new List<string>();
-                barcodes.Add(this.toolStripTextBox_barcode.Text);
+                string strBarcode = GetUpperCase(this.toolStripTextBox_barcode.Text);
+                barcodes.Add(strBarcode);
 
                 form.ClearMessage();
                 string strError = "";
@@ -4157,7 +4224,9 @@ Stack:
         // 尽量占用当前已经打开的种册窗
         void LoadItemBarcode()
         {
-            if (this.toolStripTextBox_barcode.Text == "")
+            string strBarcode = GetUpperCase(this.toolStripTextBox_barcode.Text);
+
+            if (string.IsNullOrEmpty(strBarcode))
             {
                 MessageBox.Show(this, "尚未输入条码");
                 return;
@@ -4186,14 +4255,34 @@ Stack:
             //      -1  error
             //      0   not found
             //      1   found
-            form.LoadItemByBarcode(this.toolStripTextBox_barcode.Text, false);
+            form.LoadItemByBarcode(strBarcode, false);
+        }
+
+        public string GetUpperCase(string strText)
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return strText;
+
+            // 除去首尾连续的空额 2016/12/15
+            strText = strText.Trim();
+
+            if (this.UpperInputBarcode == true)
+            {
+                if (strText.ToLower().StartsWith("@bibliorecpath:") == true)
+                    return strText; // 特殊地，不要转为大写
+                return strText.ToUpper();
+            }
+
+            return strText;
         }
 
         // 装入读者证条码号相关的记录
         // 尽量占用当前已经打开的读者窗
         void LoadReaderBarcode()
         {
-            if (this.toolStripTextBox_barcode.Text == "")
+            string strBarcode = GetUpperCase(this.toolStripTextBox_barcode.Text);
+
+            if (string.IsNullOrEmpty(strBarcode))
             {
                 MessageBox.Show(this, "尚未输入条码号");
                 return;
@@ -4216,7 +4305,7 @@ Stack:
             // 根据读者证条码号，装入读者记录
             // parameters:
             //      bForceLoad  在发生重条码的情况下是否强行装入第一条
-            form.LoadRecord(this.toolStripTextBox_barcode.Text,
+            form.LoadRecord(strBarcode,
                 false);
         }
 
@@ -4225,7 +4314,9 @@ Stack:
         {
             string strError = "";
 
-            if (this.toolStripTextBox_barcode.Text == "")
+            string strBarcode = GetUpperCase(this.toolStripTextBox_barcode.Text);
+
+            if (string.IsNullOrEmpty(strBarcode))
             {
                 strError = "尚未输入条码";
                 goto ERROR1;
@@ -4240,7 +4331,7 @@ Stack:
             //      2   是合法的册条码号
             int nRet = VerifyBarcode(
                 this.FocusLibraryCode,  // this._currentLibraryCodeList,    // this.Channel.LibraryCodeList,
-                this.toolStripTextBox_barcode.Text,
+                strBarcode,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -7164,6 +7255,24 @@ out strError);
                     "fingerprint",
                     "password",
                     strPassword);
+            }
+        }
+
+        public bool UpperInputBarcode
+        {
+            get
+            {
+                return this.AppInfo.GetBoolean(
+    "global",
+    "upper_input_barcode",
+    true);
+            }
+            set
+            {
+                this.AppInfo.SetBoolean(
+    "global",
+    "upper_input_barcode",
+    value);
             }
         }
 

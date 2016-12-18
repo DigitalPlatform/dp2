@@ -179,6 +179,18 @@ namespace dp2Circulation
             }
         }
 
+        public bool PrintReaderBarcodeLabel
+        {
+            get
+            {
+                return this.checkBox_readerBarcodeLabel.Checked;
+            }
+            set
+            {
+                this.checkBox_readerBarcodeLabel.Checked = value;
+            }
+        }
+
         public bool ExportOverdueInfo
         {
             get
@@ -212,6 +224,7 @@ namespace dp2Circulation
                 controls.Add(this.textBox_outputExcelFileName);
                 // 此处的缺省值会被忽略
                 controls.Add(new ControlWrapper(this.checkBox_readerInfo, true));
+                controls.Add(new ControlWrapper(this.checkBox_readerBarcodeLabel, false));
                 controls.Add(new ControlWrapper(this.checkBox_overdueInfo, true));
                 controls.Add(new ControlWrapper(this.checkBox_borrowInfo, true));
                 controls.Add(new ControlWrapper(this.checkBox_chargingHistory, false));
@@ -225,6 +238,7 @@ namespace dp2Circulation
                 controls.Add(this.tabControl_main);
                 controls.Add(this.textBox_outputExcelFileName);
                 controls.Add(new ControlWrapper(this.checkBox_readerInfo, true));
+                controls.Add(new ControlWrapper(this.checkBox_readerBarcodeLabel, false));
                 controls.Add(new ControlWrapper(this.checkBox_overdueInfo, true));
                 controls.Add(new ControlWrapper(this.checkBox_borrowInfo, true));
                 controls.Add(new ControlWrapper(this.checkBox_chargingHistory, false));

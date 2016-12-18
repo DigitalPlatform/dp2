@@ -43,11 +43,11 @@ namespace dp2Circulation
             this.button_load_loadFromBatchNo = new System.Windows.Forms.Button();
             this.button_load_loadFromBarcodeFile = new System.Windows.Forms.Button();
             this.tabPage_verify = new System.Windows.Forms.TabPage();
-            this.checkBox_verify_autoUppercaseBarcode = new System.Windows.Forms.CheckBox();
             this.button_verify_load = new System.Windows.Forms.Button();
             this.textBox_verify_itemBarcode = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.tabPage_move = new System.Windows.Forms.TabPage();
+            this.button_move_changeLocation = new System.Windows.Forms.Button();
             this.button_move_notifyReader = new System.Windows.Forms.Button();
             this.button_move_changeStateAll = new System.Windows.Forms.Button();
             this.button_move_moveAll = new System.Windows.Forms.Button();
@@ -66,7 +66,6 @@ namespace dp2Circulation
             this.listView_outof = new DigitalPlatform.GUI.ListViewNF();
             this.panel_up = new System.Windows.Forms.Panel();
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
-            this.button_move_changeLocation = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_load.SuspendLayout();
             this.tabPage_verify.SuspendLayout();
@@ -190,7 +189,6 @@ namespace dp2Circulation
             // tabPage_verify
             // 
             this.tabPage_verify.AutoScroll = true;
-            this.tabPage_verify.Controls.Add(this.checkBox_verify_autoUppercaseBarcode);
             this.tabPage_verify.Controls.Add(this.button_verify_load);
             this.tabPage_verify.Controls.Add(this.textBox_verify_itemBarcode);
             this.tabPage_verify.Controls.Add(this.label3);
@@ -202,17 +200,6 @@ namespace dp2Circulation
             this.tabPage_verify.TabIndex = 1;
             this.tabPage_verify.Text = "验证";
             this.tabPage_verify.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_verify_autoUppercaseBarcode
-            // 
-            this.checkBox_verify_autoUppercaseBarcode.AutoSize = true;
-            this.checkBox_verify_autoUppercaseBarcode.Location = new System.Drawing.Point(91, 33);
-            this.checkBox_verify_autoUppercaseBarcode.Margin = new System.Windows.Forms.Padding(2);
-            this.checkBox_verify_autoUppercaseBarcode.Name = "checkBox_verify_autoUppercaseBarcode";
-            this.checkBox_verify_autoUppercaseBarcode.Size = new System.Drawing.Size(222, 16);
-            this.checkBox_verify_autoUppercaseBarcode.TabIndex = 8;
-            this.checkBox_verify_autoUppercaseBarcode.Text = "自动把输入的条码字符串转为大写(&U)";
-            this.checkBox_verify_autoUppercaseBarcode.UseVisualStyleBackColor = true;
             // 
             // button_verify_load
             // 
@@ -258,6 +245,17 @@ namespace dp2Circulation
             this.tabPage_move.TabIndex = 3;
             this.tabPage_move.Text = "转移";
             this.tabPage_move.UseVisualStyleBackColor = true;
+            // 
+            // button_move_changeLocation
+            // 
+            this.button_move_changeLocation.Location = new System.Drawing.Point(193, 32);
+            this.button_move_changeLocation.Margin = new System.Windows.Forms.Padding(2);
+            this.button_move_changeLocation.Name = "button_move_changeLocation";
+            this.button_move_changeLocation.Size = new System.Drawing.Size(182, 22);
+            this.button_move_changeLocation.TabIndex = 3;
+            this.button_move_changeLocation.Text = "修改馆藏地(&L)...";
+            this.button_move_changeLocation.UseVisualStyleBackColor = true;
+            this.button_move_changeLocation.Click += new System.EventHandler(this.button_move_changeLocation_Click);
             // 
             // button_move_notifyReader
             // 
@@ -500,17 +498,6 @@ namespace dp2Circulation
             this.splitContainer_main.SplitterWidth = 8;
             this.splitContainer_main.TabIndex = 5;
             // 
-            // button_move_changeLocation
-            // 
-            this.button_move_changeLocation.Location = new System.Drawing.Point(193, 32);
-            this.button_move_changeLocation.Margin = new System.Windows.Forms.Padding(2);
-            this.button_move_changeLocation.Name = "button_move_changeLocation";
-            this.button_move_changeLocation.Size = new System.Drawing.Size(182, 22);
-            this.button_move_changeLocation.TabIndex = 3;
-            this.button_move_changeLocation.Text = "修改馆藏地(&L)...";
-            this.button_move_changeLocation.UseVisualStyleBackColor = true;
-            this.button_move_changeLocation.Click += new System.EventHandler(this.button_move_changeLocation_Click);
-            // 
             // ItemHandoverForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -576,7 +563,6 @@ namespace dp2Circulation
         private System.Windows.Forms.TabPage tabPage_move;
         private System.Windows.Forms.Button button_move_moveAll;
         private System.Windows.Forms.Button button_move_changeStateAll;
-        private System.Windows.Forms.CheckBox checkBox_verify_autoUppercaseBarcode;
         private System.Windows.Forms.Button button_move_notifyReader;
         private System.Windows.Forms.Panel panel_up;
         private System.Windows.Forms.SplitContainer splitContainer_main;

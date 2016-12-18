@@ -146,10 +146,14 @@ namespace dp2Circulation
                 "quickchargingform",
                 "eanble_hanzi",
                 false);
+#if NO
             this.toolStripButton_upperInput.Checked = this.MainForm.AppInfo.GetBoolean(
                 "quickchargingform",
                 "upper_input",
                 true);
+#endif 
+            this.toolStripButton_upperInput.Checked = Program.MainForm.UpperInputBarcode;
+
             {   // 恢复列宽度
                 string strWidths = this.MainForm.AppInfo.GetString(
                                "quickchargingform",
@@ -310,10 +314,14 @@ namespace dp2Circulation
                     "quickchargingform",
                     "eanble_hanzi",
                     this.toolStripButton_enableHanzi.Checked);
+
+#if NO
                 this.MainForm.AppInfo.SetBoolean(
                     "quickchargingform",
                     "upper_input",
                     this.toolStripButton_upperInput.Checked);
+#endif
+
                 {   // 保存列宽度
                     string strWidths = DpTable.GetColumnWidthListString(this.dpTable_tasks);
                     this.MainForm.AppInfo.SetString(
@@ -1465,7 +1473,16 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             int nRet = IsbnSplitter.VerifyISBN(strText,
                 out strError);
             if (nRet == 0)
+            {
+                // 2016/12/15
+                if (strText.Length == 10 && strText[0] != '7')
+                {
+                    // 10 位 ISBN，不是中国的出版物，则当作不是 ISBN 字符串。
+                    // 如果确实需要输入这样的 ISBN，请这样输入“ISBN2010120035”
+                    return false;
+                }
                 return true;
+            }
 
 #if NO
             if (strText.Length == 13)
@@ -3365,8 +3382,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
 
         string GetUpperCase(string strText)
         {
+#if NO
             if (string.IsNullOrEmpty(strText) == true)
                 return strText;
+
+            // 除去首尾连续的空额
+            // 2016/12/15
+            strText = strText.Trim();
+
             if (this.toolStripButton_upperInput.Checked == true)
             {
                 if (strText.ToLower().StartsWith("@bibliorecpath:") == true)
@@ -3374,6 +3397,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 return strText.ToUpper();
             }
             return strText;
+#endif
+            return Program.MainForm.GetUpperCase(strText);
         }
 
         private void toolStripButton_upperInput_CheckedChanged(object sender, EventArgs e)
@@ -3382,8 +3407,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 this.toolStripButton_upperInput.Text = "A";
             else
                 this.toolStripButton_upperInput.Text = "a";
-        }
 
+            Program.MainForm.UpperInputBarcode = this.toolStripButton_upperInput.Checked;
+        }
 
         void RefreshActionPicture()
         {

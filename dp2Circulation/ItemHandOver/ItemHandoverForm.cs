@@ -244,11 +244,13 @@ namespace dp2Circulation
                 "location_string",
                 "");
 
+#if NO
             this.checkBox_verify_autoUppercaseBarcode.Checked =
                 this.MainForm.AppInfo.GetBoolean(
                 "itemhandoverform",
                 "auto_uppercase_barcode",
                 true);
+#endif
 
             API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
         }
@@ -326,10 +328,12 @@ namespace dp2Circulation
                     "location_string",
                     this.LocationString);
 
+#if NO
                 this.MainForm.AppInfo.SetBoolean(
                     "itemhandoverform",
                     "auto_uppercase_barcode",
                     this.checkBox_verify_autoUppercaseBarcode.Checked);
+#endif
             }
 
             SaveSize();
@@ -444,7 +448,7 @@ this.splitContainer_inAndOutof,
             // verify page
             this.textBox_verify_itemBarcode.Enabled = bEnable;
             this.button_verify_load.Enabled = bEnable;
-            this.checkBox_verify_autoUppercaseBarcode.Enabled = bEnable;
+            // this.checkBox_verify_autoUppercaseBarcode.Enabled = bEnable;
 
             // print page
             this.button_print_option.Enabled = bEnable;
@@ -1935,10 +1939,24 @@ this.splitContainer_inAndOutof,
                 goto ERROR1;
             }
 
+#if NO
             // 2009/11/27
             if (this.checkBox_verify_autoUppercaseBarcode.Checked == true)
             {
                 string strUpper = this.textBox_verify_itemBarcode.Text.ToUpper();
+                if (this.textBox_verify_itemBarcode.Text != strUpper)
+                    this.textBox_verify_itemBarcode.Text = strUpper;
+            }
+
+            // 2016/12/15
+            {
+                string strTrim = this.textBox_verify_itemBarcode.Text.Trim();
+                if (this.textBox_verify_itemBarcode.Text != strTrim)
+                    this.textBox_verify_itemBarcode.Text = strTrim;
+            }
+#endif
+            {
+                string strUpper = Program.MainForm.GetUpperCase(this.textBox_verify_itemBarcode.Text);
                 if (this.textBox_verify_itemBarcode.Text != strUpper)
                     this.textBox_verify_itemBarcode.Text = strUpper;
             }
@@ -1951,7 +1969,6 @@ this.splitContainer_inAndOutof,
 
             if (item == null)
             {
-
                 EnableControls(false);
 
                 stop.OnStop += new StopEventHandler(this.DoStop);

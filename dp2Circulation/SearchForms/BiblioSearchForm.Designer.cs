@@ -13,6 +13,8 @@ namespace dp2Circulation
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
+            this.DisposeFreeControls();
+
             if (disposing && (components != null))
             {
                 components.Dispose();
@@ -587,6 +589,7 @@ namespace dp2Circulation
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.BiblioSearchForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.BiblioSearchForm_FormClosed);
             this.Load += new System.EventHandler(this.BiblioSearchForm_Load);
+            this.VisibleChanged += new System.EventHandler(this.BiblioSearchForm_VisibleChanged);
             this.contextMenuStrip_biblioDb.ResumeLayout(false);
             this.tableLayoutPanel_query.ResumeLayout(false);
             this.tableLayoutPanel_query.PerformLayout();

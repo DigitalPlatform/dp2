@@ -626,6 +626,21 @@ namespace DigitalPlatform.Marc
             }
         }
 
+        // 2016/12/14
+        public List<string> Contents
+        {
+            get
+            {
+                List<string> results = new List<string>();
+                foreach(MarcNode node in this)
+                {
+                    results.Add(node.Content);
+                }
+
+                return results;
+            }
+        }
+
         // 第一个元素的 Text
         /// <summary>
         /// 获得当前集合第一个元素的 Text 值

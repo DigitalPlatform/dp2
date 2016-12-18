@@ -3834,7 +3834,7 @@ true);
                 }
                 if (bLoadSubrecords)
                 {
-                    format_list.Add("subrecords:all" 
+                    format_list.Add("subrecords:all"
                         + (this.DisplayOtherLibraryItem == true ? "|getotherlibraryitem" : ""));
                 }
 
@@ -4003,7 +4003,7 @@ true);
         static int IndexOfFormat(List<string> formats, string format)
         {
             int i = 0;
-            foreach(string s in formats)
+            foreach (string s in formats)
             {
                 if (s.StartsWith(format))
                     return i;
@@ -7117,6 +7117,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             }
 
             LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 2, 0);    // 查重和复制一般都需要较长时间
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在复制书目记录 ...");
@@ -7158,6 +7160,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
             }
 
@@ -7318,10 +7321,14 @@ MessageBoxDefaultButton.Button2);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-
             LibraryChannel channel = channel_param;
+            TimeSpan old_timeout = channel.Timeout;
             if (channel == null)
+            {
                 channel = this.MainForm.GetChannel();
+                old_timeout = channel.Timeout;
+                channel.Timeout = TimeSpan.FromMinutes(2);
+            }
             try
             {
 
@@ -7493,7 +7500,10 @@ MessageBoxDefaultButton.Button2);
             finally
             {
                 if (channel_param == null)
+                {
+                    channel.Timeout = old_timeout;
                     this.MainForm.ReturnChannel(channel);
+                }
             }
 
         ERROR1:
@@ -10284,11 +10294,21 @@ merge_dlg.UiState);
             }
         }
 
+        // TODO: 后面改为每个 EntityForm 记载自己对应的 BiblioSearchForm，就不用找当前顶层的 BiblioSearchForm 了
         static string GetPrevNextRecPath(string strStyle)
         {
             BiblioSearchForm form = Program.MainForm.GetTopChildWindow<BiblioSearchForm>();
             if (form == null)
-                return "";
+            {
+                Control control = Program.MainForm.CurrentBrowseControl;
+                if (control == null)
+                    return "";
+
+                form = Program.MainForm.GetOwnerBiblioSearchForm(control);
+                if (form == null)
+                    return "";
+            }
+
             ListViewItem item = form.MoveSelectedItem(strStyle);
             if (item == null)
                 return "";
@@ -13217,6 +13237,41 @@ strMARC);
             if (StringUtil.HasHead(strUri, "uri:") == true)
                 return strUri.Substring(4).Trim();
             return strUri;
+        }
+
+        void MenuItem_marcEditor_toggleFixed_Click(object sender, EventArgs e)
+        {
+            if (this.Fixed == false)
+            {
+                this.Fixed = true;
+                this.SupressSizeSetting = true;
+                Program.MainForm.SetFixedPosition(this, "left");
+            }
+            else
+            {
+                this.Fixed = false;
+                this.SupressSizeSetting = false;
+
+                //尺寸要发生明显变化，让人知道不再是左侧固定
+                Program.MainForm.AppInfo.LoadMdiChildFormStates(this,
+        "mdi_form_state");
+            }
+        }
+
+        /// <summary>
+        /// 窗口是否为固定窗口。所谓固定窗口就是固定在某一侧的窗口
+        /// </summary>
+        public override bool Fixed
+        {
+            get
+            {
+                return base.Fixed;
+            }
+            set
+            {
+                base.Fixed = value;
+                this.MenuItem_marcEditor_fixed.Checked = value;
+            }
         }
     }
 

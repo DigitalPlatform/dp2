@@ -524,7 +524,7 @@ this.MainForm.ActivateFixPage("history")
 
             if (info.Collect == true)
             {
-                string strMessage = strOldPath;
+                string strMessage = "采集数据 '" + strOldPath + "'";
 
                 this.ShowMessage(strMessage);
                 this.OutputText(strMessage, 0);
@@ -654,16 +654,18 @@ this.MainForm.ActivateFixPage("history")
                     strItemBarcode + "_" + Guid.NewGuid().ToString());
         }
 
-        static void AddBiblioToItem(XmlDocument item_dom, string strBiblioXml)
+        static bool AddBiblioToItem(XmlDocument item_dom, string strBiblioXml)
         {
             if (string.IsNullOrEmpty(strBiblioXml))
                 throw new ArgumentException("strBiblioXml 值不应为空", "strBiblioXml");
 
             XmlElement biblio = item_dom.DocumentElement.SelectSingleNode("biblio") as XmlElement;
             if (biblio != null)
-                return;
+                return false;
             biblio = item_dom.CreateElement("biblio");
+            item_dom.DocumentElement.AppendChild(biblio);
             biblio.InnerXml = strBiblioXml;
+            return true;
         }
 
         Hashtable _locationTable = new Hashtable(); // location string --> count
@@ -1069,6 +1071,7 @@ new string[] { "继续", "中断" });
                 controls.Add(this.textBox_objectDirectoryName);
                 controls.Add(this.comboBox_target_targetBiblioDbName);
                 controls.Add(this.checkBox_target_randomItemBarcode);
+                controls.Add(this.checkBox_convert_addBiblioToItem);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -1078,6 +1081,7 @@ new string[] { "继续", "中断" });
                 controls.Add(this.textBox_objectDirectoryName);
                 controls.Add(this.comboBox_target_targetBiblioDbName);
                 controls.Add(this.checkBox_target_randomItemBarcode);
+                controls.Add(this.checkBox_convert_addBiblioToItem);
                 GuiState.SetUiState(controls, value);
             }
         }

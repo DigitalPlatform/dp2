@@ -101,7 +101,7 @@ namespace DigitalPlatform.Xml
 		// 从文件中装载信息
 		public int Load(out string strErrorInfo)
 		{
-			this.dom.PreserveWhitespace = true; //设PreserveWhitespace为true
+			this.dom.PreserveWhitespace = true;
 
 			strErrorInfo = "";
 
@@ -146,10 +146,10 @@ namespace DigitalPlatform.Xml
 			}
 
 			dom.Save(FileName);
-
 			return 0;
 		}
 
+        // Hashtable _cacheTable = new Hashtable();    // path --> string value
 
         // 获得一个布尔值
         // parameters:
@@ -162,6 +162,7 @@ namespace DigitalPlatform.Xml
             string strName,
             bool bDefault)
         {
+#if NO
             strPath = GetSectionPath(strPath);
 
             XmlNode node = dom.SelectSingleNode(strPath);
@@ -181,6 +182,20 @@ namespace DigitalPlatform.Xml
                 return false;
 
             return false;
+#endif
+            string value = GetString(strPath,
+strName,
+null);
+            if (value == null)
+                return bDefault;
+
+            if (String.Compare(value, "true", true) == 0)
+                return true;
+
+            if (String.Compare(value, "false", true) == 0)
+                return false;
+
+            return false;
         }
 
 
@@ -193,6 +208,7 @@ namespace DigitalPlatform.Xml
             string strName,
             bool bValue)
         {
+#if NO
             strPath = GetSectionPath(strPath);
 
             string[] aPath = strPath.Split(new char[] { '/' });
@@ -206,6 +222,10 @@ namespace DigitalPlatform.Xml
             DomUtil.SetAttr(node,
                 strName,
                 (bValue == true ? "true" : "false"));
+#endif
+            SetString(strPath,
+strName,
+(bValue == true ? "true" : "false"));
         }
 
         //
@@ -229,6 +249,7 @@ namespace DigitalPlatform.Xml
 			string strName,
 			int nDefault)
 		{
+#if NO
 			strPath = GetSectionPath(strPath);
 
             XmlNode node = null;
@@ -250,6 +271,13 @@ namespace DigitalPlatform.Xml
 				return nDefault;
 
 			return Convert.ToInt32(strText);
+#endif
+            string value = GetString(strPath,
+            strName,
+            null);
+            if (value == null)
+                return nDefault;
+            return Convert.ToInt32(value);
 		}
 
 		// 写入一个整数值
@@ -261,6 +289,7 @@ namespace DigitalPlatform.Xml
             string strName,
             int nValue)
         {
+#if NO
             strPath = GetSectionPath(strPath);
 
             string[] aPath = strPath.Split(new char[] { '/' });
@@ -274,6 +303,10 @@ namespace DigitalPlatform.Xml
             DomUtil.SetAttr(node,
                 strName,
                 Convert.ToString(nValue));
+#endif
+            SetString(strPath,
+strName,
+Convert.ToString(nValue));
         }
 
 		// 获得一个字符串
@@ -289,14 +322,22 @@ namespace DigitalPlatform.Xml
 		{
             strPath = GetSectionPath(strPath);
 
-			XmlNode node = dom.SelectSingleNode(strPath);
+            XmlNode node = null;
+
+            try
+            {
+                node = dom.SelectSingleNode(strPath);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("strPath 名称 '" + strPath + "' 不合法。应符合 XML 元素命名规则", ex);
+            }
 
 			if (node == null)
 				return strDefault;
 
 			return DomUtil.GetAttrOrDefault(node, strName, strDefault);
 		}
-
 
 		// 设置一个字符串
 		// parameters:
@@ -322,7 +363,6 @@ namespace DigitalPlatform.Xml
 				strValue);
 		}
 
-
         ////
         // 获得一个浮点数
         // parameters:
@@ -335,6 +375,7 @@ namespace DigitalPlatform.Xml
             string strName,
             float fDefault)
         {
+#if NO
             strPath = GetSectionPath(strPath);
 
             XmlNode node = dom.SelectSingleNode(strPath);
@@ -356,6 +397,21 @@ namespace DigitalPlatform.Xml
             {
                 return fDefault;
             }
+#endif
+            string value = GetString(strPath,
+strName,
+null);
+            if (value == null)
+                return fDefault;
+
+            try
+            {
+                return (float)Convert.ToDouble(value);
+            }
+            catch
+            {
+                return fDefault;
+            }
         }
 
 
@@ -368,6 +424,7 @@ namespace DigitalPlatform.Xml
             string strName,
             float fValue)
         {
+#if NO
             strPath = GetSectionPath(strPath);
 
             string[] aPath = strPath.Split(new char[] { '/' });
@@ -381,6 +438,10 @@ namespace DigitalPlatform.Xml
             DomUtil.SetAttr(node,
                 strName,
                 fValue.ToString());
+#endif
+            SetString(strPath,
+            strName,
+            fValue.ToString());
         }
 
         // 包装后的版本

@@ -65,7 +65,7 @@ function GetSummary() {
         if (external.IsInLoop == false)
             return;
 
-        var oo = $(".pending:first");   // TD
+        var oo = $("TD.pending:first,DIV.pending:first");   // TD
         if (oo.length == 0) {
             return;
         }
