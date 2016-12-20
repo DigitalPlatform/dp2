@@ -134,7 +134,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.91 (2016/11/15) GetBiblioInfos() API 增加了一种 subrecords format，可以用于同时返回下级记录的 XML。返回的最多每种下级记录不超过 10 条
         //      2.92 (2016/12/3) Return() API 增加了 boxing 功能
         //      2.93 (2016/12/13) SetBiblioInfo() 和 SetEntities() SetOrders() 等 API 支持 simulate 风格，或者增强原有对 simulate 的支持。内务模拟导入 .bdf 文件功能要用到这些新特性
-        public static string Version = "2.93";
+        //      2.94 (2016/12/20) 开始支持 997 的查重键和相关功能
+        public static string Version = "2.94";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

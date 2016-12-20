@@ -447,7 +447,7 @@ this.MainForm.ActivateFixPage("history")
             int nRet = strPath.IndexOf("?");
             if (nRet == -1)
                 return strPath;
-            return strPath.Substring(nRet);
+            return strPath.Substring(nRet+1);
         }
 
         /*

@@ -515,7 +515,7 @@ namespace dp2Circulation
         /// <param name="channel_param">通讯通道。如果为 null，表示函数内使用自动获得的通道</param>
         /// <param name="strBiblioRecPath">书目记录路径</param>
         /// <param name="preload_entities">预先装载好的事项集合</param>
-        /// <param name="strStyle">装载风格</param>
+        /// <param name="strStyle">装载风格。_refresh 表示刷新已有 BookItem 的 old 部分</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 没有装载; 1: 已经装载</returns>
         public virtual int LoadItemRecords(
@@ -545,8 +545,8 @@ namespace dp2Circulation
             {
                 List<string> errors = new List<string>();
 
-                // string strHtml = "";
-                this.ClearItems();
+                if (StringUtil.IsInList("_refresh", strStyle) == false)
+                    this.ClearItems();
                 this.ErrorInfo = "";
 
                 if (preload_entities != null)
@@ -555,6 +555,7 @@ namespace dp2Circulation
                     int nRet = FillEntities(
                         channel,
                         preload_entities,
+                        StringUtil.IsInList("_refresh", strStyle) ? "refresh" : "",
                         ref errors,
                         out strError);
                     if (nRet == -1)
@@ -651,6 +652,7 @@ namespace dp2Circulation
                         int nRet = FillEntities(
                             channel,
                             entities,
+                            StringUtil.IsInList("_refresh", strStyle) ? "refresh" : "",
                             ref errors,
                             out strError);
                         if (nRet == -1)
@@ -691,6 +693,7 @@ namespace dp2Circulation
         int FillEntities(
             LibraryChannel channel,
             EntityInfo[] entities,
+            string strStyle,
             ref List<string> errors,
             out string strError)
         {
@@ -728,6 +731,29 @@ namespace dp2Circulation
                         bookitem.Error = null;
                     else
                         bookitem.Error = entity;
+
+                    // 2016/12/19
+                    // 刷新已有事项的 old 部分
+                    if (strStyle == "refresh" )
+                    {
+                        T dup = null;
+                        if (string.IsNullOrEmpty(bookitem.RefID) == false)
+                            dup = this.Items.GetItemByRefID(bookitem.RefID) as T;
+                        if (dup == null)
+                        {
+                            if (string.IsNullOrEmpty(bookitem.OldRefID) == false)
+                                dup = this.Items.GetItemByRefID(bookitem.OldRefID) as T;
+                        }
+                        if (dup != null)
+                        {
+                            dup.OldRecord = bookitem.OldRecord;
+                            dup.Timestamp = bookitem.Timestamp;
+                            dup.RecPath = bookitem.RecPath;
+                            dup.SetElementText("refID", bookitem.RefID);
+                            dup.RefreshListView();
+                            continue;
+                        }
+                    }
 
                     // 装载对象信息
                     if (this.ItemType == "issue")   // 优化，只让期记录处理对象信息

@@ -485,7 +485,7 @@ this.comboBox_location.Text);
             }
         }
 
-        void ClearListViewItems()
+        public void ClearListViewItems()
         {
             this.listView_records.Items.Clear();
 
@@ -9517,14 +9517,13 @@ MessageBoxDefaultButton.Button1);
 
                 if (dup_table.ContainsKey(strRecPath) == true)
                     continue;
+                BiblioInfo info = null;
                 if (this.CacheTable != null)
+                    info = (BiblioInfo)this.CacheTable[strRecPath];
+                if (info == null || string.IsNullOrEmpty(info.OldXml) == true)
                 {
-                    BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];
-                    if (info == null || string.IsNullOrEmpty(info.OldXml) == true)
-                    {
-                        recpaths.Add(strRecPath);
-                        dup_table[strRecPath] = true;
-                    }
+                    recpaths.Add(strRecPath);
+                    dup_table[strRecPath] = true;
                 }
             }
 

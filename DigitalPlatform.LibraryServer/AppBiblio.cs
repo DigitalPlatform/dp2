@@ -4541,6 +4541,7 @@ nsmgr);
                     strBiblioRecPath,
                     strBiblio,
                     "setbiblio", // strResultSetName,
+                    null,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -4676,6 +4677,7 @@ out strError);
                     strBiblioRecPath,
                     strBiblio,
                     "setbiblio", // strResultSetName,
+                    null,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -5849,36 +5851,6 @@ out strError);
                         if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
                             strDeniedComment += " " + strError;
 
-                        // 查重
-                        if (string.IsNullOrEmpty(strNewBiblio) == false)
-                        {
-                            // return:
-                            //      -1  出错
-                            //      0   没有命中
-                            //      >0  命中条数。此时 strError 中返回发生重复的路径列表
-                            nRet = SearchBiblioDup(
-                                sessioninfo,
-                                strNewBiblioRecPath,
-                                strNewBiblio,
-                                "copybiblio", // strResultSetName,
-                                out strError);
-                            if (nRet == -1)
-                                goto ERROR1;
-                            if (nRet > 0)
-                            {
-                                strOutputBiblioRecPath = strError;
-                                result.Value = -1;
-                                result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作("+strAction+")被拒绝";
-                                result.ErrorCode = ErrorCode.BiblioDup;
-                                return result;
-                            }
-                        }
-                        else
-                        {
-                            // 如果当前配置了要查重，则复制行为要看源和目标是否都在同一个 space 内，如果是，则必然会造成重复，那就要拒绝执行
-                            // 如果不在同一个 space 内，则要用 strSourceBiblio 对 strTargetBiblioRecPath 所在空间进行查重
-                        }
-
                         /*
                         // 2011/11/30
                         nRet = this.SetOperation(
@@ -5890,6 +5862,70 @@ out strError);
                         if (nRet == -1)
                             goto ERROR1;
                          * */
+                    }
+                    else
+                    {
+                        // strNewBiblio 为空
+                    }
+
+                    // 查重
+                    if (string.IsNullOrEmpty(strNewBiblio) == false)
+                    {
+                        // return:
+                        //      -1  出错
+                        //      0   没有命中
+                        //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                        nRet = SearchBiblioDup(
+                            sessioninfo,
+                            strNewBiblioRecPath,
+                            strNewBiblio,
+                            "copybiblio", // strResultSetName,
+                            strAction == "move" || strAction == "onlymovebiblio" ? new List<string> { strBiblioRecPath } : null,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet > 0)
+                        {
+                            // move 操作，要排除 source 记录路径，因为它即将被删除
+                            strOutputBiblioRecPath = strError;
+                            result.Value = -1;
+                            result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作(" + strAction + ")被拒绝";
+                            result.ErrorCode = ErrorCode.BiblioDup;
+                            return result;
+                        }
+                    }
+                    else
+                    {
+                        // 如果当前配置了要查重，则复制行为要看源和目标是否都在同一个 space 内，如果是，则必然会造成重复，那就要拒绝执行
+                        // 如果不在同一个 space 内，则要用 strSourceBiblio 对 strTargetBiblioRecPath 所在空间进行查重
+                        if ( (strAction == "onlycopybiblio" || strAction == "copy")
+                            && IsInSameUniqueSpace(ResPath.GetDbName(strBiblioRecPath), ResPath.GetDbName(strNewBiblioRecPath)) == true)
+                        {
+                            strError = "因源书目记录 '"+strBiblioRecPath+"' 和目标书目记录 '"+strNewBiblioRecPath+"' 处在同一查重空间内，不允许进行直接复制(若允许复制会导致书目记录出现重复)";
+                            goto ERROR1;
+                        }
+
+                        // return:
+                        //      -1  出错
+                        //      0   没有命中
+                        //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                        nRet = SearchBiblioDup(
+                            sessioninfo,
+                            strNewBiblioRecPath,
+                            strExistingSourceXml,
+                            "copybiblio", // strResultSetName,
+                            strAction == "move" || strAction == "onlymovebiblio" ? new List<string> { strBiblioRecPath } : null,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet > 0)
+                        {
+                            strOutputBiblioRecPath = strError;
+                            result.Value = -1;
+                            result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作(" + strAction + ")被拒绝";
+                            result.ErrorCode = ErrorCode.BiblioDup;
+                            return result;
+                        }
                     }
 
                     nRet = DoBiblioOperMove(
@@ -6553,6 +6589,13 @@ out strError);
             return -1;
         }
 
+        bool UniqueSpaceDefined()
+        {
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("unique/space");
+            if (nodes.Count > 0)
+                return true;
+            return false;
+        }
         /*
     <unique>
         <space dbnames="中文图书,中文编目" />
@@ -6574,6 +6617,23 @@ out strError);
 
             StringUtil.RemoveDup(ref results);
             return results;
+        }
+
+        // 观察两个书目库是否处在同一个查重空间内
+        bool IsInSameUniqueSpace(string strBiblioDbName1, string strBiblioDbName2)
+        {
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("unique/space");
+            foreach (XmlElement space in nodes)
+            {
+                string list = space.GetAttribute("dbnames");
+
+                string[] names = list.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (Array.IndexOf(names, strBiblioDbName1) != -1
+                    && Array.IndexOf(names, strBiblioDbName2) != -1)
+                    return true;
+            }
+
+            return false;
         }
 
         static string Get997a(string strBiblioXml, out string strError)
@@ -6611,18 +6671,26 @@ out strError);
             string strBiblioRecPath,
             string strBiblioXml,
             string strResultSetName,
+            List<string> exclude_recpaths,
             out string strError)
         {
             strError = "";
 
+            if (UniqueSpaceDefined() == false)
+                return 0;
+
             string strKey = Get997a(strBiblioXml, out strError);
+            //if (strKey == null)
+            //    return -1;
             if (strKey == null)
-                return -1;
+                return 0;   // 因为西文图书还没有提供 997，所以暂时这样返回
 
             string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
 
             // 一个书目库同时处在多个 space 中怎么办？
             List<string> dbnames = GetUniqueSpaceDbNames(strBiblioDbName);
+            if (dbnames.Count == 0)
+                return 0;
 
             string strQueryXml = "";
             // 构造检索书目库的 XML 检索式
@@ -6703,8 +6771,20 @@ out strError);
                 recpaths.Add(record.Path);
             }
 
+            // 去掉查重发起记录的路径
+            recpaths.Remove(strBiblioRecPath);
+
+            // 去掉额外需要排除的记录路径
+            if (exclude_recpaths != null)
+            {
+                foreach (string recpath in exclude_recpaths)
+                {
+                    recpaths.Remove(recpath);
+                }
+            }
+
             strError = StringUtil.MakePathList(recpaths);
-            return (int)lRet;
+            return recpaths.Count;
         }
 
         /*

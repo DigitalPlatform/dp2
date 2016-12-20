@@ -53,6 +53,7 @@ namespace DigitalPlatform.LibraryServer
                 "operations", // 2009/10/24 
                 "bindingCost",  // 2012/6/1 装订费
                 "biblio",   //  2016/12/8
+                "oldRefID", // 2016/12/19
             };
 
         // <DoEntityOperChange()的下级函数>
@@ -573,6 +574,7 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
         // 复制属于同一书目记录的全部实体记录
+        // TODO: 返回记录路径变迁信息
         // parameters:
         //      strAction   copy / move
         // return:
@@ -657,24 +659,29 @@ namespace DigitalPlatform.LibraryServer
                     // 复制的情况，要避免出现操作后的条码号重复现象
                     if (strAction == "copy")
                     {
+                        string strNewGuid = Guid.NewGuid().ToString();
                         // 修改册条码号，避免发生条码号重复
                         string strOldItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
                             "barcode");
                         if (String.IsNullOrEmpty(strOldItemBarcode) == false)
                         {
-                            strNewBarcode = strOldItemBarcode + "_" + Guid.NewGuid().ToString();
+                            strNewBarcode = strOldItemBarcode + "_" + strNewGuid;
                             DomUtil.SetElementText(dom.DocumentElement,
                                 "barcode",
                                 strNewBarcode);
                         }
 
                         // *** 后面这几个清除动作要作为规则出现
+                        string strOldRefID = DomUtil.GetElementText(dom.DocumentElement,
+                            "refID");
+                        DomUtil.SetElementText(dom.DocumentElement,
+    "oldRefID",
+    strOldRefID);
 
-                        // 清除 refid
+                        // 替换 refid
                         DomUtil.SetElementText(dom.DocumentElement,
                             "refID",
-                            null);
-
+                            strNewGuid);
 
                         // 把借者清除
                         // (源实体记录中如果有借阅信息，在普通界面上是无法删除此记录的。只能用出纳窗正规进行归还，然后才能删除)
@@ -706,8 +713,6 @@ namespace DigitalPlatform.LibraryServer
                         strError = "复制实体记录 '" + info.RecPath + "' 时发生错误: " + strError;
                         goto ERROR1;
                     }
-
-
 
                     // 修改xml记录。<parent>元素发生了变化
                     byte[] baOutputTimestamp = null;
@@ -752,7 +757,6 @@ namespace DigitalPlatform.LibraryServer
 
                 nOperCount++;
             }
-
 
             return nOperCount;
         ERROR1:

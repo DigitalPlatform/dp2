@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -82,6 +83,39 @@ namespace dp2Circulation
             }
 
             return null;
+        }
+
+        // 在固定面板区“浏览”属性页显示重复的书目记录列表
+        public int DisplayDupBiblioList(string strRecPathList,
+            out string strError)
+        {
+            strError = "";
+
+            BiblioSearchForm search_form = null;
+            if (this.CurrentBrowseControl != null)
+                search_form = GetOwnerBiblioSearchForm(this.CurrentBrowseControl);
+
+            if (search_form == null)
+            {
+                search_form = new BiblioSearchForm();
+                search_form.Show();
+                search_form.DoDock(true);
+            }
+            else
+                search_form.ClearListViewItems();
+
+            this.ActivateFixPage("browse");
+
+            List<string> list = StringUtil.SplitList(strRecPathList);
+            search_form.EnableControls(false);
+            foreach (string recpath in list)
+            {
+                search_form.AddLineToBrowseList(recpath);
+            }
+            search_form.EnableControls(true);
+            search_form.RefreshAllLines();
+
+            return 0;
         }
     }
 }
