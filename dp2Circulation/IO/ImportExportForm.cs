@@ -511,9 +511,10 @@ this.MainForm.ActivateFixPage("history")
 
             string strAction = "";
             string strPath = "";
+
             if (info.OverwriteBiblio == true)
             {
-                strAction = "change";
+                strAction = "new"; //  "change";
                 strPath = GetShortPath(strOldPath);
             }
             else
@@ -538,6 +539,15 @@ this.MainForm.ActivateFixPage("history")
 
             // WriteHtml(strMessage + "\r\n");
 
+            // 2016/12/22
+            List<string> styles = new List<string>();
+            if (info.DontChangeOperations)
+                styles.Add("nooperations");
+            if (info.DontSearchDup)
+                styles.Add("nocheckdup");
+            if (info.SuppressOperLog)
+                styles.Add("noeventlog");
+            string strStyle = StringUtil.MakePathList(styles);
 
             if (info.Collect == true)
             {
@@ -560,6 +570,7 @@ this.MainForm.ActivateFixPage("history")
         info.BiblioXml,
         ByteArray.GetTimeStampByteArray(strTimestamp),
         "",
+        strStyle,
         out strOutputPath,
         out baNewTimestamp,
         out strError);

@@ -675,6 +675,7 @@
         <xs:element minOccurs="0" name="strBiblio" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="baTimestamp" nillable="true" type="xs:base64Binary" />
         <xs:element minOccurs="0" name="strComment" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

@@ -4067,6 +4067,7 @@ nsmgr);
             string strBiblio,
             byte[] baTimestamp,
             string strComment,
+            string strStyle,
             out string strOutputBiblioRecPath,
             out byte[] baOutputTimestamp)
         {
@@ -4078,6 +4079,87 @@ nsmgr);
             baOutputTimestamp = null;
 
             LibraryServerResult result = new LibraryServerResult();
+
+            bool bNoCheckDup = false;   // 是否为不查重?
+            bool bNoEventLog = false;   // 是否为不记入事件日志?
+            bool bNoOperations = false; // 是否为不要覆盖<operations>内容
+            bool bSimulate = StringUtil.IsInList("simulate", strStyle);     // 是否为模拟操作? 2015/6/9
+            bool bForce = false;
+
+            if (StringUtil.IsInList("force", strStyle) == true)
+            {
+                bForce = true;
+
+                if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "带有风格 'force' 的修改书目信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                if (sessioninfo.GlobalUser == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "修改书目信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
+            if (StringUtil.IsInList("nocheckdup", strStyle) == true)
+            {
+                bNoCheckDup = true;
+            }
+
+            if (StringUtil.IsInList("noeventlog", strStyle) == true)
+            {
+                bNoEventLog = true;
+            }
+
+            if (StringUtil.IsInList("nooperations", strStyle) == true)
+            {
+                bNoOperations = true;
+            }
+
+            if (bNoCheckDup == true)
+            {
+                if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "带有风格 'nocheckdup' 的修改书目信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                if (sessioninfo.GlobalUser == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "带有风格 'nocheckdup' 的修改书目信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
+            if (bNoEventLog == true)
+            {
+                if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "带有风格 'noeventlog' 的修改书目信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                if (sessioninfo.GlobalUser == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "带有风格 'noeventlog' 的修改书目信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
             bool bChangePartDenied = false; // 修改操作部分被拒绝
             string strDeniedComment = "";   // 关于部分字段被拒绝的注释
 
@@ -4087,8 +4169,6 @@ nsmgr);
 
             // 检查参数
             strAction = strAction.ToLower();
-
-            bool bSimulate = false;
 
             // 2015/6/8
             if (StringUtil.HasHead(strAction, "simulate_") == true)
@@ -4981,7 +5061,7 @@ out strError);
             }
 
         END1:
-            if (bSimulate == false)
+            if (bSimulate == false && bNoEventLog == false)
             {
                 if (string.IsNullOrEmpty(strOutputBiblioRecPath) == false)
                 {

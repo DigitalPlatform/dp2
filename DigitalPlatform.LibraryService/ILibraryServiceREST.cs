@@ -185,6 +185,7 @@ SessionMode = SessionMode.NotAllowed)]
             string strBiblio,
             byte[] baTimestamp,
             string strComment,
+            string strStyle,
             out string strOutputBiblioRecPath,
             out byte[] baOutputTimestamp);
 

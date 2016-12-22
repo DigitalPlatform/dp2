@@ -3599,6 +3599,7 @@ namespace dp2Library
             string strBiblio,
             byte[] baTimestamp,
             string strComment,
+            string strStyle,    // 2016/12/22
             out string strOutputBiblioRecPath,
             out byte[] baOutputTimestamp)
         {
@@ -3637,6 +3638,7 @@ namespace dp2Library
                     strBiblio,
                     baTimestamp,
                     strComment,
+                    strStyle,
                     out strOutputBiblioRecPath,
                     out baOutputTimestamp);
             }

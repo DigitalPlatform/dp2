@@ -3711,10 +3711,10 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/SetBiblioInfoResponse")]
-        System.IAsyncResult BeginSetBiblioInfo(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetBiblioInfo(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
         
@@ -10187,13 +10187,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strLocationFilter}, this.onEndSearchBiblioDelegate, this.onSearchBiblioCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment) {
-            return base.Channel.SetBiblioInfo(out strOutputBiblioRecPath, out baOutputTimestamp, strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle) {
+            return base.Channel.SetBiblioInfo(out strOutputBiblioRecPath, out baOutputTimestamp, strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, strStyle);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetBiblioInfo(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSetBiblioInfo(strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, callback, asyncState);
+        public System.IAsyncResult BeginSetBiblioInfo(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetBiblioInfo(strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, strStyle, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -10208,7 +10208,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             string strBiblio = ((string)(inValues[3]));
             byte[] baTimestamp = ((byte[])(inValues[4]));
             string strComment = ((string)(inValues[5]));
-            return this.BeginSetBiblioInfo(strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, callback, asyncState);
+            string strStyle = ((string)(inValues[6]));
+            return this.BeginSetBiblioInfo(strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, strStyle, callback, asyncState);
         }
         
         private object[] OnEndSetBiblioInfo(System.IAsyncResult result) {
@@ -10228,11 +10229,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void SetBiblioInfoAsync(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment) {
-            this.SetBiblioInfoAsync(strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, null);
+        public void SetBiblioInfoAsync(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle) {
+            this.SetBiblioInfoAsync(strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, strStyle, null);
         }
         
-        public void SetBiblioInfoAsync(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, object userState) {
+        public void SetBiblioInfoAsync(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle, object userState) {
             if ((this.onBeginSetBiblioInfoDelegate == null)) {
                 this.onBeginSetBiblioInfoDelegate = new BeginOperationDelegate(this.OnBeginSetBiblioInfo);
             }
@@ -10248,7 +10249,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strBiblioType,
                         strBiblio,
                         baTimestamp,
-                        strComment}, this.onEndSetBiblioInfoDelegate, this.onSetBiblioInfoCompletedDelegate, userState);
+                        strComment,
+                        strStyle}, this.onEndSetBiblioInfoDelegate, this.onSetBiblioInfoCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult CopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strNewBiblioRecPath, string strNewBiblio, string strMergeStyle) {
@@ -14321,10 +14323,10 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSearchBiblio(out string strQueryXml, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/SetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetBiblioInfoResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/SetBiblioInfo", ReplyAction="http://dp2003.com/dp2library/dp2library/SetBiblioInfoResponse")]
-        System.IAsyncResult BeginSetBiblioInfo(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginSetBiblioInfo(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndSetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, System.IAsyncResult result);
         
@@ -20791,13 +20793,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strLocationFilter}, this.onEndSearchBiblioDelegate, this.onSearchBiblioCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment) {
-            return base.Channel.SetBiblioInfo(out strOutputBiblioRecPath, out baOutputTimestamp, strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult SetBiblioInfo(out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle) {
+            return base.Channel.SetBiblioInfo(out strOutputBiblioRecPath, out baOutputTimestamp, strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, strStyle);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginSetBiblioInfo(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginSetBiblioInfo(strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, callback, asyncState);
+        public System.IAsyncResult BeginSetBiblioInfo(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginSetBiblioInfo(strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, strStyle, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -20812,7 +20814,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             string strBiblio = ((string)(inValues[3]));
             byte[] baTimestamp = ((byte[])(inValues[4]));
             string strComment = ((string)(inValues[5]));
-            return this.BeginSetBiblioInfo(strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, callback, asyncState);
+            string strStyle = ((string)(inValues[6]));
+            return this.BeginSetBiblioInfo(strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, strStyle, callback, asyncState);
         }
         
         private object[] OnEndSetBiblioInfo(System.IAsyncResult result) {
@@ -20832,11 +20835,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void SetBiblioInfoAsync(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment) {
-            this.SetBiblioInfoAsync(strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, null);
+        public void SetBiblioInfoAsync(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle) {
+            this.SetBiblioInfoAsync(strAction, strBiblioRecPath, strBiblioType, strBiblio, baTimestamp, strComment, strStyle, null);
         }
         
-        public void SetBiblioInfoAsync(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, object userState) {
+        public void SetBiblioInfoAsync(string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strComment, string strStyle, object userState) {
             if ((this.onBeginSetBiblioInfoDelegate == null)) {
                 this.onBeginSetBiblioInfoDelegate = new BeginOperationDelegate(this.OnBeginSetBiblioInfo);
             }
@@ -20852,7 +20855,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strBiblioType,
                         strBiblio,
                         baTimestamp,
-                        strComment}, this.onEndSetBiblioInfoDelegate, this.onSetBiblioInfoCompletedDelegate, userState);
+                        strComment,
+                        strStyle}, this.onEndSetBiblioInfoDelegate, this.onSetBiblioInfoCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult CopyBiblioInfo(out string strOutputBiblio, out string strOutputBiblioRecPath, out byte[] baOutputTimestamp, string strAction, string strBiblioRecPath, string strBiblioType, string strBiblio, byte[] baTimestamp, string strNewBiblioRecPath, string strNewBiblio, string strMergeStyle) {

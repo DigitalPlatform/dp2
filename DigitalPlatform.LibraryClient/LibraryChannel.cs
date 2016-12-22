@@ -5586,6 +5586,33 @@ out strError);
             }
         }
 
+        // 包装后的版本，兼容以前参数
+        public long SetBiblioInfo(
+            DigitalPlatform.Stop stop,
+            string strAction,
+            string strBiblioRecPath,
+            string strBiblioType,
+            string strBiblio,
+            byte[] baTimestamp,
+            string strComment,
+            out string strOutputBiblioRecPath,
+            out byte[] baOutputTimestamp,
+            out string strError)
+        {
+            return SetBiblioInfo(
+            stop,
+            strAction,
+            strBiblioRecPath,
+            strBiblioType,
+            strBiblio,
+            baTimestamp,
+            strComment,
+            "",
+            out strOutputBiblioRecPath,
+            out baOutputTimestamp,
+            out strError);
+        }
+
         // 设置书目信息
         public long SetBiblioInfo(
             DigitalPlatform.Stop stop,
@@ -5595,6 +5622,7 @@ out strError);
             string strBiblio,
             byte[] baTimestamp,
             string strComment,
+            string strStyle,
             out string strOutputBiblioRecPath,
             out byte[] baOutputTimestamp,
             out string strError)
@@ -5613,6 +5641,7 @@ out strError);
                     strBiblio,
                     baTimestamp,
                     strComment,
+                    strStyle,
                     null,
                     null);
 
