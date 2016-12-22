@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<test command="~none~" default="matchstyle=left,dbname=&lt;全部&gt;,from=分类号" rssDefault="enable=on,maxcount=100">
+  <class name="%year%.1" command="word=%year%/01/01 00:00:01Z-%year%/02/01 00:00:00Z,matchstyle=exact,datatype=number,relation=range,dbname=&lt;全部&gt;,from=操作时间;SUB;word=订购征询,matchstyle=exact,from=状态"/>
+  <class name="%year%.2" command="word=%year%/02/01 00:00:01Z-%year%/03/01 00:00:00Z,matchstyle=exact,datatype=number,relation=range,dbname=&lt;全部&gt;,from=操作时间;SUB;word=订购征询,matchstyle=exact,from=状态"/>
+  <class name="%year%.3" command="word=%year%/03/01 00:00:01Z-%year%/04/01 00:00:00Z,matchstyle=exact,datatype=number,relation=range,dbname=&lt;全部&gt;,from=操作时间;SUB;word=订购征询,matchstyle=exact,from=状态"/>
+  <class name="%year%.4" command="word=%year%/04/01 00:00:01Z-%year%/05/01 00:00:00Z,matchstyle=exact,datatype=number,relation=range,dbname=&lt;全部&gt;,from=操作时间;SUB;word=订购征询,matchstyle=exact,from=状态"/>
+  <class name="%year%.5" command="word=%year%/05/01 00:00:01Z-%year%/06/01 00:00:00Z,matchstyle=exact,datatype=number,relation=range,dbname=&lt;全部&gt;,from=操作时间;SUB;word=订购征询,matchstyle=exact,from=状态"/>
+  <class name="%year%.6" command="word=%year%/06/01 00:00:01Z-%year%/07/01 00:00:00Z,matchstyle=exact,datatype=number,relation=range,dbname=&lt;全部&gt;,from=操作时间;SUB;word=订购征询,matchstyle=exact,from=状态"/>
+  <class name="%year%.7" command="word=%year%/07/01 00:00:01Z-%year%/08/01 00:00:00Z,matchstyle=exact,datatype=number,relation=range,dbname=&lt;全部&gt;,from=操作时间;SUB;word=订购征询,matchstyle=exact,from=状态"/>
+  <class name="%year%.8" command="word=%year%/08/01 00:00:01Z-%year%/09/01 00:00:00Z,matchstyle=exact,datatype=number,relation=range,dbname=&lt;全部&gt;,from=操作时间;SUB;word=订购征询,matchstyle=exact,from=状态"/>
+  <class name="%year%.9" command="word=%year%/09/01 00:00:01Z-%year%/10/01 00:00:00Z,matchstyle=exact,datatype=number,relation=range,dbname=&lt;全部&gt;,from=操作时间;SUB;word=订购征询,matchstyle=exact,from=状态"/>
+  <class name="%year%.10" command="word=%year%/10/01 00:00:01Z-%year%/11/01 00:00:00Z,matchstyle=exact,datatype=number,relation=range,dbname=&lt;全部&gt;,from=操作时间;SUB;word=订购征询,matchstyle=exact,from=状态"/>
+  <class name="%year%.11" command="word=%year%/11/01 00:00:01Z-%year%/12/01 00:00:00Z,matchstyle=exact,datatype=number,relation=range,dbname=&lt;全部&gt;,from=操作时间;SUB;word=订购征询,matchstyle=exact,from=状态"/>
+  <class name="%year%.12" command="word=%year%/12/01 00:00:01Z-%nextyear%/01/01 00:00:00Z,matchstyle=exact,datatype=number,relation=range,dbname=&lt;全部&gt;,from=操作时间;SUB;word=订购征询,matchstyle=exact,from=状态"/>
+
+
+	<_title>
+		<caption lang="zh-CN">新书通报</caption>
+		<caption lang="en-US">New Books</caption>
+	</_title>
+</test>

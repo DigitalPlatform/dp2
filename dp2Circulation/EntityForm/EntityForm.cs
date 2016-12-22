@@ -7233,7 +7233,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             channel.Timeout = new TimeSpan(0, 2, 0);    // 查重和复制一般都需要较长时间
 #endif
             Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("正在复制书目记录 ...");
+            if (string.IsNullOrEmpty(strAction) == false && strAction.IndexOf("move") != -1)
+                Progress.Initial("正在移动书目记录 ...");
+            else
+                Progress.Initial("正在复制书目记录 ...");
             Progress.BeginLoop();
 
             try
@@ -7456,7 +7459,7 @@ MessageBoxDefaultButton.Button2);
             if (nRet == -1)
                 goto ERROR1;
             LibraryChannel channel = channel_param;
-            TimeSpan old_timeout = channel.Timeout;
+            TimeSpan old_timeout = new TimeSpan(0);
             if (channel == null)
             {
                 channel = this.MainForm.GetChannel();
@@ -9889,6 +9892,8 @@ merge_dlg.UiState);
             bool bOldChanged = this.GetMarcChanged();   //  this.m_marcEditor.Changed;
             bool bSucceed = false;
 
+            this.EnableControls(false);
+
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 2, 0);    // 查重和复制一般都需要较长时间
@@ -9997,6 +10002,7 @@ merge_dlg.UiState);
                     info.SavedNames.Add("书目信息");
                     this.BiblioChanged = false;
                     this.BiblioRecPath = strOutputBiblioRecPath;
+                    this.BiblioTimestamp = baOutputTimestamp;
                     bSucceed = true;
                 }
                 if (nRet == -1)
@@ -10052,6 +10058,8 @@ merge_dlg.UiState);
             {
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+
+                this.EnableControls(true);
 
                 if (bSucceed == false)
                 {
@@ -11978,9 +11986,9 @@ value);
             string strError = "";
             int nRet = 0;
 
-            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.39") < 0)
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.95") < 0)   // "2.39"
             {
-                strError = "本功能需要配合 dp2library 2.39 或以上版本才能使用";
+                strError = "本功能需要配合 dp2library 2.95 或以上版本才能使用";
                 goto ERROR1;
             }
 
@@ -12068,11 +12076,11 @@ value);
             {
                 // 如果当前记录没有保存，则先保存
                 if (//this.EntitiesChanged == true
-        //|| this.IssuesChanged == true
-        //|| this.BiblioChanged == true
+                    //|| this.IssuesChanged == true
+                    //|| this.BiblioChanged == true
         this.ObjectChanged == true
-        //|| this.OrdersChanged == true
-        //|| this.CommentsChanged == true
+                    //|| this.OrdersChanged == true
+                    //|| this.CommentsChanged == true
                 )
                 {
                     // 警告尚未保存
@@ -12208,6 +12216,8 @@ merge_dlg.UiState);
             bool bOldChanged = this.GetMarcChanged();   // this.m_marcEditor.Changed;
             bool bSucceed = false;
 
+            this.EnableControls(false);
+
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 2, 0);    // 查重和复制一般都需要较长时间
@@ -12278,6 +12288,7 @@ merge_dlg.UiState);
                     info.SavedNames.Add("书目信息");
                     this.BiblioChanged = false;
                     this.BiblioRecPath = strOutputBiblioRecPath;
+                    this.BiblioTimestamp = baOutputTimestamp;
                     bSucceed = true;
                 }
                 if (nRet == -1)
@@ -12318,6 +12329,8 @@ merge_dlg.UiState);
             {
                 channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
+
+                this.EnableControls(true);
 
 #if NO
                 // 复原当前窗口的记录

@@ -395,17 +395,16 @@ namespace DigitalPlatform.OPAC
             {
                 // 进行升级检查
 
+                // TODO: 是否要为数据目录增配权限
 
             }
             else
             {
                 // 需要进行最新安装，创建数据目录
-                nRet = CreateNewDataDir(strDataDir,
-out strError);
+                nRet = CreateNewDataDir(strDataDir, out strError);
                 if (nRet == -1)
                     return -1;
             }
-
 
             // 兑现修改
             if (line_info.Changed == true)

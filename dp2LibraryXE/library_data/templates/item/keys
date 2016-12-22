@@ -297,6 +297,22 @@ public class MyKeysHost : KeysHost
     <caption lang="zh-CN">父记录+馆藏地点</caption>
     <caption lang="en">Parent+Location</caption>
   </table>
+  
+  <key>
+    <xpath>*/operations/operation[@name='create']/@time</xpath>
+    <from>operTime</from>
+    <table ref="createTime" />
+  </key>
+  <table name="createTime" id="11" type="createTime">
+    <convert>
+      <number style="rfc1123time" />
+    </convert>
+    <convertquery>
+      <number style="utime" />
+    </convertquery>
+    <caption lang="zh-CN">创建时间</caption>
+    <caption lang="en">CreateTime</caption>
+  </table>
 
   <!-- ******************配置非用字**************************************** -->
   <stopword>

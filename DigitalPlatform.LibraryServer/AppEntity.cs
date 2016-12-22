@@ -2272,7 +2272,7 @@ namespace DigitalPlatform.LibraryServer
                     if (sessioninfo.GlobalUser == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'nocheckdup' 的修改册信息的" + strAction + "操作被拒绝。只有全局用户并具备restore权限才能进行这样的操作。";
+                        result.ErrorInfo = "带有风格 'nocheckdup' 的修改册信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }

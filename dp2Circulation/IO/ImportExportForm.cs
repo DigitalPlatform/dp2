@@ -214,7 +214,7 @@ strStringTable);
             {
                 info.Channel = this.GetChannel();
                 info.stop = stop;
-                info.OverwriteBiblio = false;
+
                 info.TargetBiblioDbName = (string)this.Invoke(new Func<string>(() =>
                 {
                     return this.comboBox_target_targetBiblioDbName.Text;
@@ -226,6 +226,23 @@ strStringTable);
                 info.AddBiblioToItem = (bool)this.Invoke(new Func<bool>(() =>
                 {
                     return this.checkBox_convert_addBiblioToItem.Checked;
+                }));
+                info.OverwriteBiblio = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_target_restoreOldID.Checked;
+                }));
+
+                info.DontChangeOperations = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_target_dontChangeOperations.Checked;
+                }));
+                info.SuppressOperLog = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_target_suppressOperLog.Checked;
+                }));
+                info.DontSearchDup = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_target_dontSearchDup.Checked;
                 }));
 #if NO
             info.Simulate = (bool)this.Invoke(new Func<bool>(() =>
@@ -679,6 +696,16 @@ this.MainForm.ActivateFixPage("history")
             List<EntityInfo> entityArray = new List<EntityInfo>();
             string strRootElementName = "";
 
+            // 2016/12/22
+            List<string> styles = new List<string>();
+            if (info.DontChangeOperations)
+                styles.Add("nooperations");
+            if (info.DontSearchDup)
+                styles.Add("nocheckdup");
+            if (info.SuppressOperLog)
+                styles.Add("noeventlog");
+            string strStyle = StringUtil.MakePathList(styles);
+
             foreach (string xml in item_xmls)
             {
                 if (string.IsNullOrEmpty(xml))
@@ -783,6 +810,8 @@ this.MainForm.ActivateFixPage("history")
 
                 item.OldRecord = "";
                 item.OldTimestamp = null;
+
+                item.Style = strStyle;
 
                 entityArray.Add(item);
             }
@@ -939,7 +968,7 @@ this.MainForm.ActivateFixPage("history")
 strText + "\r\n\r\n(继续) 继续处理; (中断) 中断处理",
 MessageBoxButtons.YesNo,
 MessageBoxDefaultButton.Button2,
-null,
+"此后不再出现本对话框",
 ref info.HideMessageBox,
 new string[] { "继续", "中断" });
                 if (result == DialogResult.Yes)
@@ -963,9 +992,14 @@ new string[] { "继续", "中断" });
             // 是否为册记录自动添加书目元素。(注：如果册记录中本来有了这个元素就不添加了)
             public bool AddBiblioToItem = false;
 
-            // 是否覆盖书目记录。false 表示为追加
+            // 是否覆盖书目记录(恢复到原始 ID)。false 表示为追加
             public bool OverwriteBiblio = false;
             public string TargetBiblioDbName = "";  // 目标书目库名
+
+            public bool DontChangeOperations = false;
+            public bool SuppressOperLog = false;
+            public bool DontSearchDup = false;
+
 
             public bool HideMessageBox = false; // 是否隐藏报错对话框
 
@@ -1072,6 +1106,11 @@ new string[] { "继续", "中断" });
                 controls.Add(this.comboBox_target_targetBiblioDbName);
                 controls.Add(this.checkBox_target_randomItemBarcode);
                 controls.Add(this.checkBox_convert_addBiblioToItem);
+                controls.Add(this.checkBox_target_restoreOldID);
+
+                controls.Add(this.checkBox_target_dontSearchDup);
+                controls.Add(this.checkBox_target_suppressOperLog);
+                controls.Add(this.checkBox_target_dontChangeOperations);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -1082,6 +1121,11 @@ new string[] { "继续", "中断" });
                 controls.Add(this.comboBox_target_targetBiblioDbName);
                 controls.Add(this.checkBox_target_randomItemBarcode);
                 controls.Add(this.checkBox_convert_addBiblioToItem);
+                controls.Add(this.checkBox_target_restoreOldID);
+
+                controls.Add(this.checkBox_target_dontSearchDup);
+                controls.Add(this.checkBox_target_suppressOperLog);
+                controls.Add(this.checkBox_target_dontChangeOperations);
                 GuiState.SetUiState(controls, value);
             }
         }

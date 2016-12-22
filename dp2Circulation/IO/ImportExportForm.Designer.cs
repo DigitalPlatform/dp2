@@ -42,18 +42,22 @@
             this.checkBox_subRecords_order = new System.Windows.Forms.CheckBox();
             this.checkBox_subRecords_entity = new System.Windows.Forms.CheckBox();
             this.tabPage_convert = new System.Windows.Forms.TabPage();
+            this.checkBox_convert_addBiblioToItem = new System.Windows.Forms.CheckBox();
             this.panel_map = new System.Windows.Forms.Panel();
             this.button_convert_initialMapString = new System.Windows.Forms.Button();
             this.checkBox_target_newRefID = new System.Windows.Forms.CheckBox();
             this.checkBox_target_randomItemBarcode = new System.Windows.Forms.CheckBox();
             this.tabPage_target = new System.Windows.Forms.TabPage();
+            this.checkBox_target_restoreOldID = new System.Windows.Forms.CheckBox();
             this.button_target_simulateImport = new System.Windows.Forms.Button();
             this.comboBox_target_targetBiblioDbName = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage_run = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.button_next = new System.Windows.Forms.Button();
-            this.checkBox_convert_addBiblioToItem = new System.Windows.Forms.CheckBox();
+            this.checkBox_target_dontSearchDup = new System.Windows.Forms.CheckBox();
+            this.checkBox_target_suppressOperLog = new System.Windows.Forms.CheckBox();
+            this.checkBox_target_dontChangeOperations = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_source.SuspendLayout();
             this.tabPage_convert.SuspendLayout();
@@ -233,13 +237,23 @@
             this.tabPage_convert.Text = "转换";
             this.tabPage_convert.UseVisualStyleBackColor = true;
             // 
+            // checkBox_convert_addBiblioToItem
+            // 
+            this.checkBox_convert_addBiblioToItem.AutoSize = true;
+            this.checkBox_convert_addBiblioToItem.Location = new System.Drawing.Point(3, 38);
+            this.checkBox_convert_addBiblioToItem.Name = "checkBox_convert_addBiblioToItem";
+            this.checkBox_convert_addBiblioToItem.Size = new System.Drawing.Size(168, 16);
+            this.checkBox_convert_addBiblioToItem.TabIndex = 13;
+            this.checkBox_convert_addBiblioToItem.Text = "为册记录添加书目信息元素";
+            this.checkBox_convert_addBiblioToItem.UseVisualStyleBackColor = true;
+            // 
             // panel_map
             // 
             this.panel_map.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel_map.Location = new System.Drawing.Point(3, 127);
             this.panel_map.Name = "panel_map";
-            this.panel_map.Size = new System.Drawing.Size(412, 133);
+            this.panel_map.Size = new System.Drawing.Size(378, 133);
             this.panel_map.TabIndex = 12;
             // 
             // button_convert_initialMapString
@@ -278,6 +292,10 @@
             // tabPage_target
             // 
             this.tabPage_target.AutoScroll = true;
+            this.tabPage_target.Controls.Add(this.checkBox_target_dontChangeOperations);
+            this.tabPage_target.Controls.Add(this.checkBox_target_suppressOperLog);
+            this.tabPage_target.Controls.Add(this.checkBox_target_dontSearchDup);
+            this.tabPage_target.Controls.Add(this.checkBox_target_restoreOldID);
             this.tabPage_target.Controls.Add(this.button_target_simulateImport);
             this.tabPage_target.Controls.Add(this.comboBox_target_targetBiblioDbName);
             this.tabPage_target.Controls.Add(this.label1);
@@ -289,9 +307,19 @@
             this.tabPage_target.Text = "目标库";
             this.tabPage_target.UseVisualStyleBackColor = true;
             // 
+            // checkBox_target_restoreOldID
+            // 
+            this.checkBox_target_restoreOldID.AutoSize = true;
+            this.checkBox_target_restoreOldID.Location = new System.Drawing.Point(9, 64);
+            this.checkBox_target_restoreOldID.Name = "checkBox_target_restoreOldID";
+            this.checkBox_target_restoreOldID.Size = new System.Drawing.Size(138, 16);
+            this.checkBox_target_restoreOldID.TabIndex = 6;
+            this.checkBox_target_restoreOldID.Text = "恢复到原先的记录 ID";
+            this.checkBox_target_restoreOldID.UseVisualStyleBackColor = true;
+            // 
             // button_target_simulateImport
             // 
-            this.button_target_simulateImport.Location = new System.Drawing.Point(9, 193);
+            this.button_target_simulateImport.Location = new System.Drawing.Point(9, 209);
             this.button_target_simulateImport.Name = "button_target_simulateImport";
             this.button_target_simulateImport.Size = new System.Drawing.Size(113, 23);
             this.button_target_simulateImport.TabIndex = 5;
@@ -303,7 +331,7 @@
             // 
             this.comboBox_target_targetBiblioDbName.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox_target_targetBiblioDbName.FormattingEnabled = true;
-            this.comboBox_target_targetBiblioDbName.Location = new System.Drawing.Point(126, 61);
+            this.comboBox_target_targetBiblioDbName.Location = new System.Drawing.Point(126, 22);
             this.comboBox_target_targetBiblioDbName.Name = "comboBox_target_targetBiblioDbName";
             this.comboBox_target_targetBiblioDbName.Size = new System.Drawing.Size(182, 20);
             this.comboBox_target_targetBiblioDbName.TabIndex = 1;
@@ -311,7 +339,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 64);
+            this.label1.Location = new System.Drawing.Point(7, 25);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(101, 12);
             this.label1.TabIndex = 0;
@@ -349,15 +377,35 @@
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
             // 
-            // checkBox_convert_addBiblioToItem
+            // checkBox_target_noSearchDup
             // 
-            this.checkBox_convert_addBiblioToItem.AutoSize = true;
-            this.checkBox_convert_addBiblioToItem.Location = new System.Drawing.Point(3, 38);
-            this.checkBox_convert_addBiblioToItem.Name = "checkBox_convert_addBiblioToItem";
-            this.checkBox_convert_addBiblioToItem.Size = new System.Drawing.Size(168, 16);
-            this.checkBox_convert_addBiblioToItem.TabIndex = 13;
-            this.checkBox_convert_addBiblioToItem.Text = "为册记录添加书目信息元素";
-            this.checkBox_convert_addBiblioToItem.UseVisualStyleBackColor = true;
+            this.checkBox_target_dontSearchDup.AutoSize = true;
+            this.checkBox_target_dontSearchDup.Location = new System.Drawing.Point(9, 100);
+            this.checkBox_target_dontSearchDup.Name = "checkBox_target_noSearchDup";
+            this.checkBox_target_dontSearchDup.Size = new System.Drawing.Size(60, 16);
+            this.checkBox_target_dontSearchDup.TabIndex = 7;
+            this.checkBox_target_dontSearchDup.Text = "不查重";
+            this.checkBox_target_dontSearchDup.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_target_noOperLog
+            // 
+            this.checkBox_target_suppressOperLog.AutoSize = true;
+            this.checkBox_target_suppressOperLog.Location = new System.Drawing.Point(9, 122);
+            this.checkBox_target_suppressOperLog.Name = "checkBox_target_noOperLog";
+            this.checkBox_target_suppressOperLog.Size = new System.Drawing.Size(108, 16);
+            this.checkBox_target_suppressOperLog.TabIndex = 8;
+            this.checkBox_target_suppressOperLog.Text = "不写入操作日志";
+            this.checkBox_target_suppressOperLog.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_target_dontChangeOperations
+            // 
+            this.checkBox_target_dontChangeOperations.AutoSize = true;
+            this.checkBox_target_dontChangeOperations.Location = new System.Drawing.Point(9, 144);
+            this.checkBox_target_dontChangeOperations.Name = "checkBox_target_dontChangeOperations";
+            this.checkBox_target_dontChangeOperations.Size = new System.Drawing.Size(150, 16);
+            this.checkBox_target_dontChangeOperations.TabIndex = 9;
+            this.checkBox_target_dontChangeOperations.Text = "不修改 operation 元素";
+            this.checkBox_target_dontChangeOperations.UseVisualStyleBackColor = true;
             // 
             // ImportExportForm
             // 
@@ -413,5 +461,9 @@
         private System.Windows.Forms.Panel panel_map;
         private System.Windows.Forms.WebBrowser webBrowser1;
         private System.Windows.Forms.CheckBox checkBox_convert_addBiblioToItem;
+        private System.Windows.Forms.CheckBox checkBox_target_restoreOldID;
+        private System.Windows.Forms.CheckBox checkBox_target_dontSearchDup;
+        private System.Windows.Forms.CheckBox checkBox_target_dontChangeOperations;
+        private System.Windows.Forms.CheckBox checkBox_target_suppressOperLog;
     }
 }
