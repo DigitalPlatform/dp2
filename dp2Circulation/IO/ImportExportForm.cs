@@ -518,13 +518,12 @@ this.MainForm.ActivateFixPage("history")
             return strPath.Substring(nRet + 1);
         }
 
-        bool NeedSkip(XmlDocument biblio_dom, ProcessInfo info)
+        bool NeedSkip(XmlElement biblio_root, ProcessInfo info)
         {
             if (info.Start == false
                 && string.IsNullOrEmpty(info.StartBiblioRecPath) == false)
             {
-                XmlElement root = biblio_dom.DocumentElement;
-                string strOldPath = root.GetAttribute("path");
+                string strOldPath = biblio_root.GetAttribute("path");
 
                 // 定位第一条书目记录，并进入开始处理状态
                 if (info.Start == false && GetShortPath(strOldPath) == info.StartBiblioRecPath)
@@ -578,7 +577,7 @@ this.MainForm.ActivateFixPage("history")
             XmlDocument dom = new XmlDocument();
             XmlElement root = dom.ReadNode(reader) as XmlElement;
 
-            if (NeedSkip(dom, info) == true)
+            if (NeedSkip(root, info) == true)
                 return false;
 
             string strOldPath = root.GetAttribute("path");
