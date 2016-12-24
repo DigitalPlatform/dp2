@@ -19,6 +19,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using Newtonsoft.Json;
+using DigitalPlatform.Range;
 
 namespace dp2Circulation
 {
@@ -86,7 +87,7 @@ strStringTable);
 
         public static void EnableTabPage(TabPage page, bool bEnable)
         {
-            foreach(Control control in page.Controls)
+            foreach (Control control in page.Controls)
             {
                 control.Enabled = bEnable;
             }
@@ -192,6 +193,29 @@ strStringTable);
             MessageBox.Show(this, strError);
         }
 
+        // 准备和判断范围有关的成员变量
+        void PrepareRange(ProcessInfo info)
+        {
+            info.BiblioRecCount = 0;
+            info.RangeList = null;
+            info.StartBiblioRecPath = "";
+
+            if (String.IsNullOrEmpty(info.RecordRange) == false)
+            {
+                if (info.RecordRange.IndexOf("/") != -1)
+                {
+                    info.StartBiblioRecPath = info.RecordRange;
+                    info.Start = false;
+                }
+                else
+                {
+                    info.RangeList = new RangeList(info.RecordRange);
+                    info.RangeList.Sort();
+                    info.Start = true;
+                }
+            }
+        }
+
         /* 文件头部结构
 <?xml version="1.0" encoding="utf-8"?>
 <dprms:collection xmlns:dprms="http://dp2003.com/dprms">
@@ -243,6 +267,11 @@ strStringTable);
                 info.DontSearchDup = (bool)this.Invoke(new Func<bool>(() =>
                 {
                     return this.checkBox_target_dontSearchDup.Checked;
+                }));
+
+                info.RecordRange = (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_source_range.Text;
                 }));
 #if NO
             info.Simulate = (bool)this.Invoke(new Func<bool>(() =>
@@ -305,6 +334,10 @@ this.MainForm.ActivateFixPage("history")
             TimeSpan old_timeout = info.Channel.Timeout;
             info.Channel.Timeout = new TimeSpan(0, 2, 0);
 
+            int nBiblioRecordCount = 0;
+
+            PrepareRange(info);
+
             try
             {
                 string strSourceFileName = (string)this.Invoke(new Func<string>(() =>
@@ -356,8 +389,11 @@ this.MainForm.ActivateFixPage("history")
                             break;	// 结束
 
                         DoRecord(reader, info);
+
                         if (stop != null)
                             stop.SetProgressValue(file.Position);
+
+                        info.BiblioRecCount++;
                     }
                 }
 
@@ -417,9 +453,18 @@ this.MainForm.ActivateFixPage("history")
             ...
  * */
         // 处理一个 dprms:record 元素
-        void DoRecord(XmlTextReader reader, ProcessInfo info)
+        void DoRecord(XmlTextReader reader,
+            ProcessInfo info)
         {
-            info.Clear();
+            info.ClearRecordVars();
+
+            if (info.RangeList != null && info.RangeList.IsInRange(info.BiblioRecCount, true) == false)
+            {
+                reader.ReadOuterXml();
+                return;
+            }
+
+            bool bSkip = false;
 
             // 对下级元素进行循环处理
             while (true)
@@ -440,14 +485,20 @@ this.MainForm.ActivateFixPage("history")
                     // 应当是同级元素中的第一个。因为后面写入册记录等需要知道书目记录的实际写入路径
                     if (reader.LocalName == "biblio")
                     {
-                        DoBiblio(reader, info);
+                        // return:
+                        //      true    书目记录已经处理。需要继续处理后面的下级记录
+                        //      false   书目记录不需要处理，应跳过后面的下级记录
+                        bSkip = !DoBiblio(reader, info);
                     }
                     else if (reader.LocalName == "orderCollection"
                         || reader.LocalName == "itemCollection"
                         || reader.LocalName == "issueCollection"
                         || reader.LocalName == "commentCollection")
                     {
-                        DoItemCollection(reader, info);
+                        if (bSkip)
+                            reader.ReadOuterXml();
+                        else
+                            DoItemCollection(reader, info);
                     }
                     else
                     {
@@ -464,7 +515,29 @@ this.MainForm.ActivateFixPage("history")
             int nRet = strPath.IndexOf("?");
             if (nRet == -1)
                 return strPath;
-            return strPath.Substring(nRet+1);
+            return strPath.Substring(nRet + 1);
+        }
+
+        bool NeedSkip(XmlDocument biblio_dom, ProcessInfo info)
+        {
+            if (info.Start == false
+                && string.IsNullOrEmpty(info.StartBiblioRecPath) == false)
+            {
+                XmlElement root = biblio_dom.DocumentElement;
+                string strOldPath = root.GetAttribute("path");
+
+                // 定位第一条书目记录，并进入开始处理状态
+                if (info.Start == false && GetShortPath(strOldPath) == info.StartBiblioRecPath)
+                {
+                    info.Start = true;
+                    return false;
+                }
+
+                if (info.Start == false)
+                    return true;
+            }
+
+            return false;
         }
 
         /*
@@ -473,7 +546,11 @@ this.MainForm.ActivateFixPage("history")
                 <unimarc:leader>00827nam0 2200229   45  </unimarc:leader>
                 <unimarc:controlfield tag="001">0192000006</unimarc:controlfield>
          * */
-        void DoBiblio(XmlTextReader reader, ProcessInfo info)
+        // return:
+        //      true    书目记录已经处理。需要继续处理后面的下级记录
+        //      false   书目记录不需要处理，应跳过后面的下级记录
+        bool DoBiblio(XmlTextReader reader,
+            ProcessInfo info)
         {
 #if NO
             // info.ItemRefIDTable.Clear();
@@ -500,7 +577,12 @@ this.MainForm.ActivateFixPage("history")
 #endif
             XmlDocument dom = new XmlDocument();
             XmlElement root = dom.ReadNode(reader) as XmlElement;
+
+            if (NeedSkip(dom, info) == true)
+                return false;
+
             string strOldPath = root.GetAttribute("path");
+
             string strTimestamp = root.GetAttribute("timestamp");
 
             info.BiblioXml = root.InnerXml;
@@ -558,6 +640,8 @@ this.MainForm.ActivateFixPage("history")
             }
             else
             {
+                int nRedoCount = 0;
+            REDO:
                 // 创建或者覆盖书目记录
                 string strError = "";
                 string strOutputPath = "";
@@ -581,7 +665,44 @@ this.MainForm.ActivateFixPage("history")
                         // 提示是否强行覆盖?
                     }
                     strError = "保存书目记录 '" + strPath + "' 时出错: " + strError;
-                    throw new Exception(strError);
+
+                    if (info.HideBiblioMessageBox == false || nRedoCount > 10)
+                    {
+                        DialogResult result = MessageDialog.Show(this,
+        strError + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
+        MessageBoxButtons.YesNoCancel,
+        info.LastBiblioDialogResult == DialogResult.Yes ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2,
+        "此后不再出现本对话框",
+        ref info.HideBiblioMessageBox,
+        new string[] { "重试", "跳过", "中断" });
+                        info.LastBiblioDialogResult = result;
+                        if (result == DialogResult.Yes)
+                        {
+#if NO
+                            // 为重试保存做准备。TODO: 理论上要显示对比，避免不经意覆盖了别人的修改
+                            if (baNewTimestamp != null)
+                                strTimestamp = ByteArray.GetHexTimeStampString(baNewTimestamp);
+#endif
+                            info.HideBiblioMessageBox = false;
+                            nRedoCount++;
+                            goto REDO;
+                        }
+                        if (result == DialogResult.No)
+                            return false;
+                        throw new Exception(strError);
+                    }
+                    else
+                    {
+                        if (info.LastBiblioDialogResult == DialogResult.Yes)
+                        {
+                            nRedoCount++;
+                            goto REDO;
+                        }
+                        // 跳过
+                        if (info.LastBiblioDialogResult == DialogResult.No)
+                            return false;
+                        throw new Exception(strError);
+                    }
                 }
 
                 info.BiblioRecPath = strOutputPath;
@@ -593,6 +714,8 @@ this.MainForm.ActivateFixPage("history")
                 this.ShowMessage(strMessage);
                 this.OutputText(strMessage, 0);
             }
+
+            return true;
         }
 
         static int ITEM_BATCH_SIZE = 10;
@@ -972,7 +1095,7 @@ this.MainForm.ActivateFixPage("history")
             // 1) 继续处理。但遇到错误依然报错
             // 2) 继续处理，但遇到错误不再报错。此时要累积报错信息，最后统一报错。或者显示在一个浏览器控件窗口中。
 
-            if (info.HideMessageBox == false)
+            if (info.HideItemsMessageBox == false)
             {
                 // TODO: 按钮文字较长的时候，应该能自动适应
                 DialogResult result = MessageDialog.Show(this,
@@ -980,7 +1103,7 @@ strText + "\r\n\r\n(继续) 继续处理; (中断) 中断处理",
 MessageBoxButtons.YesNo,
 MessageBoxDefaultButton.Button2,
 "此后不再出现本对话框",
-ref info.HideMessageBox,
+ref info.HideItemsMessageBox,
 new string[] { "继续", "中断" });
                 if (result == DialogResult.Yes)
                     return true;
@@ -1011,13 +1134,18 @@ new string[] { "继续", "中断" });
             public bool SuppressOperLog = false;
             public bool DontSearchDup = false;
 
-
-            public bool HideMessageBox = false; // 是否隐藏报错对话框
+            public string RecordRange = ""; // 导入源文件中的书目记录范围
 
             public int ItemErrorCount = 0;  // 总共发生过多少次下属记录导入错误
 
             public LibraryChannel Channel = null;
             public Stop stop = null;
+
+            // *** 以下成员都是在运行中动态设定和变化的
+            public bool Start = true;   // 是否进入开始处理状态
+            public string StartBiblioRecPath = "";  // 定位源文件中需开始处理的一条记录的路径
+            public RangeList RangeList = null;
+            public int BiblioRecCount = 0;  // 已经处理的书目记录数
 
             public string SourceBiblioRecPath = ""; // 数据中的书目记录路径
 
@@ -1030,10 +1158,15 @@ new string[] { "继续", "中断" });
 
             public int UploadedSubItems = 0;    // 当前书目记录累计已经上传的子记录个数
 
+            public bool HideItemsMessageBox = false; // 是否隐藏报错对话框
+            public bool HideBiblioMessageBox = false; // 是否隐藏报错对话框
+            public DialogResult LastBiblioDialogResult = DialogResult.No;   // 最近一次书目保存出错以后显示的对话框的选择结果
+
+            // *** 以下变量在整个处理过程中持久
             public List<TwoString> LocationMapTable = new List<TwoString>(); // 馆藏地转换表
 
             // 每次要处理新的一条书目记录以前，进行清除
-            public void Clear()
+            public void ClearRecordVars()
             {
                 this.ItemRefIDTable.Clear();
                 this.OrderRefIDTable.Clear();
@@ -1122,6 +1255,8 @@ new string[] { "继续", "中断" });
                 controls.Add(this.checkBox_target_dontSearchDup);
                 controls.Add(this.checkBox_target_suppressOperLog);
                 controls.Add(this.checkBox_target_dontChangeOperations);
+                controls.Add(this.textBox_source_range);
+
                 return GuiState.GetUiState(controls);
             }
             set
@@ -1137,6 +1272,8 @@ new string[] { "继续", "中断" });
                 controls.Add(this.checkBox_target_dontSearchDup);
                 controls.Add(this.checkBox_target_suppressOperLog);
                 controls.Add(this.checkBox_target_dontChangeOperations);
+                controls.Add(this.textBox_source_range);
+
                 GuiState.SetUiState(controls, value);
             }
         }

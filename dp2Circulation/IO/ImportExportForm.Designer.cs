@@ -48,6 +48,9 @@
             this.checkBox_target_newRefID = new System.Windows.Forms.CheckBox();
             this.checkBox_target_randomItemBarcode = new System.Windows.Forms.CheckBox();
             this.tabPage_target = new System.Windows.Forms.TabPage();
+            this.checkBox_target_dontChangeOperations = new System.Windows.Forms.CheckBox();
+            this.checkBox_target_suppressOperLog = new System.Windows.Forms.CheckBox();
+            this.checkBox_target_dontSearchDup = new System.Windows.Forms.CheckBox();
             this.checkBox_target_restoreOldID = new System.Windows.Forms.CheckBox();
             this.button_target_simulateImport = new System.Windows.Forms.Button();
             this.comboBox_target_targetBiblioDbName = new System.Windows.Forms.ComboBox();
@@ -55,9 +58,8 @@
             this.tabPage_run = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.button_next = new System.Windows.Forms.Button();
-            this.checkBox_target_dontSearchDup = new System.Windows.Forms.CheckBox();
-            this.checkBox_target_suppressOperLog = new System.Windows.Forms.CheckBox();
-            this.checkBox_target_dontChangeOperations = new System.Windows.Forms.CheckBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBox_source_range = new System.Windows.Forms.TextBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_source.SuspendLayout();
             this.tabPage_convert.SuspendLayout();
@@ -84,6 +86,8 @@
             // tabPage_source
             // 
             this.tabPage_source.AutoScroll = true;
+            this.tabPage_source.Controls.Add(this.textBox_source_range);
+            this.tabPage_source.Controls.Add(this.label4);
             this.tabPage_source.Controls.Add(this.button_getObjectDirectoryName);
             this.tabPage_source.Controls.Add(this.textBox_objectDirectoryName);
             this.tabPage_source.Controls.Add(this.label3);
@@ -106,7 +110,7 @@
             // button_getObjectDirectoryName
             // 
             this.button_getObjectDirectoryName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getObjectDirectoryName.Location = new System.Drawing.Point(389, 205);
+            this.button_getObjectDirectoryName.Location = new System.Drawing.Point(389, 128);
             this.button_getObjectDirectoryName.Name = "button_getObjectDirectoryName";
             this.button_getObjectDirectoryName.Size = new System.Drawing.Size(39, 23);
             this.button_getObjectDirectoryName.TabIndex = 13;
@@ -118,7 +122,7 @@
             // 
             this.textBox_objectDirectoryName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_objectDirectoryName.Location = new System.Drawing.Point(27, 207);
+            this.textBox_objectDirectoryName.Location = new System.Drawing.Point(27, 130);
             this.textBox_objectDirectoryName.Name = "textBox_objectDirectoryName";
             this.textBox_objectDirectoryName.Size = new System.Drawing.Size(356, 21);
             this.textBox_objectDirectoryName.TabIndex = 12;
@@ -126,7 +130,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(25, 192);
+            this.label3.Location = new System.Drawing.Point(25, 115);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(101, 12);
             this.label3.TabIndex = 11;
@@ -166,7 +170,7 @@
             this.checkBox_subRecords_object.AutoSize = true;
             this.checkBox_subRecords_object.Checked = true;
             this.checkBox_subRecords_object.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_subRecords_object.Location = new System.Drawing.Point(8, 173);
+            this.checkBox_subRecords_object.Location = new System.Drawing.Point(8, 96);
             this.checkBox_subRecords_object.Name = "checkBox_subRecords_object";
             this.checkBox_subRecords_object.Size = new System.Drawing.Size(66, 16);
             this.checkBox_subRecords_object.TabIndex = 4;
@@ -179,7 +183,7 @@
             this.checkBox_subRecords_comment.AutoSize = true;
             this.checkBox_subRecords_comment.Checked = true;
             this.checkBox_subRecords_comment.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_subRecords_comment.Location = new System.Drawing.Point(8, 120);
+            this.checkBox_subRecords_comment.Location = new System.Drawing.Point(276, 54);
             this.checkBox_subRecords_comment.Name = "checkBox_subRecords_comment";
             this.checkBox_subRecords_comment.Size = new System.Drawing.Size(66, 16);
             this.checkBox_subRecords_comment.TabIndex = 3;
@@ -191,7 +195,7 @@
             this.checkBox_subRecords_issue.AutoSize = true;
             this.checkBox_subRecords_issue.Checked = true;
             this.checkBox_subRecords_issue.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_subRecords_issue.Location = new System.Drawing.Point(8, 98);
+            this.checkBox_subRecords_issue.Location = new System.Drawing.Point(194, 54);
             this.checkBox_subRecords_issue.Name = "checkBox_subRecords_issue";
             this.checkBox_subRecords_issue.Size = new System.Drawing.Size(54, 16);
             this.checkBox_subRecords_issue.TabIndex = 2;
@@ -203,7 +207,7 @@
             this.checkBox_subRecords_order.AutoSize = true;
             this.checkBox_subRecords_order.Checked = true;
             this.checkBox_subRecords_order.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_subRecords_order.Location = new System.Drawing.Point(8, 76);
+            this.checkBox_subRecords_order.Location = new System.Drawing.Point(98, 54);
             this.checkBox_subRecords_order.Name = "checkBox_subRecords_order";
             this.checkBox_subRecords_order.Size = new System.Drawing.Size(66, 16);
             this.checkBox_subRecords_order.TabIndex = 1;
@@ -253,7 +257,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel_map.Location = new System.Drawing.Point(3, 127);
             this.panel_map.Name = "panel_map";
-            this.panel_map.Size = new System.Drawing.Size(378, 133);
+            this.panel_map.Size = new System.Drawing.Size(361, 133);
             this.panel_map.TabIndex = 12;
             // 
             // button_convert_initialMapString
@@ -306,6 +310,36 @@
             this.tabPage_target.TabIndex = 0;
             this.tabPage_target.Text = "目标库";
             this.tabPage_target.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_target_dontChangeOperations
+            // 
+            this.checkBox_target_dontChangeOperations.AutoSize = true;
+            this.checkBox_target_dontChangeOperations.Location = new System.Drawing.Point(9, 144);
+            this.checkBox_target_dontChangeOperations.Name = "checkBox_target_dontChangeOperations";
+            this.checkBox_target_dontChangeOperations.Size = new System.Drawing.Size(150, 16);
+            this.checkBox_target_dontChangeOperations.TabIndex = 9;
+            this.checkBox_target_dontChangeOperations.Text = "不修改 operation 元素";
+            this.checkBox_target_dontChangeOperations.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_target_suppressOperLog
+            // 
+            this.checkBox_target_suppressOperLog.AutoSize = true;
+            this.checkBox_target_suppressOperLog.Location = new System.Drawing.Point(9, 122);
+            this.checkBox_target_suppressOperLog.Name = "checkBox_target_suppressOperLog";
+            this.checkBox_target_suppressOperLog.Size = new System.Drawing.Size(108, 16);
+            this.checkBox_target_suppressOperLog.TabIndex = 8;
+            this.checkBox_target_suppressOperLog.Text = "不写入操作日志";
+            this.checkBox_target_suppressOperLog.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_target_dontSearchDup
+            // 
+            this.checkBox_target_dontSearchDup.AutoSize = true;
+            this.checkBox_target_dontSearchDup.Location = new System.Drawing.Point(9, 100);
+            this.checkBox_target_dontSearchDup.Name = "checkBox_target_dontSearchDup";
+            this.checkBox_target_dontSearchDup.Size = new System.Drawing.Size(60, 16);
+            this.checkBox_target_dontSearchDup.TabIndex = 7;
+            this.checkBox_target_dontSearchDup.Text = "不查重";
+            this.checkBox_target_dontSearchDup.UseVisualStyleBackColor = true;
             // 
             // checkBox_target_restoreOldID
             // 
@@ -377,35 +411,23 @@
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
             // 
-            // checkBox_target_noSearchDup
+            // label4
             // 
-            this.checkBox_target_dontSearchDup.AutoSize = true;
-            this.checkBox_target_dontSearchDup.Location = new System.Drawing.Point(9, 100);
-            this.checkBox_target_dontSearchDup.Name = "checkBox_target_noSearchDup";
-            this.checkBox_target_dontSearchDup.Size = new System.Drawing.Size(60, 16);
-            this.checkBox_target_dontSearchDup.TabIndex = 7;
-            this.checkBox_target_dontSearchDup.Text = "不查重";
-            this.checkBox_target_dontSearchDup.UseVisualStyleBackColor = true;
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 182);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(101, 12);
+            this.label4.TabIndex = 14;
+            this.label4.Text = "导入记录范围(&R):";
             // 
-            // checkBox_target_noOperLog
+            // textBox_source_range
             // 
-            this.checkBox_target_suppressOperLog.AutoSize = true;
-            this.checkBox_target_suppressOperLog.Location = new System.Drawing.Point(9, 122);
-            this.checkBox_target_suppressOperLog.Name = "checkBox_target_noOperLog";
-            this.checkBox_target_suppressOperLog.Size = new System.Drawing.Size(108, 16);
-            this.checkBox_target_suppressOperLog.TabIndex = 8;
-            this.checkBox_target_suppressOperLog.Text = "不写入操作日志";
-            this.checkBox_target_suppressOperLog.UseVisualStyleBackColor = true;
-            // 
-            // checkBox_target_dontChangeOperations
-            // 
-            this.checkBox_target_dontChangeOperations.AutoSize = true;
-            this.checkBox_target_dontChangeOperations.Location = new System.Drawing.Point(9, 144);
-            this.checkBox_target_dontChangeOperations.Name = "checkBox_target_dontChangeOperations";
-            this.checkBox_target_dontChangeOperations.Size = new System.Drawing.Size(150, 16);
-            this.checkBox_target_dontChangeOperations.TabIndex = 9;
-            this.checkBox_target_dontChangeOperations.Text = "不修改 operation 元素";
-            this.checkBox_target_dontChangeOperations.UseVisualStyleBackColor = true;
+            this.textBox_source_range.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_source_range.Location = new System.Drawing.Point(125, 179);
+            this.textBox_source_range.Name = "textBox_source_range";
+            this.textBox_source_range.Size = new System.Drawing.Size(258, 21);
+            this.textBox_source_range.TabIndex = 15;
             // 
             // ImportExportForm
             // 
@@ -465,5 +487,7 @@
         private System.Windows.Forms.CheckBox checkBox_target_dontSearchDup;
         private System.Windows.Forms.CheckBox checkBox_target_dontChangeOperations;
         private System.Windows.Forms.CheckBox checkBox_target_suppressOperLog;
+        private System.Windows.Forms.TextBox textBox_source_range;
+        private System.Windows.Forms.Label label4;
     }
 }
