@@ -13901,6 +13901,15 @@ strLibraryCode);    // 读者所在的馆代码
 
         public bool ClearCacheCfgs(string strResPath)
         {
+            // 2016/12/27
+            if (string.IsNullOrEmpty(strResPath) == true)
+            {
+                this.CfgsMap.Clear();
+                this.Filters.Clear();
+                this.AssemblyCache.Clear();
+                return true;
+            }
+
             string strPath = strResPath;
 
             string strDbName = StringUtil.GetFirstPartPath(ref strPath);

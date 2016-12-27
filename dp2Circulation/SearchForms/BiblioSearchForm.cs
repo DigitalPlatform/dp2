@@ -9133,7 +9133,7 @@ strNewMARC);
             if (string.IsNullOrEmpty(strImageUrl) == true)
                 return "";
 
-            if (StringUtil.HasHead(strImageUrl, "http:") == true)
+            if (StringUtil.IsHttpUrl(strImageUrl) == true)
                 return "<img src='" + strImageUrl + "'></img>";
 
             string strUri = ScriptUtil.MakeObjectUrl(strBiblioRecPath,

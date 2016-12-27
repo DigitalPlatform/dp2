@@ -13413,7 +13413,7 @@ strMARC);
 
         static string GetImageID(string strUri)
         {
-            if (StringUtil.HasHead(strUri, "http:") == true)
+            if (StringUtil.IsHttpUrl(strUri) == true)
                 return null;
             if (StringUtil.HasHead(strUri, "uri:") == true)
                 return strUri.Substring(4).Trim();

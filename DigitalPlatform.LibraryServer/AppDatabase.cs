@@ -3116,6 +3116,10 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
+            // 2016/12/27
+            // 清除缓存的各种配置文件
+            this.ClearCacheCfgs("");
+
             // 2015/6/13
             if (keyschanged_dbnames.Count > 0)
             {

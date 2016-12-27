@@ -384,6 +384,12 @@
       <DependentUpon>ChatLoginDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="IM\MessageHub.cs" />
+    <Compile Include="IO\BiblioDupDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="IO\BiblioDupDialog.Designer.cs">
+      <DependentUpon>BiblioDupDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="IO\ImportExportForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1606,6 +1612,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="IM\ChatLoginDialog.resx">
       <DependentUpon>ChatLoginDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IO\BiblioDupDialog.resx">
+      <DependentUpon>BiblioDupDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="IO\ImportExportForm.resx">
       <DependentUpon>ImportExportForm.cs</DependentUpon>

@@ -554,7 +554,7 @@ using DigitalPlatform.Text;
       string strImageFragment = "";
       if (string.IsNullOrEmpty(Root._imageUrl) == false)
       {
-        if (StringUtil.HasHead(Root._imageUrl, "http:") == true)
+        if (StringUtil.IsHttpUrl(Root._imageUrl) == true)
           strImageFragment = "<img src='"+Root._imageUrl+"' ></img>";
           else
           {

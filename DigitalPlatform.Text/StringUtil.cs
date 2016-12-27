@@ -17,6 +17,16 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        public static bool IsHttpUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+                return false;
+            url = url.ToLower();
+            if (url.StartsWith("http:") || url.StartsWith("https"))
+                return true;
+            return false;
+        }
+
         #region IP 地址匹配
 
         // 匹配 ip 地址列表

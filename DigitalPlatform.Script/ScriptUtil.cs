@@ -59,7 +59,7 @@ namespace DigitalPlatform.Script
             if (string.IsNullOrEmpty(strUri) == true)
                 return strUri;
 
-            if (StringUtil.HasHead(strUri, "http:") == true)
+            if (StringUtil.IsHttpUrl(strUri) == true)
                 return strUri;
 
             if (StringUtil.HasHead(strUri, "uri:") == true)
@@ -257,8 +257,7 @@ namespace DigitalPlatform.Script
                 }
                 string strHitCountImage = "";
                 string strObjectUrl = strUri;
-                if (StringUtil.HasHead(strUri, "http:") == false
-                    && StringUtil.HasHead(strUri, "https:") == false)
+                if (StringUtil.IsHttpUrl(strUri) == false)
                 {
                     // 内部对象
                     strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
@@ -389,24 +388,6 @@ namespace DigitalPlatform.Script
                 {
                     strSaveAs = "true";
                 }
-
-#if NO
-                string strObjectUrl = strUri;
-                if (StringUtil.HasHead(strUri, "http:") == false
-                    && StringUtil.HasHead(strUri, "https:") == false)
-                {
-                    // 内部对象
-                    strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs;
-                }
-                else
-                {
-                    // http: 或 https: 的情形，即外部 URL
-                    if ((style & BuildObjectHtmlTableStyle.HttpUrlHitCount) != 0)
-                    {
-                        strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri) + strSaveAs + "&biblioRecPath=" + HttpUtility.UrlEncode(strRecPath);
-                    }
-                }
-#endif
 
                 string y = field.select("subfield[@name='y']").FirstContent;
                 string f = field.select("subfield[@name='f']").FirstContent;

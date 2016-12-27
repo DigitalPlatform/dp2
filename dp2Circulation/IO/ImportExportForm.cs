@@ -663,6 +663,19 @@ this.MainForm.ActivateFixPage("history")
                     {
                         // 提示是否强行覆盖?
                     }
+
+                    if (info.Channel.ErrorCode == ErrorCode.BiblioDup)
+                    {
+                        this.Invoke((Action)(() =>
+{
+    BiblioDupDialog dup_dialog = new BiblioDupDialog();
+    dup_dialog.OriginXml = info.BiblioXml;
+    dup_dialog.DupBiblioRecPathList = strOutputPath;
+    dup_dialog.ShowDialog(this);
+}));
+                        return false;
+                    }
+
                     strError = "保存书目记录 '" + strPath + "' 时出错: " + strError;
 
                     if (info.HideBiblioMessageBox == false || nRedoCount > 10)
@@ -710,7 +723,7 @@ new string[] { "重试", "跳过", "中断" });
 
                 info.BiblioRecPath = strOutputPath;
 
-                string strMessage = (info.BiblioRecCount+1).ToString() + ":" + strOldPath + "-->" + info.BiblioRecPath;
+                string strMessage = (info.BiblioRecCount + 1).ToString() + ":" + strOldPath + "-->" + info.BiblioRecPath;
                 if (info.Simulate)
                     strMessage = "模拟导入 " + (info.BiblioRecCount + 1).ToString() + ":" + strOldPath + "-->" + info.BiblioRecPath;
 

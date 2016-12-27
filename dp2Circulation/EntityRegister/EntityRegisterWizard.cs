@@ -2081,11 +2081,6 @@ out strError);
                 }
             }
 
-#if NO
-            if (StringUtil.HasHead(strUrl, "http:") == true)
-                return;
-#endif
-
             if (info != null
                 && bRetry == false
                 && info.CoverImageRquested == true)
@@ -2120,7 +2115,7 @@ out strError);
                 goto ERROR1;
             }
 
-            if (StringUtil.HasHead(e.ObjectPath, "http:") == true)
+            if (StringUtil.IsHttpUrl(e.ObjectPath) == true)
             {
                 EventFilter filter = new EventFilter();
                 // filter.BiblioRegister = biblioRegister;

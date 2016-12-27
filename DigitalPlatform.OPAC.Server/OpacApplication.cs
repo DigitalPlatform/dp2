@@ -265,7 +265,7 @@ namespace DigitalPlatform.OPAC.Server
             if (string.IsNullOrEmpty(strUri) == true)
                 return strUri;
 
-            if (StringUtil.HasHead(strUri, "http:") == true)
+            if (StringUtil.IsHttpUrl(strUri) == true)
                 return strUri;
 
             if (StringUtil.HasHead(strUri, "uri:") == true)
