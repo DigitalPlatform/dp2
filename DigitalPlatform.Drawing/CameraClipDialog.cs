@@ -139,7 +139,9 @@ namespace DigitalPlatform.Drawing
         {
             Image temp = this.qrRecognitionControl1.Image;
 
-            this.pictureBox_clip.Image = new Bitmap(temp);
+            // this.pictureBox_clip.Image = new Bitmap(temp);
+            ImageUtil.SetImage(this.pictureBox_clip, new Bitmap(temp)); // 2012/12/28
+
             this.pictureBox_clip.InitialPoints(temp);
 
             this.tabControl_main.SelectedTab = this.tabPage_clip;
@@ -246,7 +248,7 @@ namespace DigitalPlatform.Drawing
             }
             set
             {
-                this.pictureBox_result.Image = value;
+                ImageUtil.SetImage(this.pictureBox_result, value);  // 2016/12/28
                 _resultRotateAngle = 0;
             }
         }
@@ -260,7 +262,7 @@ namespace DigitalPlatform.Drawing
             }
             set
             {
-                this.pictureBox_clip.Image = value;
+                ImageUtil.SetImage(this.pictureBox_clip, value);    // 2016/12/28
             }
         }
 
@@ -314,7 +316,7 @@ namespace DigitalPlatform.Drawing
             {
                 Image image = this.pictureBox_result.Image;
                 image.RotateFlip(RotateFlipType.Rotate90FlipNone);
-                this.pictureBox_result.Image = image;
+                ImageUtil.SetImage(this.pictureBox_result, image);  // 2016/12/28
 
                 _resultRotateAngle += 90;
                 if (_resultRotateAngle == 360)
@@ -427,7 +429,7 @@ namespace DigitalPlatform.Drawing
 
             if (this.tabControl_main.SelectedTab == this.tabPage_clip)
             {
-                this.pictureBox_clip.Image = image;
+                ImageUtil.SetImage(this.pictureBox_clip, image);   // 2016/12/28
                 this.pictureBox_clip.InitialPoints(image);
             }
             if (this.tabControl_main.SelectedTab == this.tabPage_result)

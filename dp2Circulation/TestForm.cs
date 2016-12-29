@@ -34,6 +34,7 @@ using DigitalPlatform.EasyMarc;
 using DigitalPlatform.AmazonInterface;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Drawing;
 
 namespace dp2Circulation
 {
@@ -793,8 +794,7 @@ namespace dp2Circulation
 
             m_idcardObj = obj.GetInterface();
  */
-            this.pictureBox_idCard.Image = null;
-
+            ImageUtil.SetImage(this.pictureBox_idCard, null);   // 2016/12/28
 
             nRet = StartChannel(out strError);
             if (nRet == -1)
@@ -815,7 +815,7 @@ namespace dp2Circulation
                 {
                     using (MemoryStream s = new MemoryStream(baPhoto))
                     {
-                        this.pictureBox_idCard.Image = new Bitmap(s);
+                        ImageUtil.SetImage(this.pictureBox_idCard, new Bitmap(s));  // 2016/12/28
                     }
                 }
 

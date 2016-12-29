@@ -36,6 +36,7 @@
             this.toolStripButton_mergeTo = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_createNew = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_skip = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_stop = new System.Windows.Forms.ToolStripButton();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -57,6 +58,7 @@
             this.listView_browse.TabIndex = 0;
             this.listView_browse.UseCompatibleStateImageBehavior = false;
             this.listView_browse.View = System.Windows.Forms.View.Details;
+            this.listView_browse.SelectedIndexChanged += new System.EventHandler(this.listView_browse_SelectedIndexChanged);
             // 
             // columnHeader_path
             // 
@@ -79,7 +81,8 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripButton_mergeTo,
             this.toolStripButton_createNew,
-            this.toolStripButton_skip});
+            this.toolStripButton_skip,
+            this.toolStripButton_stop});
             this.toolStrip1.Location = new System.Drawing.Point(0, 294);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(553, 28);
@@ -94,6 +97,7 @@
             this.toolStripButton_mergeTo.Name = "toolStripButton_mergeTo";
             this.toolStripButton_mergeTo.Size = new System.Drawing.Size(79, 25);
             this.toolStripButton_mergeTo.Text = "合并到 ...";
+            this.toolStripButton_mergeTo.Click += new System.EventHandler(this.toolStripButton_mergeTo_Click);
             // 
             // toolStripButton_createNew
             // 
@@ -103,6 +107,7 @@
             this.toolStripButton_createNew.Name = "toolStripButton_createNew";
             this.toolStripButton_createNew.Size = new System.Drawing.Size(94, 25);
             this.toolStripButton_createNew.Text = "创建新记录";
+            this.toolStripButton_createNew.Click += new System.EventHandler(this.toolStripButton_createNew_Click);
             // 
             // toolStripButton_skip
             // 
@@ -112,6 +117,18 @@
             this.toolStripButton_skip.Name = "toolStripButton_skip";
             this.toolStripButton_skip.Size = new System.Drawing.Size(46, 25);
             this.toolStripButton_skip.Text = "跳过";
+            this.toolStripButton_skip.Click += new System.EventHandler(this.toolStripButton_skip_Click);
+            // 
+            // toolStripButton_stop
+            // 
+            this.toolStripButton_stop.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripButton_stop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_stop.Image")));
+            this.toolStripButton_stop.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_stop.Name = "toolStripButton_stop";
+            this.toolStripButton_stop.Size = new System.Drawing.Size(46, 25);
+            this.toolStripButton_stop.Text = "停止";
+            this.toolStripButton_stop.Click += new System.EventHandler(this.toolStripButton_stop_Click);
             // 
             // splitContainer1
             // 
@@ -143,6 +160,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "处理重复书目";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.BiblioDupDialog_FormClosing);
             this.Load += new System.EventHandler(this.BiblioDupDialog_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
@@ -165,5 +183,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_mergeTo;
         private System.Windows.Forms.ToolStripButton toolStripButton_createNew;
         private System.Windows.Forms.ToolStripButton toolStripButton_skip;
+        private System.Windows.Forms.ToolStripButton toolStripButton_stop;
     }
 }

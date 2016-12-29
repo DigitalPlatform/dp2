@@ -728,7 +728,7 @@ namespace DigitalPlatform.rms
                                 catch (Exception /*ex*/)
                                 {
 #if NO
-                                    strError = "删除 SQL 库出错.\r\n"
+                                    strError = "删除 SQL 库出错。\r\n"
                                         + ex.Message + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strCommand;
@@ -766,7 +766,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "建库出错.\r\n"
+                                strError = "建库出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -787,7 +787,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "建表出错.\r\n"
+                                strError = "建表出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -810,7 +810,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "建索引出错.\r\n"
+                                strError = "建索引出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -895,7 +895,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "建表出错.\r\n"
+                                strError = "建表出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -918,7 +918,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "建索引出错.\r\n"
+                                strError = "建索引出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -954,7 +954,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "建库出错.\r\n"
+                                strError = "建库出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -975,7 +975,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "建表出错.\r\n"
+                                strError = "建表出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -998,7 +998,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "建索引出错.\r\n"
+                                strError = "建索引出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -1054,7 +1054,7 @@ namespace DigitalPlatform.rms
                         }
                         catch (Exception ex)
                         {
-                            strError = "建库出错.\r\n"
+                            strError = "建库出错。\r\n"
                                 + ex.Message + "\r\n"
                                 + "SQL命令:\r\n"
                                 + strCommand;
@@ -1089,7 +1089,7 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "建表出错.\r\n"
+                                    strError = "建表出错。\r\n"
                                         + ex.Message + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strLine;
@@ -1119,7 +1119,7 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "建索引出错.\r\n"
+                                    strError = "建索引出错。\r\n"
                                         + ex.Message + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strLine;
@@ -1432,7 +1432,7 @@ namespace DigitalPlatform.rms
                                 {
                                     return 0;
                                 }
-                                strError = "刷新表定义 " + strAction + " 出错.\r\n"
+                                strError = "刷新表定义 " + strAction + " 出错。\r\n"
     + ex.Message + "\r\n"
     + "SQL命令:\r\n"
     + strCommand;
@@ -1440,7 +1440,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "刷新表定义 " + strAction + " 出错.\r\n"
+                                strError = "刷新表定义 " + strAction + " 出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -1464,7 +1464,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "刷新表定义 " + strAction + " 出错.\r\n"
+                                strError = "刷新表定义 " + strAction + " 出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -1492,7 +1492,7 @@ namespace DigitalPlatform.rms
                                 if (strAction == "delete"
                                 && ex.Number == 1091)
                                     return 0;
-                                strError = "刷新表定义 " + strAction + " 出错.\r\n"
+                                strError = "刷新表定义 " + strAction + " 出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -1500,7 +1500,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "刷新表定义 " + strAction + " 出错.\r\n"
+                                strError = "刷新表定义 " + strAction + " 出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -1534,7 +1534,7 @@ namespace DigitalPlatform.rms
                                     if (strAction == "delete"
                                     && ex.Number == 1418)
                                         continue;
-                                    strError = "刷新表定义 " + strAction + " 出错.\r\n"
+                                    strError = "刷新表定义 " + strAction + " 出错。\r\n"
                                         + ex.Message + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strLine;
@@ -1542,7 +1542,7 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "刷新表定义 " + strAction + " 出错.\r\n"
+                                    strError = "刷新表定义 " + strAction + " 出错。\r\n"
                                         + ex.Message + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strLine;
@@ -1624,7 +1624,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "刷新表定义出错.\r\n"
+                                strError = "刷新表定义出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -1645,7 +1645,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "刷新表定义出错.\r\n"
+                                strError = "刷新表定义出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -1689,7 +1689,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "刷新表定义出错.\r\n"
+                                strError = "刷新表定义出错。\r\n"
                                     + ex.Message + "\r\n"
                                     + "SQL命令:\r\n"
                                     + strCommand;
@@ -1750,7 +1750,7 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "刷新表定义出错.\r\n"
+                                    strError = "刷新表定义出错。\r\n"
                                         + ex.Message + "\r\n"
                                         + "SQL命令:\r\n"
                                         + strLine;
@@ -2896,7 +2896,7 @@ namespace DigitalPlatform.rms
 
                     if (!(sqlEx.Errors is SqlErrorCollection))
                     {
-                        strError = "删除sql库出错.\r\n"
+                        strError = "删除sql库出错。\r\n"
                            + sqlEx.Message + "\r\n"
                            + "SQL命令:\r\n"
                            + strCommand;
@@ -2905,7 +2905,7 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError = "删除sql库出错.\r\n"
+                    strError = "删除 SQL 库出错。\r\n"
                         + ex.Message + "\r\n"
                         + "SQL命令:\r\n"
                         + strCommand;
@@ -5595,7 +5595,7 @@ namespace DigitalPlatform.rms
                         }
                         catch (Exception ex)
                         {
-                            strError = "增加 newdptimestamp 列时出错.\r\n"
+                            strError = "增加 newdptimestamp 列时出错。\r\n"
                                 + ex.Message + "\r\n"
                                 + "SQL命令:\r\n"
                                 + strCommand;

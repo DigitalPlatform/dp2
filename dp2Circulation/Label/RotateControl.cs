@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using DigitalPlatform.Drawing;
 
 namespace dp2Circulation
 {
@@ -76,7 +77,10 @@ namespace dp2Circulation
             Image image = (Image)this.pictureBox1.InitialImage.Clone();
 
             image.RotateFlip(type);
-            this.pictureBox1.Image = image;
+            // this.pictureBox1.Image = image; // 这里可能有内存泄露?
+
+            ImageUtil.SetImage(this.pictureBox1, image);  // 2016/12/28
+
         }
 
     }

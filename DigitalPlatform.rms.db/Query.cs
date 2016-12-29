@@ -1539,11 +1539,5 @@ namespace DigitalPlatform.rms
 
     } //  end of class ReversePolishStack
 
-    public class InterruptException : Exception
-    {
-        public InterruptException(string s)
-            : base(s)
-        {
-        }
-    }
+
 }

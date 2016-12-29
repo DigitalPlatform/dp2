@@ -299,7 +299,7 @@ namespace DigitalPlatform.Drawing
 
             pictureBox1.Width = image.Width;
             pictureBox1.Height = image.Height;
-            pictureBox1.Image = image;
+            ImageUtil.SetImage(pictureBox1, image); // 2016/12/28
         }
 
         public void SetImageBorder(bool bThick)
@@ -728,7 +728,7 @@ namespace DigitalPlatform.Drawing
             }
             set
             {
-                this.pictureBox1.Image = value;
+                ImageUtil.SetImage(this.pictureBox1, value);    // 2016/12/28
             }
         }
 

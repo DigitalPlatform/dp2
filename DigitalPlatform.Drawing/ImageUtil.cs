@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,23 @@ namespace DigitalPlatform.Drawing
 {
     public static class ImageUtil
     {
+        // 2016/12/28
+        // 设置 PictureBox 的 Image 成员，自动释放被替代的 Image，防止内存泄露
+        public static void SetImage(PictureBox box, Image image)
+        {
+            Image old = box.Image;
+            if (image != null && old == image)
+            {
+                box.Image = image;  // 可迫使刷新
+                return;
+            }
+
+            Debug.Assert(image == null || old != image, "");
+            box.Image = image;
+            if (old != null)
+                old.Dispose();
+        }
+
         // return:
         //      null    出错。错误信息在 strError 中
         //      其它      返回的图像列表

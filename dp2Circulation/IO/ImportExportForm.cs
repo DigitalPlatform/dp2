@@ -20,6 +20,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using Newtonsoft.Json;
 using DigitalPlatform.Range;
+using DigitalPlatform.Marc;
 
 namespace dp2Circulation
 {
@@ -334,7 +335,7 @@ this.MainForm.ActivateFixPage("history")
             TimeSpan old_timeout = info.Channel.Timeout;
             info.Channel.Timeout = new TimeSpan(0, 2, 0);
 
-            int nBiblioRecordCount = 0;
+            // int nBiblioRecordCount = 0;
 
             PrepareRange(info);
 
@@ -416,6 +417,11 @@ this.MainForm.ActivateFixPage("history")
                 }
                 this.ShowMessage(strOperName + "完成", "green", true);
                 return;
+            }
+            catch (InterruptException ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
             }
             catch (Exception ex)
             {
@@ -666,14 +672,95 @@ this.MainForm.ActivateFixPage("history")
 
                     if (info.Channel.ErrorCode == ErrorCode.BiblioDup)
                     {
+                        string strDialogAction = "";
+                        string strTargetRecPath = "";
+                        byte[] baTargetTimestamp = null;
+
                         this.Invoke((Action)(() =>
 {
     BiblioDupDialog dup_dialog = new BiblioDupDialog();
+    MainForm.SetControlFont(dup_dialog, this.Font, false);
+    dup_dialog.TempDir = Program.MainForm.UserTempDir;
+    dup_dialog.MarcHtmlHead = Program.MainForm.GetMarcHtmlHeadString();
     dup_dialog.OriginXml = info.BiblioXml;
     dup_dialog.DupBiblioRecPathList = strOutputPath;
+    Program.MainForm.AppInfo.LinkFormState(dup_dialog, "biblioDupDialog_state");
+    dup_dialog.UiState = Program.MainForm.AppInfo.GetString("ImportExportForm", "BiblioDupDialog_uiState", "");
     dup_dialog.ShowDialog(this);
+    Program.MainForm.AppInfo.SetString("ImportExportForm", "BiblioDupDialog_uiState", dup_dialog.UiState);
+    strDialogAction = dup_dialog.Action;
+    strTargetRecPath = dup_dialog.SelectedRecPath;
+    baTargetTimestamp = dup_dialog.SelectedTimestamp;
 }));
-                        return false;
+                        if (string.IsNullOrEmpty(strDialogAction) == true
+                            || strDialogAction == "stop")
+                        {
+                            throw new InterruptException("中断处理过程");
+                        }
+                        if (strDialogAction == "createNew")
+                        {
+                            // TODO: 最好出现一个 MARC 编辑器让操作者修改 MARC 记录
+                            // 为 200$a 增加一个随机字符串部分，以保证再次提交保存不会遇到重复情况
+                            string strBiblioXml = info.BiblioXml;
+                            int nRet = ModifyTitle(ref strBiblioXml,
+            out strError);
+                            if (nRet == -1)
+                                throw new Exception(strError);
+                            info.BiblioXml = strBiblioXml;
+                            goto REDO;
+                        }
+
+                        if (strDialogAction == "skip")
+                            return false;
+                        if (strDialogAction == "mergeTo")
+                        {
+                            // 合并源文件中的册到目标位置
+                            Debug.Assert(string.IsNullOrEmpty(strTargetRecPath) == false, "");
+                            strOutputPath = strTargetRecPath;
+                            goto CONTINUE;
+                        }
+                        if (strDialogAction == "mergeToUseSourceBiblio")
+                        {
+                            // 合并源文件的册到目标位置，同时用源书目记录覆盖目标位置的书目记录
+                            Debug.Assert(string.IsNullOrEmpty(strTargetRecPath) == false, "");
+
+                            // 按照确定位置覆盖书目记录
+                            // return:
+                            //      -1  出错
+                            //      0   跳过本条处理
+                            //      1   成功。后面继续处理
+                            int nRet = OverwriteBiblio(info,
+                                strAction,
+                                strTargetRecPath,
+                                strStyle,
+                                baTargetTimestamp,
+                                out strError);
+#if NO
+                            lRet = info.Channel.SetBiblioInfo(
+info.stop,
+info.Simulate ? "simulate_" + strAction : strAction,
+strTargetRecPath,
+"xml",
+info.BiblioXml,
+baTargetTimestamp,
+"",
+strStyle,
+out strOutputPath,
+out baNewTimestamp,
+out strError);
+                            if (lRet == -1)
+                            {
+                                // TODO: 如果这里报错了也应该有机会重做
+                                throw new Exception(strError);
+                            }
+#endif
+                            if (nRet == -1)
+                                throw new Exception(strError);
+                            if (nRet == 0)
+                                return false;
+
+                            goto CONTINUE;
+                        }
                     }
 
                     strError = "保存书目记录 '" + strPath + "' 时出错: " + strError;
@@ -694,18 +781,17 @@ new string[] { "重试", "跳过", "中断" });
                         info.LastBiblioDialogResult = result;
                         if (result == DialogResult.Yes)
                         {
-#if NO
                             // 为重试保存做准备。TODO: 理论上要显示对比，避免不经意覆盖了别人的修改
                             if (baNewTimestamp != null)
                                 strTimestamp = ByteArray.GetHexTimeStampString(baNewTimestamp);
-#endif
+
                             info.HideBiblioMessageBox = false;
                             nRedoCount++;
                             goto REDO;
                         }
                         if (result == DialogResult.No)
                             return false;
-                        throw new Exception(strError);
+                        throw new InterruptException(strError);
                     }
                     else
                     {
@@ -721,6 +807,7 @@ new string[] { "重试", "跳过", "中断" });
                     }
                 }
 
+            CONTINUE:
                 info.BiblioRecPath = strOutputPath;
 
                 string strMessage = (info.BiblioRecCount + 1).ToString() + ":" + strOldPath + "-->" + info.BiblioRecPath;
@@ -732,6 +819,153 @@ new string[] { "重试", "跳过", "中断" });
             }
 
             return true;
+        }
+
+        // 修改书目记录的题名，增加一个随机字符串部分
+        static int ModifyTitle(ref string strBiblioXml,
+            out string strError)
+        {
+            strError = "";
+            if (string.IsNullOrEmpty(strBiblioXml) == true)
+                return 0;
+
+            string strMarcSyntax = "";
+            string strMarc = "";
+            int nRet = 0;
+
+            if (string.IsNullOrEmpty(strBiblioXml) == false)
+            {
+                // 将MARCXML格式的xml记录转换为marc机内格式字符串
+                // parameters:
+                //		bWarning	== true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+                //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+                //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+                nRet = MarcUtil.Xml2Marc(strBiblioXml,
+                    true,
+                    "", // this.CurMarcSyntax,
+                    out strMarcSyntax,
+                    out strMarc,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            if (string.IsNullOrEmpty(strMarcSyntax) == true)
+                return 0;   // 不是 MARC 格式
+
+            bool bChanged = false;
+
+            MarcRecord record = new MarcRecord(strMarc);
+            if (strMarcSyntax == "unimarc")
+            {
+                string strValue = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
+                strValue += "_" + Guid.NewGuid().ToString();
+                record.setFirstSubfield("200", "a", strValue);
+                bChanged = true;
+            }
+            else if (strMarcSyntax == "usmarc")
+            {
+                // TODO: 其实需要把子字段内容最末一个符号字符后移
+                string strValue = record.select("field[@name='245']/subfield[@name='a']").FirstContent;
+                strValue += "_" + Guid.NewGuid().ToString();
+                record.setFirstSubfield("245", "a", strValue);
+                bChanged = true;
+            }
+
+            if (bChanged == true)
+            {
+                nRet = MarcUtil.Marc2XmlEx(record.Text,
+                    strMarcSyntax,
+                    ref strBiblioXml,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                return 1;
+            }
+
+            return 0;
+        }
+
+        // 按照确定位置覆盖书目记录
+        // 函数内处理了报错和重试的情况
+        // return:
+        //      -1  出错
+        //      0   跳过本条处理
+        //      1   成功。后面继续处理
+        int OverwriteBiblio(ProcessInfo info,
+            string strAction,
+            string strTargetRecPath,
+            string strStyle,
+            byte[] baTargetTimestamp,
+            out string strError)
+        {
+            strError = "";
+
+            string strOutputPath = "";
+            byte[] baNewTimestamp = null;
+            int nRedoCount = 0;
+        REDO:
+            long lRet = info.Channel.SetBiblioInfo(
+info.stop,
+info.Simulate ? "simulate_" + strAction : strAction,
+strTargetRecPath,
+"xml",
+info.BiblioXml,
+baTargetTimestamp,
+"",
+strStyle,
+out strOutputPath,
+out baNewTimestamp,
+out strError);
+            if (lRet == -1)
+            {
+                strError = "保存书目记录 '" + strTargetRecPath + "' 时出错: " + strError;
+
+                if (info.HideBiblioMessageBox == false || nRedoCount > 10)
+                {
+                    DialogResult result = System.Windows.Forms.DialogResult.Yes;
+                    string strText = strError;
+                    this.Invoke((Action)(() =>
+{
+    result = MessageDialog.Show(this,
+strText + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
+MessageBoxButtons.YesNoCancel,
+info.LastBiblioDialogResult == DialogResult.Yes ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2,
+"此后不再出现本对话框",
+ref info.HideBiblioMessageBox,
+new string[] { "重试", "跳过", "中断" });
+}));
+                    info.LastBiblioDialogResult = result;
+                    if (result == DialogResult.Yes)
+                    {
+                        // 为重试保存做准备。TODO: 理论上要显示对比，避免不经意覆盖了别人的修改
+                        if (baNewTimestamp != null)
+                            baTargetTimestamp = baNewTimestamp;
+
+                        info.HideBiblioMessageBox = false;
+                        nRedoCount++;
+                        goto REDO;
+                    }
+                    if (result == DialogResult.No)
+                        return 0;
+                    return -1;
+                }
+                else
+                {
+                    if (info.LastBiblioDialogResult == DialogResult.Yes)
+                    {
+                        nRedoCount++;
+                        goto REDO;
+                    }
+                    // 跳过
+                    if (info.LastBiblioDialogResult == DialogResult.No)
+                        return 0;
+                    return -1;
+                }
+            }
+
+            return 1;
         }
 
         static int ITEM_BATCH_SIZE = 10;
