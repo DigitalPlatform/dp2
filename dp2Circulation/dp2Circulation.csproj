@@ -396,6 +396,7 @@
     <Compile Include="IO\ImportExportForm.Designer.cs">
       <DependentUpon>ImportExportForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="IO\MergeRegistry.cs" />
     <Compile Include="IO\StringMapDialog.cs">
       <SubType>Form</SubType>
     </Compile>

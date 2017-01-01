@@ -12,13 +12,14 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Collections;
 
+using Newtonsoft.Json;
+
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
-using Newtonsoft.Json;
 using DigitalPlatform.Range;
 using DigitalPlatform.Marc;
 
@@ -273,6 +274,11 @@ strStringTable);
                 info.RecordRange = (string)this.Invoke(new Func<string>(() =>
                 {
                     return this.textBox_source_range.Text;
+                }));
+
+                info.ItemBatchNo = (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_convert_itemBatchNo.Text;
                 }));
 #if NO
             info.Simulate = (bool)this.Invoke(new Func<bool>(() =>
@@ -1149,6 +1155,11 @@ new string[] { "重试", "跳过", "中断" });
                     if (info.AddBiblioToItem)
                         AddBiblioToItem(item_dom, info.BiblioXml);
 
+                    if (string.IsNullOrEmpty(info.ItemBatchNo) == false)
+                        DomUtil.SetElementText(item_dom.DocumentElement,
+                            "batchNo",
+                            info.ItemBatchNo);
+
                 }
                 else if (strRootElementName == "order")
                 {
@@ -1384,6 +1395,8 @@ new string[] { "继续", "中断" });
             public bool SuppressOperLog = false;
             public bool DontSearchDup = false;
 
+            public string ItemBatchNo = ""; // 设定给册记录的批次号。如果为空，表示不修改册记录中的批次号，否则会覆盖记录中的批次号
+
             public string RecordRange = ""; // 导入源文件中的书目记录范围
 
             public int ItemErrorCount = 0;  // 总共发生过多少次下属记录导入错误
@@ -1507,6 +1520,8 @@ new string[] { "继续", "中断" });
                 controls.Add(this.checkBox_target_dontChangeOperations);
                 controls.Add(this.textBox_source_range);
 
+                controls.Add(this.textBox_convert_itemBatchNo);
+
                 return GuiState.GetUiState(controls);
             }
             set
@@ -1523,6 +1538,8 @@ new string[] { "继续", "中断" });
                 controls.Add(this.checkBox_target_suppressOperLog);
                 controls.Add(this.checkBox_target_dontChangeOperations);
                 controls.Add(this.textBox_source_range);
+
+                controls.Add(this.textBox_convert_itemBatchNo);
 
                 GuiState.SetUiState(controls, value);
             }

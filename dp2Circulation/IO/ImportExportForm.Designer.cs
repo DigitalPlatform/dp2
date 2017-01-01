@@ -30,6 +30,8 @@
         {
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_source = new System.Windows.Forms.TabPage();
+            this.textBox_source_range = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.button_getObjectDirectoryName = new System.Windows.Forms.Button();
             this.textBox_objectDirectoryName = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
@@ -58,8 +60,8 @@
             this.tabPage_run = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.button_next = new System.Windows.Forms.Button();
-            this.label4 = new System.Windows.Forms.Label();
-            this.textBox_source_range = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.textBox_convert_itemBatchNo = new System.Windows.Forms.TextBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_source.SuspendLayout();
             this.tabPage_convert.SuspendLayout();
@@ -106,6 +108,24 @@
             this.tabPage_source.TabIndex = 1;
             this.tabPage_source.Text = "源文件";
             this.tabPage_source.UseVisualStyleBackColor = true;
+            // 
+            // textBox_source_range
+            // 
+            this.textBox_source_range.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_source_range.Location = new System.Drawing.Point(125, 179);
+            this.textBox_source_range.Name = "textBox_source_range";
+            this.textBox_source_range.Size = new System.Drawing.Size(258, 21);
+            this.textBox_source_range.TabIndex = 15;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 182);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(101, 12);
+            this.label4.TabIndex = 14;
+            this.label4.Text = "导入记录范围(&R):";
             // 
             // button_getObjectDirectoryName
             // 
@@ -229,6 +249,8 @@
             // tabPage_convert
             // 
             this.tabPage_convert.AutoScroll = true;
+            this.tabPage_convert.Controls.Add(this.textBox_convert_itemBatchNo);
+            this.tabPage_convert.Controls.Add(this.label5);
             this.tabPage_convert.Controls.Add(this.checkBox_convert_addBiblioToItem);
             this.tabPage_convert.Controls.Add(this.panel_map);
             this.tabPage_convert.Controls.Add(this.button_convert_initialMapString);
@@ -255,14 +277,14 @@
             // 
             this.panel_map.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel_map.Location = new System.Drawing.Point(3, 127);
+            this.panel_map.Location = new System.Drawing.Point(3, 138);
             this.panel_map.Name = "panel_map";
-            this.panel_map.Size = new System.Drawing.Size(361, 133);
+            this.panel_map.Size = new System.Drawing.Size(344, 122);
             this.panel_map.TabIndex = 12;
             // 
             // button_convert_initialMapString
             // 
-            this.button_convert_initialMapString.Location = new System.Drawing.Point(3, 98);
+            this.button_convert_initialMapString.Location = new System.Drawing.Point(3, 109);
             this.button_convert_initialMapString.Name = "button_convert_initialMapString";
             this.button_convert_initialMapString.Size = new System.Drawing.Size(286, 23);
             this.button_convert_initialMapString.TabIndex = 10;
@@ -411,23 +433,21 @@
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
             // 
-            // label4
+            // label5
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 182);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(101, 12);
-            this.label4.TabIndex = 14;
-            this.label4.Text = "导入记录范围(&R):";
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(3, 85);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(83, 12);
+            this.label5.TabIndex = 14;
+            this.label5.Text = "册记录批次号:";
             // 
-            // textBox_source_range
+            // textBox_convert_itemBatchNo
             // 
-            this.textBox_source_range.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_source_range.Location = new System.Drawing.Point(125, 179);
-            this.textBox_source_range.Name = "textBox_source_range";
-            this.textBox_source_range.Size = new System.Drawing.Size(258, 21);
-            this.textBox_source_range.TabIndex = 15;
+            this.textBox_convert_itemBatchNo.Location = new System.Drawing.Point(103, 82);
+            this.textBox_convert_itemBatchNo.Name = "textBox_convert_itemBatchNo";
+            this.textBox_convert_itemBatchNo.Size = new System.Drawing.Size(186, 21);
+            this.textBox_convert_itemBatchNo.TabIndex = 15;
             // 
             // ImportExportForm
             // 
@@ -489,5 +509,7 @@
         private System.Windows.Forms.CheckBox checkBox_target_suppressOperLog;
         private System.Windows.Forms.TextBox textBox_source_range;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox textBox_convert_itemBatchNo;
+        private System.Windows.Forms.Label label5;
     }
 }

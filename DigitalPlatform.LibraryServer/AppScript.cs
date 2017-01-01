@@ -1561,12 +1561,25 @@ namespace DigitalPlatform.LibraryServer
         out strLibraryCode,
         out strRoom);
 
+            // 检查来自 location 元素中的馆代码部分
+            {
+
+            }
+
+            XmlElement item = this.App.GetLocationItemElement(
+    strLibraryCode,
+    strRoom);
+
             // 检查馆藏地点字符串
             if (strAction == "new"
 || strAction == "change"
 || strAction == "move")
             {
-
+                if (item == null)
+                {
+                    strError = "馆代码 '"+strLibraryCode+"' 没有定义馆藏地点 '"+strRoom+"'(根据 <locationTypes> 定义)";
+                    return 1;
+                }
             }
 
             // 2014/1/10
@@ -1576,9 +1589,11 @@ namespace DigitalPlatform.LibraryServer
 || strAction == "move")       // delete操作不检查
 && String.IsNullOrEmpty(strNewBarcode) == true)
             {
+#if NO
                 XmlElement item = this.App.GetLocationItemElement(
                     strLibraryCode,
                     strRoom);
+#endif
                 if (item != null)
                 {
                     bool bNullable = DomUtil.GetBooleanParam(item, "itemBarcodeNullable", true);

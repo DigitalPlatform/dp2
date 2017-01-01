@@ -2215,7 +2215,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 加工style字符串，便于写入日志
-                    if (StringUtil.IsInList("force", strStyle) == true)
+                    if (StringUtil.IsInList("force", strStyle) == false)
                         StringUtil.SetInList(ref strStyle, "force", true);
 
                 }
@@ -2543,6 +2543,39 @@ namespace DigitalPlatform.LibraryServer
                             // && bSimulate == false
                             )
                         {
+                            {
+                                string strLibraryCode = "";
+                                // 2012/12/31 先检查一次册记录中的馆藏地字段
+                                // return:
+                                //      -1  检查过程出错
+                                //      0   符合要求
+                                //      1   不符合要求
+                                nRet = CheckItemLibraryCode(domNewRec,
+                                    sessioninfo,
+                                    // sessioninfo.LibraryCodeList,
+                                    out strLibraryCode,
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    EntityInfo error = new EntityInfo(info);
+                                    error.ErrorInfo = "检查分馆代码时出错: " + strError;
+                                    error.ErrorCode = ErrorCodeValue.CommonError;
+                                    ErrorInfos.Add(error);
+                                    // domOperLog = null;  // 表示不必写入日志
+                                    continue;
+                                }
+                                // 对全局用户也要检查，唯独 restore 时候不检查
+                                if (bForce == false && nRet != 0)
+                                {
+                                    EntityInfo error = new EntityInfo(info);
+                                    error.ErrorInfo = "即将创建的册记录内容中的馆藏地点不符合要求: " + strError;
+                                    error.ErrorCode = ErrorCodeValue.CommonError;
+                                    ErrorInfos.Add(error);
+                                    // domOperLog = null;  // 表示不必写入日志
+                                    continue;
+                                }
+                            }
+
                             nRet = this.DoVerifyItemFunction(
                                 sessioninfo,
                                 strAction,
@@ -2690,11 +2723,6 @@ namespace DigitalPlatform.LibraryServer
                             // 报错
                             if (bDup == true)
                             {
-                                /*
-                                string[] pathlist = new string[aPath.Count];
-                                aPath.CopyTo(pathlist);
-                                 * */
-
                                 EntityInfo error = new EntityInfo(info);
                                 error.ErrorInfo = "条码号 '" + strNewBarcode + "' 已经被下列册记录使用了: " + StringUtil.MakePathList(aPath)/*String.Join(",", pathlist)*/;
                                 error.ErrorCode = ErrorCodeValue.CommonError;
@@ -2791,7 +2819,6 @@ namespace DigitalPlatform.LibraryServer
                             domOperLog = null;  // 表示不必写入日志
                         }
 
-
                         {
                             string strLibraryCode = "";
 
@@ -2817,6 +2844,7 @@ namespace DigitalPlatform.LibraryServer
                                 domOperLog = null;  // 表示不必写入日志
                                 continue;
                             }
+#if NO
                             if (sessioninfo.GlobalUser == false
                                 || sessioninfo.UserType == "reader")
                             {
@@ -2833,6 +2861,16 @@ namespace DigitalPlatform.LibraryServer
                                     domOperLog = null;  // 表示不必写入日志
                                     continue;
                                 }
+                            }
+#endif
+                            if (bForce == false && nRet != 0)
+                            {
+                                EntityInfo error = new EntityInfo(info);
+                                error.ErrorInfo = "即将创建的册记录内容中的馆藏地点不符合要求: " + strError;
+                                error.ErrorCode = ErrorCodeValue.CommonError;
+                                ErrorInfos.Add(error);
+                                domOperLog = null;  // 表示不必写入日志
+                                continue;
                             }
 
                             // 2014/7/3
@@ -2930,7 +2968,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             // 执行SetEntities API中的"change"操作
                             nRet = DoEntityOperChange(
-                                bForce,
+                                // bForce,
                                 strStyle,
                                 sessioninfo,
                                 channel,
@@ -2980,7 +3018,7 @@ namespace DigitalPlatform.LibraryServer
                             // 删除册记录的操作
                             nRet = DoEntityOperDelete(
                                 sessioninfo,
-                                bForce,
+                                // bForce,
                                 strStyle,
                                 channel,
                                 info,
@@ -3235,6 +3273,14 @@ namespace DigitalPlatform.LibraryServer
             ParseCalendarName(strLocation,
         out strLibraryCode,
         out strPureName);
+
+            // 2016/12/31
+            // 检查 strLibraryCode 是否在合法的馆藏地列表范围内
+            if (IsValidLibraryCode(strLibraryCode) == false)
+            {
+                strError = "馆藏地 '" + strLocation + "' 中的馆代码 '" + strLibraryCode + "' 不是一个已经定义的馆代码";
+                return 1;
+            }
 
             // 先试探一下，馆藏地点字符串是否和 strLibraryCodeList 完全一致。
             // 这种检测主要是为了处理 strLibraryCodeList 传来 "西城分馆/集贤斋" 这样的个人书斋全路径的情况
@@ -3529,7 +3575,7 @@ namespace DigitalPlatform.LibraryServer
         // 删除册记录的操作
         int DoEntityOperDelete(
             SessionInfo sessioninfo,
-            bool bForce,
+            // bool bForce,
             string strStyle,
             RmsChannel channel,
             EntityInfo info,
@@ -3544,6 +3590,8 @@ namespace DigitalPlatform.LibraryServer
             int nRet = 0;
             long lRet = 0;
             string strError = "";
+
+            bool bForce = StringUtil.IsInList("force", strStyle);
 
             // 2008/6/24 
             if (String.IsNullOrEmpty(info.NewRecPath) == false)
@@ -3886,7 +3934,7 @@ namespace DigitalPlatform.LibraryServer
         //      -1  出错
         //      0   成功
         int DoEntityOperChange(
-            bool bForce,
+            // bool bForce,
             string strStyle,
             SessionInfo sessioninfo,
             RmsChannel channel,
@@ -3902,6 +3950,8 @@ namespace DigitalPlatform.LibraryServer
             long lRet = 0;
 
             string strError = "";
+
+            bool bForce = StringUtil.IsInList("force", strStyle);
 
             // 检查一下路径
             if (String.IsNullOrEmpty(info.NewRecPath) == true)
@@ -4347,6 +4397,7 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     goto ERROR1;
 
+#if NO
                 // 检查新记录是否属于管辖范围
                 if (sessioninfo.GlobalUser == false
                     || sessioninfo.UserType == "reader")
@@ -4356,6 +4407,12 @@ namespace DigitalPlatform.LibraryServer
                         strError = "册记录新内容中的馆藏地点不符合要求: " + strError;
                         goto ERROR1;
                     }
+                }
+#endif
+                if (bForce == false && nRet != 0)
+                {
+                    strError = "册记录新内容中的馆藏地点不符合要求: " + strError;
+                    goto ERROR1;
                 }
             }
 
@@ -4812,8 +4869,8 @@ namespace DigitalPlatform.LibraryServer
             nRet = CheckItemLibraryCode(domSourceExist,
                 sessioninfo,
                 // sessioninfo.LibraryCodeList,
-                        out strSourceLibraryCode,
-                        out strError);
+                out strSourceLibraryCode,
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
 
@@ -4847,7 +4904,6 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     goto ERROR1;
             }
-
 
             // 合并新旧记录
             string strNewXml = "";
@@ -4938,6 +4994,25 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1)
                 goto ERROR1;
 
+#if NO
+            // 检查新记录是否属于管辖范围
+            if (sessioninfo.GlobalUser == false
+                || sessioninfo.UserType == "reader")
+            {
+                if (nRet != 0)
+                {
+                    strError = "册记录新内容中的馆藏地点不符合要求: " + strError;
+                    goto ERROR1;
+                }
+            }
+#endif
+            bool bForce = StringUtil.IsInList("force", strStyle);
+            if (bForce == false && nRet != 0)
+            {
+                strError = "册记录新内容中的馆藏地点不符合要求: " + strError;
+                goto ERROR1;
+            }
+
             // 2014/7/3
             if (this.VerifyBookType == true)
             {
@@ -4964,17 +5039,6 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
             }
 
-
-            // 检查新记录是否属于管辖范围
-            if (sessioninfo.GlobalUser == false
-                || sessioninfo.UserType == "reader")
-            {
-                if (nRet != 0)
-                {
-                    strError = "册记录新内容中的馆藏地点不符合要求: " + strError;
-                    goto ERROR1;
-                }
-            }
 
             // Debug.Assert(strOutputPath == info.NewRecPath);
             string strTargetPath = strOutputPath;

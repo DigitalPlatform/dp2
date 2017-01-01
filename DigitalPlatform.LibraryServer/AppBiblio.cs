@@ -2657,7 +2657,7 @@ out strError);
         }
 
 
-        static int CreateUniformKey(
+        public static int CreateUniformKey(
     ref string strBiblioXml,
     out string strError)
         {
@@ -2707,7 +2707,7 @@ out strError);
             return 1;
         }
 
-
+        // TODO: 根据多个 ISBN 创建多个 997 字段。查重算法也要改造，变成根据多个 key 分别检索
         // 创建查重键字段
         // 要创建的字段名和 MARC 格式无关，都是 997 字段。但要提取的书名等信息在什么字段，和具体的 MARC 格式有关
         public static int CreateUniformKey(ref string strMARC,
@@ -2741,14 +2741,17 @@ out strError);
                 {
                     List<string> titles = record.select("field[@name='200']/subfield[@name='a']").Contents;
 
+                    CanonializeWideChars(titles);
                     Sort(titles);
 
                     List<string> his = record.select("field[@name='200']/subfield[@name='h' or @name='i']").Contents;
 
                     if (his.Count > 0)
                     {
+                        // $a 里面的数字和标点符号要归一化
                         // h 和 i 里面的数字等要归一化
                         // h 和 i 要根据内容排序
+                        CanonializeWideChars(his);
                         Sort(his);
                         titles.AddRange(his);
                     }
@@ -2760,6 +2763,7 @@ out strError);
                 {
                     List<string> authors = record.select("field[@name='701' or @name='711']/subfield[@name='a']").Contents;
 
+                    CanonializeWideChars(authors);
                     // 要按照内容排序
                     Sort(authors);
                     segments.Add(StringUtil.MakePathList(authors));
@@ -2769,10 +2773,13 @@ out strError);
                 {
                     // 210 $c $d
                     List<string> publishers = record.select("field[@name='210']/subfield[@name='c']").Contents;
+                    CanonializeWideChars(publishers);
                     Sort(publishers);
 
                     List<string> dates = record.select("field[@name='210']/subfield[@name='d']").Contents;
-                    // TODO: 需要归一化为 年、月 形态
+                    // 日期需要归一化为 4 chars 形态
+                    CanonializeWideChars(dates);
+                    CanonializeDate(dates);
                     Sort(dates);
                     segments.Add(StringUtil.MakePathList(publishers) + "," + StringUtil.MakePathList(dates));
 
@@ -2782,12 +2789,16 @@ out strError);
                 // size
                 {
                     List<string> pages = record.select("field[@name='215']/subfield[@name='a']").Contents;
-                    // TODO: 需要归一化为纯数字
+                    // 归一化为纯数字
+                    CanonializeWideChars(pages);
+                    CanonializeNumber(pages);
                     Sort(pages);
 
                     List<string> sizes = record.select("field[@name='215']/subfield[@name='d']").Contents;
 
-                    // TODO: 需要归一化为纯粹厘米数字
+                    // 归一化为纯粹厘米数字
+                    CanonializeWideChars(sizes);
+                    CanonializeNumber(sizes);
                     Sort(sizes);
                     segments.Add(StringUtil.MakePathList(pages) + "," + StringUtil.MakePathList(sizes));
                 }
@@ -2795,12 +2806,215 @@ out strError);
                 strKey = StringUtil.MakePathList(segments, "|");
                 strCode = StringUtil.GetMd5(strKey);
 
-                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v0.01");
+                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v0.02");
+
+                strMARC = record.Text;
+            }
+
+            if (strMarcSyntax == "usmarc")
+            {
+                // isbn
+                {
+                    List<string> isbns = record.select("field[@name='020']/subfield[@name='a']").Contents;
+
+                    // 统一变换为 13 位形态
+                    for (int i = 0; i < isbns.Count; i++)
+                    {
+                        // 去掉空格以后的部分
+                        string text = isbns[i];
+                        int nRet = text.IndexOf(" ");
+                        if (nRet != -1)
+                            text = text.Substring(0, nRet).Trim();
+                        isbns[i] = IsbnSplitter.GetISBnBarcode(text);
+                    }
+                    // TODO: 去掉重复?
+                    Sort(isbns);
+                    segments.Add(StringUtil.MakePathList(isbns));
+                }
+
+                // title
+                {
+                    List<string> titles = record.select("field[@name='245']/subfield[@name='a']").Contents;
+
+                    TrimEndChar(titles);
+                    Sort(titles);
+
+                    List<string> his = record.select("field[@name='245']/subfield[@name='n']").Contents;
+
+                    if (his.Count > 0)
+                    {
+                        // $a 里面的数字和标点符号要归一化
+                        // h 和 i 里面的数字等要归一化
+                        // h 和 i 要根据内容排序
+                        TrimEndChar(his);
+                        Sort(his);
+                        titles.AddRange(his);
+                    }
+
+                    segments.Add(StringUtil.MakePathList(titles));
+                }
+
+                // author
+                {
+                    List<string> authors = record.select("field[@name='100' or @name='700']/subfield[@name='a']").Contents;
+
+                    TrimEndChar(authors);
+                    // 要按照内容排序
+                    Sort(authors);
+                    segments.Add(StringUtil.MakePathList(authors));
+                }
+
+                // publisher
+                {
+                    // 260 $b
+                    List<string> publishers = record.select("field[@name='260']/subfield[@name='b']").Contents;
+                    TrimEndChar(publishers);
+                    Sort(publishers);
+
+                    List<string> dates = record.select("field[@name='260']/subfield[@name='c']").Contents;
+                    // 日期需要归一化为 4 chars 形态
+                    TrimEndChar(dates);
+                    CanonializeDate(dates);
+                    Sort(dates);
+                    segments.Add(StringUtil.MakePathList(publishers) + "," + StringUtil.MakePathList(dates));
+                }
+
+                // pages
+                // size
+                {
+                    List<string> pages = record.select("field[@name='300']/subfield[@name='a']").Contents;
+                    // 归一化为纯数字
+                    TrimEndChar(pages);
+                    CanonializeNumber(pages);
+                    Sort(pages);
+
+                    List<string> sizes = record.select("field[@name='300']/subfield[@name='c']").Contents;
+
+                    // 归一化为纯粹厘米数字
+                    TrimEndChar(sizes);
+                    CanonializeNumber(sizes);
+                    Sort(sizes);
+                    segments.Add(StringUtil.MakePathList(pages) + "," + StringUtil.MakePathList(sizes));
+                }
+
+                strKey = StringUtil.MakePathList(segments, "|");
+                strCode = StringUtil.GetMd5(strKey);
+
+                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v0.02");
 
                 strMARC = record.Text;
             }
 
             return 0;
+        }
+
+        public static string TrimEndChar(string strText, string strDelimeters = "./,;:")
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return "";
+            strText = strText.Trim();
+            if (string.IsNullOrEmpty(strText) == true)
+                return "";
+
+            char tail = strText[strText.Length - 1];
+            if (strDelimeters.IndexOf(tail) != -1)
+                return strText.Substring(0, strText.Length - 1);
+            return strText;
+        }
+
+        static void CanonializeDate(List<string> dates)
+        {
+            // 2016/1/1
+            // 因为有 [2008] 这样的情况，所以要先处理为纯数字
+            CanonializeNumber(dates);
+
+            for (int i = 0; i < dates.Count; i++)
+            {
+                string date = dates[i];
+                if (date.Length > 4)
+                {
+                    date = date.Substring(0, 4);
+                    dates[i] = date;
+                }
+            }
+        }
+
+        static void CanonializeNumber(List<string> values)
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                string value = values[i];
+                string new_value = GetNumber(value);
+                if (value != new_value)
+                {
+                    values[i] = new_value;
+                }
+            }
+        }
+
+        static void TrimEndChar(List<string> values)
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                string value = values[i];
+                string new_value = TrimEndChar(value);
+                if (value != new_value)
+                {
+                    values[i] = new_value;
+                }
+            }
+        }
+
+        static void CanonializeWideChars(List<string> values)
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                string value = values[i];
+                string new_value = ToDBC(value);
+                if (value != new_value)
+                {
+                    values[i] = new_value;
+                }
+            }
+        }
+
+        // /
+        // / 转半角的函数(DBC case)
+        // /
+        // /任意字符串
+        // /半角字符串
+        // /
+        // /全角空格为12288，半角空格为32
+        // /其他字符半角(33-126)与全角(65281-65374)的对应关系是：均相差65248
+        // /
+        public static String ToDBC(String input)
+        {
+            char[] c = input.ToCharArray();
+            for (int i = 0; i < c.Length; i++)
+            {
+                if (c[i] == 12288)
+                {
+                    c[i] = (char)32;
+                    continue;
+                }
+                if (c[i] > 65280 && c[i] < 65375)
+                    c[i] = (char)(c[i] - 65248);
+            }
+            return new String(c);
+        }
+
+        // 获得一个字符串里面的纯数字部分
+        static string GetNumber(string strText)
+        {
+            string strHead = "";
+            string strNumber = "";
+            string strEnd = "";
+            // 把一个被字符引导的字符串分成三部分
+            StringUtil.SplitLedNumber(strText,
+            out strHead,
+            out strNumber,
+            out strEnd);
+            return strNumber;
         }
 
         static void Sort(List<string> titles)

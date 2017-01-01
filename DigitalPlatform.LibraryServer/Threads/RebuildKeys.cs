@@ -607,7 +607,10 @@ out strError);
                     }
                 }
                 else
+                {
+                    strError = "处理记录 '" + strRecPath + "'(" + strStyle + ") 时出错: " + strError;
                     return -1;
+                }
             } // end of nRet == -1
 
             bFirst = false;
@@ -732,7 +735,10 @@ out strError);
                     }
                 }
                 else
+                {
+                    strError = "获取记录 '"+strRecPath+"'("+strStyle+") 时出错: " + strError;
                     return -1;
+                }
             } // end of nRet == -1
 
             bFirst = false;
@@ -740,6 +746,39 @@ out strError);
             bFoundRecord = true;
             if (bFoundRecord == true)
                 m_nRecordCount++;
+
+            // 重建查重键
+            int nRet = LibraryApplication.CreateUniformKey(
+ref strResult,
+out strError);
+            if (nRet == -1)
+            {
+                strError = "为记录 '" + strNextRecPath + "' 创建查重键时出错: " + strError;
+                return -1;
+            }
+
+            byte[] output_timestamp = null;
+            string strOutputPath = "";
+            lRet = channel.DoSaveTextRes(strNextRecPath,
+                strResult,
+                false,
+                "content",
+                timestamp,
+                out output_timestamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
+                    && nRedoCount < 10)
+                {
+                    nRedoCount++;
+                    this.AppendResultText("因时间戳不匹配，重试处理记录 '"+strNextRecPath+"'\r\n");
+                    goto REDO_REBUILD;
+                }
+                strError = "保存记录 '" + strNextRecPath + "' 时出错: " + strError;
+                return -1;
+            }
 
             return 1;
         }

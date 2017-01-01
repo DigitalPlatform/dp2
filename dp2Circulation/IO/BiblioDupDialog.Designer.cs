@@ -37,6 +37,7 @@
             this.toolStripButton_createNew = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_skip = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_stop = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_autoSelect = new System.Windows.Forms.ToolStripButton();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -82,7 +83,8 @@
             this.toolStripButton_mergeTo,
             this.toolStripButton_createNew,
             this.toolStripButton_skip,
-            this.toolStripButton_stop});
+            this.toolStripButton_stop,
+            this.toolStripButton_autoSelect});
             this.toolStrip1.Location = new System.Drawing.Point(0, 294);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(553, 28);
@@ -129,6 +131,17 @@
             this.toolStripButton_stop.Size = new System.Drawing.Size(46, 25);
             this.toolStripButton_stop.Text = "停止";
             this.toolStripButton_stop.Click += new System.EventHandler(this.toolStripButton_stop_Click);
+            // 
+            // toolStripButton_autoSelect
+            // 
+            this.toolStripButton_autoSelect.CheckOnClick = true;
+            this.toolStripButton_autoSelect.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_autoSelect.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_autoSelect.Image")));
+            this.toolStripButton_autoSelect.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_autoSelect.Name = "toolStripButton_autoSelect";
+            this.toolStripButton_autoSelect.Size = new System.Drawing.Size(78, 25);
+            this.toolStripButton_autoSelect.Text = "自动选择";
+            this.toolStripButton_autoSelect.Click += new System.EventHandler(this.toolStripButton_autoSelect_Click);
             // 
             // splitContainer1
             // 
@@ -184,5 +197,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_createNew;
         private System.Windows.Forms.ToolStripButton toolStripButton_skip;
         private System.Windows.Forms.ToolStripButton toolStripButton_stop;
+        private System.Windows.Forms.ToolStripButton toolStripButton_autoSelect;
     }
 }

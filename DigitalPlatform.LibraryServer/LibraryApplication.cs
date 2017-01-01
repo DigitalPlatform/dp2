@@ -137,7 +137,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.94 (2016/12/20) 开始支持 997 的查重键和相关功能
         //      2.95 (2016/12/21) 修改 CopyBiblio() API 移动书目记录后没有返回正确时间戳的 bug
         //      2.96 (2016/12/22) SetBiblioInfo() 增加 strStyle 参数，strStyle 参数可以使用 noeventlog 值
-        public static string Version = "2.96";
+        //      2.97 (2017/1/1) 书目记录查重键生成法为 0.02
+        public static string Version = "2.97";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -13203,6 +13204,41 @@ strLibraryCode);    // 读者所在的馆代码
                 results.Add(strValue);
             }
             return results;
+        }
+
+        // 2016/12/31
+        // 获得当前已经定义的全部图书馆代码。不包括 ""
+        public List<string> GetLibraryCodes()
+        {
+            List<string> librarycodes = new List<string>();
+            if (this.LibraryCfgDom == null || this.LibraryCfgDom.DocumentElement == null)
+                return librarycodes;
+
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("readerdbgroup/database");
+            foreach (XmlElement node in nodes)
+            {
+                string strLibraryCode = node.GetAttribute("libraryCode");
+                if (string.IsNullOrEmpty(strLibraryCode) == true)
+                    continue;
+                librarycodes.Add(strLibraryCode);
+            }
+
+            return librarycodes;
+        }
+
+        // 检查一个馆代码是否为合法的馆代码
+        public bool IsValidLibraryCode(string strLibraryCode)
+        {
+            if (string.IsNullOrEmpty(strLibraryCode))
+                return true;
+
+            // 目前本函数仅支持判断一个馆代码
+            if (strLibraryCode.IndexOf(",") != -1)
+                throw new ArgumentException("strLibraryCode 参数中不允许包含逗号", "strLibraryCode");
+
+            if (GetLibraryCodes().IndexOf(strLibraryCode) != -1)
+                return true;
+            return false;
         }
 
         // 获得library.xml中配置的dtlp帐户信息

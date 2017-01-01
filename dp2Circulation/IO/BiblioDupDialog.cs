@@ -9,12 +9,12 @@ using System.Windows.Forms;
 using System.Web;
 using System.Collections;
 
+using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
-using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -101,6 +101,7 @@ namespace dp2Circulation
                             biblio_item.Path,
                             biblio_item.Cols);
                         ItemTag tag = new ItemTag();
+                        tag.RecPath = biblio_item.Path;
                         tag.Xml = biblio_item.RecordBody.Xml;
                         tag.Timestamp = biblio_item.RecordBody.Timestamp;
                         item.Tag = tag;
@@ -116,12 +117,24 @@ namespace dp2Circulation
             {
                 Program.MainForm.ReturnChannel(channel);
             }
-        }
 
-        class ItemTag
-        {
-            public string Xml { get; set; }
-            public byte [] Timestamp { get; set; }
+            if (this.AutoSelectMode == true)
+            {
+                SortItems();
+                if (this.listView_browse.Items.Count > 0)
+                {
+                    ListViewUtil.SelectLine(this.listView_browse.Items[0], true);
+
+                    // 自动选择保留目标书目记录的方式
+                    this.MergeStyle = MergeStyle.ReserveTargetBiblio;
+
+                    if ((this.MergeStyle & dp2Circulation.MergeStyle.ReserveTargetBiblio) == dp2Circulation.MergeStyle.ReserveTargetBiblio)
+                        this.Action = "mergeTo";    // useTargetBiblio
+                    else
+                        this.Action = "mergeToUseSourceBiblio";
+                    this.Close();
+                }
+            }
         }
 
         private void listView_browse_SelectedIndexChanged(object sender, EventArgs e)
@@ -378,6 +391,14 @@ strHtml2 +
 "BiblioDupDialog",
 "GetMergeStyleDialog_uiState",
 "");
+            {
+                MergeStyle style = merge_dlg.GetMergeStyle();
+                // 去掉和 Subrecord 有关的 bit
+                style = (style | (dp2Circulation.MergeStyle.ReserveSourceBiblio | dp2Circulation.MergeStyle.ReserveTargetBiblio));
+                // 设置为 合并下级记录
+                style |= dp2Circulation.MergeStyle.CombinSubrecord;
+                merge_dlg.SetMergeStyle(style);
+            }
             Program.MainForm.AppInfo.LinkFormState(merge_dlg, "entityform_GetMergeStyleDialog_state");
             merge_dlg.ShowDialog(this);
             Program.MainForm.AppInfo.SetString(
@@ -433,5 +454,53 @@ merge_dlg.UiState);
                 }
             }
         }
+
+        // 进入自动选择状态
+        private void toolStripButton_autoSelect_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        // 是否处在 AutoSelect 模式
+        public bool AutoSelectMode
+        {
+            get
+            {
+                return this.toolStripButton_autoSelect.Checked;
+            }
+            set
+            {
+                this.toolStripButton_autoSelect.Checked = value;
+            }
+        }
+
+        public MergeRegistry AutoMergeRegistry { get; set; }
+
+        public void SortItems()
+        {
+            if (this.listView_browse.Items.Count <= 1)
+                return;
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach(ListViewItem item in this.listView_browse.Items)
+            {
+                items.Add(item);
+            }
+
+            this.AutoMergeRegistry.Sort(ref items);
+
+            this.listView_browse.Items.Clear();
+            foreach(ListViewItem item in items)
+            {
+                this.listView_browse.Items.Add(item);
+            }
+        }
+    }
+
+    public class ItemTag
+    {
+        public string RecPath { get; set; }
+        public string Xml { get; set; }
+        public byte[] Timestamp { get; set; }
     }
 }
