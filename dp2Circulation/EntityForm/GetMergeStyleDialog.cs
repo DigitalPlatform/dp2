@@ -123,7 +123,7 @@ namespace dp2Circulation
                 style |= MergeStyle.ReserveTargetBiblio;
 
             if (radioButton_subrecord_combine.Checked)
-                style |= MergeStyle.CombinSubrecord;
+                style |= MergeStyle.CombineSubrecord;
             else if (radioButton_subrecord_source.Checked)
                 style |= MergeStyle.OverwriteSubrecord;
             else
@@ -149,7 +149,7 @@ namespace dp2Circulation
                 this.radioButton_biblio_reserveTarget.Checked = true;
             }
 
-            if ((style & MergeStyle.CombinSubrecord) != 0)
+            if ((style & MergeStyle.CombineSubrecord) != 0)
             {
                 this.radioButton_subrecord_combine.Checked = true;
                 this.radioButton_subrecord_source.Checked = false;

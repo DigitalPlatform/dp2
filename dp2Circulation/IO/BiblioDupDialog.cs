@@ -394,9 +394,9 @@ strHtml2 +
             {
                 MergeStyle style = merge_dlg.GetMergeStyle();
                 // 去掉和 Subrecord 有关的 bit
-                style = (style | (dp2Circulation.MergeStyle.ReserveSourceBiblio | dp2Circulation.MergeStyle.ReserveTargetBiblio));
+                style = (style & (dp2Circulation.MergeStyle.ReserveSourceBiblio | dp2Circulation.MergeStyle.ReserveTargetBiblio));
                 // 设置为 合并下级记录
-                style |= dp2Circulation.MergeStyle.CombinSubrecord;
+                style |= dp2Circulation.MergeStyle.CombineSubrecord;
                 merge_dlg.SetMergeStyle(style);
             }
             Program.MainForm.AppInfo.LinkFormState(merge_dlg, "entityform_GetMergeStyleDialog_state");

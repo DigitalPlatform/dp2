@@ -684,19 +684,24 @@ this.MainForm.ActivateFixPage("history")
 
                         this.Invoke((Action)(() =>
 {
-    BiblioDupDialog dup_dialog = new BiblioDupDialog();
-    MainForm.SetControlFont(dup_dialog, this.Font, false);
-    dup_dialog.TempDir = Program.MainForm.UserTempDir;
-    dup_dialog.MarcHtmlHead = Program.MainForm.GetMarcHtmlHeadString();
-    dup_dialog.OriginXml = info.BiblioXml;
-    dup_dialog.DupBiblioRecPathList = strOutputPath;
-    Program.MainForm.AppInfo.LinkFormState(dup_dialog, "biblioDupDialog_state");
-    dup_dialog.UiState = Program.MainForm.AppInfo.GetString("ImportExportForm", "BiblioDupDialog_uiState", "");
-    dup_dialog.ShowDialog(this);
-    Program.MainForm.AppInfo.SetString("ImportExportForm", "BiblioDupDialog_uiState", dup_dialog.UiState);
-    strDialogAction = dup_dialog.Action;
-    strTargetRecPath = dup_dialog.SelectedRecPath;
-    baTargetTimestamp = dup_dialog.SelectedTimestamp;
+    using (BiblioDupDialog dup_dialog = new BiblioDupDialog())
+    {
+        MainForm.SetControlFont(dup_dialog, this.Font, false);
+        dup_dialog.AutoSelectMode = info.AutoSelectMode;
+        dup_dialog.TempDir = Program.MainForm.UserTempDir;
+        dup_dialog.MarcHtmlHead = Program.MainForm.GetMarcHtmlHeadString();
+        dup_dialog.OriginXml = info.BiblioXml;
+        dup_dialog.DupBiblioRecPathList = strOutputPath;
+        Program.MainForm.AppInfo.LinkFormState(dup_dialog, "biblioDupDialog_state");
+        dup_dialog.UiState = Program.MainForm.AppInfo.GetString("ImportExportForm", "BiblioDupDialog_uiState", "");
+        dup_dialog.ShowDialog(this);
+        Program.MainForm.AppInfo.SetString("ImportExportForm", "BiblioDupDialog_uiState", dup_dialog.UiState);
+        info.AutoSelectMode = dup_dialog.AutoSelectMode;    // 记忆
+
+        strDialogAction = dup_dialog.Action;
+        strTargetRecPath = dup_dialog.SelectedRecPath;
+        baTargetTimestamp = dup_dialog.SelectedTimestamp;
+    }
 }));
                         if (string.IsNullOrEmpty(strDialogAction) == true
                             || strDialogAction == "stop")
@@ -1405,6 +1410,7 @@ new string[] { "继续", "中断" });
             public Stop stop = null;
 
             // *** 以下成员都是在运行中动态设定和变化的
+            public bool AutoSelectMode = false; // (发现书目重复时)是否自动选择目标
             public bool Start = true;   // 是否进入开始处理状态
             public string StartBiblioRecPath = "";  // 定位源文件中需开始处理的一条记录的路径
             public RangeList RangeList = null;

@@ -9591,7 +9591,7 @@ MessageBoxDefaultButton.Button1);
                 bSaveAs = true;
             }
 
-            MergeStyle merge_style = MergeStyle.CombinSubrecord | MergeStyle.ReserveSourceBiblio;
+            MergeStyle merge_style = MergeStyle.CombineSubrecord | MergeStyle.ReserveSourceBiblio;
 
             BiblioSaveToDlg dlg = new BiblioSaveToDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
@@ -12022,7 +12022,7 @@ value);
             }
 
             // string strMergeStyle = "";
-            MergeStyle merge_style = MergeStyle.CombinSubrecord | MergeStyle.ReserveSourceBiblio;
+            MergeStyle merge_style = MergeStyle.CombineSubrecord | MergeStyle.ReserveSourceBiblio;
 
             BiblioSaveToDlg dlg = new BiblioSaveToDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
