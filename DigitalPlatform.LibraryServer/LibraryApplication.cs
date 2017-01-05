@@ -138,7 +138,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.95 (2016/12/21) 修改 CopyBiblio() API 移动书目记录后没有返回正确时间戳的 bug
         //      2.96 (2016/12/22) SetBiblioInfo() 增加 strStyle 参数，strStyle 参数可以使用 noeventlog 值
         //      2.97 (2017/1/1) 书目记录查重键生成法为 0.02
-        public static string Version = "2.97";
+        //      2.98 (2017/1/2) SetBiblioInfo() strAction 增加 checkunique 功能
+        public static string Version = "2.98";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

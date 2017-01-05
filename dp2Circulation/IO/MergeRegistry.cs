@@ -23,15 +23,21 @@ namespace dp2Circulation
                 ItemTag info1 = (ItemTag)item1.Tag;
                 ItemTag info2 = (ItemTag)item2.Tag;
 
+                if (info1.RecPath == info2.RecPath)
+                    return 0;
+
                 // 先按照数据库名字排序
-                int index1 = this.DbNames.IndexOf(Global.GetDbName(info1.RecPath));
-                if (index1 == -1)
-                    index1 = this.DbNames.Count + 1;
-                int index2 = this.DbNames.IndexOf(Global.GetDbName(info2.RecPath));
-                if (index2 == -1)
-                    index2 = this.DbNames.Count + 1;
-                if (index1 != index2)
-                    return index1 - index2;
+                if (this.DbNames.Count > 0)
+                {
+                    int index1 = this.DbNames.IndexOf(Global.GetDbName(info1.RecPath));
+                    if (index1 == -1)
+                        index1 = this.DbNames.Count + 1;
+                    int index2 = this.DbNames.IndexOf(Global.GetDbName(info2.RecPath));
+                    if (index2 == -1)
+                        index2 = this.DbNames.Count + 1;
+                    if (index1 != index2)
+                        return index1 - index2;
+                }
 
                 // 再观察 606 690 丰富程度
                 int nRet = Compare6XX(info1.Xml, info2.Xml);
@@ -90,7 +96,10 @@ namespace dp2Circulation
             }
             if (strOutMarcSyntax == "usmarc")
             {
-                return 0;
+                MarcRecord record = new MarcRecord(strMarc);
+                nCount += record.select("field[@name='600' or @name='610' or @name='630' or @name='650' or @name='651']").count;
+                nCount += record.select("field[@name='093']").count;
+                return nCount;
             }
             return 0;
         }

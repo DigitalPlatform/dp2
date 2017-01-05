@@ -4688,7 +4688,7 @@ out strError);
 
                 string strTimeCondition = " substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
                      + " AND substr(item.createtime,1,10) <= '" + strEndDate + "' ";
-                if (strStartDate.Replace("-","") == "00010101")
+                if (strStartDate.Replace("-", "") == "00010101")
                     strTimeCondition = " ((substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
                      + " AND substr(item.createtime,1,10) <= '" + strEndDate + "' )"
                      + " OR item.createtime = '') ";
@@ -4701,8 +4701,8 @@ out strError);
                      + " FROM item "
                      + " LEFT OUTER JOIN " + strDistinctClassTableName + " ON item.bibliorecpath <> '' AND " + strDistinctClassTableName + ".bibliorecpath = item.bibliorecpath "
                      + "     WHERE " + strLocationLike
-                     //+ " AND substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
-                     //+ " AND substr(item.createtime,1,10) <= '" + strEndDate + "' "  // 限定册记录创建的时间在 end 以前
+                    //+ " AND substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
+                    //+ " AND substr(item.createtime,1,10) <= '" + strEndDate + "' "  // 限定册记录创建的时间在 end 以前
                      + " AND " + strTimeCondition
                      + " GROUP BY path1 "
                      + " ) group by classhead ORDER BY classhead ;";
@@ -4903,7 +4903,7 @@ out strError);
         // 去掉末尾的 -架号 部分
         static string RemoveShelfName(string strText)
         {
-            int index = strText.LastIndexOfAny(new char [] {'/','-'});
+            int index = strText.LastIndexOfAny(new char[] { '/', '-' });
             if (index == -1)
                 return strText;
             if (strText[index] == '/')
@@ -8612,8 +8612,13 @@ out strError);
                     out node);
                 if (node == null)
                 {
+#if NO
                     strError = "日志记录中缺<record>元素";
                     return -1;
+#endif
+                    // 改为进行删除操作
+                    strAction = "delete";
+                    goto TRY_DELETE;
                 }
 
                 string strNewRecPath = DomUtil.GetAttr(node, "recPath");
@@ -8670,8 +8675,10 @@ out strError);
                         return -1;
                 }
 
+                return 0;
             }
-            else if (strAction == "delete")
+        TRY_DELETE:
+            if (strAction == "delete")
             {
                 XmlNode node = null;
                 string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
@@ -8698,14 +8705,11 @@ out strError);
                     out strError);
                 if (nRet == -1)
                     return -1;
-            }
-            else
-            {
-                strError = "无法识别的<action>内容 '" + strAction + "'";
-                return -1;
+                return 0;
             }
 
-            return 0;
+            strError = "无法识别的<action>内容 '" + strAction + "'";
+            return -1;
         }
 
         // SetBiblioInfo() API 或 CopyBiblioInfo() API 的恢复动作

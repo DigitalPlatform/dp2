@@ -1338,6 +1338,22 @@ namespace dp2Circulation
             Debug.Assert(this.m_itemBarcodes != null, "this.m_itemBarcodes == null");
             this.m_itemBarcodes.Clear();
 
+            // 2017/1/4
+            // 变换条码号
+            if (this.NeedVerifyBarcode == true)
+            {
+                string strText = this.textBox_readerBarcode.Text;
+
+                nRet = Program.MainForm.TransformBarcode(
+                    Program.MainForm.FocusLibraryCode,
+                    ref strText,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                this.textBox_readerBarcode.Text = strText;
+            }
+
             if (this.NeedVerifyBarcode == true
                 && StringUtil.IsIdcardNumber(this.textBox_readerBarcode.Text) == false
                 && IsName(this.textBox_readerBarcode.Text) == false)
@@ -1977,6 +1993,22 @@ dlg.UiState);
             }
 
             this.ActiveItemBarcode = this.textBox_itemBarcode.Text;
+
+            // 2017/1/4
+            // 变换条码号
+            if (this.NeedVerifyBarcode == true)
+            {
+                string strText = this.textBox_itemBarcode.Text;
+
+                nRet = Program.MainForm.TransformBarcode(
+                    Program.MainForm.FocusLibraryCode,
+                    ref strText,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                this.textBox_itemBarcode.Text = strText;
+            }
 
             if (this.NeedVerifyBarcode == true)
             {

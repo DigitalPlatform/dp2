@@ -101,6 +101,7 @@ namespace dp2Circulation
             this.toolStripSplitButton_searchDup = new System.Windows.Forms.ToolStripSplitButton();
             this.ToolStripMenuItem_searchDupInExistWindow = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_searchDupInNewWindow = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_checkUnique = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_verifyData = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_next = new System.Windows.Forms.ToolStripButton();
@@ -852,7 +853,8 @@ namespace dp2Circulation
             this.toolStripSplitButton_searchDup.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.toolStripSplitButton_searchDup.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_searchDupInExistWindow,
-            this.ToolStripMenuItem_searchDupInNewWindow});
+            this.ToolStripMenuItem_searchDupInNewWindow,
+            this.ToolStripMenuItem_checkUnique});
             this.toolStripSplitButton_searchDup.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_searchDup.Image")));
             this.toolStripSplitButton_searchDup.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripSplitButton_searchDup.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
@@ -874,6 +876,13 @@ namespace dp2Circulation
             this.ToolStripMenuItem_searchDupInNewWindow.Size = new System.Drawing.Size(235, 22);
             this.ToolStripMenuItem_searchDupInNewWindow.Text = "在新开的查重窗中查重(&N)";
             this.ToolStripMenuItem_searchDupInNewWindow.Click += new System.EventHandler(this.ToolStripMenuItem_searchDupInNewWindow_Click);
+            // 
+            // ToolStripMenuItem_chechUnique
+            // 
+            this.ToolStripMenuItem_checkUnique.Name = "ToolStripMenuItem_chechUnique";
+            this.ToolStripMenuItem_checkUnique.Size = new System.Drawing.Size(235, 22);
+            this.ToolStripMenuItem_checkUnique.Text = "检查唯一性(&U)";
+            this.ToolStripMenuItem_checkUnique.Click += new System.EventHandler(this.ToolStripMenuItem_checkUnique_Click);
             // 
             // toolStripButton_verifyData
             // 
@@ -1332,6 +1341,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_searchDup;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_searchDupInExistWindow;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_searchDupInNewWindow;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_checkUnique;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_marcEditor_setActiveCatalogingRule;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_insertCoverImage;

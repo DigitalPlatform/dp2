@@ -4745,6 +4745,50 @@ Stack:
             }
         }
 
+        // 变换条码号
+        // return:
+        //      -1  出错
+        //      0   没有发生改变
+        //      1   发生了改变
+        public int TransformBarcode(
+    string strLibraryCode,
+    ref string strBarcode,
+    out string strError)
+        {
+            strError = "";
+
+            if (StringUtil.HasHead(strBarcode, "PQR:") == true)
+            {
+                strError = "这是读者证号二维码";
+                return 0;
+            }
+
+            // 优先进行前端校验
+            if (this.ClientHost != null)
+            {
+                dynamic o = this.ClientHost;
+                try
+                {
+                    return o.TransformBarcode(
+                        strLibraryCode,
+                        ref strBarcode,
+                        out strError);
+                }
+                catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
+                {
+                    // 源代码中没有定义这个函数
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    strError = "前端执行变换脚本抛出异常: " + ExceptionUtil.GetDebugText(ex);
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+
         public delegate void Delegate_enableControls(bool bEnable);
 
         // 形式校验条码号
@@ -4790,7 +4834,7 @@ Stack:
             // 优先进行前端校验
             if (this.ClientHost != null)
             {
-                bool bOldStyle = false;
+                bool bDetectOldStyle = false;
                 dynamic o = this.ClientHost;
                 try
                 {
@@ -4802,7 +4846,7 @@ Stack:
                 catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
                 {
                     // 继续向后进行服务器端条码校验
-                    bOldStyle = true;
+                    bDetectOldStyle = true;
                 }
                 catch (Exception ex)
                 {
@@ -4810,7 +4854,7 @@ Stack:
                     return -1;
                 }
 
-                if (bOldStyle == true)
+                if (bDetectOldStyle == true)
                 {
                     // 尝试以前的参数方式
                     try

@@ -151,7 +151,7 @@ namespace dp2Circulation
                 "quickchargingform",
                 "upper_input",
                 true);
-#endif 
+#endif
             this.toolStripButton_upperInput.Checked = Program.MainForm.UpperInputBarcode;
 
             {   // 恢复列宽度
@@ -1570,6 +1570,29 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 strText = strItemBarcode;
             }
 
+            // 变换条码号
+            if (this.NeedVerifyBarcode == true)
+            {
+                string strError = "";
+
+                // 2017/1/4
+                int nRet = Program.MainForm.TransformBarcode(
+                    Program.MainForm.FocusLibraryCode,
+                    ref strText,
+                    out strError);
+                if (nRet == -1)
+                {
+                    // TODO: 语音提示
+                    // TODO: 红色对话框
+                    MessageBox.Show(this, strError);
+                    this.textBox_input.SelectAll();
+                    this.textBox_input.Focus();
+                    return;
+                }
+
+                // TODO: 如何让操作者能看到变换后的字符串?
+            }
+
             // 检查条码号，如果是读者证条码号，则 func = LoadPatronInfo
             if (this.NeedVerifyBarcode == true)
             {
@@ -1593,6 +1616,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 else
                 {
                     string strError = "";
+
                     // 形式校验条码号
                     // return:
                     //      -2  服务器没有配置校验方法，无法校验

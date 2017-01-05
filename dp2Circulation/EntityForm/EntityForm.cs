@@ -4318,7 +4318,7 @@ true);
         /// <returns>-1: 有错。此时不排除有些信息保存成功。0: 成功。</returns>
         public int DoSaveAll(string strStyle = "displaysuccess,verifydata,searchdup")
         {
-            bool bBiblioSaved = false;
+            // bool bBiblioSaved = false;
             int nRet = 0;
             // string strText = "";
             // int nErrorCount = 0;
@@ -7341,7 +7341,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
         /// <param name="channel_param">通讯通道。如果为 null，表示函数内使用自动获得的通道</param>
         /// <param name="bIncludeFileID">(书目记录XML)是否要根据当前对象控件内容合成&lt;dprms:file&gt;元素?</param>
         /// <param name="strHtml">返回新记录的 OPAC 格式内容</param>
-        /// <param name="strStyle">风格。由 displaysuccess / searchdup 之一或者逗号间隔组合而成。displaysuccess 显示最后的成功消息在框架窗口的状态条; searchdup 保存成功后发送查重消息</param>
+        /// <param name="strStyle">风格。由 displaysuccess / searchdup 之一或者逗号间隔组合而成。displaysuccess 显示最后的成功消息在框架窗口的状态条; searchdup 保存成功后发送查重消息。如果为 checkUnique 表示不是进行保存而是检查书目记录唯一性</param>
         /// <returns>
         /// <para>-1  出错</para>
         /// <para>0   没有保存</para>
@@ -7473,16 +7473,40 @@ MessageBoxDefaultButton.Button2);
                 string strOutputPath = "";
                 byte[] baNewTimestamp = null;
                 string strWarning = "";
-                nRet = SaveXmlBiblioRecordToDatabase(
-                    channel,
-                    strTargetPath,
-                    this.DeletedMode == true,
-                    strXmlBody,
-                    this.BiblioTimestamp,
-                    out strOutputPath,
-                    out baNewTimestamp,
-                    out strWarning,
-                    out strError);
+                if (StringUtil.IsInList("checkUnique", strStyle) == true)
+                {
+                    {
+                        string strError1;
+                        nRet = Program.MainForm.DisplayDupBiblioList("",
+            out strError1);
+                        if (nRet == -1)
+                        {
+                            strError = strError + "\r\n\r\n在显示发生重复的书目记录时出错: " + strError1;
+                            goto ERROR1;
+                        }
+                    }
+                    nRet = CheckUniqueToDatabase(
+                        channel,
+                        strTargetPath,
+                        this.BiblioChanged == true ? strXmlBody : "",
+                        out strOutputPath,
+                        out strError);
+                    if (nRet == 0)
+                        this.ShowMessage("没有发现重复", "green", true);
+                }
+                else
+                {
+                    nRet = SaveXmlBiblioRecordToDatabase(
+                        channel,
+                        strTargetPath,
+                        this.DeletedMode == true,
+                        strXmlBody,
+                        this.BiblioTimestamp,
+                        out strOutputPath,
+                        out baNewTimestamp,
+                        out strWarning,
+                        out strError);
+                }
                 if (nRet == -1)
                 {
                     if (channel.ErrorCode == ErrorCode.BiblioDup)
@@ -7501,7 +7525,10 @@ MessageBoxDefaultButton.Button2);
                             goto ERROR1;
                         }
 
-                        strError += "\r\n\r\n重复的书目记录已装入固定面板区的“浏览”属性页，请合并重复书目记录后，重新提交保存";
+                        if (StringUtil.IsInList("checkUnique", strStyle) == true)
+                            strError += "\r\n\r\n重复的书目记录已装入固定面板区的“浏览”属性页";
+                        else
+                            strError += "\r\n\r\n重复的书目记录已装入固定面板区的“浏览”属性页，请合并重复书目记录后，重新提交保存";
                     }
                     goto ERROR1;
                 }
@@ -7510,6 +7537,9 @@ MessageBoxDefaultButton.Button2);
                     MessageBox.Show(this, strWarning);
                 if (channel.ErrorCode == ErrorCode.PartialDenied)
                     bPartialDenied = true;
+
+                if (StringUtil.IsInList("checkUnique", strStyle) == true)
+                    return 1;
 
                 this.BiblioTimestamp = baNewTimestamp;
                 this.BiblioRecPath = strOutputPath;
@@ -8012,6 +8042,55 @@ MessageBoxDefaultButton.Button2);
             return 1;
         ERROR1:
             return -1;
+        }
+
+        // return:
+        //      -1  出错。包括出现重复的情况
+        //      0   没有重复
+        int CheckUniqueToDatabase(
+            LibraryChannel channel,
+            string strPath,
+            string strXml,
+            out string strOutputPath,
+            out string strError)
+        {
+            strError = "";
+            strOutputPath = "";
+
+            Progress.Initial("正在检查书目记录的唯一性 ...");
+
+            try
+            {
+                string strAction = "checkUnique";
+
+            REDO:
+                byte[] baNewTimestamp = null;
+                long lRet = channel.SetBiblioInfo(
+                    Progress,
+                    strAction,
+                    strPath,
+                    "xml",
+                    strXml,
+                    null,   // baTimestamp,
+                    "",
+                    out strOutputPath,
+                    out baNewTimestamp,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode == ErrorCode.BiblioDup)
+                        strError = "检查书目记录 '" + strPath + "' 唯一性时发现重复: " + strError;
+                    else
+                        strError = "检查书目记录 '" + strPath + "' 唯一性时出错: " + strError;
+                    return -1;
+                }
+
+                return 0;
+            }
+            finally
+            {
+                Progress.Initial("");
+            }
         }
 
         // 保存XML格式的书目记录到数据库
@@ -12369,6 +12448,26 @@ merge_dlg.UiState);
             ToolStripMenuItem_searchDupInExistWindow_Click(sender, e);
         }
 
+        private void ToolStripMenuItem_checkUnique_Click(object sender, EventArgs e)
+        {
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.98") < 0)
+            {
+                MessageBox.Show(this, "本功能需要配合 dp2library 2.98 或以上版本才能使用");
+                return;
+            }
+
+            this.toolStrip_marcEditor.Enabled = false;
+            try
+            {
+                string strHtml = "";
+                SaveBiblioToDatabase(null, true, out strHtml, "checkUnique");
+            }
+            finally
+            {
+                this.toolStrip_marcEditor.Enabled = true;
+            }
+        }
+
         private void ToolStripMenuItem_searchDupInExistWindow_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -12412,7 +12511,6 @@ merge_dlg.UiState);
 
                 form.BeginSearch();
             }
-
 
             return;
         ERROR1:

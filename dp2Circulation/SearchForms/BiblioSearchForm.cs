@@ -2577,6 +2577,29 @@ out strError);
                         errors.Add("XML 记录中有非法字符");
                     }
 
+#if NO
+                    // 验证唯一性
+                    {
+                        byte[] baNewTimestamp = null;
+                        string strOutputPath = "";
+                        long lRet = channel.SetBiblioInfo(
+                            stop,
+                            "checkunique",
+                            info.RecPath,
+                            "xml",
+                            "", // info.NewXml,
+                            null,   // info.Timestamp,
+                            "",
+                            out strOutputPath,
+                            out baNewTimestamp,
+                            out strError);
+                        if (lRet == -1 && channel.ErrorCode == ErrorCode.BiblioDup)
+                        {
+
+                        }
+                    }
+#endif
+
                     if (errors.Count > 0)
                     {
                         this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");

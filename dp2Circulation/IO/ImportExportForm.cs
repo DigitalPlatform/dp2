@@ -280,6 +280,23 @@ strStringTable);
                 {
                     return this.textBox_convert_itemBatchNo.Text;
                 }));
+
+                string strDbNameList = (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_target_dbNameList.Text;
+                }));
+                info.AutoMergeRegistry = new MergeRegistry();
+                info.AutoMergeRegistry.DbNames = StringUtil.SplitList(strDbNameList.Replace("\r\n","\r"), '\r');
+                // 这里验证一下书目库名的有效性
+                foreach(string dbName in info.AutoMergeRegistry.DbNames)
+                {
+                    if (Program.MainForm.IsBiblioDbName(dbName) == false)
+                    {
+                        strError = "“自动选择目标数据库顺序”参数中的名字 '"+dbName+"' 不是当前服务器合法的书目库名";
+                        goto ERROR1;
+                    }
+                }
+
 #if NO
             info.Simulate = (bool)this.Invoke(new Func<bool>(() =>
             {
@@ -687,6 +704,7 @@ this.MainForm.ActivateFixPage("history")
     using (BiblioDupDialog dup_dialog = new BiblioDupDialog())
     {
         MainForm.SetControlFont(dup_dialog, this.Font, false);
+        dup_dialog.AutoMergeRegistry = info.AutoMergeRegistry;
         dup_dialog.AutoSelectMode = info.AutoSelectMode;
         dup_dialog.TempDir = Program.MainForm.UserTempDir;
         dup_dialog.MarcHtmlHead = Program.MainForm.GetMarcHtmlHeadString();
@@ -1099,6 +1117,11 @@ new string[] { "重试", "跳过", "中断" });
                 styles.Add("nocheckdup");
             if (info.SuppressOperLog)
                 styles.Add("noeventlog");
+
+            // 2017/1/4
+            if (info.Simulate)
+                styles.Add("simulate");
+
             string strStyle = StringUtil.MakePathList(styles);
 
             foreach (string xml in item_xmls)
@@ -1201,9 +1224,6 @@ new string[] { "重试", "跳过", "中断" });
                 string strXml = item_dom.DocumentElement.OuterXml;
 
                 item.Action = "new";
-
-                if (info.Simulate)
-                    item.Style = "simulate";
 
                 item.NewRecord = strXml;
                 item.NewTimestamp = ByteArray.GetTimeStampByteArray(strTimestamp);
@@ -1409,6 +1429,8 @@ new string[] { "继续", "中断" });
             public LibraryChannel Channel = null;
             public Stop stop = null;
 
+            public MergeRegistry AutoMergeRegistry = null;
+
             // *** 以下成员都是在运行中动态设定和变化的
             public bool AutoSelectMode = false; // (发现书目重复时)是否自动选择目标
             public bool Start = true;   // 是否进入开始处理状态
@@ -1527,7 +1549,7 @@ new string[] { "继续", "中断" });
                 controls.Add(this.textBox_source_range);
 
                 controls.Add(this.textBox_convert_itemBatchNo);
-
+                controls.Add(this.textBox_target_dbNameList);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -1546,7 +1568,7 @@ new string[] { "继续", "中断" });
                 controls.Add(this.textBox_source_range);
 
                 controls.Add(this.textBox_convert_itemBatchNo);
-
+                controls.Add(this.textBox_target_dbNameList);
                 GuiState.SetUiState(controls, value);
             }
         }

@@ -2739,7 +2739,7 @@ out strError);
 
                 // title
                 {
-                    List<string> titles = record.select("field[@name='200']/subfield[@name='a']").Contents;
+                    List<string> titles = record.select("field[@name='200']/subfield[@name='a' or @name='e']").Contents;
 
                     CanonializeWideChars(titles);
                     Sort(titles);
@@ -2785,6 +2785,7 @@ out strError);
 
                 }
 
+#if NO
                 // pages
                 // size
                 {
@@ -2802,11 +2803,12 @@ out strError);
                     Sort(sizes);
                     segments.Add(StringUtil.MakePathList(pages) + "," + StringUtil.MakePathList(sizes));
                 }
+#endif
 
                 strKey = StringUtil.MakePathList(segments, "|");
                 strCode = StringUtil.GetMd5(strKey);
 
-                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v0.02");
+                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v0.03");
 
                 strMARC = record.Text;
             }
@@ -2834,8 +2836,9 @@ out strError);
 
                 // title
                 {
-                    List<string> titles = record.select("field[@name='245']/subfield[@name='a']").Contents;
+                    List<string> titles = record.select("field[@name='245']/subfield[@name='a'  or @name='b']").Contents;
 
+                    // TODO: 是否要忽略大小写?
                     TrimEndChar(titles);
                     Sort(titles);
 
@@ -2879,6 +2882,7 @@ out strError);
                     segments.Add(StringUtil.MakePathList(publishers) + "," + StringUtil.MakePathList(dates));
                 }
 
+#if NO
                 // pages
                 // size
                 {
@@ -2896,11 +2900,12 @@ out strError);
                     Sort(sizes);
                     segments.Add(StringUtil.MakePathList(pages) + "," + StringUtil.MakePathList(sizes));
                 }
+#endif
 
                 strKey = StringUtil.MakePathList(segments, "|");
                 strCode = StringUtil.GetMd5(strKey);
 
-                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v0.02");
+                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v0.03");
 
                 strMARC = record.Text;
             }
@@ -4268,7 +4273,7 @@ nsmgr);
 
         // 修改编目记录
         // parameters:
-        //      strAction   动作。为"new" "change" "delete" "onlydeletebiblio" "onlydeletesubrecord"之一。"delete"在删除书目记录的同时，会自动删除下属的实体记录。不过要求实体均未被借出才能删除。
+        //      strAction   动作。为"new" "change" "delete" "onlydeletebiblio" "onlydeletesubrecord" "checkunique" 之一。"delete"在删除书目记录的同时，会自动删除下属的实体记录。不过要求实体均未被借出才能删除。
         //      strBiblioType   目前只允许xml一种
         //      baTimestamp 时间戳。如果为新创建记录，可以为null 
         //      strOutputBiblioRecPath 输出的书目记录路径。当strBiblioRecPath中末级为问号，表示追加保存书目记录的时候，本参数返回实际保存的书目记录路径
@@ -4395,9 +4400,10 @@ nsmgr);
                 && strAction != "change"
                 && strAction != "delete"
                 && strAction != "onlydeletebiblio"
-                && strAction != "onlydeletesubrecord")
+                && strAction != "onlydeletesubrecord"
+                && strAction != "checkunique")
             {
-                strError = "strAction参数值应当为new change delete onlydeletebiblio onlydeletesubrecord之一  (然而当前为 '" + strAction + "')";
+                strError = "strAction参数值应当为new change delete onlydeletebiblio onlydeletesubrecord checkunique之一  (然而当前为 '" + strAction + "')";
                 goto ERROR1;
             }
 
@@ -4584,7 +4590,8 @@ nsmgr);
 
             // 2016/7/4
             // 看看所保存的数据MARC格式是不是这个数据库要求的格式
-            if (strAction == "new" || strAction == "change")
+            if (string.IsNullOrEmpty(strBiblio) == false
+                && (strAction == "new" || strAction == "change" || strAction == "checkunique"))
             {
                 // 2016/11/23
                 if (strFormat == "iso2709")
@@ -4644,6 +4651,7 @@ nsmgr);
                         goto ERROR1;
                     if (nRet == 0)
                     {
+
                         strError = "无法获得 strBiblio 参数值中 MARC 记录的 MARC 格式";
                         goto ERROR1;
                     }
@@ -4691,10 +4699,13 @@ nsmgr);
             if (strAction == "change"
                 || strAction == "delete"
                 || strAction == "onlydeletebiblio"
-                || strAction == "onlydeletesubrecord")
+                || strAction == "onlydeletesubrecord"
+                || strAction == "checkunique")
             {
                 string strMetaData = "";
                 string strOutputPath = "";
+
+                // TODO: strBiblioRecPath 为 中文图书/? 时如何表现
 
                 // 先读出数据库中此位置的已有记录
                 lRet = channel.GetRes(strBiblioRecPath,
@@ -4707,8 +4718,12 @@ nsmgr);
                 {
                     if (channel.ErrorCode == ChannelErrorCode.NotFound)
                     {
+                        if (strAction == "checkunique")
+                            goto SKIP_MEMO_OLDRECORD;
+
                         // 2013/3/12
-                        if (strAction == "change" && bSimulate == false)    // 模拟操作情况下，不在乎以前这个位置的记录是否存在
+                        if (strAction == "change"
+                            && bSimulate == false)    // 模拟操作情况下，不在乎以前这个位置的记录是否存在
                         {
                             strError = "原有记录 '" + strBiblioRecPath + "' 不存在, 因此 setbiblioinfo " + strAction + " 操作被拒绝 (此时如果要保存新记录，请使用 new 子功能)";
                             result.Value = -1;
@@ -4774,6 +4789,96 @@ nsmgr);
 
             if (sessioninfo.Account != null)
                 strRights = sessioninfo.Account.Rights;
+
+            // 2017/1/2
+            if (strAction == "checkunique")
+            {
+                if (string.IsNullOrEmpty(strExistingXml) == false)
+                {
+                    if (string.IsNullOrEmpty(strBiblio) == true)
+                        strBiblio = strExistingXml;
+                    else
+                    {
+                        // 合并联合编目的新旧书目库XML记录
+                        // 功能：排除新记录中对strLibraryCode定义以外的905字段的修改
+                        // parameters:
+                        //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
+                        // return:
+                        //      -1  error
+                        //      0   not delete any fields
+                        //      1   deleted some fields
+                        nRet = MergeOldNewBiblioRec(
+                            strRights,
+                            strUnionCatalogStyle,
+                            strLibraryCode,
+                            "insert,replace,delete",
+                            strAccessParameters,
+                            strExistingXml,
+                            ref strBiblio,
+                            ref bChangePartDenied,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
+                            strDeniedComment += " " + strError;
+                    }
+                }
+                else
+                {
+                    strExistingXml = "";
+                    // 合并联合编目的新旧书目库XML记录
+                    // 功能：排除新记录中对strLibraryCode定义以外的905字段的修改
+                    // parameters:
+                    //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
+                    // return:
+                    //      -1  error
+                    //      0   not delete any fields
+                    //      1   deleted some fields
+                    nRet = MergeOldNewBiblioRec(
+                        strRights,
+                        strUnionCatalogStyle,
+                        strLibraryCode,
+                        "insert",
+                        strAccessParameters,
+                        strExistingXml,
+                        ref strBiblio,
+                        ref bChangePartDenied,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
+                        strDeniedComment += " " + strError;
+
+                }
+
+                // return:
+                //      -1  出错
+                //      0   没有命中
+                //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                nRet = SearchBiblioDup(
+                    sessioninfo,
+                    strBiblioRecPath,
+                    strBiblio,
+                    "setbiblio", // strResultSetName,
+                    null,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet > 0)
+                {
+                    strOutputBiblioRecPath = strError;
+                    result.Value = -1;
+                    result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。";
+                    result.ErrorCode = ErrorCode.BiblioDup;
+                    return result;
+                }
+
+                if (strAction == "checkunique")
+                {
+                    result.Value = 0;   // 没有发现重复
+                    return result;
+                }
+            }
 
             if (strAction == "new")
             {
@@ -4843,8 +4948,16 @@ nsmgr);
                 {
                     strOutputBiblioRecPath = strError;
                     result.Value = -1;
-                    result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作被拒绝";
+                    result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。";
+                    if (strAction != "checkunique")
+                        result.ErrorInfo += "本次保存操作被拒绝";
                     result.ErrorCode = ErrorCode.BiblioDup;
+                    return result;
+                }
+
+                if (strAction == "checkunique")
+                {
+                    result.Value = 0;   // 没有发现重复
                     return result;
                 }
 

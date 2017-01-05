@@ -86,6 +86,8 @@ namespace dp2Circulation
         }
 
         // 在固定面板区“浏览”属性页显示重复的书目记录列表
+        // parameters:
+        //      strRecPathList  路径字符串列表，逗号分隔。如果为空，表示要清除浏览窗口中原有的内容
         public int DisplayDupBiblioList(string strRecPathList,
             out string strError)
         {
@@ -108,13 +110,19 @@ namespace dp2Circulation
 
             List<string> list = StringUtil.SplitList(strRecPathList);
             search_form.EnableControls(false);
-            foreach (string recpath in list)
+            if (list.Count == 0)
+                search_form.ClearListViewItems();
+            else
             {
-                search_form.AddLineToBrowseList(recpath);
+                foreach (string recpath in list)
+                {
+                    search_form.AddLineToBrowseList(recpath);
+                }
             }
             search_form.EnableControls(true);
-            search_form.RefreshAllLines();
 
+            if (list.Count > 0)
+                search_form.RefreshAllLines();
             return 0;
         }
     }

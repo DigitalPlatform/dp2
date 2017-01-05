@@ -44,6 +44,8 @@
             this.checkBox_subRecords_order = new System.Windows.Forms.CheckBox();
             this.checkBox_subRecords_entity = new System.Windows.Forms.CheckBox();
             this.tabPage_convert = new System.Windows.Forms.TabPage();
+            this.textBox_convert_itemBatchNo = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.checkBox_convert_addBiblioToItem = new System.Windows.Forms.CheckBox();
             this.panel_map = new System.Windows.Forms.Panel();
             this.button_convert_initialMapString = new System.Windows.Forms.Button();
@@ -60,8 +62,8 @@
             this.tabPage_run = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.button_next = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
-            this.textBox_convert_itemBatchNo = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.textBox_target_dbNameList = new System.Windows.Forms.TextBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_source.SuspendLayout();
             this.tabPage_convert.SuspendLayout();
@@ -263,6 +265,22 @@
             this.tabPage_convert.Text = "转换";
             this.tabPage_convert.UseVisualStyleBackColor = true;
             // 
+            // textBox_convert_itemBatchNo
+            // 
+            this.textBox_convert_itemBatchNo.Location = new System.Drawing.Point(103, 82);
+            this.textBox_convert_itemBatchNo.Name = "textBox_convert_itemBatchNo";
+            this.textBox_convert_itemBatchNo.Size = new System.Drawing.Size(186, 21);
+            this.textBox_convert_itemBatchNo.TabIndex = 15;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(3, 85);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(83, 12);
+            this.label5.TabIndex = 14;
+            this.label5.Text = "册记录批次号:";
+            // 
             // checkBox_convert_addBiblioToItem
             // 
             this.checkBox_convert_addBiblioToItem.AutoSize = true;
@@ -279,7 +297,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel_map.Location = new System.Drawing.Point(3, 138);
             this.panel_map.Name = "panel_map";
-            this.panel_map.Size = new System.Drawing.Size(344, 122);
+            this.panel_map.Size = new System.Drawing.Size(327, 122);
             this.panel_map.TabIndex = 12;
             // 
             // button_convert_initialMapString
@@ -318,6 +336,8 @@
             // tabPage_target
             // 
             this.tabPage_target.AutoScroll = true;
+            this.tabPage_target.Controls.Add(this.textBox_target_dbNameList);
+            this.tabPage_target.Controls.Add(this.label6);
             this.tabPage_target.Controls.Add(this.checkBox_target_dontChangeOperations);
             this.tabPage_target.Controls.Add(this.checkBox_target_suppressOperLog);
             this.tabPage_target.Controls.Add(this.checkBox_target_dontSearchDup);
@@ -433,21 +453,24 @@
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
             // 
-            // label5
+            // label6
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(3, 85);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(83, 12);
-            this.label5.TabIndex = 14;
-            this.label5.Text = "册记录批次号:";
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(243, 67);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(143, 12);
+            this.label6.TabIndex = 10;
+            this.label6.Text = "自动选择目标数据库顺序:";
             // 
-            // textBox_convert_itemBatchNo
+            // textBox_target_dbNameList
             // 
-            this.textBox_convert_itemBatchNo.Location = new System.Drawing.Point(103, 82);
-            this.textBox_convert_itemBatchNo.Name = "textBox_convert_itemBatchNo";
-            this.textBox_convert_itemBatchNo.Size = new System.Drawing.Size(186, 21);
-            this.textBox_convert_itemBatchNo.TabIndex = 15;
+            this.textBox_target_dbNameList.AcceptsReturn = true;
+            this.textBox_target_dbNameList.Location = new System.Drawing.Point(245, 83);
+            this.textBox_target_dbNameList.Multiline = true;
+            this.textBox_target_dbNameList.Name = "textBox_target_dbNameList";
+            this.textBox_target_dbNameList.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_target_dbNameList.Size = new System.Drawing.Size(176, 149);
+            this.textBox_target_dbNameList.TabIndex = 11;
             // 
             // ImportExportForm
             // 
@@ -511,5 +534,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox textBox_convert_itemBatchNo;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox textBox_target_dbNameList;
+        private System.Windows.Forms.Label label6;
     }
 }
