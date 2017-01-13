@@ -56,6 +56,8 @@ namespace dp2Circulation
             this.button_loadFromSingleFile = new System.Windows.Forms.Button();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_selectFile = new System.Windows.Forms.TabPage();
+            this.label7 = new System.Windows.Forms.Label();
+            this.textBox_filter = new System.Windows.Forms.TextBox();
             this.button_getTodayFilename = new System.Windows.Forms.Button();
             this.button_getSingleLogFilename = new System.Windows.Forms.Button();
             this.tabPage_selectFiles = new System.Windows.Forms.TabPage();
@@ -79,8 +81,14 @@ namespace dp2Circulation
             this.button_repair_findSourceFilename = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox_repair_sourceFilename = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.textBox_filter = new System.Windows.Forms.TextBox();
+            this.tabPage_file = new System.Windows.Forms.TabPage();
+            this.listView_file = new System.Windows.Forms.ListView();
+            this.columnHeader_file_index = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_file_size = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_file_operation = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.toolStrip_file = new System.Windows.Forms.ToolStrip();
+            this.toolStripButton_file_load = new System.Windows.Forms.ToolStripButton();
+            this.columnHeader_file_operator = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_logRecords)).BeginInit();
             this.splitContainer_logRecords.Panel1.SuspendLayout();
             this.splitContainer_logRecords.Panel2.SuspendLayout();
@@ -95,6 +103,8 @@ namespace dp2Circulation
             this.tabPage_selectFiles.SuspendLayout();
             this.tabPage_logRecords.SuspendLayout();
             this.tabPage_repair.SuspendLayout();
+            this.tabPage_file.SuspendLayout();
+            this.toolStrip_file.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -312,6 +322,7 @@ namespace dp2Circulation
             this.tabControl_main.Controls.Add(this.tabPage_selectFiles);
             this.tabControl_main.Controls.Add(this.tabPage_logRecords);
             this.tabControl_main.Controls.Add(this.tabPage_repair);
+            this.tabControl_main.Controls.Add(this.tabPage_file);
             this.tabControl_main.Location = new System.Drawing.Point(9, 10);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl_main.Name = "tabControl_main";
@@ -335,6 +346,26 @@ namespace dp2Circulation
             this.tabPage_selectFile.TabIndex = 2;
             this.tabPage_selectFile.Text = "从单个日志文件装载";
             this.tabPage_selectFile.UseVisualStyleBackColor = true;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(2, 38);
+            this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(77, 12);
+            this.label7.TabIndex = 5;
+            this.label7.Text = "日志类型(&F):";
+            // 
+            // textBox_filter
+            // 
+            this.textBox_filter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_filter.Location = new System.Drawing.Point(92, 35);
+            this.textBox_filter.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_filter.Name = "textBox_filter";
+            this.textBox_filter.Size = new System.Drawing.Size(183, 21);
+            this.textBox_filter.TabIndex = 6;
             // 
             // button_getTodayFilename
             // 
@@ -622,25 +653,75 @@ namespace dp2Circulation
             this.textBox_repair_sourceFilename.Size = new System.Drawing.Size(183, 21);
             this.textBox_repair_sourceFilename.TabIndex = 4;
             // 
-            // label7
+            // tabPage_file
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(2, 38);
-            this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(77, 12);
-            this.label7.TabIndex = 5;
-            this.label7.Text = "日志类型(&F):";
+            this.tabPage_file.Controls.Add(this.listView_file);
+            this.tabPage_file.Controls.Add(this.toolStrip_file);
+            this.tabPage_file.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_file.Name = "tabPage_file";
+            this.tabPage_file.Size = new System.Drawing.Size(368, 233);
+            this.tabPage_file.TabIndex = 4;
+            this.tabPage_file.Text = "物理文件";
+            this.tabPage_file.UseVisualStyleBackColor = true;
             // 
-            // textBox_filter
+            // listView_file
             // 
-            this.textBox_filter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_filter.Location = new System.Drawing.Point(92, 35);
-            this.textBox_filter.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox_filter.Name = "textBox_filter";
-            this.textBox_filter.Size = new System.Drawing.Size(183, 21);
-            this.textBox_filter.TabIndex = 6;
+            this.listView_file.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader_file_index,
+            this.columnHeader_file_size,
+            this.columnHeader_file_operation,
+            this.columnHeader_file_operator});
+            this.listView_file.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView_file.FullRowSelect = true;
+            this.listView_file.HideSelection = false;
+            this.listView_file.Location = new System.Drawing.Point(0, 0);
+            this.listView_file.Name = "listView_file";
+            this.listView_file.Size = new System.Drawing.Size(368, 208);
+            this.listView_file.TabIndex = 1;
+            this.listView_file.UseCompatibleStateImageBehavior = false;
+            this.listView_file.View = System.Windows.Forms.View.Details;
+            this.listView_file.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_file_ColumnClick);
+            // 
+            // columnHeader_file_index
+            // 
+            this.columnHeader_file_index.Text = "序号";
+            // 
+            // columnHeader_file_size
+            // 
+            this.columnHeader_file_size.Text = "尺寸";
+            this.columnHeader_file_size.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.columnHeader_file_size.Width = 100;
+            // 
+            // columnHeader_file_operation
+            // 
+            this.columnHeader_file_operation.Text = "操作类型";
+            this.columnHeader_file_operation.Width = 100;
+            // 
+            // toolStrip_file
+            // 
+            this.toolStrip_file.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.toolStrip_file.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripButton_file_load});
+            this.toolStrip_file.Location = new System.Drawing.Point(0, 208);
+            this.toolStrip_file.Name = "toolStrip_file";
+            this.toolStrip_file.Size = new System.Drawing.Size(368, 25);
+            this.toolStrip_file.TabIndex = 0;
+            this.toolStrip_file.Text = "toolStrip1";
+            // 
+            // toolStripButton_file_load
+            // 
+            this.toolStripButton_file_load.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_file_load.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_file_load.Image")));
+            this.toolStripButton_file_load.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_file_load.Name = "toolStripButton_file_load";
+            this.toolStripButton_file_load.Size = new System.Drawing.Size(36, 22);
+            this.toolStripButton_file_load.Text = "装载";
+            this.toolStripButton_file_load.Click += new System.EventHandler(this.toolStripButton_file_load_Click);
+            // 
+            // columnHeader_file_operator
+            // 
+            this.columnHeader_file_operator.Text = "操作者";
+            this.columnHeader_file_operator.Width = 100;
             // 
             // OperLogForm
             // 
@@ -676,6 +757,10 @@ namespace dp2Circulation
             this.tabPage_logRecords.ResumeLayout(false);
             this.tabPage_repair.ResumeLayout(false);
             this.tabPage_repair.PerformLayout();
+            this.tabPage_file.ResumeLayout(false);
+            this.tabPage_file.PerformLayout();
+            this.toolStrip_file.ResumeLayout(false);
+            this.toolStrip_file.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -730,5 +815,13 @@ namespace dp2Circulation
         private System.Windows.Forms.ColumnHeader columnHeader_seconds;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox textBox_filter;
+        private System.Windows.Forms.TabPage tabPage_file;
+        private System.Windows.Forms.ListView listView_file;
+        private System.Windows.Forms.ToolStrip toolStrip_file;
+        private System.Windows.Forms.ColumnHeader columnHeader_file_index;
+        private System.Windows.Forms.ColumnHeader columnHeader_file_size;
+        private System.Windows.Forms.ColumnHeader columnHeader_file_operation;
+        private System.Windows.Forms.ToolStripButton toolStripButton_file_load;
+        private System.Windows.Forms.ColumnHeader columnHeader_file_operator;
     }
 }

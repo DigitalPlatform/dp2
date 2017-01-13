@@ -84,7 +84,7 @@ namespace dp2Catalog
 
 
         //保存界面信息
-        public ApplicationInfo AppInfo = new ApplicationInfo("dp2catalog.xml");
+        public ApplicationInfo AppInfo = null;  // new ApplicationInfo("dp2catalog.xml");
 
         public DigitalPlatform.StopManager stopManager = new DigitalPlatform.StopManager();
         public DigitalPlatform.Stop Stop = null;
@@ -152,6 +152,16 @@ namespace dp2Catalog
                 // 2015/8/8
                 this.UserLogDir = Path.Combine(this.UserDir, "log");
                 PathUtil.CreateDirIfNeed(this.UserLogDir);
+
+                // 将 dp2catalog.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+                nRet = MoveDp2catalogXml(out strError);
+                if (nRet == -1)
+                {
+                    this.ReportError("dp2catalog 移动 dp2catalog.xml 时出现错误", "(安静报错)" + strError);
+                    MessageBox.Show(this, strError);
+                }
+
+                this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "dp2catalog.xml"));
 
                 string strOldFileName = Path.Combine(this.DataDir, "zserver.xml");
                 string strNewFileName = Path.Combine(this.UserDir, "zserver.xml");
@@ -246,7 +256,6 @@ namespace dp2Catalog
             {
                 MessageBox.Show(this, "装载 EACC 码表文件时发生错误: " + ex.Message);
             }
-
 
             // 从文件中装载创建一个dp2ServerCollection对象
             // parameters:
@@ -344,7 +353,6 @@ namespace dp2Catalog
                 MessageBox.Show(this, strError);
             }
 
-
             this.LastSavePath = this.AppInfo.GetString(
                 "main_form",
                 "last_saved_path",
@@ -356,6 +364,72 @@ namespace dp2Catalog
             this.m_strPinyinGcatID = this.AppInfo.GetString("entity_form", "gcat_pinyin_api_id", "");
             this.m_bSavePinyinGcatID = this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", false);
 #endif
+        }
+
+        // 将 dp2catalog.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+        int MoveDp2catalogXml(out string strError)
+        {
+            strError = "";
+
+            string strTargetFileName = Path.Combine(this.UserDir, "dp2catalog.xml");
+            if (File.Exists(strTargetFileName) == true)
+                return 0;
+
+            string strSourceDirectory = "";
+            if (ApplicationDeployment.IsNetworkDeployed == true)
+            {
+                strSourceDirectory = Application.LocalUserAppDataPath;
+            }
+            else
+            {
+                strSourceDirectory = Environment.CurrentDirectory;
+            }
+
+            string strSourceFileName = Path.Combine(strSourceDirectory, "dp2catalog.xml");
+            if (File.Exists(strSourceFileName) == false)
+                return 0;   // 没有源文件，无法做什么
+
+            try
+            {
+                File.Copy(strSourceFileName, strTargetFileName, false);
+            }
+            catch (Exception ex)
+            {
+                strError = "复制文件 '" + strSourceFileName + "' 到 '" + strTargetFileName + "' 时出现异常：" + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
+            return 0;
+        }
+
+        public void ReportError(string strTitle,
+string strError)
+        {
+            // 发送给 dp2003.com
+            string strText = strError;
+            if (string.IsNullOrEmpty(strText) == true)
+                return;
+
+            strText += "\r\n\r\n===\r\n";   // +PackageEventLog.GetEnvironmentDescription().Replace("\t", "    ");
+
+            try
+            {
+                // 发送报告
+                int nRet = LibraryChannel.CrashReport(
+                    "@MAC:" + Program.GetMacAddressString(),
+                    strTitle,
+                    strText,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "CrashReport() (" + strTitle + ") 出错: " + strError;
+                    this.WriteErrorLog(strError);
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "CrashReport() (" + strTitle + ") 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.WriteErrorLog(strError);
+            }
         }
 
         public void StartPrepareNames(bool bFullInitial)
@@ -382,10 +456,12 @@ namespace dp2Catalog
                 }
             }
 
-            string[] types = strOpenedMdiWindow.Split(new char[] { ',' });
-            for (int i = 0; i < types.Length; i++)
+            List<string> types = StringUtil.SplitList(strOpenedMdiWindow);
+            StringUtil.RemoveDup(ref types);
+            // string[] types = strOpenedMdiWindow.Split(new char[] { ',' });
+            foreach (string strType in types)
             {
-                string strType = types[i];
+                // string strType = types[i];
                 if (String.IsNullOrEmpty(strType) == true)
                     continue;
 
@@ -408,7 +484,7 @@ namespace dp2Catalog
             // 广告窗口
             MenuItem_openAdvertiseForm_Click(this, null);
 
-            // 装载MDI子窗口状态
+            // 装载 MDI 子窗口状态
             this.AppInfo.LoadFormMdiChildStates(this,
                 "mainformstate");
         }
@@ -428,7 +504,6 @@ namespace dp2Catalog
                 {
                     return false;
                 }
-
             }
         }
 
@@ -1383,28 +1458,185 @@ namespace dp2Catalog
         // 打开Z39.50检索窗
         private void MenuItem_openZSearchForm_Click(object sender, EventArgs e)
         {
+#if NO
             ZSearchForm form = new ZSearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<ZSearchForm>();
         }
+
+        T OpenWindow<T>()
+        {
+            if (Control.ModifierKeys == Keys.Control)
+            {
+                T form = Activator.CreateInstance<T>();
+                dynamic o = form;
+                o.MdiParent = this;
+
+                if (o.MainForm == null)
+                {
+                    try
+                    {
+                        o.MainForm = this;
+                    }
+                    catch
+                    {
+                        // 等将来所有窗口类型的 MainForm 都是只读的以后，再修改这里
+                    }
+                }
+                o.Show();
+                return form;
+            }
+            else
+                return EnsureChildForm<T>(true);
+        }
+
+        /// <summary>
+        /// 获得一个已经打开的 MDI 子窗口，如果没有，则新打开一个
+        /// </summary>
+        /// <typeparam name="T">子窗口类型</typeparam>
+        /// <returns>子窗口对象</returns>
+        public T EnsureChildForm<T>(bool bActivate = false)
+        {
+            T form = GetTopChildWindow<T>();
+            if (form == null)
+            {
+                form = Activator.CreateInstance<T>();
+                dynamic o = form;
+                o.MdiParent = this;
+
+                // 2013/3/26
+                if (o.MainForm == null)
+                {
+                    try
+                    {
+                        o.MainForm = this;
+                    }
+                    catch
+                    {
+                        // 等将来所有窗口类型的 MainForm 都是只读的以后，再修改这里
+                    }
+                }
+                o.Show();
+            }
+            else
+            {
+                if (bActivate == true)
+                {
+                    try
+                    {
+                        dynamic o = form;
+                        o.Activate();
+
+                        if (o.WindowState == FormWindowState.Minimized)
+                            o.WindowState = FormWindowState.Normal;
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+            return form;
+        }
+
+        /// <summary>
+        /// 得到特定类型的顶层 MDI 子窗口
+        /// 注：不算 Fixed 窗口
+        /// </summary>
+        /// <typeparam name="T">子窗口类型</typeparam>
+        /// <returns>子窗口对象</returns>
+        public T GetTopChildWindow<T>()
+        {
+            if (ActiveMdiChild == null)
+                return default(T);
+
+            // 得到顶层的MDI Child
+            IntPtr hwnd = this.ActiveMdiChild.Handle;
+
+            if (hwnd == IntPtr.Zero)
+                return default(T);
+
+            while (hwnd != IntPtr.Zero)
+            {
+                Form child = null;
+                // 判断一个窗口句柄，是否为 MDI 子窗口？
+                // return:
+                //      null    不是 MDI 子窗口o
+                //      其他      返回这个句柄对应的 Form 对象
+                child = IsChildHwnd(hwnd);
+                if (child != null && IsFixedMyForm(child) == false)  // 2016/12/16 跳过固定于左侧的 MyForm
+                {
+                    // if (child is T)
+                    if (child.GetType().Equals(typeof(T)) == true)
+                    {
+                        try
+                        {
+                            return (T)Convert.ChangeType(child, typeof(T));
+                        }
+                        catch (InvalidCastException ex)
+                        {
+                            throw new InvalidCastException("在将类型 '" + child.GetType().ToString() + "' 转换为类型 '" + typeof(T).ToString() + "' 的过程中出现异常: " + ex.Message, ex);
+                        }
+                    }
+                }
+
+                hwnd = API.GetWindow(hwnd, API.GW_HWNDNEXT);
+            }
+
+            return default(T);
+        }
+
+        // 是否为固定于左侧的 MyForm?
+        static bool IsFixedMyForm(Form child)
+        {
+            if (child is MyForm)
+            {
+                if (((MyForm)child).Fixed)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 判断一个窗口句柄，是否为 MDI 子窗口？
+        // 注：不处理 Visible == false 的窗口。因为取 Handle 会导致 Visible 变成 true
+        // return:
+        //      null    不是 MDI 子窗口o
+        //      其他      返回这个句柄对应的 Form 对象
+        Form IsChildHwnd(IntPtr hwnd)
+        {
+            foreach (Form child in this.MdiChildren)
+            {
+                if (child.Visible == true && hwnd == child.Handle)
+                    return child;
+            }
+
+            return null;
+        }
+
 
         // 打开MARC记录窗
         private void MenuItem_openMarcDetailForm_Click(object sender, EventArgs e)
         {
+#if NO
             MarcDetailForm form = new MarcDetailForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<MarcDetailForm>();
         }
 
         // 带有模板
         private void MenuItem_openMarcDetailFormEx_Click(object sender, EventArgs e)
         {
+#if NO
             MarcDetailForm form = new MarcDetailForm();
 
             form.MdiParent = this;
@@ -1412,28 +1644,36 @@ namespace dp2Catalog
             form.MainForm = this;
             form.Show();
             form.LoadTemplate();
+#endif
+            MarcDetailForm form = OpenWindow<MarcDetailForm>();
+            form.LoadTemplate();
         }
 
         // 打开XML记录窗
         private void MenuItem_loadXmlDetailForm_Click(object sender, EventArgs e)
         {
+#if NO
             XmlDetailForm form = new XmlDetailForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<XmlDetailForm>();
         }
 
         private void MenuItem_openBerDebugForm_Click(object sender, EventArgs e)
         {
+#if NO
             BerDebugForm form = new BerDebugForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
-
+#endif
+            OpenWindow<BerDebugForm>();
         }
 
         private void MenuItem_saveOriginRecordToWorksheet_Click(object sender, EventArgs e)
@@ -1477,11 +1717,14 @@ namespace dp2Catalog
 
         private void MenuItem_openZhongcihaoForm_Click(object sender, EventArgs e)
         {
+#if NO
             ZhongcihaoForm form = new ZhongcihaoForm();
 
             form.MdiParent = this;
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<ZhongcihaoForm>();
         }
 
         private void MenuItem_exit_Click(object sender, EventArgs e)
@@ -1523,12 +1766,15 @@ namespace dp2Catalog
         // Dtlp协议检索窗
         private void MenuItem_openDtlpSearchForm_Click(object sender, EventArgs e)
         {
+#if NO
             DtlpSearchForm form = new DtlpSearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<DtlpSearchForm>();
         }
 
         // dp2library协议检索窗
@@ -1567,24 +1813,29 @@ namespace dp2Catalog
 
 #endif
 
+#if NO
             dp2SearchForm form = new dp2SearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<dp2SearchForm>();
         }
 
         // OAI-PMH协议检索窗
         private void MenuItem_openOaiSearchForm_Click(object sender, EventArgs e)
         {
+#if NO
             OaiSearchForm form = new OaiSearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
-
+#endif
+            OpenWindow<OaiSearchForm>();
         }
 
 
@@ -1669,45 +1920,57 @@ namespace dp2Catalog
 
         private void MenuItem_openDtlpLogForm_Click(object sender, EventArgs e)
         {
+#if NO
             DtlpLogForm form = new DtlpLogForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<DtlpLogForm>();
         }
 
         private void MenuItem_openEaccForm_Click(object sender, EventArgs e)
         {
+#if NO
             EaccForm form = new EaccForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
-
+#endif
+            OpenWindow<EaccForm>();
         }
 
         // 打开DC记录窗
         private void MenuItem_openDcForm_Click(object sender, EventArgs e)
         {
+#if NO
             DcForm form = new DcForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<DcForm>();
         }
 
         // 打开DC记录窗 带模板
         private void MenuItem_openDcFormEx_Click(object sender, EventArgs e)
         {
+#if NO
             DcForm form = new DcForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+            form.LoadTemplate();
+#endif
+            DcForm form = OpenWindow<DcForm>();
             form.LoadTemplate();
         }
 
@@ -1743,12 +2006,15 @@ namespace dp2Catalog
 
         private void MenuItem_openTestForm_Click(object sender, EventArgs e)
         {
+#if NO
             TestForm form = new TestForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<TestForm>();
         }
 
         #endregion
@@ -2158,12 +2424,15 @@ out string strError)
         // 打开修改密码窗
         private void MenuItem_changePassword_Click(object sender, EventArgs e)
         {
+#if NO
             ChangePasswordForm form = new ChangePasswordForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<ChangePasswordForm>();
         }
 
         // 缺省的MDI子窗口宽度
@@ -2655,22 +2924,28 @@ out string strError)
 
         private void MenuItem_openZBatchSearchForm_Click(object sender, EventArgs e)
         {
+#if NO
             ZBatchSearchForm form = new ZBatchSearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<ZBatchSearchForm>();
         }
 
         private void MenuItem_openAmazonSearchForm_Click(object sender, EventArgs e)
         {
+#if NO
             AmazonSearchForm form = new AmazonSearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<AmazonSearchForm>();
         }
 
         protected override void DefWndProc(ref Message m)
@@ -2817,12 +3092,15 @@ out string strError)
 
         private void MenuItem_openZBatchSearchForm1_Click(object sender, EventArgs e)
         {
+#if NO
             ZBatchSearchForm form = new ZBatchSearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<ZBatchSearchForm>();
         }
 
         // 把字符串中的汉字转换为四角号码
@@ -4428,10 +4706,13 @@ out string strError)
 
         private void MenuItem_openAdvertiseForm_Click(object sender, EventArgs e)
         {
+#if NO
             AdvertiseForm form = new AdvertiseForm();
             form.MdiParent = this;
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<AdvertiseForm>();
         }
 
         private void MenuItem_openUserFolder_Click(object sender, EventArgs e)

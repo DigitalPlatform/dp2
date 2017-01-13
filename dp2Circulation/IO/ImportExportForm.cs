@@ -253,6 +253,10 @@ strStringTable);
                 {
                     return this.checkBox_convert_addBiblioToItem.Checked;
                 }));
+                info.AddBiblioToItemOnMerging = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_convert_addBiblioToItemOnMergin.Checked;
+                }));
                 info.OverwriteBiblio = (bool)this.Invoke(new Func<bool>(() =>
                 {
                     return this.checkBox_target_restoreOldID.Checked;
@@ -693,6 +697,7 @@ this.MainForm.ActivateFixPage("history")
                         // 提示是否强行覆盖?
                     }
 
+                    info.MergeStyle = "";
                     if (info.Channel.ErrorCode == ErrorCode.BiblioDup)
                     {
                         string strDialogAction = "";
@@ -746,6 +751,7 @@ this.MainForm.ActivateFixPage("history")
                             // 合并源文件中的册到目标位置
                             Debug.Assert(string.IsNullOrEmpty(strTargetRecPath) == false, "");
                             strOutputPath = strTargetRecPath;
+                            info.MergeStyle = strDialogAction;
                             goto CONTINUE;
                         }
                         if (strDialogAction == "mergeToUseSourceBiblio")
@@ -788,6 +794,7 @@ out strError);
                             if (nRet == 0)
                                 return false;
 
+                            info.MergeStyle = strDialogAction;
                             goto CONTINUE;
                         }
                     }
@@ -1180,7 +1187,9 @@ new string[] { "重试", "跳过", "中断" });
                         }
                     }
 
-                    if (info.AddBiblioToItem)
+                    if (info.AddBiblioToItem
+                        || (info.AddBiblioToItemOnMerging == true && info.MergeStyle.StartsWith("mergeTo"))
+                        )
                         AddBiblioToItem(item_dom, info.BiblioXml);
 
                     if (string.IsNullOrEmpty(info.ItemBatchNo) == false)
@@ -1412,6 +1421,9 @@ new string[] { "继续", "中断" });
             // 是否为册记录自动添加书目元素。(注：如果册记录中本来有了这个元素就不添加了)
             public bool AddBiblioToItem = false;
 
+            // 是否为书目发生合并时的册记录自动添加书目元素。
+            public bool AddBiblioToItemOnMerging = false;
+
             // 是否覆盖书目记录(恢复到原始 ID)。false 表示为追加
             public bool OverwriteBiblio = false;
             public string TargetBiblioDbName = "";  // 目标书目库名
@@ -1432,6 +1444,7 @@ new string[] { "继续", "中断" });
             public MergeRegistry AutoMergeRegistry = null;
 
             // *** 以下成员都是在运行中动态设定和变化的
+            public string MergeStyle = "";  // 书目记录合并策略
             public bool AutoSelectMode = false; // (发现书目重复时)是否自动选择目标
             public bool Start = true;   // 是否进入开始处理状态
             public string StartBiblioRecPath = "";  // 定位源文件中需开始处理的一条记录的路径
@@ -1463,6 +1476,7 @@ new string[] { "继续", "中断" });
                 this.OrderRefIDTable.Clear();
                 this.BiblioRecPath = "";
                 this.UploadedSubItems = 0;
+                this.MergeStyle = "";
             }
         }
 
@@ -1537,37 +1551,58 @@ new string[] { "继续", "中断" });
             {
                 List<object> controls = new List<object>();
                 controls.Add(this.textBox_source_fileName);
+
+                controls.Add(this.checkBox_subRecords_entity);
+                controls.Add(this.checkBox_subRecords_issue);
+                controls.Add(this.checkBox_subRecords_order);
+                controls.Add(this.checkBox_subRecords_comment);
+                controls.Add(this.checkBox_subRecords_object);
+
                 controls.Add(this.textBox_objectDirectoryName);
+                controls.Add(this.textBox_source_range);
+
+                controls.Add(this.checkBox_convert_addBiblioToItem);
+                controls.Add(this.checkBox_convert_addBiblioToItemOnMergin);
+                controls.Add(this.textBox_convert_itemBatchNo);
+
                 controls.Add(this.comboBox_target_targetBiblioDbName);
                 controls.Add(this.checkBox_target_randomItemBarcode);
-                controls.Add(this.checkBox_convert_addBiblioToItem);
                 controls.Add(this.checkBox_target_restoreOldID);
 
                 controls.Add(this.checkBox_target_dontSearchDup);
                 controls.Add(this.checkBox_target_suppressOperLog);
                 controls.Add(this.checkBox_target_dontChangeOperations);
-                controls.Add(this.textBox_source_range);
 
-                controls.Add(this.textBox_convert_itemBatchNo);
                 controls.Add(this.textBox_target_dbNameList);
+
                 return GuiState.GetUiState(controls);
             }
             set
             {
                 List<object> controls = new List<object>();
                 controls.Add(this.textBox_source_fileName);
+
+                controls.Add(this.checkBox_subRecords_entity);
+                controls.Add(this.checkBox_subRecords_issue);
+                controls.Add(this.checkBox_subRecords_order);
+                controls.Add(this.checkBox_subRecords_comment);
+                controls.Add(this.checkBox_subRecords_object);
+
                 controls.Add(this.textBox_objectDirectoryName);
+                controls.Add(this.textBox_source_range);
+
+                controls.Add(this.checkBox_convert_addBiblioToItem);
+                controls.Add(this.checkBox_convert_addBiblioToItemOnMergin);
+                controls.Add(this.textBox_convert_itemBatchNo);
+
                 controls.Add(this.comboBox_target_targetBiblioDbName);
                 controls.Add(this.checkBox_target_randomItemBarcode);
-                controls.Add(this.checkBox_convert_addBiblioToItem);
                 controls.Add(this.checkBox_target_restoreOldID);
 
                 controls.Add(this.checkBox_target_dontSearchDup);
                 controls.Add(this.checkBox_target_suppressOperLog);
                 controls.Add(this.checkBox_target_dontChangeOperations);
-                controls.Add(this.textBox_source_range);
 
-                controls.Add(this.textBox_convert_itemBatchNo);
                 controls.Add(this.textBox_target_dbNameList);
                 GuiState.SetUiState(controls, value);
             }

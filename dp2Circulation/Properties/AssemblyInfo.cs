@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.26.*")]  // "2.4.*"
-[assembly: AssemblyFileVersion("2.26.0.0")]
+[assembly: AssemblyVersion("2.27.*")]  // "2.4.*"
+[assembly: AssemblyFileVersion("2.27.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -55,4 +55,5 @@ using System.Runtime.InteropServices;
 // 2.24 2016/11/16 种册窗采用新版 GetBiblioInfos() API 一次性同时获得十条以内的册、订购、期、评注记录。此功能需要和 dp2library 2.91 版和以上版本配套使用才具备
 // 2.25 2016/11/22 加拼音和著者号码都改用 http://dp2003.com/dp2library 服务器了。不过著者号码如果配置了以前的 URL http://dp2003.com/gcatserver 依然还可以兼容使用
 // 2.26 2016/12/9 报表窗本地存储 operlogamerce 表解决了 'undo' action 行的 price 为空的问题
+// 2.27 2017/1/14 client.cs 允许定义 TransformBarcode() 函数，对输入的条码号进行变换
 

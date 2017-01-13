@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <root>
-  <action element="state" type="" list="issueState">
+  <action element="state" type="" list="issueState" additional="combine">
     <caption lang="zh">状态</caption>
   </action>
   <action element="publishTime" type="" list="">

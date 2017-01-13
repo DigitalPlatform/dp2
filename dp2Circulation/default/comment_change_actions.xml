@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <root>
-  <action element="state" type="" list="commentState">
+  <action element="state" type="" list="commentState" additional="combine">
     <caption lang="zh">状态</caption>
   </action>
   <action element="type" type="" list="commentType">

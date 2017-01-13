@@ -933,7 +933,7 @@ MessageBoxDefaultButton.Button1);
             // search.MainForm = this.MainForm;
             search.TempFileDir = this.MainForm.UserTempDir;
 
-            search.Timeout = 5 * 1000;
+            search.Timeout = 5 * 1000; // 5
             search.Idle += search_Idle;
             try
             {

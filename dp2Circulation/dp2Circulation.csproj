@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>137</ApplicationRevision>
+    <ApplicationRevision>142</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -230,6 +230,12 @@
       <DependentUpon>SelectItemDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Charging\SummaryList.cs" />
+    <Compile Include="Charging\TargetLocationDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Charging\TargetLocationDialog.Designer.cs">
+      <DependentUpon>TargetLocationDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Dictionary\RelationCollection.cs" />
     <Compile Include="Dictionary\RelationControl.cs">
       <SubType>UserControl</SubType>
@@ -1419,9 +1425,11 @@
     </Content>
     <Content Include="default\issue_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="default\item_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="message.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -1495,9 +1503,11 @@
     </Content>
     <Content Include="default\order_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="default\patron_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="printslice.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -1534,6 +1544,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Charging\SelectItemDialog.resx">
       <DependentUpon>SelectItemDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Charging\TargetLocationDialog.resx">
+      <DependentUpon>TargetLocationDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Dictionary\RelationControl.resx">
       <DependentUpon>RelationControl.cs</DependentUpon>

@@ -1664,13 +1664,22 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 记载读者记录
+                    bool bClipped = false;
                     XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "readerRecord", readerdom.OuterXml);
+                        "readerRecord",
+                        ClipReaderXml(readerdom, out bClipped)
+                        // readerdom.OuterXml
+                        );
                     DomUtil.SetAttr(node, "recPath", strOutputReaderRecPath);
+                    if (bClipped)
+                        DomUtil.SetAttr(node, "clipping", "true");
 
                     // 记载册记录
                     node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "itemRecord", itemdom.OuterXml);
+                        "itemRecord",
+                        ShrinkItemXml(itemdom)
+                        // itemdom.OuterXml
+                        );
                     DomUtil.SetAttr(node, "recPath", strOutputItemRecPath);
 
                     nRet = this.OperLog.WriteOperLog(domOperLog,
@@ -2227,6 +2236,61 @@ start_time_1,
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 2017/1/12
+        // 裁剪读者记录中的 borrow 元素
+        static string ClipReaderXml(XmlDocument source, out bool bClipped)
+        {
+            int MAX_COUNT = 10;
+
+            bClipped = false;
+            XmlDocument target = new XmlDocument();
+            target.LoadXml(source.OuterXml);
+
+            // 删除 borrowHistory 元素
+            DomUtil.DeleteElement(target.DocumentElement, "borrowHistory");
+
+            XmlNodeList nodes = target.DocumentElement.SelectNodes("borrows/borrow");
+            if (nodes.Count <= MAX_COUNT)
+                return target.OuterXml;
+
+            XmlNode node = DomUtil.SetElementText(target.DocumentElement, "borrows", "...");
+            DomUtil.SetAttr(node, "count", nodes.Count.ToString());
+            DomUtil.SetAttr(node, "clipping", "true");
+            bClipped = true;
+
+            // 顺便也把占空间的一些元素剪裁了
+            // 注：只有当 borrows 元素被裁剪的时候，fingerprint 元素才会被裁剪。所以判断读者记录是否被裁剪的时候，只要判断 borrows 元素的 clipping 属性就可以了
+            ClipElement(target.DocumentElement, "fingerprint");
+
+            return target.OuterXml;
+        }
+
+        static void ClipElement(XmlElement start, string xpath)
+        {
+            XmlElement node = start.SelectSingleNode(xpath) as XmlElement;
+            if (node == null)
+                return;
+            node.RemoveAll();
+            node.SetAttribute("clipping", "true");
+        }
+
+        // 裁剪册记录中的 borrowHistory 元素
+        static string ShrinkItemXml(XmlDocument source)
+        {
+            XmlDocument target = new XmlDocument();
+            target.LoadXml(source.OuterXml);
+
+            // 删除 borrowHistory 元素
+            DomUtil.DeleteElement(target.DocumentElement, "borrowHistory");
+
+            // 清除空元素，节省日志记录空间
+            DomUtil.RemoveEmptyElements(target.DocumentElement);
+
+            // 把占空间的 biblio 元素剪裁
+            ClipElement(target.DocumentElement, "biblio");
+            return target.OuterXml;
         }
 
         // 写入长时操作日志
@@ -5302,15 +5366,24 @@ start_time_1,
                     }
 
                     // 写入读者记录
+                    bool bClipped = false;
                     XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                        "readerRecord", readerdom.OuterXml);
+                        "readerRecord",
+                        ClipReaderXml(readerdom, out bClipped)
+                        // readerdom.OuterXml
+                        );
                     DomUtil.SetAttr(node, "recPath", strOutputReaderRecPath);
+                    if (bClipped)
+                        DomUtil.SetAttr(node, "clipping", "true");
 
                     // 写入册记录
                     if (itemdom != null)
                     {
                         node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                            "itemRecord", itemdom.OuterXml);
+                            "itemRecord", 
+                            ShrinkItemXml(itemdom)
+                            // itemdom.OuterXml
+                            );
                         DomUtil.SetAttr(node, "recPath", strOutputItemRecPath);
                     }
 
@@ -12281,7 +12354,7 @@ out string strError)
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "获得参考ID为 '"+strNotifyID+"' 的预约到书记录时出错: " + strError;
+                    strError = "获得参考ID为 '" + strNotifyID + "' 的预约到书记录时出错: " + strError;
                     return -1;
                 }
                 if (nRet == 0)
@@ -12295,9 +12368,9 @@ out string strError)
                 {
                     notify_dom.LoadXml(strNotifyXml);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    strError = "预约到书记录 '"+strOutputPath+"' 装入 XMLDOM 时出错: " + ex.Message;
+                    strError = "预约到书记录 '" + strOutputPath + "' 装入 XMLDOM 时出错: " + ex.Message;
                     return -1;
                 }
 

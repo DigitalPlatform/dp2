@@ -4745,6 +4745,25 @@ Stack:
             }
         }
 
+        // 观察一个特定分馆是否需要变换条码号?
+        public bool NeedTranformBarcode(string strLibraryCode)
+        {
+            string strError = "";
+            string strBarcode = "?transform";
+            // 变换条码号
+            // return:
+            //      -1  出错
+            //      0   没有发生改变
+            //      1   发生了改变
+            int nRet = TransformBarcode(
+                strLibraryCode,
+                ref strBarcode,
+                out strError);
+            if (nRet == 1)
+                return true;
+            return false;
+        }
+
         // 变换条码号
         // return:
         //      -1  出错
@@ -4769,6 +4788,32 @@ Stack:
                 dynamic o = this.ClientHost;
                 try
                 {
+                    /*
+	public int TransformBarcode(
+                        string strLibraryCode,
+                        ref string strBarcode,
+                        out string strError)
+	{
+		strError = "";
+
+		if (strLibraryCode == "北京西马金润小学")
+		{
+            // 让宿主能知道这个分馆需要主动打开 transform 功能 
+            if (strBarcode == "?transform")
+                return 1;
+                
+            // 以前历史遗留的册条码号，要加上 XM 前缀才能和册记录吻合 
+			if (strBarcode.Length == 6 && strBarcode.StartsWith("23") == false)
+            {
+                strBarcode = "XM" + strBarcode;
+			    return 1;
+            }
+            return 0;
+		}
+
+		return 0;
+	}
+                     * * */
                     return o.TransformBarcode(
                         strLibraryCode,
                         ref strBarcode,

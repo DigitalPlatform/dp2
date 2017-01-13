@@ -1340,7 +1340,7 @@ namespace dp2Circulation
 
             // 2017/1/4
             // 变换条码号
-            if (this.NeedVerifyBarcode == true)
+            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
             {
                 string strText = this.textBox_readerBarcode.Text;
 
@@ -1996,7 +1996,7 @@ dlg.UiState);
 
             // 2017/1/4
             // 变换条码号
-            if (this.NeedVerifyBarcode == true)
+            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
             {
                 string strText = this.textBox_itemBarcode.Text;
 
@@ -3443,6 +3443,11 @@ Keys keyData)
         /// 配书
         /// </summary>
         Boxing = 12,    // 配书 2016/12/3
+
+        /// <summary>
+        /// 移交
+        /// </summary>
+        Move = 13,  // 移交 2017/1/12
     }
 
     /*public*/

@@ -70,7 +70,7 @@ namespace dp2Circulation
         bool StoreInTempFile = false;
 
         // 参与排序的列号数组
-        SortColumns SortColumns = new SortColumns();
+        SortColumns SortColumns_records = new SortColumns();
 
 #if NO
         public LibraryChannel Channel = new LibraryChannel();
@@ -220,7 +220,7 @@ namespace dp2Circulation
             this.listView_records.Items.Clear();
             this.listView_records.Update();
 
-            this.SortColumns.Clear();
+            this.SortColumns_records.Clear();
             SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
 
             if (this.m_operlogViewer != null)
@@ -3526,13 +3526,13 @@ FileShare.ReadWrite))
             if (nClickColumn == 1)
                 sortStyle = ColumnSortStyle.RightAlign;
 
-            this.SortColumns.SetFirstColumn(nClickColumn,
+            this.SortColumns_records.SetFirstColumn(nClickColumn,
                 sortStyle,
                 this.listView_records.Columns,
                 true);
 
             // 排序
-            this.listView_records.ListViewItemSorter = new SortColumnsComparer(this.SortColumns);
+            this.listView_records.ListViewItemSorter = new SortColumnsComparer(this.SortColumns_records);
 
             this.listView_records.ListViewItemSorter = null;
 
@@ -7420,6 +7420,461 @@ MessageBoxDefaultButton.Button1);
                 GuiState.SetUiState(controls, value);
             }
         }
+
+        private void toolStripButton_file_load_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Title = "请指定日志文件名";
+            // dlg.FileName = this.textBox_repair_sourceFilename.Text;
+            dlg.Filter = "日志文件 (*.log)|*.log|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            string strError = "";
+            int nRet = 0;
+
+            this.EnableControls(false);
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在装在日志文件 " + dlg.FileName + " ...");
+            stop.BeginLoop();
+            try
+            {
+                nRet = LoadFile(dlg.FileName, out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                this.EnableControls(true);
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        int LoadFile(string strFileName,
+            out string strError)
+        {
+            strError = "";
+
+            this.listView_file.Items.Clear();
+            this.SortColumns_file.Clear();
+            SortColumns.ClearColumnSortDisplay(this.listView_file.Columns);
+
+            this.listView_file.BeginUpdate();
+
+            using (Stream source = File.Open(
+                        strFileName,
+                        FileMode.Open,
+                        FileAccess.ReadWrite, // Read会造成无法打开 2007/5/22
+                        FileShare.ReadWrite))
+            {
+                if (stop != null)
+                    stop.SetProgressRange(0, source.Length);
+
+                for (int i = 0; ; i++)
+                {
+                    Application.DoEvents();
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断1";
+                        return -1;
+                    }
+
+                    long lStart = source.Position;
+
+                    LogRecordInfo info = null;
+                    int nRet = ReadLogRecord(
+                        source,
+                        out info,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    if (stop != null)
+                        stop.SetProgressValue(source.Position);
+
+                    if (source.Position >= source.Length)
+                        break;
+
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml(info.Body);
+
+                    string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+
+                    string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
+
+                    ListViewItem item = new ListViewItem();
+                    ListViewUtil.ChangeItemText(item, COLUMN_FILE_INDEX, (i + 1).ToString());
+                    ListViewUtil.ChangeItemText(item, COLUMN_FILE_SIZE, info.Length.ToString());
+                    ListViewUtil.ChangeItemText(item, COLUMN_FILE_OPERATION, strOperation);
+                    ListViewUtil.ChangeItemText(item, COLUMN_FILE_OPERATOR, strOperator);
+
+                    this.listView_file.Items.Add(item);
+                }
+            }
+
+            this.listView_file.EndUpdate();
+            return 0;
+        }
+
+        const int COLUMN_FILE_INDEX = 0;
+        const int COLUMN_FILE_SIZE = 1;
+        const int COLUMN_FILE_OPERATION = 2;
+        const int COLUMN_FILE_OPERATOR = 3;
+
+
+        class LogRecordInfo
+        {
+            public long Length { get; set; }
+            public string Metadata { get; set; }
+            public string Body { get; set; }
+            public long AttachmentLength { get; set; }
+        }
+
+        static int ReadLogRecord(
+            Stream stream,
+            out LogRecordInfo info,
+            out string strError)
+        {
+            strError = "";
+
+            info = new LogRecordInfo();
+
+            long lStart = stream.Position;	// 记忆起始位置
+
+            byte[] length = new byte[8];
+
+            int nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "ReadLogRecord()从偏移量 " + lStart.ToString() + " 开始试图读入8个byte，但是只读入了 " + nRet.ToString() + " 个。起始位置不正确";
+                return -1;
+            }
+
+            Int64 lRecordLength = BitConverter.ToInt64(length, 0);
+
+            if (lRecordLength == 0)
+            {
+                strError = "VerifyLogRecord()从偏移量 " + lStart.ToString() + " 开始读入了8个byte，其整数值为0，表明不是正常的记录长度";
+                return -1;
+            }
+
+            info.Length = lRecordLength;
+
+            Debug.Assert(lRecordLength != 0, "");
+
+            if (lRecordLength < 0)
+            {
+                strError = "lRecordLength = " + lRecordLength.ToString() + "不正常，为负数";
+                return -1;
+            }
+
+            if (lRecordLength > stream.Length - (lStart + 8))
+            {
+                strError = "lRecordLength = " + lRecordLength.ToString() + "不正常，超过文件尾部";
+                return -1;
+            }
+
+            string strMetadata = "";
+            string strBody = "";
+            // 读入 xml 事项
+            nRet = ReadEntry(stream,
+                true,
+                out strMetadata,
+                out strBody,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            info.Metadata = strMetadata;
+            info.Body = strBody;
+
+            string strTempMatadata = "";
+            long lAttachmentLength = 0;
+            // 读出attachment事项
+            nRet = ReadEntry(
+                stream,
+                true,
+                out strTempMatadata,
+                out lAttachmentLength,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            info.AttachmentLength = lAttachmentLength;
+
+            // 文件指针此时自然在末尾
+            if (stream.Position - lStart != lRecordLength + 8)
+            {
+                // Debug.Assert(false, "");
+                strError = "Record长度经检验不正确: stream.Position - lStart ["
+                    + (stream.Position - lStart).ToString()
+                    + "] 不等于 lRecordLength + 8 ["
+                    + (lRecordLength + 8).ToString()
+                    + "]";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 读出一个事项(string类型)
+        // parameters:
+        public static int ReadEntry(
+            Stream stream,
+            bool bRead,
+            out string strMetaData,
+            out string strBody,
+            out string strError)
+        {
+            strMetaData = "";
+            strBody = "";
+            strError = "";
+
+            long lStart = stream.Position;  // 保留起始位置
+
+            byte[] length = new byte[8];
+
+            int nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "起始位置不正确";
+                return -1;
+            }
+
+            Int64 lEntryLength = BitConverter.ToInt64(length, 0);
+
+            // metadata长度
+            nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "metadata长度位置不足8bytes";
+                return -1;
+            }
+
+            Int64 lMetaDataLength = BitConverter.ToInt64(length, 0);
+
+            if (lMetaDataLength > 100 * 1024)
+            {
+                strError = "记录格式不正确，metadata长度超过100K";
+                return -1;
+            }
+
+            if (lMetaDataLength > 0)
+            {
+                if (bRead)
+                {
+                    byte[] metadatabody = new byte[(int)lMetaDataLength];
+
+                    nRet = stream.Read(metadatabody, 0, (int)lMetaDataLength);
+                    if (nRet < (int)lMetaDataLength)
+                    {
+                        strError = "metadata不足其长度定义";
+                        return -1;
+                    }
+
+                    strMetaData = Encoding.UTF8.GetString(metadatabody);
+                }
+                else
+                    stream.Seek(lMetaDataLength, SeekOrigin.Current);
+            }
+
+
+
+
+            // strBody长度
+            nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "strBody长度位置不足8bytes";
+                return -1;
+            }
+
+            Int64 lBodyLength = BitConverter.ToInt64(length, 0);
+
+            if (lBodyLength > 1000 * 1024)
+            {
+                strError = "记录格式不正确，body长度超过1000K";
+                return -1;
+            }
+
+            if (lBodyLength > 0)
+            {
+                if (bRead)
+                {
+                    byte[] xmlbody = new byte[(int)lBodyLength];
+
+                    nRet = stream.Read(xmlbody, 0, (int)lBodyLength);
+                    if (nRet < (int)lBodyLength)
+                    {
+                        strError = "body不足其长度定义";
+                        return -1;
+                    }
+
+                    strBody = Encoding.UTF8.GetString(xmlbody);
+                }
+                else
+                    stream.Seek(lBodyLength, SeekOrigin.Current);
+
+            }
+
+            // 文件指针此时自然在末尾
+            if (stream.Position - lStart != lEntryLength + 8)
+            {
+                // Debug.Assert(false, "");
+                strError = "entry长度经检验不正确";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 读出一个事项(只观察长度)
+        public static int ReadEntry(
+            Stream stream,
+            bool bRead,
+            out string strMetaData,
+            out long lBodyLength,
+            out string strError)
+        {
+            strError = "";
+            strMetaData = "";
+            lBodyLength = 0;
+
+            long lStart = stream.Position;  // 保留起始位置
+
+            byte[] length = new byte[8];
+
+            int nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "起始位置不正确";
+                return -1;
+            }
+
+            Int64 lEntryLength = BitConverter.ToInt64(length, 0);
+
+#if NO
+            if (lEntryLength == 0)
+            {
+                // Debug.Assert(false, "");
+                // 文件指针此时自然在末尾
+                if (stream.Position - lStart != lEntryLength + 8)
+                {
+                    strError = "entry长度经检验不正确 1";
+                    return -1;
+                }
+
+                return 0;
+            }
+#endif
+
+            // metadata长度
+            nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "metadata长度位置不足8bytes";
+                return -1;
+            }
+
+            Int64 lMetaDataLength = BitConverter.ToInt64(length, 0);
+
+            if (lMetaDataLength > 100 * 1024)
+            {
+                strError = "记录格式不正确，metadata长度超过100K";
+                return -1;
+            }
+
+            if (lMetaDataLength > 0)
+            {
+                if (bRead)
+                {
+                    byte[] metadatabody = new byte[(int)lMetaDataLength];
+
+                    nRet = stream.Read(metadatabody, 0, (int)lMetaDataLength);
+                    if (nRet < (int)lMetaDataLength)
+                    {
+                        strError = "metadata不足其长度定义";
+                        return -1;
+                    }
+
+                    strMetaData = Encoding.UTF8.GetString(metadatabody);
+                }
+                else
+                    stream.Seek(lMetaDataLength, SeekOrigin.Current);
+            }
+
+            // body长度
+            nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "strBody长度位置不足8bytes";
+                return -1;
+            }
+
+            lBodyLength = BitConverter.ToInt64(length, 0);
+
+            if (lBodyLength > stream.Length - stream.Position)
+            {
+                strError = "记录格式不正确，body长度超过文件剩余部分尺寸";
+                return -1;
+            }
+
+            if (lBodyLength > 0)
+            {
+                // 虽然不读内容，但文件指针要到位
+                stream.Seek(lBodyLength, SeekOrigin.Current);
+            }
+
+            // 文件指针此时自然在末尾
+            if (stream.Position - lStart != lEntryLength + 8)
+            {
+                // Debug.Assert(false, "");
+                strError = "entry长度经检验不正确";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 参与排序的列号数组
+        SortColumns SortColumns_file = new SortColumns();
+
+
+        private void listView_file_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            int nClickColumn = e.Column;
+
+            ColumnSortStyle sortStyle = ColumnSortStyle.LeftAlign;
+
+            // 第1列为id，排序风格特殊
+            if (nClickColumn == COLUMN_FILE_INDEX)
+                sortStyle = ColumnSortStyle.RightAlign;
+            else if (nClickColumn == COLUMN_FILE_SIZE)
+                sortStyle = ColumnSortStyle.RightAlign;
+
+            this.SortColumns_file.SetFirstColumn(nClickColumn,
+                sortStyle,
+                this.listView_file.Columns,
+                true);
+
+            // 排序
+            this.listView_file.ListViewItemSorter = new SortColumnsComparer(this.SortColumns_file);
+
+            this.listView_file.ListViewItemSorter = null;
+
+        }
+
     }
 
     /// <summary>

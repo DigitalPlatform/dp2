@@ -609,6 +609,11 @@ namespace dp2Circulation
                 dlg.VerifyBorrower = this._taskList.CurrentReaderBarcode;
                 dlg.Text = "请选择要配书的册";
             }
+            else if (func == dp2Circulation.FuncState.Move)
+            {
+                dlg.FunctionType = "move";
+                dlg.Text = "请选择要调拨的册";
+            }
 
 
             dlg.AutoOperSingleItem = this.AutoOperSingleItem;
@@ -1571,7 +1576,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             }
 
             // 变换条码号
-            if (this.NeedVerifyBarcode == true)
+            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
             {
                 string strError = "";
 
@@ -1786,6 +1791,12 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             {
                 task.ItemBarcode = strText;
                 task.Action = "boxing";
+                task.Parameters = strParameters;
+            }
+            else if (func == dp2Circulation.FuncState.Move)
+            {
+                task.ItemBarcode = strText;
+                task.Action = "move";
                 task.Parameters = strParameters;
             }
 
@@ -2116,6 +2127,7 @@ false);
                 this.toolStripMenuItem_inventoryBook.Checked = false;
                 this.toolStripMenuItem_read.Checked = false;
                 this.toolStripMenuItem_boxing.Checked = false;
+                this.toolStripMenuItem_move.Checked = false;
 
                 if (this.AutoClearTextbox == true)
                 {
@@ -2189,7 +2201,11 @@ false);
 
                     WillLoadReaderInfo = false;
                 }
-
+                else if (_funcstate == FuncState.Move)
+                {
+                    this.toolStripMenuItem_move.Checked = true;
+                    WillLoadReaderInfo = false;
+                }
                 // SetInputMessage();
             }
         }
@@ -3481,6 +3497,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 strText = "读";
             else if (_funcstate == FuncState.Boxing)
                 strText = "配";
+            else if (_funcstate == FuncState.Move)
+                strText = "调";
             else
                 strText = "?";
 
@@ -3667,6 +3685,16 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
         private void ToolStripMenuItem_boxing_Click(object sender, EventArgs e)
         {
             this.FuncState = FuncState.Boxing;
+        }
+
+        private void ToolStripMenuItem_move_Click(object sender, EventArgs e)
+        {
+            this.FuncState = FuncState.Move;
+        }
+
+        private void toolStripButton_selectTargetLocation_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

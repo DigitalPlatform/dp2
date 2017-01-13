@@ -175,10 +175,10 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 构造用于复制然后同步的断点信息
-                BreakPointCollcation all_breakpoints = BreakPointCollcation.BuildFromDbNameList(strDbNameList);
+                BreakPointCollection all_breakpoints = BreakPointCollection.BuildFromDbNameList(strDbNameList, strFunction);
 
                 // 进行处理
-                BreakPointCollcation breakpoints = null;
+                BreakPointCollection breakpoints = null;
 
                 this.AppendResultText("*********\r\n");
 
@@ -219,15 +219,15 @@ namespace DigitalPlatform.LibraryServer
                 {
                     BreakPointInfo info = breakpoints[i];
 
-                    if (strFunction == "重建查重键")
+                    if (info.Function == "重建查重键")
                         nRet = RebuildUniformKeyDatabase(info,
                             out strError);
-                    else if (strFunction == "重建检索点" || string.IsNullOrEmpty(strFunction))
+                    else if (info.Function == "重建检索点" || string.IsNullOrEmpty(info.Function))
                         nRet = RebuildKeyDatabase(info,
                             out strError);
                     else
                     {
-                        strError = "未能识别的 strFunction 参数值 '" + strFunction + "'";
+                        strError = "未能识别的 info.Function 参数值 '" + info.Function + "'";
                         goto ERROR1;
                     }
                     if (nRet == -1)
@@ -436,7 +436,7 @@ out strError);
         //      -1  出错
         //      0   没有发现断点信息
         //      1   成功
-        int ReadBreakPoint(out BreakPointCollcation breakpoints,
+        int ReadBreakPoint(out BreakPointCollection breakpoints,
             out string strError)
         {
             strError = "";
@@ -450,8 +450,8 @@ out strError);
             //      0   file not found
             //      1   found
             int nRet = this.App.ReadBatchTaskBreakPointFile(this.DefaultName,
-                            out strText,
-                            out strError);
+                out strText,
+                out strError);
             if (nRet == -1)
                 return -1;
             if (nRet == 0)
@@ -468,7 +468,7 @@ out strError);
                 out strStartInfos);
 
             // 可能会抛出异常
-            breakpoints = BreakPointCollcation.Build(strBreakPoint);
+            breakpoints = BreakPointCollection.Build(strBreakPoint);
             start_infos = FromString(strStartInfos);
 
             if (start_infos != null)
@@ -478,7 +478,7 @@ out strError);
         }
 
         // 保存断点信息，并保存 this.StartInfos
-        void SaveBreakPoint(BreakPointCollcation infos,
+        void SaveBreakPoint(BreakPointCollection infos,
             bool bClearStartInfos)
         {
             // 写入断点文件
@@ -1510,6 +1510,9 @@ out string strError)
             public string DbName = "";    // 数据库名
             public string RecID = "";       // 已经处理到的 ID
 
+            // 2017/1/11
+            public string Function = "";    // 功能。重建检索点/重建查重键 空等于 "重建检索点"
+
             // 通过字符串构造
             public static BreakPointInfo Build(string strText)
             {
@@ -1518,6 +1521,7 @@ out string strError)
                 BreakPointInfo info = new BreakPointInfo();
                 info.DbName = (string)table["dbname"];
                 info.RecID = (string)table["recid"];
+                info.Function = (string)table["function"];
                 return info;
             }
 
@@ -1527,6 +1531,7 @@ out string strError)
                 Hashtable table = new Hashtable();
                 table["dbname"] = this.DbName;
                 table["recid"] = this.RecID;
+                table["function"] = this.Function;
                 return StringUtil.BuildParameterString(table);
             }
 
@@ -1535,6 +1540,7 @@ out string strError)
             {
                 string strResult = "";
                 strResult += this.DbName;
+                strResult += "(功能="+this.Function+")";
                 if (string.IsNullOrEmpty(this.RecID) == false)
                 {
                     strResult += " : 从ID " + this.RecID.ToString() + " 开始";
@@ -1545,7 +1551,7 @@ out string strError)
         }
 
         // 若干服务器的断点信息
-        class BreakPointCollcation : List<BreakPointInfo>
+        class BreakPointCollection : List<BreakPointInfo>
         {
 #if NO
             // 根据服务器名找到断点信息
@@ -1562,9 +1568,9 @@ out string strError)
 #endif
 
             // 通过字符串构造
-            public static BreakPointCollcation Build(string strText)
+            public static BreakPointCollection Build(string strText)
             {
-                BreakPointCollcation infos = new BreakPointCollcation();
+                BreakPointCollection infos = new BreakPointCollection();
 
                 string[] segments = strText.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string segment in segments)
@@ -1576,15 +1582,16 @@ out string strError)
             }
 
             // 通过数据库名列表字符串构造
-            public static BreakPointCollcation BuildFromDbNameList(string strText)
+            public static BreakPointCollection BuildFromDbNameList(string strText, string strFunction)
             {
-                BreakPointCollcation infos = new BreakPointCollcation();
+                BreakPointCollection infos = new BreakPointCollection();
 
                 string[] dbnames = strText.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (string dbname in dbnames)
                 {
                     BreakPointInfo info = new BreakPointInfo();
                     info.DbName = dbname;
+                    info.Function = strFunction;
                     infos.Add(info);
                 }
 
@@ -1617,9 +1624,5 @@ out string strError)
                 return text.ToString();
             }
         }
-
-
-
     }
-
 }

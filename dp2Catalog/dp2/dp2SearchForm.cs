@@ -891,7 +891,12 @@ namespace dp2Catalog
                 this.EnableControlsInSearching(false);
 
                 // 展开到指定的节点
-                this.dp2ResTree1.ExpandPath(respath);
+                string strError = "";
+                if (this.dp2ResTree1.ExpandPath(respath, out strError) == -1)
+                {
+                    this.Activate();
+                    MessageBox.Show(this, strError);
+                }
 
                 this.EnableControlsInSearching(true);
 
@@ -1586,6 +1591,12 @@ namespace dp2Catalog
                 if (nRet == -1)
                     goto ERROR1;
 
+                if (string.IsNullOrEmpty(strServerUrl))
+                {
+                    strError = "尚未选定要检索的服务器";
+                    goto ERROR1;
+                }
+
                 strFromStyle = dp2ResTree.GetDisplayFromStyle(strFromStyle, true, false);   // 注意，去掉 __ 开头的那些，应该还剩下至少一个 style。_ 开头的不要滤出
 
 #if OLD_CHANNEL
@@ -2221,6 +2232,12 @@ namespace dp2Catalog
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                if (string.IsNullOrEmpty(strServerUrl))
+                {
+                    strError = "尚未选定要检索的服务器";
+                    goto ERROR1;
+                }
 
 #if OLD_CHANNEL
                 this.Channel = this.Channels.GetChannel(strServerUrl);

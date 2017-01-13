@@ -376,9 +376,8 @@ namespace dp2Catalog
             // ·ñÔò²»¶¯
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
-
         }
 
         public string ActiveProtocol
@@ -439,7 +438,7 @@ namespace dp2Catalog
 
             string strPath = this.textBox_dtlpRecPath.Text;
 
-            string [] parts = strPath.Split(new char [] {'/'});
+            string[] parts = strPath.Split(new char[] { '/' });
             if (parts.Length > 2)
                 strPath = parts[0] + "/" + parts[1];
 

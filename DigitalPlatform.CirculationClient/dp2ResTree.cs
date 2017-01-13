@@ -158,8 +158,7 @@ namespace DigitalPlatform.CirculationClient
                 {
                     try
                     {
-                        MessageBox.Show(this,
-                            strError);
+                        MessageBox.Show(this, strError);
                     }
                     catch
                     {
@@ -421,16 +420,28 @@ namespace DigitalPlatform.CirculationClient
                 this.ChannelManager.DoStop(sender, e);
         }
 
-        // 根据路径逐步展开
-        // 注意：respath的Url中是服务器的URL，而TreeView的第一级为服务器名，不一样
         public void ExpandPath(ResPath respath)
         {
+            string strError = "";
+            if (ExpandPath(respath, out strError) == -1)
+                MessageBox.Show(this, strError);
+        }
+
+        // 根据路径逐步展开
+        // 注意：respath的Url中是服务器的URL，而TreeView的第一级为服务器名，不一样
+        // return:
+        //      -1  出错
+        //      0   没有出错
+        public int ExpandPath(ResPath respath, out string strError)
+        {
+            strError = "";
+
+            List<string> errors = new List<string>(); 
 
             string[] aName = respath.Path.Split(new Char[] { '/' });
 
             TreeNode node = null;
             TreeNode nodeThis = null;
-
 
             string[] temp = new string[aName.Length + 1];
             Array.Copy(aName, 0, temp, 1, aName.Length);
@@ -488,7 +499,20 @@ namespace DigitalPlatform.CirculationClient
                 // 需要展开
                 if (IsLoading(node) == true)
                 {
-                    Fill(node);
+#if NO
+                    if (Fill(node) == -1)
+                    {
+                        bError = true;
+                        break;  // 2017/1/9
+                    }
+#endif
+                    int nRet = Fill(node, out strError);
+                    if (nRet == -1)
+                    {
+                        errors.Add(strError);
+                        break;  // 2017/1/9
+                    }
+
                 }
                 node.Expand();  // 即便最终层次没有找到，也要展开中间层次
             }
@@ -497,6 +521,12 @@ namespace DigitalPlatform.CirculationClient
                 nodeThis.Parent.Expand();
 
             this.SelectedNode = nodeThis;
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "\r\n");
+                return -1;
+            }
+            return 0;
         }
 
 
@@ -645,9 +675,9 @@ namespace DigitalPlatform.CirculationClient
                 ResPath respath = OldPath.Clone();
 
                 // 刷新
-
                 respath.Path = "";
                 ExpandPath(respath);	// 选中服务器，以下节点清除
+
                 SetLoading(this.SelectedNode);
 
                 ExpandPath(OldPath);

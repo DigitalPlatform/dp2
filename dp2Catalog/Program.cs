@@ -161,7 +161,7 @@ namespace dp2Catalog
             }
         }
 
-        static string GetMacAddressString()
+        public static string GetMacAddressString()
         {
             List<string> macs = SerialCodeForm.GetMacAddress();
             return StringUtil.MakePathList(macs);

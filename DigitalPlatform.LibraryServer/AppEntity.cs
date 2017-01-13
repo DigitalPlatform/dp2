@@ -3564,9 +3564,15 @@ namespace DigitalPlatform.LibraryServer
 
             for (int i = 0; i < element_names.Length; i++)
             {
+#if NO
                 DomUtil.SetElementText(dom.DocumentElement,
                     element_names[i], "");
+#endif
+                DomUtil.DeleteElement(dom.DocumentElement, element_names[i]);
             }
+
+            // 2017/1/13
+            DomUtil.RemoveEmptyElements(dom.DocumentElement);
 
             strXml = dom.OuterXml;
             return 0;

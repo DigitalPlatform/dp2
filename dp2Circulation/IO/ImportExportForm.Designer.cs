@@ -52,6 +52,8 @@
             this.checkBox_target_newRefID = new System.Windows.Forms.CheckBox();
             this.checkBox_target_randomItemBarcode = new System.Windows.Forms.CheckBox();
             this.tabPage_target = new System.Windows.Forms.TabPage();
+            this.textBox_target_dbNameList = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
             this.checkBox_target_dontChangeOperations = new System.Windows.Forms.CheckBox();
             this.checkBox_target_suppressOperLog = new System.Windows.Forms.CheckBox();
             this.checkBox_target_dontSearchDup = new System.Windows.Forms.CheckBox();
@@ -62,8 +64,7 @@
             this.tabPage_run = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.button_next = new System.Windows.Forms.Button();
-            this.label6 = new System.Windows.Forms.Label();
-            this.textBox_target_dbNameList = new System.Windows.Forms.TextBox();
+            this.checkBox_convert_addBiblioToItemOnMergin = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_source.SuspendLayout();
             this.tabPage_convert.SuspendLayout();
@@ -251,6 +252,7 @@
             // tabPage_convert
             // 
             this.tabPage_convert.AutoScroll = true;
+            this.tabPage_convert.Controls.Add(this.checkBox_convert_addBiblioToItemOnMergin);
             this.tabPage_convert.Controls.Add(this.textBox_convert_itemBatchNo);
             this.tabPage_convert.Controls.Add(this.label5);
             this.tabPage_convert.Controls.Add(this.checkBox_convert_addBiblioToItem);
@@ -297,7 +299,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel_map.Location = new System.Drawing.Point(3, 138);
             this.panel_map.Name = "panel_map";
-            this.panel_map.Size = new System.Drawing.Size(327, 122);
+            this.panel_map.Size = new System.Drawing.Size(310, 122);
             this.panel_map.TabIndex = 12;
             // 
             // button_convert_initialMapString
@@ -352,6 +354,25 @@
             this.tabPage_target.TabIndex = 0;
             this.tabPage_target.Text = "目标库";
             this.tabPage_target.UseVisualStyleBackColor = true;
+            // 
+            // textBox_target_dbNameList
+            // 
+            this.textBox_target_dbNameList.AcceptsReturn = true;
+            this.textBox_target_dbNameList.Location = new System.Drawing.Point(245, 83);
+            this.textBox_target_dbNameList.Multiline = true;
+            this.textBox_target_dbNameList.Name = "textBox_target_dbNameList";
+            this.textBox_target_dbNameList.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_target_dbNameList.Size = new System.Drawing.Size(176, 149);
+            this.textBox_target_dbNameList.TabIndex = 11;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(243, 67);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(143, 12);
+            this.label6.TabIndex = 10;
+            this.label6.Text = "自动选择目标数据库顺序:";
             // 
             // checkBox_target_dontChangeOperations
             // 
@@ -453,24 +474,15 @@
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
             // 
-            // label6
+            // checkBox_convert_addBiblioToItemOnMergin
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(243, 67);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(143, 12);
-            this.label6.TabIndex = 10;
-            this.label6.Text = "自动选择目标数据库顺序:";
-            // 
-            // textBox_target_dbNameList
-            // 
-            this.textBox_target_dbNameList.AcceptsReturn = true;
-            this.textBox_target_dbNameList.Location = new System.Drawing.Point(245, 83);
-            this.textBox_target_dbNameList.Multiline = true;
-            this.textBox_target_dbNameList.Name = "textBox_target_dbNameList";
-            this.textBox_target_dbNameList.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_target_dbNameList.Size = new System.Drawing.Size(176, 149);
-            this.textBox_target_dbNameList.TabIndex = 11;
+            this.checkBox_convert_addBiblioToItemOnMergin.AutoSize = true;
+            this.checkBox_convert_addBiblioToItemOnMergin.Location = new System.Drawing.Point(177, 38);
+            this.checkBox_convert_addBiblioToItemOnMergin.Name = "checkBox_convert_addBiblioToItemOnMergin";
+            this.checkBox_convert_addBiblioToItemOnMergin.Size = new System.Drawing.Size(204, 16);
+            this.checkBox_convert_addBiblioToItemOnMergin.TabIndex = 16;
+            this.checkBox_convert_addBiblioToItemOnMergin.Text = "为合并的册记录添加书目信息元素";
+            this.checkBox_convert_addBiblioToItemOnMergin.UseVisualStyleBackColor = true;
             // 
             // ImportExportForm
             // 
@@ -536,5 +548,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBox_target_dbNameList;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.CheckBox checkBox_convert_addBiblioToItemOnMergin;
     }
 }
