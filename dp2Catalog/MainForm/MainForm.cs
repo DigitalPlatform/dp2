@@ -1898,7 +1898,7 @@ string strError)
                     dp2SearchForm form = (dp2SearchForm)child;
 
                     if (form.SetLayout((string)e.Value) == true)
-                        form.AppInfo_LoadMdiSize(form, null);
+                        form.AppInfo_LoadMdiLayout(form, null);
                 }
             }
 
@@ -4209,6 +4209,7 @@ out string strError)
 					Path.Combine(strBinDir , "digitalplatform.Text.dll"),
 					Path.Combine(strBinDir , "digitalplatform.IO.dll"),
 					Path.Combine(strBinDir , "digitalplatform.Xml.dll"),
+                    Path.Combine(strBinDir , "digitalplatform.LibraryClient.dll"),  // 2017/1/14
 					Path.Combine(strBinDir , "dp2catalog.exe") };
 
             Assembly assembly = null;

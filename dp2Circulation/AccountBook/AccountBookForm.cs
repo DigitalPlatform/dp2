@@ -224,8 +224,8 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, this.MainForm.DefaultFont);
             }
 
-            this.MainForm.AppInfo.LoadMdiSize += new EventHandler(AppInfo_LoadMdiSize);
-            this.MainForm.AppInfo.SaveMdiSize += new EventHandler(AppInfo_SaveMdiSize);
+            this.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
+            this.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
 
             CreateColumnHeader(this.listView_in);
 
@@ -281,7 +281,7 @@ namespace dp2Circulation
             // API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
         }
 
-        void AppInfo_SaveMdiSize(object sender, EventArgs e)
+        void AppInfo_SaveMdiLayout(object sender, EventArgs e)
         {
             if (sender != this)
                 return;
@@ -293,7 +293,7 @@ namespace dp2Circulation
                 strWidths);
         }
 
-        void AppInfo_LoadMdiSize(object sender, EventArgs e)
+        void AppInfo_LoadMdiLayout(object sender, EventArgs e)
         {
             if (sender != this)
                 return;
@@ -372,8 +372,8 @@ namespace dp2Circulation
 
                 CloseErrorInfoForm();
 
-                this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
-                this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
+                this.MainForm.AppInfo.LoadMdiLayout -= new EventHandler(AppInfo_LoadMdiLayout);
+                this.MainForm.AppInfo.SaveMdiLayout -= new EventHandler(AppInfo_SaveMdiLayout);
             }
         }
 
@@ -6180,7 +6180,6 @@ strTotalPrice);
         {
             LoadToEntityForm(this.listView_in);
         }
-
 
         void LoadToEntityForm(ListView list)
         {

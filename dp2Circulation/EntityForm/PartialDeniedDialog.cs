@@ -31,8 +31,9 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
+        // string _style = "";
 
         public PartialDeniedDialog()
         {
@@ -78,10 +79,10 @@ strHtml2 +
             lock (this)
             {
                 this.webBrowser1.Stop();
-                Debug.Assert(this.MainForm != null, "");
+                // Debug.Assert(this.MainForm != null, "");
                 Global.SetHtmlString(this.webBrowser1,
                     strHtml,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "partial_denied_viewer_html");
             }
             return;
@@ -91,7 +92,7 @@ strHtml2 +
 
         string GetHeadString(bool bAjax = true)
         {
-            string strCssFilePath = PathUtil.MergePath(this.MainForm.DataDir, "operloghtml.css");
+            string strCssFilePath = PathUtil.MergePath(Program.MainForm.DataDir, "operloghtml.css");
 
             if (bAjax == true)
                 return
@@ -170,11 +171,11 @@ strHtml2 +
                 //      -1  出错
                 //      0   成功
                 nRet = MarcDiff.DiffHtml(
-                    "拟保存的记录",
+                    _leftTitle,
                     strOldMARC,
                     strOldFragmentXml,
                     "",
-                    "实际保存后的记录",
+                    _rightTitle,
                     strNewMARC,
                     strNewFragmentXml,
                     "",
@@ -203,5 +204,9 @@ strHtml2 +
             return 0;
         }
 
+        internal string _leftTitle = "拟保存的记录";
+        internal string _rightTitle = "实际保存后的记录";
+
+        public string Action { get; set; }
     }
 }

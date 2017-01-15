@@ -12,6 +12,16 @@ namespace DigitalPlatform.GUI
 {
     public class ListViewUtil
     {
+        public static void BeginSelectItem(Control control, ListViewItem item)
+        {
+            control.BeginInvoke(new Action<ListViewItem>(
+                (o) =>
+                {
+                    o.Selected = true;
+                    o.EnsureVisible();
+                }), item);
+        }
+
         public static int GetColumnHeaderHeight(ListView list)
         {
             RECT rc = new RECT();
@@ -753,6 +763,15 @@ namespace DigitalPlatform.GUI
             }
         }
 
+    }
+
+    public static class ListBoxUtil
+    {
+        public static void EnsureVisible(ListBox listBox, int nItemIndex)
+        {
+            int visibleItems = listBox.ClientSize.Height / listBox.ItemHeight;
+            listBox.TopIndex = Math.Max(nItemIndex - visibleItems + 1, 0);
+        }
     }
 
     public class ListViewProperty

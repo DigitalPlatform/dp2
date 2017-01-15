@@ -6,7 +6,6 @@ using System.Threading;
 using System.Diagnostics;
 
 using DigitalPlatform.GUI;
-// using DigitalPlatform.CommonControl;
 
 namespace DigitalPlatform.Marc
 {
@@ -205,7 +204,7 @@ namespace DigitalPlatform.Marc
                     return;
 #endif
 
-                    // 禁止edit本身的菜单
+                // 禁止edit本身的菜单
                 case API.WM_RBUTTONDOWN:
                 case API.WM_RBUTTONUP:
                     {
@@ -218,7 +217,7 @@ namespace DigitalPlatform.Marc
                         uint nCurClickTime = API.GetMessageTime();
                         uint nDelta = nCurClickTime - this.MarcEditor.m_nLastClickTime;
 
-                        
+
 
                         int x = (int)((uint)m.LParam & 0x0000ffff);
                         int y = (int)(((uint)m.LParam >> 16) & 0x0000ffff);
@@ -265,84 +264,8 @@ namespace DigitalPlatform.Marc
                     }
                     break;
             }
-
-            /*
-            try
-            {
-             * */
-
-            base.DefWndProc(ref m);
-            /*
-            }
-            catch { }
-             * */
-        }
-
-        /*
-        // 接管回车键，变成给后面新增字段
-        // 可以改写到OnKeyPress中?
-        /// <summary>
-        /// 缺省窗口过程
-        /// </summary>
-        /// <param name="m">消息</param>
-        protected override void DefWndProc(ref Message m)
-        {
-            switch (m.Msg)
-            {
-                case API.WM_CHAR:
-                    {
-                        int nKey =API.LoWord(m.WParam.ToInt32());
-                        switch (nKey)
-                        {
-                            case (int)Keys.Enter:
-                                {
-                                    // 后插字段
-                                    this.MarcEditor.InsertAfterFieldNoDlg();
-                                    return;
-                                }
-                            case (int)Keys.Back:
-                                {
-                                    if (this.Overwrite == true)
-                                    {
-                                        int nOldSelectionStart = this.SelectionStart;
-                                        if (nOldSelectionStart > 0)
-                                        {
-                                            this.Text = this.Text.Remove(nOldSelectionStart - 1, 1);
-
-                                            this.Text = this.Text.Insert(nOldSelectionStart - 1, " ");
-                                            this.SelectionStart = nOldSelectionStart - 1;
-                                            return;
-                                        }
-                                    }
-                                }
-                                break;
-                            default:
-                                {
-                                    if (this.Overwrite == true)
-                                    {
-                                        if ((Control.ModifierKeys == Keys.Control)
-                                            || Control.ModifierKeys == Keys.Shift
-                                            || Control.ModifierKeys == Keys.Alt)
-                                        {
-                                            break;
-                                        }
-                                        int nOldSelectionStart = this.SelectionStart;
-                                        if (nOldSelectionStart < this.Text.Length)
-                                        {
-                                            this.Text = this.Text.Remove(this.SelectionStart, 1);
-                                            this.SelectionStart = nOldSelectionStart;
-                                        }
-                                    }
-                                }
-                                break;
-                        }
-                    }
-                    break;
-            }
             base.DefWndProc(ref m);
         }
-         */
-
 
         // 接管Ctrl+各种键
         /// <summary>
@@ -380,7 +303,7 @@ namespace DigitalPlatform.Marc
             if ((keyData & Keys.Control) == Keys.Control
                 && pure_key == Keys.C)
             {
-                this.Menu_Copy(null,null);
+                this.Menu_Copy(null, null);
                 return true;
             }
 
@@ -878,10 +801,8 @@ namespace DigitalPlatform.Marc
 
         #endregion
 
-
         protected override void OnMouseUp(MouseEventArgs e)
         {
-
             base.OnMouseUp(e);
         }
 
@@ -1011,7 +932,7 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                         }
 
 #if BIDI_SUPPORT
-                            int nStart = this.SelectionStart - 1;
+                        int nStart = this.SelectionStart - 1;
                         if (this.SelectionLength == 0
                             && nStart > 0)
                         {
@@ -1020,8 +941,8 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                                 && this.Text.Length >= nStart + 1 + 1)
                             {
                                 // 一同删除
-                                this.Text = this.Text.Remove(nStart-1, 2);
-                                this.SelectionStart = nStart-1;
+                                this.Text = this.Text.Remove(nStart - 1, 2);
+                                this.SelectionStart = nStart - 1;
                                 // 2011/12/5 上面两行曾经有BUG
                                 e.Handled = true;
                             }
@@ -1052,19 +973,12 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                             int nOldSelectionStart = this.SelectionStart;
                             if (nOldSelectionStart < this.Text.Length)
                             {
-                                /*
-                                if (this.Text.Length >= this.MaxLength - 1) // 2008/12/18
-                                {
-                                    this.Text = this.Text.Remove(this.SelectionStart, 1);
-                                    this.SelectionStart = nOldSelectionStart;
-                                }
-                                 * */
                                 if (this.Text.Length >= this.MaxLength) // 2009/3/6 changed
                                 {
                                     this.Text = this.Text.Remove(this.SelectionStart, 1 + (this.Text.Length - this.MaxLength));
                                     this.SelectionStart = nOldSelectionStart;
                                 }
-
+                                this.ContentIsNull = false; // 2017/1/15 防止首次在 MyEdit 中输入无法兑现到内存
                             }
                             else
                             {
@@ -1073,7 +987,6 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                         }
                     }
                     break;
-
             }
 
             base.OnKeyPress(e);
@@ -1254,7 +1167,6 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                                 }
                             }
                         }
-
                     }
                     break;
                 case Keys.Right:    // 右方向键
@@ -1862,9 +1774,9 @@ API.MakeLParam(x, y));
 
         public void EnsureVisible()
         {
-                        // 让插入符的位置可见
+            // 让插入符的位置可见
             int nHeight = 20;
-            
+
             /*
             if (this.MarcEditor.curEdit != null)
                 nHeight = Math.Max(20, this.MarcEditor.curEdit.Height + 8);

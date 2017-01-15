@@ -727,10 +727,12 @@ namespace dp2Circulation
              * 
              * * */
             if (this.MainForm != null && this.MainForm.AppInfo != null
-                && Floating == false && this.SupressSizeSetting == false)
+                && Floating == false)
             {
                 this.MainForm.AppInfo.LoadMdiChildFormStates(this,
-                        "mdi_form_state");
+                        "mdi_form_state",
+                        this.SupressSizeSetting == true ? SizeStyle.Layout : SizeStyle.All);
+
             }
         }
 
@@ -742,10 +744,11 @@ namespace dp2Circulation
         {
             // 在这里保存。如果靠后调用，可能会遇到 base.OnFormClosed() 里面相关事件被卸掉的问题
             if (this.MainForm != null && this.MainForm.AppInfo != null
-    && Floating == false && this.SupressSizeSetting == false)
+    && Floating == false )
             {
                 MainForm.AppInfo.SaveMdiChildFormStates(this,
-                    "mdi_form_state");
+                    "mdi_form_state",
+                    this.SupressSizeSetting == true ? SizeStyle.Layout : SizeStyle.All);
             }
 
             base.OnFormClosed(e);

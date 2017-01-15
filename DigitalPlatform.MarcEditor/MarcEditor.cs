@@ -3760,7 +3760,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     + rectCaret.X;
             }
 
-
             if (nDelta + rectCaret.Width >= this.ClientWidth)
             {
                 if (rectCaret.Width >= this.ClientWidth)

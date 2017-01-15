@@ -477,8 +477,8 @@ namespace dp2Circulation
 
             // this.m_webExternalHost_comment.Initial(this.MainForm);
 
-            this.MainForm.AppInfo.LoadMdiSize += new EventHandler(AppInfo_LoadMdiSize);
-            this.MainForm.AppInfo.SaveMdiSize += new EventHandler(AppInfo_SaveMdiSize);
+            this.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
+            this.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
 
             // LoadLayout0();
             if (this.AcceptMode == false)
@@ -500,7 +500,7 @@ namespace dp2Circulation
                     bStateChanged = true;
                 }
 
-                AppInfo_LoadMdiSize(this, null);
+                AppInfo_LoadMdiLayout(this, null);
 
                 if (bStateChanged == true)
                     form.WindowState = savestate;
@@ -999,7 +999,7 @@ true);
 #endif
         }
 
-        void AppInfo_SaveMdiSize(object sender, EventArgs e)
+        void AppInfo_SaveMdiLayout(object sender, EventArgs e)
         {
             if (sender != this)
                 return;
@@ -1085,7 +1085,7 @@ true);
             return strActiveItemIssuePage;
         }
 
-        void AppInfo_LoadMdiSize(object sender, EventArgs e)
+        void AppInfo_LoadMdiLayout(object sender, EventArgs e)
         {
             if (sender != this)
                 return;
@@ -1276,6 +1276,32 @@ true);
         {
             this.ActivateItemsPage();
             this.SelectItemsByBatchNo(e.BatchNo, true);
+        }
+
+        public static EntityForm OpenNewEntityForm(string strRecPath)
+        {
+            EntityForm exist_fixed = Program.MainForm.FixedEntityForm;
+
+            EntityForm form = new EntityForm();
+            form.MdiParent = Program.MainForm;
+
+            // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+            if (exist_fixed != null)
+            {
+                form.SupressSizeSetting = true;
+                Program.MainForm.SetMdiToNormal();
+            }
+
+            form.Show();
+
+            // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
+            if (exist_fixed != null)
+            {
+                Program.MainForm.SetFixedPosition(form, "right");
+            }
+
+            form.LoadRecordOld(strRecPath, "", true);
+            return form;
         }
 
         void orderControl1_OpenTargetRecord(object sender, OpenTargetRecordEventArgs e)
@@ -2546,14 +2572,14 @@ true);
                         bStateChanged = true;
                     }
 
-                    AppInfo_SaveMdiSize(this, null);
+                    AppInfo_SaveMdiLayout(this, null);
 
                     if (bStateChanged == true)
                         form.WindowState = savestate;
                 }
 
-                this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
-                this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
+                this.MainForm.AppInfo.LoadMdiLayout -= new EventHandler(AppInfo_LoadMdiLayout);
+                this.MainForm.AppInfo.SaveMdiLayout -= new EventHandler(AppInfo_SaveMdiLayout);
             }
 
             if (this.easyMarcControl1 != null)
@@ -2812,7 +2838,7 @@ true);
                     && bWarningNotSave == false)
                 {
                     nRet = this.DoSaveAll();
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == -2)
                     {
                         // strTotalError = "当前记录尚未保存";  // 2014/7/8
                         return -1;
@@ -3088,7 +3114,7 @@ true);
                     && bWarningNotSave == false)
                 {
                     int nRet = this.DoSaveAll();
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == -2)
                     {
                         // strTotalError = "当前记录尚未保存";  // 2014/7/8
                         return -1;
@@ -4309,6 +4335,7 @@ true);
         //      strStyle    风格。displaysuccess 显示最后的成功消息在框架窗口的状态条 verifydata 发送校验记录的消息(注意是否校验还要取决于配置状态)
         //                  searchdup 虽然对本函数没有作用，但是可以传递到下级函数SaveBiblioToDatabase()
         // return:
+        //      -2  出错，并且已经放弃保存
         //      -1  有错。此时不排除有些信息保存成功。
         //      0   成功。
         /// <summary>
@@ -4385,6 +4412,18 @@ true);
                     if (nRet == -1)
                     {
                         info.ErrorCount++;
+                        // 询问是否继续保存下级记录
+                        DialogResult result = MessageBox.Show(this,
+    "是否继续保存下级记录? ",
+    "EntityForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                        if (result == System.Windows.Forms.DialogResult.No)
+                        {
+                            info.ErrorCount = -1;
+                            return -2;
+                        }
                     }
                 }
 
@@ -4433,10 +4472,16 @@ true);
             }
             finally
             {
-                if (info.ErrorCount == 0)
-                    this.ShowMessage("记录保存成功", "green", true);
+                // ErrorCount 为 -1 则不显示
+                if (info.ErrorCount == -1)
+                    this.ClearMessage();
                 else
-                    this.ShowMessage("记录保存失败", "red", true);
+                {
+                    if (info.ErrorCount == 0)
+                        this.ShowMessage("记录保存成功", "green", true);
+                    else
+                        this.ShowMessage("记录保存失败", "red", true);
+                }
 
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
@@ -5968,7 +6013,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                                 return -1; // 放弃进一步操作
                              * */
                             nRet = this.DoSaveAll();
-                            if (nRet == -1)
+                            if (nRet == -1 || nRet == -2)
                                 return -1; // 放弃进一步操作
 
                         }
@@ -5982,7 +6027,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                             return -1; // 放弃进一步操作
                          * */
                         nRet = this.DoSaveAll();
-                        if (nRet == -1)
+                        if (nRet == -1 || nRet == -2)
                             return -1; // 放弃进一步操作
                     }
                 }
@@ -6072,7 +6117,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                     if (result == DialogResult.Yes)
                     {
                         nRet = this.DoSaveAll();
-                        if (nRet == -1)
+                        if (nRet == -1 || nRet == -2)
                             return -1; // 放弃进一步操作
 
                     }
@@ -6080,7 +6125,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 else
                 {
                     nRet = this.DoSaveAll();
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == -2)
                         return -1; // 放弃进一步操作
                 }
             }
@@ -6198,7 +6243,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                         if (result == DialogResult.Yes)
                         {
                             nRet = this.DoSaveAll();
-                            if (nRet == -1)
+                            if (nRet == -1 || nRet == -2)
                                 return -1; // 放弃进一步操作
 
                         }
@@ -6206,7 +6251,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                     else
                     {
                         nRet = this.DoSaveAll();
-                        if (nRet == -1)
+                        if (nRet == -1 || nRet == -2)
                             return -1; // 放弃进一步操作
                     }
                 }
@@ -6301,7 +6346,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                         if (result == DialogResult.Yes)
                         {
                             nRet = this.DoSaveAll();
-                            if (nRet == -1)
+                            if (nRet == -1 || nRet == -2)
                                 return -1; // 放弃进一步操作
 
                         }
@@ -6309,7 +6354,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                     else
                     {
                         nRet = this.DoSaveAll();
-                        if (nRet == -1)
+                        if (nRet == -1 || nRet == -2)
                             return -1; // 放弃进一步操作
                     }
                 }
@@ -6396,7 +6441,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                         if (result == DialogResult.Yes)
                         {
                             nRet = this.DoSaveAll();
-                            if (nRet == -1)
+                            if (nRet == -1 || nRet == -2)
                                 return -1; // 放弃进一步操作
 
                         }
@@ -6404,7 +6449,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                     else
                     {
                         nRet = this.DoSaveAll();
-                        if (nRet == -1)
+                        if (nRet == -1 || nRet == -2)
                             return -1; // 放弃进一步操作
                     }
                 }
@@ -6496,7 +6541,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                         if (result == DialogResult.Yes)
                         {
                             nRet = this.DoSaveAll();
-                            if (nRet == -1)
+                            if (nRet == -1 || nRet == -2)
                                 return -1; // 放弃进一步操作
 
                         }
@@ -6504,7 +6549,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                     else
                     {
                         nRet = this.DoSaveAll();
-                        if (nRet == -1)
+                        if (nRet == -1 || nRet == -2)
                             return -1; // 放弃进一步操作
                     }
                 }
@@ -6755,7 +6800,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                     && bAutoSave == true)
                 {
                     nRet = this.DoSaveAll();
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == -2)
                         return -1;
                 }
                 else
@@ -7466,9 +7511,10 @@ MessageBoxDefaultButton.Button2);
                 old_timeout = channel.Timeout;
                 channel.Timeout = TimeSpan.FromMinutes(2);
             }
+
+        REDO_SAVE:
             try
             {
-
                 bool bPartialDenied = false;
                 string strOutputPath = "";
                 byte[] baNewTimestamp = null;
@@ -7530,6 +7576,28 @@ MessageBoxDefaultButton.Button2);
                         else
                             strError += "\r\n\r\n重复的书目记录已装入固定面板区的“浏览”属性页，请合并重复书目记录后，重新提交保存";
                     }
+                    if (channel.ErrorCode == ErrorCode.TimestampMismatch)
+                    {
+                        // return:
+                        //      -1  出错
+                        //      0   放弃保存
+                        //      1   重试强行覆盖
+                        nRet = DisplayTwoBiblio(
+                            channel,
+                            strOutputPath,
+                            strXmlBody,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 1)
+                        {
+                            this.BiblioTimestamp = baNewTimestamp;
+                            goto REDO_SAVE;
+                        }
+                        Debug.Assert(nRet == 0, "");
+                        strError = "放弃保存书目记录";
+                    }
+
                     goto ERROR1;
                 }
 
@@ -7649,7 +7717,7 @@ MessageBoxDefaultButton.Button2);
                         dlg.SavingXml = strXmlBody;
                         Debug.Assert(results.Length >= 2, "");
                         dlg.SavedXml = results[1];
-                        dlg.MainForm = this.MainForm;
+                        // dlg.MainForm = this.MainForm;
 
                         this.MainForm.AppInfo.LinkFormState(dlg, "PartialDeniedDialog_state");
                         dlg.ShowDialog(this);
@@ -7697,6 +7765,80 @@ MessageBoxDefaultButton.Button2);
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   放弃保存
+        //      1   重试强行覆盖
+        int DisplayTwoBiblio(
+            LibraryChannel channel,
+            string strRecPath,
+            string strSavingXml,
+            out string strError)
+        {
+            strError = "";
+
+            List<string> format_list = new List<string>();
+            format_list.Add("xml");
+
+            // string strOutputBiblioRecPath = "";
+            string strXml = "";
+
+            string[] results = null;
+            byte[] baTimestamp = null;
+
+            long lRet = channel.GetBiblioInfos(
+                Progress,
+                strRecPath,
+                "",
+                format_list.ToArray(),
+                out results,
+                out baTimestamp,
+                out strError);
+            if (lRet == -1)
+            {
+                strError = "重新装载书目记录时出错: " + strError;
+                return -1;
+            }
+            if (lRet == 0)
+            {
+                strError = "路径为 '" + strRecPath + "' 的书目记录没有找到 ...";
+                return 0;   // not found
+            }
+
+            strXml = results[0];
+
+            TimestampMismatchDialog dlg = new TimestampMismatchDialog();
+
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.SavingXml = strSavingXml;
+            dlg.SavedXml = strXml;
+            // dlg.MainForm = this.MainForm;
+
+            Program.MainForm.AppInfo.LinkFormState(dlg, "PartialDeniedDialog_state");
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.OK)
+            {
+                if (dlg.Action == "retrySave")
+                    return 1;   // 重试强行覆盖
+                if (dlg.Action == "compareEdit")
+                {
+                    if (this.Fixed == false)
+                    {
+                        // 将当前窗口放在左侧
+                        Program.MainForm.SetMdiToNormal();
+                        this.MenuItem_marcEditor_toggleFixed_Click(this, new EventArgs());
+
+                        // 右侧打开一个新窗口限制数据库中的当前记录
+                        EntityForm form = OpenNewEntityForm(strRecPath);
+                        form.ShowMessage("这是用于对比的，数据库中的记录", "green", true);
+                    }
+                }
+            }
+
+            return 0;
         }
 
         /// <summary>
@@ -9763,6 +9905,7 @@ MessageBoxDefaultButton.Button1);
 
                 // 提交所有保存请求
                 // return:
+                //      -2  出错，并且已经放弃保存
                 //      -1  有错。此时不排除有些信息保存成功。
                 //      0   成功。
                 nRet = DoSaveAll();
@@ -9817,7 +9960,7 @@ MessageBoxDefaultButton.Button1);
                         //      -1  有错。此时不排除有些信息保存成功。
                         //      0   成功。
                         nRet = DoSaveAll();
-                        if (nRet == -1)
+                        if (nRet == -1 || nRet == -2)
                         {
                             strError = "因为保存操作出错，所以后续的复制操作被放弃";
                             goto ERROR1;
@@ -12176,7 +12319,7 @@ value);
                         //      -1  有错。此时不排除有些信息保存成功。
                         //      0   成功。
                         nRet = DoSaveAll();
-                        if (nRet == -1)
+                        if (nRet == -1 || nRet == -2)
                         {
                             strError = "因为保存操作出错，所以后续的移动操作被放弃";
                             goto ERROR1;
@@ -13533,7 +13676,8 @@ strMARC);
 
                 //尺寸要发生明显变化，让人知道不再是左侧固定
                 Program.MainForm.AppInfo.LoadMdiChildFormStates(this,
-        "mdi_form_state");
+        "mdi_form_state",
+        SizeStyle.Size);
             }
         }
 

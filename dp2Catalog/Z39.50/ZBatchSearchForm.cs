@@ -405,6 +405,7 @@ MessageBoxDefaultButton.Button1);
             // 设置窗口尺寸状态
             MainForm.AppInfo.LoadMdiChildFormStates(this,
                 "mdi_form_state",
+                SizeStyle.All,
                 MainForm.DefaultMdiWindowWidth,
                 MainForm.DefaultMdiWindowHeight);
 

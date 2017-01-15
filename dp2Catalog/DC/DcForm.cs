@@ -199,9 +199,9 @@ namespace dp2Catalog
             // 设置窗口尺寸状态
             MainForm.AppInfo.LoadMdiChildFormStates(this,
                 "mdi_form_state",
+                SizeStyle.All,
                 MainForm.DefaultMdiWindowWidth,
                 MainForm.DefaultMdiWindowHeight);
-
 
             // 获得splitContainer_main的状态
             int nValue = MainForm.AppInfo.GetInt(
@@ -611,7 +611,7 @@ namespace dp2Catalog
 #if OLD_CHANNEL
                             dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
 #endif
-                            channel,
+channel,
                             strLocalPath,
                             strRecordXml,
                             "0",  // TODO
@@ -829,7 +829,7 @@ namespace dp2Catalog
 #if OLD_CHANNEL
                     dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
 #endif
-                        channel,
+channel,
                         strLocalPath,
                         strRecordXml,
                         "0",  // TODO
@@ -1349,7 +1349,7 @@ namespace dp2Catalog
 #if OLD_CHANNEL
                         dp2_searchform.GetChannel(dp2_searchform.GetServerUrl(strServerName)),
 #endif
-                            channel,
+channel,
                             "0",   // TODO: 要替换为 server_version
                             out strError);
                         if (nRet == -1)
