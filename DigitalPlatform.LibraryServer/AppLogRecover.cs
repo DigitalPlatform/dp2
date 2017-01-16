@@ -6533,7 +6533,6 @@ strElementName);
                     // 如果有“新记录”内容
                     if (String.IsNullOrEmpty(strTargetRecord) == false)
                     {
-
                         // 写书目记录
                         lRet = channel.DoSaveTextRes(strTargetRecPath,
                             strTargetRecord,

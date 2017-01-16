@@ -4412,13 +4412,16 @@ true);
                     if (nRet == -1)
                     {
                         info.ErrorCount++;
+
+                        // TODO: 如果此时书目记录路径为 ? 形态，选择了继续保存也会报错。似乎应该自动放弃继续保存
+
                         // 询问是否继续保存下级记录
                         DialogResult result = MessageBox.Show(this,
     "是否继续保存下级记录? ",
     "EntityForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
+    MessageBoxDefaultButton.Button2);
                         if (result == System.Windows.Forms.DialogResult.No)
                         {
                             info.ErrorCount = -1;

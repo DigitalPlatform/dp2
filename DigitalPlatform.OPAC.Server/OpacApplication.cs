@@ -60,7 +60,8 @@ namespace DigitalPlatform.OPAC.Server
 
         public LibraryChannelPool ChannelPool = new LibraryChannelPool();
 
-        public double dp2LibraryVersion = 0;
+        // public double dp2LibraryVersion = 0;
+        public string dp2LibraryVersion = "0.0";
 
         // 2015/6/16
         public string dp2LibraryUID = "";
@@ -1297,28 +1298,40 @@ namespace DigitalPlatform.OPAC.Server
                             goto ERROR1;
                         }
 
-                        double value = 0;
+                        // double value = 0;
 
                         if (string.IsNullOrEmpty(strVersion) == true)
                         {
-                            strVersion = "2.0以下";
-                            value = 2.0;
+                            strVersion = "0.0";
+                            // strVersion = "2.0以下";
+                            // value = 2.0;
                         }
                         else
                         {
+#if NO
                             // 检查最低版本号
                             if (double.TryParse(strVersion, out value) == false)
                             {
                                 strError = "dp2Library 版本号 '" + strVersion + "' 格式不正确";
                                 goto ERROR1;
                             }
+#endif
                         }
 
-                        this.dp2LibraryVersion = value;
+                        this.dp2LibraryVersion = strVersion;    //  value;
                         this.dp2LibraryUID = strUID;
 
+#if NO
                         double base_version = 2.86; // 2.18
                         if (value < base_version)
+                        {
+                            strError = "当前 dp2OPAC 版本需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 '" + strVersion + "' )。请立即升级 dp2Library 到最新版本。";
+                            return -2;
+                        }
+#endif
+                        
+                        string base_version = "2.86";
+                        if (StringUtil.CompareVersion(strVersion, base_version) < 0)
                         {
                             strError = "当前 dp2OPAC 版本需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 '" + strVersion + "' )。请立即升级 dp2Library 到最新版本。";
                             return -2;
@@ -3379,7 +3392,8 @@ System.Text.Encoding.UTF8))
                 string[] results = null;
                 long lRet = // session.Channel.
                     channel.GetReaderInfo(null,
-                    this.dp2LibraryVersion >= 2.22 ?
+                    // this.dp2LibraryVersion >= 2.22 ?
+                    StringUtil.CompareVersion(this.dp2LibraryVersion, "2.22") >= 0 ?
                     "@barcode:" + strReaderBarcode // dp2Library V2.22 及以后可以使用这个方法
                     : strReaderBarcode,
                     strResultTypeList,

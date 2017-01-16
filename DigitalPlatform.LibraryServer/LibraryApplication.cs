@@ -140,7 +140,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.97 (2017/1/1) 书目记录查重键生成法为 0.02
         //      2.98 (2017/1/2) SetBiblioInfo() strAction 增加 checkunique 功能
         //      2.99 (2017/1/12) Borrow() 和 Return() API 在读者记录中 borrow 元素超过 10 个的时候，会剪裁了读者记录再写入 OperLog 记录中。此举可以大大缓解借书册数很多的读者记录导致日志文件急剧变大的问题
-        public static string Version = "2.99";
+        //      2.100 (2017/1/16) CopyBiblioInfo() API 写入操作日志的时候，增加了 overwritedRecord 元素用于存储被覆盖位置覆盖前的记录内容
+        public static string Version = "2.100";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

@@ -6158,6 +6158,8 @@ out strError);
             string strExistingSourceXml = "";
             byte[] exist_source_timestamp = null;
 
+            string strExistTargetXml = "";  // 被覆盖位置，覆盖前的记录
+
             if (strAction == "onlymovebiblio"
                 || strAction == "onlycopybiblio"
                 || strAction == "copy"
@@ -6192,7 +6194,7 @@ out strError);
                     goto ERROR1;
                 }
 
-
+                // oldRecord 元素实际上是源记录的意思，不是旧记录的意思
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                         "oldRecord", strExistingSourceXml);
                 DomUtil.SetAttr(node, "recPath", strBiblioRecPath);
@@ -6340,10 +6342,11 @@ out strError);
                         sessioninfo,
                         channel,
                         strBiblioRecPath,
-                        strExistingSourceXml,
+                        // strExistingSourceXml,
                         strNewBiblioRecPath,
                         strNewBiblio,    // 已经经过Merge预处理的新记录XML
                         strMergeStyle,
+                        out strExistTargetXml,
                         out strOutputBiblio,
                         out baOutputTimestamp,
                         out strOutputBiblioRecPath,
@@ -6438,6 +6441,14 @@ out strError);
                 // 注: 如果 strMergeStyle 为 reserve_target， 需要记载一下这个位置已经存在的记录
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                         "record", string.IsNullOrEmpty(strOutputBiblio) == false ? strOutputBiblio : strNewBiblio);
+                DomUtil.SetAttr(node, "recPath", strOutputBiblioRecPath);
+            }
+
+            // 2017/1/16
+            if (string.IsNullOrEmpty(strExistTargetXml) == false)
+            {
+                XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
+        "overwritedRecord", strExistTargetXml);
                 DomUtil.SetAttr(node, "recPath", strOutputBiblioRecPath);
             }
 
@@ -6792,16 +6803,18 @@ out strError);
         //      strAction   动作。为"onlycopybiblio" "onlymovebiblio"之一。增加 copy / move
         //      strNewBiblio    需要在目标记录中更新的内容。如果 == null，表示不特意更新
         //      strMergeStyle   如何合并两条记录的元数据部分? reserve_source / reserve_target。 空表示 reserve_source
+        //      strExistingTargetXml    被覆盖的目标位置的原有记录
+        //      strOutputRecPath    目标记录路径
         int DoBiblioOperMove(
             string strAction,
             SessionInfo sessioninfo,
             RmsChannel channel,
             string strOldRecPath,
-            string strExistingSourceXml,
-            // byte[] baExistingSourceTimestamp, // 请求中提交过来的时间戳
+            // string strExistingSourceXml,
             string strNewRecPath,
             string strNewBiblio,    // 已经经过Merge预处理的新记录XML
             string strMergeStyle,
+            out string strExistTargetXml,
             out string strOutputTargetXml,
             out byte[] baOutputTimestamp,
             out string strOutputRecPath,
@@ -6811,6 +6824,7 @@ out strError);
             long lRet = 0;
             baOutputTimestamp = null;
             strOutputRecPath = "";
+            strExistTargetXml = "";
 
             strOutputTargetXml = ""; // 最后保存成功的记录
 
@@ -6830,7 +6844,6 @@ out strError);
             // 检查即将覆盖的目标位置是不是有记录，如果有，则不允许进行move操作。
             bool bAppendStyle = false;  // 目标路径是否为追加形态？
             string strTargetRecId = ResPath.GetRecordId(strNewRecPath);
-            string strExistTargetXml = "";
 
             if (strTargetRecId == "?" || String.IsNullOrEmpty(strTargetRecId) == true)
             {

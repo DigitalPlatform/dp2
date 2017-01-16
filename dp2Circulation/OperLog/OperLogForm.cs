@@ -1829,6 +1829,38 @@ out strError);
                     return -1;
             }
 
+            // 2017/1/16 重新设计 move 和 copy 的显示方式
+            string strDirection = "";
+            if (strAction.IndexOf("move") != -1
+                || strAction.IndexOf("copy") != -1)
+            {
+                strDirection = strOldRecPath + " --> " + strRecPath;
+                string strOverwritedRecord = DomUtil.GetElementText(dom.DocumentElement, "overwritedRecord", out node);
+                if (string.IsNullOrEmpty(strOverwritedRecord) == false)
+                {
+                    strOldRecord = strOverwritedRecord;
+                    strOldRecPath = DomUtil.GetAttr(node, "recPath");
+                    nRet = GetBiblioInfoString(
+                        strOldRecPath,
+                        strOldRecord,
+        out strOldRecordHtml,
+        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+                else
+                {
+                    // 如果没有 overwritedRecord 元素，则只好显示修改后的记录内容了
+                    // 2017/1/16 以前的日志就有这个问题
+                    if (string.IsNullOrEmpty(strRecordHtml) == false)
+                    {
+                        strOldRecPath = "";
+                        strOldRecord = "";
+                        strOldRecordHtml = "";
+                    }
+                }
+            }
+
             string strDiffRecordHtml = "";
             if (string.IsNullOrEmpty(strOldRecord) == false && string.IsNullOrEmpty(strOldRecPath) == false
                 && string.IsNullOrEmpty(strRecord) == false && string.IsNullOrEmpty(strRecPath) == false)
@@ -1885,6 +1917,9 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 设置书目信息") +
                 BuildHtmlLine("动作", strAction + " -- " + GetActionName(strOperation, strAction)) +
+
+                (string .IsNullOrEmpty(strDirection) == false ?
+                BuildHtmlLine("源和目标", strDirection) : "") +
 
                 (string.IsNullOrEmpty(strDiffRecordHtml) == false ?
                 BuildHtmlLine("修改前后书目记录", strDiffLineTitle) +

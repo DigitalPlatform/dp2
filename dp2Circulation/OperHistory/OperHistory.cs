@@ -20,6 +20,7 @@ using DigitalPlatform.CirculationClient;
 // using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Xml;
 
 // 2013/3/16 添加 XML 注释
 
@@ -1118,29 +1119,32 @@ out strError);
             string strReaderLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + HttpUtility.HtmlEncode(strReaderBarcode) + "</a>";
 
             strText = "<div class='item " + strOperClass + " borrow'>"
-                + "<div class='time_line'>"
-                + " <div class='time'>" + DateTime.Now.ToLongTimeString() + "</div>"
-                + " <div class='time_span'>耗时 " + DoubleToString(delta.TotalSeconds) + "秒</div>"
-                + " <div class='clear'></div>"
-                + "</div>"
-                + "<div class='reader_line'>"
-                + " <div class='reader_prefix_text'>读者</div>"
-                + " <div class='reader_barcode'>" + strReaderLink + "</div>"
-                + " <div class='reader_summary'>" + HttpUtility.HtmlEncode(strReaderSummary) + "</div>"
-                + " <div class='clear'></div>"
-                + "</div>"
-                + "<div class='opername_line'>"
-                + " <div class='opername'>" + HttpUtility.HtmlEncode(strOperName) + "</div>"
-                + " <div class='clear'></div>"
-                + "</div>"
-                + "<div class='item_line'>"
-                + " <div class='item_prefix_text'>册</div>"
-                + " <div class='item_barcode'>" + strItemLink + "</div> "
-                + " <div class='item_summary'>" + HttpUtility.HtmlEncode(strSummary) + "</div>"
-                + " <div class='clear'></div>"
-                + "</div>"
-                + " <div class='clear'></div>"
-                + "</div>";
+                + "\r\n\t<div class='time_line'>"
+                + "\r\n\t\t<div class='time'>" + DateTime.Now.ToLongTimeString() + "</div>"
+                + "\r\n\t\t<div class='time_span'>耗时 " + DoubleToString(delta.TotalSeconds) + "秒</div>"
+                + "\r\n\t\t<div class='clear'></div>"
+                + "\r\n\t</div>"
+                + "\r\n\t<div class='reader_line'>"
+                + "\r\n\t\t<div class='reader_prefix_text'>读者</div>"
+                + "\r\n\t\t<div class='reader_barcode'>" + strReaderLink + "</div>"
+                + "\r\n\t\t<div class='reader_summary'>" + HttpUtility.HtmlEncode(strReaderSummary) + "</div>"
+                + "\r\n\t\t<div class='clear'></div>"
+                + "\r\n\t</div>"
+                + "\r\n\t<div class='opername_line'>"
+                + "\r\n\t\t<div class='opername'>" + HttpUtility.HtmlEncode(strOperName) + "</div>"
+                + "\r\n\t\t<div class='clear'></div>"
+                + "\r\n\t</div>"
+                + "\r\n\t<div class='item_line'>"
+                + "\r\n\t\t<div class='item_prefix_text'>册</div>"
+                + "\r\n\t\t<div class='item_barcode'>" + strItemLink + "</div> "
+                + "\r\n\t\t<div class='item_summary'>" + HttpUtility.HtmlEncode(strSummary) + "</div>"
+                + "\r\n\t\t<div class='clear'></div>"
+                + "\r\n\t</div>"
+                + "\r\n\t<div class='clear'></div>"
+                + "\r\n</div>";
+
+            CheckHtmlValidation(strText);
+
             /*
             strText = "<div class='" + strOperClass + "'>"
     + "<div class='time_line'><span class='time'>" + DateTime.Now.ToLongTimeString() + "</span> <span class='time_span'>耗时 " + delta.TotalSeconds.ToString() + "秒</span></div>"
@@ -1315,34 +1319,37 @@ out strError);
                 strReaderLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + HttpUtility.HtmlEncode(strReaderBarcode) + "</a>";
 
             strText = "<div class='item " + strOperClass + " return'>"
-                + "<div class='time_line'>"
-                + " <div class='time'>" + DateTime.Now.ToLongTimeString() + "</div>"
-                + " <div class='time_span'>耗时 " + DoubleToString(delta.TotalSeconds) + "秒</div>"
-                + " <div class='clear'></div>"
-                + "</div>"
+                + "\r\n\t<div class='time_line'>"
+                + "\r\n\t\t<div class='time'>" + DateTime.Now.ToLongTimeString() + "</div>"
+                + "\r\n\t\t<div class='time_span'>耗时 " + DoubleToString(delta.TotalSeconds) + "秒</div>"
+                + "\r\n\t\t<div class='clear'></div>"
+                + "\r\n\t</div>"
                 + (
                 string.IsNullOrEmpty(strReaderLink) == false ?
-                ("<div class='reader_line'>"
-                + " <div class='reader_prefix_text'>读者</div>"
-                + " <div class='reader_barcode'>" + strReaderLink + "</div>"
-                + " <div class='reader_summary'>" + HttpUtility.HtmlEncode(strReaderSummary) + "</div>"
-                + " <div class='clear'></div>") : ""
+                ("\r\n\t<div class='reader_line'>"
+                + "\r\n\t\t<div class='reader_prefix_text'>读者</div>"
+                + "\r\n\t\t<div class='reader_barcode'>" + strReaderLink + "</div>"
+                + "\r\n\t\t<div class='reader_summary'>" + HttpUtility.HtmlEncode(strReaderSummary) + "</div>"
+                + "\r\n\t\t<div class='clear'></div>"
+                + "\r\n\t</div>") : ""
                 )
-                + "</div>"
-                + "<div class='opername_line'>"
-                + " <div class='opername'>" + HttpUtility.HtmlEncode(strOperName) + "</div>"
-                + " <div class='clear'></div>"
-                + "</div>"
-                + "<div class='item_line'>"
-                + " <div class='item_prefix_text'>册</div>"
-                + " <div class='item_barcode'>" + strItemLink + "</div> "
-                + " <div class='item_summary'>" + HttpUtility.HtmlEncode(strSummary) + "</div>"
+                
+                + "\r\n\t<div class='opername_line'>"
+                + "\r\n\t\t<div class='opername'>" + HttpUtility.HtmlEncode(strOperName) + "</div>"
+                + "\r\n\t\t<div class='clear'></div>"
+                + "\r\n\t</div>"
+                + "\r\n\t<div class='item_line'>"
+                + "\r\n\t\t<div class='item_prefix_text'>册</div>"
+                + "\r\n\t\t<div class='item_barcode'>" + strItemLink + "</div> "
+                + "\r\n\t\t<div class='item_summary'>" + HttpUtility.HtmlEncode(strSummary) + "</div>"
 
-                + (string.IsNullOrEmpty(strLocation) == false ? " <div class='item_location'>" + HttpUtility.HtmlEncode(strLocation) + "</div>" : "")
-                + " <div class='clear'></div>"
-                + "</div>"
-                + " <div class='clear'></div>"
-                + "</div>";
+                + (string.IsNullOrEmpty(strLocation) == false ? "\r\n\t\t<div class='item_location'>" + HttpUtility.HtmlEncode(strLocation) + "</div>" : "")
+                + "\r\n\t\t<div class='clear'></div>"
+                + "\r\n\t</div>"
+                + "\r\n\t<div class='clear'></div>"
+                + "\r\n</div>";
+
+            CheckHtmlValidation(strText);
 
             /*
             strText = "<div class='" + strOperClass + "'>"
@@ -1404,6 +1411,19 @@ out strError);
                     string strErrorInfo = "<br/>单据打印脚本运行时出错: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
                     AppendHtml(strErrorInfo);
                 }
+            }
+        }
+
+        void CheckHtmlValidation(string strText)
+        {
+            try
+            {
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(strText);
+            }
+            catch
+            {
+                Program.MainForm.ReportError("dp2circulation 输出操作历史时发现 HTML 不合法", "(安静报错)" + strText);
             }
         }
 
@@ -1534,9 +1554,11 @@ out strError);
                     + "</div>"
                     + " <div class='clear'></div>"
                     + "</div>";
+
+                CheckHtmlValidation(strText);
+
                 AppendHtml(strText);
                 m_nCount++;
-
             }
 
             // 运行Script代码
