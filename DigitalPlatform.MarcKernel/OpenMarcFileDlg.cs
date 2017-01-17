@@ -283,9 +283,9 @@ namespace DigitalPlatform.Marc
             this.checkBox_removeField998.AutoSize = true;
             this.checkBox_removeField998.Location = new System.Drawing.Point(0, 154);
             this.checkBox_removeField998.Name = "checkBox_removeField998";
-            this.checkBox_removeField998.Size = new System.Drawing.Size(120, 16);
+            this.checkBox_removeField998.Size = new System.Drawing.Size(144, 16);
             this.checkBox_removeField998.TabIndex = 10;
-            this.checkBox_removeField998.Text = "删除 998 字段(&R)";
+            this.checkBox_removeField998.Text = "删除 997/998 字段(&R)";
             this.checkBox_removeField998.UseVisualStyleBackColor = true;
             // 
             // checkBox_880

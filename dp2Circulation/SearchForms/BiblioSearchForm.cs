@@ -3111,7 +3111,7 @@ MessageBoxDefaultButton.Button1);
             stop.Initial("正在刷新浏览行 ...");
             stop.BeginLoop();
 
-            this.EnableControls(false);
+            this.EnableControlsInSearching(false);
             try
             {
                 List<ListViewItem> items = new List<ListViewItem>();
@@ -3201,7 +3201,7 @@ MessageBoxDefaultButton.Button1);
 
                 this.ReturnChannel(channel);
 
-                this.EnableControls(true);
+                this.EnableControlsInSearching(true);
             }
         }
 
@@ -5676,7 +5676,7 @@ MessageBoxDefaultButton.Button1);
             stop.BeginLoop();
 
             this.EnableControlsInSearching(false);
-
+            this.listView_records.BeginUpdate();
             try
             {
                 // 导入的事项是没有序的，因此需要清除已有的排序标志
@@ -5787,6 +5787,8 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
+                this.listView_records.EndUpdate();
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
@@ -6523,6 +6525,8 @@ MessageBoxDefaultButton.Button2);
             this.EnableControls(false);
 
             LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在导出到 XML 文件 ...");
@@ -6766,6 +6770,7 @@ MessageBoxDefaultButton.Button1);
                 stop.Initial("");
                 stop.HideProgress();
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
@@ -7680,6 +7685,27 @@ MessageBoxDefaultButton.Button1);
             string strLastFileName = this.LastIso2709FileName;
             string strLastEncodingName = this.LastEncodingName;
 
+            ExportMarcHoldingDialog dlg_905 = new ExportMarcHoldingDialog();
+            {
+                MainForm.SetControlFont(dlg_905, this.Font);
+
+                dlg_905.UiState = Program.MainForm.AppInfo.GetString(
+                    "BiblioSearchForm",
+                    "ExportMarcHoldingDialog_uiState",
+                    "");
+
+                Program.MainForm.AppInfo.LinkFormState(dlg_905, "BiblioSearchForm_ExportMarcHoldingDialog_state");
+                dlg_905.ShowDialog(this);
+
+                Program.MainForm.AppInfo.SetString(
+                    "BiblioSearchForm",
+                    "ExportMarcHoldingDialog_uiState",
+                    dlg_905.UiState);
+
+                if (dlg_905.DialogResult != DialogResult.OK)
+                    return;
+            }
+
             bool bExist = File.Exists(dlg.FileName);
             bool bAppend = false;
 
@@ -7750,6 +7776,8 @@ MessageBoxDefaultButton.Button1);
             }
 
             LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
 
             this.EnableControls(false);
 
@@ -7788,33 +7816,6 @@ MessageBoxDefaultButton.Button1);
                         goto ERROR1;
                     }
 
-#if NO
-                    string[] results = null;
-                    byte[] baTimestamp = null;
-
-                    stop.SetMessage("正在获取书目记录 " + strRecPath);
-
-                    long lRet = Channel.GetBiblioInfos(
-                        stop,
-                        strRecPath,
-                        "",
-                        new string[] { "xml" },   // formats
-                        out results,
-                        out baTimestamp,
-                        out strError);
-                    if (lRet == 0)
-                        goto ERROR1;
-                    if (lRet == -1)
-                        goto ERROR1;
-
-                    if (results == null || results.Length == 0)
-                    {
-                        strError = "results error";
-                        goto ERROR1;
-                    }
-
-                    string strXml = results[0];
-#endif
                     BiblioInfo info = item.BiblioInfo;
 
                     string strXml = "";
@@ -7859,12 +7860,35 @@ MessageBoxDefaultButton.Button1);
                     {
                         MarcRecord record = new MarcRecord(strMARC);
                         record.select("field[@name='998']").detach();
+                        record.select("field[@name='997']").detach();
                         strMARC = record.Text;
                     }
                     if (dlg.Mode880 == true && strMarcSyntax == "usmarc")
                     {
                         MarcRecord record = new MarcRecord(strMARC);
                         MarcQuery.To880(record);
+                        strMARC = record.Text;
+                    }
+
+                    if (dlg_905.Create905)
+                    {
+                        MarcRecord record = new MarcRecord(strMARC);
+
+                        if (dlg_905.RemoveOld905)
+                        {
+                            record.select("field[@name='905']").detach();
+                        }
+
+                        nRet = OutputEntities(
+                            stop,
+                            channel,
+                            info.RecPath,
+                            "item",
+                            dlg_905.Style905,
+                            record,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
                         strMARC = record.Text;
                     }
 
@@ -7913,6 +7937,7 @@ MessageBoxDefaultButton.Button1);
                 stop.Initial("");
                 stop.HideProgress();
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
@@ -7929,6 +7954,193 @@ MessageBoxDefaultButton.Button1);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        public static int OutputEntities(
+            Stop stop,
+            LibraryChannel channel,
+            string strBiblioRecPath,
+            string strDbType,
+            string str905Style,
+            MarcRecord record,
+            out string strError)
+        {
+            strError = "";
+
+            /*
+只创建单个 905 字段
+每册一个 905 字段
+             * * */
+
+            List<string> first_d_e = null;
+            List<string> barcodes = new List<string>();
+
+            long lPerCount = 100; // 每批获得多少个
+            long lStart = 0;
+            long lResultCount = 0;
+            long lCount = -1;
+            for (; ; )
+            {
+                if (stop != null && stop.State != 0)
+                {
+                    strError = "用户中断";
+                    return -1;
+                }
+
+                EntityInfo[] entities = null;
+
+                long lRet = 0;
+
+                channel.Timeout = new TimeSpan(0, 5, 0);
+                if (strDbType == "item")
+                {
+                    lRet = channel.GetEntities(
+                         stop,
+                         strBiblioRecPath,
+                         lStart,
+                         lCount,
+                         "", // "onlygetpath",
+                         "zh",
+                         out entities,
+                         out strError);
+                }
+                if (strDbType == "order")
+                {
+                    lRet = channel.GetOrders(
+                         stop,
+                         strBiblioRecPath,
+                         lStart,
+                         lCount,
+                         "", // "onlygetpath",
+                         "zh",
+                         out entities,
+                         out strError);
+                }
+                if (strDbType == "issue")
+                {
+                    lRet = channel.GetIssues(
+                         stop,
+                         strBiblioRecPath,
+                         lStart,
+                         lCount,
+                         "", // "onlygetpath",
+                         "zh",
+                         out entities,
+                         out strError);
+                }
+                if (strDbType == "comment")
+                {
+                    lRet = channel.GetComments(
+                         stop,
+                         strBiblioRecPath,
+                         lStart,
+                         lCount,
+                         "", // "onlygetpath",
+                         "zh",
+                         out entities,
+                         out strError);
+                }
+                if (lRet == -1)
+                    return -1;
+
+                lResultCount = lRet;
+
+                if (lRet == 0)
+                    return 0;
+
+                Debug.Assert(entities != null, "");
+
+                if (str905Style == "每册一个 905 字段")
+                {
+                    foreach (EntityInfo info in entities)
+                    {
+                        if (info.ErrorCode != ErrorCodeValue.NoError)
+                        {
+                            strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo;  // NewRecPath
+                            return -1;
+                        }
+
+                        XmlDocument item_dom = new XmlDocument();
+                        item_dom.LoadXml(info.OldRecord);
+
+                        // TODO: 要按照排架体系定义，分析出索取号的各行。比如三行的索取号
+                        string strAccessNo = DomUtil.GetElementText(item_dom.DocumentElement, "accessNo");
+                        List<string> d_e = StringUtil.ParseTwoPart(strAccessNo, "/");
+                        string strBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
+
+                        MarcField field = new MarcField("905", "  ");
+                        if (string.IsNullOrEmpty(strAccessNo) == false)
+                        {
+                            field.add(new MarcSubfield("d", d_e[0]));
+                            field.add(new MarcSubfield("e", d_e[1]));
+                        }
+                        if (string.IsNullOrEmpty(strBarcode) == false)
+                            field.add(new MarcSubfield("b", strBarcode));
+                        if (field.Subfields.count > 0)
+                            record.add(field);
+                    }
+                }
+                else if (str905Style == "只创建单个 905 字段"
+                || string.IsNullOrEmpty(str905Style))
+                {
+                    foreach (EntityInfo info in entities)
+                    {
+                        if (info.ErrorCode != ErrorCodeValue.NoError)
+                        {
+                            strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo;  // NewRecPath
+                            return -1;
+                        }
+
+                        XmlDocument item_dom = new XmlDocument();
+                        item_dom.LoadXml(info.OldRecord);
+
+                        // TODO: 要按照排架体系定义，分析出索取号的各行。比如三行的索取号
+                        if (first_d_e == null)
+                        {
+                            string strAccessNo = DomUtil.GetElementText(item_dom.DocumentElement, "accessNo");
+                            if (string.IsNullOrEmpty(strAccessNo) == false)
+                                first_d_e = StringUtil.ParseTwoPart(strAccessNo, "/");
+                        }
+                        string strBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
+                        if (string.IsNullOrEmpty(strBarcode) == false)
+                            barcodes.Add(strBarcode);
+                    }
+                }
+                else
+                {
+                    strError = "无法识别的 str905Style '" + str905Style + "'";
+                    return -1;
+                }
+
+                lStart += entities.Length;
+                if (lStart >= lResultCount)
+                    break;
+
+                if (lCount == -1)
+                    lCount = lPerCount;
+
+                if (lStart + lCount > lResultCount)
+                    lCount = lResultCount - lStart;
+            }
+
+            if (str905Style == "只创建单个 905 字段"
+                || string.IsNullOrEmpty(str905Style))
+            {
+
+                MarcField field = new MarcField("905", "  ");
+                if (first_d_e != null)
+                {
+                    field.add(new MarcSubfield("d", first_d_e[0]));
+                    field.add(new MarcSubfield("e", first_d_e[1]));
+                }
+                foreach (string strBarcode in barcodes)
+                {
+                    field.add(new MarcSubfield("b", strBarcode));
+                }
+                record.add(field);
+            }
+
+            return 1;
         }
 
         // 保存到记录路径文件

@@ -5533,6 +5533,7 @@ MessageBoxDefaultButton.Button2);
                     {
                         MarcRecord temp = new MarcRecord(strRecord);
                         temp.select("field[@name='998']").detach();
+                        temp.select("field[@name='997']").detach();
                         strRecord = temp.Text;
                     }
 

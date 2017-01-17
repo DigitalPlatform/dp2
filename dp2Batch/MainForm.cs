@@ -4656,7 +4656,6 @@ this.checkBox_import_fastMode.Checked);
 
                         }
 
-
                         if (bFoundRecord == true
                             && outputfile != null)
                         {
@@ -4951,7 +4950,6 @@ this.checkBox_import_fastMode.Checked);
             return 0;
         }
 
-
         // 将记录写入ISO2709文件
         int WriteRecordToISO2709File(
             Stream outputfile,
@@ -5004,6 +5002,7 @@ this.checkBox_import_fastMode.Checked);
             {
                 MarcRecord record = new MarcRecord(strMarc);
                 record.select("field[@name='998']").detach();
+                record.select("field[@name='997']").detach();
                 strMarc = record.Text;
             }
 

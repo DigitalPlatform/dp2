@@ -2234,6 +2234,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     {
                         MarcRecord temp = new MarcRecord(strMarc);
                         temp.select("field[@name='998']").detach();
+                        temp.select("field[@name='997']").detach();
                         strMarc = temp.Text;
                     }
 
