@@ -1531,6 +1531,10 @@ ref bHideMessageBox);
                 controls.Add(this.textBox_setBiblioInfo_biblioType);
                 controls.Add(this.textBox_setBiblioInfo_content);
 
+                controls.Add(this.textBox_login_userName);
+                controls.Add(this.textBox_login_password);
+                controls.Add(this.textBox_login_parameters);
+
                 return GuiState.GetUiState(controls);
             }
             set
@@ -1543,6 +1547,10 @@ ref bHideMessageBox);
                 controls.Add(this.textBox_setBiblioInfo_biblioRecPath);
                 controls.Add(this.textBox_setBiblioInfo_biblioType);
                 controls.Add(this.textBox_setBiblioInfo_content);
+
+                controls.Add(this.textBox_login_userName);
+                controls.Add(this.textBox_login_password);
+                controls.Add(this.textBox_login_parameters);
 
                 GuiState.SetUiState(controls, value);
             }
@@ -1833,7 +1841,7 @@ dlg.UiState);
                     out strOutputBiblioRecPath,
                     out baOutputTimestamp,
                     out strError);
-                MessageBox.Show(this, "lRet="+lRet.ToString()+" , strOutputBiblioRecPath="+strOutputBiblioRecPath+", strError=" + strError);
+                MessageBox.Show(this, "lRet=" + lRet.ToString() + " , strOutputBiblioRecPath=" + strOutputBiblioRecPath + ", strError=" + strError);
             }
             finally
             {
@@ -1858,8 +1866,8 @@ dlg.UiState);
                 byte[] baRecord = null;
                 int nRet = MarcUtil.ReadMarcRecord(s,
                     dlg.Encoding,
-                    true, 
-                    out baRecord, 
+                    true,
+                    out baRecord,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1868,6 +1876,29 @@ dlg.UiState);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        private void button_login_login_Click(object sender, EventArgs e)
+        {
+            using (LibraryChannel channel = new LibraryChannel())
+            {
+                channel.Url = this.MainForm.LibraryServerUrl;
+
+                string strOutputUserName = "";
+                string strRights = "";
+                string strLibraryCode = "";
+
+                string strError = "";
+                long lRet = channel.Login(this.textBox_login_userName.Text,
+                    this.textBox_login_password.Text,
+                    this.textBox_login_parameters.Text,
+                    out strOutputUserName,
+                    out strRights,
+                    out strLibraryCode,
+                    out strError);
+                MessageBox.Show(this, "lRet=" + lRet + ", strError='" + strError + "', strRights='"+strRights+"'");
+
+            }
         }
 
     }

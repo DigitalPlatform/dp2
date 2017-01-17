@@ -619,7 +619,7 @@ namespace dp2Library
                     bSimulateLogin = true;
 #endif
                 bool bSimulateLogin = StringUtil.GetBooleanValue((string)parameters["simulate"], false);
-                string strFinalRights = "";
+                string strLimitRights = ""; // 代理者的权限。用于限定(代理登录方式下)被代理者的危险权限
                 if (bReader == false)
                 {
                     if (bSimulateLogin == true)
@@ -690,7 +690,7 @@ namespace dp2Library
 
                             // 这种情况下使用代理者的权限
                             if (strPassword == null)
-                                strFinalRights = sessioninfo.Rights;
+                                strLimitRights = sessioninfo.Rights;
 
                             // 检查工作人员帐户是否具备 simulateworker 权限
                             if (StringUtil.IsInList("simulateworker", strRights) == false)
@@ -725,12 +725,20 @@ namespace dp2Library
                     strOutputUserName = strUserName;
 
                     // 2016/10/21
-                    if (string.IsNullOrEmpty(strFinalRights) == false)
+                    if (string.IsNullOrEmpty(strLimitRights) == false)
                     {
+#if NO
                         if (sessioninfo.Account != null)
                         {
-                            strRights = strFinalRights;
-                            sessioninfo.Account.Rights = strFinalRights;
+                            strRights = strLimitRights;
+                            sessioninfo.Account.Rights = strLimitRights;
+                        }
+#endif
+                        // 2017/1/17
+                        if (sessioninfo.Account != null)
+                        {
+                            string removed = "";
+                            sessioninfo.Account.Rights = LibraryApplication.LimitRights(strRights, strLimitRights, out removed);
                         }
                     }
                 }

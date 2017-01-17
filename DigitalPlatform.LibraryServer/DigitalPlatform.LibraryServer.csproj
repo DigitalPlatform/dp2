@@ -133,6 +133,7 @@
     <Compile Include="AppCirculation.cs" />
     <Compile Include="AppFileSystem.cs" />
     <Compile Include="AppLoginCache.cs" />
+    <Compile Include="AppRights.cs" />
     <Compile Include="AppScriptFilter.cs" />
     <Compile Include="AppSystemParameter.cs" />
     <Compile Include="BiblioSummaryCache.cs" />
