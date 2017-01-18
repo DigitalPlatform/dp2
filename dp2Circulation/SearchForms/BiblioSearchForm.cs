@@ -7846,6 +7846,12 @@ MessageBoxDefaultButton.Button1);
 
                     byte[] baTarget = null;
 
+                    // 2017/1/18
+                    if (string.IsNullOrEmpty(strXml) == true)
+                    {
+                        if (string.IsNullOrEmpty(strMarcSyntax) == true)
+                            strMarcSyntax = "unimarc";
+                    }
                     Debug.Assert(strMarcSyntax != "", "");
 
                     // 按照编目规则过滤
@@ -8101,7 +8107,7 @@ MessageBoxDefaultButton.Button1);
 
                             MarcField field = new MarcField("905", "  ");
 
-                            if (first_accessNoInfo != null 
+                            if (first_accessNoInfo != null
                                 && first_accessNoInfo.HasHeadLine)
                             {
                                 field.add(new MarcSubfield("a", first_accessNoInfo.HeadLine));
