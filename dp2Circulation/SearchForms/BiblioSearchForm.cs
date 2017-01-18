@@ -7828,6 +7828,10 @@ MessageBoxDefaultButton.Button1);
                             strXml = info.OldXml;
                     }
 
+                    // 2017/1/18
+                    if (string.IsNullOrEmpty(strXml) == true)
+                        continue;   // 并发删除书目记录的时候会碰到
+
                     string strMARC = "";
                     string strMarcSyntax = "";
                     // 将XML格式转换为MARC格式
@@ -7846,12 +7850,6 @@ MessageBoxDefaultButton.Button1);
 
                     byte[] baTarget = null;
 
-                    // 2017/1/18
-                    if (string.IsNullOrEmpty(strXml) == true)
-                    {
-                        if (string.IsNullOrEmpty(strMarcSyntax) == true)
-                            strMarcSyntax = "unimarc";
-                    }
                     Debug.Assert(strMarcSyntax != "", "");
 
                     // 按照编目规则过滤
