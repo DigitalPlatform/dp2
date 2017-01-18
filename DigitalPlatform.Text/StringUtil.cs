@@ -2260,7 +2260,6 @@ string strTimestamp)
             return (int)(nValue1 - nValue2);
         }
 
-
         // 得到两个被字符引导的数字的较大者
         public static int GetBiggerLedNumber(string strLedNumber1,
             string strLedNumber2,
@@ -2338,7 +2337,6 @@ string strTimestamp)
 
             strNumber = Convert.ToString(nValue + nNumber).PadLeft(nWidth, '0');
             strResult = strHead + strNumber;
-
             return 0;
         }
 
@@ -3673,8 +3671,6 @@ string strTimestamp)
             }
             return strText;
         }
-
-
 
         // 根据操作符比较两个字符串是否符合 strText strOperator strCanKaoText
         // parameter:

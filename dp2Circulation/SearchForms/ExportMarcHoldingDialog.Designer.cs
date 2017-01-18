@@ -33,6 +33,7 @@
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.checkBox_removeOld905 = new System.Windows.Forms.CheckBox();
+            this.checkBox_906 = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // checkBox_905
@@ -94,6 +95,16 @@
             this.checkBox_removeOld905.UseVisualStyleBackColor = true;
             this.checkBox_removeOld905.Visible = false;
             // 
+            // checkBox_906
+            // 
+            this.checkBox_906.AutoSize = true;
+            this.checkBox_906.Location = new System.Drawing.Point(13, 99);
+            this.checkBox_906.Name = "checkBox_906";
+            this.checkBox_906.Size = new System.Drawing.Size(174, 16);
+            this.checkBox_906.TabIndex = 11;
+            this.checkBox_906.Text = "创建 906 字段[根据册记录]";
+            this.checkBox_906.UseVisualStyleBackColor = true;
+            // 
             // ExportMarcHoldingDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -101,6 +112,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(385, 185);
+            this.Controls.Add(this.checkBox_906);
             this.Controls.Add(this.checkBox_removeOld905);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
@@ -122,5 +134,6 @@
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.CheckBox checkBox_removeOld905;
+        private System.Windows.Forms.CheckBox checkBox_906;
     }
 }

@@ -2152,7 +2152,7 @@ namespace DigitalPlatform.Marc
 
                 this.Name = strName;
             }
-            if (strContent.IndexOf((char)31) != -1)
+            if (strContent != null && strContent.IndexOf((char)31) != -1)
                 throw new Exception("子字段内容字符串中不允许包含 ASCII 31 字符");
 
             this.Content = strContent;

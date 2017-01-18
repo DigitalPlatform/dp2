@@ -1425,6 +1425,10 @@ namespace DigitalPlatform.LibraryServer
         // 注意，如果xxxx中是多个馆代码，要表达为 "code1|code2"这样的形态。本函数能自动把'|'替换为','
         static string GetLibraryCodeParam(string strStyle)
         {
+            // 2017/1/18 加上了保护
+            if (string.IsNullOrEmpty(strStyle))
+                return null;
+
             string[] parts = strStyle.Split(new char[] { ',' });
             foreach (string strPart in parts)
             {

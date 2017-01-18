@@ -23,14 +23,12 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
         {
-
             this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.Close();
         }
@@ -72,6 +70,18 @@ namespace dp2Circulation
             }
         }
 
+        public bool Create906
+        {
+            get
+            {
+                return this.checkBox_906.Checked;
+            }
+            set
+            {
+                this.checkBox_906.Checked = value;
+            }
+        }
+
         public string UiState
         {
             get
@@ -80,6 +90,7 @@ namespace dp2Circulation
                 controls.Add(this.checkBox_905);
                 controls.Add(this.comboBox_905_style);
                 controls.Add(this.checkBox_removeOld905);
+                controls.Add(this.checkBox_906);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -88,6 +99,7 @@ namespace dp2Circulation
                 controls.Add(this.checkBox_905);
                 controls.Add(this.comboBox_905_style);
                 controls.Add(this.checkBox_removeOld905);
+                controls.Add(this.checkBox_906);
                 GuiState.SetUiState(controls, value);
             }
         }

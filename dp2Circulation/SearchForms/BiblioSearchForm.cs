@@ -7665,6 +7665,14 @@ MessageBoxDefaultButton.Button1);
             dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
             dlg.EnableMarcSyntax = false;
             dlg.ShowDialog(this);
+
+            // 放在这里的意图是即便 Cancel 了，对话框里面的内容也能被记住
+            this.LastIso2709FileName = dlg.FileName;
+            this.LastCrLfIso2709 = dlg.CrLf;
+            this.LastEncodingName = dlg.EncodingName;
+            this.LastCatalogingRule = dlg.Rule;
+            this.LastRemoveField998 = dlg.RemoveField998;
+
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
@@ -7751,12 +7759,6 @@ MessageBoxDefaultButton.Button1);
 
                 }
             }
-
-            this.LastIso2709FileName = dlg.FileName;
-            this.LastCrLfIso2709 = dlg.CrLf;
-            this.LastEncodingName = dlg.EncodingName;
-            this.LastCatalogingRule = dlg.Rule;
-            this.LastRemoveField998 = dlg.RemoveField998;
 
             Stream s = null;
 
@@ -7870,21 +7872,24 @@ MessageBoxDefaultButton.Button1);
                         strMARC = record.Text;
                     }
 
-                    if (dlg_905.Create905)
+                    if (dlg_905.Create905 || dlg_905.Create906)
                     {
                         MarcRecord record = new MarcRecord(strMARC);
 
-                        if (dlg_905.RemoveOld905)
-                        {
+                        if (dlg_905.Create905 && dlg_905.RemoveOld905)
                             record.select("field[@name='905']").detach();
-                        }
+
+                        if (dlg_905.Create906)
+                            record.select("field[@name='906']").detach();
 
                         nRet = OutputEntities(
                             stop,
                             channel,
                             info.RecPath,
                             "item",
+                            dlg_905.Create905,
                             dlg_905.Style905,
+                            dlg_905.Create906,
                             record,
                             out strError);
                         if (nRet == -1)
@@ -7961,7 +7966,9 @@ MessageBoxDefaultButton.Button1);
             LibraryChannel channel,
             string strBiblioRecPath,
             string strDbType,
+            bool bCreate905,
             string str905Style,
+            bool bCreate906,
             MarcRecord record,
             out string strError)
         {
@@ -7972,87 +7979,163 @@ MessageBoxDefaultButton.Button1);
 每册一个 905 字段
              * * */
 
-            List<string> first_d_e = null;
-            List<string> barcodes = new List<string>();
-
-            long lPerCount = 100; // 每批获得多少个
-            long lStart = 0;
-            long lResultCount = 0;
-            long lCount = -1;
-            for (; ; )
+            try
             {
-                if (stop != null && stop.State != 0)
+                SubItemLoader loader = new SubItemLoader();
+                loader.BiblioRecPath = strBiblioRecPath;
+                loader.Channel = channel;
+                loader.Stop = stop;
+                loader.DbType = strDbType;
+
+                if (bCreate905)
                 {
-                    strError = "用户中断";
-                    return -1;
+                    if (str905Style == "每册一个 905 字段")
+                    {
+                        foreach (EntityInfo info in loader)
+                        {
+                            if (info.ErrorCode != ErrorCodeValue.NoError)
+                            {
+                                strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo;  // NewRecPath
+                                return -1;
+                            }
+
+                            XmlDocument item_dom = new XmlDocument();
+                            item_dom.LoadXml(info.OldRecord);
+
+                            string strAccessNo = DomUtil.GetElementText(item_dom.DocumentElement, "accessNo");
+                            string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
+                            strLocation = StringUtil.GetPureLocation(strLocation);
+
+                            dp2Circulation.MainForm.AccessNoInfo accessNoInfo = null;
+                            // 解析索取号字符串
+                            // return:
+                            //      -1  error
+                            //      0   排架体系定义没有找到
+                            //      1   成功
+                            int nRet = Program.MainForm.ParseAccessNo(
+                                strLocation,
+                                strAccessNo,
+                                out accessNoInfo,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            string strBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
+
+                            MarcField field = new MarcField("905", "  ");
+
+                            if (accessNoInfo.HasHeadLine)
+                            {
+                                field.add(new MarcSubfield("a", accessNoInfo.HeadLine));
+                            }
+                            else
+                            {
+                                if (string.IsNullOrEmpty(strLocation) == false)
+                                    field.add(new MarcSubfield("a", strLocation));
+                            }
+
+                            if (string.IsNullOrEmpty(strAccessNo) == false)
+                            {
+                                field.add(new MarcSubfield("d", accessNoInfo.ClassLine));
+                                field.add(new MarcSubfield("e", accessNoInfo.QufenhaoLine));
+                            }
+                            if (string.IsNullOrEmpty(strBarcode) == false)
+                                field.add(new MarcSubfield("b", strBarcode));
+                            if (field.Subfields.count > 0)
+                                record.add(field);
+                        }
+                    }
+                    else if (str905Style == "只创建单个 905 字段"
+                        || string.IsNullOrEmpty(str905Style))
+                    {
+                        dp2Circulation.MainForm.AccessNoInfo first_accessNoInfo = null;
+                        List<string> barcodes = new List<string>();
+                        string strFirstLocation = "";
+
+                        foreach (EntityInfo info in loader)
+                        {
+                            if (info.ErrorCode != ErrorCodeValue.NoError)
+                            {
+                                strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo;  // NewRecPath
+                                return -1;
+                            }
+
+                            XmlDocument item_dom = new XmlDocument();
+                            item_dom.LoadXml(info.OldRecord);
+
+                            string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
+                            strLocation = StringUtil.GetPureLocation(strLocation);
+
+                            if (string.IsNullOrEmpty(strFirstLocation))
+                            {
+                                if (string.IsNullOrEmpty(strLocation) == false)
+                                    strFirstLocation = strLocation;
+                            }
+
+                            // TODO: 要按照排架体系定义，分析出索取号的各行。比如三行的索取号
+                            if (first_accessNoInfo == null)
+                            {
+                                string strAccessNo = DomUtil.GetElementText(item_dom.DocumentElement, "accessNo");
+                                if (string.IsNullOrEmpty(strAccessNo) == false)
+                                {
+                                    // 解析索取号字符串
+                                    // return:
+                                    //      -1  error
+                                    //      0   排架体系定义没有找到
+                                    //      1   成功
+                                    int nRet = Program.MainForm.ParseAccessNo(
+                                        strLocation,
+                                        strAccessNo,
+                                        out first_accessNoInfo,
+                                        out strError);
+                                    if (nRet == -1)
+                                        return -1;
+                                }
+                            }
+                            string strBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
+                            if (string.IsNullOrEmpty(strBarcode) == false)
+                                barcodes.Add(strBarcode);
+                        }
+
+                        {
+
+                            MarcField field = new MarcField("905", "  ");
+
+                            if (first_accessNoInfo != null 
+                                && first_accessNoInfo.HasHeadLine)
+                            {
+                                field.add(new MarcSubfield("a", first_accessNoInfo.HeadLine));
+                            }
+                            else
+                            {
+                                if (string.IsNullOrEmpty(strFirstLocation) == false)
+                                    field.add(new MarcSubfield("a", strFirstLocation));
+                            }
+
+                            if (first_accessNoInfo != null)
+                            {
+                                field.add(new MarcSubfield("d", first_accessNoInfo.ClassLine));
+                                field.add(new MarcSubfield("e", first_accessNoInfo.QufenhaoLine));
+                            }
+                            foreach (string strBarcode in barcodes)
+                            {
+                                field.add(new MarcSubfield("b", strBarcode));
+                            }
+                            record.add(field);
+                        }
+                    }
+                    else
+                    {
+                        strError = "无法识别的 str905Style '" + str905Style + "'";
+                        return -1;
+                    }
                 }
 
-                EntityInfo[] entities = null;
-
-                long lRet = 0;
-
-                channel.Timeout = new TimeSpan(0, 5, 0);
-                if (strDbType == "item")
+                if (bCreate906)
                 {
-                    lRet = channel.GetEntities(
-                         stop,
-                         strBiblioRecPath,
-                         lStart,
-                         lCount,
-                         "", // "onlygetpath",
-                         "zh",
-                         out entities,
-                         out strError);
-                }
-                if (strDbType == "order")
-                {
-                    lRet = channel.GetOrders(
-                         stop,
-                         strBiblioRecPath,
-                         lStart,
-                         lCount,
-                         "", // "onlygetpath",
-                         "zh",
-                         out entities,
-                         out strError);
-                }
-                if (strDbType == "issue")
-                {
-                    lRet = channel.GetIssues(
-                         stop,
-                         strBiblioRecPath,
-                         lStart,
-                         lCount,
-                         "", // "onlygetpath",
-                         "zh",
-                         out entities,
-                         out strError);
-                }
-                if (strDbType == "comment")
-                {
-                    lRet = channel.GetComments(
-                         stop,
-                         strBiblioRecPath,
-                         lStart,
-                         lCount,
-                         "", // "onlygetpath",
-                         "zh",
-                         out entities,
-                         out strError);
-                }
-                if (lRet == -1)
-                    return -1;
+                    MarcField field = new MarcField("906", "  ");
 
-                lResultCount = lRet;
-
-                if (lRet == 0)
-                    return 0;
-
-                Debug.Assert(entities != null, "");
-
-                if (str905Style == "每册一个 905 字段")
-                {
-                    foreach (EntityInfo info in entities)
+                    foreach (EntityInfo info in loader)
                     {
                         if (info.ErrorCode != ErrorCodeValue.NoError)
                         {
@@ -8063,84 +8146,86 @@ MessageBoxDefaultButton.Button1);
                         XmlDocument item_dom = new XmlDocument();
                         item_dom.LoadXml(info.OldRecord);
 
-                        // TODO: 要按照排架体系定义，分析出索取号的各行。比如三行的索取号
-                        string strAccessNo = DomUtil.GetElementText(item_dom.DocumentElement, "accessNo");
-                        List<string> d_e = StringUtil.ParseTwoPart(strAccessNo, "/");
-                        string strBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
-
-                        MarcField field = new MarcField("905", "  ");
-                        if (string.IsNullOrEmpty(strAccessNo) == false)
+                        // $a 册条码号
                         {
-                            field.add(new MarcSubfield("d", d_e[0]));
-                            field.add(new MarcSubfield("e", d_e[1]));
+                            string strBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
+                            field.add(new MarcSubfield("a", strBarcode));
                         }
-                        if (string.IsNullOrEmpty(strBarcode) == false)
-                            field.add(new MarcSubfield("b", strBarcode));
+
+                        // $b 入藏库
+                        {
+                            string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
+                            strLocation = StringUtil.GetPureLocation(strLocation);
+                            if (string.IsNullOrEmpty(strLocation) == false)
+                                field.add(new MarcSubfield("b", strLocation));
+                        }
+
+                        // TODO: 要按照排架体系定义，分析出索取号的各行。比如三行的索取号
+                        // $c架位
+                        {
+                            string strAccessNo = DomUtil.GetElementText(item_dom.DocumentElement, "accessNo");
+
+                            strAccessNo = StringUtil.BuildLocationClassEntry(strAccessNo);
+
+                            if (string.IsNullOrEmpty(strAccessNo) == false)
+                                field.add(new MarcSubfield("c", strAccessNo));
+                        }
+
+                        // $d册价格
+                        {
+                            string strPrice = DomUtil.GetElementText(item_dom.DocumentElement, "price");
+                            if (string.IsNullOrEmpty(strPrice) == false)
+                                field.add(new MarcSubfield("d", strPrice));
+                        }
+
+                        // $f册类型
+                        {
+                            string strBookType = DomUtil.GetElementText(item_dom.DocumentElement, "bookType");
+                            if (string.IsNullOrEmpty(strBookType) == false)
+                                field.add(new MarcSubfield("f", strBookType));
+                        }
+
+                        // $h登录号
+                        {
+                            string strRegisterNo = DomUtil.GetElementText(item_dom.DocumentElement, "registerNo");
+                            if (String.IsNullOrEmpty(strRegisterNo) == false)
+                                field.add(new MarcSubfield("h", strRegisterNo));
+                        }
+
+                        // $r借阅者条码号
+                        {
+                            string strBorrower = DomUtil.GetElementText(item_dom.DocumentElement, "borrower");
+                            if (String.IsNullOrEmpty(strBorrower) == false)
+                                field.add(new MarcSubfield("r", strBorrower));
+                        }
+
+                        // $s图书状态
+                        {
+                            string strState = DomUtil.GetElementText(item_dom.DocumentElement, "state");
+                            if (String.IsNullOrEmpty(strState) == false)
+                                field.add(new MarcSubfield("r", strState));
+                        }
+
+                        // $z附注
+                        {
+                            string strComment = DomUtil.GetElementText(item_dom.DocumentElement, "comment");
+                            if (String.IsNullOrEmpty(strComment) == false)
+                                field.add(new MarcSubfield("r", strComment));
+                        }
+
                         if (field.Subfields.count > 0)
                             record.add(field);
                     }
-                }
-                else if (str905Style == "只创建单个 905 字段"
-                || string.IsNullOrEmpty(str905Style))
-                {
-                    foreach (EntityInfo info in entities)
-                    {
-                        if (info.ErrorCode != ErrorCodeValue.NoError)
-                        {
-                            strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo;  // NewRecPath
-                            return -1;
-                        }
 
-                        XmlDocument item_dom = new XmlDocument();
-                        item_dom.LoadXml(info.OldRecord);
-
-                        // TODO: 要按照排架体系定义，分析出索取号的各行。比如三行的索取号
-                        if (first_d_e == null)
-                        {
-                            string strAccessNo = DomUtil.GetElementText(item_dom.DocumentElement, "accessNo");
-                            if (string.IsNullOrEmpty(strAccessNo) == false)
-                                first_d_e = StringUtil.ParseTwoPart(strAccessNo, "/");
-                        }
-                        string strBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
-                        if (string.IsNullOrEmpty(strBarcode) == false)
-                            barcodes.Add(strBarcode);
-                    }
-                }
-                else
-                {
-                    strError = "无法识别的 str905Style '" + str905Style + "'";
-                    return -1;
                 }
 
-                lStart += entities.Length;
-                if (lStart >= lResultCount)
-                    break;
-
-                if (lCount == -1)
-                    lCount = lPerCount;
-
-                if (lStart + lCount > lResultCount)
-                    lCount = lResultCount - lStart;
+                return 1;
             }
-
-            if (str905Style == "只创建单个 905 字段"
-                || string.IsNullOrEmpty(str905Style))
+            catch (Exception ex)
             {
-
-                MarcField field = new MarcField("905", "  ");
-                if (first_d_e != null)
-                {
-                    field.add(new MarcSubfield("d", first_d_e[0]));
-                    field.add(new MarcSubfield("e", first_d_e[1]));
-                }
-                foreach (string strBarcode in barcodes)
-                {
-                    field.add(new MarcSubfield("b", strBarcode));
-                }
-                record.add(field);
+                strError = ex.Message;
+                return -1;
             }
-
-            return 1;
         }
 
         // 保存到记录路径文件
