@@ -37,7 +37,7 @@
             this.groupBox_subRecord = new System.Windows.Forms.GroupBox();
             this.radioButton_subrecord_target = new System.Windows.Forms.RadioButton();
             this.radioButton_subrecord_source = new System.Windows.Forms.RadioButton();
-            this.radioButton_subrecord_combin = new System.Windows.Forms.RadioButton();
+            this.radioButton_subrecord_combine = new System.Windows.Forms.RadioButton();
             this.textBox_messageText = new System.Windows.Forms.TextBox();
             this.groupBox_biblio.SuspendLayout();
             this.groupBox_subRecord.SuspendLayout();
@@ -123,7 +123,7 @@
             this.groupBox_subRecord.BackColor = System.Drawing.SystemColors.Window;
             this.groupBox_subRecord.Controls.Add(this.radioButton_subrecord_target);
             this.groupBox_subRecord.Controls.Add(this.radioButton_subrecord_source);
-            this.groupBox_subRecord.Controls.Add(this.radioButton_subrecord_combin);
+            this.groupBox_subRecord.Controls.Add(this.radioButton_subrecord_combine);
             this.groupBox_subRecord.Location = new System.Drawing.Point(327, 188);
             this.groupBox_subRecord.Name = "groupBox_subRecord";
             this.groupBox_subRecord.Size = new System.Drawing.Size(221, 95);
@@ -155,16 +155,16 @@
             // 
             // radioButton_subrecord_combin
             // 
-            this.radioButton_subrecord_combin.AutoSize = true;
-            this.radioButton_subrecord_combin.Checked = true;
-            this.radioButton_subrecord_combin.Location = new System.Drawing.Point(54, 23);
-            this.radioButton_subrecord_combin.Name = "radioButton_subrecord_combin";
-            this.radioButton_subrecord_combin.Size = new System.Drawing.Size(95, 16);
-            this.radioButton_subrecord_combin.TabIndex = 1;
-            this.radioButton_subrecord_combin.TabStop = true;
-            this.radioButton_subrecord_combin.Text = "合并源和目标";
-            this.radioButton_subrecord_combin.UseVisualStyleBackColor = true;
-            this.radioButton_subrecord_combin.CheckedChanged += new System.EventHandler(this.radioButton_subrecord_combin_CheckedChanged);
+            this.radioButton_subrecord_combine.AutoSize = true;
+            this.radioButton_subrecord_combine.Checked = true;
+            this.radioButton_subrecord_combine.Location = new System.Drawing.Point(54, 23);
+            this.radioButton_subrecord_combine.Name = "radioButton_subrecord_combin";
+            this.radioButton_subrecord_combine.Size = new System.Drawing.Size(95, 16);
+            this.radioButton_subrecord_combine.TabIndex = 1;
+            this.radioButton_subrecord_combine.TabStop = true;
+            this.radioButton_subrecord_combine.Text = "合并源和目标";
+            this.radioButton_subrecord_combine.UseVisualStyleBackColor = true;
+            this.radioButton_subrecord_combine.CheckedChanged += new System.EventHandler(this.radioButton_subrecord_combin_CheckedChanged);
             // 
             // textBox_messageText
             // 
@@ -218,7 +218,7 @@
         private System.Windows.Forms.GroupBox groupBox_subRecord;
         private System.Windows.Forms.RadioButton radioButton_subrecord_target;
         private System.Windows.Forms.RadioButton radioButton_subrecord_source;
-        private System.Windows.Forms.RadioButton radioButton_subrecord_combin;
+        private System.Windows.Forms.RadioButton radioButton_subrecord_combine;
         private System.Windows.Forms.TextBox textBox_messageText;
     }
 }

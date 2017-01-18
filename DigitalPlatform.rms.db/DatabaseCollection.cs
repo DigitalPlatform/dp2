@@ -34,6 +34,8 @@ namespace DigitalPlatform.rms
     // TODO: 全局 static 使用
     public class DatabaseCollection : List<Database>
     {
+        public TailNumberManager TailNumberManager = new TailNumberManager();
+
         public DelayTableCollection DelayTables = null;
 
         Hashtable m_logicNameTable = new Hashtable();
@@ -2280,6 +2282,8 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
+            bool bSimulate = StringUtil.IsInList("simulate", strMergeStyle);
+
             // 检查目标路径，必须是记录路径形态，而不能是其他例如配置文件资源的形态
             bool bRecordPath = IsRecordPath(strTargetRecordPath);
             if (bRecordPath == false)
@@ -2471,6 +2475,9 @@ namespace DigitalPlatform.rms
             }
 
             string strTargetRecordStyle = "ignorechecktimestamp";
+            if (bSimulate)
+                strTargetRecordStyle += ",simulate";
+
             // byte[] baTargetRecordOutputTimestamp = null;
             string strTargetRecordOutputValue = "";
 
@@ -2516,97 +2523,100 @@ namespace DigitalPlatform.rms
             XmlNodeList fileList = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
 #endif
 
-            // 复制对象资源
-            List<string> source_ids = GetIdList(source_dom);
-
-            foreach (string strObjectID in source_ids)
+            if (bSimulate == false)
             {
-                string strOriginObjectPath = strOriginRecordPath + "/object/" + strObjectID;
-                string strTargetObjectPath = strTargetRecordOutputPath + "/object/" + GetChangedID(change_list, strObjectID);
+                // 复制对象资源
+                List<string> source_ids = GetIdList(source_dom);
 
-                int nStart = 0;
-                int nChunkSize = 1024 * 100;    // 100K
-                long lTotalLength = 0;
-
-                // 分片获取和写入资源内容
-                for (; ; )
+                foreach (string strObjectID in source_ids)
                 {
-                    // 获取源资源内容
-                    byte[] baOriginObjectData = null;
-                    string strOriginObjectMetadata = "";
-                    string strOriginObjectOutputPath = "";
-                    byte[] baOriginObjectOutputTimestamp = null;
+                    string strOriginObjectPath = strOriginRecordPath + "/object/" + strObjectID;
+                    string strTargetObjectPath = strTargetRecordOutputPath + "/object/" + GetChangedID(change_list, strObjectID);
 
-                    // int nAdditionError = 0;
-                    // return:
-                    //		-1	一般性错误
-                    //		-4	未找到路径指定的资源
-                    //		-5	未找到数据库
-                    //		-6	没有足够的权限
-                    //		-7	路径不合法
-                    //		-10	未找到记录xpath对应的节点
-                    //		>= 0	成功，返回最大长度
-                    nRet = this.API_GetRes(strOriginObjectPath,
-                        nStart,
-                        nChunkSize,
-                        "data,metadata",
-                        user,
-                        -1,
-                        out baOriginObjectData,
-                        out strOriginObjectMetadata,
-                        out strOriginObjectOutputPath,
-                        out baOriginObjectOutputTimestamp,
-                        out nAdditionError,
-                        out strError);
-                    if (nRet <= -1)
-                        return (int)nRet;
+                    int nStart = 0;
+                    int nChunkSize = 1024 * 100;    // 100K
+                    long lTotalLength = 0;
 
-                    lTotalLength = nRet;
+                    // 分片获取和写入资源内容
+                    for (; ; )
+                    {
+                        // 获取源资源内容
+                        byte[] baOriginObjectData = null;
+                        string strOriginObjectMetadata = "";
+                        string strOriginObjectOutputPath = "";
+                        byte[] baOriginObjectOutputTimestamp = null;
 
-                    // 写目标资源对象
-                    long lTargetObjectTotalLength = baOriginObjectData.Length;
-                    string strTargetObjectMetadata = strOriginObjectMetadata;
-                    string strTargetObjectStyle = "ignorechecktimestamp";
-                    string strTargetObjectOutputPath = "";
-                    byte[] baTargetObjectOutputTimestamp = null;
-                    string strTargetObjectOutputValue = "";
+                        // int nAdditionError = 0;
+                        // return:
+                        //		-1	一般性错误
+                        //		-4	未找到路径指定的资源
+                        //		-5	未找到数据库
+                        //		-6	没有足够的权限
+                        //		-7	路径不合法
+                        //		-10	未找到记录xpath对应的节点
+                        //		>= 0	成功，返回最大长度
+                        nRet = this.API_GetRes(strOriginObjectPath,
+                            nStart,
+                            nChunkSize,
+                            "data,metadata",
+                            user,
+                            -1,
+                            out baOriginObjectData,
+                            out strOriginObjectMetadata,
+                            out strOriginObjectOutputPath,
+                            out baOriginObjectOutputTimestamp,
+                            out nAdditionError,
+                            out strError);
+                        if (nRet <= -1)
+                            return (int)nRet;
 
-                    string strRange = nStart.ToString() + "-" + (nStart + baOriginObjectData.Length - 1).ToString();
+                        lTotalLength = nRet;
 
-                    if (lTotalLength == 0)
-                        strRange = "";
+                        // 写目标资源对象
+                        long lTargetObjectTotalLength = baOriginObjectData.Length;
+                        string strTargetObjectMetadata = strOriginObjectMetadata;
+                        string strTargetObjectStyle = "ignorechecktimestamp";
+                        string strTargetObjectOutputPath = "";
+                        byte[] baTargetObjectOutputTimestamp = null;
+                        string strTargetObjectOutputValue = "";
 
-                    // this.WriteErrorLog("走到CopyRecord(),写资源，目标路径='" + strTargetObjectPath + "'");
+                        string strRange = nStart.ToString() + "-" + (nStart + baOriginObjectData.Length - 1).ToString();
 
-                    // return:
-                    //		-1	一般性错误
-                    //		-2	时间戳不匹配
-                    //		-4	未找到路径指定的资源
-                    //		-5	未找到数据库
-                    //		-6	没有足够的权限
-                    //		-7	路径不合法
-                    //		-8	已经存在同名同类型的项
-                    //		-9	已经存在同名但不同类型的项
-                    //		0	成功
-                    nRet = this.API_WriteRes(strTargetObjectPath,
-                        strRange,
-                        lTotalLength,
-                        baOriginObjectData,
-                        // null,
-                        strTargetObjectMetadata,
-                        strTargetObjectStyle,
-                        null,
-                        user,
-                        out strTargetObjectOutputPath,
-                        out baTargetObjectOutputTimestamp,
-                        out strTargetObjectOutputValue,
-                        out strError);
-                    if (nRet <= -1)
-                        return (int)nRet;
+                        if (lTotalLength == 0)
+                            strRange = "";
 
-                    nStart += baOriginObjectData.Length;
-                    if (nStart >= lTotalLength)
-                        break;
+                        // this.WriteErrorLog("走到CopyRecord(),写资源，目标路径='" + strTargetObjectPath + "'");
+
+                        // return:
+                        //		-1	一般性错误
+                        //		-2	时间戳不匹配
+                        //		-4	未找到路径指定的资源
+                        //		-5	未找到数据库
+                        //		-6	没有足够的权限
+                        //		-7	路径不合法
+                        //		-8	已经存在同名同类型的项
+                        //		-9	已经存在同名但不同类型的项
+                        //		0	成功
+                        nRet = this.API_WriteRes(strTargetObjectPath,
+                            strRange,
+                            lTotalLength,
+                            baOriginObjectData,
+                            // null,
+                            strTargetObjectMetadata,
+                            strTargetObjectStyle,
+                            null,
+                            user,
+                            out strTargetObjectOutputPath,
+                            out baTargetObjectOutputTimestamp,
+                            out strTargetObjectOutputValue,
+                            out strError);
+                        if (nRet <= -1)
+                            return (int)nRet;
+
+                        nStart += baOriginObjectData.Length;
+                        if (nStart >= lTotalLength)
+                            break;
+                    }
                 }
             }
 
@@ -2624,7 +2634,7 @@ namespace DigitalPlatform.rms
                 nRet = this.API_DeleteRes(strOriginRecordPath,
                     user,
                     baOriginRecordOutputTimestamp,
-                    "",
+                    bSimulate ? "simulate" : "",
                     out baOriginRecordOutputTimestamp,
                     out strError);
                 if (nRet <= -1)
@@ -5193,6 +5203,8 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
+            bool bSimulate = StringUtil.IsInList("simulate", strStyle);
+
             //---------------------------------------
             //开始做事情 
             //---------------------------------------
@@ -5212,20 +5224,22 @@ namespace DigitalPlatform.rms
                 {
                     // 也可能是数据库对象
 
-
-                    // 删除实际的物理文件
-                    //      -1  一般性错误
-                    //      -2  时间戳不匹配
-                    //      -4  未找到路径对应的资源
-                    //      -6  没有足够的权限
-                    //      0   成功
-                    nRet = this.DeleteCfgItem(user,
-                        strResPath,
-                        baInputTimestamp,
-                        out baOutputTimestamp,
-                        out strError);
-                    if (nRet <= -1)
-                        return nRet;
+                    if (bSimulate == false)
+                    {
+                        // 删除实际的物理文件
+                        //      -1  一般性错误
+                        //      -2  时间戳不匹配
+                        //      -4  未找到路径对应的资源
+                        //      -6  没有足够的权限
+                        //      0   成功
+                        nRet = this.DeleteCfgItem(user,
+                            strResPath,
+                            baInputTimestamp,
+                            out baOutputTimestamp,
+                            out strError);
+                        if (nRet <= -1)
+                            return nRet;
+                    }
 
                     goto CHECK_CHANGED;
                 }
@@ -5267,18 +5281,21 @@ namespace DigitalPlatform.rms
                         return -6;
                     }
 
-                    // return:
-                    //		-1  一般性错误
-                    //		-2  时间戳不匹配
-                    //      -4  未找到记录
-                    //		0   成功
-                    nRet = db.DeleteRecord(strRecordID,
-                        baInputTimestamp,
-                        strStyle,
-                        out baOutputTimestamp,
-                        out strError);
-                    if (nRet <= -1)
-                        return nRet;
+                    if (bSimulate == false)
+                    {
+                        // return:
+                        //		-1  一般性错误
+                        //		-2  时间戳不匹配
+                        //      -4  未找到记录
+                        //		0   成功
+                        nRet = db.DeleteRecord(strRecordID,
+                            baInputTimestamp,
+                            strStyle,
+                            out baOutputTimestamp,
+                            out strError);
+                        if (nRet <= -1)
+                            return nRet;
+                    }
 
                     return 0;
                 }
@@ -5343,7 +5360,6 @@ namespace DigitalPlatform.rms
 
             if (strStyle == null)
                 strStyle = "";
-
 
             //-----------------------------------------
             //开始做事情 

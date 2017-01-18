@@ -62,6 +62,9 @@ namespace dp2Circulation
             "zhongcihao","种次号",
             "dictionary","词典",
             "inventory","盘点",
+            "pinyin","拼音",
+            "gcat","著者号码",
+            "word","词",
         };
 
         // 根据类型汉字名得到类型字符串
@@ -1664,9 +1667,20 @@ namespace dp2Circulation
             menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_createArrivedDatabase_Click);
             contextMenu.MenuItems.Add(menuItem);
 
-
             menuItem = new MenuItem("创建消息库(&M)");
             menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_createMessageDatabase_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("创建拼音库(&P)");
+            menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_createPinyinDatabase_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("创建著者号码库(&G)");
+            menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_createGcatDatabase_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("创建词库(&G)");
+            menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_createWordDatabase_Click);
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("创建种次号库(&Z)");
@@ -1914,9 +1928,25 @@ namespace dp2Circulation
         {
             CreateSimpleDatabase("inventory", "", "");
         }
+
         private void ToolStripMenuItem_createMessageDatabase_Click(object sender, EventArgs e)
         {
             CreateSimpleDatabase("message", "", "");
+        }
+
+        private void ToolStripMenuItem_createPinyinDatabase_Click(object sender, EventArgs e)
+        {
+            CreateSimpleDatabase("pinyin", "", "");
+        }
+
+        private void ToolStripMenuItem_createGcatDatabase_Click(object sender, EventArgs e)
+        {
+            CreateSimpleDatabase("gcat", "", "");
+        }
+
+        private void ToolStripMenuItem_createWordDatabase_Click(object sender, EventArgs e)
+        {
+            CreateSimpleDatabase("word", "", "");
         }
 
         private void ToolStripMenuItem_createZhongcihaoDatabase_Click(object sender, EventArgs e)

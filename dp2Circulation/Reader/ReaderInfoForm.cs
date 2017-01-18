@@ -5814,7 +5814,7 @@ MessageBoxDefaultButton.Button1);
         {
             _qrCodeLoaded = false;
 
-            this.pictureBox_qrCode.Image = null;
+            ImageUtil.SetImage(this.pictureBox_qrCode, null);   // 2016/12/28
             this.textBox_pqr.Text = "";
         }
 
@@ -5836,6 +5836,8 @@ MessageBoxDefaultButton.Button1);
                 return "借过(丢失)";
             if (strAction == "read")
                 return "读过";
+            if (strAction == "boxing")
+                return "配书";
             return strAction;
         }
 
@@ -5862,7 +5864,7 @@ MessageBoxDefaultButton.Button1);
                 + "<script type='text/javascript' charset='UTF-8' src='" + strSummaryJs + "'></script>";
             string strStyle = @"<style type='text/css'>
 </style>";
-            text.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">"
+            text.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head>"
                 + strLink
                 + strScriptHead.Replace("%bindir%", strBinDir)
                 + strStyle
@@ -6016,7 +6018,7 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             string strCode = "";
 
-            this.pictureBox_qrCode.Image = null;
+            ImageUtil.SetImage(this.pictureBox_qrCode, null);   // 2016/12/28
             this.textBox_pqr.Text = "";
 
             if (string.IsNullOrEmpty(this.ReaderBarcode) == true)
@@ -6054,7 +6056,7 @@ MessageBoxDefaultButton.Button1);
                 this.pictureBox_qrCode.Image = bitmap;
             }
 #endif
-            this.pictureBox_qrCode.Image = writer.Write(strCode);
+            ImageUtil.SetImage(this.pictureBox_qrCode, writer.Write(strCode));  // 2016/12/28
             return;
         ERROR1:
             this.ShowMessage(strError, "red", true);

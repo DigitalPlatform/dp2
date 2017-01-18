@@ -322,11 +322,12 @@ namespace dp2Kernel
         //      2.63 2015/11/16 WriteRes() API WriteRes() API 允许通过 lTotalLength 为 -1 调用，作用是仅修改 metadata
         //      2.64 2016/1/6 MySQL 版本在删除和创建检索点的时候所使用的 SQL 语句多了一个分号。此 Bug 已经排除
         //      2.65 2016/5/14 WriteRecords() API 支持上载结果集。XML 检索式为 item 元素增加 resultset 属性，允许已有结果集参与逻辑运算。优化 resultset[] 操作符速度。
+        //      2.66 2016/12/13 若干 API 支持 simulate style
         public Result GetVersion()
         {
             Result result = new Result();
             result.Value = 0;
-            result.ErrorString = "2.65";
+            result.ErrorString = "2.66";
             return result;
         }
 

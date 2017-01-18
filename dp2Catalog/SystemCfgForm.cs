@@ -406,7 +406,11 @@ this.checkBox_marcDetailForm_verifyDataWhenSaving.Checked);
             GuiUtil.SetControlFont(dlg, this.Font);
 
             dlg.Text = "请指定一个 dp2library 数据库，以作为模拟的查重起点";
+#if OLD_CHANNEL
             dlg.dp2Channels = dp2_searchform.Channels;
+#endif
+            dlg.ChannelManager = Program.MainForm;
+
             dlg.Servers = this.MainForm.Servers;
             dlg.EnabledIndices = new int[] { dp2ResTree.RESTYPE_DB };
             dlg.Path = strDefaultStartPath;

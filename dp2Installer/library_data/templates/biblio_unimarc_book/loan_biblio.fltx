@@ -12,6 +12,7 @@
 // 2011/9/5 去掉  width='100%' cellspacing='1' cellpadding='4'
 // 2011/9/7 采用servermapped新体系结构
 // 2014/11/5 增加显示封面图片功能
+// 2016/12/27 StringUtil.IsHttpUrl()
 
 using System;
 using System.Collections.Generic;
@@ -1130,7 +1131,7 @@ using DigitalPlatform.Text;
       string strImageFragment = "";
       if (string.IsNullOrEmpty(Root._imageUrl) == false)
       {
-        if (StringUtil.HasHead(Root._imageUrl, "http:") == true)
+        if (StringUtil.IsHttpUrl(Root._imageUrl) == true)
           strImageFragment = "<img src='"+Root._imageUrl+"' ></img>";
           else
           {

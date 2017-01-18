@@ -125,6 +125,22 @@ value);
             }
         }
 
+        // 2016/12/17
+        /// <summary>
+        /// 固定面板区域的浏览控件
+        /// </summary>
+        public Control CurrentBrowseControl
+        {
+            get
+            {
+                return this.GetFixPageControl("browse");
+            }
+            set
+            {
+                this.SetFixPageControl("browse", value);
+            }
+        }
+
         /// <summary>
         /// 激活固定面板区域的“验收”属性页
         /// </summary>
@@ -322,6 +338,8 @@ value);
                     return this.tabPage_history;
                 case "property":
                     return this.tabPage_property;
+                case "browse":
+                    return this.tabPage_browse;
                 default:
                     return null;
             }

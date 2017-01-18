@@ -21,7 +21,7 @@ namespace DigitalPlatform.rms
         public const int QUOTA_SIZE = (int)((double)(1024 * 1024) * (double)0.8);   // 经过试验 0.5 基本可行 因为字符数换算为 byte 数，中文的缘故
         public const int PACKAGE_UNIT_SIZE = 100;
         //定义一个最大数量 ,应该是用尺寸，这里暂时用数组个数计算
-        public const int MaxRecordsCountPerApi = 200;
+        public const int MaxRecordsCountPerApi = 1000;   // 原来是 200，2016/12/18 修改为 1000
 
 #if USE_TEMPDIR
         private string m_strTempDir = "";	// 临时文件目录 2011/1/19
@@ -379,8 +379,10 @@ namespace DigitalPlatform.rms
                 nLength += GetLength(record.Keys);
                 nLength += PACKAGE_UNIT_SIZE;  // 估计 20 个 bytes 的额外消耗
             }
+
             if (record.Cols != null)
                 nLength += GetLength(record.Cols);
+
             if (record.RecordBody != null)
                 nLength += GetLength(record.RecordBody);
 
@@ -502,7 +504,6 @@ namespace DigitalPlatform.rms
 #endif
                     goto CONTINUE;
                 }
-
 
                 DbPath path = new DbPath(dpRecord.ID);
                 Database db = this.app.Dbs.GetDatabaseSafety(path.Name);

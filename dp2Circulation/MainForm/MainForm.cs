@@ -55,7 +55,12 @@ namespace dp2Circulation
 
         internal CommentViewerForm m_commentViewer = null;
 
+        // 主要的通道池，用于当前服务器
         public LibraryChannelPool _channelPool = new LibraryChannelPool();
+
+        // 次要的通道池，用于著者号码和拼音
+        public LibraryChannelPool _channelPoolExt = new LibraryChannelPool();
+
 
         // 2014/10/3
         // MarcFilter对象缓冲池
@@ -388,6 +393,9 @@ namespace dp2Circulation
         {
             this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this._channelPool.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
+
+            this._channelPoolExt.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(ChannelExt_BeforeLogin);
+            this._channelPoolExt.AfterLogin += new AfterLoginEventHandle(ChannelExt_AfterLogin);
 
             this.BeginInvoke(new Action(FirstInitial));
         }
@@ -792,10 +800,12 @@ Stack:
                         "");
                 }
 
+#if GCAT_SERVER
                 if (this.m_bSavePinyinGcatID == false)
                     this.m_strPinyinGcatID = "";
                 this.AppInfo.SetString("entity_form", "gcat_pinyin_api_id", this.m_strPinyinGcatID);
                 this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", this.m_bSavePinyinGcatID);
+#endif
 
                 //记住save,保存信息XML文件
                 AppInfo.Save();
@@ -814,6 +824,14 @@ Stack:
                 this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
                 this._channelPool.Close();
             }
+
+            if (this._channelPoolExt != null)
+            {
+                this._channelPoolExt.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(ChannelExt_BeforeLogin);
+                this._channelPoolExt.AfterLogin -= new AfterLoginEventHandle(ChannelExt_AfterLogin);
+                this._channelPoolExt.Close();
+            }
+
 #if NO
             if (this.Channel != null)
                 this.Channel.Close();   // TODO: 最好限制一个时间，超过这个时间则Abort()
@@ -2271,6 +2289,7 @@ Stack:
         // 
         /// <summary>
         /// 得到特定类型的顶层 MDI 子窗口
+        /// 注：不算 Fixed 窗口
         /// </summary>
         /// <typeparam name="T">子窗口类型</typeparam>
         /// <returns>子窗口对象</returns>
@@ -2293,7 +2312,7 @@ Stack:
                 //      null    不是 MDI 子窗口o
                 //      其他      返回这个句柄对应的 Form 对象
                 child = IsChildHwnd(hwnd);
-                if (child != null)
+                if (child != null && IsFixedMyForm(child) == false)  // 2016/12/16 跳过固定于左侧的 MyForm
                 {
                     // if (child is T)
                     if (child.GetType().Equals(typeof(T)) == true)
@@ -2315,7 +2334,20 @@ Stack:
             return default(T);
         }
 
+        // 是否为固定于左侧的 MyForm?
+        static bool IsFixedMyForm(Form child)
+        {
+            if (child is MyForm)
+            {
+                if (((MyForm)child).Fixed)
+                    return true;
+            }
+
+            return false;
+        }
+
         // 判断一个窗口句柄，是否为 MDI 子窗口？
+        // 注：不处理 Visible == false 的窗口。因为取 Handle 会导致 Visible 变成 true
         // return:
         //      null    不是 MDI 子窗口o
         //      其他      返回这个句柄对应的 Form 对象
@@ -2323,13 +2355,14 @@ Stack:
         {
             foreach (Form child in this.MdiChildren)
             {
-                if (hwnd == child.Handle)
+                if (child.Visible == true && hwnd == child.Handle)
                     return child;
             }
 
             return null;
         }
 
+#if NO
         // 得到特定类型的顶层MDI窗口
         Form GetTopChildWindow(Type type)
         {
@@ -2370,8 +2403,58 @@ Stack:
             return null;
         }
 
-        // 得到顶层MDI窗口
+#endif
+
+        // 得到特定类型的顶层MDI窗口。注，会忽略 fixed 类型的窗口
+        Form GetTopChildWindow(Type type)
+        {
+            if (ActiveMdiChild == null)
+                return null;
+
+            // 得到顶层的MDI Child
+            IntPtr hwnd = this.ActiveMdiChild.Handle;
+
+            if (hwnd == IntPtr.Zero)
+                return null;
+
+            for (; ; )
+            {
+                if (hwnd == IntPtr.Zero)
+                    break;
+
+                Form child = null;
+                foreach (Form form in this.MdiChildren)
+                {
+                    if (form.Visible == true && hwnd == form.Handle)
+                    {
+                        child = form;
+                        goto FOUND;
+                    }
+                }
+
+                goto CONTINUE;
+            FOUND:
+
+                if (child.GetType().Equals(type) == true)
+                {
+                    if (child is MyForm)
+                    {
+                        if (((MyForm)child).Fixed)
+                            goto CONTINUE;
+                    }
+                    return child;
+                }
+
+            CONTINUE:
+                hwnd = API.GetWindow(hwnd, API.GW_HWNDNEXT);
+            }
+
+            return null;
+        }
+
+        // 得到顶层 MDI 窗口
         // 注： this.ActiveMdiChild 不一定在最顶层
+        // 注：不算 Fixed 窗口和 Visible == false 的窗口
         Form GetTopChildWindow()
         {
             if (this.MdiChildren.Length == 0)
@@ -2379,7 +2462,8 @@ Stack:
             List<IntPtr> handles = new List<IntPtr>();
             foreach (Form mdi in this.MdiChildren)
             {
-                handles.Add(mdi.Handle);
+                if (IsFixedMyForm(mdi) == false)    // 2016/12/16 跳过固定于左侧的 MyForm
+                    handles.Add(mdi.Handle);
             }
 
             IntPtr hwnd = this.ActiveMdiChild.Handle;
@@ -2394,7 +2478,7 @@ Stack:
 
             foreach (Form mdi in this.MdiChildren)
             {
-                if (mdi.Handle == top)
+                if (mdi.Visible == true && mdi.Handle == top)
                     return mdi;
             }
 
@@ -2528,37 +2612,40 @@ Stack:
                 }
             }
 #endif
-
             if (e.FirstTry == true)
             {
-                e.UserName = AppInfo.GetString(
+                string strPhoneNumber = "";
+
+                {
+                    e.UserName = AppInfo.GetString(
+                        "default_account",
+                        "username",
+                        "");
+                    e.Password = AppInfo.GetString(
+                        "default_account",
+                        "password",
+                        "");
+                    e.Password = this.DecryptPasssword(e.Password);
+
+                    strPhoneNumber = AppInfo.GetString(
+        "default_account",
+        "phoneNumber",
+        "");
+
+                    bool bIsReader =
+                        AppInfo.GetBoolean(
+                        "default_account",
+                        "isreader",
+                        false);
+
+                    string strLocation = AppInfo.GetString(
                     "default_account",
-                    "username",
+                    "location",
                     "");
-                e.Password = AppInfo.GetString(
-                    "default_account",
-                    "password",
-                    "");
-                e.Password = this.DecryptPasssword(e.Password);
-
-                string strPhoneNumber = AppInfo.GetString(
-    "default_account",
-    "phoneNumber",
-    "");
-
-                bool bIsReader =
-                    AppInfo.GetBoolean(
-                    "default_account",
-                    "isreader",
-                    false);
-
-                string strLocation = AppInfo.GetString(
-                "default_account",
-                "location",
-                "");
-                e.Parameters = "location=" + strLocation;
-                if (bIsReader == true)
-                    e.Parameters += ",type=reader";
+                    e.Parameters = "location=" + strLocation;
+                    if (bIsReader == true)
+                        e.Parameters += ",type=reader";
+                }
 
                 // 2014/9/13
                 e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
@@ -3202,7 +3289,7 @@ Stack:
         }
 #endif
         List<LibraryChannel> _channelList = new List<LibraryChannel>();
-        void DoStop(object sender, StopEventArgs e)
+        public void DoStop(object sender, StopEventArgs e)
         {
             foreach (LibraryChannel channel in _channelList)
             {
@@ -4108,7 +4195,8 @@ Stack:
                 ItemSearchForm form = top as ItemSearchForm;
                 form.Activate();
                 List<string> barcodes = new List<string>();
-                barcodes.Add(this.toolStripTextBox_barcode.Text);
+                string strBarcode = GetUpperCase(this.toolStripTextBox_barcode.Text);
+                barcodes.Add(strBarcode);
 
                 form.ClearMessage();
                 string strError = "";
@@ -4136,7 +4224,9 @@ Stack:
         // 尽量占用当前已经打开的种册窗
         void LoadItemBarcode()
         {
-            if (this.toolStripTextBox_barcode.Text == "")
+            string strBarcode = GetUpperCase(this.toolStripTextBox_barcode.Text);
+
+            if (string.IsNullOrEmpty(strBarcode))
             {
                 MessageBox.Show(this, "尚未输入条码");
                 return;
@@ -4165,14 +4255,34 @@ Stack:
             //      -1  error
             //      0   not found
             //      1   found
-            form.LoadItemByBarcode(this.toolStripTextBox_barcode.Text, false);
+            form.LoadItemByBarcode(strBarcode, false);
+        }
+
+        public string GetUpperCase(string strText)
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return strText;
+
+            // 除去首尾连续的空额 2016/12/15
+            strText = strText.Trim();
+
+            if (this.UpperInputBarcode == true)
+            {
+                if (strText.ToLower().StartsWith("@bibliorecpath:") == true)
+                    return strText; // 特殊地，不要转为大写
+                return strText.ToUpper();
+            }
+
+            return strText;
         }
 
         // 装入读者证条码号相关的记录
         // 尽量占用当前已经打开的读者窗
         void LoadReaderBarcode()
         {
-            if (this.toolStripTextBox_barcode.Text == "")
+            string strBarcode = GetUpperCase(this.toolStripTextBox_barcode.Text);
+
+            if (string.IsNullOrEmpty(strBarcode))
             {
                 MessageBox.Show(this, "尚未输入条码号");
                 return;
@@ -4195,7 +4305,7 @@ Stack:
             // 根据读者证条码号，装入读者记录
             // parameters:
             //      bForceLoad  在发生重条码的情况下是否强行装入第一条
-            form.LoadRecord(this.toolStripTextBox_barcode.Text,
+            form.LoadRecord(strBarcode,
                 false);
         }
 
@@ -4204,7 +4314,9 @@ Stack:
         {
             string strError = "";
 
-            if (this.toolStripTextBox_barcode.Text == "")
+            string strBarcode = GetUpperCase(this.toolStripTextBox_barcode.Text);
+
+            if (string.IsNullOrEmpty(strBarcode))
             {
                 strError = "尚未输入条码";
                 goto ERROR1;
@@ -4219,7 +4331,7 @@ Stack:
             //      2   是合法的册条码号
             int nRet = VerifyBarcode(
                 this.FocusLibraryCode,  // this._currentLibraryCodeList,    // this.Channel.LibraryCodeList,
-                this.toolStripTextBox_barcode.Text,
+                strBarcode,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -4633,6 +4745,95 @@ Stack:
             }
         }
 
+        // 观察一个特定分馆是否需要变换条码号?
+        public bool NeedTranformBarcode(string strLibraryCode)
+        {
+            string strError = "";
+            string strBarcode = "?transform";
+            // 变换条码号
+            // return:
+            //      -1  出错
+            //      0   没有发生改变
+            //      1   发生了改变
+            int nRet = TransformBarcode(
+                strLibraryCode,
+                ref strBarcode,
+                out strError);
+            if (nRet == 1)
+                return true;
+            return false;
+        }
+
+        // 变换条码号
+        // return:
+        //      -1  出错
+        //      0   没有发生改变
+        //      1   发生了改变
+        public int TransformBarcode(
+    string strLibraryCode,
+    ref string strBarcode,
+    out string strError)
+        {
+            strError = "";
+
+            if (StringUtil.HasHead(strBarcode, "PQR:") == true)
+            {
+                strError = "这是读者证号二维码";
+                return 0;
+            }
+
+            // 优先进行前端校验
+            if (this.ClientHost != null)
+            {
+                dynamic o = this.ClientHost;
+                try
+                {
+                    /*
+	public int TransformBarcode(
+                        string strLibraryCode,
+                        ref string strBarcode,
+                        out string strError)
+	{
+		strError = "";
+
+		if (strLibraryCode == "北京西马金润小学")
+		{
+            // 让宿主能知道这个分馆需要主动打开 transform 功能 
+            if (strBarcode == "?transform")
+                return 1;
+                
+            // 以前历史遗留的册条码号，要加上 XM 前缀才能和册记录吻合 
+			if (strBarcode.Length == 6 && strBarcode.StartsWith("23") == false)
+            {
+                strBarcode = "XM" + strBarcode;
+			    return 1;
+            }
+            return 0;
+		}
+
+		return 0;
+	}
+                     * * */
+                    return o.TransformBarcode(
+                        strLibraryCode,
+                        ref strBarcode,
+                        out strError);
+                }
+                catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
+                {
+                    // 源代码中没有定义这个函数
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    strError = "前端执行变换脚本抛出异常: " + ExceptionUtil.GetDebugText(ex);
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+
         public delegate void Delegate_enableControls(bool bEnable);
 
         // 形式校验条码号
@@ -4678,7 +4879,7 @@ Stack:
             // 优先进行前端校验
             if (this.ClientHost != null)
             {
-                bool bOldStyle = false;
+                bool bDetectOldStyle = false;
                 dynamic o = this.ClientHost;
                 try
                 {
@@ -4690,7 +4891,7 @@ Stack:
                 catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException ex)
                 {
                     // 继续向后进行服务器端条码校验
-                    bOldStyle = true;
+                    bDetectOldStyle = true;
                 }
                 catch (Exception ex)
                 {
@@ -4698,7 +4899,7 @@ Stack:
                     return -1;
                 }
 
-                if (bOldStyle == true)
+                if (bDetectOldStyle == true)
                 {
                     // 尝试以前的参数方式
                     try
@@ -4774,6 +4975,7 @@ Stack:
             }
         }
 
+        // TODO: 对于外部 URL 如何做到不记载到 dp2circulation.xml 中?
         // parameters:
         //      bLogin  是否在对话框后立即登录？如果为false，表示只是设置缺省帐户，并不直接登录
         CirculationLoginDlg SetDefaultAccount(
@@ -4866,8 +5068,6 @@ Stack:
                 && dlg.SavePasswordShort == false
                 && dlg.SavePasswordLong == false)
                 dlg.AutoShowShortSavePasswordTip = true;
-
-
 
             if (fail_contidion == LoginFailCondition.RetryLogin)
             {
@@ -7147,6 +7347,24 @@ out strError);
             }
         }
 
+        public bool UpperInputBarcode
+        {
+            get
+            {
+                return this.AppInfo.GetBoolean(
+    "global",
+    "upper_input_barcode",
+    true);
+            }
+            set
+            {
+                this.AppInfo.SetBoolean(
+    "global",
+    "upper_input_barcode",
+    value);
+            }
+        }
+
         // 固定面板中 Page 选定页
         private void tabControl_panelFixed_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -7271,6 +7489,12 @@ out strError);
 
         private void MenuItem_importExport_Click(object sender, EventArgs e)
         {
+            if (StringUtil.CompareVersion(this.ServerVersion, "2.96") < 0)
+            {
+                MessageBox.Show(this, "dp2library 2.96 及以上版本才能使用 从书目转储文件导入窗");
+                return;
+            }
+
             OpenWindow<ImportExportForm>();
         }
 

@@ -84,7 +84,7 @@ namespace dp2Circulation
             if ((style & MergeStyle.ReserveTargetBiblio) != 0)
                 biblio_color = rightColor;
 
-            if ((style & MergeStyle.CombinSubrecord) != 0)
+            if ((style & MergeStyle.CombineSubrecord) != 0)
             {
                 PaintRecord(e.Graphics, x3, y3,
                     ref_font,
@@ -128,7 +128,7 @@ namespace dp2Circulation
                     "left");
             }
 
-            if ((style & MergeStyle.CombinSubrecord) != 0)
+            if ((style & MergeStyle.CombineSubrecord) != 0)
             {
                 // 1 --> 3 subrecord
                 PaintCurve(e.Graphics,
@@ -298,7 +298,7 @@ namespace dp2Circulation
     {
         None = 0,
         OverwriteSubrecord = 0x01,   // 目标记录的下级记录被删除，源记录的下级记录移动过来
-        CombinSubrecord = 0x02,     // 目标和源记录的下级记录都得到保留
+        CombineSubrecord = 0x02,     // 目标和源记录的下级记录都得到保留
         MissingSourceSubrecord = 0x04,   // 目标记录的下级记录被保留，源记录的下级记录被丢弃
 
         ReserveSourceBiblio = 0x08,     // 书目记录，采用源书目记录 (对象都全部合并)

@@ -952,7 +952,7 @@ namespace dp2Circulation
                     if (lRet == -1)
                     {
                         strError = "下载资源文件失败，原因: " + strError;
-                        throw new Exception(strError);
+                        throw new ChannelException(this.Channel.ErrorCode, strError);
                         // return strError;
                     }
 
@@ -1513,6 +1513,12 @@ namespace dp2Circulation
                         {
                             // 此调用可能耗费时间好几秒
                             strResult = GetObjectFilePath((string)call.InputParameters[0], (string)call.InputParameters[1]);
+                        }
+                        catch (ChannelException ex)
+                        {
+                            // 图像对象没有找到。有可能是书目摘要本地缓存没有刷新 2016/11/24
+                            strResult = ex.Message;
+                            continue;
                         }
                         catch (Exception ex)
                         {

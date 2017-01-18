@@ -34,6 +34,7 @@ using DigitalPlatform.EasyMarc;
 using DigitalPlatform.AmazonInterface;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Drawing;
 
 namespace dp2Circulation
 {
@@ -793,8 +794,7 @@ namespace dp2Circulation
 
             m_idcardObj = obj.GetInterface();
  */
-            this.pictureBox_idCard.Image = null;
-
+            ImageUtil.SetImage(this.pictureBox_idCard, null);   // 2016/12/28
 
             nRet = StartChannel(out strError);
             if (nRet == -1)
@@ -815,7 +815,7 @@ namespace dp2Circulation
                 {
                     using (MemoryStream s = new MemoryStream(baPhoto))
                     {
-                        this.pictureBox_idCard.Image = new Bitmap(s);
+                        ImageUtil.SetImage(this.pictureBox_idCard, new Bitmap(s));  // 2016/12/28
                     }
                 }
 
@@ -1525,6 +1525,16 @@ ref bHideMessageBox);
                 List<object> controls = new List<object>();
                 controls.Add(this.tabControl_main);
                 controls.Add(this.textBox_marcTemplate_marc);
+
+                controls.Add(this.textBox_setBiblioInfo_action);
+                controls.Add(this.textBox_setBiblioInfo_biblioRecPath);
+                controls.Add(this.textBox_setBiblioInfo_biblioType);
+                controls.Add(this.textBox_setBiblioInfo_content);
+
+                controls.Add(this.textBox_login_userName);
+                controls.Add(this.textBox_login_password);
+                controls.Add(this.textBox_login_parameters);
+
                 return GuiState.GetUiState(controls);
             }
             set
@@ -1532,6 +1542,16 @@ ref bHideMessageBox);
                 List<object> controls = new List<object>();
                 controls.Add(this.tabControl_main);
                 controls.Add(this.textBox_marcTemplate_marc);
+
+                controls.Add(this.textBox_setBiblioInfo_action);
+                controls.Add(this.textBox_setBiblioInfo_biblioRecPath);
+                controls.Add(this.textBox_setBiblioInfo_biblioType);
+                controls.Add(this.textBox_setBiblioInfo_content);
+
+                controls.Add(this.textBox_login_userName);
+                controls.Add(this.textBox_login_password);
+                controls.Add(this.textBox_login_parameters);
+
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -1799,6 +1819,86 @@ dlg.UiState);
         private void kernelResTree1_ReturnChannel(object sender, ReturnChannelEventArgs e)
         {
             this.MainForm.ReturnChannel(e.Channel);
+        }
+
+        private void button_setBiblioInfo_request_Click(object sender, EventArgs e)
+        {
+            LibraryChannel channel = Program.MainForm.GetChannel();
+            try
+            {
+                byte[] baTimestamp = null;
+                string strComment = "";
+                string strOutputBiblioRecPath = "";
+                byte[] baOutputTimestamp = null;
+                string strError = "";
+                long lRet = channel.SetBiblioInfo(null,
+                    this.textBox_setBiblioInfo_action.Text,
+                    this.textBox_setBiblioInfo_biblioRecPath.Text,
+                    this.textBox_setBiblioInfo_biblioType.Text,
+                    this.textBox_setBiblioInfo_content.Text,
+                    baTimestamp,
+                    strComment,
+                    out strOutputBiblioRecPath,
+                    out baOutputTimestamp,
+                    out strError);
+                MessageBox.Show(this, "lRet=" + lRet.ToString() + " , strOutputBiblioRecPath=" + strOutputBiblioRecPath + ", strError=" + strError);
+            }
+            finally
+            {
+                Program.MainForm.ReturnChannel(channel);
+            }
+        }
+
+        private void button_setBiblioInfo_getContentFromIso2709_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            OpenMarcFileDlg dlg = new OpenMarcFileDlg();
+            GuiUtil.SetControlFont(dlg, this.Font);
+            dlg.IsOutput = false;
+
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            using (Stream s = File.OpenRead(dlg.FileName))
+            {
+                byte[] baRecord = null;
+                int nRet = MarcUtil.ReadMarcRecord(s,
+                    dlg.Encoding,
+                    true,
+                    out baRecord,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                this.textBox_setBiblioInfo_content.Text = Convert.ToBase64String(baRecord);
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        private void button_login_login_Click(object sender, EventArgs e)
+        {
+            using (LibraryChannel channel = new LibraryChannel())
+            {
+                channel.Url = this.MainForm.LibraryServerUrl;
+
+                string strOutputUserName = "";
+                string strRights = "";
+                string strLibraryCode = "";
+
+                string strError = "";
+                long lRet = channel.Login(this.textBox_login_userName.Text,
+                    this.textBox_login_password.Text,
+                    this.textBox_login_parameters.Text,
+                    out strOutputUserName,
+                    out strRights,
+                    out strLibraryCode,
+                    out strError);
+                MessageBox.Show(this, "lRet=" + lRet + ", strError='" + strError + "', strRights='"+strRights+"'");
+
+            }
         }
 
     }

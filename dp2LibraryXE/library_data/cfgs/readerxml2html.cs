@@ -22,6 +22,7 @@
 // 2015/10/2    借阅列表和借阅历史表格中，BC:xxxx 中增加了第三段 | 书目记录路径
 // 2015/10/18    this.Formats 中可以包含 style_dark 这样的风格名称。注意多个子串之间是用 ',' 分隔的
 // 2016/9/11    增加微信绑定标志 icon
+// 2016/12/4    预约到书区域显示增加了 boxing 状态显示
 
 using System;
 using System.Collections.Generic;
@@ -492,12 +493,10 @@ public class MyConverter : ReaderConverter
             int nArriveCount = 0;
 
             strResult.Append( "<table class='reservation'>");
-            strResult.Append( "<tr class='columntitle'><td nowrap>册条码号</td><td nowrap>到达情况</td><td nowrap>摘要</td><td nowrap>请求日期</td><td nowrap>操作者</td></tr>");
+            strResult.Append( "<tr class='columntitle'><td nowrap>册条码号</td><td nowrap>到达情况</td><td nowrap>摘要</td><td nowrap>请求日期</td><td nowrap>操作者</td><td nowrap>配书情况</td></tr>");
 
-            for (int i = 0; i < nodes.Count; i++)
+            foreach (XmlElement node in nodes)
             {
-                XmlNode node = nodes[i];
-
                 string strBarcodes = DomUtil.GetAttr(node, "items");
                 string strRequestDate = LocalTime(DomUtil.GetAttr(node, "requestDate"));
 
@@ -508,8 +507,8 @@ public class MyConverter : ReaderConverter
                     this.SessionInfo,
                     strBarcodes,
                     strArrivedItemBarcode,
-            "html", // "html,forcelogin",
-            ""/*"target='_blank'"*/);
+                    "html", // "html,forcelogin",
+                    ""/*"target='_blank'"*/);
 
                 string strClass = "content";
 
@@ -531,6 +530,10 @@ public class MyConverter : ReaderConverter
 
                     nArriveCount++;
                 }
+                
+                string strBox = node.GetAttribute("box");
+                if (string.IsNullOrEmpty(strBox) == false)
+                    strClass += " boxing";
 
                 strResult.Append( "<tr class='" + strClass + "'>");
                 strResult.Append( "<td class='barcode'>"
@@ -541,8 +544,8 @@ public class MyConverter : ReaderConverter
                 strResult.Append( "<td class='summary'>" + strSummary + "</td>");
                 strResult.Append( "<td class='requestdate'>" + strRequestDate + "</td>");
                 strResult.Append( "<td class='operator'>" + strOperator + "</td>");
+                strResult.Append( "<td class='boxing'>" + strBox + "</td>");
                 strResult.Append( "</tr>");
-
             }
             strResult.Append( "</table>");
 

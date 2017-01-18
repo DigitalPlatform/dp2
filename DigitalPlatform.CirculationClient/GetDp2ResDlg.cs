@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform.Text;
+using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -19,7 +20,10 @@ namespace DigitalPlatform.CirculationClient
 
         bool m_bLoaded = false;
 
+#if OLD_CHANNEL
         public LibraryChannelCollection dp2Channels = null;
+#endif
+        public IChannelManager ChannelManager = null;
 
         // dp2library服务器数组(缺省用户名/密码等)
         public dp2ServerCollection Servers = null;
@@ -34,7 +38,11 @@ namespace DigitalPlatform.CirculationClient
         private void GetDp2ResDlg_Load(object sender, EventArgs e)
         {
             this.dp2ResTree1.Servers = this.Servers;	// 引用
+#if OLD_CHANNEL
             this.dp2ResTree1.Channels = this.dp2Channels;
+#endif
+            this.dp2ResTree1.ChannelManager = this.ChannelManager;
+
             this.dp2ResTree1.EnabledIndices = this.EnabledIndices;  // new int[] { dp2ResTree.RESTYPE_DB };
             this.dp2ResTree1.Fill(null);
 

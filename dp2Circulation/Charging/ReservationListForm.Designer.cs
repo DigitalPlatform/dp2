@@ -17,6 +17,10 @@
             {
                 components.Dispose();
             }
+
+            if (this.m_chargingInterface != null)
+                this.m_chargingInterface.Dispose();
+
             base.Dispose(disposing);
         }
 

@@ -60,6 +60,8 @@ namespace DigitalPlatform.LibraryServer
             long lRet = 0;
             int nRet = 0;
 
+            bool bMissing = false;  // 是否缺失快照信息?
+
             RmsChannel channel = Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
@@ -81,6 +83,15 @@ namespace DigitalPlatform.LibraryServer
                     strError = "日志记录中缺<readerRecord>元素";
                     return -1;
                 }
+
+                // 2017/1/12
+                bool bClipping = DomUtil.GetBooleanParam(node, "clipping", false);
+                if (bClipping == true)
+                {
+                    strError = "日志记录中<readerRecord>元素为 clipping 状态，无法进行快照恢复";
+                    return -1;
+                }
+
                 string strReaderRecPath = DomUtil.GetAttr(node, "recPath");
 
                 string strItemXml = DomUtil.GetElementText(domLog.DocumentElement,
@@ -446,7 +457,6 @@ out strError);
                 string strOutputItemRecPath = "";
                 byte[] item_timestamp = null;
 
-
                 // 从册条码号获得册记录
                 List<string> aPath = null;
 
@@ -492,7 +502,6 @@ out strError);
                 }
                 else
                 {
-
                     if (nRet == -1)
                     {
                         strError = "读入册条码号为 '" + strItemBarcode + "' 的册记录时发生错误: " + strError;
@@ -656,7 +665,6 @@ out strError);
                     goto ERROR1;
 
             }
-
 
             return 0;
         ERROR1:
@@ -1282,6 +1290,15 @@ strElementName);
                     strError = "日志记录中缺<readerRecord>元素";
                     return -1;
                 }
+
+                // 2017/1/12
+                bool bClipping = DomUtil.GetBooleanParam(node, "clipping", false);
+                if (bClipping == true)
+                {
+                    strError = "日志记录中<readerRecord>元素为 clipping 状态，无法进行快照恢复";
+                    return -1;
+                }
+
                 string strReaderRecPath = DomUtil.GetAttr(node, "recPath");
 
                 string strItemXml = DomUtil.GetElementText(domLog.DocumentElement,
@@ -6516,7 +6533,6 @@ strElementName);
                     // 如果有“新记录”内容
                     if (String.IsNullOrEmpty(strTargetRecord) == false)
                     {
-
                         // 写书目记录
                         lRet = channel.DoSaveTextRes(strTargetRecPath,
                             strTargetRecord,

@@ -12,24 +12,50 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Collections;
 
+using Newtonsoft.Json;
+
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
+using DigitalPlatform.Range;
+using DigitalPlatform.Marc;
 
 namespace dp2Circulation
 {
     public partial class ImportExportForm : MyForm
     {
+        StringMapDialog _mapDialog = new StringMapDialog();
+
         public ImportExportForm()
         {
             InitializeComponent();
+
+            this.panel_map.Controls.Add(_mapDialog.ListView);
+            _mapDialog.ListView.Dock = DockStyle.Fill;
         }
 
         private void ImportExportForm_Load(object sender, EventArgs e)
         {
             FillBiblioDbNameList();
+
+            this.UiState = Program.MainForm.AppInfo.GetString(
+        "ImportExportForm",
+        "uiState",
+        "");
+
+            {
+                string strStringTable = Program.MainForm.AppInfo.GetString(
+            "ImportExportForm",
+            "stringTable",
+            "");
+                this._mapDialog.StringTable = JsonConvert.DeserializeObject<List<TwoString>>(strStringTable);
+            }
+
+            this._mapDialog.Show();  // 有了此句对话框的 xxx_load 才能被执行
+            this._mapDialog.Hide();  // 有了此句可避免主窗口背后显示一个空对话框窗口
         }
 
         private void ImportExportForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -39,7 +65,21 @@ namespace dp2Circulation
 
         private void ImportExportForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            Program.MainForm.AppInfo.SetString(
+"ImportExportForm",
+"uiState",
+this.UiState);
 
+            {
+                string strStringTable = JsonConvert.SerializeObject(this._mapDialog.StringTable);
+
+                Program.MainForm.AppInfo.SetString(
+"ImportExportForm",
+"stringTable",
+strStringTable);
+            }
+
+            this._mapDialog.Close();
         }
 
         /// <summary>
@@ -47,13 +87,25 @@ namespace dp2Circulation
         /// </summary>
         public string BiblioDumpFilePath { get; set; }
 
+        public static void EnableTabPage(TabPage page, bool bEnable)
+        {
+            foreach (Control control in page.Controls)
+            {
+                control.Enabled = bEnable;
+            }
+        }
+
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-            this.tabControl_main.Enabled = bEnable;
+            // this.tabControl_main.Enabled = bEnable;
+            EnableTabPage(this.tabPage_source, bEnable);
+            EnableTabPage(this.tabPage_convert, bEnable);
+            EnableTabPage(this.tabPage_target, bEnable);
+            // tabPage_run 不要禁止
 
             // next button
             if (bEnable == true)
@@ -67,6 +119,10 @@ namespace dp2Circulation
             // string strError = "";
 
             if (this.tabControl_main.SelectedTab == this.tabPage_source)
+            {
+                this.button_next.Enabled = true;
+            }
+            else if (this.tabControl_main.SelectedTab == this.tabPage_convert)
             {
                 this.button_next.Enabled = true;
             }
@@ -104,9 +160,14 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
 
-                this.tabControl_main.SelectedTab = this.tabPage_target;
+                this.tabControl_main.SelectedTab = this.tabPage_convert;
                 this.button_next.Enabled = true;
                 this.comboBox_target_targetBiblioDbName.Focus();
+            }
+            else if (this.tabControl_main.SelectedTab == this.tabPage_convert)
+            {
+                this.tabControl_main.SelectedTab = this.tabPage_target;
+                this.button_next.Enabled = true;
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_target)
             {
@@ -118,7 +179,7 @@ namespace dp2Circulation
 
                 this.tabControl_main.SelectedTab = this.tabPage_run;
                 this.button_next.Enabled = false;
-                Task.Factory.StartNew(() => DoImport());
+                Task.Factory.StartNew(() => DoImport(""));
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_run)
             {
@@ -134,6 +195,29 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
+        // 准备和判断范围有关的成员变量
+        void PrepareRange(ProcessInfo info)
+        {
+            info.BiblioRecCount = 0;
+            info.RangeList = null;
+            info.StartBiblioRecPath = "";
+
+            if (String.IsNullOrEmpty(info.RecordRange) == false)
+            {
+                if (info.RecordRange.IndexOf("/") != -1)
+                {
+                    info.StartBiblioRecPath = info.RecordRange;
+                    info.Start = false;
+                }
+                else
+                {
+                    info.RangeList = new RangeList(info.RecordRange);
+                    info.RangeList.Sort();
+                    info.Start = true;
+                }
+            }
+        }
+
         /* 文件头部结构
 <?xml version="1.0" encoding="utf-8"?>
 <dprms:collection xmlns:dprms="http://dp2003.com/dprms">
@@ -145,30 +229,142 @@ namespace dp2Circulation
          ...
          * */
         // 在一个单独的线程中运行
-        void DoImport()
+        // parameters:
+        //      strStyle    空/simulate/collect 之一
+        void DoImport(string strStyle)
         {
             string strError = "";
             bool bRet = false;
+
+            ProcessInfo info = new ProcessInfo();
+            {
+                info.Channel = this.GetChannel();
+                info.stop = stop;
+
+                info.TargetBiblioDbName = (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.comboBox_target_targetBiblioDbName.Text;
+                }));
+                info.RandomItemBarcode = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return checkBox_target_randomItemBarcode.Checked;
+                }));
+                info.AddBiblioToItem = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_convert_addBiblioToItem.Checked;
+                }));
+                info.AddBiblioToItemOnMerging = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_convert_addBiblioToItemOnMergin.Checked;
+                }));
+                info.OverwriteBiblio = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_target_restoreOldID.Checked;
+                }));
+
+                info.DontChangeOperations = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_target_dontChangeOperations.Checked;
+                }));
+                info.SuppressOperLog = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_target_suppressOperLog.Checked;
+                }));
+                info.DontSearchDup = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_target_dontSearchDup.Checked;
+                }));
+
+                info.RecordRange = (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_source_range.Text;
+                }));
+
+                info.ItemBatchNo = (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_convert_itemBatchNo.Text;
+                }));
+
+                string strDbNameList = (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_target_dbNameList.Text;
+                }));
+                info.AutoMergeRegistry = new MergeRegistry();
+                info.AutoMergeRegistry.DbNames = StringUtil.SplitList(strDbNameList.Replace("\r\n","\r"), '\r');
+                // 这里验证一下书目库名的有效性
+                foreach(string dbName in info.AutoMergeRegistry.DbNames)
+                {
+                    if (Program.MainForm.IsBiblioDbName(dbName) == false)
+                    {
+                        strError = "“自动选择目标数据库顺序”参数中的名字 '"+dbName+"' 不是当前服务器合法的书目库名";
+                        goto ERROR1;
+                    }
+                }
+
+#if NO
+            info.Simulate = (bool)this.Invoke(new Func<bool>(() =>
+            {
+                return this.checkBox_target_simulate.Checked;
+            }));
+#endif
+                if (strStyle == "collect")
+                {
+                    info.Collect = true;
+
+                    info.LocationMapTable = new List<TwoString>();  // 不适用转换表
+                }
+                else
+                {
+                    if (strStyle == "simulate")
+                        info.Simulate = true;
+
+                    this.Invoke((Action)(() =>
+                    info.LocationMapTable = this._mapDialog.StringTable
+                    ));
+                }
+
+            }
+
+            this._locationTable.Clear();
+            this._itemBarcodeTable.Clear();
+
+            this.ClearHtml();
+
+            // 自动切换到信息显示页
+            if (info.Collect == false)
+            {
+                this.Invoke((Action)(() =>
+        this.tabControl_main.SelectedTab = this.tabPage_run
+        ));
+            }
+
+            this.Invoke((Action)(() =>
+this.MainForm.ActivateFixPage("history")
+    ));
 
             this.Invoke((Action)(() =>
                 EnableControls(false)
                 ));
 
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在从书目转储文件导入数据 ...");
-            stop.BeginLoop();
+            string strText = "正在从书目转储文件导入数据 ...";
+            if (info.Simulate)
+                strText = ("正在从书目转储文件模拟导入数据 ...");
+            else if (info.Collect)
+                strText = ("正在从书目转储文件搜集信息 ...");
 
-            ProcessInfo info = new ProcessInfo();
-            info.Channel = this.GetChannel();
-            info.stop = stop;
-            info.OverwriteBiblio = false;
-            info.TargetBiblioDbName = (string)this.Invoke(new Func<string>(() =>
-            {
-                return this.comboBox_target_targetBiblioDbName.Text;
-            }));
+            WriteHtml(strText + "\r\n");
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial(strText);
+            stop.BeginLoop();
 
             TimeSpan old_timeout = info.Channel.Timeout;
             info.Channel.Timeout = new TimeSpan(0, 2, 0);
+
+            // int nBiblioRecordCount = 0;
+
+            PrepareRange(info);
 
             try
             {
@@ -181,7 +377,6 @@ namespace dp2Circulation
                 using (FileStream file = File.Open(strSourceFileName,
     FileMode.Open,
     FileAccess.Read))
-
                 using (XmlTextReader reader = new XmlTextReader(file))
                 {
                     if (stop != null)
@@ -202,6 +397,12 @@ namespace dp2Circulation
 
                     for (; ; )
                     {
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
                         // 到下一个 record 元素
                         while (true)
                         {
@@ -216,19 +417,38 @@ namespace dp2Circulation
                             break;	// 结束
 
                         DoRecord(reader, info);
+
+                        if (stop != null)
+                            stop.SetProgressValue(file.Position);
+
+                        info.BiblioRecCount++;
                     }
                 }
 
+                string strOperName = "导入";
+                if (info.Collect)
+                {
+                    strOperName = "搜集数据";
+                    // GetLocationList(this._locationTable);
+                }
+                else if (info.Simulate)
+                    strOperName = "模拟导入";
+
                 if (info.ItemErrorCount > 0)
                 {
-                    strError = "导入完成。共发生 " + info.ItemErrorCount + " 次错误。详情请见固定面板的操作历史属性页";
+                    strError = strOperName + "完成。共发生 " + info.ItemErrorCount + " 次错误。详情请见固定面板的操作历史属性页";
                     this.Invoke((Action)(() =>
                     this.MainForm.ActivateFixPage("history")
                         ));
                     goto ERROR1;
                 }
-                this.ShowMessage("导入完成", "green", true);
+                this.ShowMessage(strOperName + "完成", "green", true);
                 return;
+            }
+            catch (InterruptException ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
             }
             catch (Exception ex)
             {
@@ -241,6 +461,7 @@ namespace dp2Circulation
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+                stop.Style = StopStyle.None;
 
                 info.Channel.Timeout = old_timeout;
                 this.ReturnChannel(info.Channel);
@@ -265,9 +486,18 @@ namespace dp2Circulation
             ...
  * */
         // 处理一个 dprms:record 元素
-        void DoRecord(XmlTextReader reader, ProcessInfo info)
+        void DoRecord(XmlTextReader reader,
+            ProcessInfo info)
         {
-            info.Clear();
+            info.ClearRecordVars();
+
+            if (info.RangeList != null && info.RangeList.IsInRange(info.BiblioRecCount, true) == false)
+            {
+                reader.ReadOuterXml();
+                return;
+            }
+
+            bool bSkip = false;
 
             // 对下级元素进行循环处理
             while (true)
@@ -288,14 +518,20 @@ namespace dp2Circulation
                     // 应当是同级元素中的第一个。因为后面写入册记录等需要知道书目记录的实际写入路径
                     if (reader.LocalName == "biblio")
                     {
-                        DoBiblio(reader, info);
+                        // return:
+                        //      true    书目记录已经处理。需要继续处理后面的下级记录
+                        //      false   书目记录不需要处理，应跳过后面的下级记录
+                        bSkip = !DoBiblio(reader, info);
                     }
                     else if (reader.LocalName == "orderCollection"
                         || reader.LocalName == "itemCollection"
                         || reader.LocalName == "issueCollection"
                         || reader.LocalName == "commentCollection")
                     {
-                        DoItemCollection(reader, info);
+                        if (bSkip)
+                            reader.ReadOuterXml();
+                        else
+                            DoItemCollection(reader, info);
                     }
                     else
                     {
@@ -312,7 +548,28 @@ namespace dp2Circulation
             int nRet = strPath.IndexOf("?");
             if (nRet == -1)
                 return strPath;
-            return strPath.Substring(nRet);
+            return strPath.Substring(nRet + 1);
+        }
+
+        bool NeedSkip(XmlElement biblio_root, ProcessInfo info)
+        {
+            if (info.Start == false
+                && string.IsNullOrEmpty(info.StartBiblioRecPath) == false)
+            {
+                string strOldPath = biblio_root.GetAttribute("path");
+
+                // 定位第一条书目记录，并进入开始处理状态
+                if (info.Start == false && GetShortPath(strOldPath) == info.StartBiblioRecPath)
+                {
+                    info.Start = true;
+                    return false;
+                }
+
+                if (info.Start == false)
+                    return true;
+            }
+
+            return false;
         }
 
         /*
@@ -321,8 +578,13 @@ namespace dp2Circulation
                 <unimarc:leader>00827nam0 2200229   45  </unimarc:leader>
                 <unimarc:controlfield tag="001">0192000006</unimarc:controlfield>
          * */
-        void DoBiblio(XmlTextReader reader, ProcessInfo info)
+        // return:
+        //      true    书目记录已经处理。需要继续处理后面的下级记录
+        //      false   书目记录不需要处理，应跳过后面的下级记录
+        bool DoBiblio(XmlTextReader reader,
+            ProcessInfo info)
         {
+#if NO
             // info.ItemRefIDTable.Clear();
             string strOldPath = reader.GetAttribute("path");
             string strTimestamp = reader.GetAttribute("timestamp");
@@ -344,14 +606,29 @@ namespace dp2Circulation
 
             string strBiblioXml = reader.ReadOuterXml();
             reader.ReadEndElement();    // 位置已经到了 dprms:biblio 后面的一个同级元素
+#endif
+            XmlDocument dom = new XmlDocument();
+            XmlElement root = dom.ReadNode(reader) as XmlElement;
+
+            if (NeedSkip(root, info) == true)
+                return false;
+
+            string strOldPath = root.GetAttribute("path");
+
+            string strTimestamp = root.GetAttribute("timestamp");
+
+            info.BiblioXml = root.InnerXml;
+
+            info.SourceBiblioRecPath = strOldPath;
 
             // TODO: 检查 MARC 格式是否和目标书目库吻合
 
             string strAction = "";
             string strPath = "";
+
             if (info.OverwriteBiblio == true)
             {
-                strAction = "change";
+                strAction = "new"; //  "change";
                 strPath = GetShortPath(strOldPath);
             }
             else
@@ -366,37 +643,368 @@ namespace dp2Circulation
                     strPath = info.TargetBiblioDbName + "/?";
             }
 
+#if NO
             string strMessage = strOldPath + "-->" + strPath;
-            this.ShowMessage(strMessage);
-            this.OutputText(strMessage, 0);
+            if (info.Collect)
+                strMessage = strOldPath;
+            if (info.Simulate)
+                strMessage = "模拟导入 " + strOldPath + "-->" + strPath;
+#endif
 
-            // 创建或者覆盖书目记录
-            string strError = "";
-            string strOutputPath = "";
-            byte[] baNewTimestamp = null;
-            long lRet = info.Channel.SetBiblioInfo(
-    info.stop,
-    strAction,
-    strPath,
-    "xml",
-    strBiblioXml,
-    ByteArray.GetTimeStampByteArray(strTimestamp),
-    "",
-    out strOutputPath,
-    out baNewTimestamp,
-    out strError);
-            if (lRet == -1)
+            // WriteHtml(strMessage + "\r\n");
+
+            // 2016/12/22
+            List<string> styles = new List<string>();
+            if (info.DontChangeOperations)
+                styles.Add("nooperations");
+            if (info.DontSearchDup)
+                styles.Add("nocheckdup");
+            if (info.SuppressOperLog)
+                styles.Add("noeventlog");
+            string strStyle = StringUtil.MakePathList(styles);
+
+            if (info.Collect == true)
             {
-                if (info.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch)
+                string strMessage = "采集数据 '" + strOldPath + "'";
+
+                this.ShowMessage(strMessage);
+                this.OutputText(strMessage, 0);
+            }
+            else
+            {
+                int nRedoCount = 0;
+            REDO:
+                // 创建或者覆盖书目记录
+                string strError = "";
+                string strOutputPath = "";
+                byte[] baNewTimestamp = null;
+                long lRet = info.Channel.SetBiblioInfo(
+        info.stop,
+        info.Simulate ? "simulate_" + strAction : strAction,
+        strPath,
+        "xml",
+        info.BiblioXml,
+        ByteArray.GetTimeStampByteArray(strTimestamp),
+        "",
+        strStyle,
+        out strOutputPath,
+        out baNewTimestamp,
+        out strError);
+                if (lRet == -1)
                 {
-                    // 提示是否强行覆盖?
+                    if (info.Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch)
+                    {
+                        // 提示是否强行覆盖?
+                    }
+
+                    info.MergeStyle = "";
+                    if (info.Channel.ErrorCode == ErrorCode.BiblioDup)
+                    {
+                        string strDialogAction = "";
+                        string strTargetRecPath = "";
+                        byte[] baTargetTimestamp = null;
+
+                        this.Invoke((Action)(() =>
+{
+    using (BiblioDupDialog dup_dialog = new BiblioDupDialog())
+    {
+        MainForm.SetControlFont(dup_dialog, this.Font, false);
+        dup_dialog.AutoMergeRegistry = info.AutoMergeRegistry;
+        dup_dialog.AutoSelectMode = info.AutoSelectMode;
+        dup_dialog.TempDir = Program.MainForm.UserTempDir;
+        dup_dialog.MarcHtmlHead = Program.MainForm.GetMarcHtmlHeadString();
+        dup_dialog.OriginXml = info.BiblioXml;
+        dup_dialog.DupBiblioRecPathList = strOutputPath;
+        Program.MainForm.AppInfo.LinkFormState(dup_dialog, "biblioDupDialog_state");
+        dup_dialog.UiState = Program.MainForm.AppInfo.GetString("ImportExportForm", "BiblioDupDialog_uiState", "");
+        dup_dialog.ShowDialog(this);
+        Program.MainForm.AppInfo.SetString("ImportExportForm", "BiblioDupDialog_uiState", dup_dialog.UiState);
+        info.AutoSelectMode = dup_dialog.AutoSelectMode;    // 记忆
+
+        strDialogAction = dup_dialog.Action;
+        strTargetRecPath = dup_dialog.SelectedRecPath;
+        baTargetTimestamp = dup_dialog.SelectedTimestamp;
+    }
+}));
+                        if (string.IsNullOrEmpty(strDialogAction) == true
+                            || strDialogAction == "stop")
+                        {
+                            throw new InterruptException("中断处理过程");
+                        }
+                        if (strDialogAction == "createNew")
+                        {
+                            // TODO: 最好出现一个 MARC 编辑器让操作者修改 MARC 记录
+                            // 为 200$a 增加一个随机字符串部分，以保证再次提交保存不会遇到重复情况
+                            string strBiblioXml = info.BiblioXml;
+                            int nRet = ModifyTitle(ref strBiblioXml,
+            out strError);
+                            if (nRet == -1)
+                                throw new Exception(strError);
+                            info.BiblioXml = strBiblioXml;
+                            goto REDO;
+                        }
+
+                        if (strDialogAction == "skip")
+                            return false;
+                        if (strDialogAction == "mergeTo")
+                        {
+                            // 合并源文件中的册到目标位置
+                            Debug.Assert(string.IsNullOrEmpty(strTargetRecPath) == false, "");
+                            strOutputPath = strTargetRecPath;
+                            info.MergeStyle = strDialogAction;
+                            goto CONTINUE;
+                        }
+                        if (strDialogAction == "mergeToUseSourceBiblio")
+                        {
+                            // 合并源文件的册到目标位置，同时用源书目记录覆盖目标位置的书目记录
+                            Debug.Assert(string.IsNullOrEmpty(strTargetRecPath) == false, "");
+
+                            // 按照确定位置覆盖书目记录
+                            // return:
+                            //      -1  出错
+                            //      0   跳过本条处理
+                            //      1   成功。后面继续处理
+                            int nRet = OverwriteBiblio(info,
+                                strAction,
+                                strTargetRecPath,
+                                strStyle,
+                                baTargetTimestamp,
+                                out strError);
+#if NO
+                            lRet = info.Channel.SetBiblioInfo(
+info.stop,
+info.Simulate ? "simulate_" + strAction : strAction,
+strTargetRecPath,
+"xml",
+info.BiblioXml,
+baTargetTimestamp,
+"",
+strStyle,
+out strOutputPath,
+out baNewTimestamp,
+out strError);
+                            if (lRet == -1)
+                            {
+                                // TODO: 如果这里报错了也应该有机会重做
+                                throw new Exception(strError);
+                            }
+#endif
+                            if (nRet == -1)
+                                throw new Exception(strError);
+                            if (nRet == 0)
+                                return false;
+
+                            info.MergeStyle = strDialogAction;
+                            goto CONTINUE;
+                        }
+                    }
+
+                    strError = "保存书目记录 '" + strPath + "' 时出错: " + strError;
+
+                    if (info.HideBiblioMessageBox == false || nRedoCount > 10)
+                    {
+                        DialogResult result = System.Windows.Forms.DialogResult.Yes;
+                        this.Invoke((Action)(() =>
+{
+    result = MessageDialog.Show(this,
+strError + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
+MessageBoxButtons.YesNoCancel,
+info.LastBiblioDialogResult == DialogResult.Yes ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2,
+"此后不再出现本对话框",
+ref info.HideBiblioMessageBox,
+new string[] { "重试", "跳过", "中断" });
+}));
+                        info.LastBiblioDialogResult = result;
+                        if (result == DialogResult.Yes)
+                        {
+                            // 为重试保存做准备。TODO: 理论上要显示对比，避免不经意覆盖了别人的修改
+                            if (baNewTimestamp != null)
+                                strTimestamp = ByteArray.GetHexTimeStampString(baNewTimestamp);
+
+                            info.HideBiblioMessageBox = false;
+                            nRedoCount++;
+                            goto REDO;
+                        }
+                        if (result == DialogResult.No)
+                            return false;
+                        throw new InterruptException(strError);
+                    }
+                    else
+                    {
+                        if (info.LastBiblioDialogResult == DialogResult.Yes)
+                        {
+                            nRedoCount++;
+                            goto REDO;
+                        }
+                        // 跳过
+                        if (info.LastBiblioDialogResult == DialogResult.No)
+                            return false;
+                        throw new Exception(strError);
+                    }
                 }
-                strError = "保存书目记录 '" + strPath + "' 时出错: " + strError;
-                throw new Exception(strError);
+
+            CONTINUE:
+                info.BiblioRecPath = strOutputPath;
+
+                string strMessage = (info.BiblioRecCount + 1).ToString() + ":" + strOldPath + "-->" + info.BiblioRecPath;
+                if (info.Simulate)
+                    strMessage = "模拟导入 " + (info.BiblioRecCount + 1).ToString() + ":" + strOldPath + "-->" + info.BiblioRecPath;
+
+                this.ShowMessage(strMessage);
+                this.OutputText(strMessage, 0);
             }
 
-            info.BiblioRecPath = strOutputPath;
+            return true;
         }
+
+        // 修改书目记录的题名，增加一个随机字符串部分
+        static int ModifyTitle(ref string strBiblioXml,
+            out string strError)
+        {
+            strError = "";
+            if (string.IsNullOrEmpty(strBiblioXml) == true)
+                return 0;
+
+            string strMarcSyntax = "";
+            string strMarc = "";
+            int nRet = 0;
+
+            if (string.IsNullOrEmpty(strBiblioXml) == false)
+            {
+                // 将MARCXML格式的xml记录转换为marc机内格式字符串
+                // parameters:
+                //		bWarning	== true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+                //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+                //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+                nRet = MarcUtil.Xml2Marc(strBiblioXml,
+                    true,
+                    "", // this.CurMarcSyntax,
+                    out strMarcSyntax,
+                    out strMarc,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            if (string.IsNullOrEmpty(strMarcSyntax) == true)
+                return 0;   // 不是 MARC 格式
+
+            bool bChanged = false;
+
+            MarcRecord record = new MarcRecord(strMarc);
+            if (strMarcSyntax == "unimarc")
+            {
+                string strValue = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
+                strValue += "_" + Guid.NewGuid().ToString();
+                record.setFirstSubfield("200", "a", strValue);
+                bChanged = true;
+            }
+            else if (strMarcSyntax == "usmarc")
+            {
+                // TODO: 其实需要把子字段内容最末一个符号字符后移
+                string strValue = record.select("field[@name='245']/subfield[@name='a']").FirstContent;
+                strValue += "_" + Guid.NewGuid().ToString();
+                record.setFirstSubfield("245", "a", strValue);
+                bChanged = true;
+            }
+
+            if (bChanged == true)
+            {
+                nRet = MarcUtil.Marc2XmlEx(record.Text,
+                    strMarcSyntax,
+                    ref strBiblioXml,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                return 1;
+            }
+
+            return 0;
+        }
+
+        // 按照确定位置覆盖书目记录
+        // 函数内处理了报错和重试的情况
+        // return:
+        //      -1  出错
+        //      0   跳过本条处理
+        //      1   成功。后面继续处理
+        int OverwriteBiblio(ProcessInfo info,
+            string strAction,
+            string strTargetRecPath,
+            string strStyle,
+            byte[] baTargetTimestamp,
+            out string strError)
+        {
+            strError = "";
+
+            string strOutputPath = "";
+            byte[] baNewTimestamp = null;
+            int nRedoCount = 0;
+        REDO:
+            long lRet = info.Channel.SetBiblioInfo(
+info.stop,
+info.Simulate ? "simulate_" + strAction : strAction,
+strTargetRecPath,
+"xml",
+info.BiblioXml,
+baTargetTimestamp,
+"",
+strStyle,
+out strOutputPath,
+out baNewTimestamp,
+out strError);
+            if (lRet == -1)
+            {
+                strError = "保存书目记录 '" + strTargetRecPath + "' 时出错: " + strError;
+
+                if (info.HideBiblioMessageBox == false || nRedoCount > 10)
+                {
+                    DialogResult result = System.Windows.Forms.DialogResult.Yes;
+                    string strText = strError;
+                    this.Invoke((Action)(() =>
+{
+    result = MessageDialog.Show(this,
+strText + "\r\n\r\n(重试) 重试操作;(跳过) 跳过本条继续处理后面的书目记录; (中断) 中断处理",
+MessageBoxButtons.YesNoCancel,
+info.LastBiblioDialogResult == DialogResult.Yes ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2,
+"此后不再出现本对话框",
+ref info.HideBiblioMessageBox,
+new string[] { "重试", "跳过", "中断" });
+}));
+                    info.LastBiblioDialogResult = result;
+                    if (result == DialogResult.Yes)
+                    {
+                        // 为重试保存做准备。TODO: 理论上要显示对比，避免不经意覆盖了别人的修改
+                        if (baNewTimestamp != null)
+                            baTargetTimestamp = baNewTimestamp;
+
+                        info.HideBiblioMessageBox = false;
+                        nRedoCount++;
+                        goto REDO;
+                    }
+                    if (result == DialogResult.No)
+                        return 0;
+                    return -1;
+                }
+                else
+                {
+                    if (info.LastBiblioDialogResult == DialogResult.Yes)
+                    {
+                        nRedoCount++;
+                        goto REDO;
+                    }
+                    // 跳过
+                    if (info.LastBiblioDialogResult == DialogResult.No)
+                        return 0;
+                    return -1;
+                }
+            }
+
+            return 1;
+        }
+
+        static int ITEM_BATCH_SIZE = 10;
 
         void DoItemCollection(XmlTextReader reader, ProcessInfo info)
         {
@@ -426,7 +1034,7 @@ namespace dp2Circulation
                         && reader.NamespaceURI == DpNs.dprms)
                     {
                         item_xmls.Add(reader.ReadOuterXml());
-                        if (item_xmls.Count >= 10)
+                        if (item_xmls.Count >= ITEM_BATCH_SIZE)
                         {
                             DoItems(item_xmls, info);
                             item_xmls.Clear();
@@ -473,12 +1081,55 @@ namespace dp2Circulation
             }
         }
 
+        static void RandomItemBarcode(XmlDocument item_dom)
+        {
+            string strItemBarcode = DomUtil.GetElementText(item_dom.DocumentElement,
+                "barcode");
+            if (string.IsNullOrEmpty(strItemBarcode) == false)
+                DomUtil.SetElementText(item_dom.DocumentElement,
+                    "barcode",
+                    strItemBarcode + "_" + Guid.NewGuid().ToString());
+        }
+
+        static bool AddBiblioToItem(XmlDocument item_dom, string strBiblioXml)
+        {
+            if (string.IsNullOrEmpty(strBiblioXml))
+                throw new ArgumentException("strBiblioXml 值不应为空", "strBiblioXml");
+
+            XmlElement biblio = item_dom.DocumentElement.SelectSingleNode("biblio") as XmlElement;
+            if (biblio != null)
+                return false;
+            biblio = item_dom.CreateElement("biblio");
+            item_dom.DocumentElement.AppendChild(biblio);
+            biblio.InnerXml = strBiblioXml;
+            return true;
+        }
+
+        Hashtable _locationTable = new Hashtable(); // location string --> count
+
         void DoItems(List<string> item_xmls, ProcessInfo info)
         {
             string strError = "";
 
+            StringBuilder dupInfo = new StringBuilder();
+
             List<EntityInfo> entityArray = new List<EntityInfo>();
             string strRootElementName = "";
+
+            // 2016/12/22
+            List<string> styles = new List<string>();
+            if (info.DontChangeOperations)
+                styles.Add("nooperations");
+            if (info.DontSearchDup)
+                styles.Add("nocheckdup");
+            if (info.SuppressOperLog)
+                styles.Add("noeventlog");
+
+            // 2017/1/4
+            if (info.Simulate)
+                styles.Add("simulate");
+
+            string strStyle = StringUtil.MakePathList(styles);
 
             foreach (string xml in item_xmls)
             {
@@ -499,6 +1150,53 @@ namespace dp2Circulation
                 if (strRootElementName == "item")
                 {
                     RefreshRefID(info.ItemRefIDTable, ref strRefID);
+
+                    if (info.RandomItemBarcode)
+                        RandomItemBarcode(item_dom);
+                    else
+                    {
+                        // 针对册条码号进行文件空间内查重
+                        SearchDupOnFileScope(item_dom, dupInfo);
+                    }
+
+                    string strLocation1 = DomUtil.GetElementText(item_dom.DocumentElement, "location");
+
+                    string strPureLocation = StringUtil.GetPureLocation(strLocation1);
+
+                    if (info.Collect)
+                    {
+                        object o = _locationTable[strPureLocation];
+                        if (o == null)
+                            _locationTable[strPureLocation] = 1;
+                        else
+                        {
+                            int v = (int)o;
+                            v++;
+                            _locationTable[strPureLocation] = v;
+                        }
+                    }
+
+                    if (info.Collect == false)
+                    {
+                        bool bRet = ConvertLocation(info.LocationMapTable, ref strPureLocation);
+                        if (bRet == true)
+                        {
+                            DomUtil.SetElementText(item_dom.DocumentElement,
+                                "location",
+                                StringUtil.SetLocationString(strLocation1, strPureLocation));
+                        }
+                    }
+
+                    if (info.AddBiblioToItem
+                        || (info.AddBiblioToItemOnMerging == true && info.MergeStyle.StartsWith("mergeTo"))
+                        )
+                        AddBiblioToItem(item_dom, info.BiblioXml);
+
+                    if (string.IsNullOrEmpty(info.ItemBatchNo) == false)
+                        DomUtil.SetElementText(item_dom.DocumentElement,
+                            "batchNo",
+                            info.ItemBatchNo);
+
                 }
                 else if (strRootElementName == "order")
                 {
@@ -542,80 +1240,141 @@ namespace dp2Circulation
                 item.OldRecord = "";
                 item.OldTimestamp = null;
 
+                item.Style = strStyle;
+
                 entityArray.Add(item);
             }
 
-            info.stop.SetMessage("正在为书目记录 '" + info.BiblioRecPath + "' 上传 "+info.UploadedSubItems+"+" + entityArray.Count + " 个下属 " + strRootElementName + " 记录 ...");
+            if (info.Collect)
+                info.stop.SetMessage("正在为书目记录 '" + info.SourceBiblioRecPath + "' 搜集 " + info.UploadedSubItems + "+" + entityArray.Count + " 个下属 " + strRootElementName + " 记录的信息 ...");
+            else
+                info.stop.SetMessage("正在为书目记录 '" + info.BiblioRecPath + "' " +
+                    (info.Simulate ? "模拟" : "") +
+                    "上传 " + info.UploadedSubItems + "+" + entityArray.Count + " 个下属 " + strRootElementName + " 记录 ...");
 
             info.UploadedSubItems += entityArray.Count;
 
-            EntityInfo[] errorinfos = null;
-
-            long lRet = 0;
-
-            if (strRootElementName == "item")
-                lRet = info.Channel.SetEntities(
-                     info.stop,
-                     info.BiblioRecPath,
-                     entityArray.ToArray(),
-                     out errorinfos,
-                     out strError);
-            else if (strRootElementName == "order")
-                lRet = info.Channel.SetOrders(
-                     info.stop,
-                     info.BiblioRecPath,
-                     entityArray.ToArray(),
-                     out errorinfos,
-                     out strError);
-            else if (strRootElementName == "issue")
-                lRet = info.Channel.SetIssues(
-                     info.stop,
-                     info.BiblioRecPath,
-                     entityArray.ToArray(),
-                     out errorinfos,
-                     out strError);
-            else if (strRootElementName == "comment")
-                lRet = info.Channel.SetComments(
-                     info.stop,
-                     info.BiblioRecPath,
-                     entityArray.ToArray(),
-                     out errorinfos,
-                     out strError);
-            else
+            if (info.Collect == false)
             {
-                strError = "未知的 strRootElementName '" + strRootElementName + "'";
-                throw new Exception(strError);
+                EntityInfo[] errorinfos = null;
+
+                long lRet = 0;
+
+                if (strRootElementName == "item")
+                    lRet = info.Channel.SetEntities(
+                         info.stop,
+                         info.BiblioRecPath,
+                         entityArray.ToArray(),
+                         out errorinfos,
+                         out strError);
+                else if (strRootElementName == "order")
+                    lRet = info.Channel.SetOrders(
+                         info.stop,
+                         info.BiblioRecPath,
+                         entityArray.ToArray(),
+                         out errorinfos,
+                         out strError);
+                else if (strRootElementName == "issue")
+                    lRet = info.Channel.SetIssues(
+                         info.stop,
+                         info.BiblioRecPath,
+                         entityArray.ToArray(),
+                         out errorinfos,
+                         out strError);
+                else if (strRootElementName == "comment")
+                    lRet = info.Channel.SetComments(
+                         info.stop,
+                         info.BiblioRecPath,
+                         entityArray.ToArray(),
+                         out errorinfos,
+                         out strError);
+                else
+                {
+                    strError = "未知的 strRootElementName '" + strRootElementName + "'";
+                    throw new Exception(strError);
+                }
+                if (lRet == -1)
+                    throw new Exception(strError);
+
+                if (errorinfos == null || errorinfos.Length == 0)
+                    return;
+
+                StringBuilder text = new StringBuilder();
+                foreach (EntityInfo error in errorinfos)
+                {
+                    if (String.IsNullOrEmpty(error.RefID) == true)
+                        throw new Exception("服务器返回的EntityInfo结构中RefID为空");
+
+                    // 正常信息处理
+                    if (error.ErrorCode == ErrorCodeValue.NoError)
+                        continue;
+
+                    text.Append(error.RefID + "在提交保存过程中发生错误 -- " + error.ErrorInfo + "\r\n");
+                    info.ItemErrorCount++;
+                }
+
+                if (text.Length > 0)
+                {
+                    strError = "在为书目记录 '" + info.BiblioRecPath + "' 导入下属 '" + strRootElementName + "' 记录的阶段出现错误:\r\n" + text.ToString();
+
+                    this.OutputText(strError, 2);
+
+                    // 询问是否忽略错误继续向后处理? 此后全部忽略?
+                    if (AskContinue(info, strError) == false)
+                        throw new Exception(strError);
+                }
             }
-            if (lRet == -1)
-                throw new Exception(strError);
 
-            if (errorinfos == null || errorinfos.Length == 0)
-                return;
-
-            StringBuilder text = new StringBuilder();
-            foreach (EntityInfo error in errorinfos)
+            if (dupInfo.Length > 0)
             {
-                if (String.IsNullOrEmpty(error.RefID) == true)
-                    throw new Exception("服务器返回的EntityInfo结构中RefID为空");
-
-                // 正常信息处理
-                if (error.ErrorCode == ErrorCodeValue.NoError)
-                    continue;
-
-                text.Append(error.RefID + "在提交保存过程中发生错误 -- " + error.ErrorInfo + "\r\n");
-                info.ItemErrorCount++;
-            }
-
-            if (text.Length > 0)
-            {
-                strError = "在为书目记录 '" + info.BiblioRecPath + "' 导入下属 '" + strRootElementName + "' 记录的阶段出现错误:\r\n" + text.ToString();
-
+                strError = info.SourceBiblioRecPath + ":\r\n" + dupInfo.ToString();
                 this.OutputText(strError, 2);
 
-                // 询问是否忽略错误继续向后处理? 此后全部忽略?
                 if (AskContinue(info, strError) == false)
                     throw new Exception(strError);
             }
+        }
+
+        public override void OutputText(string strText, int nWarningLevel = 0)
+        {
+            base.OutputText(strText, nWarningLevel);
+            if (nWarningLevel == 2)
+                WriteHtml(strText + "\r\n");
+        }
+
+        Hashtable _itemBarcodeTable = new Hashtable();  // itemBarcode --> count
+
+        void SearchDupOnFileScope(XmlDocument item_dom, StringBuilder errorInfo)
+        {
+            string strItemBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
+            if (string.IsNullOrEmpty(strItemBarcode) == true)
+                return;
+            object o = _itemBarcodeTable[strItemBarcode];
+            if (o == null)
+            {
+                _itemBarcodeTable[strItemBarcode] = 1;
+                return;
+            }
+
+            int v = (int)o;
+            v++;
+            _itemBarcodeTable[strItemBarcode] = v;
+
+            errorInfo.Append("册条码号 '" + strItemBarcode + "' 在源文件中发生重复(出现 " + v + " 次)");
+        }
+
+        static bool ConvertLocation(List<TwoString> table, ref string location)
+        {
+            foreach (TwoString s in table)
+            {
+                if (s.Source == location)
+                {
+                    location = s.Target;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // return:
@@ -631,15 +1390,15 @@ namespace dp2Circulation
             // 1) 继续处理。但遇到错误依然报错
             // 2) 继续处理，但遇到错误不再报错。此时要累积报错信息，最后统一报错。或者显示在一个浏览器控件窗口中。
 
-            if (info.HideMessageBox == false)
+            if (info.HideItemsMessageBox == false)
             {
                 // TODO: 按钮文字较长的时候，应该能自动适应
                 DialogResult result = MessageDialog.Show(this,
 strText + "\r\n\r\n(继续) 继续处理; (中断) 中断处理",
 MessageBoxButtons.YesNo,
 MessageBoxDefaultButton.Button2,
-null,
-ref info.HideMessageBox,
+"此后不再出现本对话框",
+ref info.HideItemsMessageBox,
 new string[] { "继续", "中断" });
                 if (result == DialogResult.Yes)
                     return true;
@@ -650,31 +1409,74 @@ new string[] { "继续", "中断" });
 
         class ProcessInfo
         {
-            // 是否覆盖书目记录。false 表示为追加
+            // 是否为模拟导入
+            public bool Simulate = false;
+
+            // 是否为搜集数据
+            public bool Collect = false;    // 搜集数据时，不向 dp2library 发出请求
+
+            // 是否为册条码号加上随机的后缀字符串
+            public bool RandomItemBarcode = false;
+
+            // 是否为册记录自动添加书目元素。(注：如果册记录中本来有了这个元素就不添加了)
+            public bool AddBiblioToItem = false;
+
+            // 是否为书目发生合并时的册记录自动添加书目元素。
+            public bool AddBiblioToItemOnMerging = false;
+
+            // 是否覆盖书目记录(恢复到原始 ID)。false 表示为追加
             public bool OverwriteBiblio = false;
             public string TargetBiblioDbName = "";  // 目标书目库名
 
-            public bool HideMessageBox = false; // 是否隐藏报错对话框
+            public bool DontChangeOperations = false;
+            public bool SuppressOperLog = false;
+            public bool DontSearchDup = false;
+
+            public string ItemBatchNo = ""; // 设定给册记录的批次号。如果为空，表示不修改册记录中的批次号，否则会覆盖记录中的批次号
+
+            public string RecordRange = ""; // 导入源文件中的书目记录范围
 
             public int ItemErrorCount = 0;  // 总共发生过多少次下属记录导入错误
 
             public LibraryChannel Channel = null;
             public Stop stop = null;
 
+            public MergeRegistry AutoMergeRegistry = null;
+
+            // *** 以下成员都是在运行中动态设定和变化的
+            public string MergeStyle = "";  // 书目记录合并策略
+            public bool AutoSelectMode = false; // (发现书目重复时)是否自动选择目标
+            public bool Start = true;   // 是否进入开始处理状态
+            public string StartBiblioRecPath = "";  // 定位源文件中需开始处理的一条记录的路径
+            public RangeList RangeList = null;
+            public int BiblioRecCount = 0;  // 已经处理的书目记录数
+
+            public string SourceBiblioRecPath = ""; // 数据中的书目记录路径
+
             public string BiblioRecPath = "";   // 当前已经创建或者修改的书目记录路径
+
+            public string BiblioXml { get; set; }   // 书目记录 XML
 
             public Hashtable ItemRefIDTable = new Hashtable();  // 册记录 refID 替换情况表。旧 refID --> 新 refID 
             public Hashtable OrderRefIDTable = new Hashtable();  // 订购记录 refID 替换情况表。旧 refID --> 新 refID 
 
             public int UploadedSubItems = 0;    // 当前书目记录累计已经上传的子记录个数
 
+            public bool HideItemsMessageBox = false; // 是否隐藏报错对话框
+            public bool HideBiblioMessageBox = false; // 是否隐藏报错对话框
+            public DialogResult LastBiblioDialogResult = DialogResult.No;   // 最近一次书目保存出错以后显示的对话框的选择结果
+
+            // *** 以下变量在整个处理过程中持久
+            public List<TwoString> LocationMapTable = new List<TwoString>(); // 馆藏地转换表
+
             // 每次要处理新的一条书目记录以前，进行清除
-            public void Clear()
+            public void ClearRecordVars()
             {
                 this.ItemRefIDTable.Clear();
                 this.OrderRefIDTable.Clear();
                 this.BiblioRecPath = "";
                 this.UploadedSubItems = 0;
+                this.MergeStyle = "";
             }
         }
 
@@ -742,5 +1544,163 @@ new string[] { "继续", "中断" });
 
             this.comboBox_target_targetBiblioDbName.Items.Add("<使用文件中的原书目库名>");
         }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.textBox_source_fileName);
+
+                controls.Add(this.checkBox_subRecords_entity);
+                controls.Add(this.checkBox_subRecords_issue);
+                controls.Add(this.checkBox_subRecords_order);
+                controls.Add(this.checkBox_subRecords_comment);
+                controls.Add(this.checkBox_subRecords_object);
+
+                controls.Add(this.textBox_objectDirectoryName);
+                controls.Add(this.textBox_source_range);
+
+                controls.Add(this.checkBox_convert_addBiblioToItem);
+                controls.Add(this.checkBox_convert_addBiblioToItemOnMergin);
+                controls.Add(this.textBox_convert_itemBatchNo);
+
+                controls.Add(this.comboBox_target_targetBiblioDbName);
+                controls.Add(this.checkBox_target_randomItemBarcode);
+                controls.Add(this.checkBox_target_restoreOldID);
+
+                controls.Add(this.checkBox_target_dontSearchDup);
+                controls.Add(this.checkBox_target_suppressOperLog);
+                controls.Add(this.checkBox_target_dontChangeOperations);
+
+                controls.Add(this.textBox_target_dbNameList);
+
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.textBox_source_fileName);
+
+                controls.Add(this.checkBox_subRecords_entity);
+                controls.Add(this.checkBox_subRecords_issue);
+                controls.Add(this.checkBox_subRecords_order);
+                controls.Add(this.checkBox_subRecords_comment);
+                controls.Add(this.checkBox_subRecords_object);
+
+                controls.Add(this.textBox_objectDirectoryName);
+                controls.Add(this.textBox_source_range);
+
+                controls.Add(this.checkBox_convert_addBiblioToItem);
+                controls.Add(this.checkBox_convert_addBiblioToItemOnMergin);
+                controls.Add(this.textBox_convert_itemBatchNo);
+
+                controls.Add(this.comboBox_target_targetBiblioDbName);
+                controls.Add(this.checkBox_target_randomItemBarcode);
+                controls.Add(this.checkBox_target_restoreOldID);
+
+                controls.Add(this.checkBox_target_dontSearchDup);
+                controls.Add(this.checkBox_target_suppressOperLog);
+                controls.Add(this.checkBox_target_dontChangeOperations);
+
+                controls.Add(this.textBox_target_dbNameList);
+                GuiState.SetUiState(controls, value);
+            }
+        }
+
+        private void tabControl_main_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            this.SetNextButtonEnable();
+        }
+
+        private void button_target_simulateImport_Click(object sender, EventArgs e)
+        {
+            Task.Factory.StartNew(() => DoImport("simulate"));
+        }
+
+#if NO
+        List<TwoString> _map = null;
+
+        private async void button_target_mapString_Click(object sender, EventArgs e)
+        {
+            // 按住 Ctrl 键可迫使重新创建对照表
+            if (_map == null || (Control.ModifierKeys == Keys.Control))
+            {
+                await Task.Factory.StartNew(() => DoImport("collect"));
+
+                _map = GetStringMap(this._locationTable);
+            }
+
+            StringMapDialog dlg = new StringMapDialog();
+            dlg.StringTable = _map;
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            this._map = dlg.StringTable;
+        }
+#endif
+
+        // 从数据中获取数据，创建馆藏地转换表
+        private async void button_convert_initialMapString_Click(object sender, EventArgs e)
+        {
+            await Task.Factory.StartNew(() => DoImport("collect"));
+
+            this._mapDialog.StringTable = GetStringMap(this._locationTable);
+        }
+
+        static List<string> GetLocationList(Hashtable locationTable)
+        {
+            List<string> lines = new List<string>();
+            foreach (string key in locationTable.Keys)
+            {
+                lines.Add(key);
+            }
+            lines.Sort();
+            return lines;
+        }
+
+        static List<TwoString> GetStringMap(Hashtable locationTable)
+        {
+            List<TwoString> results = new List<TwoString>();
+            foreach (string key in locationTable.Keys)
+            {
+                TwoString item = new TwoString();
+                item.Source = key;
+                item.Target = key;  // 让源和目标一致，是预防用户使用空的目标造成意料之外的变换效果
+                results.Add(item);
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// 写入 HTML 字符串
+        /// </summary>
+        /// <param name="strHtml">HTML 字符串</param>
+        public void WriteHtml(string strHtml)
+        {
+            this.Invoke((Action)(() =>
+            {
+                Global.WriteHtml(this.webBrowser1,
+                    strHtml);
+                webBrowser1.ScrollToEnd();
+            }));
+        }
+
+        public void ClearHtml()
+        {
+            this.Invoke((Action)(() =>
+            {
+                Global.ClearForPureTextOutputing(this.webBrowser1);
+            }));
+        }
+
+#if NO
+        private void button_target_collect_Click(object sender, EventArgs e)
+        {
+            Task.Factory.StartNew(() => DoImport("collect"));
+        }
+#endif
     }
 }

@@ -274,6 +274,33 @@
         <caption lang="zh-CN">操作时间</caption>
         <caption lang="en">OperTime</caption>
     </table>
+    
+  <key>
+    <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='997']/marc:subfield[@code='a']</xpath>
+    <from>ukey</from>
+    <table ref="ukey" />
+  </key>
+  <table name="ukey" id="20" type="ukey">
+    <convert>
+      <string style="upper" />
+    </convert>
+    <convertquery>
+      <string style="upper" />
+    </convertquery>
+    <caption lang="zh-CN">查重键</caption>
+    <caption lang="en">Uniform Key</caption>
+  </table>
+  
+  <key>
+    <xpath nstable="usmarc">//marc:record/marc:datafield[@tag='997']/marc:subfield[@code='h']</xpath>
+    <from>ucode</from>
+    <table ref="ucode" />
+  </key>
+  <table name="ucode" id="21" type="ucode">
+    <caption lang="zh-CN">查重码</caption>
+    <caption lang="en">Uniform Code</caption>
+  </table>
+    
     <!-- ******************配置非用字**************************************** -->
     <stopword>
         <stopwordTable name="title">

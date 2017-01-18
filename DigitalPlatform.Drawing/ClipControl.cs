@@ -384,7 +384,7 @@ namespace DigitalPlatform.Drawing
 
             //this.Width = image.Width;
             //this.Height = image.Height;
-            this.Image = image;
+            ImageUtil.SetImage(this, image);    // 2016/12/28
 
             this.Invalidate();
         }

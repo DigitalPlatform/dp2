@@ -4271,7 +4271,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                 // 122 表 按照读者 *姓名* 没有借书的读者
                 strCommand =
                      "create temp table tt as select operlogcircu.readerbarcode "
-                     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+                     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode AND reader.state = '' "    // 2016/11/24 增加对 state 字段的判断
                      + " WHERE operlogcircu.operation = 'borrow' and operlogcircu.action = 'borrow' "
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "';"
@@ -4288,7 +4288,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                 // 9122 表 按照读者 *姓名* 没有阅读的读者
                 strCommand =
                      "create temp table tt as select operlogcircu.readerbarcode "
-                     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+                     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode AND reader.state = '' "    // 2016/11/24 增加对 state 字段的判断
                      + " WHERE operlogcircu.operation = 'return' and operlogcircu.action = 'read' "
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "';"
@@ -4688,7 +4688,7 @@ out strError);
 
                 string strTimeCondition = " substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
                      + " AND substr(item.createtime,1,10) <= '" + strEndDate + "' ";
-                if (strStartDate.Replace("-","") == "00010101")
+                if (strStartDate.Replace("-", "") == "00010101")
                     strTimeCondition = " ((substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
                      + " AND substr(item.createtime,1,10) <= '" + strEndDate + "' )"
                      + " OR item.createtime = '') ";
@@ -4701,8 +4701,8 @@ out strError);
                      + " FROM item "
                      + " LEFT OUTER JOIN " + strDistinctClassTableName + " ON item.bibliorecpath <> '' AND " + strDistinctClassTableName + ".bibliorecpath = item.bibliorecpath "
                      + "     WHERE " + strLocationLike
-                     //+ " AND substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
-                     //+ " AND substr(item.createtime,1,10) <= '" + strEndDate + "' "  // 限定册记录创建的时间在 end 以前
+                    //+ " AND substr(item.createtime,1,10) >= '" + strStartDate + "' "  // 限定册记录创建的时间在 start 以后
+                    //+ " AND substr(item.createtime,1,10) <= '" + strEndDate + "' "  // 限定册记录创建的时间在 end 以前
                      + " AND " + strTimeCondition
                      + " GROUP BY path1 "
                      + " ) group by classhead ORDER BY classhead ;";
@@ -4903,7 +4903,7 @@ out strError);
         // 去掉末尾的 -架号 部分
         static string RemoveShelfName(string strText)
         {
-            int index = strText.LastIndexOfAny(new char [] {'/','-'});
+            int index = strText.LastIndexOfAny(new char[] { '/', '-' });
             if (index == -1)
                 return strText;
             if (strText[index] == '/')
@@ -5937,7 +5937,8 @@ MessageBoxDefaultButton.Button2);
         // 0.08 (2014/11/6) reader 表增加了 state 字段 
         // 0.09 (2015/7/14) 增加了 operlogpassgate 和 operloggetres 表
         // 0.10 (2016/5/5) 给每个 operlogxxx 表增加了 librarycode 字段
-        static string _local_version = "0.10";
+        // 0.11 (2016/12/8) 以前版本 operlogamerce 中 action 为 undo 的行，price 字段内容都为空，会导致 472 报表中统计出来的实收金额偏大，这个版本修正了这个 bug
+        static string _local_version = "0.11";
 
         // TODO: 最好把第一次初始化本地 sql 表的动作也纳入 XML 文件中，这样做单项任务的时候，就不会毁掉其他的表
         // 创建批处理计划
@@ -8611,8 +8612,13 @@ out strError);
                     out node);
                 if (node == null)
                 {
+#if NO
                     strError = "日志记录中缺<record>元素";
                     return -1;
+#endif
+                    // 改为进行删除操作
+                    strAction = "delete";
+                    goto TRY_DELETE;
                 }
 
                 string strNewRecPath = DomUtil.GetAttr(node, "recPath");
@@ -8669,8 +8675,10 @@ out strError);
                         return -1;
                 }
 
+                return 0;
             }
-            else if (strAction == "delete")
+        TRY_DELETE:
+            if (strAction == "delete")
             {
                 XmlNode node = null;
                 string strOldRecord = DomUtil.GetElementText(domLog.DocumentElement,
@@ -8697,14 +8705,11 @@ out strError);
                     out strError);
                 if (nRet == -1)
                     return -1;
-            }
-            else
-            {
-                strError = "无法识别的<action>内容 '" + strAction + "'";
-                return -1;
+                return 0;
             }
 
-            return 0;
+            strError = "无法识别的<action>内容 '" + strAction + "'";
+            return -1;
         }
 
         // SetBiblioInfo() API 或 CopyBiblioInfo() API 的恢复动作

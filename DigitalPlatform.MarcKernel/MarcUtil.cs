@@ -1055,7 +1055,6 @@ namespace DigitalPlatform.Marc
 
             if (bRemoveEndCrLf)
             {
-
                 // 看看开头的byte
                 if (bUcs2 == true)
                 {
@@ -1078,7 +1077,6 @@ namespace DigitalPlatform.Marc
                     }
                     if (i > 0)
                         baTemp.RemoveRange(0, i * 2); // 删除开头连续的CR LF
-
                 }
                 else
                 {
@@ -1113,7 +1111,6 @@ namespace DigitalPlatform.Marc
 
             return nRet;
         }
-
 
         // 将MARC记录转换为字段(字符串)数组。
         public static int ConvertMarcToFieldArray(string strMARC,

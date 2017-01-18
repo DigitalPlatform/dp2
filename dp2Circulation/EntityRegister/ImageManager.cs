@@ -111,7 +111,7 @@ namespace dp2Circulation
                 info.FileName = GetTempFileName();
 
             // http 协议的图像文件
-            if (StringUtil.HasHead(info.ObjectPath, "http:") == true)
+            if (StringUtil.IsHttpUrl(info.ObjectPath) == true)
             {
                 // 先从 cache 中找
                 if (_localFileCache != null)

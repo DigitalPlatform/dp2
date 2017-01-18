@@ -49,10 +49,26 @@ namespace dp2Circulation
 
         ObjectInfoCollection _objects = new ObjectInfoCollection();
 
+#if NO
         /// <summary>
         /// 事项的显示状态
         /// </summary>
         public ItemDisplayState ItemDisplayState = ItemDisplayState.Normal;
+#endif
+        ItemDisplayState _itemDisplayState = ItemDisplayState.Normal;
+
+        public ItemDisplayState ItemDisplayState
+        {
+            get
+            {
+                return _itemDisplayState;
+            }
+            set
+            {
+                _itemDisplayState = value;
+            }
+        }
+
 
         /// <summary>
         ///  册记录路径
@@ -197,7 +213,6 @@ namespace dp2Circulation
 
             this.RecPath = strRecPath;
             this.Timestamp = baTimeStamp;
-
             return 0;
         }
 
@@ -515,6 +530,24 @@ namespace dp2Circulation
             return Guid.NewGuid().ToString();
         }
 
+        // 2016/12/19
+        /// <summary>
+        /// 旧的参考 ID
+        /// </summary>
+        public string OldRefID
+        {
+            get
+            {
+                string strRefID = DomUtil.GetElementText(this.RecordDom.DocumentElement, "oldRefID");
+                return strRefID;
+            }
+            set
+            {
+                DomUtil.SetElementText(this.RecordDom.DocumentElement, "oldRefID", value);
+                this.Changed = true;
+            }
+        }
+
         /// <summary>
         /// 参考 ID
         /// </summary>
@@ -550,6 +583,13 @@ namespace dp2Circulation
             }
         }
 
+        // 只修改 RecordDom 字段内容，不改变 Changed 状态
+        // TODO: 修改 Parent 可以用这个函数来实现
+        public void SetElementText(string strName, string strValue)
+        {
+            DomUtil.SetElementText(this.RecordDom.DocumentElement, "refID", strValue);
+        }
+
         /// <summary>
         /// 当前事项所从属的书目记录 ID
         /// </summary>
@@ -565,7 +605,8 @@ namespace dp2Circulation
                 if (oldvalue != value)
                 {
                     DomUtil.SetElementText(this.RecordDom.DocumentElement, "parent", value);
-                    this.Changed = true; // 2009/3/5
+                    // 修改 Parent 不要导致 Changed = true // 2016/12/19
+                    // this.Changed = true; // 2009/3/5
                 }
             }
         }
@@ -747,6 +788,26 @@ namespace dp2Circulation
 
             return null;
         }
+
+        public BookItemBase GetItemByOldRefID(string strRefID,
+    List<BookItemBase> excludeItems = null)
+        {
+            foreach (BookItemBase item in this)
+            {
+                // 需要排除的事项
+                if (excludeItems != null)
+                {
+                    if (excludeItems.IndexOf(item) != -1)
+                        continue;
+                }
+
+                if (item.OldRefID == strRefID)
+                    return item;
+            }
+
+            return null;
+        }
+
 
         /// <summary>
         /// 以记录路径定位一个事项

@@ -17,6 +17,11 @@ using System.Xml;
 using System.IO;
 using System.Net;   // for WebClient class
 
+#if GCAT_SERVER
+using DigitalPlatform.GcatClient.gcat_new_ws;
+using DigitalPlatform.GcatClient;
+#endif
+
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
@@ -26,14 +31,13 @@ using DigitalPlatform.Script;   // QuickPinyin IsbnSplitter
 using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.CirculationClient;
-using DigitalPlatform.GcatClient.gcat_new_ws;
-using DigitalPlatform.GcatClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Catalog
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Form, IChannelManager
     {
         // MarcFilter对象缓冲池
         public FilterCollection Filters = new FilterCollection();
@@ -80,7 +84,7 @@ namespace dp2Catalog
 
 
         //保存界面信息
-        public ApplicationInfo AppInfo = new ApplicationInfo("dp2catalog.xml");
+        public ApplicationInfo AppInfo = null;  // new ApplicationInfo("dp2catalog.xml");
 
         public DigitalPlatform.StopManager stopManager = new DigitalPlatform.StopManager();
         public DigitalPlatform.Stop Stop = null;
@@ -110,6 +114,9 @@ namespace dp2Catalog
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            this._channelPool.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channels_BeforeLogin);
+            this._channelPool.AfterLogin += new AfterLoginEventHandle(Channels_AfterLogin);
+
             int nRet = 0;
             string strError = "";
 
@@ -145,6 +152,16 @@ namespace dp2Catalog
                 // 2015/8/8
                 this.UserLogDir = Path.Combine(this.UserDir, "log");
                 PathUtil.CreateDirIfNeed(this.UserLogDir);
+
+                // 将 dp2catalog.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+                nRet = MoveDp2catalogXml(out strError);
+                if (nRet == -1)
+                {
+                    this.ReportError("dp2catalog 移动 dp2catalog.xml 时出现错误", "(安静报错)" + strError);
+                    MessageBox.Show(this, strError);
+                }
+
+                this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "dp2catalog.xml"));
 
                 string strOldFileName = Path.Combine(this.DataDir, "zserver.xml");
                 string strNewFileName = Path.Combine(this.UserDir, "zserver.xml");
@@ -239,7 +256,6 @@ namespace dp2Catalog
             {
                 MessageBox.Show(this, "装载 EACC 码表文件时发生错误: " + ex.Message);
             }
-
 
             // 从文件中装载创建一个dp2ServerCollection对象
             // parameters:
@@ -337,7 +353,6 @@ namespace dp2Catalog
                 MessageBox.Show(this, strError);
             }
 
-
             this.LastSavePath = this.AppInfo.GetString(
                 "main_form",
                 "last_saved_path",
@@ -345,8 +360,76 @@ namespace dp2Catalog
 
             StartPrepareNames(true);
 
+#if GCAT_SERVER
             this.m_strPinyinGcatID = this.AppInfo.GetString("entity_form", "gcat_pinyin_api_id", "");
             this.m_bSavePinyinGcatID = this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", false);
+#endif
+        }
+
+        // 将 dp2catalog.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
+        int MoveDp2catalogXml(out string strError)
+        {
+            strError = "";
+
+            string strTargetFileName = Path.Combine(this.UserDir, "dp2catalog.xml");
+            if (File.Exists(strTargetFileName) == true)
+                return 0;
+
+            string strSourceDirectory = "";
+            if (ApplicationDeployment.IsNetworkDeployed == true)
+            {
+                strSourceDirectory = Application.LocalUserAppDataPath;
+            }
+            else
+            {
+                strSourceDirectory = Environment.CurrentDirectory;
+            }
+
+            string strSourceFileName = Path.Combine(strSourceDirectory, "dp2catalog.xml");
+            if (File.Exists(strSourceFileName) == false)
+                return 0;   // 没有源文件，无法做什么
+
+            try
+            {
+                File.Copy(strSourceFileName, strTargetFileName, false);
+            }
+            catch (Exception ex)
+            {
+                strError = "复制文件 '" + strSourceFileName + "' 到 '" + strTargetFileName + "' 时出现异常：" + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
+            return 0;
+        }
+
+        public void ReportError(string strTitle,
+string strError)
+        {
+            // 发送给 dp2003.com
+            string strText = strError;
+            if (string.IsNullOrEmpty(strText) == true)
+                return;
+
+            strText += "\r\n\r\n===\r\n";   // +PackageEventLog.GetEnvironmentDescription().Replace("\t", "    ");
+
+            try
+            {
+                // 发送报告
+                int nRet = LibraryChannel.CrashReport(
+                    "@MAC:" + Program.GetMacAddressString(),
+                    strTitle,
+                    strText,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "CrashReport() (" + strTitle + ") 出错: " + strError;
+                    this.WriteErrorLog(strError);
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "CrashReport() (" + strTitle + ") 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.WriteErrorLog(strError);
+            }
         }
 
         public void StartPrepareNames(bool bFullInitial)
@@ -373,10 +456,12 @@ namespace dp2Catalog
                 }
             }
 
-            string[] types = strOpenedMdiWindow.Split(new char[] { ',' });
-            for (int i = 0; i < types.Length; i++)
+            List<string> types = StringUtil.SplitList(strOpenedMdiWindow);
+            StringUtil.RemoveDup(ref types);
+            // string[] types = strOpenedMdiWindow.Split(new char[] { ',' });
+            foreach (string strType in types)
             {
-                string strType = types[i];
+                // string strType = types[i];
                 if (String.IsNullOrEmpty(strType) == true)
                     continue;
 
@@ -399,7 +484,7 @@ namespace dp2Catalog
             // 广告窗口
             MenuItem_openAdvertiseForm_Click(this, null);
 
-            // 装载MDI子窗口状态
+            // 装载 MDI 子窗口状态
             this.AppInfo.LoadFormMdiChildStates(this,
                 "mainformstate");
         }
@@ -419,7 +504,6 @@ namespace dp2Catalog
                 {
                     return false;
                 }
-
             }
         }
 
@@ -461,6 +545,13 @@ namespace dp2Catalog
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            if (this._channelPool != null)
+            {
+                this._channelPool.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channels_BeforeLogin);
+                this._channelPool.AfterLogin -= new AfterLoginEventHandle(Channels_AfterLogin);
+                this._channelPool.Close();
+            }
+
             this.Servers.ServerChanged -= new dp2ServerChangedEventHandle(Servers_ServerChanged);
 
             // 保存到文件
@@ -509,10 +600,12 @@ namespace dp2Catalog
                 AppInfo.SaveFormStates(this,
                     "mainformstate");
 
+#if GCAT_SERVER
                 if (this.m_bSavePinyinGcatID == false)
                     this.m_strPinyinGcatID = "";
                 this.AppInfo.SetString("entity_form", "gcat_pinyin_api_id", this.m_strPinyinGcatID);
                 this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", this.m_bSavePinyinGcatID);
+#endif
             }
 
             // cfgcache
@@ -520,7 +613,6 @@ namespace dp2Catalog
             int nRet = cfgCache.Save(null, out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
-
 
             //记住save,保存信息XML文件
             AppInfo.Save();
@@ -861,7 +953,6 @@ namespace dp2Catalog
         private void toolButton_stop_Click(object sender, EventArgs e)
         {
             stopManager.DoStopActive();
-
         }
 
         private void toolButton_prev_Click(object sender, EventArgs e)
@@ -1306,7 +1397,6 @@ namespace dp2Catalog
             }
         }
 
-
         // 当前顶层的DcForm
         public DcForm TopDcForm
         {
@@ -1368,28 +1458,185 @@ namespace dp2Catalog
         // 打开Z39.50检索窗
         private void MenuItem_openZSearchForm_Click(object sender, EventArgs e)
         {
+#if NO
             ZSearchForm form = new ZSearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<ZSearchForm>();
         }
+
+        T OpenWindow<T>()
+        {
+            if (Control.ModifierKeys == Keys.Control)
+            {
+                T form = Activator.CreateInstance<T>();
+                dynamic o = form;
+                o.MdiParent = this;
+
+                if (o.MainForm == null)
+                {
+                    try
+                    {
+                        o.MainForm = this;
+                    }
+                    catch
+                    {
+                        // 等将来所有窗口类型的 MainForm 都是只读的以后，再修改这里
+                    }
+                }
+                o.Show();
+                return form;
+            }
+            else
+                return EnsureChildForm<T>(true);
+        }
+
+        /// <summary>
+        /// 获得一个已经打开的 MDI 子窗口，如果没有，则新打开一个
+        /// </summary>
+        /// <typeparam name="T">子窗口类型</typeparam>
+        /// <returns>子窗口对象</returns>
+        public T EnsureChildForm<T>(bool bActivate = false)
+        {
+            T form = GetTopChildWindow<T>();
+            if (form == null)
+            {
+                form = Activator.CreateInstance<T>();
+                dynamic o = form;
+                o.MdiParent = this;
+
+                // 2013/3/26
+                if (o.MainForm == null)
+                {
+                    try
+                    {
+                        o.MainForm = this;
+                    }
+                    catch
+                    {
+                        // 等将来所有窗口类型的 MainForm 都是只读的以后，再修改这里
+                    }
+                }
+                o.Show();
+            }
+            else
+            {
+                if (bActivate == true)
+                {
+                    try
+                    {
+                        dynamic o = form;
+                        o.Activate();
+
+                        if (o.WindowState == FormWindowState.Minimized)
+                            o.WindowState = FormWindowState.Normal;
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+            return form;
+        }
+
+        /// <summary>
+        /// 得到特定类型的顶层 MDI 子窗口
+        /// 注：不算 Fixed 窗口
+        /// </summary>
+        /// <typeparam name="T">子窗口类型</typeparam>
+        /// <returns>子窗口对象</returns>
+        public T GetTopChildWindow<T>()
+        {
+            if (ActiveMdiChild == null)
+                return default(T);
+
+            // 得到顶层的MDI Child
+            IntPtr hwnd = this.ActiveMdiChild.Handle;
+
+            if (hwnd == IntPtr.Zero)
+                return default(T);
+
+            while (hwnd != IntPtr.Zero)
+            {
+                Form child = null;
+                // 判断一个窗口句柄，是否为 MDI 子窗口？
+                // return:
+                //      null    不是 MDI 子窗口o
+                //      其他      返回这个句柄对应的 Form 对象
+                child = IsChildHwnd(hwnd);
+                if (child != null && IsFixedMyForm(child) == false)  // 2016/12/16 跳过固定于左侧的 MyForm
+                {
+                    // if (child is T)
+                    if (child.GetType().Equals(typeof(T)) == true)
+                    {
+                        try
+                        {
+                            return (T)Convert.ChangeType(child, typeof(T));
+                        }
+                        catch (InvalidCastException ex)
+                        {
+                            throw new InvalidCastException("在将类型 '" + child.GetType().ToString() + "' 转换为类型 '" + typeof(T).ToString() + "' 的过程中出现异常: " + ex.Message, ex);
+                        }
+                    }
+                }
+
+                hwnd = API.GetWindow(hwnd, API.GW_HWNDNEXT);
+            }
+
+            return default(T);
+        }
+
+        // 是否为固定于左侧的 MyForm?
+        static bool IsFixedMyForm(Form child)
+        {
+            if (child is MyForm)
+            {
+                if (((MyForm)child).Fixed)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 判断一个窗口句柄，是否为 MDI 子窗口？
+        // 注：不处理 Visible == false 的窗口。因为取 Handle 会导致 Visible 变成 true
+        // return:
+        //      null    不是 MDI 子窗口o
+        //      其他      返回这个句柄对应的 Form 对象
+        Form IsChildHwnd(IntPtr hwnd)
+        {
+            foreach (Form child in this.MdiChildren)
+            {
+                if (child.Visible == true && hwnd == child.Handle)
+                    return child;
+            }
+
+            return null;
+        }
+
 
         // 打开MARC记录窗
         private void MenuItem_openMarcDetailForm_Click(object sender, EventArgs e)
         {
+#if NO
             MarcDetailForm form = new MarcDetailForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<MarcDetailForm>();
         }
 
         // 带有模板
         private void MenuItem_openMarcDetailFormEx_Click(object sender, EventArgs e)
         {
+#if NO
             MarcDetailForm form = new MarcDetailForm();
 
             form.MdiParent = this;
@@ -1397,28 +1644,36 @@ namespace dp2Catalog
             form.MainForm = this;
             form.Show();
             form.LoadTemplate();
+#endif
+            MarcDetailForm form = OpenWindow<MarcDetailForm>();
+            form.LoadTemplate();
         }
 
         // 打开XML记录窗
         private void MenuItem_loadXmlDetailForm_Click(object sender, EventArgs e)
         {
+#if NO
             XmlDetailForm form = new XmlDetailForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<XmlDetailForm>();
         }
 
         private void MenuItem_openBerDebugForm_Click(object sender, EventArgs e)
         {
+#if NO
             BerDebugForm form = new BerDebugForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
-
+#endif
+            OpenWindow<BerDebugForm>();
         }
 
         private void MenuItem_saveOriginRecordToWorksheet_Click(object sender, EventArgs e)
@@ -1462,11 +1717,14 @@ namespace dp2Catalog
 
         private void MenuItem_openZhongcihaoForm_Click(object sender, EventArgs e)
         {
+#if NO
             ZhongcihaoForm form = new ZhongcihaoForm();
 
             form.MdiParent = this;
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<ZhongcihaoForm>();
         }
 
         private void MenuItem_exit_Click(object sender, EventArgs e)
@@ -1508,12 +1766,15 @@ namespace dp2Catalog
         // Dtlp协议检索窗
         private void MenuItem_openDtlpSearchForm_Click(object sender, EventArgs e)
         {
+#if NO
             DtlpSearchForm form = new DtlpSearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<DtlpSearchForm>();
         }
 
         // dp2library协议检索窗
@@ -1552,24 +1813,29 @@ namespace dp2Catalog
 
 #endif
 
+#if NO
             dp2SearchForm form = new dp2SearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<dp2SearchForm>();
         }
 
         // OAI-PMH协议检索窗
         private void MenuItem_openOaiSearchForm_Click(object sender, EventArgs e)
         {
+#if NO
             OaiSearchForm form = new OaiSearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
-
+#endif
+            OpenWindow<OaiSearchForm>();
         }
 
 
@@ -1632,7 +1898,7 @@ namespace dp2Catalog
                     dp2SearchForm form = (dp2SearchForm)child;
 
                     if (form.SetLayout((string)e.Value) == true)
-                        form.AppInfo_LoadMdiSize(form, null);
+                        form.AppInfo_LoadMdiLayout(form, null);
                 }
             }
 
@@ -1654,45 +1920,57 @@ namespace dp2Catalog
 
         private void MenuItem_openDtlpLogForm_Click(object sender, EventArgs e)
         {
+#if NO
             DtlpLogForm form = new DtlpLogForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<DtlpLogForm>();
         }
 
         private void MenuItem_openEaccForm_Click(object sender, EventArgs e)
         {
+#if NO
             EaccForm form = new EaccForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
-
+#endif
+            OpenWindow<EaccForm>();
         }
 
         // 打开DC记录窗
         private void MenuItem_openDcForm_Click(object sender, EventArgs e)
         {
+#if NO
             DcForm form = new DcForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<DcForm>();
         }
 
         // 打开DC记录窗 带模板
         private void MenuItem_openDcFormEx_Click(object sender, EventArgs e)
         {
+#if NO
             DcForm form = new DcForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+            form.LoadTemplate();
+#endif
+            DcForm form = OpenWindow<DcForm>();
             form.LoadTemplate();
         }
 
@@ -1728,12 +2006,15 @@ namespace dp2Catalog
 
         private void MenuItem_openTestForm_Click(object sender, EventArgs e)
         {
+#if NO
             TestForm form = new TestForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<TestForm>();
         }
 
         #endregion
@@ -2143,12 +2424,15 @@ out string strError)
         // 打开修改密码窗
         private void MenuItem_changePassword_Click(object sender, EventArgs e)
         {
+#if NO
             ChangePasswordForm form = new ChangePasswordForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<ChangePasswordForm>();
         }
 
         // 缺省的MDI子窗口宽度
@@ -2640,22 +2924,28 @@ out string strError)
 
         private void MenuItem_openZBatchSearchForm_Click(object sender, EventArgs e)
         {
+#if NO
             ZBatchSearchForm form = new ZBatchSearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<ZBatchSearchForm>();
         }
 
         private void MenuItem_openAmazonSearchForm_Click(object sender, EventArgs e)
         {
+#if NO
             AmazonSearchForm form = new AmazonSearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<AmazonSearchForm>();
         }
 
         protected override void DefWndProc(ref Message m)
@@ -2802,12 +3092,15 @@ out string strError)
 
         private void MenuItem_openZBatchSearchForm1_Click(object sender, EventArgs e)
         {
+#if NO
             ZBatchSearchForm form = new ZBatchSearchForm();
 
             form.MdiParent = this;
 
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<ZBatchSearchForm>();
         }
 
         // 把字符串中的汉字转换为四角号码
@@ -3130,9 +3423,11 @@ out string strError)
             return 1;   // 正常结束
         }
 
+#if GCAT_SERVER
         GcatServiceClient m_gcatClient = null;
         string m_strPinyinGcatID = "";
         bool m_bSavePinyinGcatID = false;
+#endif
 
         // 包装后的版本
         public int SmartHanziTextToPinyin(
@@ -3179,6 +3474,17 @@ out string strError)
 
             bool bNotFoundPinyin = false;   // 是否出现过没有找到拼音、只能把汉字放入结果字符串的情况
 
+#if !GCAT_SERVER
+            string strPinyinServerUrl = this.PinyinServerUrl;
+            if (string.IsNullOrEmpty(strPinyinServerUrl) == false
+                && strPinyinServerUrl.Contains("gcat"))
+            {
+                strError = "请重新配置拼音服务器 URL。当前的配置 '" + strPinyinServerUrl + "' 已过时。可配置为 http://dp2003.com/dp2library";
+                return -1;
+            }
+            LibraryChannel channel = this.GetChannel(strPinyinServerUrl, "public");
+#endif
+#if GCAT_SERVER
             Stop new_stop = new DigitalPlatform.Stop();
             new_stop.Register(this.stopManager, true);	// 和容器关联
             new_stop.OnStop += new StopEventHandler(new_stop_OnStop);
@@ -3186,14 +3492,24 @@ out string strError)
             new_stop.BeginLoop();
 
             m_gcatClient = null;
+#else
+            Stop new_stop = new DigitalPlatform.Stop();
+            new_stop.Register(this.stopManager, true);	// 和容器关联
+            new_stop.OnStop += new StopEventHandler(this.DoStop);
+            new_stop.Initial("正在获得 '" + strText + "' 的拼音信息 (从服务器 " + strPinyinServerUrl + ")...");
+            new_stop.BeginLoop();
+#endif
+
             try
             {
-
+#if GCAT_SERVER
                 m_gcatClient = GcatNew.CreateChannel(this.PinyinServerUrl);
-
             REDO_GETPINYIN:
+#endif
+
                 int nStatus = -1;	// 前面一个字符的类型 -1:前面没有字符 0:普通英文字母 1:空格 2:汉字
                 string strPinyinXml = "";
+#if GCAT_SERVER
                 // return:
                 //      -2  strID验证失败
                 //      -1  出错
@@ -3205,10 +3521,22 @@ out string strError)
                     strText,
                     out strPinyinXml,
                     out strError);
-                if (nRet == -1)
+#else
+                // return:
+                //      -2  strID验证失败
+                //      -1  出错
+                //      0   成功
+                long lRet = channel.GetPinyin(
+                    strText,
+                    out strPinyinXml,
+                    out strError);
+#endif
+                if (lRet == -1)
                 {
+#if GCAT_SERVER
                     if (new_stop != null && new_stop.State != 0)
                         return 0;
+#endif
 
                     DialogResult result = MessageBox.Show(this,
     "从服务器 '" + this.PinyinServerUrl + "' 获取拼音的过程出错:\r\n" + strError + "\r\n\r\n是否要临时改为使用本机加拼音功能? \r\n\r\n(注：临时改用本机拼音的状态在程序退出时不会保留。如果要永久改用本机拼音方式，请使用主菜单的“参数配置”命令，将“服务器”属性页的“拼音服务器URL”内容清空)",
@@ -3226,7 +3554,8 @@ out string strError)
                     return -1;
                 }
 
-                if (nRet == -2)
+#if GCAT_SERVER
+                if (lRet == -2)
                 {
                     IdLoginDialog login_dlg = new IdLoginDialog();
                     GuiUtil.SetControlFont(login_dlg, this.Font);
@@ -3244,6 +3573,7 @@ out string strError)
                     this.m_bSavePinyinGcatID = login_dlg.SaveID;
                     goto REDO_GETPINYIN;
                 }
+#endif
 
                 XmlDocument dom = new XmlDocument();
                 try
@@ -3273,7 +3603,7 @@ out string strError)
                         strWordPinyin = strWordPinyin.Trim();
 
                     // 目前只取多套读音的第一套
-                    nRet = strWordPinyin.IndexOf(";");
+                    int nRet = strWordPinyin.IndexOf(";");
                     if (nRet != -1)
                         strWordPinyin = strWordPinyin.Substring(0, nRet).Trim();
 
@@ -3447,6 +3777,7 @@ out string strError)
 
                 if (dom.DocumentElement.ChildNodes.Count > 0)
                 {
+#if GCAT_SERVER
                     // return:
                     //      -2  strID验证失败
                     //      -1  出错
@@ -3464,6 +3795,16 @@ out string strError)
 
                         return -1;
                     }
+#else
+                    // return:
+                    //      -1  出错
+                    //      0   成功
+                    lRet = channel.SetPinyin(
+                        dom.DocumentElement.OuterXml,
+                        out strError);
+                    if (lRet == -1)
+                        return -1;
+#endif
                 }
 #endif
 
@@ -3474,6 +3815,16 @@ out string strError)
             }
             finally
             {
+#if !GCAT_SERVER
+                this.ReturnChannel(channel);
+
+                new_stop.EndLoop();
+                new_stop.OnStop += new StopEventHandler(this.DoStop);
+                new_stop.Initial("");
+                new_stop.Unregister();
+#endif
+
+#if GCAT_SERVER
                 new_stop.EndLoop();
                 new_stop.OnStop -= new StopEventHandler(new_stop_OnStop);
                 new_stop.Initial("");
@@ -3483,9 +3834,11 @@ out string strError)
                     m_gcatClient.Close();
                     m_gcatClient = null;
                 }
+#endif
             }
         }
 
+#if GCAT_SERVER
         void new_stop_OnStop(object sender, StopEventArgs e)
         {
             if (this.m_gcatClient != null)
@@ -3493,6 +3846,7 @@ out string strError)
                 this.m_gcatClient.Abort();
             }
         }
+#endif
 
         // parameters:
         //      strIndicator    字段指示符。如果用null调用，则表示不对指示符进行筛选
@@ -3855,6 +4209,7 @@ out string strError)
 					Path.Combine(strBinDir , "digitalplatform.Text.dll"),
 					Path.Combine(strBinDir , "digitalplatform.IO.dll"),
 					Path.Combine(strBinDir , "digitalplatform.Xml.dll"),
+                    Path.Combine(strBinDir , "digitalplatform.LibraryClient.dll"),  // 2017/1/14
 					Path.Combine(strBinDir , "dp2catalog.exe") };
 
             Assembly assembly = null;
@@ -4352,10 +4707,13 @@ out string strError)
 
         private void MenuItem_openAdvertiseForm_Click(object sender, EventArgs e)
         {
+#if NO
             AdvertiseForm form = new AdvertiseForm();
             form.MdiParent = this;
             form.MainForm = this;
             form.Show();
+#endif
+            OpenWindow<AdvertiseForm>();
         }
 
         private void MenuItem_openUserFolder_Click(object sender, EventArgs e)
@@ -4448,6 +4806,280 @@ out string strError)
                 detailform.CopyMarcToFixed();
             }
         }
+
+        List<LibraryChannel> _channelList = new List<LibraryChannel>();
+        public void DoStop(object sender, StopEventArgs e)
+        {
+            foreach (LibraryChannel channel in _channelList)
+            {
+                if (channel != null)
+                    channel.Abort();
+            }
+        }
+
+        #region dp2library 通道
+
+        public LibraryChannelPool _channelPool = new LibraryChannelPool();
+
+        // parameters:
+        //      style    风格。如果为 GUI，表示会自动添加 Idle 事件，并在其中执行 Application.DoEvents
+        public LibraryChannel GetChannel(string strServerUrl,
+            string strUserName = ".",
+            GetChannelStyle style = GetChannelStyle.GUI)
+        {
+            if (strUserName == ".")
+            {
+                dp2Server server = this.Servers[strServerUrl];
+                if (server == null)
+                    throw new Exception("没有找到 URL 为 " + strServerUrl + " 的服务器对象(为寻找默认用户名 . 阶段)");
+
+                if (strUserName == ".")
+                    strUserName = server.DefaultUserName;
+            }
+
+            LibraryChannel channel = this._channelPool.GetChannel(strServerUrl, strUserName);
+            if ((style & GetChannelStyle.GUI) != 0)
+                channel.Idle += channel_Idle;
+            _channelList.Add(channel);
+            // TODO: 检查数组是否溢出
+            return channel;
+        }
+
+        void channel_Idle(object sender, IdleEventArgs e)
+        {
+            Application.DoEvents();
+        }
+
+        public void ReturnChannel(LibraryChannel channel)
+        {
+            channel.Idle -= channel_Idle;
+
+            this._channelPool.ReturnChannel(channel);
+            _channelList.Remove(channel);
+        }
+
+        void Channels_BeforeLogin(object sender, DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
+        {
+            LibraryChannel channel = (LibraryChannel)sender;
+
+            if (e.FirstTry == true)
+            {
+                dp2Server server = this.Servers[channel.Url];
+#if NO
+            if (server == null)
+            {
+                e.ErrorInfo = "没有找到 URL 为 " + channel.Url + " 的服务器对象";
+                e.Failed = true;
+                e.Cancel = true;
+                return;
+            }
+#endif
+
+                if (server != null)
+                {
+                    e.UserName = server.DefaultUserName;
+                    e.Password = server.DefaultPassword;
+                }
+                else
+                {
+                    if (channel != null)
+                    {
+                        e.UserName = channel.UserName;
+                        e.Password = channel.Password;
+                    }
+                    else
+                    {
+                        e.ErrorInfo = "没有找到 URL 为 " + channel.Url + " 的服务器对象";
+                        e.Failed = true;
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+
+                e.Parameters = "location=dp2Catalog,type=worker";
+
+                /*
+                e.IsReader = false;
+                e.Location = "dp2Catalog";
+                 * */
+                // 2014/9/13
+                e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
+
+#if SN
+                // 从序列号中获得 expire= 参数值
+                string strExpire = this.GetExpireParam();
+                if (string.IsNullOrEmpty(strExpire) == false)
+                    e.Parameters += ",expire=" + strExpire;
+#endif
+
+                // 2014/11/10
+                if (this.TestMode == true)
+                    e.Parameters += ",testmode=true";
+
+                e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
+
+                if (String.IsNullOrEmpty(e.UserName) == false)
+                    return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
+            }
+
+            // 
+            IWin32Window owner = this;
+
+            ServerDlg dlg = SetDefaultAccount(
+                e.LibraryServerUrl,
+                null,
+                e.ErrorInfo,
+                owner);
+            if (dlg == null)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            e.UserName = dlg.UserName;
+            e.Password = dlg.Password;
+            e.SavePasswordShort = false;
+            e.Parameters = "location=dp2Catalog,type=worker";
+
+            // 2014/11/10
+            e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
+
+#if SN
+            {
+                // 从序列号中获得 expire= 参数值
+                string strExpire = this.GetExpireParam();
+                if (string.IsNullOrEmpty(strExpire) == false)
+                    e.Parameters += ",expire=" + strExpire;
+            }
+#endif
+
+            // 2014/11/10
+            if (this.TestMode == true)
+                e.Parameters += ",testmode=true";
+
+            e.Parameters += ",client=dp2catalog|" + Program.ClientVersion;
+
+            e.SavePasswordLong = true;
+            e.LibraryServerUrl = dlg.ServerUrl;
+        }
+
+        ServerDlg SetDefaultAccount(
+            string strServerUrl,
+            string strTitle,
+            string strComment,
+            IWin32Window owner)
+        {
+            dp2Server server = this.Servers[strServerUrl];
+
+            ServerDlg dlg = new ServerDlg();
+            GuiUtil.SetControlFont(dlg, this.Font);
+
+            if (String.IsNullOrEmpty(strServerUrl) == true)
+            {
+            }
+            else
+            {
+                dlg.ServerUrl = strServerUrl;
+            }
+
+            if (owner == null)
+                owner = this;
+
+
+            if (String.IsNullOrEmpty(strTitle) == false)
+                dlg.Text = strTitle;
+
+            dlg.Comment = strComment;
+            dlg.UserName = server.DefaultUserName;
+
+            this.AppInfo.LinkFormState(dlg,
+                "dp2_logindlg_state");
+            this.Activate();    // 让 MDI 子窗口翻出来到前面
+            dlg.ShowDialog(owner);
+
+            this.AppInfo.UnlinkFormState(dlg);
+
+
+            if (dlg.DialogResult == DialogResult.Cancel)
+            {
+                return null;
+            }
+
+            bool bChanged = false;
+
+            if (server.DefaultUserName != dlg.UserName)
+            {
+                server.DefaultUserName = dlg.UserName;
+                bChanged = true;
+            }
+
+            string strNewPassword = (dlg.SavePassword == true) ?
+            dlg.Password : "";
+            if (server.DefaultPassword != strNewPassword)
+            {
+                server.DefaultPassword = strNewPassword;
+                bChanged = true;
+            }
+
+            if (server.SavePassword != dlg.SavePassword)
+            {
+                server.SavePassword = dlg.SavePassword;
+                bChanged = true;
+            }
+
+            if (server.Url != dlg.ServerUrl)
+            {
+                server.Url = dlg.ServerUrl;
+                bChanged = true;
+            }
+
+            if (bChanged == true)
+                this.Servers.Changed = true;
+
+            return dlg;
+        }
+
+        public string CurrentUserName { get; set; }
+
+        void Channels_AfterLogin(object sender, AfterLoginEventArgs e)
+        {
+            LibraryChannel channel = (LibraryChannel)sender;
+
+            this.CurrentUserName = channel.UserName;
+
+            dp2Server server = this.Servers[channel.Url];
+#if NO
+            if (server == null)
+            {
+                e.ErrorInfo = "没有找到 URL 为 " + channel.Url + " 的服务器对象";
+                return;
+            }
+#endif
+
+            if (server != null)
+            {
+#if SN
+                if (server.Verified == false && StringUtil.IsInList("serverlicensed", channel.Rights) == false)
+                {
+                    string strError = "";
+                    string strTitle = "dp2 检索窗需要先设置序列号才能访问服务器 " + server.Name + " " + server.Url;
+                    int nRet = this.VerifySerialCode(strTitle,
+                        "",
+                        true,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        channel.Close();
+                        e.ErrorInfo = strTitle;
+                        return;
+                    }
+                }
+#endif
+                server.Verified = true;
+            }
+        }
+
+        #endregion
     }
 
     public class EnableState

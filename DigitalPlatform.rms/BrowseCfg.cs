@@ -276,11 +276,14 @@ namespace DigitalPlatform.rms
                 XmlDocument resultDom = new XmlDocument();
                 try
                 {
-                    resultDom.LoadXml(strResultXml);
+                    if (string.IsNullOrEmpty(strResultXml) == false)
+                        resultDom.LoadXml(strResultXml);
+                    else
+                        resultDom.LoadXml("<root />");
                 }
                 catch (Exception ex)
                 {
-                    strError = "browse角色文件生成的结果文件加载到dom出错：" + ex.Message;
+                    strError = "browse 角色文件生成的结果文件加载到 XMLDOM 时出错：" + ex.Message;
                     return -1;
                 }
 

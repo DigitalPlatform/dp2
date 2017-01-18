@@ -13,6 +13,8 @@ namespace DigitalPlatform.LibraryClient
             string strUserName = ".",
             GetChannelStyle style = GetChannelStyle.GUI);
         void ReturnChannel(LibraryChannel channel);
+
+        void DoStop(object sender, StopEventArgs e);
     }
 
     [Flags]

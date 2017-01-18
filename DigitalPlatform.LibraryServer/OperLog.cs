@@ -1116,7 +1116,9 @@ namespace DigitalPlatform.LibraryServer
             // 1.01 (2014/3/8) 修改了 operation=amerce;action=expire 记录中元素名 oldReeaderRecord 为 oldReaderRecord
             // 1.02 (2015/9/8) 日志中增加了 time 元素 linkUID 和 uid 元素
             // 1.03 (2015/9/13) SetReaderInfo 中增加了 changedEntityRecord 元素 
-            DomUtil.SetElementText(dom.DocumentElement, "version", "1.02");
+            // 1.04 (2017/1/12) Borrow() Return() 中，readerRecord 元素增加了 clipping 属性，如果值为 "true"，表示这里记载的读者记录是不完全的，不应用于快照恢复读者记录
+            // 1.05 (2017/1/16) CopyBiblioINfo() API 的操作日志增加了 overwritedRecord 元素。记载被覆盖以前的记录内容
+            DomUtil.SetElementText(dom.DocumentElement, "version", "1.05");
 
             if (start_time != new DateTime(0))
             {

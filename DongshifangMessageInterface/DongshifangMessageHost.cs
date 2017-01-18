@@ -141,7 +141,7 @@ namespace DongshifangMessageInterface
         }
 
         /*
- * app.config 需要这样配置
+ * DongshifangMessageInterface.dll.config 需要这样配置
 <?xml version="1.0"?>
 <configuration>
     <library 

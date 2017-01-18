@@ -6358,6 +6358,7 @@ out strError);
                     {
                         MarcRecord record = new MarcRecord(strMARC);
                         record.select("field[@name='998']").detach();
+                        record.select("field[@name='997']").detach();
                         strMARC = record.Text;
                     }
                     if (dlg.Mode880 == true && strMarcSyntax == "usmarc")

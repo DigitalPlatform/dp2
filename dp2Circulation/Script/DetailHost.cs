@@ -681,10 +681,10 @@ namespace dp2Circulation
                                     strContent = strPrefix + strPinyin;
                                 else if (string.IsNullOrEmpty(strSubfieldPrefix) == false)
                                     strContent = strSubfieldPrefix + strPinyin;
-                                    /*
-                                else if (string.IsNullOrEmpty(strFieldPrefix) == false)
-                                    strContent = strFieldPrefix + strPinyin;
-                                     * */
+                                /*
+                            else if (string.IsNullOrEmpty(strFieldPrefix) == false)
+                                strContent = strFieldPrefix + strPinyin;
+                                 * */
 
                                 nRet = MarcUtil.InsertSubfield(
                                     ref strField,
@@ -1185,10 +1185,10 @@ namespace dp2Circulation
 
             string strText = "";
             string strNumber = "";
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   found
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
             nRet = this.DetailForm.MainForm.QuickCutter.GetEntry(strAuthor,
                 out strText,
                 out strNumber,
@@ -1354,7 +1354,7 @@ namespace dp2Circulation
                     EndGcatLoop();
                 }
             }
-            else
+            else if (strGcatWebServiceUrl.Contains("gcat"))
             {
                 // 新的WebService
 
@@ -1430,6 +1430,47 @@ namespace dp2Circulation
                     EndGcatLoop();
                 }
             }
+            else // dp2library 服务器
+            {
+                Hashtable question_table = (Hashtable)Program.MainForm.ParamTable["question_table"];
+                if (question_table == null)
+                    question_table = new Hashtable();
+
+                string strDebugInfo = "";
+
+                BeginGcatLoop("正在获取 '" + strAuthor + "' 的著者号，从 " + strGcatWebServiceUrl + " ...");
+                try
+                {
+                    // return:
+                    //      -1  error
+                    //      0   canceled
+                    //      1   succeed
+                    long nRet = BiblioItemsHost.GetAuthorNumber(
+                        ref question_table,
+                        this.DetailForm.Progress,
+                        this.DetailForm,
+                        strGcatWebServiceUrl,
+                        strAuthor,
+                        true,	// bSelectPinyin
+                        true,	// bSelectEntry
+                        true,	// bOutputDebugInfo
+                        out strAuthorNumber,
+                        out strDebugInfo,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "取 著者 '" + strAuthor + "' 之号码时出错 : " + strError;
+                        return -1;
+                    }
+                    Program.MainForm.ParamTable["question_table"] = question_table;
+                    return (int)nRet;
+                }
+                finally
+                {
+                    EndGcatLoop();
+                }
+            }
+
         }
 
         // 从一个索取号字符串中析出第一行
@@ -1845,7 +1886,7 @@ namespace dp2Circulation
             }
             else
             {
-                strError = "sender必须是EntityEditForm或EntityControl或BindingForm类型(当前为"+sender.GetType().ToString()+")";
+                strError = "sender必须是EntityEditForm或EntityControl或BindingForm类型(当前为" + sender.GetType().ToString() + ")";
                 goto ERROR1;
             }
 
@@ -2317,7 +2358,7 @@ namespace dp2Circulation
                             if (string.IsNullOrEmpty(strWarning) == false)
                                 strWarning += "; ";
                             strWarning += author.Author;
-                        } 
+                        }
                     }
 
                     if (string.IsNullOrEmpty(strErrorText) == false)
@@ -2454,7 +2495,7 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
             }
-            //return 0;
+        //return 0;
         ERROR1:
             return -1;
         }
@@ -2904,7 +2945,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        #if SHITOUTANG
+#if SHITOUTANG
 
         #region 石头汤著者号
 
@@ -2940,7 +2981,7 @@ namespace dp2Circulation
                 return "";
 
             if (strText[0] == '(' || strText[0] == '（')
-                throw new ArgumentException("拼音字符串 '"+strText+"' 中具有括号，不符合规范要求", "strText");
+                throw new ArgumentException("拼音字符串 '" + strText + "' 中具有括号，不符合规范要求", "strText");
 
             string[] parts = strText.Split(new char[] { ' ', ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string s in parts)
@@ -3180,7 +3221,7 @@ namespace dp2Circulation
                         // 没有 $9
                         if (ContainHanzi(a) == true)
                         {
-                            strError = "字段 "+field.Name+" 里面有 $a 而没有 $9，请先创建 $9 子字段";
+                            strError = "字段 " + field.Name + " 里面有 $a 而没有 $9，请先创建 $9 子字段";
                             return -1;
                         }
                     }
@@ -3248,7 +3289,7 @@ namespace dp2Circulation
             return 0;   // 没有找到
         }
 
-#endregion
+        #endregion
 
 #endif
 
@@ -3898,12 +3939,12 @@ chi	中文	如果是中文，则为空。
                     edit.entityEditControl_editing.AccessNo =
                         (strHeadLine != null ? strHeadLine + "/" : "")
                         + strClass +
-                        (string.IsNullOrEmpty(strQufenhao) == false ? 
+                        (string.IsNullOrEmpty(strQufenhao) == false ?
                         "/" + strQufenhao : "");
                 }
                 else if (sender is EntityControl)
                 {
-                    book_item.AccessNo = 
+                    book_item.AccessNo =
                         (strHeadLine != null ? strHeadLine + "/" : "")
                         + strClass +
                         (string.IsNullOrEmpty(strQufenhao) == false ?
@@ -4098,7 +4139,7 @@ chi	中文	如果是中文，则为空。
                 if (field.Name == "856")
                 {
                     // 找到$8
-                    for(int j=0;j<field.Subfields.Count;j++)
+                    for (int j = 0; j < field.Subfields.Count; j++)
                     {
                         Subfield subfield = field.Subfields[j];
                         if (subfield.Name == LinkSubfieldName)
@@ -4169,8 +4210,8 @@ chi	中文	如果是中文，则为空。
             }
 
             // 如果发起来自MARC编辑器
-            if (field_856 == null 
-                && !(sender is BinaryResControl) )
+            if (field_856 == null
+                && !(sender is BinaryResControl))
             {
                 // 看看当前活动字段是不是856
                 field_856 = this.DetailForm.MarcEditor.FocusedField;
@@ -4298,7 +4339,7 @@ chi	中文	如果是中文，则为空。
         // parameters:
         //      strDef  关系定义。例如 "dbname=LCC-CLC,source=050a,target=098a,color=#00aa00;dbname=DDC-CLC,source=082a,target=098a,color=#aaaa00"
         //      strDefaultStyle 缺省的处理风格。如果为空，表示不改变 RelationDialog 本身的缺省处理风格，即 DefaultStyle 值。
-        public void RelationGenerate(string strDef, 
+        public void RelationGenerate(string strDef,
             string strDefaultStyle = "")
         {
             string strError = "";

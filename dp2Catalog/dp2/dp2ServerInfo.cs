@@ -18,7 +18,7 @@ namespace dp2Catalog
         public dp2ServerInfo GetServerInfo(
             Stop stop,
             bool bUseNewChannel,
-            LibraryChannelCollection Channels,
+            // LibraryChannelCollection Channels,
             string strServerName,
             string strServerUrl,
             bool bTestMode,
@@ -49,7 +49,9 @@ namespace dp2Catalog
                 strServerUrl,
                 stop,
                 bUseNewChannel,
+#if OLD_CHANNEL
                 Channels,
+#endif
                 out strError);
             if (nRet == -1)
             {
@@ -101,7 +103,7 @@ namespace dp2Catalog
             string strServerUrl,
             Stop stop,
             bool bUseNewChannel,
-            LibraryChannelCollection Channels,
+            // LibraryChannelCollection Channels,
             out string strError)
         {
             strError = "";
@@ -110,13 +112,15 @@ namespace dp2Catalog
             this.Url = strServerUrl;
             this.Name = strName;
 
+#if OLD_CHANNEL
             LibraryChannel Channel = null;
             
             if (bUseNewChannel == false)
                 Channel = Channels.GetChannel(strServerUrl);
             else
                 Channel = Channels.NewChannel(strServerUrl);
-
+#endif
+            LibraryChannel channel = Program.MainForm.GetChannel(strServerUrl);
 
             if (stop != null)
             {
@@ -135,7 +139,7 @@ namespace dp2Catalog
                 //      0   dp2Library的版本号过低。警告信息在strError中
                 //      1   dp2Library版本号符合要求
                 nRet = LibraryChannel.GetServerVersion(
-                    Channel,
+                    channel,
                     stop,
                     out version,
                     out strError);
@@ -152,14 +156,14 @@ namespace dp2Catalog
                 this.BiblioDbProperties = new List<BiblioDbProperty>();
 
                 string strValue = "";
-                long lRet = Channel.GetSystemParameter(stop,
+                long lRet = channel.GetSystemParameter(stop,
                     "biblio",
                     "dbnames",
                     out strValue,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 获得编目库名列表过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 获得编目库名列表过程发生错误：" + strError;
                     goto ERROR1;
                 }
 
@@ -173,14 +177,14 @@ namespace dp2Catalog
                 }
 
                 // 获得语法格式
-                lRet = Channel.GetSystemParameter(stop,
+                lRet = channel.GetSystemParameter(stop,
                     "biblio",
                     "syntaxs",
                     out strValue,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 获得编目库数据格式列表过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 获得编目库数据格式列表过程发生错误：" + strError;
                     goto ERROR1;
                 }
 
@@ -188,7 +192,7 @@ namespace dp2Catalog
 
                 if (syntaxs.Length != this.BiblioDbProperties.Count)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 获得编目库名为 " + this.BiblioDbProperties.Count.ToString() + " 个，而数据格式为 " + syntaxs.Length.ToString() + " 个，数量不一致";
+                    strError = "针对服务器 " + channel.Url + " 获得编目库名为 " + this.BiblioDbProperties.Count.ToString() + " 个，而数据格式为 " + syntaxs.Length.ToString() + " 个，数量不一致";
                     goto ERROR1;
                 }
 
@@ -202,14 +206,14 @@ namespace dp2Catalog
                 ///
 
                 // 获得对应的实体库名
-                lRet = Channel.GetSystemParameter(stop,
+                lRet = channel.GetSystemParameter(stop,
                     "item",
                     "dbnames",
                     out strValue,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 获得实体库名列表过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 获得实体库名列表过程发生错误：" + strError;
                     goto ERROR1;
                 }
 
@@ -217,7 +221,7 @@ namespace dp2Catalog
 
                 if (itemdbnames.Length != this.BiblioDbProperties.Count)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 获得编目库名为 " + this.BiblioDbProperties.Count.ToString() + " 个，而实体库名为 " + itemdbnames.Length.ToString() + " 个，数量不一致";
+                    strError = "针对服务器 " + channel.Url + " 获得编目库名为 " + this.BiblioDbProperties.Count.ToString() + " 个，而实体库名为 " + itemdbnames.Length.ToString() + " 个，数量不一致";
                     goto ERROR1;
                 }
 
@@ -229,14 +233,14 @@ namespace dp2Catalog
 
 
                 // 获得对应的期库名
-                lRet = Channel.GetSystemParameter(stop,
+                lRet = channel.GetSystemParameter(stop,
                     "issue",
                     "dbnames",
                     out strValue,
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "针对服务器 " + Channel.Url + " 获得实体库名列表过程发生错误：" + strError;
+                    strError = "针对服务器 " + channel.Url + " 获得实体库名列表过程发生错误：" + strError;
                     goto ERROR1;
                 }
 
@@ -262,14 +266,14 @@ namespace dp2Catalog
                 {
                     this.UtilDbProperties = new List<UtilDbProperty>();
 
-                    lRet = Channel.GetSystemParameter(stop,
+                    lRet = channel.GetSystemParameter(stop,
                         "utilDb",
                         "dbnames",
                         out strValue,
                         out strError);
                     if (lRet == -1)
                     {
-                        strError = "针对服务器 " + Channel.Url + " 获得实用库名列表过程发生错误：" + strError;
+                        strError = "针对服务器 " + channel.Url + " 获得实用库名列表过程发生错误：" + strError;
                         goto ERROR1;
                     }
 
@@ -283,14 +287,14 @@ namespace dp2Catalog
                     }
 
                     // 获得类型
-                    lRet = Channel.GetSystemParameter(stop,
+                    lRet = channel.GetSystemParameter(stop,
                         "utilDb",
                         "types",
                         out strValue,
                         out strError);
                     if (lRet == -1)
                     {
-                        strError = "针对服务器 " + Channel.Url + " 获得实用库数据格式列表过程发生错误：" + strError;
+                        strError = "针对服务器 " + channel.Url + " 获得实用库数据格式列表过程发生错误：" + strError;
                         goto ERROR1;
                     }
 
@@ -298,7 +302,7 @@ namespace dp2Catalog
 
                     if (types.Length != this.UtilDbProperties.Count)
                     {
-                        strError = "针对服务器 " + Channel.Url + " 获得实用库名为 " + this.UtilDbProperties.Count.ToString() + " 个，而类型为 " + types.Length.ToString() + " 个，数量不一致";
+                        strError = "针对服务器 " + channel.Url + " 获得实用库名为 " + this.UtilDbProperties.Count.ToString() + " 个，而类型为 " + types.Length.ToString() + " 个，数量不一致";
                         goto ERROR1;
                     }
 
@@ -323,11 +327,14 @@ namespace dp2Catalog
                      * */
                 }
 
+                Program.MainForm.ReturnChannel(channel);
+#if OLD_CHANNEL
                 if (bUseNewChannel == true)
                 {
                     Channels.RemoveChannel(Channel);
                     Channel = null;
                 }
+#endif
             }
 
             return 0;

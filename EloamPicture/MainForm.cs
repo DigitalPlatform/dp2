@@ -462,7 +462,7 @@ namespace EloamPicture
                     }
 
                     Image temp = Image.FromFile(filename);
-                    this.pictureBox_clip.Image = new Bitmap(temp);
+                    ImageUtil.SetImage(this.pictureBox_clip, new Bitmap(temp)); // 2016/12/28
                     this.pictureBox_clip.InitialPoints(temp);
                     temp.Dispose();
                     File.Delete(filename);
@@ -609,8 +609,8 @@ namespace EloamPicture
 
             using (Bitmap bitmap = new Bitmap(this.pictureBox_clip.Image))
             {
-                this.pictureBox_result.Image = AForgeImageUtil.Clip(bitmap,
-                    this.pictureBox_clip.GetCorners());
+                ImageUtil.SetImage(this.pictureBox_result, AForgeImageUtil.Clip(bitmap,
+                    this.pictureBox_clip.GetCorners()));    // 2016/12/28
             }
 
             this.tabControl_main.SelectedTab = this.tabPage_result;

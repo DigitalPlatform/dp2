@@ -53,5 +53,13 @@ namespace dp2Circulation
             }));
         }
 
+        public void ClearHtml()
+        {
+            this.Invoke((Action)(() =>
+{
+    Global.ClearForPureTextOutputing(this.webBrowser1);
+}));
+        }
+
     }
 }

@@ -433,8 +433,8 @@ namespace dp2Circulation
                 ChangeLayout(true);
             }
 
-            this.MainForm.AppInfo.LoadMdiSize += new EventHandler(AppInfo_LoadMdiSize);
-            this.MainForm.AppInfo.SaveMdiSize += new EventHandler(AppInfo_SaveMdiSize);
+            this.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
+            this.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
 
             // LoadSize();
 
@@ -502,7 +502,7 @@ namespace dp2Circulation
             SetItemRenderString("(空)");
         }
 
-        void AppInfo_SaveMdiSize(object sender, EventArgs e)
+        void AppInfo_SaveMdiLayout(object sender, EventArgs e)
         {
             if (sender != this)
                 return;
@@ -523,7 +523,7 @@ namespace dp2Circulation
             }
         }
 
-        void AppInfo_LoadMdiSize(object sender, EventArgs e)
+        void AppInfo_LoadMdiLayout(object sender, EventArgs e)
         {
             if (sender != this)
                 return;
@@ -599,8 +599,8 @@ namespace dp2Circulation
             {
                 // SaveSize();
 
-                this.MainForm.AppInfo.LoadMdiSize -= new EventHandler(AppInfo_LoadMdiSize);
-                this.MainForm.AppInfo.SaveMdiSize -= new EventHandler(AppInfo_SaveMdiSize);
+                this.MainForm.AppInfo.LoadMdiLayout -= new EventHandler(AppInfo_LoadMdiLayout);
+                this.MainForm.AppInfo.SaveMdiLayout -= new EventHandler(AppInfo_SaveMdiLayout);
             }
         }
 
@@ -1338,6 +1338,22 @@ namespace dp2Circulation
             Debug.Assert(this.m_itemBarcodes != null, "this.m_itemBarcodes == null");
             this.m_itemBarcodes.Clear();
 
+            // 2017/1/4
+            // 变换条码号
+            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+            {
+                string strText = this.textBox_readerBarcode.Text;
+
+                nRet = Program.MainForm.TransformBarcode(
+                    Program.MainForm.FocusLibraryCode,
+                    ref strText,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                this.textBox_readerBarcode.Text = strText;
+            }
+
             if (this.NeedVerifyBarcode == true
                 && StringUtil.IsIdcardNumber(this.textBox_readerBarcode.Text) == false
                 && IsName(this.textBox_readerBarcode.Text) == false)
@@ -1977,6 +1993,22 @@ dlg.UiState);
             }
 
             this.ActiveItemBarcode = this.textBox_itemBarcode.Text;
+
+            // 2017/1/4
+            // 变换条码号
+            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+            {
+                string strText = this.textBox_itemBarcode.Text;
+
+                nRet = Program.MainForm.TransformBarcode(
+                    Program.MainForm.FocusLibraryCode,
+                    ref strText,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                this.textBox_itemBarcode.Text = strText;
+            }
 
             if (this.NeedVerifyBarcode == true)
             {
@@ -3406,6 +3438,16 @@ Keys keyData)
         /// 读过
         /// </summary>
         Read = 11,  // 读过 2016/1/8
+
+        /// <summary>
+        /// 配书
+        /// </summary>
+        Boxing = 12,    // 配书 2016/12/3
+
+        /// <summary>
+        /// 移交
+        /// </summary>
+        Move = 13,  // 移交 2017/1/12
     }
 
     /*public*/

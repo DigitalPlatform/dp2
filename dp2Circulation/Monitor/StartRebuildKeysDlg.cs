@@ -39,16 +39,19 @@ namespace dp2Circulation
             Debug.Assert(strDbNameList != null, "");
             this.textBox_dbNameList.Text = strDbNameList.Replace(",", "\r\n");
 
-#if NO
             // 通用启动参数
-            bool bLoop = false;
+            bool bClearFirst = false;
+            string strFunction = "";
 
-            nRet = ParseArriveMonitorParam(this.StartInfo.Param,
-                out bLoop,
+            nRet = ParseTaskParam(this.StartInfo.Param,
+                out strFunction,
+                out bClearFirst,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-#endif
+
+            if (string.IsNullOrEmpty(strFunction) == false)
+                this.comboBox_function.Text = strFunction;
 
             return;
         ERROR1:
@@ -98,19 +101,19 @@ namespace dp2Circulation
 
         // 解析通用启动参数
         public static int ParseTaskParam(string strParam,
-            out string strLevel,
+            out string strFunction,
             out bool bClearFirst,
             out string strError)
         {
             strError = "";
             bClearFirst = false;
-            strLevel = "";
+            strFunction = "";
 
             if (String.IsNullOrEmpty(strParam) == true)
                 return 0;
 
             Hashtable table = StringUtil.ParseParameters(strParam);
-            strLevel = (string)table["level"];
+            strFunction = (string)table["function"];
 
             string strClearFirst = (string)table["clear_first"];
             if (strClearFirst.ToLower() == "yes"
@@ -123,11 +126,11 @@ namespace dp2Circulation
         }
 
         static string BuildTaskParam(
-            string strLevel,
+            string strFunction,
             bool bClearFirst)
         {
             Hashtable table = new Hashtable();
-            table["level"] = strLevel;
+            table["function"] = strFunction;
             table["clear_first"] = bClearFirst ? "yes" : "no";
             return StringUtil.BuildParameterString(table);
         }
@@ -142,10 +145,8 @@ namespace dp2Circulation
             else
                 this.StartInfo.Start = BuildStart(this.textBox_dbNameList.Text.Replace("\r\n", ","));
 
-#if NO
             // 通用启动参数
-            this.StartInfo.Param = MakeArriveMonitorParam(this.checkBox_loop.Checked);
-#endif
+            this.StartInfo.Param = BuildTaskParam(this.comboBox_function.Text, false);
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -156,7 +157,5 @@ namespace dp2Circulation
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
-
-
     }
 }

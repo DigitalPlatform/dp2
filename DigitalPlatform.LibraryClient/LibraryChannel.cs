@@ -5586,6 +5586,33 @@ out strError);
             }
         }
 
+        // 包装后的版本，兼容以前参数
+        public long SetBiblioInfo(
+            DigitalPlatform.Stop stop,
+            string strAction,
+            string strBiblioRecPath,
+            string strBiblioType,
+            string strBiblio,
+            byte[] baTimestamp,
+            string strComment,
+            out string strOutputBiblioRecPath,
+            out byte[] baOutputTimestamp,
+            out string strError)
+        {
+            return SetBiblioInfo(
+            stop,
+            strAction,
+            strBiblioRecPath,
+            strBiblioType,
+            strBiblio,
+            baTimestamp,
+            strComment,
+            "",
+            out strOutputBiblioRecPath,
+            out baOutputTimestamp,
+            out strError);
+        }
+
         // 设置书目信息
         public long SetBiblioInfo(
             DigitalPlatform.Stop stop,
@@ -5595,6 +5622,7 @@ out strError);
             string strBiblio,
             byte[] baTimestamp,
             string strComment,
+            string strStyle,
             out string strOutputBiblioRecPath,
             out byte[] baOutputTimestamp,
             out string strError)
@@ -5613,6 +5641,7 @@ out strError);
                     strBiblio,
                     baTimestamp,
                     strComment,
+                    strStyle,
                     null,
                     null);
 
@@ -9651,70 +9680,6 @@ out strError);
             }
         }
 
-        // 2016/9/19
-        public long Dir(string strResPath,
-    long lStart,
-    long lLength,
-    string strLang,
-    string strStyle,
-    out ResInfoItem[] items,
-    out ErrorCodeValue kernel_errorcode,
-            out string strError)
-        {
-            strError = "";
-            items = null;
-            kernel_errorcode = ErrorCodeValue.NoError;
-
-        REDO:
-            try
-            {
-                IAsyncResult soapresult = this.ws.BeginDir(
-                    strResPath,
-                    lStart,
-                    lLength,
-                    strLang,
-                    strStyle,
-                    null,
-                    null);
-
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-
-                    if (soapresult.IsCompleted)
-                        break;
-                }
-                if (this.m_ws == null)
-                {
-                    strError = "用户中断";
-                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
-                    return -1;
-                }
-
-                LibraryServerResult result = this.ws.EndDir(
-                    out items,
-                    out kernel_errorcode,
-                    soapresult);
-                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
-                {
-                    if (DoNotLogin(ref strError) == 1)
-                        goto REDO;
-                    return -1;
-                }
-                strError = result.ErrorInfo;
-                this.ErrorCode = result.ErrorCode;
-                this.ClearRedoCount();
-                return result.Value;
-            }
-            catch (Exception ex)
-            {
-                int nRet = ConvertWebError(ex, out strError);
-                if (nRet == 0)
-                    return -1;
-                goto REDO;
-            }
-        }
-
         // 获得借阅历史
         // parameters:
         //      nPageNo 页号
@@ -9782,6 +9747,239 @@ out strError);
             }
 
             return lHitCount;
+        }
+
+        // 2016/9/19
+        public long Dir(string strResPath,
+    long lStart,
+    long lLength,
+    string strLang,
+    string strStyle,
+    out ResInfoItem[] items,
+    out ErrorCodeValue kernel_errorcode,
+            out string strError)
+        {
+            strError = "";
+            items = null;
+            kernel_errorcode = ErrorCodeValue.NoError;
+
+        REDO:
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginDir(
+                    strResPath,
+                    lStart,
+                    lLength,
+                    strLang,
+                    strStyle,
+                    null,
+                    null);
+
+                for (; ; )
+                {
+                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+
+                    if (soapresult.IsCompleted)
+                        break;
+                }
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndDir(
+                    out items,
+                    out kernel_errorcode,
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+        }
+
+        public long GetAuthorNumber(
+    string strAuthor,
+    bool bSelectPinyin,
+    bool bSelectEntry,
+    bool bOutputDebugInfo,
+    ref Question[] questions,
+    out string strNumber,
+    out string strDebugInfo,
+            out string strError)
+        {
+            strError = "";
+            strDebugInfo = "";
+            strNumber = null;
+
+        REDO:
+            try
+            {
+                // localhost.dp2libraryClient ws1 = this.ws;
+                IAsyncResult soapresult = this.ws.BeginGetAuthorNumber(
+                    strAuthor,
+                    bSelectPinyin,
+                    bSelectEntry,
+                    bOutputDebugInfo,
+                    ref questions,
+                    null,
+                    null);
+
+                for (; ; )
+                {
+                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+
+                    if (soapresult.IsCompleted)
+                        break;
+                }
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndGetAuthorNumber(
+                    ref questions,
+                    out strNumber,
+                    out strDebugInfo,
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+        }
+
+        public long GetPinyin(
+string strText,
+out string strPinyinXml,
+    out string strError)
+        {
+            strError = "";
+            strPinyinXml = "";
+
+        REDO:
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginGetPinyin(
+                    strText,
+                    null,
+                    null);
+
+                for (; ; )
+                {
+                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+
+                    if (soapresult.IsCompleted)
+                        break;
+                }
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndGetPinyin(
+                    out strPinyinXml,
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+        }
+
+        public long SetPinyin(
+string strPinyinXml,
+    out string strError)
+        {
+            strError = "";
+
+        REDO:
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginSetPinyin(
+                    strPinyinXml,
+                    null,
+                    null);
+
+                for (; ; )
+                {
+                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+
+                    if (soapresult.IsCompleted)
+                        break;
+                }
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndSetPinyin(
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
         }
 
         public void DoStop()

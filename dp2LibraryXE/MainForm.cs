@@ -12,13 +12,13 @@ using System.Deployment.Application;
 using System.Diagnostics;
 using System.Xml;
 using System.Collections;
-
-using Ionic.Zip;
-
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Web;
 using System.Reflection;
+
+using Ionic.Zip;
+
 using Microsoft.Win32;
 
 using DigitalPlatform;
@@ -34,6 +34,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
 using dp2LibraryXE.Properties;
+using System.Threading.Tasks;
 
 namespace dp2LibraryXE
 {
@@ -123,6 +124,8 @@ namespace dp2LibraryXE
                 return myCp;
             }
         }
+
+        CancellationTokenSource _cancel = new CancellationTokenSource();
 
         private void MainForm_Load(object sender, EventArgs e)
         {
@@ -251,15 +254,14 @@ FormWindowState.Normal);
             // cfgcache
             _versionManager.Load(Path.Combine(this.UserDir, "file_version.xml"));
 
-            Delegate_Initialize d = new Delegate_Initialize(Initialize);
-            this.BeginInvoke(d);
+            //Delegate_Initialize d = new Delegate_Initialize(Initialize);
+            //this.BeginInvoke(d);
+            this.BeginInvoke(new Action(Initialize));
 
             AutoStartDp2circulation = AutoStartDp2circulation;
         }
 
-        // MessageBar _messageBar = null;
-
-        delegate void Delegate_Initialize();
+        // delegate void Delegate_Initialize();
 
         // 启动后要执行的初始化操作
         void Initialize()
@@ -282,18 +284,6 @@ FormWindowState.Normal);
             this.MenuItem_resetSerialCode.Visible = false;
 #endif
 
-#if NO
-            _messageBar = new MessageBar();
-            _messageBar.TopMost = false;
-            _messageBar.Font = this.Font;
-            _messageBar.BackColor = SystemColors.Info;
-            _messageBar.ForeColor = SystemColors.InfoText;
-            _messageBar.Text = "dp2Library XE";
-            _messageBar.MessageText = "正在启动 dp2Library XE，请等待 ...";
-            _messageBar.StartPosition = FormStartPosition.CenterScreen;
-            _messageBar.Show(this);
-            _messageBar.Update();
-#endif
             this._floatingMessage.Text = "正在启动 dp2Library XE，请等待 ...";
 
             Application.DoEvents();
@@ -1004,6 +994,8 @@ http://github.com/digitalplatform/dp2"
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            _cancel.Cancel();
+
             if (this._skipFinalize == false)
                 Finalize(false);
 #if NO
@@ -1813,13 +1805,8 @@ http://github.com/digitalplatform/dp2"
     "password",
     "");
 
-#if NO
-            if (_messageBar != null)
-                _messageBar.MessageText = "正在初始化 dp2Library 数据目录 ...";
-#endif
             if (string.IsNullOrEmpty(this._floatingMessage.Text) == false)
                 this._floatingMessage.Text = "正在初始化 dp2Library 数据目录 ...";
-
 
             nRet = dp2Library_CreateNewDataDir(out strError);
             if (nRet == -1)
@@ -1856,13 +1843,34 @@ http://github.com/digitalplatform/dp2"
             if (string.IsNullOrEmpty(this._floatingMessage.Text) == false)
                 this._floatingMessage.Text = "正在创建基本数据库，可能需要几分钟时间 ...";
 
-            // 创建默认的几个数据库
-            nRet = CreateDefaultDatabases(out strError);
-            if (nRet == -1)
             {
-                strError = "创建数据库时出错: " + strError;
-                return -1;
+                string strErrorText = "";
+                Task task = Task.Factory.StartNew(() =>
+                {
+                    string strError1 = "";
+                    // 创建默认的几个数据库
+                    nRet = CreateDefaultDatabases(out strError1);
+                    if (nRet == -1)
+                    {
+                        strErrorText = "创建数据库时出错: " + strError1;
+                    }
+                },
+CancellationToken.None,
+TaskCreationOptions.LongRunning,
+TaskScheduler.Default);
+                while (task.Wait(100, _cancel.Token) == false)
+                {
+                    Application.DoEvents();
+                    if (_cancel.Token.IsCancellationRequested)
+                        break;
+                }
+                if (nRet == -1)
+                {
+                    strError = strErrorText;
+                    return -1;
+                }
             }
+
 
             return 1;
         }
@@ -2389,7 +2397,10 @@ http://github.com/digitalplatform/dp2"
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public void EnableControls(bool bEnable)
         {
-            this.menuStrip1.Enabled = bEnable;
+            this.BeginInvoke(new Action(() =>
+            {
+                this.menuStrip1.Enabled = bEnable;
+            }));
         }
 
 
@@ -4976,8 +4987,76 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             MessageBox.Show(this, strError);
         }
 
+        static string GetExePath(string command_line)
+        {
+            int nRet = command_line.IndexOf(".exe");
+            if (nRet == -1)
+                return command_line;
+            if (command_line[nRet + ".exe".Length] == '\"')
+                return command_line.Substring(0, nRet + ".exe".Length + 1);
+            return command_line.Substring(0, nRet + ".exe".Length);
+        }
+
+        void RemoveMongoDBService()
+        {
+            string strError = "";
+            int nRet = 0;
+
+            string strCommandLine = InstallHelper.GetPathOfService("MongoDB");
+            if (string.IsNullOrEmpty(strCommandLine) == true)
+            {
+                strError = "MongoDB 先前并未注册为 Windows Service。所以无法 Remove";
+                goto ERROR1;
+            }
+
+            string strFileName = GetExePath(strCommandLine);    // Path.Combine(dlg.BinDir, "mongod.exe");
+            // strFileName = StringUtil.Unquote(strFileName, "\"\"");
+            string strLine = " --remove";
+
+            AppendSectionTitle("开始移走 MongoDB");
+            Application.DoEvents();
+
+            Cursor oldCursor = this.Cursor;
+            this.Cursor = Cursors.WaitCursor;
+            this.Enabled = false;
+            try
+            {
+                // parameters:
+                //      lines   若干行参数。每行执行一次
+                // return:
+                //      -1  出错
+                //      0   成功。strError 里面有运行输出的信息
+                nRet = InstallHelper.RunCmd(
+                    strFileName,
+                    new List<string> { strLine },
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                AppendString(RemoveProgressText(strError));
+            }
+            finally
+            {
+                AppendSectionTitle("结束移走 MongoDB");
+
+                this.Cursor = oldCursor;
+                this.Enabled = true;
+            }
+
+            AppendString("MongoDB 移走成功\r\n");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
         private void MenuItem_dp2library_setupMongoDB_Click(object sender, EventArgs e)
         {
+            if (Control.ModifierKeys == Keys.Control)
+            {
+                RemoveMongoDBService();
+                return;
+            }
+
             string strError = "";
             int nRet = 0;
 

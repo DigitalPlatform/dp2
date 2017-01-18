@@ -4976,7 +4976,7 @@ out strError);
                 strLeft = strLeft.ToLower();
                 if (strLeft == "ip" || strLeft == "router_ip" || strLeft == "sms")
                 {
-                    strError = "strBindID 参数值 '" + strBindingID + "' 不合法。冒号左边的名称部分不能使用 '"+strLeft+"'，因为这是系统保留的绑定方式";
+                    strError = "strBindID 参数值 '" + strBindingID + "' 不合法。冒号左边的名称部分不能使用 '" + strLeft + "'，因为这是系统保留的绑定方式";
                     return -1;
                 }
             }
@@ -5316,6 +5316,13 @@ out strError);
                     DomUtil.SetElementText(readerdom.DocumentElement, "libraryCode", strLibraryCode);
                 }
 
+                // 2016/12/2
+                // 在 readerdom 中去掉一些不必要的元素，以缩减记录尺寸
+                DomUtil.DeleteElement(readerdom.DocumentElement, "borrowHistory");
+                DomUtil.DeleteElement(readerdom.DocumentElement, "password");
+                DomUtil.DeleteElement(readerdom.DocumentElement, "fingerprint");
+                DomUtil.DeleteElement(readerdom.DocumentElement, "borrows");
+
                 nRet = BuildReaderResults(
         sessioninfo,
         readerdom,
@@ -5450,7 +5457,7 @@ out strError);
                     continue;   // 忽视发现的号码
 
                 // 2016/11/14
-                if (string.IsNullOrEmpty(strBinding) == false && strBinding[0]=='@')
+                if (string.IsNullOrEmpty(strBinding) == false && strBinding[0] == '@')
                 {
                     if (StringUtil.RegexCompare(strBinding.Substring(1),
     RegexOptions.None,

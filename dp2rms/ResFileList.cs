@@ -1103,7 +1103,7 @@ namespace dp2rms
 						respath.Path = strResPath;
 
 						// strMetaData还要加入资源id?
-						ExportUtil.ChangeMetaData(ref strMetaData,
+						StringUtil.ChangeMetaData(ref strMetaData,
 							strID,
 							null,
 							null,
@@ -1130,7 +1130,7 @@ namespace dp2rms
 
 						strMetaData = "";
 						FileInfo fi = new FileInfo(strLocalFileName);
-						ExportUtil.ChangeMetaData(ref strMetaData,
+                        StringUtil.ChangeMetaData(ref strMetaData,
 							strID,
 							strLocalFileName,
 							strMime,

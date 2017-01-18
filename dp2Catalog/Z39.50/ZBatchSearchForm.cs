@@ -405,6 +405,7 @@ MessageBoxDefaultButton.Button1);
             // 设置窗口尺寸状态
             MainForm.AppInfo.LoadMdiChildFormStates(this,
                 "mdi_form_state",
+                SizeStyle.All,
                 MainForm.DefaultMdiWindowWidth,
                 MainForm.DefaultMdiWindowHeight);
 
@@ -3744,7 +3745,9 @@ MessageBoxDefaultButton.Button1);
         {
             dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
 
+#if OLD_CHANNEL
             e.dp2Channels = dp2_searchform.Channels;
+#endif
             e.MainForm = this.m_mainForm;
         }
 

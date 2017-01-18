@@ -933,7 +933,7 @@ MessageBoxDefaultButton.Button1);
             // search.MainForm = this.MainForm;
             search.TempFileDir = this.MainForm.UserTempDir;
 
-            search.Timeout = 5 * 1000;
+            search.Timeout = 5 * 1000; // 5
             search.Idle += search_Idle;
             try
             {
@@ -2081,11 +2081,6 @@ out strError);
                 }
             }
 
-#if NO
-            if (StringUtil.HasHead(strUrl, "http:") == true)
-                return;
-#endif
-
             if (info != null
                 && bRetry == false
                 && info.CoverImageRquested == true)
@@ -2108,24 +2103,6 @@ out strError);
             }
         }
 
-#if NO
-        public override MainForm MainForm
-        {
-            get
-            {
-                return base.MainForm;
-            }
-            set
-            {
-                base.MainForm = value;
-                if (value != null && this._imageManager != null)
-                {
-                    this._imageManager.TempFileDir = value.UserTempDir;
-                }
-            }
-        }
-#endif
-
         internal ImageManager _imageManager = null;
 
         internal void AsyncGetImageFile(object sender,
@@ -2138,7 +2115,7 @@ out strError);
                 goto ERROR1;
             }
 
-            if (StringUtil.HasHead(e.ObjectPath, "http:") == true)
+            if (StringUtil.IsHttpUrl(e.ObjectPath) == true)
             {
                 EventFilter filter = new EventFilter();
                 // filter.BiblioRegister = biblioRegister;

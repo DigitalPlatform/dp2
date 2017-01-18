@@ -1444,8 +1444,10 @@ MessageBoxDefaultButton.Button1);
                 this.qrRecognitionControl1.EndCatch();  // 一开始的时候并不打开摄像头 2013/5/25
             }
 
+#if GCAT_SERVER
             this.m_strPinyinGcatID = this.AppInfo.GetString("entity_form", "gcat_pinyin_api_id", "");
             this.m_bSavePinyinGcatID = this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", false);
+#endif
 
 #if NO
             // 2015/5/24

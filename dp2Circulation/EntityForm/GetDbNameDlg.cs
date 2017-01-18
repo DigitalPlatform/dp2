@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform;
+using DigitalPlatform.GUI;
 
 namespace dp2Circulation
 {
@@ -74,16 +75,23 @@ namespace dp2Circulation
                 }
             }
 
-
             // 选定项目
             if (String.IsNullOrEmpty(this.DbName) == false)
+            {
                 this.listBox_biblioDbNames.SelectedItem = this.DbName;
+                this.BeginInvoke(new Action(EnsureSelectedLineVisible));
+            }
 
             if (this.EnableNotAsk == true)
                 this.checkBox_notAsk.Enabled = true;
 
             if (this.AutoClose == true)
                 API.PostMessage(this.Handle, WM_AUTO_CLOSE, 0, 0);
+        }
+
+        void EnsureSelectedLineVisible()
+        {
+            ListBoxUtil.EnsureVisible(this.listBox_biblioDbNames, this.listBox_biblioDbNames.SelectedIndex);
         }
 
         public string DbName

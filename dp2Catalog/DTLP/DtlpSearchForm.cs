@@ -764,6 +764,7 @@ namespace dp2Catalog
             // ÉèÖÃ´°¿Ú³ß´ç×´Ì¬
             MainForm.AppInfo.LoadMdiChildFormStates(this,
                 "mdi_form_state",
+                SizeStyle.All,
                 MainForm.DefaultMdiWindowWidth,
                 MainForm.DefaultMdiWindowHeight);
 

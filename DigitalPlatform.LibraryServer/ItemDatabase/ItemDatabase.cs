@@ -652,7 +652,6 @@ namespace DigitalPlatform.LibraryServer
         // 删除事项记录的操作
         int DoOperDelete(
             SessionInfo sessioninfo,
-            bool bForce,
             RmsChannel channel,
             EntityInfo info,
             List<string> oldLocateParams,
@@ -662,6 +661,8 @@ namespace DigitalPlatform.LibraryServer
             string strOldPublishTime,
              * */
             XmlDocument domOldRec,
+            bool bForce,
+            bool bSimulate,
             ref XmlDocument domOperLog,
             ref List<EntityInfo> ErrorInfos)
         {
@@ -748,7 +749,6 @@ namespace DigitalPlatform.LibraryServer
                     strError = "删除操作中事项查重阶段发生错误:" + strError;
                     goto ERROR1;
                 }
-
 
                 if (nRet == 0)
                 {
@@ -909,6 +909,7 @@ namespace DigitalPlatform.LibraryServer
 
             lRet = channel.DoDeleteRes(info.NewRecPath,
                 info.OldTimestamp,
+                bSimulate ? "simulate" : "",
                 out output_timestamp,
                 out strError);
             if (lRet == -1)
@@ -970,6 +971,7 @@ namespace DigitalPlatform.LibraryServer
             // string strUserID,
             RmsChannel channel,
             EntityInfo info,
+            bool bSimulate,
             ref XmlDocument domOperLog,
             ref List<EntityInfo> ErrorInfos)
         {
@@ -1104,7 +1106,6 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
-
             // 观察时间戳是否发生变化
             nRet = ByteArray.Compare(info.OldTimestamp, exist_source_timestamp);
             if (nRet != 0)
@@ -1197,15 +1198,16 @@ out strError);
             if (nRet == 1)
                 strWarning = strError;
 
-
             // 移动记录
             byte[] output_timestamp = null;
-
+            string strIdChangeList = "";
             // TODO: Copy后还要写一次？因为Copy并不写入新记录。
             // 其实Copy的意义在于带走资源。否则还不如用Save+Delete
             lRet = channel.DoCopyRecord(info.OldRecPath,
                 info.NewRecPath,
                 true,   // bDeleteSourceRecord
+                bSimulate ? "simulate" : "",
+                out strIdChangeList,
                 out output_timestamp,
                 out strOutputPath,
                 out strError);
@@ -1221,7 +1223,7 @@ out strError);
             lRet = channel.DoSaveTextRes(strTargetPath,
                 strNewXml,
                 false,   // include preamble?
-                "content",
+                "content" + (bSimulate ? ",simulate" : ""),
                 output_timestamp,
                 out output_timestamp,
                 out strOutputPath,
@@ -1236,8 +1238,11 @@ out strError);
                     // 因为源已经移动，情况很复杂
                 }
 
-                // 仅仅写入错误日志即可。没有Undo
-                this.App.WriteErrorLog(strError);
+                if (bSimulate == false)
+                {
+                    // 仅仅写入错误日志即可。没有Undo
+                    this.App.WriteErrorLog(strError);
+                }
 
                 error = new EntityInfo(info);
                 error.ErrorInfo = "移动操作发生错误:" + strError;
@@ -1278,7 +1283,6 @@ out strError);
             }
 
             return 0;
-
         ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
@@ -1295,11 +1299,12 @@ out strError);
         //      -1  出错
         //      0   成功
         public int DoOperChange(
-            bool bForce,
             // string strUserID,
             SessionInfo sessioninfo,
             RmsChannel channel,
             EntityInfo info,
+            bool bForce,
+            bool bSimulate,
             ref XmlDocument domOperLog,
             ref List<EntityInfo> ErrorInfos)
         {
@@ -1399,7 +1404,6 @@ out strError);
                 goto ERROR1;
             }
 
-
             // 观察时间戳是否发生变化
             nRet = ByteArray.Compare(info.OldTimestamp, exist_timestamp);
             if (nRet != 0)
@@ -1448,7 +1452,6 @@ out strError);
 
                 // exist_timestamp此时已经反映了库中被修改后的记录的时间戳
             }
-
 
             // 合并新旧记录
             string strWarning = "";
@@ -1504,20 +1507,18 @@ out strError);
                 strNewXml = domNew.OuterXml;
             }
 
-
             // 保存新记录
             byte[] output_timestamp = null;
             lRet = channel.DoSaveTextRes(info.NewRecPath,
                 strNewXml,
                 false,   // include preamble?
-                "content",
+                "content" + (bSimulate ? ",simulate" : ""),
                 exist_timestamp,
                 out output_timestamp,
                 out strOutputPath,
                 out strError);
             if (lRet == -1)
             {
-
                 if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                 {
                     if (nRedoCount > 10)
@@ -1568,7 +1569,6 @@ out strError);
             }
 
             return 0;
-
         ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;
@@ -1576,7 +1576,6 @@ out strError);
             ErrorInfos.Add(error);
             return -1;
         }
-
 
         // 设置/保存事项信息
         // parameters:
@@ -1668,9 +1667,9 @@ out strError);
                 goto ERROR1;
             }
 
-            for (int i = 0; i < iteminfos.Length; i++)
+            foreach (EntityInfo info in iteminfos)
             {
-                EntityInfo info = iteminfos[i];
+                // EntityInfo info = iteminfos[i];
                 if (info == null)
                 {
                     Debug.Assert(false, "");
@@ -1684,6 +1683,8 @@ out strError);
                 bool bNoEventLog = false;   // 是否为不记入事件日志?
 
                 string strStyle = info.Style;
+
+                bool bSimulate = StringUtil.IsInList("simulate", strStyle);
 
                 if (StringUtil.IsInList("force", info.Style) == true)
                 {
@@ -1800,7 +1801,6 @@ out strError);
                     ErrorInfos.Add(error);
                     continue;
                 }
-
 
                 // 检查路径中的库名部分
                 if (String.IsNullOrEmpty(info.NewRecPath) == false)
@@ -2093,8 +2093,6 @@ out strError);
                                 {
                                     Debug.Assert(false, "这里不可能出现的info.Action值 '" + info.Action + "'");
                                 }
-
-
                             } // end of if (nRet == 1)
                             else
                             {
@@ -2161,7 +2159,6 @@ out strError);
                         }
                         else
                         {
-
                             string strID = ResPath.GetRecordId(info.NewRecPath);
                             if (String.IsNullOrEmpty(strID) == true)
                             {
@@ -2256,7 +2253,7 @@ out strError);
                         lRet = channel.DoSaveTextRes(info.NewRecPath,
                             strNewXml,
                             false,   // include preamble?
-                            "content",
+                            "content" + (bSimulate ? ",simulate" : ""),
                             info.OldTimestamp,
                             out output_timestamp,
                             out strOutputPath,
@@ -2301,10 +2298,11 @@ out strError);
                     {
                         // 执行SetIssues API中的"change"操作
                         nRet = DoOperChange(
-                            bForce,
                             sessioninfo,
                             channel,
                             info,
+                            bForce,
+                            bSimulate,
                             ref domOperLog,
                             ref ErrorInfos);
                         if (nRet == -1)
@@ -2320,6 +2318,7 @@ out strError);
                             sessioninfo,
                             channel,
                             info,
+                            bSimulate,
                             ref domOperLog,
                             ref ErrorInfos);
                         if (nRet == -1)
@@ -2342,11 +2341,12 @@ out strError);
                         // 删除期记录的操作
                         nRet = DoOperDelete(
                             sessioninfo,
-                            bForce,
                             channel,
                             info,
                             oldLocateParam,
                             domOldRec,
+                            bForce,
+                            bSimulate,
                             ref domOperLog,
                             ref ErrorInfos);
                         if (nRet == -1)
@@ -2364,10 +2364,10 @@ out strError);
                         ErrorInfos.Add(error);
                     }
 
-
                     // 写入日志
                     if (domOperLog != null
-                        && bNoEventLog == false)    // 2008/10/19
+                        && bNoEventLog == false    // 2008/10/19
+                        && bSimulate == false)
                     {
                         string strOperTime = this.App.Clock.GetClock();
                         DomUtil.SetElementText(domOperLog.DocumentElement,

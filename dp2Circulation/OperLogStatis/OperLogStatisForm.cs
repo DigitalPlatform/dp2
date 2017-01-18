@@ -553,6 +553,7 @@ Channel,
 LogFileNames,
 this.MainForm.OperLogLevel,
 strStyle,
+"", // strFilter
 this.MainForm.OperLogCacheDir,
 null,   // param,
 procDoRecord,   // DoRecord,

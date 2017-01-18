@@ -146,10 +146,14 @@ namespace dp2Circulation
                 "quickchargingform",
                 "eanble_hanzi",
                 false);
+#if NO
             this.toolStripButton_upperInput.Checked = this.MainForm.AppInfo.GetBoolean(
                 "quickchargingform",
                 "upper_input",
                 true);
+#endif
+            this.toolStripButton_upperInput.Checked = Program.MainForm.UpperInputBarcode;
+
             {   // 恢复列宽度
                 string strWidths = this.MainForm.AppInfo.GetString(
                                "quickchargingform",
@@ -310,10 +314,14 @@ namespace dp2Circulation
                     "quickchargingform",
                     "eanble_hanzi",
                     this.toolStripButton_enableHanzi.Checked);
+
+#if NO
                 this.MainForm.AppInfo.SetBoolean(
                     "quickchargingform",
                     "upper_input",
                     this.toolStripButton_upperInput.Checked);
+#endif
+
                 {   // 保存列宽度
                     string strWidths = DpTable.GetColumnWidthListString(this.dpTable_tasks);
                     this.MainForm.AppInfo.SetString(
@@ -595,6 +603,18 @@ namespace dp2Circulation
                 dlg.VerifyBorrower = this._taskList.CurrentReaderBarcode;
                 dlg.Text = "请选择要读过的册";
             }
+            else if (func == dp2Circulation.FuncState.Boxing)
+            {
+                dlg.FunctionType = "boxing";
+                dlg.VerifyBorrower = this._taskList.CurrentReaderBarcode;
+                dlg.Text = "请选择要配书的册";
+            }
+            else if (func == dp2Circulation.FuncState.Move)
+            {
+                dlg.FunctionType = "move";
+                dlg.Text = "请选择要调拨的册";
+            }
+
 
             dlg.AutoOperSingleItem = this.AutoOperSingleItem;
             dlg.AutoSearch = true;
@@ -1458,7 +1478,16 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             int nRet = IsbnSplitter.VerifyISBN(strText,
                 out strError);
             if (nRet == 0)
+            {
+                // 2016/12/15
+                if (strText.Length == 10 && strText[0] != '7')
+                {
+                    // 10 位 ISBN，不是中国的出版物，则当作不是 ISBN 字符串。
+                    // 如果确实需要输入这样的 ISBN，请这样输入“ISBN2010120035”
+                    return false;
+                }
                 return true;
+            }
 
 #if NO
             if (strText.Length == 13)
@@ -1546,6 +1575,29 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 strText = strItemBarcode;
             }
 
+            // 变换条码号
+            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+            {
+                string strError = "";
+
+                // 2017/1/4
+                int nRet = Program.MainForm.TransformBarcode(
+                    Program.MainForm.FocusLibraryCode,
+                    ref strText,
+                    out strError);
+                if (nRet == -1)
+                {
+                    // TODO: 语音提示
+                    // TODO: 红色对话框
+                    MessageBox.Show(this, strError);
+                    this.textBox_input.SelectAll();
+                    this.textBox_input.Focus();
+                    return;
+                }
+
+                // TODO: 如何让操作者能看到变换后的字符串?
+            }
+
             // 检查条码号，如果是读者证条码号，则 func = LoadPatronInfo
             if (this.NeedVerifyBarcode == true)
             {
@@ -1569,6 +1621,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 else
                 {
                     string strError = "";
+
                     // 形式校验条码号
                     // return:
                     //      -2  服务器没有配置校验方法，无法校验
@@ -1733,6 +1786,18 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 task.ReaderBarcode = this._taskList.CurrentReaderBarcode;
                 task.ItemBarcode = strText;
                 task.Action = "read";
+            }
+            else if (func == dp2Circulation.FuncState.Boxing)
+            {
+                task.ItemBarcode = strText;
+                task.Action = "boxing";
+                task.Parameters = strParameters;
+            }
+            else if (func == dp2Circulation.FuncState.Move)
+            {
+                task.ItemBarcode = strText;
+                task.Action = "move";
+                task.Parameters = strParameters;
             }
 
             this.textBox_input.SelectAll();
@@ -2061,6 +2126,8 @@ false);
                 this.toolStripMenuItem_continueBorrow.Checked = false;
                 this.toolStripMenuItem_inventoryBook.Checked = false;
                 this.toolStripMenuItem_read.Checked = false;
+                this.toolStripMenuItem_boxing.Checked = false;
+                this.toolStripMenuItem_move.Checked = false;
 
                 if (this.AutoClearTextbox == true)
                 {
@@ -2127,6 +2194,17 @@ false);
                 else if (_funcstate == FuncState.Read)
                 {
                     this.toolStripMenuItem_read.Checked = true;
+                }
+                else if (_funcstate == FuncState.Boxing)
+                {
+                    this.toolStripMenuItem_boxing.Checked = true;
+
+                    WillLoadReaderInfo = false;
+                }
+                else if (_funcstate == FuncState.Move)
+                {
+                    this.toolStripMenuItem_move.Checked = true;
+                    WillLoadReaderInfo = false;
                 }
                 // SetInputMessage();
             }
@@ -3344,8 +3422,14 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
 
         string GetUpperCase(string strText)
         {
+#if NO
             if (string.IsNullOrEmpty(strText) == true)
                 return strText;
+
+            // 除去首尾连续的空额
+            // 2016/12/15
+            strText = strText.Trim();
+
             if (this.toolStripButton_upperInput.Checked == true)
             {
                 if (strText.ToLower().StartsWith("@bibliorecpath:") == true)
@@ -3353,6 +3437,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 return strText.ToUpper();
             }
             return strText;
+#endif
+            return Program.MainForm.GetUpperCase(strText);
         }
 
         private void toolStripButton_upperInput_CheckedChanged(object sender, EventArgs e)
@@ -3361,8 +3447,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 this.toolStripButton_upperInput.Text = "A";
             else
                 this.toolStripButton_upperInput.Text = "a";
-        }
 
+            Program.MainForm.UpperInputBarcode = this.toolStripButton_upperInput.Checked;
+        }
 
         void RefreshActionPicture()
         {
@@ -3408,6 +3495,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                 strText = "盘";
             else if (_funcstate == FuncState.Read)
                 strText = "读";
+            else if (_funcstate == FuncState.Boxing)
+                strText = "配";
+            else if (_funcstate == FuncState.Move)
+                strText = "调";
             else
                 strText = "?";
 
@@ -3589,6 +3680,21 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, Pu
                     "simulate_reservation_arrive");
             else
                 MessageBox.Show(this, "此功能必须和还书、丢失功能配套使用");
+        }
+
+        private void ToolStripMenuItem_boxing_Click(object sender, EventArgs e)
+        {
+            this.FuncState = FuncState.Boxing;
+        }
+
+        private void ToolStripMenuItem_move_Click(object sender, EventArgs e)
+        {
+            this.FuncState = FuncState.Move;
+        }
+
+        private void toolStripButton_selectTargetLocation_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

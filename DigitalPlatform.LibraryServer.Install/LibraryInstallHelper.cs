@@ -381,6 +381,10 @@ namespace DigitalPlatform.LibraryServer
             else
             {
                 // 新的做法
+                // return:
+                //      -1  出错
+                //      0   不匹配
+                //      1   匹配
                 nRet = LibraryServerUtil.MatchUserPassword(dlg.Password,
                     info.SupervisorPassword,
                     out strError);
@@ -390,7 +394,7 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
                 Debug.Assert(nRet == 0 || nRet == 1, "");
-                if (nRet == 1)
+                if (nRet == 0)  // 2016/12/26 从 == 1 修改为 == 0
                 {
                     MessageBox.Show(owner, "密码不正确。请重新输入密码");
                     goto REDO_LOGIN;

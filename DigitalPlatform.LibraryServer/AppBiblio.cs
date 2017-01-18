@@ -875,6 +875,28 @@ namespace DigitalPlatform.LibraryServer
                 {
                     strBiblio = strBiblioXml;
                 }
+                else if (IsResultType(strBiblioType, "iso2709") == true)
+                {
+                    List<string> parts = StringUtil.ParseTwoPart(strBiblioType, ":");
+                    string strEncoding = parts[1];
+                    if (string.IsNullOrEmpty(strEncoding))
+                        strEncoding = "utf-8";
+
+                    byte[] result = null;
+                    Encoding targetEncoding = Encoding.GetEncoding(strEncoding);
+                    nRet = GetIso2709(strBiblioXml,
+                        targetEncoding,
+                        out result,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        if (String.IsNullOrEmpty(strErrorText) == false)
+                            strErrorText += ";\r\n";
+                        strErrorText += strError;
+                        goto CONTINUE;
+                    }
+                    strBiblio = Convert.ToBase64String(result);
+                }
                 // 模拟创建检索点
                 else if (String.Compare(strBiblioType, "keys", true) == 0)
                 {
@@ -1311,6 +1333,52 @@ namespace DigitalPlatform.LibraryServer
                 strError = strErrorText;
                 return -1;
             }
+            return 0;
+        }
+
+        static int GetIso2709(string strXml,
+            Encoding targetEncoding,
+            out byte[] result,
+            out string strError)
+        {
+            strError = "";
+            result = null;
+            int nRet = 0;
+
+            string strMARC = "";
+            string strMarcSyntax = "";
+            // 将XML格式转换为MARC格式
+            // 自动从数据记录中获得MARC语法
+            nRet = MarcUtil.Xml2Marc(strXml,
+                true,
+                null,
+                out strMarcSyntax,
+                out strMARC,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "XML转换到MARC记录时出错: " + strError;
+                return -1;
+            }
+
+            // 将MARC机内格式转换为ISO2709格式
+            // parameters:
+            //      strSourceMARC   [in]机内格式MARC记录。
+            //      strMarcSyntax   [in]为"unimarc"或"usmarc"
+            //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
+            //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
+            // return:
+            //      -1  出错
+            //      0   成功
+            nRet = MarcUtil.CvtJineiToISO2709(
+                strMARC,
+                strMarcSyntax,
+                targetEncoding,
+                out result,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
             return 0;
         }
 
@@ -2163,7 +2231,6 @@ return result;
 
             try
             {
-
                 if (string.IsNullOrEmpty(strFieldNameList) == false
                     || !(StringUtil.IsInList("writeres", strRights) == true || StringUtil.IsInList("writeobject", strRights) == true)
                     )
@@ -2188,6 +2255,16 @@ return result;
                     }
 
                     strError = "";
+                }
+
+                // 2016/12/14
+                if (String.IsNullOrEmpty(strNewBiblioXml) == false)
+                {
+                    int nRet = CreateUniformKey(
+ref strNewBiblioXml,
+out strError);
+                    if (nRet == -1)
+                        return -1;
                 }
 
                 XmlDocument domNew = new XmlDocument();
@@ -2577,6 +2654,378 @@ return result;
             }
 
             return 0;
+        }
+
+
+        public static int CreateUniformKey(
+    ref string strBiblioXml,
+    out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (string.IsNullOrEmpty(strBiblioXml) == true)
+                return 0;
+
+            string strMarcSyntax = "";
+            string strMarc = "";
+
+            // 将MARCXML格式的xml记录转换为marc机内格式字符串
+            // parameters:
+            //		bWarning	== true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+            //		strMarcSyntax	指示marc语法,如果==""，则自动识别
+            //		strOutMarcSyntax	out参数，返回marc，如果strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+            nRet = MarcUtil.Xml2Marc(strBiblioXml,
+                true,
+                "", // this.CurMarcSyntax,
+                out strMarcSyntax,
+                out strMarc,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (string.IsNullOrEmpty(strMarcSyntax) == true)
+                return 0;   // 不是 MARC 格式
+
+            string strKey = "";
+            string strCode = "";
+            nRet = CreateUniformKey(ref strMarc,
+                strMarcSyntax,
+                out strKey,
+                out strCode,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            nRet = MarcUtil.Marc2XmlEx(strMarc,
+                strMarcSyntax,
+                ref strBiblioXml,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            return 1;
+        }
+
+        // TODO: 根据多个 ISBN 创建多个 997 字段。查重算法也要改造，变成根据多个 key 分别检索
+        // 创建查重键字段
+        // 要创建的字段名和 MARC 格式无关，都是 997 字段。但要提取的书名等信息在什么字段，和具体的 MARC 格式有关
+        public static int CreateUniformKey(ref string strMARC,
+            string strMarcSyntax,
+            out string strKey,
+            out string strCode,
+            out string strError)
+        {
+            strError = "";
+            strKey = "";
+            strCode = "";
+
+            MarcRecord record = new MarcRecord(strMARC);
+            List<string> segments = new List<string>();
+            if (strMarcSyntax == "unimarc")
+            {
+                // isbn
+                {
+                    List<string> isbns = record.select("field[@name='010']/subfield[@name='a']").Contents;
+
+                    // 统一变换为 13 位形态
+                    for (int i = 0; i < isbns.Count; i++)
+                    {
+                        isbns[i] = IsbnSplitter.GetISBnBarcode(isbns[i]);
+                    }
+                    Sort(isbns);
+                    segments.Add(StringUtil.MakePathList(isbns));
+                }
+
+                // title
+                {
+                    List<string> titles = record.select("field[@name='200']/subfield[@name='a' or @name='e']").Contents;
+
+                    CanonializeWideChars(titles);
+                    Sort(titles);
+
+                    List<string> his = record.select("field[@name='200']/subfield[@name='h' or @name='i']").Contents;
+
+                    if (his.Count > 0)
+                    {
+                        // $a 里面的数字和标点符号要归一化
+                        // h 和 i 里面的数字等要归一化
+                        // h 和 i 要根据内容排序
+                        CanonializeWideChars(his);
+                        Sort(his);
+                        titles.AddRange(his);
+                    }
+
+                    segments.Add(StringUtil.MakePathList(titles));
+                }
+
+                // author
+                {
+                    List<string> authors = record.select("field[@name='701' or @name='711']/subfield[@name='a']").Contents;
+
+                    CanonializeWideChars(authors);
+                    // 要按照内容排序
+                    Sort(authors);
+                    segments.Add(StringUtil.MakePathList(authors));
+                }
+
+                // publisher
+                {
+                    // 210 $c $d
+                    List<string> publishers = record.select("field[@name='210']/subfield[@name='c']").Contents;
+                    CanonializeWideChars(publishers);
+                    Sort(publishers);
+
+                    List<string> dates = record.select("field[@name='210']/subfield[@name='d']").Contents;
+                    // 日期需要归一化为 4 chars 形态
+                    CanonializeWideChars(dates);
+                    CanonializeDate(dates);
+                    Sort(dates);
+                    segments.Add(StringUtil.MakePathList(publishers) + "," + StringUtil.MakePathList(dates));
+
+                }
+
+#if NO
+                // pages
+                // size
+                {
+                    List<string> pages = record.select("field[@name='215']/subfield[@name='a']").Contents;
+                    // 归一化为纯数字
+                    CanonializeWideChars(pages);
+                    CanonializeNumber(pages);
+                    Sort(pages);
+
+                    List<string> sizes = record.select("field[@name='215']/subfield[@name='d']").Contents;
+
+                    // 归一化为纯粹厘米数字
+                    CanonializeWideChars(sizes);
+                    CanonializeNumber(sizes);
+                    Sort(sizes);
+                    segments.Add(StringUtil.MakePathList(pages) + "," + StringUtil.MakePathList(sizes));
+                }
+#endif
+
+                strKey = StringUtil.MakePathList(segments, "|");
+                strCode = StringUtil.GetMd5(strKey);
+
+                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v0.03");
+
+                strMARC = record.Text;
+            }
+
+            if (strMarcSyntax == "usmarc")
+            {
+                // isbn
+                {
+                    List<string> isbns = record.select("field[@name='020']/subfield[@name='a']").Contents;
+
+                    // 统一变换为 13 位形态
+                    for (int i = 0; i < isbns.Count; i++)
+                    {
+                        // 去掉空格以后的部分
+                        string text = isbns[i];
+                        int nRet = text.IndexOf(" ");
+                        if (nRet != -1)
+                            text = text.Substring(0, nRet).Trim();
+                        isbns[i] = IsbnSplitter.GetISBnBarcode(text);
+                    }
+                    // TODO: 去掉重复?
+                    Sort(isbns);
+                    segments.Add(StringUtil.MakePathList(isbns));
+                }
+
+                // title
+                {
+                    List<string> titles = record.select("field[@name='245']/subfield[@name='a'  or @name='b']").Contents;
+
+                    // TODO: 是否要忽略大小写?
+                    TrimEndChar(titles);
+                    Sort(titles);
+
+                    List<string> his = record.select("field[@name='245']/subfield[@name='n']").Contents;
+
+                    if (his.Count > 0)
+                    {
+                        // $a 里面的数字和标点符号要归一化
+                        // h 和 i 里面的数字等要归一化
+                        // h 和 i 要根据内容排序
+                        TrimEndChar(his);
+                        Sort(his);
+                        titles.AddRange(his);
+                    }
+
+                    segments.Add(StringUtil.MakePathList(titles));
+                }
+
+                // author
+                {
+                    List<string> authors = record.select("field[@name='100' or @name='700']/subfield[@name='a']").Contents;
+
+                    TrimEndChar(authors);
+                    // 要按照内容排序
+                    Sort(authors);
+                    segments.Add(StringUtil.MakePathList(authors));
+                }
+
+                // publisher
+                {
+                    // 260 $b
+                    List<string> publishers = record.select("field[@name='260']/subfield[@name='b']").Contents;
+                    TrimEndChar(publishers);
+                    Sort(publishers);
+
+                    List<string> dates = record.select("field[@name='260']/subfield[@name='c']").Contents;
+                    // 日期需要归一化为 4 chars 形态
+                    TrimEndChar(dates);
+                    CanonializeDate(dates);
+                    Sort(dates);
+                    segments.Add(StringUtil.MakePathList(publishers) + "," + StringUtil.MakePathList(dates));
+                }
+
+#if NO
+                // pages
+                // size
+                {
+                    List<string> pages = record.select("field[@name='300']/subfield[@name='a']").Contents;
+                    // 归一化为纯数字
+                    TrimEndChar(pages);
+                    CanonializeNumber(pages);
+                    Sort(pages);
+
+                    List<string> sizes = record.select("field[@name='300']/subfield[@name='c']").Contents;
+
+                    // 归一化为纯粹厘米数字
+                    TrimEndChar(sizes);
+                    CanonializeNumber(sizes);
+                    Sort(sizes);
+                    segments.Add(StringUtil.MakePathList(pages) + "," + StringUtil.MakePathList(sizes));
+                }
+#endif
+
+                strKey = StringUtil.MakePathList(segments, "|");
+                strCode = StringUtil.GetMd5(strKey);
+
+                record.setFirstField("997", "  ", MarcQuery.SUBFLD + "a" + strKey + MarcQuery.SUBFLD + "h" + strCode + MarcQuery.SUBFLD + "v0.03");
+
+                strMARC = record.Text;
+            }
+
+            return 0;
+        }
+
+        public static string TrimEndChar(string strText, string strDelimeters = "./,;:")
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return "";
+            strText = strText.Trim();
+            if (string.IsNullOrEmpty(strText) == true)
+                return "";
+
+            char tail = strText[strText.Length - 1];
+            if (strDelimeters.IndexOf(tail) != -1)
+                return strText.Substring(0, strText.Length - 1);
+            return strText;
+        }
+
+        static void CanonializeDate(List<string> dates)
+        {
+            // 2016/1/1
+            // 因为有 [2008] 这样的情况，所以要先处理为纯数字
+            CanonializeNumber(dates);
+
+            for (int i = 0; i < dates.Count; i++)
+            {
+                string date = dates[i];
+                if (date.Length > 4)
+                {
+                    date = date.Substring(0, 4);
+                    dates[i] = date;
+                }
+            }
+        }
+
+        static void CanonializeNumber(List<string> values)
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                string value = values[i];
+                string new_value = GetNumber(value);
+                if (value != new_value)
+                {
+                    values[i] = new_value;
+                }
+            }
+        }
+
+        static void TrimEndChar(List<string> values)
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                string value = values[i];
+                string new_value = TrimEndChar(value);
+                if (value != new_value)
+                {
+                    values[i] = new_value;
+                }
+            }
+        }
+
+        static void CanonializeWideChars(List<string> values)
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                string value = values[i];
+                string new_value = ToDBC(value);
+                if (value != new_value)
+                {
+                    values[i] = new_value;
+                }
+            }
+        }
+
+        // /
+        // / 转半角的函数(DBC case)
+        // /
+        // /任意字符串
+        // /半角字符串
+        // /
+        // /全角空格为12288，半角空格为32
+        // /其他字符半角(33-126)与全角(65281-65374)的对应关系是：均相差65248
+        // /
+        public static String ToDBC(String input)
+        {
+            char[] c = input.ToCharArray();
+            for (int i = 0; i < c.Length; i++)
+            {
+                if (c[i] == 12288)
+                {
+                    c[i] = (char)32;
+                    continue;
+                }
+                if (c[i] > 65280 && c[i] < 65375)
+                    c[i] = (char)(c[i] - 65248);
+            }
+            return new String(c);
+        }
+
+        // 获得一个字符串里面的纯数字部分
+        static string GetNumber(string strText)
+        {
+            string strHead = "";
+            string strNumber = "";
+            string strEnd = "";
+            // 把一个被字符引导的字符串分成三部分
+            StringUtil.SplitLedNumber(strText,
+            out strHead,
+            out strNumber,
+            out strEnd);
+            return strNumber;
+        }
+
+        static void Sort(List<string> titles)
+        {
+            StringUtil.RemoveBlank(ref titles);
+            titles.Sort();
         }
 
         // 根据允许的字段名列表，合并新旧两条书目记录
@@ -3824,7 +4273,7 @@ nsmgr);
 
         // 修改编目记录
         // parameters:
-        //      strAction   动作。为"new" "change" "delete" "onlydeletebiblio" "onlydeletesubrecord"之一。"delete"在删除书目记录的同时，会自动删除下属的实体记录。不过要求实体均未被借出才能删除。
+        //      strAction   动作。为"new" "change" "delete" "onlydeletebiblio" "onlydeletesubrecord" "checkunique" 之一。"delete"在删除书目记录的同时，会自动删除下属的实体记录。不过要求实体均未被借出才能删除。
         //      strBiblioType   目前只允许xml一种
         //      baTimestamp 时间戳。如果为新创建记录，可以为null 
         //      strOutputBiblioRecPath 输出的书目记录路径。当strBiblioRecPath中末级为问号，表示追加保存书目记录的时候，本参数返回实际保存的书目记录路径
@@ -3837,6 +4286,7 @@ nsmgr);
             string strBiblio,
             byte[] baTimestamp,
             string strComment,
+            string strStyle,
             out string strOutputBiblioRecPath,
             out byte[] baOutputTimestamp)
         {
@@ -3848,6 +4298,87 @@ nsmgr);
             baOutputTimestamp = null;
 
             LibraryServerResult result = new LibraryServerResult();
+
+            bool bNoCheckDup = false;   // 是否为不查重?
+            bool bNoEventLog = false;   // 是否为不记入事件日志?
+            bool bNoOperations = false; // 是否为不要覆盖<operations>内容
+            bool bSimulate = StringUtil.IsInList("simulate", strStyle);     // 是否为模拟操作? 2015/6/9
+            bool bForce = false;
+
+            if (StringUtil.IsInList("force", strStyle) == true)
+            {
+                bForce = true;
+
+                if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "带有风格 'force' 的修改书目信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                if (sessioninfo.GlobalUser == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "修改书目信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
+            if (StringUtil.IsInList("nocheckdup", strStyle) == true)
+            {
+                bNoCheckDup = true;
+            }
+
+            if (StringUtil.IsInList("noeventlog", strStyle) == true)
+            {
+                bNoEventLog = true;
+            }
+
+            if (StringUtil.IsInList("nooperations", strStyle) == true)
+            {
+                bNoOperations = true;
+            }
+
+            if (bNoCheckDup == true)
+            {
+                if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "带有风格 'nocheckdup' 的修改书目信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                if (sessioninfo.GlobalUser == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "带有风格 'nocheckdup' 的修改书目信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
+            if (bNoEventLog == true)
+            {
+                if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "带有风格 'noeventlog' 的修改书目信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                if (sessioninfo.GlobalUser == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "带有风格 'noeventlog' 的修改书目信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
             bool bChangePartDenied = false; // 修改操作部分被拒绝
             string strDeniedComment = "";   // 关于部分字段被拒绝的注释
 
@@ -3857,8 +4388,6 @@ nsmgr);
 
             // 检查参数
             strAction = strAction.ToLower();
-
-            bool bSimulate = false;
 
             // 2015/6/8
             if (StringUtil.HasHead(strAction, "simulate_") == true)
@@ -3871,16 +4400,42 @@ nsmgr);
                 && strAction != "change"
                 && strAction != "delete"
                 && strAction != "onlydeletebiblio"
-                && strAction != "onlydeletesubrecord")
+                && strAction != "onlydeletesubrecord"
+                && strAction != "checkunique")
             {
-                strError = "strAction参数值应当为new change delete onlydeletebiblio onlydeletesubrecord之一";
+                strError = "strAction参数值应当为new change delete onlydeletebiblio onlydeletesubrecord checkunique之一  (然而当前为 '" + strAction + "')";
                 goto ERROR1;
             }
 
             strBiblioType = strBiblioType.ToLower();
-            if (strBiblioType != "xml")
+
+            string strFormat = "";
+            Encoding encoding = Encoding.UTF8;
+
+            if (strBiblioType == "xml")
+                strFormat = strBiblioType;
+            else if (IsResultType(strBiblioType, "iso2709") == true)
             {
-                strError = "strBiblioType必须为\"xml\"";
+                List<string> parts = StringUtil.ParseTwoPart(strBiblioType, ":");
+                string strEncoding = parts[1];
+                if (string.IsNullOrEmpty(strEncoding))
+                    strEncoding = "utf-8";
+
+                try
+                {
+                    encoding = Encoding.GetEncoding(strEncoding);
+                }
+                catch (Exception ex)
+                {
+                    strError = "strBiblioType 参数值中的编码方式 '" + strEncoding + "' 不合法: " + ex.Message;
+                    goto ERROR1;
+                }
+
+                strFormat = parts[0];
+            }
+            else
+            {
+                strError = "strBiblioType参数值必须为\"xml\" \"iso2709\" 之一";
                 goto ERROR1;
             }
 
@@ -3939,6 +4494,11 @@ nsmgr);
 #endif
 
                 cfg = GetBiblioDbCfg(strBiblioDbName);
+                if (cfg == null)
+                {
+                    strError = "获得书目库 '" + strBiblioDbName + "' 的配置信息时出错";
+                    goto ERROR1;
+                }
                 Debug.Assert(cfg != null, "");
                 strUnionCatalogStyle = cfg.UnionCatalogStyle;
 
@@ -4030,35 +4590,83 @@ nsmgr);
 
             // 2016/7/4
             // 看看所保存的数据MARC格式是不是这个数据库要求的格式
-            if (strAction == "new" || strAction == "change")
+            if (string.IsNullOrEmpty(strBiblio) == false
+                && (strAction == "new" || strAction == "change" || strAction == "checkunique"))
             {
-                string strMarcSyntax = "";
-                // 获得 MARCXML 字符串的 MARC 格式类型
-                // return:
-                //      -1  出错
-                //      0   无法探测
-                //      1   成功探测
-                nRet = MarcUtil.GetMarcSyntax(strBiblio,
-    out strMarcSyntax,
+                // 2016/11/23
+                if (strFormat == "iso2709")
+                {
+                    try
+                    {
+                        string strMARC = "";
+                        byte[] baRecord = Convert.FromBase64String(strBiblio);
+                        // return:
+                        //		-2	MARC格式错
+                        //		-1	一般错误
+                        //		0	正常
+                        nRet = MarcUtil.ConvertByteArrayToMarcRecord(baRecord,
+                            encoding,
+                            true,
+                            out strMARC,
+                            out strError);
+                        if (nRet != 0)
+                        {
+                            strError = "strBiblio 参数中的 ISO2709 格式记录不合法: " + strError;
+                            goto ERROR1;
+                        }
+
+                        if (cfg == null)
+                        {
+                            strError = "cfg == null";
+                            goto ERROR1;
+                        }
+
+                        string strBiblioXml = "";
+                        nRet = MarcUtil.Marc2XmlEx(strMARC,
+    cfg.BiblioDbSyntax,
+    ref strBiblioXml,
     out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (nRet == 0)
-                {
-                    strError = "无法获得 strBiblio 参数值中 MARC 记录的 MARC 格式";
-                    goto ERROR1;
+                        if (nRet == -1)
+                            goto ERROR1;
+                        strBiblio = strBiblioXml;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "将 strBiblio 参数值转换为 MARC 或 MARCXML 格式过程中出现异常: " + ex.Message;
+                        goto ERROR1;
+                    }
                 }
-
-                if (cfg == null)
+                else
                 {
-                    strError = "cfg == null";
-                    goto ERROR1;
-                }
+                    string strMarcSyntax = "";
+                    // 获得 MARCXML 字符串的 MARC 格式类型
+                    // return:
+                    //      -1  出错
+                    //      0   无法探测
+                    //      1   成功探测
+                    nRet = MarcUtil.GetMarcSyntax(strBiblio,
+        out strMarcSyntax,
+        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
 
-                if (cfg.BiblioDbSyntax != strMarcSyntax)
-                {
-                    strError = "所提交保存的 MARC 格式为 '" + strMarcSyntax + "'，和书目库 '" + strBiblioDbName + "' 的 MARC 格式 '" + cfg.BiblioDbSyntax + "' 不符合";
-                    goto ERROR1;
+                        strError = "无法获得 strBiblio 参数值中 MARC 记录的 MARC 格式";
+                        goto ERROR1;
+                    }
+
+                    if (cfg == null)
+                    {
+                        strError = "cfg == null";
+                        goto ERROR1;
+                    }
+
+                    if (cfg.BiblioDbSyntax != strMarcSyntax)
+                    {
+                        strError = "所提交保存的 MARC 格式为 '" + strMarcSyntax + "'，和书目库 '" + strBiblioDbName + "' 的 MARC 格式 '" + cfg.BiblioDbSyntax + "' 不符合";
+                        goto ERROR1;
+                    }
                 }
             }
 
@@ -4091,10 +4699,13 @@ nsmgr);
             if (strAction == "change"
                 || strAction == "delete"
                 || strAction == "onlydeletebiblio"
-                || strAction == "onlydeletesubrecord")
+                || strAction == "onlydeletesubrecord"
+                || strAction == "checkunique")
             {
                 string strMetaData = "";
                 string strOutputPath = "";
+
+                // TODO: strBiblioRecPath 为 中文图书/? 时如何表现
 
                 // 先读出数据库中此位置的已有记录
                 lRet = channel.GetRes(strBiblioRecPath,
@@ -4107,8 +4718,12 @@ nsmgr);
                 {
                     if (channel.ErrorCode == ChannelErrorCode.NotFound)
                     {
+                        if (strAction == "checkunique")
+                            goto SKIP_MEMO_OLDRECORD;
+
                         // 2013/3/12
-                        if (strAction == "change" && bSimulate == false)    // 模拟操作情况下，不在乎以前这个位置的记录是否存在
+                        if (strAction == "change"
+                            && bSimulate == false)    // 模拟操作情况下，不在乎以前这个位置的记录是否存在
                         {
                             strError = "原有记录 '" + strBiblioRecPath + "' 不存在, 因此 setbiblioinfo " + strAction + " 操作被拒绝 (此时如果要保存新记录，请使用 new 子功能)";
                             result.Value = -1;
@@ -4175,6 +4790,96 @@ nsmgr);
             if (sessioninfo.Account != null)
                 strRights = sessioninfo.Account.Rights;
 
+            // 2017/1/2
+            if (strAction == "checkunique")
+            {
+                if (string.IsNullOrEmpty(strExistingXml) == false)
+                {
+                    if (string.IsNullOrEmpty(strBiblio) == true)
+                        strBiblio = strExistingXml;
+                    else
+                    {
+                        // 合并联合编目的新旧书目库XML记录
+                        // 功能：排除新记录中对strLibraryCode定义以外的905字段的修改
+                        // parameters:
+                        //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
+                        // return:
+                        //      -1  error
+                        //      0   not delete any fields
+                        //      1   deleted some fields
+                        nRet = MergeOldNewBiblioRec(
+                            strRights,
+                            strUnionCatalogStyle,
+                            strLibraryCode,
+                            "insert,replace,delete",
+                            strAccessParameters,
+                            strExistingXml,
+                            ref strBiblio,
+                            ref bChangePartDenied,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
+                            strDeniedComment += " " + strError;
+                    }
+                }
+                else
+                {
+                    strExistingXml = "";
+                    // 合并联合编目的新旧书目库XML记录
+                    // 功能：排除新记录中对strLibraryCode定义以外的905字段的修改
+                    // parameters:
+                    //      bChangePartDenied   如果本次被设定为 true，则 strError 中返回了关于部分修改的注释信息
+                    // return:
+                    //      -1  error
+                    //      0   not delete any fields
+                    //      1   deleted some fields
+                    nRet = MergeOldNewBiblioRec(
+                        strRights,
+                        strUnionCatalogStyle,
+                        strLibraryCode,
+                        "insert",
+                        strAccessParameters,
+                        strExistingXml,
+                        ref strBiblio,
+                        ref bChangePartDenied,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
+                        strDeniedComment += " " + strError;
+
+                }
+
+                // return:
+                //      -1  出错
+                //      0   没有命中
+                //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                nRet = SearchBiblioDup(
+                    sessioninfo,
+                    strBiblioRecPath,
+                    strBiblio,
+                    "setbiblio", // strResultSetName,
+                    null,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet > 0)
+                {
+                    strOutputBiblioRecPath = strError;
+                    result.Value = -1;
+                    result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。";
+                    result.ErrorCode = ErrorCode.BiblioDup;
+                    return result;
+                }
+
+                if (strAction == "checkunique")
+                {
+                    result.Value = 0;   // 没有发现重复
+                    return result;
+                }
+            }
+
             if (strAction == "new")
             {
                 // 对order权限的判断。order权限允许对任何库进行new操作
@@ -4226,13 +4931,43 @@ nsmgr);
                         strDeniedComment += " " + strError;
                 }
 
+                // return:
+                //      -1  出错
+                //      0   没有命中
+                //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                nRet = SearchBiblioDup(
+                    sessioninfo,
+                    strBiblioRecPath,
+                    strBiblio,
+                    "setbiblio", // strResultSetName,
+                    null,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet > 0)
+                {
+                    strOutputBiblioRecPath = strError;
+                    result.Value = -1;
+                    result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。";
+                    if (strAction != "checkunique")
+                        result.ErrorInfo += "本次保存操作被拒绝";
+                    result.ErrorCode = ErrorCode.BiblioDup;
+                    return result;
+                }
+
+                if (strAction == "checkunique")
+                {
+                    result.Value = 0;   // 没有发现重复
+                    return result;
+                }
+
                 // 2009/11/2 
                 // 需要判断路径最后一级是否为问号？
                 string strTargetRecId = ResPath.GetRecordId(strBiblioRecPath);
                 if (strTargetRecId == "?" || String.IsNullOrEmpty(strTargetRecId) == true)
                 {
                     if (String.IsNullOrEmpty(strTargetRecId) == true)
-                        strBiblioRecPath += "/?";
+                        strBiblioRecPath = ResPath.GetDbName(strBiblioRecPath) + "/?";  // 这样做主要是防范输入 "中文图书/" 这样的字符串造成 "中文图书//?" 的结果 2016/11/24
                 }
                 else
                 {
@@ -4259,6 +4994,7 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
+#if NO
                 if (bSimulate)
                 {
                     // 模拟创建新记录的操作
@@ -4266,11 +5002,13 @@ out strError);
                     strOutputBiblioRecPath = strBiblioRecPath;  // 路径中 ID 依然为问号，没有被处理
                 }
                 else
+#endif
+
                 {
                     lRet = channel.DoSaveTextRes(strBiblioRecPath,
                         strBiblio,
                         false,
-                        "content", // ,ignorechecktimestamp
+                        "content" + (bSimulate ? ",simulate" : ""),
                         baTimestamp,
                         out baOutputTimestamp,
                         out strOutputBiblioRecPath,
@@ -4337,6 +5075,28 @@ out strError);
                         strDeniedComment += " " + strError;
                 }
 
+                // return:
+                //      -1  出错
+                //      0   没有命中
+                //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                nRet = SearchBiblioDup(
+                    sessioninfo,
+                    strBiblioRecPath,
+                    strBiblio,
+                    "setbiblio", // strResultSetName,
+                    null,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet > 0)
+                {
+                    strOutputBiblioRecPath = strError;
+                    result.Value = -1;
+                    result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作被拒绝";
+                    result.ErrorCode = ErrorCode.BiblioDup;
+                    return result;
+                }
+
                 // 2011/11/30
                 nRet = this.SetOperation(
 ref strBiblio,
@@ -4349,6 +5109,7 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
+#if NO
                 if (bSimulate)
                 {
                     // 模拟修改记录的操作
@@ -4356,6 +5117,8 @@ out strError);
                     strOutputBiblioRecPath = strBiblioRecPath;
                 }
                 else
+#endif
+
                 {
                     // 需要判断路径是否为具备最末一级索引号的形式？
 
@@ -4366,7 +5129,7 @@ out strError);
                         lRet = channel.DoSaveTextRes(strBiblioRecPath,
                             strBiblio,
                             false,
-                            "content", // ,ignorechecktimestamp
+                            "content" + (bSimulate ? ",simulate" : ""),
                             baTimestamp,
                             out baOutputTimestamp,
                             out strOutputBiblioRecPath,
@@ -4434,6 +5197,7 @@ out strError);
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
                     if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
                         strDeniedComment += " " + strError;
 
@@ -4547,6 +5311,7 @@ out strError);
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+
                     if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
                         strDeniedComment += " " + strError;
 
@@ -4623,7 +5388,7 @@ out strError);
             }
 
         END1:
-            if (bSimulate == false)
+            if (bSimulate == false && bNoEventLog == false)
             {
                 if (string.IsNullOrEmpty(strOutputBiblioRecPath) == false)
                 {
@@ -5393,6 +6158,8 @@ out strError);
             string strExistingSourceXml = "";
             byte[] exist_source_timestamp = null;
 
+            string strExistTargetXml = "";  // 被覆盖位置，覆盖前的记录
+
             if (strAction == "onlymovebiblio"
                 || strAction == "onlycopybiblio"
                 || strAction == "copy"
@@ -5427,7 +6194,7 @@ out strError);
                     goto ERROR1;
                 }
 
-
+                // oldRecord 元素实际上是源记录的意思，不是旧记录的意思
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                         "oldRecord", strExistingSourceXml);
                 DomUtil.SetAttr(node, "recPath", strBiblioRecPath);
@@ -5492,6 +6259,7 @@ out strError);
                             goto ERROR1;
                         if (bChangePartDenied == true && string.IsNullOrEmpty(strError) == false)
                             strDeniedComment += " " + strError;
+
                         /*
                         // 2011/11/30
                         nRet = this.SetOperation(
@@ -5504,16 +6272,81 @@ out strError);
                             goto ERROR1;
                          * */
                     }
+                    else
+                    {
+                        // strNewBiblio 为空
+                    }
+
+                    // 查重
+                    if (string.IsNullOrEmpty(strNewBiblio) == false)
+                    {
+                        // return:
+                        //      -1  出错
+                        //      0   没有命中
+                        //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                        nRet = SearchBiblioDup(
+                            sessioninfo,
+                            strNewBiblioRecPath,
+                            strNewBiblio,
+                            "copybiblio", // strResultSetName,
+                            strAction == "move" || strAction == "onlymovebiblio" ? new List<string> { strBiblioRecPath } : null,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet > 0)
+                        {
+                            // move 操作，要排除 source 记录路径，因为它即将被删除
+                            strOutputBiblioRecPath = strError;
+                            result.Value = -1;
+                            result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作(" + strAction + ")被拒绝";
+                            result.ErrorCode = ErrorCode.BiblioDup;
+                            return result;
+                        }
+                    }
+                    else
+                    {
+                        // 如果当前配置了要查重，则复制行为要看源和目标是否都在同一个 space 内，如果是，则必然会造成重复，那就要拒绝执行
+                        // 如果不在同一个 space 内，则要用 strSourceBiblio 对 strTargetBiblioRecPath 所在空间进行查重
+                        if ((strAction == "onlycopybiblio" || strAction == "copy")
+                            && IsInSameUniqueSpace(ResPath.GetDbName(strBiblioRecPath), ResPath.GetDbName(strNewBiblioRecPath)) == true)
+                        {
+                            strError = "因源书目记录 '" + strBiblioRecPath + "' 和目标书目记录 '" + strNewBiblioRecPath + "' 处在同一查重空间内，不允许进行直接复制(若允许复制会导致书目记录出现重复)";
+                            goto ERROR1;
+                        }
+
+                        // return:
+                        //      -1  出错
+                        //      0   没有命中
+                        //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                        nRet = SearchBiblioDup(
+                            sessioninfo,
+                            strNewBiblioRecPath,
+                            strExistingSourceXml,
+                            "copybiblio", // strResultSetName,
+                            strAction == "move" || strAction == "onlymovebiblio" ? new List<string> { strBiblioRecPath } : null,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet > 0)
+                        {
+                            strOutputBiblioRecPath = strError;
+                            result.Value = -1;
+                            result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作(" + strAction + ")被拒绝";
+                            result.ErrorCode = ErrorCode.BiblioDup;
+                            return result;
+                        }
+                    }
 
                     nRet = DoBiblioOperMove(
                         strAction,
                         sessioninfo,
                         channel,
                         strBiblioRecPath,
-                        strExistingSourceXml,
+                        // strExistingSourceXml,
                         strNewBiblioRecPath,
                         strNewBiblio,    // 已经经过Merge预处理的新记录XML
                         strMergeStyle,
+                        out strExistTargetXml,
                         out strOutputBiblio,
                         out baOutputTimestamp,
                         out strOutputBiblioRecPath,
@@ -5608,6 +6441,14 @@ out strError);
                 // 注: 如果 strMergeStyle 为 reserve_target， 需要记载一下这个位置已经存在的记录
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                         "record", string.IsNullOrEmpty(strOutputBiblio) == false ? strOutputBiblio : strNewBiblio);
+                DomUtil.SetAttr(node, "recPath", strOutputBiblioRecPath);
+            }
+
+            // 2017/1/16
+            if (string.IsNullOrEmpty(strExistTargetXml) == false)
+            {
+                XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
+        "overwritedRecord", strExistTargetXml);
                 DomUtil.SetAttr(node, "recPath", strOutputBiblioRecPath);
             }
 
@@ -5962,16 +6803,18 @@ out strError);
         //      strAction   动作。为"onlycopybiblio" "onlymovebiblio"之一。增加 copy / move
         //      strNewBiblio    需要在目标记录中更新的内容。如果 == null，表示不特意更新
         //      strMergeStyle   如何合并两条记录的元数据部分? reserve_source / reserve_target。 空表示 reserve_source
+        //      strExistingTargetXml    被覆盖的目标位置的原有记录
+        //      strOutputRecPath    目标记录路径
         int DoBiblioOperMove(
             string strAction,
             SessionInfo sessioninfo,
             RmsChannel channel,
             string strOldRecPath,
-            string strExistingSourceXml,
-            // byte[] baExistingSourceTimestamp, // 请求中提交过来的时间戳
+            // string strExistingSourceXml,
             string strNewRecPath,
             string strNewBiblio,    // 已经经过Merge预处理的新记录XML
             string strMergeStyle,
+            out string strExistTargetXml,
             out string strOutputTargetXml,
             out byte[] baOutputTimestamp,
             out string strOutputRecPath,
@@ -5981,6 +6824,7 @@ out strError);
             long lRet = 0;
             baOutputTimestamp = null;
             strOutputRecPath = "";
+            strExistTargetXml = "";
 
             strOutputTargetXml = ""; // 最后保存成功的记录
 
@@ -6000,7 +6844,6 @@ out strError);
             // 检查即将覆盖的目标位置是不是有记录，如果有，则不允许进行move操作。
             bool bAppendStyle = false;  // 目标路径是否为追加形态？
             string strTargetRecId = ResPath.GetRecordId(strNewRecPath);
-            string strExistTargetXml = "";
 
             if (strTargetRecId == "?" || String.IsNullOrEmpty(strTargetRecId) == true)
             {
@@ -6010,7 +6853,6 @@ out strError);
 
                 bAppendStyle = true;
             }
-
 
             string strOutputPath = "";
             string strMetaData = "";
@@ -6122,6 +6964,8 @@ out strError);
                 goto ERROR1;
             }
 
+            baOutputTimestamp = output_timestamp;
+
             // TODO: 兑现对 856 字段的合并，和来自源的 856 字段的 $u 修改
 
             if (String.IsNullOrEmpty(strNewBiblio) == false)
@@ -6160,11 +7004,212 @@ out strError);
                     out exist_target_timestamp,
                     out strOutputPath,
                     out strError);
+
+                // 2016/12/21
+                baOutputTimestamp = exist_target_timestamp;
             }
 
             return 0;
         ERROR1:
             return -1;
+        }
+
+        bool UniqueSpaceDefined()
+        {
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("unique/space");
+            if (nodes.Count > 0)
+                return true;
+            return false;
+        }
+        /*
+    <unique>
+        <space dbnames="中文图书,中文编目" />
+    </unique>
+         * * */
+        // 获得一个书目库所从属的查重空间的所有书目库名字
+        List<string> GetUniqueSpaceDbNames(string strBiblioDbName)
+        {
+            List<string> results = new List<string>();
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("unique/space");
+            foreach (XmlElement space in nodes)
+            {
+                string list = space.GetAttribute("dbnames");
+
+                string[] names = list.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (Array.IndexOf(names, strBiblioDbName) != -1)
+                    results.AddRange(names);
+            }
+
+            StringUtil.RemoveDup(ref results);
+            return results;
+        }
+
+        // 观察两个书目库是否处在同一个查重空间内
+        bool IsInSameUniqueSpace(string strBiblioDbName1, string strBiblioDbName2)
+        {
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("unique/space");
+            foreach (XmlElement space in nodes)
+            {
+                string list = space.GetAttribute("dbnames");
+
+                string[] names = list.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (Array.IndexOf(names, strBiblioDbName1) != -1
+                    && Array.IndexOf(names, strBiblioDbName2) != -1)
+                    return true;
+            }
+
+            return false;
+        }
+
+        static string Get997a(string strBiblioXml, out string strError)
+        {
+            strError = "";
+
+            string strMarcSyntax = "";
+            string strMarc = "";
+            int nRet = MarcUtil.Xml2Marc(strBiblioXml,
+    true,
+    "", // this.CurMarcSyntax,
+    out strMarcSyntax,
+    out strMarc,
+    out strError);
+            if (nRet == -1)
+                return null;
+
+            MarcRecord record = new MarcRecord(strMarc);
+            string strKey = record.select("field[@name='997']/subfield[@name='a']").FirstContent;
+            if (string.IsNullOrEmpty(strKey))
+            {
+                strError = "MARC 记录中不存在 997$a";
+                return null;
+            }
+
+            return strKey;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   没有命中
+        //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+        int SearchBiblioDup(
+            SessionInfo sessioninfo,
+            string strBiblioRecPath,
+            string strBiblioXml,
+            string strResultSetName,
+            List<string> exclude_recpaths,
+            out string strError)
+        {
+            strError = "";
+
+            if (UniqueSpaceDefined() == false)
+                return 0;
+
+            string strKey = Get997a(strBiblioXml, out strError);
+            //if (strKey == null)
+            //    return -1;
+            if (strKey == null)
+                return 0;   // 因为西文图书还没有提供 997，所以暂时这样返回
+
+            string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
+
+            // 一个书目库同时处在多个 space 中怎么办？
+            List<string> dbnames = GetUniqueSpaceDbNames(strBiblioDbName);
+            if (dbnames.Count == 0)
+                return 0;
+
+            string strQueryXml = "";
+            // 构造检索书目库的 XML 检索式
+            // return:
+            //      -2  没有找到指定风格的检索途径
+            //      -1  出错
+            //      0   没有发现任何书目库定义
+            //      1   成功
+            int nRet = this.BuildSearchBiblioQuery(
+        StringUtil.MakePathList(dbnames),
+        strKey,
+        100,
+        "ukey",
+        "exact",
+        "zh",
+        "", // strSearchStyle,
+        out strQueryXml,
+                out strError);
+            if (nRet == -1 || nRet == 0)
+                return -1;
+            if (nRet == -2)
+            {
+#if NO
+                    result.Value = -1;
+                    result.ErrorInfo = strError;
+                    result.ErrorCode = ErrorCode.FromNotFound;
+                    return result;
+#endif
+                return -1;
+            }
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "GetChannel() return null";
+                return -1;
+            }
+
+#if NO
+            long lRet = channel.DoSearch(strQueryXml,
+                strResultSetName,   // "default",
+                "", // strOutputStyle,
+                out strError);
+            if (lRet == -1)
+                return -1;
+            if (lRet == 0)
+                return 0;   // not found
+#endif
+            Record[] records = null;
+            long lRet = channel.DoSearchEx(strQueryXml,
+    strResultSetName,   // "default",
+    "", // strOutputStyle,
+    1000,
+            "zh",
+            "id",
+            out records,
+            out strError);
+            if (lRet == -1)
+                return -1;
+            if (lRet == 0)
+                return 0;   // not found
+
+            // 如果命中 1 条，则需要提取出来看看是否为 strBiblioRecPath 自己
+            if (lRet == 1)
+            {
+                if (records == null || records.Length < 1)
+                {
+                    strError = "records == null || records.Length < 1";
+                    return -1;
+                }
+                if (records[0].Path == strBiblioRecPath)
+                    return 0;
+            }
+
+            List<string> recpaths = new List<string>();
+            foreach (Record record in records)
+            {
+                recpaths.Add(record.Path);
+            }
+
+            // 去掉查重发起记录的路径
+            recpaths.Remove(strBiblioRecPath);
+
+            // 去掉额外需要排除的记录路径
+            if (exclude_recpaths != null)
+            {
+                foreach (string recpath in exclude_recpaths)
+                {
+                    recpaths.Remove(recpath);
+                }
+            }
+
+            strError = StringUtil.MakePathList(recpaths);
+            return recpaths.Count;
         }
 
         /*

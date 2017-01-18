@@ -619,7 +619,7 @@ namespace dp2Library
                     bSimulateLogin = true;
 #endif
                 bool bSimulateLogin = StringUtil.GetBooleanValue((string)parameters["simulate"], false);
-                string strFinalRights = "";
+                string strLimitRights = ""; // 代理者的权限。用于限定(代理登录方式下)被代理者的危险权限
                 if (bReader == false)
                 {
                     if (bSimulateLogin == true)
@@ -690,7 +690,7 @@ namespace dp2Library
 
                             // 这种情况下使用代理者的权限
                             if (strPassword == null)
-                                strFinalRights = sessioninfo.Rights;
+                                strLimitRights = sessioninfo.Rights;
 
                             // 检查工作人员帐户是否具备 simulateworker 权限
                             if (StringUtil.IsInList("simulateworker", strRights) == false)
@@ -725,12 +725,20 @@ namespace dp2Library
                     strOutputUserName = strUserName;
 
                     // 2016/10/21
-                    if (string.IsNullOrEmpty(strFinalRights) == false)
+                    if (string.IsNullOrEmpty(strLimitRights) == false)
                     {
+#if NO
                         if (sessioninfo.Account != null)
                         {
-                            strRights = strFinalRights;
-                            sessioninfo.Account.Rights = strFinalRights;
+                            strRights = strLimitRights;
+                            sessioninfo.Account.Rights = strLimitRights;
+                        }
+#endif
+                        // 2017/1/17
+                        if (sessioninfo.Account != null)
+                        {
+                            string removed = "";
+                            sessioninfo.Account.Rights = LibraryApplication.LimitRights(strRights, strLimitRights, out removed);
                         }
                     }
                 }
@@ -3581,6 +3589,7 @@ namespace dp2Library
             }
         }
 
+        // TODO: 需要增加返回保存后记录 XML 的参数。因为保存过程中，可能会略微修改前端提交的记录，比如增加一些字段
         // 设置书目信息(目前只能xml一种格式)
         // 权限:   需要具有setbiblioinfo权限
         // parameters:
@@ -3588,8 +3597,9 @@ namespace dp2Library
         //      strBiblioType   目前只允许xml一种
         //      baTimestamp 时间戳。如果为新创建记录，可以为null 
         //      strOutputBiblioRecPath 输出的书目记录路径。当strBiblioRecPath中末级为问号，表示追加保存书目记录的时候，本参数返回实际保存的书目记录路径
+        //                      此参数也用于，当保存前查重时发现了重复的书目记录，这里返回这些书目记录的路径
         //      baOutputTimestamp   操作完成后，新的时间戳
-        // Result.Value -1出错 0成功
+        // Result.Value -1出错 0成功 >0 表示查重发现了重复的书目记录，保存被拒绝
         public LibraryServerResult SetBiblioInfo(
             string strAction,
             string strBiblioRecPath,
@@ -3597,6 +3607,7 @@ namespace dp2Library
             string strBiblio,
             byte[] baTimestamp,
             string strComment,
+            string strStyle,    // 2016/12/22
             out string strOutputBiblioRecPath,
             out byte[] baOutputTimestamp)
         {
@@ -3627,18 +3638,6 @@ namespace dp2Library
                        strBiblioType);
                 }
 
-                /*
-                // 权限字符串
-                if (StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
-                {
-                    result.Value = -1;
-                    result.ErrorInfo = "设置书目信息被拒绝。不具备order或setbiblioinfo权限。";
-                    result.ErrorCode = ErrorCode.AccessDenied;
-                    return result;
-                }
-                 * */
-
                 return app.SetBiblioInfo(
                     sessioninfo,
                     strAction,
@@ -3647,6 +3646,7 @@ namespace dp2Library
                     strBiblio,
                     baTimestamp,
                     strComment,
+                    strStyle,
                     out strOutputBiblioRecPath,
                     out baOutputTimestamp);
             }
@@ -14064,12 +14064,11 @@ out strError);
         //      -1  出错
         //      0   成功
         public LibraryServerResult GetAuthorNumber(
-            string strID,   // 验证身份用的ID
             string strAuthor,
             bool bSelectPinyin,
             bool bSelectEntry,
             bool bOutputDebugInfo,
-            ref QuestionCollection questions,
+            ref List<Question> questions,
             out string strNumber,
             out string strDebugInfo)
         {
@@ -14089,7 +14088,7 @@ out strError);
 
                 if (questions == null)
                 {
-                    questions = new QuestionCollection();
+                    questions = new List<Question>();
                 }
 
                 // TODO: 验证身份
@@ -14132,7 +14131,6 @@ out strError);
         //      -1  出错
         //      0   成功
         public LibraryServerResult GetPinyin(
-string strID,
 string strText,
 out string strPinyinXml)
         {
@@ -14177,7 +14175,6 @@ out string strPinyinXml)
         //      -1  出错
         //      0   成功
         public LibraryServerResult SetPinyin(
-string strID,
 string strPinyinXml)
         {
             string strError = "";
@@ -14224,7 +14221,7 @@ true);
             out List<string> tokens)
         {
             string strError = "";
-            int nRet = 0;
+            // int nRet = 0;
 
             tokens = null;
 

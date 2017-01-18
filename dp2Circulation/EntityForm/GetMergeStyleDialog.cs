@@ -122,8 +122,8 @@ namespace dp2Circulation
             else
                 style |= MergeStyle.ReserveTargetBiblio;
 
-            if (radioButton_subrecord_combin.Checked)
-                style |= MergeStyle.CombinSubrecord;
+            if (radioButton_subrecord_combine.Checked)
+                style |= MergeStyle.CombineSubrecord;
             else if (radioButton_subrecord_source.Checked)
                 style |= MergeStyle.OverwriteSubrecord;
             else
@@ -149,22 +149,22 @@ namespace dp2Circulation
                 this.radioButton_biblio_reserveTarget.Checked = true;
             }
 
-            if ((style & MergeStyle.CombinSubrecord) != 0)
+            if ((style & MergeStyle.CombineSubrecord) != 0)
             {
-                this.radioButton_subrecord_combin.Checked = true;
+                this.radioButton_subrecord_combine.Checked = true;
                 this.radioButton_subrecord_source.Checked = false;
                 this.radioButton_subrecord_target.Checked = false;
             }
             else if ((style & MergeStyle.OverwriteSubrecord) != 0)
             {
-                this.radioButton_subrecord_combin.Checked = false;
+                this.radioButton_subrecord_combine.Checked = false;
                 this.radioButton_subrecord_source.Checked = true;
                 this.radioButton_subrecord_target.Checked = false;
             }
             else
             {
                 // missing
-                this.radioButton_subrecord_combin.Checked = false;
+                this.radioButton_subrecord_combine.Checked = false;
                 this.radioButton_subrecord_source.Checked = false;
                 this.radioButton_subrecord_target.Checked = true;
             }
@@ -187,7 +187,7 @@ namespace dp2Circulation
             get
             {
                 List<object> controls = new List<object>();
-                controls.Add(this.radioButton_subrecord_combin);
+                controls.Add(this.radioButton_subrecord_combine);
                 controls.Add(this.radioButton_subrecord_source);
                 controls.Add(this.radioButton_subrecord_target);
 
@@ -199,7 +199,7 @@ namespace dp2Circulation
             set
             {
                 List<object> controls = new List<object>();
-                controls.Add(this.radioButton_subrecord_combin);
+                controls.Add(this.radioButton_subrecord_combine);
                 controls.Add(this.radioButton_subrecord_source);
                 controls.Add(this.radioButton_subrecord_target);
 

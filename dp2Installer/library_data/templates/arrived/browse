@@ -3,6 +3,9 @@
     <col title="册条码号"  type="item_barcode">
         <xpath>*/itemBarcode</xpath>
     </col>
+    <col title="册参考ID" type="item_refid">
+        <xpath>*/itemRefID</xpath>
+    </col>
     <col title="馆藏地点" type="item_location">
         <xpath>*/location</xpath>
     </col>
@@ -12,10 +15,22 @@
     <col title="读者证条码号" type="reader_barcode">
         <xpath>*/readerBarcode</xpath>
     </col>
+    <col title="读者参考ID" type="patron_refid">
+        <xpath>*/patronRefID</xpath>
+    </col>
     <col title="通知取书日期" convert="rfc1123tolocaltimeu">
         <xpath>*/notifyDate</xpath>
     </col>
-  <col title="册参考ID" type="item_refid">
-    <xpath>*/refID</xpath>
-  </col>
+    <col title="配书位置" type="box">
+        <xpath>*/box</xpath>
+    </col>
+    <col title="配书操作者" type="boxing_operator">
+        <xpath>*/boxingOperator</xpath>
+    </col>
+    <col title="配书日期" convert="rfc1123tolocaltimeu">
+        <xpath>*/boxingDate</xpath>
+    </col>
+    <col title="参考ID" type="notify_refid">
+        <xpath>*/refID</xpath>
+    </col>
 </root>

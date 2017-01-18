@@ -1452,7 +1452,7 @@ out kernel_errorcode);
         }
 
         // TODO: 需要硬编码禁止覆盖一些流通专用的字段 borrows 等
-        // TODO: <fprms:file> 元素应该不让覆盖
+        // TODO: <dprms:file> 元素应该不让覆盖
         // 检查记录有无修改
         // return:
         //      -1  出错

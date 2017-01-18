@@ -168,6 +168,7 @@ namespace dp2Library
             string strBiblio,
             byte[] baTimestamp,
             string strComment,
+            string strStyle,
             out string strOutputBiblioRecPath,
             out byte[] baOutputTimestamp);
 
@@ -819,6 +820,26 @@ namespace dp2Library
         string strStyle,
         out ResInfoItem[] items,
         out DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode);
+
+        [OperationContract(IsInitiating = true, IsTerminating = false)]
+        LibraryServerResult GetAuthorNumber(
+    string strAuthor,
+    bool bSelectPinyin,
+    bool bSelectEntry,
+    bool bOutputDebugInfo,
+    ref List<Question> questions,
+    out string strNumber,
+    out string strDebugInfo);
+
+        [OperationContract(IsInitiating = true, IsTerminating = false)]
+        LibraryServerResult GetPinyin(
+string strText,
+out string strPinyinXml);
+
+        [OperationContract(IsInitiating = true, IsTerminating = false)]
+        LibraryServerResult SetPinyin(
+string strPinyinXml);
+
     }
 
 

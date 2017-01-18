@@ -11,79 +11,79 @@ using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.CirculationClient
 {
-	/// <summary>
+    /// <summary>
     /// 选择新记录模板名的对话框
     /// 本对话框根据一个xml模板文件，列出其中 template 元素的name属性值，让用户选择，
-	/// 最后对话框将选择的元素以及其下全部元素创建一个新的xml文档(字符串形式).
-	/// 本对话框不负责从服务获得文件。
-	/// </summary>
-	public class SelectRecordTemplateDlg : System.Windows.Forms.Form
-	{
+    /// 最后对话框将选择的元素以及其下全部元素创建一个新的xml文档(字符串形式).
+    /// 本对话框不负责从服务获得文件。
+    /// </summary>
+    public class SelectRecordTemplateDlg : System.Windows.Forms.Form
+    {
         const int WM_AUTO_CLOSE = API.WM_USER + 200;
         public bool AutoClose = false;  // 对话框口打开后立即关闭?
 
         // 2008/6/24
         public bool SaveMode = false;   // 是否为保存模式？
 
-		public ApplicationInfo ap = null;	// 引用
-		public string ApCfgTitle = "";	// 在ap中保存窗口外观状态的标题字符串
+        public ApplicationInfo ap = null;	// 引用
+        public string ApCfgTitle = "";	// 在ap中保存窗口外观状态的标题字符串
 
 
-		// public string InputXml = "";
-		// public string OutputXml = "";
+        // public string InputXml = "";
+        // public string OutputXml = "";
 
-		public string SelectedRecordXml = "";
+        public string SelectedRecordXml = "";
 
-		public bool CheckNameExist = true;
+        public bool CheckNameExist = true;
 
-		XmlDocument dom = null;
-		bool m_bChanged = false;	// DOM内容是否有变化
+        XmlDocument dom = null;
+        bool m_bChanged = false;	// DOM内容是否有变化
 
         private DigitalPlatform.GUI.ListViewNF listView1;
-		private System.Windows.Forms.ColumnHeader columnHeader_name;
-		private System.Windows.Forms.ColumnHeader columnHeader_comment;
-		private System.Windows.Forms.CheckBox checkBox_notAsk;
-		private System.Windows.Forms.Button button_OK;
-		private System.Windows.Forms.Button button_Cancel;
-		private System.Windows.Forms.Label label1;
-		public System.Windows.Forms.TextBox textBox_name;
+        private System.Windows.Forms.ColumnHeader columnHeader_name;
+        private System.Windows.Forms.ColumnHeader columnHeader_comment;
+        private System.Windows.Forms.CheckBox checkBox_notAsk;
+        private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.Button button_Cancel;
+        private System.Windows.Forms.Label label1;
+        public System.Windows.Forms.TextBox textBox_name;
 
-		private System.ComponentModel.Container components = null;
+        private System.ComponentModel.Container components = null;
 
-		public SelectRecordTemplateDlg()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public SelectRecordTemplateDlg()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SelectRecordTemplateDlg));
             this.listView1 = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -201,58 +201,57 @@ namespace DigitalPlatform.CirculationClient
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		private void SelectRecordTemplateDlg_Load(object sender, System.EventArgs e)
-		{
-			if (ap != null) 
-			{
-				if (ApCfgTitle != "" && ApCfgTitle != null) 
-				{
-					ap.LoadFormStates(this,
-						ApCfgTitle);
-				}
-				else 
-				{
-					Debug.Assert(true, "若要用ap保存和恢复窗口外观状态，必须先设置ApCfgTitle成员");
-				}
+        private void SelectRecordTemplateDlg_Load(object sender, System.EventArgs e)
+        {
+            if (ap != null)
+            {
+                if (ApCfgTitle != "" && ApCfgTitle != null)
+                {
+                    ap.LoadFormStates(this,
+                        ApCfgTitle);
+                }
+                else
+                {
+                    Debug.Assert(true, "若要用ap保存和恢复窗口外观状态，必须先设置ApCfgTitle成员");
+                }
 
-			}
+            }
 
-			if (dom != null)
-			{
-				FillList(true);
-			}
-			else 
-			{
-				Debug.Assert(true, "你一定忘记了先用Initial()");
-			}
+            if (dom != null)
+            {
+                FillList(true);
+            }
+            else
+            {
+                Debug.Assert(true, "你一定忘记了先用Initial()");
+            }
 
             //if (this.SaveMode == false)
             //    this.checkBox_notAsk.Enabled = true;
 
             if (this.AutoClose == true)
                 API.PostMessage(this.Handle, WM_AUTO_CLOSE, 0, 0);
+        }
 
-		}
+        private void SelectRecordTemplateDlg_Closed(object sender, System.EventArgs e)
+        {
+            if (ap != null)
+            {
+                if (ApCfgTitle != "" && ApCfgTitle != null)
+                {
+                    ap.SaveFormStates(this,
+                        ApCfgTitle);
+                }
+                else
+                {
+                    Debug.Assert(true, "若要用ap保存和恢复窗口外观状态，必须先设置ApCfgTitle成员");
+                }
 
-		private void SelectRecordTemplateDlg_Closed(object sender, System.EventArgs e)
-		{
-			if (ap != null) 
-			{
-				if (ApCfgTitle != "" && ApCfgTitle != null) 
-				{
-					ap.SaveFormStates(this,
-						ApCfgTitle);
-				}
-				else 
-				{
-					Debug.Assert(true, "若要用ap保存和恢复窗口外观状态，必须先设置ApCfgTitle成员");
-				}
-
-			}
-		}
+            }
+        }
 
         // 2015/5/11
         /// <summary>
@@ -271,29 +270,29 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-		public int Initial(
+        public int Initial(
             bool bSaveMode,
             string strInputXml,
-			out string strError)
-		{
-			strError = "";
+            out string strError)
+        {
+            strError = "";
 
             this.SaveMode = bSaveMode;
 
-			dom = new XmlDocument();
+            dom = new XmlDocument();
 
-			try 
-			{
-				dom.LoadXml(strInputXml);
-			}
-			catch (Exception ex)
-			{
+            try
+            {
+                dom.LoadXml(strInputXml);
+            }
+            catch (Exception ex)
+            {
                 strError = ExceptionUtil.GetAutoText(ex);
-				return -1;
-			}
+                return -1;
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
         /// <summary>
         /// 缺省窗口过程
@@ -311,48 +310,54 @@ namespace DigitalPlatform.CirculationClient
         }
 
 
-		void FillList(bool bAutoSelect)
-		{
+        void FillList(bool bAutoSelect)
+        {
             // 2015/6/14
             string strExistName = this.textBox_name.Text;
 
-			listView1.Items.Clear();
-			listView1_SelectedIndexChanged(null, null);
+            listView1.Items.Clear();
+            listView1_SelectedIndexChanged(null, null);
 
-			XmlNodeList nodes = dom.DocumentElement.SelectNodes("template");
+            bool bSelected = false;
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("template");
 
-			for(int i=0;i<nodes.Count; i++) 
-			{
-				string strName = DomUtil.GetAttr(nodes[i], "name");
-				string strComment =  DomUtil.GetAttr(nodes[i], "comment");
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                string strName = DomUtil.GetAttr(nodes[i], "name");
+                string strComment = DomUtil.GetAttr(nodes[i], "comment");
 
-				ListViewItem item = new ListViewItem(strName, 0);
-				item.SubItems.Add(strComment);
+                ListViewItem item = new ListViewItem(strName, 0);
+                item.SubItems.Add(strComment);
 
-				listView1.Items.Add(item);
+                listView1.Items.Add(item);
 
                 if (bAutoSelect == true
                     && string.IsNullOrEmpty(strExistName) == false
                     && strName == strExistName)
-                    item.Selected = true;
-			}
+                {
+                    bSelected = true;
+                    ListViewUtil.BeginSelectItem(this, item);
+                }
+            }
 
-            if (bAutoSelect == true && listView1.SelectedItems.Count == 0)
+            if (bAutoSelect == true && bSelected == false)
             {
                 // 选择第一项
-                    if (listView1.Items.Count != 0)
-                        listView1.Items[0].Selected = true;
+                if (listView1.Items.Count != 0)
+                {
+                    ListViewUtil.BeginSelectItem(this, listView1.Items[0]);
+                }
             }
-		}
+        }
 
-		private void button_OK_Click(object sender, System.EventArgs e)
-		{
-			// 如果m_bChanged == true，允许空白着OK退出
-			if (m_bChanged == false && textBox_name.Text == "")
-			{
+        private void button_OK_Click(object sender, System.EventArgs e)
+        {
+            // 如果m_bChanged == true，允许空白着OK退出
+            if (m_bChanged == false && textBox_name.Text == "")
+            {
                 MessageBox.Show(this, "尚未指定模板名");
-				return ;
-			}
+                return;
+            }
 
             /*
             if (checkBox_delete.Checked == true)
@@ -372,208 +377,208 @@ namespace DigitalPlatform.CirculationClient
 
             string strName = textBox_name.Text;
 
-			XmlNode node = dom.DocumentElement.SelectSingleNode("template[@name='" + strName + "']");
+            XmlNode node = dom.DocumentElement.SelectSingleNode("template[@name='" + strName + "']");
 
-			if (CheckNameExist == true 
-				&& node == null) 
-			{
+            if (CheckNameExist == true
+                && node == null)
+            {
                 MessageBox.Show(this, "模板名 '" + strName + "在模板文件中不存在...");
-				// MessageBox.Show(this, "SelectSingleNode()失败...");
-				return;
-			}
+                // MessageBox.Show(this, "SelectSingleNode()失败...");
+                return;
+            }
 
-			if (node != null) 
-			{
-				if (node.ChildNodes.Count == 0) 
-				{
-					MessageBox.Show(this, "<template name='"+strName+"'>元素下必须有一个儿子节点，这个节点将充当根节点...");
-					return;
-				}
+            if (node != null)
+            {
+                if (node.ChildNodes.Count == 0)
+                {
+                    MessageBox.Show(this, "<template name='" + strName + "'>元素下必须有一个儿子节点，这个节点将充当根节点...");
+                    return;
+                }
 
-				SelectedRecordXml = node.ChildNodes[0].OuterXml;
-			}
-			else
-			{
-				SelectedRecordXml = "";
-			}
+                SelectedRecordXml = node.ChildNodes[0].OuterXml;
+            }
+            else
+            {
+                SelectedRecordXml = "";
+            }
 
-			//END1:
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+            //END1:
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
 
-		private void button_Cancel_Click(object sender, System.EventArgs e)
-		{
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-		}
+        private void button_Cancel_Click(object sender, System.EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
 
-		private void listView1_DoubleClick(object sender, System.EventArgs e)
-		{
-			button_OK_Click(null, null);
-		}
+        private void listView1_DoubleClick(object sender, System.EventArgs e)
+        {
+            button_OK_Click(null, null);
+        }
 
-		private void listView1_SelectedIndexChanged(object sender, System.EventArgs e)
-		{
-			if (listView1.SelectedItems.Count == 0)
-			{
-				textBox_name.Text = "";
-			}
-			else 
-			{
-				/*
-				if () // 复选
-				{
-					textBox_name.Text = "";
+        private void listView1_SelectedIndexChanged(object sender, System.EventArgs e)
+        {
+            if (listView1.SelectedItems.Count == 0)
+            {
+                textBox_name.Text = "";
+            }
+            else
+            {
+                /*
+                if () // 复选
+                {
+                    textBox_name.Text = "";
 
-					for(int i=0;i<listView1.SelectedItems.Count;i++)
-					{
-						if (textBox_name.Text != "")
-							textBox_name.Text += ",";
+                    for(int i=0;i<listView1.SelectedItems.Count;i++)
+                    {
+                        if (textBox_name.Text != "")
+                            textBox_name.Text += ",";
 
-						textBox_name.Text += listView1.SelectedItems[i].Text;
-					}
+                        textBox_name.Text += listView1.SelectedItems[i].Text;
+                    }
 
-				}
-				else
-				*/
-					textBox_name.Text = listView1.SelectedItems[0].Text;
-			}
-		
-		}
+                }
+                else
+                */
+                textBox_name.Text = listView1.SelectedItems[0].Text;
+            }
 
-		private void textBox_name_TextChanged(object sender, System.EventArgs e)
-		{
-			/*
-			if (textBox_name.Text != "")
-			{
-				button_OK.Enabled = true;
-			}
-			else 
-			{
-				button_OK.Enabled = false;
-			}
-			*/
-		}
+        }
 
-		// 替换或者追加一个记录
-		public int ReplaceRecord(string strName,
-			string strContent,
-			out string strError)
-		{
-			strError = "";
-//			strOutputXml = "";
+        private void textBox_name_TextChanged(object sender, System.EventArgs e)
+        {
+            /*
+            if (textBox_name.Text != "")
+            {
+                button_OK.Enabled = true;
+            }
+            else 
+            {
+                button_OK.Enabled = false;
+            }
+            */
+        }
 
-			if (dom == null)
-			{
-				strError = "dom为null";
-				return -1;
-			}
+        // 替换或者追加一个记录
+        public int ReplaceRecord(string strName,
+            string strContent,
+            out string strError)
+        {
+            strError = "";
+            //			strOutputXml = "";
 
-			XmlNode node = dom.DocumentElement.SelectSingleNode("template[@name='" + strName + "']");
+            if (dom == null)
+            {
+                strError = "dom为null";
+                return -1;
+            }
 
-			if (node == null) 
-			{
-				
-				node = dom.CreateElement("template");
-				DomUtil.SetAttr(node, "name", strName);
-				// 新建立一个记录
-				node = dom.DocumentElement.AppendChild(node);
-			}
+            XmlNode node = dom.DocumentElement.SelectSingleNode("template[@name='" + strName + "']");
+
+            if (node == null)
+            {
+
+                node = dom.CreateElement("template");
+                DomUtil.SetAttr(node, "name", strName);
+                // 新建立一个记录
+                node = dom.DocumentElement.AppendChild(node);
+            }
 
 
-			// 要防止strContent是全XML文件内容
-			XmlDocument temp = new XmlDocument();
-			try 
-			{
-				temp.LoadXml(strContent);
-			}
-			catch (Exception ex)
-			{
+            // 要防止strContent是全XML文件内容
+            XmlDocument temp = new XmlDocument();
+            try
+            {
+                temp.LoadXml(strContent);
+            }
+            catch (Exception ex)
+            {
                 strError = ExceptionUtil.GetAutoText(ex);
-				return -1;
-			}
+                return -1;
+            }
 
-			node.InnerXml = temp.DocumentElement.OuterXml;	// 根的纯XML
+            node.InnerXml = temp.DocumentElement.OuterXml;	// 根的纯XML
 
-			m_bChanged = true;
+            m_bChanged = true;
 
-			// strOutputXml = dom.DocumentElement.OuterXml;	// DomUtil.GetXml(dom);
+            // strOutputXml = dom.DocumentElement.OuterXml;	// DomUtil.GetXml(dom);
 
-			return 0;
-		}
+            return 0;
+        }
 
-		/*
-		// 删除若干记录
-		public int DeleteRecords(string strNameList,
-			out string strOutputXml,
-			out string strError)
-		{
-			strError = "";
-			strOutputXml = "";
+        /*
+        // 删除若干记录
+        public int DeleteRecords(string strNameList,
+            out string strOutputXml,
+            out string strError)
+        {
+            strError = "";
+            strOutputXml = "";
 
-			if (dom == null)
-			{
-				strError = "dom为null";
-				return -1;
-			}
+            if (dom == null)
+            {
+                strError = "dom为null";
+                return -1;
+            }
 
-			string[] aName = strNameList.Split(new Char [] {','});
-
-
-			for(int i=0;i<aName.Length;i++)
-			{
-				string strName = aName[i].Trim();
-				if (strName == "")
-					continue;
-
-				XmlNode node = dom.DocumentElement.SelectSingleNode("template[@name='" + strName + "']");
-
-				if (node == null) 
-					continue;
-
-				node.ParentNode.RemoveChild(node);
-			}
-
-			strOutputXml = dom.DocumentElement.OuterXml;	// DomUtil.GetXml(dom);
-
-			return 0;
-		}
-		*/
-
-		private void listView1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			if(e.Button != MouseButtons.Right)
-				return;
-
-			ContextMenu contextMenu = new ContextMenu();
-			MenuItem menuItem = null;
-
-			bool bSelected = listView1.SelectedItems.Count > 0;
-
-			//
-			menuItem = new MenuItem("修改(&M)");
-			menuItem.Click += new System.EventHandler(this.menu_modify);
-			if (bSelected == false || this.SaveMode == false) 
-			{
-				menuItem.Enabled = false;
-			}
-			contextMenu.MenuItems.Add(menuItem);
-
-			// ---
-			menuItem = new MenuItem("-");
-			contextMenu.MenuItems.Add(menuItem);
+            string[] aName = strNameList.Split(new Char [] {','});
 
 
-			menuItem = new MenuItem("删除(&D)");
-			menuItem.Click += new System.EventHandler(this.menu_deleteRecord);
-			if (bSelected == false || this.SaveMode == false)
-				menuItem.Enabled = false;
-			contextMenu.MenuItems.Add(menuItem);
+            for(int i=0;i<aName.Length;i++)
+            {
+                string strName = aName[i].Trim();
+                if (strName == "")
+                    continue;
 
-			contextMenu.Show(listView1, new Point(e.X, e.Y) );		
-			
-		}
+                XmlNode node = dom.DocumentElement.SelectSingleNode("template[@name='" + strName + "']");
+
+                if (node == null) 
+                    continue;
+
+                node.ParentNode.RemoveChild(node);
+            }
+
+            strOutputXml = dom.DocumentElement.OuterXml;	// DomUtil.GetXml(dom);
+
+            return 0;
+        }
+        */
+
+        private void listView1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            bool bSelected = listView1.SelectedItems.Count > 0;
+
+            //
+            menuItem = new MenuItem("修改(&M)");
+            menuItem.Click += new System.EventHandler(this.menu_modify);
+            if (bSelected == false || this.SaveMode == false)
+            {
+                menuItem.Enabled = false;
+            }
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            menuItem = new MenuItem("删除(&D)");
+            menuItem.Click += new System.EventHandler(this.menu_deleteRecord);
+            if (bSelected == false || this.SaveMode == false)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            contextMenu.Show(listView1, new Point(e.X, e.Y));
+
+        }
 
 #if NO
 		// 修改名字和注释
@@ -657,123 +662,123 @@ namespace DigitalPlatform.CirculationClient
         ERROR1:
             MessageBox.Show(this, strError);
         }
-	
-		void menu_deleteRecord(object sender, System.EventArgs e)
-		{
-			if (listView1.SelectedItems.Count == 0)
-			{
+
+        void menu_deleteRecord(object sender, System.EventArgs e)
+        {
+            if (listView1.SelectedItems.Count == 0)
+            {
                 MessageBox.Show(this, "尚未选择拟删除的模板记录事项...");
-				return;
-			}
+                return;
+            }
 
-			string strError = "";
-			int nRet = 0;
+            string strError = "";
+            int nRet = 0;
 
-			DialogResult result = MessageBox.Show(this,
+            DialogResult result = MessageBox.Show(this,
                 "确实要删除所选择的模板记录?",
-				"SelectRecordTemplateDlg",
-				MessageBoxButtons.YesNo,
-				MessageBoxIcon.Question, 
-				MessageBoxDefaultButton.Button2);
-			if (result != DialogResult.Yes)
-				return;
+                "SelectRecordTemplateDlg",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
 
-			
-			foreach(ListViewItem item in listView1.SelectedItems)
-			{
-				string strOldName = ListViewUtil.GetItemText(item, 0);
-	
-				nRet = ChangeRecordProperty(strOldName, 
-					null,
-					null,
-					out strError);
-				if (nRet == -1) 
-				{
-					MessageBox.Show(this, strError);
-					return;
-				}
-			}
 
-			FillList(false);
-		}
+            foreach (ListViewItem item in listView1.SelectedItems)
+            {
+                string strOldName = ListViewUtil.GetItemText(item, 0);
 
-		// 修改DOM中的记录属性，或者删除DOM中的记录
-		// parameters:
-		//		strNewName	如果==null，表示删除此记录
-		int ChangeRecordProperty(string strOldName,
-			string strNewName,
-			string strNewComment,
-			out string strError)
-		{
+                nRet = ChangeRecordProperty(strOldName,
+                    null,
+                    null,
+                    out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
+            }
 
-			strError = "";
+            FillList(false);
+        }
 
-			if (dom == null)
-			{
-				strError = "dom为null";
-				return -1;
-			}
+        // 修改DOM中的记录属性，或者删除DOM中的记录
+        // parameters:
+        //		strNewName	如果==null，表示删除此记录
+        int ChangeRecordProperty(string strOldName,
+            string strNewName,
+            string strNewComment,
+            out string strError)
+        {
 
-			XmlNode node = dom.DocumentElement.SelectSingleNode("template[@name='" + strOldName + "']");
+            strError = "";
 
-			if (node == null) 
-			{
+            if (dom == null)
+            {
+                strError = "dom为null";
+                return -1;
+            }
+
+            XmlNode node = dom.DocumentElement.SelectSingleNode("template[@name='" + strOldName + "']");
+
+            if (node == null)
+            {
                 strError = "模板记录 '" + strOldName + "' 没有找到...";
-				return -1;
-			}
+                return -1;
+            }
 
-			if (strNewName == null || strNewName == "")
-			{
-				node.ParentNode.RemoveChild(node);
-			}
-			else 
-			{
-				DomUtil.SetAttr(node, "name", strNewName);
-				DomUtil.SetAttr(node, "comment", strNewComment);
-			}
+            if (strNewName == null || strNewName == "")
+            {
+                node.ParentNode.RemoveChild(node);
+            }
+            else
+            {
+                DomUtil.SetAttr(node, "name", strNewName);
+                DomUtil.SetAttr(node, "comment", strNewComment);
+            }
 
-			m_bChanged = true;
+            m_bChanged = true;
 
-			return 0;
-		}
+            return 0;
+        }
 
-		private void SelectRecordTemplateDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			if (this.DialogResult != DialogResult.OK
-				&& m_bChanged == true)
-			{
-				DialogResult result = MessageBox.Show(this,
+        private void SelectRecordTemplateDlg_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (this.DialogResult != DialogResult.OK
+                && m_bChanged == true)
+            {
+                DialogResult result = MessageBox.Show(this,
                     "确实要放弃先前所做的全部修改么?\r\n\r\n(是)放弃修改 (否)不关闭窗口\r\n\r\n(注: 模板名为空的情况下仍可以按\"确定\"按钮保存所做的修改。)",
-					"SelectRecordTemplateDlg",
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Question, 
-					MessageBoxDefaultButton.Button2);
-				if (result != DialogResult.Yes) 
-				{
-					e.Cancel = true;
-					return;
-				}
-			}
-		}
+                    "SelectRecordTemplateDlg",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+            }
+        }
 
         /// <summary>
         /// 内容是否发生过修改
         /// </summary>
         public bool Changed
-		{
-			get 
-			{
-				return m_bChanged;
-			}
-		}
-	
-		public string OutputXml
-		{
-			get 
-			{
-				return dom.DocumentElement.OuterXml;	// DomUtil.GetXml(dom);
-			}
-		}
+        {
+            get
+            {
+                return m_bChanged;
+            }
+        }
+
+        public string OutputXml
+        {
+            get
+            {
+                return dom.DocumentElement.OuterXml;	// DomUtil.GetXml(dom);
+            }
+        }
 
         public string SelectedName
         {
@@ -798,5 +803,5 @@ namespace DigitalPlatform.CirculationClient
                 this.checkBox_notAsk.Checked = value;
             }
         }
-	}
+    }
 }

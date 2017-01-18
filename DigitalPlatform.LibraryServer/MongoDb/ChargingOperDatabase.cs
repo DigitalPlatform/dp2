@@ -252,8 +252,10 @@ namespace DigitalPlatform.LibraryServer
             if (collection == null)
                 return -1;
 
-            var keyFunction = (BsonJavaScript)@"{}";
-
+            // var keyFunction = (BsonJavaScript)@"{}";
+            var keyFunction = (BsonJavaScript)@"function(doc) {
+return { None : '' };
+}"; // mongodb v3.4
             var document = new BsonDocument("count", 0);
             var result = collection.Group(
                 query,

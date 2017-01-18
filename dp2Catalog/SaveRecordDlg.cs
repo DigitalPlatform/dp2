@@ -115,7 +115,11 @@ namespace dp2Catalog
             // 初始化dp2协议相关参数
             this.dp2ResTree1.stopManager = e.MainForm.stopManager;
             this.dp2ResTree1.Servers = e.MainForm.Servers;	// 引用
+#if OLD_CHANNEL
             this.dp2ResTree1.Channels = e.dp2Channels;
+#endif
+            this.dp2ResTree1.ChannelManager = Program.MainForm;
+
             this.dp2ResTree1.EnabledIndices = new int[] { dp2ResTree.RESTYPE_DB };
             this.dp2ResTree1.Fill(null);
 
@@ -143,7 +147,7 @@ namespace dp2Catalog
                     return;
                 }
 
-                this.CurrentUserName = this.dp2ResTree1.CurrentUserName;
+                this.CurrentUserName = Program.MainForm.CurrentUserName;  // 2016/11/21 changed  // this.dp2ResTree1.CurrentUserName;
             }
 
             else if (this.tabControl_main.SelectedIndex == 2)
@@ -372,9 +376,8 @@ namespace dp2Catalog
             // 否则不动
 
             return;
-            ERROR1:
+        ERROR1:
             MessageBox.Show(this, strError);
-
         }
 
         public string ActiveProtocol
@@ -435,7 +438,7 @@ namespace dp2Catalog
 
             string strPath = this.textBox_dtlpRecPath.Text;
 
-            string [] parts = strPath.Split(new char [] {'/'});
+            string[] parts = strPath.Split(new char[] { '/' });
             if (parts.Length > 2)
                 strPath = parts[0] + "/" + parts[1];
 
@@ -601,6 +604,6 @@ namespace dp2Catalog
     public class GetDp2SearchParamEventArgs : EventArgs
     {
         public MainForm MainForm = null;
-        public LibraryChannelCollection dp2Channels = null;
+        // public LibraryChannelCollection dp2Channels = null;
     }
 }

@@ -271,7 +271,10 @@ namespace DigitalPlatform.LibraryServer
             var query = Query.And(Query.GTE("OperTime", start_time),
                 Query.LT("OperTime", end_time));
 
-            var keyFunction = (BsonJavaScript)@"{}";
+            // var keyFunction = (BsonJavaScript)@"{}";
+            var keyFunction = (BsonJavaScript)@"function(doc) {
+return { None : '' };
+}"; // mongodb v3.4
 
             var document = new BsonDocument("count", 0);
             var result = collection.Group(
@@ -331,7 +334,6 @@ namespace DigitalPlatform.LibraryServer
                 new BsonJavaScript("function(doc, out){ out.count++; }"),
                 null
             ).Skip<BsonDocument>(start);
-
 
             List<ValueCount> values = new List<ValueCount>();
             int nCount = 0;

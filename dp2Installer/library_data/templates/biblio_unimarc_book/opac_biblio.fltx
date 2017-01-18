@@ -12,6 +12,7 @@
 // 2015/7/17 数字资源对象表格显示，采用 ScriptUtil.BuildObjectHtmlTable() 构造
 // 2015/12/10 修正一处缺少 <div class='coverimage'> 的 Bug
 // 2015/12/14 Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "LargeImage");
+// 2016/12/27 StringUtil.IsHttpUrl()
 
 using System;
 using System.Collections.Generic;
@@ -1604,7 +1605,7 @@ using DigitalPlatform.Text;
     
      if (string.IsNullOrEmpty(Root._imageUrl) == false)
      {
-        if (StringUtil.HasHead(Root._imageUrl, "http:") == true)
+        if (StringUtil.IsHttpUrl(Root._imageUrl) == true)
           Host.ResultString = "<div class='coverimage'><img src='"+Root._imageUrl+"'></img></div>" + Host.ResultString;
         else
           {

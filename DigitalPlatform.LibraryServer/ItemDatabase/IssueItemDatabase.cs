@@ -1110,8 +1110,10 @@ out string strError)
                 "parent",
                 strBiblioRecId);
 
-            strXml = dom.OuterXml;
+            // 2017/1/13
+            DomUtil.RemoveEmptyElements(dom.DocumentElement);
 
+            strXml = dom.OuterXml;
             return 0;
         }
 

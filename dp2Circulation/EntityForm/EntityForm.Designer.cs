@@ -93,6 +93,7 @@ namespace dp2Circulation
             this.MenuItem_marcEditor_getKeys = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_marcEditor_getSummary = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_marcEditor_editMacroTable = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_marcEditor_fixed = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_marcEditor_saveTo = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_setTargetRecord = new System.Windows.Forms.ToolStripButton();
@@ -100,6 +101,7 @@ namespace dp2Circulation
             this.toolStripSplitButton_searchDup = new System.Windows.Forms.ToolStripSplitButton();
             this.ToolStripMenuItem_searchDupInExistWindow = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_searchDupInNewWindow = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_checkUnique = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripButton_verifyData = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_next = new System.Windows.Forms.ToolStripButton();
@@ -684,7 +686,8 @@ namespace dp2Circulation
             this.ToolStripMenuItem_enableSaveAllButton,
             this.MenuItem_marcEditor_getKeys,
             this.MenuItem_marcEditor_getSummary,
-            this.MenuItem_marcEditor_editMacroTable});
+            this.MenuItem_marcEditor_editMacroTable,
+            this.MenuItem_marcEditor_fixed});
             this.toolStripDropDownButton_marcEditor_someFunc.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_marcEditor_someFunc.Image")));
             this.toolStripDropDownButton_marcEditor_someFunc.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_marcEditor_someFunc.Name = "toolStripDropDownButton_marcEditor_someFunc";
@@ -799,6 +802,13 @@ namespace dp2Circulation
             this.MenuItem_marcEditor_editMacroTable.Text = "宏定义(&M)...";
             this.MenuItem_marcEditor_editMacroTable.Click += new System.EventHandler(this.MenuItem_marcEditor_editMacroTable_Click);
             // 
+            // MenuItem_marcEditor_fixed
+            // 
+            this.MenuItem_marcEditor_fixed.Name = "MenuItem_marcEditor_fixed";
+            this.MenuItem_marcEditor_fixed.Size = new System.Drawing.Size(257, 22);
+            this.MenuItem_marcEditor_fixed.Text = "固定到左侧(&L)";
+            this.MenuItem_marcEditor_fixed.Click += new System.EventHandler(this.MenuItem_marcEditor_toggleFixed_Click);
+            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
@@ -843,7 +853,8 @@ namespace dp2Circulation
             this.toolStripSplitButton_searchDup.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.toolStripSplitButton_searchDup.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_searchDupInExistWindow,
-            this.ToolStripMenuItem_searchDupInNewWindow});
+            this.ToolStripMenuItem_searchDupInNewWindow,
+            this.ToolStripMenuItem_checkUnique});
             this.toolStripSplitButton_searchDup.Image = ((System.Drawing.Image)(resources.GetObject("toolStripSplitButton_searchDup.Image")));
             this.toolStripSplitButton_searchDup.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
             this.toolStripSplitButton_searchDup.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
@@ -865,6 +876,13 @@ namespace dp2Circulation
             this.ToolStripMenuItem_searchDupInNewWindow.Size = new System.Drawing.Size(235, 22);
             this.ToolStripMenuItem_searchDupInNewWindow.Text = "在新开的查重窗中查重(&N)";
             this.ToolStripMenuItem_searchDupInNewWindow.Click += new System.EventHandler(this.ToolStripMenuItem_searchDupInNewWindow_Click);
+            // 
+            // ToolStripMenuItem_chechUnique
+            // 
+            this.ToolStripMenuItem_checkUnique.Name = "ToolStripMenuItem_chechUnique";
+            this.ToolStripMenuItem_checkUnique.Size = new System.Drawing.Size(235, 22);
+            this.ToolStripMenuItem_checkUnique.Text = "检查唯一性(&U)";
+            this.ToolStripMenuItem_checkUnique.Click += new System.EventHandler(this.ToolStripMenuItem_checkUnique_Click);
             // 
             // toolStripButton_verifyData
             // 
@@ -1323,6 +1341,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_searchDup;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_searchDupInExistWindow;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_searchDupInNewWindow;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_checkUnique;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_marcEditor_setActiveCatalogingRule;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
         private System.Windows.Forms.ToolStripSplitButton toolStripSplitButton_insertCoverImage;
@@ -1337,5 +1356,6 @@ namespace dp2Circulation
         private DigitalPlatform.EasyMarc.EasyMarcControl easyMarcControl1;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_marcEditor_editMacroTable;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_removeCoverImage;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_marcEditor_fixed;
     }
 }

@@ -26,6 +26,14 @@ namespace dp2Catalog
         // http://stackoverflow.com/questions/17117372/form-activeform-occasionally-works
         // Form.ActiveForm occasionally works
 
+        public static MainForm MainForm
+        {
+            get
+            {
+                return _mainForm;
+            }
+        }
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -153,7 +161,7 @@ namespace dp2Catalog
             }
         }
 
-        static string GetMacAddressString()
+        public static string GetMacAddressString()
         {
             List<string> macs = SerialCodeForm.GetMacAddress();
             return StringUtil.MakePathList(macs);

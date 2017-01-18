@@ -713,8 +713,10 @@ out string strError)
                 "libraryCode",
                 sessioninfo.LibraryCodeList);
 
-            strXml = dom.OuterXml;
+            // 2017/1/13
+            DomUtil.RemoveEmptyElements(dom.DocumentElement);
 
+            strXml = dom.OuterXml;
             return 0;
         }
 

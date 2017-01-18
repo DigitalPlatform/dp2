@@ -474,6 +474,7 @@ namespace dp2Catalog
                 // 设置窗口尺寸状态
                 MainForm.AppInfo.LoadMdiChildFormStates(this,
                     "mdi_form_state",
+                    SizeStyle.All,
                     MainForm.DefaultMdiWindowWidth,
                     MainForm.DefaultMdiWindowHeight);
 
@@ -2233,6 +2234,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     {
                         MarcRecord temp = new MarcRecord(strMarc);
                         temp.select("field[@name='998']").detach();
+                        temp.select("field[@name='997']").detach();
                         strMarc = temp.Text;
                     }
 
@@ -3056,7 +3058,11 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                             GuiUtil.SetControlFont(dlg, this.Font);
 
                             dlg.Text = "请指定一个 dp2library 数据库，以作为模拟的查重起点";
+#if OLD_CHANNEL
                             dlg.dp2Channels = dp2_searchform.Channels;
+#endif
+                            dlg.ChannelManager = Program.MainForm;
+
                             dlg.Servers = this.MainForm.Servers;
                             dlg.EnabledIndices = new int[] { dp2ResTree.RESTYPE_DB };
                             dlg.Path = strDefaultStartPath;  // 采用遗留的上次用过的路径
@@ -3992,7 +3998,9 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
         {
             dp2SearchForm dp2_searchform = this.GetDp2SearchForm();
 
+#if OLD_CHANNEL
             e.dp2Channels = dp2_searchform.Channels;
+#endif
             e.MainForm = this.MainForm;
         }
 
@@ -6631,7 +6639,11 @@ Stack:
                 dbname_dlg.EnableNotAsk = true;
 
                 dbname_dlg.Text = "装载书目模板 -- 请选择目标数据库";
+#if OLD_CHANNEL
                 dbname_dlg.dp2Channels = dp2_searchform.Channels;
+#endif
+                dbname_dlg.ChannelManager = Program.MainForm;
+
                 dbname_dlg.Servers = this.MainForm.Servers;
                 dbname_dlg.EnabledIndices = new int[] { dp2ResTree.RESTYPE_DB };
                 dbname_dlg.Path = strStartPath;
@@ -6985,7 +6997,11 @@ Stack:
             GuiUtil.SetControlFont(dlg, this.Font);
 
             dlg.Text = "请选择目标数据库";
+#if OLD_CHANNEL
             dlg.dp2Channels = dp2_searchform.Channels;
+#endif
+            dlg.ChannelManager = Program.MainForm;
+
             dlg.Servers = this.MainForm.Servers;
             dlg.EnabledIndices = new int[] { dp2ResTree.RESTYPE_DB };
             dlg.Path = strStartPath;
@@ -7973,6 +7989,7 @@ Keys keyData)
                         }
                     }
 
+#if OLD_CHANNEL
                     if (dp2_searchform.Channel == null)
                     {
                         string strServerName = "";
@@ -7993,6 +8010,25 @@ Keys keyData)
                     if (dp2_searchform.Channel != null)
                         return dp2_searchform.Channel.UserName;
                     return "";
+#endif
+                    if (string.IsNullOrEmpty(dp2_searchform.CurrentUserName))
+                    {
+                        string strServerName = "";
+                        string strLocalPath = "";
+
+                        // 解析记录路径。
+                        // 记录路径为如下形态 "中文图书/1 @服务器"
+                        dp2SearchForm.ParseRecPath(strPath,
+                            out strServerName,
+                            out strLocalPath);
+
+                        nRet = dp2_searchform.ForceLogin(
+    null,
+    strServerName,
+    out strError);
+                    }
+
+                    return dp2_searchform.CurrentUserName;
                 }
 
                 return "";
@@ -8746,7 +8782,7 @@ Keys keyData)
 
         #endregion
 
-        public bool GetQueryContent(out string strUse, 
+        public bool GetQueryContent(out string strUse,
             out string strWord)
         {
             strUse = "";
@@ -8791,7 +8827,7 @@ Keys keyData)
             {
                 strWord = record.select("field[@name='020']/subfield[@name='a']").FirstContent;
                 if (string.IsNullOrEmpty(strWord) == true)
-                { 
+                {
                     strWord = record.select("field[@name='245']/subfield[@name='a']").FirstContent;
                     strUse = "title";
                 }

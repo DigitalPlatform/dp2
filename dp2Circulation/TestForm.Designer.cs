@@ -28,7 +28,8 @@ namespace dp2Circulation
         /// </summary>
         private void InitializeComponent()
         {
-            DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle2 = new DigitalPlatform.CirculationClient.PatronCardStyle();
+            this.components = new System.ComponentModel.Container();
+            DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle1 = new DigitalPlatform.CirculationClient.PatronCardStyle();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_diskSpace = new System.Windows.Forms.TabPage();
             this.button_test = new System.Windows.Forms.Button();
@@ -206,6 +207,25 @@ namespace dp2Circulation
             this.tabPage_kernelResTree = new System.Windows.Forms.TabPage();
             this.button_kernelResTree_fill = new System.Windows.Forms.Button();
             this.kernelResTree1 = new DigitalPlatform.CirculationClient.KernelResTree();
+            this.tabPage_setBiblioInfo = new System.Windows.Forms.TabPage();
+            this.button_setBiblioInfo_request = new System.Windows.Forms.Button();
+            this.button_setBiblioInfo_getContentFromIso2709 = new System.Windows.Forms.Button();
+            this.textBox_setBiblioInfo_content = new System.Windows.Forms.TextBox();
+            this.label34 = new System.Windows.Forms.Label();
+            this.textBox_setBiblioInfo_biblioType = new System.Windows.Forms.TextBox();
+            this.label33 = new System.Windows.Forms.Label();
+            this.textBox_setBiblioInfo_biblioRecPath = new System.Windows.Forms.TextBox();
+            this.label32 = new System.Windows.Forms.Label();
+            this.textBox_setBiblioInfo_action = new System.Windows.Forms.TextBox();
+            this.label31 = new System.Windows.Forms.Label();
+            this.tabPage_login = new System.Windows.Forms.TabPage();
+            this.label35 = new System.Windows.Forms.Label();
+            this.textBox_login_userName = new System.Windows.Forms.TextBox();
+            this.textBox_login_password = new System.Windows.Forms.TextBox();
+            this.label36 = new System.Windows.Forms.Label();
+            this.textBox_login_parameters = new System.Windows.Forms.TextBox();
+            this.label37 = new System.Windows.Forms.Label();
+            this.button_login_login = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_diskSpace.SuspendLayout();
             this.tabPage_windowsEventLog.SuspendLayout();
@@ -239,6 +259,8 @@ namespace dp2Circulation
             this.tabPage_amazonSearch.SuspendLayout();
             this.tabPage_test.SuspendLayout();
             this.tabPage_kernelResTree.SuspendLayout();
+            this.tabPage_setBiblioInfo.SuspendLayout();
+            this.tabPage_login.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -276,11 +298,13 @@ namespace dp2Circulation
             this.tabControl_main.Controls.Add(this.tabPage_amazonSearch);
             this.tabControl_main.Controls.Add(this.tabPage_test);
             this.tabControl_main.Controls.Add(this.tabPage_kernelResTree);
+            this.tabControl_main.Controls.Add(this.tabPage_setBiblioInfo);
+            this.tabControl_main.Controls.Add(this.tabPage_login);
             this.tabControl_main.Location = new System.Drawing.Point(9, 11);
             this.tabControl_main.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(347, 251);
+            this.tabControl_main.Size = new System.Drawing.Size(347, 281);
             this.tabControl_main.TabIndex = 0;
             // 
             // tabPage_diskSpace
@@ -299,7 +323,7 @@ namespace dp2Circulation
             this.tabPage_diskSpace.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_diskSpace.Name = "tabPage_diskSpace";
             this.tabPage_diskSpace.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_diskSpace.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_diskSpace.Size = new System.Drawing.Size(339, 255);
             this.tabPage_diskSpace.TabIndex = 0;
             this.tabPage_diskSpace.Text = "磁盘空间";
             this.tabPage_diskSpace.UseVisualStyleBackColor = true;
@@ -421,7 +445,7 @@ namespace dp2Circulation
             this.tabPage_windowsEventLog.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_windowsEventLog.Name = "tabPage_windowsEventLog";
             this.tabPage_windowsEventLog.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_windowsEventLog.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_windowsEventLog.Size = new System.Drawing.Size(339, 255);
             this.tabPage_windowsEventLog.TabIndex = 1;
             this.tabPage_windowsEventLog.Text = "Windows日志";
             this.tabPage_windowsEventLog.UseVisualStyleBackColor = true;
@@ -487,7 +511,7 @@ namespace dp2Circulation
             this.tabPage_webBrowser.Location = new System.Drawing.Point(4, 22);
             this.tabPage_webBrowser.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_webBrowser.Name = "tabPage_webBrowser";
-            this.tabPage_webBrowser.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_webBrowser.Size = new System.Drawing.Size(339, 255);
             this.tabPage_webBrowser.TabIndex = 2;
             this.tabPage_webBrowser.Text = "WebBrowser";
             this.tabPage_webBrowser.UseVisualStyleBackColor = true;
@@ -546,7 +570,7 @@ namespace dp2Circulation
             this.tabPage_webClient.Location = new System.Drawing.Point(4, 22);
             this.tabPage_webClient.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_webClient.Name = "tabPage_webClient";
-            this.tabPage_webClient.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_webClient.Size = new System.Drawing.Size(339, 255);
             this.tabPage_webClient.TabIndex = 3;
             this.tabPage_webClient.Text = "WebClient";
             this.tabPage_webClient.UseVisualStyleBackColor = true;
@@ -604,7 +628,7 @@ namespace dp2Circulation
             this.tabPage_locationEditControl.Location = new System.Drawing.Point(4, 22);
             this.tabPage_locationEditControl.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_locationEditControl.Name = "tabPage_locationEditControl";
-            this.tabPage_locationEditControl.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_locationEditControl.Size = new System.Drawing.Size(339, 255);
             this.tabPage_locationEditControl.TabIndex = 4;
             this.tabPage_locationEditControl.Text = "LocationEditControl";
             this.tabPage_locationEditControl.UseVisualStyleBackColor = true;
@@ -696,7 +720,7 @@ namespace dp2Circulation
             this.tabPage_captionEditControl.Location = new System.Drawing.Point(4, 22);
             this.tabPage_captionEditControl.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_captionEditControl.Name = "tabPage_captionEditControl";
-            this.tabPage_captionEditControl.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_captionEditControl.Size = new System.Drawing.Size(339, 255);
             this.tabPage_captionEditControl.TabIndex = 5;
             this.tabPage_captionEditControl.Text = "CaptionEditControl";
             this.tabPage_captionEditControl.UseVisualStyleBackColor = true;
@@ -769,7 +793,7 @@ namespace dp2Circulation
             this.tabPage_fromEditCOntrol.Location = new System.Drawing.Point(4, 22);
             this.tabPage_fromEditCOntrol.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_fromEditCOntrol.Name = "tabPage_fromEditCOntrol";
-            this.tabPage_fromEditCOntrol.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_fromEditCOntrol.Size = new System.Drawing.Size(339, 255);
             this.tabPage_fromEditCOntrol.TabIndex = 6;
             this.tabPage_fromEditCOntrol.Text = "FromEditControl";
             this.tabPage_fromEditCOntrol.UseVisualStyleBackColor = true;
@@ -854,7 +878,7 @@ namespace dp2Circulation
             this.tabPage_checkedComboBox.Location = new System.Drawing.Point(4, 22);
             this.tabPage_checkedComboBox.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_checkedComboBox.Name = "tabPage_checkedComboBox";
-            this.tabPage_checkedComboBox.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_checkedComboBox.Size = new System.Drawing.Size(339, 255);
             this.tabPage_checkedComboBox.TabIndex = 7;
             this.tabPage_checkedComboBox.Text = "CheckedComboBox";
             this.tabPage_checkedComboBox.UseVisualStyleBackColor = true;
@@ -929,7 +953,7 @@ namespace dp2Circulation
             this.tabPage_time.Location = new System.Drawing.Point(4, 22);
             this.tabPage_time.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_time.Name = "tabPage_time";
-            this.tabPage_time.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_time.Size = new System.Drawing.Size(339, 255);
             this.tabPage_time.TabIndex = 8;
             this.tabPage_time.Text = "Times";
             this.tabPage_time.UseVisualStyleBackColor = true;
@@ -1069,7 +1093,7 @@ namespace dp2Circulation
             this.tabPage_string.Location = new System.Drawing.Point(4, 22);
             this.tabPage_string.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_string.Name = "tabPage_string";
-            this.tabPage_string.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_string.Size = new System.Drawing.Size(339, 255);
             this.tabPage_string.TabIndex = 9;
             this.tabPage_string.Text = "String";
             this.tabPage_string.UseVisualStyleBackColor = true;
@@ -1186,7 +1210,7 @@ namespace dp2Circulation
             this.tabPage_font.Controls.Add(this.textBox_fontName);
             this.tabPage_font.Location = new System.Drawing.Point(4, 22);
             this.tabPage_font.Name = "tabPage_font";
-            this.tabPage_font.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_font.Size = new System.Drawing.Size(339, 255);
             this.tabPage_font.TabIndex = 10;
             this.tabPage_font.Text = "Font";
             this.tabPage_font.UseVisualStyleBackColor = true;
@@ -1241,7 +1265,7 @@ namespace dp2Circulation
             this.tabPage_gcatClient.Controls.Add(this.textBox_gcatClient_author);
             this.tabPage_gcatClient.Location = new System.Drawing.Point(4, 22);
             this.tabPage_gcatClient.Name = "tabPage_gcatClient";
-            this.tabPage_gcatClient.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_gcatClient.Size = new System.Drawing.Size(339, 255);
             this.tabPage_gcatClient.TabIndex = 11;
             this.tabPage_gcatClient.Text = "GcatClient";
             this.tabPage_gcatClient.UseVisualStyleBackColor = true;
@@ -1354,7 +1378,7 @@ namespace dp2Circulation
             this.tabPage_marcformat.Controls.Add(this.label17);
             this.tabPage_marcformat.Location = new System.Drawing.Point(4, 22);
             this.tabPage_marcformat.Name = "tabPage_marcformat";
-            this.tabPage_marcformat.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_marcformat.Size = new System.Drawing.Size(339, 255);
             this.tabPage_marcformat.TabIndex = 12;
             this.tabPage_marcformat.Text = "MarcFormat";
             this.tabPage_marcformat.UseVisualStyleBackColor = true;
@@ -1429,7 +1453,7 @@ namespace dp2Circulation
             this.tabPage_dpTable.Controls.Add(this.dpTable1);
             this.tabPage_dpTable.Location = new System.Drawing.Point(4, 22);
             this.tabPage_dpTable.Name = "tabPage_dpTable";
-            this.tabPage_dpTable.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_dpTable.Size = new System.Drawing.Size(339, 255);
             this.tabPage_dpTable.TabIndex = 13;
             this.tabPage_dpTable.Text = "DpTable";
             this.tabPage_dpTable.UseVisualStyleBackColor = true;
@@ -1511,7 +1535,7 @@ namespace dp2Circulation
             this.tabPage_xml.Controls.Add(this.label21);
             this.tabPage_xml.Location = new System.Drawing.Point(4, 22);
             this.tabPage_xml.Name = "tabPage_xml";
-            this.tabPage_xml.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_xml.Size = new System.Drawing.Size(339, 255);
             this.tabPage_xml.TabIndex = 14;
             this.tabPage_xml.Text = "XML";
             this.tabPage_xml.UseVisualStyleBackColor = true;
@@ -1579,7 +1603,7 @@ namespace dp2Circulation
             this.tabPage_camera.Controls.Add(this.panel_camera_preview);
             this.tabPage_camera.Location = new System.Drawing.Point(4, 22);
             this.tabPage_camera.Name = "tabPage_camera";
-            this.tabPage_camera.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_camera.Size = new System.Drawing.Size(339, 255);
             this.tabPage_camera.TabIndex = 15;
             this.tabPage_camera.Text = "Camera";
             this.tabPage_camera.UseVisualStyleBackColor = true;
@@ -1645,7 +1669,7 @@ namespace dp2Circulation
             this.tabPage_idcardReader.Controls.Add(this.label22);
             this.tabPage_idcardReader.Location = new System.Drawing.Point(4, 22);
             this.tabPage_idcardReader.Name = "tabPage_idcardReader";
-            this.tabPage_idcardReader.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_idcardReader.Size = new System.Drawing.Size(339, 255);
             this.tabPage_idcardReader.TabIndex = 16;
             this.tabPage_idcardReader.Text = "IdcardReader";
             this.tabPage_idcardReader.UseVisualStyleBackColor = true;
@@ -1712,7 +1736,7 @@ namespace dp2Circulation
             this.tabPage_cutter.Controls.Add(this.button_cutter_convertTextToXml);
             this.tabPage_cutter.Location = new System.Drawing.Point(4, 22);
             this.tabPage_cutter.Name = "tabPage_cutter";
-            this.tabPage_cutter.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_cutter.Size = new System.Drawing.Size(339, 255);
             this.tabPage_cutter.TabIndex = 17;
             this.tabPage_cutter.Text = "Cutter";
             this.tabPage_cutter.UseVisualStyleBackColor = true;
@@ -1800,7 +1824,7 @@ namespace dp2Circulation
             this.tabPage_optimize.Controls.Add(this.button_test_innerTextAndXPath);
             this.tabPage_optimize.Location = new System.Drawing.Point(4, 22);
             this.tabPage_optimize.Name = "tabPage_optimize";
-            this.tabPage_optimize.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_optimize.Size = new System.Drawing.Size(339, 255);
             this.tabPage_optimize.TabIndex = 18;
             this.tabPage_optimize.Text = "速度优化";
             this.tabPage_optimize.UseVisualStyleBackColor = true;
@@ -1866,7 +1890,7 @@ namespace dp2Circulation
             this.tabPage_excel.Controls.Add(this.button_excel_test);
             this.tabPage_excel.Location = new System.Drawing.Point(4, 22);
             this.tabPage_excel.Name = "tabPage_excel";
-            this.tabPage_excel.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_excel.Size = new System.Drawing.Size(339, 255);
             this.tabPage_excel.TabIndex = 19;
             this.tabPage_excel.Text = "Excel";
             this.tabPage_excel.UseVisualStyleBackColor = true;
@@ -1886,7 +1910,7 @@ namespace dp2Circulation
             this.tabPage_encoding.Controls.Add(this.button_encoding_detectEncoding);
             this.tabPage_encoding.Location = new System.Drawing.Point(4, 22);
             this.tabPage_encoding.Name = "tabPage_encoding";
-            this.tabPage_encoding.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_encoding.Size = new System.Drawing.Size(339, 255);
             this.tabPage_encoding.TabIndex = 20;
             this.tabPage_encoding.Text = "Encoding";
             this.tabPage_encoding.UseVisualStyleBackColor = true;
@@ -1907,7 +1931,7 @@ namespace dp2Circulation
             this.tabPage_patronCardControl.Controls.Add(this.patronCardControl1);
             this.tabPage_patronCardControl.Location = new System.Drawing.Point(4, 22);
             this.tabPage_patronCardControl.Name = "tabPage_patronCardControl";
-            this.tabPage_patronCardControl.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_patronCardControl.Size = new System.Drawing.Size(339, 255);
             this.tabPage_patronCardControl.TabIndex = 21;
             this.tabPage_patronCardControl.Text = "PatronCardControl";
             this.tabPage_patronCardControl.UseVisualStyleBackColor = true;
@@ -1929,7 +1953,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.patronCardControl1.Location = new System.Drawing.Point(4, 45);
             this.patronCardControl1.Name = "patronCardControl1";
-            this.patronCardControl1.PatronCardStyle = patronCardStyle2;
+            this.patronCardControl1.PatronCardStyle = patronCardStyle1;
             this.patronCardControl1.Size = new System.Drawing.Size(156, 119);
             this.patronCardControl1.TabIndex = 0;
             this.patronCardControl1.Text = "patronCardControl1";
@@ -1940,7 +1964,7 @@ namespace dp2Circulation
             this.tabPage_javascript.Controls.Add(this.button_javascript_run);
             this.tabPage_javascript.Location = new System.Drawing.Point(4, 22);
             this.tabPage_javascript.Name = "tabPage_javascript";
-            this.tabPage_javascript.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_javascript.Size = new System.Drawing.Size(339, 255);
             this.tabPage_javascript.TabIndex = 22;
             this.tabPage_javascript.Text = "javascript";
             this.tabPage_javascript.UseVisualStyleBackColor = true;
@@ -1967,7 +1991,7 @@ namespace dp2Circulation
             this.tabPage_ftp.Controls.Add(this.label30);
             this.tabPage_ftp.Location = new System.Drawing.Point(4, 22);
             this.tabPage_ftp.Name = "tabPage_ftp";
-            this.tabPage_ftp.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_ftp.Size = new System.Drawing.Size(339, 255);
             this.tabPage_ftp.TabIndex = 23;
             this.tabPage_ftp.Text = "FTP upload";
             this.tabPage_ftp.UseVisualStyleBackColor = true;
@@ -2056,7 +2080,7 @@ namespace dp2Circulation
             this.tabPage_marcTemplate.Controls.Add(this.button_marcTemplate_addLine);
             this.tabPage_marcTemplate.Location = new System.Drawing.Point(4, 22);
             this.tabPage_marcTemplate.Name = "tabPage_marcTemplate";
-            this.tabPage_marcTemplate.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_marcTemplate.Size = new System.Drawing.Size(339, 255);
             this.tabPage_marcTemplate.TabIndex = 24;
             this.tabPage_marcTemplate.Text = "MarcTemplate";
             this.tabPage_marcTemplate.UseVisualStyleBackColor = true;
@@ -2115,7 +2139,7 @@ namespace dp2Circulation
             this.tabPage_entitiesControl.Controls.Add(this.button_entitiesControl_addLine);
             this.tabPage_entitiesControl.Location = new System.Drawing.Point(4, 22);
             this.tabPage_entitiesControl.Name = "tabPage_entitiesControl";
-            this.tabPage_entitiesControl.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_entitiesControl.Size = new System.Drawing.Size(339, 255);
             this.tabPage_entitiesControl.TabIndex = 25;
             this.tabPage_entitiesControl.Text = "EntitiesControl";
             this.tabPage_entitiesControl.UseVisualStyleBackColor = true;
@@ -2136,7 +2160,7 @@ namespace dp2Circulation
             this.tabPage_entityRegisterControl.Controls.Add(this.button_entityRegisterControl_addLine);
             this.tabPage_entityRegisterControl.Location = new System.Drawing.Point(4, 22);
             this.tabPage_entityRegisterControl.Name = "tabPage_entityRegisterControl";
-            this.tabPage_entityRegisterControl.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_entityRegisterControl.Size = new System.Drawing.Size(339, 255);
             this.tabPage_entityRegisterControl.TabIndex = 26;
             this.tabPage_entityRegisterControl.Text = "EntityRegisterControl";
             this.tabPage_entityRegisterControl.UseVisualStyleBackColor = true;
@@ -2157,7 +2181,7 @@ namespace dp2Circulation
             this.tabPage_amazonSearch.Controls.Add(this.button_amazonSearch_openDialog);
             this.tabPage_amazonSearch.Location = new System.Drawing.Point(4, 22);
             this.tabPage_amazonSearch.Name = "tabPage_amazonSearch";
-            this.tabPage_amazonSearch.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_amazonSearch.Size = new System.Drawing.Size(339, 255);
             this.tabPage_amazonSearch.TabIndex = 27;
             this.tabPage_amazonSearch.Text = "Amazon Search";
             this.tabPage_amazonSearch.UseVisualStyleBackColor = true;
@@ -2180,7 +2204,7 @@ namespace dp2Circulation
             this.tabPage_test.Controls.Add(this.button_test_detectInstallation);
             this.tabPage_test.Location = new System.Drawing.Point(4, 22);
             this.tabPage_test.Name = "tabPage_test";
-            this.tabPage_test.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_test.Size = new System.Drawing.Size(339, 255);
             this.tabPage_test.TabIndex = 28;
             this.tabPage_test.Text = "杂项";
             this.tabPage_test.UseVisualStyleBackColor = true;
@@ -2231,7 +2255,7 @@ namespace dp2Circulation
             this.tabPage_kernelResTree.Controls.Add(this.kernelResTree1);
             this.tabPage_kernelResTree.Location = new System.Drawing.Point(4, 22);
             this.tabPage_kernelResTree.Name = "tabPage_kernelResTree";
-            this.tabPage_kernelResTree.Size = new System.Drawing.Size(339, 225);
+            this.tabPage_kernelResTree.Size = new System.Drawing.Size(339, 255);
             this.tabPage_kernelResTree.TabIndex = 29;
             this.tabPage_kernelResTree.Text = "KernelResTree";
             this.tabPage_kernelResTree.UseVisualStyleBackColor = true;
@@ -2252,19 +2276,202 @@ namespace dp2Circulation
             this.kernelResTree1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.kernelResTree1.ImageIndex = 0;
             this.kernelResTree1.Lang = null;
             this.kernelResTree1.Location = new System.Drawing.Point(3, 3);
             this.kernelResTree1.Name = "kernelResTree1";
+            this.kernelResTree1.SelectedImageIndex = 0;
             this.kernelResTree1.Size = new System.Drawing.Size(333, 193);
             this.kernelResTree1.TabIndex = 0;
             this.kernelResTree1.GetChannel += new DigitalPlatform.LibraryClient.GetChannelEventHandler(this.kernelResTree1_GetChannel);
             this.kernelResTree1.ReturnChannel += new DigitalPlatform.LibraryClient.ReturnChannelEventHandler(this.kernelResTree1_ReturnChannel);
             // 
+            // tabPage_setBiblioInfo
+            // 
+            this.tabPage_setBiblioInfo.Controls.Add(this.button_setBiblioInfo_request);
+            this.tabPage_setBiblioInfo.Controls.Add(this.button_setBiblioInfo_getContentFromIso2709);
+            this.tabPage_setBiblioInfo.Controls.Add(this.textBox_setBiblioInfo_content);
+            this.tabPage_setBiblioInfo.Controls.Add(this.label34);
+            this.tabPage_setBiblioInfo.Controls.Add(this.textBox_setBiblioInfo_biblioType);
+            this.tabPage_setBiblioInfo.Controls.Add(this.label33);
+            this.tabPage_setBiblioInfo.Controls.Add(this.textBox_setBiblioInfo_biblioRecPath);
+            this.tabPage_setBiblioInfo.Controls.Add(this.label32);
+            this.tabPage_setBiblioInfo.Controls.Add(this.textBox_setBiblioInfo_action);
+            this.tabPage_setBiblioInfo.Controls.Add(this.label31);
+            this.tabPage_setBiblioInfo.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_setBiblioInfo.Name = "tabPage_setBiblioInfo";
+            this.tabPage_setBiblioInfo.Size = new System.Drawing.Size(339, 255);
+            this.tabPage_setBiblioInfo.TabIndex = 30;
+            this.tabPage_setBiblioInfo.Text = "SetBibilioInfo()";
+            this.tabPage_setBiblioInfo.UseVisualStyleBackColor = true;
+            // 
+            // button_setBiblioInfo_request
+            // 
+            this.button_setBiblioInfo_request.Location = new System.Drawing.Point(6, 227);
+            this.button_setBiblioInfo_request.Name = "button_setBiblioInfo_request";
+            this.button_setBiblioInfo_request.Size = new System.Drawing.Size(87, 23);
+            this.button_setBiblioInfo_request.TabIndex = 9;
+            this.button_setBiblioInfo_request.Text = "Request";
+            this.button_setBiblioInfo_request.UseVisualStyleBackColor = true;
+            this.button_setBiblioInfo_request.Click += new System.EventHandler(this.button_setBiblioInfo_request_Click);
+            // 
+            // button_setBiblioInfo_getContentFromIso2709
+            // 
+            this.button_setBiblioInfo_getContentFromIso2709.Location = new System.Drawing.Point(100, 198);
+            this.button_setBiblioInfo_getContentFromIso2709.Name = "button_setBiblioInfo_getContentFromIso2709";
+            this.button_setBiblioInfo_getContentFromIso2709.Size = new System.Drawing.Size(236, 23);
+            this.button_setBiblioInfo_getContentFromIso2709.TabIndex = 8;
+            this.button_setBiblioInfo_getContentFromIso2709.Text = "get content From ISO2709 file ...";
+            this.button_setBiblioInfo_getContentFromIso2709.UseVisualStyleBackColor = true;
+            this.button_setBiblioInfo_getContentFromIso2709.Click += new System.EventHandler(this.button_setBiblioInfo_getContentFromIso2709_Click);
+            // 
+            // textBox_setBiblioInfo_content
+            // 
+            this.textBox_setBiblioInfo_content.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_setBiblioInfo_content.Location = new System.Drawing.Point(100, 103);
+            this.textBox_setBiblioInfo_content.Multiline = true;
+            this.textBox_setBiblioInfo_content.Name = "textBox_setBiblioInfo_content";
+            this.textBox_setBiblioInfo_content.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_setBiblioInfo_content.Size = new System.Drawing.Size(236, 88);
+            this.textBox_setBiblioInfo_content.TabIndex = 7;
+            // 
+            // label34
+            // 
+            this.label34.AutoSize = true;
+            this.label34.Location = new System.Drawing.Point(4, 106);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(53, 12);
+            this.label34.TabIndex = 6;
+            this.label34.Text = "Content:";
+            // 
+            // textBox_setBiblioInfo_biblioType
+            // 
+            this.textBox_setBiblioInfo_biblioType.Location = new System.Drawing.Point(100, 76);
+            this.textBox_setBiblioInfo_biblioType.Name = "textBox_setBiblioInfo_biblioType";
+            this.textBox_setBiblioInfo_biblioType.Size = new System.Drawing.Size(164, 21);
+            this.textBox_setBiblioInfo_biblioType.TabIndex = 5;
+            // 
+            // label33
+            // 
+            this.label33.AutoSize = true;
+            this.label33.Location = new System.Drawing.Point(4, 79);
+            this.label33.Name = "label33";
+            this.label33.Size = new System.Drawing.Size(71, 12);
+            this.label33.TabIndex = 4;
+            this.label33.Text = "BiblioType:";
+            // 
+            // textBox_setBiblioInfo_biblioRecPath
+            // 
+            this.textBox_setBiblioInfo_biblioRecPath.Location = new System.Drawing.Point(100, 49);
+            this.textBox_setBiblioInfo_biblioRecPath.Name = "textBox_setBiblioInfo_biblioRecPath";
+            this.textBox_setBiblioInfo_biblioRecPath.Size = new System.Drawing.Size(164, 21);
+            this.textBox_setBiblioInfo_biblioRecPath.TabIndex = 3;
+            // 
+            // label32
+            // 
+            this.label32.AutoSize = true;
+            this.label32.Location = new System.Drawing.Point(4, 52);
+            this.label32.Name = "label32";
+            this.label32.Size = new System.Drawing.Size(89, 12);
+            this.label32.TabIndex = 2;
+            this.label32.Text = "BiblioRecPath:";
+            // 
+            // textBox_setBiblioInfo_action
+            // 
+            this.textBox_setBiblioInfo_action.Location = new System.Drawing.Point(100, 22);
+            this.textBox_setBiblioInfo_action.Name = "textBox_setBiblioInfo_action";
+            this.textBox_setBiblioInfo_action.Size = new System.Drawing.Size(164, 21);
+            this.textBox_setBiblioInfo_action.TabIndex = 1;
+            // 
+            // label31
+            // 
+            this.label31.AutoSize = true;
+            this.label31.Location = new System.Drawing.Point(4, 25);
+            this.label31.Name = "label31";
+            this.label31.Size = new System.Drawing.Size(47, 12);
+            this.label31.TabIndex = 0;
+            this.label31.Text = "Action:";
+            // 
+            // tabPage_login
+            // 
+            this.tabPage_login.Controls.Add(this.button_login_login);
+            this.tabPage_login.Controls.Add(this.textBox_login_parameters);
+            this.tabPage_login.Controls.Add(this.label37);
+            this.tabPage_login.Controls.Add(this.textBox_login_password);
+            this.tabPage_login.Controls.Add(this.label36);
+            this.tabPage_login.Controls.Add(this.textBox_login_userName);
+            this.tabPage_login.Controls.Add(this.label35);
+            this.tabPage_login.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_login.Name = "tabPage_login";
+            this.tabPage_login.Size = new System.Drawing.Size(339, 255);
+            this.tabPage_login.TabIndex = 31;
+            this.tabPage_login.Text = "Login()";
+            this.tabPage_login.UseVisualStyleBackColor = true;
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(18, 19);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(59, 12);
+            this.label35.TabIndex = 0;
+            this.label35.Text = "user name";
+            // 
+            // textBox_login_userName
+            // 
+            this.textBox_login_userName.Location = new System.Drawing.Point(92, 16);
+            this.textBox_login_userName.Name = "textBox_login_userName";
+            this.textBox_login_userName.Size = new System.Drawing.Size(194, 21);
+            this.textBox_login_userName.TabIndex = 1;
+            // 
+            // textBox_login_password
+            // 
+            this.textBox_login_password.Location = new System.Drawing.Point(92, 43);
+            this.textBox_login_password.Name = "textBox_login_password";
+            this.textBox_login_password.Size = new System.Drawing.Size(194, 21);
+            this.textBox_login_password.TabIndex = 3;
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(18, 46);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(53, 12);
+            this.label36.TabIndex = 2;
+            this.label36.Text = "password";
+            // 
+            // textBox_login_parameters
+            // 
+            this.textBox_login_parameters.Location = new System.Drawing.Point(92, 70);
+            this.textBox_login_parameters.Name = "textBox_login_parameters";
+            this.textBox_login_parameters.Size = new System.Drawing.Size(194, 21);
+            this.textBox_login_parameters.TabIndex = 5;
+            // 
+            // label37
+            // 
+            this.label37.AutoSize = true;
+            this.label37.Location = new System.Drawing.Point(18, 73);
+            this.label37.Name = "label37";
+            this.label37.Size = new System.Drawing.Size(65, 12);
+            this.label37.TabIndex = 4;
+            this.label37.Text = "parameters";
+            // 
+            // button_login_login
+            // 
+            this.button_login_login.Location = new System.Drawing.Point(92, 98);
+            this.button_login_login.Name = "button_login_login";
+            this.button_login_login.Size = new System.Drawing.Size(75, 23);
+            this.button_login_login.TabIndex = 6;
+            this.button_login_login.Text = "button1";
+            this.button_login_login.UseVisualStyleBackColor = true;
+            this.button_login_login.Click += new System.EventHandler(this.button_login_login_Click);
+            // 
             // TestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(365, 273);
+            this.ClientSize = new System.Drawing.Size(365, 303);
             this.Controls.Add(this.tabControl_main);
             this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "TestForm";
@@ -2323,6 +2530,10 @@ namespace dp2Circulation
             this.tabPage_amazonSearch.ResumeLayout(false);
             this.tabPage_test.ResumeLayout(false);
             this.tabPage_kernelResTree.ResumeLayout(false);
+            this.tabPage_setBiblioInfo.ResumeLayout(false);
+            this.tabPage_setBiblioInfo.PerformLayout();
+            this.tabPage_login.ResumeLayout(false);
+            this.tabPage_login.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -2506,5 +2717,24 @@ namespace dp2Circulation
         private System.Windows.Forms.TabPage tabPage_kernelResTree;
         private System.Windows.Forms.Button button_kernelResTree_fill;
         private DigitalPlatform.CirculationClient.KernelResTree kernelResTree1;
+        private System.Windows.Forms.TabPage tabPage_setBiblioInfo;
+        private System.Windows.Forms.TextBox textBox_setBiblioInfo_action;
+        private System.Windows.Forms.Label label31;
+        private System.Windows.Forms.TextBox textBox_setBiblioInfo_biblioType;
+        private System.Windows.Forms.Label label33;
+        private System.Windows.Forms.TextBox textBox_setBiblioInfo_biblioRecPath;
+        private System.Windows.Forms.Label label32;
+        private System.Windows.Forms.TextBox textBox_setBiblioInfo_content;
+        private System.Windows.Forms.Label label34;
+        private System.Windows.Forms.Button button_setBiblioInfo_getContentFromIso2709;
+        private System.Windows.Forms.Button button_setBiblioInfo_request;
+        private System.Windows.Forms.TabPage tabPage_login;
+        private System.Windows.Forms.TextBox textBox_login_parameters;
+        private System.Windows.Forms.Label label37;
+        private System.Windows.Forms.TextBox textBox_login_password;
+        private System.Windows.Forms.Label label36;
+        private System.Windows.Forms.TextBox textBox_login_userName;
+        private System.Windows.Forms.Label label35;
+        private System.Windows.Forms.Button button_login_login;
     }
 }

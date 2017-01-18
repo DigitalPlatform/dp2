@@ -719,7 +719,10 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
             GuiUtil.SetControlFont(dlg, this.Font);
 
             dlg.Text = "请指定要绑定的 dp2library 服务器名";
+#if OLD_CHANNEL
             dlg.dp2Channels = dp2_searchform.Channels;
+#endif
+            dlg.ChannelManager = this.MainForm;
             dlg.Servers = this.MainForm.Servers;
             dlg.EnabledIndices = new int[] { dp2ResTree.RESTYPE_SERVER };
             dlg.Path = this.textBox_unionCatalog_bindingDp2ServerName.Text;
@@ -730,7 +733,6 @@ this.checkBox_isbn_wild.Checked == true ? "1" : "0");
                 return;
 
             this.textBox_unionCatalog_bindingDp2ServerName.Text = dlg.Path;
-
         }
 
         private void comboBox_defaultMarcSyntaxOID_SizeChanged(object sender, EventArgs e)

@@ -52,6 +52,8 @@ namespace DigitalPlatform.LibraryServer
                 "binding",  // 2009/10/11 
                 "operations", // 2009/10/24 
                 "bindingCost",  // 2012/6/1 装订费
+                "biblio",   //  2016/12/8
+                "oldRefID", // 2016/12/19
             };
 
         // <DoEntityOperChange()的下级函数>
@@ -82,7 +84,7 @@ namespace DigitalPlatform.LibraryServer
             };
              * */
 
-            for (int i = 0; i < core_entity_element_names.Length; i++)
+            foreach (string name in core_entity_element_names)
             {
                 /*
                 string strTextNew = DomUtil.GetElementText(domNew.DocumentElement,
@@ -91,12 +93,22 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetElementText(domExist.DocumentElement,
                     core_entity_element_names[i], strTextNew);
                  * */
-                // 2009/10/24 changed
+                // 2016/12/8
+                {
+                    XmlElement node_new = domNew.DocumentElement.SelectSingleNode(name) as XmlElement;
+                    if (node_new != null)
+                    {
+                        // 看看 dprms:missing 属性是否存在
+                        if (node_new.GetAttributeNode("missing", DpNs.dprms) != null)
+                            continue;
+                    }
+                }
+
                 string strTextNew = DomUtil.GetElementOuterXml(domNew.DocumentElement,
-                    core_entity_element_names[i]);
+                    name);
 
                 DomUtil.SetElementOuterXml(domExist.DocumentElement,
-                    core_entity_element_names[i], strTextNew);
+                    name, strTextNew);
             }
 
             // 清除以前的<dprms:file>元素
@@ -562,6 +574,7 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
         // 复制属于同一书目记录的全部实体记录
+        // TODO: 返回记录路径变迁信息
         // parameters:
         //      strAction   copy / move
         // return:
@@ -646,24 +659,29 @@ namespace DigitalPlatform.LibraryServer
                     // 复制的情况，要避免出现操作后的条码号重复现象
                     if (strAction == "copy")
                     {
+                        string strNewGuid = Guid.NewGuid().ToString();
                         // 修改册条码号，避免发生条码号重复
                         string strOldItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
                             "barcode");
                         if (String.IsNullOrEmpty(strOldItemBarcode) == false)
                         {
-                            strNewBarcode = strOldItemBarcode + "_" + Guid.NewGuid().ToString();
+                            strNewBarcode = strOldItemBarcode + "_" + strNewGuid;
                             DomUtil.SetElementText(dom.DocumentElement,
                                 "barcode",
                                 strNewBarcode);
                         }
 
                         // *** 后面这几个清除动作要作为规则出现
+                        string strOldRefID = DomUtil.GetElementText(dom.DocumentElement,
+                            "refID");
+                        DomUtil.SetElementText(dom.DocumentElement,
+    "oldRefID",
+    strOldRefID);
 
-                        // 清除 refid
+                        // 替换 refid
                         DomUtil.SetElementText(dom.DocumentElement,
                             "refID",
-                            null);
-
+                            strNewGuid);
 
                         // 把借者清除
                         // (源实体记录中如果有借阅信息，在普通界面上是无法删除此记录的。只能用出纳窗正规进行归还，然后才能删除)
@@ -695,8 +713,6 @@ namespace DigitalPlatform.LibraryServer
                         strError = "复制实体记录 '" + info.RecPath + "' 时发生错误: " + strError;
                         goto ERROR1;
                     }
-
-
 
                     // 修改xml记录。<parent>元素发生了变化
                     byte[] baOutputTimestamp = null;
@@ -741,7 +757,6 @@ namespace DigitalPlatform.LibraryServer
 
                 nOperCount++;
             }
-
 
             return nOperCount;
         ERROR1:
@@ -2161,10 +2176,8 @@ namespace DigitalPlatform.LibraryServer
 
             List<EntityInfo> ErrorInfos = new List<EntityInfo>();
 
-            for (int i = 0; i < entityinfos.Length; i++)
+            foreach (EntityInfo info in entityinfos)
             {
-                EntityInfo info = entityinfos[i];
-
                 string strAction = info.Action;
 
                 bool bForce = false;    // 是否为强制操作(强制操作不去除源记录中的流通信息字段内容)
@@ -2202,7 +2215,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 加工style字符串，便于写入日志
-                    if (StringUtil.IsInList("force", strStyle) == true)
+                    if (StringUtil.IsInList("force", strStyle) == false)
                         StringUtil.SetInList(ref strStyle, "force", true);
 
                 }
@@ -2259,7 +2272,7 @@ namespace DigitalPlatform.LibraryServer
                     if (sessioninfo.GlobalUser == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "带有风格 'nocheckdup' 的修改册信息的" + strAction + "操作被拒绝。只有全局用户并具备restore权限才能进行这样的操作。";
+                        result.ErrorInfo = "带有风格 'nocheckdup' 的修改册信息的" + strAction + "操作被拒绝。只有全局用户并具备 restore 权限才能进行这样的操作。";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -2527,8 +2540,42 @@ namespace DigitalPlatform.LibraryServer
                                 || info.Action == "change"
                                 || info.Action == "move")       // delete操作不校验记录
                             && bNoCheckDup == false
-                            && bSimulate == false)
+                            // && bSimulate == false
+                            )
                         {
+                            {
+                                string strLibraryCode = "";
+                                // 2012/12/31 先检查一次册记录中的馆藏地字段
+                                // return:
+                                //      -1  检查过程出错
+                                //      0   符合要求
+                                //      1   不符合要求
+                                nRet = CheckItemLibraryCode(domNewRec,
+                                    sessioninfo,
+                                    // sessioninfo.LibraryCodeList,
+                                    out strLibraryCode,
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    EntityInfo error = new EntityInfo(info);
+                                    error.ErrorInfo = "检查分馆代码时出错: " + strError;
+                                    error.ErrorCode = ErrorCodeValue.CommonError;
+                                    ErrorInfos.Add(error);
+                                    // domOperLog = null;  // 表示不必写入日志
+                                    continue;
+                                }
+                                // 对全局用户也要检查，唯独 restore 时候不检查
+                                if (bForce == false && nRet != 0)
+                                {
+                                    EntityInfo error = new EntityInfo(info);
+                                    error.ErrorInfo = "即将创建的册记录内容中的馆藏地点不符合要求: " + strError;
+                                    error.ErrorCode = ErrorCodeValue.CommonError;
+                                    ErrorInfos.Add(error);
+                                    // domOperLog = null;  // 表示不必写入日志
+                                    continue;
+                                }
+                            }
+
                             nRet = this.DoVerifyItemFunction(
                                 sessioninfo,
                                 strAction,
@@ -2552,7 +2599,8 @@ namespace DigitalPlatform.LibraryServer
                                 || info.Action == "move")       // delete操作不查重
                             && String.IsNullOrEmpty(strNewBarcode) == false
                             && bNoCheckDup == false    // 2008/10/6 
-                            && bSimulate == false)
+                            // && bSimulate == false    // 要想跳过查重，可以使用 nocheckdup
+                            )
                         {
 #if NO
                             // 验证条码号
@@ -2675,11 +2723,6 @@ namespace DigitalPlatform.LibraryServer
                             // 报错
                             if (bDup == true)
                             {
-                                /*
-                                string[] pathlist = new string[aPath.Count];
-                                aPath.CopyTo(pathlist);
-                                 * */
-
                                 EntityInfo error = new EntityInfo(info);
                                 error.ErrorInfo = "条码号 '" + strNewBarcode + "' 已经被下列册记录使用了: " + StringUtil.MakePathList(aPath)/*String.Join(",", pathlist)*/;
                                 error.ErrorCode = ErrorCodeValue.CommonError;
@@ -2775,7 +2818,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             domOperLog = null;  // 表示不必写入日志
                         }
-                        else
+
                         {
                             string strLibraryCode = "";
 
@@ -2801,6 +2844,7 @@ namespace DigitalPlatform.LibraryServer
                                 domOperLog = null;  // 表示不必写入日志
                                 continue;
                             }
+#if NO
                             if (sessioninfo.GlobalUser == false
                                 || sessioninfo.UserType == "reader")
                             {
@@ -2817,6 +2861,16 @@ namespace DigitalPlatform.LibraryServer
                                     domOperLog = null;  // 表示不必写入日志
                                     continue;
                                 }
+                            }
+#endif
+                            if (bForce == false && nRet != 0)
+                            {
+                                EntityInfo error = new EntityInfo(info);
+                                error.ErrorInfo = "即将创建的册记录内容中的馆藏地点不符合要求: " + strError;
+                                error.ErrorCode = ErrorCodeValue.CommonError;
+                                ErrorInfos.Add(error);
+                                domOperLog = null;  // 表示不必写入日志
+                                continue;
                             }
 
                             // 2014/7/3
@@ -2852,11 +2906,10 @@ namespace DigitalPlatform.LibraryServer
                                 }
                             }
 
-
                             lRet = channel.DoSaveTextRes(info.NewRecPath,
                                 strNewXml,
                                 false,   // include preamble?
-                                "content",
+                                "content" + (bSimulate ? ",simulate" : ""),
                                 info.OldTimestamp,
                                 out output_timestamp,
                                 out strOutputPath,
@@ -2873,19 +2926,22 @@ namespace DigitalPlatform.LibraryServer
                             }
                             else // 成功
                             {
-                                DomUtil.SetElementText(domOperLog.DocumentElement,
-    "libraryCode",
-    strLibraryCode);    // 册所在的馆代码
+                                if (domOperLog != null)
+                                {
+                                    DomUtil.SetElementText(domOperLog.DocumentElement,
+        "libraryCode",
+        strLibraryCode);    // 册所在的馆代码
 
-                                DomUtil.SetElementText(domOperLog.DocumentElement, "action", "new");
-                                if (String.IsNullOrEmpty(strStyle) == false)
-                                    DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
+                                    DomUtil.SetElementText(domOperLog.DocumentElement, "action", "new");
+                                    if (String.IsNullOrEmpty(strStyle) == false)
+                                        DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 
-                                // 不创建<oldRecord>元素
+                                    // 不创建<oldRecord>元素
 
-                                XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                                    "record", strNewXml);
-                                DomUtil.SetAttr(node, "recPath", strOutputPath);
+                                    XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                                        "record", strNewXml);
+                                    DomUtil.SetAttr(node, "recPath", strOutputPath);
+                                }
 
                                 // 新记录保存成功，需要返回信息元素。因为需要返回新的时间戳和实际保存的记录路径
 
@@ -2908,11 +2964,11 @@ namespace DigitalPlatform.LibraryServer
                             // 检查权限?
                             domOperLog = null;  // 表示不必写入日志
                         }
-                        else
+
                         {
                             // 执行SetEntities API中的"change"操作
                             nRet = DoEntityOperChange(
-                                bForce,
+                                // bForce,
                                 strStyle,
                                 sessioninfo,
                                 channel,
@@ -2933,7 +2989,7 @@ namespace DigitalPlatform.LibraryServer
                             // 检查权限?
                             domOperLog = null;  // 表示不必写入日志
                         }
-                        else
+
                         {
                             // 执行SetEntities API中的"move"操作
                             nRet = DoEntityOperMove(
@@ -2957,12 +3013,12 @@ namespace DigitalPlatform.LibraryServer
                             // 检查权限?
                             domOperLog = null;  // 表示不必写入日志
                         }
-                        else
+
                         {
                             // 删除册记录的操作
                             nRet = DoEntityOperDelete(
                                 sessioninfo,
-                                bForce,
+                                // bForce,
                                 strStyle,
                                 channel,
                                 info,
@@ -3218,6 +3274,14 @@ namespace DigitalPlatform.LibraryServer
         out strLibraryCode,
         out strPureName);
 
+            // 2016/12/31
+            // 检查 strLibraryCode 是否在合法的馆藏地列表范围内
+            if (IsValidLibraryCode(strLibraryCode) == false)
+            {
+                strError = "馆藏地 '" + strLocation + "' 中的馆代码 '" + strLibraryCode + "' 不是一个已经定义的馆代码";
+                return 1;
+            }
+
             // 先试探一下，馆藏地点字符串是否和 strLibraryCodeList 完全一致。
             // 这种检测主要是为了处理 strLibraryCodeList 传来 "西城分馆/集贤斋" 这样的个人书斋全路径的情况
             if (strLocation == strLibraryCodeList)
@@ -3450,6 +3514,17 @@ namespace DigitalPlatform.LibraryServer
         }
          */
 
+        static bool HasMissingAttr(XmlDocument dom)
+        {
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            XmlNodeList attrs = dom.DocumentElement.SelectNodes("*/@dprms:missing", nsmgr);
+            if (attrs.Count > 0)
+                return true;
+            return false;
+        }
+
         // 构造出适合保存的新册记录
         // 主要是为了把待加工的记录中，可能出现的属于“流通信息”的字段去除，避免出现安全性问题
         static int BuildNewEntityRecord(string strOriginXml,
@@ -3471,6 +3546,14 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // 2016/12/8
+            // 检查XML。不应该存在 dprms:missing 属性
+            if (HasMissingAttr(dom) == true)
+            {
+                strError = "用于创建实体记录的 XML 中不应使用 dprms:missing 属性";
+                return -1;
+            }
+
             // 流通元素名列表
             string[] element_names = new string[] {
                 "borrower",
@@ -3481,19 +3564,24 @@ namespace DigitalPlatform.LibraryServer
 
             for (int i = 0; i < element_names.Length; i++)
             {
+#if NO
                 DomUtil.SetElementText(dom.DocumentElement,
                     element_names[i], "");
+#endif
+                DomUtil.DeleteElement(dom.DocumentElement, element_names[i]);
             }
 
-            strXml = dom.OuterXml;
+            // 2017/1/13
+            DomUtil.RemoveEmptyElements(dom.DocumentElement);
 
+            strXml = dom.OuterXml;
             return 0;
         }
 
         // 删除册记录的操作
         int DoEntityOperDelete(
             SessionInfo sessioninfo,
-            bool bForce,
+            // bool bForce,
             string strStyle,
             RmsChannel channel,
             EntityInfo info,
@@ -3509,6 +3597,8 @@ namespace DigitalPlatform.LibraryServer
             long lRet = 0;
             string strError = "";
 
+            bool bForce = StringUtil.IsInList("force", strStyle);
+
             // 2008/6/24 
             if (String.IsNullOrEmpty(info.NewRecPath) == false)
             {
@@ -3523,6 +3613,7 @@ namespace DigitalPlatform.LibraryServer
                 info.NewRecPath = info.OldRecPath;
             }
 
+            bool bSimulate = StringUtil.IsInList("simulate", strStyle);
 
             // 如果记录路径为空, 则先获得记录路径
             if (String.IsNullOrEmpty(info.NewRecPath) == true)
@@ -3655,7 +3746,6 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-
             if (bForce == false)
             {
                 // 观察已经存在的记录是否有流通信息
@@ -3766,12 +3856,10 @@ namespace DigitalPlatform.LibraryServer
             nRet = CheckItemLibraryCode(domExist,
                 sessioninfo,
                 // sessioninfo.LibraryCodeList,
-                        out strLibraryCode,
-                        out strError);
+                out strLibraryCode,
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
-
-
 
             // 检查旧记录是否属于管辖范围
             if (sessioninfo.GlobalUser == false)
@@ -3787,6 +3875,7 @@ namespace DigitalPlatform.LibraryServer
 
             lRet = channel.DoDeleteRes(info.NewRecPath,
                 info.OldTimestamp,
+                bSimulate ? "simulate" : "",
                 out output_timestamp,
                 out strError);
             if (lRet == -1)
@@ -3813,21 +3902,23 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
-                // 成功
-                DomUtil.SetElementText(domOperLog.DocumentElement,
-    "libraryCode",
-    strLibraryCode);    // 册所在的馆代码
+                if (domOperLog != null)
+                {
+                    // 成功
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+        "libraryCode",
+        strLibraryCode);    // 册所在的馆代码
 
-                DomUtil.SetElementText(domOperLog.DocumentElement, "action", "delete");
-                if (String.IsNullOrEmpty(strStyle) == false)
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "action", "delete");
+                    if (String.IsNullOrEmpty(strStyle) == false)
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 
-                // 不创建<record>元素
+                    // 不创建<record>元素
 
-                XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "oldRecord", strExistingXml);
-                DomUtil.SetAttr(node, "recPath", info.NewRecPath);
-
+                    XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "oldRecord", strExistingXml);
+                    DomUtil.SetAttr(node, "recPath", info.NewRecPath);
+                }
 
                 // 如果删除成功，则不必要在数组中返回表示成功的信息元素了
             }
@@ -3849,7 +3940,7 @@ namespace DigitalPlatform.LibraryServer
         //      -1  出错
         //      0   成功
         int DoEntityOperChange(
-            bool bForce,
+            // bool bForce,
             string strStyle,
             SessionInfo sessioninfo,
             RmsChannel channel,
@@ -3865,6 +3956,8 @@ namespace DigitalPlatform.LibraryServer
             long lRet = 0;
 
             string strError = "";
+
+            bool bForce = StringUtil.IsInList("force", strStyle);
 
             // 检查一下路径
             if (String.IsNullOrEmpty(info.NewRecPath) == true)
@@ -3897,6 +3990,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 bNoOperations = true;
             }
+
+            bool bSimulate = StringUtil.IsInList("simulate", strStyle);
 
             string strExistXml = "";
             byte[] exist_timestamp = null;
@@ -4014,8 +4109,8 @@ namespace DigitalPlatform.LibraryServer
                 nRet = CheckItemLibraryCode(domExist,
                     sessioninfo,
                     // sessioninfo.LibraryCodeList,
-                            out strSourceLibraryCode,
-                            out strError);
+                    out strSourceLibraryCode,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
@@ -4146,6 +4241,7 @@ namespace DigitalPlatform.LibraryServer
                         && IncludeStateProcessing(strOldState) == true && IncludeStateProcessing(strNewState) == false)
                     {
                         string strReservationReaderBarcode = "";
+                        string strNotifyID = "";
 
                         // 察看本册预约情况, 并进行初步处理
                         // TODO: 如果为注销处理，需要通知等待者，书已经注销了，不用再等待
@@ -4157,6 +4253,7 @@ namespace DigitalPlatform.LibraryServer
                             false,
                             ref domNew,
                             out strReservationReaderBarcode,
+                            out strNotifyID,
                             out strError);
                         if (nRet == -1)
                         {
@@ -4164,7 +4261,8 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR1;
                         }
 
-                        if (String.IsNullOrEmpty(strReservationReaderBarcode) == false)
+                        if (String.IsNullOrEmpty(strReservationReaderBarcode) == false
+                            && bSimulate == false)
                         {
                             List<string> DeletedNotifyRecPaths = null;  // 被删除的通知记录。不用。
                             // 通知预约到书的操作
@@ -4180,6 +4278,7 @@ namespace DigitalPlatform.LibraryServer
                                 strNewBarcode,
                                 false,  // 不在大架
                                 false,  // 不需要再修改当前册记录，因为前面已经修改过了
+                                strNotifyID,
                                 out DeletedNotifyRecPaths,
                                 out strError);
                             if (nRet == -1)
@@ -4277,6 +4376,14 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
+                // 2016/12/8
+                // 检查 XML 中不应存在 dprms:missing 属性
+                if (HasMissingAttr(domNew) == true)
+                {
+                    strError = "用于强行覆盖保存的实体记录的 XML 中不应使用 dprms:missing 属性";
+                    goto ERROR1;
+                }
+
                 // 2008/5/29 
                 strNewXml = domNew.OuterXml;
             }
@@ -4296,6 +4403,7 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     goto ERROR1;
 
+#if NO
                 // 检查新记录是否属于管辖范围
                 if (sessioninfo.GlobalUser == false
                     || sessioninfo.UserType == "reader")
@@ -4305,6 +4413,12 @@ namespace DigitalPlatform.LibraryServer
                         strError = "册记录新内容中的馆藏地点不符合要求: " + strError;
                         goto ERROR1;
                     }
+                }
+#endif
+                if (bForce == false && nRet != 0)
+                {
+                    strError = "册记录新内容中的馆藏地点不符合要求: " + strError;
+                    goto ERROR1;
                 }
             }
 
@@ -4339,7 +4453,7 @@ namespace DigitalPlatform.LibraryServer
             lRet = channel.DoSaveTextRes(info.NewRecPath,
     strNewXml,
     false,   // include preamble?
-    "content",
+    "content" + (bSimulate ? ",simulate" : ""),
     exist_timestamp,
     out output_timestamp,
     out strOutputPath,
@@ -4368,23 +4482,26 @@ namespace DigitalPlatform.LibraryServer
             }
             else // 成功
             {
-                DomUtil.SetElementText(domOperLog.DocumentElement,
-    "libraryCode",
-    strSourceLibraryCode + "," + strTargetLibraryCode);    // 册所在的馆代码
+                if (domOperLog != null)
+                {
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+        "libraryCode",
+        strSourceLibraryCode + "," + strTargetLibraryCode);    // 册所在的馆代码
 
-                DomUtil.SetElementText(domOperLog.DocumentElement, "action", "change");
-                if (String.IsNullOrEmpty(strStyle) == false)
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "action", "change");
+                    if (String.IsNullOrEmpty(strStyle) == false)
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 
-                // 新记录
-                XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "record", strNewXml);
-                DomUtil.SetAttr(node, "recPath", info.NewRecPath);
+                    // 新记录
+                    XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "record", strNewXml);
+                    DomUtil.SetAttr(node, "recPath", info.NewRecPath);
 
-                // 旧记录
-                node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "oldRecord", strExistXml);
-                DomUtil.SetAttr(node, "recPath", info.OldRecPath);
+                    // 旧记录
+                    node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "oldRecord", strExistXml);
+                    DomUtil.SetAttr(node, "recPath", info.OldRecPath);
+                }
 
                 // 保存成功，需要返回信息元素。因为需要返回新的时间戳
                 error = new EntityInfo(info);
@@ -4587,6 +4704,8 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
+            bool bSimulate = StringUtil.IsInList("simulate", strStyle);
+
             // 检查即将覆盖的目标位置是不是有记录，如果有，则不允许进行move操作。
             // 如果要进行带覆盖目标位置记录功能的move操作，前端可以先执行一个delete操作，然后再执行move操作。
             // 这样规定，是为了避免过于复杂的判断逻辑，也便于前端操作者清楚操作的后果。
@@ -4599,7 +4718,6 @@ namespace DigitalPlatform.LibraryServer
 
             string strOutputPath = "";
             string strMetaData = "";
-
 
             if (bAppendStyle == false)
             {
@@ -4640,7 +4758,6 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
             }
-
 
             string strExistSourceXml = "";
             byte[] exist_source_timestamp = null;
@@ -4704,7 +4821,6 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
-
             // 观察时间戳是否发生变化
             nRet = ByteArray.Compare(info.OldTimestamp, exist_source_timestamp);
             if (nRet != 0)
@@ -4759,11 +4875,10 @@ namespace DigitalPlatform.LibraryServer
             nRet = CheckItemLibraryCode(domSourceExist,
                 sessioninfo,
                 // sessioninfo.LibraryCodeList,
-                        out strSourceLibraryCode,
-                        out strError);
+                out strSourceLibraryCode,
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
-
 
             // 检查旧记录是否属于管辖范围
             if (sessioninfo.GlobalUser == false
@@ -4796,7 +4911,6 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
             }
 
-
             // 合并新旧记录
             string strNewXml = "";
             nRet = MergeTwoEntityXml(domSourceExist,
@@ -4805,7 +4919,6 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-
 
             // 只有order权限的情况
             if (StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false
@@ -4855,12 +4968,15 @@ namespace DigitalPlatform.LibraryServer
 
             // 移动记录
             byte[] output_timestamp = null;
+            string strIdChangeList = "";
 
             // TODO: Copy后还要写一次？因为Copy并不写入新记录。(注：Copy/Move有时候会跨库，这样记录中<parent>需要改变)
             // 其实Copy的意义在于带走资源。否则还不如用Save+Delete
             lRet = channel.DoCopyRecord(info.OldRecPath,
                 info.NewRecPath,
                 true,   // bDeleteSourceRecord
+                bSimulate ? "simulate" : "",
+                out strIdChangeList,
                 out output_timestamp,
                 out strOutputPath,
                 out strError);
@@ -4879,10 +4995,29 @@ namespace DigitalPlatform.LibraryServer
             nRet = CheckItemLibraryCode(strNewXml,
                 sessioninfo,
                 // sessioninfo.LibraryCodeList,
-                        out strTargetLibraryCode,
-                        out strError);
+                out strTargetLibraryCode,
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
+
+#if NO
+            // 检查新记录是否属于管辖范围
+            if (sessioninfo.GlobalUser == false
+                || sessioninfo.UserType == "reader")
+            {
+                if (nRet != 0)
+                {
+                    strError = "册记录新内容中的馆藏地点不符合要求: " + strError;
+                    goto ERROR1;
+                }
+            }
+#endif
+            bool bForce = StringUtil.IsInList("force", strStyle);
+            if (bForce == false && nRet != 0)
+            {
+                strError = "册记录新内容中的馆藏地点不符合要求: " + strError;
+                goto ERROR1;
+            }
 
             // 2014/7/3
             if (this.VerifyBookType == true)
@@ -4911,24 +5046,13 @@ namespace DigitalPlatform.LibraryServer
             }
 
 
-            // 检查新记录是否属于管辖范围
-            if (sessioninfo.GlobalUser == false
-                || sessioninfo.UserType == "reader")
-            {
-                if (nRet != 0)
-                {
-                    strError = "册记录新内容中的馆藏地点不符合要求: " + strError;
-                    goto ERROR1;
-                }
-            }
-
             // Debug.Assert(strOutputPath == info.NewRecPath);
             string strTargetPath = strOutputPath;
 
             lRet = channel.DoSaveTextRes(strTargetPath,
                 strNewXml,
                 false,   // include preamble?
-                "content",
+                "content" + (bSimulate ? ",simulate" : ""),
                 output_timestamp,
                 out output_timestamp,
                 out strOutputPath,
@@ -4971,23 +5095,26 @@ namespace DigitalPlatform.LibraryServer
             {
                 info.NewRecPath = strOutputPath;    // 兑现保存的位置，因为可能有追加形式的路径
 
-                DomUtil.SetElementText(domOperLog.DocumentElement,
-    "libraryCode",
-    strSourceLibraryCode + "," + strTargetLibraryCode);    // 册所在的馆代码
+                if (domOperLog != null)
+                {
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+        "libraryCode",
+        strSourceLibraryCode + "," + strTargetLibraryCode);    // 册所在的馆代码
 
-                DomUtil.SetElementText(domOperLog.DocumentElement, "action", "move");
-                if (String.IsNullOrEmpty(strStyle) == false)
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "action", "move");
+                    if (String.IsNullOrEmpty(strStyle) == false)
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 
-                // 新记录
-                XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "record", strNewXml);
-                DomUtil.SetAttr(node, "recPath", info.NewRecPath);
+                    // 新记录
+                    XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "record", strNewXml);
+                    DomUtil.SetAttr(node, "recPath", info.NewRecPath);
 
-                // 旧记录
-                node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "oldRecord", strExistSourceXml);
-                DomUtil.SetAttr(node, "recPath", info.OldRecPath);
+                    // 旧记录
+                    node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "oldRecord", strExistSourceXml);
+                    DomUtil.SetAttr(node, "recPath", info.OldRecPath);
+                }
 
                 // 保存成功，需要返回信息元素。因为需要返回新的时间戳
                 error = new EntityInfo(info);
@@ -5000,7 +5127,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
-
         ERROR1:
             error = new EntityInfo(info);
             error.ErrorInfo = strError;

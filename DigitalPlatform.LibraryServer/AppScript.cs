@@ -1379,11 +1379,12 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // return:
+                    //      -2  校验函数不打算对这个分馆的号码进行校验
                     //      -1  调用出错
                     //      0   校验正确
                     //      1   校验发现错误
                     nRet = VerifyPatronBarcode(strLibraryCode, strNewBarcode, out strError);
-                    if (nRet != 0)
+                    if (nRet != 0 && nRet != -2)
                     {
                         if (nRet == 1)
                             return -3;
@@ -1438,6 +1439,7 @@ namespace DigitalPlatform.LibraryServer
         // 2016/4/3
         // 按照缺省行为，验证读者记录中的证条码号
         // return:
+        //      -2  校验函数不打算对这个分馆的号码进行校验
         //      -1  调用出错
         //      0   校验正确
         //      1   校验发现错误
@@ -1479,6 +1481,8 @@ namespace DigitalPlatform.LibraryServer
                            + (string.IsNullOrEmpty(strError) == true ? "" : ": " + strError);
                         return -1;
                     }
+                    else if (nResultValue == -2)
+                        return -2;  // 2016/12/20
                     else if (nResultValue != 1)
                     {
                         strError = "条码号 '" + strNewBarcode + "' 经验证发现不是一个合法的证条码号"
@@ -1557,12 +1561,25 @@ namespace DigitalPlatform.LibraryServer
         out strLibraryCode,
         out strRoom);
 
+            // 检查来自 location 元素中的馆代码部分
+            {
+
+            }
+
+            XmlElement item = this.App.GetLocationItemElement(
+    strLibraryCode,
+    strRoom);
+
             // 检查馆藏地点字符串
             if (strAction == "new"
 || strAction == "change"
 || strAction == "move")
             {
-
+                if (item == null)
+                {
+                    strError = "馆代码 '"+strLibraryCode+"' 没有定义馆藏地点 '"+strRoom+"'(根据 <locationTypes> 定义)";
+                    return 1;
+                }
             }
 
             // 2014/1/10
@@ -1572,9 +1589,11 @@ namespace DigitalPlatform.LibraryServer
 || strAction == "move")       // delete操作不检查
 && String.IsNullOrEmpty(strNewBarcode) == true)
             {
+#if NO
                 XmlElement item = this.App.GetLocationItemElement(
                     strLibraryCode,
                     strRoom);
+#endif
                 if (item != null)
                 {
                     bool bNullable = DomUtil.GetBooleanParam(item, "itemBarcodeNullable", true);
@@ -1597,11 +1616,12 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(strNewBarcode) == false)
             {
                 // return:
+                //      -2  校验函数不打算对这个分馆的号码进行校验
                 //      -1  调用出错
                 //      0   校验正确
                 //      1   校验发现错误
                 nRet = VerifyItemBarcode(strLibraryCode, strNewBarcode, out strError);
-                if (nRet != 0)
+                if (nRet != 0 && nRet != -2)
                     return nRet;
             }
 
@@ -1668,6 +1688,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 按照缺省行为，验证册记录中的册条码号
         // return:
+        //      -2  VerifyBarcode() 函数中返回 -2，表示这个分馆不打算进行校验
         //      -1  调用出错
         //      0   校验正确
         //      1   校验发现错误
@@ -1709,6 +1730,8 @@ namespace DigitalPlatform.LibraryServer
                            + (string.IsNullOrEmpty(strError) == true ? "" : ": " + strError);
                         return -1;
                     }
+                    else if (nResultValue == -2)
+                        return -2;  // 2016/12/20
                     else if (nResultValue != 2)
                     {
                         strError = "条码号 '" + strNewBarcode + "' 经验证发现不是一个合法的册条码号"
@@ -2313,7 +2336,7 @@ namespace DigitalPlatform.LibraryServer
                         long lValue = 0;
                         LibraryApplication.ParsePeriodUnit(strPeriod,
                             out lValue,
-                            out strPeriodUnit, 
+                            out strPeriodUnit,
                             out strError);
                         lOver = lValue;
                         nRet = 1;

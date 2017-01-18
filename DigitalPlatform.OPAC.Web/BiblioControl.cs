@@ -850,7 +850,7 @@ namespace DigitalPlatform.OPAC.Web
                             meta.Name = item.Key;
                             meta.Content = item.Value;
                             if (StringUtil.HasHead(item.Value, "urn:") == true
-                                || StringUtil.HasHead(item.Value, "http:") == true
+                                || StringUtil.IsHttpUrl(item.Value) == true
                                 || StringUtil.HasHead(item.Value, "info:") == true
                                 )
                                 meta.Attributes.Add("scheme", "DCTERMS.URI");

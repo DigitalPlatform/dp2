@@ -53,15 +53,37 @@
     <caption lang="en">Location</caption>
   </table>
 
-  <!-- 2015/5/7 增加 参考ID -->
+  <!-- 2015/5/7 增加 册参考ID -->
+  <key>
+    <xpath>*/itemRefID</xpath>
+    <from>itemRefID</from>
+    <table ref="itemRefID" />
+  </key>
+  <table name="itemRefID" id="7" type="item_refid">
+    <caption lang="zh-CN">册参考ID</caption>
+    <caption lang="en">Item Reference ID</caption>
+  </table>
+  
+  <!-- 2016/12/4 增加 读者参考ID -->
+  <key>
+    <xpath>*/patronRefID</xpath>
+    <from>patronRefID</from>
+    <table ref="patronRefID" />
+  </key>
+  <table name="patronRefID" id="8" type="patron_refid">
+    <caption lang="zh-CN">读者参考ID</caption>
+    <caption lang="en">Patron Reference ID</caption>
+  </table>
+  
+  <!-- 2016/12/4 增加 参考ID -->
   <key>
     <xpath>*/refID</xpath>
     <from>refID</from>
     <table ref="refID" />
   </key>
-  <table name="refID" id="7" type="item_refid">
-    <caption lang="zh-CN">册参考ID</caption>
-    <caption lang="en">Item Reference ID</caption>
+  <table name="refID" id="9" type="notify_refid">
+    <caption lang="zh-CN">参考ID</caption>
+    <caption lang="en">Reference ID</caption>
   </table>
-
+  
 </root>

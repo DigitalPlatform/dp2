@@ -135,6 +135,37 @@ namespace DigitalPlatform.Script
             return 0;
         }
 
+        // 2016/12/15 尚未测试
+        // 是否为 10 位 ISBN?
+        public static bool IsISBN10(string strSource)
+        {
+            if (string.IsNullOrEmpty(strSource) == true)
+                return false;
+            strSource = strSource.Replace("-", "").Trim();
+            if (string.IsNullOrEmpty(strSource) == true)
+                return false;
+
+            // 10位、无-
+            if (strSource.Length == 10
+                && strSource.IndexOf("-") == -1)
+            {
+                try
+                {
+                    char c = GetIsbn10VerifyChar(strSource);
+                    if (c != strSource[9])
+                        return false;
+                }
+                catch (ArgumentException ex)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         // 校验 ISBN 字符串
         // 注：返回 -1 和 返回 1 的区别：-1 表示调用过程出错，暗示对这样的 ISBN 字符串应当预先检查，若不符合基本形式要求则避免调用本函数
         // return:

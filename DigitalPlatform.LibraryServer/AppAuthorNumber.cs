@@ -13,6 +13,7 @@ using Lucene.Net.Analysis.Tokenattributes;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -57,7 +58,7 @@ namespace DigitalPlatform.LibraryServer
             bool bSelectPinyin,
             bool bSelectEntry,
             bool bOutputDebugInfo,
-            ref QuestionCollection questions,
+            ref List<Question> questions,
             out string strNumber,
             out StringBuilder debug_info,
             out string strError)
@@ -151,7 +152,7 @@ namespace DigitalPlatform.LibraryServer
 
                 List<string> aPath = null;
                 lRet = channel.DoGetSearchResult(
-                "default",
+                    "default",
                     1000,
                     "zh",
                     null,	// stop,
@@ -201,7 +202,7 @@ namespace DigitalPlatform.LibraryServer
                 // 如果命中多个记录
                 if (aPath.Count > 1 && bSelectEntry == true)
                 {
-                    Question q = questions.GetQuestion(nStep);
+                    Question q = GetQuestion(questions, nStep);
                     if (q == null)
                     {
                         string strNameList = BuildNameList(
@@ -213,7 +214,8 @@ namespace DigitalPlatform.LibraryServer
                         string strAskText = "名称 '" + strPart + "' 存在多个条目: \r\n---\r\n"
                             + strNameList
                             + "---\r\n\r\n请选择一个。(输入序号，从1开始计数)";
-                        q = questions.NewQuestion(nStep,
+                        q = NewQuestion(questions,
+                            nStep,
                             strAskText);
                         Debug.Assert(q != null, "");
                         strError = "请回答问题，以便为 '" + strAuthor + "' 确定适当的号码表条目。";
@@ -782,7 +784,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 string strHanzi = dom.DocumentElement.GetAttribute("h");
-                string strPinyin = dom.DocumentElement.GetAttribute( "p");
+                string strPinyin = dom.DocumentElement.GetAttribute("p");
                 string strComment = dom.DocumentElement.GetAttribute("c");
 
                 if (strComment != "")
@@ -801,7 +803,7 @@ namespace DigitalPlatform.LibraryServer
         //		0	没有找到
         //		1	找到
         int GetPinyin(
-            ref QuestionCollection questions,
+            ref List<Question> questions,
             ref int nStep,
             string strAuthor,
             RmsChannel channel,
@@ -819,6 +821,7 @@ namespace DigitalPlatform.LibraryServer
                 + StringUtil.GetXmlStringSimple(strHanzi)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>10</maxCount></item><lang>zh</lang></target>";
 
+#if NO
             // TODO: 最好是连检索带获取命中的第一条记录
             long lRet = channel.DoSearch(strQueryXml,
                 "default",
@@ -875,6 +878,27 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+#endif
+
+            Record[] records = null;
+            long lRet = channel.DoSearchEx(strQueryXml,
+                "default",
+                "", // strOutputStyle
+                1,
+                "zh",
+                "id,xml",
+                out records,
+                out strError);
+            if (lRet == -1)
+            {
+                strError = "检索拼音库时出错: " + strError;
+                return -1;
+            }
+            if (lRet == 0)
+                return 0;	// not found
+
+            string strXml = records[0].RecordBody.Xml;
+
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -896,13 +920,14 @@ namespace DigitalPlatform.LibraryServer
 
                     return 1;
                 }
-                Question q = questions.GetQuestion(nStep);
+                Question q = GetQuestion(questions, nStep);
                 if (q == null)
                 {
                     string strAskText = "汉字 '" + strHanzi + "' 的拼音如下: \r\n---\r\n"
                         + BuildPinyinList(strPinyin)
                         + "---\r\n\r\n请选择一个。(输入序号，从1开始计数)";
-                    q = questions.NewQuestion(nStep,
+                    q = NewQuestion(questions,
+                        nStep,
                         strAskText);
                     Debug.Assert(q != null, "");
                     strError = "请回答问题，以便为 '" + strAuthor + "' 中的多音字确定读音。";
@@ -1742,6 +1767,7 @@ out string strError)
                          + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
                 }
 
+#if NO
                 long lRet = channel.DoSearch(strQueryXml,
                     "default",
                     "", // strOutputStyle
@@ -1777,7 +1803,7 @@ out string strError)
                     return -1;
                 }
 
-                for (int i = 0; i < aPath.Count; i++)
+                                for (int i = 0; i < aPath.Count; i++)
                 {
                     string strPath = (string)aPath[i];
                     // 取记录
@@ -1836,7 +1862,66 @@ out string strError)
                     return 1;
                 }
 
-                return 0;
+#endif
+                Record[] records = null;
+                long lRet = channel.DoSearchEx(strQueryXml,
+    "default",
+    "", // strOutputStyle
+    1,
+    "zh",
+    "id,xml",
+    out records,
+    out strError);
+                if (lRet == -1)
+                {
+                    if (strHanzi.Length == 1)
+                    {
+                        strError = "检索库 " + this.PinyinDbName + " 时出错: " + strError;
+                    }
+                    else
+                    {
+                        strError = "检索库 " + this.WordDbName + " 时出错: " + strError;
+                    }
+                    return -1;
+                }
+                if (lRet == 0)
+                    return 0;
+
+                string strXml = records[0].RecordBody.Xml;
+
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.LoadXml(strXml);
+                }
+                catch (Exception ex)
+                {
+                    strError = "装载路径为 '" + records[0].Path + "' 的 XML 记录到 DOM 时出错: " + ex.Message;
+                    return -1;
+                }
+
+                if (strHanzi.Length == 1)
+                    strPinyin = DomUtil.GetAttr(dom.DocumentElement, "p");
+                else
+                {
+                    XmlNodeList nodes = dom.DocumentElement.SelectNodes("pinyin");
+
+                    // 排序。使用频率高的在前
+                    List<XmlNode> node_array = new List<XmlNode>();
+                    foreach (XmlNode node in nodes)
+                    {
+                        node_array.Add(node);
+                    }
+                    node_array.Sort(new HitCountComparer());
+
+                    foreach (XmlNode node in node_array)
+                    {
+                        if (string.IsNullOrEmpty(strPinyin) == false)
+                            strPinyin += ";";
+                        strPinyin += node.InnerText;
+                    }
+                }
+                return 1;
             }
             finally
             {
@@ -2219,8 +2304,45 @@ out string strError)
         }
 
         #endregion
+
+        public static Question GetQuestion(List<Question> questions, int index)
+        {
+            if (index >= questions.Count)
+                return null;
+            return questions[index];
+        }
+
+        public static Question NewQuestion(List<Question> questions,
+            int index,
+            string strText)
+        {
+            Question result = null;
+
+            for (; ; )
+            {
+                if (index >= questions.Count)
+                {
+                    result = new Question();
+                    questions.Add(result);
+                }
+                else
+                    break;
+            }
+
+            if (index < questions.Count)
+            {
+                result = questions[index];
+                result.Text = strText;
+                result.Answer = "";
+                return result;
+            }
+
+            Debug.Assert(false, "");	// 不可能走到这里
+            return null;
+        }
     }
 
+#if NO
     public class QuestionCollection : List<Question>
     {
         // public string Name = "";
@@ -2260,8 +2382,9 @@ out string strError)
             return null;
         }
     }
+#endif
 
-    [DataContract(Namespace = "http://dp2003.com/gcat/")]
+    [DataContract(Namespace = "http://dp2003.com/dp2library/")]
     public class Question
     {
         [DataMember]

@@ -29,6 +29,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using ClosedXML.Excel;
 
 namespace dp2Circulation
 {
@@ -69,7 +70,7 @@ namespace dp2Circulation
         bool StoreInTempFile = false;
 
         // 参与排序的列号数组
-        SortColumns SortColumns = new SortColumns();
+        SortColumns SortColumns_records = new SortColumns();
 
 #if NO
         public LibraryChannel Channel = new LibraryChannel();
@@ -219,7 +220,7 @@ namespace dp2Circulation
             this.listView_records.Items.Clear();
             this.listView_records.Update();
 
-            this.SortColumns.Clear();
+            this.SortColumns_records.Clear();
             SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
 
             if (this.m_operlogViewer != null)
@@ -294,6 +295,7 @@ namespace dp2Circulation
     lines,
     this.MainForm.OperLogLevel,
     strStyle,
+    this.textBox_filter.Text,
     this.MainForm.OperLogCacheDir,
     null,   // param,
     DoRecord,
@@ -1827,6 +1829,38 @@ out strError);
                     return -1;
             }
 
+            // 2017/1/16 重新设计 move 和 copy 的显示方式
+            string strDirection = "";
+            if (strAction.IndexOf("move") != -1
+                || strAction.IndexOf("copy") != -1)
+            {
+                strDirection = strOldRecPath + " --> " + strRecPath;
+                string strOverwritedRecord = DomUtil.GetElementText(dom.DocumentElement, "overwritedRecord", out node);
+                if (string.IsNullOrEmpty(strOverwritedRecord) == false)
+                {
+                    strOldRecord = strOverwritedRecord;
+                    strOldRecPath = DomUtil.GetAttr(node, "recPath");
+                    nRet = GetBiblioInfoString(
+                        strOldRecPath,
+                        strOldRecord,
+        out strOldRecordHtml,
+        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+                else
+                {
+                    // 如果没有 overwritedRecord 元素，则只好显示修改后的记录内容了
+                    // 2017/1/16 以前的日志就有这个问题
+                    if (string.IsNullOrEmpty(strRecordHtml) == false)
+                    {
+                        strOldRecPath = "";
+                        strOldRecord = "";
+                        strOldRecordHtml = "";
+                    }
+                }
+            }
+
             string strDiffRecordHtml = "";
             if (string.IsNullOrEmpty(strOldRecord) == false && string.IsNullOrEmpty(strOldRecPath) == false
                 && string.IsNullOrEmpty(strRecord) == false && string.IsNullOrEmpty(strRecPath) == false)
@@ -1883,6 +1917,9 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 BuildHtmlLine("馆代码", strLibraryCode) +
                 BuildHtmlLine("操作类型", strOperation + " -- 设置书目信息") +
                 BuildHtmlLine("动作", strAction + " -- " + GetActionName(strOperation, strAction)) +
+
+                (string .IsNullOrEmpty(strDirection) == false ?
+                BuildHtmlLine("源和目标", strDirection) : "") +
 
                 (string.IsNullOrEmpty(strDiffRecordHtml) == false ?
                 BuildHtmlLine("修改前后书目记录", strDiffLineTitle) +
@@ -3524,13 +3561,13 @@ FileShare.ReadWrite))
             if (nClickColumn == 1)
                 sortStyle = ColumnSortStyle.RightAlign;
 
-            this.SortColumns.SetFirstColumn(nClickColumn,
+            this.SortColumns_records.SetFirstColumn(nClickColumn,
                 sortStyle,
                 this.listView_records.Columns,
                 true);
 
             // 排序
-            this.listView_records.ListViewItemSorter = new SortColumnsComparer(this.SortColumns);
+            this.listView_records.ListViewItemSorter = new SortColumnsComparer(this.SortColumns_records);
 
             this.listView_records.ListViewItemSorter = null;
 
@@ -3727,6 +3764,7 @@ FileShare.ReadWrite))
                     lines,
                     this.MainForm.OperLogLevel,
                     strStyle,
+                    this.textBox_filter.Text,
                     this.MainForm.OperLogCacheDir,
                     null,   // param,
                     DoRecord,
@@ -4046,8 +4084,8 @@ FileShare.ReadWrite))
             stop.BeginLoop();
 
 
-            this.Update();
-            this.MainForm.Update();
+            //this.Update();
+            //this.MainForm.Update();
 
 #if NO
             this.listView_records.Items.Clear();
@@ -4099,6 +4137,7 @@ FileShare.ReadWrite))
     lines,
     this.MainForm.OperLogLevel,
     strStyle,
+    this.textBox_filter.Text,
     this.MainForm.OperLogCacheDir,
     null,   // param,
     DoRecord,
@@ -5191,6 +5230,13 @@ FileShare.ReadWrite))
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("导出 amerce 操作信息到 Excel 文件(&E) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
+            menuItem.Click += new System.EventHandler(this.menu_exportAmerceExcel_Click);
+            if (this.listView_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+
             // ---
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
@@ -5257,6 +5303,381 @@ FileShare.ReadWrite))
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 导出 amerce 操作到 Excel 文件
+        void menu_exportAmerceExcel_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要创建的 Excel 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.FileName = "";
+            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            XLWorkbook doc = null;
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "OperLogForm new XLWorkbook() exception: " + ExceptionUtil.GetAutoText(ex);
+                goto ERROR1;
+            }
+
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("表格");
+
+#if NO
+            SumLine sum_amerce = new SumLine();
+            SumLine sum_undo = new SumLine();
+            SumLine sum_modify = new SumLine();
+#endif
+            Hashtable sum_table = new Hashtable();  // action --> SumLine
+
+            bool bLaunchExcel = true;
+            int nRowIndex = 1;
+            int nItemIndex = 0;
+            List<int> column_max_chars = new List<int>();
+
+            List<IXLCell> cells = new List<IXLCell>();
+            List<string> titles = new List<string>();
+            titles.Add("总序号");
+            titles.Add("日期");
+            titles.Add("action");
+            titles.Add("index");
+            titles.Add("sub_index");
+            titles.Add("册条码号");
+            titles.Add("书目摘要");
+            titles.Add("证条码号");
+            titles.Add("说明");
+            titles.Add("金额");
+            titles.Add("ID");
+            titles.Add("调试信息");
+
+            int nColIndex = 2;
+            foreach (string s in titles)
+            {
+                IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(s);
+                cell.Style.Alignment.WrapText = true;
+                cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                cell.Style.Font.Bold = true;
+                cell.Style.Font.FontColor = XLColor.DarkGray;
+                nColIndex++;
+                cells.Add(cell);
+            }
+            nRowIndex++;
+
+            try
+            {
+                int nRet = ProcessSelectedRecords((date, index, dom, timestamp) =>
+                        {
+                            if (dom.DocumentElement != null)
+                            {
+                                string action = DomUtil.GetElementText(dom.DocumentElement, "action");
+                                List<OperLogLineBase> lines = DoOneRecord(dom,
+    date.Substring(0, 8),
+    index,
+    out strError);
+                                if (lines == null)
+                                    return true;
+
+                                foreach (AmerceOperLogLine line in lines)
+                                {
+                                    List<string> cols = new List<string>();
+                                    cols.Add((nItemIndex + 1).ToString());
+                                    cols.Add(date.Substring(0, 8));
+                                    cols.Add(line.Action);
+                                    cols.Add(index.ToString());
+                                    cols.Add(line.SubNo.ToString());
+                                    cols.Add(line.ItemBarcode);
+                                    cols.Add("");
+                                    cols.Add(line.ReaderBarcode);
+                                    cols.Add(line.Reason);
+                                    cols.Add(line.Price.ToString());
+                                    cols.Add(line.ID);
+                                    cols.Add(strError);
+                                    strError = "";  // 只有第一行有调试信息
+
+                                    {
+                                        SumLine sum_line = sum_table[line.Action] as SumLine;
+                                        if (sum_line == null)
+                                        {
+                                            sum_line = new SumLine();
+                                            sum_table[line.Action] = sum_line;
+                                        }
+                                        sum_line.Count++;
+                                        sum_line.Value += line.Price;
+                                    }
+
+#if NO
+                                    if (line.Action == "modifyprice")
+                                    {
+                                        sum_modify.Count++;
+                                        sum_modify.Value += line.Price;
+                                    }
+                                    else if (line.Action == "amerce")
+                                    {
+                                        sum_amerce.Count++;
+                                        sum_amerce.Value += line.Price;
+                                    }
+                                    else if (line.Action == "undo")
+                                    {
+                                        sum_undo.Count++;
+                                        sum_undo.Value += line.Price;
+                                    }
+#endif
+
+                                    WriteLine(
+                                        sheet,
+                                        cols,
+                                        cells,
+                                        ref nItemIndex,
+                                        ref nRowIndex,
+                                        ref column_max_chars);
+                                }
+                            }
+
+                            return true;
+                        },
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+
+                foreach (string action in sum_table.Keys)
+                {
+                    SumLine sum_amerce = sum_table[action] as SumLine;
+                    List<string> cols = new List<string>();
+                    cols.Add("合计");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add(action);
+                    cols.Add("次 " + sum_amerce.Count.ToString());
+                    cols.Add(sum_amerce.Value.ToString());
+                    cols.Add("");
+                    cols.Add("");
+
+                    WriteLine(
+        sheet,
+        cols,
+        cells,
+        ref nItemIndex,
+        ref nRowIndex,
+        ref column_max_chars);
+                }
+#if NO
+                // 合计行
+                {
+                    List<string> cols = new List<string>();
+                    cols.Add("合计");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("交费");
+                    cols.Add("次 " + sum_amerce.Count.ToString());
+                    cols.Add(sum_amerce.Value.ToString());
+                    cols.Add("");
+                    cols.Add("");
+
+                    WriteLine(
+        sheet,
+        cols,
+        cells,
+        ref nItemIndex,
+        ref nRowIndex,
+        ref column_max_chars);
+                }
+
+                // 合计行
+                {
+                    List<string> cols = new List<string>();
+                    cols.Add("合计");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("撤销交费");
+                    cols.Add("次 " + sum_undo.Count.ToString());
+                    cols.Add(sum_undo.Value.ToString());
+                    cols.Add("");
+                    cols.Add("");
+
+                    WriteLine(
+        sheet,
+        cols,
+        cells,
+        ref nItemIndex,
+        ref nRowIndex,
+        ref column_max_chars);
+                }
+
+                // 合计行
+                {
+                    List<string> cols = new List<string>();
+                    cols.Add("合计");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("");
+                    cols.Add("修改金额");
+                    cols.Add("次 " + sum_modify.Count.ToString());
+                    cols.Add(sum_modify.Value.ToString());
+                    cols.Add("");
+                    cols.Add("");
+
+                    WriteLine(
+        sheet,
+        cols,
+        cells,
+        ref nItemIndex,
+        ref nRowIndex,
+        ref column_max_chars);
+                }
+#endif
+
+                // 字符数太多的列不要做 width auto adjust
+                foreach (IXLColumn column in sheet.Columns())
+                {
+                    int MAX_CHARS = 50;   // 60
+
+                    int nIndex = column.FirstCell().Address.ColumnNumber - 1;
+                    if (nIndex >= column_max_chars.Count)
+                        break;
+                    int nChars = column_max_chars[nIndex];
+
+                    if (nIndex == 1)
+                    {
+                        column.Width = 10;
+                        continue;
+                    }
+
+                    if (nIndex == 3)
+                        MAX_CHARS = 50;
+                    else
+                        MAX_CHARS = 24;
+
+                    if (nChars < MAX_CHARS)
+                        column.AdjustToContents();
+                    else
+                        column.Width = Math.Min(MAX_CHARS, nChars);
+                }
+            }
+            finally
+            {
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.FileName);
+                    doc.Dispose();
+                }
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(dlg.FileName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void WriteLine(
+            IXLWorksheet sheet,
+            List<string> cols,
+            List<IXLCell> cells,
+            ref int nItemIndex,
+            ref int nRowIndex,
+            ref List<int> column_max_chars)
+        {
+            int nColIndex = 2;
+            foreach (string s in cols)
+            {
+                // 统计最大字符数
+                ReaderSearchForm.SetMaxChars(ref column_max_chars, nColIndex - 1, ReaderSearchForm.GetCharWidth(s));
+
+                IXLCell cell = null;
+                cell = sheet.Cell(nRowIndex, nColIndex).SetValue(s);
+                if (nColIndex == 2)
+                {
+                    // cell = sheet.Cell(nRowIndex, nColIndex).SetValue(nItemIndex + 1);
+                    cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                }
+
+                cell.Style.Alignment.WrapText = true;
+                cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                nColIndex++;
+                cells.Add(cell);
+            }
+
+            nItemIndex++;
+            nRowIndex++;
+        }
+
+        class SumLine
+        {
+            public long Count { get; set; }
+            public long Value { get; set; }
+        }
+
+        List<OperLogLineBase> DoOneRecord(XmlDocument dom,
+            string strDate,
+            long lIndex,
+            out string strError)
+        {
+            strError = "";
+
+            List<OperLogLineBase> lines = null;
+
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+            string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
+#if NO
+            if (strAction == "expire")
+                return new List<OperLogLineBase>();
+#endif
+
+            AmerceOperLogLine line = new AmerceOperLogLine();
+            int nRet = line.SetData(dom,
+        strDate,
+        lIndex,
+        out lines,
+        out strError);
+            if (nRet == -1)
+                return null;
+
+            if (lines == null)
+                lines = new List<OperLogLineBase>();
+
+            lines.Insert(0, line);
+            return lines;
         }
 
         void menu_selectAllLines_Click(object sender, EventArgs e)
@@ -5870,6 +6291,7 @@ Keys keyData)
             List<string> filenames,
             int nLevel,
             string strStyle,
+            string strFilter,
             string strCacheDir,
             object param,
             Delegate_doRecord procDoRecord,
@@ -6088,6 +6510,7 @@ Keys keyData)
                     sizes[i],
                     strRange,
                     strStyle,
+                    strFilter,
                     strCacheDir,
                     param,
                     procDoRecord,
@@ -6669,6 +7092,7 @@ FileShare.ReadWrite);
             long lServerFileSize,
             string strRange,
             string strStyle,
+            string strFilter,   // 2016/12/6
             string strCacheDir,
             object param,
             Delegate_doRecord procDoRecord,
@@ -6854,7 +7278,7 @@ FileShare.ReadWrite);
                                     lHint,
                                     nCount,
                                     strTempStyle,
-                                    "", // strFilter
+                                    strFilter,
                                     out records,
                                     out strError);
                                 if (lRet == -1)
@@ -7015,6 +7439,7 @@ MessageBoxDefaultButton.Button1);
                 controls.Add(this.textBox_repair_sourceFilename);
                 controls.Add(this.textBox_repair_targetFilename);
                 controls.Add(this.textBox_repair_verifyFolderName);
+                controls.Add(this.textBox_filter);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -7026,9 +7451,465 @@ MessageBoxDefaultButton.Button1);
                 controls.Add(this.textBox_repair_sourceFilename);
                 controls.Add(this.textBox_repair_targetFilename);
                 controls.Add(this.textBox_repair_verifyFolderName);
+                controls.Add(this.textBox_filter);
                 GuiState.SetUiState(controls, value);
             }
         }
+
+        private void toolStripButton_file_load_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Title = "请指定日志文件名";
+            // dlg.FileName = this.textBox_repair_sourceFilename.Text;
+            dlg.Filter = "日志文件 (*.log)|*.log|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            string strError = "";
+            int nRet = 0;
+
+            this.EnableControls(false);
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在装在日志文件 " + dlg.FileName + " ...");
+            stop.BeginLoop();
+            try
+            {
+                nRet = LoadFile(dlg.FileName, out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                this.EnableControls(true);
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        int LoadFile(string strFileName,
+            out string strError)
+        {
+            strError = "";
+
+            this.listView_file.Items.Clear();
+            this.SortColumns_file.Clear();
+            SortColumns.ClearColumnSortDisplay(this.listView_file.Columns);
+
+            this.listView_file.BeginUpdate();
+
+            using (Stream source = File.Open(
+                        strFileName,
+                        FileMode.Open,
+                        FileAccess.ReadWrite, // Read会造成无法打开 2007/5/22
+                        FileShare.ReadWrite))
+            {
+                if (stop != null)
+                    stop.SetProgressRange(0, source.Length);
+
+                for (int i = 0; ; i++)
+                {
+                    Application.DoEvents();
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断1";
+                        return -1;
+                    }
+
+                    long lStart = source.Position;
+
+                    LogRecordInfo info = null;
+                    int nRet = ReadLogRecord(
+                        source,
+                        out info,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    if (stop != null)
+                        stop.SetProgressValue(source.Position);
+
+                    if (source.Position >= source.Length)
+                        break;
+
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml(info.Body);
+
+                    string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+
+                    string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
+
+                    ListViewItem item = new ListViewItem();
+                    ListViewUtil.ChangeItemText(item, COLUMN_FILE_INDEX, (i + 1).ToString());
+                    ListViewUtil.ChangeItemText(item, COLUMN_FILE_SIZE, info.Length.ToString());
+                    ListViewUtil.ChangeItemText(item, COLUMN_FILE_OPERATION, strOperation);
+                    ListViewUtil.ChangeItemText(item, COLUMN_FILE_OPERATOR, strOperator);
+
+                    this.listView_file.Items.Add(item);
+                }
+            }
+
+            this.listView_file.EndUpdate();
+            return 0;
+        }
+
+        const int COLUMN_FILE_INDEX = 0;
+        const int COLUMN_FILE_SIZE = 1;
+        const int COLUMN_FILE_OPERATION = 2;
+        const int COLUMN_FILE_OPERATOR = 3;
+
+
+        class LogRecordInfo
+        {
+            public long Length { get; set; }
+            public string Metadata { get; set; }
+            public string Body { get; set; }
+            public long AttachmentLength { get; set; }
+        }
+
+        static int ReadLogRecord(
+            Stream stream,
+            out LogRecordInfo info,
+            out string strError)
+        {
+            strError = "";
+
+            info = new LogRecordInfo();
+
+            long lStart = stream.Position;	// 记忆起始位置
+
+            byte[] length = new byte[8];
+
+            int nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "ReadLogRecord()从偏移量 " + lStart.ToString() + " 开始试图读入8个byte，但是只读入了 " + nRet.ToString() + " 个。起始位置不正确";
+                return -1;
+            }
+
+            Int64 lRecordLength = BitConverter.ToInt64(length, 0);
+
+            if (lRecordLength == 0)
+            {
+                strError = "VerifyLogRecord()从偏移量 " + lStart.ToString() + " 开始读入了8个byte，其整数值为0，表明不是正常的记录长度";
+                return -1;
+            }
+
+            info.Length = lRecordLength;
+
+            Debug.Assert(lRecordLength != 0, "");
+
+            if (lRecordLength < 0)
+            {
+                strError = "lRecordLength = " + lRecordLength.ToString() + "不正常，为负数";
+                return -1;
+            }
+
+            if (lRecordLength > stream.Length - (lStart + 8))
+            {
+                strError = "lRecordLength = " + lRecordLength.ToString() + "不正常，超过文件尾部";
+                return -1;
+            }
+
+            string strMetadata = "";
+            string strBody = "";
+            // 读入 xml 事项
+            nRet = ReadEntry(stream,
+                true,
+                out strMetadata,
+                out strBody,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            info.Metadata = strMetadata;
+            info.Body = strBody;
+
+            string strTempMatadata = "";
+            long lAttachmentLength = 0;
+            // 读出attachment事项
+            nRet = ReadEntry(
+                stream,
+                true,
+                out strTempMatadata,
+                out lAttachmentLength,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            info.AttachmentLength = lAttachmentLength;
+
+            // 文件指针此时自然在末尾
+            if (stream.Position - lStart != lRecordLength + 8)
+            {
+                // Debug.Assert(false, "");
+                strError = "Record长度经检验不正确: stream.Position - lStart ["
+                    + (stream.Position - lStart).ToString()
+                    + "] 不等于 lRecordLength + 8 ["
+                    + (lRecordLength + 8).ToString()
+                    + "]";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 读出一个事项(string类型)
+        // parameters:
+        public static int ReadEntry(
+            Stream stream,
+            bool bRead,
+            out string strMetaData,
+            out string strBody,
+            out string strError)
+        {
+            strMetaData = "";
+            strBody = "";
+            strError = "";
+
+            long lStart = stream.Position;  // 保留起始位置
+
+            byte[] length = new byte[8];
+
+            int nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "起始位置不正确";
+                return -1;
+            }
+
+            Int64 lEntryLength = BitConverter.ToInt64(length, 0);
+
+            // metadata长度
+            nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "metadata长度位置不足8bytes";
+                return -1;
+            }
+
+            Int64 lMetaDataLength = BitConverter.ToInt64(length, 0);
+
+            if (lMetaDataLength > 100 * 1024)
+            {
+                strError = "记录格式不正确，metadata长度超过100K";
+                return -1;
+            }
+
+            if (lMetaDataLength > 0)
+            {
+                if (bRead)
+                {
+                    byte[] metadatabody = new byte[(int)lMetaDataLength];
+
+                    nRet = stream.Read(metadatabody, 0, (int)lMetaDataLength);
+                    if (nRet < (int)lMetaDataLength)
+                    {
+                        strError = "metadata不足其长度定义";
+                        return -1;
+                    }
+
+                    strMetaData = Encoding.UTF8.GetString(metadatabody);
+                }
+                else
+                    stream.Seek(lMetaDataLength, SeekOrigin.Current);
+            }
+
+
+
+
+            // strBody长度
+            nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "strBody长度位置不足8bytes";
+                return -1;
+            }
+
+            Int64 lBodyLength = BitConverter.ToInt64(length, 0);
+
+            if (lBodyLength > 1000 * 1024)
+            {
+                strError = "记录格式不正确，body长度超过1000K";
+                return -1;
+            }
+
+            if (lBodyLength > 0)
+            {
+                if (bRead)
+                {
+                    byte[] xmlbody = new byte[(int)lBodyLength];
+
+                    nRet = stream.Read(xmlbody, 0, (int)lBodyLength);
+                    if (nRet < (int)lBodyLength)
+                    {
+                        strError = "body不足其长度定义";
+                        return -1;
+                    }
+
+                    strBody = Encoding.UTF8.GetString(xmlbody);
+                }
+                else
+                    stream.Seek(lBodyLength, SeekOrigin.Current);
+
+            }
+
+            // 文件指针此时自然在末尾
+            if (stream.Position - lStart != lEntryLength + 8)
+            {
+                // Debug.Assert(false, "");
+                strError = "entry长度经检验不正确";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 读出一个事项(只观察长度)
+        public static int ReadEntry(
+            Stream stream,
+            bool bRead,
+            out string strMetaData,
+            out long lBodyLength,
+            out string strError)
+        {
+            strError = "";
+            strMetaData = "";
+            lBodyLength = 0;
+
+            long lStart = stream.Position;  // 保留起始位置
+
+            byte[] length = new byte[8];
+
+            int nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "起始位置不正确";
+                return -1;
+            }
+
+            Int64 lEntryLength = BitConverter.ToInt64(length, 0);
+
+#if NO
+            if (lEntryLength == 0)
+            {
+                // Debug.Assert(false, "");
+                // 文件指针此时自然在末尾
+                if (stream.Position - lStart != lEntryLength + 8)
+                {
+                    strError = "entry长度经检验不正确 1";
+                    return -1;
+                }
+
+                return 0;
+            }
+#endif
+
+            // metadata长度
+            nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "metadata长度位置不足8bytes";
+                return -1;
+            }
+
+            Int64 lMetaDataLength = BitConverter.ToInt64(length, 0);
+
+            if (lMetaDataLength > 100 * 1024)
+            {
+                strError = "记录格式不正确，metadata长度超过100K";
+                return -1;
+            }
+
+            if (lMetaDataLength > 0)
+            {
+                if (bRead)
+                {
+                    byte[] metadatabody = new byte[(int)lMetaDataLength];
+
+                    nRet = stream.Read(metadatabody, 0, (int)lMetaDataLength);
+                    if (nRet < (int)lMetaDataLength)
+                    {
+                        strError = "metadata不足其长度定义";
+                        return -1;
+                    }
+
+                    strMetaData = Encoding.UTF8.GetString(metadatabody);
+                }
+                else
+                    stream.Seek(lMetaDataLength, SeekOrigin.Current);
+            }
+
+            // body长度
+            nRet = stream.Read(length, 0, 8);
+            if (nRet < 8)
+            {
+                strError = "strBody长度位置不足8bytes";
+                return -1;
+            }
+
+            lBodyLength = BitConverter.ToInt64(length, 0);
+
+            if (lBodyLength > stream.Length - stream.Position)
+            {
+                strError = "记录格式不正确，body长度超过文件剩余部分尺寸";
+                return -1;
+            }
+
+            if (lBodyLength > 0)
+            {
+                // 虽然不读内容，但文件指针要到位
+                stream.Seek(lBodyLength, SeekOrigin.Current);
+            }
+
+            // 文件指针此时自然在末尾
+            if (stream.Position - lStart != lEntryLength + 8)
+            {
+                // Debug.Assert(false, "");
+                strError = "entry长度经检验不正确";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 参与排序的列号数组
+        SortColumns SortColumns_file = new SortColumns();
+
+
+        private void listView_file_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            int nClickColumn = e.Column;
+
+            ColumnSortStyle sortStyle = ColumnSortStyle.LeftAlign;
+
+            // 第1列为id，排序风格特殊
+            if (nClickColumn == COLUMN_FILE_INDEX)
+                sortStyle = ColumnSortStyle.RightAlign;
+            else if (nClickColumn == COLUMN_FILE_SIZE)
+                sortStyle = ColumnSortStyle.RightAlign;
+
+            this.SortColumns_file.SetFirstColumn(nClickColumn,
+                sortStyle,
+                this.listView_file.Columns,
+                true);
+
+            // 排序
+            this.listView_file.ListViewItemSorter = new SortColumnsComparer(this.SortColumns_file);
+
+            this.listView_file.ListViewItemSorter = null;
+
+        }
+
     }
 
     /// <summary>

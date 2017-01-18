@@ -797,6 +797,21 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == 1)
                 bChanged = true;
 
+            // 2016/12/27
+            // return:
+            //      -1  出错
+            //      0   读者记录没有改变
+            //      1   读者记录发生改变
+            nRet = ChangeEmailField(readerdom,
+    out strError);
+            if (nRet == -1)
+            {
+                strError = "在为读者记录修改 email 元素时发生错误: " + strError;
+                this.AppendResultText(strError + "\r\n");
+            }
+            if (nRet == 1)
+                bChanged = true;
+
             // 2016/4/10
             // 如果读者记录中没有 refID 元素，自动创建它
             // return:
@@ -898,6 +913,47 @@ namespace DigitalPlatform.LibraryServer
                 strError = "发送消息到 MQ 出现异常: " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
+        }
+
+        // 2016/12/27
+        // 将旧形态的 email 元素内容修改为新的形态
+        // return:
+        //      -1  出错
+        //      0   读者记录没有改变
+        //      1   读者记录发生改变
+        int ChangeEmailField(XmlDocument readerdom,
+            out string strError)
+        {
+            strError = "";
+
+            string strEmail = DomUtil.GetElementText(readerdom.DocumentElement, "email");
+            if (string.IsNullOrEmpty(strEmail) == false)
+            {
+                string[] parts = strEmail.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length == 0)
+                    return 0;
+                bool bChanged = false;
+                List<string> results = new List<string>();
+                foreach (string s in parts)
+                {
+                    if (s.IndexOf(":") == -1)
+                    {
+                        results.Add("email:" + s);
+                        bChanged = true;
+                    }
+                    else
+                        results.Add(s);
+                }
+
+                if (bChanged)
+                {
+                    DomUtil.SetElementText(readerdom.DocumentElement, "email", StringUtil.MakePathList(results));
+                    return 1;
+                }
+                return 0;
+            }
+
+            return 0;
         }
 
         // 2016/4/10

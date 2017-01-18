@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
@@ -13,7 +14,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
-using System.Diagnostics;
 
 namespace dp2Circulation
 {
@@ -627,6 +627,13 @@ false);
                 "save_orign_cover_image",
                 false);
 
+            // 将键盘输入的条码号自动转为大写
+            this.checkBox_global_upperInputBarcode.Checked =
+                ap.GetBoolean(
+                "global",
+                "upper_input_barcode",
+                true);
+
             // *** 标签打印
             // 从何处获取索取号
             this.comboBox_labelPrint_accessNoSource.Text = ap.GetString(
@@ -1213,6 +1220,12 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "global",
                 "save_orign_cover_image",
                 this.checkBox_global_saveOriginCoverImage.Checked);
+            
+            // 将键盘输入的条码号自动转为大写
+            ap.SetBoolean(
+    "global",
+    "upper_input_barcode",
+    this.checkBox_global_upperInputBarcode.Checked);
 
             // *** 标签打印
             // 从何处获取索取号

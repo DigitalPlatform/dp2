@@ -132,7 +132,17 @@ namespace DigitalPlatform.LibraryServer
         //      2.89 (2016/11/3) dp2library 可以使用 * 作为序列号，这样最大通道数为 255，而且永不失效。
         //      2.90 (2016/11/6) 消除 首次初始化 MSMQ 队列文件遇到异常然后挂起，但再也不会重试消除挂起状态 的 Bug。尝试将 Dir() API 和 ListFile() API 连接起来
         //      2.91 (2016/11/15) GetBiblioInfos() API 增加了一种 subrecords format，可以用于同时返回下级记录的 XML。返回的最多每种下级记录不超过 10 条
-        public static string Version = "2.91";
+        //      2.92 (2016/12/3) Return() API 增加了 boxing 功能
+        //      2.93 (2016/12/13) SetBiblioInfo() 和 SetEntities() SetOrders() 等 API 支持 simulate 风格，或者增强原有对 simulate 的支持。内务模拟导入 .bdf 文件功能要用到这些新特性
+        //      2.94 (2016/12/20) 开始支持 997 的查重键和相关功能
+        //      2.95 (2016/12/21) 修改 CopyBiblio() API 移动书目记录后没有返回正确时间戳的 bug
+        //      2.96 (2016/12/22) SetBiblioInfo() 增加 strStyle 参数，strStyle 参数可以使用 noeventlog 值
+        //      2.97 (2017/1/1) 书目记录查重键生成法为 0.02
+        //      2.98 (2017/1/2) SetBiblioInfo() strAction 增加 checkunique 功能
+        //      2.99 (2017/1/12) Borrow() 和 Return() API 在读者记录中 borrow 元素超过 10 个的时候，会剪裁了读者记录再写入 OperLog 记录中。此举可以大大缓解借书册数很多的读者记录导致日志文件急剧变大的问题
+        //      2.100 (2017/1/16) CopyBiblioInfo() API 写入操作日志的时候，增加了 overwritedRecord 元素用于存储被覆盖位置覆盖前的记录内容
+        //      2.101 (2017/1/17) Login() API 在代理登录的时候，从上一个版本的做法(被代理账户为工作人员账户的时候，登录成功后使用代理账户权限)改为登录成功后使用被代理账户的权限、会自动过滤掉高于代理账户的危险权限
+        public static string Version = "2.101";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -1123,6 +1133,45 @@ namespace DigitalPlatform.LibraryServer
                         app.InvoiceDbName = "";
                     }
 
+                    // 拼音
+                    // 元素<pinyin>
+                    // 属性dbname
+                    node = dom.DocumentElement.SelectSingleNode("pinyin") as XmlElement;
+                    if (node != null)
+                    {
+                        app.PinyinDbName = DomUtil.GetAttr(node, "dbname");
+                    }
+                    else
+                    {
+                        app.PinyinDbName = "";
+                    }
+
+                    // GCAT
+                    // 元素<gcat>
+                    // 属性dbname
+                    node = dom.DocumentElement.SelectSingleNode("gcat") as XmlElement;
+                    if (node != null)
+                    {
+                        app.GcatDbName = DomUtil.GetAttr(node, "dbname");
+                    }
+                    else
+                    {
+                        app.GcatDbName = "";
+                    }
+
+                    // 词
+                    // 元素<word>
+                    // 属性dbname
+                    node = dom.DocumentElement.SelectSingleNode("word") as XmlElement;
+                    if (node != null)
+                    {
+                        app.WordDbName = DomUtil.GetAttr(node, "dbname");
+                    }
+                    else
+                    {
+                        app.WordDbName = "";
+                    }
+
                     // *** 进入内存的参数结束
 
                     // bin dir
@@ -1812,7 +1861,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 Version version = new Version(strVersion);
-                Version base_version = new Version("2.65");
+                Version base_version = new Version("2.66");
                 if (version.CompareTo(base_version) < 0)
                 {
                     strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + version + ")。请立即升级 dp2Kernel 到最新版本。";
@@ -3204,6 +3253,27 @@ namespace DigitalPlatform.LibraryServer
                         writer.WriteAttributeString("defaultQueue", this.OutgoingQueue);
                     writer.WriteEndElement();
 
+                    // 拼音
+                    // 元素<pinyin>
+                    // 属性dbname
+                    writer.WriteStartElement("pinyin");
+                    writer.WriteAttributeString("dbname", this.PinyinDbName);
+                    writer.WriteEndElement();
+
+                    // GCAT
+                    // 元素<gcat>
+                    // 属性dbname
+                    writer.WriteStartElement("gcat");
+                    writer.WriteAttributeString("dbname", this.GcatDbName);
+                    writer.WriteEndElement();
+
+                    // 词
+                    // 元素<word>
+                    // 属性dbname
+                    writer.WriteStartElement("word");
+                    writer.WriteAttributeString("dbname", this.WordDbName);
+                    writer.WriteEndElement();
+
                     /*
                     // 图书馆业务服务器
                     // 元素<libraryserver>
@@ -3428,6 +3498,14 @@ namespace DigitalPlatform.LibraryServer
 
                         // <dup>
                         node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("dup");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // 2016/12/14
+                        // <unique>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("unique");
                         if (node != null)
                         {
                             node.WriteTo(writer);
@@ -5002,7 +5080,9 @@ namespace DigitalPlatform.LibraryServer
         // TODO：判断strItemBarcode是否为空
         // 获得预约到书队列记录
         // parameters:
-        //      strItemBarcodeParam  册条码号。可以使用 @refID: 前缀
+        //      strItemBarcodeParam  册条码号。可以使用 @itemRefID: 前缀表示册参考ID。
+        //                          @notifyID: 是通知记录本身的参考ID
+        //                          @patronRefID: 是读者记录的参考ID
         // return:
         //      -1  error
         //      0   not found
@@ -5022,14 +5102,18 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             timestamp = null;
 
+            // 2016/12/4
+            // 兼容以前的用法。以前曾经有一段 @refID: 表示册参考ID
+            strItemBarcodeParam = strItemBarcodeParam.Replace("@refID:", "@itemRefID:");
+
             LibraryApplication app = this;
             string strFrom = "册条码";
 
-            // 注：旧的，也就是 2015/5/7 以前的 预约到书队列库里面并没有 参考ID 检索点，所以直接用带着 @refID 前缀的字符串进行检索即可。
+            // 注：旧的，也就是 2015/5/7 以前的 预约到书队列库里面并没有 册参考ID 检索点，所以直接用带着 @refID 前缀的字符串进行检索即可。
             // 等队列库普遍刷新检索点以后，改为使用下面一段代码
             if (this.ArrivedDbKeysContainsRefIDKey() == true)
             {
-                string strHead = "@refID:";
+                string strHead = "@itemRefID:";
 
                 if (StringUtil.HasHead(strItemBarcodeParam, strHead, true) == true)
                 {
@@ -5041,6 +5125,17 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     }
                 }
+            }
+
+            if (strItemBarcodeParam.StartsWith("@notifyID:"))
+            {
+                strFrom = "参考ID";
+                strItemBarcodeParam = strItemBarcodeParam.Substring("@notifyID:".Length);
+            }
+            else if (strItemBarcodeParam.StartsWith("@patronRefID:"))
+            {
+                strFrom = "读者参考ID";
+                strItemBarcodeParam = strItemBarcodeParam.Substring("@patronRefID:".Length);
             }
 
             // 构造检索式
@@ -13115,6 +13210,41 @@ strLibraryCode);    // 读者所在的馆代码
             return results;
         }
 
+        // 2016/12/31
+        // 获得当前已经定义的全部图书馆代码。不包括 ""
+        public List<string> GetLibraryCodes()
+        {
+            List<string> librarycodes = new List<string>();
+            if (this.LibraryCfgDom == null || this.LibraryCfgDom.DocumentElement == null)
+                return librarycodes;
+
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("readerdbgroup/database");
+            foreach (XmlElement node in nodes)
+            {
+                string strLibraryCode = node.GetAttribute("libraryCode");
+                if (string.IsNullOrEmpty(strLibraryCode) == true)
+                    continue;
+                librarycodes.Add(strLibraryCode);
+            }
+
+            return librarycodes;
+        }
+
+        // 检查一个馆代码是否为合法的馆代码
+        public bool IsValidLibraryCode(string strLibraryCode)
+        {
+            if (string.IsNullOrEmpty(strLibraryCode))
+                return true;
+
+            // 目前本函数仅支持判断一个馆代码
+            if (strLibraryCode.IndexOf(",") != -1)
+                throw new ArgumentException("strLibraryCode 参数中不允许包含逗号", "strLibraryCode");
+
+            if (GetLibraryCodes().IndexOf(strLibraryCode) != -1)
+                return true;
+            return false;
+        }
+
         // 获得library.xml中配置的dtlp帐户信息
         // return:
         //      -1  error
@@ -13811,6 +13941,15 @@ strLibraryCode);    // 读者所在的馆代码
 
         public bool ClearCacheCfgs(string strResPath)
         {
+            // 2016/12/27
+            if (string.IsNullOrEmpty(strResPath) == true)
+            {
+                this.CfgsMap.Clear();
+                this.Filters.Clear();
+                this.AssemblyCache.Clear();
+                return true;
+            }
+
             string strPath = strResPath;
 
             string strDbName = StringUtil.GetFirstPartPath(ref strPath);
@@ -14597,7 +14736,7 @@ strLibraryCode);    // 读者所在的馆代码
         ItemBarcodeNotFound = 4,  // 册条码号不存在
         Overdue = 5,    // 还书过程发现有超期情况（已经按还书处理完毕，并且已经将超期信息记载到读者记录中，但是需要提醒读者及时履行超期违约金等手续）
         NotLogin = 6,   // 尚未登录
-        DupItemBarcode = 7, // 预约中本次提交的某些册条码号被本读者先前曾预约过
+        DupItemBarcode = 7, // 预约中本次提交的某些册条码号被本读者先前曾预约过 TODO: 这个和 ItemBarcodeDup 是否要合并?
         InvalidParameter = 8,   // 不合法的参数
         ReturnReservation = 9,    // 还书操作成功, 因属于被预约图书, 请放入预约保留架
         BorrowReservationDenied = 10,    // 借书操作失败, 因属于被预约(到书)保留的图书, 非当前预约者不能借阅
@@ -14622,6 +14761,9 @@ strLibraryCode);    // 读者所在的馆代码
         NeedSmsLogin = 29,  // 需要改用短信验证码方式登录
         RetryLogin = 30,    // 需要补充验证码再次登录
         TempCodeMismatch = 31,  // 验证码不匹配
+        BiblioDup = 32,     // 书目记录发生重复
+        Borrowing = 33,    // 图书尚未还回(盘点前需修正此问题)
+        ClientVersionTooOld = 34, // 前端版本太旧
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容
@@ -14638,8 +14780,6 @@ strLibraryCode);    // 读者所在的馆代码
         RequestError = 111,
         RequestTimeOut = 112,
         TimestampMismatch = 113,
-        Borrowing = 114,    // 图书尚未还回(盘点前需修正此问题)
-        ClientVersionTooOld = 115, // 前端版本太旧
     }
 
     // API函数结果

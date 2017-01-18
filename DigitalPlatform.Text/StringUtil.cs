@@ -17,6 +17,16 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        public static bool IsHttpUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url))
+                return false;
+            url = url.ToLower();
+            if (url.StartsWith("http:") || url.StartsWith("https"))
+                return true;
+            return false;
+        }
+
         #region IP 地址匹配
 
         // 匹配 ip 地址列表
@@ -1083,6 +1093,30 @@ string strTimestamp)
             return strLocation;
         }
 
+        // 替换 #reservation,xxxx 中的 xxxx 部分
+        public static string SetLocationString(string strLocation, string strPureLocation)
+        {
+            if (string.IsNullOrEmpty(strLocation) == true)
+                return strPureLocation;
+
+            {
+                List<string> results = new List<string>();
+                string[] parts = strLocation.Split(new char[] { ',' });
+                foreach (string s in parts)
+                {
+                    string strText = s.Trim();
+                    if (string.IsNullOrEmpty(strText) == true)
+                        continue;
+                    if (strText[0] == '#')
+                        results.Add(strText);
+                }
+
+                results.Add(strPureLocation);
+                return StringUtil.MakePathList(results);
+            }
+        }
+
+
         public static string GetBooleanString(bool bValue)
         {
             if (bValue == true)
@@ -2102,7 +2136,6 @@ string strTimestamp)
                 }
             }
         }
-
 
         public static string IncreaseNumber(string strLedNubmer,
             int nNumber)

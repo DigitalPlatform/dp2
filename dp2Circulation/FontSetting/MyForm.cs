@@ -79,10 +79,20 @@ namespace dp2Circulation
         }
 
         /// <summary>
+        /// 窗口是否为固定窗口。所谓固定窗口就是固定在某一侧的窗口
+        /// </summary>
+        public virtual bool Fixed
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// 界面语言
         /// </summary>
         public string Lang = "zh";
 
+#if NO
         MainForm m_mainForm = null;
 
         /// <summary>
@@ -100,6 +110,21 @@ namespace dp2Circulation
             {
                 // 为了让脚本代码能兼容
                 this.m_mainForm = value;
+            }
+        }
+#endif
+        /// <summary>
+        /// 当前窗口所从属的框架窗口
+        /// </summary>
+        public virtual MainForm MainForm
+        {
+            get
+            {
+                return Program.MainForm;
+            }
+            set
+            {
+                // 为了让脚本代码能兼容
             }
         }
 
@@ -702,10 +727,12 @@ namespace dp2Circulation
              * 
              * * */
             if (this.MainForm != null && this.MainForm.AppInfo != null
-                && Floating == false && this.SupressSizeSetting == false)
+                && Floating == false)
             {
                 this.MainForm.AppInfo.LoadMdiChildFormStates(this,
-                        "mdi_form_state");
+                        "mdi_form_state",
+                        this.SupressSizeSetting == true ? SizeStyle.Layout : SizeStyle.All);
+
             }
         }
 
@@ -717,10 +744,11 @@ namespace dp2Circulation
         {
             // 在这里保存。如果靠后调用，可能会遇到 base.OnFormClosed() 里面相关事件被卸掉的问题
             if (this.MainForm != null && this.MainForm.AppInfo != null
-    && Floating == false && this.SupressSizeSetting == false)
+    && Floating == false )
             {
                 MainForm.AppInfo.SaveMdiChildFormStates(this,
-                    "mdi_form_state");
+                    "mdi_form_state",
+                    this.SupressSizeSetting == true ? SizeStyle.Layout : SizeStyle.All);
             }
 
             base.OnFormClosed(e);
@@ -850,7 +878,7 @@ namespace dp2Circulation
         /// </summary>
         /// <param name="strText">要输出的纯文本字符串</param>
         /// <param name="nWarningLevel">警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)</param>
-        public void OutputText(string strText, int nWarningLevel = 0)
+        public virtual void OutputText(string strText, int nWarningLevel = 0)
         {
             string strClass = "normal";
             if (nWarningLevel == 1)
