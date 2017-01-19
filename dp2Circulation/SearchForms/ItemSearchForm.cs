@@ -824,6 +824,11 @@ this.DbType + "_search_form",
                 goto ERROR1;
             }
 
+            bool bQuickLoad = false;    // 是否快速装入
+
+            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                bQuickLoad = true;
+
             /*
             bool bOutputKeyCount = false;
             if (Control.ModifierKeys == Keys.Control)
@@ -995,6 +1000,7 @@ this.DbType + "_search_form",
                     lHitCount,
                     bOutputKeyCount,
                     bOutputKeyID,
+                    bQuickLoad,
                     out strError);
                 if (nRet == 0)
                     return 0;
@@ -1123,6 +1129,7 @@ this.DbType + "_search_form",
             long lHitCount,
             bool bOutputKeyCount,
             bool bOutputKeyID,
+            bool bQuickLoad,
             out string strError)
         {
             strError = "";
@@ -1158,22 +1165,28 @@ this.DbType + "_search_form",
             {
                 Application.DoEvents();	// 出让界面控制权
 
-                if (stop != null)
+                if (stop != null && stop.State != 0)
                 {
-                    if (stop.State != 0)
-                    {
-                        // MessageBox.Show(this, "用户中断");
-                        this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
-                        return 0;
-                    }
+                    // MessageBox.Show(this, "用户中断");
+                    this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
+                    return 0;
                 }
+
+                bool bTempQuickLoad = bQuickLoad;
+
+                if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                    bTempQuickLoad = true;
+
+                string strTempBrowseStyle = strBrowseStyle;
+                if (bTempQuickLoad)
+                    StringUtil.RemoveFromInList("cols", false, ref strTempBrowseStyle);
 
                 long lRet = Channel.GetSearchResult(
                     stop,
                     null,   // strResultSetName
                     lStart,
                     lCount,
-                    strBrowseStyle, // bOutputKeyCount == true ? "keycount" : "id,cols",
+                    strTempBrowseStyle, // bOutputKeyCount == true ? "keycount" : "id,cols",
                     this.Lang,
                     out searchresults,
                     out strError);
@@ -1276,7 +1289,8 @@ this.DbType + "_search_form",
                     }
 
                     if (bOutputKeyCount == false
-                        && bAccessBiblioSummaryDenied == false)
+                        && bAccessBiblioSummaryDenied == false
+                        && bTempQuickLoad == false)
                     {
                         // return:
                         //      -2  获得书目摘要的权限不够
@@ -6623,14 +6637,14 @@ MessageBoxDefaultButton.Button1);
                     {
                         string strState = DomUtil.GetElementText(item_dom.DocumentElement, "state");
                         if (String.IsNullOrEmpty(strState) == false)
-                            field.add(new MarcSubfield("r", strState));
+                            field.add(new MarcSubfield("s", strState));
                     }
 
                     // $z附注
                     {
                         string strComment = DomUtil.GetElementText(item_dom.DocumentElement, "comment");
                         if (String.IsNullOrEmpty(strComment) == false)
-                            field.add(new MarcSubfield("r", strComment));
+                            field.add(new MarcSubfield("z", strComment));
                     }
 
                     if (field.Subfields.count > 0)
@@ -8772,6 +8786,7 @@ Keys keyData)
                     lHitCount,
                     bOutputKeyCount,
                     bOutputKeyID,
+                    bQuickLoad,
                     out strError);
                 if (nRet == 0)
                     return;

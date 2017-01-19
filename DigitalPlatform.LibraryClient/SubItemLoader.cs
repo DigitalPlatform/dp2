@@ -14,6 +14,11 @@ namespace DigitalPlatform.LibraryClient
     /// </summary>
     public class SubItemLoader : IEnumerable
     {
+        /// <summary>
+        /// 提示框事件
+        /// </summary>
+        public event MessagePromptEventHandler Prompt = null;
+
         public string DbType { get; set; }  // item/order/issue/comment 之一
 
         /// <summary>
@@ -45,6 +50,8 @@ namespace DigitalPlatform.LibraryClient
 
         public long BatchSize { get; set; }
 
+        public long TotalCount { get; set; }    // TODO: 可改进为，如果在没有枚举以前访问此成员，则触发一次不返回记录的请求
+
         public static long DefaultBatchSize = 100;
 
         public IEnumerator GetEnumerator()
@@ -68,6 +75,7 @@ namespace DigitalPlatform.LibraryClient
                     if (this.Stop != null && this.Stop.State != 0)
                         throw new InterruptException("用户中断");
 
+                REDO:
                     EntityInfo[] entities = null;
 
                     long lRet = 0;
@@ -121,12 +129,35 @@ namespace DigitalPlatform.LibraryClient
                              out strError);
                     }
                     else
-                        throw new Exception("未知的 this.DbType '"+this.DbType+"'");
+                        throw new Exception("未知的 this.DbType '" + this.DbType + "'");
 
                     if (lRet == -1)
-                        throw new ChannelException(Channel.ErrorCode, strError);
+                    {
+                        if (this.Stop != null && this.Stop.State != 0)
+                            throw new InterruptException("用户中断");
+
+                        if (this.Prompt != null)
+                        {
+                            MessagePromptEventArgs e = new MessagePromptEventArgs();
+                            e.MessageText = "获得书目记录 '" + this.BiblioRecPath + "' 的下级 " + this.DbType + " 记录时发生错误： " + strError;
+                            e.Actions = "yes,no,cancel";
+                            this.Prompt(this, e);
+                            if (e.ResultAction == "cancel")
+                                throw new ChannelException(Channel.ErrorCode, strError);
+                            else if (e.ResultAction == "yes")
+                                goto REDO;
+                            else
+                            {
+                                // no 也是抛出异常。因为继续下一批代价太大
+                                throw new ChannelException(Channel.ErrorCode, strError);
+                            }
+                        }
+                        else
+                            throw new ChannelException(Channel.ErrorCode, strError);
+                    }
 
                     lResultCount = lRet;
+                    this.TotalCount = lRet; // 记载下级记录总数
 
                     if (lRet == 0)
                         yield break;

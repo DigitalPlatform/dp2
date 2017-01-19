@@ -7965,7 +7965,7 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-        public static int OutputEntities(
+        public int OutputEntities(
             Stop stop,
             LibraryChannel channel,
             string strBiblioRecPath,
@@ -7990,6 +7990,9 @@ MessageBoxDefaultButton.Button1);
                 loader.Channel = channel;
                 loader.Stop = stop;
                 loader.DbType = strDbType;
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
                 if (bCreate905)
                 {
@@ -8207,14 +8210,14 @@ MessageBoxDefaultButton.Button1);
                         {
                             string strState = DomUtil.GetElementText(item_dom.DocumentElement, "state");
                             if (String.IsNullOrEmpty(strState) == false)
-                                field.add(new MarcSubfield("r", strState));
+                                field.add(new MarcSubfield("s", strState));
                         }
 
                         // $z附注
                         {
                             string strComment = DomUtil.GetElementText(item_dom.DocumentElement, "comment");
                             if (String.IsNullOrEmpty(strComment) == false)
-                                field.add(new MarcSubfield("r", strComment));
+                                field.add(new MarcSubfield("z", strComment));
                         }
 
                         if (field.Subfields.count > 0)

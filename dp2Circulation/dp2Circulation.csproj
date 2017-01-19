@@ -19,8 +19,8 @@
     <SccProvider>
     </SccProvider>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>46EAD2E4BB8C84DDD31EFA5C83308710A458086D</ManifestCertificateThumbprint>
-    <ManifestKeyFile>dp2Circulation_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>0758DD9211167CF9C861F240885E79987E15EC1B</ManifestCertificateThumbprint>
+    <ManifestKeyFile>dp2Circulation_1_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ApplicationIcon>nei.ico</ApplicationIcon>
@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>146</ApplicationRevision>
+    <ApplicationRevision>148</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -2327,6 +2327,7 @@
     </Content>
     <Content Include="default_printorder_publisherstatis.template" />
     <Content Include="default_printorder_publisherstatis_accept.template" />
+    <None Include="dp2Circulation_1_TemporaryKey.pfx" />
     <None Include="dp2Circulation_9_TemporaryKey.pfx" />
     <None Include="dp2Circulation_TemporaryKey.pfx" />
     <None Include="packages.config" />
