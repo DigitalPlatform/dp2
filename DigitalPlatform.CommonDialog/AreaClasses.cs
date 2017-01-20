@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Range;
+using DigitalPlatform.Drawing;
 
 namespace DigitalPlatform.CommonDialog
 {
@@ -524,7 +525,6 @@ namespace DigitalPlatform.CommonDialog
     {
         List<AreaBase> m_base_array = null;
 
-
         public TypedList(List<AreaBase> base_array)
         {
             this.m_base_array = base_array;
@@ -599,7 +599,7 @@ namespace DigitalPlatform.CommonDialog
     // 包含若干年的顶层容器
     public class DataRoot : NamedArea<YearArea>
     {
-        // public List<YearArea> YearCollection = new List<YearArea>();
+        internal SizeF DpiXY = new SizeF(96, 96);
 
         internal int m_nYearNameWidth = 100; // 50 // 左边显示年名的竖道的宽度
         internal int m_nMonthNameWidth = 80;     // 左边显示月名的竖道的宽度
@@ -632,15 +632,31 @@ namespace DigitalPlatform.CommonDialog
         public DayStateDefCollection DayStateDefs = new DayStateDefCollection();
 
         // 构造函数
-        public DataRoot()
+        public DataRoot(SizeF dpi_xy)
         {
+            if (dpi_xy.Width != 0)
+                SetDpiXY(dpi_xy);
+
             this.DayTextFont = new Font("Arial Black", 12, FontStyle.Regular);
             if (m_strDayOfWeekTitleLang == "zh")
                 this.DaysOfWeekTitleFont = new Font("楷体_GB2312", 11, FontStyle.Regular);
             else
                 this.DaysOfWeekTitleFont = new Font("Arial", 11, FontStyle.Regular);
+        }
 
+        public void SetDpiXY(SizeF dpi_xy)
+        {
+            this.DpiXY = dpi_xy;
 
+            m_nYearNameWidth = DpiUtil.GetScalingX(dpi_xy, 100);
+            m_nMonthNameWidth = DpiUtil.GetScalingX(dpi_xy, 80);
+
+            m_nDayCellWidth = DpiUtil.GetScalingX(dpi_xy, 100);
+            m_nDayCellHeight = DpiUtil.GetScalingY(dpi_xy, 100);
+
+            m_rectCheckBox = DpiUtil.GetScaingRectangle(dpi_xy, new Rectangle(4, 4, 16, 16));
+
+            m_nDayOfWeekTitleHeight = DpiUtil.GetScalingY(dpi_xy, 30);
         }
 
         public bool BackColorTransparent
@@ -1266,10 +1282,6 @@ namespace DigitalPlatform.CommonDialog
     // 年
     public class YearArea : NamedArea<MonthArea>
     {
-        // public List<MonthArea> MonthCollection = new List<MonthArea>();
-
-        // int m_nYear = 0;
-
         // 确保一年中的前方或者后方月份完整。
         // return:
         //      是否发生了增补

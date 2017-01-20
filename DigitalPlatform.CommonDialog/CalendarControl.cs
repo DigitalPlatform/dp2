@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Range;
+using DigitalPlatform.Drawing;
 
 namespace DigitalPlatform.CommonDialog
 {
@@ -65,11 +66,13 @@ namespace DigitalPlatform.CommonDialog
         {
             get
             {
-                return this.DataRoot.m_nDayCellHeight;
+                // 翻译为 96 DPI 下的数量
+                return DpiUtil.Get96ScalingY(DpiUtil.GetDpiXY(this), this.DataRoot.m_nDayCellHeight);
             }
             set
             {
-                this.DataRoot.m_nDayCellHeight = value;
+                // 从 96 DPI 下的数量翻译为物理像素数
+                this.DataRoot.m_nDayCellHeight = DpiUtil.GetScalingY(DpiUtil.GetDpiXY(this), value);
             }
         }
 
@@ -80,11 +83,11 @@ namespace DigitalPlatform.CommonDialog
         {
             get
             {
-                return this.DataRoot.m_nDayCellWidth;
+                return DpiUtil.Get96ScalingY(DpiUtil.GetDpiXY(this), this.DataRoot.m_nDayCellWidth);
             }
             set
             {
-                this.DataRoot.m_nDayCellWidth = value;
+                this.DataRoot.m_nDayCellWidth = DpiUtil.GetScalingY(DpiUtil.GetDpiXY(this), value);
             }
         }
 
@@ -1151,7 +1154,6 @@ m_DragCurrentPointOnDoc);
             DragStartMousePosition = new Point(0, 0);
 
             m_DragLastEndObject = null;
-
         }
 
 
@@ -1202,7 +1204,7 @@ m_DragCurrentPointOnDoc);
         public DateTime StartDate;  // 显示范围开始日
         public DateTime EndDate;    // 显示范围结束日
 
-        public DataRoot DataRoot = new DataRoot();
+        public DataRoot DataRoot = null;    // new DataRoot(new SizeF(0,0));
 
         int m_nLeftBlank = 10;	// 边空
         int m_nRightBlank = 10;
@@ -1522,6 +1524,8 @@ m_DragCurrentPointOnDoc);
             // trackTip.ShowAlways = true;
 
             InitializeComponent();
+
+            this.DataRoot = new DataRoot(DpiUtil.GetDpiXY(this));
 
             // 一些缺省值
             this.DayStateDefCollection = DefaultDayStateDefCollection();
@@ -2927,7 +2931,7 @@ MessageBoxDefaultButton.Button2);
 
             // 构造第一级对象 年
             if (this.DataRoot == null)
-                this.DataRoot = new DataRoot();
+                this.DataRoot = new DataRoot(DpiUtil.GetDpiXY(this));
             else
                 this.DataRoot.Clear();
 
