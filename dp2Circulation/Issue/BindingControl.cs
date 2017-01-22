@@ -7660,7 +7660,7 @@ issue.Volume);
                 if (String.IsNullOrEmpty(issue.PublishTime) == true)
                     continue;
                 // TODO: 注意期号不连续的情况
-                if (issue.Issue == "1")
+                if (IsFirstNumber(issue.Issue))
                     first = issue;
                 if (issue == ref_issue)
                 {
@@ -7673,6 +7673,14 @@ issue.Volume);
                 return null;
 
             return first;
+        }
+
+        static bool IsFirstNumber(string strNumber)
+        {
+            strNumber = strNumber.TrimStart(new char[] {' ','0'});
+            if (strNumber == "1")
+                return true;
+            return false;
         }
 
         // 查重
