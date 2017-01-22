@@ -10732,17 +10732,164 @@ merge_dlg.UiState);
 
         private void EntityForm_DragEnter(object sender, DragEventArgs e)
         {
-            if (e.Data.GetDataPresent("Text"))
-            {
-                e.Effect = DragDropEffects.Link;
-            }
+            DropData data = GetDropData(e.Data);
+
+            Debug.WriteLine("EntityForm_DragEnter");
+
+            if (data != null && string.IsNullOrEmpty(data.ErrorInfo) == true)
+                e.Effect = data.Effect; // DragDropEffects.Link;
             else
                 e.Effect = DragDropEffects.None;
+        }
 
+        public class DropData
+        {
+            /// <summary>
+            /// 动作
+            /// </summary>
+            public string Action { get; set; }
+
+            /// <summary>
+            /// 数据库类型
+            /// </summary>
+            public string DbType { get; set; }
+
+            /// <summary>
+            /// 记录路径
+            /// </summary>
+            public string RecPath { get; set; }
+
+            /// <summary>
+            /// 出错信息
+            /// </summary>
+            public string ErrorInfo { get; set; }
+
+            public DragDropEffects Effect { get; set; }
+        }
+
+        static DropData GetDropData(IDataObject data_object)
+        {
+            DropData data = new DropData();
+
+            string strWhole = (String)data_object.GetData("Text");
+
+            string[] lines = strWhole.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            if (lines.Length < 1)
+            {
+                data.ErrorInfo = "连一行也不存在";
+                return data;
+            }
+
+            if (lines.Length > 1)
+            {
+                data.ErrorInfo = "种册窗只允许拖入一个记录";
+                return data;
+            }
+
+            string strFirstLine = lines[0].Trim();
+
+            int nRet = strFirstLine.IndexOf("\t");
+            if (nRet != -1)
+                strFirstLine = strFirstLine.Substring(0, nRet).Trim();
+
+            List<string> parts = StringUtil.ParseTwoPart(strFirstLine, ":");
+            string strAction = "";
+            string strRecPath = "";
+
+            if (string.IsNullOrEmpty(parts[1]) == true)
+                strRecPath = parts[0];
+            else
+            {
+                strAction = parts[0];
+                strRecPath = parts[1];
+            }
+
+            data.Action = strAction;
+
+            if (data.Action == "move")
+                data.Effect = DragDropEffects.Move;
+            else
+                data.Effect = DragDropEffects.Link;
+
+            data.RecPath = strRecPath;
+
+            // 判断它是书目记录路径，还是实体记录路径？
+            string strDbName = Global.GetDbName(data.RecPath);
+
+            if (Program.MainForm.IsBiblioDbName(strDbName) == true)
+            {
+                data.DbType = "biblio";
+            }
+            else if (Program.MainForm.IsItemDbName(strDbName) == true)
+            {
+                data.DbType = "item";
+            }
+            else
+            {
+                data.ErrorInfo = "记录路径 '" + data.RecPath + "' 中的数据库名既不是书目库名，也不是实体库名...";
+                return data;
+            }
+
+            return data;
         }
 
         private void EntityForm_DragDrop(object sender, DragEventArgs e)
         {
+            Debug.WriteLine("EntityForm_DragDrop");
+
+            string strError = "";
+            DropData data = GetDropData(e.Data);
+            if (data == null)
+            {
+                strError = "GetDropData() return null";
+                goto ERROR1;
+            }
+
+            if (string.IsNullOrEmpty(data.ErrorInfo) == false)
+            {
+                strError = data.ErrorInfo;
+                goto ERROR1;
+            }
+
+            if (string.IsNullOrEmpty(data.Action) == true)
+            {
+                if (data.DbType == "biblio")
+                {
+                    this.LoadRecordOld(data.RecPath,
+                        "",
+                        true);
+                }
+                else if (data.DbType == "item")
+                {
+                    this.LoadItemByRecPath(data.RecPath,
+                        this.checkBox_autoSavePrev.Checked);
+                }
+                else
+                {
+                    strError = "记录路径 '" + data.RecPath + "' 中的数据库名既不是书目库名，也不是实体库名...";
+                    goto ERROR1;
+                }
+            }
+
+            if (data.Action == "move")
+            {
+                if (data.RecPath == this.BiblioRecPath)
+                {
+                    strError = "移动操作的源和目标不应相同";
+                    goto ERROR1;
+                }
+
+                // 获得源记录所在的 EntityForm
+                EntityForm source = FindEntityFormByRecPath(data.RecPath);
+                int nRet = source.MoveTo(this.BiblioRecPath, out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+#if NO
             string strError = "";
 
             string strWhole = (String)e.Data.GetData("Text");
@@ -10793,6 +10940,21 @@ merge_dlg.UiState);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
+        }
+
+        public static EntityForm FindEntityFormByRecPath(string strRecPath)
+        {
+            foreach (Form form in Program.MainForm.MdiChildren)
+            {
+                if (!(form is EntityForm))
+                    continue;
+                EntityForm entityForm = form as EntityForm;
+                if (entityForm.BiblioRecPath == strRecPath)
+                    return entityForm;
+            }
+
+            return null;
         }
 
         #region 期 相关功能
@@ -12211,12 +12373,6 @@ value);
             string strError = "";
             int nRet = 0;
 
-            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.95") < 0)   // "2.39"
-            {
-                strError = "本功能需要配合 dp2library 2.95 或以上版本才能使用";
-                goto ERROR1;
-            }
-
             string strTargetRecPath = this.m_marcEditor.Record.Fields.GetFirstSubfield("998", "t");
             if (string.IsNullOrEmpty(strTargetRecPath) == false)
             {
@@ -12238,16 +12394,6 @@ value);
                     strTargetRecPath = "";
                 }
             }
-
-            // 源记录就是 ？
-            if (Global.IsAppendRecPath(this.BiblioRecPath) == true)
-            {
-                strError = "源记录尚未建立，无法执行移动操作";
-                goto ERROR1;
-            }
-
-            // string strMergeStyle = "";
-            MergeStyle merge_style = MergeStyle.CombineSubrecord | MergeStyle.ReserveSourceBiblio;
 
             BiblioSaveToDlg dlg = new BiblioSaveToDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
@@ -12279,10 +12425,8 @@ value);
                 dlg.MarcSyntax = strMarcSyntax;
             }
 
-            // dlg.CurrentBiblioRecPath = this.BiblioRecPath;
             this.MainForm.AppInfo.LinkFormState(dlg, "entityform_BiblioMoveToDlg_state");
             dlg.ShowDialog(this);
-            // this.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
@@ -12297,6 +12441,67 @@ value);
     "entity_form",
     "move_to_used_path",
     dlg.RecPath);
+
+            nRet = MoveTo(dlg.RecPath, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 移动当前书目记录到指定的位置
+        // return:
+        //      -1  出错
+        //      0   放弃
+        //      1   成功
+        public int MoveTo(string strTargetRecPathParam,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.95") < 0)   // "2.39"
+            {
+                strError = "本功能需要配合 dp2library 2.95 或以上版本才能使用";
+                goto ERROR1;
+            }
+
+            string strTargetRecPath = this.m_marcEditor.Record.Fields.GetFirstSubfield("998", "t");
+            if (strTargetRecPath != strTargetRecPathParam)
+                strTargetRecPath = "";
+#if NO
+            string strTargetRecPath = this.m_marcEditor.Record.Fields.GetFirstSubfield("998", "t");
+            if (string.IsNullOrEmpty(strTargetRecPath) == false)
+            {
+                DialogResult result = MessageBox.Show(this,
+    "当前窗口内的记录原本是从 '" + strTargetRecPath + "' 复制过来的。是否要移动回原有位置？\r\n\r\nYes: 是; No: 否，继续进行普通移动操作; Cancel: 放弃本次操作",
+    "EntityForm",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                if (result == System.Windows.Forms.DialogResult.Cancel)
+                    return 0;
+                if (result == System.Windows.Forms.DialogResult.Yes)
+                {
+                    // strTargetRecPath会发生作用
+                }
+
+                if (result == System.Windows.Forms.DialogResult.No)
+                {
+                    strTargetRecPath = "";
+                }
+            }
+#endif
+
+            // 源记录就是 ？
+            if (Global.IsAppendRecPath(this.BiblioRecPath) == true)
+            {
+                strError = "源记录尚未建立，无法执行移动操作";
+                goto ERROR1;
+            }
+
+            MergeStyle merge_style = MergeStyle.CombineSubrecord | MergeStyle.ReserveSourceBiblio;
 
             {
                 // 如果当前记录没有保存，则先保存
@@ -12336,8 +12541,13 @@ value);
                 }
             }
 
+            string strRecID = Global.GetRecordID(strTargetRecPathParam);
+            // 空和 '?' 都统一为 '?'
+            if (string.IsNullOrEmpty(strRecID) == true)
+                strRecID = "?";
+
             // 看看要另存的位置，记录是否已经存在?
-            if (dlg.RecID != "?")
+            if (strRecID != "?")
             {
                 byte[] timestamp = null;
 
@@ -12347,35 +12557,18 @@ value);
                 //      -1  error
                 //      0   not found
                 //      1   found
-                nRet = DetectBiblioRecord(dlg.RecPath,
+                nRet = DetectBiblioRecord(strTargetRecPathParam,
                     out timestamp,
                     out strError);
                 if (nRet == 1)
                 {
-                    //bool bOverwrite = false;
-                    if (dlg.RecPath != strTargetRecPath)    // 移动回998$t情况就不询问是否覆盖了，直接选用归并方式
+                    if (strTargetRecPathParam != strTargetRecPath)    // 移动回998$t情况就不询问是否覆盖了，直接选用归并方式
                     {
-#if NO
-                        // TODO: 用专用对话框实现
-                        // 提醒覆盖？
-                        DialogResult result = MessageBox.Show(this,
-                            "目标书目记录 " + dlg.RecPath + " 已经存在。\r\n\r\n要用当前窗口中的书目记录(连同数字对象和下属的子记录)覆盖此记录，还是归并到此记录? \r\n\r\nYes: 覆盖; No: 归并; Cancel: 放弃本次移动操作",
-                            "EntityForm",
-                            MessageBoxButtons.YesNoCancel,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2);
-                        if (result == DialogResult.Cancel)
-                            return;
-                        if (result == System.Windows.Forms.DialogResult.Yes)
-                            bOverwrite = true;
-                        else
-                            bOverwrite = false;
-#endif
                         GetMergeStyleDialog merge_dlg = new GetMergeStyleDialog();
                         MainForm.SetControlFont(merge_dlg, this.Font, false);
                         merge_dlg.SourceRecPath = this.BiblioRecPath;
-                        merge_dlg.TargetRecPath = dlg.RecPath;
-                        merge_dlg.MessageText = "目标书目记录 " + dlg.RecPath + " 已经存在。\r\n\r\n请指定当前窗口中的书目记录(源)和此目标记录合并的方法";
+                        merge_dlg.TargetRecPath = strTargetRecPathParam;
+                        merge_dlg.MessageText = "目标书目记录 " + strTargetRecPathParam + " 已经存在。\r\n\r\n请指定当前窗口中的书目记录(源)和此目标记录合并的方法";
 
                         merge_dlg.UiState = this.MainForm.AppInfo.GetString(
         "entity_form",
@@ -12390,7 +12583,7 @@ value);
 merge_dlg.UiState);
 
                         if (merge_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                            return;
+                            return 0;
 
                         merge_style = merge_dlg.GetMergeStyle();
                     }
@@ -12399,33 +12592,20 @@ merge_dlg.UiState);
 
                     // TODO: 预先检查操作者权限，确保删除书目记录和下级记录都能成功，否则就警告
 
-#if NO
-                    if (bOverwrite == true)
-                    {
-                        // 删除目标位置的书目记录
-                        // 如果为归并模式，则保留其下属的实体等记录
-                        nRet = DeleteBiblioRecordFromDatabase(dlg.RecPath,
-                            bOverwrite == true ? "delete" : "onlydeletebiblio",
-                            timestamp,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                    }
-#endif
                     if ((merge_style & MergeStyle.OverwriteSubrecord) != 0)
                     {
                         // 删除目标记录整个，或者删除目标位置的下级记录
                         // TODO: 测试的时候，注意不用下述调用而测试保留目标书目记录中对象的可能性
-                        nRet = DeleteBiblioRecordFromDatabase(dlg.RecPath,
+                        nRet = DeleteBiblioRecordFromDatabase(strTargetRecPathParam,
                             (merge_style & MergeStyle.ReserveSourceBiblio) != 0 ? "delete" : "onlydeletesubrecord",
                             timestamp,
                             out strError);
                         if (nRet == -1)
                         {
                             if ((merge_style & MergeStyle.ReserveSourceBiblio) != 0)
-                                strError = "删除目标位置的书目记录 '" + dlg.RecPath + "' 时出错: " + strError;
+                                strError = "删除目标位置的书目记录 '" + strTargetRecPathParam + "' 时出错: " + strError;
                             else
-                                strError = "删除目标位置的书目记录 '" + dlg.RecPath + "' 的全部子记录时出错: " + strError;
+                                strError = "删除目标位置的书目记录 '" + strTargetRecPathParam + "' 的全部子记录时出错: " + strError;
                             goto ERROR1;
                         }
                     }
@@ -12453,7 +12633,7 @@ merge_dlg.UiState);
                 bool bOldReadOnly = this.m_marcEditor.ReadOnly;
                 Field old_998 = null;
 
-                string strDlgTargetDbName = Global.GetDbName(dlg.RecPath);
+                string strDlgTargetDbName = Global.GetDbName(strTargetRecPathParam);
                 string str998TargetDbName = Global.GetDbName(strTargetRecPath);
 
                 // 如果移动目标和strTargetRecPath同数据库，则要去掉记录中可能存在的998$t
@@ -12497,7 +12677,7 @@ merge_dlg.UiState);
                 nRet = CopyBiblio(
                     channel,
                     "move",
-                    dlg.RecPath,
+                    strTargetRecPathParam,
                     strMergeStyle,
                     out strXml,
                     out strOutputBiblioRecPath,
@@ -12547,7 +12727,7 @@ merge_dlg.UiState);
                         strOutputBiblioRecPath,
                         out strError);
                     if (nRet == -1)
-                        return;
+                        return -1;
                 }
             }
             finally
@@ -12580,14 +12760,12 @@ merge_dlg.UiState);
                 }
             }
 
-#if NO
-            // 将目标记录装入当前窗口
-            this.LoadRecordOld(strOutputBiblioRecPath, "", false);
-#endif
-            return;
+            return 1;
         ERROR1:
-            MessageBox.Show(this, strError);
+            // MessageBox.Show(this, strError);
+            return -1;
         }
+
 
         private void toolStripSplitButton_searchDup_ButtonClick(object sender, EventArgs e)
         {
@@ -13699,6 +13877,78 @@ strMARC);
                 this.MenuItem_marcEditor_fixed.Checked = value;
             }
         }
+
+        void toolStripLabel1_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left)
+                return;
+
+            Point start = this.toolStrip_marcEditor.PointToScreen(e.Location);
+#if NO
+            Task.Factory.StartNew(() => GuiUtil.TryStartDrag(start,
+                () =>
+                {
+                    this.BeginInvoke(new Action(() =>
+    {
+        this.DoDragDrop("move:" + this.textBox_biblioRecPath.Text, DragDropEffects.Move);
+    }));
+                }));
+#endif
+            GuiUtil.TryStartDrag(start, () =>
+                {
+                    this.BeginInvoke(new Action(() =>
+                    {
+                        this.DoDragDrop("move:" + this.textBox_biblioRecPath.Text, DragDropEffects.Move);
+                    }));
+                });
+        }
+
+#if NO
+        void TryStartDrag(Point start)
+        {
+            Thread.Sleep(500);
+            Point current = Control.MousePosition;
+            if (Math.Abs(current.X - start.X) > SystemInformation.DragSize.Width
+                || Math.Abs(current.Y - start.Y) > SystemInformation.DragSize.Height)
+            {
+                this.BeginInvoke(new Action(() =>
+                {
+                    this.DoDragDrop("move:" + this.textBox_biblioRecPath.Text, DragDropEffects.Move);
+                }));
+            }
+        }
+
+#endif
+
+#if NO
+        System.Threading.Timer _timer = null;
+
+        void TryStartDrag(Point start_location)
+        {
+            if (_timer != null)
+                _timer.Dispose();
+            _timer = new System.Threading.Timer((o) =>
+            {
+                Point start = (Point)o;
+                Point current = Control.MousePosition;
+                if (Math.Abs(current.X - start.X) > 10
+                    || Math.Abs(current.Y - start.Y) > 10)
+                {
+                    this.BeginInvoke(new Action(() =>
+                    {
+                        this.DoDragDrop("move:" + this.textBox_biblioRecPath.Text, DragDropEffects.Move);
+                    })); 
+                }
+                System.Threading.Timer old_timer = _timer;
+                this._timer = null;
+                if (old_timer != null)
+                    old_timer.Dispose();
+            },
+                start_location,
+                500,
+                -1);
+        }
+#endif
     }
 
     /// <summary>

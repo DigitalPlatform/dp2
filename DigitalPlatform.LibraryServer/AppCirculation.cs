@@ -53,6 +53,9 @@ namespace DigitalPlatform.LibraryServer
         public bool AcceptBlankItemBarcode = true;
         public bool AcceptBlankReaderBarcode = true;
 
+        // 馆藏地定义中 room 部分是否允许为空
+        public bool AcceptBlankRoomName = false;
+
         public bool VerifyBookType = false;  // 创建和修改册记录的时候是否验证图书类型
         public bool VerifyReaderType = false;  // 创建和修改读者记录的时候是否验证读者类型
         public bool BorrowCheckOverdue = true;  // 借书的时候是否检查未还超期册
@@ -7893,6 +7896,22 @@ out string strError)
             }
 
             source_dom.DocumentElement.AppendChild(fragment);
+
+            // 检查 item 元素文本值是否为空
+            if (this.AcceptBlankRoomName == false)
+            {
+                XmlNodeList nodes = source_dom.DocumentElement.SelectNodes("//item");
+                foreach(XmlElement item in nodes)
+                {
+                    string text = item.InnerText;
+                    if (string.IsNullOrEmpty(text) == true)
+                    {
+                        strError = "馆藏地定义中不允许阅览室名称部分为空";
+                        return -1;
+                    }
+                }
+            }
+
 
             // 检查所有<library>元素的code属性值
             // parameters:

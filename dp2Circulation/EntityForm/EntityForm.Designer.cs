@@ -592,6 +592,7 @@ namespace dp2Circulation
             this.toolStripLabel1.Name = "toolStripLabel1";
             this.toolStripLabel1.Size = new System.Drawing.Size(71, 26);
             this.toolStripLabel1.Text = "ÖÖ¼ÇÂ¼Â·¾¶:";
+            this.toolStripLabel1.MouseDown += toolStripLabel1_MouseDown;
             // 
             // textBox_biblioRecPath
             // 

@@ -4205,7 +4205,6 @@ this.checkBox_prepare_createCallNumber.Checked);
                     ListViewUtil.GetItemText((ListViewItem)e.Item, COLUMN_RECPATH),
                     DragDropEffects.Link);
             }
-
         }
 
         private void listView_accept_records_DragEnter(object sender, DragEventArgs e)

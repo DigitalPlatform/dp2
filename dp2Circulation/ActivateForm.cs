@@ -1002,7 +1002,6 @@ MessageBoxDefaultButton.Button2);
             }
             else
                 e.Effect = DragDropEffects.None;
-
         }
 
         private void panel_old_DragDrop(object sender, DragEventArgs e)

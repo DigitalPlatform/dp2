@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 
 using Microsoft.Win32;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.GUI
 {
@@ -23,6 +24,20 @@ namespace DigitalPlatform.GUI
 
     public class GuiUtil
     {
+        public static void TryStartDrag(Point start, Action action)
+        {
+            Task.Factory.StartNew(() =>
+                {
+                    Thread.Sleep(500);
+                    Point current = Control.MousePosition;
+                    if (Math.Abs(current.X - start.X) > SystemInformation.DragSize.Width
+                        || Math.Abs(current.Y - start.Y) > SystemInformation.DragSize.Height)
+                    {
+                        action.Invoke();
+                    }
+                });
+        }
+
         public static string GetText(Control control)
         {
             if (control.InvokeRequired == false)
