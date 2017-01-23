@@ -1,0 +1,70 @@
+﻿body {
+    font-family: Microsoft YaHei, Tahoma, Arial, Helvetica, sans-serif;
+    font-size: 9pt;
+    margin: 0px;
+    padding: 0px;
+}
+
+TABLE {
+    font-size: 9pt;
+    width: 100%;
+    border-width: 2px;
+    border-style: solid;
+    border-collapse: collapse;
+    border-color: #aaaaaa;
+}
+
+    TABLE TD {
+        padding: 4px;
+        padding-left: 8px;
+        padding-right: 8px;
+        border: 0px;
+        border-right: 1px;
+        border-color: #eeeeee;
+        border-style: solid;
+    }
+
+TD.summary IMG {
+    float: left;
+    margin-right: 4px;
+    max-width: 70px;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+TR.read {
+    background-color: #aaffaa;
+}
+
+input {
+    border-width: 0;
+}
+
+select {
+
+}
+
+.sel {
+    background-color: #cfe9cf;
+}
+
+.changed {
+    font-weight: bolder;
+    /* background-color: #eeeeee; */
+}
+
+.copy SELECT
+{
+    font-size: 18pt;
+}
+
+.price INPUT
+{
+    font-size: 18pt;
+}
+
+.title {
+    color: #808080;
+}

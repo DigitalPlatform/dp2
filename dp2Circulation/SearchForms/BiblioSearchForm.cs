@@ -2414,6 +2414,13 @@ out strError);
                 if (this.listView_records.SelectedItems.Count == 0)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
+
+                subMenuItem = new MenuItem("批订购窗");
+                subMenuItem.Click += new System.EventHandler(this.menu_exportToBatchOrderForm_Click);
+                if (this.listView_records.SelectedItems.Count == 0)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
             }
 
             // 标记空下级记录的事项
@@ -4954,6 +4961,46 @@ MessageBoxDefaultButton.Button1);
             foreach (ListViewItem item in items)
             {
                 item.Selected = true;
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void menu_exportToBatchOrderForm_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要装入其它查询窗的行";
+                goto ERROR1;
+            }
+
+            BatchOrderForm form = new BatchOrderForm();
+            form.MdiParent = this.MainForm;
+            form.Show();
+
+            form.EnableControls(false);
+            try
+            {
+                List<string> recpaths = new List<string>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    string strRecPath = ListViewUtil.GetItemText(item, 0);
+                    // form.AddBiblio(strRecPath);
+                    recpaths.Add(strRecPath);
+                }
+                int nRet = form.LoadLines(
+                    recpaths,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                form.EnableControls(true);
             }
 
             return;

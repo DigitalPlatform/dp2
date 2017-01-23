@@ -231,11 +231,12 @@ namespace dp2Circulation
             this.toolStrip_messageHub = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_messageHub_userManage = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_messageHub_relogin = new System.Windows.Forms.ToolStripButton();
+            this.tabPage_browse = new System.Windows.Forms.TabPage();
             this.toolStrip_panelFixed = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.tabPage_browse = new System.Windows.Forms.TabPage();
+            this.MenuItem_batchOrder = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -984,6 +985,7 @@ namespace dp2Circulation
             this.MenuItem_batch.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_openQuickChangeEntityForm_1,
             this.MenuItem_openQuickChangeBiblioForm,
+            this.MenuItem_batchOrder,
             this.toolStripSeparator16,
             this.MenuItem_itemHandover,
             this.MenuItem_printOrder,
@@ -1789,6 +1791,15 @@ namespace dp2Circulation
             this.toolStripButton_messageHub_relogin.Text = "ÖØÐÂµÇÂ¼";
             this.toolStripButton_messageHub_relogin.Click += new System.EventHandler(this.toolStripButton_messageHub_relogin_Click);
             // 
+            // tabPage_browse
+            // 
+            this.tabPage_browse.Location = new System.Drawing.Point(4, 29);
+            this.tabPage_browse.Name = "tabPage_browse";
+            this.tabPage_browse.Size = new System.Drawing.Size(199, 236);
+            this.tabPage_browse.TabIndex = 7;
+            this.tabPage_browse.Text = "ä¯ÀÀ";
+            this.tabPage_browse.UseVisualStyleBackColor = true;
+            // 
             // toolStrip_panelFixed
             // 
             this.toolStrip_panelFixed.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -1824,14 +1835,12 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // tabPage_browse
+            // MenuItem_batchOrder
             // 
-            this.tabPage_browse.Location = new System.Drawing.Point(4, 29);
-            this.tabPage_browse.Name = "tabPage_browse";
-            this.tabPage_browse.Size = new System.Drawing.Size(199, 236);
-            this.tabPage_browse.TabIndex = 7;
-            this.tabPage_browse.Text = "ä¯ÀÀ";
-            this.tabPage_browse.UseVisualStyleBackColor = true;
+            this.MenuItem_batchOrder.Name = "MenuItem_batchOrder";
+            this.MenuItem_batchOrder.Size = new System.Drawing.Size(196, 22);
+            this.MenuItem_batchOrder.Text = "Åú¶©¹º";
+            this.MenuItem_batchOrder.Click += new System.EventHandler(this.MenuItem_batchOrder_Click);
             // 
             // MainForm
             // 
@@ -2066,6 +2075,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_selectLibraryCode;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_refreshLibraryUID;
         private System.Windows.Forms.TabPage tabPage_browse;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_batchOrder;
     }
 }
 

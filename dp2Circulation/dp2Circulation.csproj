@@ -555,6 +555,13 @@
     <Compile Include="OperLogStatis\OperLogItemLoader.cs" />
     <Compile Include="OperLogStatis\OperLogLoader.cs" />
     <Compile Include="OperLogStatis\OperLogStatisTask1.cs" />
+    <Compile Include="Order\BatchOrderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\BatchOrderForm.Designer.cs">
+      <DependentUpon>BatchOrderForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\BatchOrderScript.cs" />
     <Compile Include="Reader\AddFriendsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1519,6 +1526,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Order\BatchOrder.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Order\BatchOrder.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="printslice.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -1696,6 +1709,9 @@
     <EmbeddedResource Include="Monitor\StartRebuildKeysDlg.resx">
       <DependentUpon>StartRebuildKeysDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\BatchOrderForm.resx">
+      <DependentUpon>BatchOrderForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\AddFriendsDialog.resx">
       <DependentUpon>AddFriendsDialog.cs</DependentUpon>
@@ -2550,6 +2566,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="report_def\9101.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="select2\select2.min.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="select2\select2.min.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="unimarc_cfgs\dp2circulation_marc_autogen.cs">

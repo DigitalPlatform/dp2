@@ -8765,6 +8765,18 @@ Keys keyData)
             this.ServerUID = Guid.NewGuid().ToString();
         }
 
+        private void MenuItem_batchOrder_Click(object sender, EventArgs e)
+        {
+#if NO
+            if (StringUtil.CompareVersion(this.ServerVersion, "2.47") < 0)
+            {
+                MessageBox.Show(this, "dp2library 版本 2.47 和以上才能使用 批订购窗");
+                return;
+            }
+#endif
+            OpenWindow<BatchOrderForm>();
+        }
+
     }
 
     /// <summary>
