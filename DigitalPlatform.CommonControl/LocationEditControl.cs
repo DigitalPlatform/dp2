@@ -69,7 +69,6 @@ namespace DigitalPlatform.CommonControl
 
         bool m_bChanged = false;
 
-
         public LocationEditControl()
         {
             InitializeComponent();
@@ -94,8 +93,6 @@ namespace DigitalPlatform.CommonControl
                 // SetArriveMode(value);
             }
         }
-
-
 
         // 加工id列表，只取得指定数目以内的id构成新列表
         static string LimitIDs(string strIDs,
@@ -201,7 +198,6 @@ namespace DigitalPlatform.CommonControl
                     if (LocationCollection.IsEmptyIDs(strPart) == false)
                         strResult += "{" + strPart + "}";
                 }
-
 
                 nCurrent += nCount;
             }
@@ -485,12 +481,22 @@ namespace DigitalPlatform.CommonControl
         {
             if (this.LocationItems != null)
             {
+                List<LocationItem> items = new List<LocationItem>();
                 foreach (LocationItem item in this.LocationItems)
                 {
+#if NO
                     if (item != null)
                         item.Dispose();
+#endif
+                    if (item != null)
+                        items.Add(item);
                 }
                 this.LocationItems.Clear();
+
+                foreach (LocationItem item in items)
+                {
+                    item.Dispose();
+                }
             }
         }
 
@@ -2162,7 +2168,6 @@ namespace DigitalPlatform.CommonControl
             menuItem = new MenuItem("全选(&A)");
             menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
             contextMenu.MenuItems.Add(menuItem);
-
 
             // ---
             menuItem = new MenuItem("-");

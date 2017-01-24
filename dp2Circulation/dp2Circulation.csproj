@@ -562,6 +562,12 @@
       <DependentUpon>BatchOrderForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Order\BatchOrderScript.cs" />
+    <Compile Include="Order\DistributeDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\DistributeDialog.Designer.cs">
+      <DependentUpon>DistributeDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Reader\AddFriendsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1712,6 +1718,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Order\BatchOrderForm.resx">
       <DependentUpon>BatchOrderForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\DistributeDialog.resx">
+      <DependentUpon>DistributeDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\AddFriendsDialog.resx">
       <DependentUpon>AddFriendsDialog.cs</DependentUpon>

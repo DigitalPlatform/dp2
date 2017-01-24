@@ -8,7 +8,7 @@
 TABLE {
     font-size: 9pt;
     width: 100%;
-    border-width: 2px;
+    border-width: 0px;
     border-style: solid;
     border-collapse: collapse;
     border-color: #aaaaaa;
@@ -43,7 +43,6 @@ input {
 }
 
 select {
-
 }
 
 .sel {
@@ -55,16 +54,90 @@ select {
     /* background-color: #eeeeee; */
 }
 
-.copy SELECT
-{
+.copy SELECT {
     font-size: 18pt;
 }
 
-.price INPUT
-{
+.price INPUT {
     font-size: 18pt;
 }
 
 .title {
     color: #808080;
+}
+
+TABLE.biblio {
+    font-size: 8pt;
+    width: 100%;
+    border-color: lightgrey;
+    border-width: 0px;
+    border-style: solid;
+    border-collapse: collapse;
+}
+
+    TABLE.biblio TD.name {
+        text-align: right;
+        /* background-color: #ffffff; */
+        color: #777777;
+        width: 10%;
+        border: 0px;
+        border-right: 1px;
+        border-color: #999999;
+        border-style: solid;
+        text-align: right;
+        vertical-align: top;
+        white-space: nowrap;
+    }
+
+.biblio-head {
+    text-align: right;
+    width: 100%;
+    border-color: lightgrey;
+    border-width: 0px;
+    border-style: dotted;
+    border-top-width: 2px;
+    padding: 0px;
+    padding-top: 8px;
+    margin: 0px;
+    margin-top: 16px;
+}
+
+.biblio-index {
+    vertical-align: top;
+    padding: 0px;
+    border-right: 0px;
+}
+
+    .biblio-index div {
+        margin: 0px;
+        margin-top: 16px;
+        padding: 8px;
+        text-align: right;
+        background-color: #999999;
+        font-size: 12pt;
+        font-weight: bolder;
+        color: white;
+    }
+
+tr.order TD {
+    border: 0px;
+    border-bottom: 1px;
+    border-color: #eeeeee;
+    border-style: solid;
+}
+
+tr.title TD {
+    border: 0px;
+    border-bottom: 1px;
+    border-color: #cccccc;
+    border-style: solid;
+}
+
+td.dis-button {
+    padding: 0px;
+}
+
+td.dis-button button {
+    font-size: 6pt;
+    margin-left: 0px;
 }

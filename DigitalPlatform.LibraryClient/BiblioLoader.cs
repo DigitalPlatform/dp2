@@ -33,6 +33,7 @@ namespace DigitalPlatform.LibraryClient
             }
         }
 
+        // 目前 format 只允许一种格式
         public string Format
         {
             get;

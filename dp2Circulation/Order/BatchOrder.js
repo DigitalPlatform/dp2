@@ -105,3 +105,19 @@ function deleteOrder() {
 
 }
 
+function onDisButtonClick(o) {
+    var td = $(o).parent();
+    var tr = td.parent();
+
+    var biblio_recpath = tr.attr('biblio-recpath');
+    var refid = tr.attr('ref-id');
+    var result = window.external.editDistribute(biblio_recpath, refid);
+    if (result == null)
+        return;
+    
+    var text_td = td.prev();
+    // alert(text_td.html());
+    text_td.html(result.replace(';', ';<br/>'));
+    text_td.addClass('changed');
+}
+

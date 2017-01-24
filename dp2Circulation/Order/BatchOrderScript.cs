@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.CommonControl;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Permissions;
@@ -9,7 +10,7 @@ namespace dp2Circulation
 {
     [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
-    public class BatchOrderScript 
+    public class BatchOrderScript
     {
         public event EventHandler CallFunc = null;
 
@@ -35,6 +36,26 @@ namespace dp2Circulation
         public void deleteOrder(string strBiblioRecPath, string refid)
         {
             this.BatchOrderForm.DeleteOrder(strBiblioRecPath, refid);
+        }
+
+#if NO
+        public int getArriveCount(string copy)
+        {
+            try
+            {
+                return Convert.ToInt32(OrderDesignControl.GetCopyFromCopyString(copy));
+            }
+            catch
+            {
+                return -1;  // error
+            }
+        }
+#endif
+
+        public string editDistribute(string strBiblioRecPath,
+            string strOrderRefID)
+        {
+            return this.BatchOrderForm.EditDistribute(strBiblioRecPath, strOrderRefID);
         }
     }
 }

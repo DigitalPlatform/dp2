@@ -10,12 +10,14 @@ using System.Windows.Forms;
 using System.Xml;
 using System.IO;
 using System.Web;
+using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
-using System.Collections;
+using DigitalPlatform.Script;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -74,14 +76,17 @@ namespace dp2Circulation
                 if (stop != null)
                     stop.SetProgressRange(0, recpaths.Count);
 
-                BrowseLoader loader = new BrowseLoader();
+                BiblioLoader loader = new BiblioLoader();
                 loader.Channel = channel;
                 loader.Stop = stop;
                 loader.RecPaths = recpaths;
-                loader.Format = "id,cols,xml";
+                loader.Format = "table";
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
                 int i = 0;
-                foreach (DigitalPlatform.LibraryClient.localhost.Record record in loader)
+                foreach (BiblioItem item in loader)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
@@ -91,18 +96,18 @@ namespace dp2Circulation
                         return -1;
                     }
 
-                    Debug.Assert(record.Path == recpaths[i], "");
+                    Debug.Assert(item.RecPath == recpaths[i], "");
 
                     if (stop != null)
                     {
-                        stop.SetMessage("正在刷新浏览行 " + record.Path + " ...");
+                        stop.SetMessage("正在刷新浏览行 " + item.RecPath + " ...");
                         stop.SetProgressValue(i);
                     }
 
                     BiblioStore line = new BiblioStore();
                     line.Orders = new List<OrderStore>();
-                    line.RecPath = record.Path;
-                    line.Xml = record.RecordBody.Xml;
+                    line.RecPath = item.RecPath;
+                    line.Xml = item.Content;
                     this._lines.Add(line);
                     this._recPathTable[line.RecPath] = line;
 
@@ -232,6 +237,48 @@ namespace dp2Circulation
             this.Changed = true;
         }
 
+        public string EditDistribute(string strBiblioRecPath,
+            string strOrderRefID)
+        {
+            BiblioStore biblio = this._recPathTable[strBiblioRecPath] as BiblioStore;
+            if (biblio == null)
+                throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
+            OrderStore order = biblio.FindOrderByRefID(strOrderRefID);
+            if (order == null)
+                throw new Exception("参考ID为 '" + strOrderRefID + "' 的 OrderStore 在内存中没有找到");
+
+            string strCopy = order.GetFieldValue("copy");
+            int copy = -1;
+            Int32.TryParse(OrderDesignControl.GetCopyFromCopyString(strCopy), out copy);
+
+            string strDistribute = order.GetFieldValue("distribute");
+            DistributeDialog dlg = new DistributeDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.DistributeString = strDistribute;
+            dlg.Count = copy;
+            dlg.GetValueTable += dlg_GetValueTable;
+            Program.MainForm.AppInfo.LinkFormState(dlg, "DistributeDialog_state");
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return null;
+            string strNewValue = dlg.DistributeString;
+            order.SetFieldValue("distribute", strNewValue);
+            return strNewValue;
+        }
+
+        void dlg_GetValueTable(object sender, GetValueTableEventArgs e)
+        {
+            string strError = "";
+            string[] values = null;
+            int nRet = Program.MainForm.GetValueTable(e.TableName,
+                e.DbName,
+                out values,
+                out strError);
+            if (nRet == -1)
+                MessageBox.Show(this, strError);
+            e.values = values;
+        }
+
         #endregion
 
         #region HTML View 操作
@@ -292,7 +339,7 @@ namespace dp2Circulation
             text.Append("<td class='nowrap'>经费</td>");
             text.Append("<td class='nowrap'>复本</td>");
             text.Append("<td class='nowrap'>单价</td>");
-            text.Append("<td class='nowrap'>去向</td>");
+            text.Append("<td class='nowrap' colspan='2'>去向</td>");
             text.Append("<td class='nowrap'>类别</td>");
             text.Append("</tr>");
             return text.ToString();
@@ -398,8 +445,11 @@ namespace dp2Circulation
             foreach (BiblioStore item in items)
             {
                 text.Append("<tr class='check event' biblio-recpath='" + item.RecPath + "'>");
-                text.Append("<td class=''>" + (nStart + 1).ToString() + "</td>");
-                text.Append("<td class='nowrap' colspan='9'>" + HttpUtility.HtmlEncode(item.RecPath) + "</td>");
+                text.Append("<td class='biblio-index'><div>" + (nStart + 1).ToString() + "</div></td>");
+                text.Append("<td class='nowrap' colspan='10'>"
+                    + "<div class='biblio-head'>" + HttpUtility.HtmlEncode(item.RecPath) + "</div>"
+                    + "<div class='biblio-table-container'>" + BuildBiblioHtml(item.RecPath, item.Xml) + "</div>"
+                    + "</td>");
 
 #if NO
                 text.Append("<td>");
@@ -510,12 +560,52 @@ namespace dp2Circulation
             text.Append(HttpUtility.HtmlEncode(distribute).Replace(";", ";<br/>"));
             text.Append("</td>");
 
+            text.Append("<td class='dis-button'>");
+            text.Append("<button type='button' onclick='javascript:onDisButtonClick(this);'>...</button>");
+            text.Append("</td>");
+
             text.Append("<td>");
             text.Append(GetSelectList(class_string, this._values.ClassValues, "class"));
             text.Append("</td>");
 
             text.Append("</tr>");
 
+            return text.ToString();
+        }
+
+        static string BuildBiblioHtml(
+            string strBiblioRecPath,
+            string strXml)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
+
+            StringBuilder text = new StringBuilder();
+            text.Append("<table class='biblio'>");
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("line");
+            foreach (XmlElement line in nodes)
+            {
+                string strName = line.GetAttribute("name");
+                string strValue = line.GetAttribute("value");
+
+
+                text.Append("<tr class='line'>");
+                if (strName == "_coverImage")
+                {
+                    string strResPath = ScriptUtil.MakeObjectUrl(strBiblioRecPath, strValue);
+                    strValue = @"<img src='dpres:" + strResPath + "' alt='image'></img>";
+
+                    text.Append("<td class='name'></td>");
+                    text.Append("<td class='value'>" + strValue + "</td>");
+                }
+                else
+                {
+                    text.Append("<td class='name'>" + HttpUtility.HtmlEncode(strName) + "</td>");
+                    text.Append("<td class='value'>" + HttpUtility.HtmlEncode(strValue) + "</td>");
+                }
+                text.Append("</tr>");
+            }
+            text.Append("</table>");
             return text.ToString();
         }
 
@@ -595,6 +685,8 @@ namespace dp2Circulation
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        #region 保存订购记录
 
         int BuildSaveEntities(
             BiblioStore biblio,
@@ -798,6 +890,8 @@ int nCount)
 
             return false;
         }
+
+        #endregion
 
         bool _changed = false;
 
