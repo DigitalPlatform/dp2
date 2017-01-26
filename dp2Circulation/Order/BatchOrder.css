@@ -73,6 +73,7 @@ TABLE.biblio {
     border-width: 0px;
     border-style: solid;
     border-collapse: collapse;
+    margin: 18px;
 }
 
     TABLE.biblio TD.name {
@@ -137,7 +138,37 @@ td.dis-button {
     padding: 0px;
 }
 
-td.dis-button button {
-    font-size: 6pt;
-    margin-left: 0px;
+    td.dis-button button {
+        font-size: 6pt;
+        margin-left: 0px;
+    }
+
+td.error {
+    background-color: yellow;
+}
+
+td.order-index {
+    text-align: right;
+    color: #777777;
+}
+
+div.error-text {
+    padding: 8px;
+    background-color: #990000;
+    color: white;
+}
+
+table.biblio tr.type-title td.value {
+    font-size: 12pt;
+    font-weight: bold;
+}
+
+tr.new td.order-index {
+    border-left: 8px;
+    border-left-color: yellow;
+}
+
+tr.changed td.order-index {
+    border-left: 8px;
+    border-left-color: green;
 }

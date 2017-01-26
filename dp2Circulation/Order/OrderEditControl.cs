@@ -14,6 +14,7 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryServer;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -56,6 +57,14 @@ namespace dp2Circulation
             base._tableLayoutPanel_main = this.tableLayoutPanel_main;
 
             AddEvents(true);
+        }
+
+        public Button EditDistributeButton
+        {
+            get
+            {
+                return this.button_editDistribute;
+            }
         }
 
         #region 数据成员
@@ -1324,5 +1333,124 @@ namespace dp2Circulation
         {
             this.dateTimePicker_orderTime.Value = this.dateTimePicker_orderTime.MinDate;
         }
+
+        string _displayMode = "full";
+
+        /// <summary>
+        ///  编辑区显示模式
+        /// </summary>
+        public string DisplayMode
+        {
+            get
+            {
+                return this._displayMode;
+            }
+            set
+            {
+                this._displayMode = value;
+
+                SetDisplayMode(value);
+            }
+        }
+
+        void SetDisplayMode(string strMode)
+        {
+            this.DisableUpdate();
+            try
+            {
+                if (strMode == "simple")
+                {
+                    this.tableLayoutPanel_main.AutoScroll = true;
+                    this.tableLayoutPanel_main.AutoSize = true;
+                    this.tableLayoutPanel_main.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+                }
+
+                List<Control> controls = new List<Control>();
+
+                if (strMode == "simple")
+                {
+                    controls.Add(this.textBox_catalogNo);
+                    controls.Add(this.comboBox_seller);
+                    controls.Add(this.comboBox_source);
+                    controls.Add(this.textBox_copy);
+                    controls.Add(this.textBox_price);
+                    controls.Add(this.textBox_distribute);
+                    controls.Add(this.comboBox_class);
+                    controls.Add(this.textBox_batchNo);
+                }
+
+                for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
+                {
+                    //
+                    Control control = this.tableLayoutPanel_main.GetAnyControlAt(2, i);
+                    if (control == null)
+                        continue;
+
+#if NO
+                    {
+                        Control label = this.tableLayoutPanel_main.GetControlFromPosition(0, i) as System.Windows.Forms.Label;
+                        if (label != null)
+                        {
+                            if (label != this.label_barcode)
+                            {
+                                label.MouseUp -= new System.Windows.Forms.MouseEventHandler(this.tableLayoutPanel_main_MouseUp);
+                                label.MouseUp += new System.Windows.Forms.MouseEventHandler(this.tableLayoutPanel_main_MouseUp);
+                            }
+                        }
+                    }
+#endif
+
+
+                    if (strMode == "full" || controls.IndexOf(control) != -1)
+                    {
+                        // 显示
+                        if (this.Visible == false || control.Visible == false)
+                        {
+                            SetLineVisible(control, true);
+                            this.tableLayoutPanel_main.RowStyles[i] = new RowStyle(SizeType.AutoSize);
+                        }
+                    }
+                    else
+                    {
+                        // 隐藏
+                        if (this.Visible == false || control.Visible == true)
+                        {
+                            SetLineVisible(control, false);
+                            this.tableLayoutPanel_main.RowStyles[i] = new RowStyle(SizeType.Absolute, 0);
+                        }
+                    }
+                }
+
+            }
+            finally
+            {
+                this.EnableUpdate();
+            }
+        }
+
+#if NO
+        public void AdjustScrollSize()
+        {
+            this.tableLayoutPanel_main.PerformLayout();
+
+            int nHeight = this.textBox_refID.Location.Y + this.textBox_refID.Height;
+            this.tableLayoutPanel_main.AutoScrollMinSize = new Size(this.tableLayoutPanel_main.AutoScrollMinSize.Width, nHeight);
+        }
+#endif
+
+        void SetLineVisible(Control control, bool bVisible)
+        {
+            TableLayoutPanelCellPosition position = this.tableLayoutPanel_main.GetPositionFromControl(control);
+            Control label = this.tableLayoutPanel_main.GetControlFromPosition(0, position.Row);
+            Control color = this.tableLayoutPanel_main.GetControlFromPosition(1, position.Row);
+            Control button = this.tableLayoutPanel_main.GetControlFromPosition(3, position.Row);
+
+            control.Visible = bVisible;
+            label.Visible = bVisible;
+            color.Visible = bVisible;
+            if (button != null)
+                button.Visible = bVisible;
+        }
+
     }
 }
