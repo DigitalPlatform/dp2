@@ -1193,3 +1193,77 @@ merge_dlg.UiState);
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+
+		~~~~~~~~~~~~~~~~~
+
+		        void FillItems(List<BiblioStore> items)
+        {
+            this.ClearMessage();
+
+            StringBuilder text = new StringBuilder();
+
+            string strBinDir = Environment.CurrentDirectory;
+
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "Order\\BatchOrder.css");
+            string strSummaryJs = Path.Combine(this.MainForm.DataDir, "Order\\BatchOrder.js");
+            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+            string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
+                + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"
+                + "<script type='text/javascript' charset='UTF-8' src='" + strSummaryJs + "'></script>";
+            // string strStyle = "<link href=\"%bindir%/select2/select2.min.css\" rel=\"stylesheet\" />" +
+            // "<script src=\"%bindir%/select2/select2.min.js\"></script>";
+            text.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head>"
+                + strLink
+                + strScriptHead.Replace("%bindir%", strBinDir)
+                // + strStyle.Replace("%bindir%", strBinDir)
+                + "</head><body>");
+
+            AppendHtml(text.ToString(), false);
+            text.Clear();
+
+            int nStart = 0;
+            foreach (BiblioStore item in items)
+            {
+                // Application.DoEvents();
+
+                text.Append("\r\n<" + TABLE + " class=''>");
+
+                text.Append("\r\n\t<" + TR + " class='check' biblio-recpath='" + item.RecPath + "' " + strOnClick + ">");
+                text.Append("\r\n\t\t<" + TD + " class='biblio-index'><div>" + (nStart + 1).ToString() + "</div></" + TD + ">");
+                text.Append("\r\n\t\t<" + TD + " class='nowrap' colspan='10'>"
+                    + "<div class='biblio-head'>" + HttpUtility.HtmlEncode(item.RecPath) + "</div>"
+                    + "<div class='biblio-table-container'>" + BuildBiblioHtml(item.RecPath, item.Xml) + "</div>"
+                    + "</" + TD + ">");
+
+                text.Append("\r\n\t</" + TR + ">");
+
+                if (item.Orders.Count > 0)
+                {
+                    text.Append(GetOrderTitleLine());
+                    int i = 0;
+                    foreach (OrderStore order in item.Orders)
+                    {
+                        text.Append(BuildOrderHtml(item.RecPath, order, i, null));
+
+                        i++;
+                    }
+                }
+
+                nStart++;
+                text.Append("\r\n</" + TABLE + ">");
+
+                AppendHtml(text.ToString(), false);
+                text.Clear();
+            }
+            text.Append("</body></html>");
+
+            AppendHtml(text.ToString(), false);
+            text.Clear();
+#if NO
+            Global.SetHtmlString(this.webBrowser1,
+    text.ToString(),
+    Program.MainForm.DataDir,
+    "bo_");
+#endif
+        }

@@ -4997,6 +4997,7 @@ MessageBoxDefaultButton.Button1);
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+                // form.BeginLoadLine(recpaths);
             }
             finally
             {

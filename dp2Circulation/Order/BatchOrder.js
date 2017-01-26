@@ -272,3 +272,26 @@ function onClicked(o) {
         setSel(tr);
     }
 }
+
+function onDoubleClicked(o) {
+    var biblio_recpath = o.attr('biblio-recpath');
+    if (biblio_recpath != null)
+        window.external.loadBiblio(biblio_recpath);
+}
+
+function loadBiblio() {
+    var count = 0;
+    $(".sel").each(function (index) {
+        var tr = $(this);
+        if (tr.hasClass('order')) {
+
+        }
+        else {
+            if (count < 10) {
+                var biblio_recpath = tr.attr('biblio-recpath');
+                window.external.LoadBiblio(biblio_recpath);
+                count++;
+            }
+        }
+    });
+}

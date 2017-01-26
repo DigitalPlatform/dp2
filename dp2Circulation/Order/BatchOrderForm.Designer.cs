@@ -31,15 +31,16 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BatchOrderForm));
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripButton_refresh = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSplitButton_newOrder = new System.Windows.Forms.ToolStripSplitButton();
-            this.ToolStripMenuItem_newOrderTemplate = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripButton_deleteOrder = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton_select = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_selectAllBiblio = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_selectAllOrder = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSplitButton_newOrder = new System.Windows.Forms.ToolStripSplitButton();
+            this.ToolStripMenuItem_newOrderTemplate = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton_loadBiblio = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_refresh = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_deleteOrder = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -58,6 +59,7 @@
             this.toolStripDropDownButton_select,
             this.toolStripSplitButton_newOrder,
             this.toolStripSeparator1,
+            this.toolStripButton_loadBiblio,
             this.toolStripButton_refresh,
             this.toolStripButton_deleteOrder,
             this.toolStripButton_save});
@@ -67,14 +69,31 @@
             this.toolStrip1.TabIndex = 3;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // toolStripButton_refresh
+            // toolStripDropDownButton_select
             // 
-            this.toolStripButton_refresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_refresh.Image")));
-            this.toolStripButton_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_refresh.Name = "toolStripButton_refresh";
-            this.toolStripButton_refresh.Size = new System.Drawing.Size(36, 22);
-            this.toolStripButton_refresh.Text = "刷新";
+            this.toolStripDropDownButton_select.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripDropDownButton_select.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ToolStripMenuItem_selectAllBiblio,
+            this.ToolStripMenuItem_selectAllOrder});
+            this.toolStripDropDownButton_select.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_select.Image")));
+            this.toolStripDropDownButton_select.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton_select.Name = "toolStripDropDownButton_select";
+            this.toolStripDropDownButton_select.Size = new System.Drawing.Size(45, 22);
+            this.toolStripDropDownButton_select.Text = "选择";
+            // 
+            // ToolStripMenuItem_selectAllBiblio
+            // 
+            this.ToolStripMenuItem_selectAllBiblio.Name = "ToolStripMenuItem_selectAllBiblio";
+            this.ToolStripMenuItem_selectAllBiblio.Size = new System.Drawing.Size(124, 22);
+            this.ToolStripMenuItem_selectAllBiblio.Text = "所有书目";
+            this.ToolStripMenuItem_selectAllBiblio.Click += new System.EventHandler(this.ToolStripMenuItem_selectAllBiblio_Click);
+            // 
+            // ToolStripMenuItem_selectAllOrder
+            // 
+            this.ToolStripMenuItem_selectAllOrder.Name = "ToolStripMenuItem_selectAllOrder";
+            this.ToolStripMenuItem_selectAllOrder.Size = new System.Drawing.Size(124, 22);
+            this.ToolStripMenuItem_selectAllOrder.Text = "所有订购";
+            this.ToolStripMenuItem_selectAllOrder.Click += new System.EventHandler(this.ToolStripMenuItem_selectAllOrder_Click);
             // 
             // toolStripSplitButton_newOrder
             // 
@@ -102,6 +121,26 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
+            // toolStripButton_loadBiblio
+            // 
+            this.toolStripButton_loadBiblio.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_loadBiblio.Enabled = false;
+            this.toolStripButton_loadBiblio.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_loadBiblio.Image")));
+            this.toolStripButton_loadBiblio.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_loadBiblio.Name = "toolStripButton_loadBiblio";
+            this.toolStripButton_loadBiblio.Size = new System.Drawing.Size(72, 22);
+            this.toolStripButton_loadBiblio.Text = "装入种册窗";
+            this.toolStripButton_loadBiblio.Click += new System.EventHandler(this.toolStripButton_loadBiblio_Click);
+            // 
+            // toolStripButton_refresh
+            // 
+            this.toolStripButton_refresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_refresh.Image")));
+            this.toolStripButton_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_refresh.Name = "toolStripButton_refresh";
+            this.toolStripButton_refresh.Size = new System.Drawing.Size(36, 22);
+            this.toolStripButton_refresh.Text = "刷新";
+            // 
             // toolStripButton_deleteOrder
             // 
             this.toolStripButton_deleteOrder.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -124,32 +163,6 @@
             this.toolStripButton_save.Size = new System.Drawing.Size(36, 22);
             this.toolStripButton_save.Text = "保存";
             this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
-            // 
-            // toolStripDropDownButton_select
-            // 
-            this.toolStripDropDownButton_select.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripDropDownButton_select.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolStripMenuItem_selectAllBiblio,
-            this.ToolStripMenuItem_selectAllOrder});
-            this.toolStripDropDownButton_select.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_select.Image")));
-            this.toolStripDropDownButton_select.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripDropDownButton_select.Name = "toolStripDropDownButton_select";
-            this.toolStripDropDownButton_select.Size = new System.Drawing.Size(45, 22);
-            this.toolStripDropDownButton_select.Text = "选择";
-            // 
-            // ToolStripMenuItem_selectAllBiblio
-            // 
-            this.ToolStripMenuItem_selectAllBiblio.Name = "ToolStripMenuItem_selectAllBiblio";
-            this.ToolStripMenuItem_selectAllBiblio.Size = new System.Drawing.Size(152, 22);
-            this.ToolStripMenuItem_selectAllBiblio.Text = "所有书目";
-            this.ToolStripMenuItem_selectAllBiblio.Click += new System.EventHandler(this.ToolStripMenuItem_selectAllBiblio_Click);
-            // 
-            // ToolStripMenuItem_selectAllOrder
-            // 
-            this.ToolStripMenuItem_selectAllOrder.Name = "ToolStripMenuItem_selectAllOrder";
-            this.ToolStripMenuItem_selectAllOrder.Size = new System.Drawing.Size(152, 22);
-            this.ToolStripMenuItem_selectAllOrder.Text = "所有订购";
-            this.ToolStripMenuItem_selectAllOrder.Click += new System.EventHandler(this.ToolStripMenuItem_selectAllOrder_Click);
             // 
             // BatchOrderForm
             // 
@@ -185,5 +198,6 @@
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_select;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_selectAllBiblio;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_selectAllOrder;
+        private System.Windows.Forms.ToolStripButton toolStripButton_loadBiblio;
     }
 }

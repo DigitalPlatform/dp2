@@ -21,6 +21,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
 using DigitalPlatform.CommonControl;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -52,7 +53,28 @@ namespace dp2Circulation
 
         public override void EnableControls(bool bEnable)
         {
-            this.toolStrip1.Enabled = bEnable;
+            this.BeginInvoke(new Action(() =>
+            {
+                this.toolStrip1.Enabled = bEnable;
+            }));
+        }
+
+        public void BeginLoadLine(List<string> recpaths)
+        {
+            Task.Factory.StartNew(() => LoadLine(recpaths));
+        }
+
+        public void LoadLine(List<string> recpaths)
+        {
+            string strError = "";
+            int nRet = LoadLines(recpaths, out strError);
+            if (nRet == -1)
+            {
+                this.BeginInvoke(new Action(() =>
+                {
+                    MessageBox.Show(this, strError);
+                }));
+            }
         }
 
         public int LoadLines(
@@ -90,6 +112,10 @@ namespace dp2Circulation
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
+                _tableCount = 0;
+                OutputBegin();
+
+                int nStart = 0;
                 int i = 0;
                 foreach (BiblioItem item in loader)
                 {
@@ -147,9 +173,13 @@ namespace dp2Circulation
 #endif
                     }
                     i++;
+
+                    OutputBiblio(line, ref nStart);
                 }
 
-                FillItems(this._lines);
+                OutputEnd();
+
+                // FillItems(this._lines);
                 return 0;
             }
             catch (Exception ex)
@@ -220,13 +250,24 @@ namespace dp2Circulation
 
             if (order_count > 0)
             {
-                this.toolStripButton_deleteOrder.Text = "删除 (" + (order_count) + ")";
+                this.toolStripButton_deleteOrder.Text = "删除 [" + (order_count) + "]";
                 this.toolStripButton_deleteOrder.Enabled = true;
             }
             else
             {
                 this.toolStripButton_deleteOrder.Text = "删除";
                 this.toolStripButton_deleteOrder.Enabled = false;
+            }
+
+            if (biblio_count > 0)
+            {
+                this.toolStripButton_loadBiblio.Text = "装入种册窗 [" + Math.Min(biblio_count, 10) + "]";
+                this.toolStripButton_loadBiblio.Enabled = true;
+            }
+            else
+            {
+                this.toolStripButton_loadBiblio.Text = "装入种册窗";
+                this.toolStripButton_loadBiblio.Enabled = false;
             }
         }
 
@@ -277,6 +318,11 @@ namespace dp2Circulation
             order.Type = "deleted";
 
             this.Changed = true;
+        }
+
+        public void LoadBiblio(string strBiblioRecPath)
+        {
+            EntityForm form = EntityForm.OpenNewEntityForm(strBiblioRecPath);
         }
 
         public string EditDistribute(string strBiblioRecPath,
@@ -416,19 +462,19 @@ namespace dp2Circulation
         public static string GetOrderTitleLine()
         {
             StringBuilder text = new StringBuilder();
-            text.Append("<tr class='title'>");
+            text.Append("\r\n\t<" + TR + " class='title'>");
             // text.Append("<td class='nowrap'></td>");
-            text.Append("<td class='order-index nowrap'>序号</td>");
-            text.Append("<td class='nowrap'>状态</td>");
-            text.Append("<td class='nowrap'>书目号</td>");
-            text.Append("<td class='nowrap'>渠道</td>");
-            text.Append("<td class='nowrap'>经费</td>");
-            text.Append("<td class='nowrap'>复本</td>");
-            text.Append("<td class='nowrap'>单价</td>");
-            text.Append("<td class='nowrap' colspan='2'>去向</td>");
-            text.Append("<td class='nowrap'>类别</td>");
-            text.Append("<td class='nowrap'>批次号</td>");
-            text.Append("</tr>");
+            text.Append("\r\n\t\t<" + TD + " class='order-index nowrap'>序号</" + TD + ">");
+            text.Append("\r\n\t\t<" + TD + " class='nowrap'>状态</" + TD + ">");
+            text.Append("\r\n\t\t<" + TD + " class='nowrap'>书目号</" + TD + ">");
+            text.Append("\r\n\t\t<" + TD + " class='nowrap'>渠道</" + TD + ">");
+            text.Append("\r\n\t\t<" + TD + " class='nowrap'>经费</" + TD + ">");
+            text.Append("\r\n\t\t<" + TD + " class='nowrap'>复本</" + TD + ">");
+            text.Append("\r\n\t\t<" + TD + " class='nowrap'>单价</" + TD + ">");
+            text.Append("\r\n\t\t<" + TD + " class='nowrap' colspan='2'>去向</" + TD + ">");
+            text.Append("\r\n\t\t<" + TD + " class='nowrap'>类别</" + TD + ">");
+            text.Append("\r\n\t\t<" + TD + " class='nowrap'>批次号</" + TD + ">");
+            text.Append("\r\n\t</" + TR + ">");
             return text.ToString();
         }
 
@@ -506,7 +552,11 @@ namespace dp2Circulation
             }
         }
 
-        void FillItems(List<BiblioStore> items)
+        static string TABLE = "TABLE";
+        static string TR = "TR";
+        static string TD = "TD";
+
+        void OutputBegin()
         {
             this.ClearMessage();
 
@@ -528,55 +578,82 @@ namespace dp2Circulation
                 // + strStyle.Replace("%bindir%", strBinDir)
                 + "</head><body>");
 
-#if DIV
-            text.Append("<div class='table'>");
-#else
-            text.Append("<table>");
-#endif
+            AppendHtml(text.ToString(), false);
+            text.Clear();
+        }
+
+        int _tableCount = 0;
+
+        void OutputBiblio(BiblioStore item, ref int nStart)
+        {
+            StringBuilder text = new StringBuilder();
+
+            if (_tableCount == 0)
+                text.Append("\r\n<" + TABLE + " class=''>");
+
+            text.Append("\r\n\t<" + TR + " class='check' biblio-recpath='" + item.RecPath + "' " + strOnClick + ">");
+            text.Append("\r\n\t\t<" + TD + " class='biblio-index'><div>" + (nStart + 1).ToString() + "</div></" + TD + ">");
+            text.Append("\r\n\t\t<" + TD + " class='nowrap' colspan='10'>"
+                + "<div class='biblio-head'>" + HttpUtility.HtmlEncode(item.RecPath) + "</div>"
+                + "<div class='biblio-table-container'>" + BuildBiblioHtml(item.RecPath, item.Xml) + "</div>"
+                + "</" + TD + ">");
+
+            text.Append("\r\n\t</" + TR + ">");
+
+            if (item.Orders.Count > 0)
+            {
+                text.Append(GetOrderTitleLine());
+                int i = 0;
+                foreach (OrderStore order in item.Orders)
+                {
+                    text.Append(BuildOrderHtml(item.RecPath, order, i, null));
+
+                    i++;
+                }
+            }
+
+            nStart++;
+
+            if (_tableCount >= 9)
+            {
+                text.Append("\r\n</" + TABLE + ">");
+                _tableCount = 0;
+            }
+            else
+                _tableCount++;
 
             AppendHtml(text.ToString(), false);
             text.Clear();
 
-            int nStart = 0;
-            foreach (BiblioStore item in items)
+        }
+
+        void OutputEnd()
+        {
+            StringBuilder text = new StringBuilder();
+
+            if (_tableCount != 0)
             {
-                Application.DoEvents();
-
-                text.Append("<tr class='check event' biblio-recpath='" + item.RecPath + "' "+strOnClick+">");
-                text.Append("<td class='biblio-index'><div>" + (nStart + 1).ToString() + "</div></td>");
-                text.Append("<td class='nowrap' colspan='10'>"
-                    + "<div class='biblio-head'>" + HttpUtility.HtmlEncode(item.RecPath) + "</div>"
-                    + "<div class='biblio-table-container'>" + BuildBiblioHtml(item.RecPath, item.Xml) + "</div>"
-                    + "</td>");
-
-                text.Append("</tr>");
-
-                if (item.Orders.Count > 0)
-                {
-                    text.Append(GetOrderTitleLine());
-                    int i = 0;
-                    foreach (OrderStore order in item.Orders)
-                    {
-                        text.Append(BuildOrderHtml(item.RecPath, order, i, null));
-
-                        i++;
-                    }
-                }
-
-                nStart++;
-
-                AppendHtml(text.ToString(), false);
-                text.Clear();
+                text.Append("\r\n</" + TABLE + ">");
+                _tableCount = 0;
             }
-#if DIV
-            text.Append("</div>");
-#else
-            text.Append("</table>");
-#endif
+
             text.Append("</body></html>");
 
             AppendHtml(text.ToString(), false);
             text.Clear();
+        }
+
+#if NO
+        void FillItems(List<BiblioStore> items)
+        {
+
+            int nStart = 0;
+            foreach (BiblioStore item in items)
+            {
+                // Application.DoEvents();
+
+            }
+
 #if NO
             Global.SetHtmlString(this.webBrowser1,
     text.ToString(),
@@ -584,6 +661,7 @@ namespace dp2Circulation
     "bo_");
 #endif
         }
+#endif
 
         string BuildOrderHtml(
             string strBiblioRecPath,
@@ -637,53 +715,53 @@ namespace dp2Circulation
 "batchNo");
 
 
-            text.Append("<tr "
+            text.Append("\r\n\t<" + TR + " "
                 + (string.IsNullOrEmpty(state) ? "" : "disabled ")
                 + "class='order check event"
                 + (string.IsNullOrEmpty(strClass) ? "" : " " + strClass)
-                + "' ref-id='" + refID + "' biblio-recpath='" + strBiblioRecPath + "' "+strOnClick+">");
+                + "' ref-id='" + refID + "' biblio-recpath='" + strBiblioRecPath + "' " + strOnClick + ">");
             // text.Append("<td class='nowrap'></td>");
-            text.Append("<td class='order-index'>" + (i + 1).ToString() + "</td>");
-            text.Append("<td class='state nowrap'>" + HttpUtility.HtmlEncode(state) + "</td>");
+            text.Append("\r\n\t\t<" + TD + " class='order-index'>" + (i + 1).ToString() + "</" + TD + ">");
+            text.Append("\r\n\t\t<" + TD + " class='state nowrap'>" + HttpUtility.HtmlEncode(state) + "</" + TD + ">");
 
-            text.Append("<td class='catalogNo'>");
-            text.Append("<input class='list event' type='text' value='" + HttpUtility.HtmlEncode(catalogNo) + "' col-name='catalogNo' size='8' "+strOnChange+"/>");
-            text.Append("</td>");
+            text.Append("\r\n\t\t<" + TD + " class='catalogNo'>");
+            text.Append("<input class='list event' type='text' value='" + HttpUtility.HtmlEncode(catalogNo) + "' col-name='catalogNo' size='8' " + strOnChange + "/>");
+            text.Append("</" + TD + ">");
 
-            text.Append("<td class='seller'>");
+            text.Append("\r\n\t\t<" + TD + " class='seller'>");
             text.Append(GetSelectList(seller, this._values.SellerValues, "seller"));
-            text.Append("</td>");
+            text.Append("</" + TD + ">");
 
-            text.Append("<td class='source'>");
+            text.Append("\r\n\t\t<" + TD + " class='source'>");
             text.Append(GetSelectList(source, this._values.SourceValues, "source"));
-            text.Append("</td>");
+            text.Append("</" + TD + ">");
 
-            text.Append("<td class='copy'>");
+            text.Append("\r\n\t\t<" + TD + " class='copy'>");
             // text.Append(HttpUtility.HtmlEncode(copy));
             text.Append(GetSelectList(copy, this._values.CopyNumbers, "copy"));
-            text.Append("</td>");
+            text.Append("</" + TD + ">");
 
-            text.Append("<td class='price'>");
+            text.Append("\r\n\t\t<" + TD + " class='price'>");
             text.Append("<input class='list event' type='text' value='" + HttpUtility.HtmlEncode(price) + "' col-name='price' size='8' " + strOnChange + "/>");
-            text.Append("</td>");
+            text.Append("</" + TD + ">");
 
-            text.Append("<td class='dis-text'>");
+            text.Append("\r\n\t\t<" + TD + " class='dis-text'>");
             text.Append(HttpUtility.HtmlEncode(distribute).Replace(";", ";<br/>"));
-            text.Append("</td>");
+            text.Append("</" + TD + ">");
 
-            text.Append("<td class='dis-button'>");
+            text.Append("\r\n\t\t<" + TD + " class='dis-button'>");
             text.Append("<button type='button' onclick='javascript:onDisButtonClick(this);'>...</button>");
-            text.Append("</td>");
+            text.Append("</" + TD + ">");
 
-            text.Append("<td class='order-class'>");
+            text.Append("\r\n\t\t<" + TD + " class='order-class'>");
             text.Append(GetSelectList(class_string, this._values.ClassValues, "class"));
-            text.Append("</td>");
+            text.Append("</" + TD + ">");
 
-            text.Append("<td class='batchNo'>");
+            text.Append("\r\n\t\t<" + TD + " class='batchNo'>");
             text.Append("<input class='list event' type='text' value='" + HttpUtility.HtmlEncode(batchNo) + "' col-name='batchNo' size='8' " + strOnChange + "/>");
-            text.Append("</td>");
+            text.Append("</" + TD + ">");
 
-            text.Append("</tr>");
+            text.Append("\r\n\t</" + TR + ">");
 
             return text.ToString();
         }
@@ -696,7 +774,7 @@ namespace dp2Circulation
             dom.LoadXml(strXml);
 
             StringBuilder text = new StringBuilder();
-            text.Append("<table class='biblio'>");
+            text.Append("\r\n<table class='biblio'>");
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("line");
             foreach (XmlElement line in nodes)
             {
@@ -707,23 +785,23 @@ namespace dp2Circulation
                 string strClass = "line";
                 if (string.IsNullOrEmpty(strType) == false)
                     strClass += " type-" + strType;
-                text.Append("<tr class='" + strClass + "'>");
+                text.Append("\r\n\t<tr class='" + strClass + "'>");
                 if (strName == "_coverImage")
                 {
                     string strResPath = ScriptUtil.MakeObjectUrl(strBiblioRecPath, strValue);
                     strValue = @"<img src='dpres:" + strResPath + "' alt='image'></img>";
 
-                    text.Append("<td class='name'></td>");
-                    text.Append("<td class='value'>" + strValue + "</td>");
+                    text.Append("\r\n\t\t<td class='name'></td>");
+                    text.Append("\r\n\t\t<td class='value'>" + strValue + "</td>");
                 }
                 else
                 {
-                    text.Append("<td class='name'>" + HttpUtility.HtmlEncode(strName) + "</td>");
-                    text.Append("<td class='value'>" + HttpUtility.HtmlEncode(strValue) + "</td>");
+                    text.Append("\r\n\t\t<td class='name'>" + HttpUtility.HtmlEncode(strName) + "</td>");
+                    text.Append("\r\n\t\t<td class='value'>" + HttpUtility.HtmlEncode(strValue) + "</td>");
                 }
-                text.Append("</tr>");
+                text.Append("\r\n\t</tr>");
             }
-            text.Append("</table>");
+            text.Append("\r\n</table>");
             return text.ToString();
         }
 
@@ -1105,6 +1183,11 @@ int nCount)
         {
             webBrowser1.Document.InvokeScript("selectAllOrder",
                 new object[] { Control.ModifierKeys == Keys.Control ? false : true });
+        }
+
+        private void toolStripButton_loadBiblio_Click(object sender, EventArgs e)
+        {
+            webBrowser1.Document.InvokeScript("loadBiblio");
         }
 
     }

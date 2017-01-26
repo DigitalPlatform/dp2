@@ -47,6 +47,10 @@ namespace dp2Circulation
             this.BatchOrderForm.DeleteOrder(strBiblioRecPath, refid);
         }
 
+        public void loadBiblio(string strBiblioRecPath)
+        {
+            this.BatchOrderForm.LoadBiblio(strBiblioRecPath);
+        }
 #if NO
         public int getArriveCount(string copy)
         {
