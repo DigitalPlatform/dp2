@@ -101,7 +101,7 @@ function newOrder(xml) {
         }
     });
 
-    setEvents();
+    // setEvents();
 }
 
 function deleteOrder() {

@@ -43,6 +43,7 @@ input {
 }
 
 select {
+    outline: 0;
 }
 
 .sel {
