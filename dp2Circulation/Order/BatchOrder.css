@@ -1,33 +1,33 @@
 ﻿body {
     font-family: Microsoft YaHei, Tahoma, Arial, Helvetica, sans-serif;
-    font-size: 9pt;
-    margin: 0px;
-    padding: 0px;
+    font-size: 10pt;
+    margin: 0pt;
+    padding: 0pt;
 }
 
 TABLE {
-    font-size: 9pt;
+    font-size: 10pt;
     width: 100%;
-    border-width: 0px;
+    border-width: 0pt;
     border-style: solid;
     border-collapse: collapse;
     border-color: #aaaaaa;
 }
 
     TABLE TD {
-        padding: 4px;
-        padding-left: 8px;
-        padding-right: 8px;
-        border: 0px;
-        border-right: 1px;
+        padding: 4pt;
+        padding-left: 8pt;
+        padding-right: 8pt;
+        border: 0pt;
+        border-right: 1pt;
         border-color: #eeeeee;
         border-style: solid;
     }
 
 TD.summary IMG {
     float: left;
-    margin-right: 4px;
-    max-width: 70px;
+    margin-right: 4pt;
+    max-width: 70pt;
 }
 
 .nowrap {
@@ -68,13 +68,13 @@ select {
 }
 
 TABLE.biblio {
-    font-size: 8pt;
+    font-size: 10pt;
     width: 100%;
     border-color: lightgrey;
-    border-width: 0px;
+    border-width: 0pt;
     border-style: solid;
     border-collapse: collapse;
-    margin: 18px;
+    margin: 18pt;
 }
 
     TABLE.biblio TD.name {
@@ -82,8 +82,8 @@ TABLE.biblio {
         /* background-color: #ffffff; */
         color: #777777;
         width: 10%;
-        border: 0px;
-        border-right: 1px;
+        border: 0pt;
+        border-right: 1pt;
         border-color: #999999;
         border-style: solid;
         text-align: right;
@@ -95,25 +95,25 @@ TABLE.biblio {
     text-align: right;
     width: 100%;
     border-color: lightgrey;
-    border-width: 0px;
+    border-width: 0pt;
     border-style: dotted;
-    border-top-width: 2px;
-    padding: 0px;
-    padding-top: 8px;
-    margin: 0px;
-    margin-top: 16px;
+    border-top-width: 2pt;
+    padding: 0pt;
+    padding-top: 8pt;
+    margin: 0pt;
+    margin-top: 16pt;
 }
 
 .biblio-index {
     vertical-align: top;
-    padding: 0px;
-    border-right: 0px;
+    padding: 0pt;
+    border-right: 0pt;
 }
 
     .biblio-index div {
-        margin: 0px;
-        margin-top: 16px;
-        padding: 8px;
+        margin: 0pt;
+        margin-top: 16pt;
+        padding: 8pt;
         text-align: right;
         background-color: #999999;
         font-size: 12pt;
@@ -122,26 +122,26 @@ TABLE.biblio {
     }
 
 tr.order TD {
-    border: 0px;
-    border-bottom: 1px;
+    border: 0pt;
+    border-bottom: 1pt;
     border-color: #eeeeee;
     border-style: solid;
 }
 
 tr.title TD {
-    border: 0px;
-    border-bottom: 1px;
+    border: 0pt;
+    border-bottom: 1pt;
     border-color: #cccccc;
     border-style: solid;
 }
 
 td.dis-button {
-    padding: 0px;
+    padding: 0pt;
 }
 
     td.dis-button button {
         font-size: 6pt;
-        margin-left: 0px;
+        margin-left: 0pt;
     }
 
 td.error {
@@ -154,7 +154,7 @@ td.order-index {
 }
 
 div.error-text {
-    padding: 8px;
+    padding: 8pt;
     background-color: #990000;
     color: white;
 }
@@ -165,11 +165,11 @@ table.biblio tr.type-title td.value {
 }
 
 tr.new td.order-index {
-    border-left: 8px;
+    border-left: 8pt;
     border-left-color: yellow;
 }
 
 tr.changed td.order-index {
-    border-left: 8px;
+    border-left: 8pt;
     border-left-color: green;
 }
