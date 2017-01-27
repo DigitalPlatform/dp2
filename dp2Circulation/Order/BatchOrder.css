@@ -165,11 +165,13 @@ table.biblio tr.type-title td.value {
 }
 
 tr.new td.order-index {
+    border-style: solid;
     border-left: 8pt;
     border-left-color: yellow;
 }
 
 tr.changed td.order-index {
+    border-style: solid;
     border-left: 8pt;
     border-left-color: green;
 }
