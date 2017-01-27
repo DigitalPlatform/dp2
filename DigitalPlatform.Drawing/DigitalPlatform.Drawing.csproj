@@ -211,7 +211,6 @@
     <Compile Include="DigitalPlatform.Drawing.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DpiUtil.cs" />
     <Compile Include="FontUtil.cs" />
     <Compile Include="GraphicsUtil.cs">
       <SubType>Code</SubType>

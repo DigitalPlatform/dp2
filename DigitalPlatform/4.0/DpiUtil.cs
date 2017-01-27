@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace DigitalPlatform.Drawing
+namespace DigitalPlatform
 {
     public class DpiUtil
     {
@@ -50,7 +50,7 @@ namespace DigitalPlatform.Drawing
             return new Rectangle(
                 Convert.ToInt32(rect.X * (dpi_xy.Width / 96F)),
                 Convert.ToInt32(rect.Y * (dpi_xy.Height / 96F)),
-                Convert.ToInt32(rect.Width * (dpi_xy.Width / 96F)), 
+                Convert.ToInt32(rect.Width * (dpi_xy.Width / 96F)),
                 Convert.ToInt32(rect.Height * (dpi_xy.Height / 96F))
             );
         }

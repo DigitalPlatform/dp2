@@ -12,15 +12,15 @@ using System.Threading.Tasks;
 namespace DigitalPlatform.GUI
 {
 
-	// 增补菜单
-	public delegate void GuiAppendMenuEventHandle(object sender,
+    // 增补菜单
+    public delegate void GuiAppendMenuEventHandle(object sender,
     GuiAppendMenuEventArgs e);
 
-	public class GuiAppendMenuEventArgs: EventArgs
-	{
-		public ContextMenu ContextMenu = null;
+    public class GuiAppendMenuEventArgs : EventArgs
+    {
+        public ContextMenu ContextMenu = null;
         public ContextMenuStrip ContextMenuStrip = null;
-	}
+    }
 
     public class GuiUtil
     {
@@ -111,7 +111,6 @@ namespace DigitalPlatform.GUI
             {
             }
         }
-
 
         // 注册IE9 WebControl模式
         public static bool RegisterIE9DocMode()

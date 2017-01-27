@@ -55,7 +55,6 @@ namespace DigitalPlatform.CommonControl
         int m_nLineHeight = 26;
 
         internal int m_nLabelWidth = 40;    // 26
-        // internal int m_nLibraryWidth = 100;
         internal int m_nLocationWidth = 160;
         internal int m_nArrivedWidth = 40;
 
@@ -72,7 +71,30 @@ namespace DigitalPlatform.CommonControl
         public LocationEditControl()
         {
             InitializeComponent();
+
+            // 2017/1/27
+            SetDpiXY(DpiUtil.GetDpiXY(this));
         }
+
+        internal SizeF DpiXY = new SizeF(96, 96);
+
+        public void SetDpiXY(SizeF dpi_xy)
+        {
+            this.DpiXY = dpi_xy;
+
+            m_nLineHeight = DpiUtil.GetScalingY(dpi_xy, 26);
+
+            m_nLabelWidth = DpiUtil.GetScalingX(dpi_xy, 40);
+            m_nLocationWidth = DpiUtil.GetScalingX(dpi_xy, 160);
+            m_nArrivedWidth = DpiUtil.GetScalingX(dpi_xy, 40);
+
+            m_nLineLeftBlank = DpiUtil.GetScalingX(dpi_xy, 6);
+            m_nLineWidth = DpiUtil.GetScalingX(dpi_xy, 6);
+            m_nNumberTextWidth = DpiUtil.GetScalingX(dpi_xy, 20);
+
+            m_nRightBlank = DpiUtil.GetScalingX(dpi_xy, 4);
+        }
+
 
         bool m_bArriveMode = false;
 

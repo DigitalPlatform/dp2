@@ -13,7 +13,6 @@ using System.Runtime.InteropServices;
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Range;
-using DigitalPlatform.Drawing;
 
 namespace DigitalPlatform.CommonDialog
 {

@@ -257,6 +257,7 @@
       <DependentUpon>ConfirmSupervisorDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="ControlExtensions.cs" />
+    <Compile Include="DpiUtil.cs" />
     <EmbeddedResource Include="..\AutoCloseMessageBox.resx">
       <DependentUpon>AutoCloseMessageBox.cs</DependentUpon>
       <SubType>Designer</SubType>
