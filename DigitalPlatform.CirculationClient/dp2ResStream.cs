@@ -224,7 +224,6 @@ namespace DigitalPlatform.CirculationClient
             if (m_lCurrent >= m_lLength)
                 return 0;
 
-
             string strError = "";
             // return:
             //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。

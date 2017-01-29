@@ -47,7 +47,7 @@ select {
 }
 
 .sel {
-    background-color: #cfe9cf;
+    background-color: #cfcfe9;
 }
 
 .changed {
@@ -164,14 +164,16 @@ table.biblio tr.type-title td.value {
     font-weight: bold;
 }
 
-tr.new td.order-index {
+tr.new td.order-index, tr.new.changed td.order-index {
     border-style: solid;
+    border: 0pt;
     border-left: 8pt;
     border-left-color: yellow;
 }
 
 tr.changed td.order-index {
     border-style: solid;
+    border: 0pt;
     border-left: 8pt;
     border-left-color: green;
 }

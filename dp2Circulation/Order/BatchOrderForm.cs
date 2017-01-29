@@ -417,7 +417,7 @@ namespace dp2Circulation
         /// </summary>
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "Order\\BatchOrder_dark.css");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strJs = "";
 
@@ -564,11 +564,12 @@ namespace dp2Circulation
 
             string strBinDir = Environment.CurrentDirectory;
 
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "Order\\BatchOrder.css");
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "Order\\BatchOrder_light.css");
             string strSummaryJs = Path.Combine(this.MainForm.DataDir, "Order\\BatchOrder.js");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
                 + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"
+                + "<script type=\"text/javascript\" src=\"%bindir%/order/jquery.scrollIntoView.min.js\"></script>"
                 + "<script type='text/javascript' charset='UTF-8' src='" + strSummaryJs + "'></script>";
             // string strStyle = "<link href=\"%bindir%/select2/select2.min.css\" rel=\"stylesheet\" />" +
             // "<script src=\"%bindir%/select2/select2.min.js\"></script>";
@@ -797,7 +798,7 @@ namespace dp2Circulation
                 else
                 {
                     text.Append("\r\n\t\t<td class='name'>" + HttpUtility.HtmlEncode(strName) + "</td>");
-                    text.Append("\r\n\t\t<td class='value'>" + HttpUtility.HtmlEncode(strValue) + "</td>");
+                    text.Append("\r\n\t\t<td class='value'>" + HttpUtility.HtmlEncode(strValue).Replace("\n", "<br/>") + "</td>");
                 }
                 text.Append("\r\n\t</tr>");
             }

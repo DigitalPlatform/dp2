@@ -89,6 +89,10 @@ function newOrder(xml) {
         if (tr.hasClass('order')) {
             var biblio_recpath = tr.attr('biblio-recpath');
             tr.after(window.external.newOrder(biblio_recpath, xml));
+            
+            window.setTimeout(function () {
+                tr.next().scrollIntoView();
+            }, 10);
         }
         else {
             var biblio_recpath = tr.attr('biblio-recpath');
@@ -98,6 +102,9 @@ function newOrder(xml) {
                 next_tr = tr.next();
             }
             next_tr.after(window.external.newOrder(biblio_recpath, xml));
+            window.setTimeout(function () {
+                next_tr.next().scrollIntoView();
+            }, 10);
         }
     });
 
@@ -295,3 +302,4 @@ function loadBiblio() {
         }
     });
 }
+
