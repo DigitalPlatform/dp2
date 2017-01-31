@@ -144,6 +144,30 @@ function deleteOrder() {
         window.external.onSelectionChanged();
 }
 
+function changeOrder(xml) {
+
+    var changed = false;
+    $(".sel").each(function (index) {
+        var tr = $(this);
+        if (tr.hasClass('order')) {
+            var biblio_recpath = tr.attr('biblio-recpath');
+            var refid = tr.attr('ref-id');
+            tr.after(window.external.changeOrder(biblio_recpath, refid, xml));
+
+            var new_tr = tr.next();
+            tr.detach();
+            setSel(new_tr);
+
+            changed = true;
+        }
+        else {
+        }
+
+    });
+
+}
+
+
 function onDisButtonClick(o) {
     var td = $(o).parent();
     var tr = td.parent();

@@ -8,8 +8,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 
-using DigitalPlatform.Xml;
 using DigitalPlatform;
+using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Marc
@@ -29,7 +29,6 @@ namespace DigitalPlatform.Marc
     /// </summary>
     public class MarcUtil
     {
-
         public const char FLDEND = (char)30;	// 字段结束符
         public const char RECEND = (char)29;	// 记录结束符
         public const char SUBFLD = (char)31;	// 子字段指示符
@@ -3614,6 +3613,83 @@ out strError);
         // return:
         //      0   没有实质性修改
         //      1   有实质性修改
+
+        static public int GetMappedRecord(ref string strMARC,
+    string strStyle)
+        {
+            bool bChanged = false;
+
+            MarcRecord record = new MarcRecord(strMARC);
+            MarcRecord result = new MarcRecord(strMARC.PadRight(24, ' ').Substring(0, 24));
+
+            foreach (MarcField field in record.ChildNodes)
+            {
+                string strContent = field.Content;
+
+                string strBlank = strContent;   // .Trim();
+                int nRet = strBlank.IndexOf((char)SUBFLD);
+                if (nRet != -1)
+                    strBlank = strBlank.Substring(0, nRet); // .Trim();
+
+                string strCmd = StringUtil.GetLeadingCommand(strBlank);
+                if (string.IsNullOrEmpty(strStyle) == false
+                    && string.IsNullOrEmpty(strCmd) == false
+                    && StringUtil.HasHead(strCmd, "cr:") == true)
+                {
+                    string strRule = strCmd.Substring(3);
+                    if (strRule != strStyle 
+                        && string.IsNullOrEmpty(strStyle) == false)
+                    {
+                        bChanged = true;
+                        continue;
+                    }
+                }
+
+                MarcField new_field = new MarcField(field.Text);
+
+                MarcNodeList xings = new_field.select("subfield[@name='*']");
+                if (xings.count > 0 
+                    && xings.FirstContent != strStyle && string.IsNullOrEmpty(strStyle) == false)
+                {
+                    bChanged = true;
+                    continue;
+                }
+
+                if (xings.count > 0)
+                {
+                    xings.detach();
+                    bChanged = true;
+                }
+
+                if (string.IsNullOrEmpty(strCmd) == false)
+                {
+                    new_field.Content = strContent.Substring(strCmd.Length + 2);
+                    bChanged = true;
+                }
+
+                if (new_field.Name == "hdr" && string.IsNullOrEmpty(strStyle) == false)
+                {
+                    result.Header[0, 24] = new_field.Content.PadRight(24, ' ').Substring(0, 24);
+                    bChanged = true;
+                    continue;
+                }
+
+                result.add(new_field);
+            }
+
+            strMARC = result.Text;
+            if (bChanged == true)
+                return 1;
+            return 0;
+        }
+
+#if NO
+        // 获得一个特定风格的 MARC 记录
+        // parameters:
+        //      strStyle    要匹配的style值。如果为null，表示任何$*值都匹配，实际上效果是去除$*并返回全部字段内容
+        // return:
+        //      0   没有实质性修改
+        //      1   有实质性修改
         static public int GetMappedRecord(ref string strMARC,
             string strStyle)
         {
@@ -3771,7 +3847,7 @@ out strError);
                 if (nRet == 0)
                     break;
 
-                // TODO: 没有子字段的字段内容部分，师傅哦可以包含{...} ?
+                // TODO: 没有子字段的字段内容部分，是否可以包含{...} ?
                 bool bFieldChanged = false;
                 for (int j = 0; ; j++)
                 {
@@ -3841,7 +3917,7 @@ out strError);
 
             return 0;
         }
-
+#endif
 
         // 删除空的字段
         // return:

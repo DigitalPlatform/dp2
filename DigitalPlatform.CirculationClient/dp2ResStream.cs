@@ -57,6 +57,9 @@ namespace DigitalPlatform.CirculationClient
 
             if (WaitHandle.WaitAny(new WaitHandle[] { _limit, _cancel.Token.WaitHandle }) == 1)
                 throw new Exception("canceled");
+
+            // Thread.Sleep(1000); // testing
+
             //_limit.WaitOne();
             LibraryChannel Channel = this.GetChannel();
             //_inSearch++;
@@ -191,6 +194,14 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        public override bool CanTimeout
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         public override void Flush()
         {
 
@@ -234,6 +245,9 @@ namespace DigitalPlatform.CirculationClient
 
             if (WaitHandle.WaitAny(new WaitHandle[] { _limit, _cancel.Token.WaitHandle }) == 1)
                 return 0;
+
+            // Thread.Sleep(1000); // testing
+
             //_limit.WaitOne();
             LibraryChannel Channel = this.GetChannel();
             //_inSearch++;

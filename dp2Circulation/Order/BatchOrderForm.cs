@@ -14,6 +14,7 @@ using System.Xml;
 using System.IO;
 using System.Web;
 using System.Collections;
+using System.Threading.Tasks;
 
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
@@ -21,7 +22,6 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
 using DigitalPlatform.CommonControl;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -252,11 +252,17 @@ namespace dp2Circulation
             {
                 this.toolStripButton_deleteOrder.Text = "删除 [" + (order_count) + "]";
                 this.toolStripButton_deleteOrder.Enabled = true;
+
+                this.ToolStripMenuItem_quickChange.Text = "快速修改 [" + (order_count) + "] ...";
+                this.ToolStripMenuItem_quickChange.Enabled = true;
             }
             else
             {
                 this.toolStripButton_deleteOrder.Text = "删除";
                 this.toolStripButton_deleteOrder.Enabled = false;
+
+                this.ToolStripMenuItem_quickChange.Text = "快速修改 ...";
+                this.ToolStripMenuItem_quickChange.Enabled = false;
             }
 
             if (biblio_count > 0)
@@ -319,6 +325,26 @@ namespace dp2Circulation
 
             this.Changed = true;
         }
+
+        public string ChangeOrder(string strBiblioRecPath, string strOrderRefID, string xml)
+        {
+            BiblioStore biblio = this._recPathTable[strBiblioRecPath] as BiblioStore;
+            if (biblio == null)
+                throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
+            OrderStore order = biblio.FindOrderByRefID(strOrderRefID);
+            if (order == null)
+                throw new Exception("参考ID为 '" + strOrderRefID + "' 的 OrderStore 在内存中没有找到");
+
+            order.Modify(xml);
+
+            this.Changed = true;
+
+            return BuildOrderHtml(strBiblioRecPath, 
+                order, 
+                biblio.Orders.IndexOf(order),
+                order.Type == "new" ? "new" : "changed");
+        }
+
 
         public void LoadBiblio(string strBiblioRecPath)
         {
@@ -815,11 +841,15 @@ namespace dp2Circulation
 
         private void toolStripButton_save_Click(object sender, EventArgs e)
         {
+            this.webBrowser1.Document.Body.Focus();
+
             string strError = "";
 
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(2);
+
+            this.ShowMessage("正在保存订购记录 ...");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -876,6 +906,8 @@ namespace dp2Circulation
                 this.ReturnChannel(channel);
 
                 this.EnableControls(true);
+
+                this.ClearMessage();
             }
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1099,12 +1131,14 @@ int nCount)
             set
             {
                 _changed = value;
-                this.toolStripButton_save.Enabled = value;
+                // this.toolStripButton_save.Enabled = value;
             }
         }
 
         private void BatchOrderForm_FormClosing(object sender, FormClosingEventArgs e)
         {
+            this.webBrowser1.Document.Body.Focus();
+
             if (this.Changed == true)
             {
                 // 警告尚未保存
@@ -1191,6 +1225,27 @@ int nCount)
             webBrowser1.Document.InvokeScript("loadBiblio");
         }
 
+        private void ToolStripMenuItem_quickChange_Click(object sender, EventArgs e)
+        {
+            OrderEditForm edit = new OrderEditForm();
+
+            SetXml(edit.OrderEditControl, Program.MainForm.AppInfo.GetString("batchOrderForm", "quickChangeOrderRecord", "<root />"));
+            edit.Text = "快速修改订购事项";
+            edit.DisplayMode = "simple";
+            edit.MainForm = Program.MainForm;
+
+            Program.MainForm.AppInfo.LinkFormState(edit, "BatchOrderForm_OrderEditForm_state");
+            edit.ShowDialog(this);
+
+            string strXml = GetXml(edit.OrderEditControl);
+            Program.MainForm.AppInfo.SetString("batchOrderForm", "quickChangeOrderRecord", strXml);
+
+            if (edit.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            webBrowser1.Document.InvokeScript("changeOrder", new object[] { strXml });
+        }
+
     }
 
     public class BiblioStore
@@ -1250,6 +1305,27 @@ int nCount)
             dom.LoadXml(this.Xml);
 
             return DomUtil.GetElementText(dom.DocumentElement, name);
+        }
+
+        // parameters:
+        //      template_xml    描述修改要求的 XML 字符串。元素值空表示不修改这个元素，为 "[空]"表示修改为空
+        public void Modify(string template_xml)
+        {
+            XmlDocument temp_dom = new XmlDocument();
+            temp_dom.LoadXml(template_xml);
+            
+            foreach(XmlNode node in temp_dom.DocumentElement.ChildNodes)
+            {
+                if (node.NodeType != XmlNodeType.Element)
+                    continue;
+                string value = node.InnerText.Trim();
+                if (string.IsNullOrEmpty(value))
+                    continue;   // 空表示不修改
+                if (value == "[空]")
+                    value = "";
+
+                SetFieldValue(node.Name, value);
+            }
         }
     }
 }

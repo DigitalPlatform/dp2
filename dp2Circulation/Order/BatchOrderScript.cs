@@ -47,6 +47,15 @@ namespace dp2Circulation
             this.BatchOrderForm.DeleteOrder(strBiblioRecPath, refid);
         }
 
+        // 在内存中修改一条订购记录
+        //      xml 描述如何修改订购字段的 XML 记录
+        // return:
+        //      需要在 Web 页面显示出来的代表修改后订购记录的 HTML 字符串
+        public string changeOrder(string strBiblioRecPath, string refid, string xml)
+        {
+            return this.BatchOrderForm.ChangeOrder(strBiblioRecPath, refid, xml);
+        }
+
         public void loadBiblio(string strBiblioRecPath)
         {
             this.BatchOrderForm.LoadBiblio(strBiblioRecPath);

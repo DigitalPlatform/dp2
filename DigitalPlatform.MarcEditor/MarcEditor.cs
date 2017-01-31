@@ -1402,7 +1402,14 @@ namespace DigitalPlatform.Marc
             if (Record.IsHeaderFieldName(this.FocusedField.Name) == true
                 && (this.m_nFocusCol == 1 || this.m_nFocusCol == 2))
             {
-                Debug.Assert(false, "头标区的列不能为1或2");
+                if (this.FocusedField.Name == "hdr")
+                {
+
+                }
+                else
+                {
+                    Debug.Assert(false, "头标区的列不能为1或2");
+                }
             }
             else if (Record.IsControlFieldName(this.FocusedField.Name) == true
                 && this.m_nFocusCol == 2)
@@ -5510,6 +5517,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             Debug.Assert(strSubFieldName != null, "GetValueFromTemplate()，strSubFieldName参数不能为null");
             Debug.Assert(strValue != null, "GetValueFromTemplate()，strValue参数不能为null");
 
+            // 2017/1/31
+            if (strFieldName == "hdr")
+                strFieldName = "###";
+
             strError = "";
             strOutputValue = strValue;
 
@@ -5519,6 +5530,10 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 strError = this.m_strMarcDomError;
                 return 0;   // 2008/3/19恢复。 原来为什么要注释掉?
             }
+
+            string strCmd = StringUtil.GetLeadingCommand(strValue);
+            if (string.IsNullOrEmpty(strCmd) == false)
+                strValue = strValue.Substring(strCmd.Length + 2);
 
             XmlNode nodeDef = null;
             string strTitle = "";
@@ -5634,10 +5649,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
             dlg.TemplateControl.ParseMacro -= new ParseMacroEventHandler(TemplateControl_ParseMacro);
 
-
             if (dlg.DialogResult == DialogResult.OK)
             {
                 strOutputValue = dlg.TemplateControl.Value;
+                if (string.IsNullOrEmpty(strCmd) == false)
+                    strOutputValue = "{" + strCmd + "}" + strOutputValue;
             }
 
             return 1;
