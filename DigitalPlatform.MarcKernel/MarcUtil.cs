@@ -1611,6 +1611,25 @@ out strError);
         }
 
         // 包装以后的版本
+        public static int Xml2Marc(XmlDocument dom,
+            bool bWarning,
+            string strMarcSyntax,
+            out string strOutMarcSyntax,
+            out string strMARC,
+            out string strError)
+        {
+            // Debug.Assert(string.IsNullOrEmpty(strXml) == false, "");
+            string strFragmentXml = "";
+            return Xml2Marc(dom,
+                bWarning ? Xml2MarcStyle.Warning : Xml2MarcStyle.None,
+                strMarcSyntax,
+                out strOutMarcSyntax,
+                out strMARC,
+                out strFragmentXml,
+                out strError);
+        }
+
+        // 包装以后的版本
         public static int Xml2Marc(string strXml,
             bool bWarning,
             string strMarcSyntax,
@@ -1663,9 +1682,6 @@ out strError);
 
             Debug.Assert(string.IsNullOrEmpty(strXml) == false, "");
 
-            bool bWarning = (style & Xml2MarcStyle.Warning) != 0;
-            bool bOutputFragmentXml = (style & Xml2MarcStyle.OutputFragmentXml) != 0;
-
             XmlDocument dom = new XmlDocument();
             dom.PreserveWhitespace = true;  // 在意空白符号
             try
@@ -1677,6 +1693,34 @@ out strError);
                 strError = "Xml2Marc() strXml 加载 XML 到 DOM 时出错: " + ex.Message;
                 return -1;
             }
+
+            return Xml2Marc(dom,
+    style,
+    strMarcSyntax,
+    out strOutMarcSyntax,
+    out strMARC,
+    out strFragmentXml,
+    out strError);
+        }
+
+        public static int Xml2Marc(XmlDocument dom,
+    Xml2MarcStyle style,
+    string strMarcSyntax,
+    out string strOutMarcSyntax,
+    out string strMARC,
+    out string strFragmentXml,
+    out string strError)
+        {
+            strMARC = "";
+            strError = "";
+            strOutMarcSyntax = "";
+            strFragmentXml = "";
+
+            if (dom.DocumentElement == null)
+                return 0;
+
+            bool bWarning = (style & Xml2MarcStyle.Warning) != 0;
+            bool bOutputFragmentXml = (style & Xml2MarcStyle.OutputFragmentXml) != 0;
 
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("unimarc", Ns.unimarcxml);
@@ -1918,6 +1962,7 @@ out strError);
 
             return 0;
         }
+
 
         // 将marcxchange格式转化为机内使用的marcxml格式
         public static int MarcXChangeToXml(string strSource,
@@ -3637,7 +3682,7 @@ out strError);
                     && StringUtil.HasHead(strCmd, "cr:") == true)
                 {
                     string strRule = strCmd.Substring(3);
-                    if (strRule != strStyle 
+                    if (strRule != strStyle
                         && string.IsNullOrEmpty(strStyle) == false)
                     {
                         bChanged = true;
@@ -3648,7 +3693,7 @@ out strError);
                 MarcField new_field = new MarcField(field.Text);
 
                 MarcNodeList xings = new_field.select("subfield[@name='*']");
-                if (xings.count > 0 
+                if (xings.count > 0
                     && xings.FirstContent != strStyle && string.IsNullOrEmpty(strStyle) == false)
                 {
                     bChanged = true;
@@ -3674,6 +3719,8 @@ out strError);
                     continue;
                 }
 
+                FilterSubfields(new_field, strStyle);
+
                 result.add(new_field);
             }
 
@@ -3681,6 +3728,52 @@ out strError);
             if (bChanged == true)
                 return 1;
             return 0;
+        }
+
+        // return:
+        //      false   没有发生修改
+        //      true    发生了修改
+        static bool FilterSubfields(MarcField field, string strStyle)
+        {
+            if (field.IsControlField == true)
+                return false;
+            bool bChanged = false;
+            MarcField result = new MarcField();
+            //result.Name = field.Name;
+            //result.Indicator = field.Indicator;
+            foreach (MarcSubfield subfield in field.Subfields)
+            {
+                string strCmd = StringUtil.GetLeadingCommand(subfield.Content);
+                if (string.IsNullOrEmpty(strStyle) == false
+                    && string.IsNullOrEmpty(strCmd) == false)
+                {
+                    if (StringUtil.HasHead(strCmd, "cr:") == true)
+                    {
+                        string strRule = strCmd.Substring(3);
+                        if (strRule != strStyle
+                            && string.IsNullOrEmpty(strStyle) == false)
+                        {
+                            bChanged = true;
+                            continue;
+                        }
+                    }
+                    else
+                        strCmd = null;  // 其他 xx: 命令不算
+                }
+
+                MarcSubfield new_subfield = new MarcSubfield(subfield.Name, subfield.Content);
+                if (string.IsNullOrEmpty(strCmd) == false)
+                {
+                    new_subfield.Content = subfield.Content.Substring(strCmd.Length + 2);
+                    bChanged = true;
+                }
+
+                result.add(new_subfield);
+            }
+
+            if (bChanged == true)
+                field.Content = result.Content;
+            return bChanged;
         }
 
 #if NO

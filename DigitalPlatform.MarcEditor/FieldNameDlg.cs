@@ -1,3 +1,4 @@
+#if NO
 using System;
 using System.Drawing;
 using System.Collections;
@@ -169,3 +170,5 @@ namespace DigitalPlatform.Marc
 
 	}
 }
+
+#endif

@@ -13,7 +13,7 @@
     </Property>
     <Field name="###" length="24" mandatory="yes" repeatable="no">
         <Property>
-            <Label xml:lang="en">RECORD IDENTIFIER</Label>
+            <Label xml:lang="en">Record Header</Label>
             <Label xml:lang='zh'>头标区</Label>
             <Help xml:lang='zh'>帮助信息</Help>
         </Property>
@@ -369,6 +369,12 @@
             <Label xml:lang="en">Version Identifier</Label>
             <Label xml:lang='zh'>记录处理时间标识号</Label>
             <DefaultValue>%year%%m2%%d2%%h2%%min2%%sec2%.%hsec%</DefaultValue>
+        </Property>
+    </Field>
+    <Field name="hdr">
+        <Property>
+            <Label xml:lang="en">Alter Record Header</Label>
+            <Label xml:lang='zh'>附加的头标区</Label>
         </Property>
     </Field>
     <Field name="010">

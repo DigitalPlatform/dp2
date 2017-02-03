@@ -853,6 +853,14 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
         {
             switch (e.KeyChar)
             {
+                case '#':
+                    if (this.m_marcEditor.m_nFocusCol == 1)
+                    {
+                        e.Handled = true;
+                        Console.Beep(); // 表示拒绝了输入的字符
+                        return;
+                    }
+                    break;
                 case '\\':
                     {
                         if (this.m_marcEditor.m_nFocusCol != 3)
@@ -862,7 +870,6 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                         // Ctrl + \ 还是输入 \
                         if (Control.ModifierKeys == Keys.Control)
                             break;
-
 
                         int nOldStart = this.SelectionStart;
 

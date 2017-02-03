@@ -13,7 +13,7 @@ namespace DigitalPlatform.rms
     // KeysCfg 的摘要说明。
     public class KeysBrowseBase
     {
-        public XmlDocument dom = null;
+        public XmlDocument _dom = null;
 
         // <xpath>元素 和 XmlNamespaceManager对象的对照表 
         internal Hashtable tableNsClient = new Hashtable();
@@ -73,10 +73,10 @@ namespace DigitalPlatform.rms
 
             this.CfgFileName = strCfgFileName;
 
-            dom = new XmlDocument();
+            _dom = new XmlDocument();
             try
             {
-                dom.Load(strCfgFileName);
+                _dom.Load(strCfgFileName);
             }
             catch (Exception ex)
             {
@@ -106,11 +106,11 @@ namespace DigitalPlatform.rms
             int nRet = 0;
 
             // 没有配置文件时
-            if (this.dom == null)
+            if (this._dom == null)
                 return 0;
 
             // 找到所有的<xpath>元素
-            XmlNodeList xpathNodeList = dom.DocumentElement.SelectNodes("//xpath[@nstable]");
+            XmlNodeList xpathNodeList = _dom.DocumentElement.SelectNodes("//xpath[@nstable]");
             for (int i = 0; i < xpathNodeList.Count; i++)
             {
                 XmlNode nodeXpath = xpathNodeList[i];
@@ -133,7 +133,7 @@ namespace DigitalPlatform.rms
                 {
                     // 取出nodeNstable的路径
                     string strPath = "";
-                    nRet = DomUtil.Node2Path(dom.DocumentElement,
+                    nRet = DomUtil.Node2Path(_dom.DocumentElement,
                         nodeNstable,
                         out strPath,
                         out strError);

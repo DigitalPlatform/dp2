@@ -1129,17 +1129,17 @@ namespace DigitalPlatform.Marc
             int nCol)
         {
             Debug.Assert(nFieldIndex >= 0 && nFieldIndex < this.record.Fields.Count, "nFieldIndex参数不合法。");
-            Debug.Assert(nCol == 1 || nCol == 2 || nCol == 3, "nCol只能为1,2,3");
+            Debug.Assert(nCol == 1 || nCol == 2 || nCol == 3, "nCol 只能为 1,2,3");
 
             Field field = this.record.Fields[nFieldIndex];
 
 
             // 如果是没有指示符的字段，需要调整
             // 2008/3/19
-            if (Record.IsHeaderFieldName(field.Name) == true
+            if (Record.IsFirstHeaderFieldName(field.Name) == true
                 && (nCol == 1 || nCol == 2))
             {
-                Debug.Assert(false, "");
+                Debug.Assert(false, "第一个头标区字段的 1 2 列不让接触");
                 // nCol = 3;
             }
             else if (Record.IsControlFieldName(field.Name) == true
@@ -1399,29 +1399,22 @@ namespace DigitalPlatform.Marc
 
             // ???
             // controlfield的所在列有限制，需要调整
-            if (Record.IsHeaderFieldName(this.FocusedField.Name) == true
+            if (Record.IsFirstHeaderFieldName(this.FocusedField.Name) == true
                 && (this.m_nFocusCol == 1 || this.m_nFocusCol == 2))
             {
-                if (this.FocusedField.Name == "hdr")
-                {
-
-                }
-                else
-                {
-                    Debug.Assert(false, "头标区的列不能为1或2");
-                }
+                    Debug.Assert(false, "第一个头标区的列不能为 1 或 2");
             }
             else if (Record.IsControlFieldName(this.FocusedField.Name) == true
                 && this.m_nFocusCol == 2)
             {
-                Debug.Assert(false, "控制字段的列不能为2");
+                Debug.Assert(false, "控制字段的列不能为 2");
             }
 
             // 头标区
-            if (Record.IsHeaderFieldName(this.FocusedField.Name) == true
+            if (Record.IsFirstHeaderFieldName(this.FocusedField.Name) == true
                 && (this.m_nFocusCol == 1 || this.m_nFocusCol == 2))
             {
-                Debug.Assert(false, "头标区的列不能为1或2");
+                Debug.Assert(false, "第一个头标区的列不能为1或2");
             }
 
             ChangeEditSizeAndMove(nField, this.m_nFocusCol);
@@ -2701,7 +2694,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                         if (value >= 0 && value < this.record.Fields.Count)
                         {
                             Field field = this.record.Fields[value];
-                            if (Record.IsHeaderFieldName(field.Name) == true
+                            if (Record.IsFirstHeaderFieldName(field.Name) == true
                                 && (this.m_nFocusCol == 1 || this.m_nFocusCol == 2)) // 没有字段名和指示符
                             {
                                 this.SetActiveField(value, 3, false);
