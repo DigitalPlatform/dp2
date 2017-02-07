@@ -13039,7 +13039,6 @@ strMARC);
         List<string> GetExistCatalogingRules()
         {
             return Global.GetExistCatalogingRules(this.GetMarc()/*this.m_marcEditor.Marc*/);
-
         }
 
         // 当前活动的编目规则

@@ -348,7 +348,7 @@ out string strError)
                         string strOldValue = readersMonitor.GetAttribute("types");
                         if (string.IsNullOrEmpty(strOldValue) == true)
                         {
-                            string strNewValue = "mq";
+                            string strNewValue = "dpmail,email,mq"; // 注：因缺省值为 "dpmail,email"，所以添加 mq 以后应该是 "dpmail,email,mq"
                             readersMonitor.SetAttribute("types", strNewValue);
                             bChanged = true;
                         }

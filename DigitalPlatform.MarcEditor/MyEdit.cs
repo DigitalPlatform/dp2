@@ -147,6 +147,46 @@ namespace DigitalPlatform.Marc
             return 1;
         }
 
+        public void DupCurrentSubfield()
+        {
+            if (this.MarcEditor.m_nFocusCol != 3)
+                return;
+
+            string strSubfieldName = "";
+            string strSufieldContent = "";
+            int nStart = 0;
+            int nContentStart = 0;
+            int nContentLength = 0;
+
+            // 获得有关插入符所在当前子字段的信息
+            // return:
+            //      0   不在子字段上
+            //      1   在子字段上
+            int nRet = GetCurrentSubfieldCaretInfo(
+                this.Text,
+                this.SelectionStart,
+                out strSubfieldName,
+                out strSufieldContent,
+                out nStart,
+                out nContentStart,
+                out nContentLength);
+            if (nRet == 0)
+                return;
+
+            if (nContentStart >= 2)
+            {
+                nContentStart -= 2;
+                nContentLength += 2;
+            }
+
+            string strText = this.Text.Substring(nContentStart, nContentLength);
+            int nInsertPos = nContentStart + nContentLength;
+            this.Text = this.Text.Substring(0, nInsertPos) + strText + this.Text.Substring(nInsertPos);
+            this.SelectionStart = nContentStart;
+            this.SelectionLength = nContentLength;
+        }
+
+
         // return:
         //      false   需要执行缺省窗口过程
         //      true    不要执行缺省窗口过程。即消息接管了。
@@ -267,6 +307,9 @@ namespace DigitalPlatform.Marc
             base.DefWndProc(ref m);
         }
 
+
+        bool _k = false;    // 是否在 Ctrl+K 状态
+
         // 接管Ctrl+各种键
         /// <summary>
         /// 处理对话框键
@@ -279,6 +322,14 @@ namespace DigitalPlatform.Marc
             // 去掉Control/Shift/Alt 以后的纯净的键码
             // 2008/11/30 changed
             Keys pure_key = (keyData & (~(Keys.Control | Keys.Shift | Keys.Alt)));
+
+
+            if (_k)
+            {
+                this.MarcEditor.DoCtrlK(pure_key);
+                _k = false;
+                return true;
+            }
 
             // Ctrl + M
             if (Control.ModifierKeys == Keys.Control
@@ -320,6 +371,14 @@ namespace DigitalPlatform.Marc
                 && pure_key == Keys.V)
             {
                 this.Menu_Paste(null, null);
+                return true;
+            }
+
+            // Ctrl + K
+            if ((keyData & Keys.Control) == Keys.Control
+                && pure_key == Keys.K)
+            {
+                _k = true;
                 return true;
             }
 
@@ -667,8 +726,23 @@ namespace DigitalPlatform.Marc
             }
         }
 
+        public void PasteToCurrent(string strText)
+        {
+            if (string.IsNullOrEmpty(strText) == false)
+            {
+                int nPos = this.SelectionStart;
+                if (this.SelectionLength != 0)
+                    this.Text = this.Text.Remove(nPos, this.SelectionLength);
+                this.Text = this.Text.Insert(nPos, strText);
+                this.SelectionStart = nPos;
+                this.SelectionLength = strText.Length;
+            }
+        }
+
         private void Menu_Paste(System.Object sender, System.EventArgs e)
         {
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
             // Determine if there is any text in the Clipboard to paste into the text box.
             if (Clipboard.GetDataObject().GetDataPresent(DataFormats.Text) == true)
             {
@@ -680,6 +754,12 @@ namespace DigitalPlatform.Marc
                 strText = strText.Replace("\r", "*");
                 strText = strText.Replace("\n", "*");
                 strText = strText.Replace("\t", "*");
+
+                if (bControl)
+                {
+                    strText = strText.Replace('|', Record.KERNEL_SUBFLD);
+                    strText = strText.Replace(" ", "");
+                }
 
                 Debug.Assert(this.MarcEditor.SelectedFieldIndices.Count == 1, "Menu_Paste(),MarcEditor.SelectedFieldIndices必须为1。");
 
@@ -851,6 +931,7 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
 
         protected override void OnKeyPress(KeyPressEventArgs e)
         {
+            _k = false;
             switch (e.KeyChar)
             {
                 case '#':

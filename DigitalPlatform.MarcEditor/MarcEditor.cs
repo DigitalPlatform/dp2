@@ -3928,6 +3928,35 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
 
         }
 
+        public void DoCtrlK(Keys key)
+        {
+            // 复制当前字段到后面
+            if (key == Keys.F)
+            {
+                menuItem_Copy(this, null);
+                menuItem_PasteInsert_InsertAfter(this, null);
+            }
+
+            // 复制当前子字段到后面
+            if (key == Keys.S)
+            {
+                this.curEdit.DupCurrentSubfield();
+            }
+
+
+            // 插入 {cr:CALIS}
+            if (key == Keys.C)
+            {
+                this.curEdit.PasteToCurrent("{cr:CALIS}");
+            }
+
+            // 插入 {cr:NLC}
+            if (key == Keys.N)
+            {
+                this.curEdit.PasteToCurrent("{cr:NLC}");
+            }
+        }
+
         // 复制
         private void menuItem_Copy(object sender,
             System.EventArgs e)

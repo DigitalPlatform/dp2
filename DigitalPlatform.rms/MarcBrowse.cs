@@ -184,6 +184,61 @@ true);
             return results;
         }
 
+        static List<MarcField> GetMarcFields(MarcRecord record, string name)
+        {
+            List<MarcField> results = new List<MarcField>();
+            foreach(MarcField field in record.ChildNodes)
+            {
+                if (field.Name == name)
+                    results.Add(field);
+            }
+            return results;
+        }
+
+        // parameters:
+        //      subfieldList    字符串数组。每个单元格式如下: "a; " 第一字符表示子字段名，后面若干字符表示要插入的前置符号。
+        static string BuildContent(MarcRecord record,
+            string fieldName,
+            string[] subfieldList,
+            bool trimStart)
+        {
+            List<char> chars = new List<char>();    // 用于 TrimStart 的字符
+            Hashtable prefix_table = new Hashtable();  // name -> prefix 
+            foreach (string s in subfieldList)
+            {
+                string name = s.Substring(0, 1);
+                string prefix = s.Substring(1);
+                prefix_table[name] = prefix;
+
+                string strChar = prefix.Trim();
+                if (string.IsNullOrEmpty(strChar) == false)
+                    chars.Add(strChar[0]);
+            }
+
+            List<MarcField> fields = GetMarcFields(record, fieldName);
+
+            StringBuilder text = new StringBuilder();
+            foreach (MarcField field in fields)
+            {
+                foreach (MarcSubfield subfield in field.ChildNodes)
+                {
+                    bool bExist = prefix_table.ContainsKey(subfield.Name);
+                    if (bExist)
+                    {
+                        string prefix = (string)prefix_table[subfield.Name];
+                        if (string.IsNullOrEmpty(prefix) == false)
+                            text.Append(prefix + subfield.Content);
+                        else
+                            text.Append(" " + subfield.Content);
+                    }
+                }
+            }
+            if (trimStart)
+                return text.ToString().TrimStart(chars.ToArray());
+            return text.ToString();
+        }
+
+#if NO
         // parameters:
         //      subfieldList    字符串数组。每个单元格式如下: "a; " 第一字符表示子字段名，后面若干字符表示要插入的前置符号。
         static string BuildContent(MarcRecord record,
@@ -227,6 +282,8 @@ true);
                 return text.ToString().TrimStart(chars.ToArray());
             return text.ToString();
         }
+
+#endif
     }
 
     public class MarcColumn
