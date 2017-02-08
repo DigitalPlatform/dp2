@@ -949,6 +949,8 @@ MessageBoxDefaultButton.Button1);
                     if (nRet == -1)
                         MessageBox.Show(this, "copy '" + strSourceDirectory + "' to '" + strTargetDirectory + "' error");
                 }
+                else
+                    MessageBox.Show(this, "复制 Javascript 目录时发生错误。目录 '" + strSourceDirectory + "' 不存在");
             }
             {
                 string strSourceDirectory = Path.Combine(this.DataDir, "jquery");
@@ -959,6 +961,8 @@ MessageBoxDefaultButton.Button1);
                     if (nRet == -1)
                         MessageBox.Show(this, "copy '" + strSourceDirectory + "' to '" + strTargetDirectory + "' error");
                 }
+                else
+                    MessageBox.Show(this, "复制 Javascript 目录时发生错误。目录 '" + strSourceDirectory + "' 不存在");
             }
 
         }
