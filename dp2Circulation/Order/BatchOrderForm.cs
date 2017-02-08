@@ -22,6 +22,7 @@ using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -588,10 +589,11 @@ namespace dp2Circulation
 
             StringBuilder text = new StringBuilder();
 
-            string strBinDir = Environment.CurrentDirectory;
+            // string strBinDir = Environment.CurrentDirectory;
+            string strBinDir = this.MainForm.UserDir;
 
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "Order\\BatchOrder_light.css");
-            string strSummaryJs = Path.Combine(this.MainForm.DataDir, "Order\\BatchOrder.js");
+            string strCssUrl = Path.Combine(this.MainForm.UserDir, "Order\\BatchOrder_light.css");
+            string strSummaryJs = Path.Combine(this.MainForm.UserDir, "Order\\BatchOrder.js");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
                 + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"
@@ -816,7 +818,10 @@ namespace dp2Circulation
                 if (strName == "_coverImage")
                 {
                     string strResPath = ScriptUtil.MakeObjectUrl(strBiblioRecPath, strValue);
-                    strValue = @"<img src='dpres:" + strResPath + "' alt='image'></img>";
+                    if (StringUtil.IsHttpUrl(strResPath) == false)
+                        strResPath = "dpres:" + strResPath;
+
+                    strValue = @"<img src='" + strResPath + "' alt='image'></img>";
 
                     text.Append("\r\n\t\t<td class='name'></td>");
                     text.Append("\r\n\t\t<td class='value'>" + strValue + "</td>");
