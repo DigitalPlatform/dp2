@@ -137,7 +137,7 @@ namespace dp2Catalog
                 _floatingMessage.Show(this);
 
                 if (this.MainForm != null)
-                    this.MainForm.Move -= new EventHandler(MainForm_Move);
+                    this.MainForm.Move += new EventHandler(MainForm_Move);
             }
         }
 

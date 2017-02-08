@@ -8,8 +8,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 
-using DigitalPlatform.Xml;
 using DigitalPlatform;
+using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Marc
@@ -29,7 +29,6 @@ namespace DigitalPlatform.Marc
     /// </summary>
     public class MarcUtil
     {
-
         public const char FLDEND = (char)30;	// 字段结束符
         public const char RECEND = (char)29;	// 记录结束符
         public const char SUBFLD = (char)31;	// 子字段指示符
@@ -1612,6 +1611,25 @@ out strError);
         }
 
         // 包装以后的版本
+        public static int Xml2Marc(XmlDocument dom,
+            bool bWarning,
+            string strMarcSyntax,
+            out string strOutMarcSyntax,
+            out string strMARC,
+            out string strError)
+        {
+            // Debug.Assert(string.IsNullOrEmpty(strXml) == false, "");
+            string strFragmentXml = "";
+            return Xml2Marc(dom,
+                bWarning ? Xml2MarcStyle.Warning : Xml2MarcStyle.None,
+                strMarcSyntax,
+                out strOutMarcSyntax,
+                out strMARC,
+                out strFragmentXml,
+                out strError);
+        }
+
+        // 包装以后的版本
         public static int Xml2Marc(string strXml,
             bool bWarning,
             string strMarcSyntax,
@@ -1664,9 +1682,6 @@ out strError);
 
             Debug.Assert(string.IsNullOrEmpty(strXml) == false, "");
 
-            bool bWarning = (style & Xml2MarcStyle.Warning) != 0;
-            bool bOutputFragmentXml = (style & Xml2MarcStyle.OutputFragmentXml) != 0;
-
             XmlDocument dom = new XmlDocument();
             dom.PreserveWhitespace = true;  // 在意空白符号
             try
@@ -1678,6 +1693,34 @@ out strError);
                 strError = "Xml2Marc() strXml 加载 XML 到 DOM 时出错: " + ex.Message;
                 return -1;
             }
+
+            return Xml2Marc(dom,
+    style,
+    strMarcSyntax,
+    out strOutMarcSyntax,
+    out strMARC,
+    out strFragmentXml,
+    out strError);
+        }
+
+        public static int Xml2Marc(XmlDocument dom,
+    Xml2MarcStyle style,
+    string strMarcSyntax,
+    out string strOutMarcSyntax,
+    out string strMARC,
+    out string strFragmentXml,
+    out string strError)
+        {
+            strMARC = "";
+            strError = "";
+            strOutMarcSyntax = "";
+            strFragmentXml = "";
+
+            if (dom.DocumentElement == null)
+                return 0;
+
+            bool bWarning = (style & Xml2MarcStyle.Warning) != 0;
+            bool bOutputFragmentXml = (style & Xml2MarcStyle.OutputFragmentXml) != 0;
 
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("unimarc", Ns.unimarcxml);
@@ -1919,6 +1962,7 @@ out strError);
 
             return 0;
         }
+
 
         // 将marcxchange格式转化为机内使用的marcxml格式
         public static int MarcXChangeToXml(string strSource,
@@ -3614,6 +3658,131 @@ out strError);
         // return:
         //      0   没有实质性修改
         //      1   有实质性修改
+
+        static public int GetMappedRecord(ref string strMARC,
+    string strStyle)
+        {
+            bool bChanged = false;
+
+            MarcRecord record = new MarcRecord(strMARC);
+            MarcRecord result = new MarcRecord(strMARC.PadRight(24, ' ').Substring(0, 24));
+
+            foreach (MarcField field in record.ChildNodes)
+            {
+                string strContent = field.Content;
+
+                string strBlank = strContent;   // .Trim();
+                int nRet = strBlank.IndexOf((char)SUBFLD);
+                if (nRet != -1)
+                    strBlank = strBlank.Substring(0, nRet); // .Trim();
+
+                string strCmd = StringUtil.GetLeadingCommand(strBlank);
+                if (string.IsNullOrEmpty(strStyle) == false
+                    && string.IsNullOrEmpty(strCmd) == false
+                    && StringUtil.HasHead(strCmd, "cr:") == true)
+                {
+                    string strRule = strCmd.Substring(3);
+                    if (strRule != strStyle
+                        && string.IsNullOrEmpty(strStyle) == false)
+                    {
+                        bChanged = true;
+                        continue;
+                    }
+                }
+
+                MarcField new_field = new MarcField(field.Text);
+
+                MarcNodeList xings = new_field.select("subfield[@name='*']");
+                if (xings.count > 0
+                    && xings.FirstContent != strStyle && string.IsNullOrEmpty(strStyle) == false)
+                {
+                    bChanged = true;
+                    continue;
+                }
+
+                if (xings.count > 0)
+                {
+                    xings.detach();
+                    bChanged = true;
+                }
+
+                if (string.IsNullOrEmpty(strCmd) == false)
+                {
+                    new_field.Content = strContent.Substring(strCmd.Length + 2);
+                    bChanged = true;
+                }
+
+                if (new_field.Name == "hdr" && string.IsNullOrEmpty(strStyle) == false)
+                {
+                    result.Header[0, 24] = new_field.Content.PadRight(24, ' ').Substring(0, 24);
+                    bChanged = true;
+                    continue;
+                }
+
+                FilterSubfields(new_field, strStyle);
+
+                result.add(new_field);
+            }
+
+            strMARC = result.Text;
+            if (bChanged == true)
+                return 1;
+            return 0;
+        }
+
+        // return:
+        //      false   没有发生修改
+        //      true    发生了修改
+        static bool FilterSubfields(MarcField field, string strStyle)
+        {
+            if (field.IsControlField == true)
+                return false;
+            bool bChanged = false;
+            MarcField result = new MarcField();
+            //result.Name = field.Name;
+            //result.Indicator = field.Indicator;
+            foreach (MarcSubfield subfield in field.Subfields)
+            {
+                string strCmd = StringUtil.GetLeadingCommand(subfield.Content);
+                if (string.IsNullOrEmpty(strStyle) == false
+                    && string.IsNullOrEmpty(strCmd) == false)
+                {
+                    if (StringUtil.HasHead(strCmd, "cr:") == true)
+                    {
+                        string strRule = strCmd.Substring(3);
+                        if (strRule != strStyle
+                            && string.IsNullOrEmpty(strStyle) == false)
+                        {
+                            bChanged = true;
+                            continue;
+                        }
+                    }
+                    else
+                        strCmd = null;  // 其他 xx: 命令不算
+                }
+
+                MarcSubfield new_subfield = new MarcSubfield(subfield.Name, subfield.Content);
+                if (string.IsNullOrEmpty(strCmd) == false)
+                {
+                    new_subfield.Content = subfield.Content.Substring(strCmd.Length + 2);
+                    bChanged = true;
+                }
+
+                result.add(new_subfield);
+            }
+
+            if (bChanged == true)
+                field.Content = result.Content;
+            return bChanged;
+        }
+
+#if NO
+        // 获得一个特定风格的 MARC 记录
+        // parameters:
+        //      strStyle    要匹配的style值。如果为null，表示任何$*值都匹配，实际上效果是去除$*并返回全部字段内容
+        // return:
+        //      0   没有实质性修改
+        //      1   有实质性修改
         static public int GetMappedRecord(ref string strMARC,
             string strStyle)
         {
@@ -3771,7 +3940,7 @@ out strError);
                 if (nRet == 0)
                     break;
 
-                // TODO: 没有子字段的字段内容部分，师傅哦可以包含{...} ?
+                // TODO: 没有子字段的字段内容部分，是否可以包含{...} ?
                 bool bFieldChanged = false;
                 for (int j = 0; ; j++)
                 {
@@ -3841,7 +4010,7 @@ out strError);
 
             return 0;
         }
-
+#endif
 
         // 删除空的字段
         // return:

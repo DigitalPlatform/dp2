@@ -142,7 +142,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.99 (2017/1/12) Borrow() 和 Return() API 在读者记录中 borrow 元素超过 10 个的时候，会剪裁了读者记录再写入 OperLog 记录中。此举可以大大缓解借书册数很多的读者记录导致日志文件急剧变大的问题
         //      2.100 (2017/1/16) CopyBiblioInfo() API 写入操作日志的时候，增加了 overwritedRecord 元素用于存储被覆盖位置覆盖前的记录内容
         //      2.101 (2017/1/17) Login() API 在代理登录的时候，从上一个版本的做法(被代理账户为工作人员账户的时候，登录成功后使用代理账户权限)改为登录成功后使用被代理账户的权限、会自动过滤掉高于代理账户的危险权限
-        public static string Version = "2.101";
+        //      2.102 (2017/1/20) locationTypes 定义是否允许 item 元素文本值为空，要看 library.xml 中 <circulation 元素 acceptBlankRoomName 属性，缺省为 false。SetEntities() API 保存册记录时根据 locationTypes 元素对册记录的馆藏地内容进行检查，如果 locationTypes 定义允许 room 部分为空，这个版本也是不会出现(保存时拒绝的) bug 了
+        public static string Version = "2.102";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -949,6 +950,8 @@ namespace DigitalPlatform.LibraryServer
                         this.BorrowCheckOverdue = DomUtil.GetBooleanParam(node, "borrowCheckOverdue", true);
 
                         this.CirculationNotifyTypes = node.GetAttribute("notifyTypes");
+
+                        this.AcceptBlankRoomName = DomUtil.GetBooleanParam(node, "acceptBlankRoomName", false);
                     }
                     else
                     {
@@ -963,6 +966,7 @@ namespace DigitalPlatform.LibraryServer
                         this.VerifyReaderType = false;
                         this.BorrowCheckOverdue = true;
                         this.CirculationNotifyTypes = "";
+                        this.AcceptBlankRoomName = false;
                     }
 
                     // <channel>
@@ -13109,6 +13113,10 @@ strLibraryCode);    // 读者所在的馆代码
                 // TODO: 如果有一个以上的<library>元素，则需要复制出一个新的DOM，然后把<library>元素全部删除干净
                 strFilter = "[count(ancestor::library) = 0]";
             }
+
+            // 2017/1/20 允许 item 元素的文本为空
+            if (string.IsNullOrEmpty(strPureName) == true)
+                return (XmlElement)root.SelectSingleNode("item[not(text())]" + strFilter);
 
             return (XmlElement)root.SelectSingleNode("item[text()='" + strPureName + "']" + strFilter);
         }

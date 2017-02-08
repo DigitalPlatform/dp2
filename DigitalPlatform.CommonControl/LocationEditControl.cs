@@ -55,7 +55,6 @@ namespace DigitalPlatform.CommonControl
         int m_nLineHeight = 26;
 
         internal int m_nLabelWidth = 40;    // 26
-        // internal int m_nLibraryWidth = 100;
         internal int m_nLocationWidth = 160;
         internal int m_nArrivedWidth = 40;
 
@@ -69,11 +68,33 @@ namespace DigitalPlatform.CommonControl
 
         bool m_bChanged = false;
 
-
         public LocationEditControl()
         {
             InitializeComponent();
+
+            // 2017/1/27
+            SetDpiXY(DpiUtil.GetDpiXY(this));
         }
+
+        internal SizeF DpiXY = new SizeF(96, 96);
+
+        public void SetDpiXY(SizeF dpi_xy)
+        {
+            this.DpiXY = dpi_xy;
+
+            m_nLineHeight = DpiUtil.GetScalingY(dpi_xy, 26);
+
+            m_nLabelWidth = DpiUtil.GetScalingX(dpi_xy, 40);
+            m_nLocationWidth = DpiUtil.GetScalingX(dpi_xy, 160);
+            m_nArrivedWidth = DpiUtil.GetScalingX(dpi_xy, 40);
+
+            m_nLineLeftBlank = DpiUtil.GetScalingX(dpi_xy, 6);
+            m_nLineWidth = DpiUtil.GetScalingX(dpi_xy, 6);
+            m_nNumberTextWidth = DpiUtil.GetScalingX(dpi_xy, 20);
+
+            m_nRightBlank = DpiUtil.GetScalingX(dpi_xy, 4);
+        }
+
 
         bool m_bArriveMode = false;
 
@@ -94,8 +115,6 @@ namespace DigitalPlatform.CommonControl
                 // SetArriveMode(value);
             }
         }
-
-
 
         // 加工id列表，只取得指定数目以内的id构成新列表
         static string LimitIDs(string strIDs,
@@ -151,7 +170,6 @@ namespace DigitalPlatform.CommonControl
                     strLocationString = strSection.Substring(0, nRet).Trim();
                     string strCount = strSection.Substring(nRet + 1);
 
-
                     nRet = strCount.IndexOf("{");
                     if (nRet != -1)
                     {
@@ -201,7 +219,6 @@ namespace DigitalPlatform.CommonControl
                     if (LocationCollection.IsEmptyIDs(strPart) == false)
                         strResult += "{" + strPart + "}";
                 }
-
 
                 nCurrent += nCount;
             }
@@ -390,10 +407,7 @@ namespace DigitalPlatform.CommonControl
             }
             set
             {
-
                 bool bOldValue = this.m_bChanged;
-
-
 
                 if (this.m_bChanged != value)
                 {
@@ -485,12 +499,22 @@ namespace DigitalPlatform.CommonControl
         {
             if (this.LocationItems != null)
             {
+                List<LocationItem> items = new List<LocationItem>();
                 foreach (LocationItem item in this.LocationItems)
                 {
+#if NO
                     if (item != null)
                         item.Dispose();
+#endif
+                    if (item != null)
+                        items.Add(item);
                 }
                 this.LocationItems.Clear();
+
+                foreach (LocationItem item in items)
+                {
+                    item.Dispose();
+                }
             }
         }
 
@@ -527,7 +551,6 @@ namespace DigitalPlatform.CommonControl
         public void SelectItem(LocationItem element,
             bool bClearOld)
         {
-
             if (bClearOld == true)
             {
                 for (int i = 0; i < this.LocationItems.Count; i++)
@@ -870,7 +893,6 @@ namespace DigitalPlatform.CommonControl
                         strLocationString = strSection.Substring(0, nRet).Trim();
                         string strCount = strSection.Substring(nRet + 1);
 
-
                         nRet = strCount.IndexOf("{");
                         if (nRet != -1)
                         {
@@ -1150,7 +1172,6 @@ namespace DigitalPlatform.CommonControl
                     for (int i = LocationItems.Count - 1; i >= 0; i--)
                     {
                         LocationItem item = this.LocationItems[i];
-
 
                         if (item.Arrived == false)
                             continue;
@@ -1462,7 +1483,6 @@ namespace DigitalPlatform.CommonControl
                     // 竖线
                     g.DrawLine(pen, new Point(x + w, start_y), new Point(x + w, end_y));
 
-
                     // 结束位置横线
                     g.DrawLine(pen,
                         new Point(x + w, end_y),
@@ -1511,7 +1531,6 @@ namespace DigitalPlatform.CommonControl
                 {
                     nSegmentCount++;
                 }
-
 
                 strPrevText = item.LocationString;
             }
@@ -1746,40 +1765,29 @@ namespace DigitalPlatform.CommonControl
 
             // 颜色
             label_color = new Label();
-            label_color.Size = new Size(this.Container.m_nLabelWidth, 26);
+            label_color.Size = new Size(this.Container.m_nLabelWidth,
+                DpiUtil.GetScalingY(this.Container.DpiXY, 26));  // 26
             label_color.TextAlign = ContentAlignment.MiddleRight;
             label_color.ForeColor = SystemColors.GrayText;
 
             container.panel_main.Controls.Add(label_color);
 
-            /*
-            // 馆名
-            comboBox_library = new ComboBox();
-            comboBox_library.DropDownStyle = ComboBoxStyle.DropDown;
-            comboBox_library.FlatStyle = FlatStyle.Flat;
-            comboBox_library.Size = new Size(this.Container.m_nLibraryWidth, 28);
-            comboBox_library.DropDownHeight = 300;
-            comboBox_library.DropDownWidth = 300;
-            comboBox_library.ForeColor = this.Container.panel_main.ForeColor;
-            comboBox_library.Text = "";
-
-            container.panel_main.Controls.Add(comboBox_library);
-             * */
-
             // 馆藏地点
             comboBox_location = new ComboBox();
             comboBox_location.DropDownStyle = ComboBoxStyle.DropDown;
             comboBox_location.FlatStyle = FlatStyle.Flat;
-            comboBox_location.DropDownHeight = 300;
-            comboBox_location.DropDownWidth = 300;
-            comboBox_location.Size = new Size(this.Container.m_nLocationWidth, 28);
+            comboBox_location.DropDownHeight = DpiUtil.GetScalingY(this.Container.DpiXY, 300);   //  300;
+            comboBox_location.DropDownWidth = DpiUtil.GetScalingX(this.Container.DpiXY, 300);    //  300;
+            comboBox_location.Size = new Size(this.Container.m_nLocationWidth, 
+                DpiUtil.GetScalingY(this.Container.DpiXY, 28)); // 28
             comboBox_location.ForeColor = this.Container.panel_main.ForeColor;
 
             container.panel_main.Controls.Add(comboBox_location);
 
             // 已验收标志
             this.checkBox_arrived = new CheckBox();
-            this.checkBox_arrived.Size = new Size(this.Container.m_nArrivedWidth, 28);
+            this.checkBox_arrived.Size = new Size(this.Container.m_nArrivedWidth, 
+                DpiUtil.GetScalingY(this.Container.DpiXY, 28));  // 28
             this.checkBox_arrived.ForeColor = this.Container.panel_main.ForeColor;
             container.panel_main.Controls.Add(checkBox_arrived);
 
@@ -1818,11 +1826,6 @@ namespace DigitalPlatform.CommonControl
                 this.m_nTopY = value.Y;
 
                 this.label_color.Location = new Point(this.m_nTopX, this.m_nTopY);
-
-                /*
-                this.comboBox_library.Location = new Point(this.m_nTopX + this.label_color.Width,
-                    this.m_nTopY);
-                 * */
 
                 this.comboBox_location.Location = new Point(this.m_nTopX + this.label_color.Width/* + this.comboBox_library.Width*/,
                     this.m_nTopY);
@@ -2162,7 +2165,6 @@ namespace DigitalPlatform.CommonControl
             menuItem = new MenuItem("全选(&A)");
             menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
             contextMenu.MenuItems.Add(menuItem);
-
 
             // ---
             menuItem = new MenuItem("-");

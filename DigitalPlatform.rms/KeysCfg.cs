@@ -61,10 +61,10 @@ namespace DigitalPlatform.rms
             if (nRet == -1)
                 return -1;
 
-            if (this.dom != null)
+            if (this._dom != null)
             {
                 // 初始化stopword
-                XmlNode nodeStopword = dom.DocumentElement.SelectSingleNode("//stopword");
+                XmlNode nodeStopword = _dom.DocumentElement.SelectSingleNode("//stopword");
                 if (nodeStopword != null)
                 {
                     this.StopwordCfg = new StopwordCfg();
@@ -99,14 +99,14 @@ namespace DigitalPlatform.rms
             strError = "";
             int nRet = 0;
 
-            if (this.dom == null)
+            if (this._dom == null)
             {
                 this.m_assembly = null;
                 return 0;
             }
 
             // 找到<script>节点
-            XmlNode nodeScript = this.dom.SelectSingleNode("//script");
+            XmlNode nodeScript = this._dom.SelectSingleNode("//script");
 
             // <script>节点不存在的时
             if (nodeScript == null)
@@ -335,11 +335,11 @@ namespace DigitalPlatform.rms
             strError = "";
             int nRet = 0;
 
-            if (this.dom == null)
+            if (this._dom == null)
                 return 0;
 
             // 找到<key>下级的所有<table>
-            XmlNodeList nodeListTable = this.dom.DocumentElement.SelectNodes("//key/table");
+            XmlNodeList nodeListTable = this._dom.DocumentElement.SelectNodes("//key/table");
             for (int i = 0; i < nodeListTable.Count; i++)
             {
                 // 当前<table>节点
@@ -360,7 +360,7 @@ namespace DigitalPlatform.rms
 
                 // 取出目标<table>的路径
                 string strPath = "";
-                nRet = DomUtil.Node2Path(dom.DocumentElement,
+                nRet = DomUtil.Node2Path(_dom.DocumentElement,
                     nodeTargetTable,
                     out strPath,
                     out strError);
@@ -542,7 +542,7 @@ namespace DigitalPlatform.rms
             strError = "";
             keys = new KeyCollection();
 
-            if (this.dom == null)
+            if (this._dom == null)
                 return 0;
 
             if (domData == null)
@@ -581,7 +581,7 @@ namespace DigitalPlatform.rms
 
             // 找到所有<key>节点
             // TODO: <key> 是否有明确的位置？ 那样就可以避免 // 查找。或者预先缓存起来
-            XmlNodeList keyList = dom.SelectNodes("//key");
+            XmlNodeList keyList = _dom.SelectNodes("//key");
 
             XPathNavigator nav = domData.CreateNavigator();
 
@@ -994,7 +994,7 @@ namespace DigitalPlatform.rms
                 return -1;
             }
             host.DataDom = dataDom;
-            host.CfgDom = this.dom;
+            host.CfgDom = this._dom;
             host.InputString = strInputString;
 
             // 执行函数
@@ -1127,7 +1127,7 @@ namespace DigitalPlatform.rms
                 return 0;
             }
 
-            if (this.dom == null)
+            if (this._dom == null)
                 return 0;
 
 
@@ -1135,7 +1135,7 @@ namespace DigitalPlatform.rms
 
             // 找到<key>下级的所有不带ref属性的 <table>
             string strXpath = "//table[not(@ref)]";
-            XmlNodeList nodeListTable = this.dom.DocumentElement.SelectNodes(strXpath);//"//key/table");
+            XmlNodeList nodeListTable = this._dom.DocumentElement.SelectNodes(strXpath);//"//key/table");
             for (int i = 0; i < nodeListTable.Count; i++)
             {
                 XmlNode nodeTable = nodeListTable[i];

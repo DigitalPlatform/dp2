@@ -1790,6 +1790,8 @@ MessageBoxDefaultButton.Button2);
                     XmlNodeList borrows = dom.DocumentElement.SelectNodes("borrows/borrow");
                     foreach (XmlElement borrow in borrows)
                     {
+                        DateTime borrow_time = new DateTime(0);
+
                         {
                             string borrowDate = borrow.GetAttribute("borrowDate");
                             if (string.IsNullOrEmpty(borrowDate))
@@ -1800,10 +1802,10 @@ MessageBoxDefaultButton.Button2);
 
                             try
                             {
-                                DateTime time = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
-                                if (time > DateTime.Now)
+                                borrow_time = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
+                                if (borrow_time > DateTime.Now)
                                 {
-                                    errors.Add("借书时间 '" + time.ToString() + "' 比当前时间还靠后");
+                                    errors.Add("借书时间 '" + borrow_time.ToString() + "' 比当前时间还靠后");
                                 }
                             }
                             catch (Exception ex)
@@ -1824,9 +1826,9 @@ MessageBoxDefaultButton.Button2);
                             try
                             {
                                 DateTime time = DateTimeUtil.FromRfc1123DateTimeString(returningDate).ToLocalTime();
-                                if (time < DateTime.Now)
+                                if (time < borrow_time)
                                 {
-                                    errors.Add("还书时间 '" + time.ToString() + "' 比当前时间还靠前");
+                                    errors.Add("应还书时间 '" + time.ToString() + "' 比借书时间还靠前");
                                 }
                             }
                             catch (Exception ex)

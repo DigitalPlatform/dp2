@@ -6,6 +6,7 @@ using System.Collections;
 using System.Web;
 using System.Diagnostics;
 using System.Xml;
+using System.Reflection;
 
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
@@ -20,6 +21,48 @@ namespace DigitalPlatform.Script
     /// </summary>
     public class ScriptUtil
     {
+        public static object InvokeMember(Type classType, 
+            string strFuncName, 
+            object target,
+            object[] param_list)
+        {
+            while (classType != null)
+            {
+                try
+                {
+                    // 有两个参数的成员函数
+                    // 用 GetMember 先探索看看函数是否存在
+                    MemberInfo[] infos = classType.GetMember(strFuncName,
+                        BindingFlags.DeclaredOnly |
+                        BindingFlags.Public | BindingFlags.NonPublic |
+                        BindingFlags.Instance | BindingFlags.InvokeMethod);
+                    if (infos == null || infos.Length == 0)
+                    {
+                        classType = classType.BaseType;
+                        if (classType == null)
+                            break;
+                        continue;
+                    }
+
+                    return classType.InvokeMember(strFuncName,
+                        BindingFlags.DeclaredOnly |
+                        BindingFlags.Public | BindingFlags.NonPublic |
+                        BindingFlags.Instance | BindingFlags.InvokeMethod
+                        ,
+                        null,
+                        target,
+                        param_list);
+                }
+                catch (System.MissingMethodException/*ex*/)
+                {
+                    classType = classType.BaseType;
+                    if (classType == null)
+                        break;
+                }
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// 从路径中取出库名部分

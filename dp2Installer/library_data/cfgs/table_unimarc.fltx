@@ -8,6 +8,8 @@
 // 修改历史：
 // 2016/8/6 创建
 // 2016/9/1 为题名 NameValueLine 加入 Type 属性; 856 创建 objectTable
+// 2016/9/4 优化 objectTable
+// 2017/1/30 将 <br/> 修改为 \n。s23 修改为 class_list
 
 using System;
 using System.Collections.Generic;
@@ -42,7 +44,7 @@ using DigitalPlatform.Text;
    string s20 = "";   //  连接款目块 4XX
    string s21 = "";   //  相关题名块 5XX
    string s22 = "";   //  根查 主题分析块 6XX
-   string s23 = "";   //  根查 分类号 69X
+   List<string> class_list = new List<string>();   //  根查 分类号 69X
    string s24 = "";   //  根查 作者 7XX
    string s26 = "";   //  标签 905  $d$e...
    string titlepinyin = "";   //  题名拼音
@@ -70,7 +72,7 @@ using DigitalPlatform.Text;
             <!-- 	国际标准书号(ISBN) -->
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.isbnandprice += "<br/> "; // 前置"+"
+        Root.isbnandprice += "\n"; // 前置"+"
         Root.isbnandprice += "ISBN ";
         Root.isbnandprice += this.Content;
         ]]></subfield>
@@ -99,7 +101,7 @@ using DigitalPlatform.Text;
             <!-- ISSN -->
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.isbnandprice += "<br/> "; // 前置"+"
+        Root.isbnandprice += "\n"; // 前置"+"
         Root.isbnandprice += "ISSN ";
         Root.isbnandprice += this.Content;
         ]]></subfield>
@@ -136,7 +138,7 @@ using DigitalPlatform.Text;
             <!-- 统一书刊号 -->
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.isbnandprice += "<br/> "; // 前置"+"
+        Root.isbnandprice += "\n"; // 前置"+"
         Root.isbnandprice += "统一书刊号 ";
         Root.isbnandprice += this.Content;
         ]]></subfield>
@@ -226,7 +228,7 @@ using DigitalPlatform.Text;
             <subfield name="a"><![CDATA[
         // 版本说明
         if (this.Parent.DupCount > 1)
-        Root.edition += "<br/> "; // 前置"+"
+        Root.edition += "\n"; // 前置"+"
         Root.edition += this.Content;
         ]]></subfield>
             <subfield name="b">
@@ -322,7 +324,7 @@ using DigitalPlatform.Text;
             <subfield name="a"><![CDATA[
         // 资料标志、数量
         if (this.Parent.DupCount > 1)
-        Root.s06 += "<br/> "; // 前置"+"
+        Root.s06 += "\n"; // 前置"+"
         if (this.DupCount > 1)
         Root.s06 += "; "; // 前置";"
         Root.s06 += this.Content;
@@ -404,7 +406,7 @@ using DigitalPlatform.Text;
             <subfield name="a"><![CDATA[
         // 附注内容
         if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
+        Root.notes += "\n";	// 字段重复则换行
         Root.notes += this.Content;
         ]]></subfield>
         </field>
@@ -413,7 +415,7 @@ using DigitalPlatform.Text;
             <subfield name="a"><![CDATA[
         // 附注内容
         if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
+        Root.notes += "\n";	// 字段重复则换行
         Root.notes += this.Content;
         ]]></subfield>
         </field>
@@ -422,7 +424,7 @@ using DigitalPlatform.Text;
             <subfield name="a"><![CDATA[
         // 附注内容
         if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
+        Root.notes += "\n";	// 字段重复则换行
         Root.notes += this.Content;
         ]]></subfield>
         </field>
@@ -431,7 +433,7 @@ using DigitalPlatform.Text;
             <subfield name="a"><![CDATA[
         // 附注内容
         if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
+        Root.notes += "\n";	// 字段重复则换行
         Root.notes += this.Content;
         ]]></subfield>
         </field>
@@ -440,7 +442,7 @@ using DigitalPlatform.Text;
             <subfield name="a"><![CDATA[
         // 附注内容
         if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
+        Root.notes += "\n";	// 字段重复则换行
         Root.notes += this.Content;
         ]]></subfield>
         </field>
@@ -449,7 +451,7 @@ using DigitalPlatform.Text;
             <subfield name="a"><![CDATA[
         // 附注内容
         if (this.Parent.DupCount > 1)
-        Root.notes += "<br/> ";	// 字段重复则换行
+        Root.notes += "\n";	// 字段重复则换行
         Root.notes += this.Content;
         ]]></subfield>
         </field>
@@ -458,7 +460,7 @@ using DigitalPlatform.Text;
             <subfield name="a"><![CDATA[
         // 附注内容
         if (this.Parent.DupCount > 1)
-        Root.s09 += "<br/> ";	// 字段重复则换行
+        Root.s09 += "\n";	// 字段重复则换行
         Root.s09 += this.Content;
         ]]></subfield>
             <subfield name="b"><![CDATA[
@@ -476,7 +478,7 @@ using DigitalPlatform.Text;
             <subfield name="a"><![CDATA[
         // 文献内容附注
         if (this.Parent.DupCount > 1)
-        Root.s10 += "<br/> ";	// 字段重复则换行
+        Root.s10 += "\n";	// 字段重复则换行
 
         string s = "";
         Root.number5 = Root.number5 + 1;
@@ -490,7 +492,7 @@ using DigitalPlatform.Text;
             <subfield name="a"><![CDATA[
         // 文献提要
         if (this.Parent.DupCount > 1)
-        Root.s11 += "<br/> ";	// 字段重复则换行
+        Root.s11 += "\n";	// 字段重复则换行
         Root.s11 += this.Content;
         ]]></subfield>
         </field>
@@ -505,7 +507,7 @@ using DigitalPlatform.Text;
             <subfield name="a"><![CDATA[
         // 统一题名
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/> ";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += "统一题名: ";	// 前置"统一题名: "
         Root.s21 += this.Content;        
         ]]></subfield>
@@ -514,7 +516,7 @@ using DigitalPlatform.Text;
         <field name="501">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/> ";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 作品集统一题名: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -523,7 +525,7 @@ using DigitalPlatform.Text;
         <field name="503">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/> ";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 统一惯用标目: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -532,7 +534,7 @@ using DigitalPlatform.Text;
         <field name="512">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/> ";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 封面题名: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -541,7 +543,7 @@ using DigitalPlatform.Text;
         <field name="513">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/> ";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 附加题名页题名: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -550,7 +552,7 @@ using DigitalPlatform.Text;
         <field name="514">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/> ";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 卷端题名: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -559,7 +561,7 @@ using DigitalPlatform.Text;
         <field name="515">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/> ";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 逐页题名: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -568,7 +570,7 @@ using DigitalPlatform.Text;
         <field name="516">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/> ";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 书脊题名: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -577,7 +579,7 @@ using DigitalPlatform.Text;
         <field name="520">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/>";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 前题名: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -586,7 +588,7 @@ using DigitalPlatform.Text;
         <field name="530">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/>";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 识别题名: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -595,7 +597,7 @@ using DigitalPlatform.Text;
         <field name="531">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/>";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 缩略题名: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -604,7 +606,7 @@ using DigitalPlatform.Text;
         <field name="532">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/>";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 完整题名: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -613,7 +615,7 @@ using DigitalPlatform.Text;
         <field name="540">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/>";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 编目员补充的附加题名: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -622,7 +624,7 @@ using DigitalPlatform.Text;
         <field name="541">
             <subfield name="a"><![CDATA[
         if (this.Parent.DupCount > 1)
-        Root.s21 += "<br/>";	// 字段重复则换行
+        Root.s21 += "\n";	// 字段重复则换行
         Root.s21 += " 编目员补充的翻译题名: ";
         Root.s21 += this.Content;
         ]]></subfield>
@@ -683,23 +685,9 @@ using DigitalPlatform.Text;
 
         <!-- 690 中图法分类号 -->
         <field name="690">
-            <def>
-        string stemp;
-      </def>
             <subfield name="a"><![CDATA[
-	// 分类号
-	if (this.Parent.DupCount <= 1)
-        {
-	// 如果690字段首次出现
-	Root.s23 += "中图法分类号: ";
-	}
-	else
-		Root.s23 += "<br/> ";	// 前置"<br/> "
-
-	// 增加中图分类法的根查询锚点
-        Parent.stemp += this.Content;
-	Root.s23 += Parent.stemp;
-	]]></subfield>
+                Root.class_list.Add("中图法分类号: " + this.Content);
+	        ]]></subfield>
         </field>
         <!-- 692 科图法分类号 -->
         <field name="692">
@@ -707,17 +695,7 @@ using DigitalPlatform.Text;
         string stemp;
       </def>
             <subfield name="a"><![CDATA[
-				// 分类号
-				if (this.Parent.DupCount <= 1)
-        {	// 如果692字段首次出现
-					Root.s23 += "科图法分类号: ";
-				}
-				else
-					Root.s23 += "<br/> ";	// 前置"<br/> "
-
-				// 增加科图分类法的根查询锚点
-        Parent.stemp += this.Content;
-				Root.s23 += Parent.stemp;
+                Root.class_list.Add("科图法分类号: " + this.Content);
 		]]></subfield>
         </field>
         <!-- 694 人大法分类号 -->
@@ -726,17 +704,7 @@ using DigitalPlatform.Text;
         string stemp;
       </def>
             <subfield name="a"><![CDATA[
-				// 分类号
-				if (this.Parent.DupCount <= 1)
-        {	// 如果694字段首次出现
-					Root.s23 += "人大法分类号: ";
-				}
-				else
-					Root.s23 += "<br/> ";	// 前置"<br/> "
-
-				// 增加人大分类法的根查询锚点
-        Parent.stemp += this.Content;
-				Root.s23 += Parent.stemp;
+                Root.class_list.Add("人大法分类号: " + this.Content);
 		]]></subfield>
         </field>
         <!-- 700 人名-主要责任者 -->
@@ -954,9 +922,9 @@ using DigitalPlatform.Text;
       }
       
       // 分类号项
-      if (s23.Length > 0)
+      if (class_list.Count > 0)
       {
-            	  lines.Add(new NameValueLine("分类号", s23));
+            	  lines.Add(new NameValueLine("分类号", StringUtil.MakePathList(class_list, "\n")));
       }
 
       // 附注

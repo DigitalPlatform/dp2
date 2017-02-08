@@ -3144,6 +3144,93 @@ Stack:
             return nRet;
         }
 
+        public class AccessNoInfo
+        {
+            public bool HasHeadLine { get; set; }
+            public string HeadLine { get; set; }
+            public string ClassLine { get; set; }
+            public string QufenhaoLine { get; set; }
+        }
+
+        // 解析索取号字符串
+        // return:
+        //      -1  error
+        //      0   排架体系定义没有找到。即便这样，result 中也返回了值，是按照两行方式切割的
+        //      1   成功
+        public int ParseAccessNo(
+            string strLocation,
+            string strAccessNo,
+            out AccessNoInfo result,
+            out string strError)
+        {
+            result = new AccessNoInfo();
+
+            ArrangementInfo info = null;
+            int nRet = GetArrangementInfo(strLocation,
+                out info,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                // 依然按照两行方式进行切割
+                return ParseAccessNo((ArrangementInfo)null,
+                    strAccessNo,
+                    out result,
+                    out strError);
+            }
+
+            return ParseAccessNo(info,
+                strAccessNo,
+                out result,
+                out strError);
+        }
+
+        // parameters:
+        //      info    排架体系定义。如果 info 为 null，表示用两行方式进行解析
+        // return:
+        //      -1  error
+        //      0   排架体系定义没有找到
+        //      1   成功
+        public static int ParseAccessNo(
+            ArrangementInfo info,
+            string strAccessNo,
+            out AccessNoInfo result,
+            out string strError)
+        {
+            strError = "";
+            result = new AccessNoInfo();
+
+            strAccessNo = StringUtil.BuildLocationClassEntry(strAccessNo);
+            string[] lines = strAccessNo.Split(new char[] { '/' });
+
+            if (info != null 
+                && (info.CallNumberStyle == "馆藏代码+索取类号+区分号"
+    || info.CallNumberStyle == "三行")
+                )
+            {
+                result.HasHeadLine = true;
+                if (lines.Length >= 1)
+                    result.HeadLine = lines[0];
+                if (lines.Length >= 2)
+                    result.ClassLine = lines[1];
+                if (lines.Length >= 3)
+                    result.QufenhaoLine = lines[2];
+            }
+            else
+            {
+                result.HeadLine = "";
+                if (lines.Length >= 1)
+                    result.ClassLine = lines[0];
+                if (lines.Length >= 2)
+                    result.QufenhaoLine = lines[1];
+            }
+
+            if (info == null)
+                return 0;
+            return 1;
+        }
+
         // 注意排架体系定义中的 location 元素 name 值，可能含有通配符
         // return:
         //      -1  error
@@ -8676,6 +8763,18 @@ Keys keyData)
         private void MenuItem_refreshLibraryUID_Click(object sender, EventArgs e)
         {
             this.ServerUID = Guid.NewGuid().ToString();
+        }
+
+        private void MenuItem_batchOrder_Click(object sender, EventArgs e)
+        {
+#if NO
+            if (StringUtil.CompareVersion(this.ServerVersion, "2.47") < 0)
+            {
+                MessageBox.Show(this, "dp2library 版本 2.47 和以上才能使用 批订购窗");
+                return;
+            }
+#endif
+            OpenWindow<BatchOrderForm>();
         }
 
     }

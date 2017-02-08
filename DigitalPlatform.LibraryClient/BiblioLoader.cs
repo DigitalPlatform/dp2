@@ -33,6 +33,7 @@ namespace DigitalPlatform.LibraryClient
             }
         }
 
+        // 目前 format 只允许一种格式
         public string Format
         {
             get;
@@ -109,7 +110,8 @@ namespace DigitalPlatform.LibraryClient
                         if (this.Prompt != null)
                         {
                             MessagePromptEventArgs e = new MessagePromptEventArgs();
-                            e.MessageText = "获得书目记录 '"+strCommand+"' ("+StringUtil.MakePathList(format_list)+") 时发生错误： " + strError;
+                            // e.MessageText = "获得书目记录 '"+strCommand+"' ("+StringUtil.MakePathList(format_list)+") 时发生错误： " + strError;
+                            e.MessageText = "获得书目记录时发生错误： " + strError + "\r\ncommand='" + strCommand + "' (" + StringUtil.MakePathList(format_list) + ")";
                             e.Actions = "yes,no,cancel";
                             this.Prompt(this, e);
                             if (e.ResultAction == "cancel")

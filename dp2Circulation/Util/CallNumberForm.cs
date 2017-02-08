@@ -61,7 +61,7 @@ namespace dp2Circulation
         /// 发起取号的实体记录的路径。用来校正统计过程，排除自己
         /// </summary>
         public string MyselfItemRecPath = "";    // 发起取号的实体记录的路径。用来校正统计过程，排除自己。
-        
+
         /// <summary>
         /// 发起取号的实体记录所从属的书目记录的路径。用来校正统计过程，排除和自己同属于一条书目记录的其它实体记录
         /// </summary>
@@ -218,12 +218,12 @@ namespace dp2Circulation
                         int nRet = 0;
 
                         ArrangementInfo info = null;
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   found
+                        // return:
+                        //      -1  error
+                        //      0   not found
+                        //      1   found
                         nRet = this.MainForm.GetArrangementInfo(this.LocationString,
-                            out info, 
+                            out info,
                             out strError);
 
 #if NO
@@ -270,7 +270,7 @@ namespace dp2Circulation
                         return;
                          * */
                     }
-//                    return;
+                //                    return;
             }
             base.DefWndProc(ref m);
         }
@@ -376,7 +376,7 @@ namespace dp2Circulation
                 {
                     string strError = "";
 
-                    int nRet = FillList(true, 
+                    int nRet = FillList(true,
                         "",
                         out strError);
                     if (nRet == -1)
@@ -442,7 +442,7 @@ namespace dp2Circulation
             EventFinish.Reset();
             try
             {
-                int nRet = FillList(true, 
+                int nRet = FillList(true,
                     "",
                     out strError);
                 if (nRet == -1)
@@ -686,7 +686,7 @@ namespace dp2Circulation
                 EnableControls(true);
             }
 
-            END1:
+        END1:
             // 用内存中最新的索取号来刷新
             RefreshByNewlyCallNumberItems();
 
@@ -926,7 +926,7 @@ namespace dp2Circulation
         /// <returns>同类书区分号部分</returns>
         public static string GetZhongcihaoPart(string strCallNumber)
         {
-            string [] lines = strCallNumber.Split(new char [] {'/'});
+            string[] lines = strCallNumber.Split(new char[] { '/' });
             if (lines.Length < 2)
                 return "";
 

@@ -824,6 +824,11 @@ this.DbType + "_search_form",
                 goto ERROR1;
             }
 
+            bool bQuickLoad = false;    // 是否快速装入
+
+            if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                bQuickLoad = true;
+
             /*
             bool bOutputKeyCount = false;
             if (Control.ModifierKeys == Keys.Control)
@@ -995,6 +1000,7 @@ this.DbType + "_search_form",
                     lHitCount,
                     bOutputKeyCount,
                     bOutputKeyID,
+                    bQuickLoad,
                     out strError);
                 if (nRet == 0)
                     return 0;
@@ -1123,6 +1129,7 @@ this.DbType + "_search_form",
             long lHitCount,
             bool bOutputKeyCount,
             bool bOutputKeyID,
+            bool bQuickLoad,
             out string strError)
         {
             strError = "";
@@ -1158,22 +1165,28 @@ this.DbType + "_search_form",
             {
                 Application.DoEvents();	// 出让界面控制权
 
-                if (stop != null)
+                if (stop != null && stop.State != 0)
                 {
-                    if (stop.State != 0)
-                    {
-                        // MessageBox.Show(this, "用户中断");
-                        this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
-                        return 0;
-                    }
+                    // MessageBox.Show(this, "用户中断");
+                    this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
+                    return 0;
                 }
+
+                bool bTempQuickLoad = bQuickLoad;
+
+                if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                    bTempQuickLoad = true;
+
+                string strTempBrowseStyle = strBrowseStyle;
+                if (bTempQuickLoad)
+                    StringUtil.RemoveFromInList("cols", false, ref strTempBrowseStyle);
 
                 long lRet = Channel.GetSearchResult(
                     stop,
                     null,   // strResultSetName
                     lStart,
                     lCount,
-                    strBrowseStyle, // bOutputKeyCount == true ? "keycount" : "id,cols",
+                    strTempBrowseStyle, // bOutputKeyCount == true ? "keycount" : "id,cols",
                     this.Lang,
                     out searchresults,
                     out strError);
@@ -1276,7 +1289,8 @@ this.DbType + "_search_form",
                     }
 
                     if (bOutputKeyCount == false
-                        && bAccessBiblioSummaryDenied == false)
+                        && bAccessBiblioSummaryDenied == false
+                        && bTempQuickLoad == false)
                     {
                         // return:
                         //      -2  获得书目摘要的权限不够
@@ -6031,7 +6045,615 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
+        // 将从属的书目记录保存到MARC文件
+        void menu_saveBiblioRecordToMarcFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
 
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要保存的事项";
+                goto ERROR1;
+            }
+
+            Hashtable rule_name_table = null;
+            bool bTableExists = false;
+            // 将馆藏地点名和编目规则名的对照表装入内存
+            // return:
+            //      -1  出错
+            //      0   文件不存在
+            //      1   成功
+            nRet = LoadRuleNameTable(PathUtil.MergePath(this.MainForm.DataDir, "cataloging_rules.xml"),
+                out rule_name_table,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (nRet == 1)
+                bTableExists = true;
+
+            Debug.Assert(rule_name_table != null, "");
+
+            Encoding preferredEncoding = this.CurrentEncoding;
+
+            {
+                // 观察要保存的第一条记录的marc syntax
+            }
+
+            OpenMarcFileDlg dlg = new OpenMarcFileDlg();
+            MainForm.SetControlFont(dlg, this.Font);
+
+            dlg.IsOutput = true;
+            dlg.AddG01Visible = false;
+            if (bTableExists == false)
+            {
+                dlg.RuleVisible = true;
+                dlg.Rule = this.LastCatalogingRule;
+            }
+            dlg.FileName = this.LastIso2709FileName;
+            dlg.CrLf = this.LastCrLfIso2709;
+            dlg.EncodingListItems = Global.GetEncodingList(false);
+            dlg.EncodingName =
+                (String.IsNullOrEmpty(this.LastEncodingName) == true ? Global.GetEncodingName(preferredEncoding) : this.LastEncodingName);
+            dlg.EncodingComment = "注: 原始编码方式为 " + Global.GetEncodingName(preferredEncoding);
+            dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
+            dlg.EnableMarcSyntax = false;
+            dlg.ShowDialog(this);
+
+            this.LastIso2709FileName = dlg.FileName;
+            this.LastCrLfIso2709 = dlg.CrLf;
+            this.LastEncodingName = dlg.EncodingName;
+            this.LastCatalogingRule = dlg.Rule;
+
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            string strCatalogingRule = "";
+
+            if (bTableExists == false)
+            {
+                strCatalogingRule = dlg.Rule;
+                if (strCatalogingRule == "<无限制>")
+                    strCatalogingRule = null;
+            }
+
+            Encoding targetEncoding = null;
+
+            nRet = Global.GetEncoding(dlg.EncodingName,
+                out targetEncoding,
+                out strError);
+            if (nRet == -1)
+            {
+                goto ERROR1;
+            }
+
+            string strLastFileName = this.LastIso2709FileName;
+            string strLastEncodingName = this.LastEncodingName;
+
+            ExportMarcHoldingDialog dlg_905 = new ExportMarcHoldingDialog();
+            {
+                MainForm.SetControlFont(dlg_905, this.Font);
+
+                dlg_905.UiState = Program.MainForm.AppInfo.GetString(
+                    "BiblioSearchForm",
+                    "ExportMarcHoldingDialog_uiState",
+                    "");
+
+                Program.MainForm.AppInfo.LinkFormState(dlg_905, "BiblioSearchForm_ExportMarcHoldingDialog_state");
+                dlg_905.ShowDialog(this);
+
+                Program.MainForm.AppInfo.SetString(
+                    "BiblioSearchForm",
+                    "ExportMarcHoldingDialog_uiState",
+                    dlg_905.UiState);
+
+                if (dlg_905.DialogResult != DialogResult.OK)
+                    return;
+            }
+
+            bool bExist = File.Exists(dlg.FileName);
+            bool bAppend = false;
+
+            if (bExist == true)
+            {
+                DialogResult result = MessageBox.Show(this,
+                    "文件 '" + dlg.FileName + "' 已存在，是否以追加方式写入记录?\r\n\r\n--------------------\r\n注：(是)追加  (否)覆盖  (取消)放弃",
+                    this.DbType + "SearchForm",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Yes)
+                    bAppend = true;
+
+                if (result == DialogResult.No)
+                    bAppend = false;
+
+                if (result == DialogResult.Cancel)
+                {
+                    strError = "放弃处理...";
+                    goto ERROR1;
+                }
+            }
+
+            // 检查同一个文件连续存时候的编码方式一致性
+            if (strLastFileName == dlg.FileName
+                && bAppend == true)
+            {
+                if (strLastEncodingName != ""
+                    && strLastEncodingName != dlg.EncodingName)
+                {
+                    DialogResult result = MessageBox.Show(this,
+                        "文件 '" + dlg.FileName + "' 已在先前已经用 " + strLastEncodingName + " 编码方式存储了记录，现在又以不同的编码方式 " + dlg.EncodingName + " 追加记录，这样会造成同一文件中存在不同编码方式的记录，可能会令它无法被正确读取。\r\n\r\n是否继续? (是)追加  (否)放弃操作",
+                        this.DbType + "SearchForm",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button2);
+                    if (result == DialogResult.No)
+                    {
+                        strError = "放弃处理...";
+                        goto ERROR1;
+                    }
+                }
+            }
+
+            this.EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在保存到 MARC 文件 ...");
+            stop.BeginLoop();
+
+            Stream s = null;
+
+            int nOutputCount = 0;
+
+            try
+            {
+                s = File.Open(this.LastIso2709FileName,
+                     FileMode.OpenOrCreate);
+                if (bAppend == false)
+                    s.SetLength(0);
+                else
+                    s.Seek(0, SeekOrigin.End);
+            }
+            catch (Exception ex)
+            {
+                strError = "打开或创建文件 " + this.LastIso2709FileName + " 失败，原因: " + ex.Message;
+                goto ERROR1;
+            }
+
+            try
+            {
+                List<string> biblioRecPathList = new List<string>();   // 按照出现先后的顺序存储书目记录路径
+
+                Hashtable groupTable = new Hashtable();   // 书目记录路径 --> List<string> (册记录路径列表)
+
+                nRet = GetSelectedBiblioRecPath(
+    ref biblioRecPathList,// 按照出现先后的顺序存储书目记录路径
+    ref groupTable, // 书目记录路径 --> List<string> (册记录路径列表)
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                string strMARC = "";
+                string strMarcSyntax = "";
+                MarcRecord record = null;
+                int nItemIndex = 0;
+                List<BiblioInfo> sub_items = new List<BiblioInfo>();
+
+                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+                nRet = DumpBiblioAndPartsSubItems.Dump(this.Channel,
+                    stop,
+                    this.DbType,
+                    biblioRecPathList,
+                    groupTable,
+                    // 书目记录到来
+                    (biblio_info) =>
+                    {
+
+                        strMARC = "";
+                        strMarcSyntax = "";
+                        // 将XML格式转换为MARC格式
+                        // 自动从数据记录中获得MARC语法
+                        nRet = MarcUtil.Xml2Marc(biblio_info.OldXml,
+                            true,
+                            null,
+                            out strMarcSyntax,
+                            out strMARC,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "XML转换到MARC记录时出错: " + strError;
+                            throw new Exception(strError);
+                        }
+
+                        Debug.Assert(strMarcSyntax != "", "");
+
+                        record = new MarcRecord(strMARC);
+
+                        // 按照编目规则过滤
+                        // 获得一个特定风格的 MARC 记录
+                        // parameters:
+                        //      strStyle    要匹配的style值。如果为null，表示任何$*值都匹配，实际上效果是去除$*并返回全部字段内容
+                        // return:
+                        //      0   没有实质性修改
+                        //      1   有实质性修改
+                        nRet = MarcUtil.GetMappedRecord(ref strMARC,
+                            strCatalogingRule);
+                        if (dlg.RemoveField998 == true)
+                        {
+                            record.select("field[@name='998']").detach();
+                            record.select("field[@name='997']").detach();
+                        }
+                        if (dlg.Mode880 == true && strMarcSyntax == "usmarc")
+                        {
+                            MarcQuery.To880(record);
+                        }
+
+                        sub_items.Clear();
+                        return true;
+                    },
+                    // 每一次册记录到来
+                    (biblio_info, item_info) =>
+                    {
+                        sub_items.Add(item_info);
+
+                        XmlDocument item_dom = new XmlDocument();
+                        item_dom.LoadXml(item_info.OldXml);
+
+                        string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
+                        strLocation = StringUtil.GetPureLocation(strLocation);
+
+                        if (bTableExists == true)
+                        {
+                            strCatalogingRule = "";
+                            // 根据馆藏地点获得编目规则名
+                            if (this.DbType == "item"
+                                && string.IsNullOrEmpty(strLocation) == false)
+                            {
+                                // 
+                                strCatalogingRule = (string)rule_name_table[strLocation];
+                                if (string.IsNullOrEmpty(strCatalogingRule) == true)
+                                {
+                                    strCatalogingRule = InputDlg.GetInput(
+                                        this,
+                                        null,
+                                        "请输入馆藏地点 '" + strLocation + "' 所对应的编目规则名称:",
+                                        "NLC",
+                                        this.MainForm.DefaultFont);
+                                    if (strCatalogingRule == null)
+                                    {
+                                        DialogResult result = MessageBox.Show(this,
+                                            "由于您没有指定馆藏地点 '" + strLocation + "' 所对应的编目规则名，此馆藏地点被当作 <无限制> 编目规则来处理。\r\n\r\n是否继续操作? (OK 继续；Cancel 放弃整个导出操作)",
+                                            this.DbType + "SearchForm",
+                                            MessageBoxButtons.OKCancel,
+                                            MessageBoxIcon.Question,
+                                            MessageBoxDefaultButton.Button1);
+                                        if (result == System.Windows.Forms.DialogResult.Cancel)
+                                            throw new InterruptException("中断");
+                                        strCatalogingRule = "";
+                                    }
+
+                                    rule_name_table[strLocation] = strCatalogingRule; // 储存到内存，后面就不再作相同的询问了
+                                }
+                            }
+                        }
+
+                        nItemIndex++;
+                        return true;
+                    },
+                    // 结束书目记录处理
+                    (biblio_info) =>
+                    {
+                        if (dlg_905.Create905 && dlg_905.RemoveOld905)
+                            record.select("field[@name='905']").detach();
+
+                        if (dlg_905.Create906)
+                            record.select("field[@name='906']").detach();
+
+                        Create905(
+                            dlg_905.Create905,
+                            dlg_905.Style905,
+                            dlg_905.Create906,
+                            record,
+                            sub_items);
+
+                        byte[] baTarget = null;
+                        // 将MARC机内格式转换为ISO2709格式
+                        // parameters:
+                        //      strSourceMARC   [in]机内格式MARC记录。
+                        //      strMarcSyntax   [in]为"unimarc"或"usmarc"
+                        //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
+                        //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
+                        // return:
+                        //      -1  出错
+                        //      0   成功
+                        nRet = MarcUtil.CvtJineiToISO2709(
+                            record.Text,
+                            strMarcSyntax,
+                            targetEncoding,
+                            out baTarget,
+                            out strError);
+                        if (nRet == -1)
+                            throw new Exception(strError);
+
+                        s.Write(baTarget, 0,
+                            baTarget.Length);
+
+                        if (dlg.CrLf == true)
+                        {
+                            byte[] baCrLf = targetEncoding.GetBytes("\r\n");
+                            s.Write(baCrLf, 0,
+                                baCrLf.Length);
+                        }
+
+                        stop.SetProgressValue(nItemIndex);
+
+                        nOutputCount++;
+
+                        return true;
+                    },
+                    () => { Application.DoEvents(); return true; },
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+            }
+            catch (Exception ex)
+            {
+                strError = "写入文件 " + this.LastIso2709FileName + " 失败，原因: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                s.Close();
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                this.EnableControls(true);
+            }
+
+            // 
+            if (bAppend == true)
+                MainForm.StatusBarMessage = nOutputCount.ToString()
+                    + "条记录成功追加到文件 " + this.LastIso2709FileName + " 尾部";
+            else
+                MainForm.StatusBarMessage = nOutputCount.ToString()
+                    + "条记录成功保存到新文件 " + this.LastIso2709FileName + " 尾部";
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        static void Create905(
+            bool bCreate905,
+            string str905Style,
+            bool bCreate906,
+            MarcRecord record,
+            List<BiblioInfo> sub_items)
+        {
+            string strError = "";
+
+            if (bCreate905)
+            {
+                if (str905Style == "每册一个 905 字段")
+                {
+                    foreach (BiblioInfo info in sub_items)
+                    {
+                        XmlDocument item_dom = new XmlDocument();
+                        item_dom.LoadXml(info.OldXml);
+
+                        string strAccessNo = DomUtil.GetElementText(item_dom.DocumentElement, "accessNo");
+                        string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
+                        strLocation = StringUtil.GetPureLocation(strLocation);
+
+                        dp2Circulation.MainForm.AccessNoInfo accessNoInfo = null;
+                        // 解析索取号字符串
+                        // return:
+                        //      -1  error
+                        //      0   排架体系定义没有找到
+                        //      1   成功
+                        int nRet = Program.MainForm.ParseAccessNo(
+                            strLocation,
+                            strAccessNo,
+                            out accessNoInfo,
+                            out strError);
+                        if (nRet == -1)
+                            throw new Exception(strError);
+
+                        string strBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
+
+                        MarcField field = new MarcField("905", "  ");
+
+                        if (accessNoInfo.HasHeadLine)
+                        {
+                            field.add(new MarcSubfield("a", accessNoInfo.HeadLine));
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(strLocation) == false)
+                                field.add(new MarcSubfield("a", strLocation));
+                        }
+
+                        if (string.IsNullOrEmpty(strAccessNo) == false)
+                        {
+                            field.add(new MarcSubfield("d", accessNoInfo.ClassLine));
+                            field.add(new MarcSubfield("e", accessNoInfo.QufenhaoLine));
+                        }
+                        if (string.IsNullOrEmpty(strBarcode) == false)
+                            field.add(new MarcSubfield("b", strBarcode));
+                        if (field.Subfields.count > 0)
+                            record.add(field);
+                    }
+                }
+                else if (str905Style == "只创建单个 905 字段"
+                    || string.IsNullOrEmpty(str905Style))
+                {
+                    dp2Circulation.MainForm.AccessNoInfo first_accessNoInfo = null;
+                    List<string> barcodes = new List<string>();
+                    string strFirstLocation = "";
+
+                    foreach (BiblioInfo info in sub_items)
+                    {
+                        XmlDocument item_dom = new XmlDocument();
+                        item_dom.LoadXml(info.OldXml);
+
+                        string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
+                        strLocation = StringUtil.GetPureLocation(strLocation);
+
+                        if (string.IsNullOrEmpty(strFirstLocation))
+                        {
+                            if (string.IsNullOrEmpty(strLocation) == false)
+                                strFirstLocation = strLocation;
+                        }
+
+                        // TODO: 要按照排架体系定义，分析出索取号的各行。比如三行的索取号
+                        if (first_accessNoInfo == null)
+                        {
+                            string strAccessNo = DomUtil.GetElementText(item_dom.DocumentElement, "accessNo");
+                            if (string.IsNullOrEmpty(strAccessNo) == false)
+                            {
+                                // 解析索取号字符串
+                                // return:
+                                //      -1  error
+                                //      0   排架体系定义没有找到
+                                //      1   成功
+                                int nRet = Program.MainForm.ParseAccessNo(
+                                    strLocation,
+                                    strAccessNo,
+                                    out first_accessNoInfo,
+                                    out strError);
+                                if (nRet == -1)
+                                    throw new Exception(strError);
+                            }
+                        }
+                        string strBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
+                        if (string.IsNullOrEmpty(strBarcode) == false)
+                            barcodes.Add(strBarcode);
+                    }
+
+                    {
+
+                        MarcField field = new MarcField("905", "  ");
+
+                        if (first_accessNoInfo != null
+                            && first_accessNoInfo.HasHeadLine)
+                        {
+                            field.add(new MarcSubfield("a", first_accessNoInfo.HeadLine));
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(strFirstLocation) == false)
+                                field.add(new MarcSubfield("a", strFirstLocation));
+                        }
+
+                        if (first_accessNoInfo != null)
+                        {
+                            field.add(new MarcSubfield("d", first_accessNoInfo.ClassLine));
+                            field.add(new MarcSubfield("e", first_accessNoInfo.QufenhaoLine));
+                        }
+                        foreach (string strBarcode in barcodes)
+                        {
+                            field.add(new MarcSubfield("b", strBarcode));
+                        }
+                        record.add(field);
+
+                    }
+                }
+                else
+                {
+                    strError = "无法识别的 str905Style '" + str905Style + "'";
+                    throw new Exception(strError);
+                }
+            }
+
+            if (bCreate906)
+            {
+                MarcField field = new MarcField("906", "  ");
+
+                foreach (BiblioInfo info in sub_items)
+                {
+                    XmlDocument item_dom = new XmlDocument();
+                    item_dom.LoadXml(info.OldXml);
+
+                    // $a 册条码号
+                    {
+                        string strBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
+                        field.add(new MarcSubfield("a", strBarcode));
+                    }
+
+                    // $b 入藏库
+                    {
+                        string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
+                        strLocation = StringUtil.GetPureLocation(strLocation);
+                        if (string.IsNullOrEmpty(strLocation) == false)
+                            field.add(new MarcSubfield("b", strLocation));
+                    }
+
+                    // TODO: 要按照排架体系定义，分析出索取号的各行。比如三行的索取号
+                    // $c架位
+                    {
+                        string strAccessNo = DomUtil.GetElementText(item_dom.DocumentElement, "accessNo");
+
+                        strAccessNo = StringUtil.BuildLocationClassEntry(strAccessNo);
+
+                        if (string.IsNullOrEmpty(strAccessNo) == false)
+                            field.add(new MarcSubfield("c", strAccessNo));
+                    }
+
+                    // $d册价格
+                    {
+                        string strPrice = DomUtil.GetElementText(item_dom.DocumentElement, "price");
+                        if (string.IsNullOrEmpty(strPrice) == false)
+                            field.add(new MarcSubfield("d", strPrice));
+                    }
+
+                    // $f册类型
+                    {
+                        string strBookType = DomUtil.GetElementText(item_dom.DocumentElement, "bookType");
+                        if (string.IsNullOrEmpty(strBookType) == false)
+                            field.add(new MarcSubfield("f", strBookType));
+                    }
+
+                    // $h登录号
+                    {
+                        string strRegisterNo = DomUtil.GetElementText(item_dom.DocumentElement, "registerNo");
+                        if (String.IsNullOrEmpty(strRegisterNo) == false)
+                            field.add(new MarcSubfield("h", strRegisterNo));
+                    }
+
+                    // $r借阅者条码号
+                    {
+                        string strBorrower = DomUtil.GetElementText(item_dom.DocumentElement, "borrower");
+                        if (String.IsNullOrEmpty(strBorrower) == false)
+                            field.add(new MarcSubfield("r", strBorrower));
+                    }
+
+                    // $s图书状态
+                    {
+                        string strState = DomUtil.GetElementText(item_dom.DocumentElement, "state");
+                        if (String.IsNullOrEmpty(strState) == false)
+                            field.add(new MarcSubfield("s", strState));
+                    }
+
+                    // $z附注
+                    {
+                        string strComment = DomUtil.GetElementText(item_dom.DocumentElement, "comment");
+                        if (String.IsNullOrEmpty(strComment) == false)
+                            field.add(new MarcSubfield("z", strComment));
+                    }
+
+                    if (field.Subfields.count > 0)
+                        record.add(field);
+                }
+            }
+        }
+
+#if NO
         // 将从属的书目记录保存到MARC文件
         void menu_saveBiblioRecordToMarcFile_Click(object sender, EventArgs e)
         {
@@ -6156,7 +6778,6 @@ MessageBoxDefaultButton.Button1);
                         strError = "放弃处理...";
                         goto ERROR1;
                     }
-
                 }
             }
 
@@ -6307,7 +6928,7 @@ out strError);
                     long lRet = Channel.GetBiblioInfos(
                         stop,
                         strBiblioRecPath,
-                    "",
+                        "",
                         new string[] { "xml" },   // formats
                         out results,
                         out baTimestamp,
@@ -6458,6 +7079,8 @@ out strError);
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+#endif
 
         // 保存选择的行中的有路径的部分行 到书目库记录路径文件
         void menu_saveToBiblioRecordPathFile_Click(object sender, EventArgs e)
@@ -8163,6 +8786,7 @@ Keys keyData)
                     lHitCount,
                     bOutputKeyCount,
                     bOutputKeyID,
+                    bQuickLoad,
                     out strError);
                 if (nRet == 0)
                     return;

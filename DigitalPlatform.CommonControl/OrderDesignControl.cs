@@ -389,7 +389,6 @@ namespace DigitalPlatform.CommonControl
             return strText.Substring(nRet + 1).Trim();
         }
 
-
         // return:
         //      -1  error
         //      0   succeed
@@ -608,7 +607,6 @@ namespace DigitalPlatform.CommonControl
                     // 只检查新规划的事项
                     if ((item.State & ItemState.ReadOnly) != 0)
                         continue;
-
 
                     // 2009/2/4 只检查新输入的订购事项
                     if (String.IsNullOrEmpty(item.StateString) == false)

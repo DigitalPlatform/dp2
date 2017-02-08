@@ -937,6 +937,32 @@ MessageBoxDefaultButton.Button1);
             return -1;
         }
 
+        void CopyJavascriptDirectories()
+        {
+            string strError = "";
+            {
+                string strSourceDirectory = Path.Combine(this.DataDir, "order");
+                if (Directory.Exists(strSourceDirectory) == true)
+                {
+                    string strTargetDirectory = Path.Combine(this.UserDir, "order");
+                    int nRet = PathUtil.CopyDirectory(strSourceDirectory, strTargetDirectory, false, out strError);
+                    if (nRet == -1)
+                        MessageBox.Show(this, "copy '" + strSourceDirectory + "' to '" + strTargetDirectory + "' error");
+                }
+            }
+            {
+                string strSourceDirectory = Path.Combine(this.DataDir, "jquery");
+                if (Directory.Exists(strSourceDirectory) == true)
+                {
+                    string strTargetDirectory = Path.Combine(this.UserDir, "jquery");
+                    int nRet = PathUtil.CopyDirectory(strSourceDirectory, strTargetDirectory, false, out strError);
+                    if (nRet == -1)
+                        MessageBox.Show(this, "copy '" + strSourceDirectory + "' to '" + strTargetDirectory + "' error");
+                }
+            }
+
+        }
+
         // 迁移旧版本的统计方案目录和各种配套文件
         void MigrateProjectDirectory()
         {
@@ -1409,6 +1435,8 @@ MessageBoxDefaultButton.Button1);
 
             // 迁移统计方案文件
             MigrateProjectDirectory();
+
+            CopyJavascriptDirectories();
 
             #region 脚本支持
             ScriptManager.applicationInfo = this.AppInfo;

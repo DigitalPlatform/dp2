@@ -66,7 +66,6 @@ namespace dp2Circulation
             this.Items = items;
 
             this.StartItem = item;
-
             return 0;
         }
 
@@ -221,9 +220,14 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
-            nRet = Restore(out strError);
-            if (nRet == -1)
-                goto ERROR1;
+            if (this.Item != null)
+            {
+                nRet = Restore(out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            else
+                return 0;
 
             return nRet;
         ERROR1:
@@ -646,7 +650,8 @@ namespace dp2Circulation
                 this.Item.Timestamp = this.Item.Error.OldTimestamp;
             }
 
-            this.Item.Error = null; // 结束报错状态
+            if (this.Item != null)
+                this.Item.Error = null; // 结束报错状态
 
             this.DialogResult = DialogResult.OK;
             this.Close();

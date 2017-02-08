@@ -18,7 +18,8 @@ namespace DigitalPlatform.rms
     public class BrowseCfg : KeysBrowseBase
     {
         Hashtable m_exprCache = new Hashtable();
-        Hashtable m_methodsCache = new Hashtable();
+        List<string> _useNames = new List<string>();
+        // Hashtable m_methodsCache = new Hashtable();
 
         // XmlDocument m_domTransform = null;  // 用于转换的专用DOM，由 this.dom 将<col>元素下的<title>元素去掉后产生
         XslCompiledTransform m_xt = null;
@@ -27,7 +28,8 @@ namespace DigitalPlatform.rms
         {
             base.Clear();
             m_exprCache.Clear();
-            m_methodsCache.Clear();
+            _useNames.Clear();
+            // m_methodsCache.Clear();
             this.m_xt = null;
         }
 
@@ -54,6 +56,26 @@ namespace DigitalPlatform.rms
             return convert_methods;
         }
 
+        List<string> GetUseColNames()
+        {
+            // 汇总需要创建的列名
+            XmlNodeList nodes = this._dom.DocumentElement.SelectNodes("col/use");
+            List<string> cols = new List<string>();
+            foreach (XmlElement use in nodes)
+            {
+                cols.Add(use.InnerText.Trim());
+            }
+
+            return cols;
+        }
+
+        class CacheItem
+        {
+            public XPathExpression expr { get; set; }
+            public List<string> convert_methods { get; set; }
+            public string Use { get; set; }
+        }
+
         // TODO: XPathExpression可以缓存起来，加快速度
         // 创建指定记录的浏览格式集合
         // parameters:
@@ -75,7 +97,7 @@ namespace DigitalPlatform.rms
             Debug.Assert(domData != null, "BuildCols()调用错误，domData参数不能为null。");
 
             // 没有浏览格式定义时，就没有信息
-            if (this.dom == null)
+            if (this._dom == null)
                 return 0;
 
             int nResultLength = 0;
@@ -84,57 +106,88 @@ namespace DigitalPlatform.rms
 
             List<string> col_array = new List<string>();
 
-            if (this.dom.DocumentElement.Prefix == "")
+            if (this._dom.DocumentElement.Prefix == "")
             {
+
                 // 得到xpath的值
-                XmlNodeList nodeListXpath = this.dom.SelectNodes(@"//xpath");
+                // XmlNodeList nodeListXpath = this._dom.SelectNodes(@"//xpath");
+                XmlNodeList nodeListCol = this._dom.DocumentElement.SelectNodes("col");
 
             CREATE_CACHE:
                 // 创建Cache
-                if (m_exprCache.Count == 0 && nodeListXpath.Count > 0)
+                if (m_exprCache.Count == 0 && nodeListCol.Count > 0)
                 {
-                    for (int i = 0; i < nodeListXpath.Count; i++)
-                    {
-                        XmlNode nodeXpath = nodeListXpath[i];
-                        string strXpath = nodeXpath.InnerText.Trim(); // 2012/2/16
-                        if (string.IsNullOrEmpty(strXpath) == true)
-                            continue;
+                    // 汇总需要创建的列名
+                    this._useNames = GetUseColNames();
 
-                        string strNstableName = DomUtil.GetAttrDiff(nodeXpath, "nstable");
-                        XmlNamespaceManager nsmgr = (XmlNamespaceManager)this.tableNsClient[nodeXpath];
+                    foreach (XmlElement nodeCol in nodeListCol)
+                    {
+                        CacheItem cache_item = new CacheItem();
+                        m_exprCache[nodeCol] = cache_item;
+
+                        // XmlNode nodeXpath = nodeListXpath[i];
+                        XmlElement nodeXPath = nodeCol.SelectSingleNode("xpath") as XmlElement;
+                        string strXpath = "";
+                        if (nodeXPath != null)
+                            strXpath = nodeXPath.InnerText.Trim();
+                        if (string.IsNullOrEmpty(strXpath) == false)
+                        {
+                            string strNstableName = DomUtil.GetAttrDiff(nodeXPath, "nstable");
+                            XmlNamespaceManager nsmgr = (XmlNamespaceManager)this.tableNsClient[nodeXPath];
 #if DEBUG
-                        if (nsmgr != null)
-                        {
-                            Debug.Assert(strNstableName != null, "此时应该没有定义'nstable'属性。");
-                        }
-                        else
-                        {
-                            Debug.Assert(strNstableName == null, "此时必须没有定义'nstable'属性。");
-                        }
+                            if (nsmgr != null)
+                            {
+                                Debug.Assert(strNstableName != null, "此时应该没有定义'nstable'属性。");
+                            }
+                            else
+                            {
+                                Debug.Assert(strNstableName == null, "此时必须没有定义'nstable'属性。");
+                            }
 #endif
 
-                        XPathExpression expr = nav.Compile(strXpath);
-                        if (nsmgr != null)
-                            expr.SetContext(nsmgr);
 
-                        m_exprCache[nodeXpath] = expr;
+                            XPathExpression expr = nav.Compile(strXpath);
+                            if (nsmgr != null)
+                                expr.SetContext(nsmgr);
+
+                            cache_item.expr = expr;
+                        }
+
 
                         // 把 convert 参数也缓存起来
-                        XmlNode nodeCol = nodeXpath.ParentNode;
+                        // XmlNode nodeCol = nodeXpath.ParentNode;
                         string strConvert = DomUtil.GetAttr(nodeCol, "convert");
                         if (string.IsNullOrEmpty(strConvert) == false)
                         {
                             List<string> convert_methods = GetMethods(strConvert);
-                            m_methodsCache[nodeCol] = convert_methods;
+                            cache_item.convert_methods = convert_methods;
                         }
                         else
-                            m_methodsCache[nodeCol] = new List<string>();
+                            cache_item.convert_methods = new List<string>();
 
+                        // 把 use 元素 text 缓存起来
+                        XmlElement nodeUse = nodeCol.SelectSingleNode("use") as XmlElement;
+                        string strUse = "";
+                        if (nodeUse != null)
+                            strUse = nodeUse.InnerText.Trim();
+                        if (string.IsNullOrEmpty(strUse) == false)
+                        {
+                            cache_item.Use = strUse;
+                        }
                     }
                 }
 
-                for (int i = 0; i < nodeListXpath.Count; i++)
+                Dictionary<string, MarcColumn> results = null;
+                string filter = this._dom.DocumentElement.GetAttribute("filter");
+                if (filter == "marc" && this._useNames.Count > 0)
                 {
+                    results = MarcBrowse.Build(domData,
+                        this._useNames);
+                }
+
+                foreach (XmlElement nodeCol in nodeListCol)
+                {
+#if NO
                     XmlNode nodeXpath = nodeListXpath[i];
                     string strXpath = nodeXpath.InnerText.Trim(); // 2012/2/16
                     if (string.IsNullOrEmpty(strXpath) == true)
@@ -142,90 +195,89 @@ namespace DigitalPlatform.rms
 
                     // 优化速度 2014/1/29
                     XmlNode nodeCol = nodeXpath.ParentNode;
-
-                    List<string> convert_methods = (List<string>)m_methodsCache[nodeCol];
+#endif
+                    CacheItem cache_item = m_exprCache[nodeCol] as CacheItem;
+                    List<string> convert_methods = cache_item.convert_methods;
                     if (convert_methods == null)
                     {
                         Debug.Assert(false, "");
                         string strConvert = DomUtil.GetAttr(nodeCol, "convert");
                         convert_methods = GetMethods(strConvert);
                     }
-#if NO
-                    string strNstableName = DomUtil.GetAttrDiff(nodeXpath, "nstable");
-                    XmlNamespaceManager nsmgr = (XmlNamespaceManager)this.tableNsClient[nodeXpath];
-                    if (nsmgr != null)
-                    {
-                        Debug.Assert(strNstableName != null, "此时应该没有定义'nstable'属性。");
-                    }
-                    else
-                    {
-                        Debug.Assert(strNstableName == null, "此时必须没有定义'nstable'属性。");
-                    }
-
-
-
-                    XPathExpression expr = nav.Compile(strXpath);
-                    if (nsmgr != null)
-                        expr.SetContext(nsmgr);
-#endif
-                    XPathExpression expr = (XPathExpression)m_exprCache[nodeXpath];
-
-                    if (expr == null)
-                    {
-                        this.m_exprCache.Clear();
-                        this.m_methodsCache.Clear();
-                        goto CREATE_CACHE;  // TODO: 如何预防死循环?
-                    }
-
-                    Debug.Assert(expr != null, "");
 
                     string strText = "";
 
-                    if (expr.ReturnType == XPathResultType.Number)
-                    {
-                        strText = nav.Evaluate(expr).ToString();//Convert.ToString((int)(nav.Evaluate(expr)));
-                        strText = ConvertText(convert_methods, strText);
+                    XPathExpression expr = cache_item.expr;
 
-                    }
-                    else if (expr.ReturnType == XPathResultType.Boolean)
+                    if (expr != null)
                     {
-                        strText = Convert.ToString((bool)(nav.Evaluate(expr)));
-                        strText = ConvertText(convert_methods, strText);
-                    }
-                    else if (expr.ReturnType == XPathResultType.String)
-                    {
-                        strText = (string)(nav.Evaluate(expr));
-                        strText = ConvertText(convert_methods, strText);
-                    }
-                    else if (expr.ReturnType == XPathResultType.NodeSet)
-                    {
-                        // 看看是否要插入什么分隔符
-                        string strSep = GetSepString(convert_methods);
-
-                        XPathNodeIterator iterator = nav.Select(expr);
-                        StringBuilder text = new StringBuilder(4096);
-                        while (iterator.MoveNext())
+                        if (expr == null)
                         {
-                            XPathNavigator navigator = iterator.Current;
-                            string strOneText = navigator.Value;
-                            if (strOneText == "")
-                                continue;
-
-                            strOneText = ConvertText(convert_methods, strOneText);
-
-                            // 加入分隔符号
-                            if (text.Length > 0 && string.IsNullOrEmpty(strSep) == false)
-                                text.Append(strSep);
-
-                            text.Append(strOneText);
+#if NO
+                        this.m_exprCache.Clear();
+                        this.m_methodsCache.Clear();
+                        goto CREATE_CACHE;  // TODO: 如何预防死循环?
+#endif
                         }
 
-                        strText = text.ToString();
+                        Debug.Assert(expr != null, "");
+
+
+                        if (expr.ReturnType == XPathResultType.Number)
+                        {
+                            strText = nav.Evaluate(expr).ToString();//Convert.ToString((int)(nav.Evaluate(expr)));
+                            strText = ConvertText(convert_methods, strText);
+
+                        }
+                        else if (expr.ReturnType == XPathResultType.Boolean)
+                        {
+                            strText = Convert.ToString((bool)(nav.Evaluate(expr)));
+                            strText = ConvertText(convert_methods, strText);
+                        }
+                        else if (expr.ReturnType == XPathResultType.String)
+                        {
+                            strText = (string)(nav.Evaluate(expr));
+                            strText = ConvertText(convert_methods, strText);
+                        }
+                        else if (expr.ReturnType == XPathResultType.NodeSet)
+                        {
+                            // 看看是否要插入什么分隔符
+                            string strSep = GetSepString(convert_methods);
+
+                            XPathNodeIterator iterator = nav.Select(expr);
+                            StringBuilder text = new StringBuilder(4096);
+                            while (iterator.MoveNext())
+                            {
+                                XPathNavigator navigator = iterator.Current;
+                                string strOneText = navigator.Value;
+                                if (strOneText == "")
+                                    continue;
+
+                                strOneText = ConvertText(convert_methods, strOneText);
+
+                                // 加入分隔符号
+                                if (text.Length > 0 && string.IsNullOrEmpty(strSep) == false)
+                                    text.Append(strSep);
+
+                                text.Append(strOneText);
+                            }
+
+                            strText = text.ToString();
+                        }
+                        else
+                        {
+                            strError = "XPathExpression的ReturnType为'" + expr.ReturnType.ToString() + "'无效";
+                            return -1;
+                        }
+
                     }
-                    else
+
+                    if (string.IsNullOrEmpty(cache_item.Use) == false)
                     {
-                        strError = "XPathExpression的ReturnType为'" + expr.ReturnType.ToString() + "'无效";
-                        return -1;
+                        MarcColumn column = null;
+                        results.TryGetValue(cache_item.Use, out column);
+                        if (column != null && string.IsNullOrEmpty(column.Value) == false)
+                            strText += column.Value;
                     }
 
                     // 空内容也要算作一列
@@ -236,13 +288,13 @@ namespace DigitalPlatform.rms
                     nResultLength += strText.Length;
                 }
             }
-            else if (this.dom.DocumentElement.Prefix == "xsl")
+            else if (this._dom.DocumentElement.Prefix == "xsl")
             {
                 if (this.m_xt == null)
                 {
                     // <col>元素下的<title>元素要去掉
                     XmlDocument temp = new XmlDocument();
-                    temp.LoadXml(this.dom.OuterXml);
+                    temp.LoadXml(this._dom.OuterXml);
                     XmlNodeList nodes = temp.DocumentElement.SelectNodes("//col/title");
                     foreach (XmlNode node in nodes)
                     {
@@ -307,7 +359,7 @@ namespace DigitalPlatform.rms
             }
             else
             {
-                strError = "browse角色文件的根元素的前缀'" + this.dom.DocumentElement.Prefix + "'不合法。";
+                strError = "browse 角色文件的根元素的前缀'" + this._dom.DocumentElement.Prefix + "'不合法。";
                 return -1;
             }
 

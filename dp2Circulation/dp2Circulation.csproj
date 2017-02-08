@@ -19,8 +19,8 @@
     <SccProvider>
     </SccProvider>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>46EAD2E4BB8C84DDD31EFA5C83308710A458086D</ManifestCertificateThumbprint>
-    <ManifestKeyFile>dp2Circulation_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>0758DD9211167CF9C861F240885E79987E15EC1B</ManifestCertificateThumbprint>
+    <ManifestKeyFile>dp2Circulation_1_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
     <ApplicationIcon>nei.ico</ApplicationIcon>
@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>145</ApplicationRevision>
+    <ApplicationRevision>156</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -555,6 +555,19 @@
     <Compile Include="OperLogStatis\OperLogItemLoader.cs" />
     <Compile Include="OperLogStatis\OperLogLoader.cs" />
     <Compile Include="OperLogStatis\OperLogStatisTask1.cs" />
+    <Compile Include="Order\BatchOrderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\BatchOrderForm.Designer.cs">
+      <DependentUpon>BatchOrderForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\BatchOrderScript.cs" />
+    <Compile Include="Order\DistributeDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\DistributeDialog.Designer.cs">
+      <DependentUpon>DistributeDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Reader\AddFriendsDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -851,6 +864,7 @@
     <Compile Include="SearchForms\CommentSearchForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="SearchForms\DumpBiblioAndPartsSubItems.cs" />
     <Compile Include="SearchForms\ExportMarcHoldingDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1518,6 +1532,21 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Order\BatchOrder_dark.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Order\BatchOrder_light.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Order\BatchOrder.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Order\jquery.scrollIntoView.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Order\jquery.scrollIntoView.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="printslice.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -1695,6 +1724,12 @@
     <EmbeddedResource Include="Monitor\StartRebuildKeysDlg.resx">
       <DependentUpon>StartRebuildKeysDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\BatchOrderForm.resx">
+      <DependentUpon>BatchOrderForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\DistributeDialog.resx">
+      <DependentUpon>DistributeDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\AddFriendsDialog.resx">
       <DependentUpon>AddFriendsDialog.cs</DependentUpon>
@@ -2326,6 +2361,7 @@
     </Content>
     <Content Include="default_printorder_publisherstatis.template" />
     <Content Include="default_printorder_publisherstatis_accept.template" />
+    <None Include="dp2Circulation_1_TemporaryKey.pfx" />
     <None Include="dp2Circulation_9_TemporaryKey.pfx" />
     <None Include="dp2Circulation_TemporaryKey.pfx" />
     <None Include="packages.config" />
@@ -2548,6 +2584,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="report_def\9101.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="select2\select2.min.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="select2\select2.min.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="unimarc_cfgs\dp2circulation_marc_autogen.cs">
@@ -3475,6 +3517,46 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="orderorigin.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Order\BatchOrder.js">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Order\BatchOrder_dark.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Order\BatchOrder_light.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Order\jquery.scrollIntoView.min.js">
       <Visible>False</Visible>
       <Group>
       </Group>

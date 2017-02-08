@@ -5,7 +5,6 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-
 using System.Xml;
 
 using DigitalPlatform.Xml;
@@ -111,20 +110,31 @@ namespace DigitalPlatform.Marc
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            if (this.textBox_fieldName.Text == "")
+            string strError = "";
+
+            if (string.IsNullOrEmpty(this.textBox_fieldName.Text))
             {
-                MessageBox.Show(this, "尚未输入字段名");
-                return;
+                strError = "尚未输入字段名";
+                goto ERROR1;
             }
 
             if (this.textBox_fieldName.Text.Length != 3)
             {
-                MessageBox.Show(this, "字段名应为3字符");
-                return;
+                strError = "字段名应为3字符";
+                goto ERROR1;
+            }
+
+            if (this.textBox_fieldName.Text == "###")
+            {
+                strError = "不允许创建名字为 '###' 的字段";
+                goto ERROR1;
             }
 
             this.DialogResult = DialogResult.OK;
             this.Close();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
@@ -253,11 +263,11 @@ namespace DigitalPlatform.Marc
                 // bool bScrolled = false;
                 int nStart = -1;
                 int nEnd = -1;
-                for (int i = 0; i<this.listView_fieldNameList.Items.Count; i++)
+                for (int i = 0; i < this.listView_fieldNameList.Items.Count; i++)
                 {
                     string strText = this.listView_fieldNameList.Items[i].Text;
 
-                bool bHilight = false;
+                    bool bHilight = false;
 
                     if (this.textBox_fieldName.Text.Length == 0)
                     {

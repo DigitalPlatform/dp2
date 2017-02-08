@@ -4827,8 +4827,10 @@ namespace dp2Circulation
 
                 string strText = node.InnerText;
 
+#if NO
                 if (String.IsNullOrEmpty(strText) == true)
                     continue;
+#endif
 
                 // 
                 string strLibraryCode = "";

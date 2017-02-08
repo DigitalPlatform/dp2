@@ -13,6 +13,7 @@ using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.IO;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -524,6 +525,49 @@ namespace dp2Circulation
                 this.orderEditControl_existing.Enabled = false;
             }
 #endif
+            this.orderEditControl_editing.EditDistributeButton.Click += EditDistributeButton_Click;
+
+        }
+
+        void EditDistributeButton_Click(object sender, EventArgs e)
+        {
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
+            string strCopy = this.orderEditControl_editing.Copy;
+
+            string strNewCopy = "";
+            string strOldCopy = "";
+            OrderDesignControl.ParseOldNewValue(strCopy,
+                out strOldCopy,
+                out strNewCopy);
+            int copy = -1;
+            Int32.TryParse(OrderDesignControl.GetCopyFromCopyString(strOldCopy), out copy);
+
+            string strDistribute = this.orderEditControl_editing.Distribute;
+            DistributeDialog dlg = new DistributeDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.DistributeString = strDistribute;
+            if (bControl == false)
+                dlg.Count = copy;
+            dlg.GetValueTable += dlg_GetValueTable;
+            Program.MainForm.AppInfo.LinkFormState(dlg, "DistributeDialog_state");
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+            this.orderEditControl_editing.Distribute = dlg.DistributeString;
+        }
+
+        void dlg_GetValueTable(object sender, GetValueTableEventArgs e)
+        {
+            string strError = "";
+            string[] values = null;
+            int nRet = Program.MainForm.GetValueTable(e.TableName,
+                e.DbName,
+                out values,
+                out strError);
+            if (nRet == -1)
+                MessageBox.Show(this, strError);
+            e.values = values;
         }
 
         private void OrderEditForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -538,6 +582,38 @@ namespace dp2Circulation
             get
             {
                 return (OrderControl)this.ItemControl;
+            }
+        }
+
+        public ItemEditControlBase OrderEditControl
+        {
+            get
+            {
+                return this.orderEditControl_editing;
+            }
+        }
+
+        public string DisplayMode
+        {
+            get
+            {
+                return this.orderEditControl_editing.DisplayMode;
+            }
+            set
+            {
+                this.orderEditControl_editing.DisplayMode = value;
+                if (value == "simple")
+                {
+                    this.checkBox_autoSearchDup.Visible = false;
+                    this.button_editing_nextRecord.Visible = false;
+                    this.button_editing_prevRecord.Visible = false;
+                }
+                else
+                {
+                    this.checkBox_autoSearchDup.Visible = true;
+                    this.button_editing_nextRecord.Visible = true;
+                    this.button_editing_prevRecord.Visible = true;
+                }
             }
         }
 

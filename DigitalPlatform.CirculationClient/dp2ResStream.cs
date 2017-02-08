@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Collections;
+using System.Threading;
 
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
@@ -15,16 +16,20 @@ namespace DigitalPlatform.CirculationClient
     /// </summary>
     public class dp2ResStream : Stream
     {
+        static Semaphore _limit = new Semaphore(2, 2);
+
+        CancellationTokenSource _cancel = new CancellationTokenSource();
+
         public IChannelManager Manager { get; set; }
 
-        public LibraryChannel Channel { get; set; }
+        // public LibraryChannel Channel { get; set; }
 
         public string ResPath { get; set; }
 
         long m_lLength = 0;	// 长度
         long m_lCurrent = 0;	// 文件指针当前位置
 
-        int _inSearch = 0;
+        //int _inSearch = 0;
 
         ProgressChanged _progressChanged = null;
 
@@ -38,7 +43,6 @@ namespace DigitalPlatform.CirculationClient
             this.ResPath = strObjectPath;
             this._progressChanged = progressFunc;
 
-            this.Channel = this.Manager.GetChannel();
 
             // 获得元数据。最重要的是长度
 
@@ -51,12 +55,19 @@ namespace DigitalPlatform.CirculationClient
             byte[] baOutputTimeStamp = null;
             byte[] content = null;
 
-            _inSearch++;
+            if (WaitHandle.WaitAny(new WaitHandle[] { _limit, _cancel.Token.WaitHandle }) == 1)
+                throw new Exception("canceled");
+
+            // Thread.Sleep(1000); // testing
+
+            //_limit.WaitOne();
+            LibraryChannel Channel = this.GetChannel();
+            //_inSearch++;
             try
             {
 
                 // 获得媒体类型
-                long lRet = this.Channel.GetRes(
+                long lRet = Channel.GetRes(
                     null,
                     this.ResPath,
                     0,
@@ -77,7 +88,10 @@ namespace DigitalPlatform.CirculationClient
             }
             finally
             {
-                _inSearch--;
+                //_inSearch--;
+
+                this.ReturnChannel(Channel);
+                _limit.Release();
             }
 
             // 取metadata中的mime类型信息
@@ -107,12 +121,52 @@ namespace DigitalPlatform.CirculationClient
 
         public override void Close()
         {
+            _cancel.Cancel();
+
+#if NO
             if (this.Channel != null || this.Manager != null)
             {
                 if (_inSearch > 0)
                     this.Channel.Abort();
                 this.Manager.ReturnChannel(this.Channel);
                 this.Channel = null;
+            }
+#endif
+            StopChannels();
+        }
+
+        public LibraryChannel GetChannel()
+        {
+            LibraryChannel channel = this.Manager.GetChannel();
+            lock (syncRoot)
+            {
+                _channelList.Add(channel);
+            }
+            // TODO: 检查数组是否溢出
+            return channel;
+        }
+
+        public void ReturnChannel(LibraryChannel channel)
+        {
+            this.Manager.ReturnChannel(channel);
+            lock (syncRoot)
+            {
+                _channelList.Remove(channel);
+            }
+        }
+
+        List<LibraryChannel> _channelList = new List<LibraryChannel>();
+        private static readonly Object syncRoot = new Object();
+
+        public void StopChannels()
+        {
+            lock (syncRoot)
+            {
+                foreach (LibraryChannel channel in _channelList)
+                {
+                    if (channel != null)
+                        channel.Abort();
+                }
             }
         }
 
@@ -133,6 +187,14 @@ namespace DigitalPlatform.CirculationClient
         }
 
         public override bool CanWrite
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public override bool CanTimeout
         {
             get
             {
@@ -181,14 +243,21 @@ namespace DigitalPlatform.CirculationClient
             string strOutputPath;
             byte[] baOutputTimeStamp = null;
 
-            _inSearch++;
+            if (WaitHandle.WaitAny(new WaitHandle[] { _limit, _cancel.Token.WaitHandle }) == 1)
+                return 0;
+
+            // Thread.Sleep(1000); // testing
+
+            //_limit.WaitOne();
+            LibraryChannel Channel = this.GetChannel();
+            //_inSearch++;
             try
             {
                 int fechted = 0;    // 已经获取的字节数
                 for (; ; )
                 {
                     byte[] content = null;
-                    long lRet = this.Channel.GetRes(
+                    long lRet = Channel.GetRes(
                         null,
                         this.ResPath,
                         m_lCurrent,
@@ -221,7 +290,10 @@ namespace DigitalPlatform.CirculationClient
             }
             finally
             {
-                _inSearch--;
+                //_inSearch--;
+
+                this.ReturnChannel(Channel);
+                _limit.Release();
             }
         }
 

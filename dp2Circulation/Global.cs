@@ -443,6 +443,82 @@ namespace dp2Circulation
         {
             int nRet = 0;
             List<string> results = new List<string>();
+            MarcRecord record = new MarcRecord(strMARC);
+
+            MarcNodeList subfields = record.select("field/subfield");
+            foreach(MarcSubfield subfield in subfields)
+            {
+                if (subfield.Name == "*")
+                    results.Add(subfield.Content.Trim());
+                else
+                {
+                    string strCmd = StringUtil.GetLeadingCommand(subfield.Content);
+                    if (string.IsNullOrEmpty(strCmd) == false
+                        && StringUtil.HasHead(strCmd, "cr:") == true)
+                    {
+                        results.Add(strCmd.Substring(3));
+                    }
+                }
+            }
+
+            foreach(MarcField field in record.ChildNodes)
+            {
+                string strField = field.Text;
+
+                if (string.IsNullOrEmpty(strField) == true)
+                    continue;
+                if (strField.Length < 3)
+                    continue;
+
+                {
+#if NO
+                    // 字段名后(字段指示符后)和第一个子字段符号之间的空白片断
+                    string strIndicator = "";
+                    string strContent = "";
+                    if (MarcUtil.IsControlFieldName(strField.Substring(0, 3)) == true)
+                    {
+                        strContent = strField.Substring(3);
+                    }
+                    else
+                    {
+                        if (strField.Length >= 5)
+                        {
+                            strIndicator = strField.Substring(3, 2);
+                            strContent = strField.Substring(3 + 2);
+                        }
+                        else
+                            strIndicator = strField.Substring(3, 1);
+                    }
+#endif
+
+                    string strBlank = field.Content;   // .Trim();
+                    nRet = strBlank.IndexOf((char)MarcUtil.SUBFLD);
+                    if (nRet != -1)
+                        strBlank = strBlank.Substring(0, nRet); // .Trim();
+
+                    string strCmd = StringUtil.GetLeadingCommand(strBlank);
+                    if (string.IsNullOrEmpty(strCmd) == false
+                        && StringUtil.HasHead(strCmd, "cr:") == true)
+                    {
+                        results.Add(strCmd.Substring(3));
+                    }
+                }
+            }
+            results.Sort();
+            StringUtil.RemoveDup(ref results);
+            return results;
+        }
+
+#if NO
+        /// <summary>
+        /// 获得 MARC 记录中的全部编目规则字符串
+        /// </summary>
+        /// <param name="strMARC">MARC字符串。机内格式</param>
+        /// <returns>字符串集合</returns>
+        public static List<string> GetExistCatalogingRules(string strMARC)
+        {
+            int nRet = 0;
+            List<string> results = new List<string>();
 
             for (int i = 1; ; i++)
             {
@@ -573,6 +649,7 @@ namespace dp2Circulation
             return results;
         }
 
+#endif
 
         #region 刷新列表
 
