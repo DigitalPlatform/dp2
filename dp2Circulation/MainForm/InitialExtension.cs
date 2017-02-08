@@ -952,6 +952,8 @@ MessageBoxDefaultButton.Button1);
                 else
                     MessageBox.Show(this, "复制 Javascript 目录时发生错误。目录 '" + strSourceDirectory + "' 不存在");
             }
+
+#if NO
             {
                 string strSourceDirectory = Path.Combine(this.DataDir, "jquery");
                 if (Directory.Exists(strSourceDirectory) == true)
@@ -963,6 +965,27 @@ MessageBoxDefaultButton.Button1);
                 }
                 else
                     MessageBox.Show(this, "复制 Javascript 目录时发生错误。目录 '" + strSourceDirectory + "' 不存在");
+            }
+#endif
+
+            {
+                string strZipFileName = Path.Combine(this.DataDir, "jquery.zip");
+                string strTargetDirectory = Path.Combine(this.UserDir, "jquery");
+
+                try
+                {
+                    using (ZipFile zip = ZipFile.Read(strZipFileName))
+                    {
+                        foreach (ZipEntry e in zip)
+                        {
+                            e.Extract(strTargetDirectory, ExtractExistingFileAction.OverwriteSilently);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+                }
             }
 
         }
