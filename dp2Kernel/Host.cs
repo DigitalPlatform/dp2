@@ -22,6 +22,8 @@ using Microsoft.Win32;
 using DigitalPlatform.rms;
 using DigitalPlatform.IO;
 using DigitalPlatform;
+using System.IO;
+using System.Collections;
 
 namespace dp2Kernel
 {
@@ -30,7 +32,7 @@ namespace dp2Kernel
         // ServiceHost m_host = null;
         List<ServiceHost> m_hosts = new List<ServiceHost>();
 
-        Thread m_thread = null; 
+        Thread m_thread = null;
 
         public EventLog Log = null;
 
@@ -90,7 +92,7 @@ namespace dp2Kernel
             _handler += new CtrlEventHandler(Handler);
             API.SetConsoleCtrlHandler(_handler, true);
 
-            Console.WriteLine("{0}::starting...",GetType().FullName);
+            Console.WriteLine("{0}::starting...", GetType().FullName);
 
             OnStart(null);
 
@@ -209,13 +211,121 @@ namespace dp2Kernel
             this.m_hosts.Clear();
         }
 
+        class SqlDbNameData
+        {
+            public string Instance { get; set; }
+            public string SqlDbName { get; set; }
+        }
+
+        // 检查不同实例的 dp2kernel 中所用的 SQL 数据库名是否发生了重复和冲突
+        // return:
+        //      -1  检查过程出错
+        //      0   没有冲突
+        //      1   发生了冲突。报错信息在 strError 中
+        int CheckSqlDbNames(out string strError)
+        {
+            strError = "";
+
+            Hashtable name_table = new Hashtable(); // sqldbname --> SqlDbNameData
+            Hashtable prefix_table = new Hashtable();// prefix --> SqlDbNameData
+
+            for (int i = 0; ; i++)
+            {
+                string strInstanceName = "";
+                string strDataDir = "";
+                string strCertSN = "";
+                string[] existing_urls = null;
+                bool bRet = GetInstanceInfo("dp2Kernel",
+                    i,
+                    out strInstanceName,
+                    out strDataDir,
+                    out existing_urls,
+                    out strCertSN);
+                if (bRet == false)
+                    break;
+                if (string.IsNullOrEmpty(strDataDir))
+                    continue;
+
+                string strFileName = Path.Combine(strDataDir, "databases.xml");
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.Load(strFileName);
+                }
+                catch (Exception ex)
+                {
+                    strError = "文件 '" + strFileName + "' 装入 XMLDOM 时出错: " + ex.Message;
+                    return -1;
+                }
+
+                // 检查 dbs/@instancename
+                string strInstancePrefix = "";
+                XmlAttribute prefix = dom.DocumentElement.SelectSingleNode("dbs/@instancename") as XmlAttribute;
+                if (prefix != null)
+                    strInstancePrefix = prefix.Value;
+
+                if (prefix_table.ContainsKey(strInstancePrefix))
+                {
+                    SqlDbNameData data = (SqlDbNameData)prefix_table[strInstancePrefix];
+                    strError = "实例 '" + strInstanceName + "' (" + strFileName + ") 中 dbs 元素 instancename 属性值 '" + strInstancePrefix + "' 和实例 '" + data.Instance + "' 的用法重复了";
+                    return 1;
+                }
+                else
+                {
+                    SqlDbNameData data = new SqlDbNameData();
+                    data.Instance = strInstanceName;
+                    data.SqlDbName = strInstancePrefix;
+                    prefix_table[strInstancePrefix] = data;
+                }
+
+                // 检查 sqlserverdb/@name
+                XmlNodeList name_nodes = dom.DocumentElement.SelectNodes("dbs/database/property/sqlserverdb/@name");
+                foreach (XmlAttribute attr in name_nodes)
+                {
+                    string value = attr.Value;
+                    if (string.IsNullOrEmpty(value))
+                        continue;
+                    value = value.ToLower();
+                    if (name_table.ContainsKey(value))
+                    {
+                        SqlDbNameData data = (SqlDbNameData)name_table[value];
+                        strError = "实例 '" + strInstanceName + "' 中 SQL 数据库名 '" + value + "' 和实例 '" + data.Instance + "' 中另一 SQL 数据库名重复了";
+                        return 1;
+                    }
+
+                    {
+                        SqlDbNameData data = new SqlDbNameData();
+                        data.Instance = strInstanceName;
+                        data.SqlDbName = value;
+                        name_table[value] = data;
+                    }
+                }
+            }
+
+            return 0;
+        }
+
         void ThreadMain()
         {
             // Debug.Assert(false, "");
             CloseHosts();
 
+            // 2017/2/9
+            string strError = "";
+            // 检查不同实例的 dp2kernel 中所用的 SQL 数据库名是否发生了重复和冲突
+            // return:
+            //      -1  检查过程出错
+            //      0   没有冲突
+            //      1   发生了冲突。报错信息在 strError 中
+            int nRet = CheckSqlDbNames(out strError);
+            if (nRet != 0)
+            {
+                this.Log.WriteEntry("dp2Kernel 实例启动阶段发生严重错误: " + strError, EventLogEntryType.Error);
+                return;
+            }
+
             for (int i = 0; ; i++)
-            { 
+            {
                 string strInstanceName = "";
                 string strDataDir = "";
                 string strCertSN = "";
@@ -258,7 +368,7 @@ namespace dp2Kernel
                     }
                     catch (Exception ex)
                     {
-                        this.Log.WriteEntry("dp2Kernel OnStart() 警告：发现不正确的协议URL '" + url + "' (异常信息: "+ex.Message+")。该URL已被放弃绑定。",
+                        this.Log.WriteEntry("dp2Kernel OnStart() 警告：发现不正确的协议URL '" + url + "' (异常信息: " + ex.Message + ")。该URL已被放弃绑定。",
     EventLogEntryType.Error);
                         continue;
                     }
@@ -285,7 +395,7 @@ namespace dp2Kernel
                     else
                     {
                         // 警告不能支持的协议
-                        this.Log.WriteEntry("dp2Kernel OnStart() 警告：发现不能支持的协议类型 '"+url+"'",
+                        this.Log.WriteEntry("dp2Kernel OnStart() 警告：发现不能支持的协议类型 '" + url + "'",
                             EventLogEntryType.Information);
                     }
                 }
@@ -318,7 +428,6 @@ namespace dp2Kernel
                     try
                     {
                         // host.Credentials.ServiceCertificate.Certificate = GetCertificate(strCertSN);
-                        string strError = "";
                         X509Certificate2 cert = GetCertificate(strCertSN,
                             out strError);
                         if (cert == null)
@@ -410,7 +519,7 @@ EventLogEntryType.Error);
                     if (this.m_bConsoleRun == true)
                         throw ex;
 
-                    this.Log.WriteEntry("dp2Kernel OnStart() host.Open() 时发生错误: instancename=["+strInstanceName+"]:" + ex.Message,
+                    this.Log.WriteEntry("dp2Kernel OnStart() host.Open() 时发生错误: instancename=[" + strInstanceName + "]:" + ex.Message,
     EventLogEntryType.Error);
                     return;
                 }
@@ -685,7 +794,7 @@ EventLogEntryType.Information);
     {
         public override void Validate(string userName, string password)
         {
-            
+
         }
     }
 

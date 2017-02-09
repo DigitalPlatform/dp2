@@ -99,7 +99,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IKernelService.cs" />
     <Compile Include="Host.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -112,7 +111,6 @@
     <Compile Include="Install\Installer.designer.cs">
       <DependentUpon>Installer.cs</DependentUpon>
     </Compile>
-    <Compile Include="KernelService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
