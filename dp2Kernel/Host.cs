@@ -16,14 +16,15 @@ using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Description;
 using System.Xml;
+using System.IO;
+using System.Collections;
 
 using Microsoft.Win32;
 
 using DigitalPlatform.rms;
 using DigitalPlatform.IO;
 using DigitalPlatform;
-using System.IO;
-using System.Collections;
+using DigitalPlatform.Install;
 
 namespace dp2Kernel
 {
@@ -211,12 +212,7 @@ namespace dp2Kernel
             this.m_hosts.Clear();
         }
 
-        class SqlDbNameData
-        {
-            public string Instance { get; set; }
-            public string SqlDbName { get; set; }
-        }
-
+        // 2017/2/9
         // 检查不同实例的 dp2kernel 中所用的 SQL 数据库名是否发生了重复和冲突
         // return:
         //      -1  检查过程出错
@@ -226,8 +222,8 @@ namespace dp2Kernel
         {
             strError = "";
 
-            Hashtable name_table = new Hashtable(); // sqldbname --> SqlDbNameData
-            Hashtable prefix_table = new Hashtable();// prefix --> SqlDbNameData
+            Hashtable name_table = new Hashtable();     // sqldbname --> InstanceValue
+            Hashtable prefix_table = new Hashtable();   // prefix --> InstanceValue
 
             for (int i = 0; ; i++)
             {
@@ -246,6 +242,22 @@ namespace dp2Kernel
                 if (string.IsNullOrEmpty(strDataDir))
                     continue;
 
+                // 检查不同实例的 dp2kernel 中所用的 SQL 数据库名是否发生了重复和冲突
+                // return:
+                //      -1  检查过程出错
+                //      0   没有冲突
+                //      1   发生了冲突。报错信息在 strError 中
+                int nRet = InstallHelper.CheckDatabasesXml(
+                    strInstanceName,
+                    strDataDir,
+                    prefix_table,
+                    name_table,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    return 1;
+#if NO
                 string strFileName = Path.Combine(strDataDir, "databases.xml");
                 XmlDocument dom = new XmlDocument();
                 try
@@ -266,15 +278,15 @@ namespace dp2Kernel
 
                 if (prefix_table.ContainsKey(strInstancePrefix))
                 {
-                    SqlDbNameData data = (SqlDbNameData)prefix_table[strInstancePrefix];
+                    InstanceValue data = (InstanceValue)prefix_table[strInstancePrefix];
                     strError = "实例 '" + strInstanceName + "' (" + strFileName + ") 中 dbs 元素 instancename 属性值 '" + strInstancePrefix + "' 和实例 '" + data.Instance + "' 的用法重复了";
                     return 1;
                 }
                 else
                 {
-                    SqlDbNameData data = new SqlDbNameData();
+                    InstanceValue data = new InstanceValue();
                     data.Instance = strInstanceName;
-                    data.SqlDbName = strInstancePrefix;
+                    data.Value = strInstancePrefix;
                     prefix_table[strInstancePrefix] = data;
                 }
 
@@ -288,18 +300,19 @@ namespace dp2Kernel
                     value = value.ToLower();
                     if (name_table.ContainsKey(value))
                     {
-                        SqlDbNameData data = (SqlDbNameData)name_table[value];
+                        InstanceValue data = (InstanceValue)name_table[value];
                         strError = "实例 '" + strInstanceName + "' 中 SQL 数据库名 '" + value + "' 和实例 '" + data.Instance + "' 中另一 SQL 数据库名重复了";
                         return 1;
                     }
 
                     {
-                        SqlDbNameData data = new SqlDbNameData();
+                        InstanceValue data = new InstanceValue();
                         data.Instance = strInstanceName;
-                        data.SqlDbName = value;
+                        data.Value = value;
                         name_table[value] = data;
                     }
                 }
+#endif
             }
 
             return 0;

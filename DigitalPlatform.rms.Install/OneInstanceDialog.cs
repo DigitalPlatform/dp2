@@ -9,10 +9,10 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 
-using DigitalPlatform.Install;
-using DigitalPlatform.GUI;
-using DigitalPlatform.IO;
 using DigitalPlatform;
+using DigitalPlatform.IO;
+using DigitalPlatform.GUI;
+using DigitalPlatform.Install;
 
 namespace DigitalPlatform.rms
 {
@@ -24,6 +24,8 @@ namespace DigitalPlatform.rms
         public event VerifyEventHandler VerifyInstanceName = null;
         public event VerifyEventHandler VerifyDataDir = null;
         public event VerifyEventHandler VerifyBindings = null;
+
+        public event VerifyEventHandler VerifyDatabases = null;
 
         public event LoadXmlFileInfoEventHandler LoadXmlFileInfo = null;    // 临时获取特定的数据目录内的相关信息
 
@@ -216,6 +218,18 @@ namespace DigitalPlatform.rms
                 VerifyEventArgs e1 = new VerifyEventArgs();
                 e1.Value = this.textBox_dataDir.Text;
                 this.VerifyDataDir(this, e1);
+                if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
+                {
+                    strError = e1.ErrorInfo;
+                    goto ERROR1;
+                }
+            }
+
+            if (this.VerifyDatabases != null)
+            {
+                VerifyEventArgs e1 = new VerifyEventArgs();
+                e1.Value = this.textBox_dataDir.Text;
+                this.VerifyDatabases(this, e1);
                 if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
                 {
                     strError = e1.ErrorInfo;
@@ -879,6 +893,20 @@ MessageBoxDefaultButton.Button1);
                         return;
                     }
 
+                    // TODO: 检查 databases.xml 文件中的 SQL 数据库名是否和其他实例中的名字重复
+                    if (this.VerifyDatabases != null)
+                    {
+                        VerifyEventArgs e1 = new VerifyEventArgs();
+                        e1.Value = this.textBox_dataDir.Text;
+                        this.VerifyDatabases(this, e1);
+                        if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
+                        {
+                            MessageBox.Show(this, e1.ErrorInfo);
+                            this.LoadedDataDir = this.textBox_dataDir.Text; // 防止重复询问
+                            return;
+                        }
+                    }
+
                     if (this.LoadXmlFileInfo != null)
                     {
                         LoadXmlFileInfoEventArgs e1 = new LoadXmlFileInfoEventArgs();
@@ -933,6 +961,20 @@ MessageBoxDefaultButton.Button1);
                     {
                         this.LoadedDataDir = this.textBox_dataDir.Text; // 防止重复询问
                         return;
+                    }
+
+                    // TODO: 检查 databases.xml 文件中的 SQL 数据库名是否和其他实例中的名字重复
+                    if (this.VerifyDatabases != null)
+                    {
+                        VerifyEventArgs e1 = new VerifyEventArgs();
+                        e1.Value = this.textBox_dataDir.Text;
+                        this.VerifyDatabases(this, e1);
+                        if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
+                        {
+                            this.LoadedDataDir = this.textBox_dataDir.Text; // 防止重复询问
+                            MessageBox.Show(this, e1.ErrorInfo);
+                            return;
+                        }
                     }
 
                     if (this.LoadXmlFileInfo != null)

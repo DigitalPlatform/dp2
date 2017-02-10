@@ -822,6 +822,7 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     AppendSectionTitle("配置实例结束");
+                    this.Refresh_dp2library_MenuItems();
                 }
 
                 CreateDefaultDatabases(new_instance_names);
@@ -2877,10 +2878,8 @@ MessageBoxDefaultButton.Button1);
                     AppendString("dp2kernel 服务已经停止\r\n");
                 }
 
-
                 try
                 {
-
                     DigitalPlatform.rms.InstanceDialog dlg = new DigitalPlatform.rms.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
 
@@ -2900,7 +2899,6 @@ MessageBoxDefaultButton.Button1);
                         // 兑现修改
 
                     }
-
                 }
                 finally
                 {
@@ -2923,6 +2921,7 @@ MessageBoxDefaultButton.Button1);
                     }
 
                     AppendSectionTitle("配置实例结束");
+                    Refresh_dp2kernel_MenuItems();
                 }
 
             }
@@ -2953,7 +2952,6 @@ MessageBoxDefaultButton.Button1);
 
             this.MenuItem_dp2kernel_openDataDir.DropDownItems.Clear();
             AddMenuItem(MenuItem_dp2kernel_openDataDir, "dp2Kernel");
-
         }
 
         // 刷新菜单状态

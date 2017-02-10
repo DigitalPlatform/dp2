@@ -20,6 +20,7 @@ using Ionic.Zip;
 using System.Data.SqlClient;
 using MySql.Data.MySqlClient;
 using Oracle.ManagedDataAccess.Client;
+using System.Collections;
 
 namespace DigitalPlatform.rms
 {
@@ -239,7 +240,8 @@ MessageBoxDefaultButton.Button2);
             new_instance_dlg.VerifyDataDir += new VerifyEventHandler(new_instance_dlg_VerifyDataDir);
             new_instance_dlg.VerifyBindings += new VerifyEventHandler(new_instance_dlg_VerifyBindings);
             new_instance_dlg.LoadXmlFileInfo += new LoadXmlFileInfoEventHandler(new_instance_dlg_LoadXmlFileInfo);
-
+            new_instance_dlg.VerifyDatabases += new_instance_dlg_VerifyDatabases;
+            
             new_instance_dlg.StartPosition = FormStartPosition.CenterScreen;
             if (new_instance_dlg.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -261,6 +263,17 @@ MessageBoxDefaultButton.Button2);
             if (string.IsNullOrEmpty(this.DebugInfo) == false)
                 this.DebugInfo += "\r\n\r\n";
             this.DebugInfo += new_instance_dlg.DebugInfo;
+        }
+
+        void new_instance_dlg_VerifyDatabases(object sender, VerifyEventArgs e)
+        {
+            string strError = "";
+            bool bRet = IsDatabasesDup(
+                e.Value,
+                (ListViewItem)null,
+                out strError);
+            if (bRet == true)
+                e.ErrorInfo = "数据目录 '" + e.Value + "' 和已存在的其他实例中的数据库名发生了重复: " + strError;
         }
 
         void new_instance_dlg_LoadXmlFileInfo(object sender, LoadXmlFileInfoEventArgs e)
@@ -388,6 +401,7 @@ MessageBoxDefaultButton.Button2);
             modify_instance_dlg.VerifyDataDir += new VerifyEventHandler(modify_instance_dlg_VerifyDataDir);
             modify_instance_dlg.VerifyBindings += new VerifyEventHandler(modify_instance_dlg_VerifyBindings);
             modify_instance_dlg.LoadXmlFileInfo += new LoadXmlFileInfoEventHandler(modify_instance_dlg_LoadXmlFileInfo);
+            modify_instance_dlg.VerifyDatabases += modify_instance_dlg_VerifyDatabases;
 
             modify_instance_dlg.StartPosition = FormStartPosition.CenterScreen;
             if (modify_instance_dlg.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
@@ -411,6 +425,16 @@ MessageBoxDefaultButton.Button2);
         ERROR1:
             MessageBox.Show(this, strError);
             return;
+        }
+
+        void modify_instance_dlg_VerifyDatabases(object sender, VerifyEventArgs e)
+        {
+            string strError = "";
+            bool bRet = IsDatabasesDup(e.Value,
+                this.m_currentEditItem,
+                out strError);
+            if (bRet == true)
+                e.ErrorInfo = "数据目录 '" + e.Value + "' 和已存在的其他实例中的数据库名发生了重复: " + strError;
         }
 
         void modify_instance_dlg_LoadXmlFileInfo(object sender, LoadXmlFileInfoEventArgs e)
@@ -535,6 +559,73 @@ out strError);
                     continue;
 
                 if (PathUtil.IsEqual(strDataDir, strCurrent) == true)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // return:
+        //      false   不重
+        //      true    重复
+        bool IsDatabasesDup(
+            string strDataDir,
+            ListViewItem exclude_item,
+            out string strError)
+        {
+            strError = "";
+
+            Hashtable name_table = new Hashtable();     // sqldbname --> InstanceValue
+            Hashtable prefix_table = new Hashtable();   // prefix --> InstanceValue
+
+            List<string> instance_name_list = new List<string>();
+            List<string> datadirs = new List<string>();
+
+            string strInstanceName = "新实例";
+
+            foreach (ListViewItem item in this.listView_instance.Items)
+            {
+                if (item == exclude_item)
+                    continue;
+
+                string strCurrentInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
+
+                string strCurrentDataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
+                if (String.IsNullOrEmpty(strCurrentDataDir) == true)
+                    continue;
+
+                if (PathUtil.IsEqual(strDataDir, strCurrentDataDir) == true)
+                {
+                    strInstanceName = strCurrentInstanceName;
+                    continue;
+                }
+
+                instance_name_list.Add(strCurrentInstanceName);
+                datadirs.Add(strCurrentDataDir);
+            }
+
+            instance_name_list.Add(strInstanceName);
+            datadirs.Add(strDataDir);
+
+            for (int i = 0; i < datadirs.Count; i++ )
+            {
+                string strCurrentInstanceName = instance_name_list[i];
+                string strCurrentDataDir = datadirs[i];
+
+                // 检查不同实例的 dp2kernel 中所用的 SQL 数据库名是否发生了重复和冲突
+                // return:
+                //      -1  检查过程出错
+                //      0   没有冲突
+                //      1   发生了冲突。报错信息在 strError 中
+                int nRet = InstallHelper.CheckDatabasesXml(
+                    strCurrentInstanceName,
+                    strDataDir,
+                    prefix_table,
+                    name_table,
+                    out strError);
+                if (nRet == -1)
+                    return true;    // -1
+                if (nRet == 1)
                     return true;
             }
 
