@@ -270,10 +270,11 @@ MessageBoxDefaultButton.Button2);
             string strError = "";
             bool bRet = IsDatabasesDup(
                 e.Value,
+                e.Value1,
                 (ListViewItem)null,
                 out strError);
             if (bRet == true)
-                e.ErrorInfo = "数据目录 '" + e.Value + "' 和已存在的其他实例中的数据库名发生了重复: " + strError;
+                e.ErrorInfo = "检查 databases.xml 文件过程中发现错误: " + strError;
         }
 
         void new_instance_dlg_LoadXmlFileInfo(object sender, LoadXmlFileInfoEventArgs e)
@@ -431,10 +432,11 @@ MessageBoxDefaultButton.Button2);
         {
             string strError = "";
             bool bRet = IsDatabasesDup(e.Value,
+                e.Value1,
                 this.m_currentEditItem,
                 out strError);
             if (bRet == true)
-                e.ErrorInfo = "数据目录 '" + e.Value + "' 和已存在的其他实例中的数据库名发生了重复: " + strError;
+                e.ErrorInfo = "检查 databases.xml 文件过程中发现错误: " + strError;
         }
 
         void modify_instance_dlg_LoadXmlFileInfo(object sender, LoadXmlFileInfoEventArgs e)
@@ -570,6 +572,7 @@ out strError);
         //      true    重复
         bool IsDatabasesDup(
             string strDataDir,
+            string strInstanceName,
             ListViewItem exclude_item,
             out string strError)
         {
@@ -581,7 +584,7 @@ out strError);
             List<string> instance_name_list = new List<string>();
             List<string> datadirs = new List<string>();
 
-            string strInstanceName = "新实例";
+            // string strInstanceName = "新实例";
 
             foreach (ListViewItem item in this.listView_instance.Items)
             {
@@ -596,7 +599,8 @@ out strError);
 
                 if (PathUtil.IsEqual(strDataDir, strCurrentDataDir) == true)
                 {
-                    strInstanceName = strCurrentInstanceName;
+                    if (string.IsNullOrEmpty(strInstanceName))
+                        strInstanceName = strCurrentInstanceName;
                     continue;
                 }
 
@@ -619,7 +623,7 @@ out strError);
                 //      1   发生了冲突。报错信息在 strError 中
                 int nRet = InstallHelper.CheckDatabasesXml(
                     strCurrentInstanceName,
-                    strDataDir,
+                    strCurrentDataDir,
                     prefix_table,
                     name_table,
                     out strError);

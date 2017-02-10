@@ -18,8 +18,6 @@ namespace DigitalPlatform.rms
 {
     public partial class OneInstanceDialog : Form
     {
-
-
         public bool IsNew = false;   // 是否为新创建实体
         public DigitalPlatform.rms.LineInfo LineInfo = null;
 
@@ -231,6 +229,7 @@ namespace DigitalPlatform.rms
             {
                 VerifyEventArgs e1 = new VerifyEventArgs();
                 e1.Value = this.textBox_dataDir.Text;
+                e1.Value1 = this.textBox_instanceName.Text;
                 this.VerifyDatabases(this, e1);
                 if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
                 {
@@ -900,11 +899,11 @@ MessageBoxDefaultButton.Button1);
                     {
                         VerifyEventArgs e1 = new VerifyEventArgs();
                         e1.Value = this.textBox_dataDir.Text;
+                        e1.Value1 = this.textBox_instanceName.Text;
                         this.VerifyDatabases(this, e1);
                         if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
                         {
                             MessageBox.Show(this, e1.ErrorInfo);
-                            this.LoadedDataDir = this.textBox_dataDir.Text; // 防止重复询问
                             return;
                         }
                     }
@@ -970,10 +969,10 @@ MessageBoxDefaultButton.Button1);
                     {
                         VerifyEventArgs e1 = new VerifyEventArgs();
                         e1.Value = this.textBox_dataDir.Text;
+                        e1.Value1 = this.textBox_instanceName.Text;
                         this.VerifyDatabases(this, e1);
                         if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
                         {
-                            this.LoadedDataDir = this.textBox_dataDir.Text; // 防止重复询问
                             MessageBox.Show(this, e1.ErrorInfo);
                             return;
                         }
@@ -1061,6 +1060,7 @@ MessageBoxDefaultButton.Button1);
     public class VerifyEventArgs : EventArgs
     {
         public string Value = "";   // [in] 要校验的值
+        public string Value1 = "";  // [in] 要校验的另一值
         public string ErrorInfo = "";   // [out]出错信息
     }
 
