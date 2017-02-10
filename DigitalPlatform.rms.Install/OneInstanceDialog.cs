@@ -18,6 +18,8 @@ namespace DigitalPlatform.rms
 {
     public partial class OneInstanceDialog : Form
     {
+
+
         public bool IsNew = false;   // 是否为新创建实体
         public DigitalPlatform.rms.LineInfo LineInfo = null;
 
