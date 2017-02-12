@@ -12,6 +12,10 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Web;   // HttpUtility
 
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
@@ -25,10 +29,7 @@ using DigitalPlatform.Script;
 using DigitalPlatform.Marc;
 
 using DigitalPlatform.LibraryClient.localhost;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
 using DigitalPlatform.dp2.Statis;
-using DocumentFormat.OpenXml;
 
 namespace dp2Circulation
 {

@@ -43,6 +43,7 @@
             this.toolStripButton_refresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_deleteOrder = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_orderList = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -65,7 +66,8 @@
             this.toolStripButton_loadBiblio,
             this.toolStripButton_refresh,
             this.toolStripButton_deleteOrder,
-            this.toolStripButton_save});
+            this.toolStripButton_save,
+            this.toolStripButton_orderList});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(512, 25);
@@ -134,7 +136,7 @@
             // 
             this.ToolStripMenuItem_quickChange.Enabled = false;
             this.ToolStripMenuItem_quickChange.Name = "ToolStripMenuItem_quickChange";
-            this.ToolStripMenuItem_quickChange.Size = new System.Drawing.Size(152, 22);
+            this.ToolStripMenuItem_quickChange.Size = new System.Drawing.Size(137, 22);
             this.ToolStripMenuItem_quickChange.Text = "快速修改 ...";
             this.ToolStripMenuItem_quickChange.ToolTipText = "快速修改多个订购记录的部分字段";
             this.ToolStripMenuItem_quickChange.Click += new System.EventHandler(this.ToolStripMenuItem_quickChange_Click);
@@ -186,6 +188,17 @@
             this.toolStripButton_save.Text = "保存";
             this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
             // 
+            // toolStripButton_orderList
+            // 
+            this.toolStripButton_orderList.CheckOnClick = true;
+            this.toolStripButton_orderList.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_orderList.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_orderList.Image")));
+            this.toolStripButton_orderList.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_orderList.Name = "toolStripButton_orderList";
+            this.toolStripButton_orderList.Size = new System.Drawing.Size(60, 22);
+            this.toolStripButton_orderList.Text = "订单视图";
+            this.toolStripButton_orderList.CheckedChanged += new System.EventHandler(this.toolStripButton_orderList_CheckedChanged);
+            // 
             // BatchOrderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -223,5 +236,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_loadBiblio;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_change;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_quickChange;
+        private System.Windows.Forms.ToolStripButton toolStripButton_orderList;
     }
 }

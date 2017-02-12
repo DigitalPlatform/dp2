@@ -4435,6 +4435,7 @@ MessageBoxDefaultButton.Button2);
                     this.MainForm.AppInfo.SetBoolean("entityRegisterWizard", "keyboardFormFloating", value);
             }
         }
+
         // parameters:
         //      bFloatingWindow 是否打开为浮动的对话框？ false 表示停靠在固定面板区
         void OpenKeyboardForm(bool bFloatingWindow)

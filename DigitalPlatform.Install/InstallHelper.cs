@@ -1775,7 +1775,7 @@ MessageBoxDefaultButton.Button1);
             if (prefix_table.ContainsKey(strInstancePrefix))
             {
                 InstanceValue data = (InstanceValue)prefix_table[strInstancePrefix];
-                strError = "实例 '" + strInstanceName + "' (" + strFileName + ") 中 dbs 元素 instancename 属性值 '" + strInstancePrefix + "' 和实例 '" + data.Instance + "' 的用法重复了";
+                strError = "实例 '" + strInstanceName + "' (配置文件 " + strFileName + ") 中 dbs 元素 instancename 属性值 '" + strInstancePrefix + "' 和实例 '" + data.Instance + "' 的用法重复了";
                 return 1;
             }
             else

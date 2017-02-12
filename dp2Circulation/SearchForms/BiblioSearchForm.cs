@@ -3674,7 +3674,8 @@ MessageBoxDefaultButton.Button1);
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
-                    items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
+                    // items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable
+                    this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
@@ -4290,7 +4291,8 @@ MessageBoxDefaultButton.Button1);
                 ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
                     stop,
                     items,
-                    items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
+                    // items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable
+                    this.m_biblioTable);
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 

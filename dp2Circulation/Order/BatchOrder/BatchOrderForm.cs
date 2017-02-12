@@ -23,6 +23,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
+using DigitalPlatform.GUI;
 
 namespace dp2Circulation
 {
@@ -50,6 +51,7 @@ namespace dp2Circulation
         private void BatchOrderForm_Load(object sender, EventArgs e)
         {
 
+            this.toolStripButton_orderList.Checked = Program.MainForm.AppInfo.GetBoolean("batchOrderForm", "orderListView", true);
         }
 
         public override void EnableControls(bool bEnable)
@@ -340,8 +342,8 @@ namespace dp2Circulation
 
             this.Changed = true;
 
-            return BuildOrderHtml(strBiblioRecPath, 
-                order, 
+            return BuildOrderHtml(strBiblioRecPath,
+                order,
                 biblio.Orders.IndexOf(order),
                 order.Type == "new" ? "new" : "changed");
         }
@@ -1163,7 +1165,11 @@ int nCount)
 
         private void BatchOrderForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            Program.MainForm.AppInfo.SetBoolean("batchOrderForm",
+                "orderListView",
+                this.toolStripButton_orderList.Checked);
 
+            CloseListForm();
         }
 
         private void toolStripSplitButton_newOrder_ButtonClick(object sender, EventArgs e)
@@ -1251,8 +1257,172 @@ int nCount)
             webBrowser1.Document.InvokeScript("changeOrder", new object[] { strXml });
         }
 
+        #region OrderListForm
+
+        OrderListViewerForm _listForm = null;
+
+        // parameters:
+        //      bFloatingWindow 是否打开为浮动的对话框？ false 表示停靠在固定面板区
+        void OpenListForm(bool bFloatingWindow)
+        {
+            if (this._listForm == null
+                || (bFloatingWindow == true && this._listForm.Visible == false))
+            {
+                CloseListForm();
+
+                this._listForm = new OrderListViewerForm();
+                this._listForm.FormClosed += _listForm_FormClosed;
+                this._listForm.DockChanged += _listForm_DockChanged;
+                // this._listForm.DoDockEvent += _listForm_DoDockEvent;
+                GuiUtil.AutoSetDefaultFont(this._listForm);
+                //this._keyboardForm.Text = "向导";
+                //this._keyboardForm.BaseForm = this;
+
+            }
+            // this.easyMarcControl1.HideSelection = false;    // 当 EasyMarcControl 不拥有输入焦点时也能看到蓝色选定字段的标记
+
+            if (bFloatingWindow == true)
+            {
+                if (_listForm.Visible == false)
+                {
+                    this.MainForm.AppInfo.LinkFormState(_listForm, "keyboardform_state");
+
+                    _listForm.Show(this.MainForm);
+                    _listForm.Activate();
+
+                    //if (this._listForm != null)
+                    //    this._listForm.SetColorStyle(this.ColorStyle);
+
+                    this.MainForm.CurrentPropertyControl = null;
+                }
+                else
+                {
+                    if (_listForm.WindowState == FormWindowState.Minimized)
+                        _listForm.WindowState = FormWindowState.Normal;
+                    _listForm.Activate();
+                }
+            }
+            else
+            {
+                if (_listForm.Visible == true)
+                {
+
+                }
+                else
+                {
+                    if (this.MainForm.CurrentPropertyControl != this._listForm.MainControl)
+                    {
+                        _listForm.DoDock(true); // false 不会自动显示FixedPanel
+                        // _listForm.Initialize(); // 没有 .Show() 的就用 .Initialize()
+                    }
+                }
+            }
+
+            this.toolStripButton_orderList.Checked = true;
+            // this.checkBox_settings_keyboardWizard.Checked = true;
+        }
+
+        void _listForm_DockChanged(object sender, EventArgs e)
+        {
+            if (this._listForm.Docked == false)
+            {
+                this.FloatingOrderListForm = true;
+            }
+            else
+            {
+                // this.OpenListForm(true);
+                this.FloatingOrderListForm = false;
+            }
+        }
+
+#if NO
+        void _listForm_DoDockEvent(object sender, DoDockEventArgs e)
+        {
+            if (this._listForm.Docked == false)
+            {
+                if (this.MainForm.CurrentPropertyControl != this._listForm.MainControl)
+                    this.MainForm.CurrentPropertyControl = this._listForm.MainControl;
+
+                if (e.ShowFixedPanel == true)
+                {
+                    if (this.MainForm.PanelFixedVisible == false)
+                        this.MainForm.PanelFixedVisible = true;
+                    // 把 propertypage 翻出来
+                    this.MainForm.ActivatePropertyPage();
+                }
+
+                this._listForm.Docked = true;
+                this._listForm.Visible = false;
+
+                this.FloatingOrderListForm = false;
+
+                //if (this._listForm != null)
+                //    this._listForm.SetColorStyle(this.ColorStyle);
+            }
+            else
+            {
+                this.OpenListForm(true);
+                this.FloatingOrderListForm = true;
+            }
+        }
+#endif
+
+        void _listForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.toolStripButton_orderList.Checked = false;
+            // this.checkBox_settings_keyboardWizard.Checked = false;
+        }
+
+        void CloseListForm()
+        {
+            if (this._listForm != null)
+            {
+                if (this.MainForm.CurrentPropertyControl == this._listForm.MainControl)
+                    this.MainForm.CurrentPropertyControl = null;
+
+                this._listForm.Close();
+                this._listForm = null;
+            }
+        }
+
+        bool FloatingOrderListForm
+        {
+            get
+            {
+                if (Program.MainForm != null && Program.MainForm.AppInfo != null)
+                    return Program.MainForm.AppInfo.GetBoolean("batchOrderForm", "orderListFormFloating", true);
+                return true;
+            }
+            set
+            {
+                if (Program.MainForm != null && Program.MainForm.AppInfo != null)
+                    Program.MainForm.AppInfo.SetBoolean("batchOrderForm", "orderListFormFloating", value);
+            }
+        }
+
+        #endregion
+
+        private void toolStripButton_orderList_CheckedChanged(object sender, EventArgs e)
+        {
+            // 如果按下 Ctrl 键，则表示强制打开为浮动状态
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
+            if (this.toolStripButton_orderList.Checked == true)
+            {
+                if (bControl)
+                    this.FloatingOrderListForm = true;
+                OpenListForm(this.FloatingOrderListForm);
+            }
+            else
+            {
+                CloseListForm();
+            }
+        }
     }
 
+    /// <summary>
+    /// 一个书目记录的内存结构。包含从属的下级订购记录
+    /// </summary>
     public class BiblioStore
     {
         public string RecPath { get; set; }
@@ -1275,6 +1445,9 @@ int nCount)
 
     }
 
+    /// <summary>
+    /// 一个订购记录的内存结构
+    /// </summary>
     public class OrderStore
     {
         public string RecPath { get; set; }
@@ -1318,8 +1491,8 @@ int nCount)
         {
             XmlDocument temp_dom = new XmlDocument();
             temp_dom.LoadXml(template_xml);
-            
-            foreach(XmlNode node in temp_dom.DocumentElement.ChildNodes)
+
+            foreach (XmlNode node in temp_dom.DocumentElement.ChildNodes)
             {
                 if (node.NodeType != XmlNodeType.Element)
                     continue;

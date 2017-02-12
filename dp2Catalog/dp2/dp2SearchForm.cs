@@ -9002,7 +9002,7 @@ out string strError)
                 bNew = true;
             }
 
-            m_commentViewer.MainForm = this.MainForm;  // 必须是第一句
+            // m_commentViewer.MainForm = this.MainForm;  // 必须是第一句
 
             if (bNew == true)
             {
