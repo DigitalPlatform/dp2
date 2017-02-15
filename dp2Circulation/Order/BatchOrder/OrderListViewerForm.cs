@@ -9,6 +9,7 @@ using System.Windows.Forms;
 
 using DigitalPlatform;
 using DigitalPlatform.Script;
+using System.Collections;
 
 namespace dp2Circulation
 {
@@ -113,6 +114,31 @@ namespace dp2Circulation
         private void toolStripButton_dock_Click(object sender, EventArgs e)
         {
             DoDock(true);
+        }
+
+        public class Sheet
+        {
+            public TabPage TabPage { get; set; }
+            public WebBrowser WebBrowser { get; set; }
+        }
+
+        Hashtable _sheetTable = new Hashtable();    // name --> Sheet
+
+        public Sheet CreateSheet(string name)
+        {
+            Sheet sheet = (Sheet)_sheetTable[name];
+            if (sheet != null)
+                return sheet;
+
+            sheet = new Sheet();
+            sheet.TabPage = new TabPage();
+            sheet.TabPage.Text = name;
+            sheet.WebBrowser = new WebBrowser();
+            sheet.WebBrowser.Dock = DockStyle.Fill;
+            sheet.TabPage.Controls.Add(sheet.WebBrowser);
+            this.tabControl_main.TabPages.Add(sheet.TabPage);
+
+            return sheet;
         }
 
     }

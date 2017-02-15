@@ -1566,6 +1566,12 @@ namespace DigitalPlatform.LibraryServer
 
             }
 
+            // 去除 strRoom 内容中横杠以后的部分。例如 “现刊阅览室-综合355”
+            {
+                List<string> parts = StringUtil.ParseTwoPart(strRoom, "-");
+                strRoom = parts[0];
+            }
+
             XmlElement item = this.App.GetLocationItemElement(
     strLibraryCode,
     strRoom);
@@ -1577,7 +1583,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 if (item == null)
                 {
-                    strError = "馆代码 '"+strLibraryCode+"' 没有定义馆藏地点 '"+strRoom+"'(根据 <locationTypes> 定义)";
+                    strError = "馆代码 '" + strLibraryCode + "' 没有定义馆藏地点 '" + strRoom + "'(根据 <locationTypes> 定义)";
                     return 1;
                 }
             }

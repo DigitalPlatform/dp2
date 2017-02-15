@@ -1,0 +1,185 @@
+﻿body {
+    font-family: Microsoft YaHei, Tahoma, Arial, Helvetica, sans-serif;
+    font-size: 10pt;
+    margin: 0pt;
+    padding: 0pt;
+}
+
+TABLE {
+    font-size: 10pt;
+    width: 100%;
+    border-width: 0pt;
+    border-style: solid;
+    border-collapse: collapse;
+    border-color: #aaaaaa;
+}
+
+    TABLE TD {
+        padding: 4pt;
+        padding-left: 8pt;
+        padding-right: 8pt;
+        border: 0pt;
+        border-right: 1pt;
+        border-color: #eeeeee;
+        border-style: solid;
+    }
+
+TD.summary IMG {
+    float: left;
+    margin-right: 4pt;
+    max-width: 70pt;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+TR.read {
+    background-color: #aaffaa;
+}
+
+input {
+    border-width: 0;
+}
+
+select {
+    outline: 0;
+}
+
+.sel {
+    background-color: #cfcfe9;
+}
+
+.changed {
+    font-weight: bolder;
+    /* background-color: #eeeeee; */
+}
+
+.copy SELECT {
+    font-size: 18pt;
+}
+
+.price INPUT {
+    font-size: 18pt;
+}
+
+.title {
+    color: #808080;
+}
+
+TABLE.biblio {
+    font-size: 8pt;
+    width: 100%;
+    border-color: lightgrey;
+    border-width: 0pt;
+    border-style: solid;
+    border-collapse: collapse;
+    margin: 10pt;
+    margin-bottom: 1pt;
+    margin-left: 0pt;
+}
+
+    TABLE.biblio TD {
+        padding-top: 2pt;
+        padding-bottom: 2pt;
+    }
+
+    TABLE.biblio TD.name {
+        text-align: right;
+        /* background-color: #ffffff; */
+        color: #777777;
+        width: 10%;
+        border: 0pt;
+        border-right: 1pt;
+        border-color: #999999;
+        border-style: solid;
+        text-align: right;
+        vertical-align: top;
+        white-space: nowrap;
+    }
+
+    table.biblio tr.type-title td.value {
+        font-weight: bold;
+    }
+
+.biblio-head {
+    text-align: right;
+    width: 100%;
+    border-color: lightgrey;
+    border-width: 0pt;
+    border-style: dotted;
+    border-top-width: 2pt;
+    padding: 0pt;
+    padding-top: 8pt;
+    margin: 0pt;
+    margin-top: 16pt;
+}
+
+.biblio-index {
+    vertical-align: top;
+    padding: 0pt;
+    border-right: 0pt;
+}
+
+    .biblio-index div {
+        margin: 0pt;
+        margin-top: 16pt;
+        padding: 8pt;
+        text-align: right;
+        background-color: #999999;
+        font-size: 12pt;
+        font-weight: bolder;
+        color: white;
+    }
+
+tr.order TD {
+    border: 0pt;
+    border-bottom: 1pt;
+    border-color: #eeeeee;
+    border-style: solid;
+}
+
+tr.title TD {
+    border: 0pt;
+    border-bottom: 1pt;
+    border-color: #cccccc;
+    border-style: solid;
+}
+
+td.dis-button {
+    padding: 0pt;
+}
+
+    td.dis-button button {
+        font-size: 6pt;
+        margin-left: 0pt;
+    }
+
+td.error {
+    background-color: yellow;
+}
+
+td.order-index {
+    text-align: right;
+    color: #777777;
+}
+
+div.error-text {
+    padding: 8pt;
+    background-color: #990000;
+    color: white;
+}
+
+tr.new td.order-index, tr.new.changed td.order-index {
+    border-style: solid;
+    border: 0pt;
+    border-left: 8pt;
+    border-left-color: yellow;
+}
+
+tr.changed td.order-index {
+    border-style: solid;
+    border: 0pt;
+    border-left: 8pt;
+    border-left-color: green;
+}

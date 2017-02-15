@@ -89,9 +89,10 @@ function newOrder(xml) {
         if (tr.hasClass('order')) {
             var biblio_recpath = tr.attr('biblio-recpath');
             tr.after(window.external.newOrder(biblio_recpath, xml));
-            
+
             window.setTimeout(function () {
-                tr.next().scrollIntoView();
+                // tr.next().scrollIntoView();
+                ScrollIntoView(tr.next());
             }, 10);
         }
         else {
@@ -103,7 +104,8 @@ function newOrder(xml) {
             }
             next_tr.after(window.external.newOrder(biblio_recpath, xml));
             window.setTimeout(function () {
-                next_tr.next().scrollIntoView();
+                // next_tr.next().scrollIntoView();
+                ScrollIntoView(next_tr.next());
             }, 10);
         }
     });
@@ -301,6 +303,7 @@ function onClicked(o) {
     else {
         clearAllSel();
         setSel(tr);
+        // GetPosition(tr[0]);
     }
 }
 
@@ -326,4 +329,5 @@ function loadBiblio() {
         }
     });
 }
+
 

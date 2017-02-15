@@ -88,6 +88,7 @@ namespace dp2Circulation
 
             this._lines.Clear();
             this._recPathTable.Clear();
+            this._listCollection.Clear();
 
             this._values = new Values();
 
@@ -178,9 +179,14 @@ namespace dp2Circulation
                     i++;
 
                     OutputBiblio(line, ref nStart);
+
+                    OutputOrderList(line);
                 }
 
                 OutputEnd();
+
+                // 填充 OrderList WebBrowser s
+                FillSheets();
 
                 // FillItems(this._lines);
                 return 0;
@@ -581,9 +587,9 @@ namespace dp2Circulation
             }
         }
 
-        static string TABLE = "TABLE";
-        static string TR = "TR";
-        static string TD = "TD";
+        static string TABLE = "table";
+        static string TR = "tr";
+        static string TD = "td";
 
         void OutputBegin()
         {
@@ -595,19 +601,23 @@ namespace dp2Circulation
             string strBinDir = this.MainForm.UserDir;
 
             string strCssUrl = Path.Combine(this.MainForm.UserDir, "Order\\BatchOrder_light.css");
-            string strSummaryJs = Path.Combine(this.MainForm.UserDir, "Order\\BatchOrder.js");
-            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
-            string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
-                + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"
-                + "<script type=\"text/javascript\" src=\"%bindir%/order/jquery.scrollIntoView.min.js\"></script>"
-                + "<script type='text/javascript' charset='UTF-8' src='" + strSummaryJs + "'></script>";
+            string strBatchOrderJs = Path.Combine(this.MainForm.UserDir, "Order\\BatchOrder.js");
+            string strOrderBaseJs = Path.Combine(this.MainForm.UserDir, "Order\\OrderBase.js");
+            string strLink = "\r\n<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' ></link>";
+            string strScriptHead = "\r\n<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\" ></script>"
+
+                // "\r\n<script type=\"text/javascript\" src=\"%bindir%/order/jquery-1.12.4.min.js\" ></script>"
+                + "\r\n<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\" ></script>"
+                // + "\r\n<script type=\"text/javascript\" src=\"%bindir%/order/jquery.scrollIntoView.js\" ></script>"
+                + "\r\n<script type='text/javascript' charset='UTF-8' src='" + strBatchOrderJs + "' ></script>"
+            + "\r\n<script type='text/javascript' charset='UTF-8' src='" + strOrderBaseJs + "' ></script>";
             // string strStyle = "<link href=\"%bindir%/select2/select2.min.css\" rel=\"stylesheet\" />" +
             // "<script src=\"%bindir%/select2/select2.min.js\"></script>";
-            text.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head>"
+            text.Append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head>"
                 + strLink
                 + strScriptHead.Replace("%bindir%", strBinDir)
                 // + strStyle.Replace("%bindir%", strBinDir)
-                + "</head><body>");
+                + "\r\n</head>\r\n<body>");
 
             AppendHtml(text.ToString(), false);
             text.Clear();
@@ -620,7 +630,7 @@ namespace dp2Circulation
             StringBuilder text = new StringBuilder();
 
             if (_tableCount == 0)
-                text.Append("\r\n<" + TABLE + " class=''>");
+                text.Append("\r\n<" + TABLE + " class='frame'>");
 
             text.Append("\r\n\t<" + TR + " class='check' biblio-recpath='" + item.RecPath + "' " + strOnClick + ">");
             text.Append("\r\n\t\t<" + TD + " class='biblio-index'><div>" + (nStart + 1).ToString() + "</div></" + TD + ">");
@@ -848,7 +858,8 @@ namespace dp2Circulation
 
         private void toolStripButton_save_Click(object sender, EventArgs e)
         {
-            this.webBrowser1.Document.Body.Focus();
+            if (this.webBrowser1 != null && this.webBrowser1.Document != null && this.webBrowser1.Document.Body != null)
+                this.webBrowser1.Document.Body.Focus();
 
             string strError = "";
 
@@ -1144,7 +1155,8 @@ int nCount)
 
         private void BatchOrderForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            this.webBrowser1.Document.Body.Focus();
+            if (this.webBrowser1 != null && this.webBrowser1.Document != null && this.webBrowser1.Document.Body != null)
+                this.webBrowser1.Document.Body.Focus();
 
             if (this.Changed == true)
             {
@@ -1418,6 +1430,49 @@ int nCount)
                 CloseListForm();
             }
         }
+
+        OrderListColletion _listCollection = new OrderListColletion();
+
+        // 创建一条书目对应的的订购列表
+        void OutputOrderList(BiblioStore biblio)
+        {
+            List<OrderListItem> items = OrderListItem.SplitOrderListItems(biblio);
+
+            if (items.Count > 0)
+            {
+
+                Hashtable table = biblio.GetFields();
+                // 添加书目、作者、出版社栏
+                foreach (OrderListItem item in items)
+                {
+                    item.BiblioStore = biblio;
+
+                    string strTitle = (string)table["title"];
+                    string strAuthor = (string)table["author"];
+
+                    List<string> parts = StringUtil.ParseTwoPart(strTitle, "/");
+                    if (string.IsNullOrEmpty(parts[1]) == false)
+                    {
+                        strTitle = parts[0].Trim();
+                        strAuthor = parts[1].Trim();
+                    }
+
+                    item.Title = strTitle;
+                    item.Author = strAuthor;
+                    item.Publisher = (string)table["publisher"];
+                }
+            }
+            _listCollection.AddRange(items);
+        }
+
+        void FillSheets()
+        {
+            foreach (OrderList list in _listCollection)
+            {
+                dp2Circulation.OrderListViewerForm.Sheet sheet = _listForm.CreateSheet(list.Seller);
+                list.FillInWebBrowser(sheet.WebBrowser);
+            }
+        }
     }
 
     /// <summary>
@@ -1442,6 +1497,29 @@ int nCount)
 
             return null;
         }
+
+        // 获得书名、作者、出版社 三个字段内容
+        public Hashtable GetFields()
+        {
+            Hashtable results = new Hashtable();
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(this.Xml);
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("line");
+            foreach (XmlElement line in nodes)
+            {
+                string strName = line.GetAttribute("name");
+                string strValue = line.GetAttribute("value");
+                string strType = line.GetAttribute("type");
+
+                if (results.ContainsKey(strType) == false)
+                    results[strType] = strValue;
+            }
+
+            return results;
+        }
+
 
     }
 

@@ -11,7 +11,7 @@
  * @author Arwid Bancewicz http://arwid.ca
  * @version 0.3
  */
-(function ($) {
+ (function($) {
     $.fn.scrollIntoView = function(duration, easing, complete) {
         // The arguments are optional.
         // The first argment can be false for no animation or a duration.
@@ -19,8 +19,6 @@
         // Refer to http://api.jquery.com/animate/.
         var opts = $.extend({},
         $.fn.scrollIntoView.defaults);
-
-        // debugger;
 
         // Get options
         if ($.type(duration) == "object") {

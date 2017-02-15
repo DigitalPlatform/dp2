@@ -1760,6 +1760,10 @@ MessageBoxDefaultButton.Button1);
             {
                 dom.Load(strFileName);
             }
+            catch (FileNotFoundException)
+            {
+                return 0;   // 文件不存在
+            }
             catch (Exception ex)
             {
                 strError = "文件 '" + strFileName + "' 装入 XMLDOM 时出错: " + ex.Message;
@@ -2120,6 +2124,6 @@ MessageBoxDefaultButton.Button1);
 
             return null;
         }
-    } 
+    }
 
 }

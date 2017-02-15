@@ -71,7 +71,7 @@ namespace DigitalPlatform.LibraryServer
                 nodes = field.select("subfield");
                 if (nodes.count > 0)
                 {
-                    results.Add(new NameValueLine("Personal name", ConcatSubfields(nodes)));
+                    results.Add(new NameValueLine("Personal name", ConcatSubfields(nodes), "author"));
                 }
             }
 
@@ -134,7 +134,7 @@ namespace DigitalPlatform.LibraryServer
                 nodes = field.select("subfield");
                 if (nodes.count > 0)
                 {
-                    results.Add(new NameValueLine("Published / Created", ConcatSubfields(nodes)));  // 附加的空格便于在 HTML 中自然折行
+                    results.Add(new NameValueLine("Published / Created", ConcatSubfields(nodes), "publisher"));  // 附加的空格便于在 HTML 中自然折行
                 }
             }
 
