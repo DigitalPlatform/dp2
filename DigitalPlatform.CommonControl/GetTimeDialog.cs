@@ -201,6 +201,68 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        public string String8
+        {
+            get
+            {
+                if (this.RangeMode == false)
+                {
+                    return DateTimeUtil.DateTimeToString8(this.Value);
+                }
+
+                string strStart = "";
+                if (this.Value != DateTimePicker.MinimumDateTime)
+                    strStart = DateTimeUtil.DateTimeToString8(this.Value);
+
+                string strEnd = "";
+                if (this.Value2 != DateTimePicker.MaximumDateTime)
+                    strEnd = DateTimeUtil.DateTimeToString8(this.Value2);
+
+                if (string.IsNullOrEmpty(strStart) && string.IsNullOrEmpty(strEnd))
+                    return "";
+
+                return strStart
+                    + "-"
+                    + strEnd;
+            }
+            set
+            {
+                this.dateTimePicker1.CustomFormat = "yyyy-MM-dd";
+                this.dateTimePicker2.CustomFormat = "yyyy-MM-dd";
+                this.button_clearHMS.Visible = false;
+                this.button_clearHMS_2.Visible = false;
+
+                if (this.RangeMode == false)
+                {
+                    // 注意：可能会抛出异常
+                    this.Value = DateTimeUtil.Long8ToDateTime(value);
+                    return;
+                }
+
+                string strStart = "";
+                string strEnd = "";
+
+                int nRet = value.IndexOf("-");
+                if (nRet == -1)
+                    strStart = value.Trim();
+                else
+                {
+                    strStart = value.Substring(0, nRet).Trim();
+                    strEnd = value.Substring(nRet + 1).Trim();
+                }
+
+                if (string.IsNullOrEmpty(strStart) == true)
+                    this.Value = DateTimePicker.MinimumDateTime;
+                else
+                    this.Value = DateTimeUtil.Long8ToDateTime(strStart);
+
+                if (string.IsNullOrEmpty(strEnd) == true)
+                    this.Value2 = DateTimePicker.MaximumDateTime;
+                else
+                    this.Value2 = DateTimeUtil.Long8ToDateTime(strEnd);
+            }
+        }
+
         private void button_setMin_Click(object sender, EventArgs e)
         {
             this.Value = DateTimePicker.MinimumDateTime;

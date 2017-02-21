@@ -1008,22 +1008,25 @@ namespace dp2Circulation
             // 获得 parent id
             string strText = ListViewUtil.GetItemText(item, nCol);
 
-            // 看看是否已经是路径 ?
-            if (strText.IndexOf("/") == -1)
+            if (string.IsNullOrEmpty(strText) == false)
             {
-                // 获得对应的书目库名
-                strBiblioRecPath = this.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
-                if (string.IsNullOrEmpty(strBiblioRecPath) == true)
+                // 看看是否已经是路径 ?
+                if (strText.IndexOf("/") == -1)
                 {
-                    strError = this.DbTypeCaption + "类型的数据库名 '" + strItemDbName + "' 没有找到对应的书目库名";
-                    return -1;
-                }
-                strBiblioRecPath = strBiblioRecPath + "/" + strText;
+                    // 获得对应的书目库名
+                    strBiblioRecPath = this.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
+                    if (string.IsNullOrEmpty(strBiblioRecPath) == true)
+                    {
+                        strError = this.DbTypeCaption + "类型的数据库名 '" + strItemDbName + "' 没有找到对应的书目库名";
+                        return -1;
+                    }
+                    strBiblioRecPath = strBiblioRecPath + "/" + strText;
 
-                ListViewUtil.ChangeItemText(item, nCol, strBiblioRecPath);
+                    ListViewUtil.ChangeItemText(item, nCol, strBiblioRecPath);
+                }
+                else
+                    strBiblioRecPath = strText;
             }
-            else
-                strBiblioRecPath = strText;
 
             return 1;
         }

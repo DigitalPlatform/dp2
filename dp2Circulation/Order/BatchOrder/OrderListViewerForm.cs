@@ -22,6 +22,8 @@ namespace dp2Circulation
 
         public event EventHandler DockChanged = null;
 
+        public BatchOrderForm BatchOrderForm = null;
+
         public OrderListViewerForm()
         {
             InitializeComponent();
@@ -120,6 +122,50 @@ namespace dp2Circulation
         {
             public TabPage TabPage { get; set; }
             public WebBrowser WebBrowser { get; set; }
+
+#if NO
+            public void OnSelectionChanged()
+            {
+                MessageBox.Show("test");
+            }
+#endif
+        }
+
+        public Sheet ActiveSheet
+        {
+            get
+            {
+                if (this.tabControl_main.TabPages.Count == 0)
+                    return null;
+                string name = this.tabControl_main.SelectedTab.Text;
+                return (Sheet)_sheetTable[name];
+            }
+        }
+
+        public List<string> GetSheetNames()
+        {
+            List<string> results = new List<string>();
+            foreach(TabPage page in this.tabControl_main.TabPages)
+            {
+                results.Add(page.Text);
+            }
+
+            return results;
+        }
+
+        public Sheet GetSheet(string name)
+        {
+            return (Sheet)_sheetTable[name];
+        }
+
+        public void RemoveSheet(string name)
+        {
+            Sheet sheet = (Sheet)_sheetTable[name];
+            if (sheet == null)
+                return;
+            this.tabControl_main.TabPages.Remove(sheet.TabPage);
+            sheet.TabPage.Dispose();
+            _sheetTable.Remove(name);
         }
 
         Hashtable _sheetTable = new Hashtable();    // name --> Sheet
@@ -138,6 +184,12 @@ namespace dp2Circulation
             sheet.TabPage.Controls.Add(sheet.WebBrowser);
             this.tabControl_main.TabPages.Add(sheet.TabPage);
 
+            OrderListScript script = new OrderListScript();
+            script.Sheet = sheet;
+            script.BatchOrderForm = this.BatchOrderForm;
+            sheet.WebBrowser.ObjectForScripting = script;
+
+            _sheetTable[name] = sheet;
             return sheet;
         }
 

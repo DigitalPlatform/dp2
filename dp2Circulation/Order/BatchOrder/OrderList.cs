@@ -83,9 +83,14 @@ namespace dp2Circulation
             _items.Add(item);
         }
 
-        public void FillInWebBrowser(WebBrowser webBrowser)
+        public void FillInWebBrowser(WebBrowser webBrowser,
+            List<RateItem> rate_table)
         {
             OutputBegin(webBrowser);
+
+            SumInfo info = GetSumInfo(rate_table);
+            OutputSumInfo(webBrowser, info);
+
             int nStart = 0;
             foreach (OrderListItem item in _items)
             {
@@ -94,9 +99,63 @@ namespace dp2Circulation
             OutputEnd(webBrowser);
         }
 
-        static string TABLE = "TABLE";
-        static string TR = "TR";
-        static string TD = "TD";
+        public SumInfo GetSumInfo(List<RateItem> rate_table)
+        {
+            List<string> totalprices = new List<string>();
+
+            SumInfo info = new SumInfo();
+            info.Seller = this.Seller;
+            foreach (OrderListItem item in _items)
+            {
+                info.BiblioCount++;
+                info.CopyCount += item.Copy;
+                totalprices.Add(item.TotalPrice);
+            }
+
+            if (totalprices.Count > 1)
+            {
+                string strError = "";
+                List<string> sum_prices = null;
+                int nRet = PriceUtil.TotalPrice(totalprices,
+                    out sum_prices,
+                    out strError);
+                if (nRet == -1)
+                {
+                    info.TotalPrice = strError;
+                }
+                else
+                {
+                    Debug.Assert(sum_prices.Count == 1, "");
+                    info.TotalPrice = sum_prices[0];
+                }
+            }
+            else if (totalprices.Count == 1)
+                info.TotalPrice = totalprices[0];
+
+            // 计算汇率
+            if (rate_table != null && string.IsNullOrEmpty(info.TotalPrice) == false)
+            {
+                try
+                {
+                    string strRatePrice = RateItem.RatePrices(
+                        rate_table,
+                        info.TotalPrice);
+                    info.TotalPrice1 = strRatePrice;
+                    if (info.TotalPrice == info.TotalPrice1)
+                        info.TotalPrice1 = "";
+                }
+                catch (Exception ex)
+                {
+                    info.TotalPrice1 = ex.Message;
+                }
+            }
+
+            return info;
+        }
+
+        static string TABLE = "table";
+        static string TR = "tr";
+        static string TD = "td";
 
         void OutputBegin(WebBrowser webBrowser1)
         {
@@ -119,10 +178,43 @@ namespace dp2Circulation
                 + strLink
                 + strScriptHead.Replace("%bindir%", strBinDir)
                 // + strStyle.Replace("%bindir%", strBinDir)
-                + "</head><body>");
+                + "</head><body " + strOnClick + ">");
 
             AppendHtml(webBrowser1, text.ToString(), false);
             text.Clear();
+        }
+
+        void OutputSumInfo(WebBrowser webBrowser1, SumInfo info)
+        {
+            int nColCount = 6;
+            if (string.IsNullOrEmpty(info.TotalPrice1) == false)
+                nColCount = 8;
+
+            StringBuilder text = new StringBuilder();
+
+            text.Append("\r\n<table class='sum'>\r\n\t<tr class='seller'>");
+            text.Append("<td colspan='" + nColCount + "'>"
+                + (string.IsNullOrEmpty(info.Seller) ? "[空]" : HttpUtility.HtmlEncode(info.Seller))
+                + "</td>\r\n\t</tr>");
+
+            text.Append("\r\n\t<tr class='amount'>");
+
+            text.Append("\r\n\t\t<td class='name'>种</td>");
+            text.Append("<td class='value'>" + info.BiblioCount + "</td>");
+            text.Append("\r\n\t\t<td class='name'>册</td>");
+            text.Append("<td class='value'>" + info.CopyCount + "</td>");
+            text.Append("\r\n\t\t<td class='name'>总金额</td>");
+            text.Append("<td class='value'>" + info.TotalPrice + "</td>");
+
+            if (string.IsNullOrEmpty(info.TotalPrice1) == false)
+            {
+                text.Append("\r\n\t\t<td class='name'>总金额(汇率计算后)</td>");
+                text.Append("<td class='value'>" + info.TotalPrice1 + "</td>");
+            }
+
+            text.Append("\r\n\t</tr>\r\n</table>\r\n");
+
+            AppendHtml(webBrowser1, text.ToString(), false);
         }
 
         int _tableCount = 0;
@@ -133,22 +225,30 @@ namespace dp2Circulation
         {
             StringBuilder text = new StringBuilder();
 
+            string strPubType = BatchOrderForm.GetPublicationType(item.BiblioStore.RecPath);
+
             if (_tableCount == 0)
                 text.Append("\r\n<" + TABLE + " class=''>");
 
-            text.Append("\r\n\t<" + TR + " class='check' biblio-recpath='" + item.BiblioStore.RecPath + "' " + strOnClick + ">");
+            int nColSpan = 7;
+            if (strPubType == "series")
+                nColSpan += 2;
+            text.Append("\r\n\t<" + TR + " class='biblio' biblio-recpath='" + HttpUtility.HtmlEncode(item.BiblioStore.RecPath) + "'>");
             // text.Append("\r\n\t\t<" + TD + " class='biblio-index'><div>" + (nStart + 1).ToString() + "</div></" + TD + ">");
-            text.Append("\r\n\t\t<" + TD + " class='nowrap' colspan='10'>"
+            text.Append("\r\n\t\t<" + TD + " class='nowrap' colspan='" + nColSpan + "'>"
                 // + "<div class='biblio-head'>" + HttpUtility.HtmlEncode(item.RecPath) + "</div>"
-                + "<div class='biblio-table-container'>" + BuildBiblioHtml(item) + "</div>"
+                + "<div class='biblio-table-container'>" + BuildBiblioHtml(item, strPubType) + "</div>"
                 + "</" + TD + ">");
 
             text.Append("\r\n\t</" + TR + ">");
 
-            text.Append("\r\n\t</" + TR + ">");
+            text.Append(GetTitleLine(strPubType));
+            text.Append(BuildLineHtml(item, strPubType, nStart, null));
 
-            text.Append(GetTitleLine());
-            text.Append(BuildLineHtml(item, nStart, null));
+            text.Append("\r\n\t<" + TR + " class='sep'>");
+            text.Append("\r\n\t\t<" + TD + " colspan='10'>"
+                + "</" + TD + ">");
+            text.Append("\r\n\t</" + TR + ">");
 
             nStart++;
 
@@ -180,7 +280,7 @@ namespace dp2Circulation
             text.Clear();
         }
 
-        public static string GetTitleLine()
+        public static string GetTitleLine(string strPublicationType)
         {
             StringBuilder text = new StringBuilder();
             text.Append("\r\n\t<" + TR + " class='title'>");
@@ -192,24 +292,38 @@ namespace dp2Circulation
             text.Append("\r\n\t\t<" + TD + " class='nowrap'>著者</" + TD + ">");
             text.Append("\r\n\t\t<" + TD + " class='nowrap'>出版者</" + TD + ">");
 #endif
+            if (strPublicationType == "series")
+            {
+                text.Append("\r\n\t\t<" + TD + " class='nowrap'>时间范围</" + TD + ">");
+            }
             text.Append("\r\n\t\t<" + TD + " class='nowrap'>复本</" + TD + ">");
-            text.Append("\r\n\t\t<" + TD + " class='nowrap'>期数</" + TD + ">");
+            if (strPublicationType == "series")
+            {
+                text.Append("\r\n\t\t<" + TD + " class='nowrap'>期数</" + TD + ">");
+            }
             text.Append("\r\n\t\t<" + TD + " class='nowrap'>单价</" + TD + ">");
             text.Append("\r\n\t\t<" + TD + " class='nowrap'>总价</" + TD + ">");
             text.Append("\r\n\t</" + TR + ">");
             return text.ToString();
         }
 
+        static string[] _book_types = new string[] { "title", "author", "publisher", "isbn" };
+        // static string[] _series_types = new string[] { "title", "author", "publisher", "isbn" };
+
         static string BuildBiblioHtml(
-            OrderListItem item)
+            OrderListItem item,
+            string strPubType)
         {
-            string[] types = new string[] { "title", "author", "publisher" };
+            string[] types = _book_types;
+            //if (strPubType == "series")
+            //    types = _series_types;
+
             StringBuilder text = new StringBuilder();
             text.Append("\r\n<table class='biblio'>");
 
             foreach (string type in types)
             {
-                string strName ="";
+                string strName = "";
                 string strValue = "";
                 if (type == "title")
                 {
@@ -222,13 +336,21 @@ namespace dp2Circulation
                     strName = "著者";
                     strValue = item.Author;
                 }
-                
+
                 if (type == "publisher")
                 {
                     strName = "出版者";
                     strValue = item.Publisher;
                 }
 
+                if (type == "isbn")
+                {
+                    strName = "ISBN/ISSN";
+                    strValue = item.Isbn;
+                }
+
+                if (string.IsNullOrEmpty(strValue) == true)
+                    continue;
 
                 string strClass = "line";
                 if (string.IsNullOrEmpty(type) == false)
@@ -244,21 +366,26 @@ namespace dp2Circulation
             return text.ToString();
         }
 
-        static string strOnChange = "onchange='javascript:onChanged(this);'";
-        static string strOnClick = "onclick='javascript:onClicked(this);'";
+        // static string strOnChange = "onchange='javascript:onChanged(this);'";
+        static string strOnClick = "onclick='javascript:onClicked(this); stopBubble(event);'";
 
         string BuildLineHtml(
-    OrderListItem item,
-    int i,
-    string strClass)
+            OrderListItem item,
+            string strPubType,
+            int i,
+            string strClass)
         {
             StringBuilder text = new StringBuilder();
 
+            // string strPubType = BatchOrderForm.GetPublicationType(item.BiblioStore.RecPath);
 
             text.Append("\r\n\t<" + TR + " "
                 + "class='item check "
                 + (string.IsNullOrEmpty(strClass) ? "" : " " + strClass)
-                + "' index='" + i + "' seller='" + HttpUtility.HtmlEncode(item.Seller) + "' " + strOnClick + ">");
+                + "' index='" + i + "' seller='" + HttpUtility.HtmlEncode(item.Seller)
+                + "' biblio-recpath='" + HttpUtility.HtmlEncode(item.BiblioStore.RecPath) + "' "
+                + " orders-refid='" + HttpUtility.HtmlEncode(item.GetOrdersRefIDList()) + "' "
+                + strOnClick + ">");
             // text.Append("<td class='nowrap'></td>");
             text.Append("\r\n\t\t<" + TD + " class='item-index'>" + (i + 1).ToString() + "</" + TD + ">");
 
@@ -279,14 +406,23 @@ namespace dp2Circulation
             text.Append(HttpUtility.HtmlEncode(item.Publisher));
             text.Append("</" + TD + ">");
 #endif
+            if (strPubType == "series")
+            {
+                text.Append("\r\n\t\t<" + TD + " class='range'>");
+                text.Append(HttpUtility.HtmlEncode(item.Range));
+                text.Append("</" + TD + ">");
+            }
 
             text.Append("\r\n\t\t<" + TD + " class='copy'>");
             text.Append(HttpUtility.HtmlEncode(item.Copy));
             text.Append("</" + TD + ">");
 
-            text.Append("\r\n\t\t<" + TD + " class='issueCount'>");
-            text.Append(HttpUtility.HtmlEncode(item.IssueCount));
-            text.Append("</" + TD + ">");
+            if (strPubType == "series")
+            {
+                text.Append("\r\n\t\t<" + TD + " class='issueCount'>");
+                text.Append(HttpUtility.HtmlEncode(item.IssueCount));
+                text.Append("</" + TD + ">");
+            }
 
             text.Append("\r\n\t\t<" + TD + " class='price'>");
             text.Append(HttpUtility.HtmlEncode(item.Price));
@@ -350,6 +486,7 @@ namespace dp2Circulation
         public string Title { get; set; }
         public string Author { get; set; }
         public string Publisher { get; set; }
+        public string Isbn { get; set; }
 
         public BiblioStore BiblioStore { get; set; }
 
@@ -357,6 +494,18 @@ namespace dp2Circulation
         /// 构成本行的订购记录列表
         /// </summary>
         public List<OrderStore> Orders { get; set; }
+
+        // 获得订购记录参考 ID 列表字符串
+        public string GetOrdersRefIDList()
+        {
+            List<string> refids = new List<string>();
+            foreach (OrderStore order in this.Orders)
+            {
+                refids.Add(order.RefID);
+            }
+
+            return StringUtil.MakePathList(refids, "|");
+        }
 
         // 将 OrderStorage 对象的信息合并到本对象
         public void Merge(OrderStore order)
@@ -447,6 +596,9 @@ namespace dp2Circulation
                 this.MergeComment = new List<string>();
 
             int nCopy = (int)value_table["copy"];
+
+            this.Copy += nCopy;
+
             string strSource = DomUtil.GetElementText(dom.DocumentElement,
                 "source");
             string strMergeComment = strSource + ", " + nCopy.ToString() + "册 (" + order.RecPath + ")";
@@ -532,6 +684,13 @@ namespace dp2Circulation
 
         }
 
+        public static bool CompareString(string s1, string s2)
+        {
+            if (s1 != s2)
+                return false;
+            return true;
+        }
+
         // return:
         //      true    主要字段相同，需要合并
         //      false   不需要合并
@@ -540,25 +699,25 @@ namespace dp2Circulation
             Hashtable value_table1 = GetValues(order1);
             Hashtable value_table2 = GetValues(order2);
 
-            if (value_table1["seller"] != value_table2["seller"])
+            if ((string)value_table1["seller"] != (string)value_table2["seller"])
                 return false;
 
-            if (value_table1["price"] != value_table2["price"])
+            if ((string)value_table1["price"] != (string)value_table2["price"])
                 return false;
 
-            if (value_table1["acceptPrice"] != value_table2["acceptPrice"])
+            if ((string)value_table1["acceptPrice"] != (string)value_table2["acceptPrice"])
                 return false;
 
-            if (value_table1["catalogNo"] != value_table2["catalogNo"])
+            if ((string)value_table1["catalogNo"] != (string)value_table2["catalogNo"])
                 return false;
 
-            if (value_table1["issueCount"] != value_table2["issueCount"])
+            if ((string)value_table1["issueCount"] != (string)value_table2["issueCount"])
                 return false;
 
-            if (value_table1["range"] != value_table2["range"])
+            if ((string)value_table1["range"] != (string)value_table2["range"])
                 return false;
 
-            if (value_table1["subcopy"] != value_table2["subcopy"])
+            if ((int)value_table1["subcopy"] != (int)value_table2["subcopy"])
                 return false;
 
             if (CompareAddress((string)value_table1["sellerAddress"], (string)value_table1["sellerAddress"]) != 0)
@@ -638,6 +797,8 @@ namespace dp2Circulation
             // orders.AddRange(biblio.Orders);
             foreach (OrderStore order in biblio.Orders)
             {
+                if (order.Type == "deleted")
+                    continue;
                 if (string.IsNullOrEmpty(order.GetFieldValue("state")))
                     orders.Add(order);
             }
@@ -714,10 +875,10 @@ namespace dp2Circulation
     "catalogNo");
 
 
-            string strIssueCount = DomUtil.GetElementText(dom.DocumentElement,
+            result["issueCount"] = DomUtil.GetElementText(dom.DocumentElement,
                 "issueCount");
 
-            string strRange = DomUtil.GetElementText(dom.DocumentElement,
+            result["range"] = DomUtil.GetElementText(dom.DocumentElement,
                 "range");
 
             {
@@ -797,4 +958,13 @@ namespace dp2Circulation
     }
 
 
+    public class SumInfo
+    {
+        public string Seller { get; set; }
+        public long BiblioCount { get; set; }
+        public long CopyCount { get; set; }
+        public string TotalPrice { get; set; }
+
+        public string TotalPrice1 { get; set; } // 经过汇率运算以后的金额字符串
+    }
 }

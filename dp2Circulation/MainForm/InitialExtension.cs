@@ -1737,7 +1737,6 @@ MessageBoxDefaultButton.Button1);
 
                 try
                 {
-
                     HtmlDocument doc = m_backgroundForm.WebBrowser.Document;
 
                     if (doc == null)

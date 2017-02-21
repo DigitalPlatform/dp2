@@ -1338,6 +1338,7 @@ namespace dp2Circulation
 
         /// <summary>
         ///  编辑区显示模式
+        ///  full/simplebook/simpleseries
         /// </summary>
         public string DisplayMode
         {
@@ -1347,6 +1348,9 @@ namespace dp2Circulation
             }
             set
             {
+                if (value == "simple")
+                    throw new ArgumentException("simple 模式已经废止，请使用 simplebook 或者 simpleseries");
+
                 this._displayMode = value;
 
                 SetDisplayMode(value);
@@ -1358,7 +1362,7 @@ namespace dp2Circulation
             this.DisableUpdate();
             try
             {
-                if (strMode == "simple")
+                if (strMode == "simplebook" || strMode == "simpleseries")
                 {
                     this.tableLayoutPanel_main.AutoScroll = true;
                     this.tableLayoutPanel_main.AutoSize = true;
@@ -1367,7 +1371,7 @@ namespace dp2Circulation
 
                 List<Control> controls = new List<Control>();
 
-                if (strMode == "simple")
+                if (strMode == "simplebook" || strMode == "simpleseries")
                 {
                     controls.Add(this.textBox_catalogNo);
                     controls.Add(this.comboBox_seller);
@@ -1377,6 +1381,12 @@ namespace dp2Circulation
                     controls.Add(this.textBox_distribute);
                     controls.Add(this.comboBox_class);
                     controls.Add(this.textBox_batchNo);
+                }
+
+                if (strMode == "simpleseries")
+                {
+                    controls.Add(this.textBox_issueCount);
+                    controls.Add(this.textBox_range);
                 }
 
                 for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)

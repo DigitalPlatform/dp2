@@ -602,7 +602,7 @@ namespace dp2Circulation
             set
             {
                 this.orderEditControl_editing.DisplayMode = value;
-                if (value == "simple")
+                if (value == "simplebook" || value == "simpleseries")
                 {
                     this.checkBox_autoSearchDup.Visible = false;
                     this.button_editing_nextRecord.Visible = false;

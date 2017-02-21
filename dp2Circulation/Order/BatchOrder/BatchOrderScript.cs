@@ -1,10 +1,11 @@
-﻿using DigitalPlatform.CommonControl;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Permissions;
 using System.Text;
 using System.Windows.Forms;
+
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -94,9 +95,20 @@ namespace dp2Circulation
             return this.BatchOrderForm.VerifyDistribute(strBiblioRecPath, strOrderRefID);
         }
 
-        public string getOrderTitleLine()
+        public string getOrderTitleLine(string strBiblioRecPath)
         {
-            return BatchOrderForm.GetOrderTitleLine();
+            return BatchOrderForm.GetOrderTitleLine(strBiblioRecPath);
         }
+
+        // 出现对话框编辑修改时间范围字段内容。
+        // return:
+        //      null    放弃修改
+        //      其他  修改后的时间范围字段内容。内存已经被修改了，注意用此返回值更新 Web 页面显示
+        public string editRange(string strBiblioRecPath,
+            string strOrderRefID)
+        {
+            return this.BatchOrderForm.EditRange(strBiblioRecPath, strOrderRefID);
+        }
+
     }
 }

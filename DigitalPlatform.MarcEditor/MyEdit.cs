@@ -6,6 +6,7 @@ using System.Threading;
 using System.Diagnostics;
 
 using DigitalPlatform.GUI;
+using System.Text;
 
 namespace DigitalPlatform.Marc
 {
@@ -739,6 +740,29 @@ namespace DigitalPlatform.Marc
             }
         }
 
+        // 移走 $a 后面的一个空格
+        static string RemoveBlankChar(string strText)
+        {
+            int step = -1;  // 表示当前 char 距离 $ 字符的步长。0 表示正好在 $a 的 $ 上，1 表示在 $a 的 a 上，2，表示在 a 后面一个字符上
+            StringBuilder result = new StringBuilder();
+            foreach (char ch in strText)
+            {
+                if (ch == Record.KERNEL_SUBFLD)
+                    step = 0;
+                else if (step != -1)
+                    step++;
+
+                if (step == 2 && ch == ' ')
+                {
+                    // 越过
+                }
+                else
+                    result.Append(ch);
+            }
+
+            return result.ToString();
+        }
+
         private void Menu_Paste(System.Object sender, System.EventArgs e)
         {
             bool bControl = Control.ModifierKeys == Keys.Control;
@@ -755,17 +779,23 @@ namespace DigitalPlatform.Marc
                 strText = strText.Replace("\n", "*");
                 strText = strText.Replace("\t", "*");
 
+                // 2017/2/20
+                strText = strText.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
+
                 if (bControl)
                 {
                     strText = strText.Replace('|', Record.KERNEL_SUBFLD);
-                    strText = strText.Replace(" ", "");
+                    // strText = strText.Replace(" ", "");
+                    strText = RemoveBlankChar(strText);
                 }
 
                 Debug.Assert(this.MarcEditor.SelectedFieldIndices.Count == 1, "Menu_Paste(),MarcEditor.SelectedFieldIndices必须为1。");
 
                 string strFieldsMarc = strText;
+                // strFieldsMarc = strFieldsMarc.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
+                
                 // 先找到有几个字段
-                strFieldsMarc = strFieldsMarc.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
+
                 List<string> fields = Record.GetFields(strFieldsMarc);
                 if (fields == null || fields.Count == 0)
                     return;

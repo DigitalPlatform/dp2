@@ -4,11 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Diagnostics;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient;
-using System.Diagnostics;
 
 namespace DigitalPlatform.CirculationClient
 {

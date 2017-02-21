@@ -2093,7 +2093,8 @@ true);
             //      0   not found
             //      1   found
             nRet = MacroUtil.GetFromLocalMacroTable(
-                Path.Combine(this.MainForm.DataDir, "marceditor_macrotable.xml"),
+                // Path.Combine(this.MainForm.DataDir, "marceditor_macrotable.xml"),
+                Path.Combine(Program.MainForm.UserDir, "marceditor_macrotable.xml"),
                 strName,
                 e.Simulate,
                 out strValue,
@@ -13786,7 +13787,8 @@ strMARC);
         {
             MacroTableDialog dlg = new MacroTableDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.XmlFileName = Path.Combine(this.MainForm.DataDir, "marceditor_macrotable.xml");
+            // dlg.XmlFileName = Path.Combine(this.MainForm.DataDir, "marceditor_macrotable.xml");
+            dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, "marceditor_macrotable.xml");
 
             this.MainForm.AppInfo.LinkFormState(dlg, "entityform_MacroTableDialog_state");
             dlg.ShowDialog(this);

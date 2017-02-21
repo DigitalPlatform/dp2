@@ -1414,14 +1414,17 @@ namespace DigitalPlatform.LibraryServer
 #endif
             }
 
-            string strRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
-
-            // 检查读者权限。要求不能大于当前用户的权限
-            List<string> warning_rights = null;
-            if (IsLessOrEqualThan(strRights, sessioninfo.Rights, out warning_rights) == false)
+            if (sessioninfo.UserID != "~replication")   // 2017/2/21
             {
-                strError = "读者记录中的权限超出了当前用户的权限，这是不允许的。超出的部分权限值 '" + StringUtil.MakePathList(warning_rights) + "'";
-                return 1;
+                string strRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
+
+                // 检查读者权限。要求不能大于当前用户的权限
+                List<string> warning_rights = null;
+                if (IsLessOrEqualThan(strRights, sessioninfo.Rights, out warning_rights) == false)
+                {
+                    strError = "读者记录中的权限超出了当前用户的权限，这是不允许的。超出的部分权限值 '" + StringUtil.MakePathList(warning_rights) + "'";
+                    return 1;
+                }
             }
 
             // 2016/4/11

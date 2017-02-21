@@ -44,6 +44,7 @@
             this.toolStripButton_deleteOrder = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_orderList = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_rate = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -67,7 +68,8 @@
             this.toolStripButton_refresh,
             this.toolStripButton_deleteOrder,
             this.toolStripButton_save,
-            this.toolStripButton_orderList});
+            this.toolStripButton_orderList,
+            this.toolStripButton_rate});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(512, 25);
@@ -199,6 +201,16 @@
             this.toolStripButton_orderList.Text = "订单视图";
             this.toolStripButton_orderList.CheckedChanged += new System.EventHandler(this.toolStripButton_orderList_CheckedChanged);
             // 
+            // toolStripButton_rate
+            // 
+            this.toolStripButton_rate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_rate.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_rate.Image")));
+            this.toolStripButton_rate.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_rate.Name = "toolStripButton_rate";
+            this.toolStripButton_rate.Size = new System.Drawing.Size(36, 22);
+            this.toolStripButton_rate.Text = "汇率";
+            this.toolStripButton_rate.Click += new System.EventHandler(this.toolStripButton_rate_Click);
+            // 
             // BatchOrderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -237,5 +249,6 @@
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_change;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_quickChange;
         private System.Windows.Forms.ToolStripButton toolStripButton_orderList;
+        private System.Windows.Forms.ToolStripButton toolStripButton_rate;
     }
 }

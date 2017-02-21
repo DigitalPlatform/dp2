@@ -77,6 +77,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "ObjectViewerDialog";
+            this.Load += new System.EventHandler(this.ObjectViewerDialog_Load);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);

@@ -1424,5 +1424,44 @@ namespace DigitalPlatform.Text
         /// 数值
         /// </summary>
         public decimal Value = 0;
+
+        public static CurrencyItem Parse(string strText)
+        {
+            string strError = "";
+
+            string strPrefix = "";
+            string strValue = "";
+            string strPostfix = "";
+            int nRet = PriceUtil.ParsePriceUnit(strText,
+                out strPrefix,
+                out strValue,
+                out strPostfix,
+                out strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+
+            decimal value = 0;
+            try
+            {
+                value = Convert.ToDecimal(strValue);
+            }
+            catch
+            {
+                strError = "数字 '" + strValue + "' 格式不正确";
+                throw new Exception(strError);
+            }
+
+            CurrencyItem item = new CurrencyItem();
+            item.Prefix = strPrefix;
+            item.Postfix = strPostfix;
+            item.Value = value;
+
+            return item;
+        }
+
+        public override string ToString()
+        {
+            return this.Prefix + this.Value.ToString() + this.Postfix;
+        }
     }
 }

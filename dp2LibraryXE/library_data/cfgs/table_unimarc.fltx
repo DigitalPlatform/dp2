@@ -958,7 +958,7 @@ using DigitalPlatform.Text;
       }
       
       // 获得方式
-            	  lines.Add(new NameValueLine("获得方式", isbnandprice));
+            	  lines.Add(new NameValueLine("获得方式", isbnandprice, "isbnandprice"));
       
       // 提要文摘
       if (s11.Length > 0)

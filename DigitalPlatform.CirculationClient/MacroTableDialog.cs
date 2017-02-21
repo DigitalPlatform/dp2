@@ -9,9 +9,8 @@ using System.Windows.Forms;
 using System.Xml;
 using System.IO;
 
-namespace dp2Circulation
+namespace DigitalPlatform.CirculationClient
 {
-#if NO
     /// <summary>
     /// 宏值编辑对话框
     /// </summary>
@@ -210,6 +209,4 @@ namespace dp2Circulation
         }
 #endif
     }
-
-#endif
 }

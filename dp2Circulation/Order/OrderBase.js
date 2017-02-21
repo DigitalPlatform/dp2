@@ -30,6 +30,16 @@ function ScrollIntoView(elem) {
     }
 }
 
+function getWindowOffset()
+{
+    return window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+}
+
+function setWindowOffset(offset)
+{
+    $(window).scrollTop(offset);
+}
+
 function GetPosition(obj) {
     var left = 0;
     var top = 0;

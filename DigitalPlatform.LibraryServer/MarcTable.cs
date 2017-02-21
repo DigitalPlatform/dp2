@@ -163,7 +163,7 @@ namespace DigitalPlatform.LibraryServer
             fields = record.select("field[@name='020']");
             if (fields.count > 0)
             {
-                results.Add(new NameValueLine("ISBN", BuildFields(fields)));
+                results.Add(new NameValueLine("ISBN", BuildFields(fields), "isbn"));
             }
 
             // Current frequency
@@ -198,7 +198,7 @@ namespace DigitalPlatform.LibraryServer
             MarcNodeList subfields = record.select("field[@name='022']/subfield[@name='a']");
             if (subfields.count > 0)
             {
-                results.Add(new NameValueLine("ISSN", ConcatSubfields(subfields)));
+                results.Add(new NameValueLine("ISSN", ConcatSubfields(subfields), "issn"));
             }
 
             // Linking ISSN

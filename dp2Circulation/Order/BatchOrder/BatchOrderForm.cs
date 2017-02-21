@@ -185,8 +185,7 @@ namespace dp2Circulation
 
                 OutputEnd();
 
-                // 填充 OrderList WebBrowser s
-                FillSheets();
+                RefreshOrderSheets();
 
                 // FillItems(this._lines);
                 return 0;
@@ -284,6 +283,15 @@ namespace dp2Circulation
                 this.toolStripButton_loadBiblio.Text = "装入种册窗";
                 this.toolStripButton_loadBiblio.Enabled = false;
             }
+
+            // 让当前活动的 Sheet 跟随进行相关选择
+            if (this._listForm != null && this._listForm.ActiveSheet != null)
+            {
+                string selection = (string)this.webBrowser1.Document.InvokeScript("getSelection");
+                // MessageBox.Show(this, selection);
+                this._listForm.ActiveSheet.
+                WebBrowser.Document.InvokeScript("selectOrders", new object[] { selection, true });
+            }
         }
 
         public void OnOrderChanged(string strBiblioRecPath,
@@ -300,6 +308,8 @@ namespace dp2Circulation
             order.SetFieldValue(strFieldName, strValue);
 
             this.Changed = true;
+
+            this.BeginRefreshOrderSheets();
         }
 
         // return:
@@ -319,7 +329,11 @@ namespace dp2Circulation
 
             this.Changed = true;
 
-            return BuildOrderHtml(strBiblioRecPath, order, biblio.Orders.Count - 1, "new");
+            string result = BuildOrderHtml(strBiblioRecPath, order, biblio.Orders.Count - 1, "new");
+
+            this.BeginRefreshOrderSheets();
+
+            return result;
         }
 
         public void DeleteOrder(string strBiblioRecPath, string strOrderRefID)
@@ -333,6 +347,8 @@ namespace dp2Circulation
             order.Type = "deleted";
 
             this.Changed = true;
+
+            this.BeginRefreshOrderSheets();
         }
 
         public string ChangeOrder(string strBiblioRecPath, string strOrderRefID, string xml)
@@ -348,10 +364,14 @@ namespace dp2Circulation
 
             this.Changed = true;
 
-            return BuildOrderHtml(strBiblioRecPath,
+            string result = BuildOrderHtml(strBiblioRecPath,
                 order,
                 biblio.Orders.IndexOf(order),
                 order.Type == "new" ? "new" : "changed");
+
+            this.BeginRefreshOrderSheets();
+
+            return result;
         }
 
 
@@ -443,10 +463,39 @@ namespace dp2Circulation
             return "需要增补 " + (copy - locations.Count) + " 个去向";
         }
 
+        public string EditRange(string strBiblioRecPath,
+    string strOrderRefID)
+        {
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
+            BiblioStore biblio = this._recPathTable[strBiblioRecPath] as BiblioStore;
+            if (biblio == null)
+                throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
+            OrderStore order = biblio.FindOrderByRefID(strOrderRefID);
+            if (order == null)
+                throw new Exception("参考ID为 '" + strOrderRefID + "' 的 OrderStore 在内存中没有找到");
+
+            string strRange = order.GetFieldValue("range");
+
+            GetTimeDialog dlg = new GetTimeDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.RangeMode = true;
+            dlg.String8 = strRange;
+            Program.MainForm.AppInfo.LinkFormState(dlg, "RangeDialog_state");
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return null;
+            string strNewValue = dlg.String8;
+            order.SetFieldValue("range", strNewValue);
+            return strNewValue;
+        }
+
+
         #endregion
 
         #region HTML View 操作
 
+#if NO
         /// <summary>
         /// 清除已有的 HTML 显示
         /// </summary>
@@ -470,6 +519,7 @@ namespace dp2Circulation
             Global.WriteHtml(this.webBrowser1,
                 "<html><head>" + strLink + strJs + "</head><body>");
         }
+#endif
 
         /// <summary>
         /// 向 IE 控件中追加一段 HTML 内容
@@ -494,7 +544,9 @@ namespace dp2Circulation
             }
         }
 
-        public static string GetOrderTitleLine()
+        // parameters:
+        //      strPublicationType book/series
+        public static string GetOrderTitleLine(string strPublicationType)
         {
             StringBuilder text = new StringBuilder();
             text.Append("\r\n\t<" + TR + " class='title'>");
@@ -504,6 +556,13 @@ namespace dp2Circulation
             text.Append("\r\n\t\t<" + TD + " class='nowrap'>书目号</" + TD + ">");
             text.Append("\r\n\t\t<" + TD + " class='nowrap'>渠道</" + TD + ">");
             text.Append("\r\n\t\t<" + TD + " class='nowrap'>经费</" + TD + ">");
+
+            if (strPublicationType == "series")
+            {
+                text.Append("\r\n\t\t<" + TD + " class='nowrap' colspan='2'>时间范围</" + TD + ">");
+                text.Append("\r\n\t\t<" + TD + " class='nowrap'>期数</" + TD + ">");
+            }
+
             text.Append("\r\n\t\t<" + TD + " class='nowrap'>复本</" + TD + ">");
             text.Append("\r\n\t\t<" + TD + " class='nowrap'>单价</" + TD + ">");
             text.Append("\r\n\t\t<" + TD + " class='nowrap' colspan='2'>去向</" + TD + ">");
@@ -554,6 +613,8 @@ namespace dp2Circulation
             public string[] ClassValues = null;
             public string[] CopyNumbers = null;
 
+            public string[] IssueCountValues = null;
+
             public Values()
             {
                 string strError = "";
@@ -584,6 +645,8 @@ namespace dp2Circulation
                     copyNumbers.Add(i.ToString());
                 }
                 this.CopyNumbers = copyNumbers.ToArray();
+
+                this.IssueCountValues = new string[] { "6", "12", "24", "36" };
             }
         }
 
@@ -623,18 +686,38 @@ namespace dp2Circulation
             text.Clear();
         }
 
+        // return:
+        //      null    strBiblioRecPath 不是书目库名
+        public static string GetPublicationType(string strBiblioRecPath)
+        {
+            string strBiblioDbName = Global.GetDbName(strBiblioRecPath);
+            BiblioDbProperty prop = Program.MainForm.GetBiblioDbProperty(strBiblioDbName);
+            if (prop == null)
+                return null;
+
+            if (string.IsNullOrEmpty(prop.IssueDbName) == true)
+                return "book";
+
+            return "series";
+        }
+
         int _tableCount = 0;
 
         void OutputBiblio(BiblioStore item, ref int nStart)
         {
+            string strPubType = GetPublicationType(item.RecPath);
+
             StringBuilder text = new StringBuilder();
 
             if (_tableCount == 0)
                 text.Append("\r\n<" + TABLE + " class='frame'>");
 
-            text.Append("\r\n\t<" + TR + " class='check' biblio-recpath='" + item.RecPath + "' " + strOnClick + ">");
+            int nColSpan = 10;
+            if (strPubType == "series")
+                nColSpan += 3;
+            text.Append("\r\n\t<" + TR + " class='check biblio' biblio-recpath='" + item.RecPath + "' " + strOnClick + ">");
             text.Append("\r\n\t\t<" + TD + " class='biblio-index'><div>" + (nStart + 1).ToString() + "</div></" + TD + ">");
-            text.Append("\r\n\t\t<" + TD + " class='nowrap' colspan='10'>"
+            text.Append("\r\n\t\t<" + TD + " class='nowrap' colspan='" + nColSpan + "'>"
                 + "<div class='biblio-head'>" + HttpUtility.HtmlEncode(item.RecPath) + "</div>"
                 + "<div class='biblio-table-container'>" + BuildBiblioHtml(item.RecPath, item.Xml) + "</div>"
                 + "</" + TD + ">");
@@ -643,7 +726,7 @@ namespace dp2Circulation
 
             if (item.Orders.Count > 0)
             {
-                text.Append(GetOrderTitleLine());
+                text.Append(GetOrderTitleLine(strPubType));
                 int i = 0;
                 foreach (OrderStore order in item.Orders)
                 {
@@ -710,6 +793,8 @@ namespace dp2Circulation
             int i,
             string strClass)
         {
+            string strPubType = GetPublicationType(strBiblioRecPath);
+
             StringBuilder text = new StringBuilder();
 
             XmlDocument item_dom = new XmlDocument();
@@ -729,6 +814,15 @@ namespace dp2Circulation
             // source
             string source = DomUtil.GetElementText(item_dom.DocumentElement,
 "source");
+
+            // range
+            string range = DomUtil.GetElementText(item_dom.DocumentElement,
+"range");
+
+            // issueCount
+            string issueCount = DomUtil.GetElementText(item_dom.DocumentElement,
+"issueCount");
+
             // copy
             string copy = DomUtil.GetElementText(item_dom.DocumentElement,
 "copy");
@@ -776,6 +870,21 @@ namespace dp2Circulation
             text.Append("\r\n\t\t<" + TD + " class='source'>");
             text.Append(GetSelectList(source, this._values.SourceValues, "source"));
             text.Append("</" + TD + ">");
+
+            if (strPubType == "series")
+            {
+                text.Append("\r\n\t\t<" + TD + " class='range-text'>");
+                text.Append("<input class='list event' type='text' value='" + HttpUtility.HtmlEncode(range) + "' col-name='range' size='20' " + strOnChange + "/>");
+                text.Append("</" + TD + ">");
+
+                text.Append("\r\n\t\t<" + TD + " class='range-button'>");
+                text.Append("<button type='button' onclick='javascript:onRangeButtonClick(this);'>...</button>");
+                text.Append("</" + TD + ">");
+
+                text.Append("\r\n\t\t<" + TD + " class='issue-count'>");
+                text.Append("<input class='list event' type='text' value='" + HttpUtility.HtmlEncode(issueCount) + "' col-name='issueCount' size='2' " + strOnChange + "/>");
+                text.Append("</" + TD + ">");
+            }
 
             text.Append("\r\n\t\t<" + TD + " class='copy'>");
             // text.Append(HttpUtility.HtmlEncode(copy));
@@ -1191,12 +1300,18 @@ int nCount)
 
         private void ToolStripMenuItem_newOrderTemplate_Click(object sender, EventArgs e)
         {
+            // 看看即将插入的位置是图书还是期刊?
+            string strFirstBiblioRecPath = (string)webBrowser1.Document.InvokeScript("getFirstSelectedBiblioRecPath");
+            string strPubType = GetPublicationType(strFirstBiblioRecPath);
+
             OrderEditForm edit = new OrderEditForm();
 
             // edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
-            SetXml(edit.OrderEditControl, Program.MainForm.AppInfo.GetString("batchOrderForm", "orderRecord", "<root />"));
+            SetXml(edit.OrderEditControl, 
+                Program.MainForm.AppInfo.GetString("batchOrderForm", "orderRecord", "<root />"),
+                strPubType);
             edit.Text = "新增订购事项";
-            edit.DisplayMode = "simple";
+            edit.DisplayMode = strPubType == "series" ? "simpleseries" : "simplebook";
             edit.MainForm = Program.MainForm;
             // edit.ItemControl = this;    // 2016/1/8
 
@@ -1222,9 +1337,23 @@ int nCount)
             return strXml;
         }
 
-        static void SetXml(ItemEditControlBase control, string strXml)
+        static void SetXml(ItemEditControlBase control,
+            string strXml, 
+            string strPublicationType)
         {
             string strError = "";
+
+            // 去掉记录里面的 issueCount 和 range 元素
+            if (string.IsNullOrEmpty(strXml) == false
+                && strPublicationType == "book")
+            {
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(strXml);
+                DomUtil.DeleteElement(dom.DocumentElement, "range");
+                DomUtil.DeleteElement(dom.DocumentElement, "issueCount");
+                strXml = dom.DocumentElement.OuterXml;
+            }
+
             int nRet = control.SetData(strXml, "", null, out strError);
             if (nRet == -1)
                 throw new Exception(strError);
@@ -1250,11 +1379,17 @@ int nCount)
 
         private void ToolStripMenuItem_quickChange_Click(object sender, EventArgs e)
         {
+            // 看看即将插入的位置是图书还是期刊?
+            string strFirstBiblioRecPath = (string)webBrowser1.Document.InvokeScript("getFirstSelectedBiblioRecPath");
+            string strPubType = GetPublicationType(strFirstBiblioRecPath);
+
             OrderEditForm edit = new OrderEditForm();
 
-            SetXml(edit.OrderEditControl, Program.MainForm.AppInfo.GetString("batchOrderForm", "quickChangeOrderRecord", "<root />"));
+            SetXml(edit.OrderEditControl,
+                Program.MainForm.AppInfo.GetString("batchOrderForm", "quickChangeOrderRecord", "<root />"),
+                strPubType);
             edit.Text = "快速修改订购事项";
-            edit.DisplayMode = "simple";
+            edit.DisplayMode = strPubType == "series" ? "simpleseries" : "simplebook";
             edit.MainForm = Program.MainForm;
 
             Program.MainForm.AppInfo.LinkFormState(edit, "BatchOrderForm_OrderEditForm_state");
@@ -1283,6 +1418,7 @@ int nCount)
                 CloseListForm();
 
                 this._listForm = new OrderListViewerForm();
+                this._listForm.BatchOrderForm = this;
                 this._listForm.FormClosed += _listForm_FormClosed;
                 this._listForm.DockChanged += _listForm_DockChanged;
                 // this._listForm.DoDockEvent += _listForm_DoDockEvent;
@@ -1332,6 +1468,8 @@ int nCount)
 
             this.toolStripButton_orderList.Checked = true;
             // this.checkBox_settings_keyboardWizard.Checked = true;
+
+            BeginRefreshOrderSheets();
         }
 
         void _listForm_DockChanged(object sender, EventArgs e)
@@ -1440,7 +1578,6 @@ int nCount)
 
             if (items.Count > 0)
             {
-
                 Hashtable table = biblio.GetFields();
                 // 添加书目、作者、出版社栏
                 foreach (OrderListItem item in items)
@@ -1460,18 +1597,143 @@ int nCount)
                     item.Title = strTitle;
                     item.Author = strAuthor;
                     item.Publisher = (string)table["publisher"];
+                    item.Isbn = (string)table["isbn"];
+                    if (string.IsNullOrEmpty(item.Isbn))
+                        item.Isbn = (string)table["issn"];
+                    if (string.IsNullOrEmpty(item.Isbn))
+                        item.Isbn = (string)table["isbnandprice"];
                 }
             }
             _listCollection.AddRange(items);
         }
 
+        // exception:
+        //      可能会抛出异常
         void FillSheets()
         {
+            if (this._listForm == null)
+                return;
+
+            List<string> exist_names = _listForm.GetSheetNames();
+            List<string> rest_names = new List<string>(exist_names);
+            List<string> states = new List<string>();
+            List<int> offsets = new List<int>();
+            foreach (string name in exist_names)
+            {
+                dp2Circulation.OrderListViewerForm.Sheet sheet = _listForm.GetSheet(name);
+                // 保留以前的选择状态
+                states.Add((string)sheet.WebBrowser.Document.InvokeScript("getSelection"));
+                offsets.Add((int)sheet.WebBrowser.Document.InvokeScript("getWindowOffset"));
+                ClearHtml(sheet.WebBrowser);
+            }
+
+            List<RateItem> rate_table = null;
+            if (string.IsNullOrEmpty(this.RateList) == false)
+                rate_table = RateItem.ParseList(this.RateList);
+
             foreach (OrderList list in _listCollection)
             {
                 dp2Circulation.OrderListViewerForm.Sheet sheet = _listForm.CreateSheet(list.Seller);
-                list.FillInWebBrowser(sheet.WebBrowser);
+                list.FillInWebBrowser(sheet.WebBrowser, rate_table);
+
+                rest_names.Remove(list.Seller);
             }
+
+            int i = 0;
+            foreach (string name in exist_names)
+            {
+                dp2Circulation.OrderListViewerForm.Sheet sheet = _listForm.GetSheet(name);
+                // 恢复以前的选择状态
+                {
+                    string selection = states[i];
+                    if (string.IsNullOrEmpty(selection) == false)
+                        sheet.WebBrowser.Document.InvokeScript("selectOrders", new object[] { selection, false });
+                }
+
+                {
+                    int offset = offsets[i];
+                    if (offset != 0)
+                        sheet.WebBrowser.Document.InvokeScript("setWindowOffset", new object[] { offset });
+                }
+
+                i++;
+            }
+
+            // 删除剩下的 Sheet
+            foreach (string name in rest_names)
+            {
+                _listForm.RemoveSheet(name);
+            }
+        }
+
+        public void OnSheetSelectionChanged(dp2Circulation.OrderListViewerForm.Sheet sheet)
+        {
+            string selection = (string)sheet.WebBrowser.Document.InvokeScript("getSelection");
+            // MessageBox.Show(this, selection);
+            this.webBrowser1.Document.InvokeScript("selectOrders", new object[] { selection, true });
+        }
+
+        void RefreshOrderSheets()
+        {
+            if (_listForm == null)
+                return;
+
+            _listCollection.Clear();
+            foreach (BiblioStore line in _lines)
+            {
+                OutputOrderList(line);
+            }
+            // 填充 OrderList WebBrowser s
+            try
+            {
+                FillSheets();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message);
+            }
+        }
+
+        void BeginRefreshOrderSheets()
+        {
+            this.BeginInvoke(new Action(RefreshOrderSheets));
+        }
+
+        static void ClearHtml(WebBrowser webBrowser1)
+        {
+            HtmlDocument doc = webBrowser1.Document;
+
+            if (doc == null)
+            {
+                webBrowser1.Navigate("about:blank");
+                doc = webBrowser1.Document;
+            }
+            doc = doc.OpenNew(true);
+        }
+
+        public string RateList
+        {
+            get
+            {
+                return Program.MainForm.AppInfo.GetString("batchOrderForm", "rateList", "");
+            }
+            set
+            {
+                Program.MainForm.AppInfo.SetString("batchOrderForm", "rateList", value);
+            }
+        }
+
+        private void toolStripButton_rate_Click(object sender, EventArgs e)
+        {
+            ExchangeRateDialog dlg = new ExchangeRateDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.RateList = this.RateList;
+            Program.MainForm.AppInfo.LinkFormState(dlg, "BatchOrderForm_OrderEditForm_state");
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            this.RateList = dlg.RateList;
         }
     }
 
@@ -1509,9 +1771,13 @@ int nCount)
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("line");
             foreach (XmlElement line in nodes)
             {
-                string strName = line.GetAttribute("name");
-                string strValue = line.GetAttribute("value");
+                // string strName = line.GetAttribute("name");
                 string strType = line.GetAttribute("type");
+
+                if (string.IsNullOrEmpty(strType))
+                    continue;
+
+                string strValue = line.GetAttribute("value");
 
                 if (results.ContainsKey(strType) == false)
                     results[strType] = strValue;

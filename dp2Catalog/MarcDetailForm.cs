@@ -7919,7 +7919,7 @@ Keys keyData)
             //      -1  error
             //      0   not found
             //      1   found
-            nRet = MacroUtil.GetFromLocalMacroTable(PathUtil.MergePath(this.MainForm.DataDir, "marceditor_macrotable.xml"),
+            nRet = MacroUtil.GetFromLocalMacroTable(PathUtil.MergePath(this.MainForm.UserDir, "marceditor_macrotable.xml"),
                 strName,
                 e.Simulate,
                 out strValue,

@@ -83,6 +83,16 @@ function clearAllChanged() {
     });
 }
 
+function getFirstSelectedBiblioRecPath() {
+    var tr = $(".sel").first();
+    if (tr.hasClass('order')) {
+        return tr.attr('biblio-recpath');
+    }
+    else {
+        return tr.attr('biblio-recpath');
+    }
+}
+
 function newOrder(xml) {
     $(".sel").each(function (index) {
         var tr = $(this);
@@ -99,7 +109,7 @@ function newOrder(xml) {
             var biblio_recpath = tr.attr('biblio-recpath');
             var next_tr = tr.next();
             if (next_tr.hasClass('title') == false) {
-                tr.after(window.external.getOrderTitleLine());
+                tr.after(window.external.getOrderTitleLine(biblio_recpath));
                 next_tr = tr.next();
             }
             next_tr.after(window.external.newOrder(biblio_recpath, xml));
@@ -183,6 +193,24 @@ function onDisButtonClick(o) {
     var text_td = td.prev();
     // alert(text_td.html());
     text_td.html(result.replace(';', ';<br/>'));
+    text_td.addClass('changed');
+
+    displayError(text_td, null);
+}
+
+function onRangeButtonClick(o) {
+    var td = $(o).parent();
+    var tr = td.parent();
+
+    var biblio_recpath = tr.attr('biblio-recpath');
+    var refid = tr.attr('ref-id');
+    var result = window.external.editRange(biblio_recpath, refid);
+    if (result == null)
+        return;
+
+    var text_td = td.prev();
+    // alert(text_td.html());
+    text_td.html(result);
     text_td.addClass('changed');
 
     displayError(text_td, null);
@@ -330,4 +358,50 @@ function loadBiblio() {
     });
 }
 
+function selectOrders(refid_list, scroll) {
+    var changed = false;
+    // 先清除所有书目行的选择
+    $(".biblio.check.sel").each(function (index) {
+        var tr = $(this);
+        tr.removeClass('sel');
+        changed = true;
+    });
 
+    var refids = refid_list.split('|');
+
+    $(".order.check").each(function (index) {
+        var tr = $(this);
+        var refid = tr.attr('ref-id');
+        if (jQuery.inArray(refid, refids) == -1) {
+            if (tr.hasClass('sel') == true) {
+                tr.removeClass('sel');
+                changed = true;
+            }
+        }
+        else {
+            if (tr.hasClass('sel') == false) {
+                tr.addClass('sel');
+                changed = true;
+                if (scroll == true) {
+                    window.setTimeout(function () {
+                        ScrollIntoView(tr);
+                    }, 100);
+                }
+            }
+        }
+        changed = true;
+    });
+    if (changed == true)
+        window.external.onSelectionChanged();
+}
+
+
+function getSelection() {
+    var result = "";
+    $(".order.sel").each(function (index) {
+        var tr = $(this);
+        var order_refid = tr.attr('ref-id');
+        result += order_refid + "|";
+    });
+    return result;
+}

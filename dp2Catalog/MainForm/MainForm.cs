@@ -5080,6 +5080,20 @@ out string strError)
         }
 
         #endregion
+
+        private void MenuItem_editMarcoTable_Click(object sender, EventArgs e)
+        {
+            MacroTableDialog dlg = new MacroTableDialog();
+            // MainForm.SetControlFont(dlg, this.Font, false);
+            GuiUtil.SetControlFont(dlg, this.DefaultFont);
+            dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, "marceditor_macrotable.xml");
+
+            this.AppInfo.LinkFormState(dlg, "MacroTableDialog_state");
+            dlg.ShowDialog(this);
+            this.AppInfo.UnlinkFormState(dlg);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+        }
     }
 
     public class EnableState

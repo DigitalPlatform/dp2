@@ -1,6 +1,5 @@
-﻿namespace dp2Circulation
+﻿namespace DigitalPlatform.CirculationClient
 {
-#if NO
     partial class MacroTableDialog
     {
         /// <summary>
@@ -119,6 +118,4 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_name;
         private System.Windows.Forms.DataGridViewTextBoxColumn Column_value;
     }
-
-#endif
 }

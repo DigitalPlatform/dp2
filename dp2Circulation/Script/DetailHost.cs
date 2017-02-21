@@ -294,7 +294,8 @@ namespace dp2Circulation
                         //      0   not found
                         //      1   found
                         nRet = MacroUtil.GetFromLocalMacroTable(
-                            PathUtil.MergePath(this.DetailForm.MainForm.DataDir, "marceditor_macrotable.xml"),
+                            // PathUtil.MergePath(this.DetailForm.MainForm.DataDir, "marceditor_macrotable.xml"),
+                            PathUtil.MergePath(Program.MainForm.UserDir, "marceditor_macrotable.xml"),
                 "catalog_batchno",
                 false,
                 out strValue,

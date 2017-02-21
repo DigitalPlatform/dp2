@@ -1753,7 +1753,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (this.MaxClients != 255) // 255 通道情况下不再检查版本失效日期 2016/11/3
                     {
-                        DateTime expire = new DateTime(2017, 3, 1); // 上一个版本是 2016/11/1
+                        DateTime expire = new DateTime(2017, 6, 1); // 上一个版本是 2017/3/1 2016/11/1
                         if (DateTime.Now > expire)
                         {
                             if (this.MaxClients == 255)

@@ -1156,6 +1156,9 @@ this.DbType + "_search_form",
             bool bSelectFirstLine = false;
             long lStart = 0;
             long lCount = lHitCount;
+
+            long lMaxPerCount = 500;
+
             DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
             bool bPushFillingBrowse = this.PushFillingBrowse;
@@ -1179,13 +1182,16 @@ this.DbType + "_search_form",
 
                 string strTempBrowseStyle = strBrowseStyle;
                 if (bTempQuickLoad)
-                    StringUtil.RemoveFromInList("cols", false, ref strTempBrowseStyle);
+                {
+                    // StringUtil.RemoveFromInList("cols", false, ref strTempBrowseStyle);
+                    strTempBrowseStyle += ",format:@coldef:*/parent";
+                }
 
                 long lRet = Channel.GetSearchResult(
                     stop,
                     null,   // strResultSetName
                     lStart,
-                    lCount,
+                    Math.Min(lMaxPerCount, lCount),
                     strTempBrowseStyle, // bOutputKeyCount == true ? "keycount" : "id,cols",
                     this.Lang,
                     out searchresults,
@@ -1281,6 +1287,33 @@ this.DbType + "_search_form",
                                     searchresult.Path,
                                     cols);
                             item.Tag = query;
+                        }
+
+                        // 2017/2/21
+                        // 填入 parent_id 列内容
+                        if (bTempQuickLoad)
+                        {
+                            int nCol = -1;
+                            string strBiblioRecPath = "";
+                            // 获得事项所从属的书目记录的路径
+                            // parameters:
+                            //      bAutoSearch 当没有 parent id 列的时候，是否自动进行检索以便获得书目记录路径
+                            // return:
+                            //      -1  出错
+                            //      0   相关数据库没有配置 parent id 浏览列
+                            //      1   找到
+                            int nRet = GetBiblioRecPath(item,
+            false,
+            out nCol,
+            out strBiblioRecPath,
+            out strError);
+                            if (nRet == 1)
+                            {
+                                int nTempCol = this.m_bBiblioSummaryColumn == true ? 2 : 1;
+                                string strParentID = ListViewUtil.GetItemText(item, nTempCol);
+                                ListViewUtil.ChangeItemText(item, nCol, strParentID);
+                                ListViewUtil.ChangeItemText(item, nTempCol, "");
+                            }
                         }
 
                         query.Items.Add(item);

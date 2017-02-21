@@ -1760,6 +1760,10 @@ MessageBoxDefaultButton.Button1);
             {
                 dom.Load(strFileName);
             }
+            catch (DirectoryNotFoundException)
+            {
+                return 0;   // 路径中某一级不存在
+            }
             catch (FileNotFoundException)
             {
                 return 0;   // 文件不存在

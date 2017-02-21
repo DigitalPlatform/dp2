@@ -978,7 +978,7 @@ namespace dp2Catalog
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    nRet = MacroUtil.GetFromLocalMacroTable(PathUtil.MergePath(this.DetailForm.MainForm.DataDir, "marceditor_macrotable.xml"),
+                    nRet = MacroUtil.GetFromLocalMacroTable(PathUtil.MergePath(this.DetailForm.MainForm.UserDir, "marceditor_macrotable.xml"),
             "catalog_batchno",
             false,
             out strValue,

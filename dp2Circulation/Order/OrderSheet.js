@@ -11,13 +11,17 @@ $(document).ready(function () {
 });
 
 function toggleSel(o) {
-    o.toggleClass('sel');
-    //window.external.onSelectionChanged();
+    if (o.hasClass('check')) {
+        o.toggleClass('sel');
+        window.external.onSelectionChanged();
+    }
 }
 
 function setSel(o) {
-    o.addClass('sel');
-    //window.external.onSelectionChanged();
+    if (o.hasClass('check')) {
+        o.addClass('sel');
+        window.external.onSelectionChanged();
+    }
 }
 
 function clearAllSel() {
@@ -27,8 +31,8 @@ function clearAllSel() {
         tr.removeClass('sel');
         changed = true;
     });
-    //if (changed == true)
-    //    window.external.onSelectionChanged();
+    if (changed == true)
+        window.external.onSelectionChanged();
 }
 
 function clearAllChanged() {
@@ -56,18 +60,16 @@ function setErrorText(o, error) {
         o.append("<div class='error-text'>" + error + "</div>");
 }
 
-function getSelectionCount() {
-    var count_order = 0;
-    var count_biblio = 0;
+function getSelection() {
+    var result = "";
     $(".sel").each(function (index) {
         var tr = $(this);
-        if (tr.hasClass('order'))
-            count_order++;
-        else
-            count_biblio++;
-
+        var biblio_recpath = tr.attr('biblio-recpath');
+        var orders_refid = tr.attr('orders-refid');
+        // result += "b=" + biblio_recpath + ",o=" + orders_refid + ";";
+        result += orders_refid + "|";
     });
-    return { order: count_order, biblio: count_biblio };
+    return result;
 }
 
 function selectAllBiblio(clearBefore) {
@@ -86,8 +88,8 @@ function selectAllBiblio(clearBefore) {
                 changed = true;
         }
     });
-    //if (changed == true)
-    //    window.external.onSelectionChanged();
+    if (changed == true)
+        window.external.onSelectionChanged();
 }
 
 function selectAllOrder(clearBefore) {
@@ -105,8 +107,8 @@ function selectAllOrder(clearBefore) {
             }
         }
     });
-    //if (changed == true)
-    //    window.external.onSelectionChanged();
+    if (changed == true)
+        window.external.onSelectionChanged();
 }
 
 function setSelIf(o) {
@@ -136,4 +138,65 @@ function onClicked(o) {
     }
 }
 
+//阻止事件冒泡函数
+function stopBubble(e) {
+    if (e && e.stopPropagation)
+        e.stopPropagation()
+    else
+        window.event.cancelBubble = true
+}
 
+// 只是修改选中状态，不引发 window.external.onSelectionChanged();
+function selectOrders(refid_list, scroll) {
+    var changed = false;
+
+    /*
+    // 先清除所有书目行的选择
+    $(".biblio.check.sel").each(function (index) {
+        var tr = $(this);
+        tr.removeClass('sel');
+        changed = true;
+    });
+    */
+
+    //alert("list:" + refid_list);
+
+    var refids = refid_list.split('|');
+
+    $(".item.check").each(function (index) {
+        var tr = $(this);
+        var current_refids = tr.attr('orders-refid').split('|');
+        //alert("current_refids:" + current_refids);
+
+        if (inarray(refids, current_refids) == false) {
+            if (tr.hasClass('sel') == true) {
+                tr.removeClass('sel');
+                changed = true;
+            }
+        }
+        else {
+            if (tr.hasClass('sel') == false) {
+                tr.addClass('sel');
+                changed = true;
+                if (scroll == true) {
+                    window.setTimeout(function () {
+                        ScrollIntoView(tr);
+                    }, 100);
+                }
+            }
+        }
+        changed = true;
+    });
+    //if (changed == true)
+    //    window.external.onSelectionChanged();
+}
+
+function inarray(array1, array2) {
+    for (var i = 0; i < array1.length; i++) {
+        var s = array1[i];
+        if (jQuery.inArray(s, array2) != -1)
+            return true;
+    }
+
+    return false;
+}

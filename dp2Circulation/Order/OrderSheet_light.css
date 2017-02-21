@@ -34,18 +34,6 @@ TD.summary IMG {
     white-space: nowrap;
 }
 
-TR.read {
-    background-color: #aaffaa;
-}
-
-input {
-    border-width: 0;
-}
-
-select {
-    outline: 0;
-}
-
 .sel {
     background-color: #cfcfe9;
 }
@@ -84,19 +72,19 @@ TABLE.biblio {
         padding-bottom: 2pt;
     }
 
-    TABLE.biblio TD.name {
-        text-align: right;
-        /* background-color: #ffffff; */
-        color: #777777;
-        width: 10%;
-        border: 0pt;
-        border-right: 1pt;
-        border-color: #999999;
-        border-style: solid;
-        text-align: right;
-        vertical-align: top;
-        white-space: nowrap;
-    }
+        TABLE.biblio TD.name {
+            text-align: right;
+            /* background-color: #ffffff; */
+            color: #777777;
+            width: 10%;
+            border: 0pt;
+            border-right: 1pt;
+            border-color: #999999;
+            border-style: solid;
+            text-align: right;
+            vertical-align: top;
+            white-space: nowrap;
+        }
 
     table.biblio tr.type-title td.value {
         font-weight: bold;
@@ -121,16 +109,16 @@ TABLE.biblio {
     border-right: 0pt;
 }
 
-    .biblio-index div {
-        margin: 0pt;
-        margin-top: 16pt;
-        padding: 8pt;
-        text-align: right;
-        background-color: #999999;
-        font-size: 12pt;
-        font-weight: bolder;
-        color: white;
-    }
+.item-index {
+    margin: 0pt;
+    margin-top: 16pt;
+    padding: 4pt;
+    text-align: right;
+    background-color: #bbbbbb;
+    font-size: 12pt;
+    font-weight: bolder;
+    color: white;
+}
 
 tr.order TD {
     border: 0pt;
@@ -170,16 +158,24 @@ div.error-text {
     color: white;
 }
 
-tr.new td.order-index, tr.new.changed td.order-index {
-    border-style: solid;
-    border: 0pt;
-    border-left: 8pt;
-    border-left-color: yellow;
+tr.sep td {
+    height: 8pt;
+    border-bottom: 1px;
+    border-bottom-color: black;
+    border-style: dotted;
 }
 
-tr.changed td.order-index {
-    border-style: solid;
-    border: 0pt;
-    border-left: 8pt;
-    border-left-color: green;
+table.sum td.name {
+    color: #888888;
+    text-align: right;
+}
+
+table.sum td.value {
+    border-right: 0px;
+}
+
+table.sum tr.seller td {
+    font-size: 12pt;
+    font-weight: bolder;
+    text-align: center;
 }

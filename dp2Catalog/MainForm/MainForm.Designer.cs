@@ -126,6 +126,7 @@ namespace dp2Catalog
             this.toolStrip_panelFixed = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
+            this.MenuItem_editMarcoTable = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -388,6 +389,7 @@ namespace dp2Catalog
             this.toolStripSeparator17,
             this.MenuItem_openMarcDetailFormEx,
             this.MenuItem_openDcFormEx,
+            this.MenuItem_editMarcoTable,
             this.toolStripSeparator18,
             this.MenuItem_openZBatchSearchForm,
             this.MenuItem_openAdvertiseForm});
@@ -846,7 +848,7 @@ namespace dp2Catalog
             this.toolStripButton_testSearch.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_testSearch.Image")));
             this.toolStripButton_testSearch.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_testSearch.Name = "toolStripButton_testSearch";
-            this.toolStripButton_testSearch.Size = new System.Drawing.Size(79, 21);
+            this.toolStripButton_testSearch.Size = new System.Drawing.Size(79, 26);
             this.toolStripButton_testSearch.Text = "Test Search";
             this.toolStripButton_testSearch.Visible = false;
             this.toolStripButton_testSearch.Click += new System.EventHandler(this.toolStripButton_testSearch_Click);
@@ -990,6 +992,13 @@ namespace dp2Catalog
             this.splitter_fixed.TabIndex = 7;
             this.splitter_fixed.TabStop = false;
             // 
+            // MenuItem_editMarcoTable
+            // 
+            this.MenuItem_editMarcoTable.Name = "MenuItem_editMarcoTable";
+            this.MenuItem_editMarcoTable.Size = new System.Drawing.Size(221, 22);
+            this.MenuItem_editMarcoTable.Text = "∫Í∂®“Â(&M) ...";
+            this.MenuItem_editMarcoTable.Click += new System.EventHandler(this.MenuItem_editMarcoTable_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1129,6 +1138,7 @@ namespace dp2Catalog
         private System.Windows.Forms.ToolStripButton toolStripButton_searchA;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator20;
         public System.Windows.Forms.ToolStripButton toolStripButton_copyToFixed;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_editMarcoTable;
     }
 }
 

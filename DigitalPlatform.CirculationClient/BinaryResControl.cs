@@ -862,7 +862,8 @@ bool bChanged)
 
             menuItem = new MenuItem("查看(&V)");
             menuItem.Click += new System.EventHandler(this.menu_view_Click);
-            if (this.ListView.SelectedItems.Count == 0 || StringUtil.MatchMIME(strMime, "image") == false)
+            if (this.ListView.SelectedItems.Count == 0 
+                || (StringUtil.MatchMIME(strMime, "image") == false /*&& strMime != "application/pdf"*/))
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -1675,28 +1676,55 @@ bool bChanged)
             string strResPath = this.BiblioRecPath + "/object/" + strID;
             strResPath = strResPath.Replace(":", "/");
 
-            // var html = @"<html><body style=""background-image: url(dpres:"+strResPath+@")""></body></html>";
-            var html = @"<html><body><img src='dpres:" + strResPath + "' alt='image'></img></body></html>";
-
-            try
+            string strMime = ListViewUtil.GetItemText(item, COLUMN_MIME);
+            if (strMime == "application/pdf")
             {
-                using (ObjectViewerDialog dlg = new ObjectViewerDialog())
+                try
                 {
-                    _dlg = dlg;
-                    dlg.Text = "查看图像 " + strResPath;
-                    dlg.HtmlString = html;
-                    dlg.UiState = _uiState;
+                    using (ObjectViewerDialog dlg = new ObjectViewerDialog())
+                    {
+                        _dlg = dlg;
+                        dlg.Text = "查看 " + strResPath;
+                        dlg.Url = "dpres:" + strResPath;
+                        dlg.UiState = _uiState;
 
-                    if (string.IsNullOrEmpty(_uiState))
-                        dlg.StartPosition = FormStartPosition.CenterScreen;
-                    dlg.ShowDialog(this);
+                        if (string.IsNullOrEmpty(_uiState))
+                            dlg.StartPosition = FormStartPosition.CenterScreen;
+                        dlg.ShowDialog(this);
 
-                    _uiState = dlg.UiState;
+                        _uiState = dlg.UiState;
+                    }
+                }
+                finally
+                {
+                    _dlg = null;
                 }
             }
-            finally
+            else
             {
-                _dlg = null;
+                // var html = @"<html><body style=""background-image: url(dpres:"+strResPath+@")""></body></html>";
+                var html = @"<html><body><img src='dpres:" + strResPath + "' alt='image'></img></body></html>";
+
+                try
+                {
+                    using (ObjectViewerDialog dlg = new ObjectViewerDialog())
+                    {
+                        _dlg = dlg;
+                        dlg.Text = "查看图像 " + strResPath;
+                        dlg.HtmlString = html;
+                        dlg.UiState = _uiState;
+
+                        if (string.IsNullOrEmpty(_uiState))
+                            dlg.StartPosition = FormStartPosition.CenterScreen;
+                        dlg.ShowDialog(this);
+
+                        _uiState = dlg.UiState;
+                    }
+                }
+                finally
+                {
+                    _dlg = null;
+                }
             }
             return;
         ERROR1:
