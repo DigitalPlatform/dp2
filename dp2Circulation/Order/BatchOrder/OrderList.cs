@@ -125,8 +125,9 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    Debug.Assert(sum_prices.Count == 1, "");
-                    info.TotalPrice = sum_prices[0];
+                    // Debug.Assert(sum_prices.Count == 1, "");
+                    // info.TotalPrice = sum_prices[0];
+                    info.TotalPrice = PriceUtil.JoinPriceString(sum_prices);
                 }
             }
             else if (totalprices.Count == 1)

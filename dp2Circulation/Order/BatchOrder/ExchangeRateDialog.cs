@@ -195,6 +195,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 throw new Exception(strError);
 
+#if NO
             StringBuilder text = new StringBuilder();
             for (int i = 0; i < results.Count; i++)
             {
@@ -210,6 +211,8 @@ namespace dp2Circulation
             }
 
             return text.ToString().TrimStart(new char[] { '+' });
+#endif
+            return PriceUtil.JoinPriceString(results);
         }
     }
 

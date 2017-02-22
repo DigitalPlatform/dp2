@@ -392,7 +392,7 @@ namespace DigitalPlatform.CommonControl
         // return:
         //      -1  error
         //      0   succeed
-        static int VerifyDateRange(string strValue,
+        public static int VerifyDateRange(string strValue,
             out string strError)
         {
             strError = "";

@@ -561,6 +561,7 @@
     <Compile Include="Order\BatchOrder\BatchOrderForm.Designer.cs">
       <DependentUpon>BatchOrderForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Order\BatchOrder\ErrorInfoCollection.cs" />
     <Compile Include="Order\BatchOrder\ExchangeRateDialog.cs">
       <SubType>Form</SubType>
     </Compile>

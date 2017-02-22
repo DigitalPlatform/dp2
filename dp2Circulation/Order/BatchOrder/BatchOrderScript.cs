@@ -57,6 +57,12 @@ namespace dp2Circulation
             return this.BatchOrderForm.ChangeOrder(strBiblioRecPath, refid, xml);
         }
 
+        // 验证一条书目记录下属的若干订购记录
+        public System.Reflection.IReflect verifyOrders(string strBiblioRecPath)
+        {
+            return this.BatchOrderForm.VerifyOrders(strBiblioRecPath);
+        }
+
         public void loadBiblio(string strBiblioRecPath)
         {
             this.BatchOrderForm.LoadBiblio(strBiblioRecPath);

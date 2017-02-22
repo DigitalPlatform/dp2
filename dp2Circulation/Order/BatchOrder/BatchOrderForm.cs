@@ -374,6 +374,13 @@ namespace dp2Circulation
             return result;
         }
 
+        public System.Reflection.IReflect VerifyOrders(string strBiblioRecPath)
+        {
+            List<string> list = new List<string>();
+            list.Add("test1");
+            list.Add("test2");
+            return new Reflector(list);
+        }
 
         public void LoadBiblio(string strBiblioRecPath)
         {
@@ -972,6 +979,12 @@ namespace dp2Circulation
 
             string strError = "";
 
+            if (VerifyOrders() == false)
+            {
+                strError = "校验发现订购记录有错误，保存操作被放弃。请修改后重新保存。";
+                goto ERROR1;
+            }
+
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = TimeSpan.FromMinutes(2);
@@ -1307,7 +1320,7 @@ int nCount)
             OrderEditForm edit = new OrderEditForm();
 
             // edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
-            SetXml(edit.OrderEditControl, 
+            SetXml(edit.OrderEditControl,
                 Program.MainForm.AppInfo.GetString("batchOrderForm", "orderRecord", "<root />"),
                 strPubType);
             edit.Text = "新增订购事项";
@@ -1338,7 +1351,7 @@ int nCount)
         }
 
         static void SetXml(ItemEditControlBase control,
-            string strXml, 
+            string strXml,
             string strPublicationType)
         {
             string strError = "";
@@ -1735,6 +1748,49 @@ int nCount)
 
             this.RateList = dlg.RateList;
         }
+
+        private void toolStripButton_test_Click(object sender, EventArgs e)
+        {
+            if (Control.ModifierKeys == Keys.Control)
+            {
+                webBrowser1.Document.InvokeScript("clearAllErrorInfo");
+                return;
+            }
+
+
+            // webBrowser1.Document.InvokeScript("test");
+            VerifyOrders();
+        }
+
+        // 校验所有订购记录的格式合法性
+        // return:
+        //      true    合法
+        //      false   有不合法的事项
+        bool VerifyOrders()
+        {
+            // TODO: 首先清除以前残留的报错信息
+            webBrowser1.Document.InvokeScript("clearAllErrorInfo");
+
+            int nErrorCount = 0;
+            foreach (BiblioStore biblio in this._lines)
+            {
+                // 将出错信息存储到内存结构
+                if (biblio.VerifyOrders() == false)
+                {
+                    foreach (OrderStore order in biblio.Orders)
+                    {
+                        // 将出错信息显示到 WebControl 页面
+                        if (string.IsNullOrEmpty(order.ErrorInfo) == false)
+                            webBrowser1.Document.InvokeScript("setErrorInfo", new object[] { order.RefID, order.ErrorInfo });
+                    }
+                    nErrorCount++;
+                }
+            }
+
+            if (nErrorCount > 0)
+                return false;
+            return true;
+        }
     }
 
     /// <summary>
@@ -1786,7 +1842,229 @@ int nCount)
             return results;
         }
 
+        // 校验所有下属订购记录的格式合法性
+        // return:
+        //      true    合法
+        //      false   有不合法的事项
+        public bool VerifyOrders()
+        {
+            string strError = "";
+            int nRet = 0;
 
+            string strPubType = BatchOrderForm.GetPublicationType(this.RecPath);
+            bool bStrict = true;    // 是否要严格检查
+
+            foreach (OrderStore order in Orders)
+            {
+                order.ErrorInfo = "";
+            }
+
+            int nErrorCount = 0;
+            foreach (OrderStore order in Orders)
+            {
+                string strState = order.GetFieldValue("state");
+                if (string.IsNullOrEmpty(strState) == false)
+                    continue;
+
+                List<string> errors = new List<string>();
+
+                // 检查去向字符串
+                string strLocationString = order.GetFieldValue("distribute");
+                LocationCollection locations = new LocationCollection();
+                nRet = locations.Build(strLocationString, out strError);
+                if (nRet == -1)
+                    errors.Add("馆藏分配去向字符串 '" + strLocationString + "' 格式错误: " + strError);
+
+                // price 和 totalPrice
+                string strPrice = order.GetFieldValue("price");
+                string strTotalPrice = order.GetFieldValue("totalPrice");
+
+                if (String.IsNullOrEmpty(strTotalPrice) == true)
+                {
+                    if (String.IsNullOrEmpty(strPrice) == true)
+                        errors.Add("尚未输入价格");
+                }
+                else
+                {
+                    if (String.IsNullOrEmpty(strState) == true
+                        && String.IsNullOrEmpty(strPrice) == false)
+                        errors.Add("当输入了价格 ('" + strPrice + "') 时，必须把总价格设置为空 (但现在为 '" + strTotalPrice + "')");
+                }
+
+                // copy
+
+                string strCopyString = order.GetFieldValue("copy");
+                if (String.IsNullOrEmpty(strCopyString) == true)
+                    errors.Add("尚未输入复本数");
+
+                // range 和 issueCount
+                if (strPubType == "series")
+                {
+                    string strRangeString = order.GetFieldValue("range");
+
+                    if (String.IsNullOrEmpty(strRangeString) == true)
+                        errors.Add("尚未输入时间范围");
+                    else
+                    {
+                        if (strRangeString.Length != (2 * 8 + 1))
+                            errors.Add("尚未输入完整的时间范围");
+                        else
+                        {
+                            // return:
+                            //      -1  error
+                            //      0   succeed
+                            nRet = OrderDesignControl.VerifyDateRange(strRangeString,
+                                out strError);
+                            if (nRet == -1)
+                                errors.Add(strError);
+                        }
+                    }
+
+                    string strIssueCountString = order.GetFieldValue("issueCount");
+                    if (String.IsNullOrEmpty(strIssueCountString) == true)
+                        errors.Add("尚未输入期数");
+                }
+
+                if (bStrict == true)
+                {
+                    string strSource = order.GetFieldValue("source");
+                    string strSeller = order.GetFieldValue("seller");
+
+                    if (String.IsNullOrEmpty(strSource) == true
+                        && strSeller != "交换" && strSeller != "赠")
+                        errors.Add("尚未输入经费来源");
+
+                    if (strSeller == "交换" || strSeller == "赠")
+                    {
+                        if (String.IsNullOrEmpty(strSource) == false)
+                            errors.Add("如果渠道为 交换 或 赠，则经费来源必须为空");
+                    }
+
+                    if (String.IsNullOrEmpty(strSeller) == true)
+                        errors.Add("尚未输入渠道");
+
+                    // 书目号可以为空
+
+                    string strClass = order.GetFieldValue("class");
+                    if (String.IsNullOrEmpty(strClass) == true)
+                        errors.Add("尚未输入类别");
+
+                }
+
+                if (errors.Count > 0)
+                {
+                    order.ErrorInfo = StringUtil.MakePathList(errors, "; ");
+                    nErrorCount++;
+                }
+            }
+
+            if (bStrict == true)
+            {
+                // 检查 渠道 + 经费来源 + 价格 3元组是否有重复
+                for (int i = 0; i < this.Orders.Count; i++)
+                {
+                    OrderStore order = this.Orders[i];
+
+                    string strState = order.GetFieldValue("state");
+                    if (string.IsNullOrEmpty(strState) == false)
+                        continue;
+
+                    List<string> errors0 = new List<string>();
+
+                    string strLocationString = order.GetFieldValue("distribute");
+                    LocationCollection locations = new LocationCollection();
+                    nRet = locations.Build(strLocationString, out strError);
+                    if (nRet == -1)
+                        errors0.Add("馆藏分配去向字符串 '" + strLocationString + "' 格式错误: " + strError);
+
+                    if (errors0.Count > 0)
+                    {
+                        order.ErrorInfo = StringUtil.MakePathList(errors0, "; ");
+                        nErrorCount++;
+                    }
+
+                    string strUsedLibraryCodes = StringUtil.MakePathList(locations.GetUsedLibraryCodes());
+#if NO
+
+                    // 检查馆代码是否在管辖范围内
+                    // 只检查修改过的事项
+                    if (IsChangedItem(item) == true
+                        && this.VerifyLibraryCode != null)
+                    {
+                        VerifyLibraryCodeEventArgs e = new VerifyLibraryCodeEventArgs();
+                        e.LibraryCode = strUsedLibraryCodes;
+                        this.VerifyLibraryCode(this, e);
+                        if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                        {
+                            strError = "第 " + (i + 1).ToString() + " 行: 馆藏分配去向错误: " + e.ErrorInfo;
+                            return -1;
+                        }
+                    }
+#endif
+                    string strSeller = order.GetFieldValue("seller");
+                    string strSource = order.GetFieldValue("source");
+                    string strPrice = order.GetFieldValue("price");
+
+                    for (int j = i + 1; j < this.Orders.Count; j++)
+                    {
+                        OrderStore temp_order = this.Orders[j];
+
+                        string strTempState = temp_order.GetFieldValue("state");
+                        if (string.IsNullOrEmpty(strTempState) == false)
+                            continue;
+
+                        List<string> errors = new List<string>();
+
+                        string strTempLocationString = temp_order.GetFieldValue("distribute");
+                        LocationCollection temp_locations = new LocationCollection();
+                        nRet = temp_locations.Build(strTempLocationString, out strError);
+                        if (nRet == -1)
+                            errors.Add("馆藏分配去向字符串 '" + strTempLocationString + "' 格式错误: " + strError);
+
+                        string strTempUsedLibraryCodes = StringUtil.MakePathList(temp_locations.GetUsedLibraryCodes());
+
+                        string strTempSeller = temp_order.GetFieldValue("seller");
+                        string strTempSource = temp_order.GetFieldValue("source");
+                        string strTempPrice = temp_order.GetFieldValue("price");
+
+                        if (strPubType == "book")
+                        {
+                            // 对图书检查四元组
+                            if (strSeller == strTempSeller
+                                && strSource == strTempSource
+                                && strPrice == strTempPrice
+                                && strUsedLibraryCodes == strTempUsedLibraryCodes)
+                            {
+                                // string strDebugInfo = "strPrice='"+strPrice+"' strTempPrice='"+strTempPrice+"'";
+                                errors.Add("第 " + (i + 1).ToString() + " 行 和 第 " + (j + 1) + " 行之间 渠道/经费来源/价格/馆藏分配去向(中所含的馆代码) 四元组重复，需要将它们合并为一行");
+                            }
+                        }
+                        else
+                        {
+                            // 对期刊检查五元组
+                            if (strSeller == strTempSeller
+                                && strSource == strTempSource
+                                && strPrice == strTempPrice
+                                && order.GetFieldValue("range") == temp_order.GetFieldValue("range")
+                                && strUsedLibraryCodes == strTempUsedLibraryCodes)
+                                errors.Add( "第 " + (i + 1).ToString() + " 行 和 第 " + (j + 1) + " 行之间 渠道/经费来源/时间范围/价格/馆藏分配去向(中所含的馆代码) 五元组重复，需要将它们合并为一行");
+                        }
+
+                        // 
+                        if (errors.Count > 0)
+                        {
+                            temp_order.ErrorInfo = StringUtil.MakePathList(errors, "; ");
+                            nErrorCount++;
+                        }
+                    }
+
+                }
+            }
+
+            if (nErrorCount > 0)
+                return false;
+            return true;
+        }
     }
 
     /// <summary>

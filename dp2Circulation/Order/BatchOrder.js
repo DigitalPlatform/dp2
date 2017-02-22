@@ -405,3 +405,21 @@ function getSelection() {
     });
     return result;
 }
+
+function setErrorInfo(refid, text) {
+    $(".order").each(function (index) {
+        var tr = $(this);
+        var order_refid = tr.attr('ref-id');
+        if (order_refid == refid) {
+            tr.before("<tr class='error-info'><td colspan='14' ><div class='error-text'>" + text + "</div></tr></tr>");
+        }
+    });
+}
+
+function clearAllErrorInfo() {
+    $(".error-info").each(function (index) {
+        var tr = $(this);
+        // tr.html('...');
+        tr.detach();
+    });
+}
