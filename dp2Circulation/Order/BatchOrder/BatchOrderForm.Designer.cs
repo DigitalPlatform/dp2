@@ -221,6 +221,7 @@
             this.toolStripButton_test.Name = "toolStripButton_test";
             this.toolStripButton_test.Size = new System.Drawing.Size(33, 22);
             this.toolStripButton_test.Text = "test";
+            this.toolStripButton_test.Visible = false;
             this.toolStripButton_test.Click += new System.EventHandler(this.toolStripButton_test_Click);
             // 
             // BatchOrderForm

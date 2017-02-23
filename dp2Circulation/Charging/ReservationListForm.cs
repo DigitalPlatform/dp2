@@ -498,7 +498,8 @@ namespace dp2Circulation
 
             StringBuilder text = new StringBuilder();
 
-            string strBinDir = Environment.CurrentDirectory;
+            // string strBinDir = Environment.CurrentDirectory;
+            string strBinDir = Program.MainForm.UserDir;    // 2017/2/23
 
             string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
             string strSummaryJs = Path.Combine(this.MainForm.DataDir, "getsummary.js");

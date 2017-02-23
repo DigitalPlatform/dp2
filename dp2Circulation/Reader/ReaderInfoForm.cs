@@ -5854,7 +5854,8 @@ MessageBoxDefaultButton.Button1);
             if ((nTotalCount % _itemsPerPage) > 0)
                 _pageCount++;
 
-            string strBinDir = Environment.CurrentDirectory;
+            // string strBinDir = Environment.CurrentDirectory;
+            string strBinDir = Program.MainForm.UserDir;    // 2017/2/23
 
             string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
             string strSummaryJs = Path.Combine(this.MainForm.DataDir, "getsummary.js");
