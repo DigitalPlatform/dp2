@@ -1862,6 +1862,7 @@ int nCount)
                 return;
 
             this.RateList = dlg.RateList;
+            this.BeginRefreshOrderSheets();
         }
 
         private void toolStripButton_test_Click(object sender, EventArgs e)
