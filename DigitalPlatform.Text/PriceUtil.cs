@@ -1203,9 +1203,13 @@ namespace DigitalPlatform.Text
             List<CurrencyItem> items = new List<CurrencyItem>();
 
             // �任ΪPriceItem
-            for (int i = 0; i < prices.Count; i++)
+            // for (int i = 0; i < prices.Count; i++)
+            foreach(string price in prices)
             {
-                string strText = prices[i].Trim();
+                // string strText = prices[i].Trim();
+                if (price == null)
+                    continue;
+                string strText = price.Trim();
 
                 if (String.IsNullOrEmpty(strText) == true)
                     continue;

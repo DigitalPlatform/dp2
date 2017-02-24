@@ -2061,6 +2061,11 @@ true);
 
         void m_macroutil_ParseOneMacro(object sender, ParseOneMacroEventArgs e)
         {
+            this.ParseOneMacro(e);
+        }
+#if NO
+        void m_macroutil_ParseOneMacro(object sender, ParseOneMacroEventArgs e)
+        {
             // string strError = "";
             string strName = StringUtil.Unquote(e.Macro, "%%");  // 去掉百分号
 
@@ -2202,6 +2207,7 @@ true);
             e.Canceled = true;
             e.ErrorInfo = strError;
         }
+#endif
 
 #if NO
         static string Unquote(string strValue)
@@ -4267,7 +4273,8 @@ true);
                 ParseOneMacroEventArgs e1 = new ParseOneMacroEventArgs();
                 e1.Macro = strMacroName;
                 e1.Simulate = false;
-                m_macroutil_ParseOneMacro(this, e1);
+                ParseOneMacro(e1);
+                // m_macroutil_ParseOneMacro(this, e1);
                 if (e1.Canceled == true)
                     goto CONTINUE;
                 if (string.IsNullOrEmpty(e1.ErrorInfo) == false)

@@ -109,7 +109,8 @@ namespace dp2Circulation
             {
                 info.BiblioCount++;
                 info.CopyCount += item.Copy;
-                totalprices.Add(item.TotalPrice);
+                if (string.IsNullOrEmpty(item.TotalPrice) == false)
+                    totalprices.Add(item.TotalPrice);
             }
 
             if (totalprices.Count > 1)
@@ -645,8 +646,9 @@ namespace dp2Circulation
                     throw new Exception(strError);
                 }
 
-                Debug.Assert(sum_prices.Count == 1, "");
-                this.TotalPrice = sum_prices[0];
+                // Debug.Assert(sum_prices.Count == 1, "");
+                // this.TotalPrice = sum_prices[0];
+                this.TotalPrice = PriceUtil.JoinPriceString(sum_prices);
             }
             else if (totalprices.Count == 1)
                 this.TotalPrice = totalprices[0];

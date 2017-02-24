@@ -697,7 +697,7 @@ this.MainForm.ActivateFixPage("history")
                         // 提示是否强行覆盖?
                     }
 
-                    info.MergeStyle = "";
+                    info.MergeAction = "";
                     if (info.Channel.ErrorCode == ErrorCode.BiblioDup)
                     {
                         string strDialogAction = "";
@@ -709,6 +709,8 @@ this.MainForm.ActivateFixPage("history")
     using (BiblioDupDialog dup_dialog = new BiblioDupDialog())
     {
         MainForm.SetControlFont(dup_dialog, this.Font, false);
+        dup_dialog.MergeStyle = info.UsedMergeStyle;    // 这个值会被持久存储
+
         dup_dialog.AutoMergeRegistry = info.AutoMergeRegistry;
         dup_dialog.AutoSelectMode = info.AutoSelectMode;
         dup_dialog.TempDir = Program.MainForm.UserTempDir;
@@ -720,6 +722,7 @@ this.MainForm.ActivateFixPage("history")
         dup_dialog.ShowDialog(this);
         Program.MainForm.AppInfo.SetString("ImportExportForm", "BiblioDupDialog_uiState", dup_dialog.UiState);
         info.AutoSelectMode = dup_dialog.AutoSelectMode;    // 记忆
+        info.UsedMergeStyle = dup_dialog.MergeStyle;
 
         strDialogAction = dup_dialog.Action;
         strTargetRecPath = dup_dialog.SelectedRecPath;
@@ -751,7 +754,7 @@ this.MainForm.ActivateFixPage("history")
                             // 合并源文件中的册到目标位置
                             Debug.Assert(string.IsNullOrEmpty(strTargetRecPath) == false, "");
                             strOutputPath = strTargetRecPath;
-                            info.MergeStyle = strDialogAction;
+                            info.MergeAction = strDialogAction;
                             goto CONTINUE;
                         }
                         if (strDialogAction == "mergeToUseSourceBiblio")
@@ -794,7 +797,7 @@ out strError);
                             if (nRet == 0)
                                 return false;
 
-                            info.MergeStyle = strDialogAction;
+                            info.MergeAction = strDialogAction;
                             goto CONTINUE;
                         }
                     }
@@ -1188,7 +1191,7 @@ new string[] { "重试", "跳过", "中断" });
                     }
 
                     if (info.AddBiblioToItem
-                        || (info.AddBiblioToItemOnMerging == true && info.MergeStyle.StartsWith("mergeTo"))
+                        || (info.AddBiblioToItemOnMerging == true && info.MergeAction.StartsWith("mergeTo"))
                         )
                         AddBiblioToItem(item_dom, info.BiblioXml);
 
@@ -1444,8 +1447,9 @@ new string[] { "继续", "中断" });
             public MergeRegistry AutoMergeRegistry = null;
 
             // *** 以下成员都是在运行中动态设定和变化的
-            public string MergeStyle = "";  // 书目记录合并策略
+            public string MergeAction = "";  // 书目记录合并策略
             public bool AutoSelectMode = false; // (发现书目重复时)是否自动选择目标
+            public dp2Circulation.MergeStyle UsedMergeStyle = dp2Circulation.MergeStyle.None;
             public bool Start = true;   // 是否进入开始处理状态
             public string StartBiblioRecPath = "";  // 定位源文件中需开始处理的一条记录的路径
             public RangeList RangeList = null;
@@ -1476,7 +1480,7 @@ new string[] { "继续", "中断" });
                 this.OrderRefIDTable.Clear();
                 this.BiblioRecPath = "";
                 this.UploadedSubItems = 0;
-                this.MergeStyle = "";
+                this.MergeAction = "";
             }
         }
 

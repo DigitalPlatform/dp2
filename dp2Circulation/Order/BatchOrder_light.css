@@ -135,6 +135,10 @@ tr.title TD {
     border-style: solid;
 }
 
+td.dis-text {
+
+}
+
 td.dis-button {
     padding: 0pt;
 }

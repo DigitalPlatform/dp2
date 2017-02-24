@@ -6805,10 +6805,14 @@ ORIGIN_COLUMN_COPY);
                     return -1;
                 }
 
-                Debug.Assert(sum_prices.Count == 1, "");
+                // TODO: 这里是否允许多种货币并存？
+                // Debug.Assert(sum_prices.Count == 1, "");
+                string strSumPrice = PriceUtil.JoinPriceString(sum_prices);    // 2017/2/23
+
                 // total price
                 ListViewUtil.ChangeItemText(target, MERGED_COLUMN_TOTALPRICE,
-                    sum_prices[0]);
+                    strSumPrice //sum_prices[0]
+                    );
 
                 // order time
                 if (this.checkBox_print_accepted.Checked == false)

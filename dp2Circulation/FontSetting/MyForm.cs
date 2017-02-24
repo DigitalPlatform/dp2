@@ -1415,6 +1415,149 @@ out string strError)
 
         #endregion
 
+
+        public void ParseOneMacro(ParseOneMacroEventArgs e)
+        {
+            string strName = StringUtil.Unquote(e.Macro, "%%");  // 去掉百分号
+
+            // 函数名：
+            string strFuncName = "";
+            string strParams = "";
+
+            int nRet = strName.IndexOf(":");
+            if (nRet == -1)
+            {
+                strFuncName = strName.Trim();
+            }
+            else
+            {
+                strFuncName = strName.Substring(0, nRet).Trim();
+                strParams = strName.Substring(nRet + 1).Trim();
+            }
+
+            if (strName == "username")
+            {
+                e.Value = this.CurrentUserName;
+                return;
+            }
+
+            string strValue = "";
+            string strError = "";
+            // 从marceditor_macrotable.xml文件中解析宏
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            nRet = MacroUtil.GetFromLocalMacroTable(
+                Path.Combine(Program.MainForm.UserDir, "marceditor_macrotable.xml"),
+                strName,
+                e.Simulate,
+                out strValue,
+                out strError);
+            if (nRet == -1)
+            {
+                e.Canceled = true;
+                e.ErrorInfo = strError;
+                return;
+            }
+
+            if (nRet == 1)
+            {
+                e.Value = strValue;
+                return;
+            }
+
+            if (String.Compare(strFuncName, "IncSeed", true) == 0
+                || String.Compare(strFuncName, "IncSeed+", true) == 0
+                || String.Compare(strFuncName, "+IncSeed", true) == 0)
+            {
+                // 种次号库名, 指标名, 要填充到的位数
+                string[] aParam = strParams.Split(new char[] { ',' });
+                if (aParam.Length != 3 && aParam.Length != 2)
+                {
+                    strError = "IncSeed需要2或3个参数。";
+                    goto ERROR1;
+                }
+
+                bool IncAfter = false;  // 是否为先取后加
+                if (strFuncName[strFuncName.Length - 1] == '+')
+                    IncAfter = true;
+
+                string strZhongcihaoDbName = aParam[0].Trim();
+                string strEntryName = aParam[1].Trim();
+                strValue = "";
+
+                LibraryChannel channel = this.GetChannel();
+
+                try
+                {
+
+                    long lRet = 0;
+                    if (e.Simulate == true)
+                    {
+                        // parameters:
+                        //      strZhongcihaoGroupName  @引导种次号库名 !引导线索书目库名 否则就是 种次号组名
+                        lRet = channel.GetZhongcihaoTailNumber(
+        null,
+        strZhongcihaoDbName,
+        strEntryName,
+        out strValue,
+        out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+                        if (string.IsNullOrEmpty(strValue) == true)
+                        {
+                            strValue = "1";
+                        }
+                    }
+                    else
+                    {
+                        // parameters:
+                        //      strZhongcihaoGroupName  @引导种次号库名 !引导线索书目库名 否则就是 种次号组名
+                        lRet = channel.SetZhongcihaoTailNumber(
+        null,
+        IncAfter == true ? "increase+" : "increase",
+        strZhongcihaoDbName,
+        strEntryName,
+        "1",
+        out strValue,
+        out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+                    }
+                }
+                finally
+                {
+                    this.ReturnChannel(channel);
+                }
+
+                // 补足左方'0'
+                if (aParam.Length == 3)
+                {
+                    int nWidth = 0;
+                    try
+                    {
+                        nWidth = Convert.ToInt32(aParam[2]);
+                    }
+                    catch
+                    {
+                        strError = "第三参数应当为纯数字（表示补足的宽度）";
+                        goto ERROR1;
+                    }
+                    e.Value = strValue.PadLeft(nWidth, '0');
+                }
+                else
+                    e.Value = strValue;
+                return;
+            }
+
+            e.Canceled = true;  // 不能解释处理
+            return;
+        ERROR1:
+            e.Canceled = true;
+            e.ErrorInfo = strError;
+        }
+
     }
 
     public class FilterHost

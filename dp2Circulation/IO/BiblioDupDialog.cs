@@ -125,8 +125,11 @@ namespace dp2Circulation
                 {
                     ListViewUtil.SelectLine(this.listView_browse.Items[0], true);
 
-                    // 自动选择保留目标书目记录的方式
-                    this.MergeStyle = MergeStyle.ReserveTargetBiblio;
+                    if (this.MergeStyle == dp2Circulation.MergeStyle.None)
+                    {
+                        // 自动选择保留目标书目记录的方式
+                        this.MergeStyle = MergeStyle.ReserveTargetBiblio;
+                    }
 
                     if ((this.MergeStyle & dp2Circulation.MergeStyle.ReserveTargetBiblio) == dp2Circulation.MergeStyle.ReserveTargetBiblio)
                         this.Action = "mergeTo";    // useTargetBiblio
@@ -482,7 +485,7 @@ merge_dlg.UiState);
                 return;
 
             List<ListViewItem> items = new List<ListViewItem>();
-            foreach(ListViewItem item in this.listView_browse.Items)
+            foreach (ListViewItem item in this.listView_browse.Items)
             {
                 items.Add(item);
             }
@@ -490,7 +493,7 @@ merge_dlg.UiState);
             this.AutoMergeRegistry.Sort(ref items);
 
             this.listView_browse.Items.Clear();
-            foreach(ListViewItem item in items)
+            foreach (ListViewItem item in items)
             {
                 this.listView_browse.Items.Add(item);
             }

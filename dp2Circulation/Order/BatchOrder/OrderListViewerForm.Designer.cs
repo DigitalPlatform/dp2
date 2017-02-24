@@ -91,7 +91,9 @@
             this.Controls.Add(this.tabControl_main);
             this.Controls.Add(this.toolStrip1);
             this.Name = "OrderListViewerForm";
-            this.Text = "OrderListViewForm";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
+            this.Text = "订单视图";
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);

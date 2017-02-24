@@ -312,6 +312,115 @@ namespace dp2Circulation
             this.BeginRefreshOrderSheets();
         }
 
+        string MacroOrderXml(string strXml, string strBiblioRecPath)
+        {
+            if (string.IsNullOrEmpty(strXml))
+                return "";
+
+            string strError = "";
+
+            // 字符串strNewDefault包含了一个XML记录，里面相当于一个记录的原貌。
+            // 但是部分字段的值可能为"@"引导，表示这是一个宏命令。
+            // 需要把这些宏兑现后，再正式给控件
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "XML记录装入DOM时出错: " + ex.Message;
+                throw new Exception(strError);
+            }
+
+            // 遍历所有一级元素的内容
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("*");
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                string strText = nodes[i].InnerText;
+                if (strText.Length > 0
+                    && (strText[0] == '@' || strText.IndexOf("%") != -1))
+                {
+                    // 兑现宏
+                    nodes[i].InnerText = GetMacroValue(strText, strBiblioRecPath);
+                }
+            }
+
+            return dom.DocumentElement.OuterXml;
+        }
+
+        string GetMacroValue(string strMacroName, string strBiblioRecPath)
+        {
+            string strError = "";
+            string strResultValue = "";
+            int nRet = 0;
+
+            if (strMacroName.IndexOf("%") != -1)
+            {
+                ParseOneMacroEventArgs e1 = new ParseOneMacroEventArgs();
+                e1.Macro = strMacroName;
+                e1.Simulate = false;
+                ParseOneMacro(e1);
+
+                // m_macroutil_ParseOneMacro(this, e1);
+                if (e1.Canceled == true)
+                    goto CONTINUE;
+                if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                {
+                    return strMacroName + ":error:" + e1.ErrorInfo;
+                }
+                return e1.Value;
+            }
+
+        CONTINUE:
+            // 书目记录XML格式
+            string strXmlBody = "";
+
+            // 获取书目记录的局部
+            nRet = GetBiblioPart(strBiblioRecPath,
+                strXmlBody,
+                strMacroName,
+                out strResultValue,
+                out strError);
+            if (nRet == -1)
+            {
+                if (String.IsNullOrEmpty(strResultValue) == true)
+                    return strMacroName + ":error:" + strError;
+
+                return strResultValue;
+            }
+
+            return strResultValue;
+        }
+
+        // 获取书目记录的局部
+        int GetBiblioPart(string strBiblioRecPath,
+            string strBiblioXml,
+            string strPartName,
+            out string strResultValue,
+            out string strError)
+        {
+            LibraryChannel channel = this.GetChannel();
+
+            try
+            {
+                Progress.SetMessage("正在装入书目记录 " + strBiblioRecPath + " 的局部 ...");
+                channel.Timeout = new TimeSpan(0, 0, 10);
+                long lRet = channel.GetBiblioInfo(
+                    null,   // Progress.State == 0 ? Progress : null,
+                    strBiblioRecPath,
+                    strBiblioXml,
+                    strPartName,    // 包含'@'符号
+                    out strResultValue,
+                    out strError);
+                return (int)lRet;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
         // return:
         //      返回 HTML tr 元素片段
         public string NewOrder(string strBiblioRecPath, string strXml)
@@ -324,7 +433,7 @@ namespace dp2Circulation
                 biblio.Orders = new List<OrderStore>();
             order.Type = "new";
             if (string.IsNullOrEmpty(strXml) == false)
-                order.Xml = strXml;
+                order.Xml = MacroOrderXml(strXml, strBiblioRecPath);
             biblio.Orders.Add(order);
 
             this.Changed = true;
@@ -1308,7 +1417,12 @@ int nCount)
 
         private void toolStripSplitButton_newOrder_ButtonClick(object sender, EventArgs e)
         {
-            webBrowser1.Document.InvokeScript("newOrder");
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
+            if (bControl == false)
+                webBrowser1.Document.InvokeScript("newOrder");
+            else
+                ToolStripMenuItem_newOrderTemplate_Click(sender, e);
         }
 
         private void ToolStripMenuItem_newOrderTemplate_Click(object sender, EventArgs e)
@@ -1703,7 +1817,8 @@ int nCount)
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message);
+                // TODO: 对于各种数据格式不符合的情况，要抛出特定的 Exception，这样就不用显示 Debug 信息了
+                MessageBox.Show(this, ExceptionUtil.GetDebugText(ex));
             }
         }
 
@@ -2047,7 +2162,7 @@ int nCount)
                                 && strPrice == strTempPrice
                                 && order.GetFieldValue("range") == temp_order.GetFieldValue("range")
                                 && strUsedLibraryCodes == strTempUsedLibraryCodes)
-                                errors.Add( "第 " + (i + 1).ToString() + " 行 和 第 " + (j + 1) + " 行之间 渠道/经费来源/时间范围/价格/馆藏分配去向(中所含的馆代码) 五元组重复，需要将它们合并为一行");
+                                errors.Add("第 " + (i + 1).ToString() + " 行 和 第 " + (j + 1) + " 行之间 渠道/经费来源/时间范围/价格/馆藏分配去向(中所含的馆代码) 五元组重复，需要将它们合并为一行");
                         }
 
                         // 
