@@ -165,6 +165,38 @@ namespace dp2Circulation
             }
         }
 
+        // Size 字符串，当前度量单位
+        public string Size
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.textBox_width.Text) == true
+                    && string.IsNullOrEmpty(this.textBox_height.Text) == true)
+                    return "";
+
+                return this.textBox_width.Text + "," + this.textBox_height.Text;
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value) == true)
+                {
+                    this.textBox_width.Text = "";
+                    this.textBox_height.Text = "";
+                    return;
+                }
+
+                string strLeft = "";
+                string strRight = "";
+                StringUtil.ParseTwoPart(value,
+                    ",",
+                    out strLeft,
+                    out strRight);
+
+                this.textBox_width.Text = strLeft;
+                this.textBox_height.Text = strRight;
+            }
+        }
+
         static string ToString(double v)
         {
             if (double.IsNaN(v) == true)
@@ -256,6 +288,88 @@ namespace dp2Circulation
             }
         }
 
+        // Size 字符串，1/100 英寸度量单位
+        public string UniversalSize
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(this.textBox_width.Text) == true
+                    && string.IsNullOrEmpty(this.textBox_height.Text) == true)
+                    return "";
+
+                if (this._currentUnit == GraphicsUnit.Display)
+                    return this.textBox_width.Text + "," + this.textBox_height.Text;
+
+                double left = double.NaN;
+                double right = double.NaN;
+
+                if (string.IsNullOrEmpty(this.textBox_width.Text) == false)
+                    left = double.Parse(this.textBox_width.Text);
+                if (string.IsNullOrEmpty(this.textBox_height.Text) == false)
+                    right = double.Parse(this.textBox_height.Text);
+
+                if (double.IsNaN(left) == false)
+                    left = (double)UniverseNumericUpDown.ConvertValue(this._currentUnit, GraphicsUnit.Display,
+                     (decimal)left);
+                if (double.IsNaN(right) == false)
+                    right = (double)UniverseNumericUpDown.ConvertValue(this._currentUnit, GraphicsUnit.Display,
+                     (decimal)right);
+                return ToString(left) + "," + ToString(right);
+            }
+            set
+            {
+                if (string.IsNullOrEmpty(value) == true)
+                {
+                    this.textBox_width.Text = "";
+                    this.textBox_height.Text = "";
+                    return;
+                }
+
+                string strLeft = "";
+                string strRight = "";
+                StringUtil.ParseTwoPart(value,
+                    ",",
+                    out strLeft,
+                    out strRight);
+
+                if (this._currentUnit == GraphicsUnit.Display)
+                {
+                    this.textBox_width.Text = strLeft;
+                    this.textBox_height.Text = strRight;
+                    return;
+                }
+
+                double left = double.NaN;
+                double right = double.NaN;
+
+                if (string.IsNullOrEmpty(strLeft) == false)
+                    left = double.Parse(strLeft);
+                if (string.IsNullOrEmpty(strRight) == false)
+                    right = double.Parse(strRight);
+
+                if (double.IsNaN(left) == false)
+                {
+                    left = (double)UniverseNumericUpDown.ConvertValue(
+                        GraphicsUnit.Display,
+                        this._currentUnit,
+                        (decimal)left);
+                    this.textBox_width.Text = left.ToString();
+                }
+                else
+                    this.textBox_width.Text = "";
+
+                if (double.IsNaN(right) == false)
+                {
+                    right = (double)UniverseNumericUpDown.ConvertValue(
+                        GraphicsUnit.Display,
+                        this._currentUnit,
+                        (decimal)right);
+                    this.textBox_height.Text = right.ToString();
+                }
+                else
+                    this.textBox_height.Text = "";
+            }
+        }
 
         // 当前度量单位
         public double OffsetX

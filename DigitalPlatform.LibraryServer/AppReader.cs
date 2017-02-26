@@ -5387,32 +5387,6 @@ out strError);
             }
         }
 
-        // 从读者记录 email 元素值中获得 email 地址部分
-        public static string GetEmailAddress(string strValue)
-        {
-            if (string.IsNullOrEmpty(strValue))
-                return "";
-
-            // 注: email 元素内容，现在是存储 email 和微信号等多种绑定途径 2016/4/16
-            // return:
-            //      null    没有找到前缀
-            //      ""      找到了前缀，并且值部分为空
-            //      其他     返回值部分
-            string strReaderEmailAddress = StringUtil.GetParameterByPrefix(strValue,
-    "email",
-    ":");
-            // 读者记录中没有email地址，就无法进行email方式的通知了
-            if (String.IsNullOrEmpty(strReaderEmailAddress) == true)
-            {
-                // 按照以前的 xxxx@xxxx 方式探索一下
-                if (strValue.IndexOf(":") != -1 || strValue.IndexOf("@") == -1)
-                    return "";
-                return strValue;
-            }
-
-            return strReaderEmailAddress;
-        }
-
         // 在一个绑定信息字符串里面，找到一个特定的 xxxx:xxxx 部分的下标
         // return:
         //      -1  没有找到

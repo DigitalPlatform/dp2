@@ -452,8 +452,15 @@ Stack:
         {
             GlobalVars.PrivateFonts.Dispose();
 
-            string strFontFilePath = Path.Combine(this.DataDir, "b3901.ttf");
-            API.RemoveFontResourceA(strFontFilePath);
+            {
+                string strFontFilePath = Path.Combine(this.DataDir, "b3901.ttf");
+                API.RemoveFontResourceA(strFontFilePath);
+            }
+
+            {
+                string strFontFilePath = Path.Combine(this.DataDir, "ocr-b.ttf");
+                API.RemoveFontResourceA(strFontFilePath);
+            }
         }
 
         void InstallBarcodeFont()
@@ -474,28 +481,32 @@ Stack:
                 return;
             }
 
-            // 
-            string strFontFilePath = Path.Combine(this.DataDir, "b3901.ttf");
-            int nRet = API.AddFontResourceA(strFontFilePath);
-            if (nRet == 0)
             {
-                // 失败
-                MessageBox.Show(this, "安装字体文件 " + strFontFilePath + " 失败");
-                return;
-            }
-
-            {
-                // 成功
-
+                string strFontFilePath = Path.Combine(this.DataDir, "b3901.ttf");
+                int nRet = API.AddFontResourceA(strFontFilePath);
+                if (nRet == 0)
+                {
+                    // 失败
+                    MessageBox.Show(this, "安装字体文件 " + strFontFilePath + " 失败");
+                    return;
+                }
                 // 为了解决 GDI+ 的一个 BUG
                 // PrivateFontCollection m_pfc = new PrivateFontCollection();
                 GlobalVars.PrivateFonts.AddFontFile(strFontFilePath);
-#if NO
-                API.SendMessage((IntPtr)0xffff,0x001d, IntPtr.Zero, IntPtr.Zero);
-                API.SendMessage(this.Handle, 0x001d, IntPtr.Zero, IntPtr.Zero);
-#endif
             }
 
+            {
+                string strFontFilePath = Path.Combine(this.DataDir, "ocr-b.ttf");
+                int nRet = API.AddFontResourceA(strFontFilePath);
+                if (nRet == 0)
+                {
+                    // 失败
+                    MessageBox.Show(this, "安装字体文件 " + strFontFilePath + " 失败");
+                    return;
+                }
+                // 'OCR-B 10 BT' 字体
+                GlobalVars.PrivateFonts.AddFontFile(strFontFilePath);
+            }
 #if NO
             /*
             try
@@ -3204,7 +3215,7 @@ Stack:
             strAccessNo = StringUtil.BuildLocationClassEntry(strAccessNo);
             string[] lines = strAccessNo.Split(new char[] { '/' });
 
-            if (info != null 
+            if (info != null
                 && (info.CallNumberStyle == "馆藏代码+索取类号+区分号"
     || info.CallNumberStyle == "三行")
                 )

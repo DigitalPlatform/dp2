@@ -4015,7 +4015,7 @@ nsmgr);
                     }
                     string strValue = DomUtil.GetElementText(readerdom.DocumentElement,
                         "email");
-                    strReaderEmailAddress = LibraryApplication.GetEmailAddress(strValue);
+                    strReaderEmailAddress = LibraryServerUtil.GetEmailAddress(strValue);
                     if (String.IsNullOrEmpty(strReaderEmailAddress) == true)
                         continue;
                 }

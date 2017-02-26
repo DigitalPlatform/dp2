@@ -33,6 +33,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.LibraryServer;
 
 namespace dp2Circulation
 {
@@ -1456,6 +1457,13 @@ out strError);
 
                 subMenuItem = new MenuItem("导出读者详情到 Excel 文件 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
                 subMenuItem.Click += new System.EventHandler(this.menu_exportReaderInfoToExcelFile_Click);
+                if (this.listView_records.SelectedItems.Count == 0
+                    || bSearching == true)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
+                subMenuItem = new MenuItem("打印读者账簿 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
+                subMenuItem.Click += new System.EventHandler(this.menu_printReaderSheet_Click);
                 if (this.listView_records.SelectedItems.Count == 0
                     || bSearching == true)
                     subMenuItem.Enabled = false;
@@ -3721,6 +3729,35 @@ MessageBoxDefaultButton.Button1);
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        // 打印读者账簿
+        // 账簿适合图书馆集中保管，用于小学低年级借书
+        void menu_printReaderSheet_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            List<string> barcodes = new List<string>();
+            foreach (ListViewItem item in this.listView_records.SelectedItems)
+            {
+                // TODO: 用 style 来识别列
+                barcodes.Add(item.SubItems[1].Text);
+            }
+
+            // return:
+            //      -1  出错
+            //      0   用户中断
+            //      1   成功
+            int nRet = this.PrintReaderSheet(barcodes,
+                true,
+                out strError);
+            if (nRet != 1)
+                goto ERROR1;
+
+            // MessageBox.Show(this, "导出完成");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
 
         // 导出读者详情到 Excel 文件
         void menu_exportReaderInfoToExcelFile_Click(object sender, EventArgs e)
@@ -6217,6 +6254,232 @@ dlg.UiState);
             }
         }
 
+        // 创建读者账簿
+        // return:
+        //      -1  出错
+        //      0   用户中断
+        //      1   成功
+        public int PrintReaderSheet(List<string> reader_barcodes,
+            bool bLaunchExcel,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strTempDataFileName = Path.Combine(Program.MainForm.UserTempDir, "~readersheetdata.txt");
+
+            try
+            {
+                int nReaderCount = 0;
+                using (StreamWriter sw = new StreamWriter(strTempDataFileName, false, Encoding.UTF8))
+                {
+                    // return:
+                    //      -1  出错。包括用户中断的情况
+                    //      >=0 实际处理的读者记录数
+                    nRet = this.ProcessPatrons(
+                        reader_barcodes,
+                        "", // advancexml_history_bibliosummary
+                        (strRecPath, dom, timestamp) =>
+                        {
+                            this.ShowMessage("正在处理读者记录 " + strRecPath);
+
+                            string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+                            string strDepartment = DomUtil.GetElementText(dom.DocumentElement, "department");
+                            string strName = DomUtil.GetElementText(dom.DocumentElement, "name");
+
+                            sw.WriteLine(strName);
+                            sw.WriteLine(strDepartment);
+                            sw.WriteLine(strBarcode);
+                            sw.WriteLine("***");
+
+                            nReaderCount++;
+                            return true;
+                        },
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    this.ShowMessage("共处理读者记录 " + nReaderCount + " 个", "green", true);
+                }
+
+                LabelPrintForm labelPrintForm = Program.MainForm.EnsureLabelPrintForm();
+                labelPrintForm.LabelDefFilename = Path.Combine(Program.MainForm.DataDir, "reader\\patronSheetLayout.xml");
+                labelPrintForm.LabelFilename = strTempDataFileName;
+                labelPrintForm.MdiParent = Program.MainForm;
+                labelPrintForm.Show();
+            }
+            catch (Exception ex)
+            {
+                strError = "CreateSheetExcelFile() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                return -1;
+            }
+            finally
+            {
+
+            }
+
+            // TODO: sheet 可以按照单位来区分。例如按照班级
+            return 1;
+        }
+
+#if NO
+        // 创建读者账簿
+        // return:
+        //      -1  出错
+        //      0   用户中断
+        //      1   成功
+        public int CreateReaderSheetExcelFile(List<string> reader_barcodes,
+            bool bLaunchExcel,
+            out string strError)
+        {
+            strError = "";
+            //int nRet = 0;
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要输出的 Excel 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            // dlg.FileName = this.ExportExcelFilename;
+            // dlg.InitialDirectory = Environment.CurrentDirectory;
+            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return 0;
+
+            XLWorkbook doc = null;
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "ReaderSearchForm new XLWorkbook() {} exception: " + ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("表格");
+
+            // 每个列的最大字符数
+            List<int> column_max_chars = new List<int>();
+
+            // TODO: 表的标题，创建时间
+
+            int nRowIndex = 3;  // 空出前两行
+            //int nColIndex = 1;
+
+            int nReaderIndex = 0;
+
+            try
+            {
+                // return:
+                //      -1  出错。包括用户中断的情况
+                //      >=0 实际处理的读者记录数
+                int nRet = this.ProcessPatrons(
+                    reader_barcodes,
+                    "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary", // advancexml_history_bibliosummary
+                    (strRecPath, dom, timestamp) =>
+                    {
+                        this.ShowMessage("正在处理读者记录 " + strRecPath);
+
+                        string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
+
+                        OutputReaderSheet2(sheet,
+                dom,
+                nReaderIndex,
+                "barcode",
+                ref nRowIndex,
+                ref column_max_chars);
+
+                        nRowIndex++;    // 读者之间的空行
+
+                        nReaderIndex++;
+                        return true;
+                    },
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                {
+                    if (stop != null)
+                        stop.SetMessage("正在调整列宽度 ...");
+                    Application.DoEvents();
+
+                    //double char_width = GetAverageCharPixelWidth(list);
+
+                    // 字符数太多的列不要做 width auto adjust
+                    foreach (IXLColumn column in sheet.Columns())
+                    {
+                        int MAX_CHARS = 50;   // 60
+
+                        int nIndex = column.FirstCell().Address.ColumnNumber - 1;
+                        if (nIndex >= column_max_chars.Count)
+                            break;
+                        int nChars = column_max_chars[nIndex];
+
+                        if (nIndex == 1)
+                        {
+                            column.Width = 10;
+                            continue;
+                        }
+
+                        if (nIndex == 3)
+                            MAX_CHARS = 50;
+                        else
+                            MAX_CHARS = 24;
+
+                        if (nChars < MAX_CHARS)
+                            column.AdjustToContents();
+                        else
+                            column.Width = Math.Min(MAX_CHARS, nChars);
+
+                        //else
+                        //    column.Width = (double)list.Columns[i].Width / char_width;  // Math.Min(MAX_CHARS, nChars);
+                    }
+                }
+
+                this.ShowMessage("共导出读者记录 " + nReaderIndex + " 个", "green", true);
+            }
+            catch (Exception ex)
+            {
+                strError = "CreateSheetExcelFile() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                return -1;
+            }
+            finally
+            {
+                if (stop != null)
+                    stop.SetMessage("");
+
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.FileName);
+                    doc.Dispose();
+                }
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(dlg.FileName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+
+            // TODO: sheet 可以按照单位来区分。例如按照班级
+            return 1;
+        }
+
+#endif
+
 #if NO
         // return:
         //      -1  出错
@@ -6802,6 +7065,9 @@ dlg.UiState);
 "tel");
             string strEmail = DomUtil.GetElementText(dom.DocumentElement,
 "email");
+            // 2017/2/25
+            strEmail = LibraryServerUtil.GetEmailAddress(strEmail);
+
             string strAddress = DomUtil.GetElementText(dom.DocumentElement,
 "address");
             List<string> list = new List<string>();
@@ -6844,6 +7110,213 @@ dlg.UiState);
 
             nRowIndex++;
         }
+
+#if NO
+        static void OutputReaderSheet1(IXLWorksheet sheet,
+    XmlDocument dom,
+    int nReaderIndex,
+    string strStyle,
+    ref int nRowIndex,
+    ref List<int> column_max_chars)
+        {
+            bool bBarcode = StringUtil.IsInList("barcode", strStyle);
+
+            string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
+                "barcode");
+            string strName = DomUtil.GetElementText(dom.DocumentElement,
+                "name");
+            string strDepartment = DomUtil.GetElementText(dom.DocumentElement,
+                "department");
+
+            List<IXLCell> cells = new List<IXLCell>();
+
+            // 读者序号
+            // IXLCell cell_no = null;
+            int nColIndex = 2;
+            {
+                IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(nReaderIndex + 1);
+                cell.Style.Alignment.WrapText = true;
+                cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                cell.Style.Font.Bold = true;
+                cell.Style.Font.FontSize = 20;
+                cells.Add(cell);
+                nColIndex++;
+            }
+
+            // 最大字符数
+            SetMaxChars(ref column_max_chars, 1, (nReaderIndex + 1).ToString().Length * 2);
+
+            // 序号的右边竖线
+            {
+                var rngData = sheet.Range(nRowIndex, 2, nRowIndex + 3, 2);
+                rngData.Merge();
+                rngData.LastColumn().Style.Border.RightBorder = XLBorderStyleValues.Hair;
+
+                // 第一行上面的横线
+                rngData = sheet.Range(nRowIndex, 2, nRowIndex, 2 + 7 - 1);
+                rngData.FirstRow().Style.Border.TopBorder = XLBorderStyleValues.Medium;
+            }
+
+            int nFirstRow = nRowIndex;
+            {
+                List<string> subtitles = new List<string>();
+                subtitles.Add("姓名");
+                subtitles.Add("证条码号");
+                subtitles.Add("部门");
+
+                List<string> subcols = new List<string>();
+                subcols.Add(strName);
+                if (bBarcode)
+                    subcols.Add("*" + strReaderBarcode + "*");
+                else
+                    subcols.Add(strReaderBarcode);
+                subcols.Add(strDepartment);
+
+                for (int line = 0; line < subtitles.Count; line++)
+                {
+                    nColIndex = 3;
+                    {
+                        IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(subtitles[line]);
+                        cell.Style.Alignment.WrapText = true;
+                        cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                        cell.Style.Font.Bold = true;
+                        cell.Style.Font.FontColor = XLColor.DarkGray;
+                        //cell.Style.Font.FontName = strFontName;
+                        cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+                        // cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+                        nColIndex++;
+                        cells.Add(cell);
+                    }
+                    {
+                        string strText = subcols[line];
+
+                        // 最大字符数
+                        SetMaxChars(ref column_max_chars, nColIndex - 1, strText.Length);
+
+                        IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(strText);
+                        cell.Style.Alignment.WrapText = true;
+                        cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                        //cell.Style.Font.FontName = strFontName;
+                        //cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                        if (line == 0)
+                        {
+                            cell.Style.Font.FontName = "微软雅黑";
+                            cell.Style.Font.FontSize = 20;
+                        }
+                        else if (bBarcode && line == 1)
+                        {
+                            cell.Style.Font.FontName = "C39HrP24DhTt";
+                            cell.Style.Font.FontSize = 40;
+                        }
+                        nColIndex++;
+                        cells.Add(cell);
+                    }
+                    nRowIndex++;
+                }
+            }
+
+        }
+
+        static void OutputReaderSheet2(IXLWorksheet sheet,
+XmlDocument dom,
+int nReaderIndex,
+string strStyle,
+ref int nRowIndex,
+ref List<int> column_max_chars)
+        {
+            string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
+                "barcode");
+            string strName = DomUtil.GetElementText(dom.DocumentElement,
+                "name");
+            string strDepartment = DomUtil.GetElementText(dom.DocumentElement,
+                "department");
+
+            List<IXLCell> cells = new List<IXLCell>();
+
+            int nFirstRow = nRowIndex;
+            {
+
+                int nColIndex = 1;
+
+                // 姓名
+                {
+                    string strText = strName;
+
+                    // 最大字符数
+                    SetMaxChars(ref column_max_chars, nColIndex - 1, strText.Length);
+
+                    IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(strText);
+                    cell.Style.Alignment.WrapText = true;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    cell.Style.Font.FontName = "微软雅黑";
+                    cell.Style.Font.FontSize = 20;
+
+                    nColIndex++;
+                    cells.Add(cell);
+                }
+
+                {
+
+                    // 第一行上面的横线
+                    var rngData = sheet.Range(nRowIndex, 1, nRowIndex, 1);
+                    rngData.FirstRow().Style.Border.TopBorder = XLBorderStyleValues.Medium;
+                }
+
+                nRowIndex++;
+
+                // 单位
+                {
+                    nColIndex = 1;
+                    string strText = strDepartment;
+
+                    // 最大字符数
+                    SetMaxChars(ref column_max_chars, nColIndex - 1, strText.Length);
+
+                    IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(strText);
+                    cell.Style.Alignment.WrapText = true;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    cell.Style.Font.FontName = "微软雅黑";
+                    cell.Style.Font.FontSize = 12;
+
+                    nColIndex++;
+                    cells.Add(cell);
+                }
+
+                nRowIndex++;
+
+                // 条码
+                {
+                    nColIndex = 1;
+                    string strText = "*" + strReaderBarcode + "*";
+
+                    // 最大字符数
+                    SetMaxChars(ref column_max_chars, nColIndex - 1, strText.Length);
+
+                    IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(strText);
+                    cell.Style.Alignment.WrapText = true;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                    cell.Style.Font.FontName = "C39HrP24DhTt";
+                    cell.Style.Font.FontSize = 40;
+                    nColIndex++;
+                    cells.Add(cell);
+                }
+
+#if NO
+                {
+                    var rngData = sheet.Range(nRowIndex, 3, nRowIndex, 4);
+                    rngData.Merge();
+                    // rngData.LastColumn().Style.Border.RightBorder = XLBorderStyleValues.Hair;
+                }
+#endif
+
+                nRowIndex++;
+
+            }
+
+        }
+
+#endif
 
         static void OutputReaderInfo(IXLWorksheet sheet,
             XmlDocument dom,

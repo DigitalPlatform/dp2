@@ -4,11 +4,11 @@ using System.Text;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.Xml;
+using System.Diagnostics;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Text;
-using System.Diagnostics;
 
 namespace dp2Circulation
 {
@@ -368,6 +368,27 @@ namespace dp2Circulation
                     }
                 }
 
+                string strSize = DomUtil.GetAttr(node, "size");
+                if (string.IsNullOrEmpty(strSize) == false)
+                {
+                    try
+                    {
+                        double left = double.NaN;
+                        double right = double.NaN;
+                        ParsetTwoDouble(strSize,
+                            true,
+                            out left,
+                            out right);
+                        format.Width = left;
+                        format.Height = right;
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "<line>元素size属性值格式错误: " + ex.Message;
+                        return -1;
+                    }
+                }
+
                 format.ForeColor = DomUtil.GetAttr(node, "foreColor");
                 format.BackColor = DomUtil.GetAttr(node, "backColor");
 
@@ -400,7 +421,7 @@ namespace dp2Circulation
             {
                 if (double.TryParse(strLeft, out left) == false)
                 {
-                    throw new Exception("字符串 '"+strLeft+"' 格式错误。逗号左侧应该是一个数字");
+                    throw new Exception("字符串 '" + strLeft + "' 格式错误。逗号左侧应该是一个数字");
                 }
             }
             if (string.IsNullOrEmpty(strRight) == false)
@@ -489,6 +510,9 @@ namespace dp2Circulation
                     if (double.IsNaN(format.StartX) == false || double.IsNaN(format.StartY) == false)
                         line.SetAttribute("start", ToString(format.StartX) + "," + ToString(format.StartY));
 
+                    if (double.IsNaN(format.Width) == false || double.IsNaN(format.Height) == false)
+                        line.SetAttribute("size", ToString(format.Width) + "," + ToString(format.Height));
+
                     if (string.IsNullOrEmpty(format.ForeColor) == false)
                         line.SetAttribute("foreColor", format.ForeColor);
 
@@ -523,6 +547,12 @@ namespace dp2Circulation
         // 相对偏移位置
         public double OffsetX = 0;
         public double OffsetY = 0;
+
+        // 2017/2/26
+        // 宽高
+        public double Width = Double.NaN;
+        public double Height = Double.NaN;
+
 
         // 前景颜色
         public string ForeColor = "";   // 缺省为黑色
