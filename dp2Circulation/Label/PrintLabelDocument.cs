@@ -918,6 +918,7 @@ namespace dp2Circulation
 
         }
 
+#if NO
         static PointF GetPixelPoint(Graphics g, PointF point)
         {
             return new PointF(point.X * g.DpiX / 100,
@@ -955,6 +956,42 @@ namespace dp2Circulation
             // display 值为 1/100 英寸
             return (display * g.DpiY) / 100;
         }
+#endif
+
+        static PointF GetPixelPoint(Graphics g, PointF point)
+        {
+            return point;
+        }
+
+        static RectangleF GetPixelRect(Graphics g, RectangleF rect)
+        {
+            return rect;
+        }
+
+        static float GetPixelX(Graphics g, float display)
+        {
+            // display 值为 1/100 英寸
+            return display;
+        }
+
+        static float GetPixelY(Graphics g, float display)
+        {
+            // display 值为 1/100 英寸
+            return display;
+        }
+
+        static double GetPixelX(Graphics g, double display)
+        {
+            // display 值为 1/100 英寸
+            return display;
+        }
+
+        static double GetPixelY(Graphics g, double display)
+        {
+            // display 值为 1/100 英寸
+            return display;
+        }
+
 
         static float MeasureOcrTextHeight(
     Graphics g,
