@@ -943,7 +943,10 @@ namespace dp2Circulation
             for (; ; )
             {
                 float ratio = 0.33F;
-                using (Font font = new Font("OCR-B 10 BT", height, GraphicsUnit.Pixel))
+                using (Font font = Global.BuildFont(
+                    "OCR-B 10 BT",
+                    height,
+                    GraphicsUnit.Pixel))
                 {
                     SizeF size = g.MeasureString(strText, font);
                     if (size.Width <= rect.Width)
@@ -965,7 +968,10 @@ namespace dp2Circulation
             RectangleF rect,
             string strText)
         {
-            using (Font font = new Font("OCR-B 10 BT", rect.Height, GraphicsUnit.Pixel))
+            using (Font font = Global.BuildFont(
+                "OCR-B 10 BT", 
+                rect.Height, 
+                GraphicsUnit.Pixel))
             {
                 StringFormat s_format = new StringFormat();
                 s_format.Alignment = StringAlignment.Center;

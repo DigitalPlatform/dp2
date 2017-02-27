@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <page margins="20,20,20,20" />
+  <label width="262" height="161" paddings="5,20.0000,5,5" font="Arial, 10pt" lineSep="0" />
+  <lineFormats>
+    <line font="微软雅黑, 24pt" align="center" />
+    <line font="微软雅黑, 12pt" align="center" foreColor="Silver" />
+    <line font="barcode, 8.25pt" align="center" size=",60" />
+  </lineFormats>
+</root>

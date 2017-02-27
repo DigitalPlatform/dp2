@@ -293,9 +293,34 @@ namespace dp2Circulation
 
                 // if (families.Exists(f => string.Compare(f.Name, font.OriginalFontName, true) == 0) == true)
                 if (t != null)
-                    font = new Font(t, font.Size, font.Style);
+                {
+                    Font new_font = new Font(t, font.Size, font.Style);
+                    font.Dispose(); // 2017/2/27
+                    return new_font;
+                }
             }
 
+            return font;
+        }
+
+        // 会自动从 PrivateFonts 中寻找
+        public static Font BuildFont(string font_name, float height, GraphicsUnit unit)
+        {
+            Font font = new Font(
+               font_name,    // "OCR-B 10 BT", 
+               height, unit);
+            if (string.IsNullOrEmpty(font.OriginalFontName) == false
+    && font.OriginalFontName != font.Name)
+            {
+                List<FontFamily> families = new List<FontFamily>(GlobalVars.PrivateFonts.Families);
+
+                FontFamily t = families.Find(f => string.Compare(f.Name, font.OriginalFontName, true) == 0);
+                if (t != null)
+                {
+                    font.Dispose();
+                    return new Font(t, font.Size, font.Style);
+                }
+            }
             return font;
         }
 

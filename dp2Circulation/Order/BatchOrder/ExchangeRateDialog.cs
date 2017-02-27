@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,28 +6,141 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml;
+using System.Diagnostics;
+using System.IO;
+
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
+    /// <summary>
+    /// 编辑汇率转换表的对话框
+    /// </summary>
     public partial class ExchangeRateDialog : Form
     {
+        // 汇率转换表配置文件。这是一个 XML 文件
+        public string CfgFileName { get; set; }
+
+        XmlDocument _dom = null;
+
+        public bool Changed { get; set; }
+
         public ExchangeRateDialog()
         {
             InitializeComponent();
         }
 
+        private void ExchangeRateDialog_Load(object sender, EventArgs e)
+        {
+            FillSellerList();
+
+            DisplayFirstSeller();
+        }
+
+        void OpenXml()
+        {
+            if (this._dom == null)
+            {
+                _dom = new XmlDocument();
+                try
+                {
+                    _dom.Load(this.CfgFileName);
+                }
+                catch (FileNotFoundException)
+                {
+                    _dom.LoadXml("<root />");
+                }
+            }
+        }
+
+        void CloseXml()
+        {
+            if (_dom != null)
+            {
+                if (this.Changed == true)
+                {
+                    _dom.Save(this.CfgFileName);
+                    this.Changed = false;
+                }
+                _dom = null;
+            }
+        }
+
+        void FillSellerList()
+        {
+            this.comboBox_seller.Items.Clear();
+
+            OpenXml();
+            XmlNodeList nodes = _dom.DocumentElement.SelectNodes("item");
+            foreach (XmlElement item in nodes)
+            {
+                string strSeller = item.GetAttribute("seller");
+                string strTable = item.GetAttribute("table");
+
+                this.comboBox_seller.Items.Add(strSeller);
+            }
+        }
+
+        void DisplayFirstSeller()
+        {
+            if (this.comboBox_seller.Items.Count > 0)
+            {
+                this.comboBox_seller.Text = (string)this.comboBox_seller.Items[0];
+            }
+        }
+
+        // return:
+        //      true    合法
+        //      false   不合法。已经报错了
+        bool VerifyData()
+        {
+            if (this._dom == null)
+                return true;
+
+            XmlNodeList nodes = _dom.DocumentElement.SelectNodes("item");
+            foreach (XmlElement item in nodes)
+            {
+                string strSeller = item.GetAttribute("seller");
+                string strTable = item.GetAttribute("table");
+
+                // 验证数据是否合法
+                try
+                {
+                    RateItem.ParseList(strTable);
+                }
+                catch (Exception ex)
+                {
+                    this.comboBox_seller.Text = strSeller;
+                    MessageBox.Show(this, "书商 '" + strSeller + "' 的汇率表格式不合法: " + ex.Message);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private void button_OK_Click(object sender, EventArgs e)
         {
+
+            // 如果最后的场景是即将添加，则自动添加
+            if (this.button_add.Enabled == true)
+            {
+                button_add_Click(this, e);
+            }
+
+            StoreLastSeller();
+
             // 验证数据是否合法
-            try
-            {
-                RateItem.ParseList(this.RateList);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(this, ex.Message);
+            // return:
+            //      true    合法
+            //      false   不合法。已经报错了
+            if (VerifyData() == false)
                 return;
-            }
+
+            // 保存到 XML 文件
+            this.CloseXml();
+
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
         }
@@ -53,6 +165,175 @@ namespace dp2Circulation
                     return;
                 }
                 this.textBox_rates.Text = value.Replace(";", "\r\n");
+            }
+        }
+
+        public class TableItem
+        {
+            public string Seller { get; set; }
+            public string Table { get; set; }
+        }
+
+        public static TableItem FindTableItem(XmlDocument dom, string strSeller)
+        {
+            XmlElement node = dom.DocumentElement.SelectSingleNode("item[@seller='" + strSeller + "']") as XmlElement;
+            if (node == null)
+                return null;
+            TableItem item = new TableItem();
+            item.Seller = strSeller;
+            item.Table = node.GetAttribute("table");
+            return item;
+        }
+
+        string _lastSeller = null;
+
+        // 把最近一个 seller 的修改兑现到 XmlDocument
+        void StoreLastSeller()
+        {
+            if (_lastSeller == null)
+                return;
+
+#if NO
+            XmlElement node = _dom.DocumentElement.SelectSingleNode("item[@seller='" + _lastSeller + "']") as XmlElement;
+            if (node == null)
+            {
+#if NO
+                node = _dom.CreateElement("item");
+                _dom.DocumentElement.AppendChild(node);
+                node.SetAttribute("seller", _lastSeller);
+#endif
+                _lastSeller = null;
+                return;
+            }
+
+            string strOldValue = node.GetAttribute("table");
+            string strNewValue = this.RateList;
+            if (strOldValue != strNewValue)
+            {
+                node.SetAttribute("table", strNewValue);
+                this.Changed = true;
+            }
+#endif
+            if (AddSellerToDom(this._lastSeller, true) == false)
+            {
+                _lastSeller = null;
+                return;
+            }
+        }
+
+        private void comboBox_seller_TextChanged(object sender, EventArgs e)
+        {
+            // 先保存修改
+            StoreLastSeller();
+
+            this.BeginInvoke(new Action(RefreshAddDeleteButtons));
+        }
+
+        void RefreshAddDeleteButtons()
+        {
+            TableItem item = FindTableItem(this._dom, this.comboBox_seller.Text);
+            if (item == null)
+            {
+                this.button_add.Enabled = true;
+                this.button_delete.Enabled = false;
+            }
+            else
+            {
+                this.button_add.Enabled = false;
+                this.button_delete.Enabled = true;
+            }
+        }
+
+        private void comboBox_seller_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // 先保存修改
+            StoreLastSeller();
+
+            this.RateList = "";
+
+            TableItem item = FindTableItem(this._dom, this.comboBox_seller.Text);
+            if (item != null)
+            {
+                this.RateList = item.Table;
+
+                Debug.Assert(this.comboBox_seller.Text == item.Seller, "");
+            }
+
+            _lastSeller = this.comboBox_seller.Text;
+        }
+
+        bool AddSellerToDom(string strSeller, bool bReplace)
+        {
+            bool bInserted = false;
+            XmlElement node = _dom.DocumentElement.SelectSingleNode("item[@seller='" + strSeller + "']") as XmlElement;
+            if (node == null)
+            {
+                if (bReplace == true)
+                    return false;
+
+                node = _dom.CreateElement("item");
+                _dom.DocumentElement.AppendChild(node);
+                node.SetAttribute("seller", strSeller);
+                bInserted = true;
+            }
+
+            string strOldValue = node.GetAttribute("table");
+            string strNewValue = this.RateList;
+            if (strOldValue != strNewValue)
+            {
+                node.SetAttribute("table", strNewValue);
+                this.Changed = true;
+            }
+
+            if (bInserted)
+                FillSellerList();
+            return true;
+        }
+
+        private void button_add_Click(object sender, EventArgs e)
+        {
+#if NO
+            XmlElement node = _dom.DocumentElement.SelectSingleNode("item[@seller='" + this.comboBox_seller.Text + "']") as XmlElement;
+            if (node == null)
+            {
+                node = _dom.CreateElement("item");
+                _dom.DocumentElement.AppendChild(node);
+                node.SetAttribute("seller", this.comboBox_seller.Text);
+            }
+
+            string strOldValue = node.GetAttribute("table");
+            string strNewValue = this.RateList;
+            if (strOldValue != strNewValue)
+            {
+                node.SetAttribute("table", strNewValue);
+                this.Changed = true;
+            }
+#endif
+            AddSellerToDom(this.comboBox_seller.Text, false);
+
+            this._lastSeller = this.comboBox_seller.Text;
+            this.BeginInvoke(new Action(RefreshAddDeleteButtons));
+        }
+
+        private void button_delete_Click(object sender, EventArgs e)
+        {
+            XmlElement node = _dom.DocumentElement.SelectSingleNode("item[@seller='" + this.comboBox_seller.Text + "']") as XmlElement;
+            if (node == null)
+                return;
+
+            node.ParentNode.RemoveChild(node);
+            this.Changed = true;
+
+            this._lastSeller = null;
+            FillSellerList();
+
+            // 切换为当前存在的第一个 seller
+            DisplayFirstSeller();
+
+            if (this.comboBox_seller.Items.Count == 0)
+            {
+                this.comboBox_seller.Text = "";
+                this.RateList = "";
             }
         }
     }

@@ -448,27 +448,29 @@ Stack:
             this.DefaultFontString = "微软雅黑, 9pt";
         }
 
-        void RemoveBarcodeFont()
+
+        void RemoveExternalFonts(List<string> paths)
         {
+
+            foreach(string path in paths)
+            {
+                API.RemoveFontResourceA(path);
+            }
+
             GlobalVars.PrivateFonts.Dispose();
-
-            {
-                string strFontFilePath = Path.Combine(this.DataDir, "b3901.ttf");
-                API.RemoveFontResourceA(strFontFilePath);
-            }
-
-            {
-                string strFontFilePath = Path.Combine(this.DataDir, "ocr-b.ttf");
-                API.RemoveFontResourceA(strFontFilePath);
-            }
         }
 
-        void InstallBarcodeFont()
+        // "C39HrP24DhTt"   string strFontFilePath = Path.Combine(this.DataDir, "b3901.ttf");
+        // "OCR-B 10 BT" string strFontFilePath = Path.Combine(this.DataDir, "ocr-b.ttf");
+        void InstallExternalFont(
+            // string strFontName, 
+            string strFontFilePath)
         {
+#if NO
             bool bInstalled = true;
             try
             {
-                FontFamily family = new FontFamily("C39HrP24DhTt");
+                FontFamily family = new FontFamily(strFontName);
             }
             catch
             {
@@ -480,56 +482,19 @@ Stack:
                 // 已经安装
                 return;
             }
-
-            {
-                string strFontFilePath = Path.Combine(this.DataDir, "b3901.ttf");
-                int nRet = API.AddFontResourceA(strFontFilePath);
-                if (nRet == 0)
-                {
-                    // 失败
-                    MessageBox.Show(this, "安装字体文件 " + strFontFilePath + " 失败");
-                    return;
-                }
-                // 为了解决 GDI+ 的一个 BUG
-                // PrivateFontCollection m_pfc = new PrivateFontCollection();
-                GlobalVars.PrivateFonts.AddFontFile(strFontFilePath);
-            }
-
-            {
-                string strFontFilePath = Path.Combine(this.DataDir, "ocr-b.ttf");
-                int nRet = API.AddFontResourceA(strFontFilePath);
-                if (nRet == 0)
-                {
-                    // 失败
-                    MessageBox.Show(this, "安装字体文件 " + strFontFilePath + " 失败");
-                    return;
-                }
-                // 'OCR-B 10 BT' 字体
-                GlobalVars.PrivateFonts.AddFontFile(strFontFilePath);
-            }
-#if NO
-            /*
-            try
-            {
-                FontFamily family = new FontFamily("C39HrP24DhTt");
-            }
-            catch (Exception ex)
-            {
-                bInstalled = false;
-            }
-             * */
-            InstalledFontCollection enumFonts = new InstalledFontCollection();
-            FontFamily[] fonts = enumFonts.Families;
-
-            string strResult = "";
-            foreach (FontFamily m in fonts)
-            {
-                strResult += m.Name + "\r\n";
-            }
-
-            int i = 0;
-            i++;
 #endif
+
+            {
+                int nRet = API.AddFontResourceA(strFontFilePath);
+                if (nRet == 0)
+                {
+                    // 失败
+                    MessageBox.Show(this, "安装字体文件 " + strFontFilePath + " 失败");
+                    // return null;
+                }
+
+                GlobalVars.PrivateFonts.AddFontFile(strFontFilePath);
+            }
         }
 
         void MdiClient_ClientSizeChanged(object sender, EventArgs e)
@@ -735,7 +700,13 @@ Stack:
                 TryReportPromptLines();
             }
 
-            RemoveBarcodeFont();
+            {
+                List<string> paths = new List<string>();
+                paths.Add(Path.Combine(this.DataDir, "b3901.ttf"));
+                paths.Add(Path.Combine(this.DataDir, "ocr-b.ttf"));
+
+                RemoveExternalFonts(paths);
+            }
 
             this.PropertyTaskList.Close();
 
@@ -9034,6 +9005,10 @@ Keys keyData)
         /// 私有字体集合
         /// </summary>
         public static PrivateFontCollection PrivateFonts = new PrivateFontCollection();
+
+        // 2017/2/27 注：私有字体用一般的 new Font(strFontName 方法无法正确创建字体，要用特定的 FontFamily 创建才行
+        //public static FontFamily BarcodeFontFamily = null;
+        //public static FontFamily OcrBFontFamily = null;
     }
 
     /// <summary>

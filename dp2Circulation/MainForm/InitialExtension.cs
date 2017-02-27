@@ -2507,8 +2507,18 @@ AppInfo.GetString("config",
                 }
 #endif
 
+#if NO
                 // 安装条码字体
-                InstallBarcodeFont();
+                InstallExternalFont("C39HrP24DhTt", Path.Combine(this.DataDir, "b3901.ttf"));
+                // 安装 OCR-B 10 BT 字体
+                InstallExternalFont("OCR-B 10 BT", Path.Combine(this.DataDir, "ocr-b.ttf"));
+#endif
+                // 安装条码字体
+                InstallExternalFont(Path.Combine(this.DataDir, "b3901.ttf"));
+                // 安装 OCR-B 10 BT 字体
+                InstallExternalFont(Path.Combine(this.DataDir, "ocr-b.ttf"));
+
+
             END1:
 #if NO
                 Stop = new DigitalPlatform.Stop();

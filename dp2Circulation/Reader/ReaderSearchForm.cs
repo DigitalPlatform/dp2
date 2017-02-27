@@ -1463,11 +1463,22 @@ out strError);
                 menuItem.MenuItems.Add(subMenuItem);
 
                 subMenuItem = new MenuItem("打印读者账簿 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
+#if NO
                 subMenuItem.Click += new System.EventHandler(this.menu_printReaderSheet_Click);
                 if (this.listView_records.SelectedItems.Count == 0
                     || bSearching == true)
                     subMenuItem.Enabled = false;
+#endif
                 menuItem.MenuItems.Add(subMenuItem);
+
+                List<string> names = GetPatronSheetNames();
+                foreach (string name in names)
+                {
+                    MenuItem sheetMenuItem = new MenuItem(name);
+                    sheetMenuItem.Click += new System.EventHandler(this.menu_printReaderSheet_Click);
+                    sheetMenuItem.Tag = name;
+                    subMenuItem.MenuItems.Add(sheetMenuItem);
+                }
 
 #if NO
             menuItem = new MenuItem("导出借阅历史到 Excel 文件 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
@@ -1533,6 +1544,29 @@ out strError);
             contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
+        }
+
+        List<string> GetPatronSheetNames()
+        {
+            try
+            {
+                string strDirectory = Path.Combine(Program.MainForm.DataDir, "reader");
+                DirectoryInfo di = new DirectoryInfo(strDirectory);
+                FileInfo[] fis = di.GetFiles("patronSheetLayout*.xml");
+                List<string> results = new List<string>();
+                foreach (FileInfo fi in fis)
+                {
+                    List<string> parts = StringUtil.ParseTwoPart(fi.Name, "_");
+                    parts = StringUtil.ParseTwoPart(parts[1], ".");
+                    results.Add(parts[0]);
+                }
+
+                return results;
+            }
+            catch
+            {
+                return new List<string>();
+            }
         }
 
         // 删除所选定的读者记录
@@ -3734,6 +3768,8 @@ MessageBoxDefaultButton.Button1);
         // 账簿适合图书馆集中保管，用于小学低年级借书
         void menu_printReaderSheet_Click(object sender, EventArgs e)
         {
+            MenuItem menuItem = sender as MenuItem;
+
             string strError = "";
             List<string> barcodes = new List<string>();
             foreach (ListViewItem item in this.listView_records.SelectedItems)
@@ -3746,7 +3782,9 @@ MessageBoxDefaultButton.Button1);
             //      -1  出错
             //      0   用户中断
             //      1   成功
-            int nRet = this.PrintReaderSheet(barcodes,
+            int nRet = this.PrintReaderSheet(
+                menuItem.Tag as string,
+                barcodes,
                 true,
                 out strError);
             if (nRet != 1)
@@ -6259,7 +6297,9 @@ dlg.UiState);
         //      -1  出错
         //      0   用户中断
         //      1   成功
-        public int PrintReaderSheet(List<string> reader_barcodes,
+        public int PrintReaderSheet(
+            string strSheetDefName,
+            List<string> reader_barcodes,
             bool bLaunchExcel,
             out string strError)
         {
@@ -6303,7 +6343,7 @@ dlg.UiState);
                 }
 
                 LabelPrintForm labelPrintForm = Program.MainForm.EnsureLabelPrintForm();
-                labelPrintForm.LabelDefFilename = Path.Combine(Program.MainForm.DataDir, "reader\\patronSheetLayout.xml");
+                labelPrintForm.LabelDefFilename = Path.Combine(Program.MainForm.DataDir, "reader\\patronSheetLayout_"+strSheetDefName+".xml");
                 labelPrintForm.LabelFilename = strTempDataFileName;
                 labelPrintForm.MdiParent = Program.MainForm;
                 labelPrintForm.Show();

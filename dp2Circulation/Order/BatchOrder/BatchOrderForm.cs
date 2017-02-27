@@ -1734,6 +1734,31 @@ int nCount)
             _listCollection.AddRange(items);
         }
 
+        List<RateItem> GetRateTable(string strSeller)
+        {
+            XmlDocument dom = new XmlDocument();
+            string strCfgFileName = Path.Combine(Program.MainForm.UserDir, "order_rate_table.xml");
+            try
+            {
+                dom.Load(strCfgFileName);
+            }
+            catch(FileNotFoundException)
+            {
+                return null;
+            }
+            catch(DirectoryNotFoundException)
+            {
+                return null;
+            }
+
+            dp2Circulation.ExchangeRateDialog.TableItem table = ExchangeRateDialog.FindTableItem(dom, strSeller);
+
+            if (table == null)
+                return null;
+
+            return RateItem.ParseList(table.Table);
+        }
+
         // exception:
         //      可能会抛出异常
         void FillSheets()
@@ -1754,12 +1779,15 @@ int nCount)
                 ClearHtml(sheet.WebBrowser);
             }
 
-            List<RateItem> rate_table = null;
+#if NO
             if (string.IsNullOrEmpty(this.RateList) == false)
                 rate_table = RateItem.ParseList(this.RateList);
+#endif
 
             foreach (OrderList list in _listCollection)
             {
+                List<RateItem> rate_table = GetRateTable(list.Seller);
+
                 dp2Circulation.OrderListViewerForm.Sheet sheet = _listForm.CreateSheet(list.Seller);
                 list.FillInWebBrowser(sheet.WebBrowser, rate_table);
 
@@ -1839,6 +1867,7 @@ int nCount)
             doc = doc.OpenNew(true);
         }
 
+#if NO
         public string RateList
         {
             get
@@ -1850,18 +1879,18 @@ int nCount)
                 Program.MainForm.AppInfo.SetString("batchOrderForm", "rateList", value);
             }
         }
+#endif
 
         private void toolStripButton_rate_Click(object sender, EventArgs e)
         {
             ExchangeRateDialog dlg = new ExchangeRateDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.RateList = this.RateList;
+            dlg.CfgFileName = Path.Combine(Program.MainForm.UserDir, "order_rate_table.xml");
             Program.MainForm.AppInfo.LinkFormState(dlg, "BatchOrderForm_OrderEditForm_state");
             dlg.ShowDialog(this);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
-            this.RateList = dlg.RateList;
             this.BeginRefreshOrderSheets();
         }
 

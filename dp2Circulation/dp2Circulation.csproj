@@ -2549,7 +2549,10 @@
       <DependentUpon>UrgentChargingForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Thread\ThreadBase.cs" />
-    <Content Include="Reader\patronSheetLayout.xml">
+    <Content Include="Reader\patronSheetLayout_3X7.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Reader\patronSheetLayout_3X9.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="readme.txt" />
@@ -3691,6 +3694,26 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="Reader\patronSheetLayout.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Reader\patronSheetLayout_3X7.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Reader\patronSheetLayout_3X9.xml">
       <Visible>False</Visible>
       <Group>
       </Group>
