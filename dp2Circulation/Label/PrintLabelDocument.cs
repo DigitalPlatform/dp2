@@ -335,28 +335,11 @@ namespace dp2Circulation
             if (StringUtil.IsInList("TestingGrid", strStyle) == true)
                 bTestingGrid = true;
 
-
             int nYCount = 0;
             int nXCount = 0;
 
             double PageWidth = label_param.PageWidth;
             double PageHeight = label_param.PageHeight;
-#if NO
-            if (label_param.Landscape == true)
-            {
-                double nTemp = PageHeight;
-                PageHeight = PageWidth;
-                PageWidth = nTemp;
-            }
-#endif
-#if NO
-            if (e.PageSettings.Landscape == true)
-            {
-                double nTemp = PageHeight;
-                PageHeight = PageWidth;
-                PageWidth = nTemp;
-            }
-#endif
 
             int nPageWidth = e.PageBounds.Width;    // PageBounds 中已经是按照 Landscape 处理过的方向了
             if (PageWidth != 0)
@@ -771,7 +754,7 @@ namespace dp2Circulation
         {
             using (Region old_clip = g.Clip)
             {
-                g.IntersectClip(rectContent);
+                g.IntersectClip(GetPixelRect(g, rectContent));
 
                 float y0 = 0;
                 for (int k = 0; k < lines.Count; k++)
@@ -844,7 +827,7 @@ namespace dp2Circulation
                     {
                         using (Brush brush = new SolidBrush(GetColor(format.BackColor)))
                         {
-                            g.FillRectangle(brush, rect);
+                            g.FillRectangle(brush, GetPixelRect(g, rect));
                         }
                     }
 
@@ -852,6 +835,7 @@ namespace dp2Circulation
                     {
                         // strText = strText.Trim(new char[] { '*' });
 
+                        // 应该是 1/100 inch 单位
                         float textHeight = MeasureOcrTextHeight(
     g,
     rect,
@@ -862,13 +846,13 @@ namespace dp2Circulation
                         Hashtable param = new Hashtable();
                         param["type"] = "39";
                         param["code"] = strText;
-                        param["width"] = ((int)target.Width * 2).ToString();
-                        param["height"] = ((int)(target.Height) * 2).ToString();
+                        param["width"] = ((int)GetPixelX(g, target.Width) * 2).ToString();
+                        param["height"] = ((int)GetPixelY(g, target.Height) * 2).ToString();
                         param["margin"] = "0";
                         using (Image image = BuildQrCodeImage(param))
                         {
                             RectangleF source = new RectangleF(0, 0, image.Width, image.Height);
-                            g.DrawImage(image, target, source, GraphicsUnit.Pixel);
+                            g.DrawImage(image, GetPixelRect(g, target), source, GraphicsUnit.Pixel);
                         }
 
                         RectangleF rectText = new RectangleF(rect.X,
@@ -877,7 +861,7 @@ namespace dp2Circulation
                             textHeight);
                         PaintOcrFont(
                             g,
-                            rectText,
+                            GetPixelRect(g, rectText),
                             strText);
                     }
                     else
@@ -895,7 +879,7 @@ namespace dp2Circulation
                             g.DrawString(strText,
                                 this_font,
                                 brushText,
-                                rect,
+                                GetPixelRect(g, rect),
                                 s_format);
                         }
                         finally
@@ -914,12 +898,12 @@ namespace dp2Circulation
                         {
                             pen.DashPattern = new float[] { 1F, 3F, 1F, 3F };
                             g.DrawLine(pen,
-                                new PointF(rect.Left, rect.Top),
-                                new PointF(rect.Right, rect.Top)
+                                GetPixelPoint(g, new PointF(rect.Left, rect.Top)),
+                                GetPixelPoint(g, new PointF(rect.Right, rect.Top))
                                 );
                             g.DrawLine(pen,
-                                new PointF(rect.Left + 2, rect.Bottom),
-                                new PointF(rect.Right, rect.Bottom)
+                                GetPixelPoint(g, new PointF(rect.Left + 2, rect.Bottom)),
+                                GetPixelPoint(g, new PointF(rect.Right, rect.Bottom))
                                 );
                         }
                     }
@@ -932,6 +916,44 @@ namespace dp2Circulation
                 g.Clip = old_clip;
             } // end of using clip
 
+        }
+
+        static PointF GetPixelPoint(Graphics g, PointF point)
+        {
+            return new PointF(point.X * g.DpiX / 100,
+    point.Y * g.DpiY / 100);
+        }
+
+        static RectangleF GetPixelRect(Graphics g, RectangleF rect)
+        {
+            return new RectangleF(rect.X * g.DpiX / 100,
+                rect.Y * g.DpiY / 100,
+                rect.Width * g.DpiX / 100,
+                rect.Height * g.DpiY / 100);
+        }
+
+        static float GetPixelX(Graphics g, float display)
+        {
+            // display 值为 1/100 英寸
+            return (display * g.DpiX) / 100;
+        }
+
+        static float GetPixelY(Graphics g, float display)
+        {
+            // display 值为 1/100 英寸
+            return (display * g.DpiY) / 100;
+        }
+
+        static double GetPixelX(Graphics g, double display)
+        {
+            // display 值为 1/100 英寸
+            return (display * g.DpiX) / 100;
+        }
+
+        static double GetPixelY(Graphics g, double display)
+        {
+            // display 值为 1/100 英寸
+            return (display * g.DpiY) / 100;
         }
 
         static float MeasureOcrTextHeight(
@@ -969,8 +991,8 @@ namespace dp2Circulation
             string strText)
         {
             using (Font font = Global.BuildFont(
-                "OCR-B 10 BT", 
-                rect.Height, 
+                "OCR-B 10 BT",
+                rect.Height,
                 GraphicsUnit.Pixel))
             {
                 StringFormat s_format = new StringFormat();
