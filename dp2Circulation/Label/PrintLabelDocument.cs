@@ -781,6 +781,8 @@ namespace dp2Circulation
                     //if (bIsBarcodeFont == true && string.IsNullOrEmpty(strText) == false)
                     //    strText = "*" + strText + "*";
 
+                    this_font = ReCreateFont(this_font, g);
+
                     float nLineHeight = this_font.GetHeight(g);
 
                     RectangleF rect = new RectangleF((float)x + (float)label_param.LabelPaddings.Left - nXDelta,
@@ -918,6 +920,16 @@ namespace dp2Circulation
 
         }
 
+        Font ReCreateFont(Font font, Graphics g)
+        {
+            if (g.DpiY != 96)
+            {
+                float height = font.SizeInPoints / 72 * 96;
+                return new Font(font.FontFamily, height, font.Style, GraphicsUnit.Pixel);
+            }
+
+            return font;
+        }
 #if NO
         static PointF GetPixelPoint(Graphics g, PointF point)
         {
