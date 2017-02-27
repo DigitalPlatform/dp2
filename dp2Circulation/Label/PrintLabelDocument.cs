@@ -754,7 +754,7 @@ namespace dp2Circulation
         {
             using (Region old_clip = g.Clip)
             {
-                g.IntersectClip(GetPixelRect(g, rectContent));
+                g.IntersectClip(rectContent);
 
                 float y0 = 0;
                 for (int k = 0; k < lines.Count; k++)
@@ -780,139 +780,150 @@ namespace dp2Circulation
 
                     //if (bIsBarcodeFont == true && string.IsNullOrEmpty(strText) == false)
                     //    strText = "*" + strText + "*";
+                    Font save_font = this_font;
 
-                    this_font = ReCreateFont(this_font, g);
-
-                    float nLineHeight = this_font.GetHeight(g);
-
-                    RectangleF rect = new RectangleF((float)x + (float)label_param.LabelPaddings.Left - nXDelta,
-                        (float)y + (float)label_param.LabelPaddings.Top + y0 - nYDelta,
-                        (float)label_param.LabelWidth - (float)label_param.LabelPaddings.Left - (float)label_param.LabelPaddings.Right,
-                        nLineHeight);
-
-                    bool bAbsLocation = false;
-                    // 行格式的 start 和 offset
-                    if (format != null)
+                    if (this.DesignMode)
+                        this_font = ReCreateFont(this_font, g);
+                    try
                     {
-                        if (double.IsNaN(format.StartX) == false)
-                            rect.X = (float)format.StartX;
-                        if (double.IsNaN(format.StartY) == false)
+                        float nLineHeight = this_font.GetHeight(g);
+
+                        RectangleF rect = new RectangleF((float)x + (float)label_param.LabelPaddings.Left - nXDelta,
+                            (float)y + (float)label_param.LabelPaddings.Top + y0 - nYDelta,
+                            (float)label_param.LabelWidth - (float)label_param.LabelPaddings.Left - (float)label_param.LabelPaddings.Right,
+                            nLineHeight);
+
+                        bool bAbsLocation = false;
+                        // 行格式的 start 和 offset
+                        if (format != null)
                         {
-                            rect.Y = (float)format.StartY;
-                            bAbsLocation = true;    // Y 绝对定位后，行高度不参与累计
-                        }
-                        rect.Offset((float)format.OffsetX, (float)format.OffsetY);
-
-                        y0 += (float)format.OffsetY;    // Y 偏移后，累计值也跟着调整
-
-                        if (double.IsNaN(format.Width) == false)
-                            rect.Width = (float)format.Width;
-                        if (double.IsNaN(format.Height) == false)
-                            rect.Height = (float)format.Height;
-                    }
-
-                    StringFormat s_format = new StringFormat();
-                    if (format != null)
-                    {
-                        if (format.Align == "right")
-                            s_format.Alignment = StringAlignment.Far;
-                        else if (format.Align == "center")
-                            s_format.Alignment = StringAlignment.Center;
-                        else
-                            s_format.Alignment = StringAlignment.Near;
-
-                        s_format.Trimming = StringTrimming.EllipsisCharacter;
-                        // s_format.LineAlignment = StringAlignment.Center;
-                    }
-
-                    if (format != null && string.IsNullOrEmpty(format.BackColor) == false)
-                    {
-                        using (Brush brush = new SolidBrush(GetColor(format.BackColor)))
-                        {
-                            g.FillRectangle(brush, GetPixelRect(g, rect));
-                        }
-                    }
-
-                    if (bIsBarcodeFont)
-                    {
-                        // strText = strText.Trim(new char[] { '*' });
-
-                        // 应该是 1/100 inch 单位
-                        float textHeight = MeasureOcrTextHeight(
-    g,
-    rect,
-    strText);
-                        RectangleF target = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height - textHeight);
-
-                        GraphicsUnit u = g.PageUnit;
-                        Hashtable param = new Hashtable();
-                        param["type"] = "39";
-                        param["code"] = strText;
-                        param["width"] = ((int)GetPixelX(g, target.Width) * 2).ToString();
-                        param["height"] = ((int)GetPixelY(g, target.Height) * 2).ToString();
-                        param["margin"] = "0";
-                        using (Image image = BuildQrCodeImage(param))
-                        {
-                            RectangleF source = new RectangleF(0, 0, image.Width, image.Height);
-                            g.DrawImage(image, GetPixelRect(g, target), source, GraphicsUnit.Pixel);
-                        }
-
-                        RectangleF rectText = new RectangleF(rect.X,
-                            rect.Y + target.Height,
-                            rect.Width,
-                            textHeight);
-                        PaintOcrFont(
-                            g,
-                            GetPixelRect(g, rectText),
-                            strText);
-                    }
-                    else
-                    {
-                        Brush brushText = null;
-                        try
-                        {
-                            if (format != null && string.IsNullOrEmpty(format.ForeColor) == false)
+                            if (double.IsNaN(format.StartX) == false)
+                                rect.X = (float)format.StartX;
+                            if (double.IsNaN(format.StartY) == false)
                             {
-                                brushText = new SolidBrush(GetColor(format.ForeColor));
+                                rect.Y = (float)format.StartY;
+                                bAbsLocation = true;    // Y 绝对定位后，行高度不参与累计
                             }
+                            rect.Offset((float)format.OffsetX, (float)format.OffsetY);
+
+                            y0 += (float)format.OffsetY;    // Y 偏移后，累计值也跟着调整
+
+                            if (double.IsNaN(format.Width) == false)
+                                rect.Width = (float)format.Width;
+                            if (double.IsNaN(format.Height) == false)
+                                rect.Height = (float)format.Height;
+                        }
+
+                        StringFormat s_format = new StringFormat();
+                        if (format != null)
+                        {
+                            if (format.Align == "right")
+                                s_format.Alignment = StringAlignment.Far;
+                            else if (format.Align == "center")
+                                s_format.Alignment = StringAlignment.Center;
                             else
-                                brushText = System.Drawing.Brushes.Black;
+                                s_format.Alignment = StringAlignment.Near;
 
-                            g.DrawString(strText,
-                                this_font,
-                                brushText,
-                                GetPixelRect(g, rect),
-                                s_format);
+                            s_format.Trimming = StringTrimming.EllipsisCharacter;
+                            // s_format.LineAlignment = StringAlignment.Center;
                         }
-                        finally
+
+                        if (format != null && string.IsNullOrEmpty(format.BackColor) == false)
                         {
-                            if (brushText != System.Drawing.Brushes.Black)
-                                brushText.Dispose();
+                            using (Brush brush = new SolidBrush(GetColor(format.BackColor)))
+                            {
+                                g.FillRectangle(brush, rect);
+                            }
                         }
+
+                        if (bIsBarcodeFont)
+                        {
+                            // strText = strText.Trim(new char[] { '*' });
+
+                            // 应该是 1/100 inch 单位
+                            float textHeight = MeasureOcrTextHeight(
+        g,
+        rect,
+        strText);
+                            RectangleF target = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height - textHeight);
+
+                            GraphicsUnit u = g.PageUnit;
+                            Hashtable param = new Hashtable();
+                            param["type"] = "39";
+                            param["code"] = strText;
+                            param["width"] = ((int)(target.Width * 2)).ToString();
+                            param["height"] = ((int)(target.Height * 2)).ToString();
+                            param["margin"] = "0";
+                            using (Image image = BuildQrCodeImage(param))
+                            {
+                                RectangleF source = new RectangleF(0, 0, image.Width, image.Height);
+                                g.DrawImage(image, target, source, GraphicsUnit.Pixel);
+                            }
+
+                            RectangleF rectText = new RectangleF(rect.X,
+                                rect.Y + target.Height,
+                                rect.Width,
+                                textHeight);
+                            PaintOcrFont(
+                                g,
+                                rectText,
+                                strText);
+                        }
+                        else
+                        {
+                            Brush brushText = null;
+                            try
+                            {
+                                if (format != null && string.IsNullOrEmpty(format.ForeColor) == false)
+                                {
+                                    brushText = new SolidBrush(GetColor(format.ForeColor));
+                                }
+                                else
+                                    brushText = System.Drawing.Brushes.Black;
+
+                                g.DrawString(strText,
+                                    this_font,
+                                    brushText,
+                                    rect,
+                                    s_format);
+                            }
+                            finally
+                            {
+                                if (brushText != System.Drawing.Brushes.Black)
+                                    brushText.Dispose();
+                            }
+                        }
+
+
+
+                        // 文字行区域边界
+                        // 黑色点
+                        if (bTestingGrid == true && label_param.LineSep > 0)
+                        {
+                            using (Pen pen = new Pen(Color.Black, (float)1))
+                            {
+                                pen.DashPattern = new float[] { 1F, 3F, 1F, 3F };
+                                g.DrawLine(pen,
+                                    new PointF(rect.Left, rect.Top),
+                                    new PointF(rect.Right, rect.Top)
+                                    );
+                                g.DrawLine(pen,
+                                    new PointF(rect.Left + 2, rect.Bottom),
+                                    new PointF(rect.Right, rect.Bottom)
+                                    );
+                            }
+                        }
+
+                        if (bAbsLocation == false)
+                            y0 += // nLineHeight
+                                rect.Height + (float)label_param.LineSep;
+
                     }
-
-
-                    // 文字行区域边界
-                    // 黑色点
-                    if (bTestingGrid == true && label_param.LineSep > 0)
+                    finally
                     {
-                        using (Pen pen = new Pen(Color.Black, (float)1))
-                        {
-                            pen.DashPattern = new float[] { 1F, 3F, 1F, 3F };
-                            g.DrawLine(pen,
-                                GetPixelPoint(g, new PointF(rect.Left, rect.Top)),
-                                GetPixelPoint(g, new PointF(rect.Right, rect.Top))
-                                );
-                            g.DrawLine(pen,
-                                GetPixelPoint(g, new PointF(rect.Left + 2, rect.Bottom)),
-                                GetPixelPoint(g, new PointF(rect.Right, rect.Bottom))
-                                );
-                        }
+                        if (this_font != save_font)
+                            this_font.Dispose();
                     }
-
-                    if (bAbsLocation == false)
-                        y0 += // nLineHeight
-                            rect.Height + (float)label_param.LineSep;
                 }
 
                 g.Clip = old_clip;
@@ -969,41 +980,6 @@ namespace dp2Circulation
             return (display * g.DpiY) / 100;
         }
 #endif
-
-        static PointF GetPixelPoint(Graphics g, PointF point)
-        {
-            return point;
-        }
-
-        static RectangleF GetPixelRect(Graphics g, RectangleF rect)
-        {
-            return rect;
-        }
-
-        static float GetPixelX(Graphics g, float display)
-        {
-            // display 值为 1/100 英寸
-            return display;
-        }
-
-        static float GetPixelY(Graphics g, float display)
-        {
-            // display 值为 1/100 英寸
-            return display;
-        }
-
-        static double GetPixelX(Graphics g, double display)
-        {
-            // display 值为 1/100 英寸
-            return display;
-        }
-
-        static double GetPixelY(Graphics g, double display)
-        {
-            // display 值为 1/100 英寸
-            return display;
-        }
-
 
         static float MeasureOcrTextHeight(
     Graphics g,
