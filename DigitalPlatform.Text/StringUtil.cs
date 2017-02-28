@@ -144,7 +144,12 @@ namespace DigitalPlatform.Text
             string strDelimiter = ":")
         {
             if (string.IsNullOrEmpty(strList) == true)
-                return "";
+            {
+                if (strPrefix == "")
+                    return "";
+                return null;
+            }
+
             string[] list = strList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string s in list)
             {

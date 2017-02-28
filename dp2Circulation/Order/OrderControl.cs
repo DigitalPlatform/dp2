@@ -915,12 +915,23 @@ namespace dp2Circulation
             if (this.Items == null)
                 return 0;
 
+            int i = 0;
             foreach (OrderItem item in this.Items)
             {
                 // OrderItem item = this.OrderItems[i];
 
                 if (item.ItemDisplayState == ItemDisplayState.Deleted)
+                {
+                    i++;
                     continue;
+                }
+
+                // 2017/2/28
+                if (string.IsNullOrEmpty(item.RefID))
+                {
+                    strError = "第 "+(i+1)+" 个订购记录缺乏 参考 ID 字段(XML 元素 refID)，获取订购记录失败";
+                    return -1;
+                }
 
                 // 星号表示通配
                 if (strPublishTime != "*")
@@ -960,6 +971,7 @@ namespace dp2Circulation
                     return -1;
 
                 XmlRecords.Add(strOrderXml);
+                i++;
             }
 
             return 1;

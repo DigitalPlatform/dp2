@@ -282,7 +282,6 @@ namespace dp2Circulation
 
             param.Font = Global.BuildFont(strFontString);
 
-
             param.LineFormats.Clear();
             foreach (ListViewItem item in this.listView_lineFormats.Items)
             {
@@ -306,6 +305,7 @@ namespace dp2Circulation
                     format.Font = null;
 
                 format.Align = ListViewUtil.GetItemText(item, COLUMN_ALIGN);
+                format.Style = ListViewUtil.GetItemText(item, COLUMN_STYLE);
                 SetFormatStart(format, store.UniversalStart);
                 SetFormatOffset(format, store.UniversalOffset);
                 SetFormatSize(format, store.UniversalSize);
@@ -431,6 +431,7 @@ namespace dp2Circulation
 
                 ListViewUtil.ChangeItemText(item, COLUMN_FONT, strFontString);
                 ListViewUtil.ChangeItemText(item, COLUMN_ALIGN, line.Align);
+                ListViewUtil.ChangeItemText(item, COLUMN_STYLE, line.Style);
 
                 string strStart = GetStartString(this._currentUnit, line.StartX, line.StartY);
                 ListViewUtil.ChangeItemText(item, COLUMN_START, strStart);
@@ -508,6 +509,7 @@ namespace dp2Circulation
         const int COLUMN_SIZE = 4;
         const int COLUMN_FORECOLOR = 5;
         const int COLUMN_BACKCOLOR = 6;
+        const int COLUMN_STYLE = 7;
 
         private void numericUpDown_labelWidth_ValueChanged(object sender, EventArgs e)
         {
@@ -808,6 +810,7 @@ namespace dp2Circulation
             dlg.DecimalPlaces = this.DecimalPlaces;
             dlg.FontString = ListViewUtil.GetItemText(item, COLUMN_FONT);
             dlg.Align = ListViewUtil.GetItemText(item, COLUMN_ALIGN);
+            dlg.StyleString = ListViewUtil.GetItemText(item, COLUMN_STYLE);
 #if NO
             dlg.Start = ListViewUtil.GetItemText(item, COLUMN_START);
             dlg.Offset = ListViewUtil.GetItemText(item, COLUMN_OFFSET);
@@ -829,6 +832,7 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item, COLUMN_START, dlg.Start);
             ListViewUtil.ChangeItemText(item, COLUMN_OFFSET, dlg.Offset);
             ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.Size);
+            ListViewUtil.ChangeItemText(item, COLUMN_STYLE, dlg.StyleString);
 
             store.UniversalStart = dlg.UniversalStart;
             store.UniversalOffset = dlg.UniversalOffset;
@@ -852,6 +856,7 @@ namespace dp2Circulation
             dlg.CurrentUnit = this._currentUnit;
             dlg.DecimalPlaces = this.DecimalPlaces;
             dlg.Align = "left";
+            dlg.StyleString = "";
             dlg.StartPosition = FormStartPosition.CenterParent;
             dlg.ShowDialog(this);
 
@@ -864,6 +869,7 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item, COLUMN_START, dlg.Start);
             ListViewUtil.ChangeItemText(item, COLUMN_OFFSET, dlg.Offset);
             ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.Size);
+            ListViewUtil.ChangeItemText(item, COLUMN_STYLE, dlg.StyleString);
 
             LineStore store = new LineStore();
             store.UniversalStart = dlg.UniversalStart;

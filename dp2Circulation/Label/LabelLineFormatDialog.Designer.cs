@@ -47,6 +47,10 @@
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_text = new System.Windows.Forms.TabPage();
             this.tabPage_position = new System.Windows.Forms.TabPage();
+            this.textBox_width = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.textBox_height = new System.Windows.Forms.TextBox();
             this.tabPage_color = new System.Windows.Forms.TabPage();
             this.label8 = new System.Windows.Forms.Label();
             this.textBox_backColor = new System.Windows.Forms.TextBox();
@@ -54,10 +58,8 @@
             this.label7 = new System.Windows.Forms.Label();
             this.textBox_foreColor = new System.Windows.Forms.TextBox();
             this.button_setForeColor = new System.Windows.Forms.Button();
-            this.textBox_width = new System.Windows.Forms.TextBox();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.textBox_height = new System.Windows.Forms.TextBox();
+            this.label11 = new System.Windows.Forms.Label();
+            this.textBox_styleString = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_offsetX)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown_offsetY)).BeginInit();
             this.tabControl_main.SuspendLayout();
@@ -262,6 +264,8 @@
             // 
             // tabPage_text
             // 
+            this.tabPage_text.Controls.Add(this.label11);
+            this.tabPage_text.Controls.Add(this.textBox_styleString);
             this.tabPage_text.Controls.Add(this.label1);
             this.tabPage_text.Controls.Add(this.textBox_fontString);
             this.tabPage_text.Controls.Add(this.label2);
@@ -297,6 +301,38 @@
             this.tabPage_position.TabIndex = 1;
             this.tabPage_position.Text = "位置";
             this.tabPage_position.UseVisualStyleBackColor = true;
+            // 
+            // textBox_width
+            // 
+            this.textBox_width.Location = new System.Drawing.Point(110, 150);
+            this.textBox_width.Name = "textBox_width";
+            this.textBox_width.Size = new System.Drawing.Size(100, 21);
+            this.textBox_width.TabIndex = 17;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(8, 153);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(29, 12);
+            this.label9.TabIndex = 16;
+            this.label9.Text = "宽度";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(8, 180);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(29, 12);
+            this.label10.TabIndex = 18;
+            this.label10.Text = "高度";
+            // 
+            // textBox_height
+            // 
+            this.textBox_height.Location = new System.Drawing.Point(110, 177);
+            this.textBox_height.Name = "textBox_height";
+            this.textBox_height.Size = new System.Drawing.Size(100, 21);
+            this.textBox_height.TabIndex = 19;
             // 
             // tabPage_color
             // 
@@ -371,37 +407,23 @@
             this.button_setForeColor.UseVisualStyleBackColor = true;
             this.button_setForeColor.Click += new System.EventHandler(this.button_setForeColor_Click);
             // 
-            // textBox_width
+            // label11
             // 
-            this.textBox_width.Location = new System.Drawing.Point(110, 150);
-            this.textBox_width.Name = "textBox_width";
-            this.textBox_width.Size = new System.Drawing.Size(100, 21);
-            this.textBox_width.TabIndex = 17;
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(6, 121);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(53, 12);
+            this.label11.TabIndex = 6;
+            this.label11.Text = "风格(&S):";
             // 
-            // label9
+            // textBox_styleString
             // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(8, 153);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(29, 12);
-            this.label9.TabIndex = 16;
-            this.label9.Text = "宽度";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(8, 180);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(29, 12);
-            this.label10.TabIndex = 18;
-            this.label10.Text = "高度";
-            // 
-            // textBox_height
-            // 
-            this.textBox_height.Location = new System.Drawing.Point(110, 177);
-            this.textBox_height.Name = "textBox_height";
-            this.textBox_height.Size = new System.Drawing.Size(100, 21);
-            this.textBox_height.TabIndex = 19;
+            this.textBox_styleString.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_styleString.Location = new System.Drawing.Point(110, 118);
+            this.textBox_styleString.Name = "textBox_styleString";
+            this.textBox_styleString.Size = new System.Drawing.Size(168, 21);
+            this.textBox_styleString.TabIndex = 7;
             // 
             // LabelLineFormatDialog
             // 
@@ -462,5 +484,7 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox textBox_height;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.TextBox textBox_styleString;
     }
 }

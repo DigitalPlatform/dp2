@@ -11,6 +11,8 @@ using System.Diagnostics;
 using System.Xml;
 
 using System.Runtime.InteropServices;
+using System.IO;
+using System.Net;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -23,8 +25,6 @@ using DigitalPlatform.Drawing;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.DataMining;
 using DigitalPlatform.Marc;
-using System.IO;
-using System.Net;
 
 namespace dp2Circulation
 {

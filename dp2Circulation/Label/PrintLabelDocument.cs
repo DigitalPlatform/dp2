@@ -778,11 +778,15 @@ namespace dp2Circulation
                         bIsBarcodeFont = label_param.IsBarcodeFont;
                     }
 
-                    //if (bIsBarcodeFont == true && string.IsNullOrEmpty(strText) == false)
-                    //    strText = "*" + strText + "*";
+                    string strLineStyle = "";
+                    if (format != null && string.IsNullOrEmpty(format.Style) == false)
+                    {
+                        strLineStyle = format.Style;
+                    }
+
                     Font save_font = this_font;
 
-                    if (this.DesignMode)
+                    if (this.IsDesignMode)
                         this_font = ReCreateFont(this_font, g);
                     try
                     {
@@ -793,25 +797,49 @@ namespace dp2Circulation
                             (float)label_param.LabelWidth - (float)label_param.LabelPaddings.Left - (float)label_param.LabelPaddings.Right,
                             nLineHeight);
 
-                        bool bAbsLocation = false;
+                        string strAlignment = "left";
+                        if (format != null)
+                            strAlignment = format.Align;
+
+                        bool bVertAbsLocation = false;
+                        bool bHorzAbsLocation = false;
                         // 行格式的 start 和 offset
                         if (format != null)
                         {
                             if (double.IsNaN(format.StartX) == false)
+                            {
                                 rect.X = (float)format.StartX;
+                                bHorzAbsLocation = true;    // X 绝对定位后，不考虑 alignment，一律靠左
+                            }
                             if (double.IsNaN(format.StartY) == false)
                             {
                                 rect.Y = (float)format.StartY;
-                                bAbsLocation = true;    // Y 绝对定位后，行高度不参与累计
+                                bVertAbsLocation = true;    // Y 绝对定位后，行高度不参与累计
                             }
+
+                            RectangleF rectBack = rect;
+
+                            if (double.IsNaN(format.Width) == false)
+                            {
+                                rect.Width = (float)format.Width;
+
+                                // 水平 alignment
+                                if (bHorzAbsLocation == false)
+                                {
+                                    if (strAlignment == "center")
+                                        rect.Offset((rectBack.Width - rect.Width) / 2, 0);
+                                    else if (strAlignment == "right")
+                                        rect.Offset(rectBack.Width - rect.Width, 0);
+                                }
+                            }
+
+                            if (double.IsNaN(format.Height) == false)
+                                rect.Height = (float)format.Height;
+
+                            // 一般左对齐的时候才用得上 offset
                             rect.Offset((float)format.OffsetX, (float)format.OffsetY);
 
                             y0 += (float)format.OffsetY;    // Y 偏移后，累计值也跟着调整
-
-                            if (double.IsNaN(format.Width) == false)
-                                rect.Width = (float)format.Width;
-                            if (double.IsNaN(format.Height) == false)
-                                rect.Height = (float)format.Height;
                         }
 
                         StringFormat s_format = new StringFormat();
@@ -836,9 +864,30 @@ namespace dp2Circulation
                             }
                         }
 
-                        if (bIsBarcodeFont)
+                        // return:
+                        //      null    没有找到前缀
+                        //      ""      找到了前缀，并且值部分为空
+                        //      其他     返回值部分
+                        string barcode_type = StringUtil.GetParameterByPrefix(strLineStyle,
+                                "barcode",
+                                ":");
+                        if (barcode_type != null)
                         {
                             // strText = strText.Trim(new char[] { '*' });
+
+#if NO
+                            // 条码区域边界
+                            using (Pen pen = new Pen(Color.Red, this.IsDesignMode ? (float)0.5 : (float)1))
+                            {
+                                g.DrawRectangle(pen,
+                                    rect.X,
+                                    rect.Y,
+                                    rect.Width,
+                                    rect.Height);
+                            }
+#endif
+
+                            float picture_ratio = Math.Max(2, g.DpiX / 100);
 
                             // 应该是 1/100 inch 单位
                             float textHeight = MeasureOcrTextHeight(
@@ -846,13 +895,48 @@ namespace dp2Circulation
         rect,
         strText);
                             RectangleF target = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height - textHeight);
+                            RectangleF rectText = new RectangleF(target.X,
+    target.Y + target.Height,
+    target.Width,
+    textHeight);
+
+#if NO
+                            // target 区域边界
+                            using (Pen pen = new Pen(Color.Blue, this.IsDesignMode ? (float)0.5 : (float)1))
+                            {
+                                g.DrawRectangle(pen,
+                                    rectText.X,
+                                    rectText.Y,
+                                    rectText.Width,
+                                    rectText.Height);
+                            }
+#endif
+
+                            // 修正 target 区域为正方形
+                            if (barcode_type == "qr" || barcode_type == "qrcode")
+                            {
+                                float min = Math.Min(target.Width, target.Height);
+                                if (target.Width > min)
+                                {
+                                    float delta = target.Width - min;
+                                    target.Inflate(-delta / 2, 0);
+                                    //target.Offset(delta / 2, 0);
+                                }
+                                if (target.Height > min)
+                                {
+                                    float delta = target.Height - min;
+                                    target.Inflate(0, -delta / 2);
+                                    //target.Offset(0, delta / 2);
+                                }
+                            }
+
 
                             GraphicsUnit u = g.PageUnit;
                             Hashtable param = new Hashtable();
-                            param["type"] = "39";
+                            param["type"] = string.IsNullOrEmpty(barcode_type) == true ? "39" : barcode_type;  //  "39";
                             param["code"] = strText;
-                            param["width"] = ((int)(target.Width * 2)).ToString();
-                            param["height"] = ((int)(target.Height * 2)).ToString();
+                            param["width"] = ((int)(target.Width * picture_ratio)).ToString();
+                            param["height"] = ((int)(target.Height * picture_ratio)).ToString();
                             param["margin"] = "0";
                             using (Image image = BuildQrCodeImage(param))
                             {
@@ -860,10 +944,6 @@ namespace dp2Circulation
                                 g.DrawImage(image, target, source, GraphicsUnit.Pixel);
                             }
 
-                            RectangleF rectText = new RectangleF(rect.X,
-                                rect.Y + target.Height,
-                                rect.Width,
-                                textHeight);
                             PaintOcrFont(
                                 g,
                                 rectText,
@@ -881,6 +961,9 @@ namespace dp2Circulation
                                 else
                                     brushText = System.Drawing.Brushes.Black;
 
+                                if (bIsBarcodeFont == true && string.IsNullOrEmpty(strText) == false)
+                                    strText = "*" + strText + "*";
+
                                 g.DrawString(strText,
                                     this_font,
                                     brushText,
@@ -893,8 +976,6 @@ namespace dp2Circulation
                                     brushText.Dispose();
                             }
                         }
-
-
 
                         // 文字行区域边界
                         // 黑色点
@@ -914,7 +995,7 @@ namespace dp2Circulation
                             }
                         }
 
-                        if (bAbsLocation == false)
+                        if (bVertAbsLocation == false)
                             y0 += // nLineHeight
                                 rect.Height + (float)label_param.LineSep;
 
@@ -987,9 +1068,9 @@ namespace dp2Circulation
     string strText)
         {
             float height = rect.Height / 3; // 预计的文字高度
+            float ratio = 0F;
             for (; ; )
             {
-                float ratio = 0.33F;
                 using (Font font = Global.BuildFont(
                     "OCR-B 10 BT",
                     height,
@@ -998,15 +1079,22 @@ namespace dp2Circulation
                     SizeF size = g.MeasureString(strText, font);
                     if (size.Width <= rect.Width)
                         return height;
-                    ratio = ((size.Width - rect.Width) / rect.Width) + 0.04F; // 超过的百分比
+                    // 宽高比例
+                    if (ratio != 0)
+                        ratio *= 0.9F;
+                    else
+                        ratio = size.Height / size.Width;
+                    // ratio = ((size.Width - rect.Width) / rect.Width) + 0.04F; // 超过的百分比
                 }
 
-                if (height <= 1)
-                    return Math.Max(1, height);
+                height = rect.Width * ratio;
 
                 // 减小 height
                 // 每次减小 1/3
-                height -= height * ratio;
+                // height -= height * ratio;
+
+                if (height <= 1)
+                    return Math.Max(1, height);
             }
         }
 
@@ -1054,7 +1142,6 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(strMargin) == false)
                 Int32.TryParse(strMargin, out nMargin);
 
-
             string strCharset = "ISO-8859-1";
             bool bDisableECI = false;
 
@@ -1069,6 +1156,15 @@ namespace dp2Circulation
                 format = BarcodeFormat.EAN_13;
                 strCode = strCode.ToUpper();
             }
+            else if (strType == "codabar")
+            {
+                format = BarcodeFormat.CODABAR;
+                strCode = strCode.ToUpper();
+            }
+            else if (strType == "qr" || strType == "qrcode")
+            {
+
+            }
 
             EncodingOptions options = new QrCodeEncodingOptions
             {
@@ -1080,7 +1176,7 @@ namespace dp2Circulation
             };
 
             if (strType == "39" || strType == "code_39"
-                || strType == "ean_13")
+                || strType == "ean_13" || strType == "codabar")
                 options = new EncodingOptions
                 {
                     Width = nWidth, // 500,

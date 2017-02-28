@@ -2254,6 +2254,16 @@ out strError);
 
                 }
 
+
+                if (this.DbType == "issue")
+                {
+                    subMenuItem = new MenuItem("校验期记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&V)");
+                    subMenuItem.Click += new System.EventHandler(this.menu_verifyIssueRecord_Click);
+                    if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
+                        subMenuItem.Enabled = false;
+                    menuItem.MenuItems.Add(subMenuItem);
+                }
+
                 if (this.DbType == "order")
                 {
                     subMenuItem = new MenuItem("打印订单 (&O)");
@@ -2510,6 +2520,21 @@ out strError);
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
         }
 
+
+        void menu_verifyIssueRecord_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            nRet = VerifyIssueRecord(out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个期记录");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
         void menu_verifyItemRecord_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -2565,6 +2590,167 @@ out strError);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 校验期记录
+        int VerifyIssueRecord(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            Debug.Assert(this.DbType == "issue", "");
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要进行批处理的事项";
+                return -1;
+            }
+
+            if (stop != null && stop.State == 0)    // 0 表示正在处理
+            {
+                strError = "目前有长操作正在进行，无法进行校验期记录的操作";
+                return -1;
+            }
+
+            // 切换到“操作历史”属性页
+            this.MainForm.ActivateFixPage("history");
+
+            int nCount = 0;
+
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                + " 开始进行期记录校验</div>");
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在进行校验期记录的操作 ...");
+            stop.BeginLoop();
+
+            this.EnableControls(false);
+            try
+            {
+                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+
+                ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
+    stop,
+    items,
+    this.m_biblioTable);
+                loader.DbTypeCaption = this.DbTypeCaption;
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null
+                        && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    XmlDocument itemdom = new XmlDocument();
+                    try
+                    {
+                        itemdom.LoadXml(info.OldXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
+                        return -1;
+                    }
+
+                    List<string> errors = new List<string>();
+
+                    // 检查根元素下的元素名是否有重复的
+                    nRet = VerifyDupElementName(itemdom,
+            out strError);
+                    if (nRet == -1)
+                        errors.Add(strError);
+
+                    // 校验 XML 记录中是否有非法字符
+                    string strReplaced = DomUtil.ReplaceControlCharsButCrLf(info.OldXml, '*');
+                    if (strReplaced != info.OldXml)
+                    {
+                        errors.Add("XML 记录中有非法字符");
+                    }
+
+                    nRet = VerifyIssue(itemdom,
+            out strError);
+                    if (nRet == -1)
+                        errors.Add(strError);
+
+                    if (errors.Count > 0)
+                    {
+                        this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                        foreach (string error in errors)
+                        {
+                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                        }
+
+                        {
+                            item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
+                            item.ListViewItem.ForeColor = Color.FromArgb(255, 255, 255);
+                        }
+                    }
+
+                    nCount++;
+                    stop.SetProgressValue(++i);
+                }
+
+                return nCount;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                this.EnableControls(true);
+
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                    + " 结束执行期记录校验</div>");
+            }
+        }
+
+        // return:
+        //      0   没有发现错误
+        //      -1  发现错误
+        int VerifyIssue(XmlDocument dom,
+            out string strError)
+        {
+            strError = "";
+
+            if (dom.DocumentElement == null)
+            {
+                strError = "XML 记录为空";
+                return -1;
+            }
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("orderInfo/*");
+            foreach (XmlElement record in nodes)
+            {
+                string strRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+                if (string.IsNullOrEmpty(strRefID) == true)
+                {
+                    strError = "内嵌的订购记录缺乏 refID 元素";
+                    return -1;
+                }
+            }
+
+            return 0;
         }
 
         int VerifyItemRecord(out string strError)
@@ -2801,12 +2987,23 @@ out strError);
             if (dom.DocumentElement == null)
                 return 0;
 
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(dom.NameTable);
+
             List<string> errors = new List<string>();
             foreach (XmlNode node in dom.DocumentElement.ChildNodes)
             {
-                if (node.NodeType == XmlNodeType.Element)
+                if (node.NodeType == XmlNodeType.Element
+                    // && string.IsNullOrEmpty(node.Prefix) == true
+                    )
                 {
-                    XmlNodeList nodes = dom.DocumentElement.SelectNodes(node.Name); // 2016/11/18 修改 bug
+                    // dprms:file 元素是允许重复的
+                    if (node.NamespaceURI == DpNs.dprms && node.LocalName == "file")
+                        continue;
+
+                    if (string.IsNullOrEmpty(node.Prefix) == false)
+                        nsmgr.AddNamespace(node.Prefix, node.NamespaceURI);
+
+                    XmlNodeList nodes = dom.DocumentElement.SelectNodes(node.Name, nsmgr); // 2016/11/18 修改 bug
                     if (nodes.Count > 1)
                     {
                         errors.Add("根元素下的 " + node.Name + " 元素出现了多次 " + nodes.Count);

@@ -503,6 +503,18 @@ namespace dp2Circulation
             }
         }
 
+        public string StyleString
+        {
+            get
+            {
+                return this.textBox_styleString.Text;
+            }
+            set
+            {
+                this.textBox_styleString.Text = value;
+            }
+        }
+
         private void button_getFont_Click(object sender, EventArgs e)
         {
             FontDialog dlg = new FontDialog();

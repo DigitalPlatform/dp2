@@ -325,6 +325,7 @@ namespace dp2Circulation
                     format.Font = null; // 继承页面的字体
 
                 format.Align = DomUtil.GetAttr(node, "align");
+                format.Style = DomUtil.GetAttr(node, "style");
 
                 string strOffset = DomUtil.GetAttr(node, "offset");
                 if (string.IsNullOrEmpty(strOffset) == false)
@@ -500,6 +501,7 @@ namespace dp2Circulation
                     }
 
                     DomUtil.SetAttr(line, "align", format.Align);
+                    DomUtil.SetAttr(line, "style", format.Style);
 
                     Debug.Assert(double.IsNaN(format.OffsetX) == false, "OffsetX 不可能为 NaN");
                     Debug.Assert(double.IsNaN(format.OffsetY) == false, "OffsetY 不可能为 NaN");
@@ -537,7 +539,9 @@ namespace dp2Circulation
     public class LineFormat
     {
         public Font Font = null;    // 如果为空，则表示继承页面的字体
+
         public string Align = "left";
+
         public bool IsBarcodeFont = false;  // 是否为条码字体？ 如果是条码字体，则要在文字左右加上 *
 
         // 左上角绝对位置
@@ -559,6 +563,7 @@ namespace dp2Circulation
         // 背景颜色
         public string BackColor = "";   // 缺省为透明
 
+        public string Style = "";   // 风格
     }
 
 }
