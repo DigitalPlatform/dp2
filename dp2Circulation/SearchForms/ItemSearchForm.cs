@@ -2001,7 +2001,8 @@ out strError);
 
                 // 到册窗，条码
                 // if (this.DbType == "item")
-                if (string.IsNullOrEmpty(strBarcode) == false)
+                if (string.IsNullOrEmpty(strBarcode) == false
+                    && this.DbType == "item")
                 {
                     subMenuItem = new MenuItem("装入" + strOpenStyle + this.DbTypeCaption + "窗，根据册条码号 '" + strBarcode + "'");
                     subMenuItem.Click += new System.EventHandler(this.menu_itemInfoForm_barcode_newly_Click);
@@ -2019,7 +2020,8 @@ out strError);
 
                 // 到种册窗，条码
                 // if (this.DbType == "item")
-                if (string.IsNullOrEmpty(strBarcode) == false)
+                if (string.IsNullOrEmpty(strBarcode) == false
+                    && this.DbType == "item")
                 {
                     subMenuItem = new MenuItem("装入" + strOpenStyle + "种册窗，根据册条码号 '" + strBarcode + "'");
                     subMenuItem.Click += new System.EventHandler(this.menu_entityForm_barcode_newly_Click);
@@ -2044,7 +2046,8 @@ out strError);
 
                 // 到册窗，条码
                 //if (this.DbType == "item")
-                if (string.IsNullOrEmpty(strBarcode) == false)
+                if (string.IsNullOrEmpty(strBarcode) == false
+                    && this.DbType == "item")
                 {
                     subMenuItem = new MenuItem("装入" + strOpenStyle + this.DbTypeCaption + "窗，根据册条码号 '" + strBarcode + "'");
                     subMenuItem.Click += new System.EventHandler(this.menu_itemInfoForm_barcode_exist_Click);
@@ -2064,7 +2067,8 @@ out strError);
 
                 // 到种册窗，条码
                 //                if (this.DbType == "item")
-                if (string.IsNullOrEmpty(strBarcode) == false)
+                if (string.IsNullOrEmpty(strBarcode) == false
+                    && this.DbType == "item")
                 {
                     subMenuItem = new MenuItem("装入" + strOpenStyle + "种册窗，根据册条码号 '" + strBarcode + "'");
                     subMenuItem.Click += new System.EventHandler(this.menu_entityForm_barcode_exist_Click);
@@ -2742,7 +2746,7 @@ out strError);
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("orderInfo/*");
             foreach (XmlElement record in nodes)
             {
-                string strRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+                string strRefID = DomUtil.GetElementText(record, "refID");
                 if (string.IsNullOrEmpty(strRefID) == true)
                 {
                     strError = "内嵌的订购记录缺乏 refID 元素";

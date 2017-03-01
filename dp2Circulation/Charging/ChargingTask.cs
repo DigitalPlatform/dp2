@@ -414,8 +414,8 @@ namespace dp2Circulation
         // 将字符串中的宏 %datadir% 替换为实际的值
         string ReplaceMacro(string strText)
         {
-            strText = strText.Replace("%mappeddir%", PathUtil.MergePath(this.Container.MainForm.DataDir, "servermapped"));
-            return strText.Replace("%datadir%", this.Container.MainForm.DataDir);
+            strText = strText.Replace("%mappeddir%", PathUtil.MergePath(Program.MainForm.DataDir, "servermapped"));
+            return strText.Replace("%datadir%", Program.MainForm.DataDir);
         }
 
         internal void DoStop(object sender, StopEventArgs e)
@@ -456,7 +456,7 @@ namespace dp2Circulation
                 strStyle += ",summary";
             {
                 strStyle += ",xml";
-                if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.25") >= 0)
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.25") >= 0)
                     strStyle += ":noborrowhistory";
             }
 #if NO
@@ -533,7 +533,7 @@ namespace dp2Circulation
                     strReaderXml = "";
 
                     strStyle = "xml";
-                    if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.25") >= 0)
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.25") >= 0)
                         strStyle += ":noborrowhistory";
                     results = null;
 
@@ -597,7 +597,7 @@ out strError);
             if (this.Container.SpeakPatronName == true && results.Length >= 2)
             {
                 string strName = results[1];
-                this.Container.MainForm.Speak(strName);
+                Program.MainForm.Speak(strName);
             }
 
             // this.m_strCurrentBarcode = strBarcode;
@@ -659,7 +659,7 @@ out strError);
 
         string GetPostFix()
         {
-            if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.24") >= 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.24") >= 0)
                 return ":noborrowhistory";
             return "";
         }
@@ -721,7 +721,7 @@ out strError);
             // item返回的格式
             string strItemReturnFormats = "";
 
-            if (this.Container.MainForm.ChargingNeedReturnItemXml == true)
+            if (Program.MainForm.ChargingNeedReturnItemXml == true)
             {
                 if (String.IsNullOrEmpty(strItemReturnFormats) == false)
                     strItemReturnFormats += ",";
@@ -734,7 +734,7 @@ out strError);
             // 读者返回格式
             string strReaderFormatList = "";
             bool bName = false; // 是否直接取得读者姓名，而不要获得读者 XML
-            if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.24") >= 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.24") >= 0)
             {
                 strReaderFormatList = this.Container.PatronRenderFormat + ",summary";
                 bName = true;
@@ -744,7 +744,7 @@ out strError);
 
             string strStyle = "reader";
 
-            if (this.Container.MainForm.ChargingNeedReturnItemXml)
+            if (Program.MainForm.ChargingNeedReturnItemXml)
                 strStyle += ",item";
 
             //if (this.Container.MainForm.TestMode == true)
@@ -790,7 +790,7 @@ out strError);
             }
 
             string strItemXml = "";
-            if (this.Container.MainForm.ChargingNeedReturnItemXml == true
+            if (Program.MainForm.ChargingNeedReturnItemXml == true
                 && item_records != null)
             {
                 Debug.Assert(item_records != null, "");
@@ -833,7 +833,7 @@ out strError);
                 strConfirmItemRecPath,
                 task);
 
-            this.Container.MainForm.OperHistory.BorrowAsync(
+            Program.MainForm.OperHistory.BorrowAsync(
 this.Container,
 bRenew,
 strOutputReaderBarcode,
@@ -1038,7 +1038,7 @@ end_time);
             // item返回的格式
             string strItemReturnFormats = "";
 
-            if (this.Container.MainForm.ChargingNeedReturnItemXml == true)
+            if (Program.MainForm.ChargingNeedReturnItemXml == true)
             {
                 if (String.IsNullOrEmpty(strItemReturnFormats) == false)
                     strItemReturnFormats += ",";
@@ -1051,7 +1051,7 @@ end_time);
             // 读者返回格式
             string strReaderFormatList = "";
             bool bName = false; // 是否直接取得读者姓名，而不要获得读者 XML
-            if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.24") >= 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.24") >= 0)
             {
                 strReaderFormatList = this.Container.PatronRenderFormat + ",summary";
                 bName = true;
@@ -1061,7 +1061,7 @@ end_time);
 
             string strStyle = "reader";
 
-            if (this.Container.MainForm.ChargingNeedReturnItemXml)
+            if (Program.MainForm.ChargingNeedReturnItemXml)
                 strStyle += ",item";
 
             if (string.IsNullOrEmpty(task.Parameters) == false)
@@ -1126,7 +1126,7 @@ end_time);
             }
 
             string strItemXml = "";
-            if ((this.Container.MainForm.ChargingNeedReturnItemXml == true || strAction == "inventory")
+            if ((Program.MainForm.ChargingNeedReturnItemXml == true || strAction == "inventory")
                 && item_records != null)
             {
                 Debug.Assert(item_records != null, "");
@@ -1203,7 +1203,7 @@ end_time);
 
             DateTime end_time = DateTime.Now;
 
-            this.Container.MainForm.OperHistory.ReturnAsync(
+            Program.MainForm.OperHistory.ReturnAsync(
                 this.Container,
                 strAction,  // task.Action == "lost" || task.Action == "verify_lost",
                 strOutputReaderBarcode, // this.textBox_readerBarcode.Text,

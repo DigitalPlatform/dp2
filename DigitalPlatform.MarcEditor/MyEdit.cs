@@ -772,6 +772,8 @@ namespace DigitalPlatform.Marc
             {
                 // 把子字段符号换一下
                 string strText = DigitalPlatform.Marc.MarcEditor.ClipboardToText();
+                if (strText == null)
+                    strText = "";
 
                 // 去掉回车换行符号
                 strText = strText.Replace("\r\n", "\r");

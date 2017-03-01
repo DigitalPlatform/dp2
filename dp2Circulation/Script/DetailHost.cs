@@ -1293,6 +1293,7 @@ namespace dp2Circulation
 
         // 获得著者号
         // return:
+        //      -4  著者字符串没有检索命中
         //      -1  error
         //      0   canceled
         //      1   succeed
@@ -1443,6 +1444,8 @@ namespace dp2Circulation
                 try
                 {
                     // return:
+                    //      -4  著者字符串没有检索命中
+                    //      -2  strID验证失败
                     //      -1  error
                     //      0   canceled
                     //      1   succeed
@@ -2397,14 +2400,21 @@ namespace dp2Circulation
                 string type = one.Type;
                 string strAuthor = one.Author;
                 Debug.Assert(String.IsNullOrEmpty(strAuthor) == false, "");
+            REDO:
 
                 if (type == "GCAT")
                 {
+                    string strPinyin = "";
+                    List<string> two = StringUtil.ParseTwoPart(strAuthor, "|");
+                    strAuthor = two[0];
+                    strPinyin = two[1];
+
                     // 获得著者号
                     string strGcatWebServiceUrl = this.DetailForm.MainForm.GcatServerUrl;   // "http://dp2003.com/dp2libraryws/gcat.asmx";
 
                     // 获得著者号
                     // return:
+                    //      -4  著者字符串没有检索命中
                     //      -1  error
                     //      0   canceled
                     //      1   succeed
@@ -2421,6 +2431,33 @@ namespace dp2Circulation
                         if (string.IsNullOrEmpty(strError) == true)
                             strError = "放弃从 GCAT 取号";
                         return 0;
+                    }
+
+                    if (nRet == -4)
+                    {
+                        string strHanzi = strAuthor;
+                        string strLastError = strError;
+                        // 临时取汉字的拼音
+                        if (string.IsNullOrEmpty(strPinyin))
+                        {
+                            strPinyin = strAuthor;
+                            // 取拼音
+                            nRet = HanziToPinyin(ref strPinyin,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+                        if (string.IsNullOrEmpty(strPinyin))
+                            goto ERROR1;
+                        string strMessage = "字符串 '"+strHanzi+"' 取汉语著者号码时出现意外状况: " + strLastError + "\r\n\r\n后面软件会自动尝试用卡特表方式为拼音字符串 '"+strPinyin+"' 取号。";
+                        strAuthor = strPinyin;
+                        type = "Cutter-Sanborn Three-Figure";
+                        MessageBox.Show(this.DetailForm, strMessage);
+
+                        // 尝试把信息发给 dp2003.com
+                        Program.MainForm.ReportError("dp2circulation 创建索取号", "(安静汇报)" + strMessage);
+
+                        goto REDO;
                     }
 
                     return 1;
@@ -2523,20 +2560,16 @@ namespace dp2Circulation
             strAuthor = "";
             fLevel = 2;
 
+            string strPinyin = "";
+
             string strMarcSyntax = this.DetailForm.GetCurrentMarcSyntax();
 
             if (strQufenhaoType == "GCAT")
             {
                 if (strMarcSyntax == "unimarc")
                 {
+
 #if NO
-                    List<string> locations = new List<string>();
-                    locations.Add("701a");
-                    locations.Add("711a");
-                    locations.Add("702a");
-                    locations.Add("712a");
-                    strAuthor = GetFirstSubfield(locations);
-#endif
                     List<string> results = null;
                     // 700、710、720
                     results = GetSubfields("700", "a", "@[^A].");    // 指示符
@@ -2601,6 +2634,28 @@ namespace dp2Circulation
                 FOUND:
                     Debug.Assert(results.Count > 0, "");
                     strAuthor = results[0];
+#endif
+                    MarcRecord record = new MarcRecord(this.DetailForm.MarcEditor.Marc);
+
+                    // 获得一个著者字符串和对应的拼音
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      1   找到
+                    int nRet = GetAuthorAndPinyin(record,
+            out strAuthor,
+            out strPinyin,
+            out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 0)
+                    {
+                        strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
+                        return 0;
+                    }
+
+                    if (string.IsNullOrEmpty(strPinyin) == false)
+                        strAuthor += "|" + strPinyin;
                 }
                 else if (strMarcSyntax == "usmarc")
                 {
@@ -3139,6 +3194,59 @@ namespace dp2Circulation
             return strValue;
         }
 #endif
+
+        // 2017/3/1
+        // 获得一个著者字符串和对应的拼音
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        int GetAuthorAndPinyin(MarcRecord record,
+            out string strAuthor,
+            out string strPinyin,
+            out string strError)
+        {
+            strError = "";
+            strAuthor = "";
+            strPinyin = "";
+
+            MarcNodeList fields = record.select("field[@name='700' or @name='701' or @name='702' or @name='710' or @name='711' or @name='712']");
+
+            foreach (MarcNode field in fields)
+            {
+                if ((field.Name == "700" || field.Name == "701" || field.Name == "702")
+                    && field.Indicator1 == 'A')
+                    continue;
+
+                string a = FirstContent(field.select("subfield[@name='a']"));
+                if (string.IsNullOrEmpty(a))
+                    continue;
+
+                if (ContainHanzi(a) == false)
+                    continue;
+
+                // 看看是否有 &9
+                string sub_9 = FirstContent(field.select("subfield[@name='9']"));
+#if NO
+                if (string.IsNullOrEmpty(sub_9) == false)
+                {
+                    strPinyin = a;
+                    nRet = HanziToPinyin(ref a,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+                else
+                    strPinyin = sub_9;
+#endif
+                strPinyin = sub_9;
+
+                strAuthor = a;
+                return 1;
+            }
+
+            return 0;
+        }
 
         // 从选定的字段中获得石头汤著者字符串
         // TODO: 题名字符串不看 $b

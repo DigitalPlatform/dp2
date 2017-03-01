@@ -2011,6 +2011,7 @@ namespace dp2Circulation
         // 外部调用
         // 特殊版本，具有缓存问题和答案的功能
         // return:
+        //      -4  著者字符串没有检索命中
         //      -2  strID验证失败
         //      -1  error
         //      0   canceled
@@ -2045,6 +2046,7 @@ namespace dp2Circulation
                 {
                     // 这个函数具有catch 通讯中 exeption的能力
                     // return:
+                    //      -4  "著者 'xxx' 的整体或局部均未检索命中" 2017/3/1
                     //		-3	需要回答问题
                     //      -2  strID验证失败
                     //      -1  出错
@@ -2094,7 +2096,8 @@ namespace dp2Circulation
                 return -1;
             if (nRet == -2)
                 return -2;  // strID验证失败
-
+            if (nRet == -4)
+                return -4;  // 2017/3/1
             return 1;
         }
 

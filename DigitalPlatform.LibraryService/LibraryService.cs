@@ -14061,6 +14061,7 @@ out strError);
         //		strNumber	返回号码
         //		strError	出错信息
         // return:
+        //      -4  "著者 'xxx' 的整体或局部均未检索命中" 2017/3/1
         //		-3	需要回答问题
         //      -2  strID验证失败
         //      -1  出错
@@ -14096,6 +14097,7 @@ out strError);
                 // TODO: 验证身份
                 StringBuilder debug_info = null;
                 // return:
+                //      -4  "著者 'xxx' 的整体或局部均未检索命中" 2017/3/1
                 //		-3	需要回答问题
                 //      -1  出错
                 //      0   成功

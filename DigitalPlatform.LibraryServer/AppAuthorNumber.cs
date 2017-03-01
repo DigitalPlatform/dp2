@@ -48,6 +48,7 @@ namespace DigitalPlatform.LibraryServer
         public RecordLockCollection hanzi_locks = new RecordLockCollection();
 
         // return:
+        //      -4  "著者 'xxx' 的整体或局部均未检索命中" 2017/3/1
         //		-3	需要回答问题
         //      -1  出错
         //      0   成功
@@ -272,7 +273,7 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(strMatched) == true)
             {
                 strError = "著者 '" + strAuthor + "' 的整体或局部均未检索命中";
-                return -1;
+                return -4;  // return -1;
             }
 
             string strXing = strMatched;	// 姓

@@ -452,7 +452,7 @@ Stack:
         void RemoveExternalFonts(List<string> paths)
         {
 
-            foreach(string path in paths)
+            foreach (string path in paths)
             {
                 API.RemoveFontResourceA(path);
             }
@@ -483,6 +483,16 @@ Stack:
                 return;
             }
 #endif
+            if (File.Exists(strFontFilePath) == false
+                // && ApplicationDeployment.IsNetworkDeployed
+                )
+            {
+                if (Detect360() == true)
+                {
+                    Program.PromptAndExit(this, "dp2Circulation (内务)受到 360 软件干扰而无法启动 [文件" + strFontFilePath + "不存在]。请关闭或者卸载 360 软件然后再重新启动 dp2Circulation (内务)");
+                    return;
+                }
+            }
 
             {
                 int nRet = API.AddFontResourceA(strFontFilePath);
@@ -490,7 +500,7 @@ Stack:
                 {
                     // 失败
                     MessageBox.Show(this, "安装字体文件 " + strFontFilePath + " 失败");
-                    // return null;
+                    return;
                 }
 
                 GlobalVars.PrivateFonts.AddFontFile(strFontFilePath);
