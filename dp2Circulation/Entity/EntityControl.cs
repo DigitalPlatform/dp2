@@ -1253,6 +1253,12 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 // 插入
                 bookitem.Parent = Global.GetRecordID(this.BiblioRecPath);
 
+                // 2017/3/2
+                if (string.IsNullOrEmpty(bookitem.RefID))
+                {
+                    bookitem.RefID = Guid.NewGuid().ToString();
+                }
+
                 this.Items.Add(bookitem);
 
                 if (dupitem != null)
@@ -1424,6 +1430,12 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                             goto REDO;
                         }
                     }
+                }
+
+                // 2017/3/2
+                if (string.IsNullOrEmpty(bookitem.RefID))
+                {
+                    bookitem.RefID = Guid.NewGuid().ToString();
                 }
 
                 if (edit.NextAction == "new")
@@ -1702,7 +1714,11 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
                 bookitem.Barcode = "";
                 bookitem.Parent = Global.GetRecordID(this.BiblioRecPath);
-
+                // 2017/3/2
+                if (string.IsNullOrEmpty(bookitem.RefID))
+                {
+                    bookitem.RefID = Guid.NewGuid().ToString();
+                }
                 // 加入列表
                 this.Items.Add(bookitem);
                 bookitem.ItemDisplayState = ItemDisplayState.New;
@@ -1848,6 +1864,12 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 bookitem.Barcode = strBarcode;
                 bookitem.Parent = Global.GetRecordID(this.BiblioRecPath);
 
+                // 2017/3/2
+                if (string.IsNullOrEmpty(bookitem.RefID))
+                {
+                    bookitem.RefID = Guid.NewGuid().ToString();
+                }
+
                 // 先加入列表
                 this.Items.Add(bookitem);
                 bookitem.ItemDisplayState = ItemDisplayState.New;
@@ -1898,32 +1920,10 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             {
                 this.Items.PhysicalDeleteItem(bookitem);
 
-                // 改变保存按钮状态
-                // SetSaveAllButtonState(true);
-                /*
-                if (this.ContentChanged != null)
-                {
-                    ContentChangedEventArgs e1 = new ContentChangedEventArgs();
-                    e1.OldChanged = bOldChanged;
-                    e1.CurrentChanged = this.Changed;
-                    this.ContentChanged(this, e1);
-                }
-                 * */
                 this.Changed = this.Changed;
                 return;
             }
 
-            // 改变保存按钮状态
-            // SetSaveAllButtonState(true);
-            /*
-            if (this.ContentChanged != null)
-            {
-                ContentChangedEventArgs e1 = new ContentChangedEventArgs();
-                e1.OldChanged = bOldChanged;
-                e1.CurrentChanged = this.Changed;
-                this.ContentChanged(this, e1);
-            }
-             * */
             this.Changed = this.Changed;
 
             // TODO: 2007/10/23
@@ -2290,6 +2290,11 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
             if (exist_item == null)
             {
+                // 2017/3/2
+                if (string.IsNullOrEmpty(bookitem.RefID))
+                {
+                    bookitem.RefID = Guid.NewGuid().ToString();
+                }
                 this.Items.Add(bookitem);
                 bookitem.Parent = Global.GetRecordID(this.BiblioRecPath);
                 bookitem.ItemDisplayState = ItemDisplayState.New;
@@ -2418,6 +2423,12 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             }
 
             bookitem.Barcode = strBarcode;
+
+            // 2017/3/2
+            if (string.IsNullOrEmpty(bookitem.RefID))
+            {
+                bookitem.RefID = Guid.NewGuid().ToString();
+            }
 
             if (this.Items == null)
                 this.Items = new BookItemCollection();

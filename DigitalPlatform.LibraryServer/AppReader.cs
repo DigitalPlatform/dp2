@@ -729,6 +729,27 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // 2017/3/2
+            if (strAction == "change"
+                    || strAction == "changestate"
+                    || strAction == "changeforegift"
+                    || strAction == "changereaderbarcode")
+            {
+                if (string.IsNullOrEmpty(strRecPath))
+                {
+                    strError = "修改读者记录的操作 '" + strAction + "' 不允许记录路径参数 strRecPath 值为空";
+                    goto ERROR1;
+                }
+
+                // 检查宜于早一点进行。如果这里不检查，则查重证条码号以后，命中了一条读者记录，但因为 strRecPath 中提交的不是合法的路径形态，那么判断的结果就是“证条码号已经在别的记录中存在了”，这种报错会误导用户或开发者
+                string strTargetRecId = ResPath.GetRecordId(strRecPath);
+                if (strTargetRecId == "?" || String.IsNullOrEmpty(strTargetRecId) == true)
+                {
+                    strError = "修改读者记录的操作 '" + strAction + "' 不允许使用追加形态的记录路径 '" + strRecPath + "'";
+                    goto ERROR1;
+                }
+            }
+
             // 把旧记录装载到DOM
             XmlDocument domOldRec = new XmlDocument();
             try

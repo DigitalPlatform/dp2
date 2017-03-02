@@ -458,6 +458,12 @@ namespace dp2Circulation
 #endif
             TriggerContentChanged(bOldChanged, true);
 
+            // 2017/3/2
+            if (string.IsNullOrEmpty(issueitem.RefID))
+            {
+                issueitem.RefID = Guid.NewGuid().ToString();
+            }
+
             // 要对本种进行出版日期和参考ID查重。
             // 如果重了，要保持窗口，以便修改。不过从这个角度，查重最好在对话框关闭前作？
             // 或者重新打开对话框
@@ -898,6 +904,12 @@ namespace dp2Circulation
                             goto REDO;
                         }
                     }
+                }
+
+                // 2017/3/2
+                if (string.IsNullOrEmpty(issueitem.RefID))
+                {
+                    issueitem.RefID = Guid.NewGuid().ToString();
                 }
             }
             finally
@@ -2472,6 +2484,11 @@ namespace dp2Circulation
 
                 if (exist_item == null)
                 {
+                    // 2017/3/2
+                    if (string.IsNullOrEmpty(issue_item.RefID))
+                    {
+                        issue_item.RefID = Guid.NewGuid().ToString();
+                    }
                     this.Items.Add(issue_item);
                     issue_item.ItemDisplayState = ItemDisplayState.New;
                     issue_item.AddToListView(this.listView);
@@ -2679,6 +2696,13 @@ namespace dp2Circulation
                     // 复原
                     IssueItem issue_item = (IssueItem)design_item.Tag;
                     Debug.Assert(issue_item != null, "");
+
+                    // 2017/3/2
+                    if (string.IsNullOrEmpty(issue_item.RefID))
+                    {
+                        issue_item.RefID = Guid.NewGuid().ToString();
+                    }
+
                     this.Items.Add(issue_item);
                     issue_item.AddToListView(this.listView);
 
@@ -2731,6 +2755,11 @@ namespace dp2Circulation
 
                 changed_issueitems.Add(issueitem);
 
+                // 2017/3/2
+                if (string.IsNullOrEmpty(issueitem.RefID))
+                {
+                    issueitem.RefID = Guid.NewGuid().ToString();
+                }
                 // 先加入列表
                 this.Items.Add(issueitem);
 
@@ -2766,6 +2795,11 @@ namespace dp2Circulation
                 if (bFound == true)
                     continue;
 
+                // 2017/3/2
+                if (string.IsNullOrEmpty(issue_item.RefID))
+                {
+                    issue_item.RefID = Guid.NewGuid().ToString();
+                }
                 // 先加入列表
                 this.Items.Add(issue_item);
                 issue_item.AddToListView(this.listView);

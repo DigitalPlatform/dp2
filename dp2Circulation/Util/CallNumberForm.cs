@@ -1077,6 +1077,10 @@ namespace dp2Circulation
             if (nRet == -1)
                 return -1;
 
+            // 2017/3/2
+            // 由于 FillList() 里面用了 EndUpdate()，如果后来窗口很快关闭了，就会来不及显示 ListView 的更新情况，所以需要这里 Update()，才能看到瞬间 ListView 刷新显示的效果
+            this.Update();
+
             for (int i = 0; i < this.listView_number.Items.Count; i++)
             {
                 ListViewItem item = this.listView_number.Items[i];

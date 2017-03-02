@@ -2130,6 +2130,11 @@ namespace dp2Circulation
                     }
                 }
 
+                // 2017/3/2
+                if (string.IsNullOrEmpty(commentitem.RefID))
+                {
+                    commentitem.RefID = Guid.NewGuid().ToString();
+                }
             }
             finally
             {
@@ -2534,7 +2539,13 @@ namespace dp2Circulation
                     dupitem.HilightListViewItem(true);
                     return;
                 }
-            } // end of ' if (String.IsNullOrEmpty(strIndex) == false)
+            }
+
+            // 2017/3/2
+            if (string.IsNullOrEmpty(commentitem.RefID))
+            {
+                commentitem.RefID = Guid.NewGuid().ToString();
+            }
 
             return;
         ERROR1:

@@ -348,10 +348,10 @@ namespace dp2Circulation
             strError = "";
             if (this._objects == null)
                 return 0;
-            return this._objects.Save(channel, 
-                stop, 
+            return this._objects.Save(channel,
+                stop,
                 this.RecPath,
-                dp2library_version, 
+                dp2library_version,
                 out strError);
         }
 
@@ -715,15 +715,16 @@ namespace dp2Circulation
             strError = "";
             // 检查每个事项的refID
             Hashtable table = new Hashtable();
+            int i = 0;
             foreach (BookItemBase item in this)
             {
-                if (String.IsNullOrEmpty(item.RefID) == true)
+                // 2017/3/2 启用对参考 ID 的检查
+                if (String.IsNullOrEmpty(item.RefID) == true
+                    && item.ItemDisplayState != ItemDisplayState.Deleted)
                 {
-                    /*
-                    strError = "册事项中出现了空的RefID值";
+                    strError = "事项 " + (i + 1) + " 中出现了空的RefID";
                     return -1;
-                     * */
-                    continue;
+                    // continue;
                 }
 
                 if (item.ItemDisplayState != ItemDisplayState.Deleted)  // 删除的可以例外
@@ -739,6 +740,8 @@ namespace dp2Circulation
 
                 if (table.Contains(item.RefID) == false)
                     table.Add(item.RefID, null);
+
+                i++;
             }
 
             return 0;

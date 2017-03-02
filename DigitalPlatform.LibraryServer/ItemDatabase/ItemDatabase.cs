@@ -1351,7 +1351,6 @@ out strError);
 
             // 先读出数据库中即将覆盖位置的已有记录
         REDOLOAD:
-
             lRet = channel.GetRes(info.NewRecPath,
                 out strExistXml,
                 out strMetaData,
@@ -1474,6 +1473,13 @@ out strError);
                     error.ErrorCode = ErrorCodeValue.AccessDenied;
                     ErrorInfos.Add(error);
                     return -1;
+                }
+
+                // 2017/3/2
+                {
+                    string strOldRefID = DomUtil.GetElementText(domNew.DocumentElement, "refID");
+                    if (string.IsNullOrEmpty(strOldRefID))
+                        DomUtil.SetElementText(domNew.DocumentElement, "refID", Guid.NewGuid().ToString());
                 }
 
                 // 2010/4/8
@@ -1947,7 +1953,6 @@ out strError);
                         else
                             bIsOldNewLocateSame = false;
 
-
                         if (info.Action == "new"
                             || info.Action == "change"
                             || info.Action == "move")
@@ -2206,6 +2211,13 @@ out strError);
                                 error.ErrorCode = ErrorCodeValue.CommonError;
                                 ErrorInfos.Add(error);
                                 continue;
+                            }
+
+                            // 2017/3/2
+                            {
+                                string strOldRefID = DomUtil.GetElementText(domNew.DocumentElement, "refID");
+                                if (string.IsNullOrEmpty(strOldRefID))
+                                    DomUtil.SetElementText(domNew.DocumentElement, "refID", Guid.NewGuid().ToString());
                             }
 
                             // 2011/4/11

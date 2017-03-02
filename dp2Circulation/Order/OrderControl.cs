@@ -18,7 +18,6 @@ using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -547,7 +546,7 @@ namespace dp2Circulation
                 }
                  * */
 
-                DigitalPlatform.CommonControl.Item design_item = 
+                DigitalPlatform.CommonControl.Item design_item =
                     dlg.AppendNewItem(strOrderXml, out strError);
                 if (design_item == null)
                     goto ERROR1;
@@ -598,6 +597,7 @@ namespace dp2Circulation
                     // 复原
                     OrderItem order_item = (OrderItem)design_item.Tag;
                     Debug.Assert(order_item != null, "");
+
                     this.Items.Add(order_item);
                     order_item.AddToListView(this.listView);
 
@@ -749,6 +749,11 @@ namespace dp2Circulation
                     }
                 }
 
+                // 2017/3/2
+                if (string.IsNullOrEmpty(orderitem.RefID))
+                {
+                    orderitem.RefID = Guid.NewGuid().ToString();
+                }
                 // 先加入列表
                 this.Items.Add(orderitem);
 
@@ -782,11 +787,9 @@ namespace dp2Circulation
                 e1.CurrentChanged = true;
                 this.ContentChanged(this, e1);
             }
-#endif 
+#endif
             TriggerContentChanged(bOldChanged, true);
-
             return;
-
         ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
@@ -827,7 +830,7 @@ namespace dp2Circulation
             for (int i = 0; i < nodes.Count; i++)
             {
                 string strText = nodes[i].InnerText;
-                if (strText.Length > 0 
+                if (strText.Length > 0
                     && (strText[0] == '@' || strText.IndexOf("%") != -1))
                 {
                     // 兑现宏
@@ -929,7 +932,7 @@ namespace dp2Circulation
                 // 2017/2/28
                 if (string.IsNullOrEmpty(item.RefID))
                 {
-                    strError = "第 "+(i+1)+" 个订购记录缺乏 参考 ID 字段(XML 元素 refID)，获取订购记录失败";
+                    strError = "第 " + (i + 1) + " 个订购记录缺乏 参考 ID 字段(XML 元素 refID)，获取订购记录失败";
                     return -1;
                 }
 
@@ -1034,7 +1037,7 @@ namespace dp2Circulation
             OrderArriveForm dlg = new OrderArriveForm();
             dlg.MainForm = this.MainForm;
             dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);    // 2009/2/15
-            dlg.Text = "验收 -- 批次号:"+this.AcceptBatchNo+" -- 源:" + this.BiblioRecPath + ", 目标:" + this.TargetRecPath;
+            dlg.Text = "验收 -- 批次号:" + this.AcceptBatchNo + " -- 源:" + this.BiblioRecPath + ", 目标:" + this.TargetRecPath;
             dlg.TargetRecPath = this.TargetRecPath;
             dlg.ClearAllItems();
 
@@ -1214,6 +1217,11 @@ namespace dp2Circulation
                 }
                  * */
 
+                // 2017/3/2
+                if (string.IsNullOrEmpty(orderitem.RefID))
+                {
+                    orderitem.RefID = Guid.NewGuid().ToString();
+                }
                 // 先加入列表
                 this.Items.Add(orderitem);
 
@@ -1409,7 +1417,7 @@ namespace dp2Circulation
 
 
                     // 2010/12/1 add
-                    for (int k = 0; k<nRightCopy ; k++)
+                    for (int k = 0; k < nRightCopy; k++)
                     {
                         GenerateEntityData e = new GenerateEntityData();
 
@@ -1576,7 +1584,7 @@ namespace dp2Circulation
         }
 #endif
 
-                // 外部调用接口
+        // 外部调用接口
         // 追加一个新的订购记录
         /// <summary>
         /// 追加一个新的订购记录
@@ -1701,7 +1709,6 @@ namespace dp2Circulation
 
             orderitem.Changed = true;    // 因为是新增的事项，无论如何都算修改过。这样可以避免集合中只有一个新增事项的时候，集合的changed值不对
 
-
             OrderEditForm edit = new OrderEditForm();
 
             edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
@@ -1724,37 +1731,11 @@ namespace dp2Circulation
                 )
             {
                 this.Items.PhysicalDeleteItem(orderitem);
-
-#if NO
-                // 改变保存按钮状态
-                // SetSaveAllButtonState(true);
-                if (this.ContentChanged != null)
-                {
-                    ContentChangedEventArgs e1 = new ContentChangedEventArgs();
-                    e1.OldChanged = bOldChanged;
-                    e1.CurrentChanged = this.Items.Changed;
-                    this.ContentChanged(this, e1);
-                }
-#endif
                 TriggerContentChanged(bOldChanged, this.Items.Changed);
-
-
                 return;
             }
 
-#if NO
-            // 改变保存按钮状态
-            // SetSaveAllButtonState(true);
-            if (this.ContentChanged != null)
-            {
-                ContentChangedEventArgs e1 = new ContentChangedEventArgs();
-                e1.OldChanged = bOldChanged;
-                e1.CurrentChanged = true;
-                this.ContentChanged(this, e1);
-            }
-#endif
             TriggerContentChanged(bOldChanged, true);
-
 
             // 要对本种和所有相关订购库进行编号查重。
             // 如果重了，要保持窗口，以便修改。不过从这个角度，查重最好在对话框关闭前作？
@@ -1762,7 +1743,6 @@ namespace dp2Circulation
             string strRefID = orderitem.RefID;
             if (String.IsNullOrEmpty(strRefID) == false)
             {
-
                 // 需要排除掉刚加入的自己: orderitem。
                 List<BookItemBase> excludeItems = new List<BookItemBase>();
                 excludeItems.Add(orderitem);
@@ -1819,11 +1799,13 @@ namespace dp2Circulation
                     dupitem.HilightListViewItem(true);
                     return;
                 }
-            } // end of ' if (String.IsNullOrEmpty(strPublishTime) == false)
-
+            }
+            else
+            {
+                orderitem.RefID = Guid.NewGuid().ToString();    // 2017/3/2
+            }
 
             return;
-
         ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
@@ -2215,24 +2197,13 @@ namespace dp2Circulation
 
             if (edit.DialogResult != DialogResult.OK)
                 return;
-#if NO
-            // OrderItem对象已经被修改
-            if (this.ContentChanged != null)
-            {
-                ContentChangedEventArgs e1 = new ContentChangedEventArgs();
-                e1.OldChanged = bOldChanged;
-                e1.CurrentChanged = true;
-                this.ContentChanged(this, e1);
-            }
-#endif
+
             TriggerContentChanged(bOldChanged, true);
 
             LibraryChannel channel = this.MainForm.GetChannel();
             this.EnableControls(false);
             try
             {
-
-
                 if (strOldIndex != orderitem.Index) // 编号改变了的情况下才查重
                 {
                     // 需要排除掉自己: orderitem。
@@ -2323,6 +2294,11 @@ namespace dp2Circulation
                     }
                 }
 
+                // 2017/3/2
+                if (string.IsNullOrEmpty(orderitem.RefID))
+                {
+                    orderitem.RefID = Guid.NewGuid().ToString();
+                }
             }
             finally
             {
@@ -3032,7 +3008,7 @@ namespace dp2Circulation
             if (orderitem != null)
                 return 1;   // found
 
-            strError = "没有找到 记录路径为 '"+strRecPath+"'，并且 参考ID 为 '" + strRefID + "' 的OrderItem事项";
+            strError = "没有找到 记录路径为 '" + strRecPath + "'，并且 参考ID 为 '" + strRefID + "' 的OrderItem事项";
             return 0;
         }
 
@@ -3086,7 +3062,7 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            bool bAllowModify = StringUtil.IsInList("client_uimodifyorderrecord", 
+            bool bAllowModify = StringUtil.IsInList("client_uimodifyorderrecord",
                 this.MainForm._currentUserRights// this.Rights
                 ) == true;
 
@@ -3122,7 +3098,7 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("打开已验收的目标记录 '"+this.TargetRecPath+"' (&T)");
+            menuItem = new MenuItem("打开已验收的目标记录 '" + this.TargetRecPath + "' (&T)");
             menuItem.Click += new System.EventHandler(this.menu_openTargetRecord_Click);
             if (bEnableOpenTarget == false)
                 menuItem.Enabled = false;
@@ -3228,7 +3204,7 @@ namespace dp2Circulation
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView, new Point(e.X, e.Y));		
+            contextMenu.Show(this.listView, new Point(e.X, e.Y));
         }
 
         // 全选
@@ -3752,7 +3728,7 @@ namespace dp2Circulation
                 if (refids.Count == 0)
                     return 0;
 
-                foreach(OrderItem item in this.Items)
+                foreach (OrderItem item in this.Items)
                 {
                     if (item == myself)
                         continue;
@@ -3772,11 +3748,11 @@ namespace dp2Circulation
                     List<string> current_refids = current_locations.GetRefIDs();
                     if (current_refids.Count == 0)
                         continue;
-                    foreach(string s in refids)
+                    foreach (string s in refids)
                     {
                         if (current_refids.IndexOf(s) != -1)
                         {
-                            strError = "馆藏分配字符串中的参考ID '"+s+"' 和其它订购记录的馆藏分配字符串发生了重复";
+                            strError = "馆藏分配字符串中的参考ID '" + s + "' 和其它订购记录的馆藏分配字符串发生了重复";
                             return 1;
                         }
                     }
