@@ -1941,3 +1941,218 @@ merge_dlg.UiState);
                 API.RemoveFontResourceA(strFontFilePath);
             }
         }
+
+
+		~~~~~~~~~
+		        // 校验订购记录
+        int VerifyOrderRecord(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
+            Debug.Assert(this.DbType == "order", "");
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要进行批处理的事项";
+                return -1;
+            }
+
+            if (stop != null && stop.State == 0)    // 0 表示正在处理
+            {
+                strError = "目前有长操作正在进行，无法进行校验订购记录的操作";
+                return -1;
+            }
+
+            // 切换到“操作历史”属性页
+            this.MainForm.ActivateFixPage("history");
+
+            int nCount = 0;
+            int nModifyCount = 0;
+
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                + " 开始进行订购记录校验</div>");
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在进行校验订购记录的操作 ...");
+            stop.BeginLoop();
+
+            this.EnableControls(false);
+            try
+            {
+                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+
+                bool bOldSource = true; // 是否要从 OldXml 开始做起
+
+                if (bControl)
+                {
+                    int nChangeCount = this.GetItemsChangeCount(items);
+                    if (nChangeCount > 0)
+                    {
+                        bool bHideMessageBox = true;
+                        DialogResult result = MessageDialog.Show(this,
+                            "当前选定的 " + items.Count.ToString() + " 个事项中有 " + nChangeCount + " 项修改尚未保存。\r\n\r\n请问如何进行修改? \r\n\r\n(重新修改) 重新进行修改，忽略以前内存中的修改; \r\n(继续修改) 以上次的修改为基础继续修改; \r\n(放弃) 放弃整个操作",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxDefaultButton.Button1,
+        null,
+        ref bHideMessageBox,
+        new string[] { "重新修改", "继续修改", "放弃" });
+                        if (result == DialogResult.Cancel)
+                        {
+                            strError = "放弃";
+                            return 0;
+                        }
+                        if (result == DialogResult.No)
+                        {
+                            bOldSource = false;
+                        }
+                    }
+                }
+
+                ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
+    stop,
+    items,
+    this.m_biblioTable);
+                loader.DbTypeCaption = this.DbTypeCaption;
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null
+                        && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    bool bChanged = false;
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    XmlDocument itemdom = new XmlDocument();
+                    try
+                    {
+                        // itemdom.LoadXml(info.OldXml);
+                        if (bOldSource == true)
+                        {
+                            itemdom.LoadXml(info.OldXml);
+                            // 放弃上一次的修改
+                            if (string.IsNullOrEmpty(info.NewXml) == false)
+                            {
+                                info.NewXml = "";
+                                this.m_nChangedCount--;
+                            }
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(info.NewXml) == false)
+                                itemdom.LoadXml(info.NewXml);
+                            else
+                                itemdom.LoadXml(info.OldXml);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
+                        return -1;
+                    }
+
+                    List<string> errors = new List<string>();
+
+                    // 检查根元素下的元素名是否有重复的
+                    nRet = VerifyDupElementName(itemdom,
+            out strError);
+                    if (nRet == -1)
+                        errors.Add(strError);
+
+                    // 校验 XML 记录中是否有非法字符
+                    string strReplaced = DomUtil.ReplaceControlCharsButCrLf(info.OldXml, '*');
+                    if (strReplaced != info.OldXml)
+                    {
+                        errors.Add("XML 记录中有非法字符");
+                    }
+
+                    nRet = VerifyRefID(itemdom,
+                        bControl,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        errors.Add(strError);
+                        if (bControl)
+                            bChanged = true;
+                    }
+
+                    nRet = VerifyOrder(itemdom,
+                        bControl,
+                        ref bChanged,
+                        out strError);
+                    if (nRet == -1)
+                        errors.Add(strError);
+
+                    if (errors.Count > 0)
+                    {
+                        this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                        foreach (string error in errors)
+                        {
+                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                        }
+
+                        {
+                            item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
+                            item.ListViewItem.ForeColor = Color.FromArgb(255, 255, 255);
+                        }
+                    }
+
+                    if (bChanged == true)
+                    {
+                        string strXml = itemdom.OuterXml;
+                        Debug.Assert(info != null, "");
+                        if (info != null)
+                        {
+                            if (string.IsNullOrEmpty(info.NewXml) == true)
+                                this.m_nChangedCount++;
+                            info.NewXml = strXml;
+                        }
+
+                        item.ListViewItem.BackColor = SystemColors.Info;
+                        item.ListViewItem.ForeColor = SystemColors.InfoText;
+                        nModifyCount++;
+                    }
+
+                    nCount++;
+                    stop.SetProgressValue(++i);
+                }
+
+                return nCount;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                this.EnableControls(true);
+
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                    + " 结束执行订购记录校验</div>");
+                if (nModifyCount > 0)
+                    this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                        + " 发生修改 " + nModifyCount + " 条</div>");
+            }
+        }

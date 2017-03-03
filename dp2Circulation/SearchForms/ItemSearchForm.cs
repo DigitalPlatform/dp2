@@ -2229,7 +2229,7 @@ out strError);
 
 
                     subMenuItem = new MenuItem("校验册记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&V)");
-                    subMenuItem.Click += new System.EventHandler(this.menu_verifyItemRecord_Click);
+                    subMenuItem.Click += new System.EventHandler(this.menu_verifyRecord_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
@@ -2263,7 +2263,7 @@ out strError);
                 if (this.DbType == "issue")
                 {
                     subMenuItem = new MenuItem("校验期记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&V)");
-                    subMenuItem.Click += new System.EventHandler(this.menu_verifyIssueRecord_Click);
+                    subMenuItem.Click += new System.EventHandler(this.menu_verifyRecord_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
@@ -2296,7 +2296,7 @@ out strError);
                     menuItem.MenuItems.Add(subMenuItem);
 
                     subMenuItem = new MenuItem("校验订购记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&V)");
-                    subMenuItem.Click += new System.EventHandler(this.menu_verifyOrderRecord_Click);
+                    subMenuItem.Click += new System.EventHandler(this.menu_verifyRecord_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
@@ -2532,43 +2532,30 @@ out strError);
         }
 
 
-        void menu_verifyOrderRecord_Click(object sender, EventArgs e)
+        void menu_verifyRecord_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
 
-            nRet = VerifyOrderRecord(out strError);
+            delegate_verifyItemDom func = null;
+            if (this.DbType == "order")
+                func = VerifyOneOrder;
+            else if (this.DbType == "issue")
+                func = VerifyOneIssue;
+            else if (this.DbType == "item")
+                func = VerifyOneEntity;
+            else
+            {
+                strError = "暂时不能处理 '" + this.DbType + "' 类型的记录校验";
+                goto ERROR1;
+            }
+
+            nRet = VerifyItems(
+                func,
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
-            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个订购记录");
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-        }
-
-        void menu_verifyIssueRecord_Click(object sender, EventArgs e)
-        {
-            string strError = "";
-            int nRet = 0;
-
-            nRet = VerifyIssueRecord(out strError);
-            if (nRet == -1)
-                goto ERROR1;
-            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个期记录");
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-        }
-
-        void menu_verifyItemRecord_Click(object sender, EventArgs e)
-        {
-            string strError = "";
-            int nRet = 0;
-
-            nRet = VerifyItemRecord(out strError);
-            if (nRet == -1)
-                goto ERROR1;
-            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个册记录");
+            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个" + this.DbType + "记录");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -2617,15 +2604,22 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
-        // 校验订购记录
-        int VerifyOrderRecord(out string strError)
+        delegate void delegate_verifyItemDom(
+            string strItemRecPath,
+            XmlDocument itemdom,
+            List<string> errors,
+            bool bAutoModify,
+            ref bool bChanged);
+
+        int VerifyItems(delegate_verifyItemDom func,
+            out string strError)
         {
             strError = "";
             int nRet = 0;
 
             bool bControl = Control.ModifierKeys == Keys.Control;
 
-            Debug.Assert(this.DbType == "order", "");
+            // Debug.Assert(this.DbType == "order", "");
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
@@ -2646,11 +2640,11 @@ out strError);
             int nModifyCount = 0;
 
             this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-                + " 开始进行订购记录校验</div>");
+                + " 开始进行" + this.DbType + "记录校验</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行校验订购记录的操作 ...");
+            stop.Initial("正在进行校验" + this.DbType + "记录的操作 ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -2712,8 +2706,6 @@ out strError);
                         return -1;
                     }
 
-                    bool bChanged = false;
-
                     BiblioInfo info = item.BiblioInfo;
 
                     XmlDocument itemdom = new XmlDocument();
@@ -2745,36 +2737,17 @@ out strError);
                     }
 
                     List<string> errors = new List<string>();
+                    bool bChanged = false;
 
-                    // 检查根元素下的元素名是否有重复的
-                    nRet = VerifyDupElementName(itemdom,
-            out strError);
-                    if (nRet == -1)
-                        errors.Add(strError);
-
-                    // 校验 XML 记录中是否有非法字符
-                    string strReplaced = DomUtil.ReplaceControlCharsButCrLf(info.OldXml, '*');
-                    if (strReplaced != info.OldXml)
+                    try
                     {
-                        errors.Add("XML 记录中有非法字符");
+                        func(info.RecPath, itemdom, errors, bControl, ref bChanged);
                     }
-
-                    nRet = VerifyRefID(itemdom,
-                        bControl,
-                        out strError);
-                    if (nRet == -1)
+                    catch (Exception ex)
                     {
-                        errors.Add(strError);
-                        if (bControl)
-                            bChanged = true;
+                        strError = ex.Message;
+                        return -1;
                     }
-
-                    nRet = VerifyOrder(itemdom,
-                        bControl,
-                        ref bChanged,
-                        out strError);
-                    if (nRet == -1)
-                        errors.Add(strError);
 
                     if (errors.Count > 0)
                     {
@@ -2823,150 +2796,242 @@ out strError);
                 this.EnableControls(true);
 
                 this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-                    + " 结束执行订购记录校验</div>");
+                    + " 结束执行" + this.DbType + "记录校验</div>");
                 if (nModifyCount > 0)
                     this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                         + " 发生修改 " + nModifyCount + " 条</div>");
             }
         }
 
-        // 校验期记录
-        int VerifyIssueRecord(out string strError)
+        // 校验一条订购记录
+        void VerifyOneOrder(
+            string strItemRecPath,
+            XmlDocument itemdom,
+            List<string> errors,
+            bool bAutoModify,
+            ref bool bChanged)
         {
-            strError = "";
+            string strError = "";
             int nRet = 0;
 
-            Debug.Assert(this.DbType == "issue", "");
+            // 检查根元素下的元素名是否有重复的
+            nRet = VerifyDupElementName(itemdom,
+    out strError);
+            if (nRet == -1)
+                errors.Add(strError);
 
-            if (this.listView_records.SelectedItems.Count == 0)
+            // 校验 XML 记录中是否有非法字符
+            if (itemdom.DocumentElement != null)
             {
-                strError = "尚未选定要进行批处理的事项";
-                return -1;
-            }
-
-            if (stop != null && stop.State == 0)    // 0 表示正在处理
-            {
-                strError = "目前有长操作正在进行，无法进行校验期记录的操作";
-                return -1;
-            }
-
-            // 切换到“操作历史”属性页
-            this.MainForm.ActivateFixPage("history");
-
-            int nCount = 0;
-
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-                + " 开始进行期记录校验</div>");
-
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行校验期记录的操作 ...");
-            stop.BeginLoop();
-
-            this.EnableControls(false);
-            try
-            {
-                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
-
-                List<ListViewItem> items = new List<ListViewItem>();
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                string strXml = itemdom.DocumentElement.OuterXml;
+                string strReplaced = DomUtil.ReplaceControlCharsButCrLf(strXml, '*');
+                if (strReplaced != strXml)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true)
-                        continue;
+                    errors.Add("XML 记录中有非法字符");
+                }
+            }
 
-                    items.Add(item);
+            nRet = VerifyRefID(itemdom,
+                bAutoModify,
+                out strError);
+            if (nRet == -1)
+            {
+                errors.Add(strError);
+                if (bAutoModify)
+                    bChanged = true;
+            }
+
+            nRet = VerifyOrder(itemdom,
+                bAutoModify,
+                ref bChanged,
+                out strError);
+            if (nRet == -1)
+                errors.Add(strError);
+
+        }
+
+        // 校验一条期记录
+        void VerifyOneIssue(
+            string strItemRecPath,
+            XmlDocument itemdom,
+            List<string> errors,
+            bool bAutoModify,
+            ref bool bChanged)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            // 检查根元素下的元素名是否有重复的
+            nRet = VerifyDupElementName(itemdom,
+    out strError);
+            if (nRet == -1)
+                errors.Add(strError);
+
+            // 校验 XML 记录中是否有非法字符
+            if (itemdom.DocumentElement != null)
+            {
+                string strXml = itemdom.DocumentElement.OuterXml;
+                string strReplaced = DomUtil.ReplaceControlCharsButCrLf(strXml, '*');
+                if (strReplaced != strXml)
+                {
+                    errors.Add("XML 记录中有非法字符");
+                }
+            }
+
+            nRet = VerifyRefID(itemdom,
+                bAutoModify,
+                out strError);
+            if (nRet == -1)
+            {
+                errors.Add(strError);
+                if (bAutoModify)
+                    bChanged = true;
+            }
+
+            // 检查根元素下的元素名是否有重复的
+            nRet = VerifyDupElementName(itemdom,
+    out strError);
+            if (nRet == -1)
+                errors.Add(strError);
+
+            string strParentID = DomUtil.GetElementText(itemdom.DocumentElement, "parent");
+            if (string.IsNullOrEmpty(strParentID))
+            {
+                errors.Add("缺乏 parent 元素");
+            }
+
+            {
+                string strBiblioRecPath = Program.MainForm.BuildBiblioRecPath(
+                    this.DbType,
+                    strItemRecPath,
+                    strParentID);
+                if (string.IsNullOrEmpty(strBiblioRecPath))
+                {
+                    errors.Add("获取对应的书目记录路径时出错");
                 }
 
-                ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
-    stop,
-    items,
-    this.m_biblioTable);
-                loader.DbTypeCaption = this.DbTypeCaption;
+                nRet = VerifyIssue(
+                    this.Channel,
+                    strBiblioRecPath,
+                    itemdom,
+                    bAutoModify,
+                    ref bChanged,
+                    out strError);
+                if (nRet == -1)
+                    errors.Add(strError);
+            }
 
-                int i = 0;
-                foreach (LoaderItem item in loader)
+        }
+
+        // 校验一条册记录
+        void VerifyOneEntity(
+            string strItemRecPath,
+            XmlDocument itemdom,
+            List<string> errors,
+            bool bAutoModify,
+            ref bool bChanged)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            // 检查根元素下的元素名是否有重复的
+            nRet = VerifyDupElementName(itemdom,
+    out strError);
+            if (nRet == -1)
+                errors.Add(strError);
+
+            // 校验 XML 记录中是否有非法字符
+            if (itemdom.DocumentElement != null)
+            {
+                string strXml = itemdom.DocumentElement.OuterXml;
+                string strReplaced = DomUtil.ReplaceControlCharsButCrLf(strXml, '*');
+                if (strReplaced != strXml)
                 {
-                    Application.DoEvents();	// 出让界面控制权
+                    errors.Add("XML 记录中有非法字符");
+                }
+            }
 
-                    if (stop != null
-                        && stop.State != 0)
+            nRet = VerifyRefID(itemdom,
+                bAutoModify,
+                out strError);
+            if (nRet == -1)
+            {
+                errors.Add(strError);
+                if (bAutoModify)
+                    bChanged = true;
+            }
+
+            // 检查根元素下的元素名是否有重复的
+            nRet = VerifyDupElementName(itemdom,
+    out strError);
+            if (nRet == -1)
+                errors.Add(strError);
+
+            // 校验借书时间字符串是否合法
+            string borrowDate = DomUtil.GetElementText(itemdom.DocumentElement, "borrowDate");
+            if (string.IsNullOrEmpty(borrowDate) == false)
+            {
+                try
+                {
+                    DateTime time = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
+                    if (time > DateTime.Now)
                     {
-                        strError = "用户中断";
-                        return -1;
+                        errors.Add("借书时间 '" + time.ToString() + "' 比当前时间还靠后");
                     }
+                }
+                catch (Exception ex)
+                {
+                    errors.Add("borrow 元素的 borrowDate 属性值 '" + borrowDate + "' 不合法: " + ex.Message);
+                }
+            }
 
-                    BiblioInfo info = item.BiblioInfo;
+            string strBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
 
-                    XmlDocument itemdom = new XmlDocument();
-                    try
-                    {
-                        itemdom.LoadXml(info.OldXml);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
-                        return -1;
-                    }
+            if (string.IsNullOrEmpty(strBarcode) == false)
+            {
+                string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
+                strLocation = StringUtil.GetPureLocationString(strLocation);
 
-                    List<string> errors = new List<string>();
+                string strLibraryCode = "";
+                string strRoom = "";
+                // 解析
+                Global.ParseCalendarName(strLocation,
+            out strLibraryCode,
+            out strRoom);
 
-                    // 检查根元素下的元素名是否有重复的
-                    nRet = VerifyDupElementName(itemdom,
-            out strError);
-                    if (nRet == -1)
-                        errors.Add(strError);
-
-                    // 校验 XML 记录中是否有非法字符
-                    string strReplaced = DomUtil.ReplaceControlCharsButCrLf(info.OldXml, '*');
-                    if (strReplaced != info.OldXml)
-                    {
-                        errors.Add("XML 记录中有非法字符");
-                    }
-
-                    nRet = VerifyRefID(itemdom,
-                        false,
-                        out strError);
-                    if (nRet == -1)
-                        errors.Add(strError);
-
-                    nRet = VerifyIssue(itemdom,
-            out strError);
-                    if (nRet == -1)
-                        errors.Add(strError);
-
-                    if (errors.Count > 0)
-                    {
-                        this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
-                        foreach (string error in errors)
-                        {
-                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
-                        }
-
-                        {
-                            item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
-                            item.ListViewItem.ForeColor = Color.FromArgb(255, 255, 255);
-                        }
-                    }
-
-                    nCount++;
-                    stop.SetProgressValue(++i);
+                // <para>-2  服务器没有配置校验方法，无法校验</para>
+                // <para>-1  出错</para>
+                // <para>0   不是合法的条码号</para>
+                // <para>1   是合法的读者证条码号</para>
+                // <para>2   是合法的册条码号</para>
+                nRet = this.MainForm.VerifyBarcode(
+this.stop,
+this.Channel,
+strLibraryCode,
+strBarcode,
+null,
+out strError);
+                if (nRet == -2)
+                {
+                    // throw new Exception(strError);
+                    errors.Add(strError);   // TODO: 是否可以统一报错(不要每个册都报错)?
                 }
 
-                return nCount;
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                if (nRet != 2)
+                {
+                    if (nRet == 1 && string.IsNullOrEmpty(strError) == true)
+                        strError = strLibraryCode + ": 这看起来是一个证条码号";
 
-                this.EnableControls(true);
-
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-                    + " 结束执行期记录校验</div>");
+                    errors.Add("册条码号 '" + strBarcode + "' 不合法: " + strError);
+                }
             }
+
+            // 模拟删除一些元素
+            nRet = SimulateDeleteElement(itemdom,
+out strError);
+            if (nRet == -1)
+                errors.Add(strError);
+
         }
 
         // return:
@@ -3032,27 +3097,30 @@ out strError);
                 {
                     errors.Add(strError);
 
-                    // 尝试纠正
-                    DateTime time;
-                    if (strOrderTime.Length == 8)
+                    if (bModify)
                     {
-                        try
+                        // 尝试纠正
+                        DateTime time;
+                        if (strOrderTime.Length == 8)
                         {
-                            time = DateTimeUtil.Long8ToDateTime(strOrderTime);
-                            DomUtil.SetElementText(dom.DocumentElement, "orderTime", DateTimeUtil.Rfc1123DateTimeStringEx(time));
-                            bChanged = true;
-                        }
-                        catch
-                        {
+                            try
+                            {
+                                time = DateTimeUtil.Long8ToDateTime(strOrderTime);
+                                DomUtil.SetElementText(dom.DocumentElement, "orderTime", DateTimeUtil.Rfc1123DateTimeStringEx(time));
+                                bChanged = true;
+                            }
+                            catch
+                            {
 
+                            }
                         }
-                    }
-                    else
-                    {
-                        if (DateTime.TryParse(strOrderTime, out time) == true)
+                        else
                         {
-                            DomUtil.SetElementText(dom.DocumentElement, "orderTime", DateTimeUtil.Rfc1123DateTimeStringEx(time));
-                            bChanged = true;
+                            if (DateTime.TryParse(strOrderTime, out time) == true)
+                            {
+                                DomUtil.SetElementText(dom.DocumentElement, "orderTime", DateTimeUtil.Rfc1123DateTimeStringEx(time));
+                                bChanged = true;
+                            }
                         }
                     }
                 }
@@ -3085,7 +3153,12 @@ out strError);
         // return:
         //      0   没有发现错误
         //      -1  发现错误
-        int VerifyIssue(XmlDocument dom,
+        int VerifyIssue(
+            LibraryChannel channel,
+            string strBiblioRecPath,
+            XmlDocument dom,
+            bool bModify,
+            ref bool bChanged,
             out string strError)
         {
             strError = "";
@@ -3096,212 +3169,214 @@ out strError);
                 return -1;
             }
 
+            List<string> errors = new List<string>();
+
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("orderInfo/*");
             foreach (XmlElement record in nodes)
             {
                 string strRefID = DomUtil.GetElementText(record, "refID");
                 if (string.IsNullOrEmpty(strRefID) == true)
                 {
-                    strError = "内嵌的订购记录缺乏 refID 元素";
-                    return -1;
+                    strError = "期记录中内嵌的订购记录缺乏 refID 元素";
+                    errors.Add(strError);
+                    // continue;
+                }
+                else
+                {
+                    continue;
+                }
+
+                if (bModify && string.IsNullOrEmpty(strBiblioRecPath) == false)
+                {
+                    List<XmlDocument> results = null;
+
+                    // 检索相关的订购记录
+                    // parameters:
+                    //      nest_order  期记录里面内嵌的订购记录的根元素
+                    //      results   返回检索命中并匹配上 nest_order 特征的一个或者多个订购记录
+                    int nRet = SearchRelationOrder(
+                        channel,
+                        strBiblioRecPath,
+                        record,
+                        out results,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        errors.Add("试图修正(期记录内嵌 refID)记录时出错: " + strError);
+                        continue;
+                    }
+
+                    if (results.Count == 0)
+                    {
+                        errors.Add("试图修正(期记录内嵌 refID)记录时没有匹配上源订购记录");
+                        continue;
+                    }
+                    else if (results.Count == 1)
+                    {
+                        strRefID = DomUtil.GetElementText(results[0].DocumentElement, "refID");
+                        if (string.IsNullOrEmpty(strRefID))
+                        {
+                            errors.Add("试图修正(期记录内嵌 refID)记录时发现源订购记录也没有 refID 元素。请先对所有订购记录进行修正，再执行期记录修正");
+                            continue;
+                        }
+
+#if NO
+                        // 测试
+                        string strOldRefID = DomUtil.GetElementText(record, "refID");
+                        if (strRefID != strOldRefID)
+                        {
+                            errors.Add("验证搜寻订购记录时候，发现命中的 refID 不一致");
+                            continue;
+                        }
+#endif
+
+                        DomUtil.SetElementText(record, "refID", strRefID);
+                        {
+                            // 写入 comment 元素
+                            List<string> comments = new List<string>();
+                            string strOldComment = DomUtil.GetElementText(record, "comment");
+                            if (string.IsNullOrEmpty(strOldComment) == false)
+                                comments.Add(strOldComment);
+                            comments.Add(DateTime.Now.ToString() + " 由程序填写 refID 元素");
+                            DomUtil.SetElementText(record, "comment", StringUtil.MakePathList(comments, ";"));
+                        }
+                        bChanged = true;
+                    }
+                    else if (results.Count > 1)
+                    {
+                        errors.Add("试图修正(期记录内嵌 refID)记录时发现匹配的源订购记录多于一条。请手动执行修正吧");
+                        continue;
+                    }
+
                 }
             }
 
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return -1;
+            }
             return 0;
         }
 
-        int VerifyItemRecord(out string strError)
+        // 检索相关的订购记录
+        // parameters:
+        //      nest_order  期记录里面内嵌的订购记录的根元素
+        //      results   返回检索命中并匹配上 nest_order 特征的一个或者多个订购记录
+        int SearchRelationOrder(
+            LibraryChannel channel,
+            string strBiblioRecPath,
+            XmlElement nest_order,
+            out List<XmlDocument> results,
+            out string strError)
         {
             strError = "";
-            int nRet = 0;
+            results = new List<XmlDocument>();
 
-            Debug.Assert(this.DbType == "item", "");
+            string strSourceRange = DomUtil.GetElementText(nest_order, "range");
+            string strSource = BuildCompareString(nest_order);
 
-            if (this.listView_records.SelectedItems.Count == 0)
-            {
-                strError = "尚未选定要进行批处理的事项";
-                return -1;
-            }
+            // 装入订购记录
+            SubItemLoader sub_loader = new SubItemLoader();
+            sub_loader.BiblioRecPath = strBiblioRecPath;
+            sub_loader.Channel = channel;
+            sub_loader.Stop = stop;
+            sub_loader.DbType = "order";
 
-            if (stop != null && stop.State == 0)    // 0 表示正在处理
-            {
-                strError = "目前有长操作正在进行，无法进行校验册记录的操作";
-                return -1;
-            }
-
-            // 切换到“操作历史”属性页
-            this.MainForm.ActivateFixPage("history");
+            sub_loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+            sub_loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
             int nCount = 0;
-
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-                + " 开始进行册记录校验</div>");
-
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行校验册记录的操作 ...");
-            stop.BeginLoop();
-
-            this.EnableControls(false);
-            try
+            foreach (EntityInfo info in sub_loader)
             {
-                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
-
-                List<ListViewItem> items = new List<ListViewItem>();
-                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                if (info.ErrorCode != ErrorCodeValue.NoError)
                 {
-                    if (string.IsNullOrEmpty(item.Text) == true)
-                        continue;
-
-                    items.Add(item);
+                    strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo;  // NewRecPath
+                    return -1;
                 }
 
-                ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
-    stop,
-    items,
-    this.m_biblioTable);
-                loader.DbTypeCaption = this.DbTypeCaption;
+                if (string.IsNullOrEmpty(info.OldRecord))
+                    continue;
 
-                int i = 0;
-                foreach (LoaderItem item in loader)
+                XmlDocument dom = new XmlDocument();
+                try
                 {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null
-                        && stop.State != 0)
-                    {
-                        strError = "用户中断";
-                        return -1;
-                    }
-
-                    BiblioInfo info = item.BiblioInfo;
-
-                    XmlDocument itemdom = new XmlDocument();
-                    try
-                    {
-                        itemdom.LoadXml(info.OldXml);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
-                        return -1;
-                    }
-
-                    List<string> errors = new List<string>();
-
-                    // 检查根元素下的元素名是否有重复的
-                    nRet = VerifyDupElementName(itemdom,
-            out strError);
-                    if (nRet == -1)
-                        errors.Add(strError);
-
-                    nRet = VerifyRefID(itemdom,
-                        false,
-                        out strError);
-                    if (nRet == -1)
-                        errors.Add(strError);
-
-                    // 校验 XML 记录中是否有非法字符
-                    string strReplaced = DomUtil.ReplaceControlCharsButCrLf(info.OldXml, '*');
-                    if (strReplaced != info.OldXml)
-                    {
-                        errors.Add("XML 记录中有非法字符");
-                    }
-
-                    // 校验借书时间字符串是否合法
-                    string borrowDate = DomUtil.GetElementText(itemdom.DocumentElement, "borrowDate");
-                    if (string.IsNullOrEmpty(borrowDate) == false)
-                    {
-                        try
-                        {
-                            DateTime time = DateTimeUtil.FromRfc1123DateTimeString(borrowDate).ToLocalTime();
-                            if (time > DateTime.Now)
-                            {
-                                errors.Add("借书时间 '" + time.ToString() + "' 比当前时间还靠后");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            errors.Add("borrow 元素的 borrowDate 属性值 '" + borrowDate + "' 不合法: " + ex.Message);
-                        }
-                    }
-
-                    string strBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
-
-                    if (string.IsNullOrEmpty(strBarcode) == false)
-                    {
-                        string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
-                        strLocation = StringUtil.GetPureLocationString(strLocation);
-
-                        string strLibraryCode = "";
-                        string strRoom = "";
-                        // 解析
-                        Global.ParseCalendarName(strLocation,
-                    out strLibraryCode,
-                    out strRoom);
-
-                        // <para>-2  服务器没有配置校验方法，无法校验</para>
-                        // <para>-1  出错</para>
-                        // <para>0   不是合法的条码号</para>
-                        // <para>1   是合法的读者证条码号</para>
-                        // <para>2   是合法的册条码号</para>
-                        nRet = this.MainForm.VerifyBarcode(
-        this.stop,
-        this.Channel,
-        strLibraryCode,
-        strBarcode,
-        null,
-        out strError);
-                        if (nRet == -2)
-                            return -1;
-                        if (nRet != 2)
-                        {
-                            if (nRet == 1 && string.IsNullOrEmpty(strError) == true)
-                                strError = strLibraryCode + ": 这看起来是一个证条码号";
-
-                            errors.Add("册条码号 '" + strBarcode + "' 不合法: " + strError);
-
-                        }
-                    }
-
-                    // 模拟删除一些元素
-                    nRet = SimulateDeleteElement(itemdom,
-out strError);
-                    if (nRet == -1)
-                        errors.Add(strError);
-
-                    if (errors.Count > 0)
-                    {
-                        this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
-                        foreach (string error in errors)
-                        {
-                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
-                        }
-
-                        {
-                            item.ListViewItem.BackColor = Color.FromArgb(155, 0, 0);
-                            item.ListViewItem.ForeColor = Color.FromArgb(255, 255, 255);
-                        }
-                    }
-
-                    nCount++;
-                    stop.SetProgressValue(++i);
+                    dom.LoadXml(info.OldRecord);
+                }
+                catch (Exception ex)
+                {
+                    strError = "订购记录装入 XMLDOM 时出错: " + ex.Message;
+                    return -1;
                 }
 
-                return nCount;
+                string strRange = DomUtil.GetElementText(dom.DocumentElement, "range");
+                if (strRange == strSourceRange)
+                {
+                    string strCompare = BuildCompareString(dom.DocumentElement);
+                    if (strSource == strCompare)
+                        results.Add(dom);
+                }
+
+                nCount++;
             }
-            finally
+
+            return results.Count;
+        }
+
+        // 构造一个用于比较订购记录关键字段的字符串
+        static string BuildCompareString(XmlElement root)
+        {
+            string strRange = DomUtil.GetElementText(root, "range");
+            string strParent = DomUtil.GetElementText(root, "parent");
+            //string strBatchNo = DomUtil.GetElementText(root, "batchNo");
+            //string strCatalogNo = DomUtil.GetElementText(root, "catalogNo");
+            string strSeller = DomUtil.GetElementText(root, "seller");
+            string strSource = GetOldPart(DomUtil.GetElementText(root, "source"));
+            string strCopy = GetOldPart(DomUtil.GetElementText(root, "copy"));
+            string strPrice = GetOldPart(DomUtil.GetElementText(root, "price"));
+            string strIssueCount = GetOldPart(DomUtil.GetElementText(root, "issueCount"));
+            // string strDistribute = DomUtil.GetElementText(root, "distribute");
+
+            return strRange
+                + "|" + strParent
+                //+ "|" + strBatchNo
+                //+ "|" + strCatalogNo
+                + "|" + strSeller
+                + "|" + strSource
+                + "|" + strCopy
+                + "|" + strPrice
+                + "|" + strIssueCount;
+        }
+
+        // 获得新旧值的新部分
+        static string GetOldPart(string strValue)
+        {
+            string strOldValue = "";
+            string strNewValue = "";
+
+            // 分离 "old[new]" 内的两个值
+            OrderDesignControl.ParseOldNewValue(strValue,
+                out strOldValue,
+                out strNewValue);
+
+            return strOldValue;
+        }
+
+
+
+        void loader_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+            if (e.Actions == "yes,no,cancel")
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
-
-                this.EnableControls(true);
-
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-                    + " 结束执行册记录校验</div>");
+                DialogResult result = AutoCloseMessageBox.Show(this,
+    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    20 * 1000,
+    "ItemSearchForm");
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
             }
         }
 
