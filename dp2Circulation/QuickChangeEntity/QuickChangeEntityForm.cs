@@ -44,11 +44,6 @@ namespace dp2Circulation
 
         LoadActionType m_loadActionType = LoadActionType.LoadAndAutoChange;
 
-        const int WM_SWITCH_FOCUS = API.WM_USER + 200;
-
-        // 消息WM_SWITCH_FOCUS的wparam参数值
-        const int ITEM_BARCODE = 0;
-        const int CONTROL_STATE = 1;
 
         /// <summary>
         /// 构造函数
@@ -354,7 +349,7 @@ namespace dp2Circulation
                     return;
                 }
             }
-            DOLOAD:
+        DOLOAD:
 
             nRet = LoadRecord(true, this.textBox_barcode.Text,
                 out strError);
@@ -372,7 +367,7 @@ namespace dp2Circulation
 
             this.textBox_outputBarcodes.Text += this.textBox_barcode.Text + "\r\n";
 
-            SETFOCUS:
+        SETFOCUS:
             // 焦点定位
             string strFocusAction = this.MainForm.AppInfo.GetString(
 "change_param",
@@ -382,12 +377,44 @@ namespace dp2Circulation
 
             if (strFocusAction == "册条码号，并全选")
             {
-                SwitchFocus(0);
+                BeginSwitchFocus("load_barcode", true);
             }
-            else if (strFocusAction == "册信息编辑器")
+            else if (strFocusAction == "册信息编辑器-册条码号")
             {
-                SwitchFocus(1);
+                BeginSwitchFocus("barcode", true);
             }
+            else if (strFocusAction == "册信息编辑器-状态")
+            {
+                BeginSwitchFocus("state", true);
+            }
+            else if (strFocusAction == "册信息编辑器-馆藏地")
+            {
+                BeginSwitchFocus("location", true);
+            }
+            else if (strFocusAction == "册信息编辑器-图书类型")
+            {
+                BeginSwitchFocus("bookType", true);
+            }
+
+
+        }
+
+        void BeginSwitchFocus(string name, bool bSelectAll)
+        {
+            this.BeginInvoke(new Action<string, bool>(SwitchFocus), name, bSelectAll);
+        }
+
+        void SwitchFocus(string name, bool bSelectAll)
+        {
+            if (name == "load_barcode")
+            {
+                this.textBox_barcode.SelectAll();
+                this.textBox_barcode.Focus();
+                return;
+            }
+
+            this.entityEditControl1.FocusField(name, bSelectAll);
+            return;
         }
 
         // return:
@@ -603,7 +630,7 @@ namespace dp2Circulation
 
                 return 1;
             ERROR1:
-                strError = "保存条码为 "+this.entityEditControl1.Barcode+" 的册记录时出错: " + strError;
+                strError = "保存条码为 " + this.entityEditControl1.Barcode + " 的册记录时出错: " + strError;
                 return -1;
             }
             finally
@@ -1188,6 +1215,15 @@ namespace dp2Circulation
             }
         }
 
+#if NO
+                const int WM_SWITCH_FOCUS = API.WM_USER + 200;
+
+        // 消息WM_SWITCH_FOCUS的wparam参数值
+        const int ITEM_BARCODE = 0;
+        const int CONTROL_BARCODE = 1;
+        const int CONTROL_STATE = 2;
+
+
         void SwitchFocus(int target)
         {
             API.PostMessage(this.Handle, WM_SWITCH_FOCUS,
@@ -1221,6 +1257,7 @@ namespace dp2Circulation
             }
             base.DefWndProc(ref m);
         }
+#endif
 
         private void button_file_getBarcodeFilename_Click(object sender, EventArgs e)
         {
@@ -1274,6 +1311,55 @@ namespace dp2Circulation
         ERROR1:
             MessageBox.Show(this, strError);
 
+        }
+
+        string ReturnInEditAction
+        {
+            get
+            {
+                return this.MainForm.AppInfo.GetString(
+"change_param",
+"returnInEdit",
+"<无>");
+            }
+        }
+
+        private void entityEditControl1_Enter(object sender, EventArgs e)
+        {
+            if (ReturnInEditAction == "保存当前记录")
+                this.AcceptButton = this.button_saveCurrentRecord;
+            else
+                this.AcceptButton = null;
+        }
+
+        /// <summary>
+        /// 处理对话框键
+        /// </summary>
+        /// <param name="keyData">System.Windows.Forms.Keys 值之一，它表示要处理的键。</param>
+        /// <returns>如果控件处理并使用击键，则为 true；否则为 false，以允许进一步处理</returns>
+        protected override bool ProcessDialogKey(
+    Keys keyData)
+        {
+            if (keyData == Keys.Enter)
+            {
+                if (this.AcceptButton != null)
+                    goto END1;
+                string strAction = this.ReturnInEditAction;
+                if (strAction == "将焦点切换到条码号文本框")
+                {
+                    this.textBox_barcode.SelectAll();
+                    this.textBox_barcode.Focus();
+                    return true;
+                }
+            }
+
+        END1:
+            return base.ProcessDialogKey(keyData);
+        }
+
+        private void textBox_barcode_Enter(object sender, EventArgs e)
+        {
+            this.AcceptButton = this.button_loadBarcode;
         }
     }
 

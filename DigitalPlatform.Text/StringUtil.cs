@@ -2046,6 +2046,21 @@ string strTimestamp)
             }
         }
 
+        public static bool HasDup(List<string> list)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                string strItem = list[i];
+                for (int j = i + 1; j < list.Count; j++)
+                {
+                    if (strItem == list[j])
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         /*
          * ByteArray.ToString()可以起同样作用
         // 将UTF8 byte[] 内容转换为string类型。

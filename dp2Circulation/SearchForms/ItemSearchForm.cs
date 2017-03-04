@@ -2694,6 +2694,8 @@ out strError);
     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
+                // TODO: Prompt
+
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
@@ -2833,12 +2835,11 @@ out strError);
 
             nRet = VerifyRefID(itemdom,
                 bAutoModify,
+                ref bChanged,
                 out strError);
             if (nRet == -1)
             {
                 errors.Add(strError);
-                if (bAutoModify)
-                    bChanged = true;
             }
 
             nRet = VerifyOrder(itemdom,
@@ -2880,12 +2881,11 @@ out strError);
 
             nRet = VerifyRefID(itemdom,
                 bAutoModify,
+                ref bChanged,
                 out strError);
             if (nRet == -1)
             {
                 errors.Add(strError);
-                if (bAutoModify)
-                    bChanged = true;
             }
 
             // 检查根元素下的元素名是否有重复的
@@ -2953,12 +2953,11 @@ out strError);
 
             nRet = VerifyRefID(itemdom,
                 bAutoModify,
+                ref bChanged,
                 out strError);
             if (nRet == -1)
             {
                 errors.Add(strError);
-                if (bAutoModify)
-                    bChanged = true;
             }
 
             // 检查根元素下的元素名是否有重复的
@@ -3039,6 +3038,7 @@ out strError);
         //      0   没有发现错误
         int VerifyRefID(XmlDocument dom,
             bool bModify,
+            ref bool bChanged,
             out string strError)
         {
             strError = "";
@@ -3053,7 +3053,10 @@ out strError);
             if (string.IsNullOrEmpty(strRefID))
             {
                 if (bModify)
+                {
                     DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
+                    bChanged = true;
+                }
                 strError = "refID 元素为空";
                 return -1;
             }
@@ -3171,6 +3174,8 @@ out strError);
 
             List<string> errors = new List<string>();
 
+            List<string> refids = new List<string>();   // 内嵌订购记录的 refid
+
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("orderInfo/*");
             foreach (XmlElement record in nodes)
             {
@@ -3183,12 +3188,26 @@ out strError);
                 }
                 else
                 {
+                    refids.Add(strRefID);
                     continue;
+                }
+
+                if (IsZero(record) == true)
+                {
+                    strError = "期记录中内嵌的订购记录出现了废弃的 0 copy 部分";
+                    errors.Add(strError);
+
+                    if (bModify)
+                    {
+                        record.ParentNode.RemoveChild(record);
+                        bChanged = true;
+                        continue;
+                    }
                 }
 
                 if (bModify && string.IsNullOrEmpty(strBiblioRecPath) == false)
                 {
-                    List<XmlDocument> results = null;
+                    List<PathAndDom> results = null;
 
                     // 检索相关的订购记录
                     // parameters:
@@ -3213,13 +3232,19 @@ out strError);
                     }
                     else if (results.Count == 1)
                     {
-                        strRefID = DomUtil.GetElementText(results[0].DocumentElement, "refID");
+                        PathAndDom obj = results[0];
+                        strRefID = DomUtil.GetElementText(obj.Dom.DocumentElement, "refID");
                         if (string.IsNullOrEmpty(strRefID))
                         {
-                            errors.Add("试图修正(期记录内嵌 refID)记录时发现源订购记录也没有 refID 元素。请先对所有订购记录进行修正，再执行期记录修正");
+                            errors.Add("试图修正(期记录内嵌 refID)记录时发现源订购记录(" + obj.RecPath + ")也没有 refID 元素。请先对所有订购记录进行修正，再执行期记录修正");
                             continue;
                         }
 
+                        if (refids.IndexOf(strRefID) != -1)
+                        {
+                            errors.Add("试图修正(期记录内嵌 refID)记录时，所匹配的源订购记录(" + obj.RecPath + ")的 refID 元素(值'" + strRefID + "')和其他内嵌订购记录的 refID 元素发生了重复，因此无法修复此问题");
+                            continue;
+                        }
 #if NO
                         // 测试
                         string strOldRefID = DomUtil.GetElementText(record, "refID");
@@ -3251,12 +3276,26 @@ out strError);
                 }
             }
 
+            // 检查内嵌参考 ID 是否发生了重复
+            if (refids.Count > 0)
+            {
+                refids.Sort();
+                if (StringUtil.HasDup(refids) == true)
+                    errors.Add("期记录内嵌的(多个)订购记录中参考 ID 之间发生了重复");
+            }
+
             if (errors.Count > 0)
             {
                 strError = StringUtil.MakePathList(errors, "; ");
                 return -1;
             }
             return 0;
+        }
+
+        class PathAndDom
+        {
+            public string RecPath { get; set; }
+            public XmlDocument Dom { get; set; }
         }
 
         // 检索相关的订购记录
@@ -3267,14 +3306,16 @@ out strError);
             LibraryChannel channel,
             string strBiblioRecPath,
             XmlElement nest_order,
-            out List<XmlDocument> results,
+            out List<PathAndDom> results,
             out string strError)
         {
             strError = "";
-            results = new List<XmlDocument>();
+            results = new List<PathAndDom>();
 
             string strSourceRange = DomUtil.GetElementText(nest_order, "range");
             string strSource = BuildCompareString(nest_order);
+
+            List<PathAndDom> samerange_list = new List<PathAndDom>(); // range 相同的那些记录
 
             // 装入订购记录
             SubItemLoader sub_loader = new SubItemLoader();
@@ -3286,7 +3327,7 @@ out strError);
             sub_loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
             sub_loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
-            int nCount = 0;
+            // 第一次循环，将 range 相同的记录记录下来
             foreach (EntityInfo info in sub_loader)
             {
                 if (info.ErrorCode != ErrorCodeValue.NoError)
@@ -3312,22 +3353,60 @@ out strError);
                 string strRange = DomUtil.GetElementText(dom.DocumentElement, "range");
                 if (strRange == strSourceRange)
                 {
-                    string strCompare = BuildCompareString(dom.DocumentElement);
-                    if (strSource == strCompare)
-                        results.Add(dom);
+                    PathAndDom obj = new PathAndDom();
+                    obj.RecPath = info.OldRecPath;
+                    obj.Dom = dom;
+                    samerange_list.Add(obj);
                 }
-
-                nCount++;
             }
 
+            if (nest_order.ParentNode != null)
+            {
+                XmlNodeList nodes = nest_order.ParentNode.SelectNodes("*");
+                if (nodes.Count == 1 && samerange_list.Count == 1)
+                {
+                    // 如果期记录内的内嵌订购记录只有一个，而且所有订购记录中符合 range 的也只有一个，那就是它了。不必进行精确匹配了
+                    results.Add(samerange_list[0]);
+                    return results.Count;
+                }
+            }
+
+            // 第二次循环，进行比较精确的字段匹配
+            foreach (PathAndDom obj in samerange_list)
+            {
+                string strCompare = BuildCompareString(obj.Dom.DocumentElement);
+                if (strSource == strCompare)
+                    results.Add(obj);
+            }
+
+            // TODO: 如果一个符合的也没有找到，要出现对话框让用户自己选择
+
             return results.Count;
+        }
+
+        // 是否为空的、无用的订购组信息
+        static bool IsZero(XmlElement nest_order)
+        {
+            string strCopy = DomUtil.GetElementText(nest_order, "copy");
+
+            string strOldValue = "";
+            string strNewValue = "";
+
+            // 分离 "old[new]" 内的两个值
+            OrderDesignControl.ParseOldNewValue(strCopy,
+                out strOldValue,
+                out strNewValue);
+            if ((string.IsNullOrEmpty(strOldValue) == true || strOldValue == "0")
+                && (string.IsNullOrEmpty(strNewValue) == true || strNewValue == "0"))
+                return true;
+            return false;
         }
 
         // 构造一个用于比较订购记录关键字段的字符串
         static string BuildCompareString(XmlElement root)
         {
             string strRange = DomUtil.GetElementText(root, "range");
-            string strParent = DomUtil.GetElementText(root, "parent");
+            //string strParent = DomUtil.GetElementText(root, "parent");
             //string strBatchNo = DomUtil.GetElementText(root, "batchNo");
             //string strCatalogNo = DomUtil.GetElementText(root, "catalogNo");
             string strSeller = DomUtil.GetElementText(root, "seller");
@@ -3338,7 +3417,7 @@ out strError);
             // string strDistribute = DomUtil.GetElementText(root, "distribute");
 
             return strRange
-                + "|" + strParent
+                //+ "|" + strParent
                 //+ "|" + strBatchNo
                 //+ "|" + strCatalogNo
                 + "|" + strSeller

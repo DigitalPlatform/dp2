@@ -74,6 +74,11 @@ namespace dp2Circulation
     "focusAction",
     "册条码号，并全选");
 
+            this.comboBox_returnInEdit.Text = this.MainForm.AppInfo.GetString(
+"change_param",
+"returnInEdit",
+"<无>");
+
             this.comboBox_state_TextChanged(null, null);
         }
 
@@ -108,11 +113,15 @@ namespace dp2Circulation
     "batchNo",
     this.comboBox_batchNo.Text);
 
-
             this.MainForm.AppInfo.SetString(
     "change_param",
     "focusAction",
     this.comboBox_focusAction.Text);
+
+            this.MainForm.AppInfo.SetString(
+ "change_param",
+ "returnInEdit",
+ this.comboBox_returnInEdit.Text);
 
             this.DialogResult = DialogResult.OK;
             this.Close();

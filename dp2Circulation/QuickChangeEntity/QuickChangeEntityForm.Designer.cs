@@ -53,16 +53,16 @@ namespace dp2Circulation
             this.textBox_barcodeFile = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.button_beginByBarcodeFile = new System.Windows.Forms.Button();
-            this.splitContainer_main = new System.Windows.Forms.SplitContainer();
-            this.label3 = new System.Windows.Forms.Label();
-            this.button_saveToBarcodeFile = new System.Windows.Forms.Button();
-            this.textBox_outputBarcodes = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
             this.tabPage_recPathFile = new System.Windows.Forms.TabPage();
             this.button_getRecPathFileName = new System.Windows.Forms.Button();
             this.textBox_recPathFile = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.button_beginByRecPathFile = new System.Windows.Forms.Button();
+            this.splitContainer_main = new System.Windows.Forms.SplitContainer();
+            this.label3 = new System.Windows.Forms.Label();
+            this.button_saveToBarcodeFile = new System.Windows.Forms.Button();
+            this.textBox_outputBarcodes = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.contextMenuStrip_loadAction.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_itemInfo)).BeginInit();
             this.splitContainer_itemInfo.Panel1.SuspendLayout();
@@ -71,11 +71,11 @@ namespace dp2Circulation
             this.tabControl_input.SuspendLayout();
             this.tabPage_barcodeInput.SuspendLayout();
             this.tabPage_barcodeFile.SuspendLayout();
+            this.tabPage_recPathFile.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
             this.splitContainer_main.SuspendLayout();
-            this.tabPage_recPathFile.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -90,11 +90,13 @@ namespace dp2Circulation
             // 
             // textBox_barcode
             // 
+            this.textBox_barcode.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.textBox_barcode.Location = new System.Drawing.Point(4, 22);
             this.textBox_barcode.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_barcode.Name = "textBox_barcode";
             this.textBox_barcode.Size = new System.Drawing.Size(138, 21);
             this.textBox_barcode.TabIndex = 1;
+            this.textBox_barcode.Enter += new System.EventHandler(this.textBox_barcode_Enter);
             // 
             // button_loadBarcode
             // 
@@ -132,8 +134,8 @@ namespace dp2Circulation
             // 
             // splitContainer_itemInfo
             // 
-            this.splitContainer_itemInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.splitContainer_itemInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_itemInfo.Location = new System.Drawing.Point(0, 19);
             this.splitContainer_itemInfo.Margin = new System.Windows.Forms.Padding(2);
@@ -155,16 +157,22 @@ namespace dp2Circulation
             // 
             this.entityEditControl1.AccessNo = "";
             this.entityEditControl1.AutoScroll = true;
+            this.entityEditControl1.BackColor = System.Drawing.SystemColors.Control;
             this.entityEditControl1.Barcode = "";
             this.entityEditControl1.BatchNo = "";
             this.entityEditControl1.Binding = "";
+            this.entityEditControl1.BindingCost = "";
             this.entityEditControl1.BookType = "";
             this.entityEditControl1.BorrowDate = "";
             this.entityEditControl1.Borrower = "";
             this.entityEditControl1.BorrowPeriod = "";
             this.entityEditControl1.Changed = false;
             this.entityEditControl1.Comment = "";
+            this.entityEditControl1.CreateState = dp2Circulation.ItemDisplayState.Normal;
+            this.entityEditControl1.DisplayMode = "full";
             this.entityEditControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.entityEditControl1.ErrorInfo = "";
+            this.entityEditControl1.ForeColor = System.Drawing.SystemColors.ControlText;
             this.entityEditControl1.Initializing = true;
             this.entityEditControl1.Intact = "";
             this.entityEditControl1.Location = new System.Drawing.Point(0, 0);
@@ -187,7 +195,10 @@ namespace dp2Circulation
             this.entityEditControl1.Source = "";
             this.entityEditControl1.State = "";
             this.entityEditControl1.TabIndex = 3;
+            this.entityEditControl1.TableMargin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.entityEditControl1.TablePadding = new System.Windows.Forms.Padding(12, 13, 12, 13);
             this.entityEditControl1.Volume = "";
+            this.entityEditControl1.Enter += new System.EventHandler(this.entityEditControl1_Enter);
             // 
             // webBrowser_biblio
             // 
@@ -201,7 +212,7 @@ namespace dp2Circulation
             // 
             // textBox_message
             // 
-            this.textBox_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_message.BackColor = System.Drawing.SystemColors.Info;
             this.textBox_message.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -239,7 +250,7 @@ namespace dp2Circulation
             // 
             // tabControl_input
             // 
-            this.tabControl_input.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.tabControl_input.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_input.Controls.Add(this.tabPage_barcodeInput);
             this.tabControl_input.Controls.Add(this.tabPage_barcodeFile);
@@ -294,7 +305,7 @@ namespace dp2Circulation
             // 
             // textBox_barcodeFile
             // 
-            this.textBox_barcodeFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_barcodeFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_barcodeFile.Location = new System.Drawing.Point(4, 22);
             this.textBox_barcodeFile.Margin = new System.Windows.Forms.Padding(2);
@@ -325,10 +336,68 @@ namespace dp2Circulation
             this.button_beginByBarcodeFile.UseVisualStyleBackColor = true;
             this.button_beginByBarcodeFile.Click += new System.EventHandler(this.button_beginByBarcodeFile_Click);
             // 
+            // tabPage_recPathFile
+            // 
+            this.tabPage_recPathFile.Controls.Add(this.button_getRecPathFileName);
+            this.tabPage_recPathFile.Controls.Add(this.textBox_recPathFile);
+            this.tabPage_recPathFile.Controls.Add(this.label5);
+            this.tabPage_recPathFile.Controls.Add(this.button_beginByRecPathFile);
+            this.tabPage_recPathFile.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_recPathFile.Name = "tabPage_recPathFile";
+            this.tabPage_recPathFile.Size = new System.Drawing.Size(456, 48);
+            this.tabPage_recPathFile.TabIndex = 2;
+            this.tabPage_recPathFile.Text = "记录路径文件";
+            this.tabPage_recPathFile.UseVisualStyleBackColor = true;
+            // 
+            // button_getRecPathFileName
+            // 
+            this.button_getRecPathFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_getRecPathFileName.Location = new System.Drawing.Point(269, 21);
+            this.button_getRecPathFileName.Margin = new System.Windows.Forms.Padding(2);
+            this.button_getRecPathFileName.Name = "button_getRecPathFileName";
+            this.button_getRecPathFileName.Size = new System.Drawing.Size(38, 22);
+            this.button_getRecPathFileName.TabIndex = 10;
+            this.button_getRecPathFileName.Text = "...";
+            this.button_getRecPathFileName.UseVisualStyleBackColor = true;
+            this.button_getRecPathFileName.Click += new System.EventHandler(this.button_getRecPathFileName_Click);
+            // 
+            // textBox_recPathFile
+            // 
+            this.textBox_recPathFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_recPathFile.Location = new System.Drawing.Point(7, 20);
+            this.textBox_recPathFile.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_recPathFile.Name = "textBox_recPathFile";
+            this.textBox_recPathFile.Size = new System.Drawing.Size(258, 21);
+            this.textBox_recPathFile.TabIndex = 8;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(5, 6);
+            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(101, 12);
+            this.label5.TabIndex = 7;
+            this.label5.Text = "记录路径文件(&F):";
+            // 
+            // button_beginByRecPathFile
+            // 
+            this.button_beginByRecPathFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_beginByRecPathFile.ContextMenuStrip = this.contextMenuStrip_loadAction;
+            this.button_beginByRecPathFile.Location = new System.Drawing.Point(311, 21);
+            this.button_beginByRecPathFile.Margin = new System.Windows.Forms.Padding(2);
+            this.button_beginByRecPathFile.Name = "button_beginByRecPathFile";
+            this.button_beginByRecPathFile.Size = new System.Drawing.Size(127, 22);
+            this.button_beginByRecPathFile.TabIndex = 9;
+            this.button_beginByRecPathFile.Text = "启动自动修改(&B)";
+            this.button_beginByRecPathFile.UseVisualStyleBackColor = true;
+            this.button_beginByRecPathFile.Click += new System.EventHandler(this.button_beginByRecPathFile_Click);
+            // 
             // splitContainer_main
             // 
-            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_main.Location = new System.Drawing.Point(0, 88);
             this.splitContainer_main.Margin = new System.Windows.Forms.Padding(2);
@@ -377,8 +446,8 @@ namespace dp2Circulation
             // 
             // textBox_outputBarcodes
             // 
-            this.textBox_outputBarcodes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_outputBarcodes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_outputBarcodes.Location = new System.Drawing.Point(-1, 19);
             this.textBox_outputBarcodes.Margin = new System.Windows.Forms.Padding(2);
@@ -386,7 +455,7 @@ namespace dp2Circulation
             this.textBox_outputBarcodes.Multiline = true;
             this.textBox_outputBarcodes.Name = "textBox_outputBarcodes";
             this.textBox_outputBarcodes.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_outputBarcodes.Size = new System.Drawing.Size(150, 195);
+            this.textBox_outputBarcodes.Size = new System.Drawing.Size(153, 195);
             this.textBox_outputBarcodes.TabIndex = 1;
             // 
             // label4
@@ -399,64 +468,6 @@ namespace dp2Circulation
             this.label4.Size = new System.Drawing.Size(109, 12);
             this.label4.TabIndex = 0;
             this.label4.Text = "已处理条码或路径";
-            // 
-            // tabPage_recPathFile
-            // 
-            this.tabPage_recPathFile.Controls.Add(this.button_getRecPathFileName);
-            this.tabPage_recPathFile.Controls.Add(this.textBox_recPathFile);
-            this.tabPage_recPathFile.Controls.Add(this.label5);
-            this.tabPage_recPathFile.Controls.Add(this.button_beginByRecPathFile);
-            this.tabPage_recPathFile.Location = new System.Drawing.Point(4, 22);
-            this.tabPage_recPathFile.Name = "tabPage_recPathFile";
-            this.tabPage_recPathFile.Size = new System.Drawing.Size(456, 48);
-            this.tabPage_recPathFile.TabIndex = 2;
-            this.tabPage_recPathFile.Text = "记录路径文件";
-            this.tabPage_recPathFile.UseVisualStyleBackColor = true;
-            // 
-            // button_getRecPathFileName
-            // 
-            this.button_getRecPathFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_getRecPathFileName.Location = new System.Drawing.Point(269, 21);
-            this.button_getRecPathFileName.Margin = new System.Windows.Forms.Padding(2);
-            this.button_getRecPathFileName.Name = "button_getRecPathFileName";
-            this.button_getRecPathFileName.Size = new System.Drawing.Size(38, 22);
-            this.button_getRecPathFileName.TabIndex = 10;
-            this.button_getRecPathFileName.Text = "...";
-            this.button_getRecPathFileName.UseVisualStyleBackColor = true;
-            this.button_getRecPathFileName.Click += new System.EventHandler(this.button_getRecPathFileName_Click);
-            // 
-            // textBox_recPathFile
-            // 
-            this.textBox_recPathFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_recPathFile.Location = new System.Drawing.Point(7, 20);
-            this.textBox_recPathFile.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox_recPathFile.Name = "textBox_recPathFile";
-            this.textBox_recPathFile.Size = new System.Drawing.Size(258, 21);
-            this.textBox_recPathFile.TabIndex = 8;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(5, 6);
-            this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(101, 12);
-            this.label5.TabIndex = 7;
-            this.label5.Text = "记录路径文件(&F):";
-            // 
-            // button_beginByRecPathFile
-            // 
-            this.button_beginByRecPathFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_beginByRecPathFile.ContextMenuStrip = this.contextMenuStrip_loadAction;
-            this.button_beginByRecPathFile.Location = new System.Drawing.Point(311, 21);
-            this.button_beginByRecPathFile.Margin = new System.Windows.Forms.Padding(2);
-            this.button_beginByRecPathFile.Name = "button_beginByRecPathFile";
-            this.button_beginByRecPathFile.Size = new System.Drawing.Size(127, 22);
-            this.button_beginByRecPathFile.TabIndex = 9;
-            this.button_beginByRecPathFile.Text = "启动自动修改(&B)";
-            this.button_beginByRecPathFile.UseVisualStyleBackColor = true;
-            this.button_beginByRecPathFile.Click += new System.EventHandler(this.button_beginByRecPathFile_Click);
             // 
             // QuickChangeEntityForm
             // 
@@ -484,14 +495,14 @@ namespace dp2Circulation
             this.tabPage_barcodeInput.PerformLayout();
             this.tabPage_barcodeFile.ResumeLayout(false);
             this.tabPage_barcodeFile.PerformLayout();
+            this.tabPage_recPathFile.ResumeLayout(false);
+            this.tabPage_recPathFile.PerformLayout();
             this.splitContainer_main.Panel1.ResumeLayout(false);
             this.splitContainer_main.Panel1.PerformLayout();
             this.splitContainer_main.Panel2.ResumeLayout(false);
             this.splitContainer_main.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).EndInit();
             this.splitContainer_main.ResumeLayout(false);
-            this.tabPage_recPathFile.ResumeLayout(false);
-            this.tabPage_recPathFile.PerformLayout();
             this.ResumeLayout(false);
 
         }

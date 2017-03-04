@@ -72,7 +72,7 @@ namespace DigitalPlatform.LibraryClient
                         this.Format,    // "id,cols",
                         out searchresults,
                         out strError);
-                    if (lRet == -1)
+                    if (lRet == -1) // TODO: Prompt
                         throw new Exception(strError);
 #if NO
                     if (lRet == -1)

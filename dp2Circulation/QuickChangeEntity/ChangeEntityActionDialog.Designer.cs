@@ -49,6 +49,8 @@ namespace dp2Circulation
             this.label_location = new System.Windows.Forms.Label();
             this.label_bookType = new System.Windows.Forms.Label();
             this.label_batchNo = new System.Windows.Forms.Label();
+            this.comboBox_returnInEdit = new System.Windows.Forms.ComboBox();
+            this.label8 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -134,7 +136,7 @@ namespace dp2Circulation
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(150, 279);
+            this.button_OK.Location = new System.Drawing.Point(150, 302);
             this.button_OK.Margin = new System.Windows.Forms.Padding(2);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(56, 22);
@@ -147,7 +149,7 @@ namespace dp2Circulation
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(211, 279);
+            this.button_Cancel.Location = new System.Drawing.Point(211, 302);
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(56, 22);
@@ -174,7 +176,10 @@ namespace dp2Circulation
             this.comboBox_focusAction.FormattingEnabled = true;
             this.comboBox_focusAction.Items.AddRange(new object[] {
             "册条码号，并全选",
-            "册信息编辑器"});
+            "册信息编辑器-册条码号",
+            "册信息编辑器-状态",
+            "册信息编辑器-馆藏地",
+            "册信息编辑器-图书类型"});
             this.comboBox_focusAction.Location = new System.Drawing.Point(104, 216);
             this.comboBox_focusAction.Margin = new System.Windows.Forms.Padding(2);
             this.comboBox_focusAction.Name = "comboBox_focusAction";
@@ -292,13 +297,42 @@ namespace dp2Circulation
             this.label_batchNo.Size = new System.Drawing.Size(10, 20);
             this.label_batchNo.TabIndex = 19;
             // 
-            // ChangeParamDlg
+            // comboBox_returnInEdit
+            // 
+            this.comboBox_returnInEdit.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_returnInEdit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboBox_returnInEdit.FormattingEnabled = true;
+            this.comboBox_returnInEdit.Items.AddRange(new object[] {
+            "<无>",
+            "将焦点切换到条码号文本框",
+            "保存当前记录"});
+            this.comboBox_returnInEdit.Location = new System.Drawing.Point(104, 268);
+            this.comboBox_returnInEdit.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_returnInEdit.Name = "comboBox_returnInEdit";
+            this.comboBox_returnInEdit.Size = new System.Drawing.Size(164, 20);
+            this.comboBox_returnInEdit.TabIndex = 21;
+            this.comboBox_returnInEdit.Text = "<无>";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(9, 254);
+            this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(113, 12);
+            this.label8.TabIndex = 20;
+            this.label8.Text = "在册信息区回车(&R):";
+            // 
+            // ChangeEntityActionDialog
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(276, 311);
+            this.ClientSize = new System.Drawing.Size(276, 334);
+            this.Controls.Add(this.comboBox_returnInEdit);
+            this.Controls.Add(this.label8);
             this.Controls.Add(this.label_batchNo);
             this.Controls.Add(this.label_bookType);
             this.Controls.Add(this.label_location);
@@ -321,7 +355,7 @@ namespace dp2Circulation
             this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(2);
-            this.Name = "ChangeParamDlg";
+            this.Name = "ChangeEntityActionDialog";
             this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.Text = "动作参数";
@@ -353,6 +387,8 @@ namespace dp2Circulation
         private System.Windows.Forms.Label label_location;
         private System.Windows.Forms.Label label_bookType;
         private System.Windows.Forms.Label label_batchNo;
+        private System.Windows.Forms.ComboBox comboBox_returnInEdit;
+        private System.Windows.Forms.Label label8;
 
     }
 }
