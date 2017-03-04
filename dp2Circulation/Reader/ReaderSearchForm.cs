@@ -1790,6 +1790,9 @@ MessageBoxDefaultButton.Button2);
                     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
@@ -1955,6 +1958,23 @@ MessageBoxDefaultButton.Button2);
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        void loader_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+            if (e.Actions == "yes,no,cancel")
+            {
+                DialogResult result = AutoCloseMessageBox.Show(this,
+    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    20 * 1000,
+    "ReaderSearchForm");
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
+            }
+        }
+
 
         // 筛选 --> 读者查询窗
         void menu_filterToAnotherReaderSearchForm_Click(object sender, EventArgs e)
@@ -5326,6 +5346,9 @@ out strFingerprint);
                     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
@@ -6111,6 +6134,9 @@ dlg.UiState);
                     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
@@ -6343,7 +6369,7 @@ dlg.UiState);
                 }
 
                 LabelPrintForm labelPrintForm = Program.MainForm.EnsureLabelPrintForm();
-                labelPrintForm.LabelDefFilename = Path.Combine(Program.MainForm.DataDir, "reader\\patronSheetLayout_"+strSheetDefName+".xml");
+                labelPrintForm.LabelDefFilename = Path.Combine(Program.MainForm.DataDir, "reader\\patronSheetLayout_" + strSheetDefName + ".xml");
                 labelPrintForm.LabelFilename = strTempDataFileName;
                 labelPrintForm.MdiParent = Program.MainForm;
                 labelPrintForm.Show();
@@ -8106,6 +8132,11 @@ out strError);
     public class ListViewPatronLoader : IEnumerable
     {
         /// <summary>
+        /// 提示框事件
+        /// </summary>
+        public event MessagePromptEventHandler Prompt = null;
+
+        /// <summary>
         /// 数据库类型，用于显示的文字。缺省为空
         /// </summary>
         public string DbTypeCaption
@@ -8149,10 +8180,18 @@ out strError);
             m_loader.Channel = channel;
             m_loader.Stop = stop;
             m_loader.Format = "id,xml,timestamp";
+            if (this.Prompt != null)
+                m_loader.Prompt += m_loader_Prompt;
             // m_loader.GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp; // 附加信息只取得 timestamp
 
             this.Items = items;
             this.CacheTable = cacheTable;
+        }
+
+        void m_loader_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            if (this.Prompt != null)
+                this.Prompt(sender, e);
         }
 
         /// <summary>

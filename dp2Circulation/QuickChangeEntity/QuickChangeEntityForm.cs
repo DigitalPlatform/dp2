@@ -98,6 +98,8 @@ namespace dp2Circulation
             this.AcceptButton = this.button_loadBarcode;
 
             this.entityEditControl1.GetValueTable += new GetValueTableEventHandler(entityEditControl1_GetValueTable);
+
+            BeginSwitchFocus("load_barcode", true);
         }
 
         void entityEditControl1_GetValueTable(object sender, GetValueTableEventArgs e)

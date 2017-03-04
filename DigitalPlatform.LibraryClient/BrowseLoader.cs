@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +13,11 @@ namespace DigitalPlatform.LibraryClient
     /// </summary>
     public class BrowseLoader : IEnumerable
     {
+        /// <summary>
+        /// 提示框事件
+        /// </summary>
+        public event MessagePromptEventHandler Prompt = null;
+
         List<string> m_recpaths = new List<string>();
 
         public List<string> RecPaths
@@ -72,34 +78,30 @@ namespace DigitalPlatform.LibraryClient
                         this.Format,    // "id,cols",
                         out searchresults,
                         out strError);
-                    if (lRet == -1) // TODO: Prompt
-                        throw new Exception(strError);
-#if NO
                     if (lRet == -1)
                     {
-                        if (lRet == 0 && String.IsNullOrEmpty(strError) == true)
-                        {
-                            foreach (string path in batch)
-                            {
-                                DigitalPlatform.LibraryClient.localhost.Record record = new DigitalPlatform.LibraryClient.localhost.Record();
-                                record.Path = path;
-                                // TODO: 是否需要设置 ErrorCode ?
-                                yield return record;
-                            }
-                            goto CONTINUE;
-                        }
+                        // throw new Exception(strError);
 
-                        // 如果results.Length表现正常，其实还可以继续处理?
-                        if (searchresults != null && searchresults.Length > 0)
+                        if (this.Prompt != null)
                         {
+                            MessagePromptEventArgs e = new MessagePromptEventArgs();
+                            e.MessageText = "获得浏览记录时发生错误： " + strError + "\r\npaths='" + StringUtil.MakePathList(paths) + "' (" + this.Format + ")";
+                            e.Actions = "yes,no,cancel";
+                            this.Prompt(this, e);
+                            if (e.ResultAction == "cancel")
+                                throw new ChannelException(Channel.ErrorCode, strError);
+                            else if (e.ResultAction == "yes")
+                                goto REDO;
+                            else
+                            {
+                                // no 也是抛出异常。因为继续下一批代价太大
+                                throw new ChannelException(Channel.ErrorCode, strError);
+                            }
                         }
                         else
-                        {
-                            strError = "获得浏览记录 '" + StringUtil.MakePathList(batch) + "' 时发生错误: " + strError;
-                            throw new Exception(strError);
-                        }
+                            throw new ChannelException(Channel.ErrorCode, strError);
+
                     }
-#endif
 
                     if (searchresults == null)
                     {

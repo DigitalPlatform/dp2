@@ -2640,11 +2640,11 @@ out strError);
             int nModifyCount = 0;
 
             this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-                + " 开始进行" + this.DbType + "记录校验</div>");
+                + " 开始进行" + this.DbTypeCaption + "记录校验</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在进行校验" + this.DbType + "记录的操作 ...");
+            stop.Initial("正在进行校验" + this.DbTypeCaption + "记录的操作 ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -2694,7 +2694,8 @@ out strError);
     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
 
-                // TODO: Prompt
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
                 int i = 0;
                 foreach (LoaderItem item in loader)
@@ -2798,7 +2799,7 @@ out strError);
                 this.EnableControls(true);
 
                 this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
-                    + " 结束执行" + this.DbType + "记录校验</div>");
+                    + " 结束执行" + this.DbTypeCaption + "记录校验</div>");
                 if (nModifyCount > 0)
                     this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                         + " 发生修改 " + nModifyCount + " 条</div>");
@@ -4180,6 +4181,9 @@ this.MainForm.DefaultFont);
     items,
     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
                 int i = 0;
                 foreach (LoaderItem item in loader)
@@ -9183,6 +9187,9 @@ out strError);
                     items,
                     this.m_biblioTable);
                 loader.DbTypeCaption = this.DbTypeCaption;
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
 
                 int i = 0;
                 foreach (LoaderItem item in loader)
