@@ -1783,11 +1783,14 @@ namespace DigitalPlatform.LibraryServer
 
             if (string.IsNullOrEmpty(strRange) == false)
             {
+                // TODO: 如果是图书类型的订购记录，要允许 range 使用开放式的时间范围
+
                 // 检查单个出版日期字符串是否合法
                 // return:
                 //      -1  出错
                 //      0   正确
                 nRet = LibraryServerUtil.CheckPublishTimeRange(strRange,
+                    true,   // TODO: 期刊要用 false
                     out strError);
                 if (nRet == -1)
                 {

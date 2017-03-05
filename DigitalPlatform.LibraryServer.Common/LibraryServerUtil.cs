@@ -191,12 +191,24 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        // 兼容原来用法
+        public static int CheckPublishTimeRange(string strText,
+    out string strError)
+        {
+            return CheckPublishTimeRange(strText,
+    false,
+    out strError);
+        }
+
         // 检查出版时间范围字符串是否合法
         // 如果使用单个出版时间来调用本函数，也是可以的
+        // parameters:
+        //      bAllowOpen  是否允许开放式的时间范围？所谓开放式的就是： "-" "-20170101" "20170101-"
         // return:
         //      -1  出错
         //      0   正确
         public static int CheckPublishTimeRange(string strText,
+            bool bAllowOpen,
             out string strError)
         {
             strError = "";
@@ -204,6 +216,8 @@ namespace DigitalPlatform.LibraryServer
             int nRet = strText.IndexOf("-");
             if (nRet == -1)
             {
+                if (bAllowOpen && string.IsNullOrEmpty(strText))
+                    return 0;
                 return CheckSinglePublishTime(strText,
             out strError);
             }
@@ -211,20 +225,34 @@ namespace DigitalPlatform.LibraryServer
             string strLeft = "";
             string strRight = "";
             StringUtil.ParseTwoPart(strText, "-", out strLeft, out strRight);
-            nRet = CheckSinglePublishTime(strLeft,
-                out strError);
-            if (nRet == -1)
+            if (bAllowOpen && string.IsNullOrEmpty(strLeft))
             {
-                strError = "出版时间字符串 '" + strText + "' 的起始时间部分 '" + strLeft + "' 格式错误: " + strError;
-                return -1;
+
+            }
+            else
+            {
+                nRet = CheckSinglePublishTime(strLeft,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "出版时间字符串 '" + strText + "' 的起始时间部分 '" + strLeft + "' 格式错误: " + strError;
+                    return -1;
+                }
             }
 
-            nRet = CheckSinglePublishTime(strRight,
-                out strError);
-            if (nRet == -1)
+            if (bAllowOpen && string.IsNullOrEmpty(strRight))
             {
-                strError = "出版时间字符串 '" + strText + "' 的结束时间部分 '" + strRight + "' 格式错误: " + strError;
-                return -1;
+
+            }
+            else
+            {
+                nRet = CheckSinglePublishTime(strRight,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "出版时间字符串 '" + strText + "' 的结束时间部分 '" + strRight + "' 格式错误: " + strError;
+                    return -1;
+                }
             }
 
             return 0;

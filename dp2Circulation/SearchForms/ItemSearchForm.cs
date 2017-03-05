@@ -2843,13 +2843,20 @@ out strError);
                 errors.Add(strError);
             }
 
-            nRet = VerifyOrder(itemdom,
+            nRet = VerifyOrder(
+                strItemRecPath,
+                itemdom,
                 bAutoModify,
                 ref bChanged,
                 out strError);
             if (nRet == -1)
                 errors.Add(strError);
 
+            // 顺便清除空元素
+            if (bChanged)
+            {
+                DomUtil.RemoveEmptyElements(itemdom.DocumentElement, false);
+            }
         }
 
         // 校验一条期记录
@@ -3027,11 +3034,19 @@ out strError);
             }
 
             // 模拟删除一些元素
-            nRet = SimulateDeleteElement(itemdom,
-out strError);
-            if (nRet == -1)
-                errors.Add(strError);
+            if (itemdom.DocumentElement != null)
+            {
+                nRet = SimulateDeleteElement(itemdom.OuterXml,
+    out strError);
+                if (nRet == -1)
+                    errors.Add(strError);
+            }
 
+            // 顺便清除空元素
+            if (bChanged)
+            {
+                DomUtil.RemoveEmptyElements(itemdom.DocumentElement, false);
+            }
         }
 
         // return:
@@ -3068,7 +3083,9 @@ out strError);
         // return:
         //      0   没有发现错误
         //      -1  发现错误
-        int VerifyOrder(XmlDocument dom,
+        int VerifyOrder(
+            string strOrderRecPath,
+            XmlDocument dom,
             bool bModify,
             ref bool bChanged,
             out string strError)
@@ -3103,6 +3120,7 @@ out strError);
 
                     if (bModify)
                     {
+#if NO
                         // 尝试纠正
                         DateTime time;
                         if (strOrderTime.Length == 8)
@@ -3126,6 +3144,18 @@ out strError);
                                 bChanged = true;
                             }
                         }
+#endif
+                        string strRfc1123 = "";
+                        // 尝试解析混乱的时间字符串
+                        // return:
+                        //      false   解析失败
+                        //      true    解析成功
+                        if (TryParseTimeString(strOrderTime, out strRfc1123) == true)
+                        {
+                            DomUtil.SetElementText(dom.DocumentElement, "orderTime", strRfc1123);
+                            bChanged = true;
+                        }
+
                     }
                 }
             }
@@ -3133,16 +3163,32 @@ out strError);
             string strRange = DomUtil.GetElementText(dom.DocumentElement, "range");
             if (string.IsNullOrEmpty(strRange) == false)
             {
+                string strDbName = Global.GetDbName(strOrderRecPath);
+                string strPubType = Program.MainForm.GetPubTypeFromOrderDbName(strDbName);
+
+                bool bError = false;
                 // 检查单个出版日期字符串是否合法
                 // return:
                 //      -1  出错
                 //      0   正确
                 nRet = LibraryServerUtil.CheckPublishTimeRange(strRange,
+                    strPubType == "book" ? true : false,
                     out strError);
                 if (nRet == -1)
                 {
                     strError = "时间范围字符串 '" + strRange + "' 格式错误: " + strError;
                     errors.Add(strError);
+                    bError = true;
+                }
+
+                if (bError && bModify)
+                {
+                    if (strPubType == "book")
+                    {
+                        // 图书类型，干脆清除 range 元素 
+                        DomUtil.DeleteElement(dom.DocumentElement, "range");
+                        bChanged = true;
+                    }
                 }
             }
 
@@ -3152,6 +3198,56 @@ out strError);
                 return -1;
             }
             return 0;
+        }
+
+        // 尝试解析混乱的时间字符串
+        // return:
+        //      false   解析失败
+        //      true    解析成功
+        static bool TryParseTimeString(string strOrderTime, out string strRfc1123)
+        {
+            strRfc1123 = "";
+
+            try
+            {
+                // 尝试纠正
+                DateTime time;
+                if (strOrderTime.Length == 8)
+                {
+                    time = DateTimeUtil.Long8ToDateTime(strOrderTime);
+                    strRfc1123 = DateTimeUtil.Rfc1123DateTimeStringEx(time);
+                    return true;
+
+                }
+                else if (strOrderTime.Length == 4)
+                {
+                    time = new DateTime(Convert.ToInt32(strOrderTime), 1, 1);
+                    strRfc1123 = DateTimeUtil.Rfc1123DateTimeStringEx(time);
+                    return true;
+                }
+                else if (strOrderTime.Length == 6)
+                {
+                    time = new DateTime(Convert.ToInt32(strOrderTime.Substring(0, 4)),
+                        Convert.ToInt32(strOrderTime.Substring(4)),
+                        1);
+                    strRfc1123 = DateTimeUtil.Rfc1123DateTimeStringEx(time);
+                    return true;
+                }
+                else
+                {
+                    if (DateTime.TryParse(strOrderTime, out time) == true)
+                    {
+                        strRfc1123 = DateTimeUtil.Rfc1123DateTimeStringEx(time);
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         // return:
@@ -3460,10 +3556,19 @@ out strError);
             }
         }
 
-        int SimulateDeleteElement(XmlDocument dom,
+        // return:
+        //      -1  有错
+        //      0   没有错
+        int SimulateDeleteElement(string strXml,
             out string strError)
         {
             strError = "";
+
+            if (string.IsNullOrEmpty(strXml))
+                return 0;
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
 
             string[] names = {
                 "borrower",

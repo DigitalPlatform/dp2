@@ -1275,6 +1275,7 @@ namespace dp2Circulation
                 //      -1  出错
                 //      0   正确
                 nRet = LibraryServerUtil.CheckPublishTimeRange(strRange,
+                    true,   // TODO: 期刊要用 false
                     out strError);
                 if (nRet == -1)
                     return -1;

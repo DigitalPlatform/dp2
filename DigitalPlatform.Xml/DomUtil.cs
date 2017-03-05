@@ -14,7 +14,7 @@ namespace DigitalPlatform.Xml
     {
         // 删除 start 元素下的所有空元素
         // parameters:
-        //      bCheckStart 是否检查 start。如果本参数为 true, 当 start 为空元素时，要删除 start 元素
+        //      bCheckStart 是否检查 start 节点的状况。如果本参数为 true, 当 start 为空元素时，要删除 start 元素
         public static void RemoveEmptyElements(XmlElement start,
             bool bCheckStart = false)
         {
@@ -25,7 +25,7 @@ namespace DigitalPlatform.Xml
                     continue;
                 XmlElement element = node as XmlElement;
                 if (element.HasAttributes == false
-                    && string.IsNullOrEmpty(element.InnerText.Trim()) == true)
+                    && string.IsNullOrEmpty(element.InnerXml.Trim()) == true)
                 {
                     delete.Add(element);
                 }
@@ -42,7 +42,7 @@ namespace DigitalPlatform.Xml
             {
                 XmlElement element = start;
                 if (element.HasAttributes == false
-                    && string.IsNullOrEmpty(element.InnerText.Trim()) == true)
+                    && string.IsNullOrEmpty(element.InnerXml.Trim()) == true)
                     element.ParentNode.RemoveChild(element);
             }
         }
