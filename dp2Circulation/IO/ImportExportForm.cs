@@ -768,7 +768,7 @@ this.MainForm.ActivateFixPage("history")
                             //      0   跳过本条处理
                             //      1   成功。后面继续处理
                             int nRet = OverwriteBiblio(info,
-                                strAction,
+                                // strAction,
                                 strTargetRecPath,
                                 strStyle,
                                 baTargetTimestamp,
@@ -933,13 +933,15 @@ new string[] { "重试", "跳过", "中断" });
         //      0   跳过本条处理
         //      1   成功。后面继续处理
         int OverwriteBiblio(ProcessInfo info,
-            string strAction,
+            // string strAction,
             string strTargetRecPath,
             string strStyle,
             byte[] baTargetTimestamp,
             out string strError)
         {
             strError = "";
+
+            string strAction = "change";
 
             string strOutputPath = "";
             byte[] baNewTimestamp = null;

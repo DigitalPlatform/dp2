@@ -1861,6 +1861,10 @@ namespace dp2Circulation
 
             item.Parent = Global.GetRecordID(this.BiblioRecPath);
 
+            // 2017/3/7
+            if (string.IsNullOrEmpty(item.RefID))
+                item.RefID = Guid.NewGuid().ToString();
+
             this.Items.Add(item);
 
             item.ItemDisplayState = ItemDisplayState.New;

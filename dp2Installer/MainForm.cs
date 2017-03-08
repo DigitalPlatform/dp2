@@ -2325,6 +2325,11 @@ MessageBoxDefaultButton.Button1);
                     bool bRangeSetted = false;
                     using (ZipFile zip = new ZipFile(Encoding.UTF8))
                     {
+                        // http://stackoverflow.com/questions/15337186/dotnetzip-badreadexception-on-extract
+                        // https://dotnetzip.codeplex.com/workitem/14087
+                        // uncommenting the following line can be used as a work-around
+                        zip.ParallelDeflateThreshold = -1;
+
                         foreach (string filename in filenames)
                         {
                             Application.DoEvents();

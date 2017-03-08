@@ -4407,6 +4407,16 @@ nsmgr);
                 goto ERROR1;
             }
 
+            if (strAction == "new" 
+                && string.IsNullOrEmpty(strBiblioRecPath) == false
+                && ResPath.IsAppendRecPath(strBiblioRecPath) == false)
+            {
+                // strAction = "change";
+
+                strError = "当(new)创建书目记录的时候，只能使用“书目库名/?”形式的路径(而不能使用 '" + strBiblioRecPath + "' 形式)。如果要在指定位置保存，可使用修改(change)子功能";
+                goto ERROR1;
+            }
+
             strBiblioType = strBiblioType.ToLower();
 
             string strFormat = "";

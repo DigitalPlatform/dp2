@@ -140,6 +140,10 @@ namespace ZipUtil
                 using (ZipFile zip1 = ZipFile.Read(strFileName1))
                 using (ZipFile zip2 = ZipFile.Read(strFileName2))
                 {
+                    // uncommenting the following line can be used as a work-around
+                    zip1.ParallelDeflateThreshold = -1;
+                    zip2.ParallelDeflateThreshold = -1;
+
                     if (zip1.Count != zip2.Count)
                         return 1;
                     for (int i = 0; i < zip1.Count; i++)
@@ -315,6 +319,11 @@ namespace ZipUtil
 
             using (ZipFile zip = new ZipFile(encoding))
             {
+                // http://stackoverflow.com/questions/15337186/dotnetzip-badreadexception-on-extract
+                // https://dotnetzip.codeplex.com/workitem/14087
+                // uncommenting the following line can be used as a work-around
+                zip.ParallelDeflateThreshold = -1;
+
                 foreach (string filename in filenames)
                 {
                     // string strShortFileName = filename.Substring(strHead.Length + 1);

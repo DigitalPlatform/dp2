@@ -4523,6 +4523,7 @@ MessageBoxDefaultButton.Button1);
             return -1;
         }
 
+        // TODO: 应该改为直接在内存修改，并不直接保存，要专门保存命令才真正保存
         void menu_quickChangeRecords_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -4611,6 +4612,11 @@ MessageBoxDefaultButton.Button1);
                         stop.SetMessage("正在刷新浏览行 " + item.Text + " ...");
                         stop.SetProgressValue(i++);
                     }
+
+                    // 2017/3/8
+                    ClearOneChange(item, true);
+
+                    // TODO: 还应该把 BiblioInfo 失效，迫使固定面板区属性显示 XML 时候重新获取书目记录
                     nRet = RefreshBrowseLine(
                         channel,
                         item,
@@ -4642,6 +4648,9 @@ MessageBoxDefaultButton.Button1);
 
                 this.EnableControls(true);
             }
+
+            // 如果正好修改了处于选择状态的一行
+            RefreshPropertyView(false);
             return;
         ERROR1:
             MessageBox.Show(this, strError);

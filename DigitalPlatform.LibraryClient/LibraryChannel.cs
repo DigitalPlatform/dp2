@@ -133,6 +133,7 @@ namespace DigitalPlatform.LibraryClient
 #else
                     this.m_ws.InnerChannel.OperationTimeout = value;
 #endif
+                    // RefreshContext();
                 }
             }
         }
@@ -228,6 +229,8 @@ namespace DigitalPlatform.LibraryClient
         public void Dispose()
         {
             this.Close();
+
+            // this.DisposeContext();
 
             this.BeforeLogin = null;
             this.AfterLogin = null;
@@ -496,6 +499,11 @@ out strError);
 
 #endif
 
+        static string USER_AGENT = "User-Agent";
+        static string DP2LIBRARYCLIENT = "dp2LibraryClient";
+
+        static string TIMEOUT_HEADER = "_timeout";
+
         // public localhost.LibraryWse ws
         /// <summary>
         /// 获取 localhost.dp2libraryClient 对象。这是 WCF 层的通道对象
@@ -532,12 +540,21 @@ out strError);
 #else
                             throw new Exception("当前条件编译版本不支持 basic.http 协议方式");
 #endif
+
                         {
-                            HttpUserAgentEndpointBehavior behavior = new HttpUserAgentEndpointBehavior("dp2LibraryClient");
+                            HttpUserAgentEndpointBehavior behavior = new HttpUserAgentEndpointBehavior(
+                                () =>
+                                {
+                                    Dictionary<string, string> results = new Dictionary<string, string>();
+                                    results.Add(USER_AGENT, DP2LIBRARYCLIENT);
+                                    results.Add(TIMEOUT_HEADER, this.Timeout.ToString());
+                                    return results;
+                                }
+                                );
                             this.m_ws.Endpoint.Behaviors.Add(behavior);
                         }
 
-
+                        // RefreshContext();
                     }
                     else if (uri.Scheme.ToLower() == "rest.http")
                     {
@@ -557,19 +574,18 @@ out strError);
                         }
 
                         {
-                            HttpUserAgentEndpointBehavior behavior = new HttpUserAgentEndpointBehavior("dp2LibraryClient");
+                            HttpUserAgentEndpointBehavior behavior = new HttpUserAgentEndpointBehavior(
+                                () =>
+                                {
+                                    Dictionary<string, string> results = new Dictionary<string, string>();
+                                    results.Add(USER_AGENT, DP2LIBRARYCLIENT);
+                                    results.Add(TIMEOUT_HEADER, this.Timeout.ToString());
+                                    return results;
+                                }
+                                );
                             factory.Endpoint.Behaviors.Add(behavior);
                         }
 
-#if NO
-                        {
-                            var eab = new EndpointAddressBuilder(factory.Endpoint.Address);
-                            eab.Headers.Add(AddressHeader.CreateAddressHeader("ClientIdentification",  // Header Name
-                                                                                string.Empty,           // Namespace
-                                                                                "JabberwockyClient"));  // Header Value
-                            factory.Endpoint.Address = eab.ToEndpointAddress();
-                        }
-#endif
 
 #if BASIC_HTTP
                         this.m_ws = factory.CreateChannel();
@@ -577,6 +593,8 @@ out strError);
 #else
                             throw new Exception("当前条件编译版本不支持 rest.http 协议方式");
 #endif
+
+                        // RefreshContext();
                     }
                     else if (uri.Scheme.ToLower() == "net.tcp")
                     {
@@ -706,6 +724,61 @@ out strError);
                 return m_ws;
             }
         }
+
+#if NO
+        OperationContextScope _context = null;
+
+        void DisposeContext()
+        {
+            if (this._context != null)
+            {
+                this._context.Dispose();
+                this._context = null;
+            }
+        }
+
+        void RefreshContext()
+        {
+            if (this.m_ws is localhost.dp2libraryClient)
+            {
+                localhost.dp2libraryClient client = (this.m_ws as localhost.dp2libraryClient);
+                this.DisposeContext();
+                if (_context == null)
+                    _context = new OperationContextScope(client.InnerChannel);
+            }
+            else
+            {
+                IContextChannel channel = ((IContextChannel)this.m_ws);
+
+                this.DisposeContext();
+                if (_context == null)
+                    _context = new OperationContextScope(channel);
+
+                {
+                    // Add a HTTP Header to an outgoing request
+                    HttpRequestMessageProperty requestMessage = null;
+                    if (OperationContext.Current.OutgoingMessageProperties.ContainsKey(HttpRequestMessageProperty.Name))
+                        requestMessage = OperationContext.Current.OutgoingMessageProperties[HttpRequestMessageProperty.Name] as HttpRequestMessageProperty;
+                    if (requestMessage == null)
+                    {
+                        requestMessage = new HttpRequestMessageProperty();
+                        OperationContext.Current.OutgoingMessageProperties[HttpRequestMessageProperty.Name] = requestMessage;
+                    }
+                    requestMessage.Headers[USER_AGENT] = DP2LIBRARYCLIENT;
+                    requestMessage.Headers[TIMEOUT_HEADER] = this.OperationTimeout.ToString();
+                }
+#if NO
+                using (new OperationContextScope(channel))
+                {
+                    // Add a HTTP Header to an outgoing request
+                    HttpRequestMessageProperty requestMessage = new HttpRequestMessageProperty();
+                    requestMessage.Headers["timeout"] = timeout.ToString();
+                    OperationContext.Current.OutgoingMessageProperties[HttpRequestMessageProperty.Name] = requestMessage;
+                }
+#endif
+            }
+        }
+#endif
 
         /// <summary>
         /// 是否正在进行检索

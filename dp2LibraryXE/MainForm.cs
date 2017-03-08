@@ -3751,7 +3751,14 @@ MessageBoxDefaultButton.Button2);
 
                             AppendString(e.FileName + "\r\n");
 
-                            e.Extract(this.UserDir, ExtractExistingFileAction.OverwriteSilently);
+                            // e.Extract(this.UserDir, ExtractExistingFileAction.OverwriteSilently);
+                            string strTargetDir = this.UserDir;
+                            if ((e.Attributes & FileAttributes.Directory) == 0)
+                            {
+                                ExtractFile(e, strTargetDir);
+                            }
+                            else
+                                e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
                         }
                     }
                 }

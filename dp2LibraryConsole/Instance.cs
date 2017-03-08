@@ -589,14 +589,15 @@ out strError);
                 if (si is DirectoryInfo)
                 {
                     string strServerFilePath = "!upload/" + GetFullDirectory(strTarget) + "/~" + Guid.NewGuid().ToString();
-                    string strZipFileName = Path.GetTempFileName(); // TODO: 建议在当前目录创建临时文件，便于观察是否有删除遗漏，和处理
+                    string strZipFileName = Path.GetTempFileName(); // "c:\\temp\\test.zip"; // TODO: 建议在当前目录创建临时文件，便于观察是否有删除遗漏，和处理
+                    File.Delete(strZipFileName);
                     try
                     {
                         // return:
                         //      -1  出错
                         //      0   没有发现需要上传的文件
                         //      1   成功压缩创建了 .zip 文件
-                        nRet = CompressDirecotry(
+                        nRet = CompressDirectory(
                     strSourcePath,
                     strZipFileName,
                     Encoding.UTF8,
@@ -1156,7 +1157,7 @@ value);
         //      -1  出错
         //      0   没有发现需要上传的文件
         //      1   成功压缩创建了 .zip 文件
-        int CompressDirecotry(
+        int CompressDirectory(
             string strDataDir,
             string strZipFileName,
             Encoding encoding,
@@ -1176,6 +1177,11 @@ value);
 
             using (ZipFile zip = new ZipFile(encoding))
             {
+                // http://stackoverflow.com/questions/15337186/dotnetzip-badreadexception-on-extract
+                // https://dotnetzip.codeplex.com/workitem/14087
+                // uncommenting the following line can be used as a work-around
+                zip.ParallelDeflateThreshold = -1;
+
                 foreach (string filename in filenames)
                 {
                     string strShortFileName = filename.Substring(strDataDir.Length + 1);
