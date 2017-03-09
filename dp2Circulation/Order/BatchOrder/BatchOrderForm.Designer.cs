@@ -35,6 +35,9 @@
             this.ToolStripMenuItem_newOrderTemplate = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton_select = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_selectAllBiblio = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_selectAllBiblio_hasOrders = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_selectAllBiblio_noOrder = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_selectAllOrder = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton_change = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_quickChange = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,6 +49,7 @@
             this.toolStripButton_orderList = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_rate = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_test = new System.Windows.Forms.ToolStripButton();
+            this.toolStripMenuItem_removeSelectedBiblio = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -104,6 +108,10 @@
             this.toolStripDropDownButton_select.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripDropDownButton_select.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_selectAllBiblio,
+            this.toolStripMenuItem_selectAllBiblio_hasOrders,
+            this.toolStripMenuItem_selectAllBiblio_noOrder,
+            this.toolStripMenuItem_removeSelectedBiblio,
+            this.toolStripSeparator2,
             this.ToolStripMenuItem_selectAllOrder});
             this.toolStripDropDownButton_select.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_select.Image")));
             this.toolStripDropDownButton_select.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -114,14 +122,33 @@
             // ToolStripMenuItem_selectAllBiblio
             // 
             this.ToolStripMenuItem_selectAllBiblio.Name = "ToolStripMenuItem_selectAllBiblio";
-            this.ToolStripMenuItem_selectAllBiblio.Size = new System.Drawing.Size(124, 22);
+            this.ToolStripMenuItem_selectAllBiblio.Size = new System.Drawing.Size(196, 22);
             this.ToolStripMenuItem_selectAllBiblio.Text = "所有书目";
             this.ToolStripMenuItem_selectAllBiblio.Click += new System.EventHandler(this.ToolStripMenuItem_selectAllBiblio_Click);
+            // 
+            // toolStripMenuItem_selectAllBiblio_hasOrders
+            // 
+            this.toolStripMenuItem_selectAllBiblio_hasOrders.Name = "toolStripMenuItem_selectAllBiblio_hasOrders";
+            this.toolStripMenuItem_selectAllBiblio_hasOrders.Size = new System.Drawing.Size(196, 22);
+            this.toolStripMenuItem_selectAllBiblio_hasOrders.Text = "所有包含订购的书目";
+            this.toolStripMenuItem_selectAllBiblio_hasOrders.Click += new System.EventHandler(this.toolStripMenuItem_selectAllBiblio_hasOrders_Click);
+            // 
+            // toolStripMenuItem_selectAllBiblio_noOrder
+            // 
+            this.toolStripMenuItem_selectAllBiblio_noOrder.Name = "toolStripMenuItem_selectAllBiblio_noOrder";
+            this.toolStripMenuItem_selectAllBiblio_noOrder.Size = new System.Drawing.Size(196, 22);
+            this.toolStripMenuItem_selectAllBiblio_noOrder.Text = "所有不包含订购的书目";
+            this.toolStripMenuItem_selectAllBiblio_noOrder.Click += new System.EventHandler(this.toolStripMenuItem_selectAllBiblio_noOrder_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(193, 6);
             // 
             // ToolStripMenuItem_selectAllOrder
             // 
             this.ToolStripMenuItem_selectAllOrder.Name = "ToolStripMenuItem_selectAllOrder";
-            this.ToolStripMenuItem_selectAllOrder.Size = new System.Drawing.Size(124, 22);
+            this.ToolStripMenuItem_selectAllOrder.Size = new System.Drawing.Size(196, 22);
             this.ToolStripMenuItem_selectAllOrder.Text = "所有订购";
             this.ToolStripMenuItem_selectAllOrder.Click += new System.EventHandler(this.ToolStripMenuItem_selectAllOrder_Click);
             // 
@@ -224,6 +251,14 @@
             this.toolStripButton_test.Visible = false;
             this.toolStripButton_test.Click += new System.EventHandler(this.toolStripButton_test_Click);
             // 
+            // toolStripMenuItem_removeSelectedBiblio
+            // 
+            this.toolStripMenuItem_removeSelectedBiblio.Enabled = false;
+            this.toolStripMenuItem_removeSelectedBiblio.Name = "toolStripMenuItem_removeSelectedBiblio";
+            this.toolStripMenuItem_removeSelectedBiblio.Size = new System.Drawing.Size(196, 22);
+            this.toolStripMenuItem_removeSelectedBiblio.Text = "移除所选的书目";
+            this.toolStripMenuItem_removeSelectedBiblio.Click += new System.EventHandler(this.toolStripMenuItem_removeSelectedBiblio_Click);
+            // 
             // BatchOrderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -264,5 +299,9 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_orderList;
         private System.Windows.Forms.ToolStripButton toolStripButton_rate;
         private System.Windows.Forms.ToolStripButton toolStripButton_test;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_selectAllBiblio_hasOrders;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_selectAllBiblio_noOrder;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_removeSelectedBiblio;
     }
 }

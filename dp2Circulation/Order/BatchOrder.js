@@ -265,6 +265,67 @@ function selectAllBiblio(clearBefore) {
         window.external.onSelectionChanged();
 }
 
+function selectAllBiblioHasOrder(clearBefore) {
+    var changed = false;
+    $(".check:enabled").each(function (index) {
+        var tr = $(this);
+
+        if (tr.hasClass('order')) {
+            if (clearBefore) {
+                if (clearSelIf(tr) == true)
+                    changed = true;
+            }
+        }
+        else {
+            var biblio_recpath = tr.attr('biblio-recpath');
+            var order_count = window.external.getOrderCount(biblio_recpath);
+            if (order_count > 0) {
+                if (setSelIf(tr) == true)
+                    changed = true;
+            }
+            else {
+                if (clearBefore) {
+                    if (clearSelIf(tr) == true)
+                        changed = true;
+                }
+            }
+        }
+    });
+    if (changed == true)
+        window.external.onSelectionChanged();
+}
+
+function selectAllBiblioNoOrder(clearBefore) {
+    var changed = false;
+    $(".check:enabled").each(function (index) {
+        var tr = $(this);
+
+        if (tr.hasClass('order')) {
+            if (clearBefore) {
+                if (clearSelIf(tr) == true)
+                    changed = true;
+            }
+        }
+        else {
+            var biblio_recpath = tr.attr('biblio-recpath');
+            var order_count = window.external.getOrderCount(biblio_recpath);
+            if (order_count == 0) {
+                if (setSelIf(tr) == true)
+                    changed = true;
+            }
+            else {
+                if (clearBefore) {
+                    if (clearSelIf(tr) == true)
+                        changed = true;
+                }
+            }
+        }
+    });
+    if (changed == true)
+        window.external.onSelectionChanged();
+}
+
+
 function selectAllOrder(clearBefore) {
     var changed = false;
     $(".check:enabled").each(function (index) {
@@ -395,7 +456,6 @@ function selectOrders(refid_list, scroll) {
         window.external.onSelectionChanged();
 }
 
-
 function getSelection() {
     var result = "";
     $(".order.sel").each(function (index) {
@@ -422,4 +482,69 @@ function clearAllErrorInfo() {
         // tr.html('...');
         tr.detach();
     });
+}
+
+function removeSelectedBiblio() {
+    var biblios = new Array();
+    var count = 0;
+    var order_changed_count = 0;
+    $(".sel").each(function (index) {
+        var tr = $(this);
+        if (!tr.hasClass('order')) {
+            biblios[count++] = tr;
+
+            var biblio_recpath = tr.attr('biblio-recpath');
+            order_changed_count += window.external.getOrderChangedCount(biblio_recpath);
+        }
+    });
+
+    if (count == 0)
+        return;
+
+    if (order_changed_count > 0) {
+        if (confirm('确实要移除删除选定的 ' + count + ' 个书目记录? 注意这些书目记录下面有 ' + order_changed_count + ' 个订购记录在内存中修改过尚未保存，移除书目记录将丢失这些修改。') == false)
+            return;
+    }
+    else {
+        if (confirm('确实要移除删除选定的 ' + count + ' 个书目记录?') == false)
+            return;
+    }
+
+    var deleted = false;
+    if (biblios.length > 0) {
+        for (var i = biblios.length - 1 ; i >= 0; i--) {
+            var tr = biblios[i];
+            var biblio_recpath = tr.attr('biblio-recpath');
+            window.external.removeBiblio(biblio_recpath);
+            // 一直移除所有订购信息到末尾
+            //alert("before " + i);
+            removeBiblio(tr);
+            deleted = true;
+        }
+    }
+    if (deleted) {
+        //alert("before selectionChanged");
+        window.external.onSelectionChanged();
+    }
+}
+
+function removeBiblio(tr) {
+    var trs = new Array();
+    var i = 0;
+    trs[i++] = tr;
+    tr = tr.next();
+    while (tr.length != 0) {
+        if (tr == null || tr.length == 0)
+            break;
+        if (tr.hasClass('biblio'))
+            break;
+        trs[i++] = tr;
+        tr = tr.next();
+    }
+
+    if (trs.length > 0) {
+        for (var j = trs.length - 1 ; j >= 0; j--) {
+            trs[j].detach();
+        }
+    }
 }

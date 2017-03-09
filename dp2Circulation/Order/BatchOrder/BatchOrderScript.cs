@@ -116,5 +116,22 @@ namespace dp2Circulation
             return this.BatchOrderForm.EditRange(strBiblioRecPath, strOrderRefID);
         }
 
+        // 获知一个书目记录下的订购记录数量
+        public int getOrderCount(string strBiblioRecPath)
+        {
+            return this.BatchOrderForm.GetOrderCount(strBiblioRecPath);
+        }
+
+        // 获知一个书目记录下，在内存中发生过修改的订购记录数量
+        public int getOrderChangedCount(string strBiblioRecPath)
+        {
+            return this.BatchOrderForm.GetOrderChangedCount(strBiblioRecPath);
+        }
+
+        // 移除一条书目记录。只是从内存移走，并不删除数据库中已经存在的书目记录和下属订购记录
+        public void removeBiblio(string strBiblioRecPath)
+        {
+            this.BatchOrderForm.RemoveBiblio(strBiblioRecPath);
+        }
     }
 }

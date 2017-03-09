@@ -34,9 +34,12 @@ namespace dp2Circulation
     {
         BatchOrderScript _script = new BatchOrderScript();
 
+#if NO
         List<BiblioStore> _lines = new List<BiblioStore>();
 
         Hashtable _recPathTable = new Hashtable();  // biblio_recpath --> BiblioStore
+#endif
+        BiblioStoreCollection _lines = new BiblioStoreCollection();
 
         Values _values = null;
 
@@ -86,8 +89,11 @@ namespace dp2Circulation
         {
             strError = "";
 
+            // 2017/3/9 去除可能的重复
+            StringUtil.RemoveDupNoSort(ref recpaths);
+
             this._lines.Clear();
-            this._recPathTable.Clear();
+
             this._listCollection.Clear();
 
             this._values = new Values();
@@ -144,7 +150,7 @@ namespace dp2Circulation
                     line.RecPath = item.RecPath;
                     line.Xml = item.Content;
                     this._lines.Add(line);
-                    this._recPathTable[line.RecPath] = line;
+                    // this._recPathTable[line.RecPath] = line;
 
                     // 装入订购记录
                     SubItemLoader sub_loader = new SubItemLoader();
@@ -277,11 +283,17 @@ namespace dp2Circulation
             {
                 this.toolStripButton_loadBiblio.Text = "装入种册窗 [" + Math.Min(biblio_count, 10) + "]";
                 this.toolStripButton_loadBiblio.Enabled = true;
+
+                this.toolStripMenuItem_removeSelectedBiblio.Text = "移除所选书目 [" + biblio_count + "]";
+                this.toolStripMenuItem_removeSelectedBiblio.Enabled = true;
             }
             else
             {
                 this.toolStripButton_loadBiblio.Text = "装入种册窗";
                 this.toolStripButton_loadBiblio.Enabled = false;
+
+                this.toolStripMenuItem_removeSelectedBiblio.Text = "移除所选书目";
+                this.toolStripMenuItem_removeSelectedBiblio.Enabled = false;
             }
 
             // 让当前活动的 Sheet 跟随进行相关选择
@@ -299,7 +311,7 @@ namespace dp2Circulation
     string strFieldName,
     string strValue)
         {
-            BiblioStore biblio = this._recPathTable[strBiblioRecPath] as BiblioStore;
+            BiblioStore biblio = this._lines.GetByRecPath(strBiblioRecPath);
             if (biblio == null)
                 throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
             OrderStore order = biblio.FindOrderByRefID(strOrderRefID);
@@ -425,7 +437,7 @@ namespace dp2Circulation
         //      返回 HTML tr 元素片段
         public string NewOrder(string strBiblioRecPath, string strXml)
         {
-            BiblioStore biblio = this._recPathTable[strBiblioRecPath] as BiblioStore;
+            BiblioStore biblio = this._lines.GetByRecPath(strBiblioRecPath);
             if (biblio == null)
                 throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
             OrderStore order = new OrderStore();
@@ -447,7 +459,7 @@ namespace dp2Circulation
 
         public void DeleteOrder(string strBiblioRecPath, string strOrderRefID)
         {
-            BiblioStore biblio = this._recPathTable[strBiblioRecPath] as BiblioStore;
+            BiblioStore biblio = this._lines.GetByRecPath(strBiblioRecPath);
             if (biblio == null)
                 throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
             OrderStore order = biblio.FindOrderByRefID(strOrderRefID);
@@ -462,7 +474,7 @@ namespace dp2Circulation
 
         public string ChangeOrder(string strBiblioRecPath, string strOrderRefID, string xml)
         {
-            BiblioStore biblio = this._recPathTable[strBiblioRecPath] as BiblioStore;
+            BiblioStore biblio = this._lines.GetByRecPath(strBiblioRecPath);
             if (biblio == null)
                 throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
             OrderStore order = biblio.FindOrderByRefID(strOrderRefID);
@@ -496,12 +508,61 @@ namespace dp2Circulation
             EntityForm form = EntityForm.OpenNewEntityForm(strBiblioRecPath);
         }
 
+        public int GetOrderCount(string strBiblioRecPath)
+        {
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
+            BiblioStore biblio = this._lines.GetByRecPath(strBiblioRecPath);
+            if (biblio == null)
+                throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
+
+            if (biblio.Orders == null)
+                return 0;
+            return biblio.Orders.Count;
+        }
+
+        public int GetOrderChangedCount(string strBiblioRecPath)
+        {
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
+            BiblioStore biblio = this._lines.GetByRecPath(strBiblioRecPath);
+            if (biblio == null)
+                throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
+
+            if (biblio.Orders == null)
+                return 0;
+
+            int count = 0;
+            foreach(OrderStore order in biblio.Orders)
+            {
+                if (order.Type == "new" || order.Type == "deleted")
+                    count++;
+                else if (order.Changed == true)
+                    count++;
+            }
+            return count;
+        }
+
+        public void RemoveBiblio(string strBiblioRecPath)
+        {
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
+            // BiblioStore biblio = this._recPathTable[strBiblioRecPath] as BiblioStore;
+            BiblioStore biblio = this._lines.GetByRecPath(strBiblioRecPath);
+            if (biblio == null)
+                throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
+
+            this._lines.Remove(biblio);
+
+            // 不负责从视觉上删除 Web 页面中的 TR 哟
+        }
+
         public string EditDistribute(string strBiblioRecPath,
             string strOrderRefID)
         {
             bool bControl = Control.ModifierKeys == Keys.Control;
 
-            BiblioStore biblio = this._recPathTable[strBiblioRecPath] as BiblioStore;
+            BiblioStore biblio = this._lines.GetByRecPath(strBiblioRecPath);
             if (biblio == null)
                 throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
             OrderStore order = biblio.FindOrderByRefID(strOrderRefID);
@@ -550,7 +611,7 @@ namespace dp2Circulation
         public string VerifyDistribute(string strBiblioRecPath,
     string strOrderRefID)
         {
-            BiblioStore biblio = this._recPathTable[strBiblioRecPath] as BiblioStore;
+            BiblioStore biblio = this._lines.GetByRecPath(strBiblioRecPath);
             if (biblio == null)
                 throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
             OrderStore order = biblio.FindOrderByRefID(strOrderRefID);
@@ -584,7 +645,7 @@ namespace dp2Circulation
         {
             bool bControl = Control.ModifierKeys == Keys.Control;
 
-            BiblioStore biblio = this._recPathTable[strBiblioRecPath] as BiblioStore;
+            BiblioStore biblio = this._lines.GetByRecPath(strBiblioRecPath);
             if (biblio == null)
                 throw new Exception("路径为 '" + strBiblioRecPath + " 的 BiblioStore 在内存中没有找到");
             OrderStore order = biblio.FindOrderByRefID(strOrderRefID);
@@ -1935,6 +1996,30 @@ int nCount)
             if (nErrorCount > 0)
                 return false;
             return true;
+        }
+
+        // 选择所有包含订购的书目
+        private void toolStripMenuItem_selectAllBiblio_hasOrders_Click(object sender, EventArgs e)
+        {
+            webBrowser1.Document.InvokeScript("selectAllBiblioHasOrder",
+    new object[] { Control.ModifierKeys == Keys.Control ? false : true }
+    );
+
+        }
+
+        // 选择所有不包含订购的书目
+        private void toolStripMenuItem_selectAllBiblio_noOrder_Click(object sender, EventArgs e)
+        {
+            webBrowser1.Document.InvokeScript("selectAllBiblioNoOrder",
+    new object[] { Control.ModifierKeys == Keys.Control ? false : true }
+    );
+
+        }
+
+        private void toolStripMenuItem_removeSelectedBiblio_Click(object sender, EventArgs e)
+        {
+            webBrowser1.Document.InvokeScript("removeSelectedBiblio");
+            this.BeginRefreshOrderSheets();
         }
     }
 

@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>179</ApplicationRevision>
+    <ApplicationRevision>181</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -561,6 +561,7 @@
     <Compile Include="Order\BatchOrder\BatchOrderForm.Designer.cs">
       <DependentUpon>BatchOrderForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Order\BatchOrder\BiblioStoreCollection.cs" />
     <Compile Include="Order\BatchOrder\ErrorInfoCollection.cs" />
     <Compile Include="Order\BatchOrder\ExchangeRateDialog.cs">
       <SubType>Form</SubType>

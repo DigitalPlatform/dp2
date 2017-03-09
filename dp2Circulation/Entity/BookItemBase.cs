@@ -719,17 +719,19 @@ namespace dp2Circulation
             foreach (BookItemBase item in this)
             {
                 // 2017/3/2 启用对参考 ID 的检查
+                // .Normal 状态的暂时不检查了，避免给用户造成困扰
                 if (String.IsNullOrEmpty(item.RefID) == true
-                    && item.ItemDisplayState != ItemDisplayState.Deleted)
+                    && (item.ItemDisplayState == ItemDisplayState.New || item.ItemDisplayState == ItemDisplayState.Changed))    // 2017/3/9
                 {
-                    strError = "事项 " + (i + 1) + " 中出现了空的RefID";
+                    strError = "事项 " + (i + 1) + " 中出现了空的 RefID";
                     return -1;
                     // continue;
                 }
 
                 if (item.ItemDisplayState != ItemDisplayState.Deleted)  // 删除的可以例外
                 {
-                    if (table.Contains(item.RefID) == true)
+                    if (string.IsNullOrEmpty(item.RefID) == false    // 2017/3/9
+                        && table.Contains(item.RefID) == true)
                     {
                         strError = "册事项中出现了重复的参考ID值 '" + item.RefID + "'";
                         return -1;
@@ -738,7 +740,8 @@ namespace dp2Circulation
                 else
                     continue;
 
-                if (table.Contains(item.RefID) == false)
+                if (string.IsNullOrEmpty(item.RefID) == false    // 2017/3/9
+                    && table.Contains(item.RefID) == false)
                     table.Add(item.RefID, null);
 
                 i++;
