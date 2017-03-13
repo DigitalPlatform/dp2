@@ -4407,7 +4407,7 @@ nsmgr);
                 goto ERROR1;
             }
 
-            if (strAction == "new" 
+            if (strAction == "new"
                 && string.IsNullOrEmpty(strBiblioRecPath) == false
                 && ResPath.IsAppendRecPath(strBiblioRecPath) == false)
             {
@@ -5128,6 +5128,27 @@ out strError);
                 }
                 else
 #endif
+                // 保存修改前的书目记录
+                if (StringUtil.IsInList("bibliotoitem", strStyle))
+                {
+
+                    // 为册记录添加书目信息
+                    // return:
+                    //      -1  失败
+                    //      0   成功
+                    //      1   需要结束运行，result 结果已经设置好了
+                    nRet = AddBiblioToSubRecords(
+                        sessioninfo,
+                        strBiblioRecPath,
+                        strExistingXml,
+                        ref domOperLog,
+                        ref result,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                        return result;
+                }
 
                 {
                     // 需要判断路径是否为具备最末一级索引号的形式？
@@ -7236,6 +7257,98 @@ out strError);
             return 0;
         }
          * */
+
+        // 为册记录添加书目信息
+        // return:
+        //      -1  失败
+        //      0   成功
+        //      1   需要结束运行，result 结果已经设置好了
+        int AddBiblioToSubRecords(
+            SessionInfo sessioninfo,
+            string strBiblioRecPath,
+            string strBiblioXml,
+            ref XmlDocument domOperLog,
+            ref LibraryServerResult result,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+            long lRet = 0;
+
+            // 要对种和实体都进行锁定
+            this.BiblioLocks.LockForWrite(strBiblioRecPath);
+            try
+            {
+                // 探测书目记录有没有下属的实体记录(也顺便看看实体记录里面是否有流通信息)?
+                List<DeleteEntityInfo> entityinfos = null;
+                string strStyle = "return_record_xml";
+                long lHitCount = 0;
+
+                RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                if (channel == null)
+                {
+                    strError = "channel == null";
+                    return -1;
+                }
+
+                // TODO: 是否必须全局用户才能使用本功能？这样避免只能修改部分册记录
+
+                // return:
+                //      -2  not exist entity dbname
+                //      -1  error
+                //      >=0 含有流通信息的实体记录个数
+                nRet = SearchChildEntities(channel,
+                    strBiblioRecPath,
+                    strStyle,
+                    (Delegate_checkRecord)null, // sessioninfo.GlobalUser == false ? CheckItemRecord : (Delegate_checkRecord)null,
+                    sessioninfo.GlobalUser == false ? sessioninfo.LibraryCodeList : null,
+                    out lHitCount,
+                    out entityinfos,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (nRet == -2)
+                {
+                    Debug.Assert(entityinfos.Count == 0, "");
+                }
+
+                // 如果有实体记录，则要求setentities权限，才能修改册记录
+                if (entityinfos != null && entityinfos.Count > 0)
+                {
+                    // 权限字符串
+                    if (StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
+                        && StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "为册记录设置书目信息的操作被拒绝。前用户不具备 setiteminfo 或 setentities 权限，不能修改它们。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        // return result;
+                        return 1;
+                    }
+                }
+
+                // 为实体记录添加 biblio 元素
+                // return:
+                //      -1  error
+                //      0   没有找到属于书目记录的任何实体记录，因此也就无从修改
+                //      >0  实际修改的实体记录数
+                nRet = AddBiblioToChildEntities(channel,
+                    entityinfos,
+                    strBiblioXml,
+                    false,
+                    domOperLog,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                return 0;
+            }
+            finally
+            {
+                this.BiblioLocks.UnlockForWrite(strBiblioRecPath);
+            }
+        }
     }
 
     /*

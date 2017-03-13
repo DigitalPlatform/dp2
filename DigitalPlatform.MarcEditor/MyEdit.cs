@@ -4,9 +4,9 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Threading;
 using System.Diagnostics;
+using System.Text;
 
 using DigitalPlatform.GUI;
-using System.Text;
 
 namespace DigitalPlatform.Marc
 {
@@ -442,8 +442,7 @@ namespace DigitalPlatform.Marc
                     return true;
             }
 
-            // 2008/11/30 changed
-            return base.ProcessDialogKey(keyData);  // return false
+            return base.ProcessDialogKey(keyData);
         }
 
         // 失去焦点时，应把内容还回去
@@ -760,6 +759,18 @@ namespace DigitalPlatform.Marc
                     result.Append(ch);
             }
 
+            // 去除 $ 前面的一个空格
+            for (int i = result.Length - 1; i >= 0; i--)
+            {
+                if (i - 1 >= 0
+                    && result[i] == Record.KERNEL_SUBFLD
+                    && result[i - 1] == ' ')
+                {
+                    result.Remove(i - 1, 1);
+                    // i--;
+                }
+            }
+
             return result.ToString();
         }
 
@@ -795,7 +806,7 @@ namespace DigitalPlatform.Marc
 
                 string strFieldsMarc = strText;
                 // strFieldsMarc = strFieldsMarc.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
-                
+
                 // 先找到有几个字段
 
                 List<string> fields = Record.GetFields(strFieldsMarc);

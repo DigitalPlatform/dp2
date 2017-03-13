@@ -64,7 +64,7 @@
             this.tabPage_run = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.button_next = new System.Windows.Forms.Button();
-            this.checkBox_convert_addBiblioToItemOnMergin = new System.Windows.Forms.CheckBox();
+            this.checkBox_convert_addBiblioToItemOnMerging = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_source.SuspendLayout();
             this.tabPage_convert.SuspendLayout();
@@ -252,7 +252,7 @@
             // tabPage_convert
             // 
             this.tabPage_convert.AutoScroll = true;
-            this.tabPage_convert.Controls.Add(this.checkBox_convert_addBiblioToItemOnMergin);
+            this.tabPage_convert.Controls.Add(this.checkBox_convert_addBiblioToItemOnMerging);
             this.tabPage_convert.Controls.Add(this.textBox_convert_itemBatchNo);
             this.tabPage_convert.Controls.Add(this.label5);
             this.tabPage_convert.Controls.Add(this.checkBox_convert_addBiblioToItem);
@@ -476,13 +476,13 @@
             // 
             // checkBox_convert_addBiblioToItemOnMergin
             // 
-            this.checkBox_convert_addBiblioToItemOnMergin.AutoSize = true;
-            this.checkBox_convert_addBiblioToItemOnMergin.Location = new System.Drawing.Point(177, 38);
-            this.checkBox_convert_addBiblioToItemOnMergin.Name = "checkBox_convert_addBiblioToItemOnMergin";
-            this.checkBox_convert_addBiblioToItemOnMergin.Size = new System.Drawing.Size(204, 16);
-            this.checkBox_convert_addBiblioToItemOnMergin.TabIndex = 16;
-            this.checkBox_convert_addBiblioToItemOnMergin.Text = "为合并的册记录添加书目信息元素";
-            this.checkBox_convert_addBiblioToItemOnMergin.UseVisualStyleBackColor = true;
+            this.checkBox_convert_addBiblioToItemOnMerging.AutoSize = true;
+            this.checkBox_convert_addBiblioToItemOnMerging.Location = new System.Drawing.Point(177, 38);
+            this.checkBox_convert_addBiblioToItemOnMerging.Name = "checkBox_convert_addBiblioToItemOnMergin";
+            this.checkBox_convert_addBiblioToItemOnMerging.Size = new System.Drawing.Size(204, 16);
+            this.checkBox_convert_addBiblioToItemOnMerging.TabIndex = 16;
+            this.checkBox_convert_addBiblioToItemOnMerging.Text = "为合并的册记录添加书目信息元素";
+            this.checkBox_convert_addBiblioToItemOnMerging.UseVisualStyleBackColor = true;
             // 
             // ImportExportForm
             // 
@@ -548,6 +548,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox textBox_target_dbNameList;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.CheckBox checkBox_convert_addBiblioToItemOnMergin;
+        private System.Windows.Forms.CheckBox checkBox_convert_addBiblioToItemOnMerging;
     }
 }

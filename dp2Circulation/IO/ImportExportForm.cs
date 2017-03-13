@@ -255,7 +255,7 @@ strStringTable);
                 }));
                 info.AddBiblioToItemOnMerging = (bool)this.Invoke(new Func<bool>(() =>
                 {
-                    return this.checkBox_convert_addBiblioToItemOnMergin.Checked;
+                    return this.checkBox_convert_addBiblioToItemOnMerging.Checked;
                 }));
                 info.OverwriteBiblio = (bool)this.Invoke(new Func<bool>(() =>
                 {
@@ -955,7 +955,7 @@ strTargetRecPath,
 info.BiblioXml,
 baTargetTimestamp,
 "",
-strStyle,
+strStyle + ",bibliotoitem",
 out strOutputPath,
 out baNewTimestamp,
 out strError);
@@ -1568,7 +1568,7 @@ new string[] { "继续", "中断" });
                 controls.Add(this.textBox_source_range);
 
                 controls.Add(this.checkBox_convert_addBiblioToItem);
-                controls.Add(this.checkBox_convert_addBiblioToItemOnMergin);
+                controls.Add(this.checkBox_convert_addBiblioToItemOnMerging);
                 controls.Add(this.textBox_convert_itemBatchNo);
 
                 controls.Add(this.comboBox_target_targetBiblioDbName);
@@ -1598,7 +1598,7 @@ new string[] { "继续", "中断" });
                 controls.Add(this.textBox_source_range);
 
                 controls.Add(this.checkBox_convert_addBiblioToItem);
-                controls.Add(this.checkBox_convert_addBiblioToItemOnMergin);
+                controls.Add(this.checkBox_convert_addBiblioToItemOnMerging);
                 controls.Add(this.textBox_convert_itemBatchNo);
 
                 controls.Add(this.comboBox_target_targetBiblioDbName);

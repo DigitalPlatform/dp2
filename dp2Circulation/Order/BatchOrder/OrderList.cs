@@ -32,7 +32,11 @@ namespace dp2Circulation
         }
 
         // 将多个 OrderListItem 事项加入应去的 OrderList
-        public void AddRange(List<OrderListItem> items)
+        // parameters:
+        //      strGroupStyle   订单聚集的方式。seller 或者 seller+batchno
+        public void AddRange(List<OrderListItem> items
+            // string strGroupStyle
+            )
         {
             foreach (OrderListItem item in items)
             {
@@ -41,6 +45,12 @@ namespace dp2Circulation
                 {
                     list = new OrderList();
                     list.Seller = item.Seller;
+#if NO
+                    if (strGroupStyle == "seller+batchno")
+                        list.Caption = item.Seller + item.BatchNo;
+                    else
+                        list.Caption = item.Seller;
+#endif
                     this._lists.Add(list);
                 }
                 list.Add(item);
@@ -70,6 +80,9 @@ namespace dp2Circulation
     public class OrderList
     {
         public string Seller { get; set; }
+
+        // 用于区分不同 OrderList 对象的标题文字。可能仅由 Seller 构成；也可能由 Seller + BatchNo 构成
+        public string Caption { get; set; }
 
         List<OrderListItem> _items = new List<OrderListItem>();
 
@@ -469,6 +482,8 @@ namespace dp2Circulation
     public class OrderListItem
     {
         public string Seller { get; set; }
+
+        // public string BatchNo { get; set; }
 
         public string CatalogNo { get; set; }
         public int Copy { get; set; }

@@ -10,65 +10,64 @@ using DigitalPlatform.Text;
 
 namespace DigitalPlatform.Marc
 {
-	/// <summary>
-	/// 定长模板对话框
-	/// </summary>
-	public class FixedTemplateDlg : System.Windows.Forms.Form
-	{
-        public const int WM_FIRST_SETFOCUS = API.WM_USER + 201;
+    /// <summary>
+    /// 定长模板对话框
+    /// </summary>
+    public class FixedTemplateDlg : System.Windows.Forms.Form
+    {
+        // public const int WM_FIRST_SETFOCUS = API.WM_USER + 201;
 
-		public DigitalPlatform.Marc.MarcFixedFieldControl TemplateControl;
+        public DigitalPlatform.Marc.MarcFixedFieldControl TemplateControl;
 
         public event GetTemplateDefEventHandler GetTemplateDef = null;  // 外部接口，获取一个特定模板的XML定义
 
-		private System.Windows.Forms.Button button_ok;
-		private System.Windows.Forms.Button button_cancel;
+        private System.Windows.Forms.Button button_ok;
+        private System.Windows.Forms.Button button_cancel;
 
-		public XmlNode m_fieldNode = null;
-		public string m_strLang = "";
-		public string m_strValue = "";
+        public XmlNode m_fieldNode = null;
+        public string m_strLang = "";
+        public string m_strValue = "";
 
-
-		public WaitDlg m_waitDlg = null;
-		private System.Windows.Forms.Label label_message;
+        public WaitDlg m_waitDlg = null;
+        private System.Windows.Forms.Label label_message;
         private System.Windows.Forms.ToolTip toolTip1;
 
-		private System.ComponentModel.IContainer components;
+        private System.ComponentModel.IContainer components;
 
-		public FixedTemplateDlg()
-		{
-			//
-			// Windows 窗体设计器支持所必需的
-			//
-			InitializeComponent();
+        public FixedTemplateDlg()
+        {
+            //
+            // Windows 窗体设计器支持所必需的
+            //
+            InitializeComponent();
 
-			//
-			// TODO: 在 InitializeComponent 调用后添加任何构造函数代码
-			//
-		}
+            //
+            // TODO: 在 InitializeComponent 调用后添加任何构造函数代码
+            //
+        }
 
-		/// <summary>
-		/// 清理所有正在使用的资源。
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if(components != null)
-				{
-					components.Dispose();
-				}
-			}
-			base.Dispose( disposing );
-		}
+        /// <summary>
+        /// 清理所有正在使用的资源。
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows 窗体设计器生成的代码
-		/// <summary>
-		/// 设计器支持所需的方法 - 不要使用代码编辑器修改
-		/// 此方法的内容。
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows 窗体设计器生成的代码
+        /// <summary>
+        /// 设计器支持所需的方法 - 不要使用代码编辑器修改
+        /// 此方法的内容。
+        /// </summary>
+        private void InitializeComponent()
+        {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FixedTemplateDlg));
             this.button_ok = new System.Windows.Forms.Button();
@@ -150,8 +149,8 @@ namespace DigitalPlatform.Marc
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
         public Font GetDefaultFont()
         {
@@ -170,44 +169,44 @@ namespace DigitalPlatform.Marc
             return new Font(family, height, GraphicsUnit.Point);
         }
 
-		private void SetInfo(XmlNode fieldNode,
-			string strLang,
-			string strValue)
-		{
-			this.m_fieldNode = fieldNode;
-			this.m_strLang = strLang;
-			this.m_strValue = strValue;
-		}
+        private void SetInfo(XmlNode fieldNode,
+            string strLang,
+            string strValue)
+        {
+            this.m_fieldNode = fieldNode;
+            this.m_strLang = strLang;
+            this.m_strValue = strValue;
+        }
 
-		// return:
-		//		-1	出错
-		//		0	不是定长字段或子字段
-		//		1	成功
-		public int Initial(XmlNode fieldNode,
-			string strLang,
-			string strValue,
-			out string strError)
-		{
-			strError = "";
+        // return:
+        //		-1	出错
+        //		0	不是定长字段或子字段
+        //		1	成功
+        public int Initial(XmlNode fieldNode,
+            string strLang,
+            string strValue,
+            out string strError)
+        {
+            strError = "";
 
             int nResultWidth = 0;
             int nResultHeight = 0;
-			int nRet = this.TemplateControl.Initial(fieldNode,
-				strLang,
+            int nRet = this.TemplateControl.Initial(fieldNode,
+                strLang,
                 out nResultWidth,
                 out nResultHeight,
-				out strError);
-			if (nRet == 0)
-				return 0;
+                out strError);
+            if (nRet == 0)
+                return 0;
 
-			if (nRet == -1)
-				return -1;
+            if (nRet == -1)
+                return -1;
 
-			if (strValue == null)
-				strValue = "";
+            if (strValue == null)
+                strValue = "";
 
-			if (strValue != "")
-				this.TemplateControl.Value = strValue;
+            if (strValue != "")
+                this.TemplateControl.Value = strValue;
 
             /*
             int nHeightDelta = this.Height - this.TemplateControl.Height;
@@ -216,40 +215,40 @@ namespace DigitalPlatform.Marc
                 nResultHeight + nHeightDelta);    // 
              * */
 
-			return 1;
-		}
+            return 1;
+        }
 
-		private void button_cancel_Click(object sender, System.EventArgs e)
-		{
-			this.DialogResult = DialogResult.Cancel;
-			this.Close();
-		}
+        private void button_cancel_Click(object sender, System.EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
 
-		private void button_ok_Click(object sender, System.EventArgs e)
-		{
-			this.DialogResult = DialogResult.OK;
-			this.Close();
-		}
+        private void button_ok_Click(object sender, System.EventArgs e)
+        {
+            this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
 
-		private void label_message_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
-		{
-			this.toolTip1.SetToolTip(this.label_message,
-				this.label_message.Text);
-		}
+        private void label_message_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            this.toolTip1.SetToolTip(this.label_message,
+                this.label_message.Text);
+        }
 
-		private void marcFixedFieldControl1_BeginGetValueList(object sender, DigitalPlatform.Marc.BeginGetValueListEventArgs e)
-		{
-			this.label_message.Text = e.Ref;//StringUtil.GetShortString(e.Ref,18);//e.Ref;//"正在获取列表'" + e.Ref + "'";
-			this.Update();
-		}
+        private void marcFixedFieldControl1_BeginGetValueList(object sender, DigitalPlatform.Marc.BeginGetValueListEventArgs e)
+        {
+            this.label_message.Text = e.Ref;//StringUtil.GetShortString(e.Ref,18);//e.Ref;//"正在获取列表'" + e.Ref + "'";
+            this.Update();
+        }
 
-		private void marcFixedFieldControl1_EndGetValueList(object sender, DigitalPlatform.Marc.EndGetValueListEventArgs e)
-		{
-			string strMessage = e.Ref;
-			if (strMessage != "")
-				strMessage = "出错：" + strMessage;
-			this.label_message.Text = strMessage;//StringUtil.GetShortString(strMessage,18);
-		}
+        private void marcFixedFieldControl1_EndGetValueList(object sender, DigitalPlatform.Marc.EndGetValueListEventArgs e)
+        {
+            string strMessage = e.Ref;
+            if (strMessage != "")
+                strMessage = "出错：" + strMessage;
+            this.label_message.Text = strMessage;//StringUtil.GetShortString(strMessage,18);
+        }
 
         private void MarcFixedFieldControlDlg_Load(object sender, EventArgs e)
         {
@@ -287,9 +286,15 @@ namespace DigitalPlatform.Marc
             TemplateControl.Size = new Size(nResultWidth,
                 nResultHeight);
              * */
-            API.PostMessage(this.Handle, WM_FIRST_SETFOCUS, 0, 0);
+            // API.PostMessage(this.Handle, WM_FIRST_SETFOCUS, 0, 0);
+
+            this.BeginInvoke(new Action(() =>
+{
+    TemplateControl.FocusFirstLine();
+}));
         }
 
+#if NO
         /// <summary>
         /// 缺省窗口过程
         /// </summary>
@@ -304,6 +309,7 @@ namespace DigitalPlatform.Marc
             }
             base.DefWndProc(ref m);
         }
+#endif
 
         protected override void OnFontChanged(
     EventArgs e)
@@ -355,6 +361,5 @@ namespace DigitalPlatform.Marc
         {
             this.Text = "定长模板: " + e.Title;
         }
-		
-	}
+    }
 }

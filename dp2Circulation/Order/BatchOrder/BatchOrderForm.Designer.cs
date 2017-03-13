@@ -37,6 +37,7 @@
             this.ToolStripMenuItem_selectAllBiblio = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_selectAllBiblio_hasOrders = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_selectAllBiblio_noOrder = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem_removeSelectedBiblio = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.ToolStripMenuItem_selectAllOrder = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton_change = new System.Windows.Forms.ToolStripDropDownButton();
@@ -49,7 +50,6 @@
             this.toolStripButton_orderList = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_rate = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_test = new System.Windows.Forms.ToolStripButton();
-            this.toolStripMenuItem_removeSelectedBiblio = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -139,6 +139,14 @@
             this.toolStripMenuItem_selectAllBiblio_noOrder.Size = new System.Drawing.Size(196, 22);
             this.toolStripMenuItem_selectAllBiblio_noOrder.Text = "所有不包含订购的书目";
             this.toolStripMenuItem_selectAllBiblio_noOrder.Click += new System.EventHandler(this.toolStripMenuItem_selectAllBiblio_noOrder_Click);
+            // 
+            // toolStripMenuItem_removeSelectedBiblio
+            // 
+            this.toolStripMenuItem_removeSelectedBiblio.Enabled = false;
+            this.toolStripMenuItem_removeSelectedBiblio.Name = "toolStripMenuItem_removeSelectedBiblio";
+            this.toolStripMenuItem_removeSelectedBiblio.Size = new System.Drawing.Size(196, 22);
+            this.toolStripMenuItem_removeSelectedBiblio.Text = "移除所选的书目";
+            this.toolStripMenuItem_removeSelectedBiblio.Click += new System.EventHandler(this.toolStripMenuItem_removeSelectedBiblio_Click);
             // 
             // toolStripSeparator2
             // 
@@ -251,14 +259,6 @@
             this.toolStripButton_test.Visible = false;
             this.toolStripButton_test.Click += new System.EventHandler(this.toolStripButton_test_Click);
             // 
-            // toolStripMenuItem_removeSelectedBiblio
-            // 
-            this.toolStripMenuItem_removeSelectedBiblio.Enabled = false;
-            this.toolStripMenuItem_removeSelectedBiblio.Name = "toolStripMenuItem_removeSelectedBiblio";
-            this.toolStripMenuItem_removeSelectedBiblio.Size = new System.Drawing.Size(196, 22);
-            this.toolStripMenuItem_removeSelectedBiblio.Text = "移除所选的书目";
-            this.toolStripMenuItem_removeSelectedBiblio.Click += new System.EventHandler(this.toolStripMenuItem_removeSelectedBiblio_Click);
-            // 
             // BatchOrderForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -270,6 +270,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "批订购";
+            this.Activated += new System.EventHandler(this.BatchOrderForm_Activated);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.BatchOrderForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.BatchOrderForm_FormClosed);
             this.Load += new System.EventHandler(this.BatchOrderForm_Load);

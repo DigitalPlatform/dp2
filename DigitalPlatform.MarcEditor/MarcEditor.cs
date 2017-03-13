@@ -4122,7 +4122,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         {
             Debug.Assert(this.SelectedFieldIndices.Count >= 1, "在粘贴覆盖时，SelectedFieldIndices必须>=1。");
 
-
             // 先删除选定的所有字段
             int[] fieldIndices = new int[this.SelectedFieldIndices.Count];
             for (int i = 0; i < fieldIndices.Length; i++)

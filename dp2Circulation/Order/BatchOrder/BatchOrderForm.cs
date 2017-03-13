@@ -448,6 +448,9 @@ namespace dp2Circulation
                 order.Xml = MacroOrderXml(strXml, strBiblioRecPath);
             biblio.Orders.Add(order);
 
+            // 2017/3/9 强行重新生成 refid，保证这个值的随机性
+            order.RefID = Guid.NewGuid().ToString();
+
             this.Changed = true;
 
             string result = BuildOrderHtml(strBiblioRecPath, order, biblio.Orders.Count - 1, "new");
@@ -533,7 +536,7 @@ namespace dp2Circulation
                 return 0;
 
             int count = 0;
-            foreach(OrderStore order in biblio.Orders)
+            foreach (OrderStore order in biblio.Orders)
             {
                 if (order.Type == "new" || order.Type == "deleted")
                     count++;
@@ -1169,7 +1172,6 @@ namespace dp2Circulation
             this.EnableControls(false);
             try
             {
-
                 foreach (BiblioStore biblio in this._lines)
                 {
                     Application.DoEvents();	// 出让界面控制权
@@ -1245,6 +1247,14 @@ namespace dp2Circulation
                     continue;
 
                 EntityInfo info = new EntityInfo();
+
+#if NO
+                if (string.IsNullOrEmpty(order.RefID))
+                {
+                    strError = "发现有 OrderStore 对象的 RefID 为空";
+                    return -1;
+                }
+#endif
 
                 if (String.IsNullOrEmpty(order.RefID) == true)
                 {
@@ -1803,11 +1813,11 @@ int nCount)
             {
                 dom.Load(strCfgFileName);
             }
-            catch(FileNotFoundException)
+            catch (FileNotFoundException)
             {
                 return null;
             }
-            catch(DirectoryNotFoundException)
+            catch (DirectoryNotFoundException)
             {
                 return null;
             }
@@ -2021,6 +2031,20 @@ int nCount)
             webBrowser1.Document.InvokeScript("removeSelectedBiblio");
             this.BeginRefreshOrderSheets();
         }
+
+        private void BatchOrderForm_Activated(object sender, EventArgs e)
+        {
+            if (this.FloatingOrderListForm == false)
+            {
+                if (this._listForm != null)
+                    OpenListForm(false);
+            }
+            else
+            {
+                if (this._listForm != null && this._listForm.Visible)
+                    this._listForm.Activate();
+            }
+        }
     }
 
     /// <summary>
@@ -2072,7 +2096,7 @@ int nCount)
             return results;
         }
 
-        // 校验所有下属订购记录的格式合法性
+        // 校验发生过修改的下属订购记录的格式合法性
         // return:
         //      true    合法
         //      false   有不合法的事项
@@ -2094,6 +2118,14 @@ int nCount)
             {
                 string strState = order.GetFieldValue("state");
                 if (string.IsNullOrEmpty(strState) == false)
+                    continue;
+
+                // 不检查即将删除的事项
+                if (order.Type == "deleted")
+                    continue;
+
+                // 不检查没有修改过的普通事项
+                if (order.Changed == false && order.Type != "new")
                     continue;
 
                 List<string> errors = new List<string>();
@@ -2199,6 +2231,10 @@ int nCount)
                     if (string.IsNullOrEmpty(strState) == false)
                         continue;
 
+                    // 不检查即将删除的事项
+                    if (order.Type == "deleted")
+                        continue;
+
                     List<string> errors0 = new List<string>();
 
                     string strLocationString = order.GetFieldValue("distribute");
@@ -2241,6 +2277,10 @@ int nCount)
 
                         string strTempState = temp_order.GetFieldValue("state");
                         if (string.IsNullOrEmpty(strTempState) == false)
+                            continue;
+
+                        // 不检查即将删除的事项
+                        if (temp_order.Type == "deleted")
                             continue;
 
                         List<string> errors = new List<string>();
@@ -2316,6 +2356,10 @@ int nCount)
             get
             {
                 return GetFieldValue("refID");
+            }
+            set
+            {
+                SetFieldValue("refID", value);
             }
         }
 
