@@ -3211,7 +3211,7 @@ namespace dp2Circulation
             strPinyin = "";
 
             MarcNodeList fields = record.select("field[@name='700' or @name='701' or @name='702' or @name='710' or @name='711' or @name='712']");
-
+            fields.add(record.select("field[@name='200']")); // 必须两次分别 select。因为 200 一般在 MARC 记录中会先出现
             foreach (MarcNode field in fields)
             {
                 if ((field.Name == "700" || field.Name == "701" || field.Name == "702")
@@ -4172,8 +4172,17 @@ chi	中文	如果是中文，则为空。
             return;
         ERROR1:
             e.ErrorInfo = strError;
-            if (e.ShowErrorBox == true)
-                MessageBox.Show(this.DetailForm, strError);
+        if (e.ShowErrorBox == true)
+        {
+            // MessageBox.Show(this.DetailForm, strError);
+            bool bTemp = false;
+            // TODO: 如果保持窗口修改后的尺寸位置?
+            MessageDialog.Show(this.DetailForm,
+                "创建索取号时出错",
+                strError,
+                null,
+                ref bTemp);
+        }
         }
 
         // GCAT通道登录

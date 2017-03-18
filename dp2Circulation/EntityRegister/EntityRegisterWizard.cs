@@ -4782,8 +4782,8 @@ MessageBoxDefaultButton.Button2);
             // 样本记录
             MarcRecord record = new MarcRecord();
             record.add(new MarcField('$', "001???????"));
-            record.add(new MarcField('$', "200$a书名$f作者"));
-            record.add(new MarcField('$', "701$a作者"));
+            record.add(new MarcField('$', "200  $a书名$f作者"));
+            record.add(new MarcField('$', "701  $a作者"));
 
             string strXml = "";
             int nRet = MarcUtil.Marc2Xml(record.Text,

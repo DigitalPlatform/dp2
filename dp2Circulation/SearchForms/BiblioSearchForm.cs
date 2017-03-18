@@ -28,6 +28,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.dp2.Statis;
+using ClosedXML.Excel;
 
 namespace dp2Circulation
 {
@@ -2357,6 +2358,12 @@ out strError);
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
+                subMenuItem = new MenuItem("详情到 Excel 文件 [" + nSelectedItemCount.ToString() + "] (&E)...");
+                subMenuItem.Click += new System.EventHandler(this.menu_exportDetailExcelFile_Click);
+                if (nSelectedItemCount == 0)
+                    subMenuItem.Enabled = false;
+                menuItem.MenuItems.Add(subMenuItem);
+
                 // ---
                 subMenuItem = new MenuItem("-");
                 menuItem.MenuItems.Add(subMenuItem);
@@ -2497,6 +2504,110 @@ out strError);
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        public delegate bool Delegate_processBiblio(string strRecPath,
+    XmlDocument dom,
+    byte[] timestamp);
+
+        int ProcessBiblio(
+            Delegate_processBiblio func,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要进行批处理的事项";
+                return -1;
+            }
+
+            if (stop != null && stop.State == 0)    // 0 表示正在处理
+            {
+                strError = "目前有长操作正在进行，无法进行批处理书目记录的操作";
+                return -1;
+            }
+
+            int nCount = 0;
+
+            LibraryChannel channel = this.GetChannel();
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在进行批处理书目记录的操作 ...");
+            stop.BeginLoop();
+
+            this.EnableControls(false);
+            try
+            {
+                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+
+                List<ListViewItem> items = new List<ListViewItem>();
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    if (string.IsNullOrEmpty(item.Text) == true)
+                        continue;
+
+                    items.Add(item);
+                }
+                ListViewBiblioLoader loader = new ListViewBiblioLoader(channel, // this.Channel,
+                    stop,
+                    items,
+                    items.Count > MAX_CACHE_ITEMS ? null : this.m_biblioTable);
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null
+                        && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    XmlDocument itemdom = new XmlDocument();
+                    try
+                    {
+                        itemdom.LoadXml(info.OldXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "记录 '" + info.RecPath + "' 的 XML 装入 DOM 时出错: " + ex.Message;
+                        return -1;
+                    }
+
+                    if (func != null)
+                    {
+                        if (func(info.RecPath, itemdom, info.Timestamp) == false)
+                            break;
+                    }
+
+                    nCount++;
+                    stop.SetProgressValue(++i);
+                }
+
+                return nCount;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                this.ReturnChannel(channel);
+
+                this.EnableControls(true);
+            }
+        }
+
 
         int VerifyBiblioRecord(out string strError)
         {
@@ -2642,6 +2753,185 @@ out strError);
                 this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                     + " 结束执行书目记录校验</div>");
             }
+        }
+
+        // 2017/3/17
+        // 导出详情到 Excel 文件
+        void menu_exportDetailExcelFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要导出的事项";
+                goto ERROR1;
+            }
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要输出的 Excel 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            bool bLaunchExcel = true;
+
+            XLWorkbook doc = null;
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "ReaderSearchForm new XLWorkbook() {4A02147F-FA0C-4C9F-995E-5103B7E46669} exception: " + ExceptionUtil.GetAutoText(ex);
+                return;
+            }
+
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("表格");
+
+            // 每个列的最大字符数
+            List<int> column_max_chars = new List<int>();
+            int nBiblioIndex = 0;
+            int nRowIndex = 2;
+            try
+            {
+
+                int nRet = ProcessBiblio(
+                        (strRecPath, dom, timestamp) =>
+                        {
+                            this.ShowMessage("正在处理书目记录 " + strRecPath);
+
+                            OutputBiblioInfo(sheet,
+                                dom,
+                                strRecPath,
+                                nBiblioIndex++,
+                                "",
+                                ref nRowIndex);
+                            nRowIndex++;    // 空行
+                            return true;
+                        },
+                out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            catch (Exception ex)
+            {
+                strError = "导出详情到 Excel 出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                goto ERROR1;
+            }
+            finally
+            {
+                if (stop != null)
+                    stop.SetMessage("");
+
+                this.ClearMessage();
+
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.FileName);
+                    doc.Dispose();
+                }
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(dlg.FileName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        int GetTable(
+            string strRecPath,
+            out string strXml,
+            out string strError)
+        {
+            strError = "";
+            strXml = "";
+
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                string[] results = null;
+                byte[] baNewTimestamp = null;
+                long lRet = channel.GetBiblioInfos(
+                    stop,
+                    strRecPath,
+                    "",
+                    new string[] { "table" },   // formats
+                    out results,
+                    out baNewTimestamp,
+                    out strError);
+                if (lRet == 0)
+                    return 0;
+                if (lRet == -1)
+                    return -1;
+                if (results == null || results.Length == 0)
+                {
+                    strError = "results error";
+                    return -1;
+                }
+                strXml = results[0];
+                return 1;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
+        void OutputBiblioInfo(IXLWorksheet sheet,
+            XmlDocument dom,
+            string strRecPath,
+            int nBiblioIndex,
+            string strStyle,
+            ref int nRowIndex
+            // ref List<int> column_max_chars
+            )
+        {
+            string strError = "";
+
+            string strTableXml = "";
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            int nRet = GetTable(
+                strRecPath,
+                out strTableXml,
+                out strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+
+            ExcelUtility.OutputBiblioTable(
+            strRecPath,
+            strTableXml,
+            nBiblioIndex,
+            sheet,
+            2,  // nColIndex,
+            ref nRowIndex);
+
         }
 
 

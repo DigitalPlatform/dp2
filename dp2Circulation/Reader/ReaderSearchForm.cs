@@ -6332,6 +6332,29 @@ dlg.UiState);
             strError = "";
             int nRet = 0;
 
+            PrintReaderSheetDialog dlg = new PrintReaderSheetDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.UiState = this.MainForm.AppInfo.GetString(
+        "ReaderSearchForm",
+        "PrintReaderSheetDialog_uiState",
+        "");
+
+            this.MainForm.AppInfo.LinkFormState(dlg, "ReaderSearchForm_PrintReaderSheetDialog_state");
+            dlg.ShowDialog(this);
+
+            this.MainForm.AppInfo.SetString(
+"ReaderSearchForm",
+"PrintReaderSheetDialog_uiState",
+dlg.UiState);
+
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+            {
+                strError = "放弃操作";
+                return 0;
+            }
+
+            ReaderSheetCollection sheets = new ReaderSheetCollection();
+
             string strTempDataFileName = Path.Combine(Program.MainForm.UserTempDir, "~readersheetdata.txt");
 
             try
@@ -6353,10 +6376,17 @@ dlg.UiState);
                             string strDepartment = DomUtil.GetElementText(dom.DocumentElement, "department");
                             string strName = DomUtil.GetElementText(dom.DocumentElement, "name");
 
-                            sw.WriteLine(strName);
-                            sw.WriteLine(strDepartment);
-                            sw.WriteLine(strBarcode);
-                            sw.WriteLine("***");
+                            if (dlg.GroupByDepartment == false)
+                            {
+                                sw.WriteLine(strName);
+                                sw.WriteLine(strDepartment);
+                                sw.WriteLine(strBarcode);
+                                sw.WriteLine("***");
+                            }
+                            else
+                            {
+                                sheets.AddItem(strName, strDepartment, strBarcode);
+                            }
 
                             nReaderCount++;
                             return true;
@@ -6364,6 +6394,23 @@ dlg.UiState);
                         out strError);
                     if (nRet == -1)
                         return -1;
+
+                    if (dlg.GroupByDepartment == true)
+                    {
+                        foreach(ReaderSheetInfo info in sheets)
+                        {
+                            foreach(ReaderSheetItem item in info.Items)
+                            {
+                                sw.WriteLine(item.Name);
+                                sw.WriteLine(item.Department);
+                                sw.WriteLine(item.Barcode);
+                                sw.WriteLine("***");
+                            }
+                            sw.WriteLine("{newPage}");  // 换页命令
+                            sw.WriteLine("***");
+                        }
+                    }
+
 
                     this.ShowMessage("共处理读者记录 " + nReaderCount + " 个", "green", true);
                 }

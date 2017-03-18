@@ -395,9 +395,49 @@ namespace dp2Circulation
                     this.m_nPageNo = from;
 
                     Debug.Assert(this.m_nPageNo >= 1, "");
+
+                    int nTempPageNo = 1;
+                    while (nTempPageNo < from)
+                    {
+                        // 每一行的循环
+                        for (int i = 0; i < nYCount; i++)
+                        {
+                            // 每一列的循环
+                            for (int j = 0; j < nXCount; j++)
+                            {
+                                List<string> lines = null;
+                                nRet = this.GetLabelLines(out lines,
+                                    out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+
+                                if (nRet == 1)
+                                {
+                                    e.Cancel = true;
+                                    return;
+                                }
+
+                                if (lines.Count > 0 && lines[0] == "{newPage}")
+                                {
+                                    if (i == nYCount - 1 && j == nXCount - 1)
+                                    {
+                                        // 当前为第一个标签尚未打印，此处{newPage}命令无效
+                                        j--;
+                                        continue;
+                                    }
+                                    else
+                                        goto NEXT_PAGE_0;
+                                }
+                            }
+                        }
+                    NEXT_PAGE_0:
+                        nTempPageNo++;
+                    }
+#if NO
                     long nLabelCount = (nXCount * nYCount) * (this.m_nPageNo - 1);
 
                     // 从文件中跳过这么多label的内容行
+                    // TODO: 注意纯命令的 label 不要计算在内? 换页命令要特殊处理?
                     for (int i = 0; i < nLabelCount; i++)
                     {
                         List<string> lines = null;
@@ -412,6 +452,9 @@ namespace dp2Circulation
                             return;
                         }
                     }
+#endif
+
+
                 }
 
                 /*
@@ -623,6 +666,18 @@ namespace dp2Circulation
                     if (nRet == 1)
                         bEOF = true;
 
+                    if (lines.Count > 0 && lines[0] == "{newPage}")
+                    {
+                        if (i == 0 && j == 0)
+                        {
+                            // 当前为第一个标签尚未打印，此处{newPage}命令无效
+                            j--;
+                            continue;
+                        }
+                        else
+                            goto NEXT_PAGE;
+                    }
+
                     if (bOutput == true && bDisplay == true)
                     {
                         // 标签
@@ -713,6 +768,8 @@ namespace dp2Circulation
                 //CONTINUE_LINE:
                 y += (float)label_param.LabelHeight;
             }
+
+        NEXT_PAGE:
 
             // If more lines exist, print another page.
             if (bEOF == false)

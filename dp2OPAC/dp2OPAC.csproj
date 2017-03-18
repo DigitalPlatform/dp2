@@ -63,6 +63,10 @@
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.IO, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.IO.dll</HintPath>
       <Private>True</Private>
@@ -102,6 +106,7 @@
       <DependentUpon>ASPNETDB.MDF</DependentUpon>
     </Content>
     <Content Include="Circulation.aspx" />
+    <Content Include="gcat.aspx" />
     <Content Include="Old_App_WebReferences\dp2libraryws\gcat_ws\gcat.disco" />
     <Content Include="BatchTaskMonitor.aspx" />
     <Content Include="bin\AForge.dll" />
@@ -845,6 +850,7 @@
     <Content Include="style\blankcover.gif" />
     <Content Include="style\censor.gif" />
     <Content Include="style\disable.gif" />
+    <Content Include="style\0\gcat.css" />
     <Content Include="style\haidian\0\batchtaskmonitor.css" />
     <Content Include="style\haidian\0\biblio.css" />
     <Content Include="style\haidian\0\borrowhistory.css" />
@@ -1031,6 +1037,13 @@
     </Compile>
     <Compile Include="Filter.aspx.designer.cs">
       <DependentUpon>Filter.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="gcat.aspx.cs">
+      <DependentUpon>gcat.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="gcat.aspx.designer.cs">
+      <DependentUpon>gcat.aspx</DependentUpon>
     </Compile>
     <Compile Include="GetObject.aspx.designer.cs">
       <DependentUpon>GetObject.aspx</DependentUpon>

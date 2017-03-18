@@ -609,13 +609,15 @@ namespace dp2Circulation
             this.AddCall(call);
         }
 
+        private static readonly Object _syncRootOfTempFilenames = new Object();
+
         List<string> _tempfilenames = new List<string>();
 
         string GetTempFileName()
         {
             string strTempFilePath = Path.Combine(this.MainForm.UserTempDir, "~res_" + Guid.NewGuid().ToString());
 
-            lock (this._tempfilenames)
+            lock (_syncRootOfTempFilenames)
             {
                 _tempfilenames.Add(strTempFilePath);
             }
@@ -623,10 +625,42 @@ namespace dp2Circulation
             return strTempFilePath;
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 xxx@ffe282be-e99d-4d82-87f1-d378174c78bb 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.InvalidOperationException
+Message: 集合已修改；可能无法执行枚举操作。
+Stack:
+在 System.ThrowHelper.ThrowInvalidOperationException(ExceptionResource resource)
+在 System.Collections.Generic.List`1.Enumerator.MoveNextRare()
+在 dp2Circulation.WebExternalHost.DeleteAllTempFiles()
+在 dp2Circulation.WebExternalHost.Clear()
+在 dp2Circulation.WebExternalHost.Stop()
+在 dp2Circulation.WebExternalHost.StopPrevious()
+在 dp2Circulation.WebExternalHost.SetHtmlString(String strHtml, String strTempFileType)
+在 dp2Circulation.QuickChargingForm._setReaderHtmlString(String strHtml)
+
+
+dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.2.9200.0
+操作时间 2017/3/15 12:13:04 (Wed, 15 Mar 2017 12:13:04 +0800) 
+前端地址 xxxx 经由 http://dp2003.com/dp2library 
+         * * */
         // 2015/1/4
         void DeleteAllTempFiles()
         {
-            foreach (string filename in this._tempfilenames)
+            // 2017/3/16 减少锁定时间
+            List<string> filenames = new List<string>();
+            lock (_syncRootOfTempFilenames)
+            {
+                filenames.AddRange(this._tempfilenames);
+                this._tempfilenames.Clear();
+            }
+
+            foreach (string filename in filenames)
             {
                 try
                 {
@@ -637,10 +671,6 @@ namespace dp2Circulation
                 }
             }
 
-            lock (this._tempfilenames)
-            {
-                this._tempfilenames.Clear();
-            }
         }
 
         static void BuildQrCodeImage(

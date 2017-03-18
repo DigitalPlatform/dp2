@@ -4334,6 +4334,15 @@ nsmgr);
             if (StringUtil.IsInList("noeventlog", strStyle) == true)
             {
                 bNoEventLog = true;
+
+                // 2017/3/16
+                if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "带有风格 'noeventlog' 的修改书目信息的" + strAction + "操作被拒绝。不具备 restore 权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
             }
 
             if (StringUtil.IsInList("nooperations", strStyle) == true)
@@ -4941,28 +4950,31 @@ nsmgr);
                         strDeniedComment += " " + strError;
                 }
 
-                // return:
-                //      -1  出错
-                //      0   没有命中
-                //      >0  命中条数。此时 strError 中返回发生重复的路径列表
-                nRet = SearchBiblioDup(
-                    sessioninfo,
-                    strBiblioRecPath,
-                    strBiblio,
-                    "setbiblio", // strResultSetName,
-                    null,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (nRet > 0)
+                if (bSimulate == false)
                 {
-                    strOutputBiblioRecPath = strError;
-                    result.Value = -1;
-                    result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。";
-                    if (strAction != "checkunique")
-                        result.ErrorInfo += "本次保存操作被拒绝";
-                    result.ErrorCode = ErrorCode.BiblioDup;
-                    return result;
+                    // return:
+                    //      -1  出错
+                    //      0   没有命中
+                    //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                    nRet = SearchBiblioDup(
+                        sessioninfo,
+                        strBiblioRecPath,
+                        strBiblio,
+                        "setbiblio", // strResultSetName,
+                        null,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet > 0)
+                    {
+                        strOutputBiblioRecPath = strError;
+                        result.Value = -1;
+                        result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。";
+                        if (strAction != "checkunique")
+                            result.ErrorInfo += "本次保存操作被拒绝";
+                        result.ErrorCode = ErrorCode.BiblioDup;
+                        return result;
+                    }
                 }
 
                 if (strAction == "checkunique")
@@ -5085,26 +5097,29 @@ out strError);
                         strDeniedComment += " " + strError;
                 }
 
-                // return:
-                //      -1  出错
-                //      0   没有命中
-                //      >0  命中条数。此时 strError 中返回发生重复的路径列表
-                nRet = SearchBiblioDup(
-                    sessioninfo,
-                    strBiblioRecPath,
-                    strBiblio,
-                    "setbiblio", // strResultSetName,
-                    null,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (nRet > 0)
+                if (bSimulate == false)
                 {
-                    strOutputBiblioRecPath = strError;
-                    result.Value = -1;
-                    result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作被拒绝";
-                    result.ErrorCode = ErrorCode.BiblioDup;
-                    return result;
+                    // return:
+                    //      -1  出错
+                    //      0   没有命中
+                    //      >0  命中条数。此时 strError 中返回发生重复的路径列表
+                    nRet = SearchBiblioDup(
+                        sessioninfo,
+                        strBiblioRecPath,
+                        strBiblio,
+                        "setbiblio", // strResultSetName,
+                        null,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet > 0)
+                    {
+                        strOutputBiblioRecPath = strError;
+                        result.Value = -1;
+                        result.ErrorInfo = "经查重发现书目库中已有 " + nRet.ToString() + " 条重复记录。本次保存操作被拒绝";
+                        result.ErrorCode = ErrorCode.BiblioDup;
+                        return result;
+                    }
                 }
 
                 // 2011/11/30

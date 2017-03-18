@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>184</ApplicationRevision>
+    <ApplicationRevision>188</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -672,6 +672,12 @@
     <Compile Include="Reader\FilterPatronDialog.Designer.cs">
       <DependentUpon>FilterPatronDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Reader\PrintReaderSheetDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\PrintReaderSheetDialog.Designer.cs">
+      <DependentUpon>PrintReaderSheetDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Reader\SelectPatronDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -881,6 +887,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="SearchForms\DumpBiblioAndPartsSubItems.cs" />
+    <Compile Include="SearchForms\ExcelUtility.cs" />
     <Compile Include="SearchForms\ExportMarcHoldingDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1752,6 +1759,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\FilterPatronDialog.resx">
       <DependentUpon>FilterPatronDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\PrintReaderSheetDialog.resx">
+      <DependentUpon>PrintReaderSheetDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Reader\SelectPatronDialog.resx">
       <DependentUpon>SelectPatronDialog.cs</DependentUpon>
@@ -2644,6 +2654,7 @@
     <Content Include="commenthtml.css" />
     <Content Include="cutter.xml">
       <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Docs\Design.txt" />
     <Content Include="exchangeratetable.css" />

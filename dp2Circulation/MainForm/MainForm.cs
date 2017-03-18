@@ -2723,6 +2723,8 @@ Stack:
             }
         }
 
+        bool _virusScanned = false;
+
         internal string _currentUserName = "";
         internal string _currentUserRights = "";
         internal string _currentLibraryCodeList = "";
@@ -2747,6 +2749,20 @@ Stack:
                 }
             }
             _verified = true;
+
+            if (_virusScanned == false )
+            {
+                if (StringUtil.IsInList("clientscanvirus", channel.Rights) == true)
+                {
+                    if (Detect360() == true)
+                    {
+                        channel.Close();
+                        Program.PromptAndExit(this, "dp2Circulation 被木马软件干扰，无法启动。");
+                        return;
+                    }
+                }
+                _virusScanned = true;
+            }
 #endif
         }
 

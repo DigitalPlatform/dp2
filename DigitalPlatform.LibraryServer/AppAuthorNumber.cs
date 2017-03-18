@@ -1130,13 +1130,16 @@ namespace DigitalPlatform.LibraryServer
                 //		负数	在范围左边
                 //		0	落入范围
                 //		正数	在范围右边
-                if (strStart.Length > 1 || strTail.Length > 1)
+#if NO
+                if ((strStart.Length > 1 || strTail.Length > 1)
+                    && strStart.Length == strTail.Length && strPinyin.Length == strStart.Length)
                 {
                     nRet = LocateExactRange(strStart,
                         strTail,
                         strPinyin);
                 }
                 else
+#endif
                 {
                     nRet = LocateRange(strStart,
                         strTail,
@@ -1154,7 +1157,7 @@ namespace DigitalPlatform.LibraryServer
                         }
                         return 1;
                     }
-                    strError = "拼音 '" + strPinyin + "' 没有找到对应的范围";
+                    strError = "拼音 '" + strPinyin + "' 没有找到对应的范围\r\n\r\n" + strDebugInfo;
                     return 0;
                 }
 
@@ -1184,7 +1187,11 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
 
+#if NO
                 strLast = ((char)((int)strTail[0] + 1)).ToString();	// 为下一次准备起点
+                // strLast = strTail;   // 最后一个字母如果为 'Z'，要进位。类似十进制数字
+#endif
+                strLast = GetNextString(strTail);
 
                 if (bOutputDebugInfo == true)
                 {
@@ -1224,6 +1231,26 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
+        }
+
+        // 2017/3/14
+        // 获得下一个范围的起点
+        static string GetNextString(string strText)
+        {
+            if (string.IsNullOrEmpty(strText))
+                return "A";
+
+            for (int i = strText.Length - 1; i >= 0; i--)
+            {
+                char ch = strText[i];
+                ch = (char)((int)ch + 1);
+                strText = strText.Substring(0, i) + ch; // +strText.Substring(i + 1);
+                if ((char.IsUpper(ch) && ch <= 'Z')
+                    || (char.IsLower(ch) && ch <= 'z'))
+                    break;
+            }
+
+            return strText;
         }
 
         // 在复分表中进行查找
