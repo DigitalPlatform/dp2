@@ -630,8 +630,6 @@ amerce 交费
                 return -1;
             }
 
-
-
             // 根据日志记录中的<amerceRecord>元素创建ID-价格列表
             nRet = BuildIdPriceListFromAmerceRecordTag(domOperLog,
                 false,

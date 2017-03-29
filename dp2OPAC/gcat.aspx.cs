@@ -6,10 +6,11 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
+using Newtonsoft.Json;
+
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.OPAC.Web;
 using DigitalPlatform.LibraryClient;
-using Newtonsoft.Json;
 
 namespace WebApplication1
 {
@@ -29,6 +30,27 @@ namespace WebApplication1
 ref app,
 ref sessioninfo) == false)
                 return;
+
+            // 是否登录?
+            if (string.IsNullOrEmpty(sessioninfo.UserID))
+            {
+                if (this.Page.Request["forcelogin"] == "on")
+                {
+                    sessioninfo.LoginCallStack.Push(Request.RawUrl);
+                    Response.Redirect("login.aspx", true);
+                    return;
+                }
+                if (this.Page.Request["forcelogin"] == "userid")
+                {
+                    sessioninfo.LoginCallStack.Push(Request.RawUrl);
+                    Response.Redirect("login.aspx?loginstyle=librarian", true);
+                    return;
+                }
+
+                // 默认 public
+                sessioninfo.UserID = "public";
+                sessioninfo.IsReader = false;
+            }
 
             if (this.IsPostBack == false)
                 this.Clear();

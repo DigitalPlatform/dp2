@@ -1399,6 +1399,7 @@ Keys keyData)
             int nRet = this.MainForm.MessageHub.BeginSearchBiblio(
                 "*",
                 new SearchRequest(strSearchID,
+                    new LoginInfo("public", false),
                 "searchBiblio",
                 "<全部>",
 strQueryWord,

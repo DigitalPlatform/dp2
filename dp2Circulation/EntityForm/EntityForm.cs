@@ -41,6 +41,9 @@ namespace dp2Circulation
     /// </summary>
     public partial class EntityForm : MyForm
     {
+        // 记忆临时种次号
+        public List<dp2Circulation.CallNumberForm.MemoTailNumber> MemoNumbers { get; set; }
+
         GenerateData _genData = null;
 
         // 模板界面的内容版本号
@@ -383,6 +386,8 @@ namespace dp2Circulation
         public EntityForm()
         {
             InitializeComponent();
+
+            this.MemoNumbers = new List<CallNumberForm.MemoTailNumber>();
         }
 
         void EnableItemsPage(bool bEnable)
@@ -2480,6 +2485,8 @@ true);
 
         private void EntityForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            ReleaseProtectTailNumbers();
+
             Program.MainForm.StreamProgressChanged -= MainForm_StreamProgressChanged;
 
             if (this.m_webExternalHost_biblio != null)
@@ -2608,6 +2615,21 @@ true);
         void __Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
             this.commentControl1.SetLibraryCodeFilter(this.CurrentLibraryCodeList);
+        }
+
+        void ReleaseProtectTailNumbers()
+        {
+            if (this.MemoNumbers != null && this.MemoNumbers.Count != 0)
+            {
+                foreach (dp2Circulation.CallNumberForm.MemoTailNumber number in this.MemoNumbers)
+                {
+                    string strError = "";
+                    int nRet = UnProtectTailNumber(number,
+                        out strError);
+                    if (nRet == -1)
+                        this.ShowMessage(strError);
+                }
+            }
         }
 
         // 
@@ -4616,6 +4638,8 @@ true);
                     nRet = this.entityControl1.DoSaveItems(channel);
                     if (nRet == 1)
                     {
+                        ReleaseProtectTailNumbers();    // 册记录已经保存成功，可以释放对临时种次号的保护了
+
                         info.bEntitiesSaved = true;
                         info.SavedNames.Add("册信息");
                     }
@@ -5203,13 +5227,14 @@ true);
             int nRet = this.MainForm.MessageHub.BeginSearchBiblio(
                 "*",
                 new SearchRequest(strSearchID,
+                    new LoginInfo("public", false),
                     "searchBiblio",
                 "<全部>",
 strQueryWord,
 strFromStyle,
 strMatchStyle,
 "",
-"id",
+"id,xml",   // id
 1000,
 0,
 -1,
@@ -10363,6 +10388,8 @@ merge_dlg.UiState);
                     nRet = this.entityControl1.DoSaveItems(channel);
                     if (nRet == -1)
                         return; // 放弃进一步操作
+
+                    ReleaseProtectTailNumbers();    // 册记录已经保存成功，可以释放对临时种次号的保护了
 
                     // 转而触发新种检索操作
                     this.textBox_queryWord.Text = this.textBox_itemBarcode.Text;

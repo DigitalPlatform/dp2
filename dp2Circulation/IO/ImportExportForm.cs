@@ -39,6 +39,11 @@ namespace dp2Circulation
 
         private void ImportExportForm_Load(object sender, EventArgs e)
         {
+            if (Control.ModifierKeys == Keys.Control)
+                this.SpecialState = true;
+            else
+                this.SpecialState = false;
+
             FillBiblioDbNameList();
 
             this.UiState = Program.MainForm.AppInfo.GetString(
@@ -290,13 +295,13 @@ strStringTable);
                     return this.textBox_target_dbNameList.Text;
                 }));
                 info.AutoMergeRegistry = new MergeRegistry();
-                info.AutoMergeRegistry.DbNames = StringUtil.SplitList(strDbNameList.Replace("\r\n","\r"), '\r');
+                info.AutoMergeRegistry.DbNames = StringUtil.SplitList(strDbNameList.Replace("\r\n", "\r"), '\r');
                 // 这里验证一下书目库名的有效性
-                foreach(string dbName in info.AutoMergeRegistry.DbNames)
+                foreach (string dbName in info.AutoMergeRegistry.DbNames)
                 {
                     if (Program.MainForm.IsBiblioDbName(dbName) == false)
                     {
-                        strError = "“自动选择目标数据库顺序”参数中的名字 '"+dbName+"' 不是当前服务器合法的书目库名";
+                        strError = "“自动选择目标数据库顺序”参数中的名字 '" + dbName + "' 不是当前服务器合法的书目库名";
                         goto ERROR1;
                     }
                 }
@@ -655,12 +660,15 @@ this.MainForm.ActivateFixPage("history")
 
             // 2016/12/22
             List<string> styles = new List<string>();
-            if (info.DontChangeOperations)
-                styles.Add("nooperations");
-            if (info.DontSearchDup)
-                styles.Add("nocheckdup");
-            if (info.SuppressOperLog)
-                styles.Add("noeventlog");
+            if (this.SpecialState)
+            {
+                if (info.DontChangeOperations)
+                    styles.Add("nooperations");
+                if (info.DontSearchDup)
+                    styles.Add("nocheckdup");
+                if (info.SuppressOperLog)
+                    styles.Add("noeventlog");
+            }
             string strStyle = StringUtil.MakePathList(styles);
 
             if (info.Collect == true)
@@ -1123,12 +1131,15 @@ new string[] { "重试", "跳过", "中断" });
 
             // 2016/12/22
             List<string> styles = new List<string>();
-            if (info.DontChangeOperations)
-                styles.Add("nooperations");
-            if (info.DontSearchDup)
-                styles.Add("nocheckdup");
-            if (info.SuppressOperLog)
-                styles.Add("noeventlog");
+            if (this.SpecialState)
+            {
+                if (info.DontChangeOperations)
+                    styles.Add("nooperations");
+                if (info.DontSearchDup)
+                    styles.Add("nocheckdup");
+                if (info.SuppressOperLog)
+                    styles.Add("noeventlog");
+            }
 
             // 2017/1/4
             if (info.Simulate)
@@ -1708,5 +1719,24 @@ new string[] { "继续", "中断" });
             Task.Factory.StartNew(() => DoImport("collect"));
         }
 #endif
+        bool _specialState = false; // 是否为特殊状态？特殊状态允许使用一些有危险的 checkbox
+
+        public bool SpecialState
+        {
+            get
+            {
+                return _specialState;
+            }
+            set
+            {
+                _specialState = value;
+
+                {
+                    this.checkBox_target_suppressOperLog.Visible = value;
+                    this.checkBox_target_dontSearchDup.Visible = value;
+                    this.checkBox_target_dontChangeOperations.Visible = value;
+                }
+            }
+        }
     }
 }

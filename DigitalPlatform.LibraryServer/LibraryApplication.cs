@@ -144,7 +144,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.101 (2017/1/17) Login() API 在代理登录的时候，从上一个版本的做法(被代理账户为工作人员账户的时候，登录成功后使用代理账户权限)改为登录成功后使用被代理账户的权限、会自动过滤掉高于代理账户的危险权限
         //      2.102 (2017/1/20) locationTypes 定义是否允许 item 元素文本值为空，要看 library.xml 中 <circulation 元素 acceptBlankRoomName 属性，缺省为 false。SetEntities() API 保存册记录时根据 locationTypes 元素对册记录的馆藏地内容进行检查，如果 locationTypes 定义允许 room 部分为空，这个版本也是不会出现(保存时拒绝的) bug 了
         //      2.103 (2017/3/14) SetBiblioInfo() 的 strStyle 支持 “bibliotoitem” 在修改记录以前保存旧书目记录到现有册记录的 biblio 元素
-        public static string Version = "2.103";
+        //      2.104 (2017/3/29) 为 SetOneClassTailNumber() API 增加 memo unmemo skipmemo 三个新功能
+        public static string Version = "2.104";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

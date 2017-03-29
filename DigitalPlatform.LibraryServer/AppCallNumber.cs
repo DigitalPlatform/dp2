@@ -12,6 +12,7 @@ using DigitalPlatform.rms.Client;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -468,6 +469,55 @@ namespace DigitalPlatform.LibraryServer
 
             LibraryServerResult result = new LibraryServerResult();
 
+            if (strAction == "memo")
+            {
+                // 临时记忆用过的号码
+                SetTempNumber(strArrangeGroupName,
+            strClass,
+            strTestNumber,
+            "add");
+                goto END1;
+            }
+            else if (strAction == "unmemo")
+            {
+                // 删除记忆用过的号码
+                SetTempNumber(strArrangeGroupName,
+            strClass,
+            strTestNumber,
+            "remove");
+                goto END1;
+            }
+            else if (strAction == "skipmemo")
+            {
+                // 获得一个能避开先前记忆用过的号码
+                strOutputNumber = SkipTempNumber(strArrangeGroupName,
+            strClass,
+            strTestNumber);
+                goto END1;
+            }
+            else if (strAction == "protect")
+            {
+                _lock_tempNumberTable.EnterWriteLock();
+                try
+                {                    // 获得一个能避开先前记忆用过的号码
+                    strOutputNumber = SkipTempNumber(strArrangeGroupName,
+                strClass,
+                strTestNumber,
+                false);
+                    // 记忆这个号码
+                    SetTempNumber(strArrangeGroupName,
+    strClass,
+    strOutputNumber,
+    "add",
+    false);
+                }
+                finally
+                {
+                    _lock_tempNumberTable.ExitWriteLock();
+                }
+                goto END1;
+            }
+
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
@@ -654,7 +704,7 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
-                strError = "无法识别的strAction参数值 '" + strAction + "'";
+                strError = "无法识别的 strAction 参数值 '" + strAction + "'";
                 goto ERROR1;
             }
 
@@ -667,6 +717,126 @@ namespace DigitalPlatform.LibraryServer
             result.ErrorInfo = strError;
             return result;
         }
+
+        #region 临时存储种次号
+
+        class MemoTailNumber
+        {
+            public string ArrangeGroupName { get; set; } // 排架体系名
+            public string Class { get; set; } // 类号
+            public string Number { get; set; }  // 区分号
+        }
+
+        Hashtable _tempNumberTable = new Hashtable();
+        // private static readonly Object syncRoot_tempNumberTable = new Object();
+        internal ReaderWriterLockSlim _lock_tempNumberTable = new ReaderWriterLockSlim();
+
+        void SetTempNumber(string strArrangeGroupName,
+            string strClass,
+            string strNumber,
+            string strAction,
+            bool bLock = true)
+        {
+            if (strAction == "add")
+            {
+                MemoTailNumber item = new MemoTailNumber();
+                item.ArrangeGroupName = strArrangeGroupName;
+                item.Class = strClass;
+                item.Number = strNumber;
+
+                string strKey = item.ArrangeGroupName + "|" + item.Class + "|" + item.Number;
+
+                if (bLock)
+                    _lock_tempNumberTable.EnterWriteLock();
+                try
+                {
+                    // 保护动作，防止集合过大
+                    if (_tempNumberTable.Count > 10000)
+                        _tempNumberTable.Clear();
+
+                    _tempNumberTable[strKey] = item;
+                    return;
+                }
+                finally
+                {
+                    if (bLock)
+                        _lock_tempNumberTable.ExitWriteLock();
+                }
+            }
+
+            if (strAction == "remove")
+            {
+                string strKey = strArrangeGroupName + "|" + strClass + "|" + strNumber;
+
+                if (bLock)
+                    _lock_tempNumberTable.EnterWriteLock();
+                try
+                {
+                    if (_tempNumberTable.ContainsKey(strKey))
+                        _tempNumberTable.Remove(strKey);
+
+                    return;
+                }
+                finally
+                {
+                    if (bLock)
+                        _lock_tempNumberTable.ExitWriteLock();
+                }
+            }
+
+            throw new ArgumentException("未知的 strAction 值 '" + strAction + "'", "strAction");
+        }
+
+        bool ContainsTempNumber(string strArrangeGroupName,
+            string strClass,
+            string strNumber,
+            bool bLock = true)
+        {
+            string strKey = strArrangeGroupName + "|" + strClass + "|" + strNumber;
+
+            if (bLock)
+                _lock_tempNumberTable.EnterReadLock();
+            try
+            {
+                return _tempNumberTable.ContainsKey(strKey);
+            }
+            finally
+            {
+                if (bLock)
+                    _lock_tempNumberTable.ExitReadLock();
+            }
+        }
+
+        // 检查临时存储的号码里面是否有指定的号码。如果有，则自动增量这个号码，直到在临时存储的号码里面找不到这个号码
+        string SkipTempNumber(string strArrangeGroupName,
+    string strClass,
+    string strNumber,
+            bool bLock = true)
+        {
+            for (; ; )
+            {
+                if (ContainsTempNumber(strArrangeGroupName,
+        strClass,
+        strNumber,
+        bLock) == false)
+                    return strNumber;
+
+                {
+                    string strError = "";
+                    string strOutputNumber = "";
+                    int nRet = StringUtil.IncreaseLeadNumber(strNumber,
+    1,
+    out strOutputNumber,
+    out strError);
+                    if (nRet == -1)
+                        throw new Exception("为数字 '" + strNumber + "' 增量时发生错误: " + strError);
+                    strNumber = strOutputNumber;
+                }
+            }
+        }
+
+
+        #endregion
 
         // 检索尾号记录的路径和记录体
         // return:

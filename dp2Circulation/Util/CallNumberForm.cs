@@ -17,6 +17,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -27,7 +28,7 @@ namespace dp2Circulation
     /// </summary>
     public partial class CallNumberForm : MyForm
     {
-        // XmlDocument cfg_dom = null;
+        public List<MemoTailNumber> MemoNumbers { get; set; }
 
         /// <summary>
         /// 获得值列表
@@ -527,6 +528,10 @@ namespace dp2Circulation
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索同类书实体记录 ...");
             stop.BeginLoop();
@@ -538,7 +543,7 @@ namespace dp2Circulation
             {
                 string strQueryXml = "";
 
-                long lRet = Channel.SearchOneClassCallNumber(
+                long lRet = channel.SearchOneClassCallNumber(
                     stop,
                     GetArrangeGroupName(this.LocationString),
                     // "!" + this.BiblioDbName,
@@ -554,7 +559,6 @@ namespace dp2Circulation
                     // return 0;   // not found
                     goto END1;
                 }
-
 
                 long lHitCount = lRet;
 
@@ -592,7 +596,7 @@ namespace dp2Circulation
 
                     stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
-                    lRet = Channel.GetCallNumberSearchResult(
+                    lRet = channel.GetCallNumberSearchResult(
                         stop,
                         GetArrangeGroupName(this.LocationString),
                         // "!" + this.BiblioDbName,
@@ -682,6 +686,9 @@ namespace dp2Circulation
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
@@ -1451,13 +1458,17 @@ namespace dp2Circulation
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在获得尾号 ...");
             stop.BeginLoop();
 
             try
             {
-                long lRet = Channel.GetOneClassTailNumber(
+                long lRet = channel.GetOneClassTailNumber(
                     stop,
                     GetArrangeGroupName(this.LocationString),
                     this.ClassNumber,
@@ -1473,6 +1484,9 @@ namespace dp2Circulation
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
@@ -1563,13 +1577,17 @@ namespace dp2Circulation
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在保存尾号 ...");
             stop.BeginLoop();
 
             try
             {
-                long lRet = Channel.SetOneClassTailNumber(
+                long lRet = channel.SetOneClassTailNumber(
                     stop,
                     "save",
                     GetArrangeGroupName(this.LocationString),
@@ -1588,6 +1606,9 @@ namespace dp2Circulation
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
@@ -1616,6 +1637,64 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
+        public class MemoTailNumber
+        {
+            public string ArrangeGroupName { get; set; } // 排架体系名
+            public string Class { get; set; } // 类号
+            public string Number { get; set; }  // 区分号
+        }
+
+        int ProtectTailNumber(
+            string strTestNumber,
+            List<MemoTailNumber> numbers,
+            out string strOutputNumber,
+            out string strError)
+        {
+            strOutputNumber = "";
+            strError = "";
+
+            EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在保护尾号 ...");
+            stop.BeginLoop();
+
+            try
+            {
+                string strArrangeGroupName = GetArrangeGroupName(this.LocationString);
+                string strClass = this.ClassNumber;
+
+                int nRet = ProtectTailNumber(
+                    "protect",
+                    strArrangeGroupName,
+                    strClass,
+                    strTestNumber,
+                    out strOutputNumber,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (numbers != null)
+                {
+                    MemoTailNumber number = new MemoTailNumber();
+                    number.ArrangeGroupName = strArrangeGroupName;
+                    number.Class = strClass;
+                    number.Number = strOutputNumber;
+                    numbers.Add(number);
+                }
+
+                return nRet;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+
+                EnableControls(true);
+            }
+        }
+
         // 推动尾号。如果已经存在的尾号比strTestNumber还要大，则不推动
         /// <summary>
         /// 推动当前窗口中的尾号。
@@ -1633,13 +1712,17 @@ namespace dp2Circulation
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在推动尾号 ...");
             stop.BeginLoop();
 
             try
             {
-                long lRet = Channel.SetOneClassTailNumber(
+                long lRet = channel.SetOneClassTailNumber(
                     stop,
                     "conditionalpush",
                     GetArrangeGroupName(this.LocationString),
@@ -1658,6 +1741,9 @@ namespace dp2Circulation
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
@@ -1683,13 +1769,18 @@ namespace dp2Circulation
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
+
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在增量尾号 ...");
             stop.BeginLoop();
 
             try
             {
-                long lRet = Channel.SetOneClassTailNumber(
+                long lRet = channel.SetOneClassTailNumber(
                     stop,
                     "increase",
                     GetArrangeGroupName(this.LocationString),
@@ -1708,6 +1799,9 @@ namespace dp2Circulation
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
@@ -1967,13 +2061,13 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strMyselfNumber) == false)
                 {
                     strNumber = strMyselfNumber;
-                    return 1;
+                    goto PROTECT_END;
                 }
 
                 if (String.IsNullOrEmpty(strSiblingNumber) == false)
                 {
                     strNumber = strSiblingNumber;
-                    return 1;
+                    goto PROTECT_END;
                 }
 
                 if (String.IsNullOrEmpty(strOtherMaxNumber) == false)
@@ -1988,7 +2082,7 @@ namespace dp2Circulation
                         goto ERROR1;
                     }
 
-                    return 1;
+                    goto PROTECT_END;
                 }
 
                 // 2009/2/25
@@ -2009,41 +2103,8 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strNumber) == true)
                     goto REDO_INPUT;
 
-                return 1;
+                goto PROTECT_END;
             }
-
-            /*
-            // 仅利用书目统计最大号
-            if (style == ZhongcihaoStyle.Biblio)
-            {
-                // 得到当前书目中统计出来的最大号的加1以后的号
-                // return:
-                //      -1  error
-                //      1   succeed
-                nRet = GetMaxNumberPlusOne(out strNumber,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                if (nRet == 1)
-                    return 1;
-
-                // 2009/2/25
-                Debug.Assert(nRet == 0, "");
-
-                // 此类从来没有过记录，当前是第一条
-                strNumber = InputDlg.GetInput(
-                    this,
-                    null,
-                    "请输入类 '" + strClass + "' 的当前种次号最大号:",
-                    "1");
-                if (strNumber == null)
-                    return 0;	// 放弃整个操作
-
-                return 1;
-            }
-            */
-
 
             // 每次都利用书目统计最大号来检验、校正尾号
             if (style == ZhongcihaoStyle.BiblioAndSeed
@@ -2081,13 +2142,13 @@ namespace dp2Circulation
                     if (String.IsNullOrEmpty(strMyselfNumber) == false)
                     {
                         strNumber = strMyselfNumber;
-                        return 1;
+                        goto PROTECT_END;
                     }
 
                     if (String.IsNullOrEmpty(strSiblingNumber) == false)
                     {
                         strNumber = strSiblingNumber;
-                        return 1;
+                        goto PROTECT_END;
                     }
                 }
 
@@ -2118,7 +2179,7 @@ namespace dp2Circulation
                         null,
                         "请输入类 '" + strClass + "' 的当前种次号最大号:",
                         strTestNumber,
-            this.MainForm.DefaultFont);
+                        this.MainForm.DefaultFont);
                     if (strNumber == null)
                         return 0;	// 放弃整个操作
                     if (String.IsNullOrEmpty(strNumber) == true)
@@ -2132,7 +2193,7 @@ namespace dp2Circulation
                     if (nRet == -1)
                         goto ERROR1;
 
-                    return 1;
+                    goto PROTECT_END;
                 }
                 else // 本类已经有种次号条目
                 {
@@ -2157,7 +2218,7 @@ namespace dp2Circulation
                         if (nRet == -1)
                             goto ERROR1;
 
-                        return 1;
+                        goto PROTECT_END;
                     }
 
                     // 用统计出来的号推动当前尾号，就起到了检验的作用
@@ -2167,12 +2228,23 @@ namespace dp2Circulation
                     if (nRet == -1)
                         goto ERROR1;
 
+#if NO
+                    strTestNumber = strNumber;
+                    nRet = ProtectTailNumber(
+                        strTestNumber,
+                        this.MemoNumbers,
+                        out strNumber,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+#endif
+
                     // 如果到这里就返回，效果为保守型增量，即如果当前记录反复取号而不保存，则尾号不盲目增量。当然缺点也是很明显的 -- 有可能多个窗口取出重号来
                     if (style == ZhongcihaoStyle.BiblioAndSeed)
-                        return 1;
+                        goto PROTECT_END;
 
                     if (strTailNumber != strNumber)  // 如果实际发生了推动，就要这个号，不必增量了
-                        return 1;
+                        goto PROTECT_END;
 
                     // 依靠现有尾号增量
                     nRet = this.IncreaseTailNumber("1",
@@ -2181,7 +2253,7 @@ namespace dp2Circulation
                     if (nRet == -1)
                         goto ERROR1;
 
-                    return 1;
+                    goto PROTECT_END;
                 }
 
                 // return 1;
@@ -2227,7 +2299,7 @@ namespace dp2Circulation
                         null,
                         "请输入类 '" + strClass + "' 的当前种次号最大号:",
                         strTestNumber,
-            this.MainForm.DefaultFont);
+                        this.MainForm.DefaultFont);
                     if (strNumber == null)
                         return 0;	// 放弃整个操作
                     if (String.IsNullOrEmpty(strNumber) == true)
@@ -2255,6 +2327,18 @@ namespace dp2Circulation
                 return 1;
             }
             return 1;
+        PROTECT_END:
+            {
+                string strTestNumber = strNumber;
+                nRet = ProtectTailNumber(
+                    strTestNumber,
+                    this.MemoNumbers,
+                    out strNumber,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            return 1;
         ERROR1:
             return -1;
         }
@@ -2262,6 +2346,10 @@ namespace dp2Circulation
         int GetAllBiblioSummary(out string strError)
         {
             strError = "";
+
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.SetMessage("正在获取书目摘要 ...");
@@ -2293,7 +2381,7 @@ namespace dp2Circulation
 
                     string strOutputBiblioRecPath = "";
 
-                    long lRet = Channel.GetBiblioSummary(
+                    long lRet = channel.GetBiblioSummary(
                         stop,
                         "@bibliorecpath:" + strBiblioRecPath,
                         "", // strItemRecPath,
@@ -2319,6 +2407,9 @@ namespace dp2Circulation
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
             }
 
             return 0;

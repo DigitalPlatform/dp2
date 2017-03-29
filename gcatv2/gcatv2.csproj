@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="GetNumber.aspx" />
+    <Content Include="GetNumber1.aspx" />
     <Content Include="Scripts\jquery-1.4.1-vsdoc.js" />
     <Content Include="Scripts\jquery-1.4.1.js" />
     <Content Include="Scripts\jquery-1.4.1.min.js" />
@@ -77,12 +78,12 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GetNumber.aspx.cs">
-      <DependentUpon>GetNumber.aspx</DependentUpon>
+    <Compile Include="GetNumber1.aspx.cs">
+      <DependentUpon>GetNumber1.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="GetNumber.aspx.designer.cs">
-      <DependentUpon>GetNumber.aspx</DependentUpon>
+    <Compile Include="GetNumber1.aspx.designer.cs">
+      <DependentUpon>GetNumber1.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

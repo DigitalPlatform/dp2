@@ -369,7 +369,10 @@ namespace dp2LibraryConsole
 
                 // 检查这个远程目录是否存在
 
-                this._currentDir = strResultDirectory;
+                // 用 "/" rdir， strResultDirectory 为 "upload/"
+
+                // this._currentDir = strResultDirectory;
+                this._currentDir = strResultDirectory.Substring("upload".Length);   // 2017/3/20
 
                 Debug.Assert(string.IsNullOrEmpty(this._currentDir) == true || this._currentDir.IndexOf("\\") == -1, 
                     "this._currentDir 中不允许使用字符 '\\'");

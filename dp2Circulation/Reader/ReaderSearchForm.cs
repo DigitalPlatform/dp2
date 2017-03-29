@@ -1152,6 +1152,9 @@ out strError);
             if (e.Button != MouseButtons.Right)
                 return;
 
+            // bool bSearching = !this.textBox_queryWord.Enabled;
+            bool bSearching = this.InSearching;
+
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
@@ -1338,7 +1341,7 @@ out strError);
             // 正在检索的时候，不允许进行批处理操作。因为stop.BeginLoop()嵌套后的Min Max Value之间的保存恢复问题还没有解决
             {
                 menuItem = new MenuItem("批处理(&B)");
-                menuItem.Enabled = this.textBox_queryWord.Enabled;  // 在检索阶段，不允许使用批处理菜单
+                menuItem.Enabled = !bSearching;  //  this.textBox_queryWord.Enabled;  // 在检索阶段，不允许使用批处理菜单
                 contextMenu.MenuItems.Add(menuItem);
 
                 MenuItem subMenuItem = new MenuItem("快速修改读者记录 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&Q)");
@@ -1427,7 +1430,6 @@ out strError);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 #endif
-            bool bSearching = !this.textBox_queryWord.Enabled;
 
             // 导出
             {
@@ -1463,12 +1465,9 @@ out strError);
                 menuItem.MenuItems.Add(subMenuItem);
 
                 subMenuItem = new MenuItem("打印读者账簿 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
-#if NO
-                subMenuItem.Click += new System.EventHandler(this.menu_printReaderSheet_Click);
                 if (this.listView_records.SelectedItems.Count == 0
                     || bSearching == true)
                     subMenuItem.Enabled = false;
-#endif
                 menuItem.MenuItems.Add(subMenuItem);
 
                 List<string> names = GetPatronSheetNames();
@@ -1477,6 +1476,10 @@ out strError);
                     MenuItem sheetMenuItem = new MenuItem(name);
                     sheetMenuItem.Click += new System.EventHandler(this.menu_printReaderSheet_Click);
                     sheetMenuItem.Tag = name;
+                    if (this.listView_records.SelectedItems.Count == 0
+    || bSearching == true)
+                        sheetMenuItem.Enabled = false;
+
                     subMenuItem.MenuItems.Add(sheetMenuItem);
                 }
 
@@ -6397,9 +6400,9 @@ dlg.UiState);
 
                     if (dlg.GroupByDepartment == true)
                     {
-                        foreach(ReaderSheetInfo info in sheets)
+                        foreach (ReaderSheetInfo info in sheets)
                         {
-                            foreach(ReaderSheetItem item in info.Items)
+                            foreach (ReaderSheetItem item in info.Items)
                             {
                                 sw.WriteLine(item.Name);
                                 sw.WriteLine(item.Department);

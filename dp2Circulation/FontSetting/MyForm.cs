@@ -1150,6 +1150,75 @@ namespace dp2Circulation
 
         #endregion
 
+        #region 种次号尾号相关
+
+        public int UnProtectTailNumber(
+dp2Circulation.CallNumberForm.MemoTailNumber number,
+out string strError)
+        {
+            strError = "";
+
+            string strOutputNumber = "";
+
+            return ProtectTailNumber(
+                "unmemo",
+                number.ArrangeGroupName,
+                number.Class,
+                number.Number,
+                out strOutputNumber,
+                out strError);
+        }
+
+        // 保护或者释放保护一个尾号。
+        // 所谓保护，就是把一个尾号交给 dp2library 记忆在内存中，防止后面取号的时候再用到这个号。
+        // 注: 当用到这个号的册记录保存了，或者放弃了使用这个号，需要专门请求 dp2library 释放对这个号的保护
+        // parameters:
+        //      strAction   protect/unprotect 之一
+        public int ProtectTailNumber(
+            string strAction,
+            string strArrangeGroupName,
+            string strClass,
+            string strTestNumber,
+            out string strOutputNumber,
+            out string strError)
+        {
+            strOutputNumber = "";
+
+            // EnableControls(false);
+
+            Debug.Assert(strAction == "protect" || strAction == "unmemo", "");
+
+            LibraryChannel channel = this.GetChannel();
+            string strOldMessage = Progress.Initial(strAction == "protect"?"正在请求保护尾号 ...":"正在请求释放保护尾号 ...");
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
+
+            try
+            {
+                long lRet = Channel.SetOneClassTailNumber(
+                    stop,
+                    strAction,
+                    strArrangeGroupName,
+                    strClass,
+                    strTestNumber,
+                    out strOutputNumber,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return (int)lRet;
+            }
+            finally
+            {
+                Progress.Initial(strOldMessage);
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
+        }
+
+        #endregion
+
         #region 创建书目记录的浏览格式
 
         public int BuildBrowseText(string strXml,
