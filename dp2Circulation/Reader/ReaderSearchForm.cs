@@ -6375,20 +6375,15 @@ dlg.UiState);
                         {
                             this.ShowMessage("正在处理读者记录 " + strRecPath);
 
-                            string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
                             string strDepartment = DomUtil.GetElementText(dom.DocumentElement, "department");
-                            string strName = DomUtil.GetElementText(dom.DocumentElement, "name");
 
                             if (dlg.GroupByDepartment == false)
                             {
-                                sw.WriteLine(strName);
-                                sw.WriteLine(strDepartment);
-                                sw.WriteLine(strBarcode);
-                                sw.WriteLine("***");
+                                sheets.AddItem("", dom.OuterXml);
                             }
                             else
                             {
-                                sheets.AddItem(strName, strDepartment, strBarcode);
+                                sheets.AddItem(strDepartment, dom.OuterXml);
                             }
 
                             nReaderCount++;
@@ -6398,19 +6393,16 @@ dlg.UiState);
                     if (nRet == -1)
                         return -1;
 
-                    if (dlg.GroupByDepartment == true)
                     {
                         foreach (ReaderSheetInfo info in sheets)
                         {
-                            foreach (ReaderSheetItem item in info.Items)
+                            info.Output(sw, strSheetDefName);
+
+                            if (sheets.IsTail(info) == false)   // 最后一个元素末尾不需要换页
                             {
-                                sw.WriteLine(item.Name);
-                                sw.WriteLine(item.Department);
-                                sw.WriteLine(item.Barcode);
+                                sw.WriteLine("{newPage}");  // 换页命令
                                 sw.WriteLine("***");
                             }
-                            sw.WriteLine("{newPage}");  // 换页命令
-                            sw.WriteLine("***");
                         }
                     }
 

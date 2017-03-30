@@ -893,7 +893,8 @@ MessageBoxDefaultButton.Button2);
             EntityEditControl edit = sender as EntityEditControl;
 
             if (edit.Initializing == false
-                && string.IsNullOrEmpty(edit.AccessNo) == false)
+                && string.IsNullOrEmpty(edit.AccessNo) == false
+                && edit.AccessNo != "@accessNo")
             {
                 ArrangementInfo old_info = null;
                 string strOldName = "[not found]";

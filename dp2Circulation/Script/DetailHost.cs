@@ -3973,11 +3973,13 @@ chi	中文	如果是中文，则为空。
                 if (info.QufenhaoType == "zhongcihao"
                     || info.QufenhaoType == "种次号")
                 {
+#if NO
                     if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.104") < 0)
                     {
                         strError = "创建种次号功能必须和 dp2library 2.104 及以上版本配套使用 (而当前连接的 dp2library 版本为 "+Program.MainForm.ServerVersion+")";
                         goto ERROR1;
                     }
+#endif
 
                     // 获得种次号
                     CallNumberForm dlg = new CallNumberForm();

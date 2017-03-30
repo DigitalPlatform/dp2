@@ -139,7 +139,8 @@ namespace dp2Circulation
             string strError = "";
 
             if (this.entityEditControl_editing.Initializing == false
-                && string.IsNullOrEmpty(this.entityEditControl_editing.AccessNo) == false)
+                && string.IsNullOrEmpty(this.entityEditControl_editing.AccessNo) == false
+                && this.entityEditControl_editing.AccessNo != "@accessNo")
             {
                 // MessageBox.Show(this, "修改 old '"+e.OldText+"' new '"+e.NewText+"'" );
 

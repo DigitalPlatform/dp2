@@ -2485,7 +2485,7 @@ true);
 
         private void EntityForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            ReleaseProtectTailNumbers();
+            ReleaseProtectedTailNumbers();
 
             Program.MainForm.StreamProgressChanged -= MainForm_StreamProgressChanged;
 
@@ -2617,18 +2617,27 @@ true);
             this.commentControl1.SetLibraryCodeFilter(this.CurrentLibraryCodeList);
         }
 
-        void ReleaseProtectTailNumbers()
+        void ReleaseProtectedTailNumbers()
         {
+            // 旧版本没有防范重号功能
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.104") < 0)
+            {
+                this.MemoNumbers.Clear();
+                return;
+            }
+
             if (this.MemoNumbers != null && this.MemoNumbers.Count != 0)
             {
                 foreach (dp2Circulation.CallNumberForm.MemoTailNumber number in this.MemoNumbers)
                 {
                     string strError = "";
-                    int nRet = UnProtectTailNumber(number,
+                    int nRet = ReleaseProtectedTailNumber(number,
                         out strError);
                     if (nRet == -1)
                         this.ShowMessage(strError);
                 }
+
+                this.MemoNumbers.Clear();
             }
         }
 
@@ -4638,7 +4647,7 @@ true);
                     nRet = this.entityControl1.DoSaveItems(channel);
                     if (nRet == 1)
                     {
-                        ReleaseProtectTailNumbers();    // 册记录已经保存成功，可以释放对临时种次号的保护了
+                        ReleaseProtectedTailNumbers();    // 册记录已经保存成功，可以释放对临时种次号的保护了
 
                         info.bEntitiesSaved = true;
                         info.SavedNames.Add("册信息");
@@ -10389,7 +10398,7 @@ merge_dlg.UiState);
                     if (nRet == -1)
                         return; // 放弃进一步操作
 
-                    ReleaseProtectTailNumbers();    // 册记录已经保存成功，可以释放对临时种次号的保护了
+                    ReleaseProtectedTailNumbers();    // 册记录已经保存成功，可以释放对临时种次号的保护了
 
                     // 转而触发新种检索操作
                     this.textBox_queryWord.Text = this.textBox_itemBarcode.Text;

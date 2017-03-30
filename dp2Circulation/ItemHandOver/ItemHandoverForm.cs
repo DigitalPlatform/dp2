@@ -10,6 +10,7 @@ using System.IO;
 using System.Xml;
 using System.Diagnostics;
 using System.Web;
+using System.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -21,7 +22,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 
 using DigitalPlatform.LibraryClient.localhost;
-using System.Threading;
 
 namespace dp2Circulation
 {
@@ -5032,6 +5032,7 @@ MessageBoxDefaultButton.Button2);
                 "005", 
                 "801", 
                 "905", 
+                "997",
                 "998", 
         };
 
@@ -5042,6 +5043,7 @@ MessageBoxDefaultButton.Button2);
                 "005", 
                 "801", 
                 "905", 
+                "997",
                 "998", 
         };
 

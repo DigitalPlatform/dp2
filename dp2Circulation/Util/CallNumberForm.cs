@@ -2329,6 +2329,10 @@ namespace dp2Circulation
             return 1;
         PROTECT_END:
             {
+                // 旧版本没有防范重号功能
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.104") < 0)
+                    return 1;
+
                 string strTestNumber = strNumber;
                 nRet = ProtectTailNumber(
                     strTestNumber,

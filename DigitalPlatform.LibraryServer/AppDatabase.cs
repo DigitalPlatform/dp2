@@ -6131,55 +6131,79 @@ namespace DigitalPlatform.LibraryServer
             for (int i = 0; i < this.ItemDbs.Count; i++)
             {
                 ItemDbCfg cfg = this.ItemDbs[i];
-                // 实体库
-                string strEntityDbName = cfg.DbName;
 
-                if (String.IsNullOrEmpty(strEntityDbName) == false)
+                // 实体库
                 {
-                    lRet = channel.DoInitialDB(strEntityDbName,
-                        out strTempError);
-                    if (lRet == -1)
+                    string strEntityDbName = cfg.DbName;
+
+                    if (String.IsNullOrEmpty(strEntityDbName) == false)
                     {
-                        strError += "清除实体库 '" + strEntityDbName + "' 内数据时候发生错误：" + strTempError + "; ";
+                        lRet = channel.DoInitialDB(strEntityDbName,
+                            out strTempError);
+                        if (lRet == -1)
+                        {
+                            strError += "清除实体库 '" + strEntityDbName + "' 内数据时候发生错误：" + strTempError + "; ";
+                        }
                     }
                 }
 
                 // 订购库
-                string strOrderDbName = cfg.OrderDbName;
-
-                if (String.IsNullOrEmpty(strOrderDbName) == false)
                 {
-                    lRet = channel.DoInitialDB(strOrderDbName,
-                        out strTempError);
-                    if (lRet == -1)
+                    string strOrderDbName = cfg.OrderDbName;
+
+                    if (String.IsNullOrEmpty(strOrderDbName) == false)
                     {
-                        strError += "清除订购库 '" + strOrderDbName + "' 内数据时候发生错误：" + strTempError + "; ";
+                        lRet = channel.DoInitialDB(strOrderDbName,
+                            out strTempError);
+                        if (lRet == -1)
+                        {
+                            strError += "清除订购库 '" + strOrderDbName + "' 内数据时候发生错误：" + strTempError + "; ";
+                        }
                     }
                 }
 
                 // 期库
-                string strIssueDbName = cfg.IssueDbName;
-
-                if (String.IsNullOrEmpty(strIssueDbName) == false)
                 {
-                    lRet = channel.DoInitialDB(strIssueDbName,
-                        out strTempError);
-                    if (lRet == -1)
+                    string strIssueDbName = cfg.IssueDbName;
+
+                    if (String.IsNullOrEmpty(strIssueDbName) == false)
                     {
-                        strError += "清除期库 '" + strIssueDbName + "' 内数据时候发生错误：" + strTempError + "; ";
+                        lRet = channel.DoInitialDB(strIssueDbName,
+                            out strTempError);
+                        if (lRet == -1)
+                        {
+                            strError += "清除期库 '" + strIssueDbName + "' 内数据时候发生错误：" + strTempError + "; ";
+                        }
+                    }
+                }
+
+                // 评注库
+                {
+                    string strCommentDbName = cfg.CommentDbName;
+
+                    if (String.IsNullOrEmpty(strCommentDbName) == false)
+                    {
+                        lRet = channel.DoInitialDB(strCommentDbName,
+                            out strTempError);
+                        if (lRet == -1)
+                        {
+                            strError += "清除评注库 '" + strCommentDbName + "' 内数据时候发生错误：" + strTempError + "; ";
+                        }
                     }
                 }
 
                 // 小书目库
-                string strBiblioDbName = cfg.BiblioDbName;
-
-                if (String.IsNullOrEmpty(strBiblioDbName) == false)
                 {
-                    lRet = channel.DoInitialDB(strBiblioDbName,
-                        out strTempError);
-                    if (lRet == -1)
+                    string strBiblioDbName = cfg.BiblioDbName;
+
+                    if (String.IsNullOrEmpty(strBiblioDbName) == false)
                     {
-                        strError += "清除小书目库 '" + strBiblioDbName + "' 内数据时候发生错误：" + strTempError + "; ";
+                        lRet = channel.DoInitialDB(strBiblioDbName,
+                            out strTempError);
+                        if (lRet == -1)
+                        {
+                            strError += "清除小书目库 '" + strBiblioDbName + "' 内数据时候发生错误：" + strTempError + "; ";
+                        }
                     }
                 }
             }
@@ -6210,7 +6234,6 @@ namespace DigitalPlatform.LibraryServer
                 {
                     strError += "清除预约到书库 '" + strDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                 }
-
             }
 
             // 违约金库

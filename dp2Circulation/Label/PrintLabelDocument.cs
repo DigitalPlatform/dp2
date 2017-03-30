@@ -814,6 +814,11 @@ namespace dp2Circulation
                 g.IntersectClip(rectContent);
 
                 float y0 = 0;
+
+                // 卡片内容左上角原点。已经考虑了标签内容边距。
+                float origin_x = (float)x + (float)label_param.LabelPaddings.Left - nXDelta;
+                float origin_y = (float)y + (float)label_param.LabelPaddings.Top - nYDelta;
+
                 for (int k = 0; k < lines.Count; k++)
                 {
                     string strText = lines[k];
@@ -865,12 +870,12 @@ namespace dp2Circulation
                         {
                             if (double.IsNaN(format.StartX) == false)
                             {
-                                rect.X = (float)format.StartX;
+                                rect.X = (float)format.StartX + origin_x;
                                 bHorzAbsLocation = true;    // X 绝对定位后，不考虑 alignment，一律靠左
                             }
                             if (double.IsNaN(format.StartY) == false)
                             {
-                                rect.Y = (float)format.StartY;
+                                rect.Y = (float)format.StartY + origin_y;
                                 bVertAbsLocation = true;    // Y 绝对定位后，行高度不参与累计
                             }
 
@@ -921,6 +926,11 @@ namespace dp2Circulation
                             }
                         }
 
+                        // 条码下方文字的风格
+                        string barcode_text_style = StringUtil.GetParameterByPrefix(strLineStyle,
+        "barcode_text_style",
+        ":");
+
                         // return:
                         //      null    没有找到前缀
                         //      ""      找到了前缀，并且值部分为空
@@ -947,10 +957,12 @@ namespace dp2Circulation
                             float picture_ratio = Math.Max(2, g.DpiX / 100);
 
                             // 应该是 1/100 inch 单位
-                            float textHeight = MeasureOcrTextHeight(
-        g,
-        rect,
-        strText);
+                            float textHeight = 0;
+                            if (barcode_text_style == null || StringUtil.IsInList("none", barcode_text_style) == false)
+                                textHeight = MeasureOcrTextHeight(
+             g,
+             rect,
+             strText);
                             RectangleF target = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height - textHeight);
                             RectangleF rectText = new RectangleF(target.X,
     target.Y + target.Height,
@@ -1001,10 +1013,11 @@ namespace dp2Circulation
                                 g.DrawImage(image, target, source, GraphicsUnit.Pixel);
                             }
 
-                            PaintOcrFont(
-                                g,
-                                rectText,
-                                strText);
+                            if (textHeight > 0)
+                                PaintOcrFont(
+                                    g,
+                                    rectText,
+                                    strText);
                         }
                         else
                         {

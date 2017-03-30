@@ -62,6 +62,7 @@ namespace DigitalPlatform.LibraryServer
             if (String.IsNullOrEmpty(strArrangeGroupName) == true)
                 return null;
 
+#if NO
             if (strArrangeGroupName[0] == '!')
             {
                 string strTemp = GetArrangeGroupName(strArrangeGroupName.Substring(1));
@@ -72,6 +73,11 @@ namespace DigitalPlatform.LibraryServer
                 }
                 strArrangeGroupName = strTemp;
             }
+#endif
+
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+            if (strArrangeGroupName == null)
+                return null;
 
             XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//callNumber/group[@name='" + strArrangeGroupName + "']");
             if (node == null)
@@ -102,6 +108,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
+#if NO
             if (strArrangeGroupName[0] == '!')
             {
                 string strTemp = GetArrangeGroupName(strArrangeGroupName.Substring(1));
@@ -113,6 +120,10 @@ namespace DigitalPlatform.LibraryServer
                 }
                 strArrangeGroupName = strTemp;
             }
+#endif
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+            if (strArrangeGroupName == null)
+                return null;
 
             // <location>元素数组
             XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("//callNumber/group[@name='" + strArrangeGroupName + "']/location");
@@ -236,6 +247,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
+#if NO
             if (strArrangeGroupName[0] == '!')
             {
                 string strTemp = GetArrangeGroupName(strArrangeGroupName.Substring(1));
@@ -247,7 +259,13 @@ namespace DigitalPlatform.LibraryServer
                 }
                 strArrangeGroupName = strTemp;
             }
-
+#endif
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+            if (strArrangeGroupName == null)
+            {
+                strError = "馆藏地点名 " + strArrangeGroupName.Substring(1) + " 没有找到对应的排架体系名";
+                goto ERROR1;
+            }
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
@@ -454,6 +472,18 @@ namespace DigitalPlatform.LibraryServer
             return result;
         }
 
+        // 获得正规化的排架体系名字
+        string CanonializeArrangeGroupName(string strArrangeGroupName)
+        {
+            if (string.IsNullOrEmpty(strArrangeGroupName))
+                return "";
+
+            if (strArrangeGroupName[0] == '!')
+                return GetArrangeGroupName(strArrangeGroupName.Substring(1));
+
+            return strArrangeGroupName;
+        }
+
         // 设置种次号尾号
         public LibraryServerResult SetOneClassTailNumber(
             SessionInfo sessioninfo,
@@ -468,6 +498,12 @@ namespace DigitalPlatform.LibraryServer
             string strError = "";
 
             LibraryServerResult result = new LibraryServerResult();
+
+            if (String.IsNullOrEmpty(strArrangeGroupName) == true)
+            {
+                strError = "strArrangeGroupName 参数值不能为空";
+                goto ERROR1;
+            }
 
             if (strAction == "memo")
             {
@@ -497,9 +533,11 @@ namespace DigitalPlatform.LibraryServer
             }
             else if (strAction == "protect")
             {
+                // protect 可以理解为 skipmemo 和 memo 联合执行。锁定范围内防止其他请求重入
                 _lock_tempNumberTable.EnterWriteLock();
                 try
-                {                    // 获得一个能避开先前记忆用过的号码
+                {
+                    // 获得一个能避开先前记忆用过的号码
                     strOutputNumber = SkipTempNumber(strArrangeGroupName,
                 strClass,
                 strTestNumber,
@@ -727,6 +765,7 @@ namespace DigitalPlatform.LibraryServer
             public string Number { get; set; }  // 区分号
         }
 
+        const int MAX_TEMP_NUMBER = 10000;
         Hashtable _tempNumberTable = new Hashtable();
         // private static readonly Object syncRoot_tempNumberTable = new Object();
         internal ReaderWriterLockSlim _lock_tempNumberTable = new ReaderWriterLockSlim();
@@ -737,6 +776,8 @@ namespace DigitalPlatform.LibraryServer
             string strAction,
             bool bLock = true)
         {
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+
             if (strAction == "add")
             {
                 MemoTailNumber item = new MemoTailNumber();
@@ -751,8 +792,11 @@ namespace DigitalPlatform.LibraryServer
                 try
                 {
                     // 保护动作，防止集合过大
-                    if (_tempNumberTable.Count > 10000)
+                    if (_tempNumberTable.Count > MAX_TEMP_NUMBER)
+                    {
                         _tempNumberTable.Clear();
+                        this.WriteErrorLog("_tempNumberTable 因元素个数超过 " + MAX_TEMP_NUMBER + "，被强制清空一次(此举可能会造成取种次号防范重号功能短暂局部失效)");
+                    }
 
                     _tempNumberTable[strKey] = item;
                     return;
@@ -792,6 +836,8 @@ namespace DigitalPlatform.LibraryServer
             string strNumber,
             bool bLock = true)
         {
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+
             string strKey = strArrangeGroupName + "|" + strClass + "|" + strNumber;
 
             if (bLock)
@@ -813,6 +859,8 @@ namespace DigitalPlatform.LibraryServer
     string strNumber,
             bool bLock = true)
         {
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+
             for (; ; )
             {
                 if (ContainsTempNumber(strArrangeGroupName,
@@ -834,7 +882,6 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
         }
-
 
         #endregion
 

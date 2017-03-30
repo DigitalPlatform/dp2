@@ -1152,7 +1152,7 @@ namespace dp2Circulation
 
         #region 种次号尾号相关
 
-        public int UnProtectTailNumber(
+        public int ReleaseProtectedTailNumber(
 dp2Circulation.CallNumberForm.MemoTailNumber number,
 out string strError)
         {
@@ -1173,7 +1173,7 @@ out string strError)
         // 所谓保护，就是把一个尾号交给 dp2library 记忆在内存中，防止后面取号的时候再用到这个号。
         // 注: 当用到这个号的册记录保存了，或者放弃了使用这个号，需要专门请求 dp2library 释放对这个号的保护
         // parameters:
-        //      strAction   protect/unprotect 之一
+        //      strAction   protect/unmemo 之一
         public int ProtectTailNumber(
             string strAction,
             string strArrangeGroupName,

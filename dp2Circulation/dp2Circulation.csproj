@@ -2548,6 +2548,9 @@
       <DependentUpon>UrgentChargingForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Thread\ThreadBase.cs" />
+    <Content Include="Reader\patronSheetLayout_card_QR2X5.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Reader\patronSheetLayout_QR4X5.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -3720,6 +3723,16 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="Reader\patronSheetLayout_3X9.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Reader\patronSheetLayout_card_QR2X5.xml">
       <Visible>False</Visible>
       <Group>
       </Group>
