@@ -2296,6 +2296,9 @@
       <SubType>Designer</SubType>
       <DependentUpon>TestForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Testing\TestingForm.resx">
+      <DependentUpon>TestingForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Testing\TestSearchForm.resx">
       <DependentUpon>TestSearchForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -2534,6 +2537,12 @@
     </Compile>
     <Compile Include="TestForm.Designer.cs">
       <DependentUpon>TestForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Testing\TestingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Testing\TestingForm.Designer.cs">
+      <DependentUpon>TestingForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Testing\TestSearchForm.cs">
       <SubType>Form</SubType>

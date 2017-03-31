@@ -1718,7 +1718,15 @@ Stack:
             form.MainForm = this;
             form.Show();
 #endif
-            OpenWindow<TestForm>();
+
+#if NO
+            if (Control.ModifierKeys == Keys.Control
+                && StringUtil.IsDevelopMode() == true)
+                OpenWindow<TestingForm>();
+            else
+                OpenWindow<TestForm>();
+#endif
+            OpenWindow<TestingForm>();
 
         }
 
@@ -2750,7 +2758,7 @@ Stack:
             }
             _verified = true;
 
-            if (_virusScanned == false )
+            if (_virusScanned == false)
             {
                 if (StringUtil.IsInList("clientscanvirus", channel.Rights) == true)
                 {

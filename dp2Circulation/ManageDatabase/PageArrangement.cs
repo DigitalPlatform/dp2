@@ -281,7 +281,6 @@ namespace dp2Circulation
                 return -1;
 
             this.MainForm.GetCallNumberInfo();  // 2009/6/5 刷新内存中残留的旧定义信息
-
             return 0;
         }
 

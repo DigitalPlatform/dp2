@@ -35,6 +35,10 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      strLibraryCodeList  当前用户的管辖分馆代码列表
         //      strAction   动作。getinfo create delete change initialize backup refresh
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   成功
         public int ManageDatabase(
             RmsChannelCollection Channels,
             string strLibraryCodeList,
@@ -127,7 +131,6 @@ namespace DigitalPlatform.LibraryServer
                     out strOutputInfo,
                     out strError);
             }
-
 
             strError = "未知的strAction值 '" + strAction + "'";
             return -1;
@@ -236,6 +239,10 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 修改数据库
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   成功
         int ChangeDatabase(
             RmsChannelCollection Channels,
             string strLibraryCodeList,
@@ -268,7 +275,7 @@ namespace DigitalPlatform.LibraryServer
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("database");
             if (names.Length != nodes.Count)
             {
-                strError = "strDatabaseNames参数中包含的数据库名个数 " + names.Length.ToString() + " 和strDatabaseInfo参数中包含的<database>元素数 " + nodes.Count.ToString() + " 不等";
+                strError = "strDatabaseNames 参数中包含的数据库名个数 " + names.Length.ToString() + " 和 strDatabaseInfo 参数中包含的 <database> 元素数 " + nodes.Count.ToString() + " 不等";
                 return -1;
             }
 
@@ -279,7 +286,7 @@ namespace DigitalPlatform.LibraryServer
                 string strName = names[i].Trim();
                 if (String.IsNullOrEmpty(strName) == true)
                 {
-                    strError = "strDatabaseNames参数中不能包含空的名字";
+                    strError = "strDatabaseNames 参数中不能包含空的名字";
                     return -1;
                 }
 
@@ -294,7 +301,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -613,7 +620,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的实体库(name属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -710,7 +717,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的订购库(orderDbName属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -786,7 +793,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的期库(issueDbName属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -861,7 +868,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的评注库(commentDbName属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -936,7 +943,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的读者库(name属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     // 2012/9/9
@@ -1317,7 +1324,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许修改"+strTypeCaption+"库定义";
+                        strError = "当前用户不是全局用户，不允许修改" + strTypeCaption + "库定义";
                         return -1;
                     }
 
@@ -1332,14 +1339,14 @@ namespace DigitalPlatform.LibraryServer
                         if (String.IsNullOrEmpty(strOldMessageDbName) == true
                             && String.IsNullOrEmpty(strNewMessageDbName) == false)
                         {
-                            strError = "要创建"+strTypeCaption+"库 '" + strNewMessageDbName + "'，请使用create功能，而不能使用change功能";
+                            strError = "要创建" + strTypeCaption + "库 '" + strNewMessageDbName + "'，请使用create功能，而不能使用change功能";
                             goto ERROR1;
                         }
 
                         if (String.IsNullOrEmpty(strOldMessageDbName) == false
                             && String.IsNullOrEmpty(strNewMessageDbName) == true)
                         {
-                            strError = "要删除"+strTypeCaption+"库 '" + strNewMessageDbName + "'，请使用delete功能，而不能使用change功能";
+                            strError = "要删除" + strTypeCaption + "库 '" + strNewMessageDbName + "'，请使用delete功能，而不能使用change功能";
                             goto ERROR1;
                         }
 
@@ -1350,7 +1357,7 @@ namespace DigitalPlatform.LibraryServer
                                 () =>
                                 {
                                     if (strType == "pinyin")
-                                    this.PinyinDbName = strNewMessageDbName;
+                                        this.PinyinDbName = strNewMessageDbName;
                                     if (strType == "gcat")
                                         this.GcatDbName = strNewMessageDbName;
                                     if (strType == "word")
@@ -1372,7 +1379,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "不存在name属性值为 '" + strName + "' 的<utilDb/database>的元素";
-                        goto ERROR1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -1436,7 +1443,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
-                return -1;
+                return 0;
             }
 
             if (this.Changed == true)
@@ -1457,7 +1464,7 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
             }
 
-            return 0;
+            return 1;
         ERROR1:
             // 2015/1/29
             if (this.Changed == true)
@@ -1656,6 +1663,10 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 删除数据库
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   成功
         int DeleteDatabase(
             RmsChannelCollection Channels,
             string strLibraryCodeList,
@@ -1688,8 +1699,8 @@ namespace DigitalPlatform.LibraryServer
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strName + "']");
                     if (nodeDatabase == null)
                     {
-                        strError = "配置DOM中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
-                        return -1;
+                        strError = "配置 DOM 中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -1699,14 +1710,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除书目库
-                    /*
-                    lRet = channel.DoDeleteDB(strName, out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError = "删除书目库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-                     * */
                     nRet = DeleteDatabase(channel, strName, out strError);
                     if (nRet == -1)
                     {
@@ -1720,14 +1723,6 @@ namespace DigitalPlatform.LibraryServer
                     string strEntityDbName = DomUtil.GetAttr(nodeDatabase, "name");
                     if (String.IsNullOrEmpty(strEntityDbName) == false)
                     {
-                        /*
-                        lRet = channel.DoDeleteDB(strEntityDbName, out strError);
-                        if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                        {
-                            strError = "删除书目库 '" + strName + "' 所从属的实体库 '" + strEntityDbName + "' 时发生错误: " + strError;
-                            return -1;
-                        }
-                         * */
                         nRet = DeleteDatabase(channel, strEntityDbName, out strError);
                         if (nRet == -1)
                         {
@@ -1740,35 +1735,18 @@ namespace DigitalPlatform.LibraryServer
                     string strOrderDbName = DomUtil.GetAttr(nodeDatabase, "orderDbName");
                     if (String.IsNullOrEmpty(strOrderDbName) == false)
                     {
-                        /*
-                        lRet = channel.DoDeleteDB(strOrderDbName, out strError);
-                        if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                        {
-                            strError = "删除书目库 '" + strName + "' 所从属的订购库 '" + strOrderDbName + "' 时发生错误: " + strError;
-                            return -1;
-                        }
-                         * */
                         nRet = DeleteDatabase(channel, strOrderDbName, out strError);
                         if (nRet == -1)
                         {
                             strError = "删除书目库 '" + strName + "' 所从属的订购库 '" + strOrderDbName + "' 时发生错误: " + strError;
                             return -1;
                         }
-
                     }
 
                     // 删除期库
                     string strIssueDbName = DomUtil.GetAttr(nodeDatabase, "issueDbName");
                     if (String.IsNullOrEmpty(strIssueDbName) == false)
                     {
-                        /*
-                        lRet = channel.DoDeleteDB(strIssueDbName, out strError);
-                        if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                        {
-                            strError = "删除书目库 '" + strName + "' 所从属的期库 '" + strIssueDbName + "' 时发生错误: " + strError;
-                            return -1;
-                        }
-                         * */
                         nRet = DeleteDatabase(channel, strIssueDbName, out strError);
                         if (nRet == -1)
                         {
@@ -1800,26 +1778,8 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     }
 
-                    /*
-                    // 删除一个数据库在OPAC可检索库中的定义
-                    // return:
-                    //      -1  error
-                    //      0   not change
-                    //      1   changed
-                    nRet = RemoveOpacDatabaseDef(
-                        Channels,
-                        strName,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        this.Changed = true;
-                        this.ActivateMangerThread();
-                        return -1;
-                    }*/
-
                     this.Changed = true;
                     this.ActivateManagerThread();
-
                     continue;
                 }
 
@@ -1830,8 +1790,8 @@ namespace DigitalPlatform.LibraryServer
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
                     {
-                        strError = "配置DOM中名字为 '" + strName + "' 的实体库(name属性)相关<database>元素没有找到";
-                        return -1;
+                        strError = "配置 DOM 中名字为 '" + strName + "' 的实体库(name属性)相关<database>元素没有找到";
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -1841,14 +1801,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除实体库
-                    /*
-                    lRet = channel.DoDeleteDB(strName, out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError = "删除实体库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-                     * */
                     nRet = DeleteDatabase(channel, strName, out strError);
                     if (nRet == -1)
                     {
@@ -1882,7 +1834,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的订购库(orderDbName属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -1892,21 +1844,12 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除订购库
-                    /*
-                    lRet = channel.DoDeleteDB(strName, out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError = "删除订购库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-                     * */
                     nRet = DeleteDatabase(channel, strName, out strError);
                     if (nRet == -1)
                     {
                         strError = "删除订购库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
-
 
                     bDbNameChanged = true;
 
@@ -1933,8 +1876,8 @@ namespace DigitalPlatform.LibraryServer
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@issueDbName='" + strName + "']");
                     if (nodeDatabase == null)
                     {
-                        strError = "配置DOM中名字为 '" + strName + "' 的期库(issueDbName属性)相关<database>元素没有找到";
-                        return -1;
+                        strError = "配置 DOM 中名字为 '" + strName + "' 的期库(issueDbName属性)相关<database>元素没有找到";
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -1944,14 +1887,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除期库
-                    /*
-                    lRet = channel.DoDeleteDB(strName, out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError = "删除期库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-                     * */
                     nRet = DeleteDatabase(channel, strName, out strError);
                     if (nRet == -1)
                     {
@@ -1985,13 +1920,13 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的评注库(commentDbName属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
                         strError = "当前用户不是全局用户，不允许删除评注库";
-                        return -1;
+                        return 0;
                     }
 
                     nRet = DeleteDatabase(channel, strName, out strError);
@@ -2026,10 +1961,9 @@ namespace DigitalPlatform.LibraryServer
                     XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup/database[@name='" + strName + "']");
                     if (nodeDatabase == null)
                     {
-                        strError = "配置DOM中名字为 '" + strName + "' 的读者库(name属性)相关<database>元素没有找到";
-                        return -1;
+                        strError = "配置 DOM 中名字为 '" + strName + "' 的读者库(name属性)相关<database>元素没有找到";
+                        return 0;
                     }
-
 
                     // 2012/9/9
                     // 分馆用户只允许删除属于管辖分馆的读者库
@@ -2046,14 +1980,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除读者库
-                    /*
-                    lRet = channel.DoDeleteDB(strName, out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError = "删除读者库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-                     * */
                     nRet = DeleteDatabase(channel, strName, out strError);
                     if (nRet == -1)
                     {
@@ -2067,24 +1993,6 @@ namespace DigitalPlatform.LibraryServer
 
                     // <readerdbgroup>内容更新，刷新配套的内存结构
                     this.LoadReaderDbGroupParam(this.LibraryCfgDom);
-
-                    /*
-                    // 删除一个数据库在OPAC可检索库中的定义
-                    // return:
-                    //      -1  error
-                    //      0   not change
-                    //      1   changed
-                    nRet = RemoveOpacDatabaseDef(
-                        Channels,
-                        strName,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        this.Changed = true;
-                        this.ActivateMangerThread();
-                        return -1;
-                    }
-                     * */
 
                     this.Changed = true;
                     this.ActivateManagerThread();
@@ -2101,14 +2009,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除预约到书库
-                    /*
-                    lRet = channel.DoDeleteDB(strName, out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError = "删除预约到书库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-                     * */
                     nRet = DeleteDatabase(channel, strName, out strError);
                     if (nRet == -1)
                     {
@@ -2117,24 +2017,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     this.ArrivedDbName = "";
-
-                    /*
-                    // 删除一个数据库在OPAC可检索库中的定义
-                    // return:
-                    //      -1  error
-                    //      0   not change
-                    //      1   changed
-                    nRet = RemoveOpacDatabaseDef(
-                        Channels,
-                        strName,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        this.Changed = true;
-                        this.ActivateMangerThread();
-                        return -1;
-                    }
-                     * */
 
                     this.Changed = true;
                     this.ActivateManagerThread();
@@ -2151,14 +2033,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除违约金库
-                    /*
-                    lRet = channel.DoDeleteDB(strName, out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError = "删除违约金库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-                     * */
                     nRet = DeleteDatabase(channel, strName, out strError);
                     if (nRet == -1)
                     {
@@ -2166,25 +2040,7 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     }
 
-
                     this.AmerceDbName = "";
-
-                    /*
-                    // 删除一个数据库在OPAC可检索库中的定义
-                    // return:
-                    //      -1  error
-                    //      0   not change
-                    //      1   changed
-                    nRet = RemoveOpacDatabaseDef(
-                        Channels,
-                        strName,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        this.Changed = true;
-                        this.ActivateMangerThread();
-                        return -1;
-                    }*/
 
                     this.Changed = true;
                     this.ActivateManagerThread();
@@ -2237,6 +2093,7 @@ namespace DigitalPlatform.LibraryServer
                     this.ActivateManagerThread();
                     continue;
                 }
+
                 if (this.GcatDbName == strName)
                 {
                     string strTypeCaption = "";
@@ -2260,6 +2117,7 @@ namespace DigitalPlatform.LibraryServer
                     this.ActivateManagerThread();
                     continue;
                 }
+
                 if (this.WordDbName == strName)
                 {
                     string strTypeCaption = "";
@@ -2294,14 +2152,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除消息库
-                    /*
-                    lRet = channel.DoDeleteDB(strName, out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError = "删除消息库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-                     * */
                     nRet = DeleteDatabase(channel, strName, out strError);
                     if (nRet == -1)
                     {
@@ -2310,24 +2160,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     this.MessageDbName = "";
-
-                    /*
-                    // 删除一个数据库在OPAC可检索库中的定义
-                    // return:
-                    //      -1  error
-                    //      0   not change
-                    //      1   changed
-                    nRet = RemoveOpacDatabaseDef(
-                        Channels,
-                        strName,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        this.Changed = true;
-                        this.ActivateMangerThread();
-                        return -1;
-                    }
-                     * */
 
                     this.Changed = true;
                     this.ActivateManagerThread();
@@ -2341,7 +2173,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "不存在name属性值为 '" + strName + "' 的<utilDb/database>的元素";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -2351,14 +2183,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除实用库
-                    /*
-                    lRet = channel.DoDeleteDB(strName, out strError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError = "删除实用库 '" + strName + "' 时发生错误: " + strError;
-                        return -1;
-                    }
-                     * */
                     nRet = DeleteDatabase(channel, strName, out strError);
                     if (nRet == -1)
                     {
@@ -2368,31 +2192,13 @@ namespace DigitalPlatform.LibraryServer
 
                     nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
 
-                    /*
-                    // 删除一个数据库在OPAC可检索库中的定义
-                    // return:
-                    //      -1  error
-                    //      0   not change
-                    //      1   changed
-                    nRet = RemoveOpacDatabaseDef(
-                        Channels,
-                        strName,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        this.Changed = true;
-                        this.ActivateMangerThread();
-                        return -1;
-                    }
-                     * */
-
                     this.Changed = true;
                     this.ActivateManagerThread();
                     continue;
                 }
 
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
-                return -1;
+                return 0;
             }
 
             if (bDbNameChanged == true)
@@ -2410,7 +2216,7 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
             }
 
-            return 0;
+            return 1;
         }
 
         int DeleteDatabase(
@@ -2429,6 +2235,7 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // TODO: 关注数据库不存在时返回什么值
             int nRet = DeleteDatabase(channel, strName, out strError);
             if (nRet == -1)
             {
@@ -2445,6 +2252,10 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      strDatabaseInfo 要刷新的下属文件特性。<refreshStyle include="keys,browse" exclude="">(表示只刷新keys和browse两个重要配置文件)或者<refreshStyle include="*" exclude="template">(表示刷新全部文件，但是不要刷新template) 如果参数值为空，表示全部刷新
         //      strOutputInfo   返回keys定义发生改变的数据库名。"<keysChanged dbpaths='http://localhost:8001/dp2kernel?dbname1;http://localhost:8001/dp2kernel?dbname2'/>"
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   成功
         int RefreshDatabaseDefs(
             RmsChannelCollection Channels,
             string strLibraryCodeList,
@@ -2510,7 +2321,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
-                        goto ERROR1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -2646,7 +2457,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的实体库(name属性)相关<database>元素没有找到";
-                        goto ERROR1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -2684,7 +2495,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的订购库(orderDbName属性)相关<database>元素没有找到";
-                        goto ERROR1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -2721,7 +2532,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的期库(issueDbName属性)相关<database>元素没有找到";
-                        goto ERROR1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -2759,7 +2570,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的评注库(commentDbName属性)相关<database>元素没有找到";
-                        goto ERROR1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -2797,7 +2608,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的读者库(name属性)相关<database>元素没有找到";
-                        goto ERROR1;
+                        return 0;
                     }
 
                     // 2012/9/9
@@ -2975,7 +2786,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
-                        strError = "当前用户不是全局用户，不允许刷新"+strTypeCaption+"库的定义";
+                        strError = "当前用户不是全局用户，不允许刷新" + strTypeCaption + "库的定义";
                         goto ERROR1;
                     }
 
@@ -2990,7 +2801,7 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "刷新"+strTypeCaption+"库 '" + strName + "' 定义时发生错误: " + strError;
+                        strError = "刷新" + strTypeCaption + "库 '" + strName + "' 定义时发生错误: " + strError;
                         goto ERROR1;
                     }
                     if (nRet == 1)
@@ -3006,7 +2817,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "不存在name属性值为 '" + strName + "' 的<utilDb/database>的元素";
-                        goto ERROR1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -3113,7 +2924,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
-                goto ERROR1;
+                return 0;
             }
 
             // 2016/12/27
@@ -3158,7 +2969,7 @@ namespace DigitalPlatform.LibraryServer
                 strOutputInfo = dom.OuterXml;
             }
 
-            return 0;
+            return 1;
         ERROR1:
             if (keyschanged_dbnames.Count > 0)
             {
@@ -3205,6 +3016,10 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 初始化数据库
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   成功
         int InitializeDatabase(
             RmsChannelCollection Channels,
             string strLibraryCodeList,
@@ -3238,7 +3053,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -3316,7 +3131,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的实体库(name属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -3346,7 +3161,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的订购库(orderDbName属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -3376,7 +3191,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的期库(issueDbName属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -3406,7 +3221,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的评注库(commentDbName属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -3435,7 +3250,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strName + "' 的读者库(name属性)相关<database>元素没有找到";
-                        return -1;
+                        return 0;
                     }
 
                     // 2012/9/9
@@ -3461,7 +3276,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     bDbNameChanged = true;
-
                     continue;
                 }
 
@@ -3591,7 +3405,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "不存在name属性值为 '" + strName + "' 的<utilDb/database>的元素";
-                        return -1;
+                        return 0;
                     }
 
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
@@ -3706,7 +3520,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
-                return -1;
+                return 0;
             }
 
             if (bDbNameChanged == true)
@@ -3726,7 +3540,7 @@ namespace DigitalPlatform.LibraryServer
                  * */
             }
 
-            return 0;
+            return 1;
         }
 
         const string AccessLogDbName = "访问日志";
@@ -3766,6 +3580,10 @@ namespace DigitalPlatform.LibraryServer
         //      strLibraryCodeList  当前用户的管辖分馆代码列表
         //      bRecreate   是否为重新创建？如果为重新创建，则允许已经存在定义；如果不是重新创建，即首次创建，则不允许已经存在定义
         //                  注: 重新创建的意思, 是 library.xml 中有定义，但 dp2kernel 中没有对应的数据库，要根据定义重新创建这些 dp2kernel 数据库
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   成功
         int CreateDatabase(
             RmsChannelCollection Channels,
             string strLibraryCodeList,
@@ -3828,7 +3646,7 @@ namespace DigitalPlatform.LibraryServer
                     if (bRecreate == true && exist_database_node == null)
                     {
                         strError = "library.xml中并不存在书目库 '" + strName + "' 的定义，无法进行重新创建";
-                        goto ERROR1;
+                        return 0;
                     }
 
                     string strSyntax = DomUtil.GetAttr(node, "syntax");
@@ -4184,7 +4002,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strBiblioDbName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到，无法在其下创建实体库 " + strName;
-                        goto ERROR1;
+                        return 0;
                     }
 
                     string strOldEntityDbName = DomUtil.GetAttr(nodeDatabase,
@@ -4252,7 +4070,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strBiblioDbName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到，无法在其下创建订购库 " + strName;
-                        goto ERROR1;
+                        return 0;
                     }
 
                     string strOldOrderDbName = DomUtil.GetAttr(nodeDatabase,
@@ -4302,7 +4120,7 @@ namespace DigitalPlatform.LibraryServer
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
                         strError = "当前用户不是全局用户，不允许创建或重新创建期库";
-                        return -1;
+                        goto ERROR1;
                     }
                     // TODO: 增加recreate能力
 
@@ -4319,7 +4137,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strBiblioDbName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到，无法在其下创建期库 " + strName;
-                        goto ERROR1;
+                        return 0;
                     }
 
                     string strOldIssueDbName = DomUtil.GetAttr(nodeDatabase,
@@ -4369,7 +4187,7 @@ namespace DigitalPlatform.LibraryServer
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
                         strError = "当前用户不是全局用户，不允许创建或重新创建评注库";
-                        return -1;
+                        goto ERROR1;
                     }
                     // TODO: 增加recreate能力
 
@@ -4386,7 +4204,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nodeDatabase == null)
                     {
                         strError = "配置DOM中名字为 '" + strBiblioDbName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到，无法在其下创建评注库 " + strName;
-                        goto ERROR1;
+                        return 0;
                     }
 
                     string strOldCommentDbName = DomUtil.GetAttr(nodeDatabase,
@@ -4440,9 +4258,8 @@ namespace DigitalPlatform.LibraryServer
                     if (bRecreate == true && exist_database_node == null)
                     {
                         strError = "library.xml中并不存在读者库 '" + strName + "' 的定义，无法进行重新创建";
-                        goto ERROR1;
+                        return 0;
                     }
-
 
                     if (bRecreate == false)
                     {
@@ -4574,7 +4391,7 @@ namespace DigitalPlatform.LibraryServer
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
                         strError = "当前用户不是全局用户，不允许创建或重新创建出版者库、种次号库、字典库和盘点库";
-                        return -1;
+                        goto ERROR1;
                     }
 
                     // 看看同名的 publisher/zhongcihao/dictionary/inventory 数据库是否已经存在?
@@ -4592,7 +4409,7 @@ namespace DigitalPlatform.LibraryServer
                         if (nodeDatabase == null)
                         {
                             strError = strType + "库 '" + strName + "' 的定义并不存在，无法进行重复创建";
-                            goto ERROR1;
+                            return 0;
                         }
                     }
 
@@ -4658,7 +4475,7 @@ namespace DigitalPlatform.LibraryServer
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
                         strError = "当前用户不是全局用户，不允许创建或重新创建预约到书库";
-                        return -1;
+                        goto ERROR1;
                     }
 
                     // 看看同名的 arrived 数据库是否已经存在?
@@ -4728,7 +4545,7 @@ namespace DigitalPlatform.LibraryServer
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
                         strError = "当前用户不是全局用户，不允许创建或重新创建违约金库";
-                        return -1;
+                        goto ERROR1;
                     }
 
                     // 看看同名的amerce数据库是否已经存在?
@@ -4777,7 +4594,6 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR1;
                     }
 
-
                     string strTemplateDir = this.DataDir + "\\templates\\" + "amerce";
 
                     // 根据预先的定义，创建一个数据库
@@ -4799,7 +4615,7 @@ namespace DigitalPlatform.LibraryServer
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
                         strError = "当前用户不是全局用户，不允许创建或重新创建消息库";
-                        return -1;
+                        goto ERROR1;
                     }
 
                     // 看看同名的message数据库是否已经存在?
@@ -4848,7 +4664,6 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR1;
                     }
 
-
                     string strTemplateDir = this.DataDir + "\\templates\\" + "message";
 
                     // 根据预先的定义，创建一个数据库
@@ -4870,7 +4685,7 @@ namespace DigitalPlatform.LibraryServer
                     if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
                     {
                         strError = "当前用户不是全局用户，不允许创建或重新创建发票库";
-                        return -1;
+                        goto ERROR1;
                     }
 
                     // 看看同名的invoice数据库是否已经存在?
@@ -4919,7 +4734,6 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR1;
                     }
 
-
                     string strTemplateDir = this.DataDir + "\\templates\\" + "invoice";
 
                     // 根据预先的定义，创建一个数据库
@@ -4936,7 +4750,7 @@ namespace DigitalPlatform.LibraryServer
                     this.InvoiceDbName = strName;
                     this.Changed = true;
                 }
-                else if (strType == "pinyin" 
+                else if (strType == "pinyin"
                     || strType == "gcat"
                     || strType == "word")
                 {
@@ -5006,7 +4820,7 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
             }
 
-            return 0;
+            return 1;
         ERROR1:
             List<string> error_deleting_dbnames = new List<string>();
             // 将本次已经创建的数据库在返回前删除掉
@@ -5115,7 +4929,7 @@ namespace DigitalPlatform.LibraryServer
             // 在CfgDom中增加相关的配置信息
             strDbName = strName;
             this.Changed = true;
-            return 0;
+            return 1;
         ERROR1:
             return -1;
         }
@@ -5637,6 +5451,10 @@ namespace DigitalPlatform.LibraryServer
         // 获得数据库信息
         // parameters:
         //      strLibraryCodeList  当前用户的管辖分馆代码列表
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   成功
         int GetDatabaseInfo(
             string strLibraryCodeList,
             string strDatabaseNames,
@@ -5878,7 +5696,7 @@ namespace DigitalPlatform.LibraryServer
                     else
                     {
                         strError = "不可识别的数据库名 '" + strName + "'";
-                        return -1;
+                        return 0;
                     }
                     continue;
                 }
@@ -6084,7 +5902,6 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-
                 // 是否为 publisher/zhongcihao/dictionary/inventory 库?
                 {
                     XmlNode nodeUtilDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
@@ -6102,11 +5919,11 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 strError = "不存在数据库名 '" + strName + "'";
-                return -1;
+                return 0;
             }
 
             strOutputInfo = dom.OuterXml;
-            return 0;
+            return 1;
         }
 
         // 初始化所有数据库

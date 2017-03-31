@@ -8922,6 +8922,10 @@ Stack:
                     }
                 }
 
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   成功
                 int nRet = app.ManageDatabase(sessioninfo.Channels,
                     sessioninfo.LibraryCodeList,
                     strAction,
@@ -8930,13 +8934,20 @@ Stack:
                     out strOutputInfo,
                     out strError);
                 if (nRet == -1)
+                {
+                    result.ErrorCode = ErrorCode.SystemError;
                     goto ERROR1;
+                }
+                if (nRet == 0)
+                {
+                    result.ErrorCode = ErrorCode.NotFound;
+                    goto ERROR1;
+                }
 
-                result.Value = nRet;
+                result.Value = nRet;    // 原来这里返回 0
                 return result;
             ERROR1:
                 result.Value = -1;
-                result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
                 return result;
             }

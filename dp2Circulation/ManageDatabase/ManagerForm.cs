@@ -1265,8 +1265,6 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-
-
         // 重新创建数据库
         private void menu_recreateDatabase_Click(object sender, EventArgs e)
         {
@@ -1403,7 +1401,6 @@ namespace dp2Circulation
 
                 // 选定刚修改的数据库
                 SelectDatabaseLine(dlg.DatabaseName);
-
 
                 RefreshOpacDatabaseList();
                 RefreshOpacBrowseFormatTree();

@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Web;
 using System.Reflection;
+using System.Threading.Tasks;
 
 using Ionic.Zip;
 
@@ -34,7 +35,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
 using dp2LibraryXE.Properties;
-using System.Threading.Tasks;
 
 namespace dp2LibraryXE
 {

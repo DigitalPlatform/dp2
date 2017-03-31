@@ -1000,7 +1000,7 @@ namespace dp2Circulation
                             }
 
 
-                            GraphicsUnit u = g.PageUnit;
+                            // GraphicsUnit u = g.PageUnit;
                             Hashtable param = new Hashtable();
                             param["type"] = string.IsNullOrEmpty(barcode_type) == true ? "39" : barcode_type;  //  "39";
                             param["code"] = strText;
