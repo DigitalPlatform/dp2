@@ -802,9 +802,14 @@ namespace dp2Circulation
 
             // 创建一个hash表，便于查找实体记录的路径
             Hashtable item_recpaths = new Hashtable();
-            for (int i = 0; i < this.MyselfCallNumberItems.Count; i++)
+            foreach (CallNumberItem item in this.MyselfCallNumberItems)
             {
-                CallNumberItem item = this.MyselfCallNumberItems[i];
+#if REF
+                // 2017/4/6
+                if (string.IsNullOrEmpty(item.RecPath) == true)
+                    throw new Exception("CallNumberItem 的 RecPath 成员不应为空。如记录路径为空，可以用 @refID:xxxxx 形态使用参考 ID 代替");
+#endif
+
                 item_recpaths[item.RecPath] = 1;
             }
 
@@ -1066,6 +1071,9 @@ namespace dp2Circulation
         }
 
         // 获得若干号
+        // parameters:
+        //      strMyselfNumber     从当前册得到的号码
+        //      strSiblingNumber    返回从相邻册得到的号码
         int GetMultiNumber(
             string strStyle,
             out string strOtherMaxNumber,
@@ -2061,13 +2069,13 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strMyselfNumber) == false)
                 {
                     strNumber = strMyselfNumber;
-                    goto PROTECT_END;
+                    return 1;   // 从自身得到的号码，不需要保护
                 }
 
                 if (String.IsNullOrEmpty(strSiblingNumber) == false)
                 {
                     strNumber = strSiblingNumber;
-                    goto PROTECT_END;
+                    return 1;   // 从相邻册得到的号码，不需要保护
                 }
 
                 if (String.IsNullOrEmpty(strOtherMaxNumber) == false)
@@ -2090,6 +2098,7 @@ namespace dp2Circulation
 
                 string strDefaultValue = "";    // "1"
 
+#if NO
             REDO_INPUT:
                 // 此类从来没有过记录，当前是第一条
                 strNumber = InputDlg.GetInput(
@@ -2102,6 +2111,8 @@ namespace dp2Circulation
                     return 0;	// 放弃整个操作
                 if (String.IsNullOrEmpty(strNumber) == true)
                     goto REDO_INPUT;
+#endif
+                strNumber = "1";    // testing
 
                 goto PROTECT_END;
             }
@@ -2142,13 +2153,13 @@ namespace dp2Circulation
                     if (String.IsNullOrEmpty(strMyselfNumber) == false)
                     {
                         strNumber = strMyselfNumber;
-                        goto PROTECT_END;
+                        return 1;   // 从自身得到的号码，不需要保护
                     }
 
                     if (String.IsNullOrEmpty(strSiblingNumber) == false)
                     {
                         strNumber = strSiblingNumber;
-                        goto PROTECT_END;
+                        return 1;   // 从相邻册得到的号码，不需要保护
                     }
                 }
 

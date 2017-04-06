@@ -3295,6 +3295,22 @@ namespace dp2Circulation
                 CallNumberItem item = new CallNumberItem();
 
                 item.RecPath = cur_item.RecPath;
+
+#if REF
+                // 2017/4/6
+                if (string.IsNullOrEmpty(item.RecPath))
+                {
+                    if (string.IsNullOrEmpty(cur_item.RefID) == true)
+                    {
+                        // throw new Exception("cur_item 的 RefID 成员不应为空"); // TODO: 可以考虑增加健壮性，当时发生 RefID 字符串
+                        cur_item.RefID = Guid.NewGuid().ToString();
+                        cur_item.Changed = true;
+                    }
+
+                    item.RecPath = "@refID:" + cur_item.RefID;
+                }
+#endif
+
                 item.CallNumber = cur_item.AccessNo;
                 item.Location = cur_item.LocationString;
                 item.Barcode = cur_item.Barcode;
@@ -7677,7 +7693,7 @@ issue.Volume);
 
         static bool IsFirstNumber(string strNumber)
         {
-            strNumber = strNumber.TrimStart(new char[] {' ','0'});
+            strNumber = strNumber.TrimStart(new char[] { ' ', '0' });
             if (strNumber == "1")
                 return true;
             return false;

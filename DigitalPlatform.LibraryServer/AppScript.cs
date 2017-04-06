@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-
 using System.Xml;
 using System.IO;
 using System.Collections;
 using System.Threading;
 using System.Diagnostics;
+using System.Web;
 
 using System.Reflection;
-using Microsoft.CSharp;
-// using Microsoft.VisualBasic;
 using System.CodeDom;
 using System.CodeDom.Compiler;
+
+using Microsoft.CSharp;
 
 using DigitalPlatform;	// Stop类
 using DigitalPlatform.Xml;
@@ -20,7 +20,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.Script;
 using DigitalPlatform.Interfaces;
-using System.Web;
 using DigitalPlatform.rms.Client;
 
 namespace DigitalPlatform.LibraryServer
@@ -1569,9 +1568,10 @@ namespace DigitalPlatform.LibraryServer
 
             }
 
-            // 去除 strRoom 内容中横杠以后的部分。例如 “现刊阅览室-综合355”
+            // 去除 strRoom 内容中横杠或者冒号以后的部分。例如 “现刊阅览室-综合355”
+            // 注：横杠以后的部分表示架号，统计时会忽略；冒号后面的部分表示班级书架名称，统计时不会被忽略
             {
-                List<string> parts = StringUtil.ParseTwoPart(strRoom, "-");
+                List<string> parts = StringUtil.ParseTwoPart(strRoom, new string [] {"-", ":"});
                 strRoom = parts[0];
             }
 

@@ -723,6 +723,41 @@ string strTimestamp)
             return results;
         }
 
+        public static List<string> ParseTwoPart(string strText, string[] seps)
+        {
+            string strLeft = "";
+            string strRight = "";
+
+            if (string.IsNullOrEmpty(strText) == true)
+                goto END1;
+
+            int nRet = 0;
+            string strSep = "";
+            foreach (string sep in seps)
+            {
+                nRet = strText.IndexOf(sep);
+                if (nRet != -1)
+                {
+                    strSep = sep;
+                    goto FOUND;
+                }
+            }
+
+            strLeft = strText;
+            goto END1;
+
+        FOUND:
+            Debug.Assert(nRet != -1, "");
+            strLeft = strText.Substring(0, nRet).Trim();
+            strRight = strText.Substring(nRet + strSep.Length).Trim();
+
+        END1:
+            List<string> results = new List<string>();
+            results.Add(strLeft);
+            results.Add(strRight);
+            return results;
+        }
+
         /// <summary>
         /// 通用的，切割两个部分的函数
         /// </summary>

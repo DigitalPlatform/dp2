@@ -5482,7 +5482,6 @@ this.MainForm.DefaultFont);
             this.EnableControls(false);
             try
             {
-
                 // 打开一个新的种册窗
                 EntityForm form = null;
 

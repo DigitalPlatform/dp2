@@ -188,6 +188,21 @@ this.splitContainer_main,
                 item.CallNumber = "";   // 不要给出当前的，以免影响到取号结果
 
                 item.RecPath = this.entityEditControl1.RecPath;
+
+#if REF
+                // 2017/4/6
+                if (string.IsNullOrEmpty(item.RecPath))
+                {
+                    if (string.IsNullOrEmpty(entityEditControl1.RefID) == true)
+                    {
+                        // throw new Exception("entityEditControl_editing 的 RefID 成员不应为空"); // TODO: 可以考虑增加健壮性，当时发生 RefID 字符串
+                        entityEditControl1.RefID = Guid.NewGuid().ToString();
+                    }
+
+                    item.RecPath = "@refID:" + entityEditControl1.RefID;
+                }
+#endif
+
                 item.Location = entityEditControl1.LocationString;
                 item.Barcode = entityEditControl1.Barcode;
             }

@@ -1806,6 +1806,15 @@ namespace dp2Circulation
 
                 strItemRecPath = edit.entityEditControl_editing.RecPath;
 
+#if REF
+                // 2017/4/6
+                if (string.IsNullOrEmpty(strItemRecPath))
+                {
+                    strItemRecPath = "@refID:" + edit.entityEditControl_editing.RefID;
+                    // TODO: 不应为空
+                }
+#endif
+
                 callnumber_items = edit.Items.GetCallNumberItems();
             }
             else if (sender is EntityControl)
@@ -1855,7 +1864,14 @@ namespace dp2Circulation
                     book_item.AccessNo);
 
                 strItemRecPath = book_item.RecPath;
-
+#if REF
+                // 2017/4/6
+                if (string.IsNullOrEmpty(strItemRecPath))
+                {
+                    strItemRecPath = "@refID:" + book_item.RefID;
+                    // TODO: 不应为空
+                }
+#endif
                 callnumber_items = control.Items.GetCallNumberItems();
             }
             else if (sender is BindingForm)
@@ -1886,6 +1902,14 @@ namespace dp2Circulation
 
                 strItemRecPath = binding.EntityEditControl.RecPath;
 
+#if REF
+                // 2017/4/6
+                if (string.IsNullOrEmpty(strItemRecPath))
+                {
+                    strItemRecPath = "@refID:" + binding.EntityEditControl.RefID;
+                    // TODO: 不应为空
+                }
+#endif
                 callnumber_items = binding.GetCallNumberItems();    // ???
             }
             else
@@ -3753,7 +3777,14 @@ chi	中文	如果是中文，则为空。
                     edit.entityEditControl_editing.AccessNo);
 
                 strItemRecPath = edit.entityEditControl_editing.RecPath;
-
+#if REF
+                // 2017/4/6
+                if (string.IsNullOrEmpty(strItemRecPath))
+                {
+                    strItemRecPath = "@refID:" + edit.entityEditControl_editing.RefID;
+                    // TODO: 不应为空
+                }
+#endif
                 // callnumber_items = edit.BookItems.GetCallNumberItems();
                 callnumber_items = edit.GetCallNumberItems();
 
@@ -3804,6 +3835,14 @@ chi	中文	如果是中文，则为空。
 
                 strItemRecPath = book_item.RecPath;
 
+#if REF
+                // 2017/4/6
+                if (string.IsNullOrEmpty(strItemRecPath))
+                {
+                    strItemRecPath = "@refID:" + book_item.RefID;
+                    // TODO: 不应为空
+                }
+#endif
                 callnumber_items = control.Items.GetCallNumberItems();
 
                 control.Enabled = false;
@@ -3836,6 +3875,14 @@ chi	中文	如果是中文，则为空。
 
                 strItemRecPath = binding.EntityEditControl.RecPath;
 
+#if REF
+                // 2017/4/6
+                if (string.IsNullOrEmpty(strItemRecPath))
+                {
+                    strItemRecPath = "@refID:" + binding.EntityEditControl.RefID;
+                    // TODO: 不应为空
+                }
+#endif
                 // callnumber_items = edit.BookItems.GetCallNumberItems();
                 callnumber_items = binding.GetCallNumberItems();
 

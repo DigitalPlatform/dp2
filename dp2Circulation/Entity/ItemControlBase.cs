@@ -1865,6 +1865,10 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(item.RefID))
                 item.RefID = Guid.NewGuid().ToString();
 
+            // 2017/4/6
+            if (this.Items == null)
+                this.Items = new TC();
+
             this.Items.Add(item);
 
             item.ItemDisplayState = ItemDisplayState.New;

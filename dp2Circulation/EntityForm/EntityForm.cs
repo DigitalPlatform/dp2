@@ -7009,6 +7009,39 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             this.m_webExternalHost_biblio.SetHtmlString("(空白)",
     "entityform_error");
 
+            ///
+            InitialPages(strBiblioDbName);
+
+            // 2007/11/5 
+            this.DeletedMode = false;
+
+            this.BiblioChanged = false;
+
+            // ****
+            this.toolStripButton_marcEditor_save.Enabled = true;
+
+            // 用模板的时候，无论如何ReadOnly都是false
+            if (this.m_marcEditor.ReadOnly == true)
+                this.m_marcEditor.ReadOnly = false;
+
+            // 2008/11/30 
+            SwitchFocus(MARC_EDITOR);
+            if (dbname_dlg.NotAsk == true || select_temp_dlg.NotAsk == true)
+            {
+                this.MainForm.StatusBarMessage = "自动从书目库 " + strBiblioDbName + " 中装入名为 " + select_temp_dlg.SelectedName + " 的新书目记录模板。如要重新出现装载对话框，请按住Shift键再点“装载书目模板”按钮...";
+            }
+            return 1;
+        ERROR1:
+            MessageBox.Show(this, strError);
+            return -1;
+        }
+
+        // 初始化各个属性页
+        public void InitialPages(string strBiblioDbName = null)
+        {
+            if (string.IsNullOrEmpty(strBiblioDbName))
+                strBiblioDbName = this.BiblioDbName;
+
             // 对象tabpage清空 2009/1/5 
             this.binaryResControl1.Clear();
 
@@ -7068,29 +7101,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             }
 
             this.commentControl1.ClearItems();
-
-            // 2007/11/5 
-            this.DeletedMode = false;
-
-            this.BiblioChanged = false;
-
-            // ****
-            this.toolStripButton_marcEditor_save.Enabled = true;
-
-            // 用模板的时候，无论如何ReadOnly都是false
-            if (this.m_marcEditor.ReadOnly == true)
-                this.m_marcEditor.ReadOnly = false;
-
-            // 2008/11/30 
-            SwitchFocus(MARC_EDITOR);
-            if (dbname_dlg.NotAsk == true || select_temp_dlg.NotAsk == true)
-            {
-                this.MainForm.StatusBarMessage = "自动从书目库 " + strBiblioDbName + " 中装入名为 " + select_temp_dlg.SelectedName + " 的新书目记录模板。如要重新出现装载对话框，请按住Shift键再点“装载书目模板”按钮...";
-            }
-            return 1;
-        ERROR1:
-            MessageBox.Show(this, strError);
-            return -1;
         }
 
         /*

@@ -9813,9 +9813,12 @@ DbType.String);
                         {
                             // 提交一次
                             bool bCommit = false;
-                            if (info.row_info == null && nParameters + 5 > 2100 - 1)
+
+                            // 2017/4/1
+                            // *** 注：MySQL 在 TCP/IP 方式下 2100 没有问题；在 Named Pipe 方式下 1400 没有问题，1500 就会抛出异常“connection must be valid and open to rollback transaction”，为保险这里用 1000
+                            if (info.row_info == null && nParameters + 5 > 1000 - 1)
                                 bCommit = true;
-                            if (info.row_info != null && nParameters + 5 > 2100 - 1)
+                            if (info.row_info != null && nParameters + 5 > 1000 - 1)
                                 bCommit = true;
 
                             if (bCommit == true)

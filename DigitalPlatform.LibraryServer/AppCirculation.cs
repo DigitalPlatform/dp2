@@ -3011,6 +3011,12 @@ start_time_1,
                     strError = "借阅操作被拒绝。因册记录的馆藏地 '" + strLocation + "' 不属于读者所在馆代码 '" + strLibraryCode + "' ";
                     return 0;
                 }
+
+                // 去除 strRoom 内容中横杠或者冒号以后的部分
+                {
+                    List<string> parts = StringUtil.ParseTwoPart(strRoom, new string[] { "-", ":" });
+                    strRoom = parts[0];
+                }
             }
 
             // 检查馆藏地列表
