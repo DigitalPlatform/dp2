@@ -371,6 +371,54 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        // 创建一个简单库
+        // parameters:
+        // return:
+        //      -1  出错
+        //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+        //      1   成功创建
+        public static int CreateSimpleDatabase(
+            LibraryChannel channel,
+            Stop Stop,
+            string strBiblioDbName,
+            string strType,
+            out string strError)
+        {
+            strError = "";
+
+            // 创建库的定义
+            XmlDocument database_dom = new XmlDocument();
+            database_dom.LoadXml("<root />");
+
+            {
+                CreateSimpleDatabaseNode(database_dom,
+                    strBiblioDbName,
+                    strType);
+            }
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 10, 0);
+            try
+            {
+                string strOutputInfo = "";
+                long lRet = channel.ManageDatabase(
+                    Stop,
+                    "create",
+                    "",
+                    database_dom.OuterXml,
+                    out strOutputInfo,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return 1;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+            }
+        }
+
         public class LocationItem
         {
             public string LibraryCode { get; set; }

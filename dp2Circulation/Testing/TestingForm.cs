@@ -54,11 +54,15 @@ namespace dp2Circulation
         // 测试创建索取号
         private void ToolStripMenuItem_createAccessNo_Click(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => TestCreateAccessNo());
+            Task.Factory.StartNew(() => { 
+                TestCreateAccessNo("seed");
+                TestCreateAccessNo("");
+            });
         }
 
-
-        void TestCreateAccessNo()
+        // parameters:
+        //      strStyle    风格。空/seed。seed 表示排架体系有种次号库
+        void TestCreateAccessNo(string strStyle)
         {
             string strError = "";
             int nRet = 0;
@@ -114,6 +118,42 @@ namespace dp2Circulation
                 if (nRet == -1)
                     goto ERROR1;
 
+                string strSeedDbName = "";
+                if (StringUtil.IsInList("seed", strStyle))
+                {
+                    strSeedDbName = "_测试用种次号库";
+
+                    Progress.SetMessage("正在删除测试用种次号库 ...");
+                    lRet = channel.ManageDatabase(
+        stop,
+        "delete",
+        strSeedDbName,    // strDatabaseNames,
+        "",
+        out strOutputInfo,
+        out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode != DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
+                            goto ERROR1;
+                    }
+
+                    Progress.SetMessage("正在创建测试用种次号库 ...");
+
+                    // parameters:
+                    // return:
+                    //      -1  出错
+                    //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+                    //      1   成功创建
+                    nRet = ManageHelper.CreateSimpleDatabase(
+                        channel,
+                        this.Progress,
+                        strSeedDbName,
+                        "zhongcihao",
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+
                 // *** 定义测试所需的馆藏地
                 List<DigitalPlatform.CirculationClient.ManageHelper.LocationItem> items = new List<DigitalPlatform.CirculationClient.ManageHelper.LocationItem>();
                 items.Add(new DigitalPlatform.CirculationClient.ManageHelper.LocationItem("", "_测试阅览室", true, true));
@@ -131,7 +171,7 @@ namespace dp2Circulation
 
                 // 定义排架体系
                 string strGroupFragment =
-                    "<group name=\"_测试种次号\" classType=\"中图法\" qufenhaoType=\"种次号\" zhongcihaodb=\"\" callNumberStyle=\"索取类号+区分号\">"
+                    "<group name=\"_测试种次号\" classType=\"中图法\" qufenhaoType=\"种次号\" zhongcihaodb=\"" + strSeedDbName + "\" callNumberStyle=\"索取类号+区分号\">"
                     + "<location name=\"_测试阅览室\" />"
                     + "<location name=\"_测试流通库\" />"
                     + "</group>";
@@ -147,8 +187,6 @@ namespace dp2Circulation
 
                 // 重新获得各种库名、列表
                 ReloadDatabaseCfg();
-
-
 
                 // *** 创建书目记录
                 // 创建册记录和索取号
@@ -185,6 +223,20 @@ UiTest3(strBiblioDbName)
     out strError);
                 if (lRet == -1)
                     goto ERROR1;
+
+                if (string.IsNullOrEmpty(strSeedDbName) == false)
+                {
+                    Progress.SetMessage("正在删除测试用种次号库 ...");
+                    lRet = channel.ManageDatabase(
+        stop,
+        "delete",
+        strSeedDbName,    // strDatabaseNames,
+        "",
+        out strOutputInfo,
+        out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+                }
 
                 Progress.SetMessage("正在复原测试前的排架体系 ...");
                 nRet = ManageHelper.RestoreCallNumberDef(

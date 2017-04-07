@@ -4212,6 +4212,7 @@ out strError);
 
         #region 处理MARC记录转换为ISO209任务的静态函数
 
+        // 2014/4/7 改为用 MarcRecord 处理 100$a
         // 根据MARC格式类型和输出的编码方式要求，修改MARC记录的头标区或100字段。
         // parameters:
         //		strMarcSyntax   "unimarc" "usmarc"
@@ -4221,7 +4222,94 @@ out strError);
             Encoding encoding,
             out string strResult)
         {
+            strResult = strMARC;
 
+            if (String.Compare(strMarcSyntax, "unimarc", true) == 0) // UNIMARC
+            {
+                /*
+                In UNIMARC the information about enconding sets are stored in field 100, 
+        position 26-29 & 30-33. The
+        code for Unicode is "50" in positions 26-27 and the position 28-33 will 
+        contain blanks.
+                */
+                // 将100字段中28开始的位置按照UTF-8编码特性强行置值。
+
+                MarcRecord record = new MarcRecord(strMARC);
+                bool bChanged = false;
+
+                string strValue = record.select("field[@name='100']/subfield[@name='a']").FirstContent;
+                if (strValue == null)
+                    strValue = "";
+
+                // 确保子字段内容长度为 36 字符。
+                int nOldLength = strValue.Length;
+                strValue = strValue.PadRight(36, ' ');
+                if (strValue.Length != nOldLength)
+                    bChanged = true;
+
+                string strPart = strValue.Substring(26, 8);
+                // 看看26-29是否已经符合要求
+                if (encoding == Encoding.UTF8)
+                {
+                    if (strPart == "50      ")
+                    { // 已经符合要求
+                    }
+                    else
+                    {
+                        strValue = strValue.Remove(26, 8);
+                        strValue = strValue.Insert(26, "50      ");
+                        bChanged = true;
+                    }
+                }
+                else
+                {
+                    if (strPart == "50      ")
+                    { // 需要改变
+                        strValue = strValue.Remove(26, 8);
+                        strValue = strValue.Insert(26, "0120    ");
+                        bChanged = true;
+                    }
+                    else
+                    {	// 不需要改变
+                    }
+                }
+
+                if (bChanged == true)
+                {
+                    record.setFirstSubfield("100", "a", strValue, "  ");
+                    strResult = record.Text;
+                }
+
+            }
+
+            // 修改头标区
+            if (String.Compare(strMarcSyntax, "unimarc", true) == 0)
+            {
+                // UNIMARC
+                strResult = StringUtil.SetAt(strResult, 9, ' ');
+            }
+            else if (true/*nMARCType == 1*/)
+            {
+                // USMARC。所有非UNIMARC的都仿USMARC处理，因为不必使用100字段
+                if (encoding == Encoding.UTF8)
+                    strResult = StringUtil.SetAt(strResult, 9, 'a');	// UTF-8(UCS-2也仿此)
+                else
+                    strResult = StringUtil.SetAt(strResult, 9, ' ');	// # DBCS或者MARC-8 // 2007/8/8 change '#' to ' '
+            }
+
+            return 0;
+        }
+
+#if NO
+        // 根据MARC格式类型和输出的编码方式要求，修改MARC记录的头标区或100字段。
+        // parameters:
+        //		strMarcSyntax   "unimarc" "usmarc"
+        public static int ModifyOutputMARC(
+            string strMARC,
+            string strMarcSyntax,
+            Encoding encoding,
+            out string strResult)
+        {
             strResult = strMARC;
 
             if (String.Compare(strMarcSyntax, "unimarc", true) == 0) // UNIMARC
@@ -4312,7 +4400,7 @@ out strError);
 
             return 0;
         }
-
+#endif
 
         // 将机内格式记录构造为ISO2709格式记录。
         // parameters:
