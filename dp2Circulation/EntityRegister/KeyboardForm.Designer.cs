@@ -48,7 +48,7 @@
             this.button_scan.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_scan.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button_scan.Location = new System.Drawing.Point(243, 24);
-            this.button_scan.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.button_scan.Margin = new System.Windows.Forms.Padding(2);
             this.button_scan.Name = "button_scan";
             this.button_scan.Size = new System.Drawing.Size(81, 27);
             this.button_scan.TabIndex = 15;
@@ -66,7 +66,7 @@
             this.textBox_input.HideSelection = false;
             this.textBox_input.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.textBox_input.Location = new System.Drawing.Point(0, 22);
-            this.textBox_input.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.textBox_input.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_input.Name = "textBox_input";
             this.textBox_input.Size = new System.Drawing.Size(240, 29);
             this.textBox_input.TabIndex = 14;
