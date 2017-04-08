@@ -2098,21 +2098,23 @@ namespace dp2Circulation
 
                 string strDefaultValue = "";    // "1"
 
-#if NO
-            REDO_INPUT:
-                // 此类从来没有过记录，当前是第一条
-                strNumber = InputDlg.GetInput(
-                    this,
-                    null,
-                    "请输入类 '" + strClass + "' 的当前种次号最大号:",
-                    strDefaultValue,
-            this.MainForm.DefaultFont);
-                if (strNumber == null)
-                    return 0;	// 放弃整个操作
-                if (String.IsNullOrEmpty(strNumber) == true)
-                    goto REDO_INPUT;
-#endif
-                strNumber = "1";    // testing
+                {
+
+                REDO_INPUT:
+                    // 此类从来没有过记录，当前是第一条
+                    strNumber = InputDlg.GetInput(
+                        this,
+                        null,
+                        "请输入类 '" + strClass + "' 的当前种次号最大号:",
+                        strDefaultValue,
+                        this.MainForm.DefaultFont);
+                    if (strNumber == null)
+                        return 0;	// 放弃整个操作
+                    if (String.IsNullOrEmpty(strNumber) == true)
+                        goto REDO_INPUT;
+
+                }
+                // strNumber = "1";    // testing
 
                 goto PROTECT_END;
             }

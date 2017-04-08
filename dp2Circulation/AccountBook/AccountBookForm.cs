@@ -33,6 +33,8 @@ using DigitalPlatform.LibraryClient.localhost;
 
 using DigitalPlatform.dp2.Statis;
 
+// this.Channel 用法
+
 namespace dp2Circulation
 {
     /// <summary>
@@ -1273,7 +1275,9 @@ namespace dp2Circulation
             this.SourceStyle = "recpathfile";
 
             // int nDupCount = 0;
-            nRet = LoadFromRecPathFile(dlg.FileName,
+            nRet = LoadFromRecPathFile(
+                this.Channel,
+                dlg.FileName,
                 this.comboBox_load_type.Text,
                 this.checkBox_load_fillBiblioSummary.Checked,
                 new string[] { "summary", "@isbnissn" },
@@ -1823,16 +1827,21 @@ MessageBoxDefaultButton.Button1);
 
             int nDupCount = 0;
             string strRecPathFilename = Path.GetTempFileName();
+
             try
             {
-                nRet = ConvertBarcodeFile(dlg.FileName,
+                nRet = ConvertBarcodeFile(
+                    this.Channel,
+                    dlg.FileName,
                     strRecPathFilename,
                     out nDupCount,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                nRet = LoadFromRecPathFile(strRecPathFilename,
+                nRet = LoadFromRecPathFile(
+                    this.Channel,
+                    strRecPathFilename,
                     this.comboBox_load_type.Text,
                     this.checkBox_load_fillBiblioSummary.Checked,
                     new string[] { "summary", "@isbnissn" },
@@ -6485,6 +6494,7 @@ strTotalPrice);
             {
                 // 检索 批次号 和 馆藏地点 将命中的记录路径写入文件
                 int nRet = SearchBatchNoAndLocation(
+                    this.Channel,
                     this.comboBox_load_type.Text,
                     strBatchNo,
                     strMatchLocation,
@@ -6493,7 +6503,9 @@ strTotalPrice);
                 if (nRet == -1)
                     goto ERROR1;
 
-                nRet = LoadFromRecPathFile(strRecPathFilename,
+                nRet = LoadFromRecPathFile(
+                    this.Channel,
+                    strRecPathFilename,
                     this.comboBox_load_type.Text,
                     this.checkBox_load_fillBiblioSummary.Checked,
                     new string[] { "summary", "@isbnissn" },

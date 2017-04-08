@@ -4212,7 +4212,7 @@ out strError);
 
         #region 处理MARC记录转换为ISO209任务的静态函数
 
-        // 2014/4/7 改为用 MarcRecord 处理 100$a
+        // 2017/4/7 改为用 MarcRecord 处理 100$a
         // 根据MARC格式类型和输出的编码方式要求，修改MARC记录的头标区或100字段。
         // parameters:
         //		strMarcSyntax   "unimarc" "usmarc"

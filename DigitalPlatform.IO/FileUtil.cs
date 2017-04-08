@@ -53,6 +53,8 @@ namespace DigitalPlatform.IO
         }
 
         // 根据时间戳信息，设置文件的最后修改时间
+        // parameters:
+        //      baTimeStamp 8 byte 的表示 ticks 的文件最后修改时间。应该是 GMT 时间
         public static void SetFileLastWriteTimeByTimestamp(string strFilePath,
             byte[] baTimeStamp)
         {
@@ -234,7 +236,7 @@ namespace DigitalPlatform.IO
                 if (fi.Exists == false)
                 {
                     // 创建一个0 byte的文件
-                    using(FileStream f = File.Create(strFileName))
+                    using (FileStream f = File.Create(strFileName))
                     {
 
                     }
@@ -251,8 +253,8 @@ namespace DigitalPlatform.IO
         public static void WriteByteArray(string strFileName,
             byte[] data)
         {
-            using(FileStream s = File.Create(strFileName))
-            { 
+            using (FileStream s = File.Create(strFileName))
+            {
                 s.Write(data,
                     0,
                     data.Length);

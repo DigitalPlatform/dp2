@@ -12,9 +12,9 @@ using System.Drawing;
 namespace DigitalPlatform
 {
 
-	// byte[] 数组的实用函数集
-	public class ByteArray
-	{
+    // byte[] 数组的实用函数集
+    public class ByteArray
+    {
         /*
         // 复制一个byte数组
         public static byte[] Dup(byte [] source)
@@ -30,215 +30,215 @@ namespace DigitalPlatform
             return result;
         }*/
 
-		// 克隆一个字符数组
-		public static byte[] GetCopy(byte[] baContent)
-		{
-			if (baContent == null)
-				return null;
-			byte [] baResult = new byte[baContent.Length];
-			Array.Copy(baContent, 0, baResult, 0, baContent.Length);
-			return baResult;
-		}
+        // 克隆一个字符数组
+        public static byte[] GetCopy(byte[] baContent)
+        {
+            if (baContent == null)
+                return null;
+            byte[] baResult = new byte[baContent.Length];
+            Array.Copy(baContent, 0, baResult, 0, baContent.Length);
+            return baResult;
+        }
 
-		// 将byte[]转换为字符串，自动探测编码方式
-		public static string ToString(byte [] baContent)
-		{
-			ArrayList encodings = new ArrayList();
+        // 将byte[]转换为字符串，自动探测编码方式
+        public static string ToString(byte[] baContent)
+        {
+            ArrayList encodings = new ArrayList();
 
-			encodings.Add(Encoding.UTF8);
-			encodings.Add(Encoding.Unicode);
+            encodings.Add(Encoding.UTF8);
+            encodings.Add(Encoding.Unicode);
 
-			for(int i=0;i<encodings.Count;i++)
-			{
-				Encoding encoding = (Encoding)encodings[i];
+            for (int i = 0; i < encodings.Count; i++)
+            {
+                Encoding encoding = (Encoding)encodings[i];
 
-				byte [] Preamble = encoding.GetPreamble();
+                byte[] Preamble = encoding.GetPreamble();
 
-				if (baContent.Length < Preamble.Length)
-					continue;
+                if (baContent.Length < Preamble.Length)
+                    continue;
 
-				if (ByteArray.Compare(baContent, Preamble, Preamble.Length) == 0)
-					return encoding.GetString(baContent,
-						Preamble.Length,
-						baContent.Length - Preamble.Length);
-			}
+                if (ByteArray.Compare(baContent, Preamble, Preamble.Length) == 0)
+                    return encoding.GetString(baContent,
+                        Preamble.Length,
+                        baContent.Length - Preamble.Length);
+            }
 
-			// 缺省当作UTF8
-			return Encoding.UTF8.GetString(baContent);
-		}
+            // 缺省当作UTF8
+            return Encoding.UTF8.GetString(baContent);
+        }
 
-		// byte[] 到 字符串
-		public static string ToString(byte[] bytes,
-			Encoding encoding)
-		{
-			int nIndex = 0;
-			int nCount = bytes.Length;
-			byte[] baPreamble = encoding.GetPreamble();
-			if (baPreamble != null
-				&& baPreamble.Length != 0
-				&& bytes.Length >= baPreamble.Length)
-			{
-				byte[] temp = new byte[baPreamble.Length];
-				Array.Copy(bytes,
-					0,
-					temp,
-					0,
-					temp.Length);
+        // byte[] 到 字符串
+        public static string ToString(byte[] bytes,
+            Encoding encoding)
+        {
+            int nIndex = 0;
+            int nCount = bytes.Length;
+            byte[] baPreamble = encoding.GetPreamble();
+            if (baPreamble != null
+                && baPreamble.Length != 0
+                && bytes.Length >= baPreamble.Length)
+            {
+                byte[] temp = new byte[baPreamble.Length];
+                Array.Copy(bytes,
+                    0,
+                    temp,
+                    0,
+                    temp.Length);
 
-				bool bEqual = true;
-				for(int i=0;i<temp.Length;i++)
-				{
-					if (temp[i] != baPreamble[i])
-					{
-						bEqual = false;
-						break;
-					}
-				}
+                bool bEqual = true;
+                for (int i = 0; i < temp.Length; i++)
+                {
+                    if (temp[i] != baPreamble[i])
+                    {
+                        bEqual = false;
+                        break;
+                    }
+                }
 
-				if (bEqual == true)
-				{
-					nIndex = temp.Length;
-					nCount = bytes.Length - temp.Length;
-				}
-			}
+                if (bEqual == true)
+                {
+                    nIndex = temp.Length;
+                    nCount = bytes.Length - temp.Length;
+                }
+            }
 
-			return encoding.GetString(bytes,
-				nIndex,
-				nCount);
-		}
-
-
-		// 比较两个byte[]数组是否相等。
-		// parameter:
-		//		timestamp1: 第一个byte[]数组
-		//		timestamp2: 第二个byte[]数组
-		// return:
-		//		0   相等
-		//		大于或者小于0   不等。先比较长度。长度相等，再逐个字符相减。
-		public static int Compare(
-			byte[] bytes1,
-			byte[] bytes2)
-		{
-			if (bytes1 == null	&& bytes2 == null)
-				return 0;
-			if (bytes1 == null)
-				return -1;
-			if (bytes2 == null)
-				return 1;
-
-			int nDelta = bytes1.Length - bytes2.Length;
-			if (nDelta != 0)
-				return nDelta;
-
-			for(int i=0;i<bytes1.Length;i++)
-			{
-				nDelta = bytes1[i] - bytes2[i];
-				if (nDelta != 0)
-					return nDelta;
-			}
-
-			return 0;
-		}
-
-		// 比较两个byte数组的局部
-		public static int Compare(
-			byte[] bytes1,
-			byte[] bytes2, 
-			int nLength)
-		{
-			if (bytes1.Length < nLength || bytes2.Length < nLength)
-				return Compare(bytes1, bytes2, Math.Min(bytes1.Length, bytes2.Length));
-
-			for(int i=0;i<nLength;i++)
-			{
-				int nDelta = bytes1[i] - bytes2[i];
-				if (nDelta != 0)
-					return nDelta;
-			}
-
-			return 0;
-		}
+            return encoding.GetString(bytes,
+                nIndex,
+                nCount);
+        }
 
 
-		public static int IndexOf(byte [] source,
-			byte v,
-			int nStartPos)
-		{
-			for(int i=nStartPos;i<source.Length;i++)
-			{
-				if (source[i] == v)
-					return i;
-			}
-			return -1;
-		}
-		// 确保数组尺寸足够
-		public static byte [] EnsureSize(byte [] source,
-			int nSize)
-		{
-			if (source == null) 
-			{
-				return new byte[nSize];
-			}
+        // 比较两个byte[]数组是否相等。
+        // parameter:
+        //		timestamp1: 第一个byte[]数组
+        //		timestamp2: 第二个byte[]数组
+        // return:
+        //		0   相等
+        //		大于或者小于0   不等。先比较长度。长度相等，再逐个字符相减。
+        public static int Compare(
+            byte[] bytes1,
+            byte[] bytes2)
+        {
+            if (bytes1 == null && bytes2 == null)
+                return 0;
+            if (bytes1 == null)
+                return -1;
+            if (bytes2 == null)
+                return 1;
 
-			if (source.Length < nSize) 
-			{
-				byte [] temp = new byte [nSize];
-				Array.Copy(source, 
-					0,
-					temp,
-					0,
-					source.Length);
-				return temp;	// 尺寸不够，已经重新分配，并且继承了原有内容
-			}
+            int nDelta = bytes1.Length - bytes2.Length;
+            if (nDelta != 0)
+                return nDelta;
 
-			return source;	// 尺寸足够
-		}
+            for (int i = 0; i < bytes1.Length; i++)
+            {
+                nDelta = bytes1[i] - bytes2[i];
+                if (nDelta != 0)
+                    return nDelta;
+            }
+
+            return 0;
+        }
+
+        // 比较两个byte数组的局部
+        public static int Compare(
+            byte[] bytes1,
+            byte[] bytes2,
+            int nLength)
+        {
+            if (bytes1.Length < nLength || bytes2.Length < nLength)
+                return Compare(bytes1, bytes2, Math.Min(bytes1.Length, bytes2.Length));
+
+            for (int i = 0; i < nLength; i++)
+            {
+                int nDelta = bytes1[i] - bytes2[i];
+                if (nDelta != 0)
+                    return nDelta;
+            }
+
+            return 0;
+        }
 
 
-		// 在缓冲区尾部追加一个字节
-		public static byte[] Add(byte[] source,
-			byte v)
-		{
-			int nIndex = -1;
-			if (source != null) 
-			{
-				nIndex = source.Length;
-				source = EnsureSize(source, source.Length + 1);
-			}
-			else 
-			{
-				nIndex = 0;
-				source = EnsureSize(source, 1);
-			}
+        public static int IndexOf(byte[] source,
+            byte v,
+            int nStartPos)
+        {
+            for (int i = nStartPos; i < source.Length; i++)
+            {
+                if (source[i] == v)
+                    return i;
+            }
+            return -1;
+        }
+        // 确保数组尺寸足够
+        public static byte[] EnsureSize(byte[] source,
+            int nSize)
+        {
+            if (source == null)
+            {
+                return new byte[nSize];
+            }
 
-			source[nIndex] = v;
+            if (source.Length < nSize)
+            {
+                byte[] temp = new byte[nSize];
+                Array.Copy(source,
+                    0,
+                    temp,
+                    0,
+                    source.Length);
+                return temp;	// 尺寸不够，已经重新分配，并且继承了原有内容
+            }
 
-			return source;
-		}
+            return source;	// 尺寸足够
+        }
 
-		// 在缓冲区尾部追加若干字节
-		public static byte[] Add(byte[] source,
-			byte[] v)
-		{
-			int nIndex = -1;
-			if (source != null) 
-			{
-				nIndex = source.Length;
-				source = EnsureSize(source, source.Length + v.Length);
-			}
-			else 
-			{
+
+        // 在缓冲区尾部追加一个字节
+        public static byte[] Add(byte[] source,
+            byte v)
+        {
+            int nIndex = -1;
+            if (source != null)
+            {
+                nIndex = source.Length;
+                source = EnsureSize(source, source.Length + 1);
+            }
+            else
+            {
+                nIndex = 0;
+                source = EnsureSize(source, 1);
+            }
+
+            source[nIndex] = v;
+
+            return source;
+        }
+
+        // 在缓冲区尾部追加若干字节
+        public static byte[] Add(byte[] source,
+            byte[] v)
+        {
+            int nIndex = -1;
+            if (source != null)
+            {
+                nIndex = source.Length;
+                source = EnsureSize(source, source.Length + v.Length);
+            }
+            else
+            {
                 // 2011/1/22
                 if (v == null)
                     return null;
-				nIndex = 0;
-				source = EnsureSize(source, v.Length);
-			}
+                nIndex = 0;
+                source = EnsureSize(source, v.Length);
+            }
 
-			Array.Copy(v,0,source, nIndex, v.Length);
+            Array.Copy(v, 0, source, nIndex, v.Length);
 
-			return source;
-		}
+            return source;
+        }
 
         // 2011/9/12
         // 在缓冲区尾部追加若干字节
@@ -267,118 +267,117 @@ namespace DigitalPlatform
             return source;
         }
 
-		// 得到用16进制表示的时间戳字符串
-		public static string GetHexTimeStampString(byte [] baTimeStamp)
-		{
-			if (baTimeStamp == null)
-				return "";
-			string strText = "";
-			for(int i=0;i<baTimeStamp.Length;i++) 
-			{
-				//string strHex = String.Format("{0,2:X}",baTimeStamp[i]);
-				string strHex = Convert.ToString(baTimeStamp[i], 16);
-				strText +=  strHex.PadLeft(2, '0');
-			}
+        // 得到用16进制表示的时间戳字符串
+        public static string GetHexTimeStampString(byte[] baTimeStamp)
+        {
+            if (baTimeStamp == null)
+                return "";
+            StringBuilder text = new StringBuilder();
+            for (int i = 0; i < baTimeStamp.Length; i++)
+            {
+                //string strHex = String.Format("{0,2:X}",baTimeStamp[i]);
+                string strHex = Convert.ToString(baTimeStamp[i], 16);
+                text.Append(strHex.PadLeft(2, '0'));
+            }
 
-			return strText;
-		}
+            return text.ToString();
+        }
 
-		// 得到byte[]类型的时间戳
-		public static byte[] GetTimeStampByteArray(string strHexTimeStamp)
-		{
-			if (string.IsNullOrEmpty(strHexTimeStamp) == true)
-				return null;
+        // 得到byte[]类型的时间戳
+        public static byte[] GetTimeStampByteArray(string strHexTimeStamp)
+        {
+            if (string.IsNullOrEmpty(strHexTimeStamp) == true)
+                return null;
 
-			byte [] result = new byte[strHexTimeStamp.Length / 2];
+            byte[] result = new byte[strHexTimeStamp.Length / 2];
 
-			for(int i=0;i<strHexTimeStamp.Length / 2;i++)
-			{
-				string strHex = strHexTimeStamp.Substring(i*2, 2);
-				result[i] = Convert.ToByte(strHex, 16);
+            for (int i = 0; i < strHexTimeStamp.Length / 2; i++)
+            {
+                string strHex = strHexTimeStamp.Substring(i * 2, 2);
+                result[i] = Convert.ToByte(strHex, 16);
+            }
 
-			}
+            return result;
+        }
+    }
 
-			return result;
-		}
-	}
+    /*
+    /// <summary>
+    /// 一般性、全局函数
+    /// </summary>
+    public class General
+    {
+        public static long min(long a, long b)
+        {
+            return a < b ? a : b;
+        }
 
-	/*
-	/// <summary>
-	/// 一般性、全局函数
-	/// </summary>
-	public class General
-	{
-		public static long min(long a, long b)
-		{
-			return a < b ? a : b;
-		}
+        public static int min(int a, int b)
+        {
+            return a < b ? a : b;
+        }
 
-		public static int min(int a, int b)
-		{
-			return a < b ? a : b;
-		}
+        public static long max(long a, long b)
+        {
+            return a > b ? a : b;
+        }
 
-		public static long max(long a, long b)
-		{
-			return a > b ? a : b;
-		}
+        public static int max(int a, int b)
+        {
+            return a > b ? a : b;
+        }
+    }
+    */
 
-		public static int max(int a, int b)
-		{
-			return a > b ? a : b;
-		}
-	}
-	*/
-
-	// 编写者: 任延华
-	public class ConvertUtil
-	{
+    // 编写者: 任延华
+    public class ConvertUtil
+    {
 
         // 用CopyTo()即可
-		// 把包含string对象的ArrayList转换为string[]类型
+        // 把包含string对象的ArrayList转换为string[]类型
         // parameters:
         //      nStartCol   开始的列号。一般为0
         public static string[] GetStringArray(
             int nStartCol,
             ArrayList aText)
-		{
-			string[] result = new string[aText.Count+nStartCol];
-			for(int i=0;i<aText.Count;i++)
-			{
-				result[i+nStartCol] = (string)aText[i];
-			}
-			return result;
-		}
+        {
+            string[] result = new string[aText.Count + nStartCol];
+            for (int i = 0; i < aText.Count; i++)
+            {
+                result[i + nStartCol] = (string)aText[i];
+            }
+            return result;
+        }
 
-		//字符串到int32
-		public static int S2Int32(string strText)
-		{
-			int nTemp = 0;
-			try
-			{
-				nTemp = Convert.ToInt32(strText);
-			}
-			catch(Exception ex)
-			{
-				throw(new Exception ("配置文件不合适的值:"+strText+"\r\n"+ex.Message ));
-			}
-			return nTemp;
-		}
+        //字符串到int32
+        public static int S2Int32(string strText)
+        {
+            int nTemp = 0;
+            try
+            {
+                nTemp = Convert.ToInt32(strText);
+            }
+            catch (Exception ex)
+            {
+                throw (new Exception("配置文件不合适的值:" + strText + "\r\n" + ex.Message));
+            }
+            return nTemp;
+        }
 
-		//字符串到int32带指定进制版本
-		public static int S2Int32(string strText,int nBase)
-		{
-			int nTemp = 0;
-			try
-			{
-				nTemp = Convert.ToInt32(strText,nBase);
-			}
-			catch(Exception ex)
-			{
-				throw(new Exception ("配置文件不合适的值:"+strText+"\r\n"+ex.Message ));
-			}
-			return nTemp;
-		}
+        //字符串到int32带指定进制版本
+        public static int S2Int32(string strText, int nBase)
+        {
+            int nTemp = 0;
+            try
+            {
+                nTemp = Convert.ToInt32(strText, nBase);
+            }
+            catch (Exception ex)
+            {
+                throw (new Exception("配置文件不合适的值:" + strText + "\r\n" + ex.Message));
+            }
+            return nTemp;
+        }
 
         // 检索范围是否合法,并返回真正能够取的长度
         // parameter:
@@ -411,7 +410,7 @@ namespace DigitalPlatform
             if (lStart != 0
                 && lStart >= lTotalLength)
             {
-                strError = "范围错误: 起始值 "+lStart.ToString()+" 大于总长度 "+lTotalLength.ToString()+"\r\n";
+                strError = "范围错误: 起始值 " + lStart.ToString() + " 大于总长度 " + lTotalLength.ToString() + "\r\n";
                 return -1;
             }
 
@@ -440,7 +439,7 @@ namespace DigitalPlatform
 
             return 0;
         }
-	}
+    }
 
 #if NO
 

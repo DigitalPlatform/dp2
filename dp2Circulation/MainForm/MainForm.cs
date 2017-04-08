@@ -1712,22 +1712,14 @@ Stack:
 
         private void MenuItem_openTestForm_Click(object sender, EventArgs e)
         {
-#if NO
-            TestForm form = new TestForm();
-            form.MdiParent = this;
-            form.MainForm = this;
-            form.Show();
-#endif
-
-#if NO
-            if (Control.ModifierKeys == Keys.Control
-                && StringUtil.IsDevelopMode() == true)
-                OpenWindow<TestingForm>();
-            else
-                OpenWindow<TestForm>();
-#endif
-            OpenWindow<TestingForm>();
-
+            {
+                if (Control.ModifierKeys == Keys.Control
+                    && StringUtil.IsDevelopMode() == true)
+                    OpenWindow<TestingForm>();
+                else
+                    OpenWindow<TestForm>();
+            }
+            // OpenWindow<TestingForm>();
         }
 
         // 打开种次号窗

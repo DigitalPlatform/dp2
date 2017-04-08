@@ -940,6 +940,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private string CreateTimeField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string LastAccessTimeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string LastWriteTimeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string NameField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -964,6 +970,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.CreateTimeField, value) != true)) {
                     this.CreateTimeField = value;
                     this.RaisePropertyChanged("CreateTime");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string LastAccessTime {
+            get {
+                return this.LastAccessTimeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.LastAccessTimeField, value) != true)) {
+                    this.LastAccessTimeField = value;
+                    this.RaisePropertyChanged("LastAccessTime");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string LastWriteTime {
+            get {
+                return this.LastWriteTimeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.LastWriteTimeField, value) != true)) {
+                    this.LastWriteTimeField = value;
+                    this.RaisePropertyChanged("LastWriteTime");
                 }
             }
         }

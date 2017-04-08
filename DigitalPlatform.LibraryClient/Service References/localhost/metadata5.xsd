@@ -290,6 +290,8 @@
   <xs:complexType name="FileItemInfo">
     <xs:sequence>
       <xs:element minOccurs="0" name="CreateTime" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="LastAccessTime" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="LastWriteTime" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Size" type="xs:long" />
     </xs:sequence>

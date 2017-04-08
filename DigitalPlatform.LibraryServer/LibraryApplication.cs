@@ -15531,6 +15531,13 @@ strLibraryCode);    // 读者所在的馆代码
         public string Name = ""; // 文件(或目录)名
         [DataMember]
         public string CreateTime = "";   // 创建时间。本地时间 "u" 字符串
+
+        // 2017/4/8
+        [DataMember]
+        public string LastWriteTime = "";   // 本地时间 "u" 字符串
+        [DataMember]
+        public string LastAccessTime = "";   // 本地时间 "u" 字符串
+
         [DataMember]
         public long Size = 0;   // 尺寸。-1 表示这是目录对象
     }

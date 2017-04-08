@@ -2156,3 +2156,201 @@ merge_dlg.UiState);
                         + " 发生修改 " + nModifyCount + " 条</div>");
             }
         }
+
+
+
+		~~~~~~~~~~~~~~~
+
+		        // 老版本，没有 channel 参数
+        // 准备DOM和书目摘要等
+        // parameters:
+        //      bFillSummaryColumn  是否要填充书目摘要列。如果为 false，则只设定 info.BiblioRecPath 的值
+        internal virtual int GetSummaries(
+            bool bFillSummaryColumn,
+            string [] summary_col_names,
+            List<DigitalPlatform.LibraryClient.localhost.Record> records,
+            out List<RecordInfo> infos,
+            out string strError)
+        {
+            strError = "";
+            infos = new List<RecordInfo>();
+
+            // 准备DOM和书目摘要
+            for (int i = 0; i < records.Count; i++)
+            {
+                Application.DoEvents();
+
+                if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断1";
+                        return -1;
+                    }
+
+                RecordInfo info = new RecordInfo();
+                info.Record = records[i];
+                infos.Add(info);
+
+                if (info.Record.RecordBody == null)
+                {
+                    strError = "请升级dp2Kernel到最新版本";
+                    return -1;
+                }
+
+                if (info.Record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
+                    continue;
+
+                info.Dom = new XmlDocument();
+                try
+                {
+                    info.Dom.LoadXml(info.Record.RecordBody.Xml);
+                }
+                catch (Exception ex)
+                {
+                    strError = "册记录的XML装入DOM时出错: " + ex.Message;
+                    return -1;
+                }
+
+                // 准备书目记录路径
+                string strParentID = DomUtil.GetElementText(info.Dom.DocumentElement,
+"parent");
+                string strBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName(Global.GetDbName(info.Record.Path));
+                if (string.IsNullOrEmpty(strBiblioDbName) == true)
+                {
+                    strError = "根据册记录路径 '" + info.Record.Path + "' 获得书目库名时出错";
+                    return -1;
+                }
+                info.BiblioRecPath = strBiblioDbName + "/" + strParentID;
+            }
+
+            // 准备摘要
+            if (bFillSummaryColumn == true)
+            {
+                if (summary_col_names == null || summary_col_names.Length == 0)
+                {
+                    strError = "当 bFillSummaryColumn 为 true 的时候，summary_col_names 不应为空";
+                    return -1;
+                }
+
+                // 归并书目记录路径
+                List<string> bibliorecpaths = new List<string>();
+                foreach (RecordInfo info in infos)
+                {
+                    bibliorecpaths.Add(info.BiblioRecPath);
+                }
+
+                // 去重
+                StringUtil.RemoveDupNoSort(ref bibliorecpaths);
+
+                // 看看cache中是否已经存在，如果已经存在则不再从服务器取
+                for (int i = 0; i < bibliorecpaths.Count; i++)
+                {
+                    string strPath = bibliorecpaths[i];
+                    SummaryInfo summary = (SummaryInfo)this.m_summaryTable[strPath];
+                    if (summary != null)
+                    {
+                        bibliorecpaths.RemoveAt(i);
+                        i--;
+                    }
+                }
+
+                // 从服务器获取
+                if (bibliorecpaths.Count > 0)
+                {
+                REDO_GETBIBLIOINFO_0:
+                    string strCommand = "@path-list:" + StringUtil.MakePathList(bibliorecpaths);
+
+#if NO
+                    string[] formats = new string[2];
+                    formats[0] = "summary";
+                    formats[1] = "@isbnissn";
+                    formats[2] = "targetrecpath";
+#endif
+
+                    string[] results = null;
+                    byte[] timestamp = null;
+
+                    // stop.SetMessage("正在装入书目记录 '" + bibliorecpaths[0] + "' 等的摘要 ...");
+
+                    // TODO: 有没有可能希望取的事项数目一次性取得没有取够?
+                REDO_GETBIBLIOINFO:
+                    long lRet = Channel.GetBiblioInfos(
+                        stop,
+                        strCommand,
+                        "",
+                        summary_col_names,
+                        out results,
+                        out timestamp,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        DialogResult temp_result = MessageBox.Show(this,
+        strError + "\r\n\r\n是否重试?",
+        this.FormCaption,
+        MessageBoxButtons.RetryCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                        if (temp_result == DialogResult.Retry)
+                            goto REDO_GETBIBLIOINFO;
+                    }
+                    if (lRet == -1 || lRet == 0)
+                    {
+                        if (lRet == 0 && String.IsNullOrEmpty(strError) == true)
+                            strError = "书目记录 '" + StringUtil.MakePathList(bibliorecpaths) + "' 不存在";
+
+                        strError = "获得书目摘要时发生错误: " + strError;
+                        // 如果results.Length表现正常，其实还可以继续处理
+                        if (results != null /* && results.Length == 2 * bibliorecpaths.Count */)
+                        {
+                        }
+                        else
+                            return -1;
+                    }
+
+
+                    if (results != null/* && results.Length == 2 * bibliorecpaths.Count*/)
+                    {
+                        // Debug.Assert(results != null && results.Length == 2 * bibliorecpaths.Count, "results必须包含 " + (2 * bibliorecpaths.Count).ToString() + " 个元素");
+
+                        // 放入缓存
+                        for (int i = 0; i < results.Length / summary_col_names.Length; i++)
+                        {
+                            SummaryInfo summary = new SummaryInfo();
+
+                            summary.Values = new string[summary_col_names.Length];
+                            for (int j = 0; j < summary_col_names.Length; j++)
+                            {
+                                summary.Values[j] = results[i * summary_col_names.Length + j];
+                            }
+
+                            this.m_summaryTable[bibliorecpaths[i]] = summary;
+                        }
+                    }
+
+                    if (results != null && results.Length != summary_col_names.Length * bibliorecpaths.Count)
+                    {
+                        // 没有取够，需要继续处理
+                        bibliorecpaths.RemoveRange(0, results.Length / summary_col_names.Length);
+                        goto REDO_GETBIBLIOINFO_0;
+                    }
+                }
+
+                // 挂接到每个记录附近
+                foreach (RecordInfo info in infos)
+                {
+                    SummaryInfo summary = (SummaryInfo)this.m_summaryTable[info.BiblioRecPath];
+                    if (summary == null)
+                    {
+                        strError = "缓存中找不到书目记录 '" + info.BiblioRecPath + "' 的摘要事项";
+                        return -1;
+                    }
+
+                    info.SummaryInfo = summary;
+                }
+
+                // 避免cache占据的内存太多
+                if (this.m_summaryTable.Count > 1000)
+                    this.m_summaryTable.Clear();
+            }
+
+            return 0;
+        }

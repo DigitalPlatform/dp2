@@ -22,6 +22,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -253,6 +254,8 @@ namespace dp2Circulation
 #endif
 
             API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
+
+            this.Channel = null;    // testing
         }
 
         private void ItemHandoverForm_FormClosing(object sender,
@@ -500,16 +503,23 @@ this.splitContainer_inAndOutof,
 
             int nDupCount = 0;
             string strRecPathFilename = Path.GetTempFileName();
+
+            LibraryChannel channel = this.GetChannel();
+
             try
             {
-                nRet = ConvertBarcodeFile(dlg.FileName,
+                nRet = ConvertBarcodeFile(
+                    channel,
+                    dlg.FileName,
                     strRecPathFilename,
                     out nDupCount,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                nRet = LoadFromRecPathFile(strRecPathFilename,
+                nRet = LoadFromRecPathFile(
+                    channel,
+                    strRecPathFilename,
                     this.comboBox_load_type.Text,
                     true,
                     new string[] { "summary", "@isbnissn", "targetrecpath" },
@@ -520,6 +530,8 @@ this.splitContainer_inAndOutof,
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 if (string.IsNullOrEmpty(strRecPathFilename) == false)
                 {
                     File.Delete(strRecPathFilename);
@@ -778,115 +790,122 @@ this.splitContainer_inAndOutof,
                 Debug.Assert(lines.Count == items.Count, "");
             }
 #endif
-
             List<DigitalPlatform.LibraryClient.localhost.Record> records = new List<DigitalPlatform.LibraryClient.localhost.Record>();
 
-            // 集中获取全部册记录信息
-            for (; ; )
-            {
-                if (stop != null && stop.State != 0)
-                {
-                    strError = "用户中断1";
-                    return -1;
-                }
+            LibraryChannel channel = this.GetChannel();
 
-                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
-
-                string[] paths = new string[lines.Count];
-                lines.CopyTo(paths);
-            REDO_GETRECORDS:
-                long lRet = this.Channel.GetBrowseRecords(
-                    this.stop,
-                    paths,
-                    "id,xml,timestamp", // 注意，包含了 timestamp
-                    out searchresults,
-                    out strError);
-                if (lRet == -1)
-                {
-                    if (this.InvokeRequired == false)
-                    {
-                        DialogResult temp_result = MessageBox.Show(this,
-        strError + "\r\n\r\n是否重试?",
-        this.FormCaption,
-        MessageBoxButtons.RetryCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button1);
-                        if (temp_result == DialogResult.Retry)
-                            goto REDO_GETRECORDS;
-                    }
-                    return -1;
-                }
-
-                records.AddRange(searchresults);
-
-                // 去掉已经做过的一部分
-                lines.RemoveRange(0, searchresults.Length);
-
-                if (lines.Count == 0)
-                    break;
-            }
-
-            // 准备 DOM 和书目摘要等
-            List<RecordInfo> infos = null;
-            int nRet = GetSummaries(
-                bFillSummaryColumn,
-                summary_col_names,
-                records,
-                out infos,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            Debug.Assert(records.Count == infos.Count, "");
-
-            List<dp2Circulation.AccountBookForm.OrderInfo> orderinfos = new List<dp2Circulation.AccountBookForm.OrderInfo>();
-
-            if (this.InvokeRequired == false)
-                this.listView_in.BeginUpdate();
             try
             {
-                for (int i = 0; i < infos.Count; i++)
+
+                // 集中获取全部册记录信息
+                for (; ; )
                 {
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断1";
-                            return -1;
-                        }
-                    }
-
-                    RecordInfo info = infos[i];
-
-                    if (info.Record.RecordBody == null)
-                    {
-                        strError = "请升级 dp2Kernel 到最新版本";
+                        strError = "用户中断1";
                         return -1;
                     }
-                    // stop.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
 
-                    string strOutputItemRecPath = "";
-                    ListViewItem item = null;
+                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
-                    if (items != null)
-                        item = items[i];
-
-                    // 根据册条码号，装入册记录
-                    // return: 
-                    //      -2  册条码号已经在list中存在了
-                    //      -1  出错
-                    //      1   成功
-                    nRet = LoadOneItem(
-                        this.LoadType,  // this.comboBox_load_type.Text,
-                        bFillSummaryColumn,
-                        summary_col_names,
-                        "@path:" + info.Record.Path,
-                        info,
-                        this.listView_in,
-                        null,
-                        out strOutputItemRecPath,
-                        ref item,
+                    string[] paths = new string[lines.Count];
+                    lines.CopyTo(paths);
+                REDO_GETRECORDS:
+                    long lRet = channel.GetBrowseRecords(
+                        this.stop,
+                        paths,
+                        "id,xml,timestamp", // 注意，包含了 timestamp
+                        out searchresults,
                         out strError);
+                    if (lRet == -1)
+                    {
+                        if (this.InvokeRequired == false)
+                        {
+                            DialogResult temp_result = MessageBox.Show(this,
+            strError + "\r\n\r\n是否重试?",
+            this.FormCaption,
+            MessageBoxButtons.RetryCancel,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button1);
+                            if (temp_result == DialogResult.Retry)
+                                goto REDO_GETRECORDS;
+                        }
+                        return -1;
+                    }
+
+                    records.AddRange(searchresults);
+
+                    // 去掉已经做过的一部分
+                    lines.RemoveRange(0, searchresults.Length);
+
+                    if (lines.Count == 0)
+                        break;
+                }
+
+
+                // 准备 DOM 和书目摘要等
+                List<RecordInfo> infos = null;
+                int nRet = GetSummaries(
+                    channel,
+                    bFillSummaryColumn,
+                    summary_col_names,
+                    records,
+                    out infos,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                Debug.Assert(records.Count == infos.Count, "");
+
+                List<dp2Circulation.AccountBookForm.OrderInfo> orderinfos = new List<dp2Circulation.AccountBookForm.OrderInfo>();
+
+                if (this.InvokeRequired == false)
+                    this.listView_in.BeginUpdate();
+                try
+                {
+                    for (int i = 0; i < infos.Count; i++)
+                    {
+                        if (stop != null)
+                        {
+                            if (stop.State != 0)
+                            {
+                                strError = "用户中断1";
+                                return -1;
+                            }
+                        }
+
+                        RecordInfo info = infos[i];
+
+                        if (info.Record.RecordBody == null)
+                        {
+                            strError = "请升级 dp2Kernel 到最新版本";
+                            return -1;
+                        }
+                        // stop.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
+
+                        string strOutputItemRecPath = "";
+                        ListViewItem item = null;
+
+                        if (items != null)
+                            item = items[i];
+
+                        // 根据册条码号，装入册记录
+                        // return: 
+                        //      -2  册条码号已经在list中存在了
+                        //      -1  出错
+                        //      1   成功
+                        nRet = LoadOneItem(
+                            channel,
+                            this.LoadType,  // this.comboBox_load_type.Text,
+                            bFillSummaryColumn,
+                            summary_col_names,
+                            "@path:" + info.Record.Path,
+                            info,
+                            this.listView_in,
+                            null,
+                            out strOutputItemRecPath,
+                            ref item,
+                            out strError);
 
 
 #if NO
@@ -905,13 +924,13 @@ this.splitContainer_inAndOutof,
                     }
 #endif
 
+                    }
                 }
-            }
-            finally
-            {
-                if (this.InvokeRequired == false)
-                    this.listView_in.EndUpdate();
-            }
+                finally
+                {
+                    if (this.InvokeRequired == false)
+                        this.listView_in.EndUpdate();
+                }
 
 #if NO
             // 从服务器获得订购记录的路径
@@ -925,7 +944,13 @@ this.splitContainer_inAndOutof,
             }
 #endif
 
-            return 0;
+                return 0;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+
         }
 
         // 设置listview栏目标题
@@ -1860,7 +1885,6 @@ this.splitContainer_inAndOutof,
             return 1;
         }
 
-
         // 汇报校验进行情况。
         // return:
         //      true    校验已经完成
@@ -1971,6 +1995,8 @@ this.splitContainer_inAndOutof,
             {
                 EnableControls(false);
 
+                LibraryChannel channel = this.GetChannel();
+
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在装载册 "
                     + this.textBox_verify_itemBarcode.Text
@@ -1996,6 +2022,7 @@ this.splitContainer_inAndOutof,
                     //      -1  出错
                     //      1   成功
                     int nRet = LoadOneItem(
+                        channel,
                         this.comboBox_load_type.Text,
                         true,
                         new string[] { "summary", "@isbnissn", "targetrecpath" },
@@ -2012,6 +2039,8 @@ this.splitContainer_inAndOutof,
                     stop.EndLoop();
                     stop.OnStop -= new StopEventHandler(this.DoStop);
                     stop.Initial("");
+
+                    this.ReturnChannel(channel);
 
                     EnableControls(true);
                 }
@@ -2078,11 +2107,14 @@ this.splitContainer_inAndOutof,
 
         void SetVerifyPageNextButtonEnabled()
         {
-            if (GetGreenItemCount() >= this.listView_in.Items.Count
-    && this.listView_outof.Items.Count == 0)
-                this.button_next.Enabled = true;
-            else
-                this.button_next.Enabled = false;
+            if (this.tabControl_main.SelectedTab == this.tabPage_verify)
+            {
+                if (GetGreenItemCount() >= this.listView_in.Items.Count
+        && this.listView_outof.Items.Count == 0)
+                    this.button_next.Enabled = true;
+                else
+                    this.button_next.Enabled = false;
+            }
         }
 
         // 查找条码匹配的ListViewItem事项
@@ -2300,7 +2332,6 @@ MessageBoxDefaultButton.Button2);
             // 检查当前排序状态和包含种价格列之间是否存在矛盾
             if (bHasBiblioPriceColumn(option) == true)
             {
-
                 if (this.SortColumns_in.Count != 0
                     && this.SortColumns_in[0].No == COLUMN_BIBLIORECPATH)
                 {
@@ -2687,7 +2718,8 @@ MessageBoxDefaultButton.Button2);
             return false;
         }
 
-        int BuildTableLine(PrintOption option,
+        int BuildTableLine(
+            PrintOption option,
             List<ListViewItem> items,
             string strFileName,
             int nPage,
@@ -2724,7 +2756,8 @@ MessageBoxDefaultButton.Button2);
                 if (string.IsNullOrEmpty(strBiblioRecPath) == false)
                 {
                     // TODO: 可以 cache，提高速度
-                    nRet = GetMarc(strBiblioRecPath,
+                    nRet = GetMarc(
+                        strBiblioRecPath,
                         out strMARC,
                         out strOutMarcSyntax,
                         out strError);
@@ -3152,10 +3185,13 @@ MessageBoxDefaultButton.Button2);
 
             string strRecPathFilename = Path.GetTempFileName();
 
+            LibraryChannel channel = this.GetChannel();
+
             try
             {
                 // 检索 批次号 和 馆藏地点 将命中的记录路径写入文件
                 int nRet = SearchBatchNoAndLocation(
+                    channel,
                     this.comboBox_load_type.Text,
                     strBatchNo,
                     strMatchLocation,
@@ -3164,7 +3200,9 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -1)
                     goto ERROR1;
 
-                nRet = LoadFromRecPathFile(strRecPathFilename,
+                nRet = LoadFromRecPathFile(
+                    channel,
+                    strRecPathFilename,
                     this.comboBox_load_type.Text,
                     true,
                     new string[] { "summary", "@isbnissn", "targetrecpath" },
@@ -3176,6 +3214,8 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 if (string.IsNullOrEmpty(strRecPathFilename) == false)
                 {
                     File.Delete(strRecPathFilename);
@@ -3679,7 +3719,6 @@ MessageBoxDefaultButton.Button2);
             SetGroupBackcolor(
                 this.listView_in,
                 nClickColumn);
-
         }
 
         // 对集合外列表进行排序
@@ -4261,7 +4300,6 @@ MessageBoxDefaultButton.Button2);
         {
             ListView list = (ListView)((MenuItem)sender).Tag;
 
-
             if (list.SelectedItems.Count == 0)
             {
                 MessageBox.Show(this, "尚未选定要移除的事项。");
@@ -4600,6 +4638,11 @@ MessageBoxDefaultButton.Button2);
             this.m_targetDbNameTable.Clear();
 
             EnableControls(false);
+
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在进行转移 ...");
             stop.BeginLoop();
@@ -4636,7 +4679,9 @@ MessageBoxDefaultButton.Button2);
                     //      0	没有必要转移。说明文字在strError中返回
                     //      1	成功转移
                     //      2   canceled
-                    int nRet = MoveOneRecord(item,
+                    int nRet = MoveOneRecord(
+                        channel,
+                        item,
                         out strNewItemRecPath,
                         out strError);
                     if (nRet == -1)
@@ -4686,10 +4731,11 @@ MessageBoxDefaultButton.Button2);
                 stop.Initial("");
                 stop.HideProgress();
 
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+
                 EnableControls(true);
             }
-
-
 
             if (nErrorCount > 0)
             {
@@ -4776,7 +4822,9 @@ MessageBoxDefaultButton.Button2);
         //      1   已经复制
         //      2   没有复制。因为两条记录内容相同，或者在对话框上点了“不覆盖”按钮
         //      3   没有复制。因为先前已经复制过了，或者处理过了
-        int CopyOneBiblioRecord(string strSourceBiblioRecPath,
+        int CopyOneBiblioRecord(
+            LibraryChannel channel,
+            string strSourceBiblioRecPath,
             string strTargetBiblioRecPath,
             out string strError)
         {
@@ -4795,7 +4843,7 @@ MessageBoxDefaultButton.Button2);
             string[] results = null;
             byte[] timestamp = null;
 
-            long lRet = Channel.GetBiblioInfos(
+            long lRet = channel.GetBiblioInfos(
                 stop,
                 strSourceBiblioRecPath,
                 "",
@@ -4849,7 +4897,7 @@ MessageBoxDefaultButton.Button2);
             results = null;
             byte[] target_timestamp = null;
 
-            lRet = Channel.GetBiblioInfos(
+            lRet = channel.GetBiblioInfos(
                 stop,
                 strTargetBiblioRecPath,
                 "",
@@ -4946,7 +4994,6 @@ MessageBoxDefaultButton.Button2);
             dlg.ShowDialog(this);
             this.MainForm.AppInfo.UnlinkFormState(dlg);
 
-
             if (dlg.DialogResult == DialogResult.Cancel)
                 return 0;   // 全部放弃
 
@@ -5004,7 +5051,7 @@ MessageBoxDefaultButton.Button2);
 
             byte[] baNewTimestamp = null;
             string strOutputPath = "";
-            lRet = Channel.SetBiblioInfo(
+            lRet = channel.SetBiblioInfo(
                 stop,
                 "change",
                 strTargetBiblioRecPath,
@@ -5133,7 +5180,9 @@ MessageBoxDefaultButton.Button2);
         //      -1  error
         //      0   canceled
         //      1   succeed
-        int MoveOneBiblioRecord(string strSourceBiblioRecPath,
+        int MoveOneBiblioRecord(
+            LibraryChannel channel,
+            string strSourceBiblioRecPath,
             out string strTargetBiblioRecPath,
             out string strError)
         {
@@ -5156,7 +5205,7 @@ MessageBoxDefaultButton.Button2);
 
             Debug.Assert(String.IsNullOrEmpty(strSourceBiblioRecPath) == false, "strSourceBiblioRecPath值不能为空");
 
-            long lRet = Channel.GetBiblioInfos(
+            long lRet = channel.GetBiblioInfos(
                 stop,
                 strSourceBiblioRecPath,
                 "",
@@ -5204,7 +5253,7 @@ MessageBoxDefaultButton.Button2);
             string strOutputPath = "";
             byte[] baNewTimestamp = null;
             string strOutputBiblio = "";
-            lRet = Channel.CopyBiblioInfo(
+            lRet = channel.CopyBiblioInfo(
                 stop,
                 "onlycopybiblio",   // 只复制书目记录，不复制下属的实体记录等
                 strSourceBiblioRecPath,
@@ -5213,24 +5262,11 @@ MessageBoxDefaultButton.Button2);
                 timestamp,
                 strTargetBiblioRecPath,
                 null,   // strSourceXml,
-                        "",
-                        out strOutputBiblio,
+                "",
+                out strOutputBiblio,
                 out strOutputPath,
                 out baNewTimestamp,
                 out strError);
-
-            /*
-            lRet = Channel.SetBiblioInfo(
-                stop,
-                "new",
-                strTargetBiblioRecPath,
-                "xml",
-                strSourceXml,
-                null,
-                out strOutputPath,
-                out baNewTimestamp,
-                out strError);
-             * */
             if (lRet == -1)
             {
                 strError = "创建书目记录 '" + strTargetBiblioRecPath + "' 时出错: " + strError;
@@ -5290,7 +5326,7 @@ MessageBoxDefaultButton.Button2);
                 return -1;
 
             // TODO: 以后看情况可以删除源书目记录?
-            lRet = Channel.SetBiblioInfo(
+            lRet = channel.SetBiblioInfo(
                 stop,
                 "change",
                 strSourceBiblioRecPath,
@@ -5380,7 +5416,9 @@ MessageBoxDefaultButton.Button2);
         //      0	没有必要转移。说明文字在strError中返回
         //      1	成功转移
         //      2   canceled
-        int MoveOneRecord(ListViewItem item,
+        int MoveOneRecord(
+            LibraryChannel channel,
+            ListViewItem item,
             out string strNewItemRecPath,
             out string strError)
         {
@@ -5412,7 +5450,9 @@ MessageBoxDefaultButton.Button2);
                 //      -1  error
                 //      0   canceled
                 //      1   succeed
-                nRet = MoveOneBiblioRecord(strSourceBiblioRecPath,
+                nRet = MoveOneBiblioRecord(
+                    channel,
+                    strSourceBiblioRecPath,
                     out strTargetBiblioRecPath,
                     out strError);
                 if (nRet == -1)
@@ -5453,7 +5493,9 @@ MessageBoxDefaultButton.Button2);
                 //      0   canceled
                 //      1   已经复制
                 //      2   没有复制。因为两条记录内容相同
-                nRet = CopyOneBiblioRecord(strSourceBiblioRecPath,
+                nRet = CopyOneBiblioRecord(
+                    channel,
+                    strSourceBiblioRecPath,
                     strTargetBiblioRecPath,
                     out strError);
                 if (nRet == -1)
@@ -5469,33 +5511,6 @@ MessageBoxDefaultButton.Button2);
                     // 仅仅是放弃了复制书目记录，而不是放弃整个处理过程
                 }
             }
-
-            /*
-            // 为转移，重新获得一次册记录
-            string strItemXml = "";
-            string strBiblioText = "";
-
-            string strOutputItemRecPath = "";
-            string strSourceBiblioRecPath = "";
-
-            byte[] item_timestamp = null;
-
-            lRet = Channel.GetItemInfo(
-                stop,
-                "@path:" + strItemRecPath,
-                "xml",
-                out strItemXml,
-                out strOutputItemRecPath,
-                out item_timestamp,
-                "recpath",
-                out strBiblioText,
-                out strSourceBiblioRecPath,
-                out strError);
-            if (lRet == -1 || lRet == 0)
-            {
-                return -1;
-            }
-             * */
 
             OriginItemData data = (OriginItemData)item.Tag;
             if (data == null)
@@ -5575,7 +5590,7 @@ MessageBoxDefaultButton.Button2);
 
             EntityInfo[] errorinfos = null;
 
-            lRet = Channel.SetEntities(
+            lRet = channel.SetEntities(
                 stop,
                 strTargetBiblioRecPath,
                 entities,
@@ -5833,6 +5848,10 @@ MessageBoxDefaultButton.Button2);
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在保存实体记录 ...");
             stop.BeginLoop();
@@ -5880,7 +5899,9 @@ MessageBoxDefaultButton.Button2);
                         && entity_list.Count > 0)
                     {
                         // 保存一个批次
-                        nRet = SaveOneBatchOrders(entity_list,
+                        nRet = SaveOneBatchOrders(
+                            channel,
+                            entity_list,
                             strPrevBiblioRecPath,
                             out strError);
                         if (nRet == -1)
@@ -5937,7 +5958,9 @@ MessageBoxDefaultButton.Button2);
                         && entity_list.Count > 0)
                 {
                     // 保存一个批次
-                    nRet = SaveOneBatchOrders(entity_list,
+                    nRet = SaveOneBatchOrders(
+                        channel,
+                        entity_list,
                         strPrevBiblioRecPath,
                         out strError);
                     if (nRet == -1)
@@ -5953,13 +5976,18 @@ MessageBoxDefaultButton.Button2);
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+
                 EnableControls(true);
             }
 
             return 0;
         }
 
-        int SaveOneBatchOrders(List<EntityInfo> entity_list,
+        int SaveOneBatchOrders(
+            LibraryChannel channel,
+            List<EntityInfo> entity_list,
             string strBiblioRecPath,
             out string strError)
         {
@@ -5969,7 +5997,7 @@ MessageBoxDefaultButton.Button2);
             entity_list.CopyTo(entities);
 
             EntityInfo[] errorinfos = null;
-            long lRet = Channel.SetEntities(
+            long lRet = channel.SetEntities(
                 stop,
                 strBiblioRecPath,
                 entities,
@@ -6137,13 +6165,14 @@ MessageBoxDefaultButton.Button2);
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在通知推荐订购的读者 ...");
             stop.BeginLoop();
 
             try
             {
-
                 Hashtable biblio_table = new Hashtable();
                 foreach (ListViewItem item in items)
                 {
@@ -6184,7 +6213,7 @@ MessageBoxDefaultButton.Button2);
 
                     byte[] baNewTimestamp = null;
                     string strOutputPath = "";
-                    long lRet = Channel.SetBiblioInfo(
+                    long lRet = channel.SetBiblioInfo(
                         stop,
                         "notifynewbook",
                         strBiblioRecPath,
@@ -6209,6 +6238,8 @@ MessageBoxDefaultButton.Button2);
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
@@ -6235,25 +6266,30 @@ MessageBoxDefaultButton.Button2);
 
             this.SourceStyle = "recpathfile";
 
-            // int nDupCount = 0;
-            nRet = LoadFromRecPathFile(dlg.FileName,
-                this.comboBox_load_type.Text,
-                true,
-                new string[] { "summary", "@isbnissn", "targetrecpath" },
-                (Control.ModifierKeys == Keys.Control ? false : true),
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
+            LibraryChannel channel = this.GetChannel();
+
+            try
+            {
+                // int nDupCount = 0;
+                nRet = LoadFromRecPathFile(
+                    channel,
+                    dlg.FileName,
+                    this.comboBox_load_type.Text,
+                    true,
+                    new string[] { "summary", "@isbnissn", "targetrecpath" },
+                    (Control.ModifierKeys == Keys.Control ? false : true),
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
 
             // 记忆文件名
             this.RecPathFilePath = dlg.FileName;
             this.Text = "典藏移交 " + Path.GetFileName(this.RecPathFilePath);
-            /*
-            if (nDupCount != 0)
-            {
-                MessageBox.Show(this, "装入过程中有 " + nDupCount.ToString() + "个重复条码事项被忽略。");
-            }
-             * */
 
             // 汇报数据装载情况。
             // return:
@@ -6591,6 +6627,7 @@ MessageBoxDefaultButton.Button2);
                         // 转换为记录路径
                         List<string> recpaths = new List<string>();
                         nRet = this.Container.ConvertItemBarcodeToRecPath(
+                            null,
                             barcodes,
                             out recpaths,
                             out strError);

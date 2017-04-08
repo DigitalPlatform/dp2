@@ -100,7 +100,6 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-
             if (strStyle == null)
                 strStyle = "";
 
@@ -466,6 +465,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 多轮上传的内容完成后，最后需要单独设置文件最后修改时间
                 string strLastWriteTime = StringUtil.GetStyleParam(strStyle, "last_write_time");
+                // parameters:
+                //      baTimeStamp 8 byte 的表示 ticks 的文件最后修改时间。应该是 GMT 时间
                 FileUtil.SetFileLastWriteTimeByTimestamp(strFilePath, ByteArray.GetTimeStampByteArray(strLastWriteTime));
                 baOutputTimestamp = FileUtil.GetFileTimestamp(strFilePath);
 
@@ -480,7 +481,19 @@ namespace DigitalPlatform.LibraryServer
                         {
                             foreach (ZipEntry e in zip)
                             {
-                                e.Extract(Path.GetDirectoryName(strFilePath), ExtractExistingFileAction.OverwriteSilently);
+                                string strTargetDir = Path.GetDirectoryName(strFilePath);
+                                e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
+                                // 2017/4/8 修正文件最后修改时间
+                                string strFullPath = Path.Combine(strTargetDir, e.FileName);
+                                if ((e.Attributes & FileAttributes.Directory) == 0)
+                                {
+                                    if (e.LastModified != File.GetLastWriteTime(strFullPath))
+                                    {
+                                        // 时间有可能不一致，可能是夏令时之类的问题
+                                        File.SetLastWriteTime(strFullPath, e.LastModified);
+                                    }
+                                    Debug.Assert(e.LastModified == File.GetLastWriteTime(strFullPath));
+                                }
                             }
                         }
 
@@ -548,6 +561,7 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
 
             long lTotalLength = 0;
+            strFilePath = strFilePath.Replace("/", "\\");
             FileInfo file = new FileInfo(strFilePath);
             if (file.Exists == false)
             {
@@ -732,7 +746,10 @@ namespace DigitalPlatform.LibraryServer
                     FileItemInfo info = new FileItemInfo();
                     infos.Add(info);
                     info.Name = si.FullName.Substring(strRootPath.Length);
-                    info.CreateTime = si.CreationTime.ToString("u");
+                    info.CreateTime = si.CreationTimeUtc.ToString("u");
+                    // 2017/4/8
+                    info.LastWriteTime = si.LastWriteTimeUtc.ToString("u");
+                    info.LastAccessTime = si.LastAccessTimeUtc.ToString("u");
 
                     if (si is DirectoryInfo)
                     {

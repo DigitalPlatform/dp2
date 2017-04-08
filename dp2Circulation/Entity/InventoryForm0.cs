@@ -18,6 +18,8 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 
+// this.Channel 用法
+
 namespace dp2Circulation
 {
     public partial class InventoryForm0 : BatchPrintFormBase
@@ -234,14 +236,18 @@ namespace dp2Circulation
             string strRecPathFilename = Path.GetTempFileName();
             try
             {
-                nRet = ConvertBarcodeFile(dlg.FileName,
+                nRet = ConvertBarcodeFile(
+                    this.Channel,   // ...
+                    dlg.FileName,
                     strRecPathFilename,
                     out nDupCount,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                nRet = LoadFromRecPathFile(strRecPathFilename,
+                nRet = LoadFromRecPathFile(
+                    this.Channel,
+                    strRecPathFilename,
                     this.comboBox_load_type.Text,
                     true,
                     new string[] { "summary", "@isbnissn", "targetrecpath" },
@@ -302,7 +308,9 @@ namespace dp2Circulation
             this.SourceStyle = "recpathfile";
 
             // int nDupCount = 0;
-            nRet = LoadFromRecPathFile(dlg.FileName,
+            nRet = LoadFromRecPathFile(
+                this.Channel,
+                dlg.FileName,
                 this.comboBox_load_type.Text,
                 true,
                 new string[] { "summary", "@isbnissn", "targetrecpath" },
