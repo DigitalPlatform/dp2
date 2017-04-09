@@ -1188,7 +1188,7 @@ this.DbType + "_search_form",
                     strTempBrowseStyle += ",format:@coldef:*/parent";
                 }
 
-                long lRet = Channel.GetSearchResult(
+                long lRet = this.Channel.GetSearchResult(
                     stop,
                     null,   // strResultSetName
                     lStart,
@@ -1303,7 +1303,9 @@ this.DbType + "_search_form",
                             //      -1  出错
                             //      0   相关数据库没有配置 parent id 浏览列
                             //      1   找到
-                            int nRet = GetBiblioRecPath(item,
+                            int nRet = GetBiblioRecPath(
+                                this.Channel,
+                                item,
             false,
             out nCol,
             out strBiblioRecPath,
@@ -1331,7 +1333,9 @@ this.DbType + "_search_form",
                         //      -1  出错
                         //      0   用户中断
                         //      1   完成
-                        int nRet = _fillBiblioSummaryColumn(items,
+                        int nRet = _fillBiblioSummaryColumn(
+                            this.Channel,
+                            items,
                             0,
                             false,
                             true,   // false,  // bAutoSearch
@@ -3945,7 +3949,9 @@ this.MainForm.DefaultFont);
                 //      -1  出错
                 //      0   相关数据库没有配置 parent id 浏览列
                 //      1   找到
-                nRet = GetBiblioRecPath(item,
+                nRet = GetBiblioRecPath(
+                    this.Channel,
+                    item,
                     true,
                     out nCol,
                     out strBiblioRecPath,
@@ -6181,7 +6187,7 @@ MessageBoxDefaultButton.Button1);
                     // return:
                     //      false   出现错误
                     //      true    成功
-                    if (FillLineByBarcode(strBarcode, item) == true)
+                    if (FillLineByBarcode(this.Channel, strBarcode, item) == true)
                     {
                         this.listView_records.Items.Add(item);
                         items.Add(item);
@@ -6314,7 +6320,9 @@ MessageBoxDefaultButton.Button1);
 
                     this.listView_records.Items.Add(item);
 
-                    FillLineByBarcode(strBarcode, item);
+                    FillLineByBarcode(this.Channel,
+                        strBarcode,
+                        item);
 
                     items.Add(item);
                 }
@@ -6714,7 +6722,9 @@ MessageBoxDefaultButton.Button1);
                 //      -1  出错
                 //      0   相关数据库没有配置 parent id 浏览列
                 //      1   找到
-                nRet = GetBiblioRecPath(item,
+                nRet = GetBiblioRecPath(
+                    this.Channel,
+                    item,
                     true,
                     out nCol,
                     out strBiblioRecPath,

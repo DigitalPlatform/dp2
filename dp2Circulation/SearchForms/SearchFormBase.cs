@@ -712,6 +712,8 @@ out strError);
                 this.EnableControls(false);
             }
 
+            LibraryChannel channel = this.GetChannel();
+
             try
             {
                 List<ListViewItem> items = new List<ListViewItem>();
@@ -731,7 +733,7 @@ out strError);
                     stop.SetProgressRange(0, items.Count);
 
                 BrowseLoader loader = new BrowseLoader();
-                loader.Channel = Channel;
+                loader.Channel = channel;
                 loader.Stop = stop;
                 loader.RecPaths = recpaths;
                 if (string.IsNullOrEmpty(strFormat) == true)
@@ -777,6 +779,8 @@ out strError);
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 if (stop != null && bBeginLoop == true)
                 {
                     stop.EndLoop();

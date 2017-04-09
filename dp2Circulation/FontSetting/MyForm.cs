@@ -1456,11 +1456,22 @@ out string strError)
         // 获得当前用户能管辖的全部馆代码
         public List<string> GetOwnerLibraryCodes()
         {
+            if (Global.IsGlobalUser(this.CurrentLibraryCodeList) == true)
+                return this.MainForm.GetAllLibraryCode();
+
+            return StringUtil.SplitList(this.CurrentLibraryCodeList);
+        }
+
+#if NO
+        // 获得当前用户能管辖的全部馆代码
+        public List<string> GetOwnerLibraryCodes()
+        {
             if (Global.IsGlobalUser(this.Channel.LibraryCodeList) == true)
                 return this.MainForm.GetAllLibraryCode();
 
             return StringUtil.SplitList(this.Channel.LibraryCodeList);
         }
+#endif
 
         #region 防止控件泄露
 

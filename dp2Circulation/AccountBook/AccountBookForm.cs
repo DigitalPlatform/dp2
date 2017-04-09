@@ -29,11 +29,11 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-
 using DigitalPlatform.dp2.Statis;
 
-// this.Channel 用法
+// 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
 namespace dp2Circulation
 {
@@ -231,18 +231,6 @@ namespace dp2Circulation
 
             CreateColumnHeader(this.listView_in);
 
-#if NO
-            LoadSize();
-
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
-
             // 2009/2/2 
             this.comboBox_load_type.Text = this.MainForm.AppInfo.GetString(
                 "accountbookform",
@@ -281,6 +269,8 @@ namespace dp2Circulation
                 "<无>");
 
             // API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
+
+            this.Channel = null;    // testing
         }
 
         void AppInfo_SaveMdiLayout(object sender, EventArgs e)
@@ -418,6 +408,9 @@ namespace dp2Circulation
             else
                 this.button_next.Enabled = false;
 
+            // sort page
+            this.comboBox_sort_sortStyle.Enabled = bEnable;
+
             // print page
             this.button_print_optionHTML.Enabled = bEnable;
             this.button_print_optionText.Enabled = bEnable;
@@ -481,199 +474,10 @@ namespace dp2Circulation
             return -1;
         }
 
-
-
-#if NO
-        class RecordInfo
-        {
-            public DigitalPlatform.LibraryClient.localhost.Record Record = null;    // 册记录
-            public XmlDocument Dom = null;  // 册记录XML装入DOM
-            public string BiblioRecPath = "";
-            public SummaryInfo SummaryInfo = null;  // 摘要信息
-        }
-
-        // 准备DOM和书目摘要等
-        int GetSummaries(
-            List<DigitalPlatform.LibraryClient.localhost.Record> records,
-            out List<RecordInfo> infos,
-            out string strError)
-        {
-            strError = "";
-            infos = new List<RecordInfo>();
-
-            // 准备DOM和书目摘要
-            for (int i = 0; i < records.Count; i++)
-            {
-                if (stop != null)
-                {
-                    if (stop.State != 0)
-                    {
-                        strError = "用户中断1";
-                        return -1;
-                    }
-                }
-
-                RecordInfo info = new RecordInfo();
-                info.Record = records[i];
-                infos.Add(info);
-
-                if (info.Record.RecordBody == null)
-                {
-                    strError = "请升级dp2Kernel到最新版本";
-                    return -1;
-                }
-
-                if (info.Record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
-                    continue;
-
-                info.Dom = new XmlDocument();
-                try
-                {
-                    info.Dom.LoadXml(info.Record.RecordBody.Xml);
-                }
-                catch (Exception ex)
-                {
-                    strError = "册记录的XML装入DOM时出错: " + ex.Message;
-                    return -1;
-                }
-
-                // 准备书目记录路径
-                string strParentID = DomUtil.GetElementText(info.Dom.DocumentElement,
-"parent");
-                string strBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName(Global.GetDbName(info.Record.Path));
-                if (string.IsNullOrEmpty(strBiblioDbName) == true)
-                {
-                    strError = "根据册记录路径 '" + info.Record.Path + "' 获得书目库名时出错";
-                    return -1;
-                }
-                info.BiblioRecPath = strBiblioDbName + "/" + strParentID;
-
-
-            }
-
-            // 准备摘要
-            if (this.checkBox_load_fillBiblioSummary.Checked == true)
-            {
-                // 归并书目记录路径
-                List<string> bibliorecpaths = new List<string>();
-                foreach (RecordInfo info in infos)
-                {
-                    bibliorecpaths.Add(info.BiblioRecPath);
-                }
-
-                // 去重
-                StringUtil.RemoveDupNoSort(ref bibliorecpaths);
-
-                // 看看cache中是否已经存在，如果已经存在则不再从服务器取
-                for (int i = 0; i < bibliorecpaths.Count; i++ )
-                {
-                    string strPath = bibliorecpaths[i];
-                    SummaryInfo summary = (SummaryInfo)this.m_summaryTable[strPath];
-                    if (summary != null)
-                    {
-                        bibliorecpaths.RemoveAt(i);
-                        i--;
-                    }
-                }
-
-                // 从服务器获取
-                if (bibliorecpaths.Count > 0)
-                {
-                REDO_GETBIBLIOINFO_0:
-                    string strCommand = "@path-list:" + StringUtil.MakePathList(bibliorecpaths);
-
-                    string[] formats = new string[2];
-                    formats[0] = "summary";
-                    formats[1] = "@isbnissn";
-                    string[] results = null;
-                    byte[] timestamp = null;
-
-                    // stop.SetMessage("正在装入书目记录 '" + bibliorecpaths[0] + "' 等的摘要 ...");
-
-                    // TODO: 有没有可能希望取的事项数目一次性取得没有取够?
-                REDO_GETBIBLIOINFO:
-                    long lRet = Channel.GetBiblioInfos(
-                        stop,
-                        strCommand,
-                    "",
-                        formats,
-                        out results,
-                        out timestamp,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        DialogResult temp_result = MessageBox.Show(this,
-        strError + "\r\n\r\n是否重试?",
-        "AccountBookForm",
-        MessageBoxButtons.RetryCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button1);
-                        if (temp_result == DialogResult.Retry)
-                            goto REDO_GETBIBLIOINFO;
-                    }
-                    if (lRet == -1 || lRet == 0)
-                    {
-                        if (lRet == 0 && String.IsNullOrEmpty(strError) == true)
-                            strError = "书目记录 '" + StringUtil.MakePathList(bibliorecpaths) + "' 不存在";
-
-                        strError = "获得书目摘要时发生错误: " + strError;
-                        // 如果results.Length表现正常，其实还可以继续处理
-                        if (results != null /* && results.Length == 2 * bibliorecpaths.Count */)
-                        {
-                        }
-                        else
-                            return -1;
-                    }
-
-
-                    if (results != null/* && results.Length == 2 * bibliorecpaths.Count*/)
-                    {
-                        // Debug.Assert(results != null && results.Length == 2 * bibliorecpaths.Count, "results必须包含 " + (2 * bibliorecpaths.Count).ToString() + " 个元素");
-
-                        // 放入缓存
-                        for (int i = 0; i < results.Length / 2; i++)
-                        {
-                            SummaryInfo summary = new SummaryInfo();
-
-                            summary.Summary = results[i*2];
-                            summary.ISBnISSn = results[i*2+1];
-
-                            this.m_summaryTable[bibliorecpaths[i]] = summary;
-                        }
-                    }
-
-                    if (results != null && results.Length != 2 * bibliorecpaths.Count)
-                    {
-                        // 没有取够，需要继续处理
-                        bibliorecpaths.RemoveRange(0, results.Length / 2);
-                        goto REDO_GETBIBLIOINFO_0;
-                    }
-                }
-
-                // 挂接到每个记录附近
-                foreach (RecordInfo info in infos)
-                {
-                    SummaryInfo summary = (SummaryInfo)this.m_summaryTable[info.BiblioRecPath];
-                    if (summary == null)
-                    {
-                        strError = "缓存中找不到书目记录 '" + info.BiblioRecPath + "' 的摘要事项";
-                        return -1;
-                    }
-
-                    info.SummaryInfo = summary;
-                }
-
-                // 避免cache占据的内存太多
-                if (this.m_summaryTable.Count > 1000)
-                    this.m_summaryTable.Clear();
-            }
-
-            return 0;
-        }
-#endif
-
         // 处理一小批记录的装入
-        internal override int DoLoadRecords(List<string> lines,
+        internal override int DoLoadRecords(
+            LibraryChannel channel,
+            List<string> lines,
             List<ListViewItem> items,
             bool bFillSummaryColumn,
             string[] summary_col_names,
@@ -693,6 +497,8 @@ namespace dp2Circulation
             // 集中获取全部册记录信息
             for (; ; )
             {
+                Application.DoEvents();
+
                 if (stop != null && stop.State != 0)
                 {
                     strError = "用户中断1";
@@ -704,7 +510,7 @@ namespace dp2Circulation
                 string[] paths = new string[lines.Count];
                 lines.CopyTo(paths);
             REDO_GETRECORDS:
-                long lRet = this.Channel.GetBrowseRecords(
+                long lRet = channel.GetBrowseRecords(
                     this.stop,
                     paths,
                     "id,xml",
@@ -719,20 +525,18 @@ namespace dp2Circulation
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button1);
                     if (temp_result == DialogResult.Retry)
+                    {
+                        if (this.stop != null)
+                            this.stop.Continue();
+
                         goto REDO_GETRECORDS;
+                    }
                     return -1;
                 }
-
 
                 records.AddRange(searchresults);
 
                 // 去掉已经做过的一部分
-                /*
-                for (int i = 0; i < searchresults.Length; i++)
-                {
-                    lines.RemoveAt(0);
-                }
-                */
                 lines.RemoveRange(0, searchresults.Length);
 
                 if (lines.Count == 0)
@@ -742,6 +546,7 @@ namespace dp2Circulation
             // 准备DOM和书目摘要等
             List<RecordInfo> infos = null;
             int nRet = GetSummaries(
+                channel,
                 bFillSummaryColumn,
                 summary_col_names,
                 records,
@@ -757,16 +562,12 @@ namespace dp2Circulation
             this.listView_in.BeginUpdate();
             try
             {
-
                 for (int i = 0; i < infos.Count; i++)
                 {
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断1";
-                            return -1;
-                        }
+                        strError = "用户中断1";
+                        return -1;
                     }
 
                     RecordInfo info = infos[i];
@@ -776,8 +577,6 @@ namespace dp2Circulation
                         strError = "请升级 dp2Kernel 到最新版本";
                         return -1;
                     }
-                    // stop.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
-
 
                     string strOutputItemRecPath = "";
                     ListViewItem item = null;
@@ -791,6 +590,7 @@ namespace dp2Circulation
                     //      -1  出错
                     //      1   成功
                     nRet = LoadOneItem(
+                        channel,
                         this.comboBox_load_type.Text,
                         bFillSummaryColumn,
                         summary_col_names,
@@ -801,15 +601,6 @@ namespace dp2Circulation
                         out strOutputItemRecPath,
                         ref item,
                         out strError);
-                    /*
-                    if (nRet == -2)
-                        nDupCount++;
-                     * */
-                    /*
-                    if (nRet == -1)
-                        goto ERROR1;
-                     * */
-
 
                     // 准备装入订购信息
                     if (nRet != -1 && this.checkBox_load_fillOrderInfo.Checked == true)
@@ -824,7 +615,6 @@ namespace dp2Circulation
                             orderinfos.Add(order_info);
                         }
                     }
-
                 }
             }
             finally
@@ -836,6 +626,7 @@ namespace dp2Circulation
             if (orderinfos.Count > 0)
             {
                 nRet = LoadOrderInfo(
+                    channel,
                     orderinfos,
                     out strError);
                 if (nRet == -1)
@@ -847,6 +638,7 @@ namespace dp2Circulation
 
         // 根据册记录refid，转换为订购记录的recpath，然后获得订购记录XML
         int LoadOrderInfo(
+            LibraryChannel channel,
             List<OrderInfo> orderinfos,
             out string strError)
         {
@@ -873,7 +665,7 @@ namespace dp2Circulation
             if (this.comboBox_load_type.Text == "图书")
             {
                 strRecordName = "订购记录";
-                lRet = this.Channel.GetOrderInfo(stop,
+                lRet = channel.GetOrderInfo(stop,
                      "@item-refid-list:" + StringUtil.MakePathList(refids),
                      "get-path-list",
                      out strResult,
@@ -887,7 +679,7 @@ namespace dp2Circulation
             else
             {
                 strRecordName = "期记录";
-                lRet = this.Channel.GetIssueInfo(stop,
+                lRet = channel.GetIssueInfo(stop,
                      "@item-refid-list:" + StringUtil.MakePathList(refids),
                      "get-path-list",
                      out strResult,
@@ -932,16 +724,6 @@ namespace dp2Circulation
             if (errors.Count > 0)
                 strError = "获得" + strRecordName + "的过程发生错误: " + StringUtil.MakePathList(errors);
 
-#if NO
-            if (notfound_refids.Count > 0)
-            {
-                if (string.IsNullOrEmpty(strError) == false)
-                    strError += ";\r\n";
-
-                strError += "下列 册记录参考ID 没有找到: " + StringUtil.MakePathList(notfound_refids);
-            }
-#endif
-
             if (string.IsNullOrEmpty(strError) == false)
                 return -1;
 
@@ -963,13 +745,10 @@ namespace dp2Circulation
                 // 集中获取全部册记录信息
                 for (; ; )
                 {
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断1";
-                            return -1;
-                        }
+                        strError = "用户中断1";
+                        return -1;
                     }
 
                     DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
@@ -977,7 +756,7 @@ namespace dp2Circulation
                     string[] paths = new string[lines.Count];
                     lines.CopyTo(paths);
                 REDO_GETRECORDS:
-                    lRet = this.Channel.GetBrowseRecords(
+                    lRet = channel.GetBrowseRecords(
                         this.stop,
                         paths,
                         "id,xml",
@@ -992,7 +771,12 @@ namespace dp2Circulation
         MessageBoxIcon.Question,
         MessageBoxDefaultButton.Button1);
                         if (temp_result == DialogResult.Retry)
+                        {
+                            if (this.stop != null)
+                                this.stop.Continue();
+
                             goto REDO_GETRECORDS;
+                        }
                         return -1;
                     }
 
@@ -1000,12 +784,6 @@ namespace dp2Circulation
                     records.AddRange(searchresults);
 
                     // 去掉已经做过的一部分
-                    /*
-                    for (int i = 0; i < searchresults.Length; i++)
-                    {
-                        lines.RemoveAt(0);
-                    }
-                     * */
                     lines.RemoveRange(0, searchresults.Length);
 
                     if (lines.Count == 0)
@@ -1261,6 +1039,8 @@ namespace dp2Circulation
             int nRet = 0;
             string strError = "";
 
+            bool bControl = System.Windows.Forms.Control.ModifierKeys == Keys.Control;
+
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.Title = "请指定要打开的记录路径文件名";
@@ -1274,28 +1054,30 @@ namespace dp2Circulation
 
             this.SourceStyle = "recpathfile";
 
-            // int nDupCount = 0;
-            nRet = LoadFromRecPathFile(
-                this.Channel,
-                dlg.FileName,
-                this.comboBox_load_type.Text,
-                this.checkBox_load_fillBiblioSummary.Checked,
-                new string[] { "summary", "@isbnissn" },
-                (System.Windows.Forms.Control.ModifierKeys == Keys.Control ? false : true),
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
+            LibraryChannel channel = this.GetChannel();
+
+            try
+            {
+                // int nDupCount = 0;
+                nRet = LoadFromRecPathFile(
+                    channel,
+                    dlg.FileName,
+                    this.comboBox_load_type.Text,
+                    this.checkBox_load_fillBiblioSummary.Checked,
+                    new string[] { "summary", "@isbnissn" },
+                    (bControl ? false : true),
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
 
             // 记忆文件名
             this.RecPathFilePath = dlg.FileName;
             this.Text = "打印财产帐 " + Path.GetFileName(this.RecPathFilePath);
-
-            /*
-            if (nDupCount != 0)
-            {
-                MessageBox.Show(this, "装入过程中有 " + nDupCount.ToString() + "个重复条码事项被忽略。");
-            }
-             * */
 
             // 汇报数据装载情况。
             // return:
@@ -1521,99 +1303,6 @@ namespace dp2Circulation
 #endif
 
 #if NO
-        int ConvertItemBarcodeToRecPath(
-            List<string> barcodes,
-            out List<string> recpaths,
-            out string strError)
-        {
-            strError = "";
-            recpaths = null;
-
-        REDO_GETITEMINFO:
-            string strBiblio = "";
-            string strResult = "";
-            long lRet = this.Channel.GetItemInfo(stop,
-                "@barcode-list:" + StringUtil.MakePathList(barcodes),
-                "get-path-list",
-                out strResult,
-                "", // strBiblioType,
-                out strBiblio,
-                out strError);
-            if (lRet == -1)
-                return -1;
-            recpaths = StringUtil.SplitList(strResult);
-            Debug.Assert(barcodes.Count == recpaths.Count, "");
-
-            List<string> notfound_barcodes = new List<string>();
-            List<string> errors = new List<string>();
-            {
-                int i = 0;
-                foreach (string recpath in recpaths)
-                {
-                    if (string.IsNullOrEmpty(recpath) == true)
-                        notfound_barcodes.Add(barcodes[i]);
-                    else if (recpath[0] == '!')
-                        errors.Add(recpath.Substring(1));
-                    i++;
-                }
-            }
-
-            if (errors.Count > 0)
-            {
-                strError = "转换册条码号的过程发生错误: " + StringUtil.MakePathList(errors);
-
-                DialogResult temp_result = MessageBox.Show(this,
-strError + "\r\n\r\n是否重试?",
-"AccountBookForm",
-MessageBoxButtons.RetryCancel,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
-                if (temp_result == DialogResult.Retry)
-                    goto REDO_GETITEMINFO;
-                return -1;
-            }
-
-            if (notfound_barcodes.Count > 0)
-            {
-                if (string.IsNullOrEmpty(strError) == false)
-                    strError += ";\r\n";
-
-                strError += "下列册条码号没有找到: " + StringUtil.MakePathList(notfound_barcodes);
-                DialogResult temp_result = MessageBox.Show(this,
-strError + "\r\n\r\n是否继续处理?",
-"AccountBookForm",
-MessageBoxButtons.OKCancel,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
-                if (temp_result == DialogResult.Cancel)
-                    return -1;
-            }
-
-            /*
-            if (string.IsNullOrEmpty(strError) == false)
-                return -1;
-             * */
-            // 把空字符串和 ！ 打头的都去掉
-            for (int i = 0; i < recpaths.Count; i++)
-            {
-                string recpath = recpaths[i];
-                if (string.IsNullOrEmpty(recpath) == true)
-                {
-                    recpaths.RemoveAt(i);
-                    i--;
-                }
-                else if (recpath[0] == '!')
-                {
-                    recpaths.RemoveAt(i);
-                    i--;
-                }
-            }
-
-            return 0;
-        }
-#endif
-
-#if NO
         // 根据册条码号文件得到记录路径文件
         int ConvertBarcodeFile(string strBarcodeFilename,
             string strRecPathFilename,
@@ -1828,10 +1517,11 @@ MessageBoxDefaultButton.Button1);
             int nDupCount = 0;
             string strRecPathFilename = Path.GetTempFileName();
 
+            LibraryChannel channel = this.GetChannel();
             try
             {
                 nRet = ConvertBarcodeFile(
-                    this.Channel,
+                    channel,
                     dlg.FileName,
                     strRecPathFilename,
                     out nDupCount,
@@ -1840,7 +1530,7 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
 
                 nRet = LoadFromRecPathFile(
-                    this.Channel,
+                    channel,
                     strRecPathFilename,
                     this.comboBox_load_type.Text,
                     this.checkBox_load_fillBiblioSummary.Checked,
@@ -1852,6 +1542,8 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 if (string.IsNullOrEmpty(strRecPathFilename) == false)
                 {
                     File.Delete(strRecPathFilename);
@@ -2350,277 +2042,6 @@ MessageBoxDefaultButton.Button1);
             list.EnsureVisible(list.Items.IndexOf(item));
         }
 
-#if NO
-        // 根据册条码号或者记录路径，装入册记录
-        // parameters:
-        //      strBarcodeOrRecPath 册条码号或者记录路径。如果内容前缀为"@path:"则表示为路径
-        //      strMatchLocation    附加的馆藏地点匹配条件。如果==null，表示没有这个附加条件(注意，""和null含义不同，""表示确实要匹配这个值)
-        // return: 
-        //      -2  册条码号或者记录路径已经在list中存在了(行没有加入listview中)
-        //      -1  出错(注意表示出错的行已经加入listview中了)
-        //      0   因为馆藏地点不匹配，没有加入list中
-        //      1   成功
-        int LoadOneItem(
-            string strPubType,
-            string strBarcodeOrRecPath,
-            RecordInfo info,
-            ListView list,
-            string strMatchLocation,
-            out string strOutputItemRecPath,
-            ref ListViewItem item,
-            out string strError)
-        {
-            strError = "";
-            strOutputItemRecPath = "";
-            long lRet = 0;
-
-            // 判断是否有 @path: 前缀，便于后面分支处理
-            bool bIsRecPath = StringUtil.HasHead(strBarcodeOrRecPath, "@path:");
-
-            string strItemText = "";
-            string strBiblioText = "";
-
-            // string strItemRecPath = "";
-            string strBiblioRecPath = "";
-            XmlDocument item_dom = null;
-            string strBiblioSummary = "";
-            string strISBnISSN = "";
-
-            if (info == null)
-            {
-                byte[] item_timestamp = null;
-
-            REDO_GETITEMINFO:
-                lRet = Channel.GetItemInfo(
-                    stop,
-                    strBarcodeOrRecPath,
-                    "xml",
-                    out strItemText,
-                    out strOutputItemRecPath,
-                    out item_timestamp,
-                    "recpath",
-                    out strBiblioText,
-                    out strBiblioRecPath,
-                    out strError);
-                if (lRet == -1)
-                {
-                    DialogResult temp_result = MessageBox.Show(this,
-    strError + "\r\n\r\n是否重试?",
-    "AccountBookForm",
-    MessageBoxButtons.RetryCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                    if (temp_result == DialogResult.Retry)
-                        goto REDO_GETITEMINFO;
-                }
-                if (lRet == -1 || lRet == 0)
-                {
-#if NO
-                    if (item == null)
-                    {
-                        item = new ListViewItem(strBarcodeOrRecPath, 0);
-                        list.Items.Add(item);
-                    }
-                    else
-                    {
-                        Debug.Assert(item.ListView == list, "");
-                    }
-
-                    // item.SubItems.Add(strError);
-                    ListViewUtil.ChangeItemText(item, COLUMN_ERRORINFO, strError);
-
-                    SetItemColor(item, TYPE_ERROR);
-
-                    // 将新加入的事项滚入视野
-                    list.EnsureVisible(list.Items.IndexOf(item));
-#endif
-                    SetError(list,
-                        ref item,
-                        strBarcodeOrRecPath,
-                        strError);
-                    goto ERROR1;
-                }
-
-                SummaryInfo summary = (SummaryInfo)this.m_summaryTable[strBiblioRecPath];
-                if (summary != null)
-                {
-                    strBiblioSummary = summary.Summary;
-                    strISBnISSN = summary.ISBnISSn;
-                }
-
-                if (strBiblioSummary == ""
-                    && this.checkBox_load_fillBiblioSummary.Checked == true)
-                {
-                    string[] formats = new string[2];
-                    formats[0] = "summary";
-                    formats[1] = "@isbnissn";
-                    string[] results = null;
-                    byte[] timestamp = null;
-
-                    stop.SetMessage("正在装入书目记录 '" + strBiblioRecPath + "' 的摘要 ...");
-
-                    Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "strBiblioRecPath值不能为空");
-                REDO_GETBIBLIOINFO:
-                    lRet = Channel.GetBiblioInfos(
-                        stop,
-                        strBiblioRecPath,
-                    "",
-                        formats,
-                        out results,
-                        out timestamp,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        DialogResult temp_result = MessageBox.Show(this,
-        strError + "\r\n\r\n是否重试?",
-        "AccountBookForm",
-        MessageBoxButtons.RetryCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button1);
-                        if (temp_result == DialogResult.Retry)
-                            goto REDO_GETBIBLIOINFO;
-                    }
-                    if (lRet == -1 || lRet == 0)
-                    {
-                        if (lRet == 0 && String.IsNullOrEmpty(strError) == true)
-                            strError = "书目记录 '" + strBiblioRecPath + "' 不存在";
-
-                        strBiblioSummary = "获得书目摘要时发生错误: " + strError;
-                    }
-                    else
-                    {
-                        Debug.Assert(results != null && results.Length == 2, "results必须包含2个元素");
-                        strBiblioSummary = results[0];
-                        strISBnISSN = results[1];
-
-                        // 避免cache占据的内存太多
-                        if (this.m_summaryTable.Count > 1000)
-                            this.m_summaryTable.Clear();
-
-                        if (summary == null)
-                        {
-                            summary = new SummaryInfo();
-                            summary.Summary = strBiblioSummary;
-                            summary.ISBnISSn = strISBnISSN;
-                            this.m_summaryTable[strBiblioRecPath] = summary;
-                        }
-                    }
-                }
-
-                // 剖析一个册的xml记录，取出有关信息放入listview中
-                if (item_dom == null)
-                {
-                    item_dom = new XmlDocument();
-                    try
-                    {
-                        item_dom.LoadXml(strItemText);
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "册记录的XML装入DOM时出错: " + ex.Message;
-                        goto ERROR1;
-                    }
-                }
-
-            }
-            else
-            {
-                // record 不为空调用时，对调用时参数strBarcodeOrRecPath不作要求
-
-                strBarcodeOrRecPath = "@path:" + info.Record.Path;
-                bIsRecPath = true;
-
-                if (info.Record.RecordBody.Result.ErrorCode != ErrorCodeValue.NoError)
-                {
-#if NO
-                    if (item == null)
-                        item = new ListViewItem(strBarcodeOrRecPath, 0);
-
-
-                    item.SubItems.Add(info.Record.RecordBody.Result.ErrorString);
-
-                    SetItemColor(item, TYPE_ERROR);
-                    list.Items.Add(item);
-
-                    // 将新加入的事项滚入视野
-                    list.EnsureVisible(list.Items.Count - 1);
-#endif
-                    SetError(list,
-    ref item,
-    strBarcodeOrRecPath,
-    info.Record.RecordBody.Result.ErrorString);
-                    goto ERROR1;
-                }
-
-                strItemText = info.Record.RecordBody.Xml;
-                strOutputItemRecPath = info.Record.Path;
-
-                //
-                item_dom = info.Dom;
-                strBiblioRecPath = info.BiblioRecPath;
-                if (info.SummaryInfo != null)
-                {
-                    strBiblioSummary = info.SummaryInfo.Summary;
-                    strISBnISSN = info.SummaryInfo.ISBnISSn;
-                }
-            }
-
-
-            // 附加的馆藏地点匹配
-            if (strMatchLocation != null)
-            {
-                // TODO: #reservation, 情况如何处理?
-                string strLocation = DomUtil.GetElementText(item_dom.DocumentElement,
-                    "location");
-
-                // 2013/3/26
-                if (strLocation == null)
-                    strLocation = "";
-
-                if (strMatchLocation != strLocation)
-                    return 0;
-            }
-
-            if (item == null)
-            {
-                item = AddToListView(list,
-                    item_dom,
-                    strOutputItemRecPath,
-                    strBiblioSummary,
-                    strISBnISSN,
-                    strBiblioRecPath);
-
-                // 图标
-                // item.ImageIndex = TYPE_NORMAL;
-                SetItemColor(item, TYPE_NORMAL);
-
-                // 将新加入的事项滚入视野
-                list.EnsureVisible(list.Items.Count - 1);
-
-#if NO
-                // 填充需要从订购库获得的栏目信息
-                if (this.checkBox_load_fillOrderInfo.Checked == true)
-                    FillOrderColumns(item, strPubType);
-#endif
-            }
-            else
-            {
-                SetListViewItemText(item_dom,
-    true,
-    strOutputItemRecPath,
-    strBiblioSummary,
-    strISBnISSN,
-    strBiblioRecPath,
-    item);
-                SetItemColor(item, TYPE_NORMAL);
-            }
-
-            return 1;
-        ERROR1:
-            return -1;
-        }
-#endif
-
         // 获得新旧值的新部分
         static string GetNewPart(string strValue)
         {
@@ -2635,6 +2056,7 @@ MessageBoxDefaultButton.Button1);
             return strNewValue;
         }
 
+#if OLDVERSION
         // 以前的版本
         // 填充需要从订购库获得的栏目信息
         void FillOrderColumns(ListViewItem item,
@@ -2858,6 +2280,7 @@ MessageBoxDefaultButton.Button1);
             ListViewUtil.ChangeItemText(item, EXTEND_COLUMN_CATALOGNO, strError);
         }
 
+#endif
 
         // 填充需要从订购库获得的栏目信息
         void FillOrderColumns(OrderInfo info,
@@ -3066,6 +2489,7 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
+#if OLDVERSION
         // 2009/2/2
         // 获得所连接的一条期记录(的路径)
         // return:
@@ -3148,7 +2572,9 @@ MessageBoxDefaultButton.Button1);
 
             return (int)lHitCount;
         }
+#endif
 
+#if OLDVERSION
         // 2009/2/2
         // 根据记录路径获得一条期刊记录
         int GetIssueRecord(string strRecPath,
@@ -3195,7 +2621,9 @@ MessageBoxDefaultButton.Button1);
 
             return 1;
         }
+#endif
 
+#if OLDVERSION
         // 获得所连接的一条订购记录(的路径)
         // return:
         //      -1  error
@@ -3276,7 +2704,9 @@ MessageBoxDefaultButton.Button1);
 
             return (int)lHitCount;
         }
+#endif
 
+#if OLDVERSION
         // 根据记录路径获得一条订购记录
         int GetOrderRecord(string strRecPath,
             out string strItemXml,
@@ -3322,6 +2752,8 @@ MessageBoxDefaultButton.Button1);
 
             return 1;
         }
+
+#endif
 
         // 设置事项的背景、前景颜色，和图标
         static void SetItemColor(ListViewItem item,
@@ -3651,9 +3083,12 @@ MessageBoxDefaultButton.Button1);
         // 打印全部事项清单
         private void button_print_printNormalList_Click(object sender, EventArgs e)
         {
-            // string strError = "";
-
             EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在构造财产帐 ...");
+            stop.BeginLoop();
+
             try
             {
                 int nErrorCount = 0;
@@ -3677,6 +3112,11 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
                 EnableControls(true);
             }
             /*
@@ -5187,7 +4627,6 @@ strTotalPrice);
             // 检查当前排序状态和包含种价格列之间是否存在矛盾
             if (bHasBiblioPriceColumn(option) == true)
             {
-
                 if (this.SortColumns_in.Count != 0
                     && this.SortColumns_in[0].No == COLUMN_BIBLIORECPATH)
                 {
@@ -5197,10 +4636,7 @@ strTotalPrice);
                     MessageBox.Show(this, "由于当前打印用到了 “种价格”列，为保证打印结果的准确，程序自动按 ‘种记录路径’ 列对全部列表事项进行一次自动排序。\r\n\r\n为避免这里的自动排序，可在打印前用鼠标左键点栏标题进行符合自己意愿的排序，只要最后一次点的是‘种记录路径’栏标题即可。");
                     ForceSortColumnsIn(COLUMN_BIBLIORECPATH);
                 }
-
-
             }
-
 
             // 计算出页总数
             int nTablePageCount = items.Count / option.LinesPerPage;
@@ -5406,9 +4842,7 @@ strTotalPrice);
                         strFileName,
                         false);
                 }
-
             }
-
 
             string strMarcFilterFilePath = option.GetTemplatePageFilePath("MARC过滤器");
             if (String.IsNullOrEmpty(strMarcFilterFilePath) == false)
@@ -5436,10 +4870,19 @@ strTotalPrice);
                     return -1;
             }
 
+            stop.SetProgressRange(0, nTablePageCount);
 
             // 表格页循环
             for (int i = 0; i < nTablePageCount; i++)
             {
+                Application.DoEvents();
+
+                if (stop != null && stop.State != 0)
+                {
+                    strError = "用户中断";
+                    return -1;
+                }
+
                 macro_table["%pageno%"] = (i + 1 + 1).ToString();
 
                 // strFileName = strFileNamePrefix + (i + 1).ToString() + ".html";
@@ -5454,6 +4897,8 @@ strTotalPrice);
                 // 行循环
                 for (int j = 0; j < option.LinesPerPage; j++)
                 {
+                    Application.DoEvents();
+
                     BuildHtmlTableLine(option,
                         items,
                         strFileName, i, j);
@@ -5463,19 +4908,12 @@ strTotalPrice);
                     macro_table,
                     strFileName,
                     true);
+
+                stop.SetProgressValue(i + 1);
             }
-
-            /*
-            for (int i = 0; i < this.listView_in.Items.Count; i++)
-            {
-
-            }
-             * */
-
 
             return 0;
         }
-
 
         // 用于缩进格式的tab字符串
         static string IndentString(int nLevel)
@@ -6490,11 +5928,12 @@ strTotalPrice);
 
             string strRecPathFilename = Path.GetTempFileName();
 
+            LibraryChannel channel = this.GetChannel();
             try
             {
                 // 检索 批次号 和 馆藏地点 将命中的记录路径写入文件
                 int nRet = SearchBatchNoAndLocation(
-                    this.Channel,
+                    channel,
                     this.comboBox_load_type.Text,
                     strBatchNo,
                     strMatchLocation,
@@ -6504,7 +5943,7 @@ strTotalPrice);
                     goto ERROR1;
 
                 nRet = LoadFromRecPathFile(
-                    this.Channel,
+                    channel,
                     strRecPathFilename,
                     this.comboBox_load_type.Text,
                     this.checkBox_load_fillBiblioSummary.Checked,
@@ -6517,6 +5956,8 @@ strTotalPrice);
             }
             finally
             {
+                this.ReturnChannel(channel);
+
                 if (string.IsNullOrEmpty(strRecPathFilename) == false)
                 {
                     File.Delete(strRecPathFilename);
@@ -6768,12 +6209,21 @@ strTotalPrice);
 
         void dlg_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
-            Global.GetBatchNoTable(e,
-                this,
-                this.comboBox_load_type.Text,
-                "item",
-                this.stop,
-                this.Channel);
+            LibraryChannel channel = this.GetChannel();
+
+            try
+            {
+                Global.GetBatchNoTable(e,
+                    this,
+                    this.comboBox_load_type.Text,
+                    "item",
+                    this.stop,
+                    channel);
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
 
 #if NOOOOOOOOOOOOOOOOOOO
             string strError = "";
@@ -7108,9 +6558,9 @@ strTotalPrice);
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("删除 [" + this.listView_in.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem = new MenuItem("移除 [" + this.listView_in.SelectedItems.Count.ToString() + "] (&D)");
             menuItem.Tag = this.listView_in;
-            menuItem.Click += new System.EventHandler(this.menu_deleteSelected_Click);
+            menuItem.Click += new System.EventHandler(this.menu_removeSelected_Click);
             if (this.listView_in.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
@@ -7156,15 +6606,14 @@ strTotalPrice);
         }
 #endif
 
-        // 删除集合内列表中已经选定的行
-        void menu_deleteSelected_Click(object sender, EventArgs e)
+        // 移除集合内列表中已经选定的行
+        void menu_removeSelected_Click(object sender, EventArgs e)
         {
             ListView list = (ListView)((MenuItem)sender).Tag;
 
-
             if (list.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未选定要删除的事项。");
+                MessageBox.Show(this, "尚未选定要移除的事项。");
                 return;
             }
 
@@ -7175,27 +6624,35 @@ strTotalPrice);
             }
 
             DialogResult result = MessageBox.Show(this,
-"确实要删除选定的 " + items.Count.ToString() + " 个事项?",
-"dp2Circulation",
+"确实要移除选定的 " + items.Count.ToString() + " 个事项?",
+"AccountBookForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
 
-            DeleteLines(items);
-
+            RemoveLines(items);
         }
 
-        static void DeleteLines(List<ListViewItem> items)
+        static void RemoveLines(List<ListViewItem> items)
         {
             if (items.Count == 0)
                 return;
+
             ListView list = items[0].ListView;
 
-            for (int i = 0; i < items.Count; i++)
+            list.BeginUpdate();
+            try
             {
-                list.Items.Remove(items[i]);
+                foreach (ListViewItem item in items)
+                {
+                    list.Items.Remove(item);
+                }
+            }
+            finally
+            {
+                list.EndUpdate();
             }
         }
 

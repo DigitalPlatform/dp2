@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>197</ApplicationRevision>
+    <ApplicationRevision>199</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -349,24 +349,12 @@
     <Compile Include="Entity\InventoryForm.Designer.cs">
       <DependentUpon>InventoryForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Entity\InventoryForm0.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Entity\InventoryForm0.Designer.cs">
-      <DependentUpon>InventoryForm0.cs</DependentUpon>
-    </Compile>
     <Compile Include="Entity\ItemBarcodeLoader.cs" />
     <Compile Include="Entity\ItemEditControlBase.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Entity\ItemEditFormBase.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Entity\NewInventoryForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Entity\NewInventoryForm.Designer.cs">
-      <DependentUpon>NewInventoryForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Entity\SelectBatchNoDialog.cs">
       <SubType>Form</SubType>
@@ -1616,17 +1604,11 @@
     <EmbeddedResource Include="Entity\InventoryForm.resx">
       <DependentUpon>InventoryForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Entity\InventoryForm0.resx">
-      <DependentUpon>InventoryForm0.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Entity\ItemEditControlBase.resx">
       <DependentUpon>ItemEditControlBase.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Entity\ItemEditFormBase.resx">
       <DependentUpon>ItemEditFormBase.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Entity\NewInventoryForm.resx">
-      <DependentUpon>NewInventoryForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Entity\SelectBatchNoDialog.resx">
       <DependentUpon>SelectBatchNoDialog.cs</DependentUpon>

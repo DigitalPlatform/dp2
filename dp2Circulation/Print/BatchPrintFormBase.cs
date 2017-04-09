@@ -420,6 +420,7 @@ namespace dp2Circulation
         /// <summary>
         /// 从记录路径文件装载
         /// </summary>
+        /// <param name="channel">通讯通道</param>
         /// <param name="strRecPathFilename">记录路径文件名(全路径)</param>
         /// <param name="strPubType">出版物类型</param>
         /// <param name="bFillSummaryColumn">是否填充书目摘要列</param>
@@ -550,7 +551,9 @@ namespace dp2Circulation
                                     + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(i)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
 
                             // 处理一小批记录的装入
-                            nRet = DoLoadRecords(lines,
+                            nRet = DoLoadRecords(
+                                channel,
+                                lines,
                                 null,
                                 bFillSummaryColumn,
                                 summary_col_names,
@@ -570,7 +573,9 @@ namespace dp2Circulation
                             stop.SetMessage("(" + nLineCount.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录...");
 
                         // 处理一小批记录的装入
-                        nRet = DoLoadRecords(lines,
+                        nRet = DoLoadRecords(
+                            channel,
+                            lines,
                             null,
                             bFillSummaryColumn,
                             summary_col_names,
@@ -612,7 +617,9 @@ namespace dp2Circulation
 
 
         // 处理一小批记录的装入
-        internal virtual int DoLoadRecords(List<string> lines,
+        internal virtual int DoLoadRecords(
+            LibraryChannel channel,
+            List<string> lines,
             List<ListViewItem> items,
             bool bFillSummaryColumn,
             string[] summary_col_names,
@@ -1756,6 +1763,8 @@ namespace dp2Circulation
                 EnableControls(false);
             // MainForm.ShowProgress(true);
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             if (this.InvokeRequired == false)
                 stop.Initial("正在刷新 ...");
@@ -1765,7 +1774,6 @@ namespace dp2Circulation
             {
                 if (this.InvokeRequired == false)
                     stop.SetProgressRange(0, items.Count);
-
 
                 ProgressEstimate estimate = new ProgressEstimate();
                 estimate.SetRange(0, items.Count);
@@ -1809,7 +1817,9 @@ namespace dp2Circulation
                         }
 
                         // 处理一小批记录的装入
-                        nRet = DoLoadRecords(lines,
+                        nRet = DoLoadRecords(
+                            channel,
+                            lines,
                             part_items,
                             bFillBiblioSummary,
                             summary_col_names,
@@ -1831,7 +1841,9 @@ namespace dp2Circulation
                     }
 
                     // 处理一小批记录的装入
-                    nRet = DoLoadRecords(lines,
+                    nRet = DoLoadRecords(
+                        channel,
+                        lines,
                         part_items,
                         bFillBiblioSummary,
                         summary_col_names,
@@ -1853,6 +1865,8 @@ namespace dp2Circulation
                     stop.Initial("刷新完成。");
                     stop.HideProgress();
                 }
+
+                this.ReturnChannel(channel);
 
                 if (this.InvokeRequired == false)
                     EnableControls(true);

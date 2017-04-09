@@ -24,6 +24,8 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 
+// 2017/4/8 从 this.Channel 用法改造为 ChannelPool 用法
+
 namespace dp2Circulation
 {
     /// <summary>
@@ -776,7 +778,9 @@ this.splitContainer_inAndOutof,
         }
 
         // 处理一小批记录的装入
-        internal override int DoLoadRecords(List<string> lines,
+        internal override int DoLoadRecords(
+            LibraryChannel channel,
+            List<string> lines,
             List<ListViewItem> items,
             bool bFillSummaryColumn,
             string[] summary_col_names,
@@ -792,120 +796,120 @@ this.splitContainer_inAndOutof,
 #endif
             List<DigitalPlatform.LibraryClient.localhost.Record> records = new List<DigitalPlatform.LibraryClient.localhost.Record>();
 
-            LibraryChannel channel = this.GetChannel();
-
-            try
+            // 集中获取全部册记录信息
+            for (; ; )
             {
-
-                // 集中获取全部册记录信息
-                for (; ; )
+                if (stop != null && stop.State != 0)
                 {
-                    if (stop != null && stop.State != 0)
-                    {
-                        strError = "用户中断1";
-                        return -1;
-                    }
-
-                    DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
-
-                    string[] paths = new string[lines.Count];
-                    lines.CopyTo(paths);
-                REDO_GETRECORDS:
-                    long lRet = channel.GetBrowseRecords(
-                        this.stop,
-                        paths,
-                        "id,xml,timestamp", // 注意，包含了 timestamp
-                        out searchresults,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        if (this.InvokeRequired == false)
-                        {
-                            DialogResult temp_result = MessageBox.Show(this,
-            strError + "\r\n\r\n是否重试?",
-            this.FormCaption,
-            MessageBoxButtons.RetryCancel,
-            MessageBoxIcon.Question,
-            MessageBoxDefaultButton.Button1);
-                            if (temp_result == DialogResult.Retry)
-                                goto REDO_GETRECORDS;
-                        }
-                        return -1;
-                    }
-
-                    records.AddRange(searchresults);
-
-                    // 去掉已经做过的一部分
-                    lines.RemoveRange(0, searchresults.Length);
-
-                    if (lines.Count == 0)
-                        break;
+                    strError = "用户中断1";
+                    return -1;
                 }
 
+                DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
-                // 准备 DOM 和书目摘要等
-                List<RecordInfo> infos = null;
-                int nRet = GetSummaries(
-                    channel,
-                    bFillSummaryColumn,
-                    summary_col_names,
-                    records,
-                    out infos,
+                string[] paths = new string[lines.Count];
+                lines.CopyTo(paths);
+            REDO_GETRECORDS:
+                long lRet = channel.GetBrowseRecords(
+                    this.stop,
+                    paths,
+                    "id,xml,timestamp", // 注意，包含了 timestamp
+                    out searchresults,
                     out strError);
-                if (nRet == -1)
-                    return -1;
-
-                Debug.Assert(records.Count == infos.Count, "");
-
-                List<dp2Circulation.AccountBookForm.OrderInfo> orderinfos = new List<dp2Circulation.AccountBookForm.OrderInfo>();
-
-                if (this.InvokeRequired == false)
-                    this.listView_in.BeginUpdate();
-                try
+                if (lRet == -1)
                 {
-                    for (int i = 0; i < infos.Count; i++)
+                    if (this.InvokeRequired == false)
                     {
-                        if (stop != null)
+                        DialogResult temp_result = MessageBox.Show(this,
+        strError + "\r\n\r\n是否重试?",
+        this.FormCaption,
+        MessageBoxButtons.RetryCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                        if (temp_result == DialogResult.Retry)
                         {
-                            if (stop.State != 0)
-                            {
-                                strError = "用户中断1";
-                                return -1;
-                            }
+                            if (this.stop != null)
+                                this.stop.Continue();
+
+                            goto REDO_GETRECORDS;
                         }
+                    }
+                    return -1;
+                }
 
-                        RecordInfo info = infos[i];
+                records.AddRange(searchresults);
 
-                        if (info.Record.RecordBody == null)
+                // 去掉已经做过的一部分
+                lines.RemoveRange(0, searchresults.Length);
+
+                if (lines.Count == 0)
+                    break;
+            }
+
+
+            // 准备 DOM 和书目摘要等
+            List<RecordInfo> infos = null;
+            int nRet = GetSummaries(
+                channel,
+                bFillSummaryColumn,
+                summary_col_names,
+                records,
+                out infos,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            Debug.Assert(records.Count == infos.Count, "");
+
+            List<dp2Circulation.AccountBookForm.OrderInfo> orderinfos = new List<dp2Circulation.AccountBookForm.OrderInfo>();
+
+            if (this.InvokeRequired == false)
+                this.listView_in.BeginUpdate();
+            try
+            {
+                for (int i = 0; i < infos.Count; i++)
+                {
+                    if (stop != null)
+                    {
+                        if (stop.State != 0)
                         {
-                            strError = "请升级 dp2Kernel 到最新版本";
+                            strError = "用户中断1";
                             return -1;
                         }
-                        // stop.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
+                    }
 
-                        string strOutputItemRecPath = "";
-                        ListViewItem item = null;
+                    RecordInfo info = infos[i];
 
-                        if (items != null)
-                            item = items[i];
+                    if (info.Record.RecordBody == null)
+                    {
+                        strError = "请升级 dp2Kernel 到最新版本";
+                        return -1;
+                    }
+                    // stop.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
 
-                        // 根据册条码号，装入册记录
-                        // return: 
-                        //      -2  册条码号已经在list中存在了
-                        //      -1  出错
-                        //      1   成功
-                        nRet = LoadOneItem(
-                            channel,
-                            this.LoadType,  // this.comboBox_load_type.Text,
-                            bFillSummaryColumn,
-                            summary_col_names,
-                            "@path:" + info.Record.Path,
-                            info,
-                            this.listView_in,
-                            null,
-                            out strOutputItemRecPath,
-                            ref item,
-                            out strError);
+                    string strOutputItemRecPath = "";
+                    ListViewItem item = null;
+
+                    if (items != null)
+                        item = items[i];
+
+                    // 根据册条码号，装入册记录
+                    // return: 
+                    //      -2  册条码号已经在list中存在了
+                    //      -1  出错
+                    //      1   成功
+                    nRet = LoadOneItem(
+                        channel,
+                        this.LoadType,  // this.comboBox_load_type.Text,
+                        bFillSummaryColumn,
+                        summary_col_names,
+                        "@path:" + info.Record.Path,
+                        info,
+                        this.listView_in,
+                        null,
+                        out strOutputItemRecPath,
+                        ref item,
+                        out strError);
 
 
 #if NO
@@ -924,13 +928,13 @@ this.splitContainer_inAndOutof,
                     }
 #endif
 
-                    }
                 }
-                finally
-                {
-                    if (this.InvokeRequired == false)
-                        this.listView_in.EndUpdate();
-                }
+            }
+            finally
+            {
+                if (this.InvokeRequired == false)
+                    this.listView_in.EndUpdate();
+            }
 
 #if NO
             // 从服务器获得订购记录的路径
@@ -944,13 +948,7 @@ this.splitContainer_inAndOutof,
             }
 #endif
 
-                return 0;
-            }
-            finally
-            {
-                this.ReturnChannel(channel);
-            }
-
+            return 0;
         }
 
         // 设置listview栏目标题

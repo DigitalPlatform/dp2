@@ -13,7 +13,6 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -606,7 +605,9 @@ namespace dp2Circulation
                         //      -1  出错
                         //      0   用户中断
                         //      1   完成
-                        nRet = _fillBiblioSummaryColumn(batch,
+                        nRet = _fillBiblioSummaryColumn(
+                            this.Channel,
+                            batch,
                             lStartIndex,
                             bBeginLoop,
                             true,
@@ -627,7 +628,9 @@ namespace dp2Circulation
                     //      -1  出错
                     //      0   用户中断
                     //      1   完成
-                    nRet = _fillBiblioSummaryColumn(batch,
+                    nRet = _fillBiblioSummaryColumn(
+                        this.Channel,
+                        batch,
                         lStartIndex,
                         bBeginLoop,
                         true,
@@ -668,7 +671,9 @@ namespace dp2Circulation
         //      -1  出错
         //      0   用户中断
         //      1   完成
-        internal int _fillBiblioSummaryColumn(List<ListViewItem> items,
+        internal int _fillBiblioSummaryColumn(
+            LibraryChannel channel,
+            List<ListViewItem> items,
             long lStartIndex,
             bool bDisplayMessage,
             bool bAutoSearch,
@@ -748,7 +753,9 @@ namespace dp2Circulation
                 //      -1  出错
                 //      0   相关数据库没有配置 parent id 浏览列
                 //      1   找到
-                nRet = GetBiblioRecPath(item,
+                nRet = GetBiblioRecPath(
+                    channel,
+                    item,
                     bAutoSearch,   // true 如果遇到没有 parent id 列的时候速度较慢
                     out nCol,
                     out strBiblioRecPath,
@@ -771,7 +778,7 @@ namespace dp2Circulation
             }
 
             CacheableBiblioLoader loader = new CacheableBiblioLoader();
-            loader.Channel = this.Channel;
+            loader.Channel = channel;
             loader.Stop = this.stop;
             loader.Format = "summary";
             loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
@@ -849,7 +856,9 @@ namespace dp2Circulation
         //      -1  出错
         //      0   相关数据库没有配置 parent id 浏览列
         //      1   找到
-        public virtual int GetBiblioRecPath(ListViewItem item,
+        public virtual int GetBiblioRecPath(
+            LibraryChannel channel,
+            ListViewItem item,
             bool bAutoSearch,
             out int nCol,
             out string strBiblioRecPath,
@@ -945,7 +954,7 @@ namespace dp2Circulation
 
                         nRet = SearchTwoRecPathByBarcode(
                             this.stop,
-                            this.Channel,
+                            channel,
                             strQueryString,    // "@path:" + strRecPath,
                             out strItemRecPath,
                             out strBiblioRecPath,
@@ -970,7 +979,7 @@ namespace dp2Circulation
                     {
                         nRet = SearchBiblioRecPath(
                             this.stop,
-                            this.Channel,
+                            channel,
                             this.DbType,
                             strRecPath,
                             out strBiblioRecPath,
@@ -1035,8 +1044,9 @@ namespace dp2Circulation
         //      false   出现错误
         //      true    成功
         internal bool FillLineByBarcode(
-    string strBarcode,
-    ListViewItem item)
+            LibraryChannel channel,
+            string strBarcode,
+            ListViewItem item)
         {
             string strError = "";
             string strBiblioRecPath = "";
@@ -1047,7 +1057,7 @@ namespace dp2Circulation
             // 检索册条码号，检索出其从属的书目记录路径。
             int nRet = SearchTwoRecPathByBarcode(
                 this.stop,
-                this.Channel,
+                channel,
                 strBarcode,
                 out strItemRecPath,
                 out strBiblioRecPath,

@@ -23,6 +23,8 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
+// 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
+
 namespace dp2Circulation
 {
     public partial class InventoryForm : ItemSearchFormBase
@@ -222,6 +224,8 @@ namespace dp2Circulation
             this._statisInfo = null;
             this.SetButtonState(null);
 
+            this.Channel = null;    // testing
+
             this.BeginInvoke(new Action(Initial));
         }
 
@@ -260,8 +264,8 @@ namespace dp2Circulation
     "ui_state",
     this.UiState);
                 this.MainForm.AppInfo.SetString(
-                    "inventory_form", 
-                    "batch_no", 
+                    "inventory_form",
+                    "batch_no",
                     this.inventoryBatchNoControl_start_batchNo.Text);
             }
         }
@@ -277,6 +281,7 @@ namespace dp2Circulation
             this.inventoryBatchNoControl_start_batchNo.Enabled = bEnable;
             this.textBox_start_locations.Enabled = bEnable;
             this.button_start_setLocations.Enabled = bEnable;
+            this.button_start_restoreCfgs.Enabled = bEnable;
 
             this.textBox_inventoryList_batchNo.Enabled = bEnable;
             this.button_inventoryList_getBatchNos.Enabled = bEnable;
@@ -289,7 +294,7 @@ namespace dp2Circulation
             this.textBox_operLog_dateRange.Enabled = bEnable;
             this.button_operLog_load.Enabled = bEnable;
 
-            this.SetButtonState(bEnable == false? null : this._statisInfo,
+            this.SetButtonState(bEnable == false ? null : this._statisInfo,
                 false);   // 只改变 Enabled 状态，不修改按钮文字
 #if NO
             this.button_getProjectName.Enabled = bEnable;
@@ -341,17 +346,26 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            SelectBatchNoDialog dlg = new SelectBatchNoDialog();
-            MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.Channel = this.Channel;
-            dlg.Stop = this.stop;
-            dlg.InventoryDbName = strInventoryDbName;
-            dlg.LibraryCodeList = GetOwnerLibraryCodes();
-            this.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_state");
-            dlg.ShowDialog(this);
+            LibraryChannel channel = this.GetChannel();
 
-            this.textBox_inventoryList_batchNo.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
-            return;
+            try
+            {
+                SelectBatchNoDialog dlg = new SelectBatchNoDialog();
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.Channel = channel;
+                dlg.Stop = this.stop;
+                dlg.InventoryDbName = strInventoryDbName;
+                dlg.LibraryCodeList = GetOwnerLibraryCodes();
+                this.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_state");
+                dlg.ShowDialog(this);
+
+                this.textBox_inventoryList_batchNo.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
+                return;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -460,7 +474,13 @@ namespace dp2Circulation
             strQueryXml += "</target>";
 
             EnableControls(false);
-            stop.OnStop += new StopEventHandler(this.Channel.DoStop);
+
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
+            // stop.OnStop += new StopEventHandler(this.Channel.DoStop);
+            stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索盘点记录 ...");
             stop.BeginLoop();
 
@@ -470,7 +490,7 @@ namespace dp2Circulation
             try
             {
                 // 开始检索
-                long lRet = this.Channel.Search(
+                long lRet = channel.Search(
     stop,
     strQueryXml,
     strResultSetName,
@@ -506,7 +526,7 @@ namespace dp2Circulation
                         return -1;
                     }
 
-                    lRet = this.Channel.GetSearchResult(
+                    lRet = channel.GetSearchResult(
                         stop,
                         strResultSetName,   // strResultSetName
                         lStart,
@@ -555,7 +575,9 @@ namespace dp2Circulation
                         //      -1  出错
                         //      0   用户中断
                         //      1   完成
-                        int nRet = _fillBiblioSummaryColumn0(items,
+                        int nRet = _fillBiblioSummaryColumn0(
+                            channel,
+                            items,
                             0,
                             false,
                             true,   // false,  // bAutoSearch
@@ -587,12 +609,16 @@ namespace dp2Circulation
                 this.listView_inventoryList_records.EndUpdate();
 
                 stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.Channel.DoStop);
+                // stop.OnStop -= new StopEventHandler(this.Channel.DoStop);
+                stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+                stop.HideProgress();
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
-
         }
 
         // parameters:
@@ -602,7 +628,9 @@ namespace dp2Circulation
         //      -1  出错
         //      0   用户中断
         //      1   完成
-        internal int _fillBiblioSummaryColumn0(List<ListViewItem> items,
+        internal int _fillBiblioSummaryColumn0(
+            LibraryChannel channel,
+            List<ListViewItem> items,
             long lStartIndex,
             bool bDisplayMessage,
             bool bAutoSearch,
@@ -678,9 +706,9 @@ namespace dp2Circulation
                 //      -1  出错
                 //      0   相关数据库没有配置 parent id 浏览列
                 //      1   找到
-                nRet = GetBiblioRecPath(item,
-                    // bAutoSearch,   // true 如果遇到没有 parent id 列的时候速度较慢
-                    // out nCol,
+                nRet = GetBiblioRecPath(
+                    channel,
+                    item,
                     out strBiblioRecPath,
                     out strError);
                 if (nRet == -1)
@@ -703,7 +731,7 @@ namespace dp2Circulation
             }
 
             CacheableBiblioLoader loader = new CacheableBiblioLoader();
-            loader.Channel = this.Channel;
+            loader.Channel = channel;
             loader.Stop = this.stop;
             loader.Format = "summary";
             loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
@@ -784,7 +812,9 @@ namespace dp2Circulation
         //      -1  出错
         //      0   相关数据库没有配置 parent id 浏览列
         //      1   找到
-        int GetBiblioRecPath(ListViewItem item,
+        int GetBiblioRecPath(
+            LibraryChannel channel,
+            ListViewItem item,
             // bool bAutoSearch,
             out string strBiblioRecPath,
             out string strError)
@@ -849,7 +879,7 @@ namespace dp2Circulation
 
                 nRet = SearchTwoRecPathByBarcode(
                     this.stop,
-                    this.Channel,
+                    channel,
                     strQueryString,    // "@path:" + strRecPath,
                     out strOutputItemRecPath,
                     out strBiblioRecPath,
@@ -920,16 +950,25 @@ namespace dp2Circulation
         {
             // string strError = "";
 
-            SelectBatchNoDialog dlg = new SelectBatchNoDialog();
-            MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.Channel = this.Channel;
-            dlg.Stop = this.stop;
-            dlg.InventoryDbName = "";
-            this.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
-            dlg.ShowDialog(this);
+            LibraryChannel channel = this.GetChannel();
 
-            this.textBox_baseList_locations.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
-            return;
+            try
+            {
+                SelectBatchNoDialog dlg = new SelectBatchNoDialog();
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.Channel = channel;
+                dlg.Stop = this.stop;
+                dlg.InventoryDbName = "";
+                this.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
+                dlg.ShowDialog(this);
+
+                this.textBox_baseList_locations.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
+                return;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
 #if NO
         ERROR1:
             MessageBox.Show(this, strError);
@@ -949,7 +988,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            for(int i = 0;i<location_list.Count;i++)
+            for (int i = 0; i < location_list.Count; i++)
             {
                 string location = location_list[i];
                 if (location == "[空]" || location == "[blank]")
@@ -994,7 +1033,7 @@ namespace dp2Circulation
 
             StringBuilder text = new StringBuilder();
             int i = 0;
-            foreach(ColumnProperty prop in defs)
+            foreach (ColumnProperty prop in defs)
             {
                 if (i > 0)
                     text.Append("|");
@@ -1022,7 +1061,12 @@ namespace dp2Circulation
             ClearBaseListViewItems();
 
             EnableControls(false);
-            stop.OnStop += new StopEventHandler(this.Channel.DoStop);
+
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索册记录 ...");
             stop.BeginLoop();
 
@@ -1051,7 +1095,7 @@ namespace dp2Circulation
                 {
                     string strResultSetName = "default";
 
-                    long lRet = Channel.SearchItem(stop,
+                    long lRet = channel.SearchItem(stop,
         "<all>",
         location,
         -1,
@@ -1090,7 +1134,7 @@ namespace dp2Circulation
                             return -1;
                         }
 
-                        lRet = this.Channel.GetSearchResult(
+                        lRet = channel.GetSearchResult(
                             stop,
                             strResultSetName,   // strResultSetName
                             lStart,
@@ -1139,7 +1183,9 @@ namespace dp2Circulation
                             //      -1  出错
                             //      0   用户中断
                             //      1   完成
-                            nRet = _fillBiblioSummaryColumn(items,
+                            nRet = _fillBiblioSummaryColumn(
+                                channel,
+                                items,
                                 0,
                                 false,
                                 true,   // false,  // bAutoSearch
@@ -1174,8 +1220,12 @@ namespace dp2Circulation
                 this.DbType = "inventory";
 
                 stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.Channel.DoStop);
+                stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+                stop.HideProgress();
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
@@ -1188,7 +1238,9 @@ namespace dp2Circulation
         //      -1  出错
         //      0   相关数据库没有配置 parent id 浏览列
         //      1   找到
-        public override int GetBiblioRecPath(ListViewItem item,
+        public override int GetBiblioRecPath(
+            LibraryChannel channel,
+            ListViewItem item,
             bool bAutoSearch,
             out int nCol,
             out string strBiblioRecPath,
@@ -1284,7 +1336,7 @@ namespace dp2Circulation
 
                         nRet = SearchTwoRecPathByBarcode(
                             this.stop,
-                            this.Channel,
+                            channel,
                             strQueryString,    // "@path:" + strRecPath,
                             out strItemRecPath,
                             out strBiblioRecPath,
@@ -1309,7 +1361,7 @@ namespace dp2Circulation
                     {
                         nRet = SearchBiblioRecPath(
                             this.stop,
-                            this.Channel,
+                            channel,
                             this.DbType,
                             strRecPath,
                             out strBiblioRecPath,
@@ -1366,8 +1418,6 @@ namespace dp2Circulation
 
             return 1;
         }
-
-
 
         private void listView_baseList_records_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1467,7 +1517,7 @@ null);
             int nOpertimeColumnIndex = this._defs._base_colmun_defs.Count + nTemp + 2;
 
             EnableControls(false);
-            stop.OnStop += new StopEventHandler(this.Channel.DoStop);
+            stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在进行交叉运算 ...");
             stop.BeginLoop();
 
@@ -1503,7 +1553,7 @@ null);
                     item.BackColor = SystemColors.Window;
                 }
 
-                foreach(ListViewItem item in delete_items)
+                foreach (ListViewItem item in delete_items)
                 {
                     this.listView_baseList_records.Items.Remove(item);
                 }
@@ -1519,7 +1569,7 @@ null);
                 Application.DoEvents();
 
                 Hashtable base_recpath_table = new Hashtable();  // recpath --> ListViewItem
-                foreach(ListViewItem item in this.listView_baseList_records.Items)
+                foreach (ListViewItem item in this.listView_baseList_records.Items)
                 {
                     string strRecPath = item.Text;
                     Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
@@ -1536,7 +1586,7 @@ null);
                 int nCol = temp.FindColumnByType("item_recpath");
                 if (nCol == -1)
                 {
-                    strError = "盘点库 '"+strInventoryDbName+"' 的 browse 配置文件中未定义 type 为 item_recpath 的列";
+                    strError = "盘点库 '" + strInventoryDbName + "' 的 browse 配置文件中未定义 type 为 item_recpath 的列";
                     return -1;
                 }
                 nCol += 2;
@@ -1547,7 +1597,7 @@ null);
 
                 List<ListViewItem> outofrange_source_items = new List<ListViewItem>();
                 // List<string> outof_range_recpaths = new List<string>();
-                foreach(ListViewItem item in this.listView_inventoryList_records.Items)
+                foreach (ListViewItem item in this.listView_inventoryList_records.Items)
                 {
                     string strItemRecPath = ListViewUtil.GetItemText(item, nCol);
                     if (string.IsNullOrEmpty(strItemRecPath) == true)
@@ -1655,7 +1705,7 @@ null);
                 this._statisInfo.ItemsLost = 0;
                 this._statisInfo.ItemsNeedAddLostState = 0;
 
-                foreach(ListViewItem item in this.listView_baseList_records.Items)
+                foreach (ListViewItem item in this.listView_baseList_records.Items)
                 {
                     // 没有验证过的行
                     if (item.Tag == null)
@@ -1764,7 +1814,7 @@ null);
             finally
             {
                 stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.Channel.DoStop);
+                stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
                 EnableControls(true);
@@ -1939,7 +1989,7 @@ null);
             foreach (int source_index in defs.source_indices)
             {
                 string strText = ListViewUtil.GetItemText(source, source_index + 2);
-                ListViewUtil.ChangeItemText(target, target_index ++, strText);
+                ListViewUtil.ChangeItemText(target, target_index++, strText);
             }
         }
 
@@ -2230,7 +2280,7 @@ null);
                 this.listView_baseList_records.Items[0].Selected = true;
 
             List<ListViewItem> items = new List<ListViewItem>();
-            foreach(ListViewItem item in this.listView_baseList_records.Items)
+            foreach (ListViewItem item in this.listView_baseList_records.Items)
             {
                 if (item.Tag == null)
                     continue;
@@ -2690,8 +2740,11 @@ null);
             _operLogTable = new Hashtable();
 
             EnableControls(false);
+
+            LibraryChannel channel = this.GetChannel();
+
             stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.Channel.DoStop);
+            stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在装载日志记录 ...");
             stop.BeginLoop();
             try
@@ -2699,13 +2752,14 @@ null);
                 ProgressEstimate estimate = new ProgressEstimate();
 
                 OperLogLoader loader = new OperLogLoader();
-                loader.Channel = this.Channel;
+                loader.Channel = channel;
                 loader.Stop = this.Progress;
                 loader.estimate = estimate;
                 loader.FileNames = dates;
                 loader.Level = 2;  // this.MainForm.OperLogLevel;
                 loader.AutoCache = false;
                 loader.CacheDir = "";
+                loader.Filter = "borrow,return";    // 2017/4/9
 
                 loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                 loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
@@ -2794,9 +2848,11 @@ null);
             finally
             {
                 stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.Channel.DoStop);
+                stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.Style = StopStyle.None;
+
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
@@ -2817,11 +2873,11 @@ null);
             AppendHtml("<td>操作次数</td>");
             AppendHtml("</tr>");
 
-            foreach(OperLogData data in _operLogItems)
+            foreach (OperLogData data in _operLogItems)
             {
                 AppendHtml("<tr>");
-                AppendHtml("<td>"+data.ItemRecPath+"</td>");
-                AppendHtml("<td>"+data.Action+"</td>");
+                AppendHtml("<td>" + data.ItemRecPath + "</td>");
+                AppendHtml("<td>" + data.Action + "</td>");
                 AppendHtml("<td>" + data.ItemBarcode + "</td>");
                 AppendHtml("<td>" + data.Operator + "</td>");
                 AppendHtml("<td>" + data.OperTime + "</td>");
@@ -2943,7 +2999,7 @@ null);
 
             if (strAction != "remove" && strAction != "add")
             {
-                strError = "未知的 strAction 值 '"+strAction+"'";
+                strError = "未知的 strAction 值 '" + strAction + "'";
                 return -1;
             }
 
@@ -3025,15 +3081,18 @@ MessageBoxDefaultButton.Button1);
             }
 
             EnableControls(false);
+
+            LibraryChannel channel = this.GetChannel();
+
             stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.Channel.DoStop);
+            stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在修改册记录状态 ...");
             stop.BeginLoop();
             try
             {
                 stop.SetProgressRange(0, items.Count);
 
-                ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
+                ListViewPatronLoader loader = new ListViewPatronLoader(channel,
     stop,
     items,
     this.m_biblioTable);
@@ -3111,7 +3170,9 @@ MessageBoxDefaultButton.Button1);
                     //      -2  时间戳不匹配
                     //      -1  出错
                     //      0   成功
-                    nRet = SaveItemRecord(info.RecPath,
+                    nRet = SaveItemRecord(
+                        channel,
+                        info.RecPath,
                     info,
                     out baNewTimestamp,
                     out strError);
@@ -3125,7 +3186,7 @@ MessageBoxDefaultButton.Button1);
 
                     info.Timestamp = baNewTimestamp;
 
-                    this.m_nChangedCount ++;
+                    this.m_nChangedCount++;
                     AcceptOneChange(item.ListViewItem);
 
                     // 刷新显示
@@ -3154,9 +3215,11 @@ MessageBoxDefaultButton.Button1);
             finally
             {
                 stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.Channel.DoStop);
+                stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.Style = StopStyle.None;
+
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
@@ -3188,7 +3251,7 @@ MessageBoxDefaultButton.Button1);
         {
             bool bChanged = false;
             List<string> list = StringUtil.SplitList(strList);
-            foreach(string value in list)
+            foreach (string value in list)
             {
                 if (StringUtil.RemoveFromInList(value, true, ref strText) == true)
                     bChanged = true;
@@ -3203,7 +3266,9 @@ MessageBoxDefaultButton.Button1);
         //      -2  时间戳不匹配
         //      -1  出错
         //      0   成功
-        int SaveItemRecord(string strRecPath,
+        int SaveItemRecord(
+            LibraryChannel channel,
+            string strRecPath,
             BiblioInfo info,
             out byte[] baNewTimestamp,
             out string strError)
@@ -3241,12 +3306,12 @@ MessageBoxDefaultButton.Button1);
 
             long lRet = 0;
 
-                lRet = this.Channel.SetEntities(
-                     null,   // this.BiblioStatisForm.stop,
-                     "",
-                     entities,
-                     out errorinfos,
-                     out strError);
+            lRet = channel.SetEntities(
+                 this.stop,   // this.BiblioStatisForm.stop,
+                 "",
+                 entities,
+                 out errorinfos,
+                 out strError);
 
             if (lRet == -1)
                 return -1;
@@ -3439,7 +3504,7 @@ MessageBoxDefaultButton.Button1);
                     form.Show();
                 }
 
-                    form.DbType = "item";
+                form.DbType = "item";
 
                 if (strIdType == "barcode")
                 {
@@ -3457,24 +3522,33 @@ MessageBoxDefaultButton.Button1);
 
         private void button_start_setLocations_Click(object sender, EventArgs e)
         {
-            SelectBatchNoDialog dlg = new SelectBatchNoDialog();
-            MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.Channel = this.Channel;
-            dlg.Stop = this.stop;
-            dlg.InventoryDbName = "";
-            dlg.LibraryCodeList = GetOwnerLibraryCodes();
-            this.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
-            dlg.ShowDialog(this);
+            LibraryChannel channel = this.GetChannel();
 
-            this.textBox_start_locations.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
-            return;
+            try
+            {
+                SelectBatchNoDialog dlg = new SelectBatchNoDialog();
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.Channel = channel;
+                dlg.Stop = this.stop;
+                dlg.InventoryDbName = "";
+                dlg.LibraryCodeList = GetOwnerLibraryCodes();
+                this.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
+                dlg.ShowDialog(this);
+
+                this.textBox_start_locations.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
+                return;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
         }
 
         private void inventoryBatchNoControl_start_batchNo_TextChanged(object sender, EventArgs e)
         {
             if (this._chargingForm != null)
                 this._chargingForm.BatchNo = this.inventoryBatchNoControl_start_batchNo.Text;
-         }
+        }
 
         private void textBox_start_locations_TextChanged(object sender, EventArgs e)
         {
@@ -3592,7 +3666,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             DialogResult result = MessageBox.Show(this,
-"当前有 "+barcode_list.Count+" 条经过盘点验证在架的册记录处于外借状态。\r\n\r\n是否要对这些册立即补做还书操作?",
+"当前有 " + barcode_list.Count + " 条经过盘点验证在架的册记录处于外借状态。\r\n\r\n是否要对这些册立即补做还书操作?",
 "InventoryForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -3695,7 +3769,7 @@ MessageBoxDefaultButton.Button1);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_inventoryList_records, new Point(e.X, e.Y));	
+            contextMenu.Show(this.listView_inventoryList_records, new Point(e.X, e.Y));
         }
 
         void menu_selectAllInventoryLines_Click(object sender, EventArgs e)
@@ -3724,6 +3798,8 @@ MessageBoxDefaultButton.Button2);
 
             string strError = "";
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在删除盘点记录 ...");
@@ -3735,7 +3811,7 @@ MessageBoxDefaultButton.Button2);
             {
                 stop.SetProgressRange(0, items.Count);
 
-                ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
+                ListViewPatronLoader loader = new ListViewPatronLoader(channel,
     stop,
     items,
     this.m_biblioTable);
@@ -3773,18 +3849,18 @@ MessageBoxDefaultButton.Button2);
 
                     string strOutputResPath = "";
                     byte[] output_timestamp = null;
-                        lRet = Channel.WriteRes(
-                             stop,
-                             info.RecPath,
-                             "",
-                             0,
-                             null,
-                             "",
-                             "delete",
-                             info.Timestamp,
-                             out strOutputResPath,
-                             out output_timestamp,
-                             out strError);
+                    lRet = channel.WriteRes(
+                         stop,
+                         info.RecPath,
+                         "",
+                         0,
+                         null,
+                         "",
+                         "delete",
+                         info.Timestamp,
+                         out strOutputResPath,
+                         out output_timestamp,
+                         out strError);
                     if (lRet == -1)
                         goto ERROR1;
 
@@ -3804,6 +3880,8 @@ MessageBoxDefaultButton.Button2);
 
                 this.EnableControls(true);
                 this.listView_inventoryList_records.Enabled = true;
+
+                this.ReturnChannel(channel);
             }
 
             MessageBox.Show(this, "成功删除盘点记录 " + items.Count + " 条");
@@ -3861,7 +3939,7 @@ MessageBoxDefaultButton.Button2);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            contextMenu.Show(this.listView_baseList_records, new Point(e.X, e.Y));	
+            contextMenu.Show(this.listView_baseList_records, new Point(e.X, e.Y));
 
         }
 

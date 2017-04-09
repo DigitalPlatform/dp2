@@ -5,15 +5,14 @@ using System.Text;
 using System.Xml;
 using System.Diagnostics;
 using System.Collections;
+using System.Windows.Forms;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
-//using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Windows.Forms;
 
 namespace dp2Circulation
 {

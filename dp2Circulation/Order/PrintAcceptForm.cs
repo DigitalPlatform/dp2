@@ -11,21 +11,22 @@ using System.Xml;
 using System.Diagnostics;
 using System.Web;
 
-using DigitalPlatform;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Xml;
-using DigitalPlatform.CirculationClient;
-
-using DigitalPlatform.IO;
-using DigitalPlatform.CommonControl;
-
-using DigitalPlatform.Text;
-
-using DigitalPlatform.LibraryClient.localhost;
-using DigitalPlatform.dp2.Statis;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
+
+using DigitalPlatform;
+using DigitalPlatform.GUI;
+using DigitalPlatform.Xml;
+using DigitalPlatform.IO;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
+using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.LibraryClient;
+
+// 2017/4/9 从 this.Channel 用法改造为 ChannelPool 用法
 
 namespace dp2Circulation
 {
@@ -299,16 +300,6 @@ namespace dp2Circulation
             CreateOriginColumnHeader(this.listView_origin);
             CreateMergedColumnHeader(this.listView_merged);
 
-#if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
-
             this.comboBox_load_type.Text = this.MainForm.AppInfo.GetString(
                 "printaccept_form",
                 "publication_type",
@@ -317,6 +308,8 @@ namespace dp2Circulation
             comboBox_load_type_SelectedIndexChanged(null, null);
 
             API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
+
+            this.Channel = null;
         }
 
         private void PrintAcceptForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -619,6 +612,8 @@ namespace dp2Circulation
             int nDupCount = 0;
             int nRet = 0;
 
+            LibraryChannel channel = this.GetChannel();
+
             StreamReader sr = null;
             try
             {
@@ -668,15 +663,11 @@ namespace dp2Circulation
                     int nLineCount = 0;
                     for (; ; )
                     {
-                        if (stop != null)
+                        if (stop != null && stop.State != 0)
                         {
-                            if (stop.State != 0)
-                            {
-                                strError = "用户中断1";
-                                return -1;
-                            }
+                            strError = "用户中断1";
+                            return -1;
                         }
-
 
                         string strLine = "";
                         strLine = sr.ReadLine();
@@ -748,13 +739,10 @@ namespace dp2Circulation
 
                     for (int i = 0; ; )
                     {
-                        if (stop != null)
+                        if (stop != null && stop.State != 0)
                         {
-                            if (stop.State != 0)
-                            {
-                                strError = "用户中断2";
-                                return -1;
-                            }
+                            strError = "用户中断2";
+                            return -1;
                         }
 
                         string strLine = "";
@@ -774,13 +762,13 @@ namespace dp2Circulation
 
                         stop.SetMessage("正在装入路径 " + strLine + " 对应的记录...");
 
-
                         // 根据记录路径，装入订购记录
                         // return: 
                         //      -2  路径已经在list中存在了
                         //      -1  出错
                         //      1   成功
                         nRet = LoadOneItem(
+                            channel,
                             this.comboBox_load_type.Text,
                             strLine,
                             this.listView_origin,
@@ -810,6 +798,10 @@ namespace dp2Circulation
             finally
             {
                 sr.Close();
+                sr = null;
+
+                this.ReturnChannel(channel);
+                channel = null;
             }
 
             // 记忆文件名
@@ -827,7 +819,6 @@ namespace dp2Circulation
             stop.SetMessage("");
             if (nRet == -1)
                 return -1;
-
 
             // 汇报数据装载情况。
             // return:
@@ -881,6 +872,7 @@ namespace dp2Circulation
         //      -1  出错
         //      1   成功
         int LoadOneItem(
+            LibraryChannel channel,
             string strPubType,
             string strRecPath,
             ListView list,
@@ -896,9 +888,8 @@ namespace dp2Circulation
 
             byte[] item_timestamp = null;
 
-            long lRet = Channel.GetItemInfo(
+            long lRet = channel.GetItemInfo(
                 stop,
-
                 (strRecPath[0] != '@' ? "@path:" + strRecPath : strRecPath),
                 // "",
                 "xml",
@@ -967,7 +958,7 @@ namespace dp2Circulation
 
                 Debug.Assert(String.IsNullOrEmpty(strOutputBiblioRecPath) == false, "strBiblioRecPath值不能为空");
 
-                lRet = Channel.GetBiblioInfos(
+                lRet = channel.GetBiblioInfos(
                     stop,
                     strOutputBiblioRecPath,
                     "",
@@ -1017,16 +1008,11 @@ namespace dp2Circulation
                 data.Timestamp = item_timestamp;
                 data.Xml = strItemXml;
 
-                /*
-                // 图标
-                SetItemColor(item, TYPE_NORMAL);
-                 * */
-
                 // 将新加入的事项滚入视野
                 list.EnsureVisible(list.Items.Count - 1);
 
                 // 填充需要从订购库获得的栏目信息
-                FillOrderColumns(item, strPubType);
+                FillOrderColumns(channel, item, strPubType);
             }
 
             return 1;
@@ -1035,7 +1021,9 @@ namespace dp2Circulation
         }
 
         // 填充需要从订购库获得的栏目信息
-        void FillOrderColumns(ListViewItem item,
+        void FillOrderColumns(
+            LibraryChannel channel,
+            ListViewItem item,
             string strPubType)
         {
             string strRefID = ListViewUtil.GetItemText(item, ORIGIN_COLUMN_REFID);
@@ -1045,7 +1033,6 @@ namespace dp2Circulation
             bool bSeries = false;
             if (strPubType == "连续出版物")
                 bSeries = true;
-
 
             string strError = "";
             int nRet = 0;
@@ -1061,9 +1048,11 @@ namespace dp2Circulation
                 //      -1  error
                 //      0   not found
                 //      1   found
-                nRet = GetLinkedOrderRecordRecPath(strRefID,
-                out strOrderOrIssueRecPath,
-                out strError);
+                nRet = GetLinkedOrderRecordRecPath(
+                    channel,
+                    strRefID,
+                    out strOrderOrIssueRecPath,
+                    out strError);
                 if (nRet != 1)
                 {
                     goto ERROR1;
@@ -1071,13 +1060,13 @@ namespace dp2Circulation
 
                 string strItemXml = "";
                 // 根据记录路径获得一条订购记录
-                nRet = GetOrderRecord(strOrderOrIssueRecPath,
+                nRet = GetOrderRecord(
+                    channel,
+                    strOrderOrIssueRecPath,
                     out strItemXml,
                     out strError);
                 if (nRet != 1)
-                {
                     goto ERROR1;
-                }
 
                 try
                 {
@@ -1106,7 +1095,9 @@ namespace dp2Circulation
                 //      -1  error
                 //      0   not found
                 //      1   found
-                nRet = GetLinkedIssueRecordRecPath(strRefID,
+                nRet = GetLinkedIssueRecordRecPath(
+                    channel,
+                    strRefID,
                     strPublishTime,
                     out strOrderOrIssueRecPath,
                     out strError);
@@ -1117,7 +1108,9 @@ namespace dp2Circulation
 
                 string strItemXml = "";
                 // 根据记录路径获得一条期记录
-                nRet = GetIssueRecord(strOrderOrIssueRecPath,
+                nRet = GetIssueRecord(
+                    channel,
+                    strOrderOrIssueRecPath,
                     out strItemXml,
                     out strError);
                 if (nRet != 1)
@@ -1383,7 +1376,9 @@ namespace dp2Circulation
         //      -1  error
         //      0   not found
         //      1   found
-        int GetLinkedIssueRecordRecPath(string strRefID,
+        int GetLinkedIssueRecordRecPath(
+            LibraryChannel channel,
+            string strRefID,
             string strPublishTime,
             out string strIssueRecPath,
             out string strError)
@@ -1396,7 +1391,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strIssueRecPath) == false)
                 return 1;
 
-            long lRet = Channel.SearchIssue(
+            long lRet = channel.SearchIssue(
                 stop,
                 "<all>",
                 strRefID,
@@ -1429,7 +1424,7 @@ namespace dp2Circulation
 
             // 装入浏览格式
 
-            lRet = Channel.GetSearchResult(
+            lRet = channel.GetSearchResult(
                 stop,
                 "refid",   // strResultSetName
                 0,
@@ -1462,7 +1457,9 @@ namespace dp2Circulation
 
         // 2009/2/2
         // 根据记录路径获得一条期刊记录
-        int GetIssueRecord(string strRecPath,
+        int GetIssueRecord(
+            LibraryChannel channel,
+            string strRecPath,
             out string strItemXml,
             out string strError)
         {
@@ -1484,7 +1481,7 @@ namespace dp2Circulation
 
             string strIndex = "@path:" + strRecPath;
 
-            long lRet = Channel.GetIssueInfo(
+            long lRet = channel.GetIssueInfo(
                 stop,
                 strIndex,   // strPublishTime
                 // "", // strBiblioRecPath
@@ -1512,7 +1509,9 @@ namespace dp2Circulation
         //      -1  error
         //      0   not found
         //      1   found
-        int GetLinkedOrderRecordRecPath(string strRefID,
+        int GetLinkedOrderRecordRecPath(
+            LibraryChannel channel,
+            string strRefID,
             out string strOrderRecPath,
             out string strError)
         {
@@ -1524,7 +1523,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strOrderRecPath) == false)
                 return 1;
 
-            long lRet = Channel.SearchOrder(
+            long lRet = channel.SearchOrder(
                 stop,
                 "<all>",
                 strRefID,
@@ -1557,7 +1556,7 @@ namespace dp2Circulation
 
             // 装入浏览格式
 
-            lRet = Channel.GetSearchResult(
+            lRet = channel.GetSearchResult(
                 stop,
                 "refid",   // strResultSetName
                 0,
@@ -1589,7 +1588,9 @@ namespace dp2Circulation
         }
 
         // 根据记录路径获得一条订购记录
-        int GetOrderRecord(string strRecPath,
+        int GetOrderRecord(
+            LibraryChannel channel,
+            string strRecPath,
             out string strItemXml,
             out string strError)
         {
@@ -1601,7 +1602,6 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strItemXml) == false)
                 return 1;
 
-
             string strBiblioText = "";
 
             string strItemRecPath = "";
@@ -1611,7 +1611,7 @@ namespace dp2Circulation
 
             string strIndex = "@path:" + strRecPath;
 
-            long lRet = Channel.GetOrderInfo(
+            long lRet = channel.GetOrderInfo(
                 stop,
                 strIndex,
                 // "",
@@ -3621,13 +3621,13 @@ namespace dp2Circulation
                 this.SortColumns_origin.Clear();
                 SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
 
-
                 this.refid_table.Clear();
                 this.orderxml_table.Clear();
             }
 
             EnableControls(false);
-            // MainForm.ShowProgress(true);
+
+            LibraryChannel channel = this.GetChannel();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索 ...");
@@ -3642,7 +3642,7 @@ namespace dp2Circulation
                 if (this.BatchNo == "<不指定>")
                 {
                     // 2013/3/25
-                    lRet = Channel.SearchItem(
+                    lRet = channel.SearchItem(
                     stop,
                     this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
                         //"<all>",
@@ -3663,7 +3663,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    lRet = Channel.SearchItem(
+                    lRet = channel.SearchItem(
 stop,
 this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
                         //"<all>",
@@ -3704,16 +3704,13 @@ out strError);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
+                        MessageBox.Show(this, "用户中断");
+                        return;
                     }
 
-                    lRet = Channel.GetSearchResult(
+                    lRet = channel.GetSearchResult(
                         stop,
                         "batchno",   // strResultSetName
                         lStart,
@@ -3790,6 +3787,7 @@ out strError);
                         //      -1  出错
                         //      1   成功
                         nRet = LoadOneItem(
+                            channel,
                             this.comboBox_load_type.Text,
                             strRecPath,
                             this.listView_origin,
@@ -3814,7 +3812,6 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-
                 // 填充合并后数据列表
                 stop.SetMessage("正在合并数据...");
                 nRet = FillMergedList(out strError);
@@ -3829,24 +3826,33 @@ out strError);
                 stop.Initial("");
                 stop.HideProgress();
 
+                this.ReturnChannel(channel);
+
                 EnableControls(true);
-                // MainForm.ShowProgress(false);
             }
 
             return;
-
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
         void dlg_GetBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
-            Global.GetBatchNoTable(e,
-                this,
-                this.comboBox_load_type.Text,
-                "item",
-                this.stop,
-                this.Channel);
+            LibraryChannel channel = this.GetChannel();
+
+            try
+            {
+                Global.GetBatchNoTable(e,
+                    this,
+                    this.comboBox_load_type.Text,
+                    "item",
+                    this.stop,
+                    channel);
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
 
 #if NOOOOOOOOOOOOOOOOOOOOOOOOOO
             string strError = "";
@@ -4011,12 +4017,6 @@ out strError);
                 return;
 
             this.BatchNo = dlg.BatchNo;
-            /*
-            string strMatchLocation = dlg.ItemLocation;
-
-            if (strMatchLocation == "<不指定>")
-                strMatchLocation = null;    // null和""的区别很大
-             * */
 
             string strError = "";
             int nRet = 0;
@@ -4051,7 +4051,8 @@ out strError);
             }
 
             EnableControls(false);
-            // MainForm.ShowProgress(true);
+
+            LibraryChannel channel = this.GetChannel();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索 ...");
@@ -4060,13 +4061,12 @@ out strError);
             try
             {
                 stop.SetProgressRange(0, 100);
-                // stop.SetProgressValue(0);
 
                 long lRet = 0;
                 if (this.BatchNo == "<不指定>")
                 {
                     // 2013/3/27
-                    lRet = Channel.SearchOrder(
+                    lRet = channel.SearchOrder(
                     stop,
                     this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
                     "", // dlg.BatchNo,
@@ -4086,7 +4086,7 @@ out strError);
                 }
                 else
                 {
-                    lRet = Channel.SearchOrder(
+                    lRet = channel.SearchOrder(
 stop,
 this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
 dlg.BatchNo,
@@ -4127,17 +4127,13 @@ out strError);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return;
-                        }
+                        MessageBox.Show(this, "用户中断");
+                        return;
                     }
 
-
-                    lRet = Channel.GetSearchResult(
+                    lRet = channel.GetSearchResult(
                         stop,
                         "batchno",   // strResultSetName
                         lStart,
@@ -4169,7 +4165,9 @@ out strError);
                         //      -2  路径已经在list中存在了
                         //      -1  出错
                         //      1   成功
-                        nRet = LoadOrderItem(strRecPath,
+                        nRet = LoadOrderItem(
+                            channel,
+                            strRecPath,
                             this.listView_origin,
                             ref nOrderRecCount,
                             ref nItemRecCount,
@@ -4195,7 +4193,6 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-
                 // 填充合并后数据列表
                 stop.SetMessage("正在合并数据...");
                 nRet = FillMergedList(out strError);
@@ -4214,12 +4211,12 @@ out strError);
                 stop.Initial("");
                 stop.HideProgress();
 
+                this.ReturnChannel(channel);
+
                 EnableControls(true);
-                // MainForm.ShowProgress(false);
             }
 
             return;
-
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -4232,7 +4229,9 @@ out strError);
         //      -2  路径已经在list中存在了
         //      -1  出错
         //      1   成功
-        int LoadOrderItem(string strRecPath,
+        int LoadOrderItem(
+            LibraryChannel channel,
+            string strRecPath,
             ListView list,
             ref int nOrderRecCount,
             ref int nItemRecCount,
@@ -4248,7 +4247,7 @@ out strError);
 
             byte[] item_timestamp = null;
 
-            long lRet = Channel.GetOrderInfo(
+            long lRet = channel.GetOrderInfo(
                 stop,
                 "@path:" + strRecPath,
                 // "",
@@ -4292,9 +4291,7 @@ out strError);
                 goto ERROR1;
             }
 
-
             List<string> distributes = new List<string>();
-
 
             if (this.comboBox_load_type.Text == "连续出版物")
             {
@@ -4310,7 +4307,7 @@ out strError);
 
                 // 如果是期刊的订购库，还需要通过订购记录的refid获得期记录，从期记录中才能得到馆藏分配信息
                 string strOutputStyle = "";
-                lRet = Channel.SearchIssue(stop,
+                lRet = channel.SearchIssue(stop,
     strIssueDbName, // "<全部>",
     strRefID,
     -1,
@@ -4343,7 +4340,7 @@ out strError);
                         return -1;
                     }
 
-                    lRet = Channel.GetSearchResult(
+                    lRet = channel.GetSearchResult(
                         stop,
                         "tempissue",
                         lStart,
@@ -4372,7 +4369,7 @@ out strError);
                         string strIssueXml = "";
                         string strOutputIssueRecPath = "";
 
-                        lRet = Channel.GetIssueInfo(
+                        lRet = channel.GetIssueInfo(
     stop,
     "@path:" + strIssueRecPath,
                             // "",
@@ -4466,7 +4463,9 @@ out strError);
                         //      -2  路径已经在list中存在了
                         //      -1  出错
                         //      1   成功
-                        nRet = LoadOneItem(this.comboBox_load_type.Text,
+                        nRet = LoadOneItem(
+                            channel,
+                            this.comboBox_load_type.Text,
                             "@refID:" + strRefID,
                             list,
                             out strError);
@@ -4503,12 +4502,20 @@ out strError);
 
         void dlg_GetOrderBatchNoTable(object sender, GetKeyCountListEventArgs e)
         {
-            Global.GetBatchNoTable(e,
-                this,
-                this.comboBox_load_type.Text,
-                "order",
-                this.stop,
-                this.Channel);
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                Global.GetBatchNoTable(e,
+                    this,
+                    this.comboBox_load_type.Text,
+                    "order",
+                    this.stop,
+                    channel);
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
         }
 
         void dlg_GetOrderLocationValueTable(object sender, GetValueTableEventArgs e)
@@ -4922,7 +4929,8 @@ out strError);
             string strError = "";
 
             EnableControls(false);
-            // MainForm.ShowProgress(true);
+
+            LibraryChannel channel = this.GetChannel();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在刷新 ...");
@@ -4931,8 +4939,6 @@ out strError);
             try
             {
                 stop.SetProgressRange(0, items.Count);
-                // stop.SetProgressValue(0);
-
 
                 for (int i = 0; i < items.Count; i++)
                 {
@@ -4947,7 +4953,7 @@ out strError);
 
                     stop.SetMessage("正在刷新 " + item.Text + " ...");
 
-                    int nRet = RefreshOneItem(item, out strError);
+                    int nRet = RefreshOneItem(channel, item, out strError);
                     /*
                     if (nRet == -1)
                         MessageBox.Show(this, strError);
@@ -4966,17 +4972,18 @@ out strError);
                 stop.Initial("刷新完成。");
                 stop.HideProgress();
 
+                this.ReturnChannel(channel);
+
                 EnableControls(true);
-                // MainForm.ShowProgress(false);
             }
             return;
         ERROR1:
             MessageBox.Show(this, strError);
-
         }
 
-        /*public*/
-        int RefreshOneItem(ListViewItem item,
+        int RefreshOneItem(
+            LibraryChannel channel,
+            ListViewItem item,
             out string strError)
         {
             strError = "";
@@ -4991,7 +4998,7 @@ out strError);
 
             string strIndex = "@path:" + ListViewUtil.GetItemText(item, ORIGIN_COLUMN_RECPATH);
 
-            long lRet = Channel.GetOrderInfo(
+            long lRet = channel.GetOrderInfo(
                 stop,
                 strIndex,
                 // "",
@@ -5023,7 +5030,7 @@ out strError);
 
                 Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "strBiblioRecPath值不能为空");
 
-                lRet = Channel.GetBiblioInfos(
+                lRet = channel.GetBiblioInfos(
                     stop,
                     strBiblioRecPath,
                     "",
@@ -5048,7 +5055,6 @@ out strError);
             }
 
             // 剖析一个册的xml记录，取出有关信息放入listview中
-
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -5059,7 +5065,6 @@ out strError);
                 strError = "PrintAcceptForm dom.LoadXml() {D08724A8-33B0-4DC8-8CD0-F58082E5DA7B} exception: " + ExceptionUtil.GetAutoText(ex);
                 goto ERROR1;
             }
-
 
             {
                 SetListViewItemText(dom,
@@ -5079,21 +5084,11 @@ out strError);
             return -1;
         }
 
-        /*
-        int FillMergedList(out string strError)
-        {
-            strError = "";
-            int nRet = 0;
-
-            return 0;
-        }*/
-
         int OriginIndex(ListViewItem item)
         {
             return this.listView_origin.Items.IndexOf(item);
         }
 
-        /*public*/
         class Tao
         {
             public string OrderRecPath = "";    // 订购记录路径
@@ -7005,14 +7000,14 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在保存原始记录 ...");
             stop.BeginLoop();
 
             try
             {
-
-
                 string strPrevBiblioRecPath = "";
                 List<EntityInfo> entity_list = new List<EntityInfo>();
                 for (int i = 0; i < this.listView_origin.Items.Count; i++)
@@ -7041,7 +7036,9 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                         && entity_list.Count > 0)
                     {
                         // 保存一个批次
-                        nRet = SaveOneBatchOrders(entity_list,
+                        nRet = SaveOneBatchOrders(
+                            channel,
+                            entity_list,
                             strPrevBiblioRecPath,
                             out strError);
                         if (nRet == -1)
@@ -7092,7 +7089,9 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                         && entity_list.Count > 0)
                 {
                     // 保存一个批次
-                    nRet = SaveOneBatchOrders(entity_list,
+                    nRet = SaveOneBatchOrders(
+                        channel,
+                        entity_list,
                         strPrevBiblioRecPath,
                         out strError);
                     if (nRet == -1)
@@ -7108,13 +7107,17 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
 
+                this.ReturnChannel(channel);
+
                 EnableControls(true);
             }
 
             return 0;
         }
 
-        int SaveOneBatchOrders(List<EntityInfo> entity_list,
+        int SaveOneBatchOrders(
+            LibraryChannel channel,
+            List<EntityInfo> entity_list,
             string strBiblioRecPath,
             out string strError)
         {
@@ -7124,16 +7127,14 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
             entity_list.CopyTo(entities);
 
             EntityInfo[] errorinfos = null;
-            long lRet = Channel.SetOrders(
+            long lRet = channel.SetOrders(
                 stop,
                 strBiblioRecPath,
                 entities,
                 out errorinfos,
                 out strError);
             if (lRet == -1)
-            {
                 return -1;
-            }
 
             string strErrorText = "";
             for (int i = 0; i < errorinfos.Length; i++)

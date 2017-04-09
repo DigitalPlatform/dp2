@@ -2497,7 +2497,6 @@ namespace dp2Circulation
 
                     // 
 
-
                     ListViewItem item = new ListViewItem();
                     item.Text = "";
                     // ListViewUtil.ChangeItemText(item, 1, strBarcode);
@@ -2505,7 +2504,9 @@ namespace dp2Circulation
                     this.listView_records.Items.Add(item);
 
                     FillLineByBarcode(
-                        strBarcode, item);
+                        this.Channel,
+                        strBarcode, 
+                        item);
 
                     items.Add(item);
                 }
