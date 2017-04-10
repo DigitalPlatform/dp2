@@ -2893,7 +2893,7 @@ out string strError)
             {
                 return this.AppInfo.GetString("config",
                     "gcat_server_url",
-                    "http://dp2003.com/gcatserver/");
+                    "http://dp2003.com/dp2library/");
             }
         }
 
@@ -2903,7 +2903,7 @@ out string strError)
             {
                 return this.AppInfo.GetString("config",
                     "pinyin_server_url",
-                    "http://dp2003.com/gcatserver/");
+                    "http://dp2003.com/dp2library/");
             }
         }
 

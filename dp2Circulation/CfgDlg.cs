@@ -77,13 +77,13 @@ namespace dp2Circulation
             this.textBox_server_authorNumber_gcatUrl.Text =
                 ap.GetString("config",
                 "gcat_server_url",
-                "http://dp2003.com/gcatserver/");  // "http://dp2003.com/dp2libraryws/gcat.asmx"
+                "http://dp2003.com/dp2library/");  // "http://dp2003.com/gcatserver/" // "http://dp2003.com/dp2libraryws/gcat.asmx"
 
             // pinyin serverurl
             this.textBox_server_pinyin_gcatUrl.Text =
                 ap.GetString("config",
                 "pinyin_server_url",
-                "http://dp2003.com/gcatserver/");
+                "http://dp2003.com/dp2library/");   // "http://dp2003.com/gcatserver/"
 
             // 绿色安装包
             this.textBox_server_greenPackage.Text =

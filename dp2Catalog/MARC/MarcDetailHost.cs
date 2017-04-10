@@ -471,7 +471,7 @@ namespace dp2Catalog
             strAuthorNumber = "";
 
             if (String.IsNullOrEmpty(strGcatWebServiceUrl) == true)
-                strGcatWebServiceUrl = "http://dp2003.com/gcatserver/";  //  "http://dp2003.com/dp2libraryws/gcat.asmx";
+                strGcatWebServiceUrl = "http://dp2003.com/dp2library/";  // "http://dp2003.com/gcatserver/" //  "http://dp2003.com/dp2libraryws/gcat.asmx";
 
             if (strGcatWebServiceUrl.IndexOf(".asmx") != -1)
             {
