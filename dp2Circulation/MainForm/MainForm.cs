@@ -2671,12 +2671,18 @@ Stack:
             else
                 owner = this;
 
-            CirculationLoginDlg dlg = SetDefaultAccount(
-                e.LibraryServerUrl,
-                null,
-                e.ErrorInfo,
-                e.LoginFailCondition,
-                owner);
+            CirculationLoginDlg dlg = null;
+            this.Invoke((Action)(() =>
+{
+    dlg = SetDefaultAccount(
+        e.LibraryServerUrl,
+        null,
+        e.ErrorInfo,
+        e.LoginFailCondition,
+        owner);
+
+}
+));
             if (dlg == null)
             {
                 e.Cancel = true;
@@ -5151,10 +5157,17 @@ Stack:
 
             // 2016/11/11
             if (dlg.SavePasswordShort == true || dlg.SavePasswordLong == true)
+            {
                 dlg.PhoneNumber = AppInfo.GetString(
 "default_account",
 "phoneNumber",
 "");
+                // 2017/4/11
+                dlg.TempCode = AppInfo.GetString(
+"default_account",
+"tempCode",
+"");
+            }
 
             this.AppInfo.LinkFormState(dlg,
                 "logindlg_state");
@@ -5235,6 +5248,11 @@ dlg.UsedList);
     "phoneNumber",
     dlg.PhoneNumber);
 
+            // 2017/4/11
+            AppInfo.SetString(
+"default_account",
+"tempCode",
+dlg.TempCode);
             return dlg;
         }
 

@@ -2256,6 +2256,9 @@ namespace dp2Circulation
             else
                 throw new Exception("未知的strType '" + strType + "' 值");
 
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(5);
+
             // EnableControls(false);
             stop.OnStop += new StopEventHandler(channel.DoStop);
             stop.Initial("正在列出全部" + strName + "批次号 ...");
@@ -2408,6 +2411,8 @@ namespace dp2Circulation
                 stop.Initial("");
 
                 // EnableControls(true);
+
+                channel.Timeout = old_timeout;
             }
             return;
         ERROR1:

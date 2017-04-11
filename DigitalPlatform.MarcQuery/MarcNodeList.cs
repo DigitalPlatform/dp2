@@ -773,7 +773,7 @@ namespace DigitalPlatform.Marc
             {
                 foreach (MarcNode node in this)
                 {
-                    node.Indicator = value;  // TODO: 修改indicator的长度不合适了是否高报错?
+                    node.Indicator = value;  // TODO: 修改indicator的长度不合适了是否报错?
                 }
             }
         }
