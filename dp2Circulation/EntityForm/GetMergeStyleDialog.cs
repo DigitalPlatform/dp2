@@ -25,6 +25,31 @@ namespace dp2Circulation
             set;
         }
 
+        string _strOperation = "";
+
+        // 复制 移动
+        public string Operation
+        {
+            get
+            {
+                return this._strOperation;
+            }
+            set
+            {
+                this._strOperation = value;
+                SetTitle();
+            }
+        }
+
+        void SetTitle()
+        {
+            string strText = this.Operation;
+            if (string.IsNullOrEmpty(strText) == false)
+                strText += " ";
+            strText += " 请指定合并方式";
+            this.Text = strText;
+        }
+
         /// <summary>
         /// 目标书目记录路径
         /// </summary>

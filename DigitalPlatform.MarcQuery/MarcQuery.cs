@@ -290,7 +290,7 @@ namespace DigitalPlatform.Marc
             string strText,
             string strOuterFieldDef = null)
         {
-            return createFields(strText.Replace(chFieldEnd, FLDEND[0]).Replace(chSubfield,SUBFLD[0]), strOuterFieldDef);
+            return createFields(strText.Replace(chFieldEnd, FLDEND[0]).Replace(chSubfield, SUBFLD[0]), strOuterFieldDef);
         }
 
         // 根据机内格式的片断字符串，构造若干MarcSubfield对象
@@ -623,13 +623,13 @@ namespace DigitalPlatform.Marc
         //      strFieldName6   $6 子字段里面的字段名
         static MarcField _findField(
             MarcRecord record,
-            string strFieldName, 
+            string strFieldName,
             string strFieldName6,
             string strNumber,
             bool bMainField = true)
         {
             MarcNodeList fields = record.select("field[@name='" + strFieldName + "']");
-            foreach(MarcField field in fields)
+            foreach (MarcField field in fields)
             {
                 string content_6 = field.select("subfield[@name='6']").FirstContent;
                 if (string.IsNullOrEmpty(content_6) == true)
@@ -650,7 +650,7 @@ namespace DigitalPlatform.Marc
                     continue;
                 if (string.IsNullOrEmpty(strScriptId) == true
                     && bMainField == false)
-                    continue; 
+                    continue;
                 if (strCurFieldName == strFieldName6
                     && strCurNumber == strNumber)
                     return field;
@@ -856,14 +856,14 @@ namespace DigitalPlatform.Marc
                     }
                     strMainFieldName = strFieldName;
                 }
-                main_field = new MarcField(strMainFieldName, 
+                main_field = new MarcField(strMainFieldName,
                     field.Indicator,
                     "");
-                if (field.Name != "880") 
+                if (field.Name != "880")
                     field.before(main_field);
                 else
                     record.ChildNodes.insertSequence(main_field,
-            InsertSequenceStyle.PreferTail); 
+            InsertSequenceStyle.PreferTail);
                 bNewField = true;
             }
             else
@@ -878,7 +878,7 @@ namespace DigitalPlatform.Marc
             {
                 // $6
                 MarcSubfield subfield_6 = new MarcSubfield("6",
-                    _buildSubfield6(bTo880 == true? "880" : field.Name,
+                    _buildSubfield6(bTo880 == true ? "880" : field.Name,
                     strNumber, "", strOrientation)
                 );
                 main_field.ChildNodes.add(subfield_6);
@@ -1007,6 +1007,177 @@ namespace DigitalPlatform.Marc
             }
 
             return (nMax + 1).ToString().PadLeft(2, '0');
+        }
+
+        // 给 MARC21 的若干子字段添加正确的标点符号
+        /// <summary>
+        /// 给 MARC21 的若干子字段添加正确的标点符号
+        /// </summary>
+        /// <param name="record">MARC 记录</param>
+        /// <param name="strStyle">风格</param>
+        /// <returns>记录是否发生了修改</returns>
+        public static bool PunctuationMarc21(MarcRecord record, string strStyle)
+        {
+            bool bChanged = false;
+            MarcNodeList fields = record.select("field[@name='245']");
+            foreach (MarcField field in fields)
+            {
+                if (PunctuationMarc21Field245(field, strStyle) == true)
+                    bChanged = true;
+            }
+
+            return bChanged;
+        }
+
+        // 给 MARC21 记录中 245 字段内的子字段添加正确的标点符号
+        /// <summary>
+        /// 给 MARC21 记录中 245 字段内的子字段添加正确的标点符号
+        /// </summary>
+        /// <param name="record">MARC 记录</param>
+        /// <param name="strStyle">风格</param>
+        /// <returns>记录是否发生了修改</returns>
+        public static bool PunctuationMarc21Field245(MarcField field, string strStyle)
+        {
+            List<SubfieldInfo> infos = new List<SubfieldInfo>();
+            foreach (MarcSubfield subfield in field.ChildNodes)
+            {
+                SubfieldInfo info = new SubfieldInfo();
+                info.Subfield = subfield;
+                infos.Add(info);
+            }
+
+            // 添加标点符号
+            // $a题名 (不可重复)
+            // $b题名其余部分 空: (少数情况;)
+            // $c责任者说明  空/
+            // $f首尾日期 ,
+            // $g主体日期(集中出版日期)  自己() 
+            // $h载体 自己[]
+            // $k资料形式 :
+            // $n著作分卷/分节号 .
+            // $p著作分卷/分节题名 (在$a$b或者另一个$p后，就是 .。跟在 $n 后面就是 ,)
+            // $s版本 .
+            // 最后一个子字段尾部要加入一个 .
+            {
+                MarcSubfield prev_field = null;
+                foreach (SubfieldInfo info in infos)
+                {
+                    switch (info.Subfield.Name)
+                    {
+                        case "a":
+                            if (prev_field != null)
+                                info.LeadingPunctuation = " ";
+                            break;
+                        case "b":
+                            // 注：如果前一个子字段末尾是 ';'，则用 ';'
+                            info.LeadingPunctuation = ":";
+                            break;
+                        case "c":
+                            info.LeadingPunctuation = "/";
+                            break;
+                        case "f":
+                            info.LeadingPunctuation = ",";
+                            break;
+                        case "g":
+                            info.Punctuation = "()";
+                            break;
+                        case "h":
+                            info.Punctuation = "[]";
+                            break;
+                        case "k":
+                            info.LeadingPunctuation = ":";
+                            break;
+                        case "n":
+                            info.LeadingPunctuation = ".";
+                            break;
+                        case "p":
+                            if (prev_field != null && prev_field.Name == "n")
+                                info.LeadingPunctuation = ",";
+                            else
+                                info.LeadingPunctuation = ".";
+                            break;
+                        case "s":
+                            info.LeadingPunctuation = ".";
+                            break;
+                    }
+
+                    prev_field = info.Subfield;
+                }
+            }
+
+            string strOld = field.Content;
+            {
+                MarcSubfield prev_field = null;
+                foreach (SubfieldInfo info in infos)
+                {
+                    if (prev_field != null)
+                        ResetPunctuation(prev_field, info.Punctuation);
+
+                    prev_field = info.Subfield;
+                }
+            }
+
+            if (strOld != field.Content)
+                return true;
+
+            return false;
+        }
+
+        static void ResetPunctuation(MarcSubfield subfield, string strPunctuation)
+        {
+            string content = TrimEndChar(subfield.Content);
+            if (string.IsNullOrEmpty(strPunctuation))
+            {
+                subfield.Content = content;
+                return;
+            }
+            if (strPunctuation.Length == 1)
+            {
+                subfield.Content = content + strPunctuation;
+                return;
+            }
+            if (strPunctuation.Length == 2)
+            {
+                subfield.Content = strPunctuation[0] + content + strPunctuation[1];
+                return;
+            }
+
+            // 目前暂时不会出现这种情况
+            subfield.Content = content + strPunctuation;
+            return;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="strText"></param>
+        /// <param name="strDelimeters"></param>
+        /// <returns></returns>
+        public static string TrimEndChar(string strText, string strDelimeters = "./,;:")
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return "";
+            strText = strText.Trim();
+            if (string.IsNullOrEmpty(strText) == true)
+                return "";
+
+            char tail = strText[strText.Length - 1];
+            if (strDelimeters.IndexOf(tail) != -1)
+                return strText.Substring(0, strText.Length - 1);
+            return strText;
+        }
+
+        // 子字段信息
+        // 注：标点符号都是西文一个字符。每个标点符号使用时候前面需要加的空格，另行用规则解决，不包含在这里
+        class SubfieldInfo
+        {
+            public string LeadingPunctuation { get; set; }  // 前置标点符号。最终会作用于上一个子字段的末尾
+
+            public string Punctuation { get; set; } // 当前子字段的标点符号
+
+            public MarcSubfield Subfield { get; set; }
+
+
         }
     }
 }

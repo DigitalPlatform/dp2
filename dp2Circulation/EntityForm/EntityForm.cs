@@ -10103,6 +10103,7 @@ MessageBoxDefaultButton.Button1);
 #endif
                         GetMergeStyleDialog merge_dlg = new GetMergeStyleDialog();
                         MainForm.SetControlFont(merge_dlg, this.Font, false);
+                        merge_dlg.Operation = "复制";
                         merge_dlg.SourceRecPath = this.BiblioRecPath;
                         merge_dlg.TargetRecPath = dlg.RecPath;
                         merge_dlg.MessageText = "目标书目记录 " + dlg.RecPath + " 已经存在。\r\n\r\n请指定当前窗口中的书目记录(源)和此目标记录合并的方法";
@@ -12620,6 +12621,7 @@ value);
                     {
                         GetMergeStyleDialog merge_dlg = new GetMergeStyleDialog();
                         MainForm.SetControlFont(merge_dlg, this.Font, false);
+                        merge_dlg.Operation = "移动";
                         merge_dlg.SourceRecPath = this.BiblioRecPath;
                         merge_dlg.TargetRecPath = strTargetRecPathParam;
                         merge_dlg.MessageText = "目标书目记录 " + strTargetRecPathParam + " 已经存在。\r\n\r\n请指定当前窗口中的书目记录(源)和此目标记录合并的方法";
@@ -13932,6 +13934,7 @@ strMARC);
             }
         }
 
+        // 标签有拖出的功能
         void toolStripLabel1_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left)

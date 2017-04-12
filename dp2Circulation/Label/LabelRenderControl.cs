@@ -84,11 +84,27 @@ namespace dp2Circulation
             }
 
 
-            if (this._document != null && bPrinter == true)
-                nWidth = Math.Max(nWidth, this._document.DefaultPageSettings.Bounds.Width);    // this.document.DefaultPageSettings.PaperSize.Width
+            // 2017/4/12
+            PageSettings setting = null;
+            if (this._document != null && this._document.DefaultPageSettings != null)
+            {
+                try
+                {
+                    setting = this._document.DefaultPageSettings;
+                    int nTemp = setting.Bounds.Width;
+                }
+                catch (InvalidPrinterException)
+                {
+                    setting = null;
+                    // setting = new PageSettings(this._document.PrinterSettings);
+                }
+            }
 
-            if (this._document != null && bPrinter == true)
-                nHeight = Math.Max(nHeight, this._document.DefaultPageSettings.Bounds.Height);    // this.document.DefaultPageSettings.PaperSize.Height
+            if (setting != null && bPrinter == true)
+                nWidth = Math.Max(nWidth, setting.Bounds.Width);    // this.document.DefaultPageSettings.PaperSize.Width
+
+            if (setting != null && bPrinter == true)
+                nHeight = Math.Max(nHeight, setting.Bounds.Height);    // this.document.DefaultPageSettings.PaperSize.Height
 
 #if NO
             bool bLandscape = false;
@@ -204,6 +220,20 @@ namespace dp2Circulation
 
 #endif
                 PageSettings settings = this._document.DefaultPageSettings.Clone() as PageSettings;
+
+#if NO
+                // 2017/4/12
+                try
+                {
+                    int nTemp = settings.Bounds.Width;
+                }
+                catch (InvalidPrinterException)
+                {
+                    // settings = new PageSettings(null);
+                    // settings = null;
+                }
+#endif
+
                 if (string.IsNullOrEmpty(_label_param.DefaultPrinter) == true)
                 {
                     PaperSize paper_size = new PaperSize("Custom Label",

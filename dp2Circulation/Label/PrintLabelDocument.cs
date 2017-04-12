@@ -319,6 +319,20 @@ namespace dp2Circulation
             Debug.Assert(false, "不应该出现的旋转度数 " + nRotateDegree.ToString());
         }
 
+        // 2017/4/12
+        RectangleF SafeGetPrintableArea(PrintPageEventArgs e)
+        {
+            try
+            {
+                return e.PageSettings.PrintableArea;
+            }
+            catch(InvalidPrinterException)
+            {
+                return new RectangleF(0, 0, 500, 500);
+            }
+        }
+
+
         internal void DoPrintPage(
             IWin32Window owner,
             LabelParam label_param,
@@ -475,10 +489,24 @@ namespace dp2Circulation
                     this.m_nPageNo = 1; // 一般性的初始化
             }
 
+            float nXDelta = 0;
+            float nYDelta = 0;
 
+#if NO
             // 加快运行速度
-            float nXDelta = e.PageSettings.PrintableArea.Left;
-            float nYDelta = e.PageSettings.PrintableArea.Top;
+            try
+            {
+                nXDelta = SafeGetPrintableArea(e).Left; // e.PageSettings.PrintableArea.Left;
+                nYDelta = SafeGetPrintableArea(e).Top; // e.PageSettings.PrintableArea.Top;
+            }
+            catch(InvalidPrinterException)
+            {
+
+            }
+#endif
+            nXDelta = SafeGetPrintableArea(e).Left; // e.PageSettings.PrintableArea.Left;
+            nYDelta = SafeGetPrintableArea(e).Top; // e.PageSettings.PrintableArea.Top;
+
 
             /*
             if (this.PrintController.IsPreview == true)
@@ -547,8 +575,21 @@ namespace dp2Circulation
                     nYOffs += this.OriginPoint.Y;
                 }
 
-                RectangleF rect = RotateRectangle(e.PageSettings.PrintableArea,
-                    e.PageSettings.Landscape);  // label_param.Landscape
+#if NO
+                // 2017/4/12
+                RectangleF area = new RectangleF(0, 0, 100, 100);
+                try
+                {
+                    area = e.PageSettings.PrintableArea;
+                }
+                catch(InvalidPrinterException)
+                {
+                    area = new RectangleF(0, 0, 100, 100);
+                }
+#endif
+
+                RectangleF rect = RotateRectangle(SafeGetPrintableArea(e), // e.PageSettings.PrintableArea,
+                    e.PageSettings.Landscape);
 
                 if (this.OriginAtMargins == true
     || this.PreviewMode == true)
