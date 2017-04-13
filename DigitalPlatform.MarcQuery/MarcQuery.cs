@@ -1033,7 +1033,7 @@ namespace DigitalPlatform.Marc
         /// <summary>
         /// 给 MARC21 记录中 245 字段内的子字段添加正确的标点符号
         /// </summary>
-        /// <param name="record">MARC 记录</param>
+        /// <param name="field">MARC 字段</param>
         /// <param name="strStyle">风格</param>
         /// <returns>记录是否发生了修改</returns>
         public static bool PunctuationMarc21Field245(MarcField field, string strStyle)
@@ -1053,7 +1053,7 @@ namespace DigitalPlatform.Marc
             // $f首尾日期 ,
             // $g主体日期(集中出版日期)  自己() 
             // $h载体 自己[]
-            // $k资料形式 :
+            // $k资料形式 空:
             // $n著作分卷/分节号 .
             // $p著作分卷/分节题名 (在$a$b或者另一个$p后，就是 .。跟在 $n 后面就是 ,)
             // $s版本 .
@@ -1107,14 +1107,19 @@ namespace DigitalPlatform.Marc
 
             string strOld = field.Content;
             {
-                MarcSubfield prev_field = null;
+                SubfieldInfo prev_info = null;
                 foreach (SubfieldInfo info in infos)
                 {
-                    if (prev_field != null)
-                        ResetPunctuation(prev_field, info.Punctuation);
+                    if (prev_info != null)
+                        ResetPunctuation(prev_info.Subfield, prev_info.Punctuation, info.LeadingPunctuation);
 
-                    prev_field = info.Subfield;
+                    prev_info = info;
                 }
+
+                // 最后一个子字段加上尾部符号 .
+                if (string.IsNullOrEmpty(prev_info.Subfield.Content) == true
+                    || prev_info.Subfield.Content[prev_info.Subfield.Content.Length - 1] != '.')
+                    prev_info.Subfield.Content += ".";
             }
 
             if (strOld != field.Content)
@@ -1123,28 +1128,57 @@ namespace DigitalPlatform.Marc
             return false;
         }
 
-        static void ResetPunctuation(MarcSubfield subfield, string strPunctuation)
+        // 给标点符号前面添加必要的空格
+        // 注: strDelimeter 应该为 1 字符形态
+        static string AddBlank(string strDelimeter, string strDelimeters = "/:")
         {
-            string content = TrimEndChar(subfield.Content);
-            if (string.IsNullOrEmpty(strPunctuation))
+            if (string.IsNullOrEmpty(strDelimeter))
+                return "";
+            char ch = strDelimeter[0];
+            if (strDelimeters.IndexOf(ch) != -1)
+                return " " + strDelimeter;
+            return strDelimeter;
+        }
+
+        static void ResetPunctuation(MarcSubfield subfield,
+            string strPunctuation,
+            string strTailPunctuation)
+        {
+            bool bTrimed = false;
+            // 添加本身的符号
+            if (string.IsNullOrEmpty(strPunctuation) == false)
             {
-                subfield.Content = content;
-                return;
-            }
-            if (strPunctuation.Length == 1)
-            {
-                subfield.Content = content + strPunctuation;
-                return;
-            }
-            if (strPunctuation.Length == 2)
-            {
-                subfield.Content = strPunctuation[0] + content + strPunctuation[1];
-                return;
+                string content = TrimStartEndChar(subfield.Content);
+
+                bTrimed = true;
+
+                if (strPunctuation.Length == 1)
+                {
+                    subfield.Content = strPunctuation + content;
+                }
+                else if (strPunctuation.Length == 2)
+                {
+                    subfield.Content = strPunctuation[0] + content + strPunctuation[1];
+                }
             }
 
-            // 目前暂时不会出现这种情况
-            subfield.Content = content + strPunctuation;
-            return;
+            // 添加尾部符号
+            {
+                string content = null;
+                if (bTrimed == false)
+                    content = TrimEndChar(subfield.Content);
+                else
+                    content = subfield.Content;
+
+                if (string.IsNullOrEmpty(strTailPunctuation))
+                {
+                    subfield.Content = content;
+                    return;
+                }
+
+                subfield.Content = content + AddBlank(strTailPunctuation);
+                return;
+            }
         }
 
         /// <summary>
@@ -1165,6 +1199,46 @@ namespace DigitalPlatform.Marc
             if (strDelimeters.IndexOf(tail) != -1)
                 return strText.Substring(0, strText.Length - 1);
             return strText;
+        }
+
+        public static string TrimStartEndChar(string strText, string strDelimeters = "./,;:")
+        {
+            if (string.IsNullOrEmpty(strText))
+                return "";
+            strText = TrimEndChar(strText);
+            return Unquote(strText.Trim(), "[]()");
+        }
+
+        // 去掉外围括住的符号
+        // parameters:
+        //      pairs   若干对打算去除的符号。例如 "%%" "()" "[](){}"。如果包含多对符号，则从左到右匹配，用上前面的就用它处理然后返回了，后面的若干对就不发生作用了
+        static string Unquote(string strValue, string pairs)
+        {
+            if (string.IsNullOrEmpty(pairs))
+                throw new ArgumentException("pairs 参数值不应为空", "pairs");
+
+            if ((pairs.Length % 2) != 0)
+                throw new ArgumentException("pairs 参数值的字符个数应为偶数", "pairs");
+
+            if (string.IsNullOrEmpty(strValue) == true)
+                return "";
+
+            for (int i = 0; i < pairs.Length / 2; i++)
+            {
+                char left = pairs[i * 2];
+                if (strValue[0] == left)
+                {
+                    strValue = strValue.Substring(1);
+                    if (strValue.Length == 0)
+                        return "";
+
+                    char right = pairs[(i * 2) + 1];
+                    if (strValue[strValue.Length - 1] == right)
+                        return strValue.Substring(0, strValue.Length - 1);
+                }
+            }
+
+            return strValue;
         }
 
         // 子字段信息
