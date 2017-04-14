@@ -610,7 +610,7 @@ this.DbType + "_search_form",
         {
             ItemQueryParam query = new ItemQueryParam();
 
-            query.QueryWord = this.textBox_queryWord.Text;
+            query.QueryWord = this.tabComboBox_queryWord.Text;
             query.DbNames = this.comboBox_entityDbName.Text;
             query.From = this.comboBox_from.Text;
             query.MatchStyle = this.comboBox_matchStyle.Text;
@@ -868,11 +868,11 @@ this.DbType + "_search_form",
 
                 strMatchStyle = GetCurrentMatchStyle();
 
-                if (this.textBox_queryWord.Text == "")
+                if (this.tabComboBox_queryWord.Text == "")
                 {
                     if (strMatchStyle == "null")
                     {
-                        this.textBox_queryWord.Text = "";
+                        this.tabComboBox_queryWord.Text = "";
 
                         // 专门检索空值
                         strMatchStyle = "exact";
@@ -903,7 +903,7 @@ this.DbType + "_search_form",
                 {
                     lRet = Channel.SearchItem(stop,
                         this.comboBox_entityDbName.Text, // "<all>",
-                        this.textBox_queryWord.Text,
+                        this.tabComboBox_queryWord.Text,
                         this.MaxSearchResultCount,
                         this.comboBox_from.Text,
                         strMatchStyle, // this.textBox_queryWord.Text == "" ? "left" : "exact",    // 原来为left 2007/10/18 changed
@@ -917,7 +917,7 @@ this.DbType + "_search_form",
                 {
                     lRet = Channel.SearchComment(stop,
                         this.comboBox_entityDbName.Text,
-                        this.textBox_queryWord.Text,
+                        this.tabComboBox_queryWord.Text,
                         this.MaxSearchResultCount,
                         this.comboBox_from.Text,
                         strMatchStyle,
@@ -931,7 +931,7 @@ this.DbType + "_search_form",
                 {
                     lRet = Channel.SearchOrder(stop,
                         this.comboBox_entityDbName.Text,
-                        this.textBox_queryWord.Text,
+                        this.tabComboBox_queryWord.Text,
                         this.MaxSearchResultCount,
                         this.comboBox_from.Text,
                         strMatchStyle,
@@ -945,7 +945,7 @@ this.DbType + "_search_form",
                 {
                     lRet = Channel.SearchIssue(stop,
                         this.comboBox_entityDbName.Text,
-                        this.textBox_queryWord.Text,
+                        this.tabComboBox_queryWord.Text,
                         this.MaxSearchResultCount,
                         this.comboBox_from.Text,
                         strMatchStyle,
@@ -974,7 +974,7 @@ this.DbType + "_search_form",
                     }
 
                     string strQueryXml = "<target list='" + this.MainForm.ArrivedDbName + ":" + this.comboBox_from.Text + "'><item><word>"
-        + StringUtil.GetXmlStringSimple(this.textBox_queryWord.Text)
+        + StringUtil.GetXmlStringSimple(this.tabComboBox_queryWord.Text)
         + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>"
                     + this.MaxSearchResultCount + "</maxCount></item><lang>" + this.Lang + "</lang></target>";
                     // strOutputStyle ?
@@ -1399,11 +1399,11 @@ this.DbType + "_search_form",
 
             if (this.comboBox_matchStyle.Text == "空值")
             {
-                this.textBox_queryWord.Enabled = false;
+                this.tabComboBox_queryWord.Enabled = false;
             }
             else
             {
-                this.textBox_queryWord.Enabled = bEnable;
+                this.tabComboBox_queryWord.Enabled = bEnable;
             }
 
             this.dp2QueryControl1.Enabled = bEnable;
@@ -1415,12 +1415,6 @@ this.DbType + "_search_form",
             if (this.Channel != null)
                 this.Channel.Abort();
         }*/
-
-
-        private void textBox_queryWord_Enter(object sender, EventArgs e)
-        {
-            this.AcceptButton = this.button_search;
-        }
 
         private void listView_records_Enter(object sender, EventArgs e)
         {
@@ -1654,14 +1648,14 @@ this.DbType + "_search_form",
                 ItemQueryParam query = (ItemQueryParam)this.listView_records.SelectedItems[0].Tag;
                 Debug.Assert(query != null, "");
 
-                this.textBox_queryWord.Text = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
+                this.tabComboBox_queryWord.Text = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
                 if (query != null)
                 {
                     this.comboBox_entityDbName.Text = query.DbNames;
                     this.comboBox_from.Text = query.From;
                 }
 
-                if (this.textBox_queryWord.Text == "")    // 2009/8/6 
+                if (this.tabComboBox_queryWord.Text == "")    // 2009/8/6 
                     this.comboBox_matchStyle.Text = "空值";
                 else
                     this.comboBox_matchStyle.Text = "精确一致";
@@ -5630,11 +5624,11 @@ this.MainForm.DefaultFont);
         {
             get
             {
-                return this.textBox_queryWord.Text;
+                return this.tabComboBox_queryWord.Text;
             }
             set
             {
-                this.textBox_queryWord.Text = value;
+                this.tabComboBox_queryWord.Text = value;
             }
         }
 
@@ -8530,7 +8524,7 @@ out strError);
             this.Cursor = Cursors.WaitCursor;
             try
             {
-                this.textBox_queryWord.Text = query.QueryWord;
+                this.tabComboBox_queryWord.Text = query.QueryWord;
                 this.comboBox_entityDbName.Text = query.DbNames;
                 this.comboBox_from.Text = query.From;
                 this.comboBox_matchStyle.Text = query.MatchStyle;
@@ -8599,9 +8593,9 @@ out strError);
         private void textBox_queryWord_TextChanged(object sender, EventArgs e)
         {
             if (this.DbType == "item")
-                this.Text = "实体查询 " + this.textBox_queryWord.Text;
+                this.Text = "实体查询 " + this.tabComboBox_queryWord.Text;
             else
-                this.Text = this.DbTypeCaption + "查询 " + this.textBox_queryWord.Text;
+                this.Text = this.DbTypeCaption + "查询 " + this.tabComboBox_queryWord.Text;
         }
 
         // int m_nInSelectedIndexChanged = 0;
@@ -8653,12 +8647,12 @@ out strError);
         {
             if (this.comboBox_matchStyle.Text == "空值")
             {
-                this.textBox_queryWord.Text = "";
-                this.textBox_queryWord.Enabled = false;
+                this.tabComboBox_queryWord.Text = "";
+                this.tabComboBox_queryWord.Enabled = false;
             }
             else
             {
-                this.textBox_queryWord.Enabled = true;
+                this.tabComboBox_queryWord.Enabled = true;
             }
         }
 
@@ -8696,11 +8690,11 @@ out strError);
             dlg.RangeMode = false;
             try
             {
-                dlg.Rfc1123String = this.textBox_queryWord.Text;
+                dlg.Rfc1123String = this.tabComboBox_queryWord.Text;
             }
             catch
             {
-                this.textBox_queryWord.Text = "";
+                this.tabComboBox_queryWord.Text = "";
             }
             this.MainForm.AppInfo.LinkFormState(dlg, "searchitemform_gettimedialog_single");
             dlg.ShowDialog(this);
@@ -8709,7 +8703,7 @@ out strError);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
-            this.textBox_queryWord.Text = dlg.Rfc1123String;
+            this.tabComboBox_queryWord.Text = dlg.Rfc1123String;
 
         }
 
@@ -8719,11 +8713,11 @@ out strError);
             dlg.RangeMode = false;
             try
             {
-                dlg.uString = this.textBox_queryWord.Text;
+                dlg.uString = this.tabComboBox_queryWord.Text;
             }
             catch
             {
-                this.textBox_queryWord.Text = "";
+                this.tabComboBox_queryWord.Text = "";
             }
 
             this.MainForm.AppInfo.LinkFormState(dlg, "searchitemform_gettimedialog_single");
@@ -8733,7 +8727,7 @@ out strError);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
-            this.textBox_queryWord.Text = dlg.uString;
+            this.tabComboBox_queryWord.Text = dlg.uString;
 
         }
 
@@ -8744,11 +8738,11 @@ out strError);
             // 分割为两个字符串
             try
             {
-                dlg.Rfc1123String = this.textBox_queryWord.Text;
+                dlg.Rfc1123String = this.tabComboBox_queryWord.Text;
             }
             catch
             {
-                this.textBox_queryWord.Text = "";
+                this.tabComboBox_queryWord.Text = "";
             }
             this.MainForm.AppInfo.LinkFormState(dlg, "searchitemform_gettimedialog_range");
             dlg.ShowDialog(this);
@@ -8757,8 +8751,7 @@ out strError);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
-            this.textBox_queryWord.Text = dlg.Rfc1123String;
-
+            this.tabComboBox_queryWord.Text = dlg.Rfc1123String;
         }
 
         private void ToolStripMenuItem_uRange_Click(object sender, EventArgs e)
@@ -8767,11 +8760,11 @@ out strError);
             dlg.RangeMode = true;
             try
             {
-                dlg.uString = this.textBox_queryWord.Text;
+                dlg.uString = this.tabComboBox_queryWord.Text;
             }
             catch
             {
-                this.textBox_queryWord.Text = "";
+                this.tabComboBox_queryWord.Text = "";
             }
 
             this.MainForm.AppInfo.LinkFormState(dlg, "searchitemform_gettimedialog_range");
@@ -8781,7 +8774,7 @@ out strError);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
-            this.textBox_queryWord.Text = dlg.uString;
+            this.tabComboBox_queryWord.Text = dlg.uString;
         }
 
         private void listView_records_ColumnContextMenuClicked(object sender, ColumnHeader columnHeader)
@@ -9811,6 +9804,252 @@ out strError);
         void menu_logicSearchKeyID_Click(object sender, EventArgs e)
         {
             this.DoLogicSearch(false, true, null);
+        }
+
+        private void tabComboBox_queryWord_Enter(object sender, EventArgs e)
+        {
+            this.AcceptButton = this.button_search;
+        }
+
+        // 列出当前全部检索点
+        public int ListKeys()
+        {
+            string strError = "";
+            int nRet = 0;
+
+            string strQueryWord = "";
+            int nMaxCount = 500;
+
+            string strQuery = this.comboBox_entityDbName.Text + "|" + strQueryWord + "|" + this.comboBox_from.Text + "|" + nMaxCount;
+            if (strQuery == _keysListQuery)
+                return 0;   // 不需要检索填充，当前列表内容已经有了
+
+            this.tabComboBox_queryWord.Items.Clear();
+
+            EnableControls(false);
+            this.label_message.Text = "";
+
+            stop.Style = StopStyle.None;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在列出检索点 ...");
+            stop.BeginLoop();
+
+            try
+            {
+                string strMatchStyle = "";
+
+                // 为了在检索词为空的时候，检索出全部的记录
+                strMatchStyle = "left";
+
+                string strOutputStyle = "";
+
+                strOutputStyle = "keycount";
+
+                long lRet = 0;
+
+                if (this.DbType == "item")
+                {
+                    lRet = Channel.SearchItem(stop,
+                        this.comboBox_entityDbName.Text, // "<all>",
+                        strQueryWord,
+                        nMaxCount,
+                        this.comboBox_from.Text,
+                        strMatchStyle, // this.textBox_queryWord.Text == "" ? "left" : "exact",    // 原来为left 2007/10/18 changed
+                        this.Lang,
+                        null,   // strResultSetName
+                        "",    // strSearchStyle
+                        strOutputStyle, // (bOutputKeyCount == true ? "keycount" : ""),
+                        out strError);
+                }
+                else if (this.DbType == "comment")
+                {
+                    lRet = Channel.SearchComment(stop,
+                        this.comboBox_entityDbName.Text,
+                        strQueryWord,
+                        nMaxCount,
+                        this.comboBox_from.Text,
+                        strMatchStyle,
+                        this.Lang,
+                        null,
+                        "",
+                        strOutputStyle,
+                        out strError);
+                }
+                else if (this.DbType == "order")
+                {
+                    lRet = Channel.SearchOrder(stop,
+                        this.comboBox_entityDbName.Text,
+                        strQueryWord,
+                        nMaxCount,
+                        this.comboBox_from.Text,
+                        strMatchStyle,
+                        this.Lang,
+                        null,
+                        "",
+                        strOutputStyle,
+                        out strError);
+                }
+                else if (this.DbType == "issue")
+                {
+                    lRet = Channel.SearchIssue(stop,
+                        this.comboBox_entityDbName.Text,
+                        strQueryWord,
+                        nMaxCount,
+                        this.comboBox_from.Text,
+                        strMatchStyle,
+                        this.Lang,
+                        null,
+                        "",
+                        strOutputStyle,
+                        out strError);
+                }
+                else if (this.DbType == "arrive")
+                {
+                    if (string.IsNullOrEmpty(this.MainForm.ArrivedDbName) == true)
+                    {
+                        strError = "当前服务器尚未配置预约到书库名";
+                        goto ERROR1;
+                    }
+
+                    string strQueryXml = "<target list='" + this.MainForm.ArrivedDbName + ":" + this.comboBox_from.Text + "'><item><word>"
+        + StringUtil.GetXmlStringSimple(strQueryWord)
+        + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>"
+                    + this.MaxSearchResultCount + "</maxCount></item><lang>" + this.Lang + "</lang></target>";
+                    // strOutputStyle ?
+                    lRet = Channel.Search(stop,
+                        strQueryXml,
+                        "",
+                        strOutputStyle,
+                        out strError);
+                }
+                else
+                    throw new Exception("未知的 DbType '" + this.DbType + "'");
+
+                if (lRet == -1)
+                    goto ERROR1;
+
+                if (lRet == 0)
+                {
+                    _keysListQuery = strQuery;
+                    return 1;
+                }
+
+                long lHitCount = lRet;
+
+                // return:
+                //      -1  出错
+                //      0   用户中断
+                //      1   正常完成
+                nRet = FillKeysList(
+                    lHitCount,
+                    out strError);
+                if (nRet == 0)
+                    return 0;
+                if (nRet == -1)
+                    goto ERROR1;
+                else
+                    _keysListQuery = strQuery;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                // stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                EnableControls(true);
+            }
+
+            return 1;
+        ERROR1:
+            this.ShowMessage(strError, "red", true);
+            return -1;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   用户中断或者未命中
+        //      1   正常完成
+        int FillKeysList(
+            long lHitCount,
+            out string strError)
+        {
+            strError = "";
+
+            string strBrowseStyle = "keycount";
+
+            long lStart = 0;
+            long lCount = lHitCount;
+
+            long lMaxPerCount = 500;
+
+            DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
+
+            for (; ; )
+            {
+                Application.DoEvents();	// 出让界面控制权
+
+                if (stop != null && stop.State != 0)
+                    return 0;
+
+                long lRet = this.Channel.GetSearchResult(
+                    stop,
+                    null,   // strResultSetName
+                    lStart,
+                    Math.Min(lMaxPerCount, lCount),
+                    strBrowseStyle,
+                    this.Lang,
+                    out searchresults,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                if (lRet == 0)
+                    return 0;
+
+                // 处理浏览结果
+                try
+                {
+                    List<ListViewItem> items = new List<ListViewItem>();
+                    foreach (DigitalPlatform.LibraryClient.localhost.Record searchresult in searchresults)
+                    {
+
+                        // 输出keys
+                        if (searchresult.Cols == null)
+                        {
+                            strError = "要使用获取检索点功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本";
+                            return -1;
+                        }
+
+                        KeyCount keycount = new KeyCount();
+                        string strKey = searchresult.Path;
+                        int count = Convert.ToInt32(searchresult.Cols[0]);
+
+                        this.tabComboBox_queryWord.Items.Add(strKey + "\t" + count.ToString() + "笔");
+                    }
+
+                }
+                finally
+                {
+                }
+
+                lStart += searchresults.Length;
+                lCount -= searchresults.Length;
+
+                if (lStart >= lHitCount || lCount <= 0)
+                    break;
+            }
+
+            return 1;
+        }
+
+        // 当前检索点列表对应的检索式
+        string _keysListQuery = null;
+
+        private void tabComboBox_queryWord_DropDown(object sender, EventArgs e)
+        {
+            ListKeys();
         }
     }
 

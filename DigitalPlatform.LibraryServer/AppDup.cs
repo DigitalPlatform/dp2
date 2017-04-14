@@ -384,8 +384,13 @@ namespace DigitalPlatform.LibraryServer
 
                                 Debug.Assert(dupset != null, "");
 
-                                onedatabase_set.EnsureCreateIndex(getTempFileName);
-                                dupset.EnsureCreateIndex(getTempFileName);
+                                if (onedatabase_set.Sorted == true)
+                                    onedatabase_set.EnsureCreateIndex(getTempFileName);
+                                else
+                                    onedatabase_set.Sort(getTempFileName);
+                                // dupset.EnsureCreateIndex(getTempFileName);
+                                // 2017/4/14
+                                dupset.Sort(getTempFileName);   // Sort() 里面自动确保了创建 Index
 
                                 // 将dupset和前一个set归并
                                 // 归并可以参考ResultSet中的Merge算法
@@ -420,6 +425,7 @@ namespace DigitalPlatform.LibraryServer
                                     if (onedatabase_set != null)
                                         onedatabase_set.Dispose();
                                     onedatabase_set = tempset;
+                                    onedatabase_set.Sorted = true;  // 归并后产生的结果集自然是符合顺序的
                                 }
 
                             }
@@ -446,8 +452,13 @@ namespace DigitalPlatform.LibraryServer
                         DupResultSet tempset0 = new DupResultSet();
                         tempset0.Open(false, getTempFileName);
 
-                        alldatabase_set.EnsureCreateIndex(getTempFileName);
-                        onedatabase_set.EnsureCreateIndex(getTempFileName);
+                        if (alldatabase_set.Sorted == true)
+                            alldatabase_set.EnsureCreateIndex(getTempFileName);
+                        else
+                            alldatabase_set.Sort(getTempFileName);
+                        // onedatabase_set.EnsureCreateIndex(getTempFileName);
+                        // 2017/4/14
+                        onedatabase_set.Sort(getTempFileName);   // Sort() 里面自动确保了创建 Index
 
                         nRet = DupResultSet.Merge("OR",
                             alldatabase_set,
@@ -466,6 +477,7 @@ namespace DigitalPlatform.LibraryServer
                                 alldatabase_set.Dispose();
 
                             alldatabase_set = tempset0;
+                            alldatabase_set.Sorted = true;
                         }
                     }
                 }

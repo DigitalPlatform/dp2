@@ -145,7 +145,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.102 (2017/1/20) locationTypes 定义是否允许 item 元素文本值为空，要看 library.xml 中 <circulation 元素 acceptBlankRoomName 属性，缺省为 false。SetEntities() API 保存册记录时根据 locationTypes 元素对册记录的馆藏地内容进行检查，如果 locationTypes 定义允许 room 部分为空，这个版本也是不会出现(保存时拒绝的) bug 了
         //      2.103 (2017/3/14) SetBiblioInfo() 的 strStyle 支持 “bibliotoitem” 在修改记录以前保存旧书目记录到现有册记录的 biblio 元素
         //      2.104 (2017/3/29) 为 SetOneClassTailNumber() API 增加 memo unmemo skipmemo 三个新功能
-        public static string Version = "2.104";
+        //      2.105 (2017/4/14) 消除 SearchDup() API 中合并算法之前没有对结果集进行排序的 Bug
+        public static string Version = "2.105";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
