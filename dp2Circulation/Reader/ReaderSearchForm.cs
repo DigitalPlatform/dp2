@@ -126,16 +126,6 @@ namespace dp2Circulation
 
         private void ReaderSearchForm_Load(object sender, EventArgs e)
         {
-            /*
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-             * */
-
             this.comboBox_readerDbName.Text = this.MainForm.AppInfo.GetString(
                 "readersearchform",
                 "readerdbname",
@@ -623,6 +613,7 @@ namespace dp2Circulation
         //      0   没有找到
         //      1   找到
         internal override int GetRecord(
+            LibraryChannel channel,
             string strRecPath,
             out string strXml,
             out byte[] baTimestamp,
@@ -635,7 +626,7 @@ namespace dp2Circulation
             baTimestamp = null;
             string strOutputRecPath = "";
             // 获得读者记录
-            long lRet = Channel.GetReaderInfo(
+            long lRet = channel.GetReaderInfo(
 stop,
 "@path:" + strRecPath,
 "xml",
@@ -665,7 +656,9 @@ out strError);
         //      -2  时间戳不匹配
         //      -1  出错
         //      0   成功
-        internal override int SaveRecord(string strRecPath,
+        internal override int SaveRecord(
+            LibraryChannel channel,
+            string strRecPath,
             BiblioInfo info,
             string strStyle,
             out byte[] baNewTimestamp,
@@ -679,8 +672,7 @@ out strError);
             baNewTimestamp = null;
             string strExistingXml = "";
             string strSavedXml = "";
-            // string strSavedPath = "";
-            long lRet = Channel.SetReaderInfo(
+            long lRet = channel.SetReaderInfo(
 stop,
 StringUtil.IsInList("force", strStyle) ? "changereaderbarcode" : "change",
 strRecPath,
@@ -695,7 +687,7 @@ out kernel_errorcode,
 out strError);
             if (lRet == -1)
             {
-                if (Channel.ErrorCode == ErrorCode.TimestampMismatch)
+                if (channel.ErrorCode == ErrorCode.TimestampMismatch)
                     return -2;
                 return -1;
             }
@@ -703,197 +695,6 @@ out strError);
             info.Timestamp = baNewTimestamp;    // 2013/10/17
             return 0;
         }
-
-#if NO
-                public int SaveChangedRecords(List<ListViewItem> items,
-            out string strError)
-        {
-            strError = "";
-
-            int nReloadCount = 0;
-            int nSavedCount = 0;
-
-            stop.Style = StopStyle.EnableHalfStop;
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在保存读者记录 ...");
-            stop.BeginLoop();
-
-            this.EnableControls(false);
-            // this.listView_records.Enabled = false;
-            try
-            {
-                stop.SetProgressRange(0, items.Count);
-                for (int i = 0; i < items.Count; i++)
-                {
-                    if (stop != null && stop.State != 0)
-                    {
-                        strError = "已中断";
-                        return -1;
-                    }
-
-                    ListViewItem item = items[i];
-                    string strRecPath = item.Text;
-                    if (string.IsNullOrEmpty(strRecPath) == true)
-                    {
-                        stop.SetProgressValue(i);
-                        goto CONTINUE;
-                    }
-
-                    BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
-                    if (info == null)
-                        goto CONTINUE;
-
-                    if (string.IsNullOrEmpty(info.NewXml) == true)
-                        goto CONTINUE;
-
-                    string strOutputPath = "";
-
-                    stop.SetMessage("正在保存读者记录 " + strRecPath);
-
-                    ErrorCodeValue kernel_errorcode;
-
-                    byte[] baNewTimestamp = null;
-
-                    string strExistingXml = "";
-                    string strSavedXml = "";
-                    // string strSavedPath = "";
-                    long lRet = Channel.SetReaderInfo(
-    stop,
-    "change",
-    strRecPath,
-    info.NewXml,
-    info.OldXml,
-    info.Timestamp,
-    out strExistingXml,
-    out strSavedXml,
-    out strOutputPath,
-    out baNewTimestamp,
-    out kernel_errorcode,
-    out strError);
-#if NO
-                    byte[] baNewTimestamp = null;
-
-                    long lRet = Channel.SetBiblioInfo(
-                        stop,
-                        "change",
-                        strRecPath,
-                        "xml",
-                        info.NewXml,
-                        info.Timestamp,
-                        "",
-                        out strOutputPath,
-                        out baNewTimestamp,
-                        out strError);
-#endif
-                    if (lRet == -1)
-                    {
-                        if (Channel.ErrorCode == ErrorCode.TimestampMismatch)
-                        {
-                            DialogResult result = MessageBox.Show(this,
-    "保存读者记录 " + strRecPath + " 时遭遇时间戳不匹配: " + strError + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
-    "ReaderSearchForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                            if (result == System.Windows.Forms.DialogResult.Cancel)
-                                break;
-                            if (result == System.Windows.Forms.DialogResult.No)
-                                goto CONTINUE;
-
-                            // 重新装载书目记录到 OldXml
-                            string[] results = null;
-                            string strOutputRecPath = "";
-                            lRet = Channel.GetReaderInfo(
-    stop,
-    "@path:" + strRecPath,
-    "xml",
-    out results,
-    out strOutputRecPath,
-    out baNewTimestamp,
-    out strError);
-#if NO
-                            // byte[] baTimestamp = null;
-                            lRet = Channel.GetBiblioInfos(
-                                stop,
-                                strRecPath,
-                                "",
-                                new string[] { "xml" },   // formats
-                                out results,
-                                out baNewTimestamp,
-                                out strError);
-#endif
-                            if (lRet == 0)
-                            {
-                                // TODO: 警告后，把 item 行移除？
-                                return -1;
-                            }
-                            if (lRet == -1)
-                                return -1;
-                            if (results == null || results.Length == 0)
-                            {
-                                strError = "results error";
-                                return -1;
-                            }
-                            info.OldXml = results[0];
-                            info.Timestamp = baNewTimestamp;
-                            nReloadCount++;
-                            goto CONTINUE;
-                        }
-
-                        return -1;
-                    }
-
-                    info.Timestamp = baNewTimestamp;
-                    info.OldXml = info.NewXml;
-                    info.NewXml = "";
-
-                    item.BackColor = SystemColors.Window;
-                    item.ForeColor = SystemColors.WindowText;
-
-                    nSavedCount++;
-
-                    this.m_nChangedCount--;
-                    Debug.Assert(this.m_nChangedCount >= 0, "");
-
-                CONTINUE:
-                    stop.SetProgressValue(i);
-                }
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
-
-                this.EnableControls(true);
-                // this.listView_records.Enabled = true;
-            }
-
-            DoViewComment(false);
-
-            strError = "";
-            if (nSavedCount > 0)
-                strError += "共保存读者记录 " + nSavedCount + " 条";
-            if (nReloadCount > 0)
-            {
-                if (string.IsNullOrEmpty(strError) == false)
-                    strError += " ; ";
-                strError += "有 " + nReloadCount + " 条读者记录因为时间戳不匹配而重新装载旧记录部分(请观察后重新保存)";
-            }
-
-            return 0;
-        }
-#endif
-
-        /*
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-         * */
 
         private void textBox_queryWord_Enter(object sender, EventArgs e)
         {
@@ -2479,7 +2280,9 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 // 刷新浏览行
-                int nRet = RefreshListViewLines(items,
+                int nRet = RefreshListViewLines(
+                    this.Channel,
+                    items,
                     "",
                     false,
                     true,
@@ -2771,7 +2574,9 @@ MessageBoxDefaultButton.Button2);
 
                 }
 
-                int nRet = RefreshListViewLines(items,
+                int nRet = RefreshListViewLines(
+                    this.Channel,
+                    items,
                     "",
                     false,
                     true,

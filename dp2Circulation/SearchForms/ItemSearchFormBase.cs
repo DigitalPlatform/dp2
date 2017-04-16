@@ -326,6 +326,8 @@ namespace dp2Circulation
             stop.Initial("正在导入记录路径 ...");
             stop.BeginLoop();
 
+            LibraryChannel channel = this.GetChannel();
+
             this.EnableControls(false);
             try
             {
@@ -356,14 +358,11 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
-                    {
-                        if (stop.State != 0)
+                    if (stop != null && stop.State != 0)
                         {
                             MessageBox.Show(this, "用户中断");
                             return 0;
                         }
-                    }
 
                     string strRecPath = sr.ReadLine();
 
@@ -450,7 +449,9 @@ namespace dp2Circulation
                 }
 
                 // 刷新浏览行
-                int nRet = RefreshListViewLines(items,
+                int nRet = RefreshListViewLines(
+                    channel,
+                    items,
                     "",
                     false,
                     true,
@@ -460,7 +461,9 @@ namespace dp2Circulation
 
                 // 2014/1/15
                 // 刷新书目摘要
-                nRet = FillBiblioSummaryColumn(items,
+                nRet = FillBiblioSummaryColumn(
+                    channel,
+                    items,
                     false,
                     out strError);
                 if (nRet == -1)
@@ -468,13 +471,15 @@ namespace dp2Circulation
             }
             finally
             {
+                this.EnableControls(true);
+
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
-
-                this.EnableControls(true);
 
                 if (sr != null)
                     sr.Close();
@@ -563,7 +568,9 @@ namespace dp2Circulation
         //      -1  出错
         //      0   用户中断
         //      1   完成
-        internal int FillBiblioSummaryColumn(List<ListViewItem> items,
+        internal int FillBiblioSummaryColumn(
+            LibraryChannel channel,
+            List<ListViewItem> items,
             bool bBeginLoop,
             out string strError)
         {
@@ -606,7 +613,7 @@ namespace dp2Circulation
                         //      0   用户中断
                         //      1   完成
                         nRet = _fillBiblioSummaryColumn(
-                            this.Channel,
+                            channel,
                             batch,
                             lStartIndex,
                             bBeginLoop,
@@ -629,7 +636,7 @@ namespace dp2Circulation
                     //      0   用户中断
                     //      1   完成
                     nRet = _fillBiblioSummaryColumn(
-                        this.Channel,
+                        channel,
                         batch,
                         lStartIndex,
                         bBeginLoop,
@@ -1096,7 +1103,7 @@ namespace dp2Circulation
         // 根据册条码号，检索出其册记录路径和从属的书目记录路径，以及馆藏地点信息。
         public static int SearchTwoRecPathByBarcode(
             Stop stop,
-            LibraryChannel Channel,
+            LibraryChannel channel,
             string strBarcode,
             out string strItemRecPath,
             out string strLocation,
@@ -1133,7 +1140,7 @@ namespace dp2Circulation
             else
                 throw new Exception("SearchTwoRecPathByBarcode()只能在DbType=='item'时使用");
 #endif
-            lRet = Channel.GetItemInfo(
+            lRet = channel.GetItemInfo(
      stop,
      strBarcode,
      "xml",
@@ -1170,7 +1177,7 @@ namespace dp2Circulation
         // 根据册条码号，检索出其册记录路径和从属的书目记录路径。
         public static int SearchTwoRecPathByBarcode(
             Stop stop,
-            LibraryChannel Channel,
+            LibraryChannel channel,
             string strBarcode,
             out string strItemRecPath,
             out string strBiblioRecPath,
@@ -1206,7 +1213,7 @@ namespace dp2Circulation
             else
                 throw new Exception("SearchTwoRecPathByBarcode()只能在DbType=='item'时使用");
 #endif
-            lRet = Channel.GetItemInfo(
+            lRet = channel.GetItemInfo(
      stop,
      strBarcode,
      null,
@@ -1226,7 +1233,7 @@ namespace dp2Circulation
         // 根据册记录路径，检索出从属的书目记录路径。
         public static int SearchBiblioRecPath(
             Stop stop,
-            LibraryChannel Channel,
+            LibraryChannel channel,
             string strDbType,
             string strItemRecPath,
             out string strBiblioRecPath,
@@ -1243,7 +1250,7 @@ namespace dp2Circulation
             long lRet = 0;
 
             if (strDbType == "item")
-                lRet = Channel.GetItemInfo(
+                lRet = channel.GetItemInfo(
                      stop,
                      "@path:" + strItemRecPath,
                      null,
@@ -1255,7 +1262,7 @@ namespace dp2Circulation
                      out strBiblioRecPath,
                      out strError);
             else if (strDbType == "comment")
-                lRet = Channel.GetCommentInfo(
+                lRet = channel.GetCommentInfo(
                      stop,
                      "@path:" + strItemRecPath,
                     // "",
@@ -1268,7 +1275,7 @@ namespace dp2Circulation
                      out strBiblioRecPath,
                      out strError);
             else if (strDbType == "order")
-                lRet = Channel.GetOrderInfo(
+                lRet = channel.GetOrderInfo(
                      stop,
                      "@path:" + strItemRecPath,
                     // "",
@@ -1281,7 +1288,7 @@ namespace dp2Circulation
                      out strBiblioRecPath,
                      out strError);
             else if (strDbType == "issue")
-                lRet = Channel.GetIssueInfo(
+                lRet = channel.GetIssueInfo(
                      stop,
                      "@path:" + strItemRecPath,
                     // "",

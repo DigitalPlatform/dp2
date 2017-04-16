@@ -2032,7 +2032,9 @@ null);
             string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
 
             // 刷新浏览行
-            nRet = RefreshListViewLines(items,
+            nRet = RefreshListViewLines(
+                null,
+                items,
                 strBrowseStyle,
                 false,
                 false,  // 不清除右侧多出来的列内容
@@ -3202,7 +3204,9 @@ MessageBoxDefaultButton.Button1);
                     string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
 
                     // 刷新浏览行
-                    nRet = RefreshListViewLines(changed_items,
+                    nRet = RefreshListViewLines(
+                        channel,
+                        changed_items,
                         strBrowseStyle,
                         false,
                         false,  // 不清除右侧多出来的列内容
@@ -3618,7 +3622,9 @@ MessageBoxDefaultButton.Button1);
                 string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
 
                 // 刷新浏览行
-                nRet = RefreshListViewLines(items,
+                nRet = RefreshListViewLines(
+                    null,
+                    items,
                     strBrowseStyle,
                     true,   // bBeginLoop
                     false,  // 不清除右侧多出来的列内容
@@ -4003,13 +4009,16 @@ MessageBoxDefaultButton.Button2);
             string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
 
             // 刷新浏览行
-            int nRet = RefreshListViewLines(items,
+            int nRet = RefreshListViewLines(
+                null,
+                items,
                 strBrowseStyle,
                 true,
                 false,  // 不清除右侧多出来的列内容
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
+
             return;
         ERROR1:
             MessageBox.Show(this, strError);

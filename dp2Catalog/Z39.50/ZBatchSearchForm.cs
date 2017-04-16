@@ -3490,6 +3490,11 @@ MessageBoxDefaultButton.Button1);
                         Encoding currentEncoding = null;
                         string strMARC = "";
 
+                        // return:
+                        //      -1  error
+                        //      0   suceed
+                        //      1   为诊断记录
+                        //      2   分割条，需要跳过这条记录
                         nRet = this.GetOneRecord(
                             "marc",
                             index,  // 即将废止
@@ -3507,6 +3512,10 @@ MessageBoxDefaultButton.Button1);
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
+
+                        // 2017/4/15
+                        if (nRet == 2)
+                            continue;
 
                         string strMarcSyntax = "";
                         if (record.m_strSyntaxOID == "1.2.840.10003.5.1")

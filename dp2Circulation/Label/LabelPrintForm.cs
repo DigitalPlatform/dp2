@@ -2512,7 +2512,9 @@ namespace dp2Circulation
                 }
 
                 // 刷新浏览行
-                int nRet = RefreshListViewLines(items,
+                int nRet = RefreshListViewLines(
+                    this.Channel,
+                    items,
                     "",
                     false,
                     true,
@@ -2522,7 +2524,9 @@ namespace dp2Circulation
 
                 // 2014/1/15
                 // 刷新书目摘要
-                nRet = FillBiblioSummaryColumn(items,
+                nRet = FillBiblioSummaryColumn(
+                    this.Channel,
+                    items,
                     false,
                     out strError);
                 if (nRet == -1)

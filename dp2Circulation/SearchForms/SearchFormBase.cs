@@ -206,10 +206,11 @@ namespace dp2Circulation
         }
 
         int GetBiblioInfo(
-bool bCheckSearching,
-ListViewItem item,
-out BiblioInfo info,
-out string strError)
+            LibraryChannel channel,
+            bool bCheckSearching,
+            ListViewItem item,
+            out BiblioInfo info,
+            out string strError)
         {
             strError = "";
             info = null;
@@ -237,34 +238,6 @@ out string strError)
                     if (this.InSearching == true)
                         return 0;
                 }
-
-#if NO
-                string[] results = null;
-                byte[] baTimestamp = null;
-                string strOutputRecPath = "";
-                // 获得读者记录
-                long lRet = Channel.GetReaderInfo(
-    stop,
-    "@path:" + strRecPath,
-    "xml",
-    out results,
-    out strOutputRecPath,
-    out baTimestamp,
-    out strError);
-
-                if (lRet == 0)
-                    return -1;  // 是否设定为特殊状态?
-                if (lRet == -1)
-                    return -1;
-
-                if (results == null || results.Length == 0)
-                {
-                    strError = "results error";
-                    return -1;
-                }
-
-                string strXml = results[0];
-#endif
                 string strXml = "";
                 byte[] baTimestamp = null;
 
@@ -274,6 +247,7 @@ out string strError)
                 //      0   没有找到
                 //      1   找到
                 int nRet = GetRecord(
+                    channel,
                     strRecPath,
                     out strXml,
                     out baTimestamp,
@@ -295,6 +269,7 @@ out string strError)
         //      0   没有找到
         //      1   找到
         internal virtual int GetRecord(
+            LibraryChannel channel,
             string strRecPath,
             out string strXml,
             out byte[] baTimestamp,
@@ -303,33 +278,6 @@ out string strError)
             strError = "尚未实现";
             strXml = "";
             baTimestamp = null;
-#if NO
-            string[] results = null;
-            string strOutputRecPath = "";
-            // 获得读者记录
-            long lRet = Channel.GetReaderInfo(
-stop,
-"@path:" + strRecPath,
-"xml",
-out results,
-out strOutputRecPath,
-out baTimestamp,
-out strError);
-
-            if (lRet == 0)
-                return 0;  // 是否设定为特殊状态?
-            if (lRet == -1)
-                return -1;
-
-            if (results == null || results.Length == 0)
-            {
-                strError = "results error";
-                return -1;
-            }
-
-            strXml = results[0];
-            return 1;
-#endif
             return -1;
         }
 
@@ -341,7 +289,9 @@ out strError);
         //      -2  时间戳不匹配
         //      -1  出错
         //      0   成功
-        internal virtual int SaveRecord(string strRecPath,
+        internal virtual int SaveRecord(
+            LibraryChannel channel,
+            string strRecPath,
             BiblioInfo info,
             string strStyle,
             out byte[] baNewTimestamp,
@@ -614,7 +564,9 @@ out strError);
                     return;
             }
 
-            nRet = RefreshListViewLines(items,
+            nRet = RefreshListViewLines(
+                null,
+                items,
                 "",
                 true,
                 true,
@@ -668,7 +620,9 @@ out strError);
                     return;
             }
 
-            nRet = RefreshListViewLines(items,
+            nRet = RefreshListViewLines(
+                null,
+                items,
                 "",
                 true,
                     true,
@@ -682,16 +636,20 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
+        // TODO: 检查是否有脚本调用过没有 channel_param 参数的版本
         /// <summary>
         /// 刷新浏览行
         /// </summary>
+        /// <param name="channel_param">通讯通道。可以为空</param>
         /// <param name="items_param">要刷新的 ListViewItem 集合</param>
         /// <param name="strFormat">浏览格式。供调用 GetSearchResult() 时 strStyle 参数之用 </param>
         /// <param name="bBeginLoop">是否要调用 stop.BeginLoop() </param>
         /// <param name="bClearRestColumns">是否清除右侧多余的列内容</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
-        public int RefreshListViewLines(List<ListViewItem> items_param,
+        public int RefreshListViewLines(
+            LibraryChannel channel_param,
+            List<ListViewItem> items_param,
             string strFormat,
             bool bBeginLoop,
             bool bClearRestColumns,
@@ -712,7 +670,9 @@ out strError);
                 this.EnableControls(false);
             }
 
-            LibraryChannel channel = this.GetChannel();
+            LibraryChannel channel = channel_param;
+            if (channel == null)
+                this.GetChannel();
 
             try
             {
@@ -779,7 +739,8 @@ out strError);
             }
             finally
             {
-                this.ReturnChannel(channel);
+                if (channel_param == null)
+                    this.ReturnChannel(channel);
 
                 if (stop != null && bBeginLoop == true)
                 {
@@ -1106,52 +1067,57 @@ out strError);
             stop.Initial("正在保存" + this.DbTypeCaption + "记录 ...");
             stop.BeginLoop();
 
-            this.EnableControls(false);
-            // this._listviewRecords.Enabled = false;
-            try
             {
-                stop.SetProgressRange(0, items.Count);
-                for (int i = 0; i < items.Count; i++)
+                LibraryChannel channel = this.GetChannel();
+
+                this.EnableControls(false);
+                // this._listviewRecords.Enabled = false;
+                try
                 {
-                    if (stop != null && stop.State != 0)
+                    stop.SetProgressRange(0, items.Count);
+                    for (int i = 0; i < items.Count; i++)
                     {
-                        strError = "已中断";
-                        return -1;
-                    }
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "已中断";
+                            return -1;
+                        }
 
-                    ListViewItem item = items[i];
-                    string strRecPath = item.Text;
-                    if (string.IsNullOrEmpty(strRecPath) == true)
-                    {
-                        stop.SetProgressValue(i);
-                        goto CONTINUE;
-                    }
+                        ListViewItem item = items[i];
+                        string strRecPath = item.Text;
+                        if (string.IsNullOrEmpty(strRecPath) == true)
+                        {
+                            stop.SetProgressValue(i);
+                            goto CONTINUE;
+                        }
 
-                    BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
-                    if (info == null)
-                        goto CONTINUE;
+                        BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
+                        if (info == null)
+                            goto CONTINUE;
 
-                    if (string.IsNullOrEmpty(info.NewXml) == true)
-                        goto CONTINUE;
+                        if (string.IsNullOrEmpty(info.NewXml) == true)
+                            goto CONTINUE;
 
-                    // string strOutputPath = "";
+                        // string strOutputPath = "";
 
-                    stop.SetMessage("正在保存" + this.DbTypeCaption + "记录 " + strRecPath);
+                        stop.SetMessage("正在保存" + this.DbTypeCaption + "记录 " + strRecPath);
 
-                    // ErrorCodeValue kernel_errorcode;
+                        // ErrorCodeValue kernel_errorcode;
 
-                    byte[] baNewTimestamp = null;
+                        byte[] baNewTimestamp = null;
 
-                REDO_SAVE:
-                    // return:
-                    //      -2  时间戳不匹配
-                    //      -1  出错
-                    //      0   成功
-                    nRet = SaveRecord(strRecPath,
-                        info,
-                        strStyle,
-                        out baNewTimestamp,
-                        out strError);
+                    REDO_SAVE:
+                        // return:
+                        //      -2  时间戳不匹配
+                        //      -1  出错
+                        //      0   成功
+                        nRet = SaveRecord(
+                            channel,
+                            strRecPath,
+                            info,
+                            strStyle,
+                            out baNewTimestamp,
+                            out strError);
 #if NO
                     string strExistingXml = "";
                     string strSavedXml = "";
@@ -1170,116 +1136,113 @@ out strError);
     out kernel_errorcode,
     out strError);
 #endif
-                    if (nRet == -1)
-                    {
-                        DialogResult result = MessageBox.Show(this,
-"保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时出错: " + strError + "。\r\n\r\n请问是否要重试保存此记录? \r\n\r\n([是] 重试；\r\n[否] 不保存此记录、但继续处理后面的记录保存; \r\n[取消] 中断整批保存操作)",
-this.DbTypeCaption + "查询",
-MessageBoxButtons.YesNoCancel,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
-                        if (result == System.Windows.Forms.DialogResult.Yes)
-                            goto REDO_SAVE;
-                        if (result == System.Windows.Forms.DialogResult.Cancel)
-                            return -1;
-                        error_items.Add(item);
-                        goto CONTINUE;
-                    }
-
-                    if (nRet == -2)
-                    {
-                        DialogResult result = MessageBox.Show(this,
-"保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时遭遇时间戳不匹配: " + strError + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
-this.DbTypeCaption + "查询",
-MessageBoxButtons.YesNoCancel,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
-                        if (result == System.Windows.Forms.DialogResult.Cancel)
-                            break;
-                        if (result == System.Windows.Forms.DialogResult.No)
-                            goto CONTINUE;
-
-                        // 重新装载书目记录到 OldXml
-
-#if NO
-                            string[] results = null;
-                            string strOutputRecPath = "";
-                            lRet = Channel.GetReaderInfo(
-    stop,
-    "@path:" + strRecPath,
-    "xml",
-    out results,
-    out strOutputRecPath,
-    out baNewTimestamp,
-    out strError);
-#endif
-                        string strXml = "";
-                        // 获得一条记录
-                        //return:
-                        //      -1  出错
-                        //      0   没有找到
-                        //      1   找到
-                        nRet = GetRecord(
-                            strRecPath,
-                            out strXml,
-                            out baNewTimestamp,
-                            out strError);
-                        if (nRet == 0)
-                        {
-                            // TODO: 警告后，把 item 行移除？
-                            return -1;
-                        }
                         if (nRet == -1)
-                            return -1;
+                        {
+                            DialogResult result = MessageBox.Show(this,
+    "保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时出错: " + strError + "。\r\n\r\n请问是否要重试保存此记录? \r\n\r\n([是] 重试；\r\n[否] 不保存此记录、但继续处理后面的记录保存; \r\n[取消] 中断整批保存操作)",
+    this.DbTypeCaption + "查询",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                            if (result == System.Windows.Forms.DialogResult.Yes)
+                                goto REDO_SAVE;
+                            if (result == System.Windows.Forms.DialogResult.Cancel)
+                                return -1;
+                            error_items.Add(item);
+                            goto CONTINUE;
+                        }
 
-                        info.OldXml = strXml;
+                        if (nRet == -2)
+                        {
+                            DialogResult result = MessageBox.Show(this,
+    "保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时遭遇时间戳不匹配: " + strError + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
+    this.DbTypeCaption + "查询",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                            if (result == System.Windows.Forms.DialogResult.Cancel)
+                                break;
+                            if (result == System.Windows.Forms.DialogResult.No)
+                                goto CONTINUE;
+
+                            // 重新装载书目记录到 OldXml
+
+                            string strXml = "";
+                            // 获得一条记录
+                            //return:
+                            //      -1  出错
+                            //      0   没有找到
+                            //      1   找到
+                            nRet = GetRecord(
+                                channel,
+                                strRecPath,
+                                out strXml,
+                                out baNewTimestamp,
+                                out strError);
+                            if (nRet == 0)
+                            {
+                                // TODO: 警告后，把 item 行移除？
+                                return -1;
+                            }
+                            if (nRet == -1)
+                                return -1;
+
+                            info.OldXml = strXml;
+                            info.Timestamp = baNewTimestamp;
+                            nReloadCount++;
+                            goto CONTINUE;
+                        }
+
                         info.Timestamp = baNewTimestamp;
-                        nReloadCount++;
-                        goto CONTINUE;
+                        info.OldXml = info.NewXml;
+                        info.NewXml = "";
+
+                        item.BackColor = SystemColors.Window;
+                        item.ForeColor = SystemColors.WindowText;
+
+                        nSavedCount++;
+
+                        this.m_nChangedCount--;
+                        Debug.Assert(this.m_nChangedCount >= 0, "");
+
+                    CONTINUE:
+                        stop.SetProgressValue(i);
                     }
-
-                    info.Timestamp = baNewTimestamp;
-                    info.OldXml = info.NewXml;
-                    info.NewXml = "";
-
-                    item.BackColor = SystemColors.Window;
-                    item.ForeColor = SystemColors.WindowText;
-
-                    nSavedCount++;
-
-                    this.m_nChangedCount--;
-                    Debug.Assert(this.m_nChangedCount >= 0, "");
-
-                CONTINUE:
-                    stop.SetProgressValue(i);
                 }
-            }
-            finally
-            {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
-                stop.HideProgress();
-                stop.Style = StopStyle.None;
+                finally
+                {
+                    this.EnableControls(true);
 
-                this.EnableControls(true);
-                // this._listviewRecords.Enabled = true;
+                    this.ReturnChannel(channel);
+
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                    stop.HideProgress();
+                    stop.Style = StopStyle.None;
+
+                    // this._listviewRecords.Enabled = true;
+                }
             }
 
             // 从 items 中去掉那些已经报错的
-            foreach(ListViewItem item in error_items)
+            foreach (ListViewItem item in error_items)
             {
                 items.Remove(item);
             }
 
-            // 2013/10/22
-            nRet = RefreshListViewLines(items,
-                "",
-                true,
-                true,
-                out strError);
-            if (nRet == -1)
-                return -1;
+            {
+                // 2013/10/22
+                nRet = RefreshListViewLines(
+                    null,
+                    items,
+                    "",
+                    true,
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
 
             DoViewComment(false);
 
@@ -1417,6 +1380,8 @@ dlg.UiState);
             stop.Initial("快速修改" + this.DbTypeCaption + "记录 ...");
             stop.BeginLoop();
 
+            LibraryChannel channel = this.GetChannel();
+
             EnableControls(false);
             this._listviewRecords.Enabled = false;
 
@@ -1459,7 +1424,7 @@ dlg.UiState);
                     }
                 }
 
-                ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
+                ListViewPatronLoader loader = new ListViewPatronLoader(channel,
                     stop,
                     items,
                     this.m_biblioTable);
@@ -1473,8 +1438,7 @@ dlg.UiState);
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null
-                        && stop.State != 0)
+                    if (stop != null && stop.State != 0)
                     {
                         strError = "用户中断";
                         return -1;
@@ -1559,6 +1523,8 @@ dlg.UiState);
             {
                 EnableControls(true);
                 this._listviewRecords.Enabled = true;
+
+                this.ReturnChannel(channel);
 
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);

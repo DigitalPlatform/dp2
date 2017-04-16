@@ -1205,6 +1205,7 @@ namedResultSets        (14)
                     nRet = GetMARC(strPath,
                         info.m_elementSetNames,
                         prop != null ? prop.AddField901 : false,
+                        prop != null ? prop.RemoveFields : "997",
                         out baMARC,
                         out strError);
 
@@ -1387,6 +1388,7 @@ namedResultSets        (14)
         int GetMARC(string strPath,
             List<string> elementSetNames,
             bool bAddField901,
+            string strRemoveFields,
             out byte[] baMARC,
             out string strError)
         {
@@ -1426,6 +1428,33 @@ namedResultSets        (14)
                 return -1;
             }
 
+            // 去掉记录中的 997/998
+            MarcRecord record = new MarcRecord(strMarc);
+            // record.select("field[@name='997' or @name='998']").detach();
+            if (string.IsNullOrEmpty(strRemoveFields) == false)
+            {
+                List<string> field_names = StringUtil.SplitList(strRemoveFields);
+                foreach (string field_name in field_names)
+                {
+                    if (field_name.Length != 3)
+                    {
+                        strError = "removeFields 定义里面出现了不是 3 字符的字段名('"+strRemoveFields+"')";
+                        return -1;
+                    }
+                    record.select("field[@name='"+field_name+"']").detach();
+                }
+            }
+
+            if (bAddField901 == true)
+            {
+                // 901  $p记录路径$t时间戳
+                string strContent = "$p" + strPath
+                    + "$t" + ByteArray.GetHexTimeStampString(timestamp);
+                record.setFirstField("901", "  ", strContent.Replace("$", MarcQuery.SUBFLD), "  ");
+            }
+            strMarc = record.Text;
+
+#if NO
             if (bAddField901 == true)
             {
                 // 901  $p记录路径$t时间戳
@@ -1453,6 +1482,7 @@ namedResultSets        (14)
                 if (nRet == -1)
                     return -1;
             }
+#endif
 
             // 转换为ISO2709
             nRet = MarcUtil.CvtJineiToISO2709(
