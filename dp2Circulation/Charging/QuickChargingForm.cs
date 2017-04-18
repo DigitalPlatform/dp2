@@ -117,8 +117,10 @@ namespace dp2Circulation
 
             this.FuncState = this.FuncState;
 
+#if OLD_CHARGING_CHANNEL
             this._taskList.Channel = this.Channel;
             this._taskList.stop = this.stop;
+#endif
             this._taskList.Container = this;
             this._taskList.BeginThread();
 
@@ -126,32 +128,12 @@ namespace dp2Circulation
             // this._summaryList.stop = this.stop;
             this._summaryList.Container = this;
             this._summaryList.BeginThread();
-#if NO
-            {
-                _floatingMessage = new FloatingMessageForm(this);
-                _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
-                // _floatingMessage.TopMost = true;
-                // _floatingMessage.Text = "正在处理，请不要让读者离开 ...";
-                _floatingMessage.Opacity = 0.7;
-                _floatingMessage.Show(this);
-            }
-#endif
             this._floatingMessage.RectColor = Color.Purple;
-
-#if NO
-            this.MainForm.Move += new EventHandler(MainForm_Move);
-#endif
 
             this.toolStripButton_enableHanzi.Checked = this.MainForm.AppInfo.GetBoolean(
                 "quickchargingform",
-                "eanble_hanzi",
+                "enable_hanzi",
                 false);
-#if NO
-            this.toolStripButton_upperInput.Checked = this.MainForm.AppInfo.GetBoolean(
-                "quickchargingform",
-                "upper_input",
-                true);
-#endif
             this.toolStripButton_upperInput.Checked = Program.MainForm.UpperInputBarcode;
 
             {   // 恢复列宽度
@@ -312,7 +294,7 @@ namespace dp2Circulation
             {
                 this.MainForm.AppInfo.SetBoolean(
                     "quickchargingform",
-                    "eanble_hanzi",
+                    "enable_hanzi",
                     this.toolStripButton_enableHanzi.Checked);
 
 #if NO
@@ -2254,7 +2236,11 @@ false);
             MessageBoxDefaultButton.Button2);
                     if (result == System.Windows.Forms.DialogResult.Yes)
                     {
+#if OLD_CHARGING_CHANNEL
                         this._taskList.stop.DoStop();
+#else
+                        this._taskList.DoStop(this, new StopEventArgs());
+#endif
                     }
                     else
                         return false;   // 放弃清除

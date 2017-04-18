@@ -261,7 +261,6 @@ namespace DigitalPlatform.LibraryServer
                 // BUG!!! 以前缺乏排序。2008/2/1
                 Array.Sort(fis, new FileInfoCompare());
 
-
                 for (int i = 0; i < fis.Length; i++)
                 {
                     if (this.Stopped == true)
@@ -620,7 +619,5 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
-
-
     }
 }

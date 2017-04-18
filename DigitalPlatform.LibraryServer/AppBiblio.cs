@@ -5996,6 +5996,21 @@ out strError);
                 goto ERROR1;
             }
 
+            if (StringUtil.IsInList("reserve_target", strMergeStyle) == true
+                && StringUtil.IsInList("reserve_source", strMergeStyle) == true)
+            {
+                strError = "strMergeStyle 中的 reserve_source 和 reserve_target 不应同时具备";
+                goto ERROR1;
+            }
+
+            // 2017/4/18
+            if (StringUtil.IsInList("reserve_target", strMergeStyle) == true
+                && string.IsNullOrEmpty(strNewBiblio) == false)
+            {
+                strError = "strMergeStyle 中包含 reserve_target 时，strNewBiblio 参数必须为空";
+                goto ERROR1;
+            }
+
             bool bChangePartDenied = false; // 修改操作部分被拒绝
             string strDeniedComment = "";   // 关于部分字段被拒绝的注释
 
@@ -6349,7 +6364,7 @@ out strError);
                             return result;
                         }
                     }
-                    else
+                    else if (StringUtil.IsInList("reserve_target", strMergeStyle) == false)
                     {
                         // 如果当前配置了要查重，则复制行为要看源和目标是否都在同一个 space 内，如果是，则必然会造成重复，那就要拒绝执行
                         // 如果不在同一个 space 内，则要用 strSourceBiblio 对 strTargetBiblioRecPath 所在空间进行查重
@@ -6493,12 +6508,15 @@ out strError);
             // 2017/1/16
             if (string.IsNullOrEmpty(strExistTargetXml) == false)
             {
+                // 注：当 strMergeStyle 为 reserve_target 的时候，目标记录并未被覆盖，这里只是记载一下原目标记录(并未被覆盖或修改)，也有好处
+                // 若此时这里不记载，record 元素里面也能找到完全一样的内容
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
         "overwritedRecord", strExistTargetXml);
                 DomUtil.SetAttr(node, "recPath", strOutputBiblioRecPath);
             }
 
             // 2015/1/21
+            // 注；如果 reserve_source 和 reserve_target 都没有，则默认 reserve_source
             DomUtil.SetElementText(domOperLog.DocumentElement, "mergeStyle",
     strMergeStyle);
 
@@ -6848,7 +6866,7 @@ out strError);
         // parameters:
         //      strAction   动作。为"onlycopybiblio" "onlymovebiblio"之一。增加 copy / move
         //      strNewBiblio    需要在目标记录中更新的内容。如果 == null，表示不特意更新
-        //      strMergeStyle   如何合并两条记录的元数据部分? reserve_source / reserve_target。 空表示 reserve_source
+        //      strMergeStyle   如何合并两条记录的(书目)元数据部分? reserve_source / reserve_target。 空表示 reserve_source
         //      strExistingTargetXml    被覆盖的目标位置的原有记录
         //      strOutputRecPath    目标记录路径
         int DoBiblioOperMove(
@@ -6903,10 +6921,9 @@ out strError);
             string strOutputPath = "";
             string strMetaData = "";
 
+            byte[] exist_target_timestamp = null;
             if (bAppendStyle == false)
             {
-                byte[] exist_target_timestamp = null;
-
                 // 获取覆盖目标位置的现有记录
                 lRet = channel.GetRes(strNewRecPath,
                     out strExistTargetXml,
@@ -6939,6 +6956,8 @@ out strError);
                     goto ERROR1;
 #endif
                 }
+
+                strOutputRecPath = strOutputPath;   // 2017/4/17
             }
 
             /*
@@ -6991,26 +7010,53 @@ out strError);
             }
 
             // 移动记录
-            byte[] output_timestamp = null;
-            string strIdChangeList = "";
-
-            // TODO: Copy后还要写一次？因为Copy并不写入新记录。
-            // 其实Copy的意义在于带走资源。否则还不如用Save+Delete
-            lRet = channel.DoCopyRecord(strOldRecPath,
-                 strNewRecPath,
-                 strAction == "onlymovebiblio" || strAction == "move" ? true : false,   // bDeleteSourceRecord
-                 strMergeStyle,
-                 out strIdChangeList,
-                 out output_timestamp,
-                 out strOutputRecPath,
-                 out strError);
-            if (lRet == -1)
+#if NO
+            if (StringUtil.IsInList("reserve_target", strMergeStyle) == true)
             {
-                strError = "DoCopyRecord() error :" + strError;
-                goto ERROR1;
-            }
+            // 这个方法的问题是，源记录中的 files 不会被移动到目标记录中
+                byte[] output_timestamp = null;
 
-            baOutputTimestamp = output_timestamp;
+                lRet = channel.DoDeleteRes(strOldRecPath, 
+                    null,
+                    "ignorechecktimestamp",
+                    out output_timestamp, 
+                    out strError);
+                if (lRet == -1)
+                {
+                    baOutputTimestamp = output_timestamp;   // 即便出错了也可能会返回
+
+                    strError = "删除源书目记录时出错 DoDeleteRes() error :" + strError;
+                    goto ERROR1;
+                }
+                baOutputTimestamp = exist_target_timestamp;
+                strOutputTargetXml = strExistTargetXml;
+            }
+            else
+#endif
+            {
+                byte[] output_timestamp = null;
+                string strIdChangeList = "";
+
+                // TODO: Copy后还要写一次？因为Copy并不写入新记录。
+                // 其实Copy的意义在于带走资源。否则还不如用Save+Delete
+                lRet = channel.DoCopyRecord(strOldRecPath,
+                     strNewRecPath,
+                     strAction == "onlymovebiblio" || strAction == "move" ? true : false,   // bDeleteSourceRecord
+                     strMergeStyle,
+                     out strIdChangeList,
+                     out output_timestamp,
+                     out strOutputRecPath,
+                     out strError);
+                if (lRet == -1)
+                {
+                    baOutputTimestamp = output_timestamp;   // 即便出错了也可能会返回
+
+                    strError = "DoCopyRecord() error :" + strError;
+                    goto ERROR1;
+                }
+
+                baOutputTimestamp = output_timestamp;
+            }
 
             // TODO: 兑现对 856 字段的合并，和来自源的 856 字段的 $u 修改
 
@@ -7021,6 +7067,8 @@ out strError);
                 try
                 {
                     // TODO: 如果新的、已存在的xml没有不同，或者新的xml为空，则这步保存可以省略
+                    byte[] output_timestamp = baOutputTimestamp;
+                    
                     string strOutputBiblioRecPath = "";
                     lRet = channel.DoSaveTextRes(strOutputRecPath,
                         strNewBiblio,
@@ -7039,20 +7087,17 @@ out strError);
                 }
             }
 
+            // if (string.IsNullOrEmpty(strOutputTargetXml))
             {
                 // TODO: 是否和前面一起锁定?
-                byte[] exist_target_timestamp = null;
 
                 // 获取最后的记录
                 lRet = channel.GetRes(strOutputRecPath,
                     out strOutputTargetXml,
                     out strMetaData,
-                    out exist_target_timestamp,
+                    out baOutputTimestamp,
                     out strOutputPath,
                     out strError);
-
-                // 2016/12/21
-                baOutputTimestamp = exist_target_timestamp;
             }
 
             return 0;

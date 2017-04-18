@@ -2409,7 +2409,7 @@ namespace DigitalPlatform.rms
                 || existing_dom == null)
             {
                 target_dom = new XmlDocument();
-                target_dom.LoadXml(source_dom.OuterXml);
+                target_dom.LoadXml(source_dom.OuterXml);  // target_dom 是来自源记录的记录内容
 
                 if (existing_dom == null)
                 {
@@ -2429,13 +2429,15 @@ namespace DigitalPlatform.rms
                     out change_list);
                     }
                 }
+
+                // 注：至此 target_dom 中有即将被覆盖记录的全部 file 元素，和来自 source_dom 的全部 file 元素
             }
             else
             {
                 Debug.Assert(existing_dom != null, "");
 
                 target_dom = new XmlDocument();
-                target_dom.LoadXml(existing_dom.OuterXml);
+                target_dom.LoadXml(existing_dom.OuterXml);  // target_dom 依然是目标位置的记录内容，意思就是目标位置元数据记录不会被源参数所提供的内容覆盖
 
                 // existing_dom 里面的全部 file 元素已经存在，需要新加入 source_dom 中的 file 元素
 
@@ -2443,6 +2445,8 @@ namespace DigitalPlatform.rms
                 AddFiles(source_dom,
             ref target_dom,
             out change_list);
+
+                // 注：虽然此时目标位置记录基本内容不会被覆盖，但加入了来自源参数记录的 files 元素
             }
 
             Debug.Assert(target_dom != null, "");

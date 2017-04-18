@@ -54,7 +54,8 @@ namespace dp2Circulation
         // 测试创建索取号
         private void ToolStripMenuItem_createAccessNo_Click(object sender, EventArgs e)
         {
-            Task.Factory.StartNew(() => { 
+            Task.Factory.StartNew(() =>
+            {
                 TestCreateAccessNo("seed");
                 TestCreateAccessNo("");
             });
@@ -585,10 +586,13 @@ UiTest3(strBiblioDbName)
             }
         }
 
-        static void CreateEntityRecords(EntityForm entity_form, int nCount)
+        // 创建若干册记录
+        // 返回参考 ID 列表
+        static List<string> CreateEntityRecords(EntityForm entity_form, int nCount)
         {
             string strError = "";
 
+            List<string> refids = new List<string>();
             for (int i = 0; i < nCount; i++)
             {
                 BookItem bookitem = new BookItem();
@@ -599,9 +603,398 @@ UiTest3(strBiblioDbName)
                     out strError);
                 if (nRet == -1)
                     throw new Exception(strError);
+                int index = entity_form.EntityControl.ListView.Items.Count - 1;
+                ListViewItem new_item = entity_form.EntityControl.ListView.Items[index];
+                string refid = ListViewUtil.GetItemText(new_item, BookItem.COLUMN_REFID);
+                refids.Add(refid);
+            }
+
+            return refids;
+        }
+
+        // 移动书目记录
+        private void ToolStripMenuItem_moveBiblioRecord_Click(object sender, EventArgs e)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                MoveBiblioRecord("");
+            });
+
+        }
+
+        #region 移动书目记录
+
+        void MoveBiblioRecord(string strStyle)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(10);
+
+            Progress.Style = StopStyle.EnableHalfStop;
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在进行测试 ...");
+            Progress.BeginLoop();
+
+            this.Invoke((Action)(() =>
+                EnableControls(false)
+                ));
+            try
+            {
+                // 创建测试所需的书目库
+
+                string strBiblioDbName = "_测试用中文图书";
+
+                // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
+                Progress.SetMessage("正在删除测试用书目库 ...");
+                string strOutputInfo = "";
+                long lRet = channel.ManageDatabase(
+    stop,
+    "delete",
+    strBiblioDbName,    // strDatabaseNames,
+    "",
+    out strOutputInfo,
+    out strError);
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode != DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
+                        goto ERROR1;
+                }
+
+                Progress.SetMessage("正在创建测试用书目库 ...");
+                // 创建一个书目库
+                // parameters:
+                // return:
+                //      -1  出错
+                //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+                //      1   成功创建
+                nRet = ManageHelper.CreateBiblioDatabase(
+                    channel,
+                    this.Progress,
+                    strBiblioDbName,
+                    "book",
+                    "unimarc",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // *** 定义测试所需的馆藏地
+                List<DigitalPlatform.CirculationClient.ManageHelper.LocationItem> items = new List<DigitalPlatform.CirculationClient.ManageHelper.LocationItem>();
+                items.Add(new DigitalPlatform.CirculationClient.ManageHelper.LocationItem("", "_测试阅览室", true, true));
+                items.Add(new DigitalPlatform.CirculationClient.ManageHelper.LocationItem("", "_测试流通库", true, true));
+
+                // 为系统添加新的馆藏地定义
+                nRet = ManageHelper.AddLocationTypes(
+                    channel,
+                    this.Progress,
+                    "add",
+                    items,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 重新获得各种库名、列表
+                ReloadDatabaseCfg();
+
+                // *** 界面测试
+                this.Invoke((Action)(() =>
+UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_source,change_biblio_before")
+));
+                this.Invoke((Action)(() =>
+UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target,change_biblio_before")
+));
+
+
+                this.Invoke((Action)(() =>
+    UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_source")
+    ));
+                this.Invoke((Action)(() =>
+UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
+));
+
+                // 删除测试用的书目库、排架体系、馆藏地定义
+                Progress.SetMessage("正在删除测试用书目库 ...");
+                lRet = channel.ManageDatabase(
+    stop,
+    "delete",
+    strBiblioDbName,    // strDatabaseNames,
+    "",
+    out strOutputInfo,
+    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                Progress.SetMessage("正在删除测试用的馆藏地 ...");
+                nRet = ManageHelper.AddLocationTypes(
+    channel,
+    this.Progress,
+    "remove",
+    items,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 重新获得各种库名、列表
+                ReloadDatabaseCfg();
+
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = "MoveBiblioRecord() Exception: " + ExceptionUtil.GetExceptionText(ex);
+                goto ERROR1;
+            }
+            finally
+            {
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+                Progress.HideProgress();
+
+                this.Invoke((Action)(() =>
+                    EnableControls(true)
+                    ));
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
+        ERROR1:
+            this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+            this.ShowMessage(strError, "red", true);
+        }
+
+        // 创建两条书目记录，然后移动一条去覆盖另外一条
+        // parameters:
+        //      strStyle    reserve_source reserve_target 分别表示保留源和保留目标书目记录(指移动之后的目标记录)
+        void UiTest_moveBiblioRecord_1(string strBiblioDbName, string strStyle)
+        {
+            string strError = "";
+
+            if (string.IsNullOrEmpty(strStyle))
+                strStyle = "reserve_source";
+
+            BiblioCreationInfo info1 = CreateBiblioRecord(strBiblioDbName,
+                "源记录",
+                "");
+            BiblioCreationInfo info2 = CreateBiblioRecord(strBiblioDbName,
+    "目标记录",
+    "");
+
+            using (EntityForm entity_form = new EntityForm())
+            {
+                entity_form.MainForm = Program.MainForm;
+                entity_form.MdiParent = Program.MainForm;
+                entity_form.Show();
+
+                entity_form.SafeLoadRecord(info1.BiblioRecPath, "");
+
+                if (StringUtil.IsInList("change_biblio_before", strStyle))
+                {
+                    ChangeBiblioTitle(entity_form, "源记录_changed");
+                }
+
+                if (StringUtil.IsInList("reserve_source", strStyle))
+                {
+                    MessageBox.Show(this, "请注意在后面对话框中选择 采用源 书目记录");
+                }
+                if (StringUtil.IsInList("reserve_target", strStyle))
+                {
+                    MessageBox.Show(this, "请注意在后面对话框中选择 采用目标 书目记录");
+                }
+
+                int nRet = entity_form.MoveTo(info2.BiblioRecPath, out strError);
+                if (nRet == -1)
+                    throw new Exception(strError);
+
+                {
+                    // 检查窗口中的书目记录是否符合要求
+                    if (StringUtil.IsInList("reserve_source", strStyle))
+                    {
+                        strError = VerifyBiblioTitle(entity_form,
+                            StringUtil.IsInList("change_biblio_before", strStyle) ? "源记录_changed" : "源记录");
+                        if (string.IsNullOrEmpty(strError) == false)
+                            throw new Exception(strError);
+                    }
+                    if (StringUtil.IsInList("reserve_target", strStyle))
+                    {
+                        strError = VerifyBiblioTitle(entity_form, "目标记录");
+                        if (string.IsNullOrEmpty(strError) == false)
+                            throw new Exception(strError);
+                    }
+
+                    // 检查窗口中的册记录是否符合要求
+                    // 主要检查 refid 列表
+                    strError = VerifyItems(entity_form, info1.ItemRefIDs);
+                    if (string.IsNullOrEmpty(strError) == false)
+                        throw new Exception(strError);
+                    strError = VerifyItems(entity_form, info2.ItemRefIDs);
+                    if (string.IsNullOrEmpty(strError) == false)
+                        throw new Exception(strError);
+                }
 
             }
+
+            // 重新打开种册窗装载目标记录，再次检测一次。因为有时候第一次在窗口没有关闭的时候看起来对了，但重新打开又不对了
+            using (EntityForm entity_form = new EntityForm())
+            {
+                entity_form.MainForm = Program.MainForm;
+                entity_form.MdiParent = Program.MainForm;
+                entity_form.Show();
+
+                entity_form.SafeLoadRecord(info2.BiblioRecPath, "");
+
+                {
+                    // 检查窗口中的书目记录是否符合要求
+                    if (StringUtil.IsInList("reserve_source", strStyle))
+                    {
+                        strError = VerifyBiblioTitle(entity_form,
+                            StringUtil.IsInList("change_biblio_before", strStyle) ? "源记录_changed" : "源记录");
+                        if (string.IsNullOrEmpty(strError) == false)
+                            throw new Exception(strError);
+                    }
+                    if (StringUtil.IsInList("reserve_target", strStyle))
+                    {
+                        strError = VerifyBiblioTitle(entity_form, "目标记录");
+                        if (string.IsNullOrEmpty(strError) == false)
+                            throw new Exception(strError);
+                    }
+
+                    // 检查窗口中的册记录是否符合要求
+                    // 主要检查 refid 列表
+                    strError = VerifyItems(entity_form, info1.ItemRefIDs);
+                    if (string.IsNullOrEmpty(strError) == false)
+                        throw new Exception(strError);
+                    strError = VerifyItems(entity_form, info2.ItemRefIDs);
+                    if (string.IsNullOrEmpty(strError) == false)
+                        throw new Exception(strError);
+                }
+
+            }
+
+            // 检查源书目记录，应该已经不存在
+            VerifyBiblioRecordExisting(info1.BiblioRecPath);
         }
+
+        string VerifyBiblioRecordExisting(string strBiblioRecPath)
+        {
+            LibraryChannel channel = this.GetChannel();
+
+            try
+            {
+                string[] results = null;
+                byte[] baTimestamp = null;
+                string strError = "";
+                List<string> format_list = new List<string>();
+                format_list.Add("xml");
+                long lRet = channel.GetBiblioInfos(
+                    Progress,
+                    strBiblioRecPath,
+                    "",
+                    format_list.ToArray(),
+                    out results,
+                    out baTimestamp,
+                    out strError);
+                if (lRet == 0)
+                    return null;
+                if (lRet == -1)
+                    throw new Exception(strError);
+                return "书目记录 '"+strBiblioRecPath+"' 尚存在，不符合测试要求";
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+        }
+
+        // 验证种册窗里面的 MARC 编辑器中的题名是否符合要求
+        static string VerifyBiblioTitle(EntityForm entity_form, string strTitle)
+        {
+            MarcRecord record = new MarcRecord(entity_form.MarcEditor.Marc);
+            string strContent = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
+            if (strContent != strTitle)
+            {
+                return "种册窗中的题名 '" + strContent + "' 和期望的题名 '" + strTitle + "' 不一致";
+            }
+
+            return null;    // 表示正确
+        }
+
+        // 修改种册窗里面的 MARC 编辑器中的题名
+        static void ChangeBiblioTitle(EntityForm entity_form, string strNewTitle)
+        {
+            MarcRecord record = new MarcRecord(entity_form.MarcEditor.Marc);
+            record.setFirstSubfield("200", "a", strNewTitle);
+
+            entity_form.MarcEditor.Marc = record.Text;
+        }
+
+        // 检查 refids 中的参考 ID 是否都存在
+        static string VerifyItems(EntityForm entity_form, List<string> refids)
+        {
+            foreach (string refid in refids)
+            {
+                BookItemBase item = entity_form.EntityControl.Items.GetItemByRefID(refid);
+                if (item == null)
+                    return "参考 ID 为 '" + refid + "' 的册记录事项在种册窗的“册”属性页中没有找到";
+            }
+
+            return null;
+        }
+
+        // 所创建的书目记录和下属册记录信息。用于最后核对验证
+        class BiblioCreationInfo
+        {
+            public string BiblioRecPath { get; set; }
+            public List<string> ItemRefIDs { get; set; }
+        }
+
+        BiblioCreationInfo CreateBiblioRecord(string strBiblioDbName,
+            string strTitle,
+            string strStyle)
+        {
+            string strError = "";
+
+            using (EntityForm entity_form = new EntityForm())
+            {
+                entity_form.MainForm = Program.MainForm;
+                entity_form.MdiParent = Program.MainForm;
+                entity_form.Show();
+
+                MarcRecord record = new MarcRecord();
+                record.add(new MarcField('$', "200  $a" + strTitle));
+                record.add(new MarcField('$', "690  $aI247.5"));
+                record.add(new MarcField('$', "701  $a测试著者"));
+
+                // 将 MARC 机内格式记录赋予窗口
+                entity_form.MarcEditor.Marc = record.Text;
+                entity_form.BiblioRecPath = strBiblioDbName + "/?";
+                entity_form.InitialPages();
+                entity_form.ActivateItemsPage();
+
+                // 保存
+                if (entity_form.DoSaveAll("") == -1)
+                    throw new Exception("种册窗保存记录时出错");
+
+                string strBiblioRecPath = entity_form.BiblioRecPath;
+
+                // 创建册记录
+                List<string> refids = CreateEntityRecords(entity_form, 10);
+
+                // 保存
+                if (entity_form.DoSaveAll("") == -1)
+                    throw new Exception("种册窗保存记录时出错");
+
+                BiblioCreationInfo info = new BiblioCreationInfo();
+                info.BiblioRecPath = entity_form.BiblioRecPath;
+                info.ItemRefIDs = refids;
+
+                return info;
+            }
+        }
+
+        #endregion
     }
 
     // 验证异常

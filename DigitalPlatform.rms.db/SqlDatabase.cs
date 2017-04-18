@@ -17729,7 +17729,7 @@ bool bTempObject)
         // 删除记录,包括子文件,检索点,和本记录
         // parameter:
         //		strRecordID           记录ID
-        //      strStyle        可包含 fastmode
+        //      strStyle        可包含 fastmode。ignorechecktimestamp
         //		inputTimestamp  输入的时间戳
         //		outputTimestamp out参数,返回的实际的时间戳
         //		strError        out参数,返回出错信息

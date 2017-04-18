@@ -7343,6 +7343,11 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             {
                 string strOutputBiblio = "";
 
+#if NO
+                if (StringUtil.IsInList("reserve_target", strMergeStyle))
+                    strXml = "";    // 在需要保留目标书目记录的情况下，就不要向服务器发送记录内容了
+#endif
+
                 // result.Value:
                 //      -1  出错
                 //      0   成功，没有警告信息。
@@ -7355,7 +7360,8 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                     null,
                     this.BiblioTimestamp,
                     strTargetBiblioRecPath,
-                    this.BiblioChanged == true ? strXml : null, // 2016/12/18 增加左侧判断
+                    this.BiblioChanged == false || StringUtil.IsInList("reserve_target", strMergeStyle) ?
+                    null : strXml, // 2016/12/18 增加左侧判断
                     strMergeStyle,
                     out strOutputBiblio,
                     out strOutputBiblioRecPath,
@@ -7383,6 +7389,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                     }
                     return -1;
                 }
+                else
+                    strXml = strOutputBiblio;   // 2017/4/17
+
                 if (lRet == 1)
                 {
                     // 有警告
@@ -12747,9 +12756,22 @@ merge_dlg.UiState);
                 {
                     info.bBiblioSaved = true;
                     info.SavedNames.Add("书目信息");
-                    this.BiblioChanged = false;
                     this.BiblioRecPath = strOutputBiblioRecPath;
                     this.BiblioTimestamp = baOutputTimestamp;
+                    // 2017/4/17
+                    if (string.IsNullOrEmpty(strXml) == false)
+                    {
+                        // return:
+                        //      -1  error
+                        //      0   空的记录
+                        //      1   成功
+                        int nRet0 = SetBiblioRecordToMarcEditor(strXml,
+                            out strError);
+                        if (nRet0 == -1)
+                            goto ERROR1;
+                    }
+
+                    this.BiblioChanged = false;
                     bSucceed = true;
                 }
                 if (nRet == -1)
