@@ -5082,7 +5082,7 @@ MessageBoxDefaultButton.Button1);
                         null,    // this.BiblioTimestamp,
                         dlg.RecPath,
                         null,   // strXml,
-                        "",
+                        "file_reserve_source",  // 2017/4/19
                         out strOutputBiblio,
                         out strOutputBiblioRecPath,
                         out baOutputTimestamp,

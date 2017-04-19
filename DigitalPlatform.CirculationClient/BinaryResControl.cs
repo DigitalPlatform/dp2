@@ -1252,6 +1252,21 @@ bool bChanged)
             return results;
         }
 
+        // 按照尺寸搜寻事项
+        public List<ListViewItem> FindItemBySize(string strSize)
+        {
+            List<ListViewItem> results = new List<ListViewItem>();
+            for (int i = 0; i < this.ListView.Items.Count; i++)
+            {
+                ListViewItem item = this.ListView.Items[i];
+                string strCurrentSize = ListViewUtil.GetItemText(item, COLUMN_SIZE);
+                if (strSize == "*" || strCurrentSize == strSize)
+                    results.Add(item);
+            }
+
+            return results;
+        }
+
         // 获得一个事项的尚未上载的本地文件名
         // parameters:
         // return:

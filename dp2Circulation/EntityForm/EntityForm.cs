@@ -10238,9 +10238,9 @@ merge_dlg.UiState);
 
                 string strMergeStyle = "";
                 if ((merge_style & MergeStyle.ReserveSourceBiblio) != 0)
-                    strMergeStyle = "reserve_source";
+                    strMergeStyle = "reserve_source,file_reserve_source";
                 else
-                    strMergeStyle = "reserve_target";
+                    strMergeStyle = "reserve_target,file_reserve_target";
 
                 if ((merge_style & MergeStyle.MissingSourceSubrecord) != 0)
                     strMergeStyle += ",missing_source_subrecord";
@@ -12514,12 +12514,23 @@ value);
             MessageBox.Show(this, strError);
         }
 
+        public int MoveTo(string strTargetRecPathParam,
+    out string strError)
+        {
+            return MoveTo(strTargetRecPathParam,
+    MergeStyle.None,
+    out strError);
+        }
+
         // 移动当前书目记录到指定的位置
+        // parameters:
+        //      auto_mergeStyle    如果函数中打开合并风格对话框，对话框初始的状态。如果为 MergeStyle.None，表示不使用这个参数；如果不是 MergeStyle.None 则表示对话框会自动设置值并关闭、继续
         // return:
         //      -1  出错
         //      0   放弃
         //      1   成功
         public int MoveTo(string strTargetRecPathParam,
+            MergeStyle auto_mergeStyle,
             out string strError)
         {
             strError = "";
@@ -12635,6 +12646,7 @@ value);
                         merge_dlg.TargetRecPath = strTargetRecPathParam;
                         merge_dlg.MessageText = "目标书目记录 " + strTargetRecPathParam + " 已经存在。\r\n\r\n请指定当前窗口中的书目记录(源)和此目标记录合并的方法";
 
+                        merge_dlg.AutoMergeStyle = auto_mergeStyle;
                         merge_dlg.UiState = this.MainForm.AppInfo.GetString(
         "entity_form",
         "GetMergeStyleDialog_uiState",
@@ -12724,9 +12736,9 @@ merge_dlg.UiState);
 
                 string strMergeStyle = "";
                 if ((merge_style & MergeStyle.ReserveSourceBiblio) != 0)
-                    strMergeStyle = "reserve_source";
+                    strMergeStyle = "reserve_source,file_reserve_source";
                 else
-                    strMergeStyle = "reserve_target";
+                    strMergeStyle = "reserve_target,file_reserve_target";
 
                 if ((merge_style & MergeStyle.MissingSourceSubrecord) != 0)
                     strMergeStyle += ",missing_source_subrecord";
@@ -12769,6 +12781,9 @@ merge_dlg.UiState);
                             out strError);
                         if (nRet0 == -1)
                             goto ERROR1;
+
+
+
                     }
 
                     this.BiblioChanged = false;
@@ -12790,7 +12805,7 @@ merge_dlg.UiState);
                         nRet = LoadSubRecords(
                             channel,
                             strOutputBiblioRecPath,
-                            null,   // strXml, // 书目记录 XML
+                            strXml, // null,   // strXml, // 书目记录 XML
                             "", // strSubRecords,
                             load_info,
                             true,

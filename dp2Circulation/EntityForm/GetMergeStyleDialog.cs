@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading;
 
 using DigitalPlatform.CommonControl;
 
@@ -16,6 +17,19 @@ namespace dp2Circulation
     /// </summary>
     public partial class GetMergeStyleDialog : Form
     {
+        // 自动设置的风格，若为 .None 以外的值，对话框会自动关闭、继续
+        MergeStyle _autoMergeStyle = MergeStyle.None;
+        public MergeStyle AutoMergeStyle
+        {
+            get
+            {
+                return _autoMergeStyle;
+            }
+            set
+            {
+                _autoMergeStyle = value;
+            }
+        }
         /// <summary>
         /// 源书目记录路径
         /// </summary>
@@ -66,7 +80,27 @@ namespace dp2Circulation
 
         private void GetMergeStyleDialog_Load(object sender, EventArgs e)
         {
+            this.BeginInvoke(new Action(AutoSet));
+        }
 
+        void AutoSet()
+        {
+            if (this._autoMergeStyle != MergeStyle.None)
+            {
+                this.SetMergeStyle(this._autoMergeStyle);
+
+                // 延时 五秒
+                DateTime start_time = DateTime.Now;
+                while(DateTime.Now - start_time < TimeSpan.FromSeconds(5))
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(500);
+                }
+
+                // MessageBox.Show(this, "Pause");
+                button_OK_Click(this, new EventArgs());
+                return;
+            }
         }
 
         private void button_OK_Click(object sender, EventArgs e)

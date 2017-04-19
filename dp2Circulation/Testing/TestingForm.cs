@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -699,6 +700,29 @@ UiTest3(strBiblioDbName)
                 ReloadDatabaseCfg();
 
                 // *** 界面测试
+                // 追加方式移动
+                this.Invoke((Action)(() =>
+UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_source,create_objects,append_target")
+));
+                this.Invoke((Action)(() =>
+UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_source,create_objects,append_targe,change_biblio_before")
+));
+
+                this.Invoke((Action)(() =>
+UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_source,append_target")
+));
+                this.Invoke((Action)(() =>
+UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_source,append_targe,change_biblio_before")
+));
+
+                // 已有目标记录的方式移动
+                this.Invoke((Action)(() =>
+UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_source,create_objects")
+));
+                this.Invoke((Action)(() =>
+UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target,create_objects")
+));
+
                 this.Invoke((Action)(() =>
 UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_source,change_biblio_before")
 ));
@@ -768,19 +792,43 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
         // 创建两条书目记录，然后移动一条去覆盖另外一条
         // parameters:
         //      strStyle    reserve_source reserve_target 分别表示保留源和保留目标书目记录(指移动之后的目标记录)
+        //                  change_biblio_before 表示在移动操作前故意修改一下 MARC 编辑器中的书目记录的题名字段，而且不做保存
+        //                  create_objects 表示要为参与测试的书目记录创建对象文件，这样移动的时候就是带着对象移动了
+        //                  append_target 表示移动源书目记录到书目库尾部，以追加的方式。这时也没有必要先创建测试用的目标书目记录了
+        //                          注意，append_target 只能和 reserve_source 配合使用，不允许和 reserve_target 配合使用。因为移动前，目标记录是不存在的，也就无所谓保留目标记录了
         void UiTest_moveBiblioRecord_1(string strBiblioDbName, string strStyle)
         {
             string strError = "";
 
-            if (string.IsNullOrEmpty(strStyle))
-                strStyle = "reserve_source";
+            if (StringUtil.IsInList("reserve_source", strStyle) == true
+    && StringUtil.IsInList("reserve_target", strStyle) == true)
+                throw new ArgumentException("strStyle 中 reserve_source 和 reserve_target 不应该同时具备。只能使用其中一个");
+
+            // 如果都缺，则默认 reserve_source
+            if (StringUtil.IsInList("reserve_source", strStyle) == false
+                && StringUtil.IsInList("reserve_target", strStyle) == false)
+                StringUtil.SetInList(ref strStyle, "reserve_source", true);
+
+                // 检查参数
+            if (StringUtil.IsInList("append_target", strStyle)
+                && StringUtil.IsInList("reserve_target", strStyle))
+                throw new ArgumentException("strStyle 中 append_target 只能和 reserve_source 配套使用，不允许和 reserve_target 配套使用");
 
             BiblioCreationInfo info1 = CreateBiblioRecord(strBiblioDbName,
                 "源记录",
-                "");
-            BiblioCreationInfo info2 = CreateBiblioRecord(strBiblioDbName,
-    "目标记录",
-    "");
+                strStyle);
+            BiblioCreationInfo info2 = null;
+            if (StringUtil.IsInList("append_target", strStyle))
+            {
+                info2 = new BiblioCreationInfo();
+                info2.BiblioRecPath = strBiblioDbName + "/?";
+            }
+            else
+            {
+                info2 = CreateBiblioRecord(strBiblioDbName,
+         "目标记录",
+         strStyle);
+            }
 
             using (EntityForm entity_form = new EntityForm())
             {
@@ -795,18 +843,30 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     ChangeBiblioTitle(entity_form, "源记录_changed");
                 }
 
+                MergeStyle autoMergeStyle = MergeStyle.None;
                 if (StringUtil.IsInList("reserve_source", strStyle))
                 {
-                    MessageBox.Show(this, "请注意在后面对话框中选择 采用源 书目记录");
+                    //MessageBox.Show(this, "请注意在后面对话框中选择 采用源 书目记录");
+                    autoMergeStyle = MergeStyle.ReserveSourceBiblio | MergeStyle.CombineSubrecord;
                 }
                 if (StringUtil.IsInList("reserve_target", strStyle))
                 {
-                    MessageBox.Show(this, "请注意在后面对话框中选择 采用目标 书目记录");
+                    //MessageBox.Show(this, "请注意在后面对话框中选择 采用目标 书目记录");
+                    autoMergeStyle = MergeStyle.ReserveTargetBiblio | MergeStyle.CombineSubrecord;
                 }
 
-                int nRet = entity_form.MoveTo(info2.BiblioRecPath, out strError);
+                int nRet = entity_form.MoveTo(info2.BiblioRecPath, 
+                    autoMergeStyle,
+                    out strError);
                 if (nRet == -1)
                     throw new Exception(strError);
+
+                //
+                if (StringUtil.IsInList("append_target", strStyle))
+                {
+                    // 移动完成后才知道目标记录的路径
+                    info2.BiblioRecPath = entity_form.BiblioRecPath;
+                }
 
                 {
                     // 检查窗口中的书目记录是否符合要求
@@ -832,6 +892,32 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     strError = VerifyItems(entity_form, info2.ItemRefIDs);
                     if (string.IsNullOrEmpty(strError) == false)
                         throw new Exception(strError);
+
+                    // 检查窗口中的对象记录是否符合要求
+                    if (StringUtil.IsInList("create_objects", strStyle))
+                    {
+                        if (StringUtil.IsInList("reserve_source", strStyle))
+                        {
+                            strError = VerifyObjects(entity_form, info1.Objects, true);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+
+                            strError = VerifyObjects(entity_form, info2.Objects, false);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+                        }
+                        if (StringUtil.IsInList("reserve_target", strStyle))
+                        {
+                            strError = VerifyObjects(entity_form, info1.Objects, false);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+
+                            strError = VerifyObjects(entity_form, info2.Objects, true);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+                        }
+                    }
+
                 }
 
             }
@@ -869,6 +955,31 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     strError = VerifyItems(entity_form, info2.ItemRefIDs);
                     if (string.IsNullOrEmpty(strError) == false)
                         throw new Exception(strError);
+
+                    // 检查窗口中的对象记录是否符合要求
+                    if (StringUtil.IsInList("create_objects", strStyle))
+                    {
+                        if (StringUtil.IsInList("reserve_source", strStyle))
+                        {
+                            strError = VerifyObjects(entity_form, info1.Objects, true);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+
+                            strError = VerifyObjects(entity_form, info2.Objects, false);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+                        }
+                        if (StringUtil.IsInList("reserve_target", strStyle))
+                        {
+                            strError = VerifyObjects(entity_form, info1.Objects, false);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+
+                            strError = VerifyObjects(entity_form, info2.Objects, true);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+                        }
+                    }
                 }
 
             }
@@ -900,7 +1011,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     return null;
                 if (lRet == -1)
                     throw new Exception(strError);
-                return "书目记录 '"+strBiblioRecPath+"' 尚存在，不符合测试要求";
+                return "书目记录 '" + strBiblioRecPath + "' 尚存在，不符合测试要求";
             }
             finally
             {
@@ -921,6 +1032,90 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             return null;    // 表示正确
         }
 
+        // 所创建的对象记录信息。用于最后核对验证
+        class ObjectCreationInfo
+        {
+            public string LocalFilePath { get; set; }   // 本地物理文件全路径
+            public long Size { get; set; }  // 文件尺寸
+            public string MD5 { get; set; }
+        }
+
+        // 验证种册窗中是否具备特定特征的对象
+        // parameters:
+        //      bExist  验证方向。如果 == true，表示要验证这些对象存在；== false，表示要验证这些对象不存在
+        static string VerifyObjects(EntityForm entity_form,
+            List<ObjectCreationInfo> infos,
+            bool bExist)
+        {
+            if (infos == null)
+                return null;
+            foreach (ObjectCreationInfo info in infos)
+            {
+                string strMD5 = info.MD5;
+                List<ListViewItem> items = entity_form.BinaryResControl.FindItemByUsage(strMD5);
+                if (items == null || items.Count == 0)
+                {
+                    if (bExist == true)
+                        return "特征 '" + strMD5 + "' 没有找到对应的对象";
+                    continue;
+                }
+
+                if (bExist == false)
+                    return "特征为 '" + strMD5 + "' 的对象不应该存在";
+
+                if (bExist == true && items.Count != 1)
+                {
+                    return "特征 '" + strMD5 + "' 找到的对象不唯一 (" + items.Count + ")";
+                }
+            }
+
+            return null;
+        }
+
+        // 为种册窗添加若干对象文件
+        static List<ObjectCreationInfo> AddObjects(EntityForm entity_form,
+            string strTitle,
+            int count)
+        {
+            List<ObjectCreationInfo> infos = new List<ObjectCreationInfo>();
+
+            for (int i = 0; i < count; i++)
+            {
+                string strError = "";
+
+                ObjectCreationInfo info = new ObjectCreationInfo();
+                infos.Add(info);
+
+                // 发生一个本地文件
+                info.LocalFilePath = Program.MainForm.GetTempFileName("testing");
+                using (StreamWriter sw = new StreamWriter(info.LocalFilePath, false, Encoding.UTF8))
+                {
+                    for (int j = 0; j < i + 1; j++)
+                    {
+                        sw.WriteLine(strTitle + " " + j);
+                    }
+                }
+
+                using (StreamReader sr = new StreamReader(info.LocalFilePath, Encoding.UTF8))
+                {
+                    info.MD5 = StringUtil.GetMd5(sr.ReadToEnd());
+                }
+
+                ListViewItem new_item = null;
+                int nRet = entity_form.BinaryResControl.AppendNewItem(
+                info.LocalFilePath,
+                info.MD5,
+            out new_item,
+            out strError);
+                if (nRet == -1)
+                    throw new Exception(strError);
+
+                info.Size = (new FileInfo(info.LocalFilePath)).Length;
+            }
+
+            return infos;
+        }
+
         // 修改种册窗里面的 MARC 编辑器中的题名
         static void ChangeBiblioTitle(EntityForm entity_form, string strNewTitle)
         {
@@ -933,6 +1128,8 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
         // 检查 refids 中的参考 ID 是否都存在
         static string VerifyItems(EntityForm entity_form, List<string> refids)
         {
+            if (refids == null)
+                return null;
             foreach (string refid in refids)
             {
                 BookItemBase item = entity_form.EntityControl.Items.GetItemByRefID(refid);
@@ -948,8 +1145,11 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
         {
             public string BiblioRecPath { get; set; }
             public List<string> ItemRefIDs { get; set; }
+            public List<ObjectCreationInfo> Objects { get; set; }
         }
 
+        // parameters:
+        //      strStyle    create_objects  表示要创建对象文件
         BiblioCreationInfo CreateBiblioRecord(string strBiblioDbName,
             string strTitle,
             string strStyle)
@@ -982,6 +1182,14 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 // 创建册记录
                 List<string> refids = CreateEntityRecords(entity_form, 10);
 
+                List<ObjectCreationInfo> objects = null;
+                if (StringUtil.IsInList("create_objects", strStyle))
+                {
+                    // 为种册窗添加若干对象文件
+                    objects = AddObjects(entity_form, strTitle, 10);
+                }
+
+
                 // 保存
                 if (entity_form.DoSaveAll("") == -1)
                     throw new Exception("种册窗保存记录时出错");
@@ -989,6 +1197,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 BiblioCreationInfo info = new BiblioCreationInfo();
                 info.BiblioRecPath = entity_form.BiblioRecPath;
                 info.ItemRefIDs = refids;
+                info.Objects = objects;
 
                 return info;
             }

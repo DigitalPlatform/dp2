@@ -303,6 +303,5 @@ namespace dp2Circulation
 
         ReserveSourceBiblio = 0x08,     // 书目记录，采用源书目记录 (对象都全部合并)
         ReserveTargetBiblio = 0x10,     // 书目记录，采用目标书目记录 (对象都全部合并)
-
     }
 }
