@@ -72,11 +72,7 @@
     <comment lang='zh'>强制修改读者信息中的证条码号</comment>
     <comment lang='en'>force change reader barcode</comment>
   </property>
-  <property name='listbibliodbfroms'>
-    <comment lang='zh'>列出书目库检索途径 -- 即将废止</comment>
-    <comment lang='en'>list biblio db froms</comment>
-  </property>
-  <property name='listdbfroms'>
+  <property name='listdbfroms' alias='listbibliodbfroms'>
     <comment lang='zh'>列出数据库检索途径</comment>
     <comment lang='en'>list database froms</comment>
   </property>
@@ -92,11 +88,11 @@
     <comment lang='zh'>检索册</comment>
     <comment lang='en'>search item</comment>
   </property>
-  <property name='getiteminfo'>
+  <property name='getiteminfo' alias='getentities'>
     <comment lang='zh'>获得册信息</comment>
     <comment lang='en'>get item info</comment>
   </property>
-  <property name='setiteminfo'>
+  <property name='setiteminfo' alias='setentities'>
     <comment lang='zh'>修改册</comment>
     <comment lang='en'>set item info</comment>
   </property>
@@ -274,7 +270,7 @@
     <comment lang='zh'>获得期信息</comment>
     <comment lang='en'>get issue info</comment>
   </property>
-  <property name='setissueinfo'>
+  <property name='setissueinfo' alias='setissues'>
     <comment lang='zh'>修改期信息</comment>
     <comment lang='en'>set issue info</comment>
   </property>
@@ -287,7 +283,7 @@
     <comment lang='zh'>获得订购信息</comment>
     <comment lang='en'>get order info</comment>
   </property>
-  <property name='setorderinfo'>
+  <property name='setorderinfo' alias='setorders'>
     <comment lang='zh'>修改订购信息</comment>
     <comment lang='en'>set order info</comment>
   </property>

@@ -106,13 +106,19 @@ namespace dp2Circulation
         private void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
-            MergeStyle style = GetMergeStyle();
-            // 如果 missing 和 reservetarget 同时出现，表示没有必要操作了
-            if ((style & MergeStyle.MissingSourceSubrecord) != 0
-                && (style & MergeStyle.ReserveTargetBiblio) != 0)
+
+            // 测试的时候不经过这个检查
+            if (this._autoMergeStyle == MergeStyle.None)
             {
-                strError = "若不采纳来自源记录的书目和子记录，意味着没有必要进行此次合并操作";
-                goto ERROR1;
+                // 检查操作必要性
+                MergeStyle style = GetMergeStyle();
+                // 如果 missing 和 reservetarget 同时出现，表示没有必要操作了
+                if ((style & MergeStyle.MissingSourceSubrecord) != 0
+                    && (style & MergeStyle.ReserveTargetBiblio) != 0)
+                {
+                    strError = "若不采纳来自源记录的书目和子记录，意味着没有必要进行此次合并操作";
+                    goto ERROR1;
+                }
             }
 
             this.DialogResult = System.Windows.Forms.DialogResult.OK;

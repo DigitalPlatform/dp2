@@ -9876,7 +9876,7 @@ MessageBoxDefaultButton.Button1);
                 bSaveAs = true;
             }
 
-            MergeStyle merge_style = MergeStyle.CombineSubrecord | MergeStyle.ReserveSourceBiblio;
+            // MergeStyle merge_style = MergeStyle.CombineSubrecord | MergeStyle.ReserveSourceBiblio;
 
             BiblioSaveToDlg dlg = new BiblioSaveToDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
@@ -10038,360 +10038,18 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
-#if NO
-            {
-                // TODO: 移动或者复制前，要求下属记录已经保存。否则移动不过去，会造成困惑。
-                // 另外一种方法是允许这样做，但移动时候的操作就复杂了，要把内存中的册记录保存到新的书目记录名下，容易造成册条码号重复等问题
+            CopyParam info = new CopyParam();
+            info.CopyChildRecords = dlg.CopyChildRecords;
+            info.BuildLink = dlg.BuildLink;
+            info.EnableSubRecord = dlg.EnableCopyChildRecords;
 
-                // 如果当前记录没有保存，则先保存
-                if (this.EntitiesChanged == true
-        || this.IssuesChanged == true
-                    // || this.BiblioChanged == true
-        || this.ObjectChanged == true
-        || this.OrdersChanged == true
-        || this.CommentsChanged == true)
-                {
-                    // 警告尚未保存
-                    DialogResult result = MessageBox.Show(this,
-                        "当前窗口内有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。仅复制书目的操作不会复制下属记录。\r\n\r\n请问要在复制书目记录前立即保存这些修改到源记录么？",
-                        "EntityForm",
-                        MessageBoxButtons.OKCancel,
-                        MessageBoxIcon.Question,
-                        MessageBoxDefaultButton.Button2);
-                    if (result == DialogResult.OK)
-                    {
-                        // 提交所有保存请求
-                        // return:
-                        //      -1  有错。此时不排除有些信息保存成功。
-                        //      0   成功。
-                        nRet = DoSaveAll();
-                        if (nRet == -1)
-                        {
-                            strError = "因为保存操作出错，所以后续的复制操作被放弃";
-                            goto ERROR1;
-                        }
-                    }
-                    else
-                    {
-                        strError = "复制操作被放弃";
-                        goto ERROR1;
-                    }
-                }
-            }
-#endif
-
-            // 看看要另存的位置，记录是否已经存在?
-            // TODO：　需要改造为合并，或者覆盖。覆盖是先删除目标位置的记录。
-            if (dlg.RecID != "?")
-            {
-                byte[] timestamp = null;
-
-                // 检测特定位置书目记录是否已经存在
-                // parameters:
-                // return:
-                //      -1  error
-                //      0   not found
-                //      1   found
-                nRet = DetectBiblioRecord(dlg.RecPath,
-                    out timestamp,
-                    out strError);
-                if (nRet == 1)
-                {
-                    if (dlg.RecPath != strTargetRecPath)
-                    {
-#if NO
-                        // 提醒覆盖？
-                        DialogResult result = MessageBox.Show(this,
-                            "书目记录 " + dlg.RecPath + " 已经存在。\r\n\r\n要用当前窗口中的书目记录覆盖此记录么? ",
-                            "EntityForm",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2);
-                        if (result != DialogResult.Yes)
-                            return;
-#endif
-                        GetMergeStyleDialog merge_dlg = new GetMergeStyleDialog();
-                        MainForm.SetControlFont(merge_dlg, this.Font, false);
-                        merge_dlg.Operation = "复制";
-                        merge_dlg.SourceRecPath = this.BiblioRecPath;
-                        merge_dlg.TargetRecPath = dlg.RecPath;
-                        merge_dlg.MessageText = "目标书目记录 " + dlg.RecPath + " 已经存在。\r\n\r\n请指定当前窗口中的书目记录(源)和此目标记录合并的方法";
-
-                        merge_dlg.UiState = this.MainForm.AppInfo.GetString(
-        "entity_form",
-        "GetMergeStyleDialog_copy_uiState",
-        "");
-                        merge_dlg.EnableSubRecord = dlg.CopyChildRecords;
-
-                        this.MainForm.AppInfo.LinkFormState(merge_dlg, "entityform_GetMergeStyleDialog_copy_state");
-                        merge_dlg.ShowDialog(this);
-                        this.MainForm.AppInfo.UnlinkFormState(merge_dlg);
-                        this.MainForm.AppInfo.SetString(
-"entity_form",
-"GetMergeStyleDialog_copy_uiState",
-merge_dlg.UiState);
-
-                        if (merge_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                            return;
-
-                        merge_style = merge_dlg.GetMergeStyle();
-                    }
-
-                    // this.BiblioTimestamp = timestamp;   // 为了顺利覆盖
-
-                    // TODO: 预先检查操作者权限，确保删除书目记录和下级记录都能成功，否则就警告
-
-#if NO
-                    // 删除目标位置的书目记录，但保留其下属的实体等记录
-                    nRet = DeleteBiblioRecordFromDatabase(dlg.RecPath,
-                        "onlydeletebiblio",
-                        timestamp,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-#endif
-                    if ((merge_style & MergeStyle.OverwriteSubrecord) != 0)
-                    {
-                        // 删除目标记录整个，或者删除目标位置的下级记录
-                        // TODO: 测试的时候，注意不用下述调用而测试保留目标书目记录中对象的可能性
-                        nRet = DeleteBiblioRecordFromDatabase(dlg.RecPath,
-                            (merge_style & MergeStyle.ReserveSourceBiblio) != 0 ? "delete" : "onlydeletesubrecord",
-                            timestamp,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            if ((merge_style & MergeStyle.ReserveSourceBiblio) != 0)
-                                strError = "删除目标位置的书目记录 '" + dlg.RecPath + "' 时出错: " + strError;
-                            else
-                                strError = "删除目标位置的书目记录 '" + dlg.RecPath + "' 的全部子记录时出错: " + strError;
-                            goto ERROR1;
-                        }
-                    }
-                }
-            }
-
-            string strOutputBiblioRecPath = "";
-            byte[] baOutputTimestamp = null;
-            string strXml = "";
-
-            string strOldBiblioRecPath = this.BiblioRecPath;
-            string strOldMarc = this.GetMarc();    //  this.m_marcEditor.Marc;
-            bool bOldChanged = this.GetMarcChanged();   //  this.m_marcEditor.Changed;
-            bool bSucceed = false;
-
-            this.EnableControls(false);
-
-            LibraryChannel channel = this.GetChannel();
-            TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = new TimeSpan(0, 2, 0);    // 查重和复制一般都需要较长时间
-
-            try
-            {
-                // 保存原来的记录路径
-                bool bOldReadOnly = this.m_marcEditor.ReadOnly;
-                Field old_998 = null;
-
-                if (dlg.BuildLink == true)
-                {
-                    nRet = this.MainForm.CheckBuildLinkCondition(
-                        dlg.RecPath,    // 即将创建/保存的记录
-                        strOldBiblioRecPath,    // 保存前的记录
-                        false,
-                        out strError);
-                    if (nRet == -1 || nRet == 0)
-                    {
-                        // 
-                        strError = "无法为记录 '" + this.BiblioRecPath + "' 建立指向 '" + strOldBiblioRecPath + "' 的目标关系：" + strError;
-                        MessageBox.Show(this, strError);
-                    }
-                    else
-                    {
-                        // 保存当前记录的998字段
-                        old_998 = this.m_marcEditor.Record.Fields.GetOneField("998", 0);
-
-                        this.m_marcEditor.Record.Fields.SetFirstSubfield("998", "t", strOldBiblioRecPath);
-                        /*
-                        if (bOldReadOnly == false)
-                            this.MarcEditor.ReadOnly = true;
-                        */
-                    }
-                }
-                else
-                {
-                    // 保存当前记录的998字段
-                    old_998 = this.m_marcEditor.Record.Fields.GetOneField("998", 0);
-
-                    // 清除可能存在的998$t
-                    if (old_998 != null)
-                    {
-                        SubfieldCollection subfields = old_998.Subfields;
-                        Subfield old_t = subfields["t"];
-                        if (old_t != null)
-                        {
-                            old_998.Subfields = subfields.Remove(old_t);
-                            // 如果998内一个子字段也没有了，是否这个字段要删除?
-                        }
-                        else
-                            old_998 = null; // 表示(既然没有删除$t，就)不用恢复
-                    }
-                }
-
-                string strMergeStyle = "";
-                if ((merge_style & MergeStyle.ReserveSourceBiblio) != 0)
-                    strMergeStyle = "reserve_source,file_reserve_source";
-                else
-                    strMergeStyle = "reserve_target,file_reserve_target";
-
-                if ((merge_style & MergeStyle.MissingSourceSubrecord) != 0)
-                    strMergeStyle += ",missing_source_subrecord";
-                else if ((merge_style & MergeStyle.OverwriteSubrecord) != 0)
-                {
-                    // dp2library 尚未实现这个功能，不过本函数前面已经用 SetBiblioInfo() API 主动删除了目标位置下属的子记录，效果是一样的。(当然，这样实现起来原子性不是那么好)
-                    // strMergeStyle += ",overwrite_target_subrecord";
-                }
-
-                SavedInfo info = new SavedInfo();
-
-                if (dlg.CopyChildRecords == false)
-                {
-                    nRet = CopyBiblio(
-                        channel,
-        "onlycopybiblio",
-        dlg.RecPath,
-        strMergeStyle,
-        out strXml,
-        out strOutputBiblioRecPath,
-        out baOutputTimestamp,
-        out strError);
-                }
-                else
-                {
-                    nRet = CopyBiblio(
-                        channel,
-                        "copy",
-                        dlg.RecPath,
-                        strMergeStyle,
-                        out strXml,
-                        out strOutputBiblioRecPath,
-                        out baOutputTimestamp,
-                        out strError);
-                }
-
-#if NO
-                if (nRet == -1)
-                {
-                    MessageBox.Show(this, strError);
-                }
-#endif
-                if (nRet == 0)
-                {
-                    info.bBiblioSaved = true;
-                    info.SavedNames.Add("书目信息");
-                    this.BiblioChanged = false;
-                    this.BiblioRecPath = strOutputBiblioRecPath;
-                    this.BiblioTimestamp = baOutputTimestamp;
-                    bSucceed = true;
-                }
-                if (nRet == -1)
-                {
-                    info.ErrorCount++;
-                    goto ERROR1; // 书目记录若保存不成功，后继的实体记录保存就没法定位正确的书目记录路径
-                }
-
-                if (dlg.CopyChildRecords == false)
-                {
-                    // 清空4个下属记录的控件
-                    this.entityControl1.ClearItems();
-                    this.textBox_itemBarcode.Text = "";
-
-                    this.issueControl1.ClearItems();
-                    this.orderControl1.ClearItems();
-                    this.commentControl1.ClearItems();
-                    this.binaryResControl1.Clear();
-                    if (this.m_verifyViewer != null)
-                        this.m_verifyViewer.Clear();
-                }
-                else
-                {
-                    /// 
-                    LoadSubRecordsInfo load_info = new LoadSubRecordsInfo();
-
-                    if (String.IsNullOrEmpty(strOutputBiblioRecPath) == false)
-                    {
-                        // 装载下级记录，为保存下级记录的修改做准备
-                        nRet = LoadSubRecords(
-                            channel,
-                            strOutputBiblioRecPath,
-                            null,   // strXml, // 书目记录 XML
-                            "", // strSubRecords,
-                            load_info,
-                            true,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                        // TODO: load_info.ErrorCount ?
-                    }
-
-                    nRet = SaveSubRecords(channel,
-                        info,
-                        strOutputBiblioRecPath,
-                        out strError);
-                    if (nRet == -1)
-                        return;
-                }
-
-            }
-            finally
-            {
-                channel.Timeout = old_timeout;
-                this.ReturnChannel(channel);
-
-                this.EnableControls(true);
-
-                if (bSucceed == false)
-                {
-                    if (this.GetMarc() /*this.m_marcEditor.Marc*/ != strOldMarc)
-                    {
-                        // this.m_marcEditor.Marc = strOldMarc;
-                        this.SetMarc(strOldMarc);
-                    }
-                    if (this.GetMarcChanged() /*this.m_marcEditor.Changed*/ != bOldChanged)
-                    {
-                        // this.m_marcEditor.Changed = bOldChanged;
-                        this.SetMarcChanged(bOldChanged);
-                    }
-
-                    this.BiblioRecPath = strOldBiblioRecPath;
-                }
-            }
-
-#if NO
-            // TODO: 询问是否要立即装载目标记录到当前窗口，还是装入新的一个种册窗，还是不装入？
-            {
-                DialogResult result = MessageBox.Show(this,
-        "复制操作已经成功。\r\n\r\n请问是否立即将目标记录 '" + strOutputBiblioRecPath + "' 装入一个新的种册窗以便进行观察? \r\n\r\n是(Yes): 装入一个新的种册窗；\r\n否(No): 装入当前窗口；\r\n取消(Cancel): 不装入目标记录到任何窗口",
-        "EntityForm",
-        MessageBoxButtons.YesNoCancel,
-        MessageBoxIcon.Question,
-        MessageBoxDefaultButton.Button1);
-                if (result == System.Windows.Forms.DialogResult.Yes)
-                {
-                    EntityForm form = new EntityForm();
-                    form.MdiParent = this.MainForm;
-                    form.MainForm = this.MainForm;
-                    form.Show();
-                    Debug.Assert(form != null, "");
-
-                    form.LoadRecordOld(strOutputBiblioRecPath, "", true);
-                    return;
-                }
-                if (result == System.Windows.Forms.DialogResult.Cancel)
-                    return;
-            }
-
-            // 将目标记录装入当前窗口
-            this.LoadRecordOld(strOutputBiblioRecPath, "", false);
-#endif
+            nRet = MoveTo("copy",
+                dlg.RecPath,
+                info,
+                MergeStyle.None,    // 用户自己亲自选择对话框里面的参数
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -10945,7 +10603,8 @@ merge_dlg.UiState);
 
                 // 获得源记录所在的 EntityForm
                 EntityForm source = FindEntityFormByRecPath(data.RecPath);
-                int nRet = source.MoveTo(this.BiblioRecPath, out strError);
+                int nRet = source.MoveTo(this.BiblioRecPath,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }
@@ -12517,30 +12176,57 @@ value);
         public int MoveTo(string strTargetRecPathParam,
     out string strError)
         {
-            return MoveTo(strTargetRecPathParam,
-    MergeStyle.None,
-    out strError);
+            return MoveTo(
+                "move",
+                strTargetRecPathParam,
+                null,
+                MergeStyle.None,
+                out strError);
+        }
+
+        // 拷贝书目记录时的参数
+        public class CopyParam
+        {
+            public bool CopyChildRecords { get; set; }
+            public bool BuildLink { get; set; }
+            public bool EnableSubRecord { get; set; }
         }
 
         // 移动当前书目记录到指定的位置
         // parameters:
+        //      strAction           move 或者 copy
+        //      copy_param          只有当 strAction 为 "copy" 的时候此参数才有效
         //      auto_mergeStyle    如果函数中打开合并风格对话框，对话框初始的状态。如果为 MergeStyle.None，表示不使用这个参数；如果不是 MergeStyle.None 则表示对话框会自动设置值并关闭、继续
         // return:
         //      -1  出错
         //      0   放弃
         //      1   成功
-        public int MoveTo(string strTargetRecPathParam,
+        public int MoveTo(
+            string strAction,
+            string strTargetRecPathParam,
+            CopyParam copy_param,
             MergeStyle auto_mergeStyle,
             out string strError)
         {
             strError = "";
             int nRet = 0;
 
+#if NO
             if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.95") < 0)   // "2.39"
             {
                 strError = "本功能需要配合 dp2library 2.95 或以上版本才能使用";
                 goto ERROR1;
             }
+#endif
+            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.106") < 0)   // "2.39"
+            {
+                strError = "本功能需要配合 dp2library 2.106 或以上版本才能使用";
+                goto ERROR1;
+            }
+
+            string strActionName = "移动";
+            if (strAction == "copy")
+                strActionName = "复制";
 
             string strTargetRecPath = this.m_marcEditor.Record.Fields.GetFirstSubfield("998", "t");
             if (strTargetRecPath != strTargetRecPathParam)
@@ -12572,7 +12258,7 @@ value);
             // 源记录就是 ？
             if (Global.IsAppendRecPath(this.BiblioRecPath) == true)
             {
-                strError = "源记录尚未建立，无法执行移动操作";
+                strError = "源记录尚未建立，无法执行" + strActionName + "操作";
                 goto ERROR1;
             }
 
@@ -12621,6 +12307,15 @@ value);
             if (string.IsNullOrEmpty(strRecID) == true)
                 strRecID = "?";
 
+            if (strRecID == "?")
+            {
+                if (strAction == "copy" && copy_param.CopyChildRecords == false)
+                {
+                    merge_style -= merge_style & MergeStyle.SubRecordMask;
+                    merge_style |= MergeStyle.MissingSourceSubrecord;
+                }
+            }
+
             // 看看要另存的位置，记录是否已经存在?
             if (strRecID != "?")
             {
@@ -12641,7 +12336,7 @@ value);
                     {
                         GetMergeStyleDialog merge_dlg = new GetMergeStyleDialog();
                         MainForm.SetControlFont(merge_dlg, this.Font, false);
-                        merge_dlg.Operation = "移动";
+                        merge_dlg.Operation = strActionName;    // "移动";
                         merge_dlg.SourceRecPath = this.BiblioRecPath;
                         merge_dlg.TargetRecPath = strTargetRecPathParam;
                         merge_dlg.MessageText = "目标书目记录 " + strTargetRecPathParam + " 已经存在。\r\n\r\n请指定当前窗口中的书目记录(源)和此目标记录合并的方法";
@@ -12649,14 +12344,26 @@ value);
                         merge_dlg.AutoMergeStyle = auto_mergeStyle;
                         merge_dlg.UiState = this.MainForm.AppInfo.GetString(
         "entity_form",
-        "GetMergeStyleDialog_uiState",
+        "GetMergeStyleDialog_" + strAction + "_uiState",
         "");
-                        this.MainForm.AppInfo.LinkFormState(merge_dlg, "entityform_GetMergeStyleDialog_state");
+                        if (strAction == "copy")
+                        {
+                            if (copy_param.CopyChildRecords == false)
+                            {
+                                // 强制修改为“下级记录保留目标”
+                                MergeStyle old_style = merge_dlg.GetMergeStyle();
+                                old_style -= old_style & MergeStyle.SubRecordMask;
+                                merge_dlg.SetMergeStyle(old_style & MergeStyle.MissingSourceSubrecord);
+                            }
+                            merge_dlg.EnableSubRecord = copy_param.EnableSubRecord;
+                        }
+
+                        this.MainForm.AppInfo.LinkFormState(merge_dlg, "entityform_GetMergeStyleDialog_" + strAction + "_state");
                         merge_dlg.ShowDialog(this);
                         this.MainForm.AppInfo.UnlinkFormState(merge_dlg);
                         this.MainForm.AppInfo.SetString(
 "entity_form",
-"GetMergeStyleDialog_uiState",
+        "GetMergeStyleDialog_" + strAction + "_uiState",
 merge_dlg.UiState);
 
                         if (merge_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
@@ -12665,6 +12372,16 @@ merge_dlg.UiState);
                         merge_style = merge_dlg.GetMergeStyle();
                     }
 
+                    // 检查参数
+                    // 删除记录前先检查
+                    if (copy_param != null && copy_param.CopyChildRecords == false)
+                    {
+                        if ((merge_style & MergeStyle.ReserveSourceBiblio) != 0)
+                        {
+                            strError = "copy_param.CopyChildRecords == false 和 merge_style 包含 MergeStyle.ReserveSourceBiblio 之间矛盾了";
+                            goto ERROR1;
+                        }
+                    }
                     // this.BiblioTimestamp = timestamp;   // 为了顺利覆盖
 
                     // TODO: 预先检查操作者权限，确保删除书目记录和下级记录都能成功，否则就警告
@@ -12686,6 +12403,16 @@ merge_dlg.UiState);
                             goto ERROR1;
                         }
                     }
+                }
+            }
+
+            // 检查参数
+            if (copy_param != null && copy_param.CopyChildRecords == false)
+            {
+                if ((merge_style & MergeStyle.ReserveSourceBiblio) != 0)
+                {
+                    strError = "copy_param.CopyChildRecords == false 和 merge_style 包含 MergeStyle.ReserveSourceBiblio 之间矛盾了";
+                    goto ERROR1;
                 }
             }
 
@@ -12713,24 +12440,72 @@ merge_dlg.UiState);
                 string strDlgTargetDbName = Global.GetDbName(strTargetRecPathParam);
                 string str998TargetDbName = Global.GetDbName(strTargetRecPath);
 
-                // 如果移动目标和strTargetRecPath同数据库，则要去掉记录中可能存在的998$t
-                if (strDlgTargetDbName == str998TargetDbName)
+                // TODO: copy 的情况下，copy_param.BuildLink == true 要保存 998 字段
+                if (strAction == "copy")
                 {
-                    // 保存当前记录的998字段
-                    old_998 = this.m_marcEditor.Record.Fields.GetOneField("998", 0);
-
-                    // 清除可能存在的998$t
-                    if (old_998 != null)
+                    if (copy_param.BuildLink == true)
                     {
-                        SubfieldCollection subfields = old_998.Subfields;
-                        Subfield old_t = subfields["t"];
-                        if (old_t != null)
+                        nRet = this.MainForm.CheckBuildLinkCondition(
+                            strTargetRecPathParam,    // 即将创建/保存的记录
+                            strOldBiblioRecPath,    // 保存前的记录
+                            false,
+                            out strError);
+                        if (nRet == -1 || nRet == 0)
                         {
-                            old_998.Subfields = subfields.Remove(old_t);
-                            // 如果998内一个子字段也没有了，是否这个字段要删除?
+                            // 
+                            strError = "无法为记录 '" + strTargetRecPathParam + "' 建立指向 '" + strOldBiblioRecPath + "' 的目标关系：" + strError;
+                            MessageBox.Show(this, strError);
                         }
                         else
-                            old_998 = null; // 表示(既然没有删除$t，就)不用恢复
+                        {
+                            // 保存当前记录的998字段
+                            old_998 = this.m_marcEditor.Record.Fields.GetOneField("998", 0);
+                            this.m_marcEditor.Record.Fields.SetFirstSubfield("998", "t", strOldBiblioRecPath);
+                        }
+                    }
+                    else
+                    {
+                        // 保存当前记录的998字段
+                        old_998 = this.m_marcEditor.Record.Fields.GetOneField("998", 0);
+
+                        // 清除可能存在的998$t
+                        if (old_998 != null)
+                        {
+                            SubfieldCollection subfields = old_998.Subfields;
+                            Subfield old_t = subfields["t"];
+                            if (old_t != null)
+                            {
+                                old_998.Subfields = subfields.Remove(old_t);
+                                // 如果998内一个子字段也没有了，是否这个字段要删除?
+                            }
+                            else
+                                old_998 = null; // 表示(既然没有删除$t，就)不用恢复
+                        }
+                    }
+
+                }
+
+                if (strAction == "move")
+                {
+                    // 如果移动目标和strTargetRecPath同数据库，则要去掉记录中可能存在的998$t
+                    if (strDlgTargetDbName == str998TargetDbName)
+                    {
+                        // 保存当前记录的998字段
+                        old_998 = this.m_marcEditor.Record.Fields.GetOneField("998", 0);
+
+                        // 清除可能存在的998$t
+                        if (old_998 != null)
+                        {
+                            SubfieldCollection subfields = old_998.Subfields;
+                            Subfield old_t = subfields["t"];
+                            if (old_t != null)
+                            {
+                                old_998.Subfields = subfields.Remove(old_t);
+                                // 如果998内一个子字段也没有了，是否这个字段要删除?
+                            }
+                            else
+                                old_998 = null; // 表示(既然没有删除$t，就)不用恢复
+                        }
                     }
                 }
 
@@ -12751,15 +12526,46 @@ merge_dlg.UiState);
 
                 SavedInfo info = new SavedInfo();
 
-                nRet = CopyBiblio(
-                    channel,
-                    "move",
-                    strTargetRecPathParam,
-                    strMergeStyle,
-                    out strXml,
-                    out strOutputBiblioRecPath,
-                    out baOutputTimestamp,
-                    out strError);
+                if (strAction == "copy")
+                {
+                    if (copy_param.CopyChildRecords == false)
+                    {
+                        nRet = CopyBiblio(
+                            channel,
+            "onlycopybiblio",
+            strTargetRecPathParam,
+            strMergeStyle,
+            out strXml,
+            out strOutputBiblioRecPath,
+            out baOutputTimestamp,
+            out strError);
+                    }
+                    else
+                    {
+                        nRet = CopyBiblio(
+                            channel,
+                            "copy",
+                            strTargetRecPathParam,
+                            strMergeStyle,
+                            out strXml,
+                            out strOutputBiblioRecPath,
+                            out baOutputTimestamp,
+                            out strError);
+                    }
+                }
+
+                if (strAction == "move")
+                {
+                    nRet = CopyBiblio(
+                        channel,
+                        "move",
+                        strTargetRecPathParam,
+                        strMergeStyle,
+                        out strXml,
+                        out strOutputBiblioRecPath,
+                        out baOutputTimestamp,
+                        out strError);
+                }
 #if NO
                 if (nRet == -1)
                     MessageBox.Show(this, strError);
@@ -12781,9 +12587,6 @@ merge_dlg.UiState);
                             out strError);
                         if (nRet0 == -1)
                             goto ERROR1;
-
-
-
                     }
 
                     this.BiblioChanged = false;
@@ -12795,6 +12598,26 @@ merge_dlg.UiState);
                     goto ERROR1; // 书目记录若保存不成功，后继的实体记录保存就没法定位正确的书目记录路径
                 }
 
+                if (strAction == "copy"
+                    || (merge_style & MergeStyle.MissingSourceSubrecord) != 0)
+                {
+                    // 源书目的下级记录丢失了，需要清除以后重装下级记录
+                    // TODO: 这种情况，在移动操作前，要考虑警告、提示用户先保存对源记录的修改
+
+                    LoadSubRecordsInfo load_info = new LoadSubRecordsInfo();
+                    nRet = LoadSubRecords(
+    channel,
+    strOutputBiblioRecPath,
+    strXml, // null,   // strXml, // 书目记录 XML
+    "", // strSubRecords,
+    load_info,
+    false,
+    out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+                else if ((merge_style & MergeStyle.OverwriteSubrecord) != 0
+                    || (merge_style & MergeStyle.CombineSubrecord) != 0)
                 {
                     /// 
                     LoadSubRecordsInfo load_info = new LoadSubRecordsInfo();
@@ -12858,7 +12681,6 @@ merge_dlg.UiState);
             // MessageBox.Show(this, strError);
             return -1;
         }
-
 
         private void toolStripSplitButton_searchDup_ButtonClick(object sender, EventArgs e)
         {

@@ -16,6 +16,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
+using System.Diagnostics;
 
 namespace dp2Circulation
 {
@@ -700,12 +701,44 @@ UiTest3(strBiblioDbName)
                 ReloadDatabaseCfg();
 
                 // *** 界面测试
+#if NO
+                this.Invoke((Action)(() =>
+UiTest_copyBiblioRecord_1(strBiblioDbName, "reserve_source,child_reserve_source,copy_copychildrecords")
+));
+
+                this.Invoke((Action)(() =>
+UiTest_copyBiblioRecord_1(strBiblioDbName, "reserve_target,child_reserve_target,copy_copychildrecords")
+));
+#endif
+                {
+                    List<string> styles = Build_copyBiblioRecord_styleCombination();
+                    styles.Sort();
+                    foreach (string style in styles)
+                    {
+                        this.Invoke((Action)(() =>
+    UiTest_copyBiblioRecord_1(strBiblioDbName, strStyle)
+    ));
+                    }
+                }
+
+
+
+#if NO
+                this.Invoke((Action)(() =>
+UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_source,child_reserve_source")
+));
+                this.Invoke((Action)(() =>
+UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target,child_reserve_target")
+));
+#endif
+
+#if NO
                 // 追加方式移动
                 this.Invoke((Action)(() =>
 UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_source,create_objects,append_target")
 ));
                 this.Invoke((Action)(() =>
-UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_source,create_objects,append_targe,change_biblio_before")
+UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_source,create_objects,append_target,change_biblio_before")
 ));
 
                 this.Invoke((Action)(() =>
@@ -737,6 +770,18 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target,change_biblio_before"
                 this.Invoke((Action)(() =>
 UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
 ));
+#endif
+
+                {
+                    List<string> styles = Build_moveBiblioRecord_styleCombination();
+                    styles.Sort();
+                    foreach (string style in styles)
+                    {
+                        this.Invoke((Action)(() =>
+    UiTest_moveBiblioRecord_1(strBiblioDbName, strStyle)
+    ));
+                    }
+                }
 
                 // 删除测试用的书目库、排架体系、馆藏地定义
                 Progress.SetMessage("正在删除测试用书目库 ...");
@@ -789,6 +834,143 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             this.ShowMessage(strError, "red", true);
         }
 
+        static string[] copy_faces = new string[] { 
+            "reserve_source",
+            "reserve_target",
+            "create_objects",
+            "append_target",
+            "change_biblio_before",
+        "child_reserve_source",
+        "child_reserve_target"};
+
+        // 构造出用于测试 复制书目记录 功能的全部可用 style 字符串
+        static List<string> Build_copyBiblioRecord_styleCombination()
+        {
+            List<string> styles = new List<string>();
+            int length = copy_faces.Length;
+#if NO
+            IEnumerable<IEnumerable<int>> result =
+    GetPermutations(Enumerable.Range(0, length - 1), length - 1);
+#endif
+            List<int> base_array = new List<int>();
+            for (int i = 0; i < length; i++)
+            {
+                base_array.Add(i);
+            }
+            List<List<int>> result = Permutation.GetPermuation(base_array);
+
+            foreach (IEnumerable<int> indices in result)
+            {
+                List<string> list = new List<string>();
+                foreach (int i in indices)
+                {
+                    list.Add(move_faces[i]);
+                }
+
+                styles.Add(StringUtil.MakePathList(list));
+            }
+
+            List<string> styles1 = new List<string>();
+            // 去掉一些会冲突的组合
+            foreach (string style in styles)
+            {
+                // 去掉 reserve_target reserve_source 一个都没有的组合
+                if (StringUtil.IsInList("reserve_source", style) == false
+    && StringUtil.IsInList("reserve_target", style) == false)
+                    continue;
+
+                // 去掉 reserve_target reserve_source 两个同时具有的组合
+                if (StringUtil.IsInList("reserve_source", style) == true
+    && StringUtil.IsInList("reserve_target", style) == true)
+                    continue;
+
+                // 去掉会冲突的组合
+                if (StringUtil.IsInList("reserve_target", style) == true
+                    && StringUtil.IsInList("append_target", style) == true)
+                    continue;
+
+                // 确保
+                string strStyle = style;
+                if (StringUtil.IsInList("child_reserve_source", strStyle) == true)
+                    StringUtil.SetInList(ref strStyle, "copy_copychildrecords", true);
+
+                styles1.Add(strStyle);
+            }
+
+            return styles1;
+        }
+
+        static string[] move_faces = new string[] { 
+            "reserve_source",
+            "reserve_target",
+            "create_objects",
+            "append_target",
+            "change_biblio_before",
+        "child_reserve_source",
+        "child_reserve_target"};
+
+        static IEnumerable<IEnumerable<T>>
+    GetPermutations<T>(IEnumerable<T> list, int length)
+        {
+            if (length == 1) return list.Select(t => new T[] { t });
+
+            return GetPermutations(list, length - 1)
+                .SelectMany(t => list.Where(e => !t.Contains(e)),
+                    (t1, t2) => t1.Concat(new T[] { t2 }));
+        }
+
+        // 构造出用于测试 移动书目记录 功能的全部可用 style 字符串
+        static List<string> Build_moveBiblioRecord_styleCombination()
+        {
+            List<string> styles = new List<string>();
+            int length = move_faces.Length;
+#if NO
+            IEnumerable<IEnumerable<int>> result =
+    GetPermutations(Enumerable.Range(0, length - 1), length - 1);
+#endif
+            List<int> base_array = new List<int>();
+            for (int i = 0; i < length; i++)
+            {
+                base_array.Add(i);
+            }
+            List<List<int>> result = Permutation.GetPermuation(base_array);
+
+            foreach (IEnumerable<int> indices in result)
+            {
+                List<string> list = new List<string>();
+                foreach (int i in indices)
+                {
+                    list.Add(move_faces[i]);
+                }
+
+                styles.Add(StringUtil.MakePathList(list));
+            }
+
+            List<string> styles1 = new List<string>();
+            // 去掉一些会冲突的组合
+            foreach (string style in styles)
+            {
+                // 去掉 reserve_target reserve_source 一个都没有的组合
+                if (StringUtil.IsInList("reserve_source", style) == false
+    && StringUtil.IsInList("reserve_target", style) == false)
+                    continue;
+
+                // 去掉 reserve_target reserve_source 两个同时具有的组合
+                if (StringUtil.IsInList("reserve_source", style) == true
+    && StringUtil.IsInList("reserve_target", style) == true)
+                    continue;
+
+                // 去掉会冲突的组合
+                if (StringUtil.IsInList("reserve_target", style) == true
+                    && StringUtil.IsInList("append_target", style) == true)
+                    continue;
+
+                styles1.Add(style);
+            }
+
+            return styles1;
+        }
+
         // 创建两条书目记录，然后移动一条去覆盖另外一条
         // parameters:
         //      strStyle    reserve_source reserve_target 分别表示保留源和保留目标书目记录(指移动之后的目标记录)
@@ -796,6 +978,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
         //                  create_objects 表示要为参与测试的书目记录创建对象文件，这样移动的时候就是带着对象移动了
         //                  append_target 表示移动源书目记录到书目库尾部，以追加的方式。这时也没有必要先创建测试用的目标书目记录了
         //                          注意，append_target 只能和 reserve_source 配合使用，不允许和 reserve_target 配合使用。因为移动前，目标记录是不存在的，也就无所谓保留目标记录了
+        //                  child_reserve_source child_reserve_target 表示下属的册记录等要如何保留。如果这两个值同时都缺，默认为 "child_reserve_source,child_reserve_target" 效果，即合并下级记录
         void UiTest_moveBiblioRecord_1(string strBiblioDbName, string strStyle)
         {
             string strError = "";
@@ -809,7 +992,16 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 && StringUtil.IsInList("reserve_target", strStyle) == false)
                 StringUtil.SetInList(ref strStyle, "reserve_source", true);
 
-                // 检查参数
+            // 如果都缺，则默认 两个组合的情况
+            if (StringUtil.IsInList("child_reserve_source", strStyle) == false
+                && StringUtil.IsInList("child_reserve_target", strStyle) == false)
+            {
+                StringUtil.SetInList(ref strStyle, "child_reserve_source", true);
+                StringUtil.SetInList(ref strStyle, "child_reserve_target", true);
+            }
+
+
+            // 检查参数
             if (StringUtil.IsInList("append_target", strStyle)
                 && StringUtil.IsInList("reserve_target", strStyle))
                 throw new ArgumentException("strStyle 中 append_target 只能和 reserve_source 配套使用，不允许和 reserve_target 配套使用");
@@ -855,7 +1047,29 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     autoMergeStyle = MergeStyle.ReserveTargetBiblio | MergeStyle.CombineSubrecord;
                 }
 
-                int nRet = entity_form.MoveTo(info2.BiblioRecPath, 
+                if (StringUtil.IsInList("child_reserve_source", strStyle)
+                    && StringUtil.IsInList("child_reserve_target", strStyle))
+                {
+                    autoMergeStyle -= (autoMergeStyle & MergeStyle.SubRecordMask);
+                    autoMergeStyle |= MergeStyle.CombineSubrecord;
+                }
+                else if (StringUtil.IsInList("child_reserve_source", strStyle))
+                {
+                    autoMergeStyle -= (autoMergeStyle & MergeStyle.SubRecordMask);
+                    autoMergeStyle |= MergeStyle.OverwriteSubrecord;
+                }
+                else if (StringUtil.IsInList("child_reserve_target", strStyle))
+                {
+                    autoMergeStyle -= (autoMergeStyle & MergeStyle.SubRecordMask);
+                    autoMergeStyle |= MergeStyle.MissingSourceSubrecord;
+                }
+                else
+                    throw new ArgumentException("child_xxx 使用不正确");
+
+                int nRet = entity_form.MoveTo(
+                    "move",
+                    info2.BiblioRecPath,
+                    null,
                     autoMergeStyle,
                     out strError);
                 if (nRet == -1)
@@ -886,10 +1100,12 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
 
                     // 检查窗口中的册记录是否符合要求
                     // 主要检查 refid 列表
-                    strError = VerifyItems(entity_form, info1.ItemRefIDs);
+                    strError = VerifyItems(entity_form, info1.ItemRefIDs,
+                        StringUtil.IsInList("child_reserve_source", strStyle));
                     if (string.IsNullOrEmpty(strError) == false)
                         throw new Exception(strError);
-                    strError = VerifyItems(entity_form, info2.ItemRefIDs);
+                    strError = VerifyItems(entity_form, info2.ItemRefIDs,
+                        StringUtil.IsInList("child_reserve_target", strStyle));
                     if (string.IsNullOrEmpty(strError) == false)
                         throw new Exception(strError);
 
@@ -949,10 +1165,12 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
 
                     // 检查窗口中的册记录是否符合要求
                     // 主要检查 refid 列表
-                    strError = VerifyItems(entity_form, info1.ItemRefIDs);
+                    strError = VerifyItems(entity_form, info1.ItemRefIDs,
+                        StringUtil.IsInList("child_reserve_source", strStyle));
                     if (string.IsNullOrEmpty(strError) == false)
                         throw new Exception(strError);
-                    strError = VerifyItems(entity_form, info2.ItemRefIDs);
+                    strError = VerifyItems(entity_form, info2.ItemRefIDs,
+                        StringUtil.IsInList("child_reserve_target", strStyle));
                     if (string.IsNullOrEmpty(strError) == false)
                         throw new Exception(strError);
 
@@ -987,6 +1205,258 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             // 检查源书目记录，应该已经不存在
             VerifyBiblioRecordExisting(info1.BiblioRecPath);
         }
+
+
+        // 创建两条书目记录，然后复制一条去覆盖另外一条
+        // parameters:
+        //      strStyle    reserve_source reserve_target 分别表示保留源和保留目标书目记录(指移动之后的目标记录)
+        //                  change_biblio_before 表示在移动操作前故意修改一下 MARC 编辑器中的书目记录的题名字段，而且不做保存
+        //                  create_objects 表示要为参与测试的书目记录创建对象文件，这样移动的时候就是带着对象移动了
+        //                  append_target 表示移动源书目记录到书目库尾部，以追加的方式。这时也没有必要先创建测试用的目标书目记录了
+        //                          注意，append_target 只能和 reserve_source 配合使用，不允许和 reserve_target 配合使用。因为移动前，目标记录是不存在的，也就无所谓保留目标记录了
+        //                  child_reserve_source child_reserve_target 表示下属的册记录等要如何保留。如果这两个值同时都缺，默认为 "child_reserve_source,child_reserve_target" 效果，即合并下级记录
+        //                  copy_copychildrecords 是否复制下级记录?
+        //                  copy_buildlink          是否创建新记录到旧记录的 link 字段?
+        //                  copy_enablesubrecord    是否允许下级记录
+        void UiTest_copyBiblioRecord_1(string strBiblioDbName, string strStyle)
+        {
+            string strError = "";
+
+            if (StringUtil.IsInList("reserve_source", strStyle) == true
+    && StringUtil.IsInList("reserve_target", strStyle) == true)
+                throw new ArgumentException("strStyle 中 reserve_source 和 reserve_target 不应该同时具备。只能使用其中一个");
+
+            // 如果都缺，则默认 reserve_source
+            if (StringUtil.IsInList("reserve_source", strStyle) == false
+                && StringUtil.IsInList("reserve_target", strStyle) == false)
+                StringUtil.SetInList(ref strStyle, "reserve_source", true);
+
+            // 如果都缺，则默认 两个组合的情况
+            if (StringUtil.IsInList("child_reserve_source", strStyle) == false
+                && StringUtil.IsInList("child_reserve_target", strStyle) == false)
+            {
+                StringUtil.SetInList(ref strStyle, "child_reserve_source", true);
+                StringUtil.SetInList(ref strStyle, "copy_copychildrecords", true);
+                StringUtil.SetInList(ref strStyle, "child_reserve_target", true);
+            }
+
+            if (StringUtil.IsInList("child_reserve_source", strStyle) == true
+&& StringUtil.IsInList("copy_copychildrecords", strStyle) == false)
+                throw new ArgumentException("strStyle 中 child_reserve_source 具备时，也应该具备 copy_copychildrecords");
+
+            // 检查参数
+            if (StringUtil.IsInList("append_target", strStyle)
+                && StringUtil.IsInList("reserve_target", strStyle))
+                throw new ArgumentException("strStyle 中 append_target 只能和 reserve_source 配套使用，不允许和 reserve_target 配套使用");
+
+            BiblioCreationInfo info1 = CreateBiblioRecord(strBiblioDbName,
+                "源记录",
+                strStyle);
+            BiblioCreationInfo info2 = null;
+            if (StringUtil.IsInList("append_target", strStyle))
+            {
+                info2 = new BiblioCreationInfo();
+                info2.BiblioRecPath = strBiblioDbName + "/?";
+            }
+            else
+            {
+                info2 = CreateBiblioRecord(strBiblioDbName,
+         "目标记录",
+         strStyle);
+            }
+
+            EntityForm.CopyParam copy_param = new EntityForm.CopyParam();
+            copy_param.CopyChildRecords = StringUtil.IsInList("copy_copychildrecords",strStyle);
+            copy_param.BuildLink = StringUtil.IsInList("copy_buildlink",strStyle);
+            copy_param.EnableSubRecord = StringUtil.IsInList("copy_enablesubrecord",strStyle);
+
+
+            using (EntityForm entity_form = new EntityForm())
+            {
+                entity_form.MainForm = Program.MainForm;
+                entity_form.MdiParent = Program.MainForm;
+                entity_form.Show();
+
+                entity_form.SafeLoadRecord(info1.BiblioRecPath, "");
+
+                if (StringUtil.IsInList("change_biblio_before", strStyle))
+                {
+                    ChangeBiblioTitle(entity_form, "源记录_changed");
+                }
+
+                MergeStyle autoMergeStyle = MergeStyle.None;
+                if (StringUtil.IsInList("reserve_source", strStyle))
+                {
+                    //MessageBox.Show(this, "请注意在后面对话框中选择 采用源 书目记录");
+                    autoMergeStyle = MergeStyle.ReserveSourceBiblio | MergeStyle.CombineSubrecord;
+                }
+                if (StringUtil.IsInList("reserve_target", strStyle))
+                {
+                    //MessageBox.Show(this, "请注意在后面对话框中选择 采用目标 书目记录");
+                    autoMergeStyle = MergeStyle.ReserveTargetBiblio | MergeStyle.CombineSubrecord;
+                }
+
+                // 目前 child_xxx 这几个值主要是控制 MoveTo() 函数的 autoMergeStyle 之用。以达到自动测试的目的。
+                // 而在种册窗的真实用户操作界面中，是靠用户通过鼠标选择对话框上的合并方式来实现功能的，和这里的原理不同，特此说明
+                if (StringUtil.IsInList("child_reserve_source", strStyle)
+                    && StringUtil.IsInList("child_reserve_target", strStyle))
+                {
+                    autoMergeStyle -= (autoMergeStyle & MergeStyle.SubRecordMask);
+                    autoMergeStyle |= MergeStyle.CombineSubrecord;
+                }
+                else if (StringUtil.IsInList("child_reserve_source", strStyle))
+                {
+                    autoMergeStyle -= (autoMergeStyle & MergeStyle.SubRecordMask);
+                    autoMergeStyle |= MergeStyle.OverwriteSubrecord;
+                }
+                else if (StringUtil.IsInList("child_reserve_target", strStyle))
+                {
+                    autoMergeStyle -= (autoMergeStyle & MergeStyle.SubRecordMask);
+                    autoMergeStyle |= MergeStyle.MissingSourceSubrecord;
+                }
+                else
+                    throw new ArgumentException("child_xxx 使用不正确");
+
+                int nRet = entity_form.MoveTo(
+                    "copy",
+                    info2.BiblioRecPath,
+                    copy_param,
+                    autoMergeStyle,
+                    out strError);
+                if (nRet == -1)
+                    throw new Exception(strError);
+
+                //
+                if (StringUtil.IsInList("append_target", strStyle))
+                {
+                    // 移动完成后才知道目标记录的路径
+                    info2.BiblioRecPath = entity_form.BiblioRecPath;
+                }
+
+                {
+                    // 检查窗口中的书目记录是否符合要求
+                    if (StringUtil.IsInList("reserve_source", strStyle))
+                    {
+                        strError = VerifyBiblioTitle(entity_form,
+                            StringUtil.IsInList("change_biblio_before", strStyle) ? "源记录_changed" : "源记录");
+                        if (string.IsNullOrEmpty(strError) == false)
+                            throw new Exception(strError);
+                    }
+                    if (StringUtil.IsInList("reserve_target", strStyle))
+                    {
+                        strError = VerifyBiblioTitle(entity_form, "目标记录");
+                        if (string.IsNullOrEmpty(strError) == false)
+                            throw new Exception(strError);
+                    }
+
+                    // 检查窗口中的册记录是否符合要求
+                    // 主要检查 refid 列表
+                    strError = VerifyItems_useOldRefID(entity_form, info1.ItemRefIDs,
+                        StringUtil.IsInList("child_reserve_source", strStyle));
+                    if (string.IsNullOrEmpty(strError) == false)
+                        throw new Exception(strError);
+                    strError = VerifyItems(entity_form, info2.ItemRefIDs,
+                        StringUtil.IsInList("child_reserve_target", strStyle));
+                    if (string.IsNullOrEmpty(strError) == false)
+                        throw new Exception(strError);
+
+                    // 检查窗口中的对象记录是否符合要求
+                    if (StringUtil.IsInList("create_objects", strStyle))
+                    {
+                        if (StringUtil.IsInList("reserve_source", strStyle))
+                        {
+                            strError = VerifyObjects(entity_form, info1.Objects, true);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+
+                            strError = VerifyObjects(entity_form, info2.Objects, false);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+                        }
+                        if (StringUtil.IsInList("reserve_target", strStyle))
+                        {
+                            strError = VerifyObjects(entity_form, info1.Objects, false);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+
+                            strError = VerifyObjects(entity_form, info2.Objects, true);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+                        }
+                    }
+
+                }
+
+            }
+
+            // 重新打开种册窗装载目标记录，再次检测一次。因为有时候第一次在窗口没有关闭的时候看起来对了，但重新打开又不对了
+            using (EntityForm entity_form = new EntityForm())
+            {
+                entity_form.MainForm = Program.MainForm;
+                entity_form.MdiParent = Program.MainForm;
+                entity_form.Show();
+
+                entity_form.SafeLoadRecord(info2.BiblioRecPath, "");
+
+                {
+                    // 检查窗口中的书目记录是否符合要求
+                    if (StringUtil.IsInList("reserve_source", strStyle))
+                    {
+                        strError = VerifyBiblioTitle(entity_form,
+                            StringUtil.IsInList("change_biblio_before", strStyle) ? "源记录_changed" : "源记录");
+                        if (string.IsNullOrEmpty(strError) == false)
+                            throw new Exception(strError);
+                    }
+                    if (StringUtil.IsInList("reserve_target", strStyle))
+                    {
+                        strError = VerifyBiblioTitle(entity_form, "目标记录");
+                        if (string.IsNullOrEmpty(strError) == false)
+                            throw new Exception(strError);
+                    }
+
+                    // 检查窗口中的册记录是否符合要求
+                    // 主要检查 refid 列表
+                    strError = VerifyItems_useOldRefID(entity_form, info1.ItemRefIDs,
+                        StringUtil.IsInList("child_reserve_source", strStyle));
+                    if (string.IsNullOrEmpty(strError) == false)
+                        throw new Exception(strError);
+                    strError = VerifyItems(entity_form, info2.ItemRefIDs,
+                        StringUtil.IsInList("child_reserve_target", strStyle));
+                    if (string.IsNullOrEmpty(strError) == false)
+                        throw new Exception(strError);
+
+                    // 检查窗口中的对象记录是否符合要求
+                    if (StringUtil.IsInList("create_objects", strStyle))
+                    {
+                        if (StringUtil.IsInList("reserve_source", strStyle))
+                        {
+                            strError = VerifyObjects(entity_form, info1.Objects, true);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+
+                            strError = VerifyObjects(entity_form, info2.Objects, false);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+                        }
+                        if (StringUtil.IsInList("reserve_target", strStyle))
+                        {
+                            strError = VerifyObjects(entity_form, info1.Objects, false);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+
+                            strError = VerifyObjects(entity_form, info2.Objects, true);
+                            if (string.IsNullOrEmpty(strError) == false)
+                                throw new Exception(strError);
+                        }
+                    }
+                }
+
+            }
+
+            // 检查源书目记录，应该已经不存在
+            VerifyBiblioRecordExisting(info1.BiblioRecPath);
+        }
+
 
         string VerifyBiblioRecordExisting(string strBiblioRecPath)
         {
@@ -1126,15 +1596,57 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
         }
 
         // 检查 refids 中的参考 ID 是否都存在
-        static string VerifyItems(EntityForm entity_form, List<string> refids)
+        // parameters:
+        //      bExist  验证方向。如果 == true，表示要验证这些册存在；== false，表示要验证这些册不存在
+        static string VerifyItems_useOldRefID(EntityForm entity_form,
+            List<string> refids,
+            bool bExist)
+        {
+            if (refids == null)
+                return null;
+            foreach (string refid in refids)
+            {
+                BookItemBase item = entity_form.EntityControl.Items.GetItemByOldRefID(refid);
+                // TODO: 如果 item 找到，要进一步验证其 oldRefID 成员是否符合查找参数
+                if (bExist == true)
+                {
+                    if (item == null)
+                        return "(oldRefID)参考 ID 为 '" + refid + "' 的册记录事项在种册窗的“册”属性页中没有找到";
+                }
+                else
+                {
+                    if (item != null)
+                        return "(oldRefID)参考 ID 为 '" + refid + "' 的册记录事项在种册窗的“册”属性页中不应该存在";
+                }
+            }
+
+            return null;
+        }
+
+
+        // 检查 refids 中的参考 ID 是否都存在
+        // parameters:
+        //      bExist  验证方向。如果 == true，表示要验证这些册存在；== false，表示要验证这些册不存在
+        static string VerifyItems(EntityForm entity_form,
+            List<string> refids,
+            bool bExist)
         {
             if (refids == null)
                 return null;
             foreach (string refid in refids)
             {
                 BookItemBase item = entity_form.EntityControl.Items.GetItemByRefID(refid);
-                if (item == null)
-                    return "参考 ID 为 '" + refid + "' 的册记录事项在种册窗的“册”属性页中没有找到";
+                // TODO: 如果 item 找到，要进一步验证其 refid 成员是否符合查找参数
+                if (bExist == true)
+                {
+                    if (item == null)
+                        return "参考 ID 为 '" + refid + "' 的册记录事项在种册窗的“册”属性页中没有找到";
+                }
+                else
+                {
+                    if (item != null)
+                        return "参考 ID 为 '" + refid + "' 的册记录事项在种册窗的“册”属性页中不应该存在";
+                }
             }
 
             return null;
@@ -1215,5 +1727,95 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
         {
         }
 
+    }
+
+    public static class Permutation
+    {
+        public static List<List<int>> GetPermuation(List<int> base_array)
+        {
+            List<List<int>> results = new List<List<int>>();
+
+            List<List<int>> prev = new List<List<int>>();   // 上一步骤，上一长度的所有组合
+            prev.AddRange(GetNextArray(base_array, new List<int>()));
+            results.AddRange(prev);
+            for (int i = 0; i < base_array.Count; i++)
+            {
+                List<List<int>> next = new List<List<int>>();   // 下一长度的所有组合
+
+                foreach (List<int> one in prev)
+                {
+                    List<List<int>> temp = GetNextArray(base_array, one);
+
+                    AddResults(results, temp);
+                    // results.AddRange(temp);
+
+                    AddResults(next, temp);
+                    // next.AddRange(temp);
+                }
+
+                prev = next;
+            }
+
+            return results;
+        }
+
+        static void AddResults(List<List<int>> results, List<List<int>> result)
+        {
+            foreach(List<int> current in result)
+            {
+                AddResult(results, current);
+            }
+        }
+
+        // 将 result 内部元素排序之后，加入 results 数组。加入以前要查重，重复的不会加入
+        static void AddResult(List<List<int>> results, List<int> result)
+        {
+            // result.Sort();
+            if (IsContained(results, result) == true)
+                return;
+            results.Add(result);
+        }
+
+        static bool IsContained(List<List<int>> results, List<int> result)
+        {
+            foreach (List<int> current in results)
+            {
+                if (IsEqual(current, result) == true)
+                    return true;
+            }
+            return false;
+        }
+
+        static bool IsEqual(List<int> result1, List<int> result2)
+        {
+            if (result1.Count != result2.Count)
+                return false;
+            for (int i = 0; i < result1.Count; i++)
+            {
+                if (result1[i] != result2[i])
+                    return false;
+            }
+            return true;
+        }
+
+        static List<List<int>> GetNextArray(List<int> base_array, List<int> source_array)
+        {
+            List<List<int>> results = new List<List<int>>();
+
+            // 多一个数字的所有可能
+            foreach (int v in base_array)
+            {
+                if (source_array.IndexOf(v) != -1)
+                    continue;
+                List<int> result = new List<int>(source_array);
+                result.Add(v);
+
+                result.Sort();
+
+                results.Add(result);
+            }
+
+            return results;
+        }
     }
 }

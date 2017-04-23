@@ -303,5 +303,7 @@ namespace dp2Circulation
 
         ReserveSourceBiblio = 0x08,     // 书目记录，采用源书目记录 (对象都全部合并)
         ReserveTargetBiblio = 0x10,     // 书目记录，采用目标书目记录 (对象都全部合并)
+
+        SubRecordMask = 0x01 | 0x02 | 0x04, // 下级记录部分的掩码
     }
 }
