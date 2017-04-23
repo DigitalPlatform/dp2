@@ -44,6 +44,7 @@ namespace dp2Circulation
         // 记忆临时种次号
         public List<dp2Circulation.CallNumberForm.MemoTailNumber> MemoNumbers { get; set; }
 
+        // 拥有。需要及时 Dispose()
         GenerateData _genData = null;
 
         // 模板界面的内容版本号

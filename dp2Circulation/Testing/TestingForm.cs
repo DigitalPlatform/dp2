@@ -325,7 +325,8 @@ UiTest3(strBiblioDbName)
         {
             string strError = "";
 
-            using (EntityForm entity_form = new EntityForm())
+            EntityForm entity_form = new EntityForm();
+            try
             {
                 entity_form.MainForm = Program.MainForm;
                 entity_form.MdiParent = Program.MainForm;
@@ -383,6 +384,11 @@ UiTest3(strBiblioDbName)
                     strSave = strAccessNo;
                 }
             }
+            finally
+            {
+                entity_form.Close();
+            }
+
         }
 
         // 每创建一个册记录在内存，然后发生索取号，保存。再创建下一个索取号。要求索取号完全相同
@@ -392,7 +398,8 @@ UiTest3(strBiblioDbName)
         {
             string strError = "";
 
-            using (EntityForm entity_form = new EntityForm())
+            EntityForm entity_form = new EntityForm();
+            try
             {
                 entity_form.MainForm = Program.MainForm;
                 entity_form.MdiParent = Program.MainForm;
@@ -453,6 +460,10 @@ UiTest3(strBiblioDbName)
                     strSave = strAccessNo;
                 }
             }
+            finally
+            {
+                entity_form.Close();
+            }
         }
 
         // 多个窗口并发创建索取号，然后再统一保存
@@ -462,8 +473,9 @@ UiTest3(strBiblioDbName)
         {
             string strError = "";
 
-            using (EntityForm entity_form1 = new EntityForm())
-            using (EntityForm entity_form2 = new EntityForm())
+            EntityForm entity_form1 = new EntityForm();
+            EntityForm entity_form2 = new EntityForm();
+            try
             {
                 entity_form1.MainForm = Program.MainForm;
                 entity_form1.MdiParent = Program.MainForm;
@@ -585,6 +597,11 @@ UiTest3(strBiblioDbName)
                         throw new VerifyException("UiTest3() 中验证阶段 3 发现错误：两个书目记录的种次号不是差 1 (strNumber1='" + strNumber1 + "' '" + strNumber2 + "')");
                 }
 
+            }
+            finally
+            {
+                entity_form1.Close();
+                entity_form2.Close();
             }
         }
 
@@ -1022,7 +1039,8 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
          strStyle);
             }
 
-            using (EntityForm entity_form = new EntityForm())
+            EntityForm entity_form = new EntityForm();
+            try
             {
                 entity_form.MainForm = Program.MainForm;
                 entity_form.MdiParent = Program.MainForm;
@@ -1137,9 +1155,15 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 }
 
             }
+            finally
+            {
+                entity_form.Close();
+                entity_form = null;
+            }
 
             // 重新打开种册窗装载目标记录，再次检测一次。因为有时候第一次在窗口没有关闭的时候看起来对了，但重新打开又不对了
-            using (EntityForm entity_form = new EntityForm())
+            entity_form = new EntityForm();
+            try
             {
                 entity_form.MainForm = Program.MainForm;
                 entity_form.MdiParent = Program.MainForm;
@@ -1200,6 +1224,10 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     }
                 }
 
+            }
+            finally
+            {
+                entity_form.Close();
             }
 
             // 检查源书目记录，应该已经不存在
@@ -1271,7 +1299,8 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             copy_param.EnableSubRecord = StringUtil.IsInList("copy_enablesubrecord",strStyle);
 
 
-            using (EntityForm entity_form = new EntityForm())
+            EntityForm entity_form = new EntityForm();
+            try
             {
                 entity_form.MainForm = Program.MainForm;
                 entity_form.MdiParent = Program.MainForm;
@@ -1388,9 +1417,15 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 }
 
             }
+            finally
+            {
+                entity_form.Close();
+                entity_form = null;
+            }
 
             // 重新打开种册窗装载目标记录，再次检测一次。因为有时候第一次在窗口没有关闭的时候看起来对了，但重新打开又不对了
-            using (EntityForm entity_form = new EntityForm())
+            entity_form = new EntityForm();
+            try
             {
                 entity_form.MainForm = Program.MainForm;
                 entity_form.MdiParent = Program.MainForm;
@@ -1451,6 +1486,10 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     }
                 }
 
+            }
+            finally
+            {
+                entity_form.Close();
             }
 
             // 检查源书目记录，应该已经不存在
@@ -1668,7 +1707,8 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
         {
             string strError = "";
 
-            using (EntityForm entity_form = new EntityForm())
+            EntityForm entity_form = new EntityForm();
+            try
             {
                 entity_form.MainForm = Program.MainForm;
                 entity_form.MdiParent = Program.MainForm;
@@ -1712,6 +1752,10 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 info.Objects = objects;
 
                 return info;
+            }
+            finally
+            {
+                entity_form.Close();
             }
         }
 

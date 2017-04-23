@@ -34,6 +34,7 @@ namespace dp2Circulation
 
         public IBiblioItemsWindow DetailWindow = null;
 
+        // 拥有
         GenerateDataForm m_genDataViewer = null;
 
         public GenerateData(MyForm myform,
@@ -48,6 +49,9 @@ namespace dp2Circulation
         {
             if (m_detailHostObj != null)
                 m_detailHostObj.Dispose();
+
+            // 2017/4/23
+            this.Close();
         }
 
         public void Close()

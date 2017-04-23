@@ -784,6 +784,10 @@ namespace dp2Circulation
         /// <param name="e">事件参数</param>
         protected override void OnActivated(EventArgs e)
         {
+            // 2017/4/23
+            if (this.IsDisposed)
+                return;
+
             if (Program.MainForm != null)
             {
                 // if (this.stop != null)

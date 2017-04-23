@@ -1180,18 +1180,21 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            // 基类代码不用脚本重载也足以运行 2017/4/23
+#if NO
             if (this.m_assemblyLibraryHost == null)
             {
                 strError = "未定义<script>脚本代码，无法校验册记录。";
                 return -2;
             }
+#endif
 
             Type hostEntryClassType = ScriptManager.GetDerivedClassType(
-                this.m_assemblyLibraryHost,
+                this.m_assemblyLibraryHost == null ? Assembly.GetExecutingAssembly() : this.m_assemblyLibraryHost,
                 "DigitalPlatform.LibraryServer.LibraryHost");
             if (hostEntryClassType == null)
             {
-                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法校验条码号。";
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法校验册记录。";
                 return -2;
             }
 
@@ -1212,7 +1215,7 @@ namespace DigitalPlatform.LibraryServer
                 null);
             if (host == null)
             {
-                strError = "创建DigitalPlatform.LibraryServer.LibraryHost类的派生类的对象（构造函数）失败。";
+                strError = "(DoVerifyItemFunction) 创建 DigitalPlatform.LibraryServer.LibraryHost 类的派生类的对象（构造函数）失败。";
                 return -1;
             }
 
