@@ -1681,7 +1681,7 @@ MessageBoxDefaultButton.Button2);
                         string strTempItemDbName = Global.GetDbName(control.RecPath);
                         string strTempBiblioDbName = "";
 
-                        strTempBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName("item", strTempItemDbName);
+                        strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName("item", strTempItemDbName);
                         if (string.IsNullOrEmpty(strTempBiblioDbName) == true)
                         {
                             strWarning += " " + this.ItemType + "类型的数据库名 '" + strTempItemDbName + "' 没有找到对应的书目库名";

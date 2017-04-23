@@ -17,7 +17,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 构造函数
@@ -107,12 +107,12 @@ namespace dp2Circulation
             if (this.comboBox_readerDbName.Items.Count > 0)
                 return;
 
-            if (this.MainForm.ReaderDbNames == null)
+            if (Program.MainForm.ReaderDbNames == null)
                 return;
 
-            for (int i = 0; i < this.MainForm.ReaderDbNames.Length; i++)
+            for (int i = 0; i < Program.MainForm.ReaderDbNames.Length; i++)
             {
-                this.comboBox_readerDbName.Items.Add(this.MainForm.ReaderDbNames[i]);
+                this.comboBox_readerDbName.Items.Add(Program.MainForm.ReaderDbNames[i]);
             }
 
         }

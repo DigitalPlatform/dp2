@@ -46,19 +46,6 @@ namespace dp2Circulation
         WebExternalHost m_webExternalHost_itemInfo = new WebExternalHost();
         WebExternalHost m_webExternalHost_biblioInfo = new WebExternalHost();
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        // public ApplicationInfo ap = null;
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
-
         string m_strCurrentBarcode = "";
         string m_strCurrentReaderBarcode = "";
 
@@ -165,7 +152,7 @@ namespace dp2Circulation
                     return "text";
 
                 if (this.NoBorrowHistory == true
-                    && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.21") >= 0)
+                    && StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.21") >= 0)
                     return "html:noborrowhistory";
 
                 return "html";
@@ -249,7 +236,7 @@ namespace dp2Circulation
             {
                 return false;   // 2008/10/29 
                 /*
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "force",
                     false);
@@ -258,7 +245,7 @@ namespace dp2Circulation
             set
             {
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "charging_form",
                     "force",
                     value);
@@ -275,14 +262,14 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "autoClearTextbox",
                     true);
             }
             set
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "charging_form",
                     "autoClearTextbox",
                     value);
@@ -296,7 +283,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "no_biblio_and_item_info",
                     false);
@@ -312,7 +299,7 @@ namespace dp2Circulation
             get
             {
                 return
-                this.MainForm.AppInfo.GetBoolean(
+                Program.MainForm.AppInfo.GetBoolean(
                 "charging_form",
                 "green_infodlg_not_occur",
                 false);
@@ -326,7 +313,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "verify_barcode",
                     false);
@@ -340,7 +327,7 @@ namespace dp2Circulation
         {
             get
             {
-                return (double)this.MainForm.AppInfo.GetInt(
+                return (double)Program.MainForm.AppInfo.GetInt(
                     "charging_form",
                     "info_dlg_opacity",
                     100) / (double)100;
@@ -352,7 +339,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "auto_switch_reader_barcode",
                     false);
@@ -366,7 +353,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "doubleItemInputAsEnd",
                     false);
@@ -423,9 +410,9 @@ namespace dp2Circulation
 
         private void ChargingForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
             if (this.NoBiblioAndItemInfo == true)
@@ -433,15 +420,15 @@ namespace dp2Circulation
                 ChangeLayout(true);
             }
 
-            this.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
-            this.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
+            Program.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
+            Program.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
 
             // LoadSize();
 
             this.FuncState = this.FuncState;    // 使"操作"按钮文字显示正确
 
             string strDisplayFormat =
-                this.MainForm.AppInfo.GetString(
+                Program.MainForm.AppInfo.GetString(
                 "charging_form",
                 "display_format",
                 "HTML");
@@ -451,19 +438,22 @@ namespace dp2Circulation
                 this.DisplayState = DisplayState.TEXT;
 
             // webbrowser
-            this.m_webExternalHost_readerInfo.Initial(this.MainForm, this.webBrowser_reader);
+            this.m_webExternalHost_readerInfo.Initial(// Program.MainForm, 
+                this.webBrowser_reader);
             this.webBrowser_reader.ObjectForScripting = this.m_webExternalHost_readerInfo;
 
             // 2009/10/18 
-            this.m_webExternalHost_itemInfo.Initial(this.MainForm, this.webBrowser_item);
+            this.m_webExternalHost_itemInfo.Initial(// Program.MainForm,
+                this.webBrowser_item);
             this.webBrowser_item.ObjectForScripting = this.m_webExternalHost_itemInfo;
 
-            this.m_webExternalHost_biblioInfo.Initial(this.MainForm, this.webBrowser_biblio);
+            this.m_webExternalHost_biblioInfo.Initial(// Program.MainForm, 
+                this.webBrowser_biblio);
             this.webBrowser_biblio.ObjectForScripting = this.m_webExternalHost_biblioInfo;
 
 #if NO
             // this.VerifyReaderPassword = this.VerifyReaderPassword;  // 使"校验读者密码"按钮文字状态显示正确
-            this.VerifyReaderPassword = this.MainForm.AppInfo.GetBoolean(
+            this.VerifyReaderPassword = Program.MainForm.AppInfo.GetBoolean(
                 "charging_form",
                 "verify_reader_password",
                 false);
@@ -488,7 +478,7 @@ namespace dp2Circulation
 
 #if NO
             // 窗口打开时初始化
-            this.m_bSuppressScriptErrors = !this.MainForm.DisplayScriptErrorDialog;
+            this.m_bSuppressScriptErrors = !Program.MainForm.DisplayScriptErrorDialog;
 #endif
 
             // API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
@@ -507,16 +497,16 @@ namespace dp2Circulation
             if (sender != this)
                 return;
 
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
                 // 分割条位置
                 // 保存splitContainer_main的状态
-                this.MainForm.SaveSplitterPos(
+                Program.MainForm.SaveSplitterPos(
                     this.splitContainer_main,
                     "chargingform_state",
                     "splitContainer_main");
                 // 保存splitContainer_biblioAndItem的状态
-                this.MainForm.SaveSplitterPos(
+                Program.MainForm.SaveSplitterPos(
                     this.splitContainer_biblioAndItem,
                     "chargingform_state",
                     "splitContainer_biblioAndItem");
@@ -549,13 +539,13 @@ namespace dp2Circulation
                  * */
 
                 // 获得splitContainer_main的状态
-                this.MainForm.LoadSplitterPos(
+                Program.MainForm.LoadSplitterPos(
                     this.splitContainer_main,
                     "chargingform_state",
                     "splitContainer_main");
 
                 // 获得splitContainer_biblioAndItem的状态
-                this.MainForm.LoadSplitterPos(
+                Program.MainForm.LoadSplitterPos(
                     this.splitContainer_biblioAndItem,
                     "chargingform_state",
                     "splitContainer_biblioAndItem");
@@ -595,12 +585,12 @@ namespace dp2Circulation
             if (this.Channel != null)
                 this.Channel.Close();   // TODO: 最好限制一个时间，超过这个时间则Abort()
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 // SaveSize();
 
-                this.MainForm.AppInfo.LoadMdiLayout -= new EventHandler(AppInfo_LoadMdiLayout);
-                this.MainForm.AppInfo.SaveMdiLayout -= new EventHandler(AppInfo_SaveMdiLayout);
+                Program.MainForm.AppInfo.LoadMdiLayout -= new EventHandler(AppInfo_LoadMdiLayout);
+                Program.MainForm.AppInfo.SaveMdiLayout -= new EventHandler(AppInfo_SaveMdiLayout);
             }
         }
 
@@ -942,16 +932,16 @@ namespace dp2Circulation
                 if (strText == "(空)")
                 {
                     Global.ClearHtmlPage(this.webBrowser_reader,
-                        this.MainForm.DataDir);
+                        Program.MainForm.DataDir);
                     return;
                 }
 
                 // 2012/1/13
                 Global.StopWebBrowser(this.webBrowser_reader);
 
-                // PathUtil.CreateDirIfNeed(this.MainForm.DataDir + "\\servermapped");
+                // PathUtil.CreateDirIfNeed(Program.MainForm.DataDir + "\\servermapped");
 
-                string strTempFilename = Path.Combine(this.MainForm.DataDir, "~charging_temp_reader.html");
+                string strTempFilename = Path.Combine(Program.MainForm.DataDir, "~charging_temp_reader.html");
                 using (StreamWriter sw = new StreamWriter(strTempFilename, false, Encoding.UTF8))
                 {
                     sw.Write(strText);
@@ -972,15 +962,15 @@ namespace dp2Circulation
                 if (strText == "(空)")
                 {
                     Global.ClearHtmlPage(this.webBrowser_item,
-                        this.MainForm.DataDir);
+                        Program.MainForm.DataDir);
                     return;
                 }
 
                 // 2012/1/13
                 Global.StopWebBrowser(this.webBrowser_item);
 
-                // PathUtil.CreateDirIfNeed(this.MainForm.DataDir + "\\servermapped");
-                string strTempFilename = this.MainForm.DataDir + "\\~charging_temp_item.html";
+                // PathUtil.CreateDirIfNeed(Program.MainForm.DataDir + "\\servermapped");
+                string strTempFilename = Program.MainForm.DataDir + "\\~charging_temp_item.html";
                 using (StreamWriter sw = new StreamWriter(strTempFilename, false, Encoding.UTF8))
                 {
                     sw.Write(strText);
@@ -1002,15 +992,15 @@ namespace dp2Circulation
                 if (strText == "(空)")
                 {
                     Global.ClearHtmlPage(this.webBrowser_biblio,
-                        this.MainForm.DataDir);
+                        Program.MainForm.DataDir);
                     return;
                 }
 
                 // 2012/1/13
                 Global.StopWebBrowser(this.webBrowser_biblio);
 
-                // PathUtil.CreateDirIfNeed(this.MainForm.DataDir + "\\servermapped");
-                string strTempFilename = this.MainForm.DataDir + "\\~charging_temp_biblio.html";
+                // PathUtil.CreateDirIfNeed(Program.MainForm.DataDir + "\\servermapped");
+                string strTempFilename = Program.MainForm.DataDir + "\\~charging_temp_biblio.html";
                 using (StreamWriter sw = new StreamWriter(strTempFilename, false, Encoding.UTF8))
                 {
                     sw.Write(strText);
@@ -1022,8 +1012,8 @@ namespace dp2Circulation
         // 将字符串中的宏 %datadir% 替换为实际的值
         string ReplaceMacro(string strText)
         {
-            strText = strText.Replace("%mappeddir%", PathUtil.MergePath(this.MainForm.DataDir, "servermapped"));
-            return strText.Replace("%datadir%", this.MainForm.DataDir);
+            strText = strText.Replace("%mappeddir%", PathUtil.MergePath(Program.MainForm.DataDir, "servermapped"));
+            return strText.Replace("%datadir%", Program.MainForm.DataDir);
         }
 
         /// <summary>
@@ -1033,7 +1023,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "speak_reader_name",
                     false);
@@ -1066,7 +1056,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             EnableControls(false);
 
@@ -1130,18 +1120,16 @@ namespace dp2Circulation
                     dlg.MessageVisible = false;
                     dlg.Overflow = StringUtil.SplitList(strRecPath).Count < lRet;
                     int nRet = dlg.Initial(
-                        this.MainForm,
-                        //this.Channel,
-                        //this.stop,
+                        // Program.MainForm,
                         StringUtil.SplitList(strRecPath),
                         "请选择一个读者记录",
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
                     // TODO: 保存窗口内的尺寸状态
-                    this.MainForm.AppInfo.LinkFormState(dlg, "ChargingForm_SelectPatronDialog_state");
+                    Program.MainForm.AppInfo.LinkFormState(dlg, "ChargingForm_SelectPatronDialog_state");
                     dlg.ShowDialog(this);
-                    this.MainForm.AppInfo.UnlinkFormState(dlg);
+                    Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
                     if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                         return 2;
@@ -1157,7 +1145,7 @@ namespace dp2Circulation
                 if (this.VoiceName == true && results.Length >= 2)
                 {
                     string strName = results[1];
-                    this.MainForm.Speak(strName);
+                    Program.MainForm.Speak(strName);
                 }
             }
             finally
@@ -1253,12 +1241,12 @@ namespace dp2Circulation
         {
             this.AcceptButton = this.button_loadReader;
 
-            this.MainForm.EnterPatronIdEdit(InputType.ALL);
+            Program.MainForm.EnterPatronIdEdit(InputType.ALL);
         }
 
         private void textBox_readerBarcode_Leave(object sender, EventArgs e)
         {
-            this.MainForm.LeavePatronIdEdit();
+            Program.MainForm.LeavePatronIdEdit();
         }
 
         private void textBox_readerPassword_Enter(object sender, EventArgs e)
@@ -1270,12 +1258,12 @@ namespace dp2Circulation
         {
             this.AcceptButton = this.button_itemAction;
 
-            this.MainForm.EnterPatronIdEdit(InputType.ALL);
+            Program.MainForm.EnterPatronIdEdit(InputType.ALL);
         }
 
         private void textBox_itemBarcode_Leave(object sender, EventArgs e)
         {
-            this.MainForm.LeavePatronIdEdit();
+            Program.MainForm.LeavePatronIdEdit();
         }
 
         private void button_loadReader_Click(object sender, EventArgs e)
@@ -1313,7 +1301,7 @@ namespace dp2Circulation
             string strError = "";
             int nRet = 0;
 
-            Debug.Assert(this.MainForm != null, "this.MainForm == null");
+            Debug.Assert(Program.MainForm != null, "Program.MainForm == null");
             Debug.Assert(this.Channel != null, "this.Channel == null");
 
             // 2008/9/26 
@@ -1366,7 +1354,7 @@ namespace dp2Circulation
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
+                    Program.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.textBox_readerBarcode.Text,
                     out strError);
                 if (nRet == -1)
@@ -1381,7 +1369,7 @@ namespace dp2Circulation
                         InfoColor.Red,
                         "装载读者记录",
                         this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                     this.SwitchFocus(READER_BARCODE, strFastInputText);
                     return;
                 }
@@ -1395,7 +1383,7 @@ namespace dp2Circulation
                         InfoColor.Red,
                         "装载读者记录",
                         this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                     this.SwitchFocus(READER_BARCODE, strFastInputText);
                     return;
                 }
@@ -1432,7 +1420,7 @@ namespace dp2Circulation
                     InfoColor.Red,
                     "装载读者记录",
                     this.InfoDlgOpacity,
-                    this.MainForm.DefaultFont);
+                    Program.MainForm.DefaultFont);
                 /*
                 SetReaderRenderString(this.webBrowser_reader,
                     "装载读者记录发生错误: " + strError);
@@ -1456,7 +1444,7 @@ namespace dp2Circulation
                         InfoColor.Red,
                         "装载读者记录",
                         this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
 
                 // 输入焦点仍然回到读者证条码号输入域
                 /*
@@ -1496,10 +1484,10 @@ namespace dp2Circulation
                     this.SwitchFocus(ITEM_BARCODE, null);
                 }
 
-                Debug.Assert(this.MainForm.OperHistory != null, "this.MainForm.OperHistory == null");
+                Debug.Assert(Program.MainForm.OperHistory != null, "Program.MainForm.OperHistory == null");
 
                 // 触发操作历史动作
-                this.MainForm.OperHistory.ReaderBarcodeScaned(
+                Program.MainForm.OperHistory.ReaderBarcodeScaned(
                     this.textBox_readerBarcode.Text);
             }
             return;
@@ -1519,7 +1507,7 @@ namespace dp2Circulation
         public void Print()
         {
             // 触发历史动作
-            this.MainForm.OperHistory.Print();
+            Program.MainForm.OperHistory.Print();
         }
 
         /*
@@ -1527,7 +1515,7 @@ namespace dp2Circulation
         public void TestPrint()
         {
             // 触发历史动作
-            this.MainForm.OperHistory.TestPrint();
+            Program.MainForm.OperHistory.TestPrint();
         }*/
 
         void EnableEdit(int target,
@@ -1778,7 +1766,7 @@ namespace dp2Circulation
             }
 
             this.m_webExternalHost = new WebExternalHost();
-            this.m_webExternalHost.Initial(this.MainForm);
+            this.m_webExternalHost.Initial(Program.MainForm);
             this.webBrowser_reader.ObjectForScripting = this.m_webExternalHost;
         }
 #endif
@@ -1864,21 +1852,21 @@ namespace dp2Circulation
 
             dlg.AutoOperSingleItem = this.AutoOperSingleItem;
             dlg.AutoSearch = true;
-            dlg.MainForm = this.MainForm;
+            dlg.MainForm = Program.MainForm;
             dlg.From = "ISBN";
             dlg.QueryWord = strText;
 
-            dlg.UiState = this.MainForm.AppInfo.GetString(
+            dlg.UiState = Program.MainForm.AppInfo.GetString(
         "ChargingForm",
         "SelectItemDialog_uiState",
         "");
 
             // TODO: 保存窗口内的尺寸状态
-            this.MainForm.AppInfo.LinkFormState(dlg, "ChargingForm_SelectItemDialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ChargingForm_SelectItemDialog_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
 "ChargingForm",
 "SelectItemDialog_uiState",
 dlg.UiState);
@@ -1984,7 +1972,7 @@ dlg.UiState);
                         InfoColor.Red,
                         "扫入册条码",
                         this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                     this.SwitchFocus(ITEM_BARCODE, strFastInputText);
                     return -1;
                 }
@@ -2020,7 +2008,7 @@ dlg.UiState);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
+                    Program.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.textBox_itemBarcode.Text,
                     out strError);
                 if (nRet == -1)
@@ -2035,7 +2023,7 @@ dlg.UiState);
                         InfoColor.Red,
                         "扫入册条码",
                         this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                     this.SwitchFocus(ITEM_BARCODE, strFastInputText);
                     return -1;
                 }
@@ -2071,7 +2059,7 @@ dlg.UiState);
                         InfoColor.Red,
                         "扫入册条码",
                         this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                     this.SwitchFocus(ITEM_BARCODE, strFastInputText);
                     return -1;
                 }
@@ -2154,7 +2142,7 @@ dlg.UiState);
                         // 2008/5/9 有必要才返回item信息
                         if (this.NoBiblioAndItemInfo == false)
                             strItemReturnFormats = this.RenderFormat;
-                        if (this.MainForm.ChargingNeedReturnItemXml == true)
+                        if (Program.MainForm.ChargingNeedReturnItemXml == true)
                         {
                             if (String.IsNullOrEmpty(strItemReturnFormats) == false)
                                 strItemReturnFormats += ",";
@@ -2169,10 +2157,10 @@ dlg.UiState);
                         string strStyle = "reader";
                         if (this.NoBiblioAndItemInfo == false)
                             strStyle += ",item,biblio";
-                        else if (this.MainForm.ChargingNeedReturnItemXml)
+                        else if (Program.MainForm.ChargingNeedReturnItemXml)
                             strStyle += ",item";
 
-                        //if (this.MainForm.TestMode == true)
+                        //if (Program.MainForm.TestMode == true)
                         //    strStyle += ",testmode";
 
                         lRet = Channel.Borrow(
@@ -2219,7 +2207,7 @@ dlg.UiState);
                         }
 
                         string strItemXml = "";
-                        if (this.MainForm.ChargingNeedReturnItemXml == true
+                        if (Program.MainForm.ChargingNeedReturnItemXml == true
                             && item_records != null)
                         {
                             Debug.Assert(item_records != null, "");
@@ -2238,19 +2226,19 @@ dlg.UiState);
 
                             if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.ItemBarcodeDup)
                             {
-                                // this.MainForm.PrepareSearch();
-                                LibraryChannel channel = this.MainForm.GetChannel();
+                                // Program.MainForm.PrepareSearch();
+                                LibraryChannel channel = Program.MainForm.GetChannel();
                                 try
                                 {
                                     ItemBarcodeDupDlg dupdlg = new ItemBarcodeDupDlg();
                                     MainForm.SetControlFont(dupdlg, this.Font, false);
                                     string strErrorNew = "";
                                     nRet = dupdlg.Initial(
-                                        this.MainForm,
+                                        // Program.MainForm,
                                         aDupPath,
                                         "因册条码号发生重复，" + strOperName + "操作被拒绝。\r\n\r\n可根据下面列出的详细信息，选择适当的册记录，重试操作。\r\n\r\n原始出错信息:\r\n" + strError,
-                                        channel,    // this.MainForm.Channel,
-                                        this.MainForm.Stop,
+                                        channel,    // Program.MainForm.Channel,
+                                        Program.MainForm.Stop,
                                         out strErrorNew);
                                     if (nRet == -1)
                                     {
@@ -2259,9 +2247,9 @@ dlg.UiState);
                                         goto ERROR1;
                                     }
 
-                                    this.MainForm.AppInfo.LinkFormState(dupdlg, "ChargingForm_dupdlg_state");
+                                    Program.MainForm.AppInfo.LinkFormState(dupdlg, "ChargingForm_dupdlg_state");
                                     dupdlg.ShowDialog(this);
-                                    this.MainForm.AppInfo.UnlinkFormState(dupdlg);
+                                    Program.MainForm.AppInfo.UnlinkFormState(dupdlg);
 
                                     if (dupdlg.DialogResult == DialogResult.Cancel)
                                         goto ERROR1;
@@ -2272,8 +2260,8 @@ dlg.UiState);
                                 }
                                 finally
                                 {
-                                    this.MainForm.ReturnChannel(channel);
-                                    // this.MainForm.EndSearch();
+                                    Program.MainForm.ReturnChannel(channel);
+                                    // Program.MainForm.EndSearch();
                                 }
                             }
 
@@ -2305,14 +2293,14 @@ dlg.UiState);
                             /*
                             // 2012/1/5
                             // 加入缓存
-                            this.MainForm.SetReaderXmlCache(strOutputReaderBarcode,
+                            Program.MainForm.SetReaderXmlCache(strOutputReaderBarcode,
                                 "",
                                 reader_records[1]);
                              * */
                             strReaderSummary = Global.GetReaderSummary(reader_records[1]);
                         }
 
-                        this.MainForm.OperHistory.BorrowAsync(
+                        Program.MainForm.OperHistory.BorrowAsync(
                             this,
                             bRenew,
                             strOutputReaderBarcode,
@@ -2344,7 +2332,7 @@ dlg.UiState);
                             InfoColor.Yellow,
                             strOperName,    // "caption",
                         this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                     }
                     else
                     {
@@ -2356,7 +2344,7 @@ dlg.UiState);
                                 InfoColor.Green,
                                 strOperName,    // "caption",
                             this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                         }
                     }
                 }
@@ -2422,7 +2410,7 @@ dlg.UiState);
                         string strItemReturnFormats = "";
                         if (this.NoBiblioAndItemInfo == false)
                             strItemReturnFormats = this.RenderFormat;
-                        if (this.MainForm.ChargingNeedReturnItemXml == true)
+                        if (Program.MainForm.ChargingNeedReturnItemXml == true)
                         {
                             if (String.IsNullOrEmpty(strItemReturnFormats) == false)
                                 strItemReturnFormats += ",";
@@ -2437,10 +2425,10 @@ dlg.UiState);
                         string strStyle = "reader";
                         if (this.NoBiblioAndItemInfo == false)
                             strStyle += ",item,biblio";
-                        else if (this.MainForm.ChargingNeedReturnItemXml)
+                        else if (Program.MainForm.ChargingNeedReturnItemXml)
                             strStyle += ",item";
 
-                        //if (this.MainForm.TestMode == true)
+                        //if (Program.MainForm.TestMode == true)
                         //    strStyle += ",testmode";
 
                         lRet = Channel.Return(
@@ -2468,19 +2456,19 @@ dlg.UiState);
 
                             if (Channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.ItemBarcodeDup)
                             {
-                                // this.MainForm.PrepareSearch();
-                                LibraryChannel channel = this.MainForm.GetChannel();
+                                // Program.MainForm.PrepareSearch();
+                                LibraryChannel channel = Program.MainForm.GetChannel();
                                 try
                                 {
                                     ItemBarcodeDupDlg dupdlg = new ItemBarcodeDupDlg();
                                     MainForm.SetControlFont(dupdlg, this.Font, false);
                                     string strErrorNew = "";
                                     nRet = dupdlg.Initial(
-                                        this.MainForm,
+                                        // Program.MainForm,
                                         aDupPath,
                                         "因册条码号发生重复，还回操作被拒绝。\r\n\r\n可根据下面列出的详细信息，选择适当的册记录，重试操作。\r\n\r\n原始出错信息:\r\n" + strError,
-                                        channel,    // this.MainForm.Channel,
-                                        this.MainForm.Stop,
+                                        channel,    // Program.MainForm.Channel,
+                                        Program.MainForm.Stop,
                                         out strErrorNew);
                                     if (nRet == -1)
                                     {
@@ -2489,9 +2477,9 @@ dlg.UiState);
                                         goto ERROR1;
                                     }
 
-                                    this.MainForm.AppInfo.LinkFormState(dupdlg, "ChargingForm_dupdlg_state");
+                                    Program.MainForm.AppInfo.LinkFormState(dupdlg, "ChargingForm_dupdlg_state");
                                     dupdlg.ShowDialog(this);
-                                    this.MainForm.AppInfo.UnlinkFormState(dupdlg);
+                                    Program.MainForm.AppInfo.UnlinkFormState(dupdlg);
 
                                     if (dupdlg.DialogResult == DialogResult.Cancel)
                                         goto ERROR1;
@@ -2502,8 +2490,8 @@ dlg.UiState);
                                 }
                                 finally
                                 {
-                                    this.MainForm.ReturnChannel(channel);
-                                    // this.MainForm.EndSearch();
+                                    Program.MainForm.ReturnChannel(channel);
+                                    // Program.MainForm.EndSearch();
                                 }
                             }
 
@@ -2527,7 +2515,7 @@ dlg.UiState);
                             /*
                             // 2012/1/5
                             // 加入缓存
-                            this.MainForm.SetReaderXmlCache(strOutputReaderBarcode,
+                            Program.MainForm.SetReaderXmlCache(strOutputReaderBarcode,
                                 "",
                                 reader_records[1]);
                              * */
@@ -2582,7 +2570,7 @@ dlg.UiState);
                         }
 
                         string strItemXml = "";
-                        if (this.MainForm.ChargingNeedReturnItemXml == true
+                        if (Program.MainForm.ChargingNeedReturnItemXml == true
                             && item_records != null)
                         {
                             if (item_records.Length > 0)
@@ -2594,7 +2582,7 @@ dlg.UiState);
 
                         DateTime end_time = DateTime.Now;
 
-                        this.MainForm.OperHistory.ReturnAsync(
+                        Program.MainForm.OperHistory.ReturnAsync(
                             this,
                             strAction,  // this.FuncState == FuncState.Lost,
                             strOutputReaderBarcode, // this.textBox_readerBarcode.Text,
@@ -2623,7 +2611,7 @@ dlg.UiState);
                             InfoColor.Yellow,
                             strOperName,    // "caption",
                         this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                     }
                     else
                     {
@@ -2638,7 +2626,7 @@ dlg.UiState);
                                 InfoColor.Green,
                                 strOperName,    // "caption",
                             this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                         }
                     }
                 } // endif if 还书
@@ -2650,7 +2638,7 @@ dlg.UiState);
                         InfoColor.Red,
                         "caption",  // 
                         this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                 }
 
             }
@@ -2669,7 +2657,7 @@ dlg.UiState);
                 InfoColor.Red,
                 "caption",
                 this.InfoDlgOpacity,
-                this.MainForm.DefaultFont);
+                Program.MainForm.DefaultFont);
             EnableControls(true);
 
             // 焦点回到册条码号textbox
@@ -2704,7 +2692,7 @@ dlg.UiState);
                 color,
                 strCaption,
                 this.InfoDlgOpacity,
-                this.MainForm.DefaultFont);
+                Program.MainForm.DefaultFont);
 
             this.SwitchFocus(nTarget, strFastInputText);
         }
@@ -2822,7 +2810,7 @@ dlg.UiState);
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             this.EnableControls(false);
 
@@ -2866,7 +2854,7 @@ dlg.UiState);
                 "验证读者证密码",
                 this.InfoDlgOpacity,
                 true,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
             // 焦点重新定位到密码输入域
             /*
             this.textBox_readerPassword.Focus();
@@ -2905,14 +2893,14 @@ dlg.UiState);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "verify_reader_password",
                     false);
             }
             set
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "charging_form",
                     "verify_reader_password",
                     value);
@@ -2926,7 +2914,7 @@ dlg.UiState);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "auto_oper_single_item",
                     false);
@@ -2940,7 +2928,7 @@ dlg.UiState);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "isbn_borrow",
                     true);
@@ -2955,14 +2943,14 @@ dlg.UiState);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "no_borrow_history",
                     true);
             }
             set
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "charging_form",
                     "no_borrow_history",
                     value);
@@ -3030,13 +3018,13 @@ dlg.UiState);
 
         private void ChargingForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
 
-            this.MainForm.toolButton_refresh.Enabled = true;
+            Program.MainForm.toolButton_refresh.Enabled = true;
         }
 
         // 2008/10/31 
@@ -3097,7 +3085,7 @@ dlg.UiState);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                 "charging_form",
                 "auto_toupper_barcode",
                 false);
@@ -3114,7 +3102,7 @@ dlg.UiState);
                 return;
             }
 
-            AmerceForm form = this.MainForm.EnsureAmerceForm();
+            AmerceForm form = Program.MainForm.EnsureAmerceForm();
             Global.Activate(form);
 
             form.LoadReader(this.ActiveReaderBarcode, true);
@@ -3128,7 +3116,7 @@ dlg.UiState);
                 return;
             }
 
-            ReaderInfoForm form = this.MainForm.EnsureReaderInfoForm();
+            ReaderInfoForm form = Program.MainForm.EnsureReaderInfoForm();
             Global.Activate(form);
 
             form.LoadRecord(this.ActiveReaderBarcode,
@@ -3143,7 +3131,7 @@ dlg.UiState);
                 return;
             }
 
-            ActivateForm form = this.MainForm.EnsureActivateForm();
+            ActivateForm form = Program.MainForm.EnsureActivateForm();
             Global.Activate(form);
 
             form.LoadOldRecord(this.ActiveReaderBarcode);
@@ -3157,7 +3145,7 @@ dlg.UiState);
                 return;
             }
 
-            ActivateForm form = this.MainForm.EnsureActivateForm();
+            ActivateForm form = Program.MainForm.EnsureActivateForm();
             Global.Activate(form);
 
             form.LoadNewRecord(this.ActiveReaderBarcode);
@@ -3171,7 +3159,7 @@ dlg.UiState);
                 return;
             }
 
-            ReaderManageForm form = this.MainForm.EnsureReaderManageForm();
+            ReaderManageForm form = Program.MainForm.EnsureReaderManageForm();
             Global.Activate(form);
 
             form.LoadRecord(this.ActiveReaderBarcode);
@@ -3190,7 +3178,7 @@ dlg.UiState);
                 return;
             }
 
-            EntityForm form = this.MainForm.EnsureEntityForm();
+            EntityForm form = Program.MainForm.EnsureEntityForm();
             Global.Activate(form);
 
             form.LoadItemByBarcode(this.ActiveItemBarcode, false);
@@ -3204,7 +3192,7 @@ dlg.UiState);
                 return;
             }
 
-            ItemInfoForm form = this.MainForm.EnsureItemInfoForm();
+            ItemInfoForm form = Program.MainForm.EnsureItemInfoForm();
             Global.Activate(form);
 
             form.LoadRecord(this.ActiveItemBarcode);
@@ -3261,7 +3249,7 @@ dlg.UiState);
             // 判断它是不是读者记录路径
             string strDbName = Global.GetDbName(strRecPath);
 
-            if (this.MainForm.IsReaderDbName(strDbName) == true)
+            if (Program.MainForm.IsReaderDbName(strDbName) == true)
             {
                 string[] parts = strFirstLine.Split(new char[] { '\t' });
                 string strReaderBarcode = "";
@@ -3331,7 +3319,7 @@ Keys keyData)
 
         void Window_Error(object sender, HtmlElementErrorEventArgs e)
         {
-            if (this.MainForm.SuppressScriptErrors == true)
+            if (Program.MainForm.SuppressScriptErrors == true)
                 e.Handled = true;
         }
 
@@ -3357,7 +3345,7 @@ Keys keyData)
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
     "charging_form",
     "stop_filling_when_close_infodlg",
     true);
@@ -3371,7 +3359,7 @@ Keys keyData)
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "patron_barcode_allow_hanzi",
                     false);

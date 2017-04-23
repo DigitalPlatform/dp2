@@ -23,33 +23,6 @@ namespace dp2Circulation
     public partial class OrderEditForm : OrderEditFormBase
     // ItemEditFormBase<OrderItem, OrderItemCollection>
     {
-#if NO
-        /// <summary>
-        /// 起始事项
-        /// </summary>
-        public OrderItem StartOrderItem = null;   // 最开始时的对象
-
-        /// <summary>
-        /// 当前事项
-        /// </summary>
-        public OrderItem OrderItem = null;
-
-        /// <summary>
-        /// 事项集合
-        /// </summary>
-        public OrderItemCollection OrderItems = null;
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        /// <summary>
-        /// 订购控件
-        /// </summary>
-        public OrderControl OrderControl = null;
-#endif
-
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -489,9 +462,9 @@ namespace dp2Circulation
         private void OrderEditForm_Load(object sender, EventArgs e)
         {
 #if NO
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
             LoadOrderItem(this.OrderItem);
             EnablePrevNextRecordButtons();

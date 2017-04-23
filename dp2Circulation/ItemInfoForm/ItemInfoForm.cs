@@ -90,7 +90,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 // 把 XML 字符串装入一个Web浏览器控件
                 // 这个函数能够适应"<root ... />"这样的没有prolog的XML内容
                 Global.SetXmlToWebbrowser(this.webBrowser_itemXml,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "xml",
                     value);
 
@@ -128,18 +128,6 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
         WebExternalHost m_chargingInterface = new WebExternalHost();
         WebExternalHost m_webExternalHost_biblio = new WebExternalHost();
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
-
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -150,14 +138,14 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
         private void ItemInfoForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 #if NO
             MainForm.AppInfo.LoadMdiChildFormStates(this,
     "mdi_form_state");
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -180,14 +168,17 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             }
 
             // webbrowser
-            this.m_webExternalHost_item.Initial(this.MainForm, this.webBrowser_itemHTML);
+            this.m_webExternalHost_item.Initial(// Program.MainForm, 
+                this.webBrowser_itemHTML);
             this.webBrowser_itemHTML.ObjectForScripting = this.m_webExternalHost_item;
 
-            this.m_chargingInterface.Initial(this.MainForm, this.webBrowser_borrowHistory);
+            this.m_chargingInterface.Initial(// Program.MainForm, 
+                this.webBrowser_borrowHistory);
             this.m_chargingInterface.CallFunc += m_chargingInterface_CallFunc;
             this.webBrowser_borrowHistory.ObjectForScripting = this.m_chargingInterface;
 
-            this.m_webExternalHost_biblio.Initial(this.MainForm, this.webBrowser_biblio);
+            this.m_webExternalHost_biblio.Initial(// Program.MainForm,
+                this.webBrowser_biblio);
             this.webBrowser_biblio.ObjectForScripting = this.m_webExternalHost_biblio;
 
             this.commander = new Commander(this);
@@ -342,11 +333,11 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             stop.BeginLoop();
 
             Global.ClearHtmlPage(this.webBrowser_itemHTML,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
             Global.ClearHtmlPage(this.webBrowser_itemXml,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
             Global.ClearHtmlPage(this.webBrowser_biblio,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
 
             ClearBorrowHistoryPage();
             SetItemRefID("");
@@ -394,7 +385,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 #if NO
                 Global.SetHtmlString(this.webBrowser_itemHTML,
                     strItemText,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "iteminfoform_item");
 #endif
                 this.m_webExternalHost_item.SetHtmlString(strItemText,
@@ -408,7 +399,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 #if NO
                     Global.SetHtmlString(this.webBrowser_biblio,
                         strBiblioText,
-                        this.MainForm.DataDir,
+                        Program.MainForm.DataDir,
                         "iteminfoform_biblio");
 #endif
                     this.m_webExternalHost_biblio.SetHtmlString(strBiblioText,
@@ -452,7 +443,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                             this.Channel,
                             strItemRecPath,
                             this.Xml,
-                            this.MainForm.ServerVersion,
+                            Program.MainForm.ServerVersion,
                             out strError);
                         if (nRet == -1)
                         {
@@ -519,7 +510,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             bool bPrevNext = false;
 
@@ -535,11 +526,11 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
             if (bPrevNext == false)
             {
                 Global.ClearHtmlPage(this.webBrowser_itemHTML,
-                    this.MainForm.DataDir);
+                    Program.MainForm.DataDir);
                 Global.ClearHtmlPage(this.webBrowser_itemXml,
-                    this.MainForm.DataDir);
+                    Program.MainForm.DataDir);
                 Global.ClearHtmlPage(this.webBrowser_biblio,
-                    this.MainForm.DataDir);
+                    Program.MainForm.DataDir);
 
                 // this.textBox_message.Text = "";
                 this.toolStripLabel_message.Text = "";
@@ -730,7 +721,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                     // 把 XML 字符串装入一个Web浏览器控件
                     // 这个函数能够适应"<root ... />"这样的没有prolog的XML内容
                     Global.SetXmlToWebbrowser(this.webBrowser_itemXml,
-                        this.MainForm.DataDir,
+                        Program.MainForm.DataDir,
                         "xml",
                         strItemText);
 
@@ -744,7 +735,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                             this.Channel,
                             strOutputItemRecPath,
                             this.Xml,
-                            this.MainForm.ServerVersion,
+                            Program.MainForm.ServerVersion,
                             out strError);
                         if (nRet == -1)
                         {
@@ -796,7 +787,7 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 //		>=0 实际上载的资源对象数
                 nRet = this.binaryResControl1.Save(
                     this.Channel,
-                    this.MainForm.ServerVersion,
+                    Program.MainForm.ServerVersion,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1034,16 +1025,16 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
 
             // 工具条按钮
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
 
-            this.MainForm.toolButton_refresh.Enabled = true;
+            Program.MainForm.toolButton_refresh.Enabled = true;
         }
 
         private void ItemInfoForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
             SetMenuItemState();
         }
@@ -1285,9 +1276,9 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                 if (StringUtil.IsInList("已处理", strCommentState) == false)
                     dlg.NewSubjects = dlg.HiddenNewSubjects;
 
-                this.MainForm.AppInfo.LinkFormState(dlg, "iteminfoform_addsubjectdialog_state");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "iteminfoform_addsubjectdialog_state");
                 dlg.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(dlg);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
                 if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                     return;
@@ -2112,8 +2103,8 @@ out strError);
             // string strBinDir = Environment.CurrentDirectory;
             string strBinDir = Program.MainForm.UserDir;    // 2017/2/23
 
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
-            string strSummaryJs = Path.Combine(this.MainForm.DataDir, "getsummary.js");
+            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "default\\charginghistory.css");
+            string strSummaryJs = Path.Combine(Program.MainForm.DataDir, "getsummary.js");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
                 + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"
@@ -2199,7 +2190,7 @@ out strError);
         /// </summary>
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
+            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "default\\charginghistory.css");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strJs = "";
 
@@ -2317,9 +2308,9 @@ out strError);
                 ImageInfo info = new ImageInfo();
                 info.Image = image;
                 dlg.ImageInfo = info;
-                this.MainForm.AppInfo.LinkFormState(dlg, "entityform_CreateCoverImageDialog_state");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "entityform_CreateCoverImageDialog_state");
                 dlg.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(dlg);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
                 if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                     return;
             }

@@ -21,11 +21,11 @@ namespace dp2Circulation
 
         public string GetWaitingHtml(string strText)
         {
-            string strGifFileName = Path.Combine(this.Container.MainForm.DataDir, "ajax-loader3.gif");
+            string strGifFileName = Path.Combine(Program.MainForm.DataDir, "ajax-loader3.gif");
 
             // 显示 正在处理
             return "<html>" +
-    this.Container.MainForm.GetMarcHtmlHeadString(true) +
+    Program.MainForm.GetMarcHtmlHeadString(true) +
     "<body style='background-color: #aaaaaa;'>" +
     "<h2 align='center'><img src='" + strGifFileName + "' /></h2>"
             + "<h2 align='center'>" + HttpUtility.HtmlEncode(strText) + "</h2>"
@@ -68,11 +68,13 @@ namespace dp2Circulation
     {
         List<PropertyTask> _tasks = new List<PropertyTask>();
 
+#if NO
         public MainForm MainForm
         {
             get;
             set;
         }
+#endif
 
         ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
         static int m_nLockTimeout = 5000;	// 5000=5秒
@@ -129,8 +131,8 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                this.MainForm.WriteErrorLog("PropertyTaskList Worker() 出现异常: " + ExceptionUtil.GetDebugText(ex));
-                this.MainForm.ReportError("dp2circulation 调试信息", "PropertyTaskList Worker() 出现异常: " + ExceptionUtil.GetDebugText(ex));
+                Program.MainForm.WriteErrorLog("PropertyTaskList Worker() 出现异常: " + ExceptionUtil.GetDebugText(ex));
+                Program.MainForm.ReportError("dp2circulation 调试信息", "PropertyTaskList Worker() 出现异常: " + ExceptionUtil.GetDebugText(ex));
             }
         }
 

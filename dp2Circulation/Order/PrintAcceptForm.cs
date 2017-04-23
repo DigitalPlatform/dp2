@@ -51,13 +51,6 @@ namespace dp2Circulation
 
         string BatchNo = "";    // 最近在检索面板输入过的批次号
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-#endif
         /// <summary>
         /// 事项图标 ImageIndex : 错误
         /// </summary>
@@ -293,14 +286,14 @@ namespace dp2Circulation
 
         private void PrintAcceptForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
             CreateOriginColumnHeader(this.listView_origin);
             CreateMergedColumnHeader(this.listView_merged);
 
-            this.comboBox_load_type.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_load_type.Text = Program.MainForm.AppInfo.GetString(
                 "printaccept_form",
                 "publication_type",
                 "图书");
@@ -352,9 +345,9 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "printaccept_form",
                     "publication_type",
                     this.comboBox_load_type.Text);
@@ -372,7 +365,7 @@ namespace dp2Circulation
                 "mdi_form_state");
 #endif
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
                 "printaccept_form",
                 "list_origin_width",
                 "");
@@ -383,7 +376,7 @@ namespace dp2Circulation
                     true);
             }
 
-            strWidths = this.MainForm.AppInfo.GetString(
+            strWidths = Program.MainForm.AppInfo.GetString(
     "printaccept_form",
     "list_merged_width",
     "");
@@ -405,18 +398,18 @@ namespace dp2Circulation
 
             /*
             // 如果MDI子窗口不是MainForm刚刚准备退出时的状态，恢复它。为了记忆尺寸做准备
-            if (this.WindowState != this.MainForm.MdiWindowState)
-                this.WindowState = this.MainForm.MdiWindowState;
+            if (this.WindowState != Program.MainForm.MdiWindowState)
+                this.WindowState = Program.MainForm.MdiWindowState;
              * */
 
             string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_origin);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "printaccept_form",
                 "list_origin_width",
                 strWidths);
 
             strWidths = ListViewUtil.GetColumnWidthListString(this.listView_merged);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "printaccept_form",
                 "list_merged_width",
                 strWidths);
@@ -627,7 +620,7 @@ namespace dp2Circulation
                 stop.Initial("正在初始化浏览器组件 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -689,7 +682,7 @@ namespace dp2Circulation
                         //      -1  不是实体库
                         //      0   图书类型
                         //      1   期刊类型
-                        nRet = this.MainForm.IsSeriesTypeFromItemDbName(strItemDbName);
+                        nRet = Program.MainForm.IsSeriesTypeFromItemDbName(strItemDbName);
                         if (nRet == -1)
                         {
                             strError = "记录路径 '" + strLine + "' 中的数据库名 '" + strItemDbName + "' 不是实体库名";
@@ -2518,11 +2511,11 @@ namespace dp2Circulation
                 HtmlPrintForm printform = new HtmlPrintForm();
 
                 printform.Text = "打印验收单";
-                printform.MainForm = this.MainForm;
+                // printform.MainForm = Program.MainForm;
                 printform.Filenames = filenames;
-                this.MainForm.AppInfo.LinkFormState(printform, "printaccept_htmlprint_formstate");
+                Program.MainForm.AppInfo.LinkFormState(printform, "printaccept_htmlprint_formstate");
                 printform.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(printform);
+                Program.MainForm.AppInfo.UnlinkFormState(printform);
 
             }
             finally
@@ -2581,17 +2574,17 @@ namespace dp2Circulation
             // 配置标题和风格
             string strNamePath = "printaccept_printoption";
 
-            PrintOption option = new PrintAcceptPrintOption(this.MainForm.DataDir,
+            PrintOption option = new PrintAcceptPrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
 
             PrintOptionDlg dlg = new PrintOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.MainForm = this.MainForm;
-            dlg.DataDir = this.MainForm.DataDir;
+            // dlg.MainForm = Program.MainForm;
+            dlg.DataDir = Program.MainForm.DataDir;
             dlg.Text = this.comboBox_load_type.Text + " 验收单 打印参数";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
@@ -2633,14 +2626,14 @@ namespace dp2Circulation
             };
 
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "printorder_printoption_formstate");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "printorder_printoption_formstate");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            option.SaveData(this.MainForm.AppInfo,
+            option.SaveData(Program.MainForm.AppInfo,
                 strNamePath);
         }
 
@@ -2704,9 +2697,9 @@ namespace dp2Circulation
             string strNamePath = "printaccept_printoption";
 
             // 获得打印参数
-            PrintOption option = new PrintAcceptPrintOption(this.MainForm.DataDir,
+            PrintOption option = new PrintAcceptPrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
             /*
@@ -2775,7 +2768,7 @@ namespace dp2Circulation
             filenames = new List<string>();    // 每页一个文件，这个数组存放了所有文件名
 
             // 需要将属于不同渠道的文件名前缀区别开来
-            string strFileNamePrefix = this.MainForm.DataDir + "\\~printaccept_" + items.GetHashCode().ToString() + "_";
+            string strFileNamePrefix = Program.MainForm.DataDir + "\\~printaccept_" + items.GetHashCode().ToString() + "_";
 
             string strFileName = "";
 
@@ -2797,8 +2790,8 @@ namespace dp2Circulation
                 macro_table["%pageno%"] = "1";
 
                 // 2009/7/30
-                macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
-                ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
+                macro_table["%datadir%"] = Program.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
+                ////macro_table["%libraryserverdir%"] = Program.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
                 // 2009/10/10
                 macro_table["%cssfilepath%"] = this.GetAutoCssUrl(option, "printaccept.css");  // 便于引用服务器端或“css”模板的CSS文件
 
@@ -2929,8 +2922,8 @@ namespace dp2Circulation
                 return strCssFilePath;
             else
             {
-                // return this.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // 缺省的
-                return PathUtil.MergePath(this.MainForm.DataDir, strDefaultCssFileName);    // 缺省的
+                // return Program.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // 缺省的
+                return PathUtil.MergePath(Program.MainForm.DataDir, strDefaultCssFileName);    // 缺省的
             }
         }
 
@@ -2940,7 +2933,7 @@ namespace dp2Circulation
             bool bOutputTable)
         {
             /*
-            string strLibraryServerUrl = this.MainForm.AppInfo.GetString(
+            string strLibraryServerUrl = Program.MainForm.AppInfo.GetString(
     "config",
     "circulation_server_url",
     "");
@@ -2949,7 +2942,7 @@ namespace dp2Circulation
                 strLibraryServerUrl = strLibraryServerUrl.Substring(0, pos);
              * */
 
-            // string strCssUrl = this.MainForm.LibraryServerDir + "/printaccept.css";
+            // string strCssUrl = Program.MainForm.LibraryServerDir + "/printaccept.css";
             // 2009/10/10 changed
             string strCssUrl = GetAutoCssUrl(option, "printaccept.css");
 
@@ -2959,7 +2952,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;
             else
-                strCssUrl = this.MainForm.LibraryServerDir + "/printaccept.css";    // 缺省的
+                strCssUrl = Program.MainForm.LibraryServerDir + "/printaccept.css";    // 缺省的
              * */
 
 
@@ -3581,7 +3574,7 @@ namespace dp2Circulation
             dlg.GetBatchNoTable += new GetKeyCountListEventHandler(dlg_GetBatchNoTable);
 
             dlg.RefDbName = "";
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -3746,7 +3739,7 @@ out strError);
                         //      -1  不是实体库
                         //      0   图书类型
                         //      1   期刊类型
-                        nRet = this.MainForm.IsSeriesTypeFromItemDbName(strItemDbName);
+                        nRet = Program.MainForm.IsSeriesTypeFromItemDbName(strItemDbName);
                         if (nRet == -1)
                         {
                             strError = "记录路径 '" + strRecPath + "' 中的数据库名 '" + strItemDbName + "' 不是实体库名";
@@ -4008,7 +4001,7 @@ out strError);
             dlg.GetBatchNoTable += new GetKeyCountListEventHandler(dlg_GetOrderBatchNoTable);
 
             dlg.RefDbName = "";
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -4302,8 +4295,8 @@ out strError);
                     return -1;
                 }
 
-                string strBiblioDbName = this.MainForm.GetBiblioDbNameFromOrderDbName(Global.GetDbName(strRecPath));
-                string strIssueDbName = this.MainForm.GetIssueDbName(strBiblioDbName);
+                string strBiblioDbName = Program.MainForm.GetBiblioDbNameFromOrderDbName(Global.GetDbName(strRecPath));
+                string strIssueDbName = Program.MainForm.GetIssueDbName(strBiblioDbName);
 
                 // 如果是期刊的订购库，还需要通过订购记录的refid获得期记录，从期记录中才能得到馆藏分配信息
                 string strOutputStyle = "";
@@ -4740,8 +4733,8 @@ out strError);
 
             EntityForm form = new EntityForm();
 
-            form.MainForm = this.MainForm;
-            form.MdiParent = this.MainForm;
+            form.MainForm = Program.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             form.LoadItemByRecPath(strRecPath, false);
@@ -4762,8 +4755,8 @@ out strError);
 
             EntityForm form = new EntityForm();
 
-            form.MainForm = this.MainForm;
-            form.MdiParent = this.MainForm;
+            form.MainForm = Program.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             if (String.IsNullOrEmpty(strBarcode) == false)
@@ -4798,8 +4791,8 @@ out strError);
 
             EntityForm form = new EntityForm();
 
-            form.MainForm = this.MainForm;
-            form.MdiParent = this.MainForm;
+            form.MainForm = Program.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             if (this.comboBox_load_type.Text == "图书")
@@ -6023,16 +6016,16 @@ out strError);
             // 配置标题和风格
             string strNamePath = "printaccept_origin_printoption";
 
-            PrintOption option = new AcceptOriginPrintOption(this.MainForm.DataDir,
+            PrintOption option = new AcceptOriginPrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
             PrintOptionDlg dlg = new PrintOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.MainForm = this.MainForm;
-            dlg.DataDir = this.MainForm.DataDir;
+            // dlg.MainForm = Program.MainForm;
+            dlg.DataDir = Program.MainForm.DataDir;
             dlg.Text = this.comboBox_load_type.Text + " 原始数据 打印参数";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
@@ -6080,14 +6073,14 @@ out strError);
             };
 
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "orderorigin_printoption_formstate");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "orderorigin_printoption_formstate");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            option.SaveData(this.MainForm.AppInfo,
+            option.SaveData(Program.MainForm.AppInfo,
                 strNamePath);
         }
 
@@ -6113,12 +6106,12 @@ out strError);
                 HtmlPrintForm printform = new HtmlPrintForm();
 
                 printform.Text = "打印原始验收数据(册信息)";
-                printform.MainForm = this.MainForm;
+                // printform.MainForm = Program.MainForm;
                 printform.Filenames = filenames;
 
-                this.MainForm.AppInfo.LinkFormState(printform, "printaccept_htmlprint_formstate");
+                Program.MainForm.AppInfo.LinkFormState(printform, "printaccept_htmlprint_formstate");
                 printform.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(printform);
+                Program.MainForm.AppInfo.UnlinkFormState(printform);
             }
 
             finally
@@ -6144,9 +6137,9 @@ out strError);
             Hashtable macro_table = new Hashtable();
 
             // 获得打印参数
-            PrintOption option = new AcceptOriginPrintOption(this.MainForm.DataDir,
+            PrintOption option = new AcceptOriginPrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 "printaccept_origin_printoption");
 
             /*
@@ -6214,7 +6207,7 @@ out strError);
 
             filenames = new List<string>();    // 每页一个文件，这个数组存放了所有文件名
 
-            string strFileNamePrefix = this.MainForm.DataDir + "\\~printaccept";
+            string strFileNamePrefix = Program.MainForm.DataDir + "\\~printaccept";
 
             string strFileName = "";
 
@@ -6235,8 +6228,8 @@ out strError);
                 macro_table["%pageno%"] = "1";
 
                 // 2009/7/30
-                macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
-                ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
+                macro_table["%datadir%"] = Program.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
+                ////macro_table["%libraryserverdir%"] = Program.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
                 // 2009/10/10
                 macro_table["%cssfilepath%"] = this.GetAutoCssUrl(option, "acceptorigin.css");  // 便于引用服务器端或“css”模板的CSS文件
 
@@ -6359,7 +6352,7 @@ out strError);
             bool bOutputTable)
         {
             /*
-            string strLibraryServerUrl = this.MainForm.AppInfo.GetString(
+            string strLibraryServerUrl = Program.MainForm.AppInfo.GetString(
     "config",
     "circulation_server_url",
     "");
@@ -6368,7 +6361,7 @@ out strError);
                 strLibraryServerUrl = strLibraryServerUrl.Substring(0, pos);
             */
 
-            // string strCssUrl = this.MainForm.LibraryServerDir + "/acceptorigin.css";
+            // string strCssUrl = Program.MainForm.LibraryServerDir + "/acceptorigin.css";
             // 2009/10/10 changed
             string strCssUrl = GetAutoCssUrl(option, "acceptorigin.css");
 
@@ -6378,7 +6371,7 @@ out strError);
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;
             else
-                strCssUrl = this.MainForm.LibraryServerDir + "/acceptorigin.css";    // 缺省的
+                strCssUrl = Program.MainForm.LibraryServerDir + "/acceptorigin.css";    // 缺省的
              * */
 
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
@@ -7248,7 +7241,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
         private void PrintAcceptForm_Activated(object sender, EventArgs e)
         {
             // 2009/8/13
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
         }
 
         private void comboBox_load_type_SelectedIndexChanged(object sender, EventArgs e)
@@ -7379,7 +7372,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                 this.ExportExcelFilename = dlg.FileName;
 
 #if NO
-                // string filepath = Path.Combine(this.MainForm.UserDir, "test.xlsx");
+                // string filepath = Path.Combine(Program.MainForm.UserDir, "test.xlsx");
                 SpreadsheetDocument spreadsheetDocument = null;
                 spreadsheetDocument = SpreadsheetDocument.Create(this.ExportExcelFilename, SpreadsheetDocumentType.Workbook);
 
@@ -7475,12 +7468,12 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                     HtmlPrintForm printform = new HtmlPrintForm();
 
                     printform.Text = "打印汇率统计表";
-                    printform.MainForm = this.MainForm;
+                    // printform.MainForm = Program.MainForm;
                     printform.Filenames = filenames;
 
-                    this.MainForm.AppInfo.LinkFormState(printform, "printaccept_htmlprint_formstate");
+                    Program.MainForm.AppInfo.LinkFormState(printform, "printaccept_htmlprint_formstate");
                     printform.ShowDialog(this);
-                    this.MainForm.AppInfo.UnlinkFormState(printform);
+                    Program.MainForm.AppInfo.UnlinkFormState(printform);
                 }
             }
 
@@ -7628,9 +7621,9 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
 
             // 获得打印参数
             string strNamePath = "printaccept_exchangerate_printoption";
-            ExchangeRatePrintOption option = new ExchangeRatePrintOption(this.MainForm.DataDir,
+            ExchangeRatePrintOption option = new ExchangeRatePrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
             this.m_exchangeTable.Clear();
@@ -7687,7 +7680,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
 
             if (String.IsNullOrEmpty(strStatisTemplateFilePath) == true)
             {
-                strStatisTemplateFilePath = PathUtil.MergePath(this.MainForm.DataDir, "default_printaccept_exchangeratetable.template");
+                strStatisTemplateFilePath = PathUtil.MergePath(Program.MainForm.DataDir, "default_printaccept_exchangeratetable.template");
             }
 
             Debug.Assert(String.IsNullOrEmpty(strStatisTemplateFilePath) == false, "");
@@ -7785,7 +7778,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                 return 0;
             }
 
-            string strFileName = this.MainForm.DataDir + "\\~printaccept_exchangerate";
+            string strFileName = Program.MainForm.DataDir + "\\~printaccept_exchangerate";
             filenames.Add(strFileName);
 
             Sheet sheet = null;
@@ -7909,29 +7902,29 @@ false);
             // 配置标题和风格
             string strNamePath = "printaccept_exchangerate_printoption";
 
-            PrintOption option = new ExchangeRatePrintOption(this.MainForm.DataDir,
+            PrintOption option = new ExchangeRatePrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
             PrintOptionDlg dlg = new PrintOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.MainForm = this.MainForm;
-            dlg.DataDir = this.MainForm.DataDir;
+            // dlg.MainForm = Program.MainForm;
+            dlg.DataDir = Program.MainForm.DataDir;
             dlg.Text = this.comboBox_load_type.Text + " 汇率表 打印参数";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
             };
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "order_exchangerate_printoption_formstate");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "order_exchangerate_printoption_formstate");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            option.SaveData(this.MainForm.AppInfo,
+            option.SaveData(Program.MainForm.AppInfo,
                 strNamePath);
         }
 

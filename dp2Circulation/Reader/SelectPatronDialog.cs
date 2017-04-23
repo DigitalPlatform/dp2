@@ -78,7 +78,8 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            this.m_webExternalHost_patron.Initial(this.MainForm, this.webBrowser_patron);
+            this.m_webExternalHost_patron.Initial(//Program.MainForm, 
+                this.webBrowser_patron);
             this.webBrowser_patron.ObjectForScripting = this.m_webExternalHost_patron;
 
             MessageVisible = MessageVisible;
@@ -132,18 +133,14 @@ namespace dp2Circulation
 
         // 初始化数据成员
         public int Initial(
-            MainForm mainform,
-            //LibraryChannel channel,
-            //Stop stop,
+            // MainForm mainform,
             List<string> paths,
             string strMessage,
             out string strError)
         {
             strError = "";
 
-            this.MainForm = mainform;
-            //this.Channel = channel;
-            //this._stop = stop;
+            // this.MainForm = mainform;
             this.RecPaths = paths;
 
             this.textBox_message.Text = strMessage;
@@ -317,7 +314,7 @@ namespace dp2Circulation
 #if NO
             Global.SetHtmlString(this.webBrowser_patron,
                 info.PatronHtml,
-                this.MainForm.DataDir,
+                Program.MainForm.DataDir,
                 "selectpatrondialog");
 #endif
             this.m_webExternalHost_patron.SetHtmlString(info.PatronHtml,
@@ -534,7 +531,7 @@ namespace dp2Circulation
 
         void Window_Error(object sender, HtmlElementErrorEventArgs e)
         {
-            // if (this.MainForm.SuppressScriptErrors == true)
+            // if (Program.MainForm.SuppressScriptErrors == true)
             e.Handled = true;
         }
 

@@ -203,7 +203,7 @@ namespace dp2Circulation
             Stop.BeginLoop();
 
             this.Update();
-            // this.MainForm.Update();
+            // Program.MainForm.Update();
 
             try
             {
@@ -366,7 +366,7 @@ namespace dp2Circulation
                     {
                         IssuePublishTimeFoundDupDlg dlg = new IssuePublishTimeFoundDupDlg();
                         MainForm.SetControlFont(dlg, this.Font, false);
-                        dlg.MainForm = this.MainForm;
+                        dlg.MainForm = Program.MainForm;
                         dlg.BiblioText = strBiblioText;
                         dlg.IssueText = strIssueText;
                         dlg.MessageText = "拟新增的出版时间 '" + strPublishTime + "' 在数据库中发现已经存在。因此无法新增。";
@@ -410,8 +410,7 @@ namespace dp2Circulation
 
             edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
             edit.Text = "新增期";
-            edit.MainForm = this.MainForm;
-            // edit.EntityForm = this;  // ???
+            // edit.MainForm = Program.MainForm;
             nRet = edit.InitialForEdit(issueitem,
                 this.Items,
                 out strError);
@@ -419,9 +418,9 @@ namespace dp2Circulation
                 goto ERROR1;
 
             //REDO:
-            this.MainForm.AppInfo.LinkFormState(edit, "IssueEditForm_state");
+            Program.MainForm.AppInfo.LinkFormState(edit, "IssueEditForm_state");
             edit.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(edit);
+            Program.MainForm.AppInfo.UnlinkFormState(edit);
 
             if (edit.DialogResult != DialogResult.OK
                 && edit.Item == issueitem    // 表明尚未前后移动，或者移动回到起点，然后Cancel
@@ -720,7 +719,7 @@ namespace dp2Circulation
         {
             strError = "";
 
-            string strNewDefault = this.MainForm.AppInfo.GetString(
+            string strNewDefault = Program.MainForm.AppInfo.GetString(
     "entityform_optiondlg",
     strCfgEntry,
     "<root />");
@@ -779,7 +778,7 @@ namespace dp2Circulation
             IssueEditForm edit = new IssueEditForm();
 
             edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
-            edit.MainForm = this.MainForm;
+            // edit.MainForm = Program.MainForm;
             edit.ItemControl = this;
             string strError = "";
             int nRet = edit.InitialForEdit(issueitem,
@@ -793,9 +792,9 @@ namespace dp2Circulation
             edit.StartItem = null;  // 清除原始对象标记
 
         REDO:
-            this.MainForm.AppInfo.LinkFormState(edit, "IssueEditForm_state");
+            Program.MainForm.AppInfo.LinkFormState(edit, "IssueEditForm_state");
             edit.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(edit);
+            Program.MainForm.AppInfo.UnlinkFormState(edit);
 
             if (edit.DialogResult != DialogResult.OK)
                 return;
@@ -811,7 +810,7 @@ namespace dp2Circulation
 #endif
             TriggerContentChanged(bOldChanged, true);
 
-            LibraryChannel channel = this.MainForm.GetChannel();
+            LibraryChannel channel = Program.MainForm.GetChannel();
             this.EnableControls(false);
             try
             {
@@ -915,7 +914,7 @@ namespace dp2Circulation
             finally
             {
                 this.EnableControls(true);
-                this.MainForm.ReturnChannel(channel);
+                Program.MainForm.ReturnChannel(channel);
             }
         }
 
@@ -1032,7 +1031,7 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 this.Changed = false;
-                this.MainForm.StatusBarMessage = "期信息 提交 / 保存 成功";
+                Program.MainForm.StatusBarMessage = "期信息 提交 / 保存 成功";
                 return 1;
             ERROR1:
                 MessageBox.Show(ForegroundWindow.Instance, strError);
@@ -1145,7 +1144,7 @@ namespace dp2Circulation
             Stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -1295,7 +1294,7 @@ namespace dp2Circulation
                     if (String.IsNullOrEmpty(issueitem.RecPath) == false)
                     {
                         string strTempItemDbName = Global.GetDbName(issueitem.RecPath);
-                        string strTempBiblioDbName = this.MainForm.GetBiblioDbNameFromIssueDbName(strTempItemDbName);
+                        string strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromIssueDbName(strTempItemDbName);
 
                         Debug.Assert(String.IsNullOrEmpty(strTempBiblioDbName) == false, "");
                         // TODO: 这里要正规报错
@@ -1557,7 +1556,7 @@ namespace dp2Circulation
             menuItem = new MenuItem("装入已经打开的期窗(&E)");
             menuItem.Click += new System.EventHandler(this.menu_loadToExistItemForm_Click);
             if (this.listView.SelectedItems.Count == 0
-                || this.MainForm.GetTopChildWindow<ItemInfoForm>() == null)
+                || Program.MainForm.GetTopChildWindow<ItemInfoForm>() == null)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -1689,8 +1688,8 @@ namespace dp2Circulation
             ItemInfoForm form = null;
 
             form = new ItemInfoForm();
-            form.MdiParent = this.MainForm;
-            form.MainForm = this.MainForm;
+            form.MdiParent = Program.MainForm;
+            form.MainForm = Program.MainForm;
             form.Show();
 
             form.DbType = "issue";
@@ -1729,7 +1728,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            ItemInfoForm form = this.MainForm.GetTopChildWindow<ItemInfoForm>();
+            ItemInfoForm form = Program.MainForm.GetTopChildWindow<ItemInfoForm>();
             if (form == null)
             {
                 strError = "当前并没有已经打开的期窗";
@@ -1838,26 +1837,26 @@ namespace dp2Circulation
                 BindingForm dlg = new BindingForm();
 
                 dlg.Text = strTitle;
-                dlg.MainForm = this.MainForm;
-                dlg.AppInfo = this.MainForm.AppInfo;
+                // dlg.MainForm = Program.MainForm;
+                dlg.AppInfo = Program.MainForm.AppInfo;
                 dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);
                 if (this.PrepareAccept != null)
                 {
                     dlg.AcceptBatchNoInputed = true;
                     // dlg.AcceptBatchNo = this.AcceptBatchNo;
-                    this.MainForm.AppInfo.SetString(
+                    Program.MainForm.AppInfo.SetString(
                         "binding_form",
                         "accept_batchno",
                         this.AcceptBatchNo);
                 }
 
-                dlg.Operator = this.MainForm.DefaultUserName;
+                dlg.Operator = Program.MainForm.DefaultUserName;
 #if NO
                 if (this.Channel != null)
                     dlg.LibraryCodeList = this.Channel.LibraryCodeList;
 #endif
-                if (this.MainForm != null)
-                    dlg.LibraryCodeList = this.MainForm._currentLibraryCodeList;
+                if (Program.MainForm != null)
+                    dlg.LibraryCodeList = Program.MainForm._currentLibraryCodeList;
 
                 dlg.SetProcessingState = this.SetProcessingState;
                 /*
@@ -2019,10 +2018,10 @@ namespace dp2Circulation
 
                 dlg.Changed = false;
 
-                MainForm.AppInfo.LinkFormState(dlg,
+                Program.MainForm.AppInfo.LinkFormState(dlg,
                     "binding_form_state");
                 dlg.ShowDialog(this);
-                MainForm.AppInfo.UnlinkFormState(dlg);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
                 if (dlg.DialogResult != DialogResult.OK)
                     return;
@@ -2614,7 +2613,7 @@ namespace dp2Circulation
             Debug.Assert(this.Items != null, "");
 
             IssueManageForm dlg = new IssueManageForm();
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             // 2009/2/15
             dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);
 
@@ -2661,12 +2660,12 @@ namespace dp2Circulation
             dlg.GenerateEntity += new GenerateEntityEventHandler(dlg_GenerateEntity);
              * */
 
-            MainForm.AppInfo.LinkFormState(dlg,
+            Program.MainForm.AppInfo.LinkFormState(dlg,
                 "issue_manage_form_state");
 
             dlg.ShowDialog(this);
 
-            MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -2863,7 +2862,7 @@ namespace dp2Circulation
         {
             string strError = "";
             string[] values = null;
-            int nRet = MainForm.GetValueTable(e.TableName,
+            int nRet = Program.MainForm.GetValueTable(e.TableName,
                 e.DbName,
                 out values,
                 out strError);

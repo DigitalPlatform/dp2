@@ -24,25 +24,6 @@ namespace dp2Circulation
     /// </summary>
     public partial class OperLogStatisForm : MyScriptForm
     {
-        // bool Running = false;   // 正在执行运算
-
-        //string m_strMainCsDllName = "";
-
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm
-        {
-            get
-            {
-                return (MainForm)this.MdiParent;
-            }
-        }
-        
-        DigitalPlatform.Stop stop = null;
-#endif
-
 #if NO
         /// <summary>
         /// 脚本管理器
@@ -77,12 +58,12 @@ namespace dp2Circulation
 
         private void OperLogStatisForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -92,14 +73,14 @@ namespace dp2Circulation
 #endif
 
             ScriptManager.CfgFilePath = Path.Combine(
-    this.MainForm.UserDir,
+    Program.MainForm.UserDir,
     "statis_projects.xml");
 
 #if NO
-            ScriptManager.applicationInfo = this.MainForm.AppInfo;
+            ScriptManager.applicationInfo = Program.MainForm.AppInfo;
             ScriptManager.CfgFilePath =
-                this.MainForm.DataDir + "\\statis_projects.xml";
-            ScriptManager.DataDir = this.MainForm.DataDir;
+                Program.MainForm.DataDir + "\\statis_projects.xml";
+            ScriptManager.DataDir = Program.MainForm.DataDir;
 
             ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
             ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
@@ -119,38 +100,38 @@ namespace dp2Circulation
 #endif
 
             // 方案名
-            this.textBox_projectName.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_projectName.Text = Program.MainForm.AppInfo.GetString(
                 "operlogstatisform",
                 "projectname",
                 "");
 
             // 起始日期
-            this.dateControl_start.Text = this.MainForm.AppInfo.GetString(
+            this.dateControl_start.Text = Program.MainForm.AppInfo.GetString(
                  "operlogstatisform",
                  "start_date",
                  "");
 
             // 结束日期
-            this.dateControl_end.Text = this.MainForm.AppInfo.GetString(
+            this.dateControl_end.Text = Program.MainForm.AppInfo.GetString(
                 "operlogstatisform",
                 "end_date",
                 "");
 
             /*
             // 如何输出表格
-            this.checkBox_startToEndTable.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_startToEndTable.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "operlogstatisform",
                 "startToEndTable",
                 true);
-            this.checkBox_perYearTable.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_perYearTable.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "operlogstatisform",
                 "perYearTable",
                 false);
-            this.checkBox_perMonthTable.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_perMonthTable.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "operlogstatisform",
                 "perMonthTable",
                 false);
-            this.checkBox_perDayTable.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_perDayTable.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "operlogstatisform",
                 "perDayTable",
                 false);
@@ -185,37 +166,37 @@ namespace dp2Circulation
 #endif
 
             // 方案名
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "operlogstatisform",
                 "projectname",
                 this.textBox_projectName.Text);
 
             // 起始日期
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "operlogstatisform",
                 "start_date",
                 this.dateControl_start.Text);
             // 结束日期
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "operlogstatisform",
                 "end_date",
                 this.dateControl_end.Text);
 
             /*
             // 如何输出表格
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
                 "operlogstatisform",
                 "startToEndTable",
                 this.checkBox_startToEndTable.Checked);
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
                 "operlogstatisform",
                 "perYearTable",
                 this.checkBox_perYearTable.Checked);
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
                 "operlogstatisform",
                 "perMonthTable",
                 this.checkBox_perMonthTable.Checked);
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
                 "operlogstatisform",
                 "perDayTable",
                 this.checkBox_perDayTable.Checked);
@@ -280,8 +261,8 @@ namespace dp2Circulation
             dlg.ProjectsUrl = "http://dp2003.com/dp2circulation/projects/projects.xml";
             dlg.HostName = "OperLogStatisForm";
             dlg.scriptManager = this.ScriptManager;
-            dlg.AppInfo = this.MainForm.AppInfo;
-            dlg.DataDir = this.MainForm.DataDir;
+            dlg.AppInfo = Program.MainForm.AppInfo;
+            dlg.DataDir = Program.MainForm.DataDir;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
         }
@@ -313,7 +294,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             _dllPaths.Clear();
             _dllPaths.Add(strProjectLocate);
@@ -541,7 +522,7 @@ namespace dp2Circulation
                 MessageBox.Show(this, strWarning);
 
             string strStyle = "";
-            if (this.MainForm.AutoCacheOperlogFile == true)
+            if (Program.MainForm.AutoCacheOperlogFile == true)
                 strStyle = "autocache";
 
             ProgressEstimate estimate = new ProgressEstimate();
@@ -551,10 +532,10 @@ stop,
 estimate,
 Channel,
 LogFileNames,
-this.MainForm.OperLogLevel,
+Program.MainForm.OperLogLevel,
 strStyle,
 "", // strFilter
-this.MainForm.OperLogCacheDir,
+Program.MainForm.OperLogCacheDir,
 null,   // param,
 procDoRecord,   // DoRecord,
 out strError);
@@ -578,7 +559,7 @@ out strError);
             string strWarning = "";
             string strMainCsDllName = PathUtil.MergePath(this.InstanceDir, "\\~operlog_statis_main_" + Convert.ToString(AssemblyVersion++) + ".dll");    // ++
 
-            string strLibPaths = "\"" + this.MainForm.DataDir + "\""
+            string strLibPaths = "\"" + Program.MainForm.DataDir + "\""
                 + ","
                 + "\"" + strProjectLocate + "\"";
 
@@ -703,7 +684,7 @@ out strError);
 
             strMainCsDllName = strProjectLocate + "\\~main_" + Convert.ToString(AssemblyVersion) + ".dll";    // ++
 
-            string strLibPaths = "\"" + this.MainForm.DataDir + "\""
+            string strLibPaths = "\"" + Program.MainForm.DataDir + "\""
                 + ","
                 + "\"" + strProjectLocate + "\"";
 
@@ -1096,9 +1077,9 @@ out strError);
             dlg.ProjectName = this.textBox_projectName.Text;
             dlg.NoneProject = false;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -1129,13 +1110,13 @@ out strError);
             HtmlPrintForm printform = new HtmlPrintForm();
 
             printform.Text = "打印统计结果";
-            printform.MainForm = this.MainForm;
+            // printform.MainForm = Program.MainForm;
 
             Debug.Assert(this.objStatis != null, "");
             printform.Filenames = this.objStatis.OutputFileNames;
-            this.MainForm.AppInfo.LinkFormState(printform, "printform_state");
+            Program.MainForm.AppInfo.LinkFormState(printform, "printform_state");
             printform.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(printform);
+            Program.MainForm.AppInfo.UnlinkFormState(printform);
         }
 
         private void tabControl_main_SelectedIndexChanged(object sender, EventArgs e)
@@ -1260,7 +1241,7 @@ out strError);
 
             // 看看cache中是否已经有了
             StringCacheItem item = null;
-            item = this.MainForm.SummaryCache.SearchItem(
+            item = Program.MainForm.SummaryCache.SearchItem(
                 "P:" + strPatronBarcode);   // 前缀是为了和册条码号区别
             if (item != null)
             {
@@ -1310,7 +1291,7 @@ out strError);
                 "name");
 
             // 如果cache中没有，则加入cache
-            item = this.MainForm.SummaryCache.EnsureItem(
+            item = Program.MainForm.SummaryCache.EnsureItem(
                 "P:" + strPatronBarcode);
             item.Content = strSummary;
 
@@ -1377,7 +1358,7 @@ out strError);
 
         private void OperLogStatisForm_Activated(object sender, EventArgs e)
         {
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
         }
 
         private void comboBox_quickSetFilenames_SelectedIndexChanged(object sender, EventArgs e)

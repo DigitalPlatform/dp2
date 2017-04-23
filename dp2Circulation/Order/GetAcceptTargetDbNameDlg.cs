@@ -24,7 +24,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 是否为期刊模式? 
@@ -89,11 +89,11 @@ namespace dp2Circulation
         {
             this.listView_dbnames.Items.Clear();
 
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (String.IsNullOrEmpty(prop.ItemDbName) == true)
                         continue;

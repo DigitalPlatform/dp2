@@ -66,9 +66,9 @@ namespace dp2Circulation
 
         private void UserForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
             EnableControls(false);
@@ -103,17 +103,17 @@ namespace dp2Circulation
 
         void SaveSize()
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
 
                 // 保存splitContainer_main的状态
-                this.MainForm.SaveSplitterPos(
+                Program.MainForm.SaveSplitterPos(
                     this.splitContainer_main,
                     "userform_state",
                     "splitContainer_main_ratio");
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_users);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "user_form",
                     "amerced_list_column_width",
                     strWidths);
@@ -125,9 +125,9 @@ namespace dp2Circulation
             try
             {
                 // 获得splitContainer_main的状态
-                if (this.MainForm != null)
+                if (Program.MainForm != null)
                 {
-                    this.MainForm.LoadSplitterPos(
+                    Program.MainForm.LoadSplitterPos(
                     this.splitContainer_main,
                     "userform_state",
                     "splitContainer_main_ratio");
@@ -137,7 +137,7 @@ namespace dp2Circulation
             {
             }
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
                 "user_form",
                 "amerced_list_column_width",
                 "");
@@ -270,7 +270,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -560,7 +560,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -606,7 +606,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -646,7 +646,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -686,7 +686,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -719,7 +719,7 @@ namespace dp2Circulation
         private void button_editUserRights_Click(object sender, EventArgs e)
         {
             bool bControl = Control.ModifierKeys == Keys.Control;
-            string strRightsCfgFileName = Path.Combine(this.MainForm.UserDir, "objectrights.xml");
+            string strRightsCfgFileName = Path.Combine(Program.MainForm.UserDir, "objectrights.xml");
 
             DigitalPlatform.CommonControl.PropertyDlg dlg = new DigitalPlatform.CommonControl.PropertyDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
@@ -727,7 +727,7 @@ namespace dp2Circulation
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.Text = "用户 '" + this.textBox_userName.Text + "' 的权限";
             dlg.PropertyString = this.textBox_userRights.Text;
-            dlg.CfgFileName = this.MainForm.DataDir + "\\userrightsdef.xml";
+            dlg.CfgFileName = Program.MainForm.DataDir + "\\userrightsdef.xml";
             if (bControl)
             {
                 if (File.Exists(strRightsCfgFileName) == true)
@@ -980,11 +980,11 @@ namespace dp2Circulation
 
         private void UserForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
         SortColumns SortColumns = new SortColumns();

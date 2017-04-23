@@ -24,18 +24,6 @@ namespace dp2Circulation
     /// </summary>
     public partial class CheckBorrowInfoForm : MyForm
     {
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
-
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -46,14 +34,14 @@ namespace dp2Circulation
 
         private void CheckBorrowInfoForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 #if NO
             MainForm.AppInfo.LoadMdiChildFormStates(this,
     "mdi_form_state");
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -64,17 +52,17 @@ namespace dp2Circulation
 
             Global.ClearForPureTextOutputing(this.webBrowser_resultInfo);
 
-            this.checkBox_displayPriceString.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_displayPriceString.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "check_borrowinfo_form",
                 "display_price_string",
                 true);
 
-            this.checkBox_forceCNY.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_forceCNY.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "check_borrowinfo_form",
                 "force_cny",
                 false);
 
-            this.checkBox_overwriteExistPrice.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_overwriteExistPrice.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "check_borrowinfo_form",
                 "overwrite_exist_price",
                 false);
@@ -99,19 +87,19 @@ namespace dp2Circulation
 
         private void CheckBorrowInfoForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "check_borrowinfo_form",
                     "display_price_string",
                     this.checkBox_displayPriceString.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "check_borrowinfo_form",
                     "force_cny",
                     this.checkBox_forceCNY.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "check_borrowinfo_form",
                     "overwrite_exist_price",
                     this.checkBox_overwriteExistPrice.Checked);
@@ -1240,19 +1228,19 @@ out strError);
                 {
                     if (Channel.ErrorCode == ErrorCode.ItemBarcodeDup)
                     {
-                        // this.MainForm.PrepareSearch();
-                        LibraryChannel channel = this.MainForm.GetChannel();
+                        // Program.MainForm.PrepareSearch();
+                        LibraryChannel channel = Program.MainForm.GetChannel();
                         try
                         {
                             ItemBarcodeDupDlg dupdlg = new ItemBarcodeDupDlg();
                             MainForm.SetControlFont(dupdlg, this.Font, false);
                             string strErrorNew = "";
                             int nRet = dupdlg.Initial(
-                                this.MainForm,
+                                // Program.MainForm,
                                 aDupPath,
                                 "因册条码号发生重复，修复操作被拒绝。\r\n\r\n可根据下面列出的详细信息，选择适当的册记录，重试操作。\r\n\r\n原始出错信息:\r\n" + strError,
-                                channel,    // this.MainForm.Channel,
-                                this.MainForm.Stop,
+                                channel,    // Program.MainForm.Channel,
+                                Program.MainForm.Stop,
                                 out strErrorNew);
                             if (nRet == -1)
                             {
@@ -1261,9 +1249,9 @@ out strError);
                                 goto ERROR1;
                             }
 
-                            this.MainForm.AppInfo.LinkFormState(dupdlg, "CheckBorrowInfoForm_dupdlg_state");
+                            Program.MainForm.AppInfo.LinkFormState(dupdlg, "CheckBorrowInfoForm_dupdlg_state");
                             dupdlg.ShowDialog(this);
-                            this.MainForm.AppInfo.UnlinkFormState(dupdlg);
+                            Program.MainForm.AppInfo.UnlinkFormState(dupdlg);
 
                             if (dupdlg.DialogResult == DialogResult.Cancel)
                                 goto ERROR1;
@@ -1274,8 +1262,8 @@ out strError);
                         }
                         finally
                         {
-                            this.MainForm.ReturnChannel(channel);
-                            // this.MainForm.EndSearch();
+                            Program.MainForm.ReturnChannel(channel);
+                            // Program.MainForm.EndSearch();
                         }
                     }
 
@@ -1930,7 +1918,7 @@ out strError);
 
         private void CheckBorrowInfoForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
         }
 
         private void button_single_checkFromReader_Click(object sender, EventArgs e)

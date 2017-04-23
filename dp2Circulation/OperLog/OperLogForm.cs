@@ -72,18 +72,6 @@ namespace dp2Circulation
         // 参与排序的列号数组
         SortColumns SortColumns_records = new SortColumns();
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
-
         // 临时文件名集合
         List<string> m_tempFileNames = new List<string>();
 
@@ -99,9 +87,9 @@ namespace dp2Circulation
 
         private void OperLogForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
             this.AcceptButton = this.button_loadFromSingleFile;
@@ -113,12 +101,12 @@ namespace dp2Circulation
 #endif
 
             /*
-            if (this.MainForm.CanDisplayItemProperty() == true)
+            if (Program.MainForm.CanDisplayItemProperty() == true)
                 DownPannelVisible = false;
              * */
             DownPannelVisible = false;  // 必须隐藏。因为放开后有 javascript 没有连接 host 等问题
 
-            this.UiState = this.MainForm.AppInfo.GetString(
+            this.UiState = Program.MainForm.AppInfo.GetString(
 "operlog_form",
 "ui_state",
 "");
@@ -159,7 +147,7 @@ namespace dp2Circulation
 #if NO
         void Channels_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            this.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
+            Program.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 #endif
 
@@ -181,9 +169,9 @@ namespace dp2Circulation
 
             ClearAllTempFiles();
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
     "operlog_form",
     "ui_state",
     this.UiState);
@@ -229,9 +217,9 @@ namespace dp2Circulation
             this.ClearAllTempFiles();
 
             Global.ClearHtmlPage(this.webBrowser_xml,
-    this.MainForm.DataDir);
+    Program.MainForm.DataDir);
             Global.ClearHtmlPage(this.webBrowser_html,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
         }
 
         // 
@@ -256,7 +244,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
 #if NO
             this.listView_records.Items.Clear();
@@ -267,9 +255,9 @@ namespace dp2Circulation
             this.ClearAllTempFiles();
 
             Global.ClearHtmlPage(this.webBrowser_xml,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
             Global.ClearHtmlPage(this.webBrowser_html,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
 #endif
             this.Clear();
 
@@ -283,7 +271,7 @@ namespace dp2Circulation
                 lines.Add(strLogFileName);
 
                 string strStyle = "";
-                if (this.MainForm.AutoCacheOperlogFile == true)
+                if (Program.MainForm.AutoCacheOperlogFile == true)
                     strStyle = "autocache";
                 if (bControl)
                     StringUtil.SetInList(ref strStyle, "accessLog", true);
@@ -293,10 +281,10 @@ namespace dp2Circulation
     this.estimate,
     Channel,
     lines,
-    this.MainForm.OperLogLevel,
+    Program.MainForm.OperLogLevel,
     strStyle,
     this.textBox_filter.Text,
-    this.MainForm.OperLogCacheDir,
+    Program.MainForm.OperLogCacheDir,
     null,   // param,
     DoRecord,
     out strError);
@@ -520,7 +508,7 @@ namespace dp2Circulation
 
         string GetHeadString(bool bAjax = true)
         {
-            string strCssFilePath = PathUtil.MergePath(this.MainForm.DataDir, "operloghtml.css");
+            string strCssFilePath = PathUtil.MergePath(Program.MainForm.DataDir, "operloghtml.css");
 
             if (bAjax == true)
                 return
@@ -2654,7 +2642,7 @@ out string strError)
             }
             // string strBarcodeLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ItemInfoForm', this.innerText, true);\">" + strBarcode + "</a>";
 
-            // string strCssFilePath = PathUtil.MergePath(this.MainForm.DataDir, "operloghtml.css");
+            // string strCssFilePath = PathUtil.MergePath(Program.MainForm.DataDir, "operloghtml.css");
 
             strHtml =
                 "<table class='iteminfo'>" +
@@ -3255,14 +3243,14 @@ out string strError)
                         {
                             Global.SetHtmlString(this.webBrowser_xml,
                                 strError,
-                                this.MainForm.DataDir,
+                                Program.MainForm.DataDir,
                                 "operlogerror");
                         }
                         else
                         {
                             Global.SetXmlString(this.webBrowser_xml,
         strXml,
-        this.MainForm.DataDir,
+        Program.MainForm.DataDir,
         "operlogexml");
 
                             string strHtml = "";
@@ -3278,19 +3266,19 @@ out string strError)
                             if (nRet == -1 || nRet == 1)
                                 Global.SetHtmlString(this.webBrowser_html,
                                     strError,
-                                    this.MainForm.DataDir,
+                                    Program.MainForm.DataDir,
                                     "operlogerror_html");
                             else
                             {
                                 if (string.IsNullOrEmpty(strHtml) == true)
                                     Global.SetHtmlString(this.webBrowser_html,
                                         NOTSUPPORT,
-                                        this.MainForm.DataDir,
+                                        Program.MainForm.DataDir,
                                         "operloghtml");
                                 else
                                     Global.SetHtmlString(this.webBrowser_html,
                                         strHtml,
-                                        this.MainForm.DataDir,
+                                        Program.MainForm.DataDir,
                                         "operloghtml");
                             }
 
@@ -3301,9 +3289,9 @@ out string strError)
                 else
                 {
                     Global.ClearHtmlPage(this.webBrowser_xml,
-                        this.MainForm.DataDir);
+                        Program.MainForm.DataDir);
                     Global.ClearHtmlPage(this.webBrowser_html,
-                        this.MainForm.DataDir);
+                        Program.MainForm.DataDir);
                 }
             }
 
@@ -3334,7 +3322,7 @@ out string strError)
 
 #if NO
             LibraryChannel channel = this.Channels.NewChannel(MainForm.LibraryServerUrl);
-            channel.Url = this.MainForm.LibraryServerUrl;
+            channel.Url = Program.MainForm.LibraryServerUrl;
 #endif
             LibraryChannel channel = this.GetChannel();
             try
@@ -3350,7 +3338,7 @@ out string strError)
 
                 if (info.InCacheFile == false)
                 {
-                    string strStyle = "level-" + this.MainForm.OperLogLevel.ToString();
+                    string strStyle = "level-" + Program.MainForm.OperLogLevel.ToString();
                     if (this.AccessLog)
                         strStyle += ",accessLog";
 
@@ -3386,7 +3374,7 @@ out string strError)
                 else
                 {
                     string strCacheFilename = Path.Combine(
-                        this.MainForm.OperLogCacheDir,
+                        Program.MainForm.OperLogCacheDir,
                         strLogFileName);
                     using (Stream stream = File.Open(
 strCacheFilename,
@@ -3543,11 +3531,11 @@ FileShare.ReadWrite))
 
         private void OperLogForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
 
         }
 
@@ -3712,7 +3700,7 @@ FileShare.ReadWrite))
 
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
 #if DELAY_UPDATE
             this.listView_records.BeginUpdate();
@@ -3727,9 +3715,9 @@ FileShare.ReadWrite))
             this.ClearAllTempFiles();
 
             Global.ClearHtmlPage(this.webBrowser_xml,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
             Global.ClearHtmlPage(this.webBrowser_html,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
 #endif
             this.Clear();
 
@@ -3752,7 +3740,7 @@ FileShare.ReadWrite))
                 }
 
                 string strStyle = "";
-                if (this.MainForm.AutoCacheOperlogFile == true)
+                if (Program.MainForm.AutoCacheOperlogFile == true)
                     strStyle = "autocache";
                 if (bControl)
                     StringUtil.SetInList(ref strStyle, "accessLog", true);
@@ -3762,10 +3750,10 @@ FileShare.ReadWrite))
                     this.estimate,
                     Channel,
                     lines,
-                    this.MainForm.OperLogLevel,
+                    Program.MainForm.OperLogLevel,
                     strStyle,
                     this.textBox_filter.Text,
-                    this.MainForm.OperLogCacheDir,
+                    Program.MainForm.OperLogCacheDir,
                     null,   // param,
                     DoRecord,
                     out strError);
@@ -3787,7 +3775,7 @@ FileShare.ReadWrite))
                 EnableControls(true);
             }
 
-            this.MainForm.StatusBarMessage = "总共耗费时间: " + this.estimate.GetTotalTime().ToString();
+            Program.MainForm.StatusBarMessage = "总共耗费时间: " + this.estimate.GetTotalTime().ToString();
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -4085,7 +4073,7 @@ FileShare.ReadWrite))
 
 
             //this.Update();
-            //this.MainForm.Update();
+            //Program.MainForm.Update();
 
 #if NO
             this.listView_records.Items.Clear();
@@ -4097,9 +4085,9 @@ FileShare.ReadWrite))
             this.ClearAllTempFiles();
 
             Global.ClearHtmlPage(this.webBrowser_xml,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
             Global.ClearHtmlPage(this.webBrowser_html,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
 #endif
             this.Clear();
 
@@ -4125,7 +4113,7 @@ FileShare.ReadWrite))
                 }
 
                 string strStyle = "";
-                if (this.MainForm.AutoCacheOperlogFile == true)
+                if (Program.MainForm.AutoCacheOperlogFile == true)
                     strStyle = "autocache";
                 if (this.AccessLog)
                     strStyle += ",accessLog";
@@ -4135,10 +4123,10 @@ FileShare.ReadWrite))
     this.estimate,
     Channel,
     lines,
-    this.MainForm.OperLogLevel,
+    Program.MainForm.OperLogLevel,
     strStyle,
     this.textBox_filter.Text,
-    this.MainForm.OperLogCacheDir,
+    Program.MainForm.OperLogCacheDir,
     null,   // param,
     DoRecord,
     out strError);
@@ -5069,7 +5057,7 @@ FileShare.ReadWrite))
             // 优化，避免无谓地进行服务器调用
             if (bOpenWindow == false)
             {
-                if (this.MainForm.PanelFixedVisible == false
+                if (Program.MainForm.PanelFixedVisible == false
                     && (m_operlogViewer == null || m_operlogViewer.Visible == false))
                     return;
             }
@@ -5125,11 +5113,11 @@ FileShare.ReadWrite))
             {
                 m_operlogViewer = new CommentViewerForm();
                 MainForm.SetControlFont(m_operlogViewer, this.Font, false);
-                m_operlogViewer.SuppressScriptErrors = this.MainForm.SuppressScriptErrors;
+                m_operlogViewer.SuppressScriptErrors = Program.MainForm.SuppressScriptErrors;
                 bNew = true;
             }
 
-            m_operlogViewer.MainForm = this.MainForm;  // 必须是第一句
+            // m_operlogViewer.MainForm = Program.MainForm;  // 必须是第一句
 
             if (bNew == true)
                 m_operlogViewer.InitialWebBrowser();
@@ -5144,11 +5132,11 @@ FileShare.ReadWrite))
             {
                 if (m_operlogViewer.Visible == false)
                 {
-                    this.MainForm.AppInfo.LinkFormState(m_operlogViewer, "operlog_viewer_state");
+                    Program.MainForm.AppInfo.LinkFormState(m_operlogViewer, "operlog_viewer_state");
                     m_operlogViewer.Show(this);
                     m_operlogViewer.Activate();
 
-                    this.MainForm.CurrentPropertyControl = null;
+                    Program.MainForm.CurrentPropertyControl = null;
                 }
                 else
                 {
@@ -5165,7 +5153,7 @@ FileShare.ReadWrite))
                 }
                 else
                 {
-                    if (this.MainForm.CurrentPropertyControl != m_operlogViewer.MainControl)
+                    if (Program.MainForm.CurrentPropertyControl != m_operlogViewer.MainControl)
                         m_operlogViewer.DoDock(false); // 不会自动显示FixedPanel
                 }
             }
@@ -5178,7 +5166,7 @@ FileShare.ReadWrite))
         {
             if (m_operlogViewer != null)
             {
-                this.MainForm.AppInfo.UnlinkFormState(m_operlogViewer);
+                Program.MainForm.AppInfo.UnlinkFormState(m_operlogViewer);
                 this.m_operlogViewer = null;
             }
         }
@@ -5812,7 +5800,7 @@ FileShare.ReadWrite))
             }
 
             List<string> filenames = new List<string>();
-            string strFileNamePrefix = this.MainForm.DataDir + "\\~operlog_print_";
+            string strFileNamePrefix = Program.MainForm.DataDir + "\\~operlog_print_";
             string strFilename = strFileNamePrefix + (1).ToString() + ".html";
             filenames.Add(strFilename);
 
@@ -5831,7 +5819,8 @@ FileShare.ReadWrite))
             stop.BeginLoop();
 
             m_webExternalHost = new WebExternalHost();
-            m_webExternalHost.Initial(this.MainForm, null);
+            m_webExternalHost.Initial(// Program.MainForm,
+                null);
             m_webExternalHost.IsInLoop = true;
 
             this.GetSummary += new GetSummaryEventHandler(OperLogForm_GetSummary);
@@ -5871,7 +5860,7 @@ FileShare.ReadWrite))
 
                     Global.SetXmlString(this.webBrowser_xml,
     strXml,
-    this.MainForm.DataDir,
+    Program.MainForm.DataDir,
     "operlogexml");
 
                     string strHtml = "";
@@ -5925,12 +5914,12 @@ FileShare.ReadWrite))
             HtmlPrintForm printform = new HtmlPrintForm();
 
             printform.Text = "打印解释内容";
-            printform.MainForm = this.MainForm;
+            // printform.MainForm = Program.MainForm;
             printform.Filenames = filenames;
 
-            this.MainForm.AppInfo.LinkFormState(printform, "operlogform_printform_state");
+            Program.MainForm.AppInfo.LinkFormState(printform, "operlogform_printform_state");
             printform.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(printform);
+            Program.MainForm.AppInfo.UnlinkFormState(printform);
 
             return;
         ERROR1:
@@ -5959,9 +5948,9 @@ FileShare.ReadWrite))
             dlg.Text = "筛选";
             dlg.Operations = m_strFindOperations;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "operlogform_finddialog_formstate");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "operlogform_finddialog_formstate");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
@@ -6036,9 +6025,9 @@ FileShare.ReadWrite))
             MainForm.SetControlFont(dlg, this.Font, false);
             dlg.Operations = m_strFindOperations;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "operlogform_finddialog_formstate");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "operlogform_finddialog_formstate");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
@@ -6135,9 +6124,9 @@ Keys keyData)
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.Operations = m_strFindOperations;
 
-                this.MainForm.AppInfo.LinkFormState(dlg, "operlogform_finddialog_formstate");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "operlogform_finddialog_formstate");
                 dlg.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(dlg);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
                 if (dlg.DialogResult != DialogResult.OK)
                     return;
@@ -6187,13 +6176,13 @@ Keys keyData)
                 this.Cursor = oldCursor;
             }
 
-            this.MainForm.StatusBarMessage = "操作类型为 '" + m_strFindOperations + "' 的日志记录没有找到";
+            Program.MainForm.StatusBarMessage = "操作类型为 '" + m_strFindOperations + "' 的日志记录没有找到";
             return;
         FOUND:
             ListViewUtil.ClearSelection(this.listView_records);
             found_item.Selected = true;
             found_item.EnsureVisible();
-            this.MainForm.StatusBarMessage = "找到";
+            Program.MainForm.StatusBarMessage = "找到";
         }
 
         // 
@@ -6204,7 +6193,7 @@ Keys keyData)
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "operlog_form",
                     "display_reader_borrow_history",
                     true);
@@ -6219,7 +6208,7 @@ Keys keyData)
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                 "operlog_form",
                 "display_item_borrow_history",
                 true);

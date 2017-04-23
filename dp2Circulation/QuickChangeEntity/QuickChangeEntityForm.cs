@@ -29,13 +29,6 @@ namespace dp2Circulation
 
         string m_strRefID_1 = "";
         // public string m_strRefID_2 = "";
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-#endif
 
         /// <summary>
         /// 当前正在处理的一条册记录所从属的书目记录路径
@@ -78,12 +71,12 @@ namespace dp2Circulation
 
         private void QuickChangeEntityForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -92,7 +85,8 @@ namespace dp2Circulation
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
 
-            this.m_webExternalHost_biblio.Initial(this.MainForm, this.webBrowser_biblio);
+            this.m_webExternalHost_biblio.Initial(// Program.MainForm, 
+                this.webBrowser_biblio);
             this.webBrowser_biblio.ObjectForScripting = this.m_webExternalHost_biblio;
 
             this.AcceptButton = this.button_loadBarcode;
@@ -197,7 +191,7 @@ namespace dp2Circulation
 
 
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
             }
 
             this.entityEditControl1.Clear();
@@ -206,7 +200,7 @@ namespace dp2Circulation
             this.webBrowser_biblio.Stop();
 
             Global.ClearHtmlPage(this.webBrowser_biblio,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
 
             this.textBox_message.Text = "";
 
@@ -260,7 +254,7 @@ namespace dp2Circulation
 #if NO
                 Global.SetHtmlString(this.webBrowser_biblio,
                     strBiblioText,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "quickchangeentityform_biblio");
 #endif
                 this.m_webExternalHost_biblio.SetHtmlString(strBiblioText,
@@ -371,7 +365,7 @@ namespace dp2Circulation
 
         SETFOCUS:
             // 焦点定位
-            string strFocusAction = this.MainForm.AppInfo.GetString(
+            string strFocusAction = Program.MainForm.AppInfo.GetString(
 "change_param",
 "focusAction",
 "册条码号，并全选");
@@ -427,7 +421,7 @@ namespace dp2Circulation
             bool bChanged = false;
             // 装载值
             /*
-            string strState = this.MainForm.AppInfo.GetString(
+            string strState = Program.MainForm.AppInfo.GetString(
                 "change_param",
                 "state",
                 "<不改变>");
@@ -438,7 +432,7 @@ namespace dp2Circulation
 
 
             // state
-            string strStateAction = this.MainForm.AppInfo.GetString(
+            string strStateAction = Program.MainForm.AppInfo.GetString(
                 "change_param",
                 "state",
                 "<不改变>");
@@ -448,11 +442,11 @@ namespace dp2Circulation
 
                 if (strStateAction == "<增、减>")
                 {
-                    string strAdd = this.MainForm.AppInfo.GetString(
+                    string strAdd = Program.MainForm.AppInfo.GetString(
                         "change_param",
                         "state_add",
                         "");
-                    string strRemove = this.MainForm.AppInfo.GetString(
+                    string strRemove = Program.MainForm.AppInfo.GetString(
                         "change_param",
                         "state_remove",
                         "");
@@ -480,7 +474,7 @@ namespace dp2Circulation
                 }
             }
 
-            string strLocation = this.MainForm.AppInfo.GetString(
+            string strLocation = Program.MainForm.AppInfo.GetString(
                 "change_param",
                 "location",
                 "<不改变>");
@@ -495,7 +489,7 @@ namespace dp2Circulation
             }
 
 
-            string strBookType = this.MainForm.AppInfo.GetString(
+            string strBookType = Program.MainForm.AppInfo.GetString(
                 "change_param",
                 "bookType",
                 "<不改变>");
@@ -509,7 +503,7 @@ namespace dp2Circulation
                 }
             }
 
-            string strBatchNo = this.MainForm.AppInfo.GetString(
+            string strBatchNo = Program.MainForm.AppInfo.GetString(
                 "change_param",
                 "batchNo",
                 "<不改变>");
@@ -546,12 +540,11 @@ namespace dp2Circulation
             {
                 dlg.RefDbName = Global.GetDbName(this.entityEditControl1.RecPath);
             }
-            dlg.MainForm = this.MainForm;
-            // dlg.StartPosition = FormStartPosition.CenterScreen;
+            // dlg.MainForm = Program.MainForm;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "quickchangeentityform_changeparamdialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "quickchangeentityform_changeparamdialog_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.OK)
                 return true;
@@ -701,7 +694,7 @@ namespace dp2Circulation
                 stop.BeginLoop();
 
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
             }
 
 
@@ -844,11 +837,11 @@ namespace dp2Circulation
 
         private void QuickChangeEntityForm_Activated(object sender, EventArgs e)
         {
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
         // 探测文本文件的行数
@@ -1061,7 +1054,7 @@ namespace dp2Circulation
                 stop.Initial("正在初始化浏览器组件 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -1319,7 +1312,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetString(
+                return Program.MainForm.AppInfo.GetString(
 "change_param",
 "returnInEdit",
 "<无>");

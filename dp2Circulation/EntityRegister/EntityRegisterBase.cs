@@ -41,6 +41,7 @@ namespace dp2Circulation
             }
         }
 
+#if NO
         MainForm _mainForm = null;
         public virtual MainForm MainForm
         {
@@ -53,6 +54,7 @@ namespace dp2Circulation
                 this._mainForm = value;
             }
         }
+#endif
 
         XmlDocument _servers_dom = null;
         public XmlDocument ServersDom
@@ -87,7 +89,7 @@ namespace dp2Circulation
                 Debug.Assert(_currentAccount != null, "");
 
                 if (IsDot(_currentAccount.ServerUrl) == true)
-                    e.LibraryServerUrl = this.MainForm.LibraryServerUrl;
+                    e.LibraryServerUrl = Program.MainForm.LibraryServerUrl;
                 else
                     e.LibraryServerUrl = _currentAccount.ServerUrl;
 
@@ -95,19 +97,19 @@ namespace dp2Circulation
 
                 if (IsDot(_currentAccount.UserName) == true)
                 {
-                    e.UserName = this.MainForm.AppInfo.GetString(
+                    e.UserName = Program.MainForm.AppInfo.GetString(
                     "default_account",
                     "username",
                     "");
 
-                    e.Password = this.MainForm.AppInfo.GetString(
+                    e.Password = Program.MainForm.AppInfo.GetString(
 "default_account",
 "password",
 "");
-                    e.Password = this.MainForm.DecryptPasssword(e.Password);
+                    e.Password = Program.MainForm.DecryptPasssword(e.Password);
 
                     bIsReader =
-this.MainForm.AppInfo.GetBoolean(
+Program.MainForm.AppInfo.GetBoolean(
 "default_account",
 "isreader",
 false);
@@ -124,16 +126,16 @@ false);
 #if NO
                 if (IsDot(_currentAccount.IsReader) == true)
                     bIsReader =
-        this.MainForm.AppInfo.GetBoolean(
+        Program.MainForm.AppInfo.GetBoolean(
         "default_account",
         "isreader",
         false);
                 else
                     bIsReader = DomUtil.IsBooleanTrue(_currentAccount.IsReader);
 #endif
-                Debug.Assert(this.MainForm != null, "");
+                Debug.Assert(Program.MainForm != null, "");
 
-                string strLocation = this.MainForm.AppInfo.GetString(
+                string strLocation = Program.MainForm.AppInfo.GetString(
                 "default_account",
                 "location",
                 "");
@@ -146,7 +148,7 @@ false);
 
 #if SN
                 // 从序列号中获得 expire= 参数值
-                string strExpire = this.MainForm.GetExpireParam();
+                string strExpire = Program.MainForm.GetExpireParam();
                 if (string.IsNullOrEmpty(strExpire) == false)
                     e.Parameters += ",expire=" + strExpire;
 #endif
@@ -166,9 +168,9 @@ false);
             GetChannelStyle style = GetChannelStyle.GUI)
         {
             if (EntityRegisterBase.IsDot(strServerUrl) == true)
-                strServerUrl = this.MainForm.LibraryServerUrl;
+                strServerUrl = Program.MainForm.LibraryServerUrl;
             if (EntityRegisterBase.IsDot(strUserName) == true)
-                strUserName = this.MainForm.DefaultUserName;
+                strUserName = Program.MainForm.DefaultUserName;
 
             LibraryChannel channel =  this._channelPool.GetChannel(strServerUrl, strUserName);
             if ((style & GetChannelStyle.GUI) != 0)

@@ -119,7 +119,7 @@ namespace dp2Circulation
             object o = m_tableBarcodeColIndex[strItemDbName];
             if (o == null)
             {
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                 nCol = temp.FindColumnByType("item_barcode");
                 if (nCol == -1)
                 {
@@ -157,7 +157,7 @@ namespace dp2Circulation
             object o = m_tableBarcodeColIndex[strItemDbName];
             if (o == null)
             {
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                 nCol = temp.FindColumnByType("item_barcode");
                 if (nCol == -1)
                 {
@@ -202,7 +202,7 @@ namespace dp2Circulation
             object o = _columnIndexTable[strCacheKey];
             if (o == null)
             {
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                 nCol = temp.FindColumnByType(strColumnType);
                 if (nCol == -1)
                     return -1;
@@ -381,7 +381,7 @@ namespace dp2Circulation
 
                     if (this.DbType == "item")
                     {
-                        if (this.MainForm.IsItemDbName(strDbName) == false)
+                        if (Program.MainForm.IsItemDbName(strDbName) == false)
                         {
                             strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的实体库名。很可能所指定的文件不是实体库的记录路径文件";
                             goto ERROR1;
@@ -389,7 +389,7 @@ namespace dp2Circulation
                     }
                     else if (this.DbType == "comment")
                     {
-                        if (this.MainForm.IsCommentDbName(strDbName) == false)
+                        if (Program.MainForm.IsCommentDbName(strDbName) == false)
                         {
                             strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的评注库名。很可能所指定的文件不是评注库的记录路径文件";
                             goto ERROR1;
@@ -397,7 +397,7 @@ namespace dp2Circulation
                     }
                     else if (this.DbType == "order")
                     {
-                        if (this.MainForm.IsOrderDbName(strDbName) == false)
+                        if (Program.MainForm.IsOrderDbName(strDbName) == false)
                         {
                             strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的订购库名。很可能所指定的文件不是订购库的记录路径文件";
                             goto ERROR1;
@@ -405,7 +405,7 @@ namespace dp2Circulation
                     }
                     else if (this.DbType == "issue")
                     {
-                        if (this.MainForm.IsIssueDbName(strDbName) == false)
+                        if (Program.MainForm.IsIssueDbName(strDbName) == false)
                         {
                             strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的期库名。很可能所指定的文件不是期库的记录路径文件";
                             goto ERROR1;
@@ -713,7 +713,7 @@ namespace dp2Circulation
                 object o = m_tableSummaryColIndex[strItemDbName];
                 if (o == null)
                 {
-                    ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                    ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                     nCol = temp.FindColumnByType("parent_id");
                     if (nCol == -1)
                     {
@@ -740,7 +740,7 @@ namespace dp2Circulation
                 if (strText.IndexOf("/") == -1)
                 {
                     // 获得对应的书目库名
-                    strBiblioRecPath = this.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
+                    strBiblioRecPath = Program.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
                     if (string.IsNullOrEmpty(strBiblioRecPath) == true)
                     {
                         strError = "数据库名 '" + strItemDbName + "' 没有找到对应的书目库名";
@@ -892,12 +892,12 @@ namespace dp2Circulation
             object o = m_tableSummaryColIndex[strItemDbName];
             if (o == null)
             {
-                if (this.MainForm.NormalDbProperties == null)
+                if (Program.MainForm.NormalDbProperties == null)
                 {
                     strError = "普通数据库属性尚未初始化";
                     return -1;
                 }
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                 if (temp == null)
                 {
                     strError = "实体库 '" + strItemDbName + "' 没有找到列定义";
@@ -1030,7 +1030,7 @@ namespace dp2Circulation
                 if (strText.IndexOf("/") == -1)
                 {
                     // 获得对应的书目库名
-                    strBiblioRecPath = this.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
+                    strBiblioRecPath = Program.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
                     if (string.IsNullOrEmpty(strBiblioRecPath) == true)
                     {
                         strError = this.DbTypeCaption + "类型的数据库名 '" + strItemDbName + "' 没有找到对应的书目库名";

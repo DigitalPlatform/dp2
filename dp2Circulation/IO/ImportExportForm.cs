@@ -344,7 +344,7 @@ strStringTable);
             }
 
             this.Invoke((Action)(() =>
-this.MainForm.ActivateFixPage("history")
+Program.MainForm.ActivateFixPage("history")
     ));
 
             this.Invoke((Action)(() =>
@@ -443,7 +443,7 @@ this.MainForm.ActivateFixPage("history")
                 {
                     strError = strOperName + "完成。共发生 " + info.ItemErrorCount + " 次错误。详情请见固定面板的操作历史属性页";
                     this.Invoke((Action)(() =>
-                    this.MainForm.ActivateFixPage("history")
+                    Program.MainForm.ActivateFixPage("history")
                         ));
                     goto ERROR1;
                 }
@@ -1551,7 +1551,7 @@ new string[] { "继续", "中断" });
         {
             this.comboBox_target_targetBiblioDbName.Items.Clear();
 
-            foreach (BiblioDbProperty prop in this.MainForm.BiblioDbProperties)
+            foreach (BiblioDbProperty prop in Program.MainForm.BiblioDbProperties)
             {
                 string strDbName = prop.DbName;
                 if (string.IsNullOrEmpty(strDbName) == true)

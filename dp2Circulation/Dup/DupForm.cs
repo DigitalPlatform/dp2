@@ -26,14 +26,6 @@ namespace dp2Circulation
         // 参与排序的列号数组
         SortColumns SortColumns = new SortColumns();
 
-        /*
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-         * */
-
         string m_strXmlRecord = "";
 
         /// <summary>
@@ -159,7 +151,7 @@ namespace dp2Circulation
         void prop_GetColumnTitles(object sender, GetColumnTitlesEventArgs e)
         {
             e.ColumnTitles = new ColumnPropertyCollection();
-            ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(e.DbName);
+            ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(e.DbName);
             if (temp != null)
                 e.ColumnTitles.AddRange(temp);  // 要复制，不要直接使用，因为后面可能会修改。怕影响到原件
 
@@ -174,13 +166,13 @@ namespace dp2Circulation
 
         private void DupForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -189,24 +181,24 @@ namespace dp2Circulation
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
 
-            this.checkBox_includeLowCols.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_includeLowCols.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "dup_form",
                 "include_low_cols",
                 true);
-            this.checkBox_returnAllRecords.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_returnAllRecords.Checked = Program.MainForm.AppInfo.GetBoolean(
     "dup_form",
     "return_all_records",
     true);
 
             if (String.IsNullOrEmpty(this.comboBox_projectName.Text) == true)
             {
-                this.comboBox_projectName.Text = this.MainForm.AppInfo.GetString(
+                this.comboBox_projectName.Text = Program.MainForm.AppInfo.GetString(
                         "dup_form",
                         "projectname",
                         "");
             }
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
     "dup_form",
     "browse_list_column_width",
     "");
@@ -273,24 +265,24 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
         "dup_form",
         "include_low_cols",
         this.checkBox_includeLowCols.Checked);
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
         "dup_form",
         "return_all_records",
         this.checkBox_returnAllRecords.Checked);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "dup_form",
                     "projectname",
                     this.comboBox_projectName.Text);
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_browse);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "dup_form",
                     "browse_list_column_width",
                     strWidths);
@@ -391,7 +383,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -646,7 +638,7 @@ namespace dp2Circulation
             XmlViewerForm dlg = new XmlViewerForm();
 
             dlg.Text = "当前XML数据";
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.XmlString = this.XmlRecord;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);   // ?? this
@@ -725,9 +717,9 @@ namespace dp2Circulation
 
             EntityForm form = new EntityForm();
 
-            form.MdiParent = this.MainForm;
+            form.MdiParent = Program.MainForm;
 
-            form.MainForm = this.MainForm;
+            form.MainForm = Program.MainForm;
             form.Show();
             form.LoadRecordOld(strPath, "", true);
         }
@@ -760,7 +752,7 @@ namespace dp2Circulation
         {
 #if NO
             // 2009/8/13 
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 #endif
 
         }
@@ -841,7 +833,7 @@ namespace dp2Circulation
             menuItem = new MenuItem("装入已经打开的种册窗(&E)");
             menuItem.Click += new System.EventHandler(this.menu_loadToExistDetailWindow_Click);
             if (this.listView_browse.SelectedItems.Count == 0
-                || this.MainForm.GetTopChildWindow<EntityForm>() == null)
+                || Program.MainForm.GetTopChildWindow<EntityForm>() == null)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -871,8 +863,8 @@ namespace dp2Circulation
 
             EntityForm form = new EntityForm();
 
-            form.MdiParent = this.MainForm;
-            form.MainForm = this.MainForm;
+            form.MdiParent = Program.MainForm;
+            form.MainForm = Program.MainForm;
             form.Show();
             form.LoadRecordOld(strPath, "", true);
         }
@@ -886,7 +878,7 @@ namespace dp2Circulation
             }
             string strPath = this.listView_browse.SelectedItems[0].SubItems[0].Text;
 
-            EntityForm form = this.MainForm.GetTopChildWindow<EntityForm>();
+            EntityForm form = Program.MainForm.GetTopChildWindow<EntityForm>();
             if (form == null)
             {
                 MessageBox.Show(this, "目前并没有已经打开的种册窗");
@@ -934,7 +926,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {

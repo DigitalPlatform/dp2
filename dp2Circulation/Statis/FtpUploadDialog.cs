@@ -15,7 +15,7 @@ namespace dp2Circulation
 {
     public partial class FtpUploadDialog : Form
     {
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         public FtpUploadDialog()
         {
@@ -75,31 +75,31 @@ namespace dp2Circulation
         private void FtpUploadDialog_Load(object sender, EventArgs e)
         {
 #if NO
-            this.textBox_ftpServerUrl.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_ftpServerUrl.Text = Program.MainForm.AppInfo.GetString(
                 "ftp_upload_report",
                 "ftp_server_url",
                 "");
 
-            this.textBox_targetDir.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_targetDir.Text = Program.MainForm.AppInfo.GetString(
                 "ftp_upload_report",
                 "target_dir",
                 "");
 
-            this.textBox_userName.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_userName.Text = Program.MainForm.AppInfo.GetString(
                 "ftp_upload_report",
                 "username",
                 "");
 
-            string strPassword = this.MainForm.AppInfo.GetString(
+            string strPassword = Program.MainForm.AppInfo.GetString(
                 "ftp_upload_report",
                 "password",
                 "");
             if (string.IsNullOrEmpty(strPassword) == false)
-                strPassword = this.MainForm.DecryptPasssword(strPassword);
+                strPassword = Program.MainForm.DecryptPasssword(strPassword);
 
             this.textBox_password.Text = strPassword;
 
-            this.checkBox_savePassword.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_savePassword.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "ftp_upload_report",
                 "save_password",
                 false);
@@ -109,17 +109,17 @@ namespace dp2Circulation
         private void FtpUploadDialog_FormClosed(object sender, FormClosedEventArgs e)
         {
 #if NO
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "ftp_upload_report",
     "ftp_server_url",
     this.textBox_ftpServerUrl.Text);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "ftp_upload_report",
                 "target_dir",
                 this.textBox_targetDir.Text);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "ftp_upload_report",
                 "username",
                 this.textBox_userName.Text);
@@ -127,14 +127,14 @@ namespace dp2Circulation
             string strPassword = "";
 
             if (this.checkBox_savePassword.Checked == true)
-                strPassword = this.MainForm.EncryptPassword(this.textBox_password.Text);
+                strPassword = Program.MainForm.EncryptPassword(this.textBox_password.Text);
                 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                 "ftp_upload_report",
                 "password",
                 strPassword);
 
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
                 "ftp_upload_report",
                 "save_password",
                 this.checkBox_savePassword.Checked);

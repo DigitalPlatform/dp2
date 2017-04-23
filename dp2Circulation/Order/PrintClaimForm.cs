@@ -46,17 +46,6 @@ namespace dp2Circulation
         /// </summary>
         bool Running = false;
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-#endif
-
         const int WM_LOADSIZE = API.WM_USER + 201;
 
         /// <summary>
@@ -69,13 +58,13 @@ namespace dp2Circulation
 
         private void PrintClaimForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -84,90 +73,90 @@ namespace dp2Circulation
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
 
-            this.comboBox_source_type.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_source_type.Text = Program.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "publication_type",
                 "连续出版物");
 
-            this.checkBox_source_guess.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_source_guess.Checked = Program.MainForm.AppInfo.GetBoolean(
     "printclaimform",
     "guess",
     true);
 
-            this.radioButton_inputStyle_biblioRecPathFile.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_inputStyle_biblioRecPathFile.Checked = Program.MainForm.AppInfo.GetBoolean(
     "printclaimform",
     "inputstyle_bibliorecpathfile",
     false);
 
 
-            this.radioButton_inputStyle_biblioDatabase.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_inputStyle_biblioDatabase.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "printclaimform",
                 "inputstyle_bibliodatabase",
                 true);
 
 
             // 输入的记录路径文件名
-            this.textBox_inputBiblioRecPathFilename.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_inputBiblioRecPathFilename.Text = Program.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "input_recpath_filename",
                 "");
 
 
             // 输入的书目库名
-            this.comboBox_inputBiblioDbName.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_inputBiblioDbName.Text = Program.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "input_bibliodbname",
                 "<全部>");
 
             // 
-            this.radioButton_inputStyle_orderRecPathFile.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_inputStyle_orderRecPathFile.Checked = Program.MainForm.AppInfo.GetBoolean(
 "printclaimform",
 "inputstyle_orderrecpathfile",
 false);
 
 
-            this.radioButton_inputStyle_orderDatabase.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_inputStyle_orderDatabase.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "printclaimform",
                 "inputstyle_orderdatabase",
                 false);
 
             // 输入的订购库记录路径文件名
-            this.textBox_inputOrderRecPathFilename.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_inputOrderRecPathFilename.Text = Program.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "input_orderrecpath_filename",
                 "");
 
 
             // 输入的订购库名
-            this.comboBox_inputOrderDbName.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_inputOrderDbName.Text = Program.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "input_orderdbname",
                 "");
 
             // *** 时间范围页
 
-            this.checkBox_timeRange_usePublishTime.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_timeRange_usePublishTime.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "printclaimform",
                 "time_range_userPublishTime",
                 true);
 
-            this.checkBox_timeRange_useOrderTime.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_timeRange_useOrderTime.Checked = Program.MainForm.AppInfo.GetBoolean(
     "printclaimform",
     "time_range_userOrderTime",
     true);
 
-            this.comboBox_timeRange_afterOrder.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_timeRange_afterOrder.Text = Program.MainForm.AppInfo.GetString(
     "printclaimform",
     "time_range_afterOrder",
     "");
 
-            this.checkBox_timeRange_none.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_timeRange_none.Checked = Program.MainForm.AppInfo.GetBoolean(
     "printclaimform",
     "time_range_none",
     false);
 
             // 时间范围
-            this.textBox_timeRange.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_timeRange.Text = Program.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "time_range",
                 "");
@@ -204,86 +193,86 @@ false);
                 stop = null;
             }
 #endif
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "printclaimform",
                     "publication_type",
                     this.comboBox_source_type.Text);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "printclaimform",
                     "guess",
                     this.checkBox_source_guess.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "printclaimform",
                     "inputstyle_bibliorecpathfile",
                     this.radioButton_inputStyle_biblioRecPathFile.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "printclaimform",
                     "inputstyle_bibliodatabase",
                     this.radioButton_inputStyle_biblioDatabase.Checked);
 
                 // 输入的记录路径文件名
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "printclaimform",
                     "input_recpath_filename",
                     this.textBox_inputBiblioRecPathFilename.Text);
 
                 // 输入的书目库名
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "printclaimform",
                     "input_bibliodbname",
                     this.comboBox_inputBiblioDbName.Text);
                 // 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
     "printclaimform",
     "inputstyle_orderrecpathfile",
     this.radioButton_inputStyle_orderRecPathFile.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "printclaimform",
                     "inputstyle_orderdatabase",
                     this.radioButton_inputStyle_orderDatabase.Checked);
 
                 // 输入的订购库记录路径文件名
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "printclaimform",
                     "input_orderrecpath_filename",
                     this.textBox_inputOrderRecPathFilename.Text);
 
                 // 输入的订购库名
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "printclaimform",
                     "input_orderdbname",
                     this.comboBox_inputOrderDbName.Text);
 
                 // *** 时间范围页
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "printclaimform",
                     "time_range_userPublishTime",
                     this.checkBox_timeRange_usePublishTime.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
         "printclaimform",
         "time_range_userOrderTime",
         this.checkBox_timeRange_useOrderTime.Checked);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
         "printclaimform",
         "time_range_afterOrder",
         this.comboBox_timeRange_afterOrder.Text);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
         "printclaimform",
         "time_range_none",
         this.checkBox_timeRange_none.Checked);
 
                 // 时间范围
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "printclaimform",
                     "time_range",
                     this.textBox_timeRange.Text);
@@ -300,7 +289,7 @@ false);
                 "mdi_form_state");
 #endif
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "list_origin_width",
                 "");
@@ -311,7 +300,7 @@ false);
                     true);
             }
 
-            strWidths = this.MainForm.AppInfo.GetString(
+            strWidths = Program.MainForm.AppInfo.GetString(
     "printclaimform",
     "list_merged_width",
     "");
@@ -332,18 +321,18 @@ false);
 
             /*
             // 如果MDI子窗口不是MainForm刚刚准备退出时的状态，恢复它。为了记忆尺寸做准备
-            if (this.WindowState != this.MainForm.MdiWindowState)
-                this.WindowState = this.MainForm.MdiWindowState;
+            if (this.WindowState != Program.MainForm.MdiWindowState)
+                this.WindowState = Program.MainForm.MdiWindowState;
              * */
 
             string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_origin);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "printclaimform",
                 "list_origin_width",
                 strWidths);
 
             strWidths = ListViewUtil.GetColumnWidthListString(this.listView_merged);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "printclaimform",
                 "list_merged_width",
                 strWidths);
@@ -661,7 +650,7 @@ false);
             if (strBiblioRecPathFilename.IndexOf(",") != -1)
             {
                 // 将内容先写入一个临时文件
-                strTempFileName = this.MainForm.GetTempFileName("pcf_");
+                strTempFileName = Program.MainForm.GetTempFileName("pcf_");
 
                 using (StreamWriter sw = new StreamWriter(strTempFileName, false, Encoding.UTF8))
                 {
@@ -693,7 +682,7 @@ false);
                             // 检查书目库路径
                             {
                                 string strDbName = Global.GetDbName(strBiblioRecPath);
-                                BiblioDbProperty prop = this.MainForm.GetBiblioDbProperty(strDbName);
+                                BiblioDbProperty prop = Program.MainForm.GetBiblioDbProperty(strDbName);
 
                                 if (prop == null)
                                 {
@@ -922,7 +911,7 @@ false);
 
             // TODO: 临时文件是否删除?
             // 记录路径临时文件
-            strTempRecPathFilename = this.MainForm.GetTempFileName("pcf_");
+            strTempRecPathFilename = Program.MainForm.GetTempFileName("pcf_");
 
             // 整个书目库
             if (this.InputStyle == PrintClaimInputStyle.BiblioDatabase)
@@ -1242,7 +1231,7 @@ false);
                     else
                     {
                         // 将内容先写入一个临时文件
-                        strTempRecPathFilename = this.MainForm.GetTempFileName("pcf_");
+                        strTempRecPathFilename = Program.MainForm.GetTempFileName("pcf_");
 
                         using (StreamWriter sw = new StreamWriter(strTempRecPathFilename, false, Encoding.UTF8))
                         {
@@ -1345,13 +1334,13 @@ false);
                         // 检查订购库路径
                         {
                             string strDbName = Global.GetDbName(strOrderRecPath);
-                            string strBiblioDbName = this.MainForm.GetBiblioDbNameFromOrderDbName(strDbName);
+                            string strBiblioDbName = Program.MainForm.GetBiblioDbNameFromOrderDbName(strDbName);
                             if (string.IsNullOrEmpty(strBiblioDbName) == true)
                             {
                                 strError = "记录路径 '" + strOrderRecPath + "' 中的数据库名 '" + strDbName + "' 不是订购库名";
                                 return -1;
                             }
-                            BiblioDbProperty prop = this.MainForm.GetBiblioDbProperty(strBiblioDbName);
+                            BiblioDbProperty prop = Program.MainForm.GetBiblioDbProperty(strBiblioDbName);
                             if (prop == null)
                             {
                                 strError = "数据库名 '" + strBiblioDbName + "' 不是书目库名";
@@ -1452,7 +1441,7 @@ false);
                         // strXml中为书目记录
                         string strBiblioDbName = Global.GetDbName(strOrderRecPath);
 
-                        string strSyntax = this.MainForm.GetBiblioSyntax(strBiblioDbName);
+                        string strSyntax = Program.MainForm.GetBiblioSyntax(strBiblioDbName);
                         if (String.IsNullOrEmpty(strSyntax) == true)
                             strSyntax = "unimarc";
 
@@ -2010,11 +1999,11 @@ false);
                 return this.comboBox_inputBiblioDbName.Text;
 
             List<string> dbnames = new List<string>();
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (String.IsNullOrEmpty(prop.OrderDbName) == true)
                         continue;   // 没有订购功能的书目库不在考虑之列
@@ -2327,11 +2316,11 @@ false);
             else
                 this.comboBox_inputBiblioDbName.Items.Add("<全部期刊>");
 
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (String.IsNullOrEmpty(prop.OrderDbName) == true)
                         continue;   // 没有订购功能的书目库不在考虑之列
@@ -2365,11 +2354,11 @@ false);
 
 #if NO
             // 检查一下当前已经选定的书目库名和出版物类型是否矛盾
-             if (this.MainForm.BiblioDbProperties != null)
+             if (Program.MainForm.BiblioDbProperties != null)
              {
-                 for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                 for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                  {
-                     BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
+                     BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                      if (strText == prop.DbName)
                      {
@@ -2404,11 +2393,11 @@ false);
                 return;
             }
             string strText = this.comboBox_inputBiblioDbName.Text;
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (strText == prop.DbName)
                     {
@@ -2450,11 +2439,11 @@ false);
                 this.comboBox_inputOrderDbName.Text = "<全部期刊>";
                 return;
             }
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (strText == prop.OrderDbName)
                     {
@@ -2611,11 +2600,11 @@ false);
                 HtmlPrintForm printform = new HtmlPrintForm();
 
                 printform.Text = "打印催询单";
-                printform.MainForm = this.MainForm;
+                // printform.MainForm = Program.MainForm;
                 printform.Filenames = filenames;
-                this.MainForm.AppInfo.LinkFormState(printform, "printclaim_htmlprint_formstate");
+                Program.MainForm.AppInfo.LinkFormState(printform, "printclaim_htmlprint_formstate");
                 printform.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(printform);
+                Program.MainForm.AppInfo.UnlinkFormState(printform);
 
             }
             finally
@@ -2756,14 +2745,14 @@ false);
 
 
             // 获得打印参数
-            PrintClaimPrintOption option = new PrintClaimPrintOption(this.MainForm.DataDir,
+            PrintClaimPrintOption option = new PrintClaimPrintOption(Program.MainForm.DataDir,
                 this.comboBox_source_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 "printclaim_printoption");
 
             macro_table["%seller%"] = GetPureSellerName(seller.Seller); // 渠道名
             macro_table["%selleraddress%"] = strAddressText;    // 2009/9/17
-            macro_table["%libraryname%"] = this.MainForm.LibraryName;
+            macro_table["%libraryname%"] = Program.MainForm.LibraryName;
             /*
             macro_table["%pagecount%"] = nPageCount.ToString();
             macro_table["%linesperpage%"] = option.LinesPerPage.ToString();
@@ -2772,7 +2761,7 @@ false);
 
 
             // 需要将属于不同书商的文件名前缀区别开来
-            string strFileNamePrefix = this.MainForm.DataDir + "\\~printclaim_" + seller.GetHashCode().ToString() + "_";
+            string strFileNamePrefix = Program.MainForm.DataDir + "\\~printclaim_" + seller.GetHashCode().ToString() + "_";
 
             strFilename = strFileNamePrefix + "0" + ".html";
 
@@ -2791,8 +2780,8 @@ false);
                 // 缺的册数
                 macro_table["%missingitemcount%"] = GetMissingItemCount(seller).ToString();
 
-                macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
-                //// macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
+                macro_table["%datadir%"] = Program.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
+                //// macro_table["%libraryserverdir%"] = Program.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
 
                 string strTemplateFilePath = option.GetTemplatePageFilePath("信件正文");
                 if (String.IsNullOrEmpty(strTemplateFilePath) == false)
@@ -3189,8 +3178,8 @@ false);
                 return strCssFilePath;
             else
             {
-                // return this.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // 缺省的
-                return PathUtil.MergePath(this.MainForm.DataDir, strDefaultCssFileName);    // 缺省的
+                // return Program.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // 缺省的
+                return PathUtil.MergePath(Program.MainForm.DataDir, strDefaultCssFileName);    // 缺省的
             }
         }
 
@@ -3199,7 +3188,7 @@ false);
             string strFileName,
             OneSeller seller)
         {
-            // string strCssUrl = this.MainForm.LibraryServerDir + "/printclaim.css";
+            // string strCssUrl = Program.MainForm.LibraryServerDir + "/printclaim.css";
             // 2009/10/10 changed
             string strCssUrl = GetAutoCssUrl(option, "printclaim.css");
 
@@ -3209,7 +3198,7 @@ false);
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;
             else
-                strCssUrl = this.MainForm.LibraryServerDir + "/printclaim.css";    // 缺省的
+                strCssUrl = Program.MainForm.LibraryServerDir + "/printclaim.css";    // 缺省的
              * */
 
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
@@ -3373,7 +3362,7 @@ false);
 
         private void PrintClaimForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
         }
 
         private void button_printOption_Click(object sender, EventArgs e)
@@ -3381,17 +3370,17 @@ false);
             // 配置标题和风格
             string strNamePath = "printclaim_printoption";
 
-            PrintClaimPrintOption option = new PrintClaimPrintOption(this.MainForm.DataDir,
+            PrintClaimPrintOption option = new PrintClaimPrintOption(Program.MainForm.DataDir,
                 this.comboBox_source_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
 
             PrintOptionDlg dlg = new PrintOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.MainForm = this.MainForm;
-            dlg.DataDir = this.MainForm.DataDir;
+            // dlg.MainForm = Program.MainForm;
+            dlg.DataDir = Program.MainForm.DataDir;
             dlg.Text = this.comboBox_source_type.Text + " 催询单 打印参数";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
@@ -3403,14 +3392,14 @@ false);
             };
 
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "printclaim_printoption_formstate");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "printclaim_printoption_formstate");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            option.SaveData(this.MainForm.AppInfo,
+            option.SaveData(Program.MainForm.AppInfo,
                 strNamePath);
         }
 
@@ -3458,11 +3447,11 @@ false);
             else
                 this.comboBox_inputOrderDbName.Items.Add("<全部期刊>");
 
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (String.IsNullOrEmpty(prop.OrderDbName) == true)
                         continue;

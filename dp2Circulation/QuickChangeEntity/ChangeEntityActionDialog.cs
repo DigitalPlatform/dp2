@@ -22,7 +22,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 获得值列表
@@ -41,40 +41,40 @@ namespace dp2Circulation
             // 填充几个combobox
 
             // 装载值
-            this.comboBox_state.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_state.Text = Program.MainForm.AppInfo.GetString(
                 "change_param",
                 "state",
                 "<不改变>");
-            this.checkedComboBox_stateAdd.Text = this.MainForm.AppInfo.GetString(
+            this.checkedComboBox_stateAdd.Text = Program.MainForm.AppInfo.GetString(
     "change_param",
     "state_add",
     "");
-            this.checkedComboBox_stateRemove.Text = this.MainForm.AppInfo.GetString(
+            this.checkedComboBox_stateRemove.Text = Program.MainForm.AppInfo.GetString(
     "change_param",
     "state_remove",
     "");
 
-            this.comboBox_location.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_location.Text = Program.MainForm.AppInfo.GetString(
     "change_param",
     "location",
     "<不改变>");
 
-            this.comboBox_bookType.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_bookType.Text = Program.MainForm.AppInfo.GetString(
     "change_param",
     "bookType",
     "<不改变>");
 
-            this.comboBox_batchNo.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_batchNo.Text = Program.MainForm.AppInfo.GetString(
 "change_param",
 "batchNo",
 "<不改变>");
 
-            this.comboBox_focusAction.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_focusAction.Text = Program.MainForm.AppInfo.GetString(
     "change_param",
     "focusAction",
     "册条码号，并全选");
 
-            this.comboBox_returnInEdit.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_returnInEdit.Text = Program.MainForm.AppInfo.GetString(
 "change_param",
 "returnInEdit",
 "<无>");
@@ -85,40 +85,40 @@ namespace dp2Circulation
         private void button_OK_Click(object sender, EventArgs e)
         {
             // 保存值
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "change_param",
                 "state",
                 this.comboBox_state.Text);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "change_param",
     "state_add",
     this.checkedComboBox_stateAdd.Text);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "change_param",
     "state_remove",
     this.checkedComboBox_stateRemove.Text);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "change_param",
     "location",
     this.comboBox_location.Text);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "change_param",
     "bookType",
     this.comboBox_bookType.Text);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "change_param",
     "batchNo",
     this.comboBox_batchNo.Text);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "change_param",
     "focusAction",
     this.comboBox_focusAction.Text);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
  "change_param",
  "returnInEdit",
  this.comboBox_returnInEdit.Text);

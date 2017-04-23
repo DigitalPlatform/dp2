@@ -18,7 +18,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         public string ExistingXml = "";
         public byte [] ExistingTimestamp = null;
@@ -34,7 +34,7 @@ namespace dp2Circulation
         }
 
         public void Initial(
-            MainForm mainform,
+            // MainForm mainform,
             string strRecPath,
             string strExistingXml,
             byte [] baExistingTimestamp,
@@ -42,7 +42,7 @@ namespace dp2Circulation
             byte [] baUnsaveTimestamp,
             string strMessage)
         {
-            this.MainForm = mainform;
+            // this.MainForm = mainform;
 
             this.RecPath = strRecPath;
 
@@ -57,9 +57,9 @@ namespace dp2Circulation
 
         private void CompareReaderForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
             string strError = "";
@@ -96,7 +96,7 @@ namespace dp2Circulation
         {
             string strError = "";
             string[] values = null;
-            int nRet = MainForm.GetValueTable(e.TableName,
+            int nRet = Program.MainForm.GetValueTable(e.TableName,
                 e.DbName,
                 out values,
                 out strError);
@@ -137,12 +137,12 @@ namespace dp2Circulation
 
         private void readerEditControl_existing_GetLibraryCode(object sender, GetLibraryCodeEventArgs e)
         {
-            e.LibraryCode = this.MainForm.GetReaderDbLibraryCode(e.DbName);
+            e.LibraryCode = Program.MainForm.GetReaderDbLibraryCode(e.DbName);
         }
 
         private void readerEditControl_unSaved_GetLibraryCode(object sender, GetLibraryCodeEventArgs e)
         {
-            e.LibraryCode = this.MainForm.GetReaderDbLibraryCode(e.DbName);
+            e.LibraryCode = Program.MainForm.GetReaderDbLibraryCode(e.DbName);
         }
 
 

@@ -206,6 +206,7 @@ namespace dp2Circulation
 
         #endregion
 
+        // 引用
         /// <summary>
         /// 种册窗
         /// </summary>
@@ -230,6 +231,10 @@ namespace dp2Circulation
         {
             if (this.GcatChannel != null)
                 this.GcatChannel.Dispose();
+
+            // 2017/4/23
+            if (this.DetailForm != null)
+                this.DetailForm = null;
         }
 
         /// <summary>

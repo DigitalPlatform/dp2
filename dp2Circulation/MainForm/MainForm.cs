@@ -1459,7 +1459,7 @@ Stack:
 
             dlg.ParamChanged += new ParamChangedEventHandler(CfgDlg_ParamChanged);
             dlg.ap = this.AppInfo;
-            dlg.MainForm = this;
+            // dlg.MainForm = this;
 
             dlg.UiState = this.AppInfo.GetString(
                     "main_form",
@@ -1946,7 +1946,7 @@ Stack:
             if (_acceptForm == null || _acceptForm.IsDisposed == true)
             {
                 _acceptForm = new AcceptForm();
-                _acceptForm.MainForm = this;
+                // _acceptForm.MainForm = this;
                 _acceptForm.FormClosed -= new FormClosedEventHandler(accept_FormClosed);
                 _acceptForm.FormClosed += new FormClosedEventHandler(accept_FormClosed);
 
@@ -3872,7 +3872,7 @@ Stack:
 
                 form = new HtmlPrintForm();
                 form.MdiParent = this;
-                form.MainForm = this;
+                // form.MainForm = this;
                 if (bMinimized == true)
                     form.WindowState = FormWindowState.Minimized;
                 form.Show();
@@ -4753,7 +4753,7 @@ Stack:
 
             /*
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
              * */
             EnableControls(false);
 
@@ -6550,7 +6550,7 @@ out strError);
             if (m_propertyViewer.Text == strTitle)
                 return;
 
-            m_propertyViewer.MainForm = this;  // 必须是第一句
+            // m_propertyViewer.MainForm = this;  // 必须是第一句
 
             if (string.IsNullOrEmpty(strTitle) == true
                 && string.IsNullOrEmpty(strHtml) == true
@@ -7264,7 +7264,7 @@ out strError);
         {
             get
             {
-                // string strDir = PathUtil.MergePath(this.MainForm.DataDir, "fingerprintcache");
+                // string strDir = PathUtil.MergePath(Program.MainForm.DataDir, "fingerprintcache");
                 return PathUtil.MergePath(this.UserDir, "fingerprintcache");   // 2013/6/16
             }
         }
@@ -8441,11 +8441,11 @@ Keys keyData)
                 // Blocks all the messages relating to the left mouse button. 
                 if (m.Msg >= 513 && m.Msg <= 515)
                 {
-                    if (this.MainForm.MessageFilter != null)
+                    if (Program.MainForm.MessageFilter != null)
                     {
                         MessageFilterEventArgs e = new MessageFilterEventArgs();
                         e.Message = m;
-                        this.MainForm.MessageFilter(this, e);
+                        Program.MainForm.MessageFilter(this, e);
                         m = e.Message;
                         return e.ReturnValue;
                     }
@@ -8711,7 +8711,7 @@ Keys keyData)
             {
                 bNew = true;
                 m_commentViewer = new CommentViewerForm();
-                m_commentViewer.MainForm = this;  // 必须是第一句
+                // m_commentViewer.MainForm = this;  // 必须是第一句
 
                 m_commentViewer.FormClosed -= new FormClosedEventHandler(marc_viewer_FormClosed);
                 m_commentViewer.FormClosed += new FormClosedEventHandler(marc_viewer_FormClosed);
@@ -8755,7 +8755,7 @@ Keys keyData)
         {
             if (m_commentViewer != null)
             {
-                // this.MainForm.AppInfo.UnlinkFormState(m_commentViewer);
+                // Program.MainForm.AppInfo.UnlinkFormState(m_commentViewer);
                 this.m_commentViewer = null;
             }
         }

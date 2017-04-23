@@ -207,7 +207,7 @@ out string strError)
 
 #if NO
             string strStyle = "";
-            if (this.MainForm.AutoCacheOperlogFile == true)
+            if (Program.MainForm.AutoCacheOperlogFile == true)
                 strStyle = "autocache";
 #endif
 
@@ -219,9 +219,9 @@ stop,
 estimate,
 Channel,
 LogFileNames,
-this.MainForm.OperLogLevel,
+Program.MainForm.OperLogLevel,
 strStyle,
-this.MainForm.OperLogCacheDir,
+Program.MainForm.OperLogCacheDir,
 null,   // param,
 procDoRecord,   // DoRecord,
 out strError);
@@ -235,7 +235,7 @@ out strError);
             loader.owner = this;
             loader.estimate = estimate;
             loader.FileNames = LogFileNames;
-            loader.nLevel = this.MainForm.OperLogLevel;
+            loader.nLevel = Program.MainForm.OperLogLevel;
             loader.AutoCache = false;
             loader.CacheDir = "";
 

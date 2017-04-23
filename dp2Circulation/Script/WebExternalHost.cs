@@ -102,7 +102,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         DigitalPlatform.Stop stop = null;
 
@@ -136,17 +136,16 @@ namespace dp2Circulation
         /// <summary>
         /// 初始化
         /// </summary>
-        /// <param name="mainform">框架窗口</param>
         /// <param name="webBrowser">浏览器控件</param>
         /// <param name="bDisplayMessage">是否显示消息。缺省为 false</param>
-        public void Initial(MainForm mainform,
+        public void Initial(// MainForm mainform,
             WebBrowser webBrowser,
             bool bDisplayMessage = false)
         {
-            this.MainForm = mainform;
+            // this.MainForm = mainform;
             this.WebBrowser = webBrowser;
 #if SINGLE_CHANNEL
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -165,7 +164,7 @@ namespace dp2Circulation
             if (bDisplayMessage == true)
             {
                 stop = new DigitalPlatform.Stop();
-                stop.Register(MainForm.stopManager, true);	// 和容器关联
+                stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
             }
 
             // this.BeginThread();
@@ -354,7 +353,7 @@ namespace dp2Circulation
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
+            Program.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 #else
         void Channels_BeforeLogin(object sender, BeforeLoginEventArgs e)
@@ -399,15 +398,15 @@ namespace dp2Circulation
                 if (this.IsBelongToHoverWindow == true)
                     return;
 
-                if (this.MainForm.CanDisplayItemProperty() == false)
+                if (Program.MainForm.CanDisplayItemProperty() == false)
                     return;
 
-                if (this.MainForm.GetItemPropertyTitle() == strItemBarcode)
+                if (Program.MainForm.GetItemPropertyTitle() == strItemBarcode)
                     return; // 优化
 
                 if (string.IsNullOrEmpty(strItemBarcode) == true)
                 {
-                    this.MainForm.DisplayItemProperty("",
+                    Program.MainForm.DisplayItemProperty("",
         "",
         "");
                     return;
@@ -488,7 +487,7 @@ namespace dp2Circulation
         out strBiblioRecPath,
         out strError);
 
-                        this.MainForm.DisplayItemProperty(strItemBarcode,
+                        Program.MainForm.DisplayItemProperty(strItemBarcode,
                             strItemText,
                             strXml);
 
@@ -517,7 +516,7 @@ namespace dp2Circulation
 
             ERROR1:
 
-                this.MainForm.DisplayItemProperty("error",
+                Program.MainForm.DisplayItemProperty("error",
                     strError,
                     "");
             }
@@ -543,14 +542,14 @@ namespace dp2Circulation
                 ItemInfoForm form = null;
                 if (bOpenNew == false)
                 {
-                    form = this.MainForm.EnsureItemInfoForm();
+                    form = Program.MainForm.EnsureItemInfoForm();
                     Global.Activate(form);
                 }
                 else
                 {
                     form = new ItemInfoForm();
-                    form.MainForm = this.MainForm;
-                    form.MdiParent = this.MainForm;
+                    form.MainForm = Program.MainForm;
+                    form.MdiParent = Program.MainForm;
                     form.Show();
                 }
                 form.LoadRecord(strParameter);  // 用册条码号装载
@@ -562,14 +561,14 @@ namespace dp2Circulation
                 EntityForm form = null;
                 if (bOpenNew == false)
                 {
-                    form = this.MainForm.EnsureEntityForm();
+                    form = Program.MainForm.EnsureEntityForm();
                     Global.Activate(form);
                 }
                 else
                 {
                     form = new EntityForm();
-                    form.MainForm = this.MainForm;
-                    form.MdiParent = this.MainForm;
+                    form.MainForm = Program.MainForm;
+                    form.MdiParent = Program.MainForm;
                     form.Show();
                 }
                 form.LoadItemByBarcode(strParameter, false);  // 用册条码号装载
@@ -581,14 +580,14 @@ namespace dp2Circulation
                 ReaderInfoForm form = null;
                 if (bOpenNew == false)
                 {
-                    form = this.MainForm.EnsureReaderInfoForm();
+                    form = Program.MainForm.EnsureReaderInfoForm();
                     Global.Activate(form);
                 }
                 else
                 {
                     form = new ReaderInfoForm();
-                    form.MainForm = this.MainForm;
-                    form.MdiParent = this.MainForm;
+                    form.MainForm = Program.MainForm;
+                    form.MdiParent = Program.MainForm;
                     form.Show();
                 }
                 form.LoadRecord(strParameter,
@@ -615,7 +614,7 @@ namespace dp2Circulation
 
         string GetTempFileName()
         {
-            string strTempFilePath = Path.Combine(this.MainForm.UserTempDir, "~res_" + Guid.NewGuid().ToString());
+            string strTempFilePath = Path.Combine(Program.MainForm.UserTempDir, "~res_" + Guid.NewGuid().ToString());
 
             lock (_syncRootOfTempFilenames)
             {
@@ -772,7 +771,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
              * */
             long lRet = 0;
 
-            string strNoneFilePath = Path.Combine(this.MainForm.UserDir, "nonephoto.png");
+            string strNoneFilePath = Path.Combine(Program.MainForm.UserDir, "nonephoto.png");
 
             // 2012/1/6
             if (string.IsNullOrEmpty(strPatronBarcode) == true)
@@ -781,7 +780,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
             // 获得本地图像资源
             if (strPatronBarcode == "?")
             {
-                // return this.MainForm.DataDir + "/~current_unsaved_patron_photo.png";
+                // return Program.MainForm.DataDir + "/~current_unsaved_patron_photo.png";
                 if (this.GetLocalPath != null)
                 {
                     GetLocalFilePathEventArgs e = new GetLocalFilePathEventArgs();
@@ -852,7 +851,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                     {
                         // 可以直接获得图像对象
                         string strCode = strPatronBarcode.Substring("qrcode:".Length);
-                        string strFileName = Path.Combine(this.MainForm.UserTempDir, "~qr" + this.GetHashCode() + ".png");
+                        string strFileName = Path.Combine(Program.MainForm.UserTempDir, "~qr" + this.GetHashCode() + ".png");
                         BuildQrCodeImage("", strCode, strFileName);
                         return strFileName;
                     }
@@ -860,7 +859,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                     {
                         // 可以直接获得图像对象
                         string strCode = strPatronBarcode.Substring("39code:".Length);
-                        string strFileName = Path.Combine(this.MainForm.UserTempDir, "~qr" + this.GetHashCode() + ".png");
+                        string strFileName = Path.Combine(Program.MainForm.UserTempDir, "~qr" + this.GetHashCode() + ".png");
                         BuildQrCodeImage("39", strCode, strFileName);
                         return strFileName;
                     }
@@ -875,7 +874,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                         //      -1  出错
                         //      0   没有找到
                         //      1   找到
-                        int nRet = this.MainForm.GetCachedReaderXml(strPatronBarcode,
+                        int nRet = Program.MainForm.GetCachedReaderXml(strPatronBarcode,
                             "",
         out strXml,
         out strOutputPath,
@@ -916,7 +915,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                             strXml = results[0];
 
                             // 加入到缓存
-                            this.MainForm.SetReaderXmlCache(strPatronBarcode,
+                            Program.MainForm.SetReaderXmlCache(strPatronBarcode,
                                 "",
                                 strXml,
                                 strOutputPath);
@@ -958,7 +957,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
 
                     }
 
-                    // string strTempFilePath = this.MainForm.DataDir + "/~temp_obj";
+                    // string strTempFilePath = Program.MainForm.DataDir + "/~temp_obj";
 
                     string strTempFilePath = GetTempFileName();
                     // TODO: 是否可以建立本地 cache 机制
@@ -1062,7 +1061,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
 
             // 看看cache中是否已经有了
             StringCacheItem item = null;
-            item = this.MainForm.SummaryCache.SearchItem(
+            item = Program.MainForm.SummaryCache.SearchItem(
                 "P:" + strPatronBarcode);   // 前缀是为了和册条码号区别
             if (item != null)
             {
@@ -1168,7 +1167,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                 }
 
                 // 如果cache中没有，则加入cache
-                item = this.MainForm.SummaryCache.EnsureItem(
+                item = Program.MainForm.SummaryCache.EnsureItem(
                     "P:" + strPatronBarcode);
                 item.Content = strSummary;
             }
@@ -1248,7 +1247,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
             // 看看cache中是否已经有了
             StringCacheItem item = null;
 
-            item = this.MainForm.SummaryCache.SearchItem(strItemBarcodeUnionPath);
+            item = Program.MainForm.SummaryCache.SearchItem(strItemBarcodeUnionPath);
             if (item != null)
             {
                 // Application.DoEvents();
@@ -1364,7 +1363,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                 }
 
                 // 如果cache中没有，则加入cache
-                item = this.MainForm.SummaryCache.EnsureItem(strItemBarcodeUnionPath);
+                item = Program.MainForm.SummaryCache.EnsureItem(strItemBarcodeUnionPath);
                 item.Content = strSummary;
             }
             finally
@@ -1560,7 +1559,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                         }
 
                         // this.WebBrowser.Document.InvokeScript((string)call.InputParameters[2], new object[] { (object)call.InputParameters[3], (object)strResult });
-                        this.MainForm.BeginInvokeScript(this.WebBrowser,
+                        Program.MainForm.BeginInvokeScript(this.WebBrowser,
                             (string)call.InputParameters[2],
                             new object[] { (object)call.InputParameters[3], (object)strResult });
                     }
@@ -1568,7 +1567,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                     {
                         string strResult = GetSummary((string)call.InputParameters[0], (bool)call.InputParameters[1]);
                         // this.WebBrowser.Document.InvokeScript((string)call.InputParameters[2], new object[] { (object)call.InputParameters[3], (object)strResult });
-                        this.MainForm.BeginInvokeScript(this.WebBrowser,
+                        Program.MainForm.BeginInvokeScript(this.WebBrowser,
                             (string)call.InputParameters[2],
                             new object[] { (object)call.InputParameters[3], (object)strResult });
                     }
@@ -1576,7 +1575,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                     {
                         string strResult = GetPatronSummary((string)call.InputParameters[0]);
                         // this.WebBrowser.Document.InvokeScript((string)call.InputParameters[2], new object[] { (object)call.InputParameters[3], (object)strResult });
-                        this.MainForm.BeginInvokeScript(this.WebBrowser,
+                        Program.MainForm.BeginInvokeScript(this.WebBrowser,
                             (string)call.InputParameters[1],
                             new object[] { (object)call.InputParameters[2], (object)strResult });
                     }
@@ -1599,7 +1598,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                 // 要在一个控制台输出这些异常信息，帮助诊断
                 string strError = "WebExternalHost 异常：" + ExceptionUtil.GetDebugText(ex);
                 DoOutputDebugInfo(strError);
-                this.MainForm.ReportError("dp2circulation WebExternalHost 异常",
+                Program.MainForm.ReportError("dp2circulation WebExternalHost 异常",
                     strError);
             }
         }
@@ -1632,7 +1631,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
 
             Global.SetHtmlString(this.WebBrowser,
                 strHtml,
-                this.MainForm.DataDir,
+                Program.MainForm.DataDir,
                 strTempFileType);
         }
 
@@ -1683,7 +1682,7 @@ text-align: center;
 
             Global.SetHtmlString(this.WebBrowser,
                 strHtml,
-                this.MainForm.DataDir,
+                Program.MainForm.DataDir,
                 strTempFileType);
         }
 
@@ -1694,7 +1693,7 @@ text-align: center;
         public void ClearHtmlPage()
         {
             Global.ClearHtmlPage(this.WebBrowser,
-                this.MainForm.DataDir,
+                Program.MainForm.DataDir,
                 this.BackColor);
         }
 

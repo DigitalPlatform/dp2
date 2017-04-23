@@ -32,7 +32,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 期刊控件所关联的 ApplicationInfo 对象
@@ -80,9 +80,9 @@ namespace dp2Circulation
 
         private void BindingForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
             this.bindingControl1.GetOrderInfo -= new GetOrderInfoEventHandler(bindingControl1_GetOrderInfo);
@@ -110,7 +110,7 @@ namespace dp2Circulation
 
             LoadState();
 
-            this.MainForm.LoadSplitterPos(
+            Program.MainForm.LoadSplitterPos(
 this.splitContainer_main,
 "bindingform",
 "main_splitter_pos");
@@ -362,22 +362,22 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 // 分割条位置
-                this.MainForm.SaveSplitterPos(
+                Program.MainForm.SaveSplitterPos(
                     this.splitContainer_main,
                     "bindingform",
                     "main_splitter_pos");
 
                 // 显示订购信息坐标值
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "binding_form",
                     "display_orderinfoxy",
                     this.bindingControl1.DisplayOrderInfoXY);
 
                 // 显示分馆外订购组
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "binding_form",
                     "display_lockedOrderGroup",
                     !this.bindingControl1.HideLockedOrderGroup);
@@ -1003,12 +1003,12 @@ MessageBoxDefaultButton.Button2);
         private void button_option1_Click(object sender, EventArgs e)
         {
             // 同步存储值
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
     "binding_form",
     "display_orderinfoxy",
     this.bindingControl1.DisplayOrderInfoXY);
 
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
 "binding_form",
 "display_lockedOrderGroup",
 !this.bindingControl1.HideLockedOrderGroup);

@@ -16,13 +16,6 @@ namespace dp2Circulation
     /// </summary>
     internal class AboutDlg : System.Windows.Forms.Form
     {
-#if NO
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-#endif
-
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.LinkLabel linkLabel1;
         private System.Windows.Forms.Button button_OK;

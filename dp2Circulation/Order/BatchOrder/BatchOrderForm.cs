@@ -681,7 +681,7 @@ namespace dp2Circulation
         /// </summary>
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "Order\\BatchOrder_dark.css");
+            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "Order\\BatchOrder_dark.css");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strJs = "";
 
@@ -841,11 +841,11 @@ namespace dp2Circulation
             StringBuilder text = new StringBuilder();
 
             // string strBinDir = Environment.CurrentDirectory;
-            string strBinDir = this.MainForm.UserDir;
+            string strBinDir = Program.MainForm.UserDir;
 
-            string strCssUrl = Path.Combine(this.MainForm.UserDir, "Order\\BatchOrder_light.css");
-            string strBatchOrderJs = Path.Combine(this.MainForm.UserDir, "Order\\BatchOrder.js");
-            string strOrderBaseJs = Path.Combine(this.MainForm.UserDir, "Order\\OrderBase.js");
+            string strCssUrl = Path.Combine(Program.MainForm.UserDir, "Order\\BatchOrder_light.css");
+            string strBatchOrderJs = Path.Combine(Program.MainForm.UserDir, "Order\\BatchOrder.js");
+            string strOrderBaseJs = Path.Combine(Program.MainForm.UserDir, "Order\\OrderBase.js");
             string strLink = "\r\n<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' ></link>";
             string strScriptHead = "\r\n<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\" ></script>"
 
@@ -1510,8 +1510,7 @@ int nCount)
                 strPubType);
             edit.Text = "新增订购事项";
             edit.DisplayMode = strPubType == "series" ? "simpleseries" : "simplebook";
-            edit.MainForm = Program.MainForm;
-            // edit.ItemControl = this;    // 2016/1/8
+            // edit.MainForm = Program.MainForm;
 
             Program.MainForm.AppInfo.LinkFormState(edit, "BatchOrderForm_OrderEditForm_state");
             edit.ShowDialog(this);
@@ -1588,7 +1587,7 @@ int nCount)
                 strPubType);
             edit.Text = "快速修改订购事项";
             edit.DisplayMode = strPubType == "series" ? "simpleseries" : "simplebook";
-            edit.MainForm = Program.MainForm;
+            // edit.MainForm = Program.MainForm;
 
             Program.MainForm.AppInfo.LinkFormState(edit, "BatchOrderForm_OrderEditForm_state");
             edit.ShowDialog(this);
@@ -1631,15 +1630,15 @@ int nCount)
             {
                 if (_listForm.Visible == false)
                 {
-                    this.MainForm.AppInfo.LinkFormState(_listForm, "keyboardform_state");
+                    Program.MainForm.AppInfo.LinkFormState(_listForm, "keyboardform_state");
 
-                    _listForm.Show(this.MainForm);
+                    _listForm.Show(Program.MainForm);
                     _listForm.Activate();
 
                     //if (this._listForm != null)
                     //    this._listForm.SetColorStyle(this.ColorStyle);
 
-                    this.MainForm.CurrentPropertyControl = null;
+                    Program.MainForm.CurrentPropertyControl = null;
                 }
                 else
                 {
@@ -1656,7 +1655,7 @@ int nCount)
                 }
                 else
                 {
-                    if (this.MainForm.CurrentPropertyControl != this._listForm.MainControl)
+                    if (Program.MainForm.CurrentPropertyControl != this._listForm.MainControl)
                     {
                         _listForm.DoDock(true); // false 不会自动显示FixedPanel
                         // _listForm.Initialize(); // 没有 .Show() 的就用 .Initialize()
@@ -1688,15 +1687,15 @@ int nCount)
         {
             if (this._listForm.Docked == false)
             {
-                if (this.MainForm.CurrentPropertyControl != this._listForm.MainControl)
-                    this.MainForm.CurrentPropertyControl = this._listForm.MainControl;
+                if (Program.MainForm.CurrentPropertyControl != this._listForm.MainControl)
+                    Program.MainForm.CurrentPropertyControl = this._listForm.MainControl;
 
                 if (e.ShowFixedPanel == true)
                 {
-                    if (this.MainForm.PanelFixedVisible == false)
-                        this.MainForm.PanelFixedVisible = true;
+                    if (Program.MainForm.PanelFixedVisible == false)
+                        Program.MainForm.PanelFixedVisible = true;
                     // 把 propertypage 翻出来
-                    this.MainForm.ActivatePropertyPage();
+                    Program.MainForm.ActivatePropertyPage();
                 }
 
                 this._listForm.Docked = true;
@@ -1725,8 +1724,8 @@ int nCount)
         {
             if (this._listForm != null)
             {
-                if (this.MainForm.CurrentPropertyControl == this._listForm.MainControl)
-                    this.MainForm.CurrentPropertyControl = null;
+                if (Program.MainForm.CurrentPropertyControl == this._listForm.MainControl)
+                    Program.MainForm.CurrentPropertyControl = null;
 
                 this._listForm.Close();
                 this._listForm = null;

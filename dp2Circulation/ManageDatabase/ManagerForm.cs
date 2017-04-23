@@ -164,9 +164,9 @@ namespace dp2Circulation
 
         private void ManagerForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
 #if NO
@@ -622,7 +622,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -658,11 +658,11 @@ namespace dp2Circulation
 
         private void ManagerForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
         // 从服务器获得最新的关于全部数据库的 XML 定义。注意，不刷新界面。
@@ -787,7 +787,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -861,7 +861,7 @@ namespace dp2Circulation
             SelectDatabaseLine(dlg.BiblioDatabaseName);
 
             // 重新获得各种库名、列表
-            this.MainForm.StartPrepareNames(false, false);
+            Program.MainForm.StartPrepareNames(false, false);
         }
 
         void SelectDatabaseLine(string strDatabaseName)
@@ -902,7 +902,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -953,7 +953,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -1008,7 +1008,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -1059,7 +1059,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -1112,7 +1112,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -1253,7 +1253,7 @@ namespace dp2Circulation
                     UpdateLoanPolicyLibraryCode();
 
                 // 重新获得各种库名、列表
-                this.MainForm.StartPrepareNames(false, false);
+                Program.MainForm.StartPrepareNames(false, false);
             }
             finally
             {
@@ -1319,7 +1319,7 @@ namespace dp2Circulation
                 RefreshOpacBrowseFormatTree();
 
                 // 重新获得各种库名、列表
-                this.MainForm.StartPrepareNames(false, false);
+                Program.MainForm.StartPrepareNames(false, false);
             }
             else if (strType == "reader")
             {
@@ -1354,7 +1354,7 @@ namespace dp2Circulation
                 SelectDatabaseLine(dlg.ReaderDatabaseName);
 
                 // 重新获得各种库名、列表
-                this.MainForm.StartPrepareNames(false, false);
+                Program.MainForm.StartPrepareNames(false, false);
 
                 RefreshOpacDatabaseList();
                 RefreshOpacBrowseFormatTree();
@@ -1406,7 +1406,7 @@ namespace dp2Circulation
                 RefreshOpacBrowseFormatTree();
 
                 // 重新获得各种库名、列表
-                this.MainForm.StartPrepareNames(false, false);
+                Program.MainForm.StartPrepareNames(false, false);
             }
 
             return;
@@ -1467,7 +1467,7 @@ namespace dp2Circulation
                 RefreshOpacBrowseFormatTree();
 
                 // 重新获得各种库名、列表
-                this.MainForm.StartPrepareNames(false, false);
+                Program.MainForm.StartPrepareNames(false, false);
             }
             else if (strType == "reader")
             {
@@ -1501,7 +1501,7 @@ namespace dp2Circulation
                 SelectDatabaseLine(dlg.ReaderDatabaseName);
 
                 // 重新获得各种库名、列表
-                this.MainForm.StartPrepareNames(false, false);
+                Program.MainForm.StartPrepareNames(false, false);
 
                 RefreshOpacDatabaseList();
                 RefreshOpacBrowseFormatTree();
@@ -1555,7 +1555,7 @@ namespace dp2Circulation
                 RefreshOpacBrowseFormatTree();
 
                 // 重新获得各种库名、列表
-                this.MainForm.StartPrepareNames(false, false);
+                Program.MainForm.StartPrepareNames(false, false);
             }
 
             return;
@@ -1792,12 +1792,11 @@ namespace dp2Circulation
             XmlViewerForm dlg = new XmlViewerForm();
 
             dlg.Text = "数据库  " + strDbNameList + " 的定义";
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.XmlString = strXml;
-            // dlg.StartPosition = FormStartPosition.CenterScreen;
-            this.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_viewXml_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_viewXml_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
             return;
         }
 
@@ -1835,7 +1834,7 @@ namespace dp2Circulation
                 UpdateLoanPolicyLibraryCode();
 
             // 重新获得各种库名、列表
-            this.MainForm.StartPrepareNames(false, false);
+            Program.MainForm.StartPrepareNames(false, false);
 
 
         }
@@ -1901,7 +1900,7 @@ namespace dp2Circulation
             SelectDatabaseLine(dlg.DatabaseName);
 
             // 重新获得各种库名、列表
-            this.MainForm.StartPrepareNames(false, false);
+            Program.MainForm.StartPrepareNames(false, false);
             return 1;
         }
 
@@ -1977,12 +1976,12 @@ namespace dp2Circulation
             strError = "";
 
             ConfirmSupervisorDialog login_dlg = new ConfirmSupervisorDialog();
-            MainForm.SetControlFont(login_dlg, this.MainForm.DefaultFont);
-            login_dlg.UserName = this.MainForm.AppInfo.GetString(
+            MainForm.SetControlFont(login_dlg, Program.MainForm.DefaultFont);
+            login_dlg.UserName = Program.MainForm.AppInfo.GetString(
                     "default_account",
                     "username",
                     "");
-            login_dlg.ServerUrl = this.MainForm.LibraryServerUrl;
+            login_dlg.ServerUrl = Program.MainForm.LibraryServerUrl;
             login_dlg.Comment = "重要操作前，需要验证您的身份";
 
             login_dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -1991,7 +1990,7 @@ namespace dp2Circulation
             if (login_dlg.DialogResult != DialogResult.OK)
                 return 0;
 
-            string strLocation = this.MainForm.AppInfo.GetString(
+            string strLocation = Program.MainForm.AppInfo.GetString(
                 "default_account",
                 "location",
                 "");
@@ -2022,7 +2021,7 @@ namespace dp2Circulation
         //      strDbPaths  分号分割的数据库全路径列表
         void ReplaceHostName(ref string strDbPaths)
         {
-            Uri library_uri = new Uri(this.MainForm.LibraryServerDir1);
+            Uri library_uri = new Uri(Program.MainForm.LibraryServerDir1);
             if (library_uri.IsLoopback == true)
                 return; // 说明前端和图书馆服务器同在一台机器，就不用替换了
 
@@ -2102,10 +2101,10 @@ namespace dp2Circulation
             MainForm.SetControlFont(style_dlg, this.Font, false);
 
             // 2.38
-            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.38") >= 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.38") >= 0)
                 style_dlg.AutoRebuildKeysVisible = true;
 
-            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.54") >= 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.54") >= 0)
                 style_dlg.RecoverStateVisible = bHasReaderDatabase;
 
             style_dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -2256,7 +2255,7 @@ namespace dp2Circulation
 
             // 2015/6/13
             // 重新获得各种库名、列表
-            this.MainForm.StartPrepareNames(false, false);
+            Program.MainForm.StartPrepareNames(false, false);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -2529,7 +2528,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -2569,7 +2568,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -2619,7 +2618,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -2680,9 +2679,9 @@ namespace dp2Circulation
                 goto ERROR1;
 
             // dlg.StartPosition = FormStartPosition.CenterScreen;
-            this.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_OpacVirtualDatabaseDialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_OpacVirtualDatabaseDialog_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
@@ -3057,13 +3056,13 @@ namespace dp2Circulation
             XmlViewerForm dlg = new XmlViewerForm();
 
             dlg.Text = "OPAC数据库  " + strDbNameList + " 的定义";
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.XmlString = strXml;
             // dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_viewXml_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_viewXml_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
             return;
         }
 
@@ -3115,9 +3114,9 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 // dlg.StartPosition = FormStartPosition.CenterScreen;
-                this.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_OpacVirtualDatabaseDialog_state");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_OpacVirtualDatabaseDialog_state");
                 dlg.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(dlg);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
 
                 if (dlg.DialogResult != DialogResult.OK)
@@ -3214,9 +3213,9 @@ namespace dp2Circulation
                 dlg.DatabaseName = DomUtil.GetAttr(dom.DocumentElement, "name");
                 dlg.DatabaseAlias = dom.DocumentElement.GetAttribute("alias");
 
-                this.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_OpacNormalDatabaseDialog_state");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_OpacNormalDatabaseDialog_state");
                 dlg.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(dlg);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
                 if (dlg.DialogResult != DialogResult.OK)
                     return;
@@ -3272,9 +3271,9 @@ namespace dp2Circulation
             dlg.ManagerForm = this;
             dlg.ExcludingDbNames = existing_dbnames;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_OpacNormalDatabaseDialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ManagerForm_OpacNormalDatabaseDialog_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
@@ -3674,7 +3673,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -3714,7 +3713,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -4884,7 +4883,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -4924,7 +4923,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -5065,7 +5064,7 @@ namespace dp2Circulation
 
             // 2014/9/4
             // library.xml 中 <locationTypes> 内容或可能与 GetValueTable() API 相关，每当修改和保存了<locationTypes> 信息，都要刷新一下值列表缓存，以便界面可以重新获得 location 列表值
-            this.MainForm.ClearValueTableCache();
+            Program.MainForm.ClearValueTableCache();
             return 0;
         }
 
@@ -5616,7 +5615,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -5658,7 +5657,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -5672,7 +5671,7 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 // 清除内容中缓存的值列表定义
-                this.MainForm.ClearValueTableCache();
+                Program.MainForm.ClearValueTableCache();
 
                 return (int)lRet;
             }
@@ -5837,7 +5836,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -5879,7 +5878,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -7073,8 +7072,8 @@ namespace dp2Circulation
         // 观察XML定义代码
         private void toolStripButton_arrangement_viewXml_Click(object sender, EventArgs e)
         {
-            if (this.MainForm.CallNumberCfgDom == null
-                || this.MainForm.CallNumberCfgDom.DocumentElement == null)
+            if (Program.MainForm.CallNumberCfgDom == null
+                || Program.MainForm.CallNumberCfgDom.DocumentElement == null)
             {
                 MessageBox.Show(this, "当前内存中尚未具备排架体系XML定义代码");
                 return;
@@ -7083,8 +7082,8 @@ namespace dp2Circulation
             XmlViewerForm dlg = new XmlViewerForm();
 
             dlg.Text = "当前内存中的排架体系XML定义代码";
-            dlg.MainForm = this.MainForm;
-            dlg.XmlString = this.MainForm.CallNumberCfgDom.DocumentElement.OuterXml;
+            // dlg.MainForm = Program.MainForm;
+            dlg.XmlString = Program.MainForm.CallNumberCfgDom.DocumentElement.OuterXml;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog();
             return;
@@ -7743,7 +7742,7 @@ namespace dp2Circulation
 
             dlg.CreateMode = true;
             //dlg.DupCfgDialog = this;
-            dlg.DbFromInfos = this.MainForm.BiblioDbFromInfos;
+            dlg.DbFromInfos = Program.MainForm.BiblioDbFromInfos;
             dlg.BiblioDbNames = this.GetAllBiblioDbNames();
             dlg.ProjectName = "新的查重方案";
             dlg.ProjectComment = "";
@@ -7789,7 +7788,7 @@ namespace dp2Circulation
 
             dlg.CreateMode = false;
             // dlg.DupCfgDialog = this;
-            dlg.DbFromInfos = this.MainForm.BiblioDbFromInfos;
+            dlg.DbFromInfos = Program.MainForm.BiblioDbFromInfos;
             dlg.BiblioDbNames = this.GetAllBiblioDbNames();
             dlg.ProjectName = strProjectName;
             dlg.ProjectComment = strProjectComment;
@@ -8266,7 +8265,7 @@ namespace dp2Circulation
                 goto ERROR1;
 
             this.LoanPolicyDefChanged = false;
-            this.MainForm.ClearValueTableCache();   // 因为 <rightsTable> 里面的 <readerTypes> 和 <bookTypes> 元素可能发生变化，影响着值列表缓存
+            Program.MainForm.ClearValueTableCache();   // 因为 <rightsTable> 里面的 <readerTypes> 和 <bookTypes> 元素可能发生变化，影响着值列表缓存
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -8305,7 +8304,7 @@ namespace dp2Circulation
                 menuItem = new MenuItem("修改 " + strName + " (&M)");
                 menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_modify_Click);
                 if (this.listView_calendar.SelectedItems.Count == 0
-                || StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.29") < 0)
+                || StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.29") < 0)
                     menuItem.Enabled = false;
                 // 缺省命令
                 menuItem.DefaultItem = true;
@@ -8319,7 +8318,7 @@ namespace dp2Circulation
 
             menuItem = new MenuItem("新增(&N)");
             menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_new_Click);
-            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.29") < 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.29") < 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -8339,7 +8338,7 @@ namespace dp2Circulation
             menuItem = new MenuItem(strText);
             menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_delete_Click);
             if (this.listView_calendar.SelectedItems.Count == 0
-                || StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.29") < 0)
+                || StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.29") < 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -8350,7 +8349,7 @@ namespace dp2Circulation
             menuItem = new MenuItem("保存(&S)");
             menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_save_Click);
             if (this.CalendarDefChanged == false
-                || StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.29") < 0)
+                || StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.29") < 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -8425,9 +8424,9 @@ namespace dp2Circulation
             dlg.Range = ListViewUtil.GetItemText(item, COLUMN_CALENDAR_RANGE);
             dlg.Comment = ListViewUtil.GetItemText(item, COLUMN_CALENDAR_COMMENT);
             dlg.Content = ListViewUtil.GetItemText(item, COLUMN_CALENDAR_CONTENT);
-            this.MainForm.AppInfo.LinkFormState(dlg, "CalendarDialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "CalendarDialog_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -8468,9 +8467,9 @@ namespace dp2Circulation
             dlg.Content = "";
 
         REDO:
-            this.MainForm.AppInfo.LinkFormState(dlg, "CalendarDialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "CalendarDialog_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -8610,9 +8609,9 @@ namespace dp2Circulation
             if (this.tabControl_main.SelectedTab == this.tabPage_kernel
                 && _kernelInitialized == false)
             {
-                if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.84") < 0)
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.84") < 0)
                 {
-                    this.ShowMessage("内核管理功能要求当前连接的 dp2library 服务器版本为 2.84 或以上 (而现在是 " + this.MainForm.ServerVersion + ")", "red", true);
+                    this.ShowMessage("内核管理功能要求当前连接的 dp2library 服务器版本为 2.84 或以上 (而现在是 " + Program.MainForm.ServerVersion + ")", "red", true);
                     return;
                 }
 
@@ -8672,7 +8671,7 @@ namespace dp2Circulation
 
         private void kernelResTree1_GetChannel(object sender, DigitalPlatform.LibraryClient.GetChannelEventArgs e)
         {
-            e.Channel = this.MainForm.GetChannel();
+            e.Channel = Program.MainForm.GetChannel();
             if (e.BeginLoop == true)
             {
                 this.ShowMessage("正在访问服务器 ...");
@@ -8684,7 +8683,7 @@ namespace dp2Circulation
 
         private void kernelResTree1_ReturnChannel(object sender, DigitalPlatform.LibraryClient.ReturnChannelEventArgs e)
         {
-            this.MainForm.ReturnChannel(e.Channel);
+            Program.MainForm.ReturnChannel(e.Channel);
             if (e.EndLoop == true)
             {
                 stop.EndLoop();

@@ -49,30 +49,6 @@ namespace dp2Circulation
         internal Assembly AssemblyFilter = null;
         internal ColumnFilterDocument MarcFilter = null;
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm
-        {
-            get
-            {
-                return (MainForm)this.MdiParent;
-            }
-        }
-        
-        internal DigitalPlatform.Stop stop = null;
-
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public virtual void EnableControls(bool bEnable)
-        {
-            throw new Exception("尚未实现 EnableControls() ");
-        }
-#endif
-
         // 兼容以前的版本
         public int GetMarc(
     string strBiblioRecPath,
@@ -238,7 +214,7 @@ namespace dp2Circulation
 
             string strWarning = "";
 
-            string strLibPaths = "\"" + this.MainForm.DataDir + "\"";
+            string strLibPaths = "\"" + Program.MainForm.DataDir + "\"";
             Type entryClassType = this.GetType();
 
             filter = new ColumnFilterDocument();
@@ -458,7 +434,7 @@ namespace dp2Circulation
                 stop.Initial("正在初始化浏览器组件 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -608,7 +584,7 @@ namespace dp2Circulation
                 sr.Close();
             }
 
-            this.MainForm.StatusBarMessage = strTimeMessage;
+            Program.MainForm.StatusBarMessage = strTimeMessage;
 
             return 0;
         ERROR1:
@@ -699,7 +675,7 @@ namespace dp2Circulation
                 // 准备书目记录路径
                 string strParentID = DomUtil.GetElementText(info.Dom.DocumentElement,
 "parent");
-                string strBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName(Global.GetDbName(info.Record.Path));
+                string strBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName(Global.GetDbName(info.Record.Path));
                 if (string.IsNullOrEmpty(strBiblioDbName) == true)
                 {
                     strError = "根据册记录路径 '" + info.Record.Path + "' 获得书目库名时出错";
@@ -1237,7 +1213,7 @@ namespace dp2Circulation
                 stop.Initial("正在将册条码号转换为记录路径 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {

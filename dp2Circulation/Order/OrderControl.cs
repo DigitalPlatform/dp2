@@ -98,50 +98,6 @@ namespace dp2Circulation
         /// </summary>
         public event VerifyLibraryCodeEventHandler VerifyLibraryCode = null;
 
-#if NO
-        /// <summary>
-        /// 界面许可 / 禁止状态发生改变
-        /// </summary>
-        public event EnableControlsHandler EnableControlsEvent = null;
-
-
-        public event LoadRecordHandler LoadRecord = null;
-
-
-
-        public bool m_bRemoveDeletedItem = false;   // 在删除事项时, 是否从视觉上抹除这些事项(实际上内存里面还保留有即将提交的事项)?
-
-        /// <summary>
-        /// 通讯通道
-        /// </summary>
-        public LibraryChannel Channel = null;
-
-        /// <summary>
-        /// 停止控制
-        /// </summary>
-        public DigitalPlatform.Stop Stop = null;
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        /// <summary>
-        /// 获得宏的值
-        /// </summary>
-        public event GetMacroValueHandler GetMacroValue = null;
-
-        /// <summary>
-        /// 内容发生改变
-        /// </summary>
-        public event ContentChangedEventHandler ContentChanged = null;
-        string m_strBiblioRecPath = "";
-
-        public OrderItemCollection Items = null;
-
-#endif
-
-
         /// <summary>
         /// 创建实体数据
         /// </summary>
@@ -390,7 +346,7 @@ namespace dp2Circulation
             Stop.BeginLoop();
 
             this.Update();
-            // this.MainForm.Update();
+            // Program.MainForm.Update();
 
             try
             {
@@ -484,7 +440,7 @@ namespace dp2Circulation
         {
             string strError = "";
             string[] values = null;
-            int nRet = MainForm.GetValueTable(e.TableName,
+            int nRet = Program.MainForm.GetValueTable(e.TableName,
                 e.DbName,
                 out values,
                 out strError);
@@ -506,7 +462,7 @@ namespace dp2Circulation
             Debug.Assert(this.Items != null, "");
 
             OrderDesignForm dlg = new OrderDesignForm();
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.SeriesMode = this.SeriesMode;   // 2008/12/24
             dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);    // 2009/2/15
             dlg.CheckDupItem = true;
@@ -563,14 +519,14 @@ namespace dp2Circulation
             dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
             dlg.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(dlg_VerifyLibraryCode);
 
-            MainForm.AppInfo.LinkFormState(dlg,
+            Program.MainForm.AppInfo.LinkFormState(dlg,
                 "order_design_form_state");
 
             dlg.FocusedTime = DateTime.Now;
 
             dlg.ShowDialog(this);
 
-            MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
@@ -806,7 +762,7 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            string strNewDefault = this.MainForm.AppInfo.GetString(
+            string strNewDefault = Program.MainForm.AppInfo.GetString(
                 "entityform_optiondlg",
                 "order_normalRegister_default",
                 "<root />");
@@ -1035,7 +991,7 @@ namespace dp2Circulation
             Debug.Assert(this.Items != null, "");
 
             OrderArriveForm dlg = new OrderArriveForm();
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);    // 2009/2/15
             dlg.Text = "验收 -- 批次号:" + this.AcceptBatchNo + " -- 源:" + this.BiblioRecPath + ", 目标:" + this.TargetRecPath;
             dlg.TargetRecPath = this.TargetRecPath;
@@ -1082,12 +1038,12 @@ namespace dp2Circulation
             dlg.GetValueTable -= new GetValueTableEventHandler(designOrder_GetValueTable);
             dlg.GetValueTable += new GetValueTableEventHandler(designOrder_GetValueTable);
 
-            MainForm.AppInfo.LinkFormState(dlg,
+            Program.MainForm.AppInfo.LinkFormState(dlg,
                 "order_accept_design_form_state");
 
             dlg.ShowDialog(this);
 
-            MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
@@ -1260,7 +1216,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strTargetRecPath) == false)
                 {
                     string strBiblioDbName = Global.GetDbName(this.BiblioRecPath);
-                    if (this.MainForm.IsOrderWorkDb(strBiblioDbName) == false)
+                    if (Program.MainForm.IsOrderWorkDb(strBiblioDbName) == false)
                     {
                         if (this.SetTargetRecPath != null)
                         {
@@ -1670,7 +1626,7 @@ namespace dp2Circulation
                     {
                         OrderIndexFoundDupDlg dlg = new OrderIndexFoundDupDlg();
                         MainForm.SetControlFont(dlg, this.Font, false);
-                        dlg.MainForm = this.MainForm;
+                        dlg.MainForm = Program.MainForm;
                         dlg.BiblioText = strBiblioText;
                         dlg.OrderText = strOrderText;
                         dlg.MessageText = "拟新增的编号 '" + strIndex + "' 在数据库中发现已经存在。因此无法新增。";
@@ -1713,7 +1669,7 @@ namespace dp2Circulation
 
             edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
             edit.Text = "新增订购事项";
-            edit.MainForm = this.MainForm;
+            // edit.MainForm = Program.MainForm;
             edit.ItemControl = this;    // 2016/1/8
             nRet = edit.InitialForEdit(orderitem,
                 this.Items,
@@ -1722,9 +1678,9 @@ namespace dp2Circulation
                 goto ERROR1;
 
             //REDO:
-            this.MainForm.AppInfo.LinkFormState(edit, "OrderEditForm_state");
+            Program.MainForm.AppInfo.LinkFormState(edit, "OrderEditForm_state");
             edit.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(edit);
+            Program.MainForm.AppInfo.UnlinkFormState(edit);
 
             if (edit.DialogResult != DialogResult.OK
                 && edit.Item == orderitem    // 表明尚未前后移动，或者移动回到起点，然后Cancel
@@ -2119,7 +2075,7 @@ namespace dp2Circulation
         {
             strError = "";
 
-            string strNewDefault = this.MainForm.AppInfo.GetString(
+            string strNewDefault = Program.MainForm.AppInfo.GetString(
     "entityform_optiondlg",
     strCfgEntry,
     "<root />");
@@ -2177,7 +2133,7 @@ namespace dp2Circulation
             OrderEditForm edit = new OrderEditForm();
 
             edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
-            edit.MainForm = this.MainForm;
+            // edit.MainForm = Program.MainForm;
             edit.ItemControl = this;
             string strError = "";
             int nRet = edit.InitialForEdit(orderitem,
@@ -2191,16 +2147,16 @@ namespace dp2Circulation
             edit.StartItem = null;  // 清除原始对象标记
 
         REDO:
-            this.MainForm.AppInfo.LinkFormState(edit, "OrderEditForm_state");
+            Program.MainForm.AppInfo.LinkFormState(edit, "OrderEditForm_state");
             edit.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(edit);
+            Program.MainForm.AppInfo.UnlinkFormState(edit);
 
             if (edit.DialogResult != DialogResult.OK)
                 return;
 
             TriggerContentChanged(bOldChanged, true);
 
-            LibraryChannel channel = this.MainForm.GetChannel();
+            LibraryChannel channel = Program.MainForm.GetChannel();
             this.EnableControls(false);
             try
             {
@@ -2303,7 +2259,7 @@ namespace dp2Circulation
             finally
             {
                 this.EnableControls(true);
-                this.MainForm.ReturnChannel(channel);
+                Program.MainForm.ReturnChannel(channel);
             }
         }
 
@@ -2421,7 +2377,7 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 this.Changed = false;
-                this.MainForm.StatusBarMessage = "订购信息 提交 / 保存 成功";
+                Program.MainForm.StatusBarMessage = "订购信息 提交 / 保存 成功";
                 return 1;
             ERROR1:
                 MessageBox.Show(ForegroundWindow.Instance, strError);
@@ -2667,7 +2623,7 @@ namespace dp2Circulation
             Stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -2815,7 +2771,7 @@ namespace dp2Circulation
                     if (String.IsNullOrEmpty(orderitem.RecPath) == false)
                     {
                         string strTempOrderDbName = Global.GetDbName(orderitem.RecPath);
-                        string strTempBiblioDbName = this.MainForm.GetBiblioDbNameFromOrderDbName(strTempOrderDbName);
+                        string strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromOrderDbName(strTempOrderDbName);
 
                         Debug.Assert(String.IsNullOrEmpty(strTempBiblioDbName) == false, "");
                         // TODO: 这里要正规报错
@@ -3063,7 +3019,7 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
             bool bAllowModify = StringUtil.IsInList("client_uimodifyorderrecord",
-                this.MainForm._currentUserRights// this.Rights
+                Program.MainForm._currentUserRights// this.Rights
                 ) == true;
 
             {
@@ -3176,7 +3132,7 @@ namespace dp2Circulation
             menuItem = new MenuItem("装入已经打开的订购窗(&E)");
             menuItem.Click += new System.EventHandler(this.menu_loadToExistItemForm_Click);
             if (this.listView.SelectedItems.Count == 0
-                || this.MainForm.GetTopChildWindow<ItemInfoForm>() == null)
+                || Program.MainForm.GetTopChildWindow<ItemInfoForm>() == null)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -3242,8 +3198,8 @@ namespace dp2Circulation
             ItemInfoForm form = null;
 
             form = new ItemInfoForm();
-            form.MdiParent = this.MainForm;
-            form.MainForm = this.MainForm;
+            form.MdiParent = Program.MainForm;
+            form.MainForm = Program.MainForm;
             form.Show();
 
             form.DbType = "order";
@@ -3283,7 +3239,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            ItemInfoForm form = this.MainForm.GetTopChildWindow<ItemInfoForm>();
+            ItemInfoForm form = Program.MainForm.GetTopChildWindow<ItemInfoForm>();
             if (form == null)
             {
                 strError = "当前并没有已经打开的订购窗";
@@ -3324,7 +3280,7 @@ namespace dp2Circulation
                 "请指定新的书目记录路径",
                 "书目记录路径(格式'库名/ID'): ",
                 "",
-            this.MainForm.DefaultFont);
+            Program.MainForm.DefaultFont);
 
             if (strNewBiblioRecPath == null)
                 return;
@@ -3387,7 +3343,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
-            this.MainForm.StatusBarMessage = "订购信息 修改归属 成功";
+            Program.MainForm.StatusBarMessage = "订购信息 修改归属 成功";
             return;
         ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
@@ -3433,7 +3389,7 @@ namespace dp2Circulation
             }
 
             bool bAllowModify = StringUtil.IsInList("client_uimodifyorderrecord",
-    this.MainForm._currentUserRights// this.Rights
+    Program.MainForm._currentUserRights// this.Rights
     ) == true;
             if (bAllowModify == false)
             {

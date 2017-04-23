@@ -26,7 +26,7 @@ namespace dp2Circulation
         /// <summary>
         /// MainForm 对象
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 词典数据库名
@@ -196,8 +196,8 @@ true);
         void DoStop(object sender, StopEventArgs e)
         {
 #if NO
-            if (this.MainForm.Channel != null)
-                this.MainForm.Channel.Abort();
+            if (Program.MainForm.Channel != null)
+                Program.MainForm.Channel.Abort();
 #endif
         }
 
@@ -218,7 +218,7 @@ true);
 
             lock (this._stop)
             {
-                LibraryChannel channel = this.MainForm.GetChannel();
+                LibraryChannel channel = Program.MainForm.GetChannel();
 
                 _stop.OnStop += new StopEventHandler(this.DoStop);
                 _stop.Initial("正在检索词条 '" + strKey + "' ...");
@@ -226,7 +226,7 @@ true);
                 try
                 {
 
-                    int nRet = this.MainForm.SearchDictionary(
+                    int nRet = Program.MainForm.SearchDictionary(
                         channel,
                         this._stop,
                         strDbName,
@@ -251,7 +251,7 @@ true);
                     _stop.OnStop -= new StopEventHandler(this.DoStop);
                     _stop.Initial("");
 
-                    this.MainForm.ReturnChannel(channel);
+                    Program.MainForm.ReturnChannel(channel);
                 }
 
             }

@@ -113,7 +113,7 @@ namespace dp2Circulation
 #endif
 
             e.ColumnTitles = new ColumnPropertyCollection();
-            ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(e.DbName);
+            ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(e.DbName);
             if (temp != null)
             {
                 e.ColumnTitles.Insert(0, "书目摘要");
@@ -157,7 +157,7 @@ namespace dp2Circulation
             }
 #endif
             e.ColumnTitles = new ColumnPropertyCollection();
-            ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties("[inventory_item]");  // e.DbName
+            ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties("[inventory_item]");  // e.DbName
             if (temp != null)
             {
                 if (m_bBiblioSummaryColumn == true)
@@ -172,7 +172,7 @@ namespace dp2Circulation
             // 右侧补充的列
             if (this._defs != null)
             {
-                ColumnPropertyCollection inventory_properties = this.MainForm.GetBrowseColumnProperties(this._defs.InventoryDbName);
+                ColumnPropertyCollection inventory_properties = Program.MainForm.GetBrowseColumnProperties(this._defs.InventoryDbName);
                 if (inventory_properties != null)
                 {
                     foreach (int index in this._defs.source_indices)
@@ -191,7 +191,7 @@ namespace dp2Circulation
         private void InventoryForm_Load(object sender, EventArgs e)
         {
             this._chargingForm.SupressSizeSetting = true; // 避免保存窗口尺寸
-            this._chargingForm.MainForm = this.MainForm;
+            this._chargingForm.MainForm = Program.MainForm;
             this._chargingForm.ShowInTaskbar = false;
             this._chargingForm.Show();  // 有了此句对话框的 xxx_load 才能被执行
             this._chargingForm.Hide();  // 有了此句可避免主窗口背后显示一个空对话框窗口
@@ -200,7 +200,7 @@ namespace dp2Circulation
             this._chargingForm.FloatingMessageForm = this.FloatingMessageForm;
 #if NO
                         // 输入的ISO2709文件名
-            this._openMarcFileDialog.FileName = this.MainForm.AppInfo.GetString(
+            this._openMarcFileDialog.FileName = Program.MainForm.AppInfo.GetString(
                 "iso2709statisform",
                 "input_iso2709_filename",
                 "");
@@ -208,7 +208,7 @@ namespace dp2Circulation
             {
                 List<string> librarycodes = GetOwnerLibraryCodes();
                 this.inventoryBatchNoControl_start_batchNo.LibraryCodeList = librarycodes;
-                this.inventoryBatchNoControl_start_batchNo.Text = this.MainForm.AppInfo.GetString("inventory_form", "batch_no", "");
+                this.inventoryBatchNoControl_start_batchNo.Text = Program.MainForm.AppInfo.GetString("inventory_form", "batch_no", "");
                 if (librarycodes.Count == 1)
                 {
                     if (this.inventoryBatchNoControl_start_batchNo.LibraryCodeText != librarycodes[0])
@@ -216,7 +216,7 @@ namespace dp2Circulation
                     this.inventoryBatchNoControl_start_batchNo.LibaryCodeEanbled = false;
                 }
             }
-            this.UiState = this.MainForm.AppInfo.GetString(
+            this.UiState = Program.MainForm.AppInfo.GetString(
     "inventory_form",
     "ui_state",
     "");
@@ -257,13 +257,13 @@ namespace dp2Circulation
         {
             this._chargingForm.Close();
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
     "inventory_form",
     "ui_state",
     this.UiState);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "inventory_form",
                     "batch_no",
                     this.inventoryBatchNoControl_start_batchNo.Text);
@@ -356,7 +356,7 @@ namespace dp2Circulation
                 dlg.Stop = this.stop;
                 dlg.InventoryDbName = strInventoryDbName;
                 dlg.LibraryCodeList = GetOwnerLibraryCodes();
-                this.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_state");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_state");
                 dlg.ShowDialog(this);
 
                 this.textBox_inventoryList_batchNo.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
@@ -659,7 +659,7 @@ namespace dp2Circulation
                 object o = m_tableSummaryColIndex[strItemDbName];
                 if (o == null)
                 {
-                    ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                    ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                     nCol = temp.FindColumnByType("parent_id");
                     if (nCol == -1)
                     {
@@ -686,7 +686,7 @@ namespace dp2Circulation
                 if (strText.IndexOf("/") == -1)
                 {
                     // 获得对应的书目库名
-                    strBiblioRecPath = this.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
+                    strBiblioRecPath = Program.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
                     if (string.IsNullOrEmpty(strBiblioRecPath) == true)
                     {
                         strError = "数据库名 '" + strItemDbName + "' 没有找到对应的书目库名";
@@ -841,12 +841,12 @@ namespace dp2Circulation
             object o = m_tableSummaryColIndex[strItemDbName];
             if (o == null)
             {
-                if (this.MainForm.NormalDbProperties == null)
+                if (Program.MainForm.NormalDbProperties == null)
                 {
                     strError = "普通数据库属性尚未初始化";
                     return -1;
                 }
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                 if (temp == null)
                 {
                     strError = "盘点库 '" + strItemDbName + "' 没有找到列定义";
@@ -959,7 +959,7 @@ namespace dp2Circulation
                 dlg.Channel = channel;
                 dlg.Stop = this.stop;
                 dlg.InventoryDbName = "";
-                this.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
                 dlg.ShowDialog(this);
 
                 this.textBox_baseList_locations.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
@@ -1018,13 +1018,13 @@ namespace dp2Circulation
             strError = "";
             strResult = "";
 
-            if (this.MainForm.NormalDbProperties == null)
+            if (Program.MainForm.NormalDbProperties == null)
             {
                 strError = "普通数据库属性尚未初始化";
                 return -1;
             }
 
-            ColumnPropertyCollection defs = this.MainForm.GetBrowseColumnProperties("[inventory_item]");
+            ColumnPropertyCollection defs = Program.MainForm.GetBrowseColumnProperties("[inventory_item]");
             if (defs == null)
             {
                 strError = "没有找到 [inventory_item] 的列定义";
@@ -1267,12 +1267,12 @@ namespace dp2Circulation
             object o = m_tableSummaryColIndex[strItemDbName];
             if (o == null)
             {
-                if (this.MainForm.NormalDbProperties == null)
+                if (Program.MainForm.NormalDbProperties == null)
                 {
                     strError = "普通数据库属性尚未初始化";
                     return -1;
                 }
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties("[inventory_item]");
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties("[inventory_item]");
                 if (temp == null)
                 {
                     strError = "实体库 '" + strItemDbName + "' 没有找到列定义 [inventory_item]";
@@ -1403,7 +1403,7 @@ namespace dp2Circulation
             if (strText.IndexOf("/") == -1)
             {
                 // 获得对应的书目库名
-                strBiblioRecPath = this.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
+                strBiblioRecPath = Program.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
                 if (string.IsNullOrEmpty(strBiblioRecPath) == true)
                 {
                     strError = this.DbTypeCaption + "类型的数据库名 '" + strItemDbName + "' 没有找到对应的书目库名";
@@ -1485,7 +1485,7 @@ null);
             this._statisInfo.ItemsVerified = this.listView_inventoryList_records.Items.Count;
             this._statisInfo.ItemsBase = this.listView_baseList_records.Items.Count;
 #if NO
-            string strInventoryDbName = this.MainForm.GetUtilDbName("inventory");
+            string strInventoryDbName = Program.MainForm.GetUtilDbName("inventory");
             if (string.IsNullOrEmpty(strInventoryDbName) == true)
             {
                 strError = "尚未定义盘点库";
@@ -1582,7 +1582,7 @@ null);
                 Application.DoEvents();
 
                 // 获得 册记录路径 的列号
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strInventoryDbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strInventoryDbName);
                 int nCol = temp.FindColumnByType("item_recpath");
                 if (nCol == -1)
                 {
@@ -1911,7 +1911,7 @@ null);
 
             defs = new ColumnDefs();
 
-            defs.InventoryDbName = this.MainForm.GetUtilDbName("inventory");
+            defs.InventoryDbName = Program.MainForm.GetUtilDbName("inventory");
             if (string.IsNullOrEmpty(defs.InventoryDbName) == true)
             {
                 strError = "尚未定义盘点库";
@@ -1920,7 +1920,7 @@ null);
 
             {
                 // 获得 册记录路径 的列号
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(defs.InventoryDbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(defs.InventoryDbName);
                 defs.InventoryItemRecPathColumnIndex = temp.FindColumnByType("item_recpath");
                 if (defs.InventoryItemRecPathColumnIndex == -1)
                 {
@@ -1931,7 +1931,7 @@ null);
             }
 
             {
-                defs._base_colmun_defs = this.MainForm.GetBrowseColumnProperties("[inventory_item]");
+                defs._base_colmun_defs = Program.MainForm.GetBrowseColumnProperties("[inventory_item]");
                 if (defs._base_colmun_defs == null)
                 {
                     strError = "[inventory_item] 库列定义没有找到";
@@ -1941,7 +1941,7 @@ null);
 
             {
                 // 获得 册记录路径 的列号
-                defs._inventory_column_defs = this.MainForm.GetBrowseColumnProperties(defs.InventoryDbName);
+                defs._inventory_column_defs = Program.MainForm.GetBrowseColumnProperties(defs.InventoryDbName);
                 if (defs._inventory_column_defs == null)
                 {
                     strError = defs.InventoryDbName + " 库列定义没有找到";
@@ -2633,7 +2633,7 @@ null);
             MainForm.SetControlFont(dlg, this.Font, false);
             dlg.ListView = this.listView_baseList_records;
             dlg.NumberList = StringUtil.SplitList(this.OutputColumns);
-            this.MainForm.AppInfo.LinkFormState(dlg, "SelectColumnDialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "SelectColumnDialog_state");
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
@@ -2649,11 +2649,11 @@ null);
         {
             get
             {
-                return this.MainForm.AppInfo.GetString("inventory_form", "output_columns", "<all>");
+                return Program.MainForm.AppInfo.GetString("inventory_form", "output_columns", "<all>");
             }
             set
             {
-                this.MainForm.AppInfo.SetString("inventory_form", "output_columns", value);
+                Program.MainForm.AppInfo.SetString("inventory_form", "output_columns", value);
             }
         }
 
@@ -2663,7 +2663,7 @@ null);
             MainForm.SetControlFont(dlg, this.Font, false);
             dlg.Text = "请指定日志起止日期范围";
             dlg.DateRange = this.textBox_operLog_dateRange.Text;
-            this.MainForm.AppInfo.LinkFormState(dlg, "GetOperLogFilenameDlg_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "GetOperLogFilenameDlg_state");
             dlg.ShowDialog(this);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -2758,7 +2758,7 @@ null);
                 loader.Stop = this.Progress;
                 loader.estimate = estimate;
                 loader.FileNames = dates;
-                loader.Level = 2;  // this.MainForm.OperLogLevel;
+                loader.Level = 2;  // Program.MainForm.OperLogLevel;
                 loader.AutoCache = false;
                 loader.CacheDir = "";
                 loader.Filter = "borrow,return";    // 2017/4/9
@@ -2895,7 +2895,7 @@ null);
         /// </summary>
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\inventory.css");   // ?? 还是用的 default 目录的文件啊，没有用用户目录的同名文件。似乎启动时不用拷贝了
+            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "default\\inventory.css");   // ?? 还是用的 default 目录的文件啊，没有用用户目录的同名文件。似乎启动时不用拷贝了
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strJs = "";
 
@@ -3451,9 +3451,9 @@ MessageBoxDefaultButton.Button1);
                 {
                     form = new EntityForm();
 
-                    form.MdiParent = this.MainForm;
+                    form.MdiParent = Program.MainForm;
 
-                    form.MainForm = this.MainForm;
+                    form.MainForm = Program.MainForm;
                     form.Show();
                 }
 
@@ -3502,9 +3502,9 @@ MessageBoxDefaultButton.Button1);
                 {
                     form = new ItemInfoForm();
 
-                    form.MdiParent = this.MainForm;
+                    form.MdiParent = Program.MainForm;
 
-                    form.MainForm = this.MainForm;
+                    form.MainForm = Program.MainForm;
                     form.Show();
                 }
 
@@ -3536,7 +3536,7 @@ MessageBoxDefaultButton.Button1);
                 dlg.Stop = this.stop;
                 dlg.InventoryDbName = "";
                 dlg.LibraryCodeList = GetOwnerLibraryCodes();
-                this.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
                 dlg.ShowDialog(this);
 
                 this.textBox_start_locations.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
@@ -3903,7 +3903,7 @@ MessageBoxDefaultButton.Button2);
             filenames.Add("inventory_item_browse.xml");
             filenames.Add("inventory.css");
 
-            int nRet = this.MainForm.CopyDefaultCfgFiles(filenames,
+            int nRet = Program.MainForm.CopyDefaultCfgFiles(filenames,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -3965,7 +3965,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
-            string strTempFileName = this.MainForm.GetTempFileName("baselist");
+            string strTempFileName = Program.MainForm.GetTempFileName("baselist");
             try
             {
                 using (StreamWriter sw = new StreamWriter(strTempFileName, false, Encoding.UTF8))
@@ -3975,7 +3975,7 @@ MessageBoxDefaultButton.Button2);
                         sw.WriteLine(item.Text);
                     }
                 }
-                ItemSearchForm form = this.MainForm.OpenItemSearchForm("item");
+                ItemSearchForm form = Program.MainForm.OpenItemSearchForm("item");
                 // form.Activate();
                 int nRet = form.ImportFromRecPathFile(strTempFileName,
                     "clear",

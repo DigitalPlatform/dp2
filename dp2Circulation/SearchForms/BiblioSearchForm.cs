@@ -93,11 +93,11 @@ namespace dp2Circulation
                 return;
             }
 
-            // e.ColumnTitles = this.MainForm.GetBrowseColumnNames(e.DbName);
+            // e.ColumnTitles = Program.MainForm.GetBrowseColumnNames(e.DbName);
             if (e.DbName.IndexOf("@") == -1)
             {
                 e.ColumnTitles = new ColumnPropertyCollection();
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(e.DbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(e.DbName);
                 if (temp != null)
                     e.ColumnTitles.AddRange(temp);  // 要复制，不要直接使用，因为后面可能会修改。怕影响到原件
             }
@@ -137,35 +137,35 @@ namespace dp2Circulation
             this.commander.IsBusy -= new IsBusyEventHandler(commander_IsBusy);
             this.commander.IsBusy += new IsBusyEventHandler(commander_IsBusy);
 
-            this.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
-            this.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
+            Program.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
+            Program.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
 
-            this.MainForm.FillBiblioFromList(this.comboBox_from);
+            Program.MainForm.FillBiblioFromList(this.comboBox_from);
 
-            this.m_strUsedMarcQueryFilename = this.MainForm.AppInfo.GetString(
+            this.m_strUsedMarcQueryFilename = Program.MainForm.AppInfo.GetString(
                 "bibliosearchform",
                 "usedMarcQueryFilename",
                 "");
 
             // 恢复上次退出时保留的检索途径
-            string strFrom = this.MainForm.AppInfo.GetString(
+            string strFrom = Program.MainForm.AppInfo.GetString(
                 "bibliosearchform",
                 "search_from",
                 "");
             if (String.IsNullOrEmpty(strFrom) == false)
                 this.comboBox_from.Text = strFrom;
 
-            this.checkedComboBox_biblioDbNames.Text = this.MainForm.AppInfo.GetString(
+            this.checkedComboBox_biblioDbNames.Text = Program.MainForm.AppInfo.GetString(
                 "bibliosearchform",
                 "biblio_db_name",
                 "<全部>");
 
-            this.comboBox_matchStyle.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_matchStyle.Text = Program.MainForm.AppInfo.GetString(
                 "bibliosearchform",
                 "match_style",
                 "前方一致");
 
-            bool bHideMatchStyle = this.MainForm.AppInfo.GetBoolean(
+            bool bHideMatchStyle = Program.MainForm.AppInfo.GetBoolean(
                 "biblio_search_form",
                 "hide_matchstyle",
                 false);
@@ -177,7 +177,7 @@ namespace dp2Circulation
                 this.comboBox_matchStyle.Text = "前方一致"; // 隐藏后，采用缺省值
             }
 
-            string strSaveString = this.MainForm.AppInfo.GetString(
+            string strSaveString = Program.MainForm.AppInfo.GetString(
 "bibliosearchform",
 "query_lines",
 "^^^");
@@ -191,15 +191,15 @@ namespace dp2Circulation
             EnableControls(false);
             API.PostMessage(this.Handle, API.WM_USER + 100, 0, 0);
              */
-            if (this.MainForm != null)
-                this.MainForm.FixedSelectedPageChanged += new EventHandler(MainForm_FixedSelectedPageChanged);
+            if (Program.MainForm != null)
+                Program.MainForm.FixedSelectedPageChanged += new EventHandler(MainForm_FixedSelectedPageChanged);
 
             UpdateMenu();
 
 #if NO
-            if (this.MainForm.NormalDbProperties == null
-                || this.MainForm.BiblioDbFromInfos == null
-                || this.MainForm.BiblioDbProperties == null)
+            if (Program.MainForm.NormalDbProperties == null
+                || Program.MainForm.BiblioDbFromInfos == null
+                || Program.MainForm.BiblioDbProperties == null)
             {
                 this.tableLayoutPanel_main.Enabled = false;
             }
@@ -209,7 +209,7 @@ namespace dp2Circulation
                 string strError = "";
                 List<string> codes = null;
                 // 获得全部可用的图书馆代码。注意，并不包含 "" (全局)
-                int nRet = this.MainForm.GetAllLibraryCodes(out codes,
+                int nRet = Program.MainForm.GetAllLibraryCodes(out codes,
                 out strError);
                 if (nRet == -1)
                     MessageBox.Show(this, strError);
@@ -223,7 +223,7 @@ namespace dp2Circulation
                     }
                 }
 
-                this.comboBox_location.Text = this.MainForm.AppInfo.GetString(
+                this.comboBox_location.Text = Program.MainForm.AppInfo.GetString(
     "bibliosearchform",
     "location_filter",
     "<不筛选>");
@@ -233,7 +233,7 @@ namespace dp2Circulation
         void MainForm_FixedSelectedPageChanged(object sender, EventArgs e)
         {
             // 固定面板属性区域被显示出来后
-            if (this.MainForm.ActiveMdiChild == this && this.MainForm.CanDisplayItemProperty() == true)
+            if (Program.MainForm.ActiveMdiChild == this && Program.MainForm.CanDisplayItemProperty() == true)
             {
                 RefreshPropertyView(false);
             }
@@ -248,16 +248,16 @@ namespace dp2Circulation
         {
             if (sender != this)
                 return;
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliosearchform",
                     "record_list_column_width",
                     strWidths);
 
-                this.MainForm.SaveSplitterPos(
+                Program.MainForm.SaveSplitterPos(
     this.splitContainer_main,
     "bibliosearchform",
     "splitContainer_main_ratio");
@@ -269,7 +269,7 @@ namespace dp2Circulation
             if (sender != this)
                 return;
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
     "bibliosearchform",
     "record_list_column_width",
     "");
@@ -281,7 +281,7 @@ namespace dp2Circulation
             }
 
 
-            this.MainForm.LoadSplitterPos(
+            Program.MainForm.LoadSplitterPos(
 this.splitContainer_main,
 "bibliosearchform",
 "splitContainer_main_ratio");
@@ -322,49 +322,49 @@ this.splitContainer_main,
             if (this.commander != null)
                 this.commander.Destroy();
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
         "bibliosearchform",
         "usedMarcQueryFilename",
         this.m_strUsedMarcQueryFilename);
 
                 // 保存检索途径
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliosearchform",
                     "search_from",
                     this.comboBox_from.Text);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliosearchform",
                     "biblio_db_name",
                     this.checkedComboBox_biblioDbNames.Text);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliosearchform",
                     "match_style",
                     this.comboBox_matchStyle.Text);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
     "bibliosearchform",
     "query_lines",
     this.dp2QueryControl1.GetSaveString());
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
 "bibliosearchform",
 "location_filter",
 this.comboBox_location.Text);
 
 
-                this.MainForm.AppInfo.LoadMdiLayout -= new EventHandler(AppInfo_LoadMdiLayout);
-                this.MainForm.AppInfo.SaveMdiLayout -= new EventHandler(AppInfo_SaveMdiLayout);
+                Program.MainForm.AppInfo.LoadMdiLayout -= new EventHandler(AppInfo_LoadMdiLayout);
+                Program.MainForm.AppInfo.SaveMdiLayout -= new EventHandler(AppInfo_SaveMdiLayout);
             }
 
             if (this.m_commentViewer != null)
                 this.m_commentViewer.Close();
 
-            if (this.MainForm != null)
-                this.MainForm.FixedSelectedPageChanged -= new EventHandler(MainForm_FixedSelectedPageChanged);
+            if (Program.MainForm != null)
+                Program.MainForm.FixedSelectedPageChanged -= new EventHandler(MainForm_FixedSelectedPageChanged);
         }
 
 
@@ -399,7 +399,7 @@ this.comboBox_location.Text);
         {
             get
             {
-                return (int)this.MainForm.AppInfo.GetInt(
+                return (int)Program.MainForm.AppInfo.GetInt(
                     "biblio_search_form",
                     "max_result_count",
                     -1);
@@ -1008,7 +1008,7 @@ Keys keyData)
 
                 try
                 {
-                    strFromStyle = this.MainForm.GetBiblioFromStyle(this.comboBox_from.Text);
+                    strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_from.Text);
                 }
                 catch (Exception ex)
                 {
@@ -1064,8 +1064,8 @@ Keys keyData)
 
                 bool bNeedShareSearch = false;
                 if (this.SearchShareBiblio == true
-    && this.MainForm != null && this.MainForm.MessageHub != null
-    && this.MainForm.MessageHub.ShareBiblio == true
+    && Program.MainForm != null && Program.MainForm.MessageHub != null
+    && Program.MainForm.MessageHub.ShareBiblio == true
                     && bOutputKeyCount == false
                     && bOutputKeyID == false)
                 {
@@ -1342,8 +1342,8 @@ Keys keyData)
                 if (bDisplayClickableError == false
                     && this._floatingMessage.InDelay() == false)
                     this.ClearMessage();
-                if (this.MainForm.MessageHub != null)
-                    this.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
+                if (Program.MainForm.MessageHub != null)
+                    Program.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
 
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -1381,7 +1381,7 @@ Keys keyData)
         {
             strError = "";
 
-            if (this.MainForm.MessageHub == null)
+            if (Program.MainForm.MessageHub == null)
             {
                 strError = "MessageHub is null";
                 return -1;
@@ -1393,10 +1393,10 @@ Keys keyData)
             _searchParam._searchComplete = false;
             _searchParam._searchCount = 0;
             _searchParam._serverPushEncoding = "utf-7";
-            this.MainForm.MessageHub.SearchResponseEvent += MessageHub_SearchResponseEvent;
+            Program.MainForm.MessageHub.SearchResponseEvent += MessageHub_SearchResponseEvent;
 
             string strOutputSearchID = "";
-            int nRet = this.MainForm.MessageHub.BeginSearchBiblio(
+            int nRet = Program.MainForm.MessageHub.BeginSearchBiblio(
                 "*",
                 new SearchRequest(strSearchID,
                     new LoginInfo("public", false),
@@ -1710,8 +1710,8 @@ out strError);
             {
                 form = new EntityForm();
 
-                form.MdiParent = this.MainForm;
-                form.MainForm = this.MainForm;
+                form.MdiParent = Program.MainForm;
+                form.MainForm = Program.MainForm;
                 if (bFixed)
                 {
                     form.Fixed = true;
@@ -1775,9 +1775,9 @@ out strError);
                 {
                     form = new EntityForm();
 
-                    form.MdiParent = this.MainForm;
+                    form.MdiParent = Program.MainForm;
 
-                    form.MainForm = this.MainForm;
+                    form.MainForm = Program.MainForm;
                     form.Show();
                     if (strStyle == "fixed")
                         Program.MainForm.SetFixedPosition(form, "left");
@@ -1879,8 +1879,8 @@ out strError);
 #if NO
                 form = new EntityForm();
 
-                form.MdiParent = this.MainForm;
-                form.MainForm = this.MainForm;
+                form.MdiParent = Program.MainForm;
+                form.MainForm = Program.MainForm;
                 form.Show();
 #endif
                 form = OpenEntityForm(false, false);    // 新开一个窗口，普通窗口(不是左侧)
@@ -1907,8 +1907,8 @@ out strError);
 #if NO
                 form = new EntityForm();
 
-                form.MdiParent = this.MainForm;
-                form.MainForm = this.MainForm;
+                form.MdiParent = Program.MainForm;
+                form.MainForm = Program.MainForm;
                 form.Show();
 #endif
                 form = OpenEntityForm(false, false);    // 新开一个窗口，普通窗口(不是左侧)
@@ -1927,7 +1927,7 @@ out strError);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "all_search_form",
                     "load_to_exist_detailwindow",
                     true);
@@ -1982,7 +1982,7 @@ out strError);
 
         private void BiblioSearchForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
 
             RefreshPropertyView(false);
         }
@@ -2002,11 +2002,11 @@ out strError);
 
             // Debug.Assert(false, "");
 
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty property = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
 
                     strText += "<p>书目库名: " + property.DbName + "; 语法: " + property.Syntax + "</p>";
                 }
@@ -2027,11 +2027,11 @@ out strError);
 
             this.checkedComboBox_biblioDbNames.Items.Add("<全部>");
 
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty property = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
                     this.checkedComboBox_biblioDbNames.Items.Add(property.DbName);
                 }
             }
@@ -2055,18 +2055,18 @@ out strError);
 
             menuItem = new MenuItem("装入已打开的种册窗(&E)");
             if (this.LoadToExistDetailWindow == true
-                && this.MainForm.GetTopChildWindow<EntityForm>() != null)
+                && Program.MainForm.GetTopChildWindow<EntityForm>() != null)
                 menuItem.DefaultItem = true;
             menuItem.Click += new System.EventHandler(this.menu_loadToOpenedEntityForm_Click);
             if (this.listView_records.SelectedItems.Count == 0
-                || this.MainForm.GetTopChildWindow<EntityForm>() == null
+                || Program.MainForm.GetTopChildWindow<EntityForm>() == null
                 || String.IsNullOrEmpty(strFirstColumn) == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("装入新开的种册窗(&N)");
             if (this.LoadToExistDetailWindow == false
-                || this.MainForm.GetTopChildWindow<EntityForm>() == null)
+                || Program.MainForm.GetTopChildWindow<EntityForm>() == null)
                 menuItem.DefaultItem = true;
             menuItem.Click += new System.EventHandler(this.menu_loadToNewEntityForm_Click);
             if (this.listView_records.SelectedItems.Count == 0
@@ -2628,11 +2628,11 @@ out strError);
             }
 
             // 切换到“操作历史”属性页
-            this.MainForm.ActivateFixPage("history");
+            Program.MainForm.ActivateFixPage("history");
 
             int nCount = 0;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                 + " 开始进行书目记录校验</div>");
 
             LibraryChannel channel = this.GetChannel();
@@ -2721,10 +2721,10 @@ out strError);
 
                     if (errors.Count > 0)
                     {
-                        this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
                         foreach (string error in errors)
                         {
-                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
                         }
 
                         {
@@ -2751,7 +2751,7 @@ out strError);
 
                 this.EnableControls(true);
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                     + " 结束执行书目记录校验</div>");
             }
         }
@@ -3000,7 +3000,7 @@ out strError);
                 strFirstRecPath = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 0);
                 string strDbName = Global.GetDbName(strFirstRecPath);
                 if (string.IsNullOrEmpty(strDbName) == false)
-                    strIssueDbName = this.MainForm.GetIssueDbName(strDbName);
+                    strIssueDbName = Program.MainForm.GetIssueDbName(strDbName);
             }
 
             List<string> recpaths = new List<string>();
@@ -3012,7 +3012,7 @@ out strError);
             }
 
             PrintClaimForm form = new PrintClaimForm();
-            form.MdiParent = this.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             if (string.IsNullOrEmpty(strIssueDbName) == false)
@@ -3725,8 +3725,8 @@ MessageBoxDefaultButton.Button1);
             }
 
             BiblioSearchForm form = new BiblioSearchForm();
-            form.MdiParent = this.MainForm;
-            // form.MainForm = this.MainForm;
+            form.MdiParent = Program.MainForm;
+            // form.MainForm = Program.MainForm;
             form.Show();
 
             ItemQueryParam query = (ItemQueryParam)this.listView_records.SelectedItems[0].Tag;
@@ -3874,7 +3874,7 @@ MessageBoxDefaultButton.Button1);
 
             host.CodeFileName = this.m_strUsedMarcQueryFilename;
             {
-                host.MainForm = this.MainForm;
+                // host.MainForm = Program.MainForm;
                 host.UiForm = this;
                 host.RecordPath = "";
                 host.MarcRecord = null;
@@ -3893,7 +3893,7 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.FileName + "</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.FileName + "</div>");
 
             LibraryChannel channel = this.GetChannel();
 
@@ -3911,7 +3911,7 @@ MessageBoxDefaultButton.Button1);
                     stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 {
-                    host.MainForm = this.MainForm;
+                    host.MainForm = Program.MainForm;
                     host.RecordPath = "";
                     host.MarcRecord = null;
                     host.MarcSyntax = "";
@@ -4021,9 +4021,9 @@ MessageBoxDefaultButton.Button1);
                         goto ERROR1;
                     }
 
-                    this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
 
-                    host.MainForm = this.MainForm;
+                    host.MainForm = Program.MainForm;
                     host.RecordPath = info.RecPath;
                     host.MarcRecord = new MarcRecord(strMARC);
                     host.MarcSyntax = strMarcSyntax;
@@ -4066,7 +4066,7 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 {
-                    host.MainForm = this.MainForm;
+                    host.MainForm = Program.MainForm;
                     host.RecordPath = "";
                     host.MarcRecord = null;
                     host.MarcSyntax = "";
@@ -4105,7 +4105,7 @@ MessageBoxDefaultButton.Button1);
 
                 this.EnableControls(true);
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.FileName + "</div>");
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.FileName + "</div>");
             }
 
             RefreshPropertyView(false);
@@ -4311,7 +4311,7 @@ MessageBoxDefaultButton.Button1);
                         goto ERROR1;
                     }
 
-                    host.MainForm = this.MainForm;
+                    host.MainForm = Program.MainForm;
                     host.MarcRecord = new MarcRecord(strMARC);
                     host.MarcSyntax = strMarcSyntax;
                     host.Changed = false;
@@ -4379,7 +4379,7 @@ MessageBoxDefaultButton.Button1);
 #endif
                     }
 
-                    this.MainForm.OperHistory.AppendHtml("<p>" + HttpUtility.HtmlEncode(strRecPath) + "</p>");
+                    Program.MainForm.OperHistory.AppendHtml("<p>" + HttpUtility.HtmlEncode(strRecPath) + "</p>");
 
                     // 显示为工作单形式
 
@@ -4548,7 +4548,7 @@ MessageBoxDefaultButton.Button1);
 
             nRet = PrepareMarcFilter(
                 this,
-                this.MainForm.DataDir,
+                Program.MainForm.DataDir,
                 this.m_strUsedMarcFilterFilename,
                 filter,
                 out strError);
@@ -4672,11 +4672,11 @@ MessageBoxDefaultButton.Button1);
                     if (nRet == -1)
                         goto ERROR1;
 
-                    this.MainForm.OperHistory.AppendHtml("<p>" + HttpUtility.HtmlEncode(item.BiblioInfo.RecPath) + "</p>");    // strRecPath
+                    Program.MainForm.OperHistory.AppendHtml("<p>" + HttpUtility.HtmlEncode(item.BiblioInfo.RecPath) + "</p>");    // strRecPath
                     foreach (string key in filter.Host.ColumnTable.Keys)
                     {
                         string strHtml = "<p>" + HttpUtility.HtmlEncode(key + "=" + (string)filter.Host.ColumnTable[key]) + "</p>";
-                        this.MainForm.OperHistory.AppendHtml(strHtml);
+                        Program.MainForm.OperHistory.AppendHtml(strHtml);
                     }
 
 #if NO
@@ -4847,8 +4847,8 @@ MessageBoxDefaultButton.Button1);
 
                 // 新打开一个快速修改书目窗口
                 QuickChangeBiblioForm form = new QuickChangeBiblioForm();
-                // form.MainForm = this.MainForm;
-                form.MdiParent = this.MainForm;
+                // form.MainForm = Program.MainForm;
+                form.MdiParent = Program.MainForm;
                 form.Show();
 
                 form.RecPathLines = strLines.ToString();
@@ -4972,7 +4972,7 @@ MessageBoxDefaultButton.Button1);
             BiblioSaveToDlg dlg = new BiblioSaveToDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.Text = strActionName + "书目记录到数据库";
 
             dlg.MessageText = "请指定书目记录要追加" + strActionName + "到的位置";
@@ -4995,9 +4995,9 @@ MessageBoxDefaultButton.Button1);
             // TODO: 要让记录ID为问号，并且不可改动
 
             dlg.CurrentBiblioRecPath = "";  // 源记录路径？ 但是批处理情况下源记录路径并不确定阿
-            this.MainForm.AppInfo.LinkFormState(dlg, "BiblioSearchform_BiblioSaveToDlg_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "BiblioSearchform_BiblioSaveToDlg_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -5281,7 +5281,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             BatchOrderForm form = new BatchOrderForm();
-            form.MdiParent = this.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             form.EnableControls(false);
@@ -5322,7 +5322,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             BiblioSearchForm form = new BiblioSearchForm();
-            form.MdiParent = this.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             form.EnableControls(false);
@@ -5475,7 +5475,7 @@ MessageBoxDefaultButton.Button1);
     out string strError)
         {
             strError = "";
-            string strTempFileName = Path.Combine(this.MainForm.DataDir, "~export_to_searchform.txt");
+            string strTempFileName = Path.Combine(Program.MainForm.DataDir, "~export_to_searchform.txt");
             int nRet = SaveToEntityRecordPathFile(strDbType,
                 strTempFileName,
                 out strError);
@@ -5486,10 +5486,10 @@ MessageBoxDefaultButton.Button1);
             // TODO: 最好为具体类型的 SearchForm 类。否则推出时保留的遗留出鞥口类型不对
             ItemSearchForm form = new ItemSearchForm();
             form.DbType = strDbType;
-            form.MdiParent = this.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 #endif
-            ItemSearchForm form = this.MainForm.OpenItemSearchForm(strDbType);
+            ItemSearchForm form = Program.MainForm.OpenItemSearchForm(strDbType);
 
             nRet = form.ImportFromRecPathFile(strTempFileName,
                 "clear",
@@ -5511,8 +5511,8 @@ MessageBoxDefaultButton.Button1);
             }
 
             Marc856SearchForm form = new Marc856SearchForm();
-            form.MdiParent = this.MainForm;
-            form.MainForm = this.MainForm;
+            form.MdiParent = Program.MainForm;
+            form.MainForm = Program.MainForm;
             form.Show();
 
             this.EnableControls(false);
@@ -5831,7 +5831,7 @@ MessageBoxDefaultButton.Button1);
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            this.MainForm.StatusBarMessage = strDbTypeName + "记录记录路径 " + nCount.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportEntityRecPathFilename;
+            Program.MainForm.StatusBarMessage = strDbTypeName + "记录记录路径 " + nCount.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportEntityRecPathFilename;
             return 1;
         ERROR1:
             return -1;
@@ -5978,7 +5978,7 @@ MessageBoxDefaultButton.Button1);
                 this.listView_records.Enabled = true;
             }
 
-            this.MainForm.StatusBarMessage = "统计出下级" + strDbTypeName + "记录为空的书目记录 " + nCount.ToString() + "个";
+            Program.MainForm.StatusBarMessage = "统计出下级" + strDbTypeName + "记录为空的书目记录 " + nCount.ToString() + "个";
             return 1;
         ERROR1:
             return -1;
@@ -6015,7 +6015,7 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
 
-            string strLibraryUrl = StringUtil.CanonicalizeHostUrl(this.MainForm.LibraryServerUrl);
+            string strLibraryUrl = StringUtil.CanonicalizeHostUrl(Program.MainForm.LibraryServerUrl);
 
             // 需要刷新的行
             List<ListViewItem> items = new List<ListViewItem>();
@@ -6095,7 +6095,7 @@ MessageBoxDefaultButton.Button1);
                             strRecPath = strPureRecPath;
                         else
                         {
-                            strError = "长路径 '" + strRecPath + "' 中的服务器 URL 部分 '" + strUrl + "' 和当前 dp2Circulation 服务器 URL '" + this.MainForm.LibraryServerUrl + "' 不匹配，因此无法导入这个记录路径文件";
+                            strError = "长路径 '" + strRecPath + "' 中的服务器 URL 部分 '" + strUrl + "' 和当前 dp2Circulation 服务器 URL '" + Program.MainForm.LibraryServerUrl + "' 不匹配，因此无法导入这个记录路径文件";
                             goto ERROR1;
                         }
                     }
@@ -6109,7 +6109,7 @@ MessageBoxDefaultButton.Button1);
                         goto ERROR1;
                     }
 
-                    if (this.MainForm.IsBiblioDbName(strDbName) == false)
+                    if (Program.MainForm.IsBiblioDbName(strDbName) == false)
                     {
                         strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的书目库名。很可能所指定的文件不是书目库的记录路径文件";
                         goto ERROR1;
@@ -6280,7 +6280,7 @@ MessageBoxDefaultButton.Button1);
                         goto ERROR1;
                     }
 
-                    if (this.MainForm.IsBiblioDbName(strDbName) == false)
+                    if (Program.MainForm.IsBiblioDbName(strDbName) == false)
                     {
                         strError = "路径 '"+strRecPath+"' 中的数据库名 '" + strDbName + "' 不是合法的书目库名。很可能所指定的文件不是书目库的记录路径文件";
                         goto ERROR1;
@@ -6528,7 +6528,7 @@ MessageBoxDefaultButton.Button1);
             // 检查前端权限
             bool bDeleteSub = StringUtil.IsInList("client_deletebibliosubrecords",
                 // this.Channel.Rights
-                this.MainForm.GetCurrentUserRights()
+                Program.MainForm.GetCurrentUserRights()
                 );
 
             LibraryChannel channel = this.GetChannel();
@@ -6562,7 +6562,7 @@ MessageBoxDefaultButton.Button1);
                     string strOutputPath = "";
                     string[] formats = null;
                     if (bDeleteSub == false
-                        && StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.30") >= 0)
+                        && StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.30") >= 0)
                     {
                         formats = new string[1];
                         formats[0] = "subcount";
@@ -6704,14 +6704,14 @@ MessageBoxDefaultButton.Button2);
         {
             get
             {
-                return this.MainForm.AppInfo.GetString(
+                return Program.MainForm.AppInfo.GetString(
                     "bibliosearchform",
                     "last_iso2709_filename",
                     "");
             }
             set
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliosearchform",
                     "last_iso2709_filename",
                     value);
@@ -6725,14 +6725,14 @@ MessageBoxDefaultButton.Button2);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "bibliosearchform",
                     "last_iso2709_crlf",
                     false);
             }
             set
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "bibliosearchform",
                     "last_iso2709_crlf",
                     value);
@@ -6746,14 +6746,14 @@ MessageBoxDefaultButton.Button2);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "bibliosearchform",
                     "last_iso2709_removefield998",
                     false);
             }
             set
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "bibliosearchform",
                     "last_iso2709_removefield998",
                     value);
@@ -6767,14 +6767,14 @@ MessageBoxDefaultButton.Button2);
         {
             get
             {
-                return this.MainForm.AppInfo.GetString(
+                return Program.MainForm.AppInfo.GetString(
                     "bibliosearchform",
                     "last_encoding_name",
                     "");
             }
             set
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliosearchform",
                     "last_encoding_name",
                     value);
@@ -6788,14 +6788,14 @@ MessageBoxDefaultButton.Button2);
         {
             get
             {
-                return this.MainForm.AppInfo.GetString(
+                return Program.MainForm.AppInfo.GetString(
                     "bibliosearchform",
                     "last_cataloging_rule",
                     "<无限制>");
             }
             set
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliosearchform",
                     "last_cataloging_rule",
                     value);
@@ -6847,9 +6847,9 @@ MessageBoxDefaultButton.Button2);
             MainForm.SetControlFont(dlg, this.Font);
             dlg.CreateMode = true;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_OpenBiblioDumpFileDialog");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_OpenBiblioDumpFileDialog");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != System.Windows.Forms.DialogResult.OK)
                 return;
@@ -7018,7 +7018,7 @@ MessageBoxDefaultButton.Button1);
                         if (bRemote == true)
                             writer.WriteAttributeString("path", item.BiblioInfo.RecPath);
                         else
-                            writer.WriteAttributeString("path", this.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);
+                            writer.WriteAttributeString("path", Program.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);
                         writer.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));
 
                         biblio_dom.DocumentElement.WriteTo(writer);
@@ -7028,7 +7028,7 @@ MessageBoxDefaultButton.Button1);
                     if (bRemote == false)
                     {
                         string strBiblioDbName = StringUtil.GetDbName(item.BiblioInfo.RecPath);
-                        BiblioDbProperty prop = this.MainForm.GetBiblioDbProperty(strBiblioDbName);
+                        BiblioDbProperty prop = Program.MainForm.GetBiblioDbProperty(strBiblioDbName);
                         if (prop == null)
                         {
                             strError = "数据库名 '" + strBiblioDbName + "' 没有找到属性定义";
@@ -7631,7 +7631,7 @@ MessageBoxDefaultButton.Button1);
                         if (dom.DocumentElement != null)
                         {
                             // 给根元素设置几个参数
-                            DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, this.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
+                            DomUtil.SetAttr(dom.DocumentElement, "path", DpNs.dprms, Program.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
                             DomUtil.SetAttr(dom.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));   // baTimestamp
 
                             dom.DocumentElement.WriteTo(writer);
@@ -7914,7 +7914,7 @@ MessageBoxDefaultButton.Button1);
 
                     /*
                     Encoding sourceEncoding = connection.GetRecordsEncoding(
-                        this.MainForm,
+                        Program.MainForm,
                         record.m_strSyntaxOID);
 
 
@@ -8649,7 +8649,7 @@ MessageBoxDefaultButton.Button1);
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            this.MainForm.StatusBarMessage = "书目记录路径 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportRecPathFilename;
+            Program.MainForm.StatusBarMessage = "书目记录路径 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportRecPathFilename;
         }
 
         private void listView_records_ColumnClick(object sender, ColumnClickEventArgs e)
@@ -9115,11 +9115,11 @@ MessageBoxDefaultButton.Button1);
             // 获得所有数据库名
             if (string.IsNullOrEmpty(e.Path) == true)
             {
-                if (this.MainForm.BiblioDbProperties != null)
+                if (Program.MainForm.BiblioDbProperties != null)
                 {
-                    for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                    for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                     {
-                        BiblioDbProperty property = this.MainForm.BiblioDbProperties[i];
+                        BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
                         e.Values.Add(property.DbName);
                     }
                 }
@@ -9128,9 +9128,9 @@ MessageBoxDefaultButton.Button1);
             {
                 // 获得特定数据库的检索途径
                 // 每个库都一样
-                for (int i = 0; i < this.MainForm.BiblioDbFromInfos.Length; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbFromInfos.Length; i++)
                 {
-                    BiblioDbFromInfo info = this.MainForm.BiblioDbFromInfos[i];
+                    BiblioDbFromInfo info = Program.MainForm.BiblioDbFromInfos[i];
                     e.Values.Add(info.Caption);   // + "\t" + info.Style);
                 }
             }
@@ -9155,13 +9155,13 @@ out strError);
             XmlViewerForm dlg = new XmlViewerForm();
 
             dlg.Text = "检索式XML";
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.XmlString = strQueryXml;
             // dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_viewqueryxml");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_viewqueryxml");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             return;
         ERROR1:
@@ -9233,9 +9233,9 @@ out strError);
             {
                 this.textBox_queryWord.Text = "";
             }
-            this.MainForm.AppInfo.LinkFormState(dlg, "searchbiblioform_gettimedialog_single");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "searchbiblioform_gettimedialog_single");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -9256,9 +9256,9 @@ out strError);
                 this.textBox_queryWord.Text = "";
             }
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "searchbiblioform_gettimedialog_single");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "searchbiblioform_gettimedialog_single");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -9280,9 +9280,9 @@ out strError);
             {
                 this.textBox_queryWord.Text = "";
             }
-            this.MainForm.AppInfo.LinkFormState(dlg, "searchbiblioform_gettimedialog_range");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "searchbiblioform_gettimedialog_range");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -9304,9 +9304,9 @@ out strError);
                 this.textBox_queryWord.Text = "";
             }
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "searchbiblioform_gettimedialog_range");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "searchbiblioform_gettimedialog_range");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -9339,7 +9339,7 @@ out strError);
 
         private void dp2QueryControl1_GetFromStyle(object sender, GetFromStyleArgs e)
         {
-            e.FromStyles = this.MainForm.GetBiblioFromStyle(e.FromCaption);
+            e.FromStyles = Program.MainForm.GetBiblioFromStyle(e.FromCaption);
         }
 
         // return:
@@ -9502,7 +9502,7 @@ out strError);
             if (item == null)
                 return; // 是否要显示一个空画面?
 
-            this.MainForm.OpenCommentViewer(bOpenWindow);
+            Program.MainForm.OpenCommentViewer(bOpenWindow);
 
             string strRecPath = item.Text;
             if (string.IsNullOrEmpty(strRecPath) == true)
@@ -9521,7 +9521,7 @@ out strError);
             task.BiblioInfo = info;
             task.Stop = this.stop;
 
-            this.MainForm.PropertyTaskList.AddTask(task, true);
+            Program.MainForm.PropertyTaskList.AddTask(task, true);
         }
 
 #if NO
@@ -9534,11 +9534,11 @@ out strError);
             // 优化，避免无谓地进行服务器调用
             if (bOpenWindow == false)
             {
-                if (this.MainForm.PanelFixedVisible == false
+                if (Program.MainForm.PanelFixedVisible == false
                     && (m_commentViewer == null || m_commentViewer.Visible == false))
                     return;
                 // 2013/3/7
-                if (this.MainForm.CanDisplayItemProperty() == false)
+                if (Program.MainForm.CanDisplayItemProperty() == false)
                     return;
             }
 
@@ -9598,7 +9598,7 @@ out strError);
                 bNew = true;
             }
 
-            m_commentViewer.MainForm = this.MainForm;  // 必须是第一句
+            m_commentViewer.MainForm = Program.MainForm;  // 必须是第一句
 
             if (bNew == true)
                 m_commentViewer.InitialWebBrowser();
@@ -9608,18 +9608,18 @@ out strError);
             m_commentViewer.XmlString = MergeXml(strXml1, strXml2);
             m_commentViewer.FormClosed -= new FormClosedEventHandler(marc_viewer_FormClosed);
             m_commentViewer.FormClosed += new FormClosedEventHandler(marc_viewer_FormClosed);
-            // this.MainForm.AppInfo.LinkFormState(m_viewer, "comment_viewer_state");
+            // Program.MainForm.AppInfo.LinkFormState(m_viewer, "comment_viewer_state");
             // m_viewer.ShowDialog(this);
-            // this.MainForm.AppInfo.UnlinkFormState(m_viewer);
+            // Program.MainForm.AppInfo.UnlinkFormState(m_viewer);
             if (bOpenWindow == true)
             {
                 if (m_commentViewer.Visible == false)
                 {
-                    this.MainForm.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
+                    Program.MainForm.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
                     m_commentViewer.Show(this);
                     m_commentViewer.Activate();
 
-                    this.MainForm.CurrentPropertyControl = null;
+                    Program.MainForm.CurrentPropertyControl = null;
                 }
                 else
                 {
@@ -9636,7 +9636,7 @@ out strError);
                 }
                 else
                 {
-                    if (this.MainForm.CurrentPropertyControl != m_commentViewer.MainControl)
+                    if (Program.MainForm.CurrentPropertyControl != m_commentViewer.MainControl)
                         m_commentViewer.DoDock(false); // 不会自动显示FixedPanel
                 }
             }
@@ -9824,16 +9824,16 @@ strNewMARC);
         {
             if (m_commentViewer != null)
             {
-                this.MainForm.AppInfo.UnlinkFormState(m_commentViewer);
+                Program.MainForm.AppInfo.UnlinkFormState(m_commentViewer);
                 this.m_commentViewer = null;
             }
         }
 
         string GetHeadString(bool bAjax = true)
         {
-            return this.MainForm.GetMarcHtmlHeadString(bAjax);
+            return Program.MainForm.GetMarcHtmlHeadString(bAjax);
 #if NO
-            string strCssFilePath = PathUtil.MergePath(this.MainForm.DataDir, "operloghtml.css");
+            string strCssFilePath = PathUtil.MergePath(Program.MainForm.DataDir, "operloghtml.css");
 
             if (bAjax == true)
                 return
@@ -9892,8 +9892,8 @@ strNewMARC);
             if (this.SearchShareBiblio == false)
             {
                 // 先检查一下当前用户是否允许开放共享书目
-                if (this.MainForm != null && this.MainForm.MessageHub != null
-    && this.MainForm.MessageHub.ShareBiblio == false)
+                if (Program.MainForm != null && Program.MainForm.MessageHub != null
+    && Program.MainForm.MessageHub.ShareBiblio == false)
                 {
                     DialogResult result = MessageBox.Show(this,
 "使用共享书目检索功能须知：为检索网络中共享书目记录，您必须明确同意允许他人检索您所在图书馆的全部书目记录。\r\n\r\n请问您是否允许他人从现在起一直能访问您所在图书馆的书目记录？\r\n\r\n(是: 同意；否：不同意)\r\n\r\n(除了在这里设定相关参数，您还可以稍后用“参数配置”对话框的“消息”属性页来设定是否允许共享书目数据)",
@@ -9907,7 +9907,7 @@ MessageBoxDefaultButton.Button1);
                         this._floatingMessage.DelayClear(new TimeSpan(0, 0, 3));
                         return;
                     }
-                    this.MainForm.MessageHub.ShareBiblio = true;
+                    Program.MainForm.MessageHub.ShareBiblio = true;
                 }
 
                 this.SearchShareBiblio = true;
@@ -9922,9 +9922,9 @@ MessageBoxDefaultButton.Button1);
         void UpdateMenu()
         {
             this.ToolStripMenuItem_searchShareBiblio.Checked = this.SearchShareBiblio;
-            if (this.MainForm != null && this.MainForm.MessageHub != null)
+            if (Program.MainForm != null && Program.MainForm.MessageHub != null)
             {
-                if (this.MainForm.MessageHub.ShareBiblio == false)
+                if (Program.MainForm.MessageHub.ShareBiblio == false)
                     this.ToolStripMenuItem_searchShareBiblio.Text = "使用共享网络 [暂时被禁用]";
                 else
                     this.ToolStripMenuItem_searchShareBiblio.Text = "使用共享网络";
@@ -10001,9 +10001,9 @@ MessageBoxDefaultButton.Button1);
 
             this.Docked = true;
             this.Visible = false;
-            this.MainForm = Program.MainForm;   //
+            // this..MainForm = Program.MainForm;   //
             this.MdiParent = null;
-            Debug.Assert(this.MainForm != null, "");
+            Debug.Assert(Program.MainForm != null, "");
 
             Program.MainForm._dockedBiblioSearchForm = this;
         }
@@ -10017,7 +10017,7 @@ MessageBoxDefaultButton.Button1);
             this.Docked = false;
             this.MdiParent = Program.MainForm;
             this.Visible = true;
-            Debug.Assert(this.MainForm != null, "");
+            Debug.Assert(Program.MainForm != null, "");
 
             this.splitContainer_main.Panel2.Controls.Add(this.listView_records);
             //this.listView_records.ResumeLayout(false);

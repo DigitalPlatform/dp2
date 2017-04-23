@@ -163,7 +163,7 @@ namespace dp2Circulation
                 string strOldName = "[not found]";
                 // 获得关于一个特定馆藏地点的索取号配置信息
                 // <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
-                int nRet = this.MainForm.GetArrangementInfo(e.OldText,
+                int nRet = Program.MainForm.GetArrangementInfo(e.OldText,
                     out old_info,
                     out strError);
                 if (nRet == -1)
@@ -174,7 +174,7 @@ namespace dp2Circulation
                 ArrangementInfo new_info = null;
                 string strNewName = "[not found]";
                 // 获得关于一个特定馆藏地点的索取号配置信息
-                nRet = this.MainForm.GetArrangementInfo(e.NewText,
+                nRet = Program.MainForm.GetArrangementInfo(e.NewText,
                    out new_info,
                    out strError);
                 if (nRet == -1)
@@ -315,7 +315,7 @@ namespace dp2Circulation
             string strIssueDbName = "";
 
             if (string.IsNullOrEmpty(this.BiblioDbName) == false)
-                strIssueDbName = this.MainForm.GetIssueDbName(this.BiblioDbName);
+                strIssueDbName = Program.MainForm.GetIssueDbName(this.BiblioDbName);
 
             if (string.IsNullOrEmpty(strIssueDbName) == false)
             {
@@ -400,11 +400,11 @@ namespace dp2Circulation
 
         private void EntityEditForm_Activated(object sender, EventArgs e)
         {
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
         // 撤销标记删除状态
@@ -684,7 +684,7 @@ namespace dp2Circulation
         {
             EntityFormOptionDlg dlg = new EntityFormOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.DisplayStyle = "normal_entity";
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);

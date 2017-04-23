@@ -46,17 +46,17 @@ namespace dp2Circulation
             else
                 throw new Exception("未知的DbType '" + this.DbType + "'");
 
-            this.comboBox_from.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_from.Text = Program.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
                 "from",
                 strDefaulFrom);
 
-            this.comboBox_matchStyle.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_matchStyle.Text = Program.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
                 "match_style",
                 "精确一致");
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
                 "record_list_column_width",
                 "");
@@ -79,20 +79,20 @@ namespace dp2Circulation
 
         private void InvoiceSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
         this.DbType + "_search_form",
         "from",
         this.comboBox_from.Text);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     this.DbType + "_search_form",
                     "match_style",
                     this.comboBox_matchStyle.Text);
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     this.DbType + "_search_form",
                     "record_list_column_width",
                     strWidths);
@@ -103,9 +103,9 @@ namespace dp2Circulation
         {
             BiblioDbFromInfo[] infos = null;
             if (this.DbType == "invoice")
-                infos = this.MainForm.InvoiceDbFromInfos;
+                infos = Program.MainForm.InvoiceDbFromInfos;
             else if (this.DbType == "amerce")
-                infos = this.MainForm.AmerceDbFromInfos;
+                infos = Program.MainForm.AmerceDbFromInfos;
             else
                 throw new Exception("未知的DbType '" + this.DbType + "'");
 

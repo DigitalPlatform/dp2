@@ -25,17 +25,6 @@ namespace dp2Circulation
     /// </summary>
     public partial class SettlementForm : MyForm
     {
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-#endif
-
         const int WM_LOADSIZE = API.WM_USER + 201;
 
         // 图标下标
@@ -78,13 +67,13 @@ namespace dp2Circulation
 
         private void SettlementForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -94,49 +83,49 @@ namespace dp2Circulation
 #endif
 
             // 起始日期
-            this.dateControl_start.Text = this.MainForm.AppInfo.GetString(
+            this.dateControl_start.Text = Program.MainForm.AppInfo.GetString(
                  "settlementform",
                  "start_date",
                  "");
 
             // 结束日期
-            this.dateControl_end.Text = this.MainForm.AppInfo.GetString(
+            this.dateControl_end.Text = Program.MainForm.AppInfo.GetString(
                 "settlementform",
                 "end_date",
                 "");
 
             // 起始索引号
-            this.textBox_range_startCtlno.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_range_startCtlno.Text = Program.MainForm.AppInfo.GetString(
                 "settlementform",
                 "start_ctlno",
                 "");
 
             // 结束索引号
-            this.textBox_range_endCtlno.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_range_endCtlno.Text = Program.MainForm.AppInfo.GetString(
                 "settlementform",
                 "end_ctlno",
                 "");
 
             // 收费操作时间范围
-            this.radioButton_range_amerceOperTime.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_range_amerceOperTime.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "settlementform",
                 "range_amerceopertime",
                 true);
 
             // 索引号范围
-            this.radioButton_range_ctlno.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_range_ctlno.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "settlementform",
                 "range_ctlno",
                 false);
 
             // 状态
-            this.comboBox_range_state.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_range_state.Text = Program.MainForm.AppInfo.GetString(
                 "settlementform",
                 "range_state",
                 "<全部>");
 
             // 按照收费者小计
-            this.checkBox_sumByAmerceOperator.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_sumByAmerceOperator.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "settlementform",
                 "sumby_amerceoperator",
                 true);
@@ -168,49 +157,49 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 // 起始日期
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "settlementform",
                     "start_date",
                     this.dateControl_start.Text);
                 // 结束日期
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "settlementform",
                     "end_date",
                     this.dateControl_end.Text);
 
                 // 起始索引号
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "settlementform",
                     "start_ctlno",
                     this.textBox_range_startCtlno.Text);
 
                 // 结束索引号
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "settlementform",
                     "end_ctlno",
                     this.textBox_range_endCtlno.Text);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "settlementform",
                     "range_amerceopertime",
                     this.radioButton_range_amerceOperTime.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "settlementform",
                     "range_ctlno",
                     this.radioButton_range_ctlno.Checked);
 
                 // 状态
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "settlementform",
                     "range_state",
                     this.comboBox_range_state.Text);
 
                 // 按照收费者小计
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "settlementform",
                     "sumby_amerceoperator",
                     this.checkBox_sumByAmerceOperator.Checked);
@@ -228,7 +217,7 @@ namespace dp2Circulation
                 "mdi_form_state");
 #endif
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
                 "settlement_form",
                 "amerced_list_column_width",
                 "");
@@ -250,12 +239,12 @@ namespace dp2Circulation
 
             /*
             // 如果MDI子窗口不是MainForm刚刚准备退出时的状态，恢复它。为了记忆尺寸做准备
-            if (this.WindowState != this.MainForm.MdiWindowState)
-                this.WindowState = this.MainForm.MdiWindowState;
+            if (this.WindowState != Program.MainForm.MdiWindowState)
+                this.WindowState = Program.MainForm.MdiWindowState;
              * */
 
             string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_amerced);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "settlement_form",
                 "amerced_list_column_width",
                 strWidths);
@@ -510,7 +499,7 @@ namespace dp2Circulation
 
             this.EnableControls(false);
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             this.m_nInSearching++;
 
@@ -2105,11 +2094,11 @@ namespace dp2Circulation
                 HtmlPrintForm printform = new HtmlPrintForm();
 
                 printform.Text = "打印结算清单";
-                printform.MainForm = this.MainForm;
+                // printform.MainForm = Program.MainForm;
                 printform.Filenames = filenames;
-                this.MainForm.AppInfo.LinkFormState(printform, "printform_state");
+                Program.MainForm.AppInfo.LinkFormState(printform, "printform_state");
                 printform.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(printform);
+                Program.MainForm.AppInfo.UnlinkFormState(printform);
             }
 
             finally
@@ -2147,8 +2136,8 @@ namespace dp2Circulation
             Hashtable macro_table = new Hashtable();
 
             // 获得打印参数
-            PrintOption option = new SettlementPrintOption(this.MainForm.DataDir);
-            option.LoadData(this.MainForm.AppInfo,
+            PrintOption option = new SettlementPrintOption(Program.MainForm.DataDir);
+            option.LoadData(Program.MainForm.AppInfo,
                 "settlement_printoption");
 
             // 检查按收费者小计时，是否具有价格列
@@ -2177,7 +2166,7 @@ namespace dp2Circulation
 
             filenames = new List<string>();    // 每页一个文件，这个数组存放了所有文件名
 
-            string strFileNamePrefix = this.MainForm.DataDir + "\\~settlement";
+            string strFileNamePrefix = Program.MainForm.DataDir + "\\~settlement";
 
             string strFileName = "";
 
@@ -2323,8 +2312,8 @@ namespace dp2Circulation
                 return strCssFilePath;
             else
             {
-                // return this.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // 缺省的
-                return PathUtil.MergePath(this.MainForm.DataDir, strDefaultCssFileName);    // 缺省的
+                // return Program.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // 缺省的
+                return PathUtil.MergePath(Program.MainForm.DataDir, strDefaultCssFileName);    // 缺省的
             }
         }
 
@@ -2334,7 +2323,7 @@ namespace dp2Circulation
             bool bOutputTable)
         {
             /*
-            string strLibraryServerUrl = this.MainForm.AppInfo.GetString(
+            string strLibraryServerUrl = Program.MainForm.AppInfo.GetString(
     "config",
     "circulation_server_url",
     "");
@@ -2343,7 +2332,7 @@ namespace dp2Circulation
                 strLibraryServerUrl = strLibraryServerUrl.Substring(0, pos);
              * */
 
-            // string strCssUrl = this.MainForm.LibraryServerDir + "/settlement.css";
+            // string strCssUrl = Program.MainForm.LibraryServerDir + "/settlement.css";
             // 2009/10/10 changed
             string strCssUrl = GetAutoCssUrl(option, "settlement.css");
 
@@ -2353,7 +2342,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;
             else
-                strCssUrl = this.MainForm.LibraryServerDir + "/settlement.css";    // 缺省的
+                strCssUrl = Program.MainForm.LibraryServerDir + "/settlement.css";    // 缺省的
              * */
 
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
@@ -2645,16 +2634,16 @@ namespace dp2Circulation
         private void button_print_option_Click(object sender, EventArgs e)
         {
             // 配置标题和风格
-            PrintOption option = new SettlementPrintOption(this.MainForm.DataDir);
-            option.LoadData(this.MainForm.AppInfo,
+            PrintOption option = new SettlementPrintOption(Program.MainForm.DataDir);
+            option.LoadData(Program.MainForm.AppInfo,
                 "settlement_printoption");
 
 
             PrintOptionDlg dlg = new PrintOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.MainForm = this.MainForm;
-            dlg.DataDir = this.MainForm.DataDir;
+            // dlg.MainForm = Program.MainForm;
+            dlg.DataDir = Program.MainForm.DataDir;
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -2677,14 +2666,14 @@ namespace dp2Circulation
                 "recpath -- 记录路径"
             };
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "settlement_printoption_formstate");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "settlement_printoption_formstate");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            option.SaveData(this.MainForm.AppInfo,
+            option.SaveData(Program.MainForm.AppInfo,
                 "settlement_printoption");
         }
 
@@ -2955,7 +2944,7 @@ namespace dp2Circulation
 
         private void SettlementForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
         }
 
         // 返回列表中各类事项的个数

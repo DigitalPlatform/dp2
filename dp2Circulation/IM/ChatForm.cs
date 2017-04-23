@@ -33,17 +33,17 @@ namespace dp2Circulation
 
         private void IMForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
             this.ClearHtml();
 
-            if (this.MainForm != null && this.MainForm.MessageHub != null)
+            if (Program.MainForm != null && Program.MainForm.MessageHub != null)
             {
-                this.MainForm.MessageHub.ConnectionStateChange += MessageHub_ConnectionStateChange;
-                this.MainForm.MessageHub.AddMessage += MessageHub_AddMessage;
+                Program.MainForm.MessageHub.ConnectionStateChange += MessageHub_ConnectionStateChange;
+                Program.MainForm.MessageHub.AddMessage += MessageHub_AddMessage;
             }
             SystemEvents.PowerModeChanged += SystemEvents_PowerModeChanged;
 
@@ -72,11 +72,11 @@ namespace dp2Circulation
         void FillDeltaMessage()
         {
             // 补充获取先前在没有连接时间段的消息
-            bool bUrlChanged = this.MainForm.MessageHub.dp2MServerUrl != _currentUrl;
+            bool bUrlChanged = Program.MainForm.MessageHub.dp2MServerUrl != _currentUrl;
             //if (bUrlChanged == true)
             //    _lastMessage = null;
 
-            _currentUrl = this.MainForm.MessageHub.dp2MServerUrl;
+            _currentUrl = Program.MainForm.MessageHub.dp2MServerUrl;
 
             string strLastTime = "";
             if (_lastMessage != null && bUrlChanged == false)
@@ -138,12 +138,12 @@ namespace dp2Circulation
         // 是否为自己发出的消息
         bool IsMe(MessageRecord record)
         {
-            if (string.IsNullOrEmpty(this.MainForm.MessageHub.UserName) == false
-                && record.userName == this.MainForm.MessageHub.UserName)
+            if (string.IsNullOrEmpty(Program.MainForm.MessageHub.UserName) == false
+                && record.userName == Program.MainForm.MessageHub.UserName)
                 return true;
-            if (string.IsNullOrEmpty(this.MainForm.MessageHub.UserName))
+            if (string.IsNullOrEmpty(Program.MainForm.MessageHub.UserName))
             {
-                string strParameters = this.MainForm.MessageHub.Parameters;
+                string strParameters = Program.MainForm.MessageHub.Parameters;
                 Hashtable table = StringUtil.ParseParameters(strParameters, ',', '=', "url");
                 string strLibraryName = (string)table["libraryName"];
                 string strLibraryUID = (string)table["libraryUID"];
@@ -227,10 +227,10 @@ namespace dp2Circulation
             _redoLoadMesssageCount = 100; // 让重试尽快结束
 
             SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
-            if (this.MainForm != null && this.MainForm.MessageHub != null)
+            if (Program.MainForm != null && Program.MainForm.MessageHub != null)
             {
-                this.MainForm.MessageHub.AddMessage -= MessageHub_AddMessage;
-                this.MainForm.MessageHub.ConnectionStateChange -= MessageHub_ConnectionStateChange;
+                Program.MainForm.MessageHub.AddMessage -= MessageHub_AddMessage;
+                Program.MainForm.MessageHub.ConnectionStateChange -= MessageHub_ConnectionStateChange;
             }
 
             //CloseConnection();
@@ -314,7 +314,7 @@ namespace dp2Circulation
         /// 清除已有的 HTML 显示
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "message.css");
+            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "message.css");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strJs = "";
 
@@ -348,7 +348,7 @@ namespace dp2Circulation
 
             if (string.IsNullOrEmpty(strText) == false)
             {
-                string strGifFileName = Path.Combine(this.MainForm.DataDir, "ajax-loader3.gif");
+                string strGifFileName = Path.Combine(Program.MainForm.DataDir, "ajax-loader3.gif");
                 AppendHtml("<h2 id='waiting1' align='center'><img src='" + strGifFileName + "' /></h2>"
                     + "<h2 id='waiting2' align='center'>" + HttpUtility.HtmlEncode(strText) + "</h2>");
             }
@@ -378,7 +378,7 @@ namespace dp2Circulation
         private void button_send_Click(object sender, EventArgs e)
         {
 #if NO
-            string strUserName = this.MainForm.GetCurrentUserName();
+            string strUserName = Program.MainForm.GetCurrentUserName();
             HubProxy.Invoke("Send", strUserName, this.textBox_input.Text);
             textBox_input.Text = string.Empty;
             textBox_input.Focus();
@@ -405,7 +405,7 @@ namespace dp2Circulation
                 "",
                messages);
 
-            SetMessageResult result = this.MainForm.MessageHub.SetMessageAsync(param).Result;
+            SetMessageResult result = Program.MainForm.MessageHub.SetMessageAsync(param).Result;
             if (result.Value == -1)
             {
                 this.Invoke((Action)(() => MessageBox.Show(this, result.ErrorInfo)));
@@ -437,16 +437,16 @@ namespace dp2Circulation
             {
                 string strError = "";
 
-                if (this.MainForm == null)
+                if (Program.MainForm == null)
                     return;
 
                 // TODO: 如果当前 Connection 尚未连接，则要促使它连接，然后重试 load
-                if (this.MainForm.MessageHub.IsConnected == false)
+                if (Program.MainForm.MessageHub.IsConnected == false)
                 {
                     if (_redoLoadMesssageCount < 5)
                     {
                         AddErrorLine("当前点对点连接尚未建立。重试操作中 ...");
-                        this.MainForm.MessageHub.Connect();
+                        Program.MainForm.MessageHub.Connect();
                         Thread.Sleep(5000);
                         _redoLoadMesssageCount++;
                         Task.Factory.StartNew(() => DoLoadMessage(strGroupName, strTimeRange, bClearAll));
@@ -481,7 +481,7 @@ namespace dp2Circulation
                         -1);
                     try
                     {
-                        MessageResult result = await this.MainForm.MessageHub.GetMessageAsync(
+                        MessageResult result = await Program.MainForm.MessageHub.GetMessageAsync(
                             request,
                             FillMessage,
                             new TimeSpan(0, 1, 0),

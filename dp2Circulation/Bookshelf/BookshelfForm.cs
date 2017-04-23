@@ -35,7 +35,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         DigitalPlatform.Stop stop = null;
 
@@ -46,12 +46,12 @@ namespace dp2Circulation
 
         private void BookshelfForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -60,8 +60,7 @@ namespace dp2Circulation
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-
+            stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
         }
 
 
@@ -95,12 +94,12 @@ namespace dp2Circulation
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            this.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
+            Program.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 
         void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
-            this.MainForm.Channel_AfterLogin(sender, e);    // 2015/11/8
+            Program.MainForm.Channel_AfterLogin(sender, e);    // 2015/11/8
         }
 
 
@@ -113,7 +112,7 @@ namespace dp2Circulation
         private void BookshelfForm_Activated(object sender, EventArgs e)
         {
             // 2009/8/13 
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
         }
     }

@@ -26,15 +26,6 @@ namespace dp2Circulation
     /// </summary>
     internal partial class QuickChangeBiblioForm : MyForm
     {
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-#endif
-
-
         public QuickChangeBiblioForm()
         {
             InitializeComponent();
@@ -42,13 +33,13 @@ namespace dp2Circulation
 
         private void QuickChangeBiblioForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -100,7 +91,7 @@ namespace dp2Circulation
             stop.Initial("");
             stop.BeginLoop();
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -128,7 +119,7 @@ namespace dp2Circulation
             stop.Initial("");
             stop.BeginLoop();
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
             try
             {
                 DoFileName();
@@ -151,7 +142,7 @@ namespace dp2Circulation
             stop.Initial("");
             stop.BeginLoop();
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -537,7 +528,7 @@ MessageBoxDefaultButton.Button1);
             int nCount = 0;
 
             // state
-            string strStateAction = this.MainForm.AppInfo.GetString(
+            string strStateAction = Program.MainForm.AppInfo.GetString(
                 "change_biblio_param",
                 "state",
                 "<不改变>");
@@ -545,11 +536,11 @@ MessageBoxDefaultButton.Button1);
             {
                 if (strStateAction == "<增、减>")
                 {
-                    string strAdd = this.MainForm.AppInfo.GetString(
+                    string strAdd = Program.MainForm.AppInfo.GetString(
                 "change_biblio_param",
                 "state_add",
                 "");
-                    string strRemove = this.MainForm.AppInfo.GetString(
+                    string strRemove = Program.MainForm.AppInfo.GetString(
             "change_biblio_param",
             "state_remove",
             "");
@@ -574,7 +565,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             // time
-            string strTimeAction = this.MainForm.AppInfo.GetString(
+            string strTimeAction = Program.MainForm.AppInfo.GetString(
     "change_biblio_param",
     "opertime",
     "<不改变>");
@@ -592,7 +583,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 else if (strTimeAction == "<指定时间>")
                 {
-                    string strValue = this.MainForm.AppInfo.GetString(
+                    string strValue = Program.MainForm.AppInfo.GetString(
                         "change_biblio_param",
                         "opertime_value",
                         "");
@@ -606,7 +597,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             // batchno
-            string strBatchNoAction = this.MainForm.AppInfo.GetString(
+            string strBatchNoAction = Program.MainForm.AppInfo.GetString(
 "change_biblio_param",
 "batchNo",
 "<不改变>");
@@ -646,7 +637,7 @@ MessageBoxDefaultButton.Button1);
 
 
             // state
-            string strStateAction = this.MainForm.AppInfo.GetString(
+            string strStateAction = Program.MainForm.AppInfo.GetString(
                 "change_biblio_param",
                 "state",
                 "<不改变>");
@@ -657,11 +648,11 @@ MessageBoxDefaultButton.Button1);
 
                 if (strStateAction == "<增、减>")
                 {
-                    string strAdd = this.MainForm.AppInfo.GetString(
+                    string strAdd = Program.MainForm.AppInfo.GetString(
                 "change_biblio_param",
                 "state_add",
                 "");
-                    string strRemove = this.MainForm.AppInfo.GetString(
+                    string strRemove = Program.MainForm.AppInfo.GetString(
             "change_biblio_param",
             "state_remove",
             "");
@@ -694,7 +685,7 @@ MessageBoxDefaultButton.Button1);
 
 
             // time
-            string strTimeAction = this.MainForm.AppInfo.GetString(
+            string strTimeAction = Program.MainForm.AppInfo.GetString(
     "change_biblio_param",
     "opertime",
     "<不改变>");
@@ -713,7 +704,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 else if (strTimeAction == "<指定时间>")
                 {
-                    string strValue = this.MainForm.AppInfo.GetString(
+                    string strValue = Program.MainForm.AppInfo.GetString(
                         "change_biblio_param",
                         "opertime_value",
                         "");
@@ -756,7 +747,7 @@ MessageBoxDefaultButton.Button1);
 
 
             // batchno
-            string strBatchNoAction = this.MainForm.AppInfo.GetString(
+            string strBatchNoAction = Program.MainForm.AppInfo.GetString(
 "change_biblio_param",
 "batchNo",
 "<不改变>");
@@ -795,11 +786,11 @@ MessageBoxDefaultButton.Button1);
             MainForm.SetControlFont(dlg, this.Font, false);
             dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
             dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "ChangeBiblioActionDialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ChangeBiblioActionDialog_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.OK)
                 return true;
@@ -827,11 +818,11 @@ MessageBoxDefaultButton.Button1);
 
         private void QuickChangeBiblioForm_Activated(object sender, EventArgs e)
         {
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
 
         }
 

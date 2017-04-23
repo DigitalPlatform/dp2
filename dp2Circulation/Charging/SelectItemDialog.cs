@@ -72,7 +72,7 @@ namespace dp2Circulation
 
         private void SelectItemDialog_Load(object sender, EventArgs e)
         {
-            this.MainForm.FillBiblioFromList(this.comboBox_from);
+            Program.MainForm.FillBiblioFromList(this.comboBox_from);
 
 #if NO
             {
@@ -100,9 +100,9 @@ namespace dp2Circulation
                 this.BeginInvoke(new Action<object, EventArgs>(button_search_Click), this, new EventArgs());
             }
 
-            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.33") < 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.33") < 0)
             {
-                MessageBox.Show(this, "选择册记录功能要求 dp2Library 版本必须在 2.33 以上。当前 dp2Library 的版本为 " + this.MainForm.ServerVersion.ToString() + "，请及时升级");
+                MessageBox.Show(this, "选择册记录功能要求 dp2Library 版本必须在 2.33 以上。当前 dp2Library 的版本为 " + Program.MainForm.ServerVersion.ToString() + "，请及时升级");
             }
         }
 
@@ -135,9 +135,9 @@ namespace dp2Circulation
         string GetBiblioDbNames()
         {
             List<string> results = new List<string>();
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                foreach (BiblioDbProperty prop in this.MainForm.BiblioDbProperties)
+                foreach (BiblioDbProperty prop in Program.MainForm.BiblioDbProperties)
                 {
                     if (string.IsNullOrEmpty(prop.DbName) == true)
                         continue;   // 很罕见的情况下，数据库组可能不包含书目库
@@ -207,7 +207,7 @@ namespace dp2Circulation
 
                 try
                 {
-                    strFromStyle = this.MainForm.GetBiblioFromStyle(this.comboBox_from.Text);
+                    strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_from.Text);
                 }
                 catch (Exception ex)
                 {
@@ -564,7 +564,7 @@ namespace dp2Circulation
                     cell = new DpCell();
                     if (string.IsNullOrEmpty(strBorrower) == false)
                     {
-                        string strReaderSummary = this.MainForm.GetReaderSummary(strBorrower, false);
+                        string strReaderSummary = Program.MainForm.GetReaderSummary(strBorrower, false);
                         bool bError = (string.IsNullOrEmpty(strReaderSummary) == false && strReaderSummary[0] == '!');
 
                         if (bError == true)
@@ -595,7 +595,7 @@ namespace dp2Circulation
                     }
                     else
                     {
-                        int nRet = this.MainForm.GetBiblioSummary("@bibliorecpath:" + strBiblioRecPath,
+                        int nRet = Program.MainForm.GetBiblioSummary("@bibliorecpath:" + strBiblioRecPath,
                             "",
                             false,
                             out strSummary,
@@ -770,7 +770,7 @@ namespace dp2Circulation
             // 书目摘要
             string strSummary = "";
             {
-                int nRet = this.MainForm.GetBiblioSummary("@bibliorecpath:" + strBiblioRecPath,
+                int nRet = Program.MainForm.GetBiblioSummary("@bibliorecpath:" + strBiblioRecPath,
                     "",
                     false,
                     out strSummary,
@@ -1223,7 +1223,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            ItemInfoForm form = this.MainForm.EnsureItemInfoForm();
+            ItemInfoForm form = Program.MainForm.EnsureItemInfoForm();
             Global.Activate(form);
 
             form.LoadRecord(strItemBarcode);
@@ -1254,7 +1254,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            EntityForm form = this.MainForm.EnsureEntityForm();
+            EntityForm form = Program.MainForm.EnsureEntityForm();
             Global.Activate(form);
 
             if (strItemBarcode.StartsWith("@biblioRecPath:") == true)

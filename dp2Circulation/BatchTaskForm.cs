@@ -34,18 +34,6 @@ namespace dp2Circulation
         internal ReaderWriterLock m_lock = new ReaderWriterLock();
         internal static int m_nLockTimeout = 5000;	// 5000=5秒
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
-
         string MonitorTaskName = "";    // 要监控的任务名
 
         Decoder ResultTextDecoder = Encoding.UTF8.GetDecoder();
@@ -93,14 +81,14 @@ namespace dp2Circulation
 
         private void BatchTaskForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 #if NO
             MainForm.AppInfo.LoadMdiChildFormStates(this,
     "mdi_form_state");
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -141,7 +129,7 @@ namespace dp2Circulation
                     {
                         stop.SetMessage("正在初始化浏览器控件...");
                         this.Update();
-                        this.MainForm.Update();
+                        Program.MainForm.Update();
 
                         ClearWebBrowser(this.webBrowser_info, true);
 
@@ -163,7 +151,7 @@ namespace dp2Circulation
 
             this.timer_monitorTask.Stop();
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 MainForm.AppInfo.SetString(
     "BatchTaskForm",
@@ -374,7 +362,7 @@ namespace dp2Circulation
                 stop.BeginLoop();
 
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -445,7 +433,7 @@ namespace dp2Circulation
                 stop.BeginLoop();
 
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -504,7 +492,7 @@ namespace dp2Circulation
                 stop.BeginLoop();
 
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -568,7 +556,7 @@ namespace dp2Circulation
                 stop.BeginLoop();
 
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -875,11 +863,11 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
 
         private void BatchTaskForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
         private void ToolStripMenuItem_result_Click(object sender, EventArgs e)

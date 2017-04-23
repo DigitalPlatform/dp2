@@ -1536,7 +1536,7 @@ MessageBoxDefaultButton.Button1);
                 return;
             }
 
-            this.PropertyTaskList.MainForm = this;
+            // this.PropertyTaskList.MainForm = this;
             this.PropertyTaskList.BeginThread();
         }
 
@@ -2285,7 +2285,7 @@ MessageBoxDefaultButton.Button1);
 
                         FirstRunDialog first_dialog = new FirstRunDialog();
                         MainForm.SetControlFont(first_dialog, this.DefaultFont);
-                        first_dialog.MainForm = this;
+                        // first_dialog.MainForm = this;
                         first_dialog.StartPosition = FormStartPosition.CenterScreen;
                         if (first_dialog.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
                         {
@@ -2607,7 +2607,7 @@ Culture=neutral, PublicKeyToken=null
                 if (this.OperHistory == null)
                 {
                     this.OperHistory = new OperHistory();
-                    nRet = this.OperHistory.Initial(this,
+                    nRet = this.OperHistory.Initial(// this,
                         this.webBrowser_history,
                         out strError);
                     if (nRet == -1)
@@ -2622,7 +2622,8 @@ Culture=neutral, PublicKeyToken=null
                 {
                     // 初始化 MessageHub
                     this.MessageHub = new MessageHub();
-                    this.MessageHub.Initial(this, this.webBrowser_messageHub);
+                    this.MessageHub.Initial(// this,
+                        this.webBrowser_messageHub);
                 }
                 else
                 {

@@ -20,21 +20,6 @@ namespace dp2Circulation
     public partial class CommentEditForm : CommentEditFormBase
         // ItemEditFormBase<CommentItem, CommentItemCollection>
     {
-#if NO
-        public CommentItem StartCommentItem = null;   // 最开始时的对象
-
-        public CommentItem CommentItem = null;
-
-        public CommentItemCollection CommentItems = null;
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        public CommentControl CommentControl = null;
-#endif
-
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -457,9 +442,9 @@ namespace dp2Circulation
         private void CommentEditForm_Load(object sender, EventArgs e)
         {
 #if NO
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
             LoadCommentItem(this.CommentItem);

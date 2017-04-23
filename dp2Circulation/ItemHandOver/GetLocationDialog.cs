@@ -19,7 +19,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         // 保存信息的小节名
         public string CfgSectionName = "GetLocationDialog";
@@ -37,13 +37,13 @@ namespace dp2Circulation
         private void SearchByBatchnoForm_Load(object sender, EventArgs e)
         {
 #if NO
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 #endif
 
-            this.comboBox_location.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_location.Text = Program.MainForm.AppInfo.GetString(
                 this.CfgSectionName,
                 "location",
                 "");
@@ -51,7 +51,7 @@ namespace dp2Circulation
 
         private void SearchByBatchnoForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 this.CfgSectionName,
                 "location",
                 this.comboBox_location.Text);

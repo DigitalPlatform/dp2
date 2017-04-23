@@ -61,7 +61,7 @@ namespace dp2Circulation
             {
                 lock (syncRoot)
                 {
-                    channel = this.Container.MainForm.GetChannel();
+                    channel = Program.MainForm.GetChannel();
                 }
                 try
                 {
@@ -187,7 +187,7 @@ namespace dp2Circulation
                     {
                         channel = null;
                     }
-                    this.Container.MainForm.ReturnChannel(temp_channel);
+                    Program.MainForm.ReturnChannel(temp_channel);
                 }
             }
 
@@ -209,7 +209,7 @@ namespace dp2Circulation
             }
 
             this.HTML = "<html>" +
-    this.Container.MainForm.GetMarcHtmlHeadString(true) +
+    Program.MainForm.GetMarcHtmlHeadString(true) +
     "<body>" +
     strHtml2 +
     EntityForm.GetTimestampHtml(info.Timestamp) +
@@ -222,19 +222,19 @@ namespace dp2Circulation
         public override bool ShowData()
         {
             if (this.Container == null
-                || this.Container.MainForm == null)
+                || Program.MainForm == null)
                 return false;
 
-            if (this.Container.MainForm.InvokeRequired)
+            if (Program.MainForm.InvokeRequired)
             {
-                return (bool)this.Container.MainForm.Invoke(new Func<bool>(ShowData));
+                return (bool)Program.MainForm.Invoke(new Func<bool>(ShowData));
             }
 
-            if (this.Container.MainForm.m_commentViewer != null)
+            if (Program.MainForm.m_commentViewer != null)
             {
-                this.Container.MainForm.m_commentViewer.Text = "记录内容 '" + this.BiblioInfo.RecPath + "'";
-                this.Container.MainForm.m_commentViewer.HtmlString = this.HTML;
-                this.Container.MainForm.m_commentViewer.XmlString = this.XML;
+                Program.MainForm.m_commentViewer.Text = "记录内容 '" + this.BiblioInfo.RecPath + "'";
+                Program.MainForm.m_commentViewer.HtmlString = this.HTML;
+                Program.MainForm.m_commentViewer.XmlString = this.XML;
                 return true;
             }
             return false;

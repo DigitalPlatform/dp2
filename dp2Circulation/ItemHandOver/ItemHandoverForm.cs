@@ -46,14 +46,6 @@ namespace dp2Circulation
         string BatchNo = "";    // 面板输入的批次号
         string LocationString = ""; // 面板输入的馆藏地点
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-#endif
-
         /// <summary>
         /// 事项图标下标: 出错
         /// </summary>
@@ -201,9 +193,9 @@ namespace dp2Circulation
 
         private void ItemHandoverForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
             CreateColumnHeader(this.listView_in);
@@ -211,7 +203,7 @@ namespace dp2Circulation
             CreateColumnHeader(this.listView_outof);
 
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -221,35 +213,35 @@ namespace dp2Circulation
 #endif
 
             // 2009/2/2
-            this.comboBox_load_type.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_load_type.Text = Program.MainForm.AppInfo.GetString(
                 "itemhandoverform",
                 "publication_type",
                 "图书");
 
 
-            this.BarcodeFilePath = this.MainForm.AppInfo.GetString(
+            this.BarcodeFilePath = Program.MainForm.AppInfo.GetString(
                 "itemhandoverform",
                 "barcode_filepath",
                 "");
 
-            this.RecPathFilePath = this.MainForm.AppInfo.GetString(
+            this.RecPathFilePath = Program.MainForm.AppInfo.GetString(
     "itemhandoverform",
     "recpath_filepath",
     "");
 
-            this.BatchNo = this.MainForm.AppInfo.GetString(
+            this.BatchNo = Program.MainForm.AppInfo.GetString(
                 "itemhandoverform",
                 "batchno",
                 "");
 
-            this.LocationString = this.MainForm.AppInfo.GetString(
+            this.LocationString = Program.MainForm.AppInfo.GetString(
                 "itemhandoverform",
                 "location_string",
                 "");
 
 #if NO
             this.checkBox_verify_autoUppercaseBarcode.Checked =
-                this.MainForm.AppInfo.GetBoolean(
+                Program.MainForm.AppInfo.GetBoolean(
                 "itemhandoverform",
                 "auto_uppercase_barcode",
                 true);
@@ -305,36 +297,36 @@ namespace dp2Circulation
             if (this._scanBarcodeForm != null)
                 this._scanBarcodeForm.Close();
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 // 2009/2/2
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "itemhandoverform",
                     "publication_type",
                     this.comboBox_load_type.Text);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "itemhandoverform",
                     "barcode_filepath",
                     this.BarcodeFilePath);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "itemhandoverform",
                     "recpath_filepath",
                     this.RecPathFilePath);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "itemhandoverform",
                     "batchno",
                     this.BatchNo);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "itemhandoverform",
                     "location_string",
                     this.LocationString);
 
 #if NO
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "itemhandoverform",
                     "auto_uppercase_barcode",
                     this.checkBox_verify_autoUppercaseBarcode.Checked);
@@ -353,7 +345,7 @@ namespace dp2Circulation
                 "mdi_form_state");
 #endif
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
                 "itemhandoverform",
                 "list_in_width",
                 "");
@@ -364,7 +356,7 @@ namespace dp2Circulation
                     true);
             }
 
-            strWidths = this.MainForm.AppInfo.GetString(
+            strWidths = Program.MainForm.AppInfo.GetString(
     "itemhandoverform",
     "list_outof_width",
     "");
@@ -375,12 +367,12 @@ namespace dp2Circulation
                     true);
             }
 
-            this.MainForm.LoadSplitterPos(
+            Program.MainForm.LoadSplitterPos(
 this.splitContainer_main,
 "itemhandoverform",
 "splitContainer_main_ratio");
 
-            this.MainForm.LoadSplitterPos(
+            Program.MainForm.LoadSplitterPos(
 this.splitContainer_inAndOutof,
 "itemhandoverform",
 "splitContainer_inandoutof_ratio");
@@ -389,27 +381,27 @@ this.splitContainer_inAndOutof,
         /*public*/
         void SaveSize()
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_in);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "itemhandoverform",
                     "list_in_width",
                     strWidths);
 
                 strWidths = ListViewUtil.GetColumnWidthListString(this.listView_outof);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "itemhandoverform",
                     "list_outof_width",
                     strWidths);
 
-                this.MainForm.SaveSplitterPos(
+                Program.MainForm.SaveSplitterPos(
     this.splitContainer_main,
     "itemhandoverform",
     "splitContainer_main_ratio");
 
-                this.MainForm.SaveSplitterPos(
+                Program.MainForm.SaveSplitterPos(
     this.splitContainer_inAndOutof,
     "itemhandoverform",
     "splitContainer_inandoutof_ratio");
@@ -599,7 +591,7 @@ this.splitContainer_inAndOutof,
                 stop.Initial("正在初始化浏览器组件 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -1726,7 +1718,7 @@ this.splitContainer_inAndOutof,
                         {
                             string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_BIBLIORECPATH);
                             string strBiblioDbName = Global.GetDbName(strBiblioRecPath);
-                            if (this.MainForm.IsOrderWorkDb(strBiblioDbName) == true)
+                            if (Program.MainForm.IsOrderWorkDb(strBiblioDbName) == true)
                                 nNeedMoveCount++;
                         }
 
@@ -2236,12 +2228,12 @@ MessageBoxDefaultButton.Button2);
                 HtmlPrintForm printform = new HtmlPrintForm();
 
                 printform.Text = "打印" + strTitle;
-                printform.MainForm = this.MainForm;
+                // printform.MainForm = Program.MainForm;
                 printform.Filenames = filenames;
 
-                this.MainForm.AppInfo.LinkFormState(printform, "printform_state");
+                Program.MainForm.AppInfo.LinkFormState(printform, "printform_state");
                 printform.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(printform);
+                Program.MainForm.AppInfo.UnlinkFormState(printform);
             }
             finally
             {
@@ -2261,18 +2253,18 @@ MessageBoxDefaultButton.Button2);
             string strNamePath = "handover_printoption";
 
             // 配置标题和风格
-            PrintOption option = new ItemHandoverPrintOption(this.MainForm.DataDir,
+            PrintOption option = new ItemHandoverPrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
 
             PrintOptionDlg dlg = new PrintOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " 打印配置";
-            dlg.DataDir = this.MainForm.DataDir;    // 允许新增模板页
+            dlg.DataDir = Program.MainForm.DataDir;    // 允许新增模板页
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -2297,14 +2289,14 @@ MessageBoxDefaultButton.Button2);
             };
 
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "handover_printoption_formstate");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "handover_printoption_formstate");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            option.SaveData(this.MainForm.AppInfo,
+            option.SaveData(Program.MainForm.AppInfo,
                 strNamePath);
         }
 
@@ -2322,9 +2314,9 @@ MessageBoxDefaultButton.Button2);
             string strNamePath = "handover_printoption";
 
             // 获得打印参数
-            PrintOption option = new ItemHandoverPrintOption(this.MainForm.DataDir,
+            PrintOption option = new ItemHandoverPrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
             // 检查当前排序状态和包含种价格列之间是否存在矛盾
@@ -2384,7 +2376,7 @@ MessageBoxDefaultButton.Button2);
 
             filenames = new List<string>();    // 每页一个文件，这个数组存放了所有文件名
 
-            string strFileNamePrefix = this.MainForm.DataDir + "\\~itemhandover";
+            string strFileNamePrefix = Program.MainForm.DataDir + "\\~itemhandover";
 
             string strFileName = "";
 
@@ -2401,8 +2393,8 @@ MessageBoxDefaultButton.Button2);
                 macro_table["%pageno%"] = "1";
 
                 // 2008/11/23
-                macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
-                ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
+                macro_table["%datadir%"] = Program.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
+                ////macro_table["%libraryserverdir%"] = Program.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
                 // 2009/10/10
                 macro_table["%cssfilepath%"] = this.GetAutoCssUrl(option, "itemhandover.css");  // 便于引用服务器端或“css”模板的CSS文件
 
@@ -2566,8 +2558,8 @@ MessageBoxDefaultButton.Button2);
                 return strCssFilePath;
             else
             {
-                // return this.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // 缺省的
-                return PathUtil.MergePath(this.MainForm.DataDir, strDefaultCssFileName);    // 缺省的
+                // return Program.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // 缺省的
+                return PathUtil.MergePath(Program.MainForm.DataDir, strDefaultCssFileName);    // 缺省的
             }
         }
 
@@ -2577,7 +2569,7 @@ MessageBoxDefaultButton.Button2);
             bool bOutputTable)
         {
             /*
-            string strLibraryServerUrl = this.MainForm.AppInfo.GetString(
+            string strLibraryServerUrl = Program.MainForm.AppInfo.GetString(
     "config",
     "circulation_server_url",
     "");
@@ -2586,7 +2578,7 @@ MessageBoxDefaultButton.Button2);
                 strLibraryServerUrl = strLibraryServerUrl.Substring(0, pos);
              * */
 
-            // string strCssUrl = this.MainForm.LibraryServerDir + "/itemhandover.css";
+            // string strCssUrl = Program.MainForm.LibraryServerDir + "/itemhandover.css";
             // 2009/10/10 changed
             string strCssUrl = GetAutoCssUrl(option, "itemhandover.css");
 
@@ -2596,7 +2588,7 @@ MessageBoxDefaultButton.Button2);
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;
             else
-                strCssUrl = this.MainForm.LibraryServerDir + "/itemhandover.css";    // 缺省的
+                strCssUrl = Program.MainForm.LibraryServerDir + "/itemhandover.css";    // 缺省的
              * */
 
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
@@ -3120,8 +3112,8 @@ MessageBoxDefaultButton.Button2);
 
             EntityForm form = new EntityForm();
 
-            form.MainForm = this.MainForm;
-            form.MdiParent = this.MainForm;
+            form.MainForm = Program.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             if (String.IsNullOrEmpty(strBarcode) == false)
@@ -3150,7 +3142,7 @@ MessageBoxDefaultButton.Button2);
             /*
                 dlg.RefDbName = EntityForm.GetDbName(this.entityEditControl1.RecPath);
              * */
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -3246,7 +3238,7 @@ MessageBoxDefaultButton.Button2);
             /*
                 dlg.RefDbName = EntityForm.GetDbName(this.entityEditControl1.RecPath);
              * */
-            dlg.MainForm = this.MainForm;
+            dlg.MainForm = Program.MainForm;
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -3990,7 +3982,7 @@ MessageBoxDefaultButton.Button2);
             out strError);
                         if (nRet == -1)
                             return -1;
-                        MessageBox.Show(this.MainForm, "修改馆藏地的操作已被取消。请等待还书操作完全完成后，再重新执行修改馆藏地的操作。\r\n\r\n注: 还书操作完成后，如果有红色的事项，需要专门处理");
+                        MessageBox.Show(Program.MainForm, "修改馆藏地的操作已被取消。请等待还书操作完全完成后，再重新执行修改馆藏地的操作。\r\n\r\n注: 还书操作完成后，如果有红色的事项，需要专门处理");
                         return 0;
                     }
                 }
@@ -4021,7 +4013,7 @@ MessageBoxDefaultButton.Button2);
             /*
                 dlg.RefDbName = EntityForm.GetDbName(this.entityEditControl1.RecPath);
              * */
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -4621,7 +4613,7 @@ MessageBoxDefaultButton.Button2);
         private void ItemHandoverForm_Activated(object sender, EventArgs e)
         {
             // 2009/8/13
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
         }
 
@@ -4808,7 +4800,7 @@ MessageBoxDefaultButton.Button2);
             MainForm.SetControlFont(dlg, this.Font, false);
             dlg.MessageText = "请指定来自书目库 '" + strSourceBiblioDbName + "' 中的记录要转移去的目标书目库";
             dlg.SourceBiblioDbName = strSourceBiblioDbName;
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.TargetBiblioDbName = SearchExistRelation(strSourceBiblioDbName);    // 从已有的事项中搜索出对照关系
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -4881,7 +4873,7 @@ MessageBoxDefaultButton.Button2);
 
             // 转换为MARC格式
             // TODO: 是否可以直接在XML上进行修改?
-            string strSourceSyntax = this.MainForm.GetBiblioSyntax(strSourceBiblioDbName);
+            string strSourceSyntax = Program.MainForm.GetBiblioSyntax(strSourceBiblioDbName);
             string strOutMarcSyntax = "";
             string strSourceMarc = "";
             // 将XML格式转换为MARC格式
@@ -4934,7 +4926,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             // 转换为MARC格式
-            string strTargetSyntax = this.MainForm.GetBiblioSyntax(strTargetBiblioDbName);
+            string strTargetSyntax = Program.MainForm.GetBiblioSyntax(strTargetBiblioDbName);
             string strTargetMarc = "";
 
             if (strSourceSyntax.ToLower() != strTargetSyntax.ToLower())
@@ -4997,9 +4989,9 @@ MessageBoxDefaultButton.Button2);
             dlg.ReadOnlyTarget = true;   // 目标MARC编辑器不让进行修改。其实也可以让修改？比如仅仅从左边复制一点东西过来？
             // dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "TwoBiblioDialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "TwoBiblioDialog_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == DialogResult.Cancel)
                 return 0;   // 全部放弃
@@ -5236,7 +5228,7 @@ MessageBoxDefaultButton.Button2);
 
             // 转换为MARC格式
             // TODO: 是否可以直接在XML上进行修改?
-            string strSourceSyntax = this.MainForm.GetBiblioSyntax(strSourceBiblioDbName);
+            string strSourceSyntax = Program.MainForm.GetBiblioSyntax(strSourceBiblioDbName);
             string strOutMarcSyntax = "";
             string strMarc = "";
             // 将XML格式转换为MARC格式
@@ -5445,7 +5437,7 @@ MessageBoxDefaultButton.Button2);
             if (String.IsNullOrEmpty(strTargetBiblioRecPath) == true)
             {
                 // 看看源书目库是不是属于工作库
-                if (this.MainForm.IsOrderWorkDb(strSourceBiblioDbName) == false)
+                if (Program.MainForm.IsOrderWorkDb(strSourceBiblioDbName) == false)
                 {
                     strError = "记录 '" + strItemRecPath + "' 因其从属的书目记录不具备目标记录，并且不是采购工作库角色，不必转移";
                     return 0;
@@ -6324,14 +6316,14 @@ MessageBoxDefaultButton.Button2);
             strError = "";
 
             string strItemDbName = Global.GetDbName(strItemRecPath);
-            string strBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName(strItemDbName);
+            string strBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName(strItemDbName);
             if (String.IsNullOrEmpty(strBiblioDbName) == true)
             {
                 strError = "实体库 '" + strItemDbName + "' 未找到对应的书目库名";
                 return -1;
             }
 
-            string strIssueDbName = this.MainForm.GetIssueDbName(strBiblioDbName);
+            string strIssueDbName = Program.MainForm.GetIssueDbName(strBiblioDbName);
 
             if (strPubType == "图书")
             {
@@ -6740,8 +6732,8 @@ MessageBoxDefaultButton.Button2);
             {
                 // 打开一个新的快捷出纳窗
                 QuickChargingForm form = new QuickChargingForm();
-                form.MdiParent = this.MainForm;
-                form.MainForm = this.MainForm;
+                form.MdiParent = Program.MainForm;
+                form.MainForm = Program.MainForm;
                 form.BorrowComplete -= new BorrowCompleteEventHandler(form_BorrowComplete);
                 form.BorrowComplete += new BorrowCompleteEventHandler(form_BorrowComplete);
                 form.Show();

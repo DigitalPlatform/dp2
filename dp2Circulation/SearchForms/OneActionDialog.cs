@@ -554,9 +554,9 @@ namespace dp2Circulation
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            //this.MainForm.AppInfo.LinkFormState(dlg, "ChangeOrderActionDialog_gettimedialog");
+            //Program.MainForm.AppInfo.LinkFormState(dlg, "ChangeOrderActionDialog_gettimedialog");
             dlg.ShowDialog(this);
-            //this.MainForm.AppInfo.UnlinkFormState(dlg);
+            //Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;

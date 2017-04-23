@@ -16,7 +16,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 构造函数
@@ -37,12 +37,12 @@ namespace dp2Circulation
         {
             this.listView_printed_list.Items.Clear();
 
-            if (this.MainForm.OperHistory.PrintHostObj == null)
+            if (Program.MainForm.OperHistory.PrintHostObj == null)
                 return;
 
-            for (int i = 0; i < this.MainForm.OperHistory.PrintHostObj.PrintedInfos.Count; i++)
+            for (int i = 0; i < Program.MainForm.OperHistory.PrintHostObj.PrintedInfos.Count; i++)
             {
-                PrintInfo info = this.MainForm.OperHistory.PrintHostObj.PrintedInfos[i];
+                PrintInfo info = Program.MainForm.OperHistory.PrintHostObj.PrintedInfos[i];
 
                 ListViewItem item = new ListViewItem();
                 item.Text = info.CurrentReaderBarcode;
@@ -57,12 +57,12 @@ namespace dp2Circulation
         {
             this.listView_unprint_list.Items.Clear();
 
-            if (this.MainForm.OperHistory.PrintHostObj == null)
+            if (Program.MainForm.OperHistory.PrintHostObj == null)
                 return;
 
-            for (int i = 0; i < this.MainForm.OperHistory.PrintHostObj.UnprintInfos.Count; i++)
+            for (int i = 0; i < Program.MainForm.OperHistory.PrintHostObj.UnprintInfos.Count; i++)
             {
-                PrintInfo info = this.MainForm.OperHistory.PrintHostObj.UnprintInfos[i];
+                PrintInfo info = Program.MainForm.OperHistory.PrintHostObj.UnprintInfos[i];
 
                 ListViewItem item = new ListViewItem();
                 item.Text = info.CurrentReaderBarcode;
@@ -78,10 +78,10 @@ namespace dp2Circulation
             string strFormat = "";
             string strText = "";
 
-            if (this.MainForm.OperHistory.PrintHostObj == null)
+            if (Program.MainForm.OperHistory.PrintHostObj == null)
                 return;
 
-            this.MainForm.OperHistory.GetPrintContent(this.MainForm.OperHistory.PrintHostObj.PrintInfo,
+            Program.MainForm.OperHistory.GetPrintContent(Program.MainForm.OperHistory.PrintHostObj.PrintInfo,
                 out strText,
                 out strFormat);
             this.textBox_currentContent.Text = strText;
@@ -108,7 +108,7 @@ namespace dp2Circulation
                 string strFormat = "";
                 string strText = "";
 
-                this.MainForm.OperHistory.GetPrintContent(info,
+                Program.MainForm.OperHistory.GetPrintContent(info,
                      out strText,
                      out strFormat);
                 this.textBox_printed_oneContent.Text = strText;
@@ -134,7 +134,7 @@ namespace dp2Circulation
             foreach (ListViewItem item in this.listView_printed_list.SelectedItems)
             {
                 PrintInfo info = (PrintInfo)item.Tag;
-                this.MainForm.OperHistory.Print(info);
+                Program.MainForm.OperHistory.Print(info);
             }
 
         }
@@ -155,7 +155,7 @@ namespace dp2Circulation
                 string strFormat = "";
                 string strText = "";
 
-                this.MainForm.OperHistory.GetPrintContent(info,
+                Program.MainForm.OperHistory.GetPrintContent(info,
                     out strText,
                     out strFormat);
                 this.textBox_unprint_oneContent.Text = strText;
@@ -182,14 +182,14 @@ namespace dp2Circulation
             foreach (ListViewItem item in this.listView_unprint_list.SelectedItems)
             {
                 PrintInfo info = (PrintInfo)item.Tag;
-                this.MainForm.OperHistory.Print(info);
+                Program.MainForm.OperHistory.Print(info);
             }
 
         }
 
         private void button_currentContent_print_Click(object sender, EventArgs e)
         {
-            this.MainForm.OperHistory.Print();
+            Program.MainForm.OperHistory.Print();
         }
 
         private void button_refresh_Click(object sender, EventArgs e)
@@ -202,21 +202,21 @@ namespace dp2Circulation
 
         private void button_testPrint_Click(object sender, EventArgs e)
         {
-            this.MainForm.OperHistory.TestPrint();
+            Program.MainForm.OperHistory.TestPrint();
         }
 
         private void button_currentContent_push_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            if (this.MainForm.OperHistory.PrintHostObj == null)
+            if (Program.MainForm.OperHistory.PrintHostObj == null)
             {
                 MessageBox.Show(this, "PrintHostObj尚未初始化");
                 return;
             }
 
 
-            int nRet = this.MainForm.OperHistory.PrintHostObj.PushCurrentToQueue(out strError);
+            int nRet = Program.MainForm.OperHistory.PrintHostObj.PushCurrentToQueue(out strError);
 
             MessageBox.Show(this, strError);
 
@@ -227,7 +227,7 @@ namespace dp2Circulation
         // 清除打印机配置
         private void button_clearPrinterPreference_Click(object sender, EventArgs e)
         {
-            this.MainForm.OperHistory.ClearPrinterPreference();
+            Program.MainForm.OperHistory.ClearPrinterPreference();
         }
 
     }

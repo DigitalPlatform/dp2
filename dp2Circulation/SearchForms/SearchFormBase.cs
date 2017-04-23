@@ -332,7 +332,7 @@ namespace dp2Circulation
 
             ListViewItem item = this._listviewRecords.SelectedItems[0];
 
-            this.MainForm.OpenCommentViewer(bOpenWindow);
+            Program.MainForm.OpenCommentViewer(bOpenWindow);
 
             string strRecPath = item.Text;
             if (string.IsNullOrEmpty(strRecPath) == true)
@@ -352,7 +352,7 @@ namespace dp2Circulation
             task.Stop = this.stop;
             task.DbType = this.DbType;
 
-            this.MainForm.PropertyTaskList.AddTask(task, true);
+            Program.MainForm.PropertyTaskList.AddTask(task, true);
         }
 
 #if NO
@@ -365,11 +365,11 @@ namespace dp2Circulation
             // 优化，避免无谓地进行服务器调用
             if (bOpenWindow == false)
             {
-                if (this.MainForm.PanelFixedVisible == false
+                if (Program.MainForm.PanelFixedVisible == false
                     && (m_commentViewer == null || m_commentViewer.Visible == false))
                     return;
                 // 2013/3/7
-                if (this.MainForm.CanDisplayItemProperty() == false)
+                if (Program.MainForm.CanDisplayItemProperty() == false)
                     return;
             }
 
@@ -440,7 +440,7 @@ namespace dp2Circulation
                 bNew = true;
             }
 
-            m_commentViewer.MainForm = this.MainForm;  // 必须是第一句
+            m_commentViewer.MainForm = Program.MainForm;  // 必须是第一句
 
             if (bNew == true)
                 m_commentViewer.InitialWebBrowser();
@@ -450,18 +450,18 @@ namespace dp2Circulation
             m_commentViewer.XmlString = strXml; //  MergeXml(strXml1, strXml2);
             m_commentViewer.FormClosed -= new FormClosedEventHandler(marc_viewer_FormClosed);
             m_commentViewer.FormClosed += new FormClosedEventHandler(marc_viewer_FormClosed);
-            // this.MainForm.AppInfo.LinkFormState(m_viewer, "comment_viewer_state");
+            // Program.MainForm.AppInfo.LinkFormState(m_viewer, "comment_viewer_state");
             // m_viewer.ShowDialog(this);
-            // this.MainForm.AppInfo.UnlinkFormState(m_viewer);
+            // Program.MainForm.AppInfo.UnlinkFormState(m_viewer);
             if (bOpenWindow == true)
             {
                 if (m_commentViewer.Visible == false)
                 {
-                    this.MainForm.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
+                    Program.MainForm.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
                     m_commentViewer.Show(this);
                     m_commentViewer.Activate();
 
-                    this.MainForm.CurrentPropertyControl = null;
+                    Program.MainForm.CurrentPropertyControl = null;
                 }
                 else
                 {
@@ -478,7 +478,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    if (this.MainForm.CurrentPropertyControl != m_commentViewer.MainControl)
+                    if (Program.MainForm.CurrentPropertyControl != m_commentViewer.MainControl)
                         m_commentViewer.DoDock(false); // 不会自动显示FixedPanel
                 }
             }
@@ -492,7 +492,7 @@ namespace dp2Circulation
         {
             if (m_commentViewer != null)
             {
-                this.MainForm.AppInfo.UnlinkFormState(m_commentViewer);
+                Program.MainForm.AppInfo.UnlinkFormState(m_commentViewer);
                 this.m_commentViewer = null;
             }
         }
@@ -1343,21 +1343,19 @@ namespace dp2Circulation
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.DbType = this.DbType;
                 dlg.Text = "快速修改" + this.DbTypeCaption + "记录 -- 请指定动作参数";
-                dlg.MainForm = this.MainForm;
-                //dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
-                //dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
+                // dlg.MainForm = Program.MainForm;
 
-                dlg.UiState = this.MainForm.AppInfo.GetString(
+                dlg.UiState = Program.MainForm.AppInfo.GetString(
 this.DbType + "search_form",
 "ChangeItemActionDialog_uiState",
 "");
 
-                this.MainForm.AppInfo.LinkFormState(dlg, this.DbType + "searchform_quickchangedialog_state");
+                Program.MainForm.AppInfo.LinkFormState(dlg, this.DbType + "searchform_quickchangedialog_state");
                 dlg.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(dlg);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
 this.DbType + "search_form",
 "ChangeItemActionDialog_uiState",
 dlg.UiState);
@@ -1373,7 +1371,7 @@ dlg.UiState);
             DateTime now = DateTime.Now;
 
             // TODO: 检查一下，看看是否一项修改动作都没有
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行快速修改" + this.DbTypeCaption + "记录</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行快速修改" + this.DbTypeCaption + "记录</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1450,7 +1448,7 @@ dlg.UiState);
 
                     Debug.Assert(info != null, "");
 
-                    this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
 
                     XmlDocument dom = new XmlDocument();
                     try
@@ -1496,7 +1494,7 @@ dlg.UiState);
                     if (nRet == -1)
                         return -1;
 
-                    this.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(strDebugInfo).Replace("\r\n", "<br/>") + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(strDebugInfo).Replace("\r\n", "<br/>") + "</div>");
 
                     nProcessCount++;
 
@@ -1532,7 +1530,7 @@ dlg.UiState);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束快速修改" + this.DbTypeCaption + "记录</div>");
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束快速修改" + this.DbTypeCaption + "记录</div>");
             }
 
             DoViewComment(false);
@@ -1627,7 +1625,7 @@ dlg.UiState);
                 string strFieldValue = action.FieldValue;
                 if (strFieldValue.IndexOf("%") != -1)
                 {
-                    this._macroFileName = Path.Combine(this.MainForm.UserDir, this.DbType + "_macrotable.xml");
+                    this._macroFileName = Path.Combine(Program.MainForm.UserDir, this.DbType + "_macrotable.xml");
                     if (File.Exists(this._macroFileName) == false)
                     {
                         strError = "宏定义文件 '" + this._macroFileName + "' 不存在，无法进行宏替换";
@@ -1740,7 +1738,7 @@ ref bChanged);
             //      0   not found
             //      1   found
             int nRet = MacroUtil.GetFromLocalMacroTable(
-                _macroFileName, // Path.Combine(this.MainForm.DataDir, "marceditor_macrotable.xml"),
+                _macroFileName, // Path.Combine(Program.MainForm.DataDir, "marceditor_macrotable.xml"),
                 strName,
                 bSimulate,
                 out strValue,
@@ -1802,7 +1800,7 @@ ref bChanged);
             object o = _tableColIndex[strItemDbName + "|" + strType];
             if (o == null)
             {
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                 nCol = temp.FindColumnByType(strType);
                 if (nCol == -1)
                 {

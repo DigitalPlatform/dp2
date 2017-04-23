@@ -37,7 +37,8 @@ namespace dp2Circulation
         private void ReservationListForm_Load(object sender, EventArgs e)
         {
             // webBrowser_borrowHistory
-            this.m_chargingInterface.Initial(this.MainForm, this.webBrowser1);
+            this.m_chargingInterface.Initial(// Program.MainForm, 
+                this.webBrowser1);
             //this.m_chargingInterface.GetLocalPath -= new GetLocalFilePathEventHandler(m_webExternalHost_GetLocalPath);
             //this.m_chargingInterface.GetLocalPath += new GetLocalFilePathEventHandler(m_webExternalHost_GetLocalPath);
             // this.m_chargingInterface.CallFunc += m_chargingInterface_CallFunc;
@@ -90,11 +91,11 @@ namespace dp2Circulation
             strError = "";
             info = new MyReaderInfo();
 
-            string strUserName = this.MainForm.AppInfo.GetString(
+            string strUserName = Program.MainForm.AppInfo.GetString(
     "default_account",
     "username",
     "");
-            bool bIsReader = this.MainForm.AppInfo.GetBoolean(
+            bool bIsReader = Program.MainForm.AppInfo.GetBoolean(
     "default_account",
     "isreader",
     false);
@@ -161,7 +162,7 @@ namespace dp2Circulation
                 info.ReaderXml = strResult;
                 info.Name = DomUtil.GetElementText(dom.DocumentElement, "name");
                 // 根据读者库查到馆代码
-                info.LibraryCode = this.MainForm.GetReaderDbLibraryCode(Global.GetDbName(strRecPath));
+                info.LibraryCode = Program.MainForm.GetReaderDbLibraryCode(Global.GetDbName(strRecPath));
                 info.PersonalLibrary = DomUtil.GetElementText(dom.DocumentElement, "personalLibrary");
 
             }
@@ -182,7 +183,7 @@ namespace dp2Circulation
         {
             strError = "";
 
-            if (string.IsNullOrEmpty(this.MainForm.ArrivedDbName) == true)
+            if (string.IsNullOrEmpty(Program.MainForm.ArrivedDbName) == true)
             {
                 strError = "当前服务器尚未配置预约到书库名";
                 return -1;
@@ -202,7 +203,7 @@ namespace dp2Circulation
                 string strQueryWord = "arrived";
                 string strFrom = "状态";
                 string strMatchStyle = "exact";
-                string strQueryXml = "<target list='" + this.MainForm.ArrivedDbName + ":"
+                string strQueryXml = "<target list='" + Program.MainForm.ArrivedDbName + ":"
                     + strFrom + "'><item><word>"
     + StringUtil.GetXmlStringSimple(strQueryWord)
     + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + this.Lang + "</lang></target>";
@@ -305,7 +306,7 @@ namespace dp2Circulation
                 return -1;
             }
 
-            if (string.IsNullOrEmpty(this.MainForm.ArrivedDbName) == true)
+            if (string.IsNullOrEmpty(Program.MainForm.ArrivedDbName) == true)
             {
                 strError = "当前服务器尚未配置预约到书库名";
                 return -1;
@@ -326,7 +327,7 @@ namespace dp2Circulation
                     strQueryWord = info.LibraryCode + "/" + info.PersonalLibrary;
                 string strFrom = "馆藏地点";
                 string strMatchStyle = "exact";
-                string strQueryXml = "<target list='" + this.MainForm.ArrivedDbName + ":"
+                string strQueryXml = "<target list='" + Program.MainForm.ArrivedDbName + ":"
                     + strFrom + "'><item><word>"
     + StringUtil.GetXmlStringSimple(strQueryWord)
     + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + this.Lang + "</lang></target>";
@@ -453,7 +454,7 @@ namespace dp2Circulation
         /// </summary>
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
+            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "default\\charginghistory.css");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strJs = "";
 
@@ -501,8 +502,8 @@ namespace dp2Circulation
             // string strBinDir = Environment.CurrentDirectory;
             string strBinDir = Program.MainForm.UserDir;    // 2017/2/23
 
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
-            string strSummaryJs = Path.Combine(this.MainForm.DataDir, "getsummary.js");
+            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "default\\charginghistory.css");
+            string strSummaryJs = Path.Combine(Program.MainForm.DataDir, "getsummary.js");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
                 + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"

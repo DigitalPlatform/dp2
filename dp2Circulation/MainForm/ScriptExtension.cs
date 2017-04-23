@@ -832,7 +832,7 @@ namespace dp2Circulation
                 return -1;
             }
 
-            _clientHost.MainForm = this;
+            // _clientHost.MainForm = this;
 
             return 0;
         }

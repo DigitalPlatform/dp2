@@ -117,7 +117,7 @@ namespace dp2Circulation
 
                     long lRet = Channel.GetCalendar(
                         stop,
-                        (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.29") < 0 ? "list" : "get"), // "list",
+                        (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.29") < 0 ? "list" : "get"), // "list",
                         "",
                         nStart,
                         nCount,
@@ -167,7 +167,7 @@ namespace dp2Circulation
             this.CalendarDefChanged = false;
 
             // dp2Library 版本 2.29 以后，才允许 get 获得全部事项内容，此处界面才允许修改日历定义
-            if (StringUtil.CompareVersion(this.MainForm.ServerVersion,"2.29") < 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion,"2.29") < 0)
                 this.toolStrip_calendar.Enabled = false;
 
             // 缺省按照第一列排序
@@ -303,7 +303,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {

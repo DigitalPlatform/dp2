@@ -35,14 +35,6 @@ namespace dp2Circulation
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-#endif
-
         /// <summary>
         /// 检索结束信号
         /// </summary>
@@ -121,13 +113,13 @@ namespace dp2Circulation
 
         private void CallNumberForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -143,7 +135,7 @@ namespace dp2Circulation
             // 类号
             if (String.IsNullOrEmpty(this.textBox_classNumber.Text) == true)
             {
-                this.textBox_classNumber.Text = this.MainForm.AppInfo.GetString(
+                this.textBox_classNumber.Text = Program.MainForm.AppInfo.GetString(
                     "callnumberform",
                     "classnumber",
                     "");
@@ -152,7 +144,7 @@ namespace dp2Circulation
             // 线索馆藏地点
             if (m_bLocationSetted == false)
             {
-                this.comboBox_location.Text = this.MainForm.AppInfo.GetString(
+                this.comboBox_location.Text = Program.MainForm.AppInfo.GetString(
                     "callnumberform",
                     "location",
                     "");
@@ -160,12 +152,12 @@ namespace dp2Circulation
             }
 
             // 是否要返回浏览列
-            this.checkBox_returnBrowseCols.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_returnBrowseCols.Checked = Program.MainForm.AppInfo.GetBoolean(
                     "callnumberform",
                     "return_browse_cols",
                     true);
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
     "callnumberform",
     "record_list_column_width",
     "");
@@ -223,7 +215,7 @@ namespace dp2Circulation
                         //      -1  error
                         //      0   not found
                         //      1   found
-                        nRet = this.MainForm.GetArrangementInfo(this.LocationString,
+                        nRet = Program.MainForm.GetArrangementInfo(this.LocationString,
                             out info,
                             out strError);
 
@@ -238,7 +230,7 @@ namespace dp2Circulation
                         //      -1  error
                         //      0   notd found
                         //      1   found
-                        nRet = this.MainForm.GetCallNumberInfo(this.LocationString,
+                        nRet = Program.MainForm.GetCallNumberInfo(this.LocationString,
                             out strArrangeGroupName,
                             out strZhongcihaoDbname,
                             out strClassType,
@@ -301,28 +293,28 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 // 类号
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "callnumberform",
                     "classnumber",
                     this.textBox_classNumber.Text);
 
                 // 线索馆藏地点
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "callnumberform",
                     "location",
                     this.comboBox_location.Text);
 
                 // 是否要返回浏览列
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                         "callnumberform",
                         "return_browse_cols",
                         this.checkBox_returnBrowseCols.Checked);
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_number);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "callnumberform",
                     "record_list_column_width",
                     strWidths);
@@ -537,7 +529,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -644,7 +636,7 @@ namespace dp2Circulation
 
                         if (String.IsNullOrEmpty(strBiblioDbName) == true)
                         {
-                            strBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName(strItemDbName);
+                            strBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName(strItemDbName);
                             dbname_table[strItemDbName] = strBiblioDbName;
                         }
 
@@ -784,7 +776,7 @@ namespace dp2Circulation
             string strClassType = "";
             string strQufenhaoType = "";
             // 获得关于一个特定馆藏地点的索取号配置信息
-            int nRet = this.MainForm.GetCallNumberInfo(this.LocationString,
+            int nRet = Program.MainForm.GetCallNumberInfo(this.LocationString,
                 out strArrangeGroupName,
                 out strZhongcihaoDbname,
                 out strClassType,
@@ -792,7 +784,7 @@ namespace dp2Circulation
                 out strError);
 #endif
             ArrangementInfo info = null;
-            int nRet = this.MainForm.GetArrangementInfo(this.LocationString,
+            int nRet = Program.MainForm.GetArrangementInfo(this.LocationString,
                 out info,
                 out strError);
             if (nRet == 0)
@@ -856,7 +848,7 @@ namespace dp2Circulation
                 string strCurrentArrangeGroupName = "";
 
                 // TODO: 可以利用hashtable加速
-                nRet = this.MainForm.GetCallNumberInfo(strLocation,
+                nRet = Program.MainForm.GetCallNumberInfo(strLocation,
                     out strCurrentArrangeGroupName,
                     out strZhongcihaoDbname,
                     out strClassType,
@@ -875,7 +867,7 @@ namespace dp2Circulation
                 if (strCurrentArrangeGroupName == null)
                 {
                     ArrangementInfo current_info = null;
-                    nRet = this.MainForm.GetArrangementInfo(strLocation,
+                    nRet = Program.MainForm.GetArrangementInfo(strLocation,
                         out current_info,
                         out strError);
                     if (nRet == 0)
@@ -1308,9 +1300,9 @@ namespace dp2Circulation
                 {
                     form = new EntityForm();
 
-                    form.MdiParent = this.MainForm;
+                    form.MdiParent = Program.MainForm;
 
-                    form.MainForm = this.MainForm;
+                    form.MainForm = Program.MainForm;
                     form.Show();
                 }
 
@@ -1359,9 +1351,9 @@ namespace dp2Circulation
                 {
                     form = new ItemInfoForm();
 
-                    form.MdiParent = this.MainForm;
+                    form.MdiParent = Program.MainForm;
 
-                    form.MainForm = this.MainForm;
+                    form.MainForm = Program.MainForm;
                     form.Show();
                 }
 
@@ -1911,7 +1903,7 @@ namespace dp2Circulation
             //      -1  error
             //      0   notd found
             //      1   found
-            nRet = this.MainForm.GetCallNumberInfo(this.LocationString,
+            nRet = Program.MainForm.GetCallNumberInfo(this.LocationString,
                 out strArrangeGroupName,
                 out strZhongcihaoDbname,
                 out strClassType,
@@ -1919,7 +1911,7 @@ namespace dp2Circulation
                 out strError);
 #endif
             ArrangementInfo info = null;
-            nRet = this.MainForm.GetArrangementInfo(this.LocationString,
+            nRet = Program.MainForm.GetArrangementInfo(this.LocationString,
                 out info,
                 out strError);
             if (nRet == 0)
@@ -2107,7 +2099,7 @@ namespace dp2Circulation
                         null,
                         "请输入类 '" + strClass + "' 的当前种次号最大号:",
                         strDefaultValue,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                     if (strNumber == null)
                         return 0;	// 放弃整个操作
                     if (String.IsNullOrEmpty(strNumber) == true)
@@ -2192,7 +2184,7 @@ namespace dp2Circulation
                         null,
                         "请输入类 '" + strClass + "' 的当前种次号最大号:",
                         strTestNumber,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                     if (strNumber == null)
                         return 0;	// 放弃整个操作
                     if (String.IsNullOrEmpty(strNumber) == true)
@@ -2312,7 +2304,7 @@ namespace dp2Circulation
                         null,
                         "请输入类 '" + strClass + "' 的当前种次号最大号:",
                         strTestNumber,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                     if (strNumber == null)
                         return 0;	// 放弃整个操作
                     if (String.IsNullOrEmpty(strNumber) == true)
@@ -2436,18 +2428,18 @@ namespace dp2Circulation
         {
             if (this.checkBox_topmost.Checked == true)
             {
-                Debug.Assert(this.MainForm != null || this.MdiParent != null, "");
+                Debug.Assert(Program.MainForm != null || this.MdiParent != null, "");
                 if (this.MdiParent != null)
                     this.MainForm = (MainForm)this.MdiParent;
                 this.MdiParent = null;
-                Debug.Assert(this.MainForm != null, "");
-                this.Owner = this.MainForm;
+                Debug.Assert(Program.MainForm != null, "");
+                this.Owner = Program.MainForm;
                 // this.TopMost = true;
             }
             else
             {
-                Debug.Assert(this.MainForm != null, "");
-                this.MdiParent = this.MainForm;
+                Debug.Assert(Program.MainForm != null, "");
+                this.MdiParent = Program.MainForm;
                 // this.TopMost = false;
             }
         }
@@ -2470,7 +2462,7 @@ namespace dp2Circulation
         private void CallNumberForm_Activated(object sender, EventArgs e)
         {
             // 2009/8/13
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
         }
 
         private void comboBox_location_TextChanged(object sender, EventArgs e)
@@ -2540,7 +2532,7 @@ namespace dp2Circulation
         {
             strError = "";
 
-            if (String.IsNullOrEmpty(this.MainForm.CallNumberInfo) == true)
+            if (String.IsNullOrEmpty(Program.MainForm.CallNumberInfo) == true)
                 return 0;
 
             this.cfg_dom = new XmlDocument();
@@ -2548,7 +2540,7 @@ namespace dp2Circulation
 
             try
             {
-                this.cfg_dom.DocumentElement.InnerXml = this.MainForm.CallNumberInfo;
+                this.cfg_dom.DocumentElement.InnerXml = Program.MainForm.CallNumberInfo;
             }
             catch (Exception ex)
             {

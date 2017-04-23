@@ -374,7 +374,8 @@ namespace dp2Circulation
 
             this.ListViewItem = item;
 
-            this.ListViewItem.Tag = this;   // 将BookItem对象引用保存在ListViewItem事项中
+            // 2017/4/23 这里会造成循环引用
+            // this.ListViewItem.Tag = this;   // 将BookItem对象引用保存在ListViewItem事项中
 
             return item;
         }

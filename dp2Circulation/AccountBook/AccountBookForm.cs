@@ -221,49 +221,49 @@ namespace dp2Circulation
 
         private void AccountBookForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
-            this.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
-            this.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
+            Program.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
+            Program.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
 
             CreateColumnHeader(this.listView_in);
 
             // 2009/2/2 
-            this.comboBox_load_type.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_load_type.Text = Program.MainForm.AppInfo.GetString(
                 "accountbookform",
                 "publication_type",
                 "图书");
 
             // 2012/11/26
-            this.checkBox_load_fillOrderInfo.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_load_fillOrderInfo.Checked = Program.MainForm.AppInfo.GetBoolean(
     "accountbookform",
     "fillOrderInfo",
     true);
 
-            this.checkBox_load_fillBiblioSummary.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_load_fillBiblioSummary.Checked = Program.MainForm.AppInfo.GetBoolean(
     "accountbookform",
     "fillBiblioSummary",
     true);
 
-            this.BarcodeFilePath = this.MainForm.AppInfo.GetString(
+            this.BarcodeFilePath = Program.MainForm.AppInfo.GetString(
                 "accountbookform",
                 "barcode_filepath",
                 "");
 
-            this.BatchNo = this.MainForm.AppInfo.GetString(
+            this.BatchNo = Program.MainForm.AppInfo.GetString(
                 "accountbookform",
                 "batchno",
                 "");
 
-            this.LocationString = this.MainForm.AppInfo.GetString(
+            this.LocationString = Program.MainForm.AppInfo.GetString(
                 "accountbookform",
                 "location_string",
                 "");
 
-            this.comboBox_sort_sortStyle.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_sort_sortStyle.Text = Program.MainForm.AppInfo.GetString(
                 "accountbookform",
                 "sort_style",
                 "<无>");
@@ -279,7 +279,7 @@ namespace dp2Circulation
                 return;
 
             string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_in);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "accountbookform",
                 "list_in_width",
                 strWidths);
@@ -290,7 +290,7 @@ namespace dp2Circulation
             if (sender != this)
                 return;
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
                "accountbookform",
                "list_in_width",
                "");
@@ -323,49 +323,49 @@ namespace dp2Circulation
 
         private void AccountBookForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 // 2009/2/2 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "accountbookform",
                     "publication_type",
                     this.comboBox_load_type.Text);
 
                 // 2012/11/26
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
         "accountbookform",
         "fillOrderInfo",
         this.checkBox_load_fillOrderInfo.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
         "accountbookform",
         "fillBiblioSummary",
         this.checkBox_load_fillBiblioSummary.Checked);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "accountbookform",
                     "barcode_filepath",
                     this.BarcodeFilePath);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "accountbookform",
                     "batchno",
                     this.BatchNo);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "accountbookform",
                     "location_string",
                     this.LocationString);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "accountbookform",
                     "sort_style",
                     this.comboBox_sort_sortStyle.Text);
 
                 CloseErrorInfoForm();
 
-                this.MainForm.AppInfo.LoadMdiLayout -= new EventHandler(AppInfo_LoadMdiLayout);
-                this.MainForm.AppInfo.SaveMdiLayout -= new EventHandler(AppInfo_SaveMdiLayout);
+                Program.MainForm.AppInfo.LoadMdiLayout -= new EventHandler(AppInfo_LoadMdiLayout);
+                Program.MainForm.AppInfo.SaveMdiLayout -= new EventHandler(AppInfo_SaveMdiLayout);
             }
         }
 
@@ -441,14 +441,14 @@ namespace dp2Circulation
             strError = "";
 
             string strItemDbName = Global.GetDbName(strItemRecPath);
-            string strBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName(strItemDbName);
+            string strBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName(strItemDbName);
             if (String.IsNullOrEmpty(strBiblioDbName) == true)
             {
                 strError = "实体库 '" + strItemDbName + "' 未找到对应的书目库名";
                 return -1;
             }
 
-            string strIssueDbName = this.MainForm.GetIssueDbName(strBiblioDbName);
+            string strIssueDbName = Program.MainForm.GetIssueDbName(strBiblioDbName);
 
             if (strPubType == "图书")
             {
@@ -883,7 +883,7 @@ namespace dp2Circulation
                 stop.Initial("正在初始化浏览器组件 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -1024,7 +1024,7 @@ namespace dp2Circulation
                 sr.Close();
             }
 
-            this.MainForm.StatusBarMessage = strTimeMessage;
+            Program.MainForm.StatusBarMessage = strTimeMessage;
 
             return 0;
         ERROR1:
@@ -1131,7 +1131,7 @@ namespace dp2Circulation
                 stop.Initial("正在初始化浏览器组件 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -1330,7 +1330,7 @@ namespace dp2Circulation
                 stop.Initial("正在将册条码号转换为记录路径 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -1614,7 +1614,7 @@ namespace dp2Circulation
                 stop.Initial("正在初始化浏览器组件 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -3228,12 +3228,12 @@ namespace dp2Circulation
                 HtmlPrintForm printform = new HtmlPrintForm();
 
                 printform.Text = "打印" + strTitle;
-                printform.MainForm = this.MainForm;
+                // printform.MainForm = Program.MainForm;
                 printform.Filenames = filenames;
 
-                this.MainForm.AppInfo.LinkFormState(printform, "printform_state");
+                Program.MainForm.AppInfo.LinkFormState(printform, "printform_state");
                 printform.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(printform);
+                Program.MainForm.AppInfo.UnlinkFormState(printform);
             }
             finally
             {
@@ -3372,9 +3372,9 @@ null,
             string strNamePath = "accountbook_printoption_wordxml";
 
             // 获得打印参数
-            PrintOption option = new AccountBookPrintOption(this.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
             // 检查当前排序状态和包含种价格列之间是否存在矛盾
@@ -3465,8 +3465,8 @@ null,
                 macro_table["%pageno%"] = "1";
 
                 // 2008/11/23 
-                macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
-                ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
+                macro_table["%datadir%"] = Program.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
+                ////macro_table["%libraryserverdir%"] = Program.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
 
                 string strTemplateFilePath = option.GetTemplatePageFilePath("统计页");
                 if (String.IsNullOrEmpty(strTemplateFilePath) == false)
@@ -3980,9 +3980,9 @@ null,
             string strNamePath = "accountbook_printoption_text";
 
             // 获得打印参数
-            PrintOption option = new AccountBookPrintOption(this.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
             // 检查当前排序状态和包含种价格列之间是否存在矛盾
@@ -4066,8 +4066,8 @@ null,
                 macro_table["%pageno%"] = "1";
 
                 // 2008/11/23 
-                macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
-                ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
+                macro_table["%datadir%"] = Program.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
+                ////macro_table["%libraryserverdir%"] = Program.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
 
                 string strTemplateFilePath = option.GetTemplatePageFilePath("统计页");
                 if (String.IsNullOrEmpty(strTemplateFilePath) == false)
@@ -4619,9 +4619,9 @@ strTotalPrice);
             string strNamePath = "accountbook_printoption_html";
 
             // 获得打印参数
-            PrintOption option = new AccountBookPrintOption(this.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
             // 检查当前排序状态和包含种价格列之间是否存在矛盾
@@ -4695,7 +4695,7 @@ strTotalPrice);
 
             filenames = new List<string>();    // 每页一个文件，这个数组存放了所有文件名
 
-            string strFileNamePrefix = Path.Combine(this.MainForm.DataDir, "~accountbook");
+            string strFileNamePrefix = Path.Combine(Program.MainForm.DataDir, "~accountbook");
 
             string strFileName = "";
 
@@ -4712,8 +4712,8 @@ strTotalPrice);
                 macro_table["%pageno%"] = "1";
 
                 // 2008/11/23 
-                macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
-                ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
+                macro_table["%datadir%"] = Program.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
+                ////macro_table["%libraryserverdir%"] = Program.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
                 // 2009/10/10 
                 macro_table["%cssfilepath%"] = this.GetAutoCssUrl(option, "accountbook.css");  // 便于引用服务器端或“css”模板的CSS文件
 
@@ -4932,7 +4932,7 @@ strTotalPrice);
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 return strCssFilePath;
             else
-                return this.MainForm.LibraryServerDir + "/accountbook.css";    // 缺省的
+                return Program.MainForm.LibraryServerDir + "/accountbook.css";    // 缺省的
         }*/
 
         // 2009/10/10 
@@ -4947,8 +4947,8 @@ strTotalPrice);
                 return strCssFilePath;
             else
             {
-                // return this.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // 缺省的
-                return PathUtil.MergePath(this.MainForm.DataDir, strDefaultCssFileName);    // 缺省的
+                // return Program.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // 缺省的
+                return PathUtil.MergePath(Program.MainForm.DataDir, strDefaultCssFileName);    // 缺省的
             }
         }
 
@@ -4958,7 +4958,7 @@ strTotalPrice);
             bool bOutputTable)
         {
             /*
-            string strLibraryServerUrl = this.MainForm.AppInfo.GetString(
+            string strLibraryServerUrl = Program.MainForm.AppInfo.GetString(
     "config",
     "circulation_server_url",
     "");
@@ -5641,8 +5641,8 @@ strTotalPrice);
 
             EntityForm form = new EntityForm();
 
-            form.MainForm = this.MainForm;
-            form.MdiParent = this.MainForm;
+            form.MainForm = Program.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             if (String.IsNullOrEmpty(strBarcode) == false)
@@ -5895,7 +5895,7 @@ strTotalPrice);
             /*
                 dlg.RefDbName = EntityForm.GetDbName(this.entityEditControl1.RecPath);
              * */
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -5991,7 +5991,7 @@ strTotalPrice);
             /*
                 dlg.RefDbName = EntityForm.GetDbName(this.entityEditControl1.RecPath);
              * */
-            dlg.MainForm = this.MainForm;
+            dlg.MainForm = Program.MainForm;
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -7072,7 +7072,7 @@ MessageBoxDefaultButton.Button1);
                 if (bAppend == true)
                     strExportStyle = "追加";
 
-                this.MainForm.StatusBarMessage = "财产帐簿内容 " + nCount.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportTextFilename;
+                Program.MainForm.StatusBarMessage = "财产帐簿内容 " + nCount.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportTextFilename;
 
             }
             finally
@@ -7099,17 +7099,17 @@ MessageBoxDefaultButton.Button1);
             // 配置标题和风格
             string strNamePath = "accountbook_printoption_wordxml";
 
-            PrintOption option = new AccountBookPrintOption(this.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
             PrintOptionDlg dlg = new PrintOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " WordML 打印配置";
-            dlg.DataDir = this.MainForm.DataDir;    // 允许新增模板页
+            dlg.DataDir = Program.MainForm.DataDir;    // 允许新增模板页
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -7150,14 +7150,14 @@ MessageBoxDefaultButton.Button1);
             };
 
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "accountbook_printoption_wordxml_formstate");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "accountbook_printoption_wordxml_formstate");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            option.SaveData(this.MainForm.AppInfo,
+            option.SaveData(Program.MainForm.AppInfo,
                 strNamePath);
         }
 
@@ -7167,17 +7167,17 @@ MessageBoxDefaultButton.Button1);
             // 配置标题和风格
             string strNamePath = "accountbook_printoption_html";
 
-            PrintOption option = new AccountBookPrintOption(this.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
             PrintOptionDlg dlg = new PrintOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " HTML 打印配置";
-            dlg.DataDir = this.MainForm.DataDir;    // 允许新增模板页
+            dlg.DataDir = Program.MainForm.DataDir;    // 允许新增模板页
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -7218,14 +7218,14 @@ MessageBoxDefaultButton.Button1);
             };
 
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "accountbook_printoption_html_formstate");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "accountbook_printoption_html_formstate");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            option.SaveData(this.MainForm.AppInfo,
+            option.SaveData(Program.MainForm.AppInfo,
                 strNamePath);
         }
 
@@ -7235,17 +7235,17 @@ MessageBoxDefaultButton.Button1);
             // 配置标题和风格
             string strNamePath = "accountbook_printoption_text";
 
-            PrintOption option = new AccountBookPrintOption(this.MainForm.DataDir,
+            PrintOption option = new AccountBookPrintOption(Program.MainForm.DataDir,
                 this.comboBox_load_type.Text);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
             PrintOptionDlg dlg = new PrintOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.Text = this.comboBox_load_type.Text + " 纯文本 输出配置";
-            dlg.DataDir = this.MainForm.DataDir;    // 允许新增模板页
+            dlg.DataDir = Program.MainForm.DataDir;    // 允许新增模板页
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
                 "no -- 序号",
@@ -7286,26 +7286,26 @@ MessageBoxDefaultButton.Button1);
             };
 
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "accountbook_printoption_text_formstate");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "accountbook_printoption_text_formstate");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            option.SaveData(this.MainForm.AppInfo,
+            option.SaveData(Program.MainForm.AppInfo,
                 strNamePath);
         }
 
         private void listView_in_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (this.listView_in.SelectedIndices.Count == 0)
-                this.MainForm.StatusBarMessage = "未选定行";
+                Program.MainForm.StatusBarMessage = "未选定行";
             else if (this.listView_in.SelectedIndices.Count == 1)
-                this.MainForm.StatusBarMessage = "行号 " + (this.listView_in.SelectedIndices[0] + 1).ToString();
+                Program.MainForm.StatusBarMessage = "行号 " + (this.listView_in.SelectedIndices[0] + 1).ToString();
             else
             {
-                this.MainForm.StatusBarMessage = "从行号 " + (this.listView_in.SelectedIndices[0] + 1).ToString() + " 起共选定了 " + this.listView_in.SelectedIndices.Count.ToString() + " 个事项";
+                Program.MainForm.StatusBarMessage = "从行号 " + (this.listView_in.SelectedIndices[0] + 1).ToString() + " 起共选定了 " + this.listView_in.SelectedIndices.Count.ToString() + " 个事项";
             }
         }
 
@@ -7395,7 +7395,7 @@ MessageBoxDefaultButton.Button1);
 
                     this.Cursor = oldCursor;
 
-                    this.MainForm.StatusBarMessage = "财产帐簿内容 " + nCount.ToString() + "个 已成功创建到文件 " + this.ExportWordXmlFilename;
+                    Program.MainForm.StatusBarMessage = "财产帐簿内容 " + nCount.ToString() + "个 已成功创建到文件 " + this.ExportWordXmlFilename;
                 }
                 finally
                 {
@@ -7419,7 +7419,7 @@ MessageBoxDefaultButton.Button1);
         private void AccountBookForm_Activated(object sender, EventArgs e)
         {
             // 2009/8/13 
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
         }
 
         string m_strUsedScriptFilename = "";
@@ -7450,7 +7450,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 goto ERROR1;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.FileName + "</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.FileName + "</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -7508,7 +7508,7 @@ MessageBoxDefaultButton.Button1);
                     stop.SetProgressValue(i);
 
 
-                    this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode((i + 1).ToString()) + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode((i + 1).ToString()) + "</div>");
 
                     host.AccountBookForm = this;
                     host.ListViewItem = item;
@@ -7554,7 +7554,7 @@ MessageBoxDefaultButton.Button1);
 
                 this.EnableControls(true);
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.FileName + "</div>");
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.FileName + "</div>");
             }
 
             return;
@@ -7799,7 +7799,7 @@ MessageBoxDefaultButton.Button1);
                     doc.SaveAs(this.ExportExcelFilename);
                 }
 
-                this.MainForm.StatusBarMessage = "财产帐簿内容 " + nCount.ToString() + "个 已成功输出到文件 " + this.ExportExcelFilename;
+                Program.MainForm.StatusBarMessage = "财产帐簿内容 " + nCount.ToString() + "个 已成功输出到文件 " + this.ExportExcelFilename;
             }
             finally
             {

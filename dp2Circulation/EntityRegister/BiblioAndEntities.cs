@@ -28,7 +28,7 @@ namespace dp2Circulation
     /// </summary>
     public class BiblioAndEntities
     {
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         public Form Owner = null;
         public EasyMarcControl easyMarcControl1 = null;     // MarcControl
@@ -900,7 +900,7 @@ MessageBoxDefaultButton.Button2);
                 string strOldName = "[not found]";
                 // 获得关于一个特定馆藏地点的索取号配置信息
                 // <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
-                int nRet = this.MainForm.GetArrangementInfo(e.OldText,
+                int nRet = Program.MainForm.GetArrangementInfo(e.OldText,
                     out old_info,
                     out strError);
                 if (nRet == -1)
@@ -911,7 +911,7 @@ MessageBoxDefaultButton.Button2);
                 ArrangementInfo new_info = null;
                 string strNewName = "[not found]";
                 // 获得关于一个特定馆藏地点的索取号配置信息
-                nRet = this.MainForm.GetArrangementInfo(e.NewText,
+                nRet = Program.MainForm.GetArrangementInfo(e.NewText,
                    out new_info,
                    out strError);
                 if (nRet == -1)
@@ -2065,7 +2065,7 @@ MessageBoxDefaultButton.Button2);
                         string strTempItemDbName = Global.GetDbName(control.RecPath);
                         string strTempBiblioDbName = "";
 
-                        strTempBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName("item", strTempItemDbName);
+                        strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName("item", strTempItemDbName);
                         if (string.IsNullOrEmpty(strTempBiblioDbName) == true)
                         {
                             strWarning += " " + this.ItemType + "类型的数据库名 '" + strTempItemDbName + "' 没有找到对应的书目库名";

@@ -39,26 +39,26 @@ namespace dp2Circulation
 
         private void TestSearchForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
-            this.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
-            this.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
+            Program.MainForm.AppInfo.LoadMdiLayout += new EventHandler(AppInfo_LoadMdiLayout);
+            Program.MainForm.AppInfo.SaveMdiLayout += new EventHandler(AppInfo_SaveMdiLayout);
 
-            this.textBox_biblioSearch_queryFilename.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_biblioSearch_queryFilename.Text = Program.MainForm.AppInfo.GetString(
                 "testsearchform",
                 "queryfilename",
                 "");
 
 
-            this.textBox_searchBiblio_beforeAbort.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_searchBiblio_beforeAbort.Text = Program.MainForm.AppInfo.GetString(
                 "testsearchform",
                 "beforeabort",
                 "-1");
 
 
-            this.textBox_searchBiblio_loopTimes.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_searchBiblio_loopTimes.Text = Program.MainForm.AppInfo.GetString(
                 "testsearchform",
                 "looptimes",
                 "1");
@@ -74,25 +74,25 @@ namespace dp2Circulation
 
         private void TestSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "testsearchform",
                     "queryfilename",
                     this.textBox_biblioSearch_queryFilename.Text);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
         "testsearchform",
         "beforeabort",
         this.textBox_searchBiblio_beforeAbort.Text);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
         "testsearchform",
         "looptimes",
         this.textBox_searchBiblio_loopTimes.Text);
 
-                this.MainForm.AppInfo.LoadMdiLayout -= new EventHandler(AppInfo_LoadMdiLayout);
-                this.MainForm.AppInfo.SaveMdiLayout -= new EventHandler(AppInfo_SaveMdiLayout);
+                Program.MainForm.AppInfo.LoadMdiLayout -= new EventHandler(AppInfo_LoadMdiLayout);
+                Program.MainForm.AppInfo.SaveMdiLayout -= new EventHandler(AppInfo_SaveMdiLayout);
             }
         }
 

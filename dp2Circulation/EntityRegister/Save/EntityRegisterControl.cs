@@ -212,7 +212,7 @@ namespace dp2Circulation
                 if (line != null)
                 {
                     // 根据缺省值，构造最初的 XML
-                    string strQuickDefault = this.MainForm.AppInfo.GetString(
+                    string strQuickDefault = Program.MainForm.AppInfo.GetString(
 "entityform_optiondlg",
 "quickRegister_default",
 "<root />");
@@ -312,10 +312,10 @@ namespace dp2Circulation
             {
                 // TODO: 如何知道 MARC 记录是什么具体的 MARC 格式?
                 // 可能需要在服务器信息中增加一个首选的 MARC 格式属性
-                string strFileName = Path.Combine(this.MainForm.DataDir, "unimarc_cfgs/" + strPath);
+                string strFileName = Path.Combine(Program.MainForm.DataDir, "unimarc_cfgs/" + strPath);
 
                 // 在cache中寻找
-                e.XmlDocument = this.MainForm.DomCache.FindObject(strFileName);
+                e.XmlDocument = Program.MainForm.DomCache.FindObject(strFileName);
                 if (e.XmlDocument != null)
                     return;
 
@@ -330,7 +330,7 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
                 e.XmlDocument = dom;
-                this.MainForm.DomCache.SetObject(strFileName, dom);  // 保存到缓存
+                Program.MainForm.DomCache.SetObject(strFileName, dom);  // 保存到缓存
                 return;
             }
 
@@ -355,7 +355,7 @@ namespace dp2Circulation
             }
 
             // 在cache中寻找
-            e.XmlDocument = this.MainForm.DomCache.FindObject(strCfgFilePath);
+            e.XmlDocument = Program.MainForm.DomCache.FindObject(strCfgFilePath);
             if (e.XmlDocument != null)
                 return;
 
@@ -395,7 +395,7 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
                 e.XmlDocument = dom;
-                this.MainForm.DomCache.SetObject(strCfgFilePath, dom);  // 保存到缓存
+                Program.MainForm.DomCache.SetObject(strCfgFilePath, dom);  // 保存到缓存
             }
 
             return;
@@ -427,9 +427,9 @@ namespace dp2Circulation
             string strUserName = account.UserName;
 
             if (EntityRegisterBase.IsDot(strServerUrl) == true)
-                strServerUrl = this.MainForm.LibraryServerUrl;
+                strServerUrl = Program.MainForm.LibraryServerUrl;
             if (EntityRegisterBase.IsDot(strUserName) == true)
-                strUserName = this.MainForm.DefaultUserName;
+                strUserName = Program.MainForm.DefaultUserName;
 
             EventFilter filter = new EventFilter();
             filter.BiblioRegister = biblioRegister;
@@ -679,11 +679,11 @@ namespace dp2Circulation
 
             FilterHost host = new FilterHost();
             host.ID = "";
-            host.MainForm = this.MainForm;
+            host.MainForm = Program.MainForm;
 
             BrowseFilterDocument filter = null;
 
-            string strFilterFileName = Path.Combine(this.MainForm.DataDir, strMarcSyntax.Replace(".", "_") + "_cfgs\\marc_browse.fltx");
+            string strFilterFileName = Path.Combine(Program.MainForm.DataDir, strMarcSyntax.Replace(".", "_") + "_cfgs\\marc_browse.fltx");
 
             int nRet = this.PrepareMarcFilter(
                 host,
@@ -708,7 +708,7 @@ namespace dp2Circulation
             finally
             {
                 // 归还对象
-                this.MainForm.Filters.SetFilter(strFilterFileName, filter);
+                Program.MainForm.Filters.SetFilter(strFilterFileName, filter);
             }
 
             return 0;
@@ -725,7 +725,7 @@ out string strError)
             strError = "";
 
             // 看看是否有现成可用的对象
-            filter = (BrowseFilterDocument)this.MainForm.Filters.GetFilter(strFilterFileName);
+            filter = (BrowseFilterDocument)Program.MainForm.Filters.GetFilter(strFilterFileName);
 
             if (filter != null)
             {
@@ -848,9 +848,9 @@ out string strError)
             if (IsDot(strServerName) == true)
             {
                 List<string> results = new List<string>();
-                if (this.MainForm.BiblioDbProperties != null)
+                if (Program.MainForm.BiblioDbProperties != null)
                 {
-                    foreach (BiblioDbProperty prop in this.MainForm.BiblioDbProperties)
+                    foreach (BiblioDbProperty prop in Program.MainForm.BiblioDbProperties)
                     {
                         if (string.IsNullOrEmpty(prop.DbName) == false &&
                             string.IsNullOrEmpty(prop.ItemDbName) == false)
@@ -1447,7 +1447,7 @@ int nCount)
                 string strUrl = server.GetAttribute("url");
                 string strUserName = server.GetAttribute("userName");
                 string strPassword = server.GetAttribute("password");
-                // e.Password = this.MainForm.DecryptPasssword(e.Password);
+                // e.Password = Program.MainForm.DecryptPasssword(e.Password);
                 string strIsReader = server.GetAttribute("isReader");
 #endif
 
@@ -1662,8 +1662,8 @@ int nCount)
             line.BiblioSummary = "正在针对 " + account.ServerName + " \r\n检索 " + line.BiblioBarcode + " ...";
 
             AmazonSearch search = new AmazonSearch();
-            // search.MainForm = this.MainForm;
-            search.TempFileDir = this.MainForm.UserTempDir;
+            // search.MainForm = Program.MainForm;
+            search.TempFileDir = Program.MainForm.UserTempDir;
 
             // 多行检索中的一行检索
             int nRedoCount = 0;
@@ -1805,7 +1805,7 @@ MessageBoxDefaultButton.Button1);
 
                 try
                 {
-                    strFromStyle = this.MainForm.GetBiblioFromStyle("ISBN");
+                    strFromStyle = Program.MainForm.GetBiblioFromStyle("ISBN");
                 }
                 catch (Exception ex)
                 {

@@ -79,7 +79,7 @@ strHtml2 +
             lock (this)
             {
                 this.webBrowser1.Stop();
-                // Debug.Assert(this.MainForm != null, "");
+                // Debug.Assert(Program.MainForm != null, "");
                 Global.SetHtmlString(this.webBrowser1,
                     strHtml,
                     Program.MainForm.DataDir,

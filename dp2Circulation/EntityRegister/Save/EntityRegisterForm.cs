@@ -88,8 +88,8 @@ namespace dp2Circulation
         {
             // this.entityRegisterControl1.Channel = this.Channel;
             this.entityRegisterControl1.Progress = this.stop;
-            this.entityRegisterControl1.MainForm = this.MainForm;
-            string strFileName = Path.Combine(this.MainForm.DataDir, "ajax-loader.gif");
+            this.entityRegisterControl1.MainForm = Program.MainForm;
+            string strFileName = Path.Combine(Program.MainForm.DataDir, "ajax-loader.gif");
             this.entityRegisterControl1.LoaderImage = Image.FromFile(strFileName);
 
             // TODO: 异步加快窗口打开速度?
@@ -110,7 +110,7 @@ namespace dp2Circulation
         void LoadServerXml()
         {
             // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
-            string strFileName = Path.Combine(this.MainForm.ServerCfgDir, ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName()) + "\\servers.xml");
+            string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName()) + "\\servers.xml");
             PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFileName));
 
             if (File.Exists(strFileName) == false
@@ -118,7 +118,7 @@ namespace dp2Circulation
             {
                 string strError = "";
                 // 创建 servers.xml 配置文件
-                int nRet = this.MainForm.BuildServersCfgFile(strFileName,
+                int nRet = Program.MainForm.BuildServersCfgFile(strFileName,
                     out strError);
                 if (nRet == -1)
                 {
@@ -327,7 +327,7 @@ namespace dp2Circulation
             // 册快速登记
             {
                 string strError = "";
-                string strQuickDefault = this.MainForm.AppInfo.GetString(
+                string strQuickDefault = Program.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
                     "quickRegister_default",
                     "<root />");
@@ -359,7 +359,7 @@ namespace dp2Circulation
                     MessageBox.Show(this, strError);
                 else
                 {
-                    this.MainForm.AppInfo.SetString(
+                    Program.MainForm.AppInfo.SetString(
                         "entityform_optiondlg",
                         "quickRegister_default",
                         strQuickDefault);
@@ -407,9 +407,9 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            // string strCfgFileName = Path.Combine(this.MainForm.DataDir, "servers.xml");
+            // string strCfgFileName = Path.Combine(Program.MainForm.DataDir, "servers.xml");
             // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
-            string strFileName = Path.Combine(this.MainForm.ServerCfgDir, ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName()) + "\\servers.xml");
+            string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName()) + "\\servers.xml");
             PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFileName));
 
             if (File.Exists(strFileName) == true)
@@ -425,7 +425,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             // 创建 servers.xml 配置文件
-            int nRet = this.MainForm.BuildServersCfgFile(strFileName,
+            int nRet = Program.MainForm.BuildServersCfgFile(strFileName,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;

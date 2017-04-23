@@ -23,7 +23,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 获得值列表
@@ -41,42 +41,42 @@ namespace dp2Circulation
             // 装载值
 
             // state
-            this.comboBox_state.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_state.Text = Program.MainForm.AppInfo.GetString(
                 "change_reader_param",
                 "state",
                 "<不改变>");
 
-            this.checkedComboBox_stateAdd.Text = this.MainForm.AppInfo.GetString(
+            this.checkedComboBox_stateAdd.Text = Program.MainForm.AppInfo.GetString(
                 "change_reader_param",
                 "state_add",
                 "");
-            this.checkedComboBox_stateRemove.Text = this.MainForm.AppInfo.GetString(
+            this.checkedComboBox_stateRemove.Text = Program.MainForm.AppInfo.GetString(
     "change_reader_param",
     "state_remove",
     "");
 
             // expire date
-            this.comboBox_expireDate.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_expireDate.Text = Program.MainForm.AppInfo.GetString(
     "change_reader_param",
     "expire_date",
     "<不改变>");
-            this.dateControl_expireDate.Text = this.MainForm.AppInfo.GetString(
+            this.dateControl_expireDate.Text = Program.MainForm.AppInfo.GetString(
     "change_reader_param",
     "expire_date_value",
     "");
 
             // reader type
-            this.comboBox_readerType.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_readerType.Text = Program.MainForm.AppInfo.GetString(
 "change_reader_param",
 "reader_type",
 "<不改变>");
 
             // 其它字段
-            this.comboBox_fieldName.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_fieldName.Text = Program.MainForm.AppInfo.GetString(
 "change_reader_param",
 "field_name",
 "<不使用>");
-            this.textBox_fieldValue.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_fieldValue.Text = Program.MainForm.AppInfo.GetString(
 "change_reader_param",
 "field_value",
 "");
@@ -143,42 +143,42 @@ namespace dp2Circulation
             }
 
             // state
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "change_reader_param",
                 "state",
                 this.comboBox_state.Text);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "change_reader_param",
                 "state_add",
                 this.checkedComboBox_stateAdd.Text);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "change_reader_param",
     "state_remove",
     this.checkedComboBox_stateRemove.Text);
 
             // expire date
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "change_reader_param",
     "expire_date",
     this.comboBox_expireDate.Text);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "change_reader_param",
     "expire_date_value",
     this.dateControl_expireDate.Text);
 
             // reader type
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
 "change_reader_param",
 "reader_type",
 this.comboBox_readerType.Text);
 
             // 其它字段
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
 "change_reader_param",
 "field_name",
 this.comboBox_fieldName.Text);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
 "change_reader_param",
 "field_value",
 this.textBox_fieldValue.Text);
@@ -440,9 +440,9 @@ this.textBox_fieldValue.Text);
             {
                 this.textBox_fieldValue.Text = "";
             }
-            this.MainForm.AppInfo.LinkFormState(dlg, "ChangeReaderActionDialog_gettimedialog");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ChangeReaderActionDialog_gettimedialog");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;

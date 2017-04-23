@@ -75,7 +75,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 获得宏的值
@@ -345,7 +345,7 @@ namespace dp2Circulation
         {
             strError = "";
 
-            string strNewDefault = this.MainForm.AppInfo.GetString(
+            string strNewDefault = Program.MainForm.AppInfo.GetString(
     "entityform_optiondlg",
     strCfgEntry,
     "<root />");
@@ -530,7 +530,7 @@ namespace dp2Circulation
 
             LibraryChannel channel = channel_param;
             if (channel == null)
-                channel = this.MainForm.GetChannel();
+                channel = Program.MainForm.GetChannel();
 #if NO
             Stop.OnStop += new StopEventHandler(this.DoStop);
             Stop.Initial("正在装入"+this.ItemTypeName+"信息 ...");
@@ -680,7 +680,7 @@ namespace dp2Circulation
             finally
             {
                 if (channel_param == null)
-                    this.MainForm.ReturnChannel(channel);
+                    Program.MainForm.ReturnChannel(channel);
 #if NO
                 Stop.EndLoop();
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -821,7 +821,7 @@ namespace dp2Circulation
             string strTargetBiblioDbName = Global.GetDbName(strNewBiblioRecPath);
 
             // 检查一下目标编目库名是不是合法的编目库名
-            if (MainForm.IsBiblioDbName(strTargetBiblioDbName) == false)
+            if (Program.MainForm.IsBiblioDbName(strTargetBiblioDbName) == false)
             {
                 strError = "目标库名 '" + strTargetBiblioDbName + "' 不在系统定义的书目库名之列";
                 return -1;
@@ -853,7 +853,7 @@ namespace dp2Circulation
             {
                 // 书目库发生了改变，才有必要移动。否则仅仅修改实体记录的<parent>即可
                 bMove = true;
-                strTargetEntityDbName = MainForm.GetItemDbName(strTargetBiblioDbName, this.ItemType);
+                strTargetEntityDbName = Program.MainForm.GetItemDbName(strTargetBiblioDbName, this.ItemType);
 
                 // 2008/11/28
                 if (String.IsNullOrEmpty(strTargetEntityDbName) == true)
@@ -1189,7 +1189,7 @@ namespace dp2Circulation
                         string strTempItemDbName = Global.GetDbName(bookitem.RecPath);
                         string strTempBiblioDbName = "";
 
-                        strTempBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName(this.ItemType, strTempItemDbName);
+                        strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName(this.ItemType, strTempItemDbName);
                         if (string.IsNullOrEmpty(strTempBiblioDbName) == true)
                         {
                             strWarning += " " + this.ItemType + "类型的数据库名 '" + strTempItemDbName + "' 没有找到对应的书目库名";
@@ -1198,13 +1198,13 @@ namespace dp2Circulation
                         }
 #if NO
                         if (this.ItemType == "item")
-                            strTempBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName(strTempItemDbName);
+                            strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName(strTempItemDbName);
                         else if (this.ItemType == "order")
-                            strTempBiblioDbName = this.MainForm.GetBiblioDbNameFromOrderDbName(strTempItemDbName);
+                            strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromOrderDbName(strTempItemDbName);
                         else if (this.ItemType == "issue")
-                            strTempBiblioDbName = this.MainForm.GetBiblioDbNameFromIssueDbName(strTempItemDbName);
+                            strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromIssueDbName(strTempItemDbName);
                         else if (this.ItemType == "comment")
-                            strTempBiblioDbName = this.MainForm.GetBiblioDbNameFromCommentDbName(strTempItemDbName);
+                            strTempBiblioDbName = Program.MainForm.GetBiblioDbNameFromCommentDbName(strTempItemDbName);
                         else
                         {
                             MessageBox.Show(this/*ForegroundWindow.Instance*/, "未知的 ItemType 类型 '"+this.ItemType+"'");
@@ -1366,7 +1366,7 @@ namespace dp2Circulation
             Stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 #endif
             Stop.Initial("正在保存" + this.ItemTypeName + "信息 ...");
 
@@ -1530,7 +1530,7 @@ namespace dp2Circulation
                     }
 
                     this.Changed = false;
-                    this.MainForm.StatusBarMessage = this.ItemTypeName + "信息 提交 / 保存 成功";
+                    Program.MainForm.StatusBarMessage = this.ItemTypeName + "信息 提交 / 保存 成功";
                     return 1;
                 }
                 finally
@@ -1622,7 +1622,7 @@ namespace dp2Circulation
             string strRecPath = bookitem.RecPath;
             if (string.IsNullOrEmpty(strRecPath) == true)
             {
-                string strItemDbName = MainForm.GetItemDbName(Global.GetDbName(this.BiblioRecPath), this.ItemType);
+                string strItemDbName = Program.MainForm.GetItemDbName(Global.GetDbName(this.BiblioRecPath), this.ItemType);
                 if (string.IsNullOrEmpty(strItemDbName) == true)
                 {
                     strError = "无法获得当前 " + this.ItemTypeName + "库的库名";
@@ -1658,7 +1658,7 @@ namespace dp2Circulation
                 "请指定新的书目记录路径",
                 "书目记录路径(格式'库名/ID'): ",
                 "",
-            this.MainForm.DefaultFont);
+            Program.MainForm.DefaultFont);
 
             if (strNewBiblioRecPath == null)
                 return;
@@ -1678,7 +1678,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
-            this.MainForm.StatusBarMessage = this.ItemTypeName + "信息 修改归属 成功";
+            Program.MainForm.StatusBarMessage = this.ItemTypeName + "信息 修改归属 成功";
             return;
         ERROR1:
             MessageBox.Show(this/*ForegroundWindow.Instance*/, strError);
@@ -1769,7 +1769,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 #endif
-            LibraryChannel channel = this.MainForm.GetChannel();
+            LibraryChannel channel = Program.MainForm.GetChannel();
             try
             {
                 // 分批进行保存
@@ -1783,7 +1783,7 @@ namespace dp2Circulation
             }
             finally
             {
-                this.MainForm.ReturnChannel(channel);
+                Program.MainForm.ReturnChannel(channel);
             }
 
             return 0;
@@ -1821,15 +1821,15 @@ namespace dp2Circulation
             if (bNew == true)
             {
                 ItemInfoForm form = new ItemInfoForm();
-                form.MdiParent = this.MainForm;
-                form.MainForm = this.MainForm;
+                form.MdiParent = Program.MainForm;
+                form.MainForm = Program.MainForm;
                 form.Show();
                 form.DbType = this.ItemType;
                 form.LoadRecordByRecPath(strRecPath, "");
             }
             else
             {
-                ItemInfoForm form = this.MainForm.GetTopChildWindow<ItemInfoForm>();
+                ItemInfoForm form = Program.MainForm.GetTopChildWindow<ItemInfoForm>();
                 if (form == null)
                 {
                     strError = "当前并没有已经打开的" + this.ItemTypeName + "窗";
@@ -2007,7 +2007,7 @@ namespace dp2Circulation
 
 
             // 根据事项记录路径检索，检索出其从属的书目记录路径。
-            LibraryChannel channel = this.MainForm.GetChannel();
+            LibraryChannel channel = Program.MainForm.GetChannel();
             try
             {
                 nRet = SearchBiblioRecPath(
@@ -2019,7 +2019,7 @@ namespace dp2Circulation
             }
             finally
             {
-                this.MainForm.ReturnChannel(channel);
+                Program.MainForm.ReturnChannel(channel);
             }
             if (nRet == -1)
             {
@@ -2150,7 +2150,7 @@ namespace dp2Circulation
             string strError = "";
 
             string strResultXml = "";
-            LibraryChannel channel = this.MainForm.GetChannel();
+            LibraryChannel channel = Program.MainForm.GetChannel();
             try
             {
                 int nRet = GetKeys(
@@ -2164,13 +2164,13 @@ namespace dp2Circulation
             }
             finally
             {
-                this.MainForm.ReturnChannel(channel);
+                Program.MainForm.ReturnChannel(channel);
             }
 
             XmlViewerForm dlg = new XmlViewerForm();
 
             dlg.Text = this.ItemTypeName + "记录 " + strRecPath + " 的检索点";
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.XmlString = strResultXml;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -2189,7 +2189,7 @@ namespace dp2Circulation
             strError = "";
             strResultXml = "";
 
-            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.43") < 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.43") < 0)
             {
                 strError = "获得子记录检索点要求 dp2Library 版本在 2.43 及以上";
                 return -1;

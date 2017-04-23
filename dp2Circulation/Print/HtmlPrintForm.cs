@@ -21,7 +21,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         DigitalPlatform.Stop stop = null;
 
@@ -47,9 +47,9 @@ namespace dp2Circulation
 
         private void HtmlPrintForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
             // 把第一页装入
             this.LoadPageFile();
@@ -59,7 +59,7 @@ namespace dp2Circulation
             DisplayPageInfoLine();
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
+            stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
         }
 
         private void HtmlPrintForm_FormClosed(object sender, FormClosedEventArgs e)
@@ -176,7 +176,7 @@ namespace dp2Circulation
             stop.Initial("正在打印 ...");
             stop.BeginLoop();
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             int nPrinted = 0;
 
@@ -301,7 +301,7 @@ namespace dp2Circulation
         {
             if (this.Filenames == null || this.Filenames.Count == 0)
             {
-                Global.ClearHtmlPage(this.webBrowser1, this.MainForm.DataDir);
+                Global.ClearHtmlPage(this.webBrowser1, Program.MainForm.DataDir);
                 return;
             }
             this.webBrowser1.Navigate(this.Filenames[this.m_nCurrenPageNo]);

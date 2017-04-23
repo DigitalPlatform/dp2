@@ -17,7 +17,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         public string DisplayStyle = "all"; // 要只显示哪些 page? 目前可用 all / quick_entity
 
@@ -33,16 +33,16 @@ namespace dp2Circulation
 
         private void EntityFormOptionDlg_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
             string strError = "";
 
             // 册一般登记
             {
-                string strNormalDefault = this.MainForm.AppInfo.GetString(
+                string strNormalDefault = Program.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
                     "normalRegister_default",
                     "<root />");
@@ -56,7 +56,7 @@ namespace dp2Circulation
                 this.entityEditControl_normalRegisterDefault.SetReadOnly("librarian");
                 this.entityEditControl_normalRegisterDefault.GetValueTable += new GetValueTableEventHandler(entityEditControl_GetValueTable);
 
-                this.checkBox_normalRegister_simple.Checked = this.MainForm.AppInfo.GetBoolean(
+                this.checkBox_normalRegister_simple.Checked = Program.MainForm.AppInfo.GetBoolean(
     "entityform_optiondlg",
     "normalRegister_simple",
     false);
@@ -64,7 +64,7 @@ namespace dp2Circulation
 
             // 册快速登记
             {
-                string strQuickDefault = this.MainForm.AppInfo.GetString(
+                string strQuickDefault = Program.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
                     "quickRegister_default",
                     "<root />");
@@ -83,7 +83,7 @@ namespace dp2Circulation
 
             // 期一般登记
             {
-                string strIssueNormalDefault = this.MainForm.AppInfo.GetString(
+                string strIssueNormalDefault = Program.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
                     "issue_normalRegister_default",
                     "<root />");
@@ -101,7 +101,7 @@ namespace dp2Circulation
 
             // 期快速登记
             {
-                string strIssueQuickDefault = this.MainForm.AppInfo.GetString(
+                string strIssueQuickDefault = Program.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
                     "issue_quickRegister_default",
                     "<root />");
@@ -120,7 +120,7 @@ namespace dp2Circulation
 
             // 订购一般登记
             {
-                string strOrderNormalDefault = this.MainForm.AppInfo.GetString(
+                string strOrderNormalDefault = Program.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
                     "order_normalRegister_default",
                     "<root />");
@@ -139,7 +139,7 @@ namespace dp2Circulation
             // 2012/12/26
             // 评注一般登记
             {
-                string strCommentNormalDefault = this.MainForm.AppInfo.GetString(
+                string strCommentNormalDefault = Program.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
                     "comment_normalRegister_default",
                     "<root />");
@@ -157,7 +157,7 @@ namespace dp2Circulation
 
 
             // 校验条码
-            this.checkBox_verifyItemBarcode.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_verifyItemBarcode.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "entity_form",
                 "verify_item_barcode",
                 false);
@@ -169,7 +169,7 @@ namespace dp2Circulation
         {
             string strError = "";
             string[] values = null;
-            int nRet = MainForm.GetValueTable(e.TableName,
+            int nRet = Program.MainForm.GetValueTable(e.TableName,
                 e.DbName,
                 out values,
                 out strError);
@@ -217,13 +217,13 @@ namespace dp2Circulation
                     MessageBox.Show(this, strError);
                 else
                 {
-                    this.MainForm.AppInfo.SetString(
+                    Program.MainForm.AppInfo.SetString(
                         "entityform_optiondlg",
                         "normalRegister_default",
                         strNormalDefault);
                 }
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
 "entityform_optiondlg",
 "normalRegister_simple",
 this.checkBox_normalRegister_simple.Checked);
@@ -242,7 +242,7 @@ this.checkBox_normalRegister_simple.Checked);
                     MessageBox.Show(this, strError);
                 else
                 {
-                    this.MainForm.AppInfo.SetString(
+                    Program.MainForm.AppInfo.SetString(
                         "entityform_optiondlg",
                         "quickRegister_default",
                         strQuickDefault);
@@ -261,7 +261,7 @@ this.checkBox_normalRegister_simple.Checked);
                     MessageBox.Show(this, strError);
                 else
                 {
-                    this.MainForm.AppInfo.SetString(
+                    Program.MainForm.AppInfo.SetString(
                         "entityform_optiondlg",
                         "issue_normalRegister_default",
                         strIssueNormalDefault);
@@ -281,7 +281,7 @@ this.checkBox_normalRegister_simple.Checked);
                     MessageBox.Show(this, strError);
                 else
                 {
-                    this.MainForm.AppInfo.SetString(
+                    Program.MainForm.AppInfo.SetString(
                         "entityform_optiondlg",
                         "issue_quickRegister_default",
                         strIssueQuickDefault);
@@ -300,7 +300,7 @@ this.checkBox_normalRegister_simple.Checked);
                     MessageBox.Show(this, strError);
                 else
                 {
-                    this.MainForm.AppInfo.SetString(
+                    Program.MainForm.AppInfo.SetString(
                         "entityform_optiondlg",
                         "order_normalRegister_default",
                         strOrderNormalDefault);
@@ -319,13 +319,13 @@ this.checkBox_normalRegister_simple.Checked);
                     MessageBox.Show(this, strError);
                 else
                 {
-                    this.MainForm.AppInfo.SetString(
+                    Program.MainForm.AppInfo.SetString(
                         "entityform_optiondlg",
                         "comment_normalRegister_default",
                         strCommentNormalDefault);
                 }
             }
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
                 "entity_form",
                 "verify_item_barcode",
                 this.checkBox_verifyItemBarcode.Checked);

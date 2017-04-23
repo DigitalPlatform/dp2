@@ -45,7 +45,7 @@ namespace dp2Circulation
                 if (string.IsNullOrEmpty(this.m_strInstanceDir) == false)
                     return this.m_strInstanceDir;
 
-                this.m_strInstanceDir = PathUtil.MergePath(this.MainForm.DataDir, "~bin_" + Guid.NewGuid().ToString());
+                this.m_strInstanceDir = PathUtil.MergePath(Program.MainForm.DataDir, "~bin_" + Guid.NewGuid().ToString());
                 PathUtil.CreateDirIfNeed(this.m_strInstanceDir);
 
                 return this.m_strInstanceDir;
@@ -83,15 +83,15 @@ namespace dp2Circulation
         {
             base.OnLoad(e);
 
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                ScriptManager.applicationInfo = this.MainForm.AppInfo;
+                ScriptManager.applicationInfo = Program.MainForm.AppInfo;
 
                 /*
                 ScriptManager.CfgFilePath =
-                    this.MainForm.DataDir + "\\biblio_statis_projects.xml";
+                    Program.MainForm.DataDir + "\\biblio_statis_projects.xml";
                  * */
-                ScriptManager.DataDir = this.MainForm.UserDir;
+                ScriptManager.DataDir = Program.MainForm.UserDir;
 
                 ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
                 ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);

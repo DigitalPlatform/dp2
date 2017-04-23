@@ -45,17 +45,17 @@ namespace dp2Circulation
             FillEncodingList(this.comboBox_worToIso_encoding,
     false);
 
-            this.UiState = this.MainForm.AppInfo.GetString(
+            this.UiState = Program.MainForm.AppInfo.GetString(
                 "utilityform",
                 "ui_state",
                 "");
 
 #if NO
-            this.textBox_serverFilePath.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_serverFilePath.Text = Program.MainForm.AppInfo.GetString(
                 "utilityform",
                 "server_file_path",
                 "");
-            this.textBox_clientFilePath.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_clientFilePath.Text = Program.MainForm.AppInfo.GetString(
     "utilityform",
     "client_file_path",
     "");
@@ -76,18 +76,18 @@ namespace dp2Circulation
         private void UtilityForm_FormClosed(object sender, FormClosedEventArgs e)
         {
 #if NO
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "utilityform",
     "server_file_path",
     this.textBox_serverFilePath.Text);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "utilityform",
     "client_file_path",
     this.textBox_clientFilePath.Text);
 #endif
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
         "utilityform",
         "ui_state",
         this.UiState);
@@ -175,10 +175,10 @@ namespace dp2Circulation
                 int nRet = 0;
 
 
-                nRet = this.MainForm.LoadQuickSjhm(true, out strError);
+                nRet = Program.MainForm.LoadQuickSjhm(true, out strError);
                 if (nRet == -1)
                     return -1;
-                nRet = this.MainForm.QuickSjhm.GetSjhm(
+                nRet = Program.MainForm.QuickSjhm.GetSjhm(
                     strHanzi,
                     out strResultSjhm,
                     out strError);
@@ -683,7 +683,7 @@ out strError);
         {
             string strError = "";
 
-            int nRet = this.MainForm.LoadIsbnSplitter(true, out strError);
+            int nRet = Program.MainForm.LoadIsbnSplitter(true, out strError);
             if (nRet == -1)
             {
                 MessageBox.Show(this, strError);
@@ -712,7 +712,7 @@ out strError);
                     }
 
                     string strTarget = "";
-                    nRet = this.MainForm.IsbnSplitter.IsbnInsertHyphen(
+                    nRet = Program.MainForm.IsbnSplitter.IsbnInsertHyphen(
                        strText,
                        strAction,   // "force10",
                         out strTarget,
@@ -1156,7 +1156,7 @@ MessageBoxDefaultButton.Button2);
             dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
             dlg.EnableMarcSyntax = false;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "OpenMarcFileDlg_forOutput_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "OpenMarcFileDlg_forOutput_state");
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)
                 return;
@@ -1380,9 +1380,9 @@ MessageBoxDefaultButton.Button2);
             string strError = "";
             string strValue = "";
 
-            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.83") < 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.83") < 0)
             {
-                strError = "当前连接的 dp2library 版本必须在 2.83 以上才能使用本功能 (但它是 "+this.MainForm.ServerVersion+")";
+                strError = "当前连接的 dp2library 版本必须在 2.83 以上才能使用本功能 (但它是 "+Program.MainForm.ServerVersion+")";
                 goto ERROR1;
             }
 

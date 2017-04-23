@@ -101,13 +101,13 @@ namespace dp2Circulation
 
         private void ReaderInfoForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
 
 #if NO
                 // 窗口打开时初始化
-                this.m_bSuppressScriptErrors = !this.MainForm.DisplayScriptErrorDialog;
+                this.m_bSuppressScriptErrors = !Program.MainForm.DisplayScriptErrorDialog;
 #endif
             }
 
@@ -115,7 +115,7 @@ namespace dp2Circulation
             MainForm.AppInfo.LoadMdiChildFormStates(this,
     "mdi_form_state");
 
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -144,13 +144,15 @@ namespace dp2Circulation
             this.binaryResControl1.Stop = this.stop;
 
             // webBrowser_readerInfo
-            this.m_webExternalHost.Initial(this.MainForm, this.webBrowser_readerInfo);
+            this.m_webExternalHost.Initial(// Program.MainForm, 
+                this.webBrowser_readerInfo);
             this.m_webExternalHost.GetLocalPath -= new GetLocalFilePathEventHandler(m_webExternalHost_GetLocalPath);
             this.m_webExternalHost.GetLocalPath += new GetLocalFilePathEventHandler(m_webExternalHost_GetLocalPath);
             this.webBrowser_readerInfo.ObjectForScripting = this.m_webExternalHost;
 
             // webBrowser_borrowHistory
-            this.m_chargingInterface.Initial(this.MainForm, this.webBrowser_borrowHistory);
+            this.m_chargingInterface.Initial(// Program.MainForm, 
+                this.webBrowser_borrowHistory);
             this.m_chargingInterface.GetLocalPath -= new GetLocalFilePathEventHandler(m_webExternalHost_GetLocalPath);
             this.m_chargingInterface.GetLocalPath += new GetLocalFilePathEventHandler(m_webExternalHost_GetLocalPath);
             this.m_chargingInterface.CallFunc += m_chargingInterface_CallFunc;
@@ -160,7 +162,7 @@ namespace dp2Circulation
             this.commander.IsBusy -= new IsBusyEventHandler(commander_IsBusy);
             this.commander.IsBusy += new IsBusyEventHandler(commander_IsBusy);
 
-            string strSelectedTemplates = this.MainForm.AppInfo.GetString(
+            string strSelectedTemplates = Program.MainForm.AppInfo.GetString(
     "readerinfo_form",
     "selected_templates",
     "");
@@ -195,7 +197,7 @@ namespace dp2Circulation
         {
             string strError = "";
             // 从配置文件装载字段配置，初始化这些字段
-            string strFileName = Path.Combine(this.MainForm.UserDir, "patron_extend.xml");
+            string strFileName = Path.Combine(Program.MainForm.UserDir, "patron_extend.xml");
             if (File.Exists(strFileName) == true)
             {
                 int nRet = this.readerEditControl1.LoadConfig(strFileName,
@@ -316,7 +318,7 @@ namespace dp2Circulation
             }
 
             this.m_webExternalHost = new WebExternalHost();
-            this.m_webExternalHost.Initial(this.MainForm);
+            this.m_webExternalHost.Initial(Program.MainForm);
             this.webBrowser_readerInfo.ObjectForScripting = this.m_webExternalHost;
         }*/
 
@@ -381,10 +383,10 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 string strSelectedTemplates = selected_templates.Export();
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "readerinfo_form",
                     "selected_templates",
                     strSelectedTemplates);
@@ -514,7 +516,7 @@ MessageBoxDefaultButton.Button2);
                 this.readerEditControl1.Clear();
 #if NO
                 Global.ClearHtmlPage(this.webBrowser_readerInfo,
-                    this.MainForm.DataDir);
+                    Program.MainForm.DataDir);
 #endif
                 ClearReaderHtmlPage();
                 this.binaryResControl1.Clear();
@@ -579,18 +581,16 @@ MessageBoxDefaultButton.Button2);
 
                         dlg.Overflow = StringUtil.SplitList(strOutputRecPath).Count < lRet;
                         nRet = dlg.Initial(
-                            this.MainForm,
-                            //this.Channel,
-                            //this.stop,
+                            // Program.MainForm,
                             StringUtil.SplitList(strOutputRecPath),
                             "请选择一个读者记录",
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
 
-                        this.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_SelectPatronDialog_state");
+                        Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_SelectPatronDialog_state");
                         dlg.ShowDialog(this);
-                        this.MainForm.AppInfo.UnlinkFormState(dlg);
+                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
                         if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                             return 0;
@@ -637,7 +637,7 @@ MessageBoxDefaultButton.Button2);
                             this.Channel,
                             strOutputRecPath,    // 2008/11/2 changed
                             strXml,
-                            this.MainForm.ServerVersion,
+                            Program.MainForm.ServerVersion,
                             out strError);
                         if (nRet == -1)
                         {
@@ -651,7 +651,7 @@ MessageBoxDefaultButton.Button2);
                         strXml);
                      * */
                     Global.SetXmlToWebbrowser(this.webBrowser_xml,
-                        this.MainForm.DataDir,
+                        Program.MainForm.DataDir,
                         "xml",
                         strXml);
 
@@ -676,7 +676,7 @@ MessageBoxDefaultButton.Button2);
                     {
                         ChargingForm.SetHtmlString(this.webBrowser_readerInfo,
                             strHtml,
-        this.MainForm.DataDir,
+        Program.MainForm.DataDir,
         "readerinfoform_reader");
                     }
                      * */
@@ -688,7 +688,7 @@ MessageBoxDefaultButton.Button2);
 
                     Global.SetHtmlString(this.webBrowser_readerInfo,
         strHtml,
-        this.MainForm.DataDir,
+        Program.MainForm.DataDir,
         "readerinfoform_reader");
 #endif
                     this.SetReaderHtmlString(strHtml);
@@ -722,7 +722,7 @@ MessageBoxDefaultButton.Button2);
             // this.webBrowser_readerInfo.Stop();
 
             Global.ClearHtmlPage(this.webBrowser_readerInfo,
-    this.MainForm.DataDir);
+    Program.MainForm.DataDir);
 
             this.m_chargingInterface.StopPrevious();
         }
@@ -736,7 +736,7 @@ MessageBoxDefaultButton.Button2);
 
             Global.SetHtmlString(this.webBrowser_readerInfo,
 strHtml,
-this.MainForm.DataDir,
+Program.MainForm.DataDir,
 "readerinfoform_reader");
 #endif
             this.m_webExternalHost.SetHtmlString(strHtml,
@@ -811,7 +811,7 @@ MessageBoxDefaultButton.Button2);
                     this.readerEditControl1.Clear();
 #if NO
                     Global.ClearHtmlPage(this.webBrowser_readerInfo,
-                        this.MainForm.DataDir);
+                        Program.MainForm.DataDir);
 #endif
                     ClearReaderHtmlPage();
 
@@ -886,7 +886,7 @@ MessageBoxDefaultButton.Button2);
                             this.Channel,
                             strOutputRecPath,    // 2008/11/2 changed
                             strXml,
-                            this.MainForm.ServerVersion,
+                            Program.MainForm.ServerVersion,
                             out strError);
                         if (nRet == -1)
                         {
@@ -902,7 +902,7 @@ MessageBoxDefaultButton.Button2);
                         strXml);
                      * */
                     Global.SetXmlToWebbrowser(this.webBrowser_xml,
-    this.MainForm.DataDir,
+    Program.MainForm.DataDir,
     "xml",
     strXml);
 
@@ -915,7 +915,7 @@ MessageBoxDefaultButton.Button2);
 
                     Global.SetHtmlString(this.webBrowser_readerInfo,
         strHtml,
-        this.MainForm.DataDir,
+        Program.MainForm.DataDir,
         "readerinfoform_reader");
 #endif
                     this.SetReaderHtmlString(strHtml);
@@ -956,18 +956,18 @@ MessageBoxDefaultButton.Button2);
 
             // 工具条按钮
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
         void EnableSendKey(bool bEnable)
         {
             // 2014/10/12
-            if (this.MainForm == null)
+            if (Program.MainForm == null)
                 return;
 
-            if (string.IsNullOrEmpty(this.MainForm.IdcardReaderUrl) == true)
+            if (string.IsNullOrEmpty(Program.MainForm.IdcardReaderUrl) == true)
                 return;
 
             int nRet = 0;
@@ -975,7 +975,7 @@ MessageBoxDefaultButton.Button2);
             try
             {
                 nRet = StartIdcardChannel(
-                    this.MainForm.IdcardReaderUrl,
+                    Program.MainForm.IdcardReaderUrl,
                     out strError);
                 if (nRet == -1)
                     return;
@@ -1001,7 +1001,7 @@ MessageBoxDefaultButton.Button2);
 
         private void ReaderInfoForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
             SetMenuItemState();
 
@@ -1276,7 +1276,7 @@ MessageBoxDefaultButton.Button2);
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.DbType = "reader";
                 dlg.DbName = strReaderDbName;
-                dlg.MainForm = this.MainForm;
+                // dlg.MainForm = Program.MainForm;
                 dlg.Text = "请选择目标读者库名";
                 dlg.StartPosition = FormStartPosition.CenterScreen;
                 dlg.ShowDialog(this);
@@ -1312,7 +1312,7 @@ MessageBoxDefaultButton.Button2);
 
                 tempdlg.Text = "请选择要修改的模板记录";
                 tempdlg.CheckNameExist = false;	// 按OK按钮时不警告"名字不存在",这样允许新建一个模板
-                //tempdlg.ap = this.MainForm.applicationInfo;
+                //tempdlg.ap = Program.MainForm.applicationInfo;
                 //tempdlg.ApCfgTitle = "detailform_selecttemplatedlg";
                 tempdlg.ShowDialog(this);
 
@@ -1378,7 +1378,7 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -1)
                     goto ERROR1;
 
-                this.MainForm.StatusBarMessage = "修改模板成功。";
+                Program.MainForm.StatusBarMessage = "修改模板成功。";
                 return;
             }
             finally
@@ -1436,7 +1436,7 @@ MessageBoxDefaultButton.Button2);
 
                 this.readerEditControl1.Changed = false;
 
-                string strSelectedDbName = this.MainForm.AppInfo.GetString(
+                string strSelectedDbName = Program.MainForm.AppInfo.GetString(
                     "readerinfo_form",
                     "selected_dbname_for_loadtemplate",
                     "");
@@ -1454,21 +1454,21 @@ MessageBoxDefaultButton.Button2);
 
                 dbname_dlg.EnableNotAsk = true;
                 dbname_dlg.DbName = strSelectedDbName;
-                dbname_dlg.MainForm = this.MainForm;
+                // dbname_dlg.MainForm = Program.MainForm;
 
                 dbname_dlg.Text = "装载读者记录模板 -- 请选择目标读者库名";
                 //  dbname_dlg.StartPosition = FormStartPosition.CenterScreen;
 
-                this.MainForm.AppInfo.LinkFormState(dbname_dlg, "readerinfoformm_load_template_GetBiblioDbNameDlg_state");
+                Program.MainForm.AppInfo.LinkFormState(dbname_dlg, "readerinfoformm_load_template_GetBiblioDbNameDlg_state");
                 dbname_dlg.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(dbname_dlg);
+                Program.MainForm.AppInfo.UnlinkFormState(dbname_dlg);
 
                 if (dbname_dlg.DialogResult != DialogResult.OK)
                     return 0;
 
                 string strReaderDbName = dbname_dlg.DbName;
                 // 记忆
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "readerinfo_form",
                     "selected_dbname_for_loadtemplate",
                     strReaderDbName);
@@ -1496,7 +1496,7 @@ MessageBoxDefaultButton.Button2);
                     MessageBox.Show(this, strError + "\r\n\r\n将改用位于本地的 “选项/读者信息缺省值” 来刷新记录");
 
                     // 如果template文件不存在，则找本地配置的模板
-                    string strNewDefault = this.MainForm.AppInfo.GetString(
+                    string strNewDefault = Program.MainForm.AppInfo.GetString(
     "readerinfoform_optiondlg",
     "newreader_default",
     "<root />");
@@ -1513,7 +1513,7 @@ MessageBoxDefaultButton.Button2);
 
 #if NO
                     Global.ClearHtmlPage(this.webBrowser_readerInfo,
-                        this.MainForm.DataDir);
+                        Program.MainForm.DataDir);
 #endif
                     ClearReaderHtmlPage();
 
@@ -1523,7 +1523,7 @@ MessageBoxDefaultButton.Button2);
                         strNewDefault);
                      * */
                     Global.SetXmlToWebbrowser(this.webBrowser_xml,
-    this.MainForm.DataDir,
+    Program.MainForm.DataDir,
     "xml",
     strNewDefault);
 
@@ -1565,9 +1565,9 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
                 }
 
-                this.MainForm.AppInfo.LinkFormState(select_temp_dlg, "readerinfoform_load_template_SelectTemplateDlg_state");
+                Program.MainForm.AppInfo.LinkFormState(select_temp_dlg, "readerinfoform_load_template_SelectTemplateDlg_state");
                 select_temp_dlg.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(select_temp_dlg);
+                Program.MainForm.AppInfo.UnlinkFormState(select_temp_dlg);
 
                 if (select_temp_dlg.DialogResult != DialogResult.OK)
                     return 0;
@@ -1596,7 +1596,7 @@ MessageBoxDefaultButton.Button2);
                     select_temp_dlg.SelectedRecordXml);
                  * */
                 Global.SetXmlToWebbrowser(this.webBrowser_xml,
-this.MainForm.DataDir,
+Program.MainForm.DataDir,
 "xml",
 select_temp_dlg.SelectedRecordXml);
 
@@ -1605,7 +1605,7 @@ select_temp_dlg.SelectedRecordXml);
 
 #if NO
                 Global.ClearHtmlPage(this.webBrowser_readerInfo,
-                    this.MainForm.DataDir);
+                    Program.MainForm.DataDir);
 #endif
                 ClearReaderHtmlPage();
 
@@ -1652,7 +1652,7 @@ select_temp_dlg.SelectedRecordXml);
             {
                 string strError = "";
 
-                string strNewDefault = this.MainForm.AppInfo.GetString(
+                string strNewDefault = Program.MainForm.AppInfo.GetString(
         "readerinfoform_optiondlg",
         "newreader_default",
         "<root />");
@@ -1671,7 +1671,7 @@ select_temp_dlg.SelectedRecordXml);
 
 #if NO
                 Global.ClearHtmlPage(this.webBrowser_readerInfo,
-                    this.MainForm.DataDir);
+                    Program.MainForm.DataDir);
 #endif
                 ClearReaderHtmlPage();
 
@@ -1680,7 +1680,7 @@ select_temp_dlg.SelectedRecordXml);
                     strNewDefault);
                  * */
                 Global.SetXmlToWebbrowser(this.webBrowser_xml,
-this.MainForm.DataDir,
+Program.MainForm.DataDir,
 "xml",
 strNewDefault);
 
@@ -1739,7 +1739,7 @@ strNewDefault);
 
             /*
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
              * */
 
             try
@@ -1777,7 +1777,7 @@ strNewDefault);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "reader_info_form",
                     "verify_barcode",
                     false);
@@ -1816,7 +1816,7 @@ strNewDefault);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.MainForm.FocusLibraryCode, // 是否可以根据读者库的馆代码？或者现在已经有了服务器校验功能，这里已经没有必要校验了? // this.Channel.LibraryCodeList,
+                    Program.MainForm.FocusLibraryCode, // 是否可以根据读者库的馆代码？或者现在已经有了服务器校验功能，这里已经没有必要校验了? // this.Channel.LibraryCodeList,
                     this.readerEditControl1.Barcode,
                     out strError);
                 if (nRet == -1)
@@ -1853,13 +1853,13 @@ strNewDefault);
                 ReaderSaveToDialog saveto_dlg = new ReaderSaveToDialog();
                 MainForm.SetControlFont(saveto_dlg, this.Font, false);
                 saveto_dlg.MessageText = "请选择记录位置";
-                saveto_dlg.MainForm = this.MainForm;
+                // saveto_dlg.MainForm = Program.MainForm;
                 saveto_dlg.RecPath = this.readerEditControl1.RecPath;
                 saveto_dlg.RecID = "?";
 
-                this.MainForm.AppInfo.LinkFormState(saveto_dlg, "readerinfoform_savetodialog_state");
+                Program.MainForm.AppInfo.LinkFormState(saveto_dlg, "readerinfoform_savetodialog_state");
                 saveto_dlg.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(saveto_dlg);
+                Program.MainForm.AppInfo.UnlinkFormState(saveto_dlg);
 
                 if (saveto_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                     return 0;
@@ -1903,9 +1903,9 @@ strNewDefault);
                 bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
                 if (strAction == "change" && bChangeReaderBarcode)
                 {
-                    if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.51") < 0)
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.51") < 0)
                     {
-                        strError = "需要 dp2library 版本在 2.51 以上才能实现强制修改册条码号的功能。当前 dp2library 版本为 " + this.MainForm.ServerVersion;
+                        strError = "需要 dp2library 版本在 2.51 以上才能实现强制修改册条码号的功能。当前 dp2library 版本为 " + Program.MainForm.ServerVersion;
                         goto ERROR1;
                     }
                     strAction = "changereaderbarcode";
@@ -1937,7 +1937,7 @@ strNewDefault);
                     {
                         CompareReaderForm dlg = new CompareReaderForm();
                         dlg.Initial(
-                            this.MainForm,
+                            //Program.MainForm,
                             this.readerEditControl1.RecPath,
                             strExistingXml,
                             baNewTimestamp,
@@ -1991,7 +1991,7 @@ strNewDefault);
                     //		>=0 实际上载的资源对象数
                     nRet = this.binaryResControl1.Save(
                         this.Channel,
-                        this.MainForm.ServerVersion,
+                        Program.MainForm.ServerVersion,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2030,7 +2030,7 @@ strNewDefault);
                         strSavedXml);
                      * */
                     Global.SetXmlToWebbrowser(this.webBrowser_xml,
-this.MainForm.DataDir,
+Program.MainForm.DataDir,
 "xml",
 strSavedXml);
                     // 2007/11/12
@@ -2093,7 +2093,7 @@ strSavedXml);
 #if NO
                         Global.SetHtmlString(this.webBrowser_readerInfo,
                             strHtml,
-        this.MainForm.DataDir,
+        Program.MainForm.DataDir,
         "readerinfoform_reader");
 #endif
                         this.SetReaderHtmlString(strHtml);
@@ -2101,7 +2101,7 @@ strSavedXml);
                 }
 
                 // 更新指纹高速缓存
-                if (string.IsNullOrEmpty(this.MainForm.FingerprintReaderUrl) == false
+                if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == false
                     && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == false)
                 {
                     // return:
@@ -2131,7 +2131,7 @@ strSavedXml);
             }
 
             if (StringUtil.IsInList("displaysuccess", strStyle) == true)
-                this.MainForm.StatusBarMessage = "读者记录保存成功";
+                Program.MainForm.StatusBarMessage = "读者记录保存成功";
             // MessageBox.Show(this, "保存成功");
             return 1;
         ERROR1:
@@ -2285,7 +2285,7 @@ strSavedXml);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
+                    Program.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.readerEditControl1.Barcode,
                     out strError);
                 if (nRet == -1)
@@ -2317,13 +2317,13 @@ strSavedXml);
             MainForm.SetControlFont(saveto_dlg, this.Font, false);
             saveto_dlg.Text = "新增一条读者记录";
             saveto_dlg.MessageText = "请选择要保存的目标记录位置\r\n(记录ID为 ? 表示追加保存到数据库末尾)";
-            saveto_dlg.MainForm = this.MainForm;
+            // saveto_dlg.MainForm = Program.MainForm;
             saveto_dlg.RecPath = this.readerEditControl1.RecPath;
             saveto_dlg.RecID = "?";
 
-            this.MainForm.AppInfo.LinkFormState(saveto_dlg, "readerinfoform_savetodialog_state");
+            Program.MainForm.AppInfo.LinkFormState(saveto_dlg, "readerinfoform_savetodialog_state");
             saveto_dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(saveto_dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(saveto_dlg);
 
             if (saveto_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -2410,7 +2410,7 @@ strSavedXml);
                     {
                         CompareReaderForm dlg = new CompareReaderForm();
                         dlg.Initial(
-                            this.MainForm,
+                            //Program.MainForm,
                             this.readerEditControl1.RecPath,
                             strExistingXml,
                             baNewTimestamp,
@@ -2464,7 +2464,7 @@ strSavedXml);
                     //		>=0 实际上载的资源对象数
                     nRet = this.binaryResControl1.Save(
                         this.Channel,
-                        this.MainForm.ServerVersion,
+                        Program.MainForm.ServerVersion,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2501,7 +2501,7 @@ strSavedXml);
                         strSavedXml);
                      * */
                     Global.SetXmlToWebbrowser(this.webBrowser_xml,
-this.MainForm.DataDir,
+Program.MainForm.DataDir,
 "xml",
 strSavedXml);
                     // 2007/11/12
@@ -2513,7 +2513,7 @@ strSavedXml);
                             this.Channel,
                             strSavedPath,    // 2008/11/2 changed
                             strSavedXml,
-                            this.MainForm.ServerVersion,
+                            Program.MainForm.ServerVersion,
                             out strError);
                         if (nRet == -1)
                         {
@@ -2570,7 +2570,7 @@ strSavedXml);
 #if NO
                         Global.SetHtmlString(this.webBrowser_readerInfo,
                             strHtml,
-        this.MainForm.DataDir,
+        Program.MainForm.DataDir,
         "readerinfoform_reader");
 #endif
                         this.SetReaderHtmlString(strHtml);
@@ -2687,7 +2687,7 @@ strSavedXml);
                     {
                         CompareReaderForm dlg = new CompareReaderForm();
                         dlg.Initial(
-                            this.MainForm,
+                            //Program.MainForm,
                             this.readerEditControl1.RecPath,
                             strExistingXml,
                             baNewTimestamp,
@@ -2731,7 +2731,7 @@ strSavedXml);
                 this.readerEditControl1.Changed = false;
 
                 // 更新指纹高速缓存
-                if (string.IsNullOrEmpty(this.MainForm.FingerprintReaderUrl) == false
+                if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == false
                     && string.IsNullOrEmpty(this.readerEditControl1.Barcode) == false)
                 {
                     // return:
@@ -2835,7 +2835,7 @@ MessageBoxDefaultButton.Button2);
                     {
                         CompareReaderForm dlg = new CompareReaderForm();
                         dlg.Initial(
-                            this.MainForm,
+                            Program.MainForm,
                             this.readerEditControl1.RecPath,
                             strExistingXml,
                             baNewTimestamp,
@@ -2967,7 +2967,7 @@ MessageBoxDefaultButton.Button2);
                     {
                         CompareReaderForm dlg = new CompareReaderForm();
                         dlg.Initial(
-                            this.MainForm,
+                            Program.MainForm,
                             this.readerEditControl1.RecPath,
                             strExistingXml,
                             baNewTimestamp,
@@ -3100,7 +3100,7 @@ MessageBoxDefaultButton.Button2);
                     {
                         CompareReaderForm dlg = new CompareReaderForm();
                         dlg.Initial(
-                            this.MainForm,
+                            Program.MainForm,
                             this.readerEditControl1.RecPath,
                             strExistingXml,
                             baNewTimestamp,
@@ -3202,7 +3202,7 @@ MessageBoxDefaultButton.Button2);
             {
                 string strError = "";
 
-                string strNewDefault = this.MainForm.AppInfo.GetString(
+                string strNewDefault = Program.MainForm.AppInfo.GetString(
         "readerinfoform_optiondlg",
         "newreader_default",
         "<root />");
@@ -3214,7 +3214,7 @@ MessageBoxDefaultButton.Button2);
                     MessageBox.Show(this, strError);
 
                 Global.ClearHtmlPage(this.webBrowser_readerInfo,
-                    this.MainForm.DataDir);
+                    Program.MainForm.DataDir);
                 // 
                 this.SetXmlToWebbrowser(this.webBrowser_xml,
                     strNewDefault);
@@ -3235,7 +3235,7 @@ MessageBoxDefaultButton.Button2);
             MainForm.SetControlFont(dlg, this.Font, false);
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.MainForm = this.MainForm;
+            dlg.MainForm = Program.MainForm;
             dlg.ShowDialog(this);
         }
 
@@ -3250,7 +3250,7 @@ MessageBoxDefaultButton.Button2);
             MainForm.SetControlFont(dlg, this.Font, false);
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.ShowDialog(this);
         }
 
@@ -3285,7 +3285,7 @@ MessageBoxDefaultButton.Button2);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
+                    Program.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.readerEditControl1.Barcode,
                     out strError);
                 if (nRet == -1)
@@ -3621,7 +3621,7 @@ MessageBoxDefaultButton.Button2);
                 //      1   是合法的读者证条码号
                 //      2   是合法的册条码号
                 nRet = VerifyBarcode(
-                    this.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
+                    Program.MainForm.FocusLibraryCode, // this.Channel.LibraryCodeList,
                     this.readerEditControl1.Barcode,
                     out strError);
                 if (nRet == -1)
@@ -3789,7 +3789,7 @@ MessageBoxDefaultButton.Button2);
             // 判断它是不是读者记录路径
             string strDbName = Global.GetDbName(strRecPath);
 
-            if (this.MainForm.IsReaderDbName(strDbName) == true)
+            if (Program.MainForm.IsReaderDbName(strDbName) == true)
             {
                 this.LoadRecordByRecPath(strRecPath,
                     "");
@@ -3888,11 +3888,11 @@ MessageBoxDefaultButton.Button2);
             string strShrinkComment = "";
 
 #if NO
-            UtilityForm form = this.MainForm.EnsureUtilityForm();
+            UtilityForm form = Program.MainForm.EnsureUtilityForm();
             form.Activate();
             form.ActivateWebCameraPage();
 #endif
-            this.MainForm.DisableCamera();
+            Program.MainForm.DisableCamera();
             try
             {
                 // 注： new CameraPhotoDialog() 可能会抛出异常
@@ -3901,16 +3901,16 @@ MessageBoxDefaultButton.Button2);
                     // MainForm.SetControlFont(dlg, this.Font, false);
                     dlg.Font = this.Font;
 
-                    dlg.CurrentCamera = this.MainForm.AppInfo.GetString(
+                    dlg.CurrentCamera = Program.MainForm.AppInfo.GetString(
                         "readerinfoform",
                         "current_camera",
                         "");
 
-                    this.MainForm.AppInfo.LinkFormState(dlg, "CameraPhotoDialog_state");
+                    Program.MainForm.AppInfo.LinkFormState(dlg, "CameraPhotoDialog_state");
                     dlg.ShowDialog(this);
-                    this.MainForm.AppInfo.UnlinkFormState(dlg);
+                    Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
-                    this.MainForm.AppInfo.SetString(
+                    Program.MainForm.AppInfo.SetString(
                         "readerinfoform",
                         "current_camera",
                         dlg.CurrentCamera);
@@ -3937,7 +3937,7 @@ MessageBoxDefaultButton.Button2);
             {
                 Application.DoEvents();
 
-                this.MainForm.EnableCamera();
+                Program.MainForm.EnableCamera();
             }
 
             // 切换到对象属性页，以便操作者能看到刚刚创建的对象行
@@ -4226,7 +4226,7 @@ MessageBoxDefaultButton.Button2);
             int nRet = 0;
 
             // 自动缩小图像
-            string strMaxWidth = this.MainForm.AppInfo.GetString(
+            string strMaxWidth = Program.MainForm.AppInfo.GetString(
     "readerinfoform_optiondlg",
     "cardphoto_maxwidth",
     "120");
@@ -4259,7 +4259,7 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
-            string strTempFilePath = FileUtil.NewTempFileName(this.MainForm.DataDir,
+            string strTempFilePath = FileUtil.NewTempFileName(Program.MainForm.DataDir,
                 "~temp_make_cardphoto_",
                 ".png");
 
@@ -4300,14 +4300,14 @@ MessageBoxDefaultButton.Button2);
         {
             get
             {
-                return this.MainForm.AppInfo.GetString(
+                return Program.MainForm.AppInfo.GetString(
     "reader_info_form",
     "display_setreaderbarcode_dialog_button",
     "no");
             }
             set
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
     "reader_info_form",
     "display_setreaderbarcode_dialog_button",
     value);
@@ -4321,14 +4321,14 @@ MessageBoxDefaultButton.Button2);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
     "reader_info_form",
     "display_setreaderbarcode_dialog",
     true);
             }
             set
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
     "reader_info_form",
     "display_setreaderbarcode_dialog",
     value);
@@ -4343,7 +4343,7 @@ MessageBoxDefaultButton.Button2);
         {
             get
             {
-                return this.MainForm.AppInfo.GetString(
+                return Program.MainForm.AppInfo.GetString(
     "readerinfoform_optiondlg",
     "idcardfield_filter_list",
     "name,gender,nation,dateOfBirth,address,idcardnumber,agency,validaterange,photo");
@@ -4359,14 +4359,14 @@ MessageBoxDefaultButton.Button2);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                 "reader_info_form",
                 "autoretry_readcarddialog",
                 true);
             }
             set
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                 "reader_info_form",
                 "autoretry_readcarddialog",
                 value);
@@ -4381,7 +4381,7 @@ MessageBoxDefaultButton.Button2);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
     "reader_info_form",
     "disable_idcardreader_sendkey",
     true);
@@ -4404,7 +4404,7 @@ MessageBoxDefaultButton.Button2);
         {
             strError = "";
 
-            if (string.IsNullOrEmpty(this.MainForm.IdcardReaderUrl) == true)
+            if (string.IsNullOrEmpty(Program.MainForm.IdcardReaderUrl) == true)
             {
                 strError = "尚未配置 身份证读卡器URL 系统参数，无法读取身份证卡";
                 return -1;
@@ -4421,7 +4421,7 @@ MessageBoxDefaultButton.Button2);
             try
             {
                 int nRet = StartIdcardChannel(
-                    this.MainForm.IdcardReaderUrl,
+                    Program.MainForm.IdcardReaderUrl,
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -4435,7 +4435,7 @@ MessageBoxDefaultButton.Button2);
                     }
                     catch (Exception ex)
                     {
-                        strError = "针对 " + this.MainForm.IdcardReaderUrl + " 操作失败: " + ex.Message;
+                        strError = "针对 " + Program.MainForm.IdcardReaderUrl + " 操作失败: " + ex.Message;
                         return -1;
                     }
 
@@ -4473,7 +4473,7 @@ MessageBoxDefaultButton.Button2);
                     }
                     catch (Exception ex)
                     {
-                        strError = "针对 " + this.MainForm.IdcardReaderUrl + " 操作失败: " + ex.Message;
+                        strError = "针对 " + Program.MainForm.IdcardReaderUrl + " 操作失败: " + ex.Message;
                         return -1;
                     }
 
@@ -4497,9 +4497,9 @@ MessageBoxDefaultButton.Button1);
                         dlg.AutoRetry = this.AutoRetryReaderCard;
                         dlg.ReadCard -= new ReadCardEventHandler(dlg_ReadCard);
                         dlg.ReadCard += new ReadCardEventHandler(dlg_ReadCard);
-                        this.MainForm.AppInfo.LinkFormState(dlg, "PlaceIdcardDialog_state");
+                        Program.MainForm.AppInfo.LinkFormState(dlg, "PlaceIdcardDialog_state");
                         dlg.ShowDialog(this);
-                        this.MainForm.AppInfo.UnlinkFormState(dlg);
+                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
                         this.AutoRetryReaderCard = dlg.AutoRetry;
 
@@ -4519,7 +4519,7 @@ MessageBoxDefaultButton.Button1);
 
                     Console.Beep(); // 表示读取成功
 
-                    // string strLocalTempPhotoFilename = this.MainForm.DataDir + "/~current_unsaved_patron_photo.png";
+                    // string strLocalTempPhotoFilename = Program.MainForm.DataDir + "/~current_unsaved_patron_photo.png";
                     if (m_baPhoto != null
                     && StringUtil.IsInList("photo", this.IdcardFieldSelection) == true)
                     {
@@ -4560,9 +4560,9 @@ MessageBoxDefaultButton.Button1);
 
                         dlg.DontAsk = !this.DisplaySetReaderBarcodeDialog;
                         dlg.InitialSelect = this.DisplaySetReaderBarcodeDialogButton;
-                        this.MainForm.AppInfo.LinkFormState(dlg, "readerinfoformm_SetReaderBarcodeNumberDialog_state");
+                        Program.MainForm.AppInfo.LinkFormState(dlg, "readerinfoformm_SetReaderBarcodeNumberDialog_state");
                         dlg.ShowDialog(this);
-                        this.MainForm.AppInfo.UnlinkFormState(dlg);
+                        Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
                         this.DisplaySetReaderBarcodeDialog = !dlg.DontAsk;
                         this.DisplaySetReaderBarcodeDialogButton = (dlg.DialogResult == System.Windows.Forms.DialogResult.Yes ? "yes" : "no");
@@ -4625,7 +4625,7 @@ MessageBoxDefaultButton.Button1);
 
 #if NO
                 Global.ClearHtmlPage(this.webBrowser_readerInfo,
-                    this.MainForm.DataDir);
+                    Program.MainForm.DataDir);
 #endif
                 ClearReaderHtmlPage();
 
@@ -4668,7 +4668,7 @@ MessageBoxDefaultButton.Button1);
 
                         Global.SetHtmlString(this.webBrowser_readerInfo,
                             strHtml,
-                            this.MainForm.DataDir,
+                            Program.MainForm.DataDir,
                             "readerinfoform_reader");
 #endif
                         this.SetReaderHtmlString(strHtml);
@@ -4688,7 +4688,7 @@ MessageBoxDefaultButton.Button1);
                     strReaderXml);
                  * */
                 Global.SetXmlToWebbrowser(this.webBrowser_xml,
-this.MainForm.DataDir,
+Program.MainForm.DataDir,
 "xml",
 strReaderXml);
                 if (bClear == false) // 2013/6/19
@@ -4799,13 +4799,13 @@ MessageBoxDefaultButton.Button2);
             MainForm.SetControlFont(saveto_dlg, this.Font, false);
             saveto_dlg.Text = "移动读者记录";
             saveto_dlg.MessageText = "请选择要移动去的目标记录位置";
-            saveto_dlg.MainForm = this.MainForm;
+            // saveto_dlg.MainForm = Program.MainForm;
             saveto_dlg.RecPath = this.readerEditControl1.RecPath;
             saveto_dlg.RecID = "?";
 
-            this.MainForm.AppInfo.LinkFormState(saveto_dlg, "readerinfoform_movetodialog_state");
+            Program.MainForm.AppInfo.LinkFormState(saveto_dlg, "readerinfoform_movetodialog_state");
             saveto_dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(saveto_dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(saveto_dlg);
 
             if (saveto_dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -4876,13 +4876,13 @@ MessageBoxDefaultButton.Button2);
 
         void Window_Error(object sender, HtmlElementErrorEventArgs e)
         {
-            if (this.MainForm.SuppressScriptErrors == true)
+            if (Program.MainForm.SuppressScriptErrors == true)
                 e.Handled = true;
         }
 
         private void readerEditControl1_GetLibraryCode(object sender, GetLibraryCodeEventArgs e)
         {
-            e.LibraryCode = this.MainForm.GetReaderDbLibraryCode(e.DbName);
+            e.LibraryCode = Program.MainForm.GetReaderDbLibraryCode(e.DbName);
         }
 
         #region 指纹登记功能
@@ -4940,14 +4940,14 @@ MessageBoxDefaultButton.Button2);
         {
             strError = "";
 
-            if (string.IsNullOrEmpty(this.MainForm.FingerprintReaderUrl) == true)
+            if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == true)
             {
                 strError = "尚未配置 指纹阅读器URL 系统参数，无法更新指纹高速缓存";
                 return -1;
             }
 
             int nRet = StartFingerprintChannel(
-                this.MainForm.FingerprintReaderUrl,
+                Program.MainForm.FingerprintReaderUrl,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -4999,12 +4999,12 @@ MessageBoxDefaultButton.Button2);
             // [System.Runtime.Remoting.RemotingException] = {"连接到 IPC 端口失败: 系统找不到指定的文件。\r\n "}
             catch (System.Runtime.Remoting.RemotingException ex)
             {
-                strError = "针对 " + this.MainForm.FingerprintReaderUrl + " 的 AddItems() 操作失败: " + ex.Message;
+                strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 AddItems() 操作失败: " + ex.Message;
                 return -2;
             }
             catch (Exception ex)
             {
-                strError = "针对 " + this.MainForm.FingerprintReaderUrl + " 的 AddItems() 操作失败: " + ex.Message;
+                strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 AddItems() 操作失败: " + ex.Message;
                 return -1;
             }
 
@@ -5024,14 +5024,14 @@ MessageBoxDefaultButton.Button2);
             strFingerprint = "";
             strVersion = "";
 
-            if (string.IsNullOrEmpty(this.MainForm.FingerprintReaderUrl) == true)
+            if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == true)
             {
                 strError = "尚未配置 指纹阅读器URL 系统参数，无法读取指纹信息";
                 return -1;
             }
 
             int nRet = StartFingerprintChannel(
-                this.MainForm.FingerprintReaderUrl,
+                Program.MainForm.FingerprintReaderUrl,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -5052,11 +5052,11 @@ MessageBoxDefaultButton.Button2);
                         return -1;
 
                     return nRet;
-                    // this.MainForm.StatusBarMessage = "";
+                    // Program.MainForm.StatusBarMessage = "";
                 }
                 catch (Exception ex)
                 {
-                    strError = "针对 " + this.MainForm.FingerprintReaderUrl + " 的 GetFingerprintString() 操作失败: " + ex.Message;
+                    strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 GetFingerprintString() 操作失败: " + ex.Message;
                     return -1;
                 }
                 // Console.Beep(); // 表示读取成功
@@ -5076,7 +5076,7 @@ MessageBoxDefaultButton.Button2);
             string strVersion = "";
 
             this.EnableControls(false);
-            this.MainForm.StatusBarMessage = "等待扫描指纹...";
+            Program.MainForm.StatusBarMessage = "等待扫描指纹...";
             this.Update();
             Application.DoEvents();
             try
@@ -5120,10 +5120,10 @@ MessageBoxDefaultButton.Button1);
             }
 
             // MessageBox.Show(this, strFingerprint);
-            this.MainForm.StatusBarMessage = "指纹信息获取成功";
+            Program.MainForm.StatusBarMessage = "指纹信息获取成功";
             return;
         ERROR1:
-            this.MainForm.StatusBarMessage = strError;
+            Program.MainForm.StatusBarMessage = strError;
             MessageBox.Show(this, strError);
         }
 
@@ -5207,7 +5207,7 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
-            this.MainForm.StatusBarMessage = "导出成功。";
+            Program.MainForm.StatusBarMessage = "导出成功。";
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -5217,7 +5217,7 @@ MessageBoxDefaultButton.Button1);
         {
             if (m_nChannelInUse > 0)
                 return;
-            this.MainForm.EnterPatronIdEdit(InputType.PQR);
+            Program.MainForm.EnterPatronIdEdit(InputType.PQR);
 
             // 2013/5/25
             // 禁止身份证读卡器键盘仿真的时候，证条码号输入域例外
@@ -5233,10 +5233,10 @@ MessageBoxDefaultButton.Button1);
         private void toolStripTextBox_barcode_Leave(object sender, EventArgs e)
         {
             // 2014/10/12
-            if (this.MainForm == null)
+            if (Program.MainForm == null)
                 return;
 
-            this.MainForm.LeavePatronIdEdit();
+            Program.MainForm.LeavePatronIdEdit();
 
             // 2013/5/25
             // 禁止身份证读卡器键盘仿真的时候，证条码号输入域例外
@@ -5267,7 +5267,7 @@ MessageBoxDefaultButton.Button1);
                 //      -1  出错
                 //      0   用户中断选择
                 //      1   成功
-                nRet = this.MainForm.GetPinyin(
+                nRet = Program.MainForm.GetPinyin(
                     this,
                     strHanzi,
                     PinyinStyle.None,
@@ -5395,7 +5395,7 @@ MessageBoxDefaultButton.Button1);
                         string strBorrowDate = node.GetAttribute("borrowDate");
                         string strBorrowPeriod = node.GetAttribute("borrowPeriod");
                         string strSummary = "";
-                        nRet = this.MainForm.GetBiblioSummary(strItemBarcode,
+                        nRet = Program.MainForm.GetBiblioSummary(strItemBarcode,
                             strConfirmItemRecPath,
                             true,
                             out strSummary,
@@ -5437,7 +5437,7 @@ MessageBoxDefaultButton.Button1);
                 this.EnableControls(true);
             }
 
-            this.MainForm.StatusBarMessage = "导出成功。";
+            Program.MainForm.StatusBarMessage = "导出成功。";
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -5460,9 +5460,9 @@ MessageBoxDefaultButton.Button1);
             DigitalPlatform.CommonControl.PropertyDlg dlg = new DigitalPlatform.CommonControl.PropertyDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            string strPatronRightsCfgFileName = Path.Combine(this.MainForm.UserDir, "patronrights.xml");
+            string strPatronRightsCfgFileName = Path.Combine(Program.MainForm.UserDir, "patronrights.xml");
 
-            string strRightsCfgFileName = Path.Combine(this.MainForm.UserDir, "objectrights.xml");
+            string strRightsCfgFileName = Path.Combine(Program.MainForm.UserDir, "objectrights.xml");
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.Text = "当前读者的权限";
@@ -5471,7 +5471,7 @@ MessageBoxDefaultButton.Button1);
                 && Control.ModifierKeys != Keys.Control)
                 dlg.CfgFileName = strPatronRightsCfgFileName;   // 优先用读者权限定义配置文件
             else
-                dlg.CfgFileName = Path.Combine(this.MainForm.DataDir, "userrightsdef.xml");
+                dlg.CfgFileName = Path.Combine(Program.MainForm.DataDir, "userrightsdef.xml");
             if (File.Exists(strRightsCfgFileName) == true)
                 dlg.CfgFileName += "," + strRightsCfgFileName;
             dlg.ShowDialog(this);
@@ -5496,9 +5496,9 @@ MessageBoxDefaultButton.Button1);
             AddFriendsDialog dlg = new AddFriendsDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_AddFriendsDialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderInfoForm_AddFriendsDialog_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -5545,7 +5545,7 @@ MessageBoxDefaultButton.Button1);
                 // TODO: 需要立即刷新窗口，兑现 firends 字段的更新显示
                 MessageBox.Show(this, "好友字段已经被修改，请注意重新装载读者记录");
             }
-            this.MainForm.StatusBarMessage = strError;
+            Program.MainForm.StatusBarMessage = strError;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -5571,7 +5571,7 @@ MessageBoxDefaultButton.Button1);
             //      0   用户中断
             //      1   成功
             nRet = ReaderSearchForm.CreateReaderDetailExcelFile(xmls,
-                this.MainForm.GetBiblioSummary,
+                Program.MainForm.GetBiblioSummary,
                 null,
                 false,
                 true,
@@ -5857,8 +5857,8 @@ MessageBoxDefaultButton.Button1);
             // string strBinDir = Environment.CurrentDirectory;
             string strBinDir = Program.MainForm.UserDir;    // 2017/2/23
 
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
-            string strSummaryJs = Path.Combine(this.MainForm.DataDir, "getsummary.js");
+            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "default\\charginghistory.css");
+            string strSummaryJs = Path.Combine(Program.MainForm.DataDir, "getsummary.js");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strScriptHead = "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-1.4.4.min.js\"></script>"
                 + "<script type=\"text/javascript\" src=\"%bindir%/jquery/js/jquery-ui-1.8.7.min.js\"></script>"
@@ -5951,7 +5951,7 @@ MessageBoxDefaultButton.Button1);
         /// </summary>
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\charginghistory.css");
+            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "default\\charginghistory.css");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strJs = "";
 

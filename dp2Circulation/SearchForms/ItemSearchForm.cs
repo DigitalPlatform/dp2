@@ -142,7 +142,7 @@ namespace dp2Circulation
             }
 
             e.ColumnTitles = new ColumnPropertyCollection();
-            ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(e.DbName);
+            ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(e.DbName);
             if (temp != null)
             {
                 if (m_bBiblioSummaryColumn == true)
@@ -175,24 +175,24 @@ namespace dp2Circulation
                 throw new Exception("未知的DbType '" + this.DbType + "'");
 
 
-            this.comboBox_from.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_from.Text = Program.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
                 "from",
                 strDefaultFrom);
 
-            this.comboBox_entityDbName.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_entityDbName.Text = Program.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
                 "entity_db_name",
                 "<全部>");
 
-            this.comboBox_matchStyle.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_matchStyle.Text = Program.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
                 "match_style",
                 "精确一致");
 
             if (this.DbType != "arrive")
             {
-                bool bHideMatchStyle = this.MainForm.AppInfo.GetBoolean(
+                bool bHideMatchStyle = Program.MainForm.AppInfo.GetBoolean(
                     this.DbType + "_search_form",
                     "hide_matchstyle_and_dbname",
                     false);
@@ -215,7 +215,7 @@ namespace dp2Circulation
             }
 
 #if NO
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
                 "record_list_column_width",
                 "");
@@ -226,11 +226,11 @@ namespace dp2Circulation
                     true);
             }
 #endif
-            this.UiState = this.MainForm.AppInfo.GetString(
+            this.UiState = Program.MainForm.AppInfo.GetString(
     this.DbType + "_search_form",
     "ui_state",
     "");
-            string strSaveString = this.MainForm.AppInfo.GetString(
+            string strSaveString = Program.MainForm.AppInfo.GetString(
 this.DbType + "_search_form",
 "query_lines",
 "^^^");
@@ -336,19 +336,19 @@ this.DbType + "_search_form",
             List<string> results = new List<string>();
 
             // 填入从服务器获得的最新froms
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
                 BiblioDbFromInfo[] infos = null;
                 if (this.DbType == "item")
-                    infos = this.MainForm.ItemDbFromInfos;
+                    infos = Program.MainForm.ItemDbFromInfos;
                 else if (this.DbType == "comment")
-                    infos = this.MainForm.CommentDbFromInfos;
+                    infos = Program.MainForm.CommentDbFromInfos;
                 else if (this.DbType == "order")
-                    infos = this.MainForm.OrderDbFromInfos;
+                    infos = Program.MainForm.OrderDbFromInfos;
                 else if (this.DbType == "issue")
-                    infos = this.MainForm.IssueDbFromInfos;
+                    infos = Program.MainForm.IssueDbFromInfos;
                 else if (this.DbType == "arrive")
-                    infos = this.MainForm.ArrivedDbFromInfos;
+                    infos = Program.MainForm.ArrivedDbFromInfos;
                 else
                     throw new Exception("未知的DbType '" + this.DbType + "'");
 
@@ -447,17 +447,17 @@ this.DbType + "_search_form",
             }
 
             // 填入从服务器获得的最新froms
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
                 BiblioDbFromInfo[] infos = null;
                 if (this.DbType == "item")
-                    infos = this.MainForm.ItemDbFromInfos;
+                    infos = Program.MainForm.ItemDbFromInfos;
                 else if (this.DbType == "comment")
-                    infos = this.MainForm.CommentDbFromInfos;
+                    infos = Program.MainForm.CommentDbFromInfos;
                 else if (this.DbType == "order")
-                    infos = this.MainForm.OrderDbFromInfos;
+                    infos = Program.MainForm.OrderDbFromInfos;
                 else if (this.DbType == "issue")
-                    infos = this.MainForm.IssueDbFromInfos;
+                    infos = Program.MainForm.IssueDbFromInfos;
                 else
                     throw new Exception("未知的DbType '" + this.DbType + "'");
 
@@ -507,36 +507,36 @@ this.DbType + "_search_form",
                 stop = null;
             }*/
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     this.DbType + "_search_form",
                     "from",
                     this.comboBox_from.Text);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     this.DbType + "_search_form",
                     "entity_db_name",
                     this.comboBox_entityDbName.Text);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     this.DbType + "_search_form",
                     "match_style",
                     this.comboBox_matchStyle.Text);
 
 #if NO
             string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 this.DbType + "_search_form",
                 "record_list_column_width",
                 strWidths);
 #endif
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     this.DbType + "_search_form",
                     "ui_state",
                     this.UiState);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
     this.DbType + "_search_form",
     "query_lines",
     this.dp2QueryControl1.GetSaveString());
@@ -550,7 +550,7 @@ this.DbType + "_search_form",
         {
             get
             {
-                return (int)this.MainForm.AppInfo.GetInt(
+                return (int)Program.MainForm.AppInfo.GetInt(
                 this.DbType + "_search_form",
                 "max_result_count",
                 -1);
@@ -969,13 +969,13 @@ this.DbType + "_search_form",
                     if (nRet == -1 || nRet == 0)
                         goto ERROR1;
 #endif
-                    if (string.IsNullOrEmpty(this.MainForm.ArrivedDbName) == true)
+                    if (string.IsNullOrEmpty(Program.MainForm.ArrivedDbName) == true)
                     {
                         strError = "当前服务器尚未配置预约到书库名";
                         goto ERROR1;
                     }
 
-                    string strQueryXml = "<target list='" + this.MainForm.ArrivedDbName + ":" + this.comboBox_from.Text + "'><item><word>"
+                    string strQueryXml = "<target list='" + Program.MainForm.ArrivedDbName + ":" + this.comboBox_from.Text + "'><item><word>"
         + StringUtil.GetXmlStringSimple(this.tabComboBox_queryWord.Text)
         + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>"
                     + this.MaxSearchResultCount + "</maxCount></item><lang>" + this.Lang + "</lang></target>";
@@ -1454,9 +1454,9 @@ this.DbType + "_search_form",
             {
                 form = new ItemInfoForm();
 
-                form.MdiParent = this.MainForm;
+                form.MdiParent = Program.MainForm;
 
-                form.MainForm = this.MainForm;
+                form.MainForm = Program.MainForm;
                 form.Show();
             }
 
@@ -1486,9 +1486,9 @@ this.DbType + "_search_form",
             {
                 form = new ItemInfoForm();
 
-                form.MdiParent = this.MainForm;
+                form.MdiParent = Program.MainForm;
 
-                form.MainForm = this.MainForm;
+                form.MainForm = Program.MainForm;
                 form.Show();
             }
 
@@ -1520,9 +1520,9 @@ this.DbType + "_search_form",
             {
                 form = new EntityForm();
 
-                form.MdiParent = this.MainForm;
+                form.MdiParent = Program.MainForm;
 
-                form.MainForm = this.MainForm;
+                form.MainForm = Program.MainForm;
                 form.Show();
             }
 
@@ -1559,9 +1559,9 @@ this.DbType + "_search_form",
             {
                 form = new EntityForm();
 
-                form.MdiParent = this.MainForm;
+                form.MdiParent = Program.MainForm;
 
-                form.MainForm = this.MainForm;
+                form.MainForm = Program.MainForm;
                 form.Show();
             }
 
@@ -1585,7 +1585,7 @@ this.DbType + "_search_form",
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "all_search_form",
                     "load_to_exist_detailwindow",
                     true);
@@ -1600,14 +1600,14 @@ this.DbType + "_search_form",
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "item_search_form",
                     "load_to_itemwindow",
                     false);
             }
             set
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "item_search_form",
                     "load_to_itemwindow",
                     value);
@@ -1673,14 +1673,14 @@ this.DbType + "_search_form",
 
         private void ItemSearchForm_Activated(object sender, EventArgs e)
         {
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            // this.MainForm.MenuItem_font.Enabled = false;
-            // this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            // Program.MainForm.MenuItem_font.Enabled = false;
+            // Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
 
-            this.MainForm.toolStripDropDownButton_barcodeLoadStyle.Enabled = true;
-            this.MainForm.toolStripTextBox_barcode.Enabled = true;
+            Program.MainForm.toolStripDropDownButton_barcodeLoadStyle.Enabled = true;
+            Program.MainForm.toolStripTextBox_barcode.Enabled = true;
         }
 
         // 装入种册窗/实体窗，用册条码号/记录路径
@@ -1748,9 +1748,9 @@ this.DbType + "_search_form",
                 {
                     form = new EntityForm();
 
-                    form.MdiParent = this.MainForm;
+                    form.MdiParent = Program.MainForm;
 
-                    form.MainForm = this.MainForm;
+                    form.MainForm = Program.MainForm;
                     form.Show();
                 }
 
@@ -1810,9 +1810,9 @@ this.DbType + "_search_form",
                 {
                     form = new ItemInfoForm();
 
-                    form.MdiParent = this.MainForm;
+                    form.MdiParent = Program.MainForm;
 
-                    form.MainForm = this.MainForm;
+                    form.MainForm = Program.MainForm;
                     form.Show();
                 }
 
@@ -1987,8 +1987,8 @@ out strError);
     out strError);
                 }
 
-                bool bExistEntityForm = (this.MainForm.GetTopChildWindow<EntityForm>() != null);
-                bool bExistItemInfoForm = (this.MainForm.GetTopChildWindow<ItemInfoForm>() != null);
+                bool bExistEntityForm = (Program.MainForm.GetTopChildWindow<EntityForm>() != null);
+                bool bExistItemInfoForm = (Program.MainForm.GetTopChildWindow<ItemInfoForm>() != null);
 
                 //
                 menuItem = new MenuItem("打开方式(&T)");
@@ -2642,12 +2642,12 @@ out strError);
             }
 
             // 切换到“操作历史”属性页
-            this.MainForm.ActivateFixPage("history");
+            Program.MainForm.ActivateFixPage("history");
 
             int nCount = 0;
             int nModifyCount = 0;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                 + " 开始进行" + this.DbTypeCaption + "记录校验</div>");
 
             if (stop.IsInLoop == true)
@@ -2768,10 +2768,10 @@ out strError);
 
                     if (errors.Count > 0)
                     {
-                        this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
                         foreach (string error in errors)
                         {
-                            this.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
                         }
 
                         {
@@ -2814,10 +2814,10 @@ out strError);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                     + " 结束执行" + this.DbTypeCaption + "记录校验</div>");
                 if (nModifyCount > 0)
-                    this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
                         + " 发生修改 " + nModifyCount + " 条</div>");
             }
         }
@@ -3030,7 +3030,7 @@ out strError);
                 // <para>0   不是合法的条码号</para>
                 // <para>1   是合法的读者证条码号</para>
                 // <para>2   是合法的册条码号</para>
-                nRet = this.MainForm.VerifyBarcode(
+                nRet = Program.MainForm.VerifyBarcode(
 this.stop,
 channel,
 strLibraryCode,
@@ -3730,8 +3730,8 @@ out strError);
 
                 // 打开一个新的快捷出纳窗
                 QuickChargingForm form = new QuickChargingForm();
-                form.MdiParent = this.MainForm;
-                form.MainForm = this.MainForm;
+                form.MdiParent = Program.MainForm;
+                form.MainForm = Program.MainForm;
                 form.Show();
 
                 string strReaderBarcode = "";
@@ -3743,7 +3743,7 @@ out strError);
          "批处理" + strOperName,
          "请输入读者证条码号:",
          "",
-         this.MainForm.DefaultFont);
+         Program.MainForm.DefaultFont);
                     if (strReaderBarcode == null)
                     {
                         form.Close();
@@ -3799,7 +3799,7 @@ this,
 "批处理" + strOperName,
 "请输入批次号:",
 "",
-this.MainForm.DefaultFont);
+Program.MainForm.DefaultFont);
                     if (strBatchNo == null)
                     {
                         form.Close();
@@ -4051,7 +4051,7 @@ this.MainForm.DefaultFont);
                 }
 
                 ReaderSearchForm form = new ReaderSearchForm();
-                form.MdiParent = this.MainForm;
+                form.MdiParent = Program.MainForm;
                 form.Show();
 
                 // return:
@@ -4136,7 +4136,7 @@ this.MainForm.DefaultFont);
                 }
 
                 ReaderSearchForm form = new ReaderSearchForm();
-                form.MdiParent = this.MainForm;
+                form.MdiParent = Program.MainForm;
                 form.Show();
 
                 form.EnableControls(false);
@@ -4183,7 +4183,7 @@ this.MainForm.DefaultFont);
             }
 
             BiblioSearchForm form = new BiblioSearchForm();
-            form.MdiParent = this.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             int nWarningLineCount = 0;
@@ -4510,13 +4510,13 @@ this.MainForm.DefaultFont);
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.DbType = this.DbType;
                 dlg.Text = "快速修改" + this.DbTypeCaption + "记录 -- 请指定动作参数";
-                dlg.MainForm = this.MainForm;
+                dlg.MainForm = Program.MainForm;
                 dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
                 dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
 
-                this.MainForm.AppInfo.LinkFormState(dlg, "itemsearchform_quickchange"+this.DbType+"dialog_state");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "itemsearchform_quickchange"+this.DbType+"dialog_state");
                 dlg.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(dlg);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
                 if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                     return;
@@ -4528,7 +4528,7 @@ this.MainForm.DefaultFont);
             DateTime now = DateTime.Now;
 
             // TODO: 检查一下，看看是否一项修改动作都没有
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行快速修改" + this.DbTypeCaption + "记录</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行快速修改" + this.DbTypeCaption + "记录</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -4574,7 +4574,7 @@ this.MainForm.DefaultFont);
 
                     BiblioInfo info = item.BiblioInfo;
 
-                    this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
 
                     XmlDocument dom = new XmlDocument();
                     try
@@ -4609,7 +4609,7 @@ this.MainForm.DefaultFont);
                             goto ERROR1;
                     }
 
-                    this.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(strDebugInfo).Replace("\r\n", "<br/>") + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(strDebugInfo).Replace("\r\n", "<br/>") + "</div>");
 
                     nProcessCount++;
 
@@ -4642,7 +4642,7 @@ this.MainForm.DefaultFont);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束快速修改" + this.DbTypeCaption + "记录</div>");
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束快速修改" + this.DbTypeCaption + "记录</div>");
             }
 
             DoViewComment(false);
@@ -4690,7 +4690,7 @@ this.MainForm.DefaultFont);
             StringBuilder debug = new StringBuilder(4096);
 
             // state
-            string strStateAction = this.MainForm.AppInfo.GetString(
+            string strStateAction = Program.MainForm.AppInfo.GetString(
                 "change_order_param",
                 "state",
                 "<不改变>");
@@ -4701,11 +4701,11 @@ this.MainForm.DefaultFont);
 
                 if (strStateAction == "<增、减>")
                 {
-                    string strAdd = this.MainForm.AppInfo.GetString(
+                    string strAdd = Program.MainForm.AppInfo.GetString(
                 "change_order_param",
                 "state_add",
                 "");
-                    string strRemove = this.MainForm.AppInfo.GetString(
+                    string strRemove = Program.MainForm.AppInfo.GetString(
             "change_order_param",
             "state_remove",
             "");
@@ -4742,14 +4742,14 @@ this.MainForm.DefaultFont);
             }
 
             // 其它字段
-            string strFieldName = this.MainForm.AppInfo.GetString(
+            string strFieldName = Program.MainForm.AppInfo.GetString(
 "change_order_param",
 "field_name",
 "<不使用>");
 
             if (strFieldName != "<不使用>")
             {
-                string strFieldValue = this.MainForm.AppInfo.GetString(
+                string strFieldValue = Program.MainForm.AppInfo.GetString(
     "change_order_param",
     "field_value",
     "");
@@ -4914,7 +4914,7 @@ this.MainForm.DefaultFont);
         void menu_printOrderFormAccept_Click(object sender, EventArgs e)
         {
             string strError = "";
-            string strFilename = PathUtil.MergePath(this.MainForm.DataDir, "~orderrecpath.txt");
+            string strFilename = PathUtil.MergePath(Program.MainForm.DataDir, "~orderrecpath.txt");
             bool bAppend = false;   // 不希望出现询问追加的对话框，直接覆盖
             // 导出到订购记录路径文件
             // return:
@@ -4935,8 +4935,8 @@ this.MainForm.DefaultFont);
             }
 
             PrintOrderForm form = new PrintOrderForm();
-            // form.MainForm = this.MainForm;
-            form.MdiParent = this.MainForm;
+            // form.MainForm = Program.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             form.AcceptCondition = true;
@@ -4963,7 +4963,7 @@ this.MainForm.DefaultFont);
         void menu_printOrderForm_Click(object sender, EventArgs e)
         {
             string strError = "";
-            string strFilename = PathUtil.MergePath(this.MainForm.DataDir, "~orderrecpath.txt");
+            string strFilename = PathUtil.MergePath(Program.MainForm.DataDir, "~orderrecpath.txt");
             bool bAppend = false;   // 不希望出现询问追加的对话框，直接覆盖
             // 导出到订购记录路径文件
             // return:
@@ -4984,8 +4984,8 @@ this.MainForm.DefaultFont);
             }
 
             PrintOrderForm form = new PrintOrderForm();
-            // form.MainForm = this.MainForm;
-            form.MdiParent = this.MainForm;
+            // form.MainForm = Program.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             form.AcceptCondition = false;
@@ -5026,8 +5026,8 @@ this.MainForm.DefaultFont);
                 string strOrderDbName = Global.GetDbName(strFirstRecPath);
                 if (string.IsNullOrEmpty(strOrderDbName) == false)
                 {
-                    string strBiblioDbName = this.MainForm.GetBiblioDbNameFromOrderDbName(strOrderDbName);
-                    strIssueDbName = this.MainForm.GetIssueDbName(strBiblioDbName);
+                    string strBiblioDbName = Program.MainForm.GetBiblioDbNameFromOrderDbName(strOrderDbName);
+                    strIssueDbName = Program.MainForm.GetIssueDbName(strBiblioDbName);
                 }
             }
 
@@ -5040,7 +5040,7 @@ this.MainForm.DefaultFont);
             }
 
             PrintClaimForm form = new PrintClaimForm();
-            form.MdiParent = this.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             if (string.IsNullOrEmpty(strIssueDbName) == false)
@@ -5062,7 +5062,7 @@ this.MainForm.DefaultFont);
         void menu_printAcceptForm_Click(object sender, EventArgs e)
         {
             string strError = "";
-            string strFilename = PathUtil.MergePath(this.MainForm.DataDir, "~itemrecpath.txt");
+            string strFilename = PathUtil.MergePath(Program.MainForm.DataDir, "~itemrecpath.txt");
             bool bAppend = false;   // 不希望出现询问追加的对话框，直接覆盖
             // 导出到(已验收的)册记录路径文件
             // return:
@@ -5083,8 +5083,8 @@ this.MainForm.DefaultFont);
             }
 
             PrintAcceptForm form = new PrintAcceptForm();
-            // form.MainForm = this.MainForm;
-            form.MdiParent = this.MainForm;
+            // form.MainForm = Program.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             // 从(已验收的)册记录路径文件装载
@@ -5144,7 +5144,7 @@ this.MainForm.DefaultFont);
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            this.MainForm.StatusBarMessage = "册记录路径 " + nRet.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportItemRecPathFilename;
+            Program.MainForm.StatusBarMessage = "册记录路径 " + nRet.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportItemRecPathFilename;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -5309,7 +5309,7 @@ this.MainForm.DefaultFont);
             //      -1  不是订购库
             //      0   图书类型
             //      1   期刊类型
-            nRet = this.MainForm.IsSeriesTypeFromOrderDbName(Global.GetDbName(strRecPath));
+            nRet = Program.MainForm.IsSeriesTypeFromOrderDbName(Global.GetDbName(strRecPath));
             if (nRet == -1)
             {
                 strError = "IsSeriesTypeFromOrderDbName() '" + strRecPath + "' error";
@@ -5328,8 +5328,8 @@ this.MainForm.DefaultFont);
                     return -1;
                 }
 
-                string strBiblioDbName = this.MainForm.GetBiblioDbNameFromOrderDbName(Global.GetDbName(strRecPath));
-                string strIssueDbName = this.MainForm.GetIssueDbName(strBiblioDbName);
+                string strBiblioDbName = Program.MainForm.GetBiblioDbNameFromOrderDbName(Global.GetDbName(strRecPath));
+                string strIssueDbName = Program.MainForm.GetIssueDbName(strBiblioDbName);
 
                 // 如果是期刊的订购库，还需要通过订购记录的refid获得期记录，从期记录中才能得到馆藏分配信息
                 string strOutputStyle = "";
@@ -5563,9 +5563,9 @@ this.MainForm.DefaultFont);
 
                 form = new EntityForm();
 
-                form.MdiParent = this.MainForm;
+                form.MdiParent = Program.MainForm;
 
-                form.MainForm = this.MainForm;
+                form.MainForm = Program.MainForm;
                 form.Show();
 
                 stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
@@ -5642,11 +5642,11 @@ this.MainForm.DefaultFont);
                     {
                         if (itemsearchform == null)
                         {
-                            Form active_mdi = this.MainForm.ActiveMdiChild;
+                            Form active_mdi = Program.MainForm.ActiveMdiChild;
 
                             itemsearchform = new ItemSearchForm();
-                            itemsearchform.MdiParent = this.MainForm;
-                            itemsearchform.MainForm = this.MainForm;
+                            itemsearchform.MdiParent = Program.MainForm;
+                            itemsearchform.MainForm = Program.MainForm;
                             itemsearchform.Show();
                             itemsearchform.QueryWordString = "创建索取号过程中出错的册记录";
 
@@ -5762,7 +5762,7 @@ this.MainForm.DefaultFont);
             {
                 if (string.IsNullOrEmpty(m_strTempQuickBarcodeFilename) == true)
                 {
-                    m_strTempQuickBarcodeFilename = PathUtil.MergePath(this.MainForm.DataDir, "~" + Guid.NewGuid().ToString());
+                    m_strTempQuickBarcodeFilename = PathUtil.MergePath(Program.MainForm.DataDir, "~" + Guid.NewGuid().ToString());
                 }
 
                 File.Delete(m_strTempQuickBarcodeFilename);
@@ -5818,8 +5818,8 @@ this.MainForm.DefaultFont);
 
                 // 新打开一个快速修改册窗口
                 QuickChangeEntityForm form = new QuickChangeEntityForm();
-                // form.MainForm = this.MainForm;
-                form.MdiParent = this.MainForm;
+                // form.MainForm = Program.MainForm;
+                form.MdiParent = Program.MainForm;
                 form.Show();
 
                 if (form.SetChangeParameters() == false)
@@ -6094,8 +6094,8 @@ MessageBoxDefaultButton.Button1);
 
             ItemSearchForm form = new ItemSearchForm();
             form.DbType = this.DbType;
-            form.MdiParent = this.MainForm;
-            // form.MainForm = this.MainForm;
+            form.MdiParent = Program.MainForm;
+            // form.MainForm = Program.MainForm;
             form.Show();
 
             int i = 0;
@@ -6175,7 +6175,7 @@ MessageBoxDefaultButton.Button1);
             this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
             listView_records_SelectedIndexChanged(null, null);
             TimeSpan delta = DateTime.Now - start_time;
-            this.MainForm.StatusBarMessage = "剪切操作 耗时 " + delta.TotalSeconds.ToString() + " 秒";
+            Program.MainForm.StatusBarMessage = "剪切操作 耗时 " + delta.TotalSeconds.ToString() + " 秒";
         }
 
         void menu_pasteFromClipboard_insertBefore_Click(object sender, EventArgs e)
@@ -6611,7 +6611,7 @@ MessageBoxDefaultButton.Button1);
                     object o = m_tableBarcodeColIndex[strItemDbName];
                     if (o == null)
                     {
-                        ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                        ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                         nCol = temp.FindColumnByType("item_barcode");
                         if (nCol == -1)
                         {
@@ -6662,7 +6662,7 @@ MessageBoxDefaultButton.Button1);
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            this.MainForm.StatusBarMessage = "册条码号 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBarcodeFilename;
+            Program.MainForm.StatusBarMessage = "册条码号 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBarcodeFilename;
             return;
         ERROR1:
             MessageBox.Show(strError);
@@ -6681,14 +6681,14 @@ MessageBoxDefaultButton.Button1);
         {
             get
             {
-                return this.MainForm.AppInfo.GetString(
+                return Program.MainForm.AppInfo.GetString(
                     "bibliosearchform",
                     "last_iso2709_filename",
                     "");
             }
             set
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliosearchform",
                     "last_iso2709_filename",
                     value);
@@ -6703,14 +6703,14 @@ MessageBoxDefaultButton.Button1);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "bibliosearchform",
                     "last_iso2709_crlf",
                     false);
             }
             set
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "bibliosearchform",
                     "last_iso2709_crlf",
                     value);
@@ -6725,14 +6725,14 @@ MessageBoxDefaultButton.Button1);
         {
             get
             {
-                return this.MainForm.AppInfo.GetString(
+                return Program.MainForm.AppInfo.GetString(
                     "bibliosearchform",
                     "last_encoding_name",
                     "");
             }
             set
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliosearchform",
                     "last_encoding_name",
                     value);
@@ -6747,14 +6747,14 @@ MessageBoxDefaultButton.Button1);
         {
             get
             {
-                return this.MainForm.AppInfo.GetString(
+                return Program.MainForm.AppInfo.GetString(
                     "bibliosearchform",
                     "last_cataloging_rule",
                     "<无限制>");
             }
             set
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliosearchform",
                     "last_cataloging_rule",
                     value);
@@ -6967,11 +6967,11 @@ MessageBoxDefaultButton.Button1);
 
 #if NO
                         // 给根元素设置几个参数
-                        DomUtil.SetAttr(domBiblio.DocumentElement, "path", DpNs.dprms, this.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
+                        DomUtil.SetAttr(domBiblio.DocumentElement, "path", DpNs.dprms, Program.MainForm.LibraryServerUrl + "?" + item.BiblioInfo.RecPath);  // strRecPath
                         DomUtil.SetAttr(domBiblio.DocumentElement, "timestamp", DpNs.dprms, ByteArray.GetHexTimeStampString(item.BiblioInfo.Timestamp));   // baTimestamp
 #endif
 
-                        w.WriteAttributeString("path", this.MainForm.LibraryServerUrl + "?" + strBiblioRecPath);
+                        w.WriteAttributeString("path", Program.MainForm.LibraryServerUrl + "?" + strBiblioRecPath);
                         w.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(baTimestamp));
 
                         domBiblio.DocumentElement.WriteTo(w);
@@ -7028,7 +7028,7 @@ MessageBoxDefaultButton.Button1);
                 stop.HideProgress();
             }
 
-            this.MainForm.StatusBarMessage = "书目记录 " + groupTable.Count.ToString() + "个 已成功导出到文件 " + this.ExportBiblioDumpFilename;
+            Program.MainForm.StatusBarMessage = "书目记录 " + groupTable.Count.ToString() + "个 已成功导出到文件 " + this.ExportBiblioDumpFilename;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -7053,7 +7053,7 @@ MessageBoxDefaultButton.Button1);
             //      -1  出错
             //      0   文件不存在
             //      1   成功
-            nRet = LoadRuleNameTable(PathUtil.MergePath(this.MainForm.DataDir, "cataloging_rules.xml"),
+            nRet = LoadRuleNameTable(PathUtil.MergePath(Program.MainForm.DataDir, "cataloging_rules.xml"),
                 out rule_name_table,
                 out strError);
             if (nRet == -1)
@@ -7323,7 +7323,7 @@ MessageBoxDefaultButton.Button1);
                                         null,
                                         "请输入馆藏地点 '" + strLocation + "' 所对应的编目规则名称:",
                                         "NLC",
-                                        this.MainForm.DefaultFont);
+                                        Program.MainForm.DefaultFont);
                                     if (strCatalogingRule == null)
                                     {
                                         DialogResult result = MessageBox.Show(this,
@@ -7680,7 +7680,7 @@ MessageBoxDefaultButton.Button1);
             //      -1  出错
             //      0   文件不存在
             //      1   成功
-            nRet = LoadRuleNameTable(PathUtil.MergePath(this.MainForm.DataDir, "cataloging_rules.xml"),
+            nRet = LoadRuleNameTable(PathUtil.MergePath(Program.MainForm.DataDir, "cataloging_rules.xml"),
                 out rule_name_table,
                 out strError);
             if (nRet == -1)
@@ -7905,7 +7905,7 @@ out strError);
                                     null,
                                     "请输入馆藏地点 '" + strLocation + "' 所对应的编目规则名称:",
                                     "NLC",
-                                    this.MainForm.DefaultFont);
+                                    Program.MainForm.DefaultFont);
                                 if (strCatalogingRule == null)
                                 {
                                     DialogResult result = MessageBox.Show(this,
@@ -8013,7 +8013,7 @@ out strError);
 
                     /*
                     Encoding sourceEncoding = connection.GetRecordsEncoding(
-                        this.MainForm,
+                        Program.MainForm,
                         record.m_strSyntaxOID);
 
 
@@ -8196,7 +8196,7 @@ out strError);
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            this.MainForm.StatusBarMessage = "书目记录路径 " + biblio_recpaths.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBiblioRecPathFilename;
+            Program.MainForm.StatusBarMessage = "书目记录路径 " + biblio_recpaths.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBiblioRecPathFilename;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -8327,7 +8327,7 @@ out strError);
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            this.MainForm.StatusBarMessage = "册记录路径 " + nRet.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportRecPathFilename;
+            Program.MainForm.StatusBarMessage = "册记录路径 " + nRet.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportRecPathFilename;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -8430,7 +8430,7 @@ out strError);
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            this.MainForm.StatusBarMessage = "行内容 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文本文件 " + this.ExportTextFilename;
+            Program.MainForm.StatusBarMessage = "行内容 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文本文件 " + this.ExportTextFilename;
         }
 
         // 导出选择的行到 Excel 文件
@@ -8516,9 +8516,9 @@ out strError);
             this.comboBox_entityDbName.Items.Add("<全部>");
 
             if (this.DbType == "arrive"
-                && string.IsNullOrEmpty(this.MainForm.ArrivedDbName) == false)
+                && string.IsNullOrEmpty(Program.MainForm.ArrivedDbName) == false)
             {
-                this.comboBox_entityDbName.Items.Add(this.MainForm.ArrivedDbName);
+                this.comboBox_entityDbName.Items.Add(Program.MainForm.ArrivedDbName);
                 return;
             }
 
@@ -8527,11 +8527,11 @@ out strError);
 
             this.comboBox_entityDbName.Items.Add("<全部期刊>");
 
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty property = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
 
                     if (this.DbType == "item")
                     {
@@ -8569,7 +8569,7 @@ out strError);
         bool CheckProperties()
         {
             string strError = "";
-            if (this.MainForm.NormalDbProperties == null)
+            if (Program.MainForm.NormalDbProperties == null)
             {
                 strError = "普通数据库属性尚未初始化";
                 goto ERROR1;
@@ -8766,9 +8766,9 @@ out strError);
             {
                 this.tabComboBox_queryWord.Text = "";
             }
-            this.MainForm.AppInfo.LinkFormState(dlg, "searchitemform_gettimedialog_single");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "searchitemform_gettimedialog_single");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -8790,9 +8790,9 @@ out strError);
                 this.tabComboBox_queryWord.Text = "";
             }
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "searchitemform_gettimedialog_single");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "searchitemform_gettimedialog_single");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -8814,9 +8814,9 @@ out strError);
             {
                 this.tabComboBox_queryWord.Text = "";
             }
-            this.MainForm.AppInfo.LinkFormState(dlg, "searchitemform_gettimedialog_range");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "searchitemform_gettimedialog_range");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -8837,9 +8837,9 @@ out strError);
                 this.tabComboBox_queryWord.Text = "";
             }
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "searchitemform_gettimedialog_range");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "searchitemform_gettimedialog_range");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -8878,7 +8878,7 @@ out strError);
 
         internal override string GetHeadString(bool bAjax = true)
         {
-            string strCssFilePath = PathUtil.MergePath(this.MainForm.DataDir, "operloghtml.css");
+            string strCssFilePath = PathUtil.MergePath(Program.MainForm.DataDir, "operloghtml.css");
 
             if (bAjax == true)
                 return
@@ -9279,7 +9279,7 @@ out strError);
 
             host.CodeFileName = this.m_strUsedMarcQueryFilename;
             {
-                host.MainForm = this.MainForm;
+                // host.MainForm = Program.MainForm;
                 host.UiForm = this;
                 host.DbType = this.DbType;
                 host.RecordPath = "";
@@ -9298,7 +9298,7 @@ out strError);
                 }
             }
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.FileName + "</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行脚本 " + dlg.FileName + "</div>");
 
             if (stop.IsInLoop == true)
             {
@@ -9321,7 +9321,7 @@ out strError);
                     stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
 
                 {
-                    host.MainForm = this.MainForm;
+                    // host.MainForm = Program.MainForm;
                     host.DbType = this.DbType;
                     host.RecordPath = "";
                     host.ItemDom = null;
@@ -9393,9 +9393,9 @@ out strError);
 
                     BiblioInfo info = item.BiblioInfo;
 
-                    this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
 
-                    host.MainForm = this.MainForm;
+                    // host.MainForm = Program.MainForm;
                     host.DbType = this.DbType;
                     host.RecordPath = info.RecPath;
                     host.ItemDom = new XmlDocument();
@@ -9449,7 +9449,7 @@ out strError);
                 }
 
                 {
-                    host.MainForm = this.MainForm;
+                    host.MainForm = Program.MainForm;
                     host.DbType = this.DbType;
                     host.RecordPath = "";
                     host.ItemDom = null;
@@ -9486,7 +9486,7 @@ out strError);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.FileName + "</div>");
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行脚本 " + dlg.FileName + "</div>");
             }
 
             DoViewComment(false);
@@ -9770,11 +9770,11 @@ Keys keyData)
             // 获得所有数据库名
             if (string.IsNullOrEmpty(e.Path) == true)
             {
-                if (this.MainForm.BiblioDbProperties != null)
+                if (Program.MainForm.BiblioDbProperties != null)
                 {
-                    for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                    for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                     {
-                        BiblioDbProperty property = this.MainForm.BiblioDbProperties[i];
+                        BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
 
                         if (this.DbType == "item")
                         {
@@ -9834,13 +9834,13 @@ out strError);
             XmlViewerForm dlg = new XmlViewerForm();
 
             dlg.Text = "检索式XML";
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.XmlString = strQueryXml;
             // dlg.StartPosition = FormStartPosition.CenterScreen;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_viewqueryxml");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "bibliosearchform_viewqueryxml");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             return;
         ERROR1:
@@ -10007,13 +10007,13 @@ out strError);
                 }
                 else if (this.DbType == "arrive")
                 {
-                    if (string.IsNullOrEmpty(this.MainForm.ArrivedDbName) == true)
+                    if (string.IsNullOrEmpty(Program.MainForm.ArrivedDbName) == true)
                     {
                         strError = "当前服务器尚未配置预约到书库名";
                         goto ERROR1;
                     }
 
-                    string strQueryXml = "<target list='" + this.MainForm.ArrivedDbName + ":" + this.comboBox_from.Text + "'><item><word>"
+                    string strQueryXml = "<target list='" + Program.MainForm.ArrivedDbName + ":" + this.comboBox_from.Text + "'><item><word>"
         + StringUtil.GetXmlStringSimple(strQueryWord)
         + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>"
                     + this.MaxSearchResultCount + "</maxCount></item><lang>" + this.Lang + "</lang></target>";
