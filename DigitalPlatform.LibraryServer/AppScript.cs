@@ -154,10 +154,15 @@ namespace DigitalPlatform.LibraryServer
         //		-1	出错
         //		0	脚本代码没有找到
         //      1   成功
-        int _initialLibraryHostAssembly(out Assembly assembly,
+        int _initialLibraryHostAssembly(
+            Assembly existing_assembly,
+            string strExistingMD5,
+            out Assembly assembly,
+            out string strMD5,
             out string strError)
         {
             assembly = null;
+            strMD5 = "";
             strError = "";
             int nRet = 0;
 
@@ -212,11 +217,13 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
 
             // 将 strCode 和 saRef 构造 hash 字符串
-            string strMD5 = StringUtil.GetMd5(strCode + "\r\n" + StringUtil.MakePathList(saRef));
-            if (strMD5 == _scriptMD5)
+            strMD5 = StringUtil.GetMd5(strCode + "\r\n" + StringUtil.MakePathList(saRef));
+            if (existing_assembly != null
+                && strMD5 == strExistingMD5)
+            {
+                assembly = existing_assembly;
                 return 1;   // 代码没有变化，不用刷新 Assembly
-
-            _scriptMD5 = strMD5;
+            }
 
             {
                 string strWarning = "";
@@ -246,13 +253,33 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             int nRet = 0;
 
+            Assembly existing_assembly = null;
+            string strExistingMD5 = "";
+
+            _lockAssembly.EnterReadLock();
+            try
+            {
+                existing_assembly = this.m_assemblyLibraryHost;
+                strExistingMD5 = this._scriptMD5;
+            }
+            finally
+            {
+                _lockAssembly.ExitReadLock();
+            }
+
             Assembly assembly = null;
+            string strMD5 = "";
+
             // 初始化 Assembly 对象
             // return:
             //		-1	出错
             //		0	脚本代码没有找到
             //      1   成功
-            nRet = _initialLibraryHostAssembly(out assembly,
+            nRet = _initialLibraryHostAssembly(
+                existing_assembly,
+                strExistingMD5,
+                out assembly,
+                out strMD5,
                 out strError);
 
             _lockAssembly.EnterWriteLock();
@@ -266,8 +293,12 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
-                    Debug.Assert(assembly != null, "");
+                    if (nRet == 1)
+                    {
+                        Debug.Assert(assembly != null, "");
+                    }
                     this.m_assemblyLibraryHost = assembly;
+                    this._scriptMD5 = strMD5;
                 }
             }
             finally
