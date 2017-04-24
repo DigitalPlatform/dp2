@@ -29,6 +29,10 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
+        // 2017/4/24
+        public ReaderWriterLockSlim _lockAssembly = new ReaderWriterLockSlim();
+        string _scriptMD5 = "";
+
         public Assembly m_assemblyLibraryHost = null;
         public string m_strAssemblyLibraryHostError = "";
 
@@ -49,97 +53,113 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
-            this.m_externalMessageInterfaces = null;
-
-            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("externalMessageInterface");
-            if (root == null)
+            _lockAssembly.EnterWriteLock();
+            try
             {
-                strError = "在library.xml中没有找到<externalMessageInterface>元素";
-                return 0;
+                this.m_externalMessageInterfaces = null;
+
+                XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("externalMessageInterface");
+                if (root == null)
+                {
+                    strError = "在library.xml中没有找到<externalMessageInterface>元素";
+                    return 0;
+                }
+
+                this.m_externalMessageInterfaces = new List<MessageInterface>();
+
+                XmlNodeList nodes = root.SelectNodes("interface");
+                foreach (XmlNode node in nodes)
+                {
+                    string strType = DomUtil.GetAttr(node, "type");
+                    if (String.IsNullOrEmpty(strType) == true)
+                    {
+                        strError = "<interface>元素未配置type属性值";
+                        return -1;
+                    }
+
+                    string strAssemblyName = DomUtil.GetAttr(node, "assemblyName");
+                    if (String.IsNullOrEmpty(strAssemblyName) == true)
+                    {
+                        strError = "<interface>元素未配置assemblyName属性值";
+                        return -1;
+                    }
+
+                    MessageInterface message_interface = new MessageInterface();
+                    message_interface.Type = strType;
+                    message_interface.Assembly = Assembly.Load(strAssemblyName);
+                    if (message_interface.Assembly == null)
+                    {
+                        strError = "名字为 '" + strAssemblyName + "' 的Assembly加载失败...";
+                        return -1;
+                    }
+
+                    Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+            message_interface.Assembly,
+            "DigitalPlatform.Interfaces.ExternalMessageHost");
+                    if (hostEntryClassType == null)
+                    {
+                        strError = "名字为 '" + strAssemblyName + "' 的Assembly中未找到 DigitalPlatform.Interfaces.ExternalMessageHost类的派生类，初始化扩展消息接口失败...";
+                        return -1;
+                    }
+
+                    message_interface.HostObj = (ExternalMessageHost)hostEntryClassType.InvokeMember(null,
+            BindingFlags.DeclaredOnly |
+            BindingFlags.Public | BindingFlags.NonPublic |
+            BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+            null);
+                    if (message_interface.HostObj == null)
+                    {
+                        strError = "创建 type 为 '" + strType + "' 的 DigitalPlatform.Interfaces.ExternalMessageHost 类的派生类的对象（构造函数）失败，初始化扩展消息接口失败...";
+                        return -1;
+                    }
+
+                    message_interface.HostObj.App = this;
+
+                    this.m_externalMessageInterfaces.Add(message_interface);
+                }
+
+                return 1;
             }
-
-            this.m_externalMessageInterfaces = new List<MessageInterface>();
-
-            XmlNodeList nodes = root.SelectNodes("interface");
-            foreach (XmlNode node in nodes)
+            finally
             {
-                string strType = DomUtil.GetAttr(node, "type");
-                if (String.IsNullOrEmpty(strType) == true)
-                {
-                    strError = "<interface>元素未配置type属性值";
-                    return -1;
-                }
-
-                string strAssemblyName = DomUtil.GetAttr(node, "assemblyName");
-                if (String.IsNullOrEmpty(strAssemblyName) == true)
-                {
-                    strError = "<interface>元素未配置assemblyName属性值";
-                    return -1;
-                }
-
-                MessageInterface message_interface = new MessageInterface();
-                message_interface.Type = strType;
-                message_interface.Assembly = Assembly.Load(strAssemblyName);
-                if (message_interface.Assembly == null)
-                {
-                    strError = "名字为 '" + strAssemblyName + "' 的Assembly加载失败...";
-                    return -1;
-                }
-
-                Type hostEntryClassType = ScriptManager.GetDerivedClassType(
-        message_interface.Assembly,
-        "DigitalPlatform.Interfaces.ExternalMessageHost");
-                if (hostEntryClassType == null)
-                {
-                    strError = "名字为 '" + strAssemblyName + "' 的Assembly中未找到 DigitalPlatform.Interfaces.ExternalMessageHost类的派生类，初始化扩展消息接口失败...";
-                    return -1;
-                }
-
-                message_interface.HostObj = (ExternalMessageHost)hostEntryClassType.InvokeMember(null,
-        BindingFlags.DeclaredOnly |
-        BindingFlags.Public | BindingFlags.NonPublic |
-        BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
-        null);
-                if (message_interface.HostObj == null)
-                {
-                    strError = "创建 type 为 '" + strType + "' 的 DigitalPlatform.Interfaces.ExternalMessageHost 类的派生类的对象（构造函数）失败，初始化扩展消息接口失败...";
-                    return -1;
-                }
-
-                message_interface.HostObj.App = this;
-
-                this.m_externalMessageInterfaces.Add(message_interface);
+                _lockAssembly.ExitWriteLock();
             }
-
-            return 1;
         }
 
         public MessageInterface GetMessageInterface(string strType)
         {
-            // 2012/3/29
-            if (this.m_externalMessageInterfaces == null)
-                return null;
-
-            foreach (MessageInterface message_interface in this.m_externalMessageInterfaces)
+            _lockAssembly.EnterReadLock();
+            try
             {
-                if (message_interface.Type == strType)
-                    return message_interface;
-            }
+                // 2012/3/29
+                if (this.m_externalMessageInterfaces == null)
+                    return null;
 
-            return null;
+                foreach (MessageInterface message_interface in this.m_externalMessageInterfaces)
+                {
+                    if (message_interface.Type == strType)
+                        return message_interface;
+                }
+
+                return null;
+            }
+            finally
+            {
+                _lockAssembly.ExitReadLock();
+            }
         }
 
-        // 初始化Assembly对象
+        // 初始化 Assembly 对象
         // return:
         //		-1	出错
-        //		0	成功
-        public int InitialLibraryHostAssembly(out string strError)
+        //		0	脚本代码没有找到
+        //      1   成功
+        int _initialLibraryHostAssembly(Assembly assembly,
+            out string strError)
         {
+            assembly = null;
             strError = "";
             int nRet = 0;
-
-            this.m_strAssemblyLibraryHostError = "";
-            this.m_assemblyLibraryHost = null;
 
             if (this.LibraryCfgDom == null)
             {
@@ -154,27 +174,18 @@ namespace DigitalPlatform.LibraryServer
 
             // <script>节点不存在
             if (nodeScript == null)
-            {
-                this.m_assemblyLibraryHost = null;
                 return 0;
-            }
 
             // <script>节点下级无CDATA节点
             if (nodeScript.ChildNodes.Count == 0)
-            {
-                this.m_assemblyLibraryHost = null;
                 return 0;
-            }
 
             XmlNode firstNode = nodeScript.ChildNodes[0];
 
             //第一个儿子节点不是CDATA或者Text节点时
             if (firstNode.NodeType != XmlNodeType.CDATA
                 && firstNode.NodeType != XmlNodeType.Text)
-            {
-                this.m_assemblyLibraryHost = null;
                 return 0;
-            }
 
             //~~~~~~~~~~~~~~~~~~
             // 创建Assembly对象
@@ -197,9 +208,17 @@ namespace DigitalPlatform.LibraryServer
 
             string strCode = firstNode.Value;
 
-            if (strCode != "")
+            if (string.IsNullOrEmpty(strCode) == true)
+                return 0;
+
+            // 将 strCode 和 saRef 构造 hash 字符串
+            string strMD5 = StringUtil.GetMd5(strCode + "\r\n" + StringUtil.MakePathList(saRef));
+            if (strMD5 == _scriptMD5)
+                return 1;   // 代码没有变化，不用刷新 Assembly
+
+            _scriptMD5 = strMD5;
+
             {
-                Assembly assembly = null;
                 string strWarning = "";
                 nRet = CreateAssembly(strCode,
                     saRef,
@@ -209,15 +228,50 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                 {
                     strError = "library.xml中<script>元素内C#脚本编译时出错: \r\n" + strError;
-                    this.m_strAssemblyLibraryHostError = strError;
                     return -1;
                 }
-
-                this.m_assemblyLibraryHost = assembly;
             }
 
+            return 1;
+        }
 
-            return 0;
+
+        // 初始化Assembly对象
+        // return:
+        //		-1	出错
+        //		0	成功
+        public int InitialLibraryHostAssembly(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            Assembly assembly = null;
+            // 初始化 Assembly 对象
+            // return:
+            //		-1	出错
+            //		0	脚本代码没有找到
+            //      1   成功
+            nRet = _initialLibraryHostAssembly(assembly,
+                out strError);
+
+            _lockAssembly.EnterWriteLock();
+            try
+            {
+                if (nRet == -1)
+                {
+                    this.m_strAssemblyLibraryHostError = strError;
+                    this.m_assemblyLibraryHost = null;
+                    this._scriptMD5 = "";
+                }
+                else
+                    this.m_assemblyLibraryHost = assembly;
+            }
+            finally
+            {
+                _lockAssembly.ExitWriteLock();
+            }
+
+            return nRet;
         }
 
         // 从node节点得到refs字符串数组
@@ -387,6 +441,24 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             nResultValue = -1;
 
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = GetAssembly("",
+        out assembly,
+        out strError);
+            if (nRet == 1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "未定义<script>脚本代码，无法校验条码号。";
+                return -2;
+            }
+
+            Debug.Assert(assembly != null, "");
+#if NO
             if (this.m_strAssemblyLibraryHostError != "")
             {
                 strError = this.m_strAssemblyLibraryHostError;
@@ -398,9 +470,10 @@ namespace DigitalPlatform.LibraryServer
                 strError = "未定义<script>脚本代码，无法校验条码号。";
                 return -2;
             }
+#endif
 
             Type hostEntryClassType = ScriptManager.GetDerivedClassType(
-                this.m_assemblyLibraryHost,
+                assembly,
                 "DigitalPlatform.LibraryServer.LibraryHost");
             if (hostEntryClassType == null)
             {
@@ -507,6 +580,24 @@ namespace DigitalPlatform.LibraryServer
             // test 2016/10/25
             // account.Location = null;
 
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = GetAssembly("",
+        out assembly,
+        out strError);
+            if (nRet == 1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "未定义 <script> 脚本代码，无法执行脚本函数 ItemCanBorrow()。";
+                return -2;
+            }
+
+            Debug.Assert(assembly != null, "");
+#if NO
             if (this.m_strAssemblyLibraryHostError != "")
             {
                 strError = this.m_strAssemblyLibraryHostError;
@@ -518,9 +609,10 @@ namespace DigitalPlatform.LibraryServer
                 strError = "未定义<script>脚本代码，无法执行脚本函数ItemCanBorrow()。";
                 return -2;
             }
+#endif
 
             Type hostEntryClassType = ScriptManager.GetDerivedClassType(
-                this.m_assemblyLibraryHost,
+                assembly,
                 "DigitalPlatform.LibraryServer.LibraryHost");
             if (hostEntryClassType == null)
             {
@@ -594,6 +686,24 @@ namespace DigitalPlatform.LibraryServer
             strMessage = "";
             bResultValue = false;
 
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = GetAssembly("",
+        out assembly,
+        out strError);
+            if (nRet == 1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "未定义 <script> 脚本代码，无法执行脚本函数 ItemCanReturn()。";
+                return -2;
+            }
+
+            Debug.Assert(assembly != null, "");
+#if NO
             if (this.m_strAssemblyLibraryHostError != "")
             {
                 strError = this.m_strAssemblyLibraryHostError;
@@ -605,9 +715,10 @@ namespace DigitalPlatform.LibraryServer
                 strError = "未定义<script>脚本代码，无法执行脚本函数ItemCanReturn()。";
                 return -2;
             }
+#endif
 
             Type hostEntryClassType = ScriptManager.GetDerivedClassType(
-                this.m_assemblyLibraryHost,
+                assembly,
                 "DigitalPlatform.LibraryServer.LibraryHost");
             if (hostEntryClassType == null)
             {
@@ -690,6 +801,24 @@ namespace DigitalPlatform.LibraryServer
             // wantNotifyBarcodes = null;
             strMime = "";
 
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = GetAssembly("",
+        out assembly,
+        out strError);
+            if (nRet == 1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "未定义<script>脚本代码，无法执行脚本函数NotifyReader()。";
+                return -2;
+            }
+
+            Debug.Assert(assembly != null, "");
+#if NO
             if (this.m_strAssemblyLibraryHostError != "")
             {
                 strError = this.m_strAssemblyLibraryHostError;
@@ -701,9 +830,10 @@ namespace DigitalPlatform.LibraryServer
                 strError = "未定义<script>脚本代码，无法执行脚本函数NotifyReader()。";
                 return -2;
             }
+#endif
 
             Type hostEntryClassType = ScriptManager.GetDerivedClassType(
-                this.m_assemblyLibraryHost,
+                assembly,
                 "DigitalPlatform.LibraryServer.LibraryHost");
             if (hostEntryClassType == null)
             {
@@ -804,6 +934,24 @@ namespace DigitalPlatform.LibraryServer
 
             string strFuncName = "GetForegift";
 
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = GetAssembly("",
+        out assembly,
+        out strError);
+            if (nRet == 1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "未定义<script>脚本代码，无法执行脚本函数" + strFuncName + "()。";
+                return -2;
+            }
+
+            Debug.Assert(assembly != null, "");
+#if NO
             if (this.m_strAssemblyLibraryHostError != "")
             {
                 strError = this.m_strAssemblyLibraryHostError;
@@ -815,9 +963,10 @@ namespace DigitalPlatform.LibraryServer
                 strError = "未定义<script>脚本代码，无法执行脚本函数" + strFuncName + "()。";
                 return -2;
             }
+#endif
 
             Type hostEntryClassType = ScriptManager.GetDerivedClassType(
-                this.m_assemblyLibraryHost,
+                assembly,
                 "DigitalPlatform.LibraryServer.LibraryHost");
             if (hostEntryClassType == null)
             {
@@ -899,6 +1048,24 @@ namespace DigitalPlatform.LibraryServer
 
             string strFuncName = "GetHire";
 
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = GetAssembly("",
+        out assembly,
+        out strError);
+            if (nRet == 1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "未定义<script>脚本代码，无法执行脚本函数" + strFuncName + "()。";
+                return -2;
+            }
+
+            Debug.Assert(assembly != null, "");
+#if NO
             if (this.m_strAssemblyLibraryHostError != "")
             {
                 strError = this.m_strAssemblyLibraryHostError;
@@ -910,9 +1077,10 @@ namespace DigitalPlatform.LibraryServer
                 strError = "未定义<script>脚本代码，无法执行脚本函数" + strFuncName + "()。";
                 return -2;
             }
+#endif
 
             Type hostEntryClassType = ScriptManager.GetDerivedClassType(
-                this.m_assemblyLibraryHost,
+                assembly,
                 "DigitalPlatform.LibraryServer.LibraryHost");
             if (hostEntryClassType == null)
             {
@@ -973,6 +1141,78 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        // 当前是否定义了脚本?
+        // return:
+        //      -1  定义了，但编译有错
+        //      0   没有定义
+        //      1   定义了
+        public int HasScript(out string strError)
+        {
+            strError = "";
+
+            _lockAssembly.EnterReadLock();
+            try
+            {
+                if (string.IsNullOrEmpty(this.m_strAssemblyLibraryHostError) == false)
+                {
+                    strError = this.m_strAssemblyLibraryHostError;
+                    return -1;
+                }
+
+                if (this.m_assemblyLibraryHost == null)
+                {
+                    strError = "未定义<script>脚本代码";
+                    return 0;
+                }
+
+                return 1;
+            }
+            finally
+            {
+                _lockAssembly.ExitReadLock();
+            }
+        }
+
+        // return:
+        //      -1  出错
+        //      0   Assembly 为空
+        //      1   找到 Assembly
+        int GetAssembly(
+            string strStyle,
+            out Assembly assembly,
+            out string strError)
+        {
+            strError = "";
+            assembly = null;
+
+            _lockAssembly.EnterReadLock();
+            try
+            {
+                if (string.IsNullOrEmpty(this.m_strAssemblyLibraryHostError) == false)
+                {
+                    strError = this.m_strAssemblyLibraryHostError;
+                    return -1;
+                }
+
+                if (this.m_assemblyLibraryHost == null)
+                {
+                    if (StringUtil.IsInList("findBase", strStyle))
+                    {
+                        assembly = Assembly.GetExecutingAssembly();
+                        return 1;
+                    }
+                    strError = "未定义<script>脚本代码";
+                    return 0;
+                }
+
+                assembly = this.m_assemblyLibraryHost;
+                return 1;
+            }
+            finally
+            {
+                _lockAssembly.ExitReadLock();
+            }
+        }
 
         // 执行脚本函数GetLost
         // 根据当前读者记录、实体记录、书目记录，计算出丢失后的赔偿金额
@@ -998,20 +1238,26 @@ namespace DigitalPlatform.LibraryServer
 
             string strFuncName = "GetLost";
 
-            if (this.m_strAssemblyLibraryHostError != "")
-            {
-                strError = this.m_strAssemblyLibraryHostError;
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = GetAssembly("",
+        out assembly,
+        out strError);
+            if (nRet == 1)
                 return -1;
-            }
-
-            if (this.m_assemblyLibraryHost == null)
+            if (nRet == 0)
             {
                 strError = "未定义<script>脚本代码，无法执行脚本函数" + strFuncName + "()。";
                 return -2;
             }
 
+            Debug.Assert(assembly != null, "");
+
             Type hostEntryClassType = ScriptManager.GetDerivedClassType(
-                this.m_assemblyLibraryHost,
+                assembly,
                 "DigitalPlatform.LibraryServer.LibraryHost");
             if (hostEntryClassType == null)
             {
@@ -1092,6 +1338,25 @@ namespace DigitalPlatform.LibraryServer
 
             string strFuncName = "GetBiblioPart";
 
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = GetAssembly("",
+        out assembly,
+        out strError);
+            if (nRet == 1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "未定义<script>脚本代码，无法执行脚本函数" + strFuncName + "()。";
+                return -2;
+            }
+
+            Debug.Assert(assembly != null, "");
+
+#if NO
             if (this.m_strAssemblyLibraryHostError != "")
             {
                 strError = this.m_strAssemblyLibraryHostError;
@@ -1103,9 +1368,10 @@ namespace DigitalPlatform.LibraryServer
                 strError = "未定义<script>脚本代码，无法执行脚本函数" + strFuncName + "()。";
                 return -2;
             }
+#endif
 
             Type hostEntryClassType = ScriptManager.GetDerivedClassType(
-                this.m_assemblyLibraryHost,
+                assembly,
                 "DigitalPlatform.LibraryServer.LibraryHost");
             if (hostEntryClassType == null)
             {
@@ -1161,6 +1427,77 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        // 执行脚本函数 VerifyItem
+        // parameters:
+        // return:
+        //      -2  not found script
+        //      -1  出错
+        //      0   成功
+        public int DoVerifyItemFunction(
+            SessionInfo sessioninfo,
+            string strAction,
+            XmlDocument itemdom,
+            out string strError)
+        {
+            strError = "";
+
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = GetAssembly("findBase",
+        out assembly,
+        out strError);
+            if (nRet == 1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "未定义<script>脚本代码，无法执行校验册记录功能。";
+                return -2;
+            }
+
+            Debug.Assert(assembly != null, "");
+
+            Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+                assembly,
+                "DigitalPlatform.LibraryServer.LibraryHost");
+            if (hostEntryClassType == null)
+            {
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法校验册记录。";
+                return -2;
+            }
+
+            LibraryHost host = (LibraryHost)hostEntryClassType.InvokeMember(null,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                null);
+            if (host == null)
+            {
+                strError = "(DoVerifyItemFunction) 创建 DigitalPlatform.LibraryServer.LibraryHost 类的派生类的对象（构造函数）失败。";
+                return -1;
+            }
+
+            host.App = this;
+            host.SessionInfo = sessioninfo;
+
+            // 执行函数
+            try
+            {
+                return host.VerifyItem(strAction,
+                    itemdom,
+                    out strError);
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数 '" + "VerifyItem" + "' 出错：" + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
+        }
+
+#if NO
+        // TODO: 脚本代码编译期间要锁定相关数据结构
         // 执行脚本函数 VerifyItem
         // parameters:
         // return:
@@ -1252,6 +1589,8 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+#endif
+
         // 执行脚本函数 VerifyReader
         // parameters:
         // return:
@@ -1267,6 +1606,25 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
+
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = GetAssembly("findBase",
+        out assembly,
+        out strError);
+            if (nRet == 1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "未定义<script>脚本代码，无法校验读者记录。";
+                return -2;
+            }
+
+            Debug.Assert(assembly != null, "");
+#if NO
             if (this.m_strAssemblyLibraryHostError != "")
             {
                 strError = this.m_strAssemblyLibraryHostError;
@@ -1278,9 +1636,10 @@ namespace DigitalPlatform.LibraryServer
                 strError = "未定义<script>脚本代码，无法校验册记录。";
                 return -2;
             }
+#endif
 
             Type hostEntryClassType = ScriptManager.GetDerivedClassType(
-                this.m_assemblyLibraryHost,
+                assembly,
                 "DigitalPlatform.LibraryServer.LibraryHost");
             if (hostEntryClassType == null)
             {
@@ -1574,7 +1933,7 @@ namespace DigitalPlatform.LibraryServer
             // 去除 strRoom 内容中横杠或者冒号以后的部分。例如 “现刊阅览室-综合355”
             // 注：横杠以后的部分表示架号，统计时会忽略；冒号后面的部分表示班级书架名称，统计时不会被忽略
             {
-                List<string> parts = StringUtil.ParseTwoPart(strRoom, new string [] {"-", ":"});
+                List<string> parts = StringUtil.ParseTwoPart(strRoom, new string[] { "-", ":" });
                 strRoom = parts[0];
             }
 

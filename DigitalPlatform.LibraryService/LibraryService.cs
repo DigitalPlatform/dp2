@@ -9440,6 +9440,7 @@ Stack:
                     return result;
                 }
 
+#if NO
                 if (app.m_assemblyLibraryHost == null)
                 {
                     result.Value = -1;
@@ -9447,11 +9448,28 @@ Stack:
                     result.ErrorCode = ErrorCode.NotFound;
                     return result;
                 }
+#endif
+                // 当前是否定义了脚本?
+                // return:
+                //      -1  定义了，但编译有错
+                //      0   没有定义
+                //      1   定义了
+                int nRet = app.HasScript(out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "没有配置<script>，无法校验条码号";
+                    result.ErrorCode = ErrorCode.NotFound;
+                    return result;
+                }
+
                 // return:
                 //      -2  not found script
                 //      -1  出错
                 //      0   成功
-                int nRet = app.DoVerifyBarcodeScriptFunction(
+                nRet = app.DoVerifyBarcodeScriptFunction(
                     null,
                     strLibraryCode, // sessioninfo.LibraryCodeList,
                     strBarcode,

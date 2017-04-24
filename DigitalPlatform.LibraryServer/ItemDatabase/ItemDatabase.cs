@@ -2005,7 +2005,7 @@ out strError);
         || info.Action == "move")       // delete操作不校验记录
     && bNoCheckDup == false)
                         {
-                            nRet = this.DoVerifyItemFunction(
+                            nRet = this.App.DoVerifyItemFunction(
                                 sessioninfo,
                                 strAction,
                                 domNewRec,
@@ -2424,6 +2424,7 @@ out strError);
             return result;
         }
 
+#if NO
         // 执行脚本函数 VerifyItem
         // parameters:
         // return:
@@ -2437,6 +2438,25 @@ out strError);
             out string strError)
         {
             strError = "";
+
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = this.App.GetAssembly("",
+        out assembly,
+        out strError);
+            if (nRet == 1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "未定义<script>脚本代码，无法校验册记录。";
+                return -2;
+            }
+
+            Debug.Assert(assembly != null, "");
+#if NO
             if (this.App.m_strAssemblyLibraryHostError != "")
             {
                 strError = this.App.m_strAssemblyLibraryHostError;
@@ -2448,6 +2468,7 @@ out strError);
                 strError = "未定义<script>脚本代码，无法校验册记录。";
                 return -2;
             }
+#endif
 
             Type hostEntryClassType = ScriptManager.GetDerivedClassType(
                 this.App.m_assemblyLibraryHost,
@@ -2488,6 +2509,8 @@ out strError);
                 itemdom,
                 out strError);
         }
+
+#endif
 
         // return:
         //      -1  调用出错
