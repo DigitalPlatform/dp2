@@ -2244,12 +2244,12 @@ Stack:
                 dynamic o = form;
                 o.MdiParent = this;
 
-                // 2013/3/26
-                if (o.MainForm == null)
                 {
                     try
                     {
-                        o.MainForm = this;
+                        // 2017/4/25
+                        if (o.MainForm == null)
+                            o.MainForm = this;
                     }
                     catch
                     {

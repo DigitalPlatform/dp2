@@ -545,12 +545,9 @@ namespace dp2Circulation
         /// <param name="e">一个包含事件数据的 System.EventArgs</param>
         protected override void OnLoad(EventArgs e)
         {
-#if NO
             if (Program.MainForm != null)
-            {
                 MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
-            }
-#endif
+
             if (this._editing != null)
             {
                 LoadItem(this.Item);
@@ -569,12 +566,10 @@ namespace dp2Circulation
                     if (nRet == -1)
                         MessageBox.Show(this, strError);
 
-
                     this._existing.SetReadOnly("all");
 
                     // 突出差异内容
                     this._editing.HighlightDifferences(this._existing);
-
                 }
                 else
                 {
@@ -586,6 +581,7 @@ namespace dp2Circulation
                     this._existing.Enabled = false;
                 }
             }
+
             base.OnLoad(e);
         }
 

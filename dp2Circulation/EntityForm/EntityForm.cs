@@ -10032,7 +10032,7 @@ MessageBoxDefaultButton.Button1);
             CopyParam info = new CopyParam();
             info.CopyChildRecords = dlg.CopyChildRecords;
             info.BuildLink = dlg.BuildLink;
-            info.EnableSubRecord = dlg.EnableCopyChildRecords;
+            // info.EnableSubRecord = dlg.EnableCopyChildRecords;
 
             nRet = MoveTo("copy",
                 dlg.RecPath,
@@ -12180,7 +12180,7 @@ value);
         {
             public bool CopyChildRecords { get; set; }
             public bool BuildLink { get; set; }
-            public bool EnableSubRecord { get; set; }
+            // public bool EnableSubRecord { get; set; }
         }
 
         // 移动当前书目记录到指定的位置
@@ -12345,8 +12345,9 @@ value);
                                 MergeStyle old_style = merge_dlg.GetMergeStyle();
                                 old_style -= old_style & MergeStyle.SubRecordMask;
                                 merge_dlg.SetMergeStyle(old_style & MergeStyle.MissingSourceSubrecord);
+                                merge_dlg.EnableSubRecord = false;
                             }
-                            merge_dlg.EnableSubRecord = copy_param.EnableSubRecord;
+                            // merge_dlg.EnableSubRecord = copy_param.EnableSubRecord;
                         }
 
                         Program.MainForm.AppInfo.LinkFormState(merge_dlg, "entityform_GetMergeStyleDialog_" + strAction + "_state");
@@ -12367,9 +12368,9 @@ merge_dlg.UiState);
                     // 删除记录前先检查
                     if (copy_param != null && copy_param.CopyChildRecords == false)
                     {
-                        if ((merge_style & MergeStyle.ReserveSourceBiblio) != 0)
+                        if ((merge_style & MergeStyle.OverwriteSubrecord) != 0)
                         {
-                            strError = "copy_param.CopyChildRecords == false 和 merge_style 包含 MergeStyle.ReserveSourceBiblio 之间矛盾了";
+                            strError = "copy_param.CopyChildRecords == false 和 merge_style 包含 MergeStyle.OverwriteSubrecord 之间矛盾了";
                             goto ERROR1;
                         }
                     }
@@ -12400,9 +12401,9 @@ merge_dlg.UiState);
             // 检查参数
             if (copy_param != null && copy_param.CopyChildRecords == false)
             {
-                if ((merge_style & MergeStyle.ReserveSourceBiblio) != 0)
+                if ((merge_style & MergeStyle.OverwriteSubrecord) != 0)    // ReserveSourceBiblio
                 {
-                    strError = "copy_param.CopyChildRecords == false 和 merge_style 包含 MergeStyle.ReserveSourceBiblio 之间矛盾了";
+                    strError = "copy_param.CopyChildRecords == false 和 merge_style 包含 MergeStyle.OverwriteSubrecord 之间矛盾了";
                     goto ERROR1;
                 }
             }

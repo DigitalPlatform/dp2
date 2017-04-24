@@ -1245,7 +1245,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
         //                  child_reserve_source child_reserve_target 表示下属的册记录等要如何保留。如果这两个值同时都缺，默认为 "child_reserve_source,child_reserve_target" 效果，即合并下级记录
         //                  copy_copychildrecords 是否复制下级记录?
         //                  copy_buildlink          是否创建新记录到旧记录的 link 字段?
-        //                  copy_enablesubrecord    是否允许下级记录
+        //                  //copy_enablesubrecord    是否允许下级记录
         void UiTest_copyBiblioRecord_1(string strBiblioDbName, string strStyle)
         {
             string strError = "";
@@ -1296,7 +1296,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             EntityForm.CopyParam copy_param = new EntityForm.CopyParam();
             copy_param.CopyChildRecords = StringUtil.IsInList("copy_copychildrecords", strStyle);
             copy_param.BuildLink = StringUtil.IsInList("copy_buildlink", strStyle);
-            copy_param.EnableSubRecord = StringUtil.IsInList("copy_enablesubrecord", strStyle);
+            // copy_param.EnableSubRecord = StringUtil.IsInList("copy_enablesubrecord", strStyle);
 
 
             EntityForm entity_form = new EntityForm();
