@@ -37,8 +37,17 @@ namespace dp2Circulation
             {
                 if (this.Channel != null)
                     this.Channel.Dispose();
+
+                // 2017/4/24
+                if (stop != null) // 脱离关联
+                {
+                    stop.Unregister();	// 和容器关联
+                    stop = null;
+                }
+
                 CloseFloatingMessage();
             }
+
             base.Dispose(disposing);
         }
 

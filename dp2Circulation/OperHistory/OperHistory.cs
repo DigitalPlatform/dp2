@@ -361,6 +361,50 @@ namespace dp2Circulation
             return 0;
         }
 
+        // 2017/4/24
+        public void TestCompile(string strProjectName)
+        {
+            string strError = "";
+
+            if (String.IsNullOrEmpty(strProjectName) == true)
+            {
+                strError = "尚未指定方案名";
+                goto ERROR1;
+            }
+
+            string strProjectLocate = "";
+            // 获得方案参数
+            // strProjectNamePath	方案名，或者路径
+            // return:
+            //		-1	error
+            //		0	not found project
+            //		1	found
+            int nRet = this.ScriptManager.GetProjectData(
+                strProjectName,
+                out strProjectLocate);
+            if (nRet == 0)
+            {
+                strError = "凭条打印方案 " + strProjectName + " 没有找到...";
+                goto ERROR1;
+            }
+            if (nRet == -1)
+            {
+                strError = "scriptManager.GetProjectData() error ...";
+                goto ERROR1;
+            }
+
+            // 
+            nRet = PrepareScript(strProjectName,
+                strProjectLocate,
+                out strError);
+            if (nRet == -1)
+               goto ERROR1;
+
+            return;
+        ERROR1:
+            throw new Exception(strError);
+        }
+
 #if USE_LOCAL_CHANNEL
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
@@ -787,7 +831,7 @@ namespace dp2Circulation
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 string strError = "OperHistory 的工作线程出现异常: \r\n" + ExceptionUtil.GetDebugText(ex);
                 Program.MainForm.WriteErrorLog(strError);
@@ -968,7 +1012,7 @@ namespace dp2Circulation
             string strItemBarcode,
             string strConfirmItemRecPath,
             string strReaderSummary,
-            string strItemXml, 
+            string strItemXml,
             BorrowInfo borrow_info,
             DateTime start_time,
             DateTime end_time);
@@ -1334,7 +1378,7 @@ out strError);
                 + "\r\n\t\t<div class='clear'></div>"
                 + "\r\n\t</div>") : ""
                 )
-                
+
                 + "\r\n\t<div class='opername_line'>"
                 + "\r\n\t\t<div class='opername'>" + HttpUtility.HtmlEncode(strOperName) + "</div>"
                 + "\r\n\t\t<div class='clear'></div>"
@@ -1795,6 +1839,6 @@ out strError);
     {
         public string name = "";
         public object func = null;
-        public object [] parameters = null;
+        public object[] parameters = null;
     }
 }

@@ -283,10 +283,14 @@ namespace dp2Circulation
             this.button_projectManage.Enabled = bEnable;
         }
 
-        int RunScript(string strProjectName,
-            string strProjectLocate,
-            out string strError)
+        public override int RunScript(string strProjectName,
+    string strProjectLocate,
+    string strInitialParamString,
+    out string strError,
+    out string strWarning)
         {
+            strWarning = "";
+
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -326,6 +330,10 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                if (strInitialParamString == "test_compile")
+                    return 0;
+
 
                 /*
                  * 

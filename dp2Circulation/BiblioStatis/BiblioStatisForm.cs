@@ -541,7 +541,7 @@ Stack:
 在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
 
          * */
-        int RunScript(string strProjectName,
+        public override int RunScript(string strProjectName,
             string strProjectLocate,
             string strInitialParamString,
             out string strError,
@@ -585,6 +585,9 @@ Stack:
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                if (strInitialParamString == "test_compile")
+                    return 0;
 
                 //
                 if (filter != null)

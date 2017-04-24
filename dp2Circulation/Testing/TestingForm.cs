@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -16,7 +17,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
-using System.Diagnostics;
 
 namespace dp2Circulation
 {
@@ -1294,9 +1294,9 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             }
 
             EntityForm.CopyParam copy_param = new EntityForm.CopyParam();
-            copy_param.CopyChildRecords = StringUtil.IsInList("copy_copychildrecords",strStyle);
-            copy_param.BuildLink = StringUtil.IsInList("copy_buildlink",strStyle);
-            copy_param.EnableSubRecord = StringUtil.IsInList("copy_enablesubrecord",strStyle);
+            copy_param.CopyChildRecords = StringUtil.IsInList("copy_copychildrecords", strStyle);
+            copy_param.BuildLink = StringUtil.IsInList("copy_buildlink", strStyle);
+            copy_param.EnableSubRecord = StringUtil.IsInList("copy_enablesubrecord", strStyle);
 
 
             EntityForm entity_form = new EntityForm();
@@ -1760,6 +1760,129 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
         }
 
         #endregion
+
+        // 测试编译所有统计方案
+        private void ToolStripMenuItem_compileAllProjects_Click(object sender, EventArgs e)
+        {
+            CompileStatisProjects();
+        }
+
+        void CompileStatisProjects()
+        {
+            string strError = "";
+            int nCompileCount = 0;
+            int nRet = 0;
+
+            //bool bHideMessageBox = false;
+            //bool bDontUpdate = false;
+
+            List<Type> types = new List<Type>();
+            types.Add(typeof(Iso2709StatisForm));
+            types.Add(typeof(OperLogStatisForm));
+            types.Add(typeof(ReaderStatisForm));
+            types.Add(typeof(ItemStatisForm));
+            types.Add(typeof(OrderStatisForm));
+            types.Add(typeof(BiblioStatisForm));
+            types.Add(typeof(XmlStatisForm));
+            types.Add(typeof(PrintOrderForm));
+
+            foreach (Type type in types)
+            {
+                var form = (Form)Activator.CreateInstance(type);
+                form.MdiParent = Program.MainForm;
+                // form.WindowState = FormWindowState.Minimized;
+                form.Show();
+
+                Application.DoEvents();
+
+                try
+                {
+                    // return:
+                    //      -2  全部放弃
+                    //      -1  出错
+                    //      >=0 更新数
+                    nRet = CompileProjects(form,
+                        out strError);
+                    if (nRet == -1 || nRet == -2)
+                        goto ERROR1;
+                    nCompileCount += nRet;
+                }
+                finally
+                {
+                    form.Close();
+                }
+            }
+
+            // 凭条打印
+            {
+                // return:
+                //      -2  全部放弃
+                //      -1  出错
+                //      >=0 更新数
+                nRet = CompileProjects(Program.MainForm.OperHistory,
+                        out strError);
+                if (nRet == -1 || nRet == -2)
+                    goto ERROR1;
+                nCompileCount += nRet;
+            }
+
+            // MainForm
+            {
+                // return:
+                //      -2  全部放弃
+                //      -1  出错
+                //      >=0 更新数
+                nRet = CompileProjects(Program.MainForm,
+                        out strError);
+                if (nRet == -1 || nRet == -2)
+                    goto ERROR1;
+                nCompileCount += nRet;
+            }
+
+            if (nCompileCount > 0)
+                MessageBox.Show(this, "共编译了 " + nCompileCount.ToString() + " 个方案");
+            else
+                MessageBox.Show(this, "没有编译任何方案");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 更新一个窗口拥有的全部方案
+        // parameters:
+        //      strSource   "!url"或者磁盘目录。分别表示从网络检查更新，或者从磁盘检查更新
+        // return:
+        //      -2  全部放弃
+        //      -1  出错
+        //      >=0 更新数
+        int CompileProjects(
+            object form,
+            out string strError)
+        {
+            strError = "";
+            int nCompileCount = 0;
+
+            dynamic o = form;
+
+            o.EnableControls(false);
+            try
+            {
+                List<string> names = o.ScriptManager.GetAllProjectNames(out strError);
+                if (names == null)
+                    return -1;
+
+                foreach (string name in names)
+                {
+                    o.TestCompile(name);
+                    nCompileCount++;
+                }
+            }
+            finally
+            {
+                o.EnableControls(true);
+            }
+            return nCompileCount;
+        }
     }
 
     // 验证异常
@@ -1805,7 +1928,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
 
         static void AddResults(List<List<int>> results, List<List<int>> result)
         {
-            foreach(List<int> current in result)
+            foreach (List<int> current in result)
             {
                 AddResult(results, current);
             }

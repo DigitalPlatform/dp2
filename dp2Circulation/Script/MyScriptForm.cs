@@ -128,6 +128,79 @@ namespace dp2Circulation
 
         }
 
+        public virtual void TestCompile(string strProjectName)
+        {
+            string strError = "";
+
+            if (String.IsNullOrEmpty(strProjectName) == true)
+            {
+                strError = "尚未指定方案名";
+                goto ERROR1;
+            }
+
+            string strProjectLocate = "";
+            // 获得方案参数
+            // strProjectNamePath	方案名，或者路径
+            // return:
+            //		-1	error
+            //		0	not found project
+            //		1	found
+            int nRet = this.ScriptManager.GetProjectData(
+                strProjectName,
+                out strProjectLocate);
+
+            if (nRet == 0)
+            {
+                strError = "方案 " + strProjectName + " 没有找到...";
+                goto ERROR1;
+            }
+            if (nRet == -1)
+            {
+                strError = "scriptManager.GetProjectData() error ...";
+                goto ERROR1;
+            }
+
+            string strWarning = "";
+
+            // TODO: 增加一个参数表示这是测试编译
+            nRet = RunScript(strProjectName,
+                strProjectLocate,
+                "test_compile", // strInitialParamString
+                out strError,
+                out strWarning);
+            if (nRet == -1)
+                goto ERROR1;
+
+            return;
+        ERROR1:
+            throw new Exception(strError);
+        }
+
+        // 兼容以前用法
+        public int RunScript(string strProjectName,
+            string strProjectLocate,
+            out string strError)
+        {
+            string strWarning = "";
+            return RunScript(strProjectName,
+            strProjectLocate,
+            "",
+            out strError,
+            out strWarning);
+        }
+
+        public virtual int RunScript(string strProjectName,
+            string strProjectLocate,
+            string strInitialParamString,
+            out string strError,
+            out string strWarning)
+        {
+            strError = "尚未重载 RunScript() 函数";
+            strWarning = "";
+
+            return -1;
+        }
+
         /// <summary>
         /// Form 关闭事件
         /// </summary>

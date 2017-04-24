@@ -33,6 +33,19 @@ namespace dp2Circulation
         /// </summary>
         // public MainForm MainForm = null;
 
+        // 为了让脚本代码能够兼容
+        public virtual MainForm MainForm
+        {
+            get
+            {
+                return Program.MainForm;
+            }
+            set
+            {
+                // 为了让脚本代码能兼容
+            }
+        }
+
         /// <summary>
         /// 脚本编译后的 Assembly
         /// </summary>

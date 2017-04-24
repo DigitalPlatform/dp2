@@ -31,11 +31,12 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.ToolStripMenuItem_test = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_createAccessNo = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_moveBiblioRecord = new System.Windows.Forms.ToolStripMenuItem();
             this.button1 = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.menuStrip2 = new System.Windows.Forms.MenuStrip();
-            this.ToolStripMenuItem_moveBiblioRecord = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_compileAllProjects = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -54,7 +55,8 @@
             // 
             this.ToolStripMenuItem_test.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_createAccessNo,
-            this.ToolStripMenuItem_moveBiblioRecord});
+            this.ToolStripMenuItem_moveBiblioRecord,
+            this.ToolStripMenuItem_compileAllProjects});
             this.ToolStripMenuItem_test.Name = "ToolStripMenuItem_test";
             this.ToolStripMenuItem_test.Size = new System.Drawing.Size(44, 21);
             this.ToolStripMenuItem_test.Text = "测试";
@@ -65,6 +67,13 @@
             this.ToolStripMenuItem_createAccessNo.Size = new System.Drawing.Size(180, 22);
             this.ToolStripMenuItem_createAccessNo.Text = "创建索取号(种次号)";
             this.ToolStripMenuItem_createAccessNo.Click += new System.EventHandler(this.ToolStripMenuItem_createAccessNo_Click);
+            // 
+            // ToolStripMenuItem_moveBiblioRecord
+            // 
+            this.ToolStripMenuItem_moveBiblioRecord.Name = "ToolStripMenuItem_moveBiblioRecord";
+            this.ToolStripMenuItem_moveBiblioRecord.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_moveBiblioRecord.Text = "移动书目记录";
+            this.ToolStripMenuItem_moveBiblioRecord.Click += new System.EventHandler(this.ToolStripMenuItem_moveBiblioRecord_Click);
             // 
             // button1
             // 
@@ -100,12 +109,12 @@
             this.menuStrip2.Text = "menuStrip2";
             this.menuStrip2.Visible = false;
             // 
-            // ToolStripMenuItem_moveBiblioRecord
+            // ToolStripMenuItem_compileAllProjects
             // 
-            this.ToolStripMenuItem_moveBiblioRecord.Name = "ToolStripMenuItem_moveBiblioRecord";
-            this.ToolStripMenuItem_moveBiblioRecord.Size = new System.Drawing.Size(180, 22);
-            this.ToolStripMenuItem_moveBiblioRecord.Text = "移动书目记录";
-            this.ToolStripMenuItem_moveBiblioRecord.Click += new System.EventHandler(this.ToolStripMenuItem_moveBiblioRecord_Click);
+            this.ToolStripMenuItem_compileAllProjects.Name = "ToolStripMenuItem_compileAllProjects";
+            this.ToolStripMenuItem_compileAllProjects.Size = new System.Drawing.Size(180, 22);
+            this.ToolStripMenuItem_compileAllProjects.Text = "编译所有统计方案";
+            this.ToolStripMenuItem_compileAllProjects.Click += new System.EventHandler(this.ToolStripMenuItem_compileAllProjects_Click);
             // 
             // TestingForm
             // 
@@ -140,6 +149,7 @@
         private System.Windows.Forms.MenuStrip menuStrip2;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_createAccessNo;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_moveBiblioRecord;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_compileAllProjects;
 
     }
 }
