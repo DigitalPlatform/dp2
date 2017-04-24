@@ -154,7 +154,7 @@ namespace DigitalPlatform.LibraryServer
         //		-1	出错
         //		0	脚本代码没有找到
         //      1   成功
-        int _initialLibraryHostAssembly(Assembly assembly,
+        int _initialLibraryHostAssembly(out Assembly assembly,
             out string strError)
         {
             assembly = null;
@@ -163,7 +163,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (this.LibraryCfgDom == null)
             {
-                this.m_assemblyLibraryHost = null;
+                assembly = null;
                 strError = "LibraryCfgDom为空";
                 return -1;
             }
@@ -232,6 +232,7 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            Debug.Assert(assembly != null, "");
             return 1;
         }
 
@@ -251,7 +252,7 @@ namespace DigitalPlatform.LibraryServer
             //		-1	出错
             //		0	脚本代码没有找到
             //      1   成功
-            nRet = _initialLibraryHostAssembly(assembly,
+            nRet = _initialLibraryHostAssembly(out assembly,
                 out strError);
 
             _lockAssembly.EnterWriteLock();
@@ -264,7 +265,10 @@ namespace DigitalPlatform.LibraryServer
                     this._scriptMD5 = "";
                 }
                 else
+                {
+                    Debug.Assert(assembly != null, "");
                     this.m_assemblyLibraryHost = assembly;
+                }
             }
             finally
             {
