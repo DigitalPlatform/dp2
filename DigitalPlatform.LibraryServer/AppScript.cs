@@ -449,7 +449,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = GetAssembly("",
         out assembly,
         out strError);
-            if (nRet == 1)
+            if (nRet == -1)
                 return -1;
             if (nRet == 0)
             {
@@ -588,7 +588,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = GetAssembly("",
         out assembly,
         out strError);
-            if (nRet == 1)
+            if (nRet == -1)
                 return -1;
             if (nRet == 0)
             {
@@ -694,7 +694,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = GetAssembly("",
         out assembly,
         out strError);
-            if (nRet == 1)
+            if (nRet == -1)
                 return -1;
             if (nRet == 0)
             {
@@ -809,7 +809,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = GetAssembly("",
         out assembly,
         out strError);
-            if (nRet == 1)
+            if (nRet == -1)
                 return -1;
             if (nRet == 0)
             {
@@ -942,7 +942,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = GetAssembly("",
         out assembly,
         out strError);
-            if (nRet == 1)
+            if (nRet == -1)
                 return -1;
             if (nRet == 0)
             {
@@ -1056,7 +1056,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = GetAssembly("",
         out assembly,
         out strError);
-            if (nRet == 1)
+            if (nRet == -1)
                 return -1;
             if (nRet == 0)
             {
@@ -1246,7 +1246,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = GetAssembly("",
         out assembly,
         out strError);
-            if (nRet == 1)
+            if (nRet == -1)
                 return -1;
             if (nRet == 0)
             {
@@ -1346,7 +1346,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = GetAssembly("",
         out assembly,
         out strError);
-            if (nRet == 1)
+            if (nRet == -1)
                 return -1;
             if (nRet == 0)
             {
@@ -1449,7 +1449,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = GetAssembly("findBase",
         out assembly,
         out strError);
-            if (nRet == 1)
+            if (nRet == -1)
                 return -1;
             if (nRet == 0)
             {
@@ -1615,7 +1615,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = GetAssembly("findBase",
         out assembly,
         out strError);
-            if (nRet == 1)
+            if (nRet == -1)
                 return -1;
             if (nRet == 0)
             {
