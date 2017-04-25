@@ -5929,6 +5929,9 @@ strTotalPrice);
             string strRecPathFilename = Path.GetTempFileName();
 
             LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
             try
             {
                 // 检索 批次号 和 馆藏地点 将命中的记录路径写入文件
@@ -5956,6 +5959,7 @@ strTotalPrice);
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 if (string.IsNullOrEmpty(strRecPathFilename) == false)

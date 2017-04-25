@@ -506,8 +506,10 @@ namespace dp2Library
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult VerifyBarcode(
+            string strAction,
             string strLibraryCode,
-            string strBarcode);
+            string strBarcode,
+            out string strOutputBarcode);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult GetSystemParameter(

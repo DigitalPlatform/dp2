@@ -2005,7 +2005,7 @@ out strError);
         || info.Action == "move")       // delete操作不校验记录
     && bNoCheckDup == false)
                         {
-                            nRet = this.App.DoVerifyItemFunction(
+                            nRet = this.DoVerifyItemFunction(
                                 sessioninfo,
                                 strAction,
                                 domNewRec,
@@ -2424,7 +2424,6 @@ out strError);
             return result;
         }
 
-#if NO
         // 执行脚本函数 VerifyItem
         // parameters:
         // return:
@@ -2444,14 +2443,14 @@ out strError);
             //      -1  出错
             //      0   Assembly 为空
             //      1   找到 Assembly
-            int nRet = this.App.GetAssembly("",
+            int nRet = this.App.GetAssembly("findBase",
         out assembly,
         out strError);
-            if (nRet == 1)
+            if (nRet == -1)
                 return -1;
             if (nRet == 0)
             {
-                strError = "未定义<script>脚本代码，无法校验册记录。";
+                strError = "未定义<script>脚本代码，无法校验 " + this.ItemName + " 记录。";
                 return -2;
             }
 
@@ -2509,8 +2508,6 @@ out strError);
                 itemdom,
                 out strError);
         }
-
-#endif
 
         // return:
         //      -1  调用出错

@@ -1633,7 +1633,7 @@ this.DbType + "_search_form",
 
                 bool bLoadToItemWindow = this.LoadToItemWindow;
 
-                if (bLoadToItemWindow == true)
+                if (bLoadToItemWindow == true || this.DbType == "arrive")
                 {
                     LoadRecord("ItemInfoForm",
                         "recpath",
@@ -1731,6 +1731,12 @@ this.DbType + "_search_form",
 
             if (strTargetFormType == "EntityForm")
             {
+                if (this.DbType == "arrive")
+                {
+                    MessageBox.Show(this, "预约到书库记录无法装入 实体窗");
+                    return;
+                }
+
                 EntityForm form = null;
 
                 if (strOpenType == "exist")
@@ -1817,7 +1823,7 @@ this.DbType + "_search_form",
                 }
 
                 if (this.DbType == "arrive")
-                    form.DbType = "item";
+                    form.DbType = "item";   // ??
                 else
                     form.DbType = this.DbType;
 

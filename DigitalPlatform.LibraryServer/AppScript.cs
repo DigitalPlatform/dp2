@@ -594,6 +594,114 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        // 2017/4/25
+        // 执行脚本函数 TransformBarcode
+        // parameters:
+        //      host    如果为空，则函数内部会 new 一个此类型的对象；如果不为空，则直接使用
+        //      strLibraryCodeList  当前操作者管辖的馆代码列表
+        // return:
+        //      -2  not found script
+        //      -1  出错
+        //      0   成功
+        public int DoTransformBarcodeScriptFunction(
+            LibraryHost host,
+            string strLibraryCodeList,
+            ref string strBarcode,
+            out int nResultValue,
+            out string strError)
+        {
+            strError = "";
+            nResultValue = -1;
+
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = GetAssembly("",
+        out assembly,
+        out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "未定义 <script> 脚本代码，无法变换条码号";
+                return -2;
+            }
+
+            Debug.Assert(assembly != null, "");
+
+            Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+                assembly,
+                "DigitalPlatform.LibraryServer.LibraryHost");
+            if (hostEntryClassType == null)
+            {
+                strError = "<script> 脚本中未找到DigitalPlatform.LibraryServer.LibraryHost 类的派生类，无法变换条码号";
+                return -2;
+            }
+
+            // 迟绑定技术。从assembly中实时寻找特定名字的函数
+            MethodInfo mi = hostEntryClassType.GetMethod("TransformBarcode");
+            if (mi == null)
+            {
+                strError = "<script> 脚本中 DigitalPlatform.LibraryServer.LibraryHost 类的派生类中，没有提供 int Transform(string strLibraryCodeList,  ref string strBarcode, out string strError) 函数，因此无法变换条码号";
+                return -2;
+            }
+
+            if (host == null)
+            {
+                host = (LibraryHost)hostEntryClassType.InvokeMember(null,
+                    BindingFlags.DeclaredOnly |
+                    BindingFlags.Public | BindingFlags.NonPublic |
+                    BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                    null);
+                if (host == null)
+                {
+                    strError = "创建 DigitalPlatform.LibraryServer.LibraryHost 类的派生类的对象（构造函数）失败";
+                    return -1;
+                }
+
+                host.App = this;
+            }
+
+            ParameterInfo[] parameters = mi.GetParameters();
+
+            // 执行函数
+            try
+            {
+                if (parameters.Length == 3)
+                {
+                    object[] args = new object[3];
+                    args[0] = strLibraryCodeList;
+                    args[1] = strBarcode;
+                    args[2] = strError;
+                    nResultValue = (int)mi.Invoke(host,
+                         BindingFlags.DeclaredOnly |
+                         BindingFlags.Public | BindingFlags.NonPublic |
+                         BindingFlags.Instance | BindingFlags.InvokeMethod,
+                         null,
+                         args,
+                         null);
+
+                    // 取出out参数值
+                    strBarcode = (string)args[1];
+                    strError = (string)args[2];
+                }
+                else
+                {
+                    strError = "脚本函数 TransformBarcode() 的参数个数不正确，应该为 3 个";
+                    return -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数 '" + "TransformBarcode" + "' 时出错：" + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
+
+            return 0;
+        }
+
         // 执行脚本函数ItemCanBorrow
         // parameters:
         // return:
@@ -1212,7 +1320,7 @@ namespace DigitalPlatform.LibraryServer
         //      -1  出错
         //      0   Assembly 为空
         //      1   找到 Assembly
-        int GetAssembly(
+        internal int GetAssembly(
             string strStyle,
             out Assembly assembly,
             out string strError)
@@ -1848,6 +1956,7 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
+
             // 验证条码号
             if (this.App.VerifyBarcode == true)
             {

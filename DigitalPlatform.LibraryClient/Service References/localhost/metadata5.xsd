@@ -1692,6 +1692,7 @@
   <xs:element name="VerifyBarcode">
     <xs:complexType>
       <xs:sequence>
+        <xs:element minOccurs="0" name="strAction" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strLibraryCode" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strBarcode" nillable="true" type="xs:string" />
       </xs:sequence>
@@ -1701,6 +1702,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element xmlns:q104="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="VerifyBarcodeResult" nillable="true" type="q104:LibraryServerResult" />
+        <xs:element minOccurs="0" name="strOutputBarcode" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

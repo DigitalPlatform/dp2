@@ -147,7 +147,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.104 (2017/3/29) 为 SetOneClassTailNumber() API 增加 memo unmemo skipmemo 三个新功能
         //      2.105 (2017/4/14) 消除 SearchDup() API 中合并算法之前没有对结果集进行排序的 Bug
         //      2.106 (2017/4/20) CopyBiblioInfo() API 经过较为严格的测试，修正了一些 Bug，从此前端的移动书目记录功能要求必须使用这个版本
-        public static string Version = "2.106";
+        //      2.107 (2017/4/25) 为 VerifyBarcode() API 扩充 strAction 和 out strOutputBarcode 参数，支持变换条码号功能
+        public static string Version = "2.107";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

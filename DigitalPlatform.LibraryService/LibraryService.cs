@@ -9418,9 +9418,13 @@ Stack:
         //      result.Value 0: 不是合法的条码号 1:合法的读者证条码号 2:合法的册条码号
         // 权限：暂时不需要任何权限
         public LibraryServerResult VerifyBarcode(
+            string strAction,
             string strLibraryCode,
-            string strBarcode)
+            string strBarcode,
+            out string strOutputBarcode)
         {
+            strOutputBarcode = "";
+
             // LibraryServerResult result = this.PrepareEnvironment(false);
             LibraryServerResult result = this.PrepareEnvironment("VerifyBarcode", true, true);
             if (result.Value == -1)
@@ -9465,16 +9469,40 @@ Stack:
                     return result;
                 }
 
-                // return:
-                //      -2  not found script
-                //      -1  出错
-                //      0   成功
-                nRet = app.DoVerifyBarcodeScriptFunction(
-                    null,
-                    strLibraryCode, // sessioninfo.LibraryCodeList,
-                    strBarcode,
-                    out nResultValue,
-                    out strError);
+                if (string.IsNullOrEmpty(strAction)
+                    || strAction == "VerifyBarcode")
+                {
+                    // return:
+                    //      -2  not found script
+                    //      -1  出错
+                    //      0   成功
+                    nRet = app.DoVerifyBarcodeScriptFunction(
+                        null,
+                        strLibraryCode, // sessioninfo.LibraryCodeList,
+                        strBarcode,
+                        out nResultValue,
+                        out strError);
+                }
+                else if (strAction == "transform" || strAction == "TransformBarcode")
+                {
+                    // return:
+                    //      -2  not found script
+                    //      -1  出错
+                    //      0   成功
+                    nRet = app.DoTransformBarcodeScriptFunction(
+                        null,
+                        strLibraryCode, // sessioninfo.LibraryCodeList,
+                        ref strBarcode,
+                        out nResultValue,
+                        out strError);
+                    strOutputBarcode = strBarcode;
+                }
+                else
+                {
+                    strError = "无法识别的 strAction 参数值 '" + strAction + "'";
+                    goto ERROR1;
+                }
+
                 if (nRet == -1)
                     goto ERROR1;
                 if (nRet == -2)
@@ -9485,13 +9513,6 @@ Stack:
                     return result;
                 }
 
-                /*
-                // 脚本内可以使用出错字符串
-                if (nResultValue == -1)
-                {
-                    goto ERROR1;
-                }*/
-                // 2009/2/23 
                 result.ErrorInfo = strError;
                 result.Value = nResultValue;
                 return result;

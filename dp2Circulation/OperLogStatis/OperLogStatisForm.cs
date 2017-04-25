@@ -835,6 +835,13 @@ out strError);
             strNextLogFileName = "";
             int nRet = 0;
 
+            if (string.IsNullOrEmpty(strLogFileName)
+                || strLogFileName.Length < 8)
+            {
+                strError = "日期 '" + strLogFileName + "' 字符串格式错误，应为 8 个数字字符";
+                return -1;
+            }
+
             string strYear = strLogFileName.Substring(0, 4);
             string strMonth = strLogFileName.Substring(4, 2);
             string strDay = strLogFileName.Substring(6, 2);

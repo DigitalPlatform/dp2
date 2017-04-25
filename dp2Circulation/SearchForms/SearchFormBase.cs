@@ -672,7 +672,7 @@ namespace dp2Circulation
 
             LibraryChannel channel = channel_param;
             if (channel == null)
-                this.GetChannel();
+                channel = this.GetChannel();
 
             try
             {

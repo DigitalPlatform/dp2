@@ -3176,6 +3176,8 @@ MessageBoxDefaultButton.Button2);
             string strRecPathFilename = Path.GetTempFileName();
 
             LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
 
             try
             {
@@ -3204,6 +3206,7 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 if (string.IsNullOrEmpty(strRecPathFilename) == false)

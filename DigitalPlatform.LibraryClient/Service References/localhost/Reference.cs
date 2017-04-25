@@ -4079,12 +4079,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndChangeUserPassword(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyBarcode", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyBarcodeResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyBarcode(string strLibraryCode, string strBarcode);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyBarcode(out string strOutputBarcode, string strAction, string strLibraryCode, string strBarcode);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyBarcode", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/VerifyBarcodeResponse")]
-        System.IAsyncResult BeginVerifyBarcode(string strLibraryCode, string strBarcode, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginVerifyBarcode(string strAction, string strLibraryCode, string strBarcode, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyBarcode(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyBarcode(out string strOutputBarcode, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetSystemParameter", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetSystemParameterResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetSystemParameter(out string strValue, string strCategory, string strName);
@@ -6526,10 +6526,17 @@ namespace DigitalPlatform.LibraryClient.localhost {
             this.results = results;
         }
         
+        public string strOutputBarcode {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -12607,29 +12614,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strNewPassword}, this.onEndChangeUserPasswordDelegate, this.onChangeUserPasswordCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyBarcode(string strLibraryCode, string strBarcode) {
-            return base.Channel.VerifyBarcode(strLibraryCode, strBarcode);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyBarcode(out string strOutputBarcode, string strAction, string strLibraryCode, string strBarcode) {
+            return base.Channel.VerifyBarcode(out strOutputBarcode, strAction, strLibraryCode, strBarcode);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginVerifyBarcode(string strLibraryCode, string strBarcode, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginVerifyBarcode(strLibraryCode, strBarcode, callback, asyncState);
+        public System.IAsyncResult BeginVerifyBarcode(string strAction, string strLibraryCode, string strBarcode, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginVerifyBarcode(strAction, strLibraryCode, strBarcode, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyBarcode(System.IAsyncResult result) {
-            return base.Channel.EndVerifyBarcode(result);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyBarcode(out string strOutputBarcode, System.IAsyncResult result) {
+            return base.Channel.EndVerifyBarcode(out strOutputBarcode, result);
         }
         
         private System.IAsyncResult OnBeginVerifyBarcode(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strLibraryCode = ((string)(inValues[0]));
-            string strBarcode = ((string)(inValues[1]));
-            return this.BeginVerifyBarcode(strLibraryCode, strBarcode, callback, asyncState);
+            string strAction = ((string)(inValues[0]));
+            string strLibraryCode = ((string)(inValues[1]));
+            string strBarcode = ((string)(inValues[2]));
+            return this.BeginVerifyBarcode(strAction, strLibraryCode, strBarcode, callback, asyncState);
         }
         
         private object[] OnEndVerifyBarcode(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndVerifyBarcode(result);
+            string strOutputBarcode = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndVerifyBarcode(out strOutputBarcode, result);
             return new object[] {
+                    strOutputBarcode,
                     retVal};
         }
         
@@ -12640,11 +12650,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void VerifyBarcodeAsync(string strLibraryCode, string strBarcode) {
-            this.VerifyBarcodeAsync(strLibraryCode, strBarcode, null);
+        public void VerifyBarcodeAsync(string strAction, string strLibraryCode, string strBarcode) {
+            this.VerifyBarcodeAsync(strAction, strLibraryCode, strBarcode, null);
         }
         
-        public void VerifyBarcodeAsync(string strLibraryCode, string strBarcode, object userState) {
+        public void VerifyBarcodeAsync(string strAction, string strLibraryCode, string strBarcode, object userState) {
             if ((this.onBeginVerifyBarcodeDelegate == null)) {
                 this.onBeginVerifyBarcodeDelegate = new BeginOperationDelegate(this.OnBeginVerifyBarcode);
             }
@@ -12655,6 +12665,7 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 this.onVerifyBarcodeCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnVerifyBarcodeCompleted);
             }
             base.InvokeAsync(this.onBeginVerifyBarcodeDelegate, new object[] {
+                        strAction,
                         strLibraryCode,
                         strBarcode}, this.onEndVerifyBarcodeDelegate, this.onVerifyBarcodeCompletedDelegate, userState);
         }
@@ -14691,12 +14702,12 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndChangeUserPassword(System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/VerifyBarcode", ReplyAction="http://dp2003.com/dp2library/dp2library/VerifyBarcodeResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyBarcode(string strLibraryCode, string strBarcode);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyBarcode(out string strOutputBarcode, string strAction, string strLibraryCode, string strBarcode);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/VerifyBarcode", ReplyAction="http://dp2003.com/dp2library/dp2library/VerifyBarcodeResponse")]
-        System.IAsyncResult BeginVerifyBarcode(string strLibraryCode, string strBarcode, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginVerifyBarcode(string strAction, string strLibraryCode, string strBarcode, System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyBarcode(System.IAsyncResult result);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyBarcode(out string strOutputBarcode, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetSystemParameter", ReplyAction="http://dp2003.com/dp2library/dp2library/GetSystemParameterResponse")]
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetSystemParameter(out string strValue, string strCategory, string strName);
@@ -17132,10 +17143,17 @@ namespace DigitalPlatform.LibraryClient.localhost {
             this.results = results;
         }
         
+        public string strOutputBarcode {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.LibraryClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -23213,29 +23231,32 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strNewPassword}, this.onEndChangeUserPasswordDelegate, this.onChangeUserPasswordCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyBarcode(string strLibraryCode, string strBarcode) {
-            return base.Channel.VerifyBarcode(strLibraryCode, strBarcode);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult VerifyBarcode(out string strOutputBarcode, string strAction, string strLibraryCode, string strBarcode) {
+            return base.Channel.VerifyBarcode(out strOutputBarcode, strAction, strLibraryCode, strBarcode);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginVerifyBarcode(string strLibraryCode, string strBarcode, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginVerifyBarcode(strLibraryCode, strBarcode, callback, asyncState);
+        public System.IAsyncResult BeginVerifyBarcode(string strAction, string strLibraryCode, string strBarcode, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginVerifyBarcode(strAction, strLibraryCode, strBarcode, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyBarcode(System.IAsyncResult result) {
-            return base.Channel.EndVerifyBarcode(result);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndVerifyBarcode(out string strOutputBarcode, System.IAsyncResult result) {
+            return base.Channel.EndVerifyBarcode(out strOutputBarcode, result);
         }
         
         private System.IAsyncResult OnBeginVerifyBarcode(object[] inValues, System.AsyncCallback callback, object asyncState) {
-            string strLibraryCode = ((string)(inValues[0]));
-            string strBarcode = ((string)(inValues[1]));
-            return this.BeginVerifyBarcode(strLibraryCode, strBarcode, callback, asyncState);
+            string strAction = ((string)(inValues[0]));
+            string strLibraryCode = ((string)(inValues[1]));
+            string strBarcode = ((string)(inValues[2]));
+            return this.BeginVerifyBarcode(strAction, strLibraryCode, strBarcode, callback, asyncState);
         }
         
         private object[] OnEndVerifyBarcode(System.IAsyncResult result) {
-            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndVerifyBarcode(result);
+            string strOutputBarcode = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.LibraryClient.localhost.LibraryServerResult retVal = this.EndVerifyBarcode(out strOutputBarcode, result);
             return new object[] {
+                    strOutputBarcode,
                     retVal};
         }
         
@@ -23246,11 +23267,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void VerifyBarcodeAsync(string strLibraryCode, string strBarcode) {
-            this.VerifyBarcodeAsync(strLibraryCode, strBarcode, null);
+        public void VerifyBarcodeAsync(string strAction, string strLibraryCode, string strBarcode) {
+            this.VerifyBarcodeAsync(strAction, strLibraryCode, strBarcode, null);
         }
         
-        public void VerifyBarcodeAsync(string strLibraryCode, string strBarcode, object userState) {
+        public void VerifyBarcodeAsync(string strAction, string strLibraryCode, string strBarcode, object userState) {
             if ((this.onBeginVerifyBarcodeDelegate == null)) {
                 this.onBeginVerifyBarcodeDelegate = new BeginOperationDelegate(this.OnBeginVerifyBarcode);
             }
@@ -23261,6 +23282,7 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 this.onVerifyBarcodeCompletedDelegate = new System.Threading.SendOrPostCallback(this.OnVerifyBarcodeCompleted);
             }
             base.InvokeAsync(this.onBeginVerifyBarcodeDelegate, new object[] {
+                        strAction,
                         strLibraryCode,
                         strBarcode}, this.onEndVerifyBarcodeDelegate, this.onVerifyBarcodeCompletedDelegate, userState);
         }

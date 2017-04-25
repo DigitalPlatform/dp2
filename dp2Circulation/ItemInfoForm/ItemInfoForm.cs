@@ -605,6 +605,10 @@ SetXmlToWebbrowser(this.webBrowser_itemXml,
                          out strBiblioText,
                          out strBiblioRecPath,
                          out strError);
+                else if (this.m_strDbType == "arrive")
+                {
+
+                }
                 else
                     throw new Exception("未知的DbType '" + this.m_strDbType + "'");
 

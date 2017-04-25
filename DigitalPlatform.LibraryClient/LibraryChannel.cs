@@ -5113,6 +5113,23 @@ out strError);
             }
         }
 
+        // 兼容以前用法
+        public long VerifyBarcode(
+    DigitalPlatform.Stop stop,
+    string strLibraryCode,
+    string strBarcode,
+    out string strError)
+        {
+            string strOutputBarcode = "";
+            return VerifyBarcode(
+    stop,
+    "",
+    strLibraryCode,
+    strBarcode,
+    out strOutputBarcode,
+    out strError);
+        }
+
         // 校验条码
         /// <summary>
         /// 校验条码号
@@ -5127,16 +5144,20 @@ out strError);
         /// </returns>
         public long VerifyBarcode(
             DigitalPlatform.Stop stop,
+            string strAction,
             string strLibraryCode,
             string strBarcode,
+            out string strOutputBarcode,
             out string strError)
         {
             strError = "";
+            strOutputBarcode = "";
 
         REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginVerifyBarcode(
+                    strAction,
                     strLibraryCode,
                     strBarcode,
                     null,
@@ -5156,7 +5177,9 @@ out strError);
                     return -1;
                 }
 
-                LibraryServerResult result = this.ws.EndVerifyBarcode(soapresult);
+                LibraryServerResult result = this.ws.EndVerifyBarcode(
+                    out strOutputBarcode,
+                    soapresult);
                 if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
                 {
                     if (DoNotLogin(ref strError) == 1)
