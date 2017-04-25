@@ -9470,7 +9470,7 @@ Stack:
                 }
 
                 if (string.IsNullOrEmpty(strAction)
-                    || strAction == "VerifyBarcode")
+                    || strAction == "verify" || strAction == "VerifyBarcode")
                 {
                     // return:
                     //      -2  not found script

@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Threading;
 
 using DigitalPlatform.CommonControl;
+using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -139,6 +140,8 @@ namespace dp2Circulation
         {
             Point pt = this.panel1.AutoScrollPosition;
             e.Graphics.TranslateTransform(pt.X, pt.Y);
+
+            MergePicture.SetMetrics(DpiUtil.GetDpiXY(this));
 
             Size size = MergePicture.Paint(e,
                 this.panel1.ClientSize,

@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -13,21 +14,42 @@ namespace dp2Circulation
     /// </summary>
     public class MergePicture
     {
+        static SizeF _dpi;
+
         // 书目记录
-        static int BIBLIO_WIDTH = 95;
-        static int BIBLIO_HEIGHT = 50;
+        static int _BIBLIO_WIDTH = 95;
+        static int _BIBLIO_HEIGHT = 50;
 
         // 下级记录
-        static int SUBREC_WIDTH = 90;
-        static int SUBREC_HEIGHT = 12;
+        static int _SUBREC_WIDTH = 90;
+        static int _SUBREC_HEIGHT = 12;
 
-        static int SEP = 7; // 普通间隔距离
-        static int PIC_SEP = 30;
+        static int _SEP = 7; // 普通间隔距离
+        static int _PIC_SEP = 30;
 
         static Color lineColor = Color.White;
         static Color leftColor = Color.DarkGreen;
         static Color rightColor = Color.DarkOrange;
 
+        static int BIBLIO_WIDTH = _BIBLIO_WIDTH;
+        static int BIBLIO_HEIGHT = _BIBLIO_HEIGHT;
+        static int SUBREC_WIDTH = _SUBREC_WIDTH;
+        static int SUBREC_HEIGHT = _SUBREC_HEIGHT;
+
+        static int SEP = _SEP;
+        static int PIC_SEP = _PIC_SEP;
+
+        public static void SetMetrics(SizeF dpi_ratio)
+        {
+            BIBLIO_WIDTH = DpiUtil.Get96ScalingX(dpi_ratio, _BIBLIO_WIDTH);
+            BIBLIO_HEIGHT = DpiUtil.Get96ScalingY(dpi_ratio, _BIBLIO_HEIGHT);
+
+            SUBREC_WIDTH = DpiUtil.Get96ScalingX(dpi_ratio, _SUBREC_WIDTH);
+            SUBREC_HEIGHT = DpiUtil.Get96ScalingY(dpi_ratio, _SUBREC_HEIGHT);
+
+            SEP = DpiUtil.Get96ScalingX(dpi_ratio, _SEP);
+            PIC_SEP = DpiUtil.Get96ScalingY(dpi_ratio, _PIC_SEP);
+        }
 
         // parameters:
         //      
@@ -54,16 +76,18 @@ namespace dp2Circulation
 
             Size total_size = new Size(content_size.Width + x + SEP * 4, content_size.Height + y + SEP * 4);
 
+            // testing
+            // e.Graphics.ScaleTransform(2.0F, 2.0F);
+
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-
 
             // 绘制左边一个书目记录
             Size size = PaintRecord(e.Graphics, x, y,
                 ref_font,
                 strSouceTitle,
                 leftColor,
-                3, new Color[] { leftColor, leftColor, leftColor});
+                3, new Color[] { leftColor, leftColor, leftColor });
 
             // 绘制右边一个书目记录
             int x2 = x + size.Width + PIC_SEP;
@@ -75,12 +99,12 @@ namespace dp2Circulation
                 2, new Color[] { rightColor, rightColor });
 
             // 绘制下边一个
-            int x3 = x + (size.Width*2 + PIC_SEP)/2 - size.Width / 2;
+            int x3 = x + (size.Width * 2 + PIC_SEP) / 2 - size.Width / 2;
             int y3 = y + size.Height + PIC_SEP / 2;
 
             Color biblio_color = leftColor;
             if ((style & MergeStyle.ReserveSourceBiblio) != 0)
-                            biblio_color = leftColor;
+                biblio_color = leftColor;
             if ((style & MergeStyle.ReserveTargetBiblio) != 0)
                 biblio_color = rightColor;
 
@@ -205,14 +229,14 @@ namespace dp2Circulation
             string strTitle,
             Color biblio_body_color,
             int nSubRecordCount,
-            Color [] sub_colors)
+            Color[] sub_colors)
         {
             Size size = new Size();
 
             int x = x0;
             int y = y0;
 
-            PaintBiblio(g, x, y, 
+            PaintBiblio(g, x, y,
                 font, strTitle,
                 biblio_body_color);
             x += SEP * 2;
@@ -266,7 +290,7 @@ namespace dp2Circulation
         }
 
         // 绘制一个书目记录的图像
-        static void PaintBiblio(Graphics g, 
+        static void PaintBiblio(Graphics g,
             int x, int y,
             Font font,
             string strTitle,
