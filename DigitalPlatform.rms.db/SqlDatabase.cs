@@ -10866,7 +10866,8 @@ out strError);
                         foreach (DelayTable table in tables)
                         {
                             var bulkCopy = new MySqlBulkCopy(connection.MySqlConnection);
-                            bulkCopy.BatchSize = 5000;
+                            // 2017/4/27 MySQL Named Pipe 方式下 1000 比较保险
+                            bulkCopy.BatchSize = 1000;  // 5000;
                             bulkCopy.DestinationTableName = "`" + this.m_strSqlDbName + "`." + table.TableName;
                             int nRet = table.OpenForRead(table.FileName, out strError);
                             if (nRet == -1)
