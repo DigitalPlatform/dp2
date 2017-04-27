@@ -96,7 +96,7 @@ namespace dp2Circulation
             string strName = DomUtil.GetElementText(dom.DocumentElement, "name");
 
             string strReaderType = DomUtil.GetElementText(dom.DocumentElement, "readerType");
-            string strExpire = DomUtil.GetElementText(dom.DocumentElement, "expire");
+            string strExpire = DomUtil.GetElementText(dom.DocumentElement, "expireDate");
             if (string.IsNullOrEmpty(strExpire) == false)
                 strExpire = DateTimeUtil.LocalDate(strExpire);
 

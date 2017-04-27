@@ -953,20 +953,67 @@ namespace dp2Circulation
         {
             strError = "";
 
-            PaperSize old_papersize = document.DefaultPageSettings.PaperSize;
-
-            PaperSize paper_size = PrintUtil.BuildPaperSize(strPaperName);
-            if (paper_size != null)
+            try
             {
-                // 进行检查
-                if (bCheck == true)
+                PaperSize old_papersize = document.DefaultPageSettings.PaperSize;
+
+                PaperSize paper_size = PrintUtil.BuildPaperSize(strPaperName);
+                if (paper_size != null)
                 {
+                    // 进行检查
+                    if (bCheck == true)
+                    {
+                        PaperSize found = null;
+                        foreach (PaperSize ps in document.PrinterSettings.PaperSizes)
+                        {
+                            if (ps.PaperName.Equals(paper_size.PaperName)
+                                && ps.Width == paper_size.Width
+                                && ps.Height == paper_size.Height)
+                            {
+                                found = ps;
+                                break;
+                            }
+                        }
+
+                        if (found != null)
+                        {
+                            paper_size = found;
+                            goto END1;
+                        }
+
+                        // 如果没有匹配的，则退而求其次，用尺寸匹配一个
+                        found = null;
+                        foreach (PaperSize ps in document.PrinterSettings.PaperSizes)
+                        {
+                            if (ps.Width == paper_size.Width
+                                && ps.Height == paper_size.Height)
+                            {
+                                found = ps;
+                                break;
+                            }
+                        }
+
+                        if (found != null)
+                        {
+                            paper_size = found;
+                            goto END1;
+                        }
+
+                        strError = "打印机 " + document.PrinterSettings.PrinterName + " 的纸张类型 " + strPaperName + " 当前不可用，请重新选定纸张";
+                        return 1;
+                    }
+
+                END1:
+                    document.DefaultPageSettings.PaperSize = paper_size;    // 注：直接 new PaperSize 这样赋值，会导致打印机对话框中纸张名字为空。也许可以把 PrinterSetting 里面的也修改了就可以了?
+                    document.DefaultPageSettings.Landscape = bLandscape;
+                }
+                else
+                {
+                    // 试探用名字来查找
                     PaperSize found = null;
                     foreach (PaperSize ps in document.PrinterSettings.PaperSizes)
                     {
-                        if (ps.PaperName.Equals(paper_size.PaperName)
-                            && ps.Width == paper_size.Width
-                            && ps.Height == paper_size.Height)
+                        if (ps.PaperName.Equals(strPaperName) == true)
                         {
                             found = ps;
                             break;
@@ -976,59 +1023,14 @@ namespace dp2Circulation
                     if (found != null)
                     {
                         paper_size = found;
-                        goto END1;
-                    }
-
-                    // 如果没有匹配的，则退而求其次，用尺寸匹配一个
-                    found = null;
-                    foreach (PaperSize ps in document.PrinterSettings.PaperSizes)
-                    {
-                        if (ps.Width == paper_size.Width
-                            && ps.Height == paper_size.Height)
-                        {
-                            found = ps;
-                            break;
-                        }
-                    }
-
-                    if (found != null)
-                    {
-                        paper_size = found;
-                        goto END1;
+                        document.DefaultPageSettings.PaperSize = paper_size;
+                        document.DefaultPageSettings.Landscape = bLandscape;
+                        return 0;
                     }
 
                     strError = "打印机 " + document.PrinterSettings.PrinterName + " 的纸张类型 " + strPaperName + " 当前不可用，请重新选定纸张";
                     return 1;
                 }
-
-            END1:
-                document.DefaultPageSettings.PaperSize = paper_size;    // 注：直接 new PaperSize 这样赋值，会导致打印机对话框中纸张名字为空。也许可以把 PrinterSetting 里面的也修改了就可以了?
-                document.DefaultPageSettings.Landscape = bLandscape;
-            }
-            else
-            {
-                // 试探用名字来查找
-                PaperSize found = null;
-                foreach (PaperSize ps in document.PrinterSettings.PaperSizes)
-                {
-                    if (ps.PaperName.Equals(strPaperName) == true)
-                    {
-                        found = ps;
-                        break;
-                    }
-                }
-
-                if (found != null)
-                {
-                    paper_size = found;
-                    document.DefaultPageSettings.PaperSize = paper_size;
-                    document.DefaultPageSettings.Landscape = bLandscape;
-                    return 0;
-                }
-
-                strError = "打印机 " + document.PrinterSettings.PrinterName + " 的纸张类型 " + strPaperName + " 当前不可用，请重新选定纸张";
-                return 1;
-            }
 #if NO
             if ((string.IsNullOrEmpty(strPaperName) == false
                 && strPaperName != document.DefaultPageSettings.PaperSize.PaperName)
@@ -1056,7 +1058,14 @@ namespace dp2Circulation
             }
 #endif
 
-            return 0;
+                return 0;
+            }
+            catch(Exception ex)
+            {
+                // 2017/4/26
+                strError = ex.Message;
+                return -1;
+            }
         }
 
         /// <summary>

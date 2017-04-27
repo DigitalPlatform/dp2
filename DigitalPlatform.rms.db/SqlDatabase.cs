@@ -10265,10 +10265,53 @@ FileShare.ReadWrite))
             return 0;
         }
 
+        const int MYSQL_MAX_GETINFO_COUNT   = 1000;
+
+        // 这一层主要是把较大的数组分片进行调用
+        private int GetRowInfos(Connection connection,
+    bool bGetData,
+    List<string> ids,
+    out List<RecordRowInfo> row_infos,
+    out string strError)
+        {
+            strError = "";
+            row_infos = new List<RecordRowInfo>();
+
+            if (connection.SqlServerType == SqlServerType.MySql)
+            {
+                int nRet = 0;
+                List<RecordRowInfo> results = new List<RecordRowInfo>();
+                int start = 0;
+                int length = Math.Min(MYSQL_MAX_GETINFO_COUNT, ids.Count);
+                int count = 0;
+                while (count >= ids.Count)
+                {
+                    nRet = _getRowInfos(connection,
+                    bGetData,
+                    ids.GetRange(start, length),
+                    out results,
+                    out strError);
+                    if (nRet == -1)
+                        return -1;
+                    row_infos.AddRange(results);
+                    count += length;
+
+                    start += Math.Min(MYSQL_MAX_GETINFO_COUNT, ids.Count - count);
+                }
+                return nRet;
+            }
+            else
+                return _getRowInfos(connection,
+                    bGetData,
+                    ids,
+                    out row_infos,
+                    out strError);
+        }
+
         // 获得 records表中 多个已存在的行信息
         // parameters:
         //      bGetData    是否需要获得记录体?
-        private int GetRowInfos(Connection connection,
+        private int _getRowInfos(Connection connection,
             bool bGetData,
             List<string> ids,
             out List<RecordRowInfo> row_infos,

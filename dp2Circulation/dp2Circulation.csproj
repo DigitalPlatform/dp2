@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>212</ApplicationRevision>
+    <ApplicationRevision>213</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -2540,6 +2540,9 @@
       <DependentUpon>UrgentChargingForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Thread\ThreadBase.cs" />
+    <Content Include="Reader\patronSheetLayout_card_2X5.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Reader\patronSheetLayout_card_QR2X5.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -3715,6 +3718,16 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="Reader\patronSheetLayout_3X9.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Reader\patronSheetLayout_card_2X5.xml">
       <Visible>False</Visible>
       <Group>
       </Group>
