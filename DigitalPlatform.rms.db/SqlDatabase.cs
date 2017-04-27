@@ -10284,7 +10284,7 @@ FileShare.ReadWrite))
                 int start = 0;
                 int length = Math.Min(MYSQL_MAX_GETINFO_COUNT, ids.Count);
                 int count = 0;
-                while (count >= ids.Count)
+                while (count < ids.Count)
                 {
                     nRet = _getRowInfos(connection,
                     bGetData,
@@ -10295,8 +10295,8 @@ FileShare.ReadWrite))
                         return -1;
                     row_infos.AddRange(results);
                     count += length;
-
-                    start += Math.Min(MYSQL_MAX_GETINFO_COUNT, ids.Count - count);
+                    start += length;
+                    length = Math.Min(MYSQL_MAX_GETINFO_COUNT, ids.Count - count);
                 }
                 return nRet;
             }
@@ -14968,7 +14968,8 @@ start_time,
 #if PARAMETERS
                         int nMaxLinesPerExecute = (2100 / 5) - 1;   // 4个参数，加上一个sql命令字符串
 #else
-                        int nMaxLinesPerExecute = 5000;
+                        // 2017/4/27 MySQL Named Pipe 情况下 1000 比较保险
+                        int nMaxLinesPerExecute = 1000;
 #endif
 
                         if (keysDelete != null)
