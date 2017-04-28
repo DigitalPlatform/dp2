@@ -3637,7 +3637,6 @@ MessageBoxDefaultButton.Button1);
             if (nRet != 1)
                 goto ERROR1;
 
-            // MessageBox.Show(this, "导出完成");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -6099,6 +6098,12 @@ dlg.UiState);
 
                 return nReaderIndex;    // 实际处理的读者记录数
             }
+            catch (ChannelException ex)
+            {
+                // 2017/4/27
+                strError = ex.Message;
+                return -1;
+            }
             catch (Exception ex)
             {
                 strError = "ProcessPatrons() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
@@ -6716,7 +6721,7 @@ dlg.UiState);
             out string strError)
         {
             strError = "";
-            //int nRet = 0;
+            int nRet = 0;
 
             ExportPatronExcelDialog dlg = new ExportPatronExcelDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
@@ -6752,11 +6757,21 @@ dlg.UiState);
                 return -1;
             }
 
+            string strOutputFileName = dlg.FileName;
+
             XLWorkbook doc = null;
             try
             {
+                // 提前保存一下，如果此时文件扩展名不正确，就能当时抛出异常
+                File.Delete(strOutputFileName);
+                using (doc = new XLWorkbook(XLEventTracking.Disabled))
+                {
+                    doc.Worksheets.Add("表格");
+                    doc.SaveAs(strOutputFileName);
+                }
+
+                File.Delete(strOutputFileName);
                 doc = new XLWorkbook(XLEventTracking.Disabled);
-                File.Delete(dlg.FileName);
             }
             catch (Exception ex)
             {
@@ -6782,7 +6797,7 @@ dlg.UiState);
                 // return:
                 //      -1  出错。包括用户中断的情况
                 //      >=0 实际处理的读者记录数
-                int nRet = this.ProcessPatrons(
+                nRet = this.ProcessPatrons(
                     reader_barcodes,
                     "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary", // advancexml_history_bibliosummary
                     (strRecPath, dom, timestamp) =>
@@ -6852,10 +6867,14 @@ dlg.UiState);
                         ref nRowIndex,
                         ref column_max_chars);
                             }
+                            catch (ChannelException)
+                            {
+                                throw;
+                            }
                             catch (Exception ex)
                             {
                                 string strErrorText = "输出借阅历史时出现异常: " + ex.Message;
-                                throw new Exception(strErrorText);
+                                throw new Exception(strErrorText, ex);
                             }
                         }
 
@@ -6866,7 +6885,11 @@ dlg.UiState);
                     },
                     out strError);
                 if (nRet == -1)
+                {
+                    doc.Dispose();
+                    doc = null;
                     return -1;
+                }
 
                 {
                     if (stop != null)
@@ -6906,7 +6929,6 @@ dlg.UiState);
                     }
                 }
 
-                this.ShowMessage("共导出读者记录 " + nReaderIndex + " 个", "green", true);
             }
             catch (Exception ex)
             {
@@ -6920,24 +6942,27 @@ dlg.UiState);
 
                 if (doc != null)
                 {
-                    doc.SaveAs(dlg.FileName);
+                    doc.SaveAs(strOutputFileName);
                     doc.Dispose();
+
+                    if (bLaunchExcel)
+                    {
+                        try
+                        {
+                            System.Diagnostics.Process.Start(strOutputFileName);
+                        }
+                        catch
+                        {
+
+                        }
+                    }
                 }
 
-                if (bLaunchExcel)
-                {
-                    try
-                    {
-                        System.Diagnostics.Process.Start(dlg.FileName);
-                    }
-                    catch
-                    {
-
-                    }
-                }
+                this.ClearMessage();
             }
 
             // TODO: sheet 可以按照单位来区分。例如按照班级
+            this.ShowMessage("共导出读者记录 " + nReaderIndex + " 个", "green", true);
             return 1;
         }
 
@@ -7429,6 +7454,7 @@ ref nRowIndex,
 XLColor.DarkGreen,
 2,
 7);
+
 
             List<IXLCell> cells = new List<IXLCell>();
 
