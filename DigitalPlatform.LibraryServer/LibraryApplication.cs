@@ -950,6 +950,10 @@ namespace DigitalPlatform.LibraryServer
 
                         this.AcceptBlankReaderBarcode = DomUtil.GetBooleanParam(node, "acceptBlankReaderBarcode", true);
 
+                        // 2017/5/4
+                        this.UpperCaseItemBarcode = DomUtil.GetBooleanParam(node, "upperCaseItemBarcode", true);
+                        this.UpperCaseReaderBarcode = DomUtil.GetBooleanParam(node, "upperCaseReaderBarcode", true);
+
                         this.VerifyBookType = DomUtil.GetBooleanParam(node, "verifyBookType", false);
                         this.VerifyReaderType = DomUtil.GetBooleanParam(node, "verifyReaderType", false);
                         this.BorrowCheckOverdue = DomUtil.GetBooleanParam(node, "borrowCheckOverdue", true);
@@ -967,6 +971,11 @@ namespace DigitalPlatform.LibraryServer
                         this.VerifyBarcode = false;
                         this.AcceptBlankItemBarcode = true;
                         this.AcceptBlankReaderBarcode = true;
+
+                        // 2017/5/4
+                        this.UpperCaseItemBarcode = true;
+                        this.UpperCaseReaderBarcode = true;
+
                         this.VerifyBookType = false;
                         this.VerifyReaderType = false;
                         this.BorrowCheckOverdue = true;
@@ -1758,7 +1767,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (this.MaxClients != 255) // 255 通道情况下不再检查版本失效日期 2016/11/3
                     {
-                        DateTime expire = new DateTime(2017, 6, 1); // 上一个版本是 2017/3/1 2016/11/1
+                        DateTime expire = new DateTime(2017, 9, 1); // 上一个版本是 2017/6/1 2017/3/1 2016/11/1
                         if (DateTime.Now > expire)
                         {
                             if (this.MaxClients == 255)

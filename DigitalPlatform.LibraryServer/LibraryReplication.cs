@@ -10,7 +10,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.rms.Client;
-// using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 
 namespace DigitalPlatform.LibraryServer

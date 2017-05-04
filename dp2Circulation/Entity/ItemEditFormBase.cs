@@ -41,6 +41,21 @@ namespace dp2Circulation
         // public MainForm MainForm = null;
 
         /// <summary>
+        /// 当前窗口所从属的框架窗口
+        /// </summary>
+        public virtual MainForm MainForm
+        {
+            get
+            {
+                return Program.MainForm;
+            }
+            set
+            {
+                // 为了让脚本代码能兼容
+            }
+        }
+
+        /// <summary>
         /// 订购控件
         /// </summary>
         public ItemControlBase<T, TC> ItemControl = null;

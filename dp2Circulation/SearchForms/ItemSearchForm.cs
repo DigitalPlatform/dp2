@@ -2842,7 +2842,9 @@ out strError);
 
             // 检查根元素下的元素名是否有重复的
             nRet = VerifyDupElementName(itemdom,
-    out strError);
+                bAutoModify,
+                ref bChanged,
+                out strError);
             if (nRet == -1)
                 errors.Add(strError);
 
@@ -2896,7 +2898,9 @@ out strError);
 
             // 检查根元素下的元素名是否有重复的
             nRet = VerifyDupElementName(itemdom,
-    out strError);
+                bAutoModify,
+                ref bChanged,
+                out strError);
             if (nRet == -1)
                 errors.Add(strError);
 
@@ -2911,6 +2915,7 @@ out strError);
                 }
             }
 
+#if NO
             nRet = VerifyRefID(itemdom,
                 bAutoModify,
                 ref bChanged,
@@ -2919,10 +2924,13 @@ out strError);
             {
                 errors.Add(strError);
             }
+#endif
 
             // 检查根元素下的元素名是否有重复的
             nRet = VerifyDupElementName(itemdom,
-    out strError);
+                bAutoModify,
+                ref bChanged,
+                out strError);
             if (nRet == -1)
                 errors.Add(strError);
 
@@ -2969,7 +2977,9 @@ out strError);
 
             // 检查根元素下的元素名是否有重复的
             nRet = VerifyDupElementName(itemdom,
-    out strError);
+                bAutoModify,
+                ref bChanged,
+                out strError);
             if (nRet == -1)
                 errors.Add(strError);
 
@@ -2993,11 +3003,15 @@ out strError);
                 errors.Add(strError);
             }
 
+#if NO
             // 检查根元素下的元素名是否有重复的
             nRet = VerifyDupElementName(itemdom,
-    out strError);
+                bAutoModify,
+                ref bChanged,
+                out strError);
             if (nRet == -1)
                 errors.Add(strError);
+#endif
 
             // 校验借书时间字符串是否合法
             string borrowDate = DomUtil.GetElementText(itemdom.DocumentElement, "borrowDate");
@@ -3629,6 +3643,8 @@ out strError);
         }
 
         int VerifyDupElementName(XmlDocument dom,
+            bool bModify,
+            ref bool bChanged,
             out string strError)
         {
             strError = "";
@@ -3661,8 +3677,130 @@ out strError);
 
             if (errors.Count == 0)
                 return 0;
+
+            // 删除重复的元素。如果一个内容为空，优先删除它
+            if (bModify)
+            {
+                StringBuilder comment = new StringBuilder();
+
+                List<XmlElement> deletes = new List<XmlElement>();
+                List<string> processed_names = new List<string>();
+                foreach (XmlNode node in dom.DocumentElement.ChildNodes)
+                {
+                    if (node.NodeType == XmlNodeType.Element)
+                    {
+                        // dprms:file 元素是允许重复的
+                        if (node.NamespaceURI == DpNs.dprms && node.LocalName == "file")
+                            continue;
+
+                        if (string.IsNullOrEmpty(node.Prefix) == false)
+                            nsmgr.AddNamespace(node.Prefix, node.NamespaceURI);
+
+                        XmlNodeList nodes = dom.DocumentElement.SelectNodes(node.Name, nsmgr);
+                        if (nodes.Count > 1 && processed_names.IndexOf(node.Name) == -1)
+                        {
+                            // 保证了不重复处理
+                            processed_names.Add(node.Name);
+
+                            // 保留整理前的状态
+                            if (comment.Length > 0)
+                                comment.Append("。");
+                            comment.Append("整理前的 " + BuildComment(nodes));
+
+                            // 挑选一个加以保留，其他的删除
+                            deletes.AddRange(RemoveDupNodes(nodes));
+                        }
+                    }
+                }
+
+                if (deletes.Count > 0)
+                {
+                    foreach (XmlElement node in deletes)
+                    {
+                        node.ParentNode.RemoveChild(node);
+                        bChanged = true;
+                    }
+
+                    // 记入 comment 元素
+                    if (comment.Length > 0)
+                    {
+                        string strOldComment = DomUtil.GetElementText(dom.DocumentElement, "comment");
+                        if (string.IsNullOrEmpty(strOldComment) == false)
+                            strOldComment += "。";
+                        DomUtil.SetElementText(dom.DocumentElement, 
+                            "comment",
+                            strOldComment + DateTime.Now.ToString() + " " + comment.ToString());
+                    }
+                }
+            }
+
             strError = StringUtil.MakePathList(errors, "; ");
             return -1;
+        }
+
+        class DeleteItem
+        {
+            public XmlElement Element { get; set; }
+            public int Length { get; set; }
+        }
+
+        static string BuildComment(XmlNodeList nodes)
+        {
+            StringBuilder text = new StringBuilder();
+            int i = 0;
+            text.Append(nodes.Count.ToString() + " 个重复元素: ");
+            foreach (XmlElement node in nodes)
+            {
+                if (text.Length > 0)
+                    text.Append("; ");
+                text.Append((i + 1).ToString() + ") " + node.OuterXml);
+                i++;
+            }
+
+            return text.ToString();
+        }
+
+        static List<XmlElement> RemoveDupNodes(XmlNodeList nodes)
+        {
+            List<XmlElement> results = new List<XmlElement>();
+            List<XmlElement> rests = new List<XmlElement>();
+            // 删除空元素
+            foreach (XmlElement node in nodes)
+            {
+                if (String.IsNullOrEmpty(node.InnerXml.Trim()))
+                    results.Add(node);
+                else
+                    rests.Add(node);
+            }
+
+            // 已经删除了只剩下一个了，结束处理
+            if (results.Count >= nodes.Count - 1)
+                return results;
+
+            List<DeleteItem> delete = new List<DeleteItem>();
+            // 按照下级 XML 尺寸排序，最大的保留，其余删除
+            foreach (XmlElement node in rests)
+            {
+                DeleteItem item = new DeleteItem();
+                item.Element = node;
+                item.Length = node.InnerXml.Trim().Length;
+                delete.Add(item);
+            }
+
+            delete.Sort((x, y) =>
+            {
+                return -1 * (x.Length - y.Length);
+            });
+
+            if (delete.Count > 0)
+                delete.RemoveAt(0); // 去掉最大一个
+
+            foreach (DeleteItem item in delete)
+            {
+                results.Add(item.Element);
+            }
+
+            return results;
         }
 
         // 进行流通操作

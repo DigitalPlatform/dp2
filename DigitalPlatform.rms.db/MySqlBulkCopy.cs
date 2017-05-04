@@ -162,9 +162,9 @@ namespace DigitalPlatform.rms
                 try
                 {
 #endif
-                    StringBuilder strCommand = new StringBuilder(4096);
-                    while (reader.Read())
-                    {
+                StringBuilder strCommand = new StringBuilder(4096);
+                while (reader.Read())
+                {
 #if PARAMETERS
                         string strIndex = index.ToString();
                         string strKeyParamName = "@k" + strIndex;
@@ -173,25 +173,25 @@ namespace DigitalPlatform.rms
                         string strKeynumParamName = "@n" + strIndex;
 #endif
 
-                        string strKeyString = (string)reader["keystring"];
+                    string strKeyString = (string)reader["keystring"];
 
-                        string strFromString = (string)reader["fromstring"];
+                    string strFromString = (string)reader["fromstring"];
 
-                        string strIdString = (string)reader["idstring"];
+                    string strIdString = (string)reader["idstring"];
 
-                        string strKeyStringNum = (string)reader["keystringnum"];
+                    string strKeyStringNum = (string)reader["keystringnum"];
 
-                        if (strCommand.Length == 0)
-                        {
+                    if (strCommand.Length == 0)
+                    {
 #if !PARAMETERS
-                            strCommand.Append(
-                                " INSERT INTO " + strTableName
-                                + " (keystring,fromstring,idstring,keystringnum) "
-                                + " VALUES (N'" + MySqlHelper.EscapeString(strKeyString) + "',N'"
-                                + MySqlHelper.EscapeString(strFromString) + "',N'"
-                                + MySqlHelper.EscapeString(strIdString) + "',N'"
-                                + MySqlHelper.EscapeString(strKeyStringNum) + "') "
-                                );
+                        strCommand.Append(
+                            " INSERT INTO " + strTableName
+                            + " (keystring,fromstring,idstring,keystringnum) "
+                            + " VALUES (N'" + MySqlHelper.EscapeString(strKeyString) + "',N'"
+                            + MySqlHelper.EscapeString(strFromString) + "',N'"
+                            + MySqlHelper.EscapeString(strIdString) + "',N'"
+                            + MySqlHelper.EscapeString(strKeyStringNum) + "') "
+                            );
 #else 
                             strCommand.Append(
                                 " INSERT INTO " + strTableName
@@ -202,16 +202,16 @@ namespace DigitalPlatform.rms
                                 + strKeynumParamName + ") "
                                 );
 #endif
-                        }
-                        else
-                        {
+                    }
+                    else
+                    {
 #if !PARAMETERS
-                            strCommand.Append(
-                                ",(N'" + MySqlHelper.EscapeString(strKeyString) + "',N'"
-                                + MySqlHelper.EscapeString(strFromString) + "',N'"
-                                + MySqlHelper.EscapeString(strIdString) + "',N'"
-                                + MySqlHelper.EscapeString(strKeyStringNum) + "') "
-                                );
+                        strCommand.Append(
+                            ",(N'" + MySqlHelper.EscapeString(strKeyString) + "',N'"
+                            + MySqlHelper.EscapeString(strFromString) + "',N'"
+                            + MySqlHelper.EscapeString(strIdString) + "',N'"
+                            + MySqlHelper.EscapeString(strKeyStringNum) + "') "
+                            );
 #else
                             strCommand.Append(
                                 ",(" + strKeyParamName + ","
@@ -220,7 +220,7 @@ namespace DigitalPlatform.rms
                                 + strKeynumParamName + ") "
                                 );
 #endif
-                        }
+                    }
 
 #if PARAMETERS
                         command.Parameters.AddWithValue(strKeyParamName, strKeyString);
@@ -230,32 +230,10 @@ namespace DigitalPlatform.rms
                         command.Parameters.AddWithValue(strKeynumParamName, strKeyStringNum);
 #endif
 
-                        nCount++;
+                    nCount++;
 
-                        if (nCount >= this.BatchSize && this.BatchSize != 0)
-                        {
-                            command.CommandText = "use " + strDbName + " ;\n"
-                                + strCommand + " ;\n";
-
-                            command.ExecuteNonQuery();
-
-                            strCommand.Clear();
-                            command.Parameters.Clear();
-                            nCount = 0;
-                            index = 0;
-                            continue;
-                        }
-
-
-
-
-                        index++;
-                    }
-
-                    // 最后一次
-                    if (strCommand.Length > 0)
+                    if (nCount >= this.BatchSize && this.BatchSize != 0)
                     {
-
                         command.CommandText = "use " + strDbName + " ;\n"
                             + strCommand + " ;\n";
 
@@ -265,8 +243,26 @@ namespace DigitalPlatform.rms
                         command.Parameters.Clear();
                         nCount = 0;
                         index = 0;
-
+                        continue;
                     }
+
+                    index++;
+                }
+
+                // 最后一次
+                if (strCommand.Length > 0)
+                {
+
+                    command.CommandText = "use " + strDbName + " ;\n"
+                        + strCommand + " ;\n";
+
+                    command.ExecuteNonQuery();
+
+                    strCommand.Clear();
+                    command.Parameters.Clear();
+                    nCount = 0;
+                    index = 0;
+                }
 
 #if NO
                     if (trans != null)

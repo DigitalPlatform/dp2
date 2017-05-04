@@ -21,92 +21,93 @@ using DigitalPlatform.CommonDialog;
 
 namespace dp2Manager
 {
-	/// <summary>
-	/// Summary description for MainForm.
-	/// </summary>
-	public class MainForm : System.Windows.Forms.Form
-	{
+    /// <summary>
+    /// Summary description for MainForm.
+    /// </summary>
+    public class MainForm : System.Windows.Forms.Form
+    {
         public string DataDir = "";
 
-		public DigitalPlatform.StopManager	stopManager = new DigitalPlatform.StopManager();
-		DigitalPlatform.Stop stop = null;
+        public DigitalPlatform.StopManager stopManager = new DigitalPlatform.StopManager();
+        DigitalPlatform.Stop stop = null;
 
-		public ServerCollection Servers = null;
+        public ServerCollection Servers = null;
 
-		public LinkInfoCollection LinkInfos = null;
+        public LinkInfoCollection LinkInfos = null;
 
-		public string Lang = "zh";
+        public string Lang = "zh";
 
-		//保存界面信息
-		public ApplicationInfo	AppInfo = new ApplicationInfo("dp2managers.xml");
+        //保存界面信息
+        public ApplicationInfo AppInfo = new ApplicationInfo("dp2managers.xml");
 
         RmsChannel channel = null;	// 临时使用的channel对象
 
-		public RmsChannelCollection	Channels = new RmsChannelCollection();	// 拥有
+        public RmsChannelCollection Channels = new RmsChannelCollection();	// 拥有
 
-		private ResTree treeView_res;
+        private ResTree treeView_res;
 
-		private System.Windows.Forms.MainMenu mainMenu1;
-		private System.Windows.Forms.MenuItem menuItem1;
-		private System.Windows.Forms.MenuItem menuItem_accountManagement;
-		private System.Windows.Forms.MenuItem menuItem_databaseManagement;
-		private System.Windows.Forms.MenuItem menuItem_newDatabase;
-		private System.Windows.Forms.MenuItem menuItem_deleteDatabase;
+        private System.Windows.Forms.MainMenu mainMenu1;
+        private System.Windows.Forms.MenuItem menuItem1;
+        private System.Windows.Forms.MenuItem menuItem_accountManagement;
+        private System.Windows.Forms.MenuItem menuItem_databaseManagement;
+        private System.Windows.Forms.MenuItem menuItem_newDatabase;
+        private System.Windows.Forms.MenuItem menuItem_deleteDatabase;
         private System.Windows.Forms.MenuItem menuItem_refresh;
-		private System.Windows.Forms.MenuItem menuItem2;
-		private System.Windows.Forms.MenuItem menuItem_serversCfg;
-		private System.Windows.Forms.MenuItem menuItem_exit;
-		private System.Windows.Forms.ToolBar toolBar1;
-		private System.Windows.Forms.ToolBarButton toolBarButton_stop;
-		private System.Windows.Forms.ImageList imageList_toolbar;
-		private System.Windows.Forms.MenuItem menuItem_cfgLinkInfo;
-		private System.Windows.Forms.MenuItem menuItem3;
+        private System.Windows.Forms.MenuItem menuItem2;
+        private System.Windows.Forms.MenuItem menuItem_serversCfg;
+        private System.Windows.Forms.MenuItem menuItem_exit;
+        private System.Windows.Forms.ToolBar toolBar1;
+        private System.Windows.Forms.ToolBarButton toolBarButton_stop;
+        private System.Windows.Forms.ImageList imageList_toolbar;
+        private System.Windows.Forms.MenuItem menuItem_cfgLinkInfo;
+        private System.Windows.Forms.MenuItem menuItem3;
         private MenuItem menuItem_test;
         private StatusStrip statusStrip_main;
         private ToolStripStatusLabel toolStripStatusLabel_main;
         private ToolStripProgressBar toolStripProgressBar_main;
-		private System.ComponentModel.IContainer components;
+        private MenuItem menuItem_testAccessKey;
+        private System.ComponentModel.IContainer components;
 
-		public MainForm()
-		{
-			//
-			// Required for Windows Form Designer support
-			//
-			InitializeComponent();
+        public MainForm()
+        {
+            //
+            // Required for Windows Form Designer support
+            //
+            InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
-		}
+            //
+            // TODO: Add any constructor code after InitializeComponent call
+            //
+        }
 
-		/// <summary>
-		/// Clean up any resources being used.
-		/// </summary>
-		protected override void Dispose( bool disposing )
-		{
-			if( disposing )
-			{
-				if (components != null) 
-				{
-					components.Dispose();
-				}
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
 
                 if (this.LinkInfos != null)
                     this.LinkInfos.Dispose();
 
                 if (this.Channels != null)
                     this.Channels.Dispose();
-			}
-			base.Dispose( disposing );
-		}
+            }
+            base.Dispose(disposing);
+        }
 
-		#region Windows Form Designer generated code
-		/// <summary>
-		/// Required method for Designer support - do not modify
-		/// the contents of this method with the code editor.
-		/// </summary>
-		private void InitializeComponent()
-		{
+        #region Windows Form Designer generated code
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.mainMenu1 = new System.Windows.Forms.MainMenu(this.components);
@@ -129,6 +130,7 @@ namespace dp2Manager
             this.statusStrip_main = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
+            this.menuItem_testAccessKey = new System.Windows.Forms.MenuItem();
             this.statusStrip_main.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -181,7 +183,8 @@ namespace dp2Manager
             this.menuItem_newDatabase,
             this.menuItem_deleteDatabase,
             this.menuItem_refresh,
-            this.menuItem_test});
+            this.menuItem_test,
+            this.menuItem_testAccessKey});
             this.menuItem1.Text = "功能(&U)";
             // 
             // menuItem_accountManagement
@@ -286,6 +289,12 @@ namespace dp2Manager
             this.toolStripProgressBar_main.Name = "toolStripProgressBar_main";
             this.toolStripProgressBar_main.Size = new System.Drawing.Size(172, 16);
             // 
+            // menuItem_testAccessKey
+            // 
+            this.menuItem_testAccessKey.Index = 6;
+            this.menuItem_testAccessKey.Text = "测试检索点";
+            this.menuItem_testAccessKey.Click += new System.EventHandler(this.menuItem_testAccessKey_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -306,22 +315,22 @@ namespace dp2Manager
             this.ResumeLayout(false);
             this.PerformLayout();
 
-		}
-		#endregion
+        }
+        #endregion
 
-		/// <summary>
-		/// The main entry point for the application.
-		/// </summary>
-		[STAThread]
-		static void Main() 
-		{
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main()
+        {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
-		}
+        }
 
-		private void Form1_Load(object sender, System.EventArgs e)
-		{
+        private void Form1_Load(object sender, System.EventArgs e)
+        {
             if (ApplicationDeployment.IsNetworkDeployed == true)
             {
                 // MessageBox.Show(this, "network");
@@ -333,75 +342,75 @@ namespace dp2Manager
                 DataDir = Environment.CurrentDirectory;
             }
 
-			// 从文件中装载创建一个ServerCollection对象
-			// parameters:
-			//		bIgnorFileNotFound	是否不抛出FileNotFoundException异常。
-			//							如果==true，函数直接返回一个新的空ServerCollection对象
-			// Exception:
-			//			FileNotFoundException	文件没找到
-			//			SerializationException	版本迁移时容易出现
+            // 从文件中装载创建一个ServerCollection对象
+            // parameters:
+            //		bIgnorFileNotFound	是否不抛出FileNotFoundException异常。
+            //							如果==true，函数直接返回一个新的空ServerCollection对象
+            // Exception:
+            //			FileNotFoundException	文件没找到
+            //			SerializationException	版本迁移时容易出现
 
-			try 
-			{
+            try
+            {
                 Servers = ServerCollection.Load(this.DataDir
-					+ "\\manager_servers.bin",
-					true);
-				Servers.ownerForm = this;
-			}
-			catch (SerializationException ex)
-			{
-				MessageBox.Show(this, ex.Message);
-				Servers = new ServerCollection();
-				// 设置文件名，以便本次运行结束时覆盖旧文件
+                    + "\\manager_servers.bin",
+                    true);
+                Servers.ownerForm = this;
+            }
+            catch (SerializationException ex)
+            {
+                MessageBox.Show(this, ex.Message);
+                Servers = new ServerCollection();
+                // 设置文件名，以便本次运行结束时覆盖旧文件
                 Servers.FileName = this.DataDir
-					+ "\\manager_servers.bin";
+                    + "\\manager_servers.bin";
 
-			}
+            }
 
             this.Servers.ServerChanged += new ServerChangedEventHandle(Servers_ServerChanged);
 
-			// 从文件中装载创建一个LinkInfoCollection对象
-			// parameters:
-			//		bIgnorFileNotFound	是否不抛出FileNotFoundException异常。
-			//							如果==true，函数直接返回一个新的空ServerCollection对象
-			// Exception:
-			//			FileNotFoundException	文件没找到
-			//			SerializationException	版本迁移时容易出现
-			try 
-			{
+            // 从文件中装载创建一个LinkInfoCollection对象
+            // parameters:
+            //		bIgnorFileNotFound	是否不抛出FileNotFoundException异常。
+            //							如果==true，函数直接返回一个新的空ServerCollection对象
+            // Exception:
+            //			FileNotFoundException	文件没找到
+            //			SerializationException	版本迁移时容易出现
+            try
+            {
                 LinkInfos = LinkInfoCollection.Load(this.DataDir
-					+ "\\manager_linkinfos.bin",
-					true);
-			}
-			catch (SerializationException ex)
-			{
-				MessageBox.Show(this, ex.Message);
-				LinkInfos = new LinkInfoCollection();
-				// 设置文件名，以便本次运行结束时覆盖旧文件
+                    + "\\manager_linkinfos.bin",
+                    true);
+            }
+            catch (SerializationException ex)
+            {
+                MessageBox.Show(this, ex.Message);
+                LinkInfos = new LinkInfoCollection();
+                // 设置文件名，以便本次运行结束时覆盖旧文件
                 LinkInfos.FileName = this.DataDir
-					+ "\\manager_linkinfos.bin";
+                    + "\\manager_linkinfos.bin";
 
-			}
-
-
+            }
 
 
-			// 设置窗口尺寸状态
-			if (AppInfo != null) 
-			{
+
+
+            // 设置窗口尺寸状态
+            if (AppInfo != null)
+            {
                 SetFirstDefaultFont();
 
                 MainForm.SetControlFont(this, this.DefaultFont);
 
-				AppInfo.LoadFormStates(this,
-					"mainformstate");
-			}
+                AppInfo.LoadFormStates(this,
+                    "mainformstate");
+            }
 
-			stopManager.Initial(toolBarButton_stop,
+            stopManager.Initial(toolBarButton_stop,
                 this.toolStripStatusLabel_main,
                 this.toolStripProgressBar_main);
-			stop = new DigitalPlatform.Stop();
-			stop.Register(this.stopManager, true);	// 和容器关联
+            stop = new DigitalPlatform.Stop();
+            stop.Register(this.stopManager, true);	// 和容器关联
 
             /*
 			this.Channels.procAskAccountInfo = 
@@ -411,27 +420,27 @@ namespace dp2Manager
 
 
 
-			// 简单检索界面准备工作
-			treeView_res.AppInfo = this.AppInfo;	// 便于treeview中popup菜单修改配置文件时保存dialog尺寸位置
+            // 简单检索界面准备工作
+            treeView_res.AppInfo = this.AppInfo;	// 便于treeview中popup菜单修改配置文件时保存dialog尺寸位置
 
-			treeView_res.stopManager = this.stopManager;
+            treeView_res.stopManager = this.stopManager;
 
-			treeView_res.Servers = this.Servers;	// 引用
+            treeView_res.Servers = this.Servers;	// 引用
 
-			treeView_res.Channels = this.Channels;	// 引用
-		
-			treeView_res.Fill(null);
+            treeView_res.Channels = this.Channels;	// 引用
 
-			//
-			LinkInfos.Channels = this.Channels;
+            treeView_res.Fill(null);
 
-			int nRet = 0;
-			string strError = "";
-			nRet = this.LinkInfos.Link(out strError);
-			if (nRet == -1)
-				MessageBox.Show(this, strError);
-		
-		}
+            //
+            LinkInfos.Channels = this.Channels;
+
+            int nRet = 0;
+            string strError = "";
+            nRet = this.LinkInfos.Link(out strError);
+            if (nRet == -1)
+                MessageBox.Show(this, strError);
+
+        }
 
         void Servers_ServerChanged(object sender, ServerChangedEventArgs e)
         {
@@ -439,171 +448,171 @@ namespace dp2Manager
         }
 
 
-		private void Form1_Closed(object sender, System.EventArgs e)
-		{
+        private void Form1_Closed(object sender, System.EventArgs e)
+        {
             this.Channels.AskAccountInfo -= new AskAccountInfoEventHandle(this.Servers.OnAskAccountInfo);
 
             // 如果缺了此句，则Servers.Save会出现问题
             this.Servers.ServerChanged -= new ServerChangedEventHandle(Servers_ServerChanged);
 
-			// 保存到文件
-			// parameters:
-			//		strFileName	文件名。如果==null,表示使用装载时保存的那个文件名
-			Servers.Save(null);
-			Servers = null;
+            // 保存到文件
+            // parameters:
+            //		strFileName	文件名。如果==null,表示使用装载时保存的那个文件名
+            Servers.Save(null);
+            Servers = null;
 
-			LinkInfos.Save(null);
-			LinkInfos = null;
+            LinkInfos.Save(null);
+            LinkInfos = null;
 
-			// 保存窗口尺寸状态
-			if (AppInfo != null) 
-			{
+            // 保存窗口尺寸状态
+            if (AppInfo != null)
+            {
 
-				AppInfo.SaveFormStates(this,
-					"mainformstate");
-			}
+                AppInfo.SaveFormStates(this,
+                    "mainformstate");
+            }
 
-			//记住save,保存信息XML文件
-			AppInfo.Save();
-			AppInfo = null;	// 避免后面再用这个对象	
-		}
+            //记住save,保存信息XML文件
+            AppInfo.Save();
+            AppInfo = null;	// 避免后面再用这个对象	
+        }
 
-		private void menuItem_accountManagement_Click(object sender, System.EventArgs e)
-		{
+        private void menuItem_accountManagement_Click(object sender, System.EventArgs e)
+        {
 
-			if (treeView_res.SelectedNode == null)
-			{
-				MessageBox.Show("请选择一个节点");
-				return;
-			}
+            if (treeView_res.SelectedNode == null)
+            {
+                MessageBox.Show("请选择一个节点");
+                return;
+            }
 
-			ResPath respath = new ResPath(treeView_res.SelectedNode);
+            ResPath respath = new ResPath(treeView_res.SelectedNode);
 
-			GetUserNameDlg namedlg = new GetUserNameDlg();
+            GetUserNameDlg namedlg = new GetUserNameDlg();
             MainForm.SetControlFont(namedlg, this.DefaultFont);
 
-			string strError = "";
+            string strError = "";
             this.Cursor = Cursors.WaitCursor;
             int nRet = namedlg.Initial(this.Servers,
-				this.Channels,
-				this.stopManager,
-				respath.Url,
-				out strError);
+                this.Channels,
+                this.stopManager,
+                respath.Url,
+                out strError);
             this.Cursor = Cursors.Arrow;
             if (nRet == -1)
-			{
-				MessageBox.Show(strError);
-				return;
-			}
+            {
+                MessageBox.Show(strError);
+                return;
+            }
 
-			namedlg.StartPosition = FormStartPosition.CenterScreen;
-			namedlg.ShowDialog(this);
-			if (namedlg.DialogResult != DialogResult.OK)
-				return;
+            namedlg.StartPosition = FormStartPosition.CenterScreen;
+            namedlg.ShowDialog(this);
+            if (namedlg.DialogResult != DialogResult.OK)
+                return;
 
-			UserRightsDlg dlg = new UserRightsDlg();
+            UserRightsDlg dlg = new UserRightsDlg();
             MainForm.SetControlFont(dlg, this.DefaultFont);
             dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.UserName = namedlg.SelectedUserName;
+            dlg.UserName = namedlg.SelectedUserName;
             dlg.UserRecPath = namedlg.SelectedUserRecPath;
-			dlg.ServerUrl = respath.Url;
-			dlg.MainForm = this;
+            dlg.ServerUrl = respath.Url;
+            dlg.MainForm = this;
 
-			this.AppInfo.LinkFormState(dlg, "userrightsdlg_state");
-			dlg.ShowDialog(this);
-			this.AppInfo.UnlinkFormState(dlg);
-		}
+            this.AppInfo.LinkFormState(dlg, "userrightsdlg_state");
+            dlg.ShowDialog(this);
+            this.AppInfo.UnlinkFormState(dlg);
+        }
 
-		private void menuItem_databaseManagement_Click(object sender, System.EventArgs e)
-		{
-			if (treeView_res.SelectedNode == null)
-			{
-				MessageBox.Show("请选择一个数据库节点");
-				return;
-			}
+        private void menuItem_databaseManagement_Click(object sender, System.EventArgs e)
+        {
+            if (treeView_res.SelectedNode == null)
+            {
+                MessageBox.Show("请选择一个数据库节点");
+                return;
+            }
 
-			ResPath respath = new ResPath(treeView_res.SelectedNode);
-			if (respath.Path == "")
-			{
-				MessageBox.Show("请选择一个数据库类型的节点");
-				return;
-			}
-			string strPath = respath.Path;
-			string strDbName = StringUtil.GetFirstPartPath(ref strPath);
-			if (strDbName == "")
-			{
-				MessageBox.Show("错误: 数据库名为空");
-				return;
-			}
+            ResPath respath = new ResPath(treeView_res.SelectedNode);
+            if (respath.Path == "")
+            {
+                MessageBox.Show("请选择一个数据库类型的节点");
+                return;
+            }
+            string strPath = respath.Path;
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+            if (strDbName == "")
+            {
+                MessageBox.Show("错误: 数据库名为空");
+                return;
+            }
 
-			DatabaseDlg dlg = new DatabaseDlg();
+            DatabaseDlg dlg = new DatabaseDlg();
             MainForm.SetControlFont(dlg, this.DefaultFont);
             dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.MainForm = this;
-			dlg.Initial(respath.Url, 
+            dlg.MainForm = this;
+            dlg.Initial(respath.Url,
                 strDbName);
 
-			this.AppInfo.LinkFormState(dlg, "databasedlg_state");
-			dlg.ShowDialog(this);
-			this.AppInfo.UnlinkFormState(dlg);
-		}
+            this.AppInfo.LinkFormState(dlg, "databasedlg_state");
+            dlg.ShowDialog(this);
+            this.AppInfo.UnlinkFormState(dlg);
+        }
 
-		// 创建新数据库
-		private void menuItem_newDatabase_Click(object sender, System.EventArgs e)
-		{
-			if (treeView_res.SelectedNode == null)
-			{
-				MessageBox.Show("请选择一个服务器或数据库节点");
-				return;
-			}
+        // 创建新数据库
+        private void menuItem_newDatabase_Click(object sender, System.EventArgs e)
+        {
+            if (treeView_res.SelectedNode == null)
+            {
+                MessageBox.Show("请选择一个服务器或数据库节点");
+                return;
+            }
 
-			ResPath respath = new ResPath(treeView_res.SelectedNode);
+            ResPath respath = new ResPath(treeView_res.SelectedNode);
 
-			string strRefDbName = "";
-			if (treeView_res.SelectedNode != null
+            string strRefDbName = "";
+            if (treeView_res.SelectedNode != null
                 && treeView_res.SelectedNode.ImageIndex == ResTree.RESTYPE_DB)
-			{
-				if (respath.Path != "")
-				{
-					string strPath = respath.Path;
-					strRefDbName = StringUtil.GetFirstPartPath(ref strPath);
-				}
-			}
+            {
+                if (respath.Path != "")
+                {
+                    string strPath = respath.Path;
+                    strRefDbName = StringUtil.GetFirstPartPath(ref strPath);
+                }
+            }
 
 
-			DatabaseDlg dlg = new DatabaseDlg();
+            DatabaseDlg dlg = new DatabaseDlg();
             MainForm.SetControlFont(dlg, this.DefaultFont);
             dlg.Text = "创建新数据库";
-			dlg.IsCreate = true;
-			dlg.RefDbName = strRefDbName;
-			dlg.StartPosition = FormStartPosition.CenterScreen;
-			dlg.MainForm = this;
-			dlg.Initial(respath.Url, 
-				"");
+            dlg.IsCreate = true;
+            dlg.RefDbName = strRefDbName;
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.MainForm = this;
+            dlg.Initial(respath.Url,
+                "");
 
-			this.AppInfo.LinkFormState(dlg, "databasedlg_state");
-			dlg.ShowDialog(this);
-			this.AppInfo.UnlinkFormState(dlg);
-		}
+            this.AppInfo.LinkFormState(dlg, "databasedlg_state");
+            dlg.ShowDialog(this);
+            this.AppInfo.UnlinkFormState(dlg);
+        }
 
-		// 获得用户记录
+        // 获得用户记录
         // return:
         //      -1  error
         //      0   not found
         //      >=1   检索命中的条数
-		public int GetUserRecord(
-			string strServerUrl,
-			string strUserName,
-			out string strRecPath,
-			out string strXml,
-			out byte[] baTimeStamp,
-			out string strError)
-		{
-			strError = "";
+        public int GetUserRecord(
+            string strServerUrl,
+            string strUserName,
+            out string strRecPath,
+            out string strXml,
+            out byte[] baTimeStamp,
+            out string strError)
+        {
+            strError = "";
 
-			strXml = "";
+            strXml = "";
             strRecPath = "";
-			baTimeStamp = null;
+            baTimeStamp = null;
 
             if (strUserName == "")
             {
@@ -613,71 +622,71 @@ namespace dp2Manager
 
             string strQueryXml = "<target list='" + Defs.DefaultUserDb.Name
                 + ":" + Defs.DefaultUserDb.SearchPath.UserName + "'><item><word>"
-				+ strUserName + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>10</maxCount></item><lang>chi</lang></target>";
+                + strUserName + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>10</maxCount></item><lang>chi</lang></target>";
 
             RmsChannel channel = this.Channels.GetChannel(strServerUrl);
-			if (channel == null)
-			{
-				strError = "Channels.GetChannel 异常";
-				return -1;
-			}
+            if (channel == null)
+            {
+                strError = "Channels.GetChannel 异常";
+                return -1;
+            }
 
-			long nRet = channel.DoSearch(strQueryXml,
+            long nRet = channel.DoSearch(strQueryXml,
                 "default",
                 out strError);
-			if (nRet == -1) 
-			{
-				strError = "检索帐户库时出错: " + strError;
-				return -1;
-			}
+            if (nRet == -1)
+            {
+                strError = "检索帐户库时出错: " + strError;
+                return -1;
+            }
 
-			if (nRet == 0)
-				return 0;	// not found
+            if (nRet == 0)
+                return 0;	// not found
 
             long nSearchCount = nRet;
 
-			List<string> aPath = null;
-			nRet = channel.DoGetSearchResult(
+            List<string> aPath = null;
+            nRet = channel.DoGetSearchResult(
                 "default",
-				1,
-				this.Lang,
-				null,	// stop,
-				out aPath,
-				out strError);
-			if (nRet == -1) 
-			{
-				strError = "检索注册用户库获取检索结果时出错: " + strError;
-				return -1;
-			}
-			if (aPath.Count == 0)
-			{
-				strError = "检索注册用户库获取的检索结果为空";
-				return -1;
-			}
+                1,
+                this.Lang,
+                null,	// stop,
+                out aPath,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "检索注册用户库获取检索结果时出错: " + strError;
+                return -1;
+            }
+            if (aPath.Count == 0)
+            {
+                strError = "检索注册用户库获取的检索结果为空";
+                return -1;
+            }
 
-			// strRecID = ResPath.GetRecordId((string)aPath[0]);
+            // strRecID = ResPath.GetRecordId((string)aPath[0]);
             strRecPath = (string)aPath[0];
 
-			string strStyle = "content,data,timestamp,withresmetadata";
-			string strMetaData;
-			string strOutputPath;
+            string strStyle = "content,data,timestamp,withresmetadata";
+            string strMetaData;
+            string strOutputPath;
 
-			nRet = channel.GetRes((string)aPath[0],
-				strStyle,
-				out strXml,
-				out strMetaData,
-				out baTimeStamp,
-				out strOutputPath,
-				out strError);
-			if (nRet == -1) 
-			{
-				strError = "获取注册用户库记录体时出错: " + strError;
-				return -1;
-			}
+            nRet = channel.GetRes((string)aPath[0],
+                strStyle,
+                out strXml,
+                out strMetaData,
+                out baTimeStamp,
+                out strOutputPath,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "获取注册用户库记录体时出错: " + strError;
+                return -1;
+            }
 
 
-			return (int)nSearchCount;
-		}
+            return (int)nSearchCount;
+        }
 
         // 根据路径获得用户记录
         // return:
@@ -710,7 +719,7 @@ namespace dp2Manager
                 return -1;
             }
 
- 
+
             string strStyle = "content,data,timestamp,withresmetadata";
             string strMetaData;
             string strOutputPath;
@@ -736,7 +745,7 @@ namespace dp2Manager
 
 
         private void menuItem_deleteObject_Click(object sender, System.EventArgs e)
-		{
+        {
             try
             {
                 string strError = "";
@@ -832,16 +841,16 @@ namespace dp2Manager
             {
                 MessageBox.Show(this, "menuItem_deleteObject_Click（) 抛出异常: " + ExceptionUtil.GetDebugText(ex));
             }
-		}
+        }
 
-		public void menuItem_refresh_Click(object sender, System.EventArgs e)
-		{
-			treeView_res.menu_refresh(null, null);
-		}
+        public void menuItem_refresh_Click(object sender, System.EventArgs e)
+        {
+            treeView_res.menu_refresh(null, null);
+        }
 
-		private void treeView_res_OnSetMenu(object sender, DigitalPlatform.GUI.GuiAppendMenuEventArgs e)
-		{
-			Debug.Assert(e.ContextMenu != null, "e不能为null");
+        private void treeView_res_OnSetMenu(object sender, DigitalPlatform.GUI.GuiAppendMenuEventArgs e)
+        {
+            Debug.Assert(e.ContextMenu != null, "e不能为null");
 
             int nNodeType = -1;
             TreeNode node = this.treeView_res.SelectedNode;
@@ -850,14 +859,14 @@ namespace dp2Manager
 
 
 
-			MenuItem menuItem = new MenuItem("-");
-			e.ContextMenu.MenuItems.Add(menuItem);
+            MenuItem menuItem = new MenuItem("-");
+            e.ContextMenu.MenuItems.Add(menuItem);
 
 
-			// 帐户管理
-			menuItem = new MenuItem("帐户(&A)...");
-			menuItem.Click += new System.EventHandler(this.menuItem_accountManagement_Click);
-			e.ContextMenu.MenuItems.Add(menuItem);
+            // 帐户管理
+            menuItem = new MenuItem("帐户(&A)...");
+            menuItem.Click += new System.EventHandler(this.menuItem_accountManagement_Click);
+            e.ContextMenu.MenuItems.Add(menuItem);
 
             // 新建帐户
             menuItem = new MenuItem("新帐户(&N)...");
@@ -865,40 +874,40 @@ namespace dp2Manager
             e.ContextMenu.MenuItems.Add(menuItem);
 
 
-			menuItem = new MenuItem("-");
-			e.ContextMenu.MenuItems.Add(menuItem);
+            menuItem = new MenuItem("-");
+            e.ContextMenu.MenuItems.Add(menuItem);
 
 
-			// 配置数据库
-			menuItem = new MenuItem("数据库(&M)...");
-			menuItem.Click += new System.EventHandler(this.menuItem_databaseManagement_Click);
+            // 配置数据库
+            menuItem = new MenuItem("数据库(&M)...");
+            menuItem.Click += new System.EventHandler(this.menuItem_databaseManagement_Click);
             if (nNodeType != ResTree.RESTYPE_DB)
                 menuItem.Enabled = false;
-			e.ContextMenu.MenuItems.Add(menuItem);
+            e.ContextMenu.MenuItems.Add(menuItem);
 
 
 
-			// 新建数据库
-			menuItem = new MenuItem("新建数据库(&N)...");
-			menuItem.Click += new System.EventHandler(this.menuItem_newDatabase_Click);
-			e.ContextMenu.MenuItems.Add(menuItem);
+            // 新建数据库
+            menuItem = new MenuItem("新建数据库(&N)...");
+            menuItem.Click += new System.EventHandler(this.menuItem_newDatabase_Click);
+            e.ContextMenu.MenuItems.Add(menuItem);
 
-			menuItem = new MenuItem("-");
-			e.ContextMenu.MenuItems.Add(menuItem);
+            menuItem = new MenuItem("-");
+            e.ContextMenu.MenuItems.Add(menuItem);
 
-			// 删除数据库
-			menuItem = new MenuItem("删除数据库(&D)");
-			menuItem.Click += new System.EventHandler(this.menuItem_deleteObject_Click);
-            if (nNodeType != ResTree.RESTYPE_DB 
+            // 删除数据库
+            menuItem = new MenuItem("删除数据库(&D)");
+            menuItem.Click += new System.EventHandler(this.menuItem_deleteObject_Click);
+            if (nNodeType != ResTree.RESTYPE_DB
                 && nNodeType != ResTree.RESTYPE_FILE
                 && nNodeType != ResTree.RESTYPE_FOLDER)
                 menuItem.Enabled = false;
             if (nNodeType != ResTree.RESTYPE_DB)
                 menuItem.Text = "删除对象(&D)";
-			e.ContextMenu.MenuItems.Add(menuItem);
+            e.ContextMenu.MenuItems.Add(menuItem);
 
-			menuItem = new MenuItem("-");
-			e.ContextMenu.MenuItems.Add(menuItem);
+            menuItem = new MenuItem("-");
+            e.ContextMenu.MenuItems.Add(menuItem);
 
 #if NO
 			// 关联本地目录
@@ -921,7 +930,7 @@ namespace dp2Manager
             e.ContextMenu.MenuItems.Add(menuItem);
 
 
-		}
+        }
 
         // 导出模板
         void menuItem_exportTemplate_Click(object sender, System.EventArgs e)
@@ -1009,14 +1018,14 @@ namespace dp2Manager
             OpenFileDialog filedlg = new OpenFileDialog();
 
             filedlg.FileName = "*.template";
-			// filedlg.InitialDirectory = Environment.CurrentDirectory;
-			filedlg.Filter = "模板文件 (*.template)|*.template|All files (*.*)|*.*" ;
-			filedlg.RestoreDirectory = true ;
+            // filedlg.InitialDirectory = Environment.CurrentDirectory;
+            filedlg.Filter = "模板文件 (*.template)|*.template|All files (*.*)|*.*";
+            filedlg.RestoreDirectory = true;
 
-			if (filedlg.ShowDialog() != DialogResult.OK)
-			{
-				return;
-			}
+            if (filedlg.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
 
 
             ImportTemplateDlg dlg = new ImportTemplateDlg();
@@ -1048,51 +1057,51 @@ namespace dp2Manager
             dlg.ShowDialog(this);
         }
 
-		// 关联本地目录
-		private void menuItem_linkLocalDir_Click(object sender, System.EventArgs e)
-		{
-			string strDefault = "";
-			if (treeView_res.SelectedNode != null)
-			{
-				ResPath respath = new ResPath(treeView_res.SelectedNode);
+        // 关联本地目录
+        private void menuItem_linkLocalDir_Click(object sender, System.EventArgs e)
+        {
+            string strDefault = "";
+            if (treeView_res.SelectedNode != null)
+            {
+                ResPath respath = new ResPath(treeView_res.SelectedNode);
 
 
-				if (treeView_res.SelectedNode.ImageIndex == ResTree.RESTYPE_FOLDER)
-					strDefault = respath.FullPath;
-				else
-					strDefault = respath.Url;
-			}
+                if (treeView_res.SelectedNode.ImageIndex == ResTree.RESTYPE_FOLDER)
+                    strDefault = respath.FullPath;
+                else
+                    strDefault = respath.Url;
+            }
 
 
-			LinkInfoDlg dlg = new LinkInfoDlg();
+            LinkInfoDlg dlg = new LinkInfoDlg();
             MainForm.SetControlFont(dlg, this.DefaultFont);
 
-			dlg.LinkInfos = this.LinkInfos;
-			dlg.CreateNewServerPath = strDefault;
-			dlg.ShowDialog(this);
-		}
-		
+            dlg.LinkInfos = this.LinkInfos;
+            dlg.CreateNewServerPath = strDefault;
+            dlg.ShowDialog(this);
+        }
 
-		private void treeView_res_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
-		{
-			if (treeView_res.SelectedNode == null)
-			{
+
+        private void treeView_res_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
+        {
+            if (treeView_res.SelectedNode == null)
+            {
                 this.toolStripStatusLabel_main.Text = "尚未选择一个节点";
-				return;
-			}
+                return;
+            }
 
-			ResPath respath = new ResPath(treeView_res.SelectedNode);
+            ResPath respath = new ResPath(treeView_res.SelectedNode);
 
             this.toolStripStatusLabel_main.Text = "当前节点: " + respath.FullPath;
-		
-		}
 
-		private void menuItem_serversCfg_Click(object sender, System.EventArgs e)
-		{
-			ServersDlg dlg = new ServersDlg();
+        }
+
+        private void menuItem_serversCfg_Click(object sender, System.EventArgs e)
+        {
+            ServersDlg dlg = new ServersDlg();
             MainForm.SetControlFont(dlg, this.DefaultFont);
 
-			ServerCollection newServers = Servers.Dup();
+            ServerCollection newServers = Servers.Dup();
 
             string strWidths = this.AppInfo.GetString(
 "serversdlg",
@@ -1117,55 +1126,55 @@ namespace dp2Manager
                 "list_column_width",
                 strWidths);
 
-			if (dlg.DialogResult != DialogResult.OK)
-				return;
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
 
-			// this.Servers = newServers;
+            // this.Servers = newServers;
             this.Servers.Import(newServers);
 
-			// this.treeView_res.Servers = this.Servers;
-			treeView_res.Fill(null);
-		}
+            // this.treeView_res.Servers = this.Servers;
+            treeView_res.Fill(null);
+        }
 
-		private void menuItem_exit_Click(object sender, System.EventArgs e)
-		{
-			this.Close();
-		}
+        private void menuItem_exit_Click(object sender, System.EventArgs e)
+        {
+            this.Close();
+        }
 
-		private void toolBar1_ButtonClick(object sender, System.Windows.Forms.ToolBarButtonClickEventArgs e)
-		{
-			if (e.Button == toolBarButton_stop) 
-			{
-				stopManager.DoStopActive();
-			}
-		}
+        private void toolBar1_ButtonClick(object sender, System.Windows.Forms.ToolBarButtonClickEventArgs e)
+        {
+            if (e.Button == toolBarButton_stop)
+            {
+                stopManager.DoStopActive();
+            }
+        }
 
-		private void MainForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			if (stop != null) 
-			{
-				if (stop.State == 0 || stop.State == 1) 
-				{
-					this.channel.Abort();
-					e.Cancel = true;
-				}
-			}
-		}
+        private void MainForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (stop != null)
+            {
+                if (stop.State == 0 || stop.State == 1)
+                {
+                    this.channel.Abort();
+                    e.Cancel = true;
+                }
+            }
+        }
 
-		void DoStop()
-		{
-			if (this.channel != null)
-				this.channel.Abort();
-		}
+        void DoStop()
+        {
+            if (this.channel != null)
+                this.channel.Abort();
+        }
 
-		private void menuItem_cfgLinkInfo_Click(object sender, System.EventArgs e)
-		{
-			LinkInfoDlg dlg = new LinkInfoDlg();
+        private void menuItem_cfgLinkInfo_Click(object sender, System.EventArgs e)
+        {
+            LinkInfoDlg dlg = new LinkInfoDlg();
             MainForm.SetControlFont(dlg, this.DefaultFont);
 
-			dlg.LinkInfos = this.LinkInfos;
-			dlg.ShowDialog(this);
-		}
+            dlg.LinkInfos = this.LinkInfos;
+            dlg.ShowDialog(this);
+        }
 
         // 测试属性值对话框
         private void menuItem_test_Click(object sender, EventArgs e)
@@ -1295,5 +1304,211 @@ namespace dp2Manager
                 }
             }
         }
-	}
+
+        // 测试一个数据库的全部检索点是否完好具备
+        private void menuItem_testAccessKey_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.treeView_res.SelectedNode == null)
+            {
+                strError = "尚未选择要要导出数据的数据库节点";
+                goto ERROR1;
+            }
+
+            List<string> paths = null;
+            if (this.treeView_res.CheckBoxes == false)
+            {
+                if (this.treeView_res.SelectedNode.ImageIndex != ResTree.RESTYPE_DB)
+                {
+                    strError = "所选择的节点不是数据库类型。请选择要导出数据的数据库节点。";
+                    goto ERROR1;
+                }
+                ResPath respath = new ResPath(this.treeView_res.SelectedNode);
+                paths = new List<string>();
+                paths.Add(respath.FullPath);   // respath.Path;
+            }
+            else
+            {
+                paths = this.treeView_res.GetCheckedDatabaseList();
+                if (paths.Count == 0)
+                {
+                    strError = "请选择至少一个要导出数据的数据库节点。";
+                    goto ERROR1;
+                }
+            }
+
+            DigitalPlatform.Stop stop = this.treeView_res.PrepareStop("正在导出数据");
+
+            try
+            {
+                RecordLoader loader = new RecordLoader(this.Channels,
+                    stop,
+                    paths,
+                    "default",
+                    "id,xml");
+                foreach (KernelRecord record in loader)
+                {
+                    string path = record.RecPath;
+                    string url = record.Url;
+
+                    // return:
+                    //      -1  出错
+                    //      0   有检索点没有命中。出错情况在 strError 中返回
+                    //      1   所有检索点均已命中
+                    int nRet = VerifyAccessKey(
+                        this.Channels,
+                        stop,
+                        url,
+                        path,
+                        record.Xml,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        strError = "验证检索点发现问题: " + strError;
+                        goto ERROR1;
+                    }
+                }
+            }
+            finally
+            {
+                this.treeView_res.EndStop(stop);
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // return:
+        //      -1  出错
+        //      0   有检索点没有命中。出错情况在 strError 中返回
+        //      1   所有检索点均已命中
+        static int VerifyAccessKey(
+            RmsChannelCollection channels,
+            Stop stop,
+            string url,
+            string path,
+            string strXml,
+            out string strError)
+        {
+            strError = "";
+
+            // 获得检索点
+
+            // RmsChannel channel = channels.CreateTempChannel(url);
+            RmsChannel channel = channels.GetChannel(url);
+            try
+            {
+                if (stop != null)
+                    stop.SetMessage("正在验证 " + path);
+
+                List<AccessKeyInfo> keys = null;
+                long lRet = channel.DoGetKeys(path,
+                    strXml,
+                    "zh",
+                    stop,
+                    out keys,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                string strDbName = ResPath.GetDbName(path);
+
+                // 对每个检索点都进行验证
+                foreach (AccessKeyInfo info in keys)
+                {
+                    Application.DoEvents();
+
+                    // 验证一个 key
+                    // return:
+                    //      -1  出错
+                    //      0   没有命中
+                    //      1   命中了
+                    int nRet = VerifyOneKey(
+                        channel,
+                        strDbName,
+                        info.FromName,
+                        info.Key,
+                        path,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 0)
+                    {
+                        string strError1= "";
+                        nRet = VerifyOneKey(
+    channel,
+    strDbName,
+    info.FromName,
+    info.KeyNoProcess,
+    path,
+    out strError1);
+                        if (nRet == -1)
+                            return -1;
+                        if (nRet == 0)
+                        {
+                            strError += "; " + strError1;
+                            return 0;
+                        }
+                    }
+
+                }
+
+                return 1;
+            }
+            finally
+            {
+                //channel.Close();
+                //channel = null;
+            }
+        }
+
+        // 验证一个 key
+        // return:
+        //      -1  出错
+        //      0   没有命中
+        //      1   命中了
+        static int VerifyOneKey(
+            RmsChannel channel,
+            string strDbName,
+            string strFromName,
+            string strKey,
+            string path,
+            out string strError)
+        {
+            string strQueryXml = "<target list='" + StringUtil.GetXmlStringSimple(strDbName)
++ ":" + StringUtil.GetXmlStringSimple(strFromName) + "'><item><word>"
++ StringUtil.GetXmlStringSimple(strKey) + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+            long lRet = channel.DoSearch(strQueryXml,
+"test",
+out strError);
+            if (lRet == -1)
+                return -1;
+
+            if (lRet == 0)
+            {
+                strError = "检索点 '" + strKey + "' (" + strFromName + ") 没有命中记录 '" + path + "' (没有任何命中)";
+                return 0;
+            }
+
+            // 验证命中记录中是否包含 path 这一条
+            SearchResultLoader loader = new SearchResultLoader(channel,
+                null,
+                "test",
+                "id");
+            foreach (KernelRecord record in loader)
+            {
+                Application.DoEvents();
+
+                if (record.RecPath == path)
+                    return 1;
+            }
+
+            strError = "检索点 '" + strKey + "' (" + strFromName + ") 没有命中记录 '" + path + "'";
+            return 0;
+        }
+    }
 }

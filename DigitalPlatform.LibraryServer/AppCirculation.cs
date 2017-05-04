@@ -53,6 +53,10 @@ namespace DigitalPlatform.LibraryServer
         public bool AcceptBlankItemBarcode = true;
         public bool AcceptBlankReaderBarcode = true;
 
+        // 2017/5/4
+        public bool UpperCaseItemBarcode = true;
+        public bool UpperCaseReaderBarcode = true;
+
         // 馆藏地定义中 room 部分是否允许为空
         public bool AcceptBlankRoomName = false;
 

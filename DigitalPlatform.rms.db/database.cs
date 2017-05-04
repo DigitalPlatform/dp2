@@ -1057,7 +1057,6 @@ namespace DigitalPlatform.rms
             if (nRet == -1)
                 return -1;
 
-
             //如果strTableNames为空,则返回所有的表,但不包含通过id检索
             if (strTableNames == ""
                 || strTableNames.ToLower() == "<all>"
@@ -1074,9 +1073,18 @@ namespace DigitalPlatform.rms
                 return 0;
             }
 
+#if NO
             // 2007/9/14 新增，提升执行速度
             List<TableInfo> ref_table_infos = new List<TableInfo>();
             nRet = keysCfg.GetTableInfosRemoveDup(out ref_table_infos,
+                out strError);
+            if (nRet == -1)
+                return -1;
+#endif
+            List<TableInfo> ref_table_infos = new List<TableInfo>();
+            // 2017/5/4
+            // 不用 ...RemoveDup() 的原因是，strTableName 可能为 "@311" 形态，必须针对没有去重的列表才能正确定位表对象
+            nRet = keysCfg.GetTableInfos(out ref_table_infos,
                 out strError);
             if (nRet == -1)
                 return -1;

@@ -1868,6 +1868,16 @@ namespace DigitalPlatform.LibraryServer
             {
                 if (string.IsNullOrEmpty(strNewBarcode) == false)
                 {
+                    // 2017/5/4
+                    if (this.App.UpperCaseReaderBarcode)
+                    {
+                        if (strNewBarcode.ToUpper() != strNewBarcode)
+                        {
+                            strError = "读者证条码号 '" + strNewBarcode + "' 中的字母应为大写";
+                            return 1;
+                        }
+                    }
+
                     string strDbName = ResPath.GetDbName(strRecPath);
                     if (string.IsNullOrEmpty(strDbName) == true)
                     {
@@ -2126,10 +2136,21 @@ namespace DigitalPlatform.LibraryServer
                         return 1;
                     }
                 }
+
             }
 
             if (string.IsNullOrEmpty(strNewBarcode) == false)
             {
+                // 2017/5/4
+                if (this.App.UpperCaseItemBarcode)
+                {
+                    if (strNewBarcode.ToUpper() != strNewBarcode)
+                    {
+                        strError = "册条码号 '" + strNewBarcode + "' 中的字母应为大写";
+                        return 1;
+                    }
+                }
+
                 // return:
                 //      -2  校验函数不打算对这个分馆的号码进行校验
                 //      -1  调用出错

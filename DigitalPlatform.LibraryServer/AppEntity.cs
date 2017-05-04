@@ -2582,18 +2582,22 @@ namespace DigitalPlatform.LibraryServer
                                 }
                             }
 
-                            nRet = this.DoVerifyItemFunction(
-                                sessioninfo,
-                                strAction,
-                                domNewRec,
-                                out strError);
-                            if (nRet != 0)
+                            // 2017/5/4 restore 的时候不要执行校验册记录的函数
+                            if (bForce == false)
                             {
-                                EntityInfo error = new EntityInfo(info);
-                                error.ErrorInfo = strError;
-                                error.ErrorCode = ErrorCodeValue.CommonError;
-                                ErrorInfos.Add(error);
-                                continue;
+                                nRet = this.DoVerifyItemFunction(
+                                    sessioninfo,
+                                    strAction,
+                                    domNewRec,
+                                    out strError);
+                                if (nRet != 0)
+                                {
+                                    EntityInfo error = new EntityInfo(info);
+                                    error.ErrorInfo = strError;
+                                    error.ErrorCode = ErrorCodeValue.CommonError;
+                                    ErrorInfos.Add(error);
+                                    continue;
+                                }
                             }
                         }
 
