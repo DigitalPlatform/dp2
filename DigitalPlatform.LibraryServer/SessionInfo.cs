@@ -55,6 +55,8 @@ namespace DigitalPlatform.LibraryServer
         public bool NeedAutoClean = true;   // 是否需要自动清除
         public long CallCount = 0;
 
+        public int Used = 0;
+
         public SessionTime SessionTime = null;
 
         public string Lang = "";
@@ -1487,7 +1489,9 @@ SetStartEventArgs e);
 
                     if ((DateTime.Now - info.SessionTime.LastUsedTime) >= delta)
                     {
-                        remove_keys.Add(key);   // 这里不能删除，因为 foreach 还要用枚举器
+                        // 2017/5/7 正在使用中的 SessionInfo 不要清除
+                        if (info.Used == 0)
+                            remove_keys.Add(key);   // 这里不能删除，因为 foreach 还要用枚举器
                     }
                 }
             }
@@ -1504,7 +1508,8 @@ SetStartEventArgs e);
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
                 throw new ApplicationException("锁定尝试中超时");
             try
-            {            // 2013.11.1
+            {
+                // 2013.11.1
                 foreach (string key in remove_keys)
                 {
                     SessionInfo info = (SessionInfo)this[key];

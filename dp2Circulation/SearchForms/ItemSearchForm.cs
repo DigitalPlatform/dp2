@@ -861,7 +861,7 @@ this.DbType + "_search_form",
 
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromMinutes(2);
+            channel.Timeout = TimeSpan.FromMinutes(20);
 
             EnableControls(false);
             try
@@ -3021,6 +3021,16 @@ out strError);
                 errors.Add(strError);
             }
 
+            nRet = VerifyBlankChar(itemdom,
+                new List<string>() {"barcode", "registerNo"},
+    bAutoModify,
+    ref bChanged,
+    out strError);
+            if (nRet == -1)
+            {
+                errors.Add(strError);
+            }
+
 #if NO
             // 检查根元素下的元素名是否有重复的
             nRet = VerifyDupElementName(itemdom,
@@ -3099,6 +3109,50 @@ out strError);
             {
                 DomUtil.RemoveEmptyElements(itemdom.DocumentElement, false);
             }
+        }
+
+        // return:
+        //      -1  发现错误
+        //      0   没有发现错误
+        int VerifyBlankChar(XmlDocument dom,
+            List<string> element_names,
+            bool bModify,
+            ref bool bChanged,
+            out string strError)
+        {
+            strError = "";
+
+            if (dom.DocumentElement == null)
+            {
+                strError = "XML 记录为空";
+                return -1;
+            }
+
+            List<string> errors = new List<string>();
+            foreach (string element_name in element_names)
+            {
+                string strValue = DomUtil.GetElementText(dom.DocumentElement, element_name);
+                if (string.IsNullOrEmpty(strValue) == false)
+                {
+                    string strTrimed = strValue.Trim();
+                    if (strTrimed == strValue)
+                        continue;
+
+                    errors.Add(element_name + "元素内文本 '"+strValue+"' 中包含空格字符");
+                    if (bModify)
+                    {
+                        DomUtil.SetElementText(dom.DocumentElement, element_name, strTrimed);
+                        bChanged = true;
+                    }
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return -1;
+            }
+            return 0;
         }
 
         // return:
@@ -3790,6 +3844,10 @@ out strError);
             if (dom.DocumentElement == null)
                 return 0;
 
+            StringBuilder comment = new StringBuilder();
+            List<XmlElement> deletes = new List<XmlElement>();
+            List<string> processed_names = new List<string>();
+
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(dom.NameTable);
 
             List<string> errors = new List<string>();
@@ -3807,40 +3865,15 @@ out strError);
                         nsmgr.AddNamespace(node.Prefix, node.NamespaceURI);
 
                     XmlNodeList nodes = dom.DocumentElement.SelectNodes(node.Name, nsmgr); // 2016/11/18 修改 bug
-                    if (nodes.Count > 1)
+                    if (nodes.Count > 1 && processed_names.IndexOf(node.Name) == -1)
                     {
                         errors.Add("根元素下的 " + node.Name + " 元素出现了多次 " + nodes.Count);
-                    }
-                }
-            }
 
-            if (errors.Count == 0)
-                return 0;
+                        // 保证了不重复处理
+                        processed_names.Add(node.Name);
 
-            // 删除重复的元素。如果一个内容为空，优先删除它
-            if (bModify)
-            {
-                StringBuilder comment = new StringBuilder();
-
-                List<XmlElement> deletes = new List<XmlElement>();
-                List<string> processed_names = new List<string>();
-                foreach (XmlNode node in dom.DocumentElement.ChildNodes)
-                {
-                    if (node.NodeType == XmlNodeType.Element)
-                    {
-                        // dprms:file 元素是允许重复的
-                        if (node.NamespaceURI == DpNs.dprms && node.LocalName == "file")
-                            continue;
-
-                        if (string.IsNullOrEmpty(node.Prefix) == false)
-                            nsmgr.AddNamespace(node.Prefix, node.NamespaceURI);
-
-                        XmlNodeList nodes = dom.DocumentElement.SelectNodes(node.Name, nsmgr);
-                        if (nodes.Count > 1 && processed_names.IndexOf(node.Name) == -1)
+                        if (bModify)
                         {
-                            // 保证了不重复处理
-                            processed_names.Add(node.Name);
-
                             // 保留整理前的状态
                             if (comment.Length > 0)
                                 comment.Append("。");
@@ -3851,7 +3884,10 @@ out strError);
                         }
                     }
                 }
+            }
 
+            if (bModify)
+            {
                 if (deletes.Count > 0)
                 {
                     foreach (XmlElement node in deletes)
@@ -3860,7 +3896,6 @@ out strError);
                         bChanged = true;
                     }
 
-#if NO
                     // 记入 comment 元素
                     if (comment.Length > 0)
                     {
@@ -3870,10 +3905,14 @@ out strError);
                         DomUtil.SetElementText(dom.DocumentElement,
                             "comment",
                             strOldComment + DateTime.Now.ToString() + " " + comment.ToString());
+                        bChanged = true;
                     }
-#endif
                 }
+
             }
+
+            if (errors.Count == 0)
+                return 0;
 
             strError = StringUtil.MakePathList(errors, "; ");
             return -1;
@@ -10002,7 +10041,7 @@ Keys keyData)
 
             LibraryChannel channel = this.GetChannel();
             TimeSpan old_timeout = channel.Timeout;
-            channel.Timeout = TimeSpan.FromMinutes(2);
+            channel.Timeout = TimeSpan.FromMinutes(20);
 
             this.EnableControls(false);
             try

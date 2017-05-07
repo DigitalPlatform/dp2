@@ -47,6 +47,13 @@ namespace dp2Library
                 this.sessioninfo.CloseSession();
             }
 #endif
+            // 2017/5/7
+            if (this.sessioninfo != null)
+            {
+                if (this.RestMode)
+                    this.sessioninfo.Used--;
+            }
+
             if (this.RestMode == false)
             {
                 if (this.sessioninfo != null)
@@ -61,6 +68,7 @@ namespace dp2Library
                     this._ip = null;
                 }
             }
+
         }
 
         #region 基础函数
@@ -400,6 +408,10 @@ namespace dp2Library
 #endif
 
                 SetLang(sessioninfo.Lang);
+
+                // 2017/5/7
+                if (this.RestMode)
+                    this.sessioninfo.Used++;
             }
 
             if (bPrepareSessionInfo == false && this.sessioninfo == null)
