@@ -91,6 +91,10 @@
       <HintPath>..\packages\ClosedXML.0.80.1\lib\net40-client\ClosedXML.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="DigitalPlatform.rms, Version=2.0.6333.41774, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\DigitalPlatform.rms\bin\Debug\DigitalPlatform.rms.dll</HintPath>
+    </Reference>
     <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
@@ -144,6 +148,7 @@
     </Reference>
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IdentityModel" />
     <Reference Include="System.IO, Version=2.6.10.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.1.1.10\lib\net40\System.IO.dll</HintPath>
       <Private>True</Private>
@@ -261,9 +266,7 @@
     <Compile Include="EntityForm\GetMergeStyleDialog.Designer.cs">
       <DependentUpon>GetMergeStyleDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="EntityForm\MacroTableDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="EntityForm\MacroTableDialog.cs" />
     <Compile Include="EntityForm\MacroTableDialog.Designer.cs">
       <DependentUpon>MacroTableDialog.cs</DependentUpon>
     </Compile>
@@ -2935,6 +2938,10 @@
     <ProjectReference Include="..\DigitalPlatform.ResultSet\DigitalPlatform.ResultSet.csproj">
       <Project>{86E0817D-79A4-4769-B450-C8352D0D1907}</Project>
       <Name>DigitalPlatform.ResultSet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.rms.Client\DigitalPlatform.rms.Client.csproj">
+      <Project>{D63FAE14-7CD6-4BD3-90D7-7DBBCDF8EEEF}</Project>
+      <Name>DigitalPlatform.rms.Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Script\DigitalPlatform.Script.csproj">
       <Project>{5107DE16-DDA1-4606-B3A3-840B24428329}</Project>

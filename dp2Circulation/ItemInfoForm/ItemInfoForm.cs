@@ -68,7 +68,9 @@ namespace dp2Circulation
         /// </summary>
         public string BiblioRecPath { get; set; }   // 当前已装载的书目记录路径
 
+#if NO
         string _xml = "";
+
         /// <summary>
         /// 记录 XML
         /// </summary>
@@ -81,6 +83,35 @@ namespace dp2Circulation
             set
             {
                 this._xml = value;
+
+                this.ItemXmlChanged = true;
+                /*
+SetXmlToWebbrowser(this.webBrowser_itemXml,
+    strItemText);
+ * */
+                // 把 XML 字符串装入一个Web浏览器控件
+                // 这个函数能够适应"<root ... />"这样的没有prolog的XML内容
+                Global.SetXmlToWebbrowser(this.webBrowser_itemXml,
+                    Program.MainForm.DataDir,
+                    "xml",
+                    value);
+
+                SetItemRefID(value);
+            }
+        }
+#endif
+        /// <summary>
+        /// 记录 XML
+        /// </summary>
+        public string Xml
+        {
+            get
+            {
+                return this.textBox_editor.Text;
+            }
+            set
+            {
+                this.textBox_editor.Text = value;
 
                 this.ItemXmlChanged = true;
                 /*
@@ -2433,6 +2464,49 @@ out strError);
 
             this.Xml = (string)ido.GetData(DataFormats.UnicodeText);
 
+        }
+
+        private void textBox_editor_TextChanged(object sender, EventArgs e)
+        {
+            this.ItemXmlChanged = true;
+        }
+
+        private void ToolStripMenuItem_edit_indentXml_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            string strXml = "";
+            int nRet = DomUtil.GetIndentXml(this.textBox_editor.Text,
+                true,
+                out strXml,
+                out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+                return;
+            }
+
+            this.textBox_editor.Text = strXml;
+        }
+
+        // 删除 XML 中的空元素
+        private void ToolStripMenuItem_edit_removeEmptyElements_Click(object sender, EventArgs e)
+        {
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(this.textBox_editor.Text);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "XML 格式错误: " + ex.Message);
+                return;
+            }
+
+            DomUtil.RemoveEmptyElements(dom.DocumentElement, false);
+            if (dom.DocumentElement != null)
+                this.textBox_editor.Text = dom.DocumentElement.OuterXml;
+            else
+                this.textBox_editor.Text = "";
         }
 
     }

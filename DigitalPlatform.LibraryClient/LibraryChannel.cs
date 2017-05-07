@@ -401,10 +401,17 @@ out strError);
             {
                 if (channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
                 {
+                    // 2017/5/5
+                    // 通讯安全性问题，时钟问题
+                    // 极少可能是很早的 dp2library 版本不具备 GetVersion() API
+                    strError = strError + "\r\n\r\n有可能是前端机器时钟和服务器时钟差异过大造成的(也有极少可能是用了很旧的 dp2library 版本)";
+                    return -1;
+#if NO
                     // 原来的dp2Library不具备GetVersion() API，会走到这里
                     strVersion = "0.0";
                     strError = "dp2 前端需要和 dp2Library 2.1 或以上版本配套使用 (而当前 dp2Library 版本号为 '2.0或以下' )。请升级 dp2Library 到最新版本。";
                     return 0;
+#endif
                 }
 
                 strError = "针对服务器 " + channel.Url + " 获得版本号的过程发生错误：" + strError;

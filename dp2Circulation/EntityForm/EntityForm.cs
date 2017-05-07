@@ -8321,20 +8321,11 @@ MessageBoxDefaultButton.Button2);
             {
                 string strAction = "change";
 
-                if (Global.IsAppendRecPath(strPath) == true || bResave == true)
+                if (Global.IsAppendRecPath(strPath) == true 
+                     || bResave == true
+                    )
                     strAction = "new";
 
-                /*
-                if (String.IsNullOrEmpty(strPath) == true)
-                    strAction = "new";
-                else
-                {
-                    string strRecordID = Global.GetRecordID(strPath);
-                    if (String.IsNullOrEmpty(strRecordID) == true
-                        || strRecordID == "?")
-                        strAction = "new";
-                }
-                */
             REDO:
                 long lRet = channel.SetBiblioInfo(
                     Progress,

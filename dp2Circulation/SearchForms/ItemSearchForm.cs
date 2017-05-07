@@ -2975,6 +2975,15 @@ out strError);
             string strError = "";
             int nRet = 0;
 
+            // 模拟删除一些元素
+            if (itemdom.DocumentElement != null)
+            {
+                nRet = SimulateDeleteElement(itemdom.OuterXml,
+    out strError);
+                if (nRet == -1)
+                    errors.Add(strError);
+            }
+
             // 检查根元素下的元素名是否有重复的
             nRet = VerifyDupElementName(itemdom,
                 bAutoModify,
@@ -2982,6 +2991,15 @@ out strError);
                 out strError);
             if (nRet == -1)
                 errors.Add(strError);
+
+#if NO
+            nRet = RestoreFromComment(itemdom,
+    bAutoModify,
+    ref bChanged,
+    out strError);
+            if (nRet == -1)
+                errors.Add(strError);
+#endif
 
             // 校验 XML 记录中是否有非法字符
             if (itemdom.DocumentElement != null)
@@ -3033,6 +3051,7 @@ out strError);
 
             string strBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
 
+#if NO
             if (string.IsNullOrEmpty(strBarcode) == false)
             {
                 string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
@@ -3071,15 +3090,9 @@ out strError);
                     errors.Add("册条码号 '" + strBarcode + "' 不合法: " + strError);
                 }
             }
+#endif
 
-            // 模拟删除一些元素
-            if (itemdom.DocumentElement != null)
-            {
-                nRet = SimulateDeleteElement(itemdom.OuterXml,
-    out strError);
-                if (nRet == -1)
-                    errors.Add(strError);
-            }
+            //// 模拟删除
 
             // 顺便清除空元素
             if (bChanged)
@@ -3642,6 +3655,132 @@ out strError);
             return -1;
         }
 
+        /*
+         * 2017/5/4 18:17:17 整理前的 2 个重复元素: ; 1) <borrower></borrower>; 2) <borrower>DZ0567</borrower>。整理前的 2 个重复元素: ; 1) <borrowDate></borrowDate>; 2) <borrowDate>Tue, 31 Dec 2019 16:00:00 GMT</borrowDate>。整理前的 2 个重复元素: ; 1) <borrowPeriod></borrowPeriod>; 2) <borrowPeriod>1day</borrowPeriod>
+         * * */
+        int RestoreFromComment(XmlDocument dom,
+    bool bModify,
+    ref bool bChanged,
+    out string strError)
+        {
+            strError = "";
+            if (dom.DocumentElement == null)
+                return 0;
+
+            string strComment = DomUtil.GetElementText(dom.DocumentElement, "comment");
+            if (string.IsNullOrEmpty(strComment))
+                return 0;
+
+            List<string> errors = new List<string>();
+
+            // 把 comment 元素中的内容构造回一个临时 XmlDocument
+            XmlDocument tempdom = new XmlDocument();
+            tempdom.LoadXml("<root />");
+
+            List<string> segs = StringUtil.SplitList(strComment.Replace("。", ";"), ";");
+            foreach (string seg in segs)
+            {
+                if (string.IsNullOrEmpty(seg))
+                    continue;
+                string strLine = seg.Trim();
+                int nRet = strLine.IndexOf(")");
+                if (nRet == -1)
+                    continue;
+                strLine = strLine.Substring(nRet + 1).Trim();
+
+                XmlDocumentFragment frag = tempdom.CreateDocumentFragment();
+                frag.InnerXml = strLine;
+
+                tempdom.DocumentElement.AppendChild(frag);
+            }
+
+            XmlNodeList nodes1 = tempdom.DocumentElement.SelectNodes("*");
+            if (nodes1.Count > 0)
+            {
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(dom.NameTable);
+
+                List<XmlElement> deletes = new List<XmlElement>();
+                List<string> processed_names = new List<string>();
+                foreach (XmlNode node in tempdom.DocumentElement.ChildNodes)
+                {
+                    if (node.NodeType == XmlNodeType.Element)
+                    {
+                        // dprms:file 元素是允许重复的
+                        if (node.NamespaceURI == DpNs.dprms && node.LocalName == "file")
+                            continue;
+
+                        if (string.IsNullOrEmpty(node.Prefix) == false)
+                            nsmgr.AddNamespace(node.Prefix, node.NamespaceURI);
+
+                        XmlNodeList nodes = tempdom.DocumentElement.SelectNodes(node.Name, nsmgr);
+                        if (nodes.Count > 1 && processed_names.IndexOf(node.Name) == -1)
+                        {
+                            // 保证了不重复处理
+                            processed_names.Add(node.Name);
+
+                            // 挑选一个加以保留，其他的删除
+                            deletes.AddRange(RemoveDupNodes(nodes));
+                        }
+                    }
+                }
+
+                if (deletes.Count > 0)
+                {
+                    foreach (XmlElement node in deletes)
+                    {
+                        node.ParentNode.RemoveChild(node);
+                    }
+                }
+
+                if (bModify)
+                {
+                    XmlNodeList origins = tempdom.DocumentElement.SelectNodes("*");
+                    foreach (XmlElement origin in origins)
+                    {
+                        string strSource = origin.OuterXml.Trim();
+                        XmlElement target = dom.DocumentElement.SelectSingleNode(origin.Name) as XmlElement;
+                        if (target == null)
+                        {
+                            if (string.IsNullOrEmpty(strSource) == false)
+                            {
+                                DomUtil.SetElementText(dom.DocumentElement, origin.Name, "test");
+                                DomUtil.SetElementOuterXml(target, strSource);
+                                bChanged = true;
+                                errors.Add("元素 " + origin.Name + " 被创建: " + strSource);
+                            }
+
+                        }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(strSource))
+                            {
+                                target.ParentNode.RemoveChild(target);
+                                bChanged = true;
+                                errors.Add("元素 " + origin.Name + " 被删除");
+                            }
+                            else
+                            {
+                                if (target.OuterXml.Trim() != strSource)
+                                {
+                                    DomUtil.SetElementOuterXml(target, strSource);
+                                    bChanged = true;
+                                    errors.Add("元素 " + origin.Name + " 被覆盖: " + strSource);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return -1;
+            }
+
+            return 0;
+        }
+
         int VerifyDupElementName(XmlDocument dom,
             bool bModify,
             ref bool bChanged,
@@ -3721,16 +3860,18 @@ out strError);
                         bChanged = true;
                     }
 
+#if NO
                     // 记入 comment 元素
                     if (comment.Length > 0)
                     {
                         string strOldComment = DomUtil.GetElementText(dom.DocumentElement, "comment");
                         if (string.IsNullOrEmpty(strOldComment) == false)
                             strOldComment += "。";
-                        DomUtil.SetElementText(dom.DocumentElement, 
+                        DomUtil.SetElementText(dom.DocumentElement,
                             "comment",
                             strOldComment + DateTime.Now.ToString() + " " + comment.ToString());
                     }
+#endif
                 }
             }
 
@@ -3740,8 +3881,9 @@ out strError);
 
         class DeleteItem
         {
-            public XmlElement Element { get; set; }
-            public int Length { get; set; }
+            public int Index { get; set; }  // 事项原先的序号
+            public XmlElement Element { get; set; } // XML 元素
+            public int Length { get; set; } // InnerXml 部分长度
         }
 
         static string BuildComment(XmlNodeList nodes)
@@ -3763,6 +3905,23 @@ out strError);
         static List<XmlElement> RemoveDupNodes(XmlNodeList nodes)
         {
             List<XmlElement> results = new List<XmlElement>();
+            // 除了第一个，后面都纳入返回
+            int i = 0;
+            foreach (XmlElement node in nodes)
+            {
+                if (i > 0)
+                    results.Add(node);
+
+                i++;
+            }
+
+            return results;
+        }
+
+#if NO
+        static List<XmlElement> RemoveDupNodes(XmlNodeList nodes)
+        {
+            List<XmlElement> results = new List<XmlElement>();
             List<XmlElement> rests = new List<XmlElement>();
             // 删除空元素
             foreach (XmlElement node in nodes)
@@ -3779,21 +3938,29 @@ out strError);
 
             List<DeleteItem> delete = new List<DeleteItem>();
             // 按照下级 XML 尺寸排序，最大的保留，其余删除
+            int index = 0;
             foreach (XmlElement node in rests)
             {
                 DeleteItem item = new DeleteItem();
                 item.Element = node;
                 item.Length = node.InnerXml.Trim().Length;
+                item.Index = index++;
                 delete.Add(item);
             }
 
+            // 排序。若内容长度一样，则 index 小的在前。这是因为假定更新的修改在 XML 结构中会靠前
             delete.Sort((x, y) =>
             {
-                return -1 * (x.Length - y.Length);
+                int nRet = 0;
+                if (x.Length > 0 && y.Length > 0)
+                    nRet = x.Index - y.Index;   // 序号小在前
+                if (nRet != 0)
+                    return nRet;
+                return -1 * (x.Length - y.Length);  // 长度长的在前
             });
 
             if (delete.Count > 0)
-                delete.RemoveAt(0); // 去掉最大一个
+                delete.RemoveAt(0); // 去掉最靠前的一个，也就是不应该删除的一个
 
             foreach (DeleteItem item in delete)
             {
@@ -3802,6 +3969,7 @@ out strError);
 
             return results;
         }
+#endif
 
         // 进行流通操作
         int DoCirculation(string strAction,

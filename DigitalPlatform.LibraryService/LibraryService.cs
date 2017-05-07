@@ -918,7 +918,10 @@ namespace dp2Library
                 parameters,
                 alter_type_list,
                 result) == true)
+                    {
+                        sessioninfo.Account = null; // 2017/5/5 堵住漏洞
                         return result;
+                    }
                 }
 
                 // END1:
@@ -988,6 +991,8 @@ namespace dp2Library
                     strTempCode,
                     out strError) == false)
                 {
+                    sessioninfo.Account = null; // 2017/5/5 堵住漏洞
+
                     result.Value = -1;
                     result.ErrorInfo = strError;
                     result.ErrorCode = ErrorCode.TempCodeMismatch;
@@ -1123,6 +1128,7 @@ namespace dp2Library
 
             return false;
         ERROR1:
+            sessioninfo.Account = null; // 2017/5/5 堵住漏洞
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;

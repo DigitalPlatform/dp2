@@ -8044,8 +8044,10 @@ out strError);
             m_loader.Channel = channel;
             m_loader.Stop = stop;
             m_loader.Format = "id,xml,timestamp";
+#if NO
             if (this.Prompt != null)
                 m_loader.Prompt += m_loader_Prompt;
+#endif
             // m_loader.GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp; // 附加信息只取得 timestamp
 
             this.Items = items;
@@ -8066,60 +8068,73 @@ out strError);
         {
             Debug.Assert(m_loader != null, "");
 
-            List<string> recpaths = new List<string>(); // 缓存中么有包含的那些记录
-            foreach (ListViewItem item in this.Items)
+            // 2017/5/5
+            if (this.Prompt != null)
+                m_loader.Prompt += m_loader_Prompt;
+
+            try
             {
-                string strRecPath = item.Text;
-                Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
 
-                BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];
-                if (info == null || string.IsNullOrEmpty(info.OldXml) == true)
-                    recpaths.Add(strRecPath);
-            }
-
-            // 注： Hashtable 在这一段时间内不应该被修改。否则会破坏 m_loader 和 items 之间的锁定对应关系
-
-            m_loader.RecPaths = recpaths;
-
-            var enumerator = m_loader.GetEnumerator();
-
-            // 开始循环
-            foreach (ListViewItem item in this.Items)
-            {
-                string strRecPath = item.Text;
-                Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
-
-                BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];
-                if (info == null || string.IsNullOrEmpty(info.OldXml) == true)
+                List<string> recpaths = new List<string>(); // 缓存中么有包含的那些记录
+                foreach (ListViewItem item in this.Items)
                 {
-                    if (m_loader.Stop != null)
-                    {
-                        m_loader.Stop.SetMessage("正在获取" + this.DbTypeCaption + "记录 " + strRecPath);
-                    }
-                    bool bRet = enumerator.MoveNext();
-                    if (bRet == false)
-                    {
-                        Debug.Assert(false, "还没有到结尾, MoveNext() 不应该返回 false");
-                        // TODO: 这时候也可以采用返回一个带没有找到的错误码的元素
-                        yield break;
-                    }
+                    string strRecPath = item.Text;
+                    Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
 
-                    DigitalPlatform.LibraryClient.localhost.Record biblio = (DigitalPlatform.LibraryClient.localhost.Record)enumerator.Current;
-                    Debug.Assert(biblio.Path == strRecPath, "m_loader 和 items 的元素之间 记录路径存在严格的锁定对应关系");
-
-                    // 需要放入缓存
-                    if (info == null)
-                    {
-                        info = new BiblioInfo();
-                        info.RecPath = biblio.Path;
-                    }
-                    info.OldXml = biblio.RecordBody.Xml;
-                    info.Timestamp = biblio.RecordBody.Timestamp;
-                    this.CacheTable[strRecPath] = info;
-                    yield return new LoaderItem(info, item);
+                    BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];
+                    if (info == null || string.IsNullOrEmpty(info.OldXml) == true)
+                        recpaths.Add(strRecPath);
                 }
-                else
-                    yield return new LoaderItem(info, item);
+
+                // 注： Hashtable 在这一段时间内不应该被修改。否则会破坏 m_loader 和 items 之间的锁定对应关系
+
+                m_loader.RecPaths = recpaths;
+
+                var enumerator = m_loader.GetEnumerator();
+
+                // 开始循环
+                foreach (ListViewItem item in this.Items)
+                {
+                    string strRecPath = item.Text;
+                    Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
+
+                    BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];
+                    if (info == null || string.IsNullOrEmpty(info.OldXml) == true)
+                    {
+                        if (m_loader.Stop != null)
+                        {
+                            m_loader.Stop.SetMessage("正在获取" + this.DbTypeCaption + "记录 " + strRecPath);
+                        }
+                        bool bRet = enumerator.MoveNext();
+                        if (bRet == false)
+                        {
+                            Debug.Assert(false, "还没有到结尾, MoveNext() 不应该返回 false");
+                            // TODO: 这时候也可以采用返回一个带没有找到的错误码的元素
+                            yield break;
+                        }
+
+                        DigitalPlatform.LibraryClient.localhost.Record biblio = (DigitalPlatform.LibraryClient.localhost.Record)enumerator.Current;
+                        Debug.Assert(biblio.Path == strRecPath, "m_loader 和 items 的元素之间 记录路径存在严格的锁定对应关系");
+
+                        // 需要放入缓存
+                        if (info == null)
+                        {
+                            info = new BiblioInfo();
+                            info.RecPath = biblio.Path;
+                        }
+                        info.OldXml = biblio.RecordBody.Xml;
+                        info.Timestamp = biblio.RecordBody.Timestamp;
+                        this.CacheTable[strRecPath] = info;
+                        yield return new LoaderItem(info, item);
+                    }
+                    else
+                        yield return new LoaderItem(info, item);
+                }
+            }
+            finally
+            {
+                if (this.Prompt != null)
+                    m_loader.Prompt -= m_loader_Prompt;
             }
         }
     }

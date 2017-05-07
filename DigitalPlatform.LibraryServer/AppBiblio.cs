@@ -2258,7 +2258,8 @@ return result;
                 }
 
                 // 2016/12/14
-                if (String.IsNullOrEmpty(strNewBiblioXml) == false)
+                if (strDefaultOperation != "delete" // 2017/5/5
+                    && String.IsNullOrEmpty(strNewBiblioXml) == false)
                 {
                     int nRet = CreateUniformKey(
 ref strNewBiblioXml,
@@ -3183,12 +3184,19 @@ out strError);
                 strComment += "部分 856 字段的修改被拒绝(因为其权限导致当前用户获取被限制)";
             }
 
-            nRet = MarcUtil.Marc2XmlEx(strNewMarc,
-                strMarcSyntax,
-                ref strNewBiblioXml,
-                out strError);
-            if (nRet == -1)
-                return -1;
+            // 2017/5/5
+            if (strDefaultOperation == "delete"
+                && IsBlankHeader(strNewMarc))
+                strNewBiblioXml = "";
+            else
+            {
+                nRet = MarcUtil.Marc2XmlEx(strNewMarc,
+                    strMarcSyntax,
+                    ref strNewBiblioXml,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
 
             if (bNotAccepted == true)
             {
@@ -3196,6 +3204,13 @@ out strError);
                 return 1;
             }
             return 0;
+        }
+
+        static bool IsBlankHeader(string strMARC)
+        {
+            if (strMARC == "????????????????????????")
+                return true;
+            return false;
         }
 
 #if NO
@@ -4420,10 +4435,12 @@ nsmgr);
                 && string.IsNullOrEmpty(strBiblioRecPath) == false
                 && ResPath.IsAppendRecPath(strBiblioRecPath) == false)
             {
-                // strAction = "change";
+                strAction = "change";
 
+#if NO
                 strError = "当(new)创建书目记录的时候，只能使用“书目库名/?”形式的路径(而不能使用 '" + strBiblioRecPath + "' 形式)。如果要在指定位置保存，可使用修改(change)子功能";
                 goto ERROR1;
+#endif
             }
 
             strBiblioType = strBiblioType.ToLower();
@@ -4744,11 +4761,17 @@ nsmgr);
                         if (strAction == "change"
                             && bSimulate == false)    // 模拟操作情况下，不在乎以前这个位置的记录是否存在
                         {
+#if NO
                             strError = "原有记录 '" + strBiblioRecPath + "' 不存在, 因此 setbiblioinfo " + strAction + " 操作被拒绝 (此时如果要保存新记录，请使用 new 子功能)";
                             result.Value = -1;
                             result.ErrorInfo = strError;
                             result.ErrorCode = ErrorCode.NotFound;
                             return result;
+#endif
+                            // 2017/5/5
+                            strExistingXml = "";
+                            strOutputPath = strBiblioRecPath;
+                            exist_timestamp = null;
                         }
                         goto SKIP_MEMO_OLDRECORD;
                     }
@@ -5211,7 +5234,7 @@ out strError);
                     if (IsOrderWorkBiblioDb(strBiblioDbName) == false)
                     {
                         // 非工作库。要求原来记录不存在
-                        strError = "当前帐户只有order权限而没有setbiblioinfo权限，不能用delete功能删除书目记录 '" + strBiblioRecPath + "'";
+                        strError = "当前帐户只有 order 权限而没有 setbiblioinfo 权限，不能用 delete 功能删除书目记录 '" + strBiblioRecPath + "'";
                         result.Value = -1;
                         result.ErrorInfo = strError;
                         result.ErrorCode = ErrorCode.AccessDenied;
@@ -5274,6 +5297,9 @@ out strError);
 
                         if (tempdom.DocumentElement.ChildNodes.Count != 0)
                         {
+                            // 2017/5/5
+                            this.WriteErrorLog("用户 '" + sessioninfo.UserID + "' 删除书目记录 '" + strBiblioRecPath + "' (已被拒绝) 最后一步剩下的记录 XML 内容 '" + tempdom.OuterXml + "'");
+
                             result.Value = -1;
                             result.ErrorInfo = "当前用户的权限不足以删除所有MARC字段，因此删除操作被拒绝。可改用修改操作。";
                             result.ErrorCode = ErrorCode.AccessDenied;
@@ -5388,6 +5414,9 @@ out strError);
 
                         if (tempdom.DocumentElement.ChildNodes.Count != 0)
                         {
+                            // 2017/5/5
+                            this.WriteErrorLog("用户 '" + sessioninfo.UserID + "' 删除书目记录 '" + strBiblioRecPath + "' (已被拒绝) 最后一步剩下的记录 XML 内容 '" + tempdom.OuterXml + "'");
+                            
                             result.Value = -1;
                             result.ErrorInfo = "当前用户的权限不足以删除所有MARC字段，因此删除操作被拒绝。可改用修改操作。";
                             result.ErrorCode = ErrorCode.AccessDenied;
@@ -7068,7 +7097,7 @@ out strError);
                 {
                     // TODO: 如果新的、已存在的xml没有不同，或者新的xml为空，则这步保存可以省略
                     byte[] output_timestamp = baOutputTimestamp;
-                    
+
                     string strOutputBiblioRecPath = "";
                     lRet = channel.DoSaveTextRes(strOutputRecPath,
                         strNewBiblio,

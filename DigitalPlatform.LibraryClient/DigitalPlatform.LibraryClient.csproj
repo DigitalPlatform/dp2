@@ -54,6 +54,7 @@
     <Compile Include="LibraryChannel.cs" />
     <Compile Include="LibraryChannelPool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResultSetLoader.cs" />
     <Compile Include="Service References\localhost\Reference.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

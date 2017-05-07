@@ -1069,6 +1069,8 @@ namespace dp2Circulation
 
             {
                 LibraryChannel channel = this.GetChannel();
+                TimeSpan old_timeout = channel.Timeout;
+                channel.Timeout = TimeSpan.FromMinutes(1);
 
                 this.EnableControls(false);
                 // this._listviewRecords.Enabled = false;
@@ -1213,6 +1215,7 @@ namespace dp2Circulation
                 {
                     this.EnableControls(true);
 
+                    channel.Timeout = old_timeout;
                     this.ReturnChannel(channel);
 
                     stop.EndLoop();
