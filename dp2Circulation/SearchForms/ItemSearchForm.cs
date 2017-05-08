@@ -2618,6 +2618,7 @@ out strError);
         }
 
         delegate void delegate_verifyItemDom(
+            object param,
             LibraryChannel channel,
             string strItemRecPath,
             XmlDocument itemdom,
@@ -2646,6 +2647,25 @@ out strError);
                 strError = "目前有长操作正在进行，无法进行校验订购记录的操作";
                 return -1;
             }
+
+            VerifyEntityDialog dlg = new VerifyEntityDialog();
+            MainForm.SetControlFont(dlg, this.Font);
+
+            dlg.UiState = Program.MainForm.AppInfo.GetString(
+                "ItemSearchForm",
+                "VerifyEntityDialog_uiState",
+                "");
+
+            if (bControl == true)
+                dlg.AutoModify = true;
+
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ItemSearchForm_VerifyEntityDialog_state");
+            dlg.ShowDialog(this);
+
+            Program.MainForm.AppInfo.SetString(
+                "ItemSearchForm",
+                "VerifyEntityDialog_uiState",
+                dlg.UiState);
 
             // 切换到“操作历史”属性页
             Program.MainForm.ActivateFixPage("history");
@@ -2684,7 +2704,7 @@ out strError);
 
                 bool bOldSource = true; // 是否要从 OldXml 开始做起
 
-                if (bControl)
+                if (dlg.AutoModify)
                 {
                     int nChangeCount = this.GetItemsChangeCount(items);
                     if (nChangeCount > 0)
@@ -2764,7 +2784,7 @@ out strError);
 
                     try
                     {
-                        func(channel, info.RecPath, itemdom, errors, bControl, ref bChanged);
+                        func(dlg, channel, info.RecPath, itemdom, errors, dlg.AutoModify, ref bChanged);
                     }
                     catch (Exception ex)
                     {
@@ -2795,6 +2815,7 @@ out strError);
                             if (string.IsNullOrEmpty(info.NewXml) == true)
                                 this.m_nChangedCount++;
                             info.NewXml = strXml;
+                            // TODO: new 和 old 对比，看 borrower 等敏感元素是否被修改。如果发生了修改，要提示用 force 方式保存，否则这些字段的修改在保存阶段会被忽略。
                         }
 
                         item.ListViewItem.BackColor = SystemColors.Info;
@@ -2830,6 +2851,7 @@ out strError);
 
         // 校验一条订购记录
         void VerifyOneOrder(
+            object param,
             LibraryChannel channel,
             string strItemRecPath,
             XmlDocument itemdom,
@@ -2886,6 +2908,7 @@ out strError);
 
         // 校验一条期记录
         void VerifyOneIssue(
+            object param,
             LibraryChannel channel,
             string strItemRecPath,
             XmlDocument itemdom,
@@ -2965,6 +2988,7 @@ out strError);
 
         // 校验一条册记录
         void VerifyOneEntity(
+            object param,
             LibraryChannel channel,
             string strItemRecPath,
             XmlDocument itemdom,
@@ -2974,6 +2998,8 @@ out strError);
         {
             string strError = "";
             int nRet = 0;
+
+            VerifyEntityDialog dlg = (VerifyEntityDialog)param;
 
             // 模拟删除一些元素
             if (itemdom.DocumentElement != null)
@@ -3061,8 +3087,8 @@ out strError);
 
             string strBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
 
-#if NO
-            if (string.IsNullOrEmpty(strBarcode) == false)
+            if (dlg.VerifyItemBarcode == true 
+                && string.IsNullOrEmpty(strBarcode) == false)
             {
                 string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
                 strLocation = StringUtil.GetPureLocationString(strLocation);
@@ -3100,7 +3126,6 @@ out strError);
                     errors.Add("册条码号 '" + strBarcode + "' 不合法: " + strError);
                 }
             }
-#endif
 
             //// 模拟删除
 

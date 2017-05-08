@@ -2504,7 +2504,7 @@ out strError);
 
             DomUtil.RemoveEmptyElements(dom.DocumentElement, false);
             if (dom.DocumentElement != null)
-                this.textBox_editor.Text = dom.DocumentElement.OuterXml;
+                this.textBox_editor.Text = DomUtil.GetIndentInnerXml(dom.DocumentElement);  // dom.DocumentElement.OuterXml;
             else
                 this.textBox_editor.Text = "";
         }

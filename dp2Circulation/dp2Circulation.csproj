@@ -2233,6 +2233,9 @@
     <EmbeddedResource Include="SearchForms\OpenBiblioDumpFileDialog.resx">
       <DependentUpon>OpenBiblioDumpFileDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\VerifyEntityDialog.resx">
+      <DependentUpon>VerifyEntityDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SettlementForm.resx">
       <SubType>Designer</SubType>
       <DependentUpon>SettlementForm.cs</DependentUpon>
@@ -2435,6 +2438,12 @@
     </Compile>
     <Compile Include="SearchForms\SearchFormBase.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\VerifyEntityDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\VerifyEntityDialog.Designer.cs">
+      <DependentUpon>VerifyEntityDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="SettlementForm.cs">
       <SubType>Form</SubType>
