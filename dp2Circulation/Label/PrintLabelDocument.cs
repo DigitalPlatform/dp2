@@ -23,6 +23,8 @@ namespace dp2Circulation
     {
         StreamReader _sr = null;
 
+        public string DataDir { get; set; }
+
         int m_nPageNo = 0;  // 0表示没有初始化
 
         /// <summary> 
@@ -74,6 +76,7 @@ namespace dp2Circulation
             this.BeginPrint += new PrintEventHandler(PrintLabelDocument_BeginPrint);
              * */
 
+            this.DataDir = Path.GetDirectoryName(strLabelFilename); // TODO: 用 FileInfo 获得全路径
             return 0;
         }
 
@@ -326,7 +329,7 @@ namespace dp2Circulation
             {
                 return e.PageSettings.PrintableArea;
             }
-            catch(InvalidPrinterException)
+            catch (InvalidPrinterException)
             {
                 return new RectangleF(0, 0, 500, 500);
             }
@@ -746,7 +749,6 @@ namespace dp2Circulation
                                     (float)label_param.LabelWidth - (float)label_param.LabelPaddings.Left - (float)label_param.LabelPaddings.Right - 1,
                                     (float)label_param.LabelHeight - (float)label_param.LabelPaddings.Top - (float)label_param.LabelPaddings.Bottom - 1);
 
-
                             // 绘制标签边界
                             // 灰色
                             if (bTestingGrid == true)
@@ -769,7 +771,6 @@ namespace dp2Circulation
                                         rectLabel.Width,
                                         rectLabel.Height);
                                 }
-
 
                                 // 绘制标签内部文字区域边界
                                 // 淡红色
@@ -798,10 +799,7 @@ namespace dp2Circulation
 
                         } // end if IntersectsWith
 
-
-
                     } // end if bOutput == true
-
 
                     x += (float)label_param.LabelWidth;
                 }
@@ -967,6 +965,14 @@ namespace dp2Circulation
                             }
                         }
 
+                        // return:
+                        //      null    没有找到前缀
+                        //      ""      找到了前缀，并且值部分为空
+                        //      其他     返回值部分
+                        string picture_type = StringUtil.GetParameterByPrefix(strLineStyle,
+                                "picture",
+                                ":");
+
                         // 条码下方文字的风格
                         string barcode_text_style = StringUtil.GetParameterByPrefix(strLineStyle,
         "barcode_text_style",
@@ -1060,6 +1066,36 @@ namespace dp2Circulation
                                     rectText,
                                     strText);
                         }
+                        else if (picture_type != null)
+                        {
+                            if (string.IsNullOrEmpty(strText) == false)
+                            {
+                                string filename = "";
+                                if (strText.IndexOf("\\") == -1 && strText.IndexOf("/") == -1
+                                    && string.IsNullOrEmpty(this.DataDir) == false)
+                                    filename = Path.Combine(this.DataDir, strText);
+                                else
+                                    filename = strText;
+                                try
+                                {
+                                    using (Image image = Image.FromFile(filename))
+                                    {
+                                        RectangleF source = new RectangleF(0, 0, image.Width, image.Height);
+
+                                        // rect 要调整为等比例缩放
+                                        RectangleF target = GetPictureRect(source, rect, s_format);
+                                        g.DrawImage(image, target, source, GraphicsUnit.Pixel);
+                                    }
+                                }
+                                catch(Exception ex)
+                                {
+                                    using (Brush brush = new SolidBrush(Color.Red))
+                                    {
+                                        g.FillRectangle(brush, rect);
+                                    }
+                                }
+                            }
+                        }
                         else
                         {
                             Brush brushText = null;
@@ -1121,6 +1157,31 @@ namespace dp2Circulation
                 g.Clip = old_clip;
             } // end of using clip
 
+        }
+
+        // 将 picture 纵横等比例缩放，放入 rect 中央
+        static RectangleF GetPictureRect(RectangleF picture, 
+            RectangleF area,
+            StringFormat format)
+        {
+            double x_ratio = area.Width / picture.Width;
+            double y_ratio = area.Height / picture.Height;
+            double ratio = Math.Min(x_ratio, y_ratio);
+            double width = (double)picture.Width * ratio;
+            double height = (double)picture.Height * ratio;
+
+            double x = area.X;
+            if (format.Alignment == StringAlignment.Near)
+                x = area.X;
+            else if (format.Alignment == StringAlignment.Far)
+                x = area.X + area.Width - width;
+            else
+                x = (area.X + (area.Width - width) / 2);
+
+            return new RectangleF((float)x,
+                (float)(area.Y + (area.Height - height) / 2),
+                (float)width,
+                (float)height);
         }
 
         Font ReCreateFont(Font font, Graphics g)

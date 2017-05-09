@@ -78,10 +78,12 @@ namespace dp2Circulation
         }
 #endif
         public string Xml { get; set; }
+        public string CardPhotoPath { get; set; }
 
-        public ReaderSheetItem(string strXml)
+        public ReaderSheetItem(string strXml, string strCardPhotoPath)
         {
             this.Xml = strXml;
+            this.CardPhotoPath = strCardPhotoPath;
         }
 
         public void Output(StreamWriter sw, string strSheetDefName)
@@ -110,6 +112,8 @@ namespace dp2Circulation
                 sw.WriteLine("失效期: " + strExpire);
 
                 sw.WriteLine(strBarcode);
+                if (strSheetDefName.ToLower().IndexOf("photo") != -1)
+                    sw.WriteLine(this.CardPhotoPath);
                 sw.WriteLine("***");
                 return;
             }
@@ -117,6 +121,8 @@ namespace dp2Circulation
             sw.WriteLine(strName);
             sw.WriteLine(strDepartment);
             sw.WriteLine(strBarcode);
+            if (strSheetDefName.ToLower().IndexOf("photo") != -1)
+                sw.WriteLine(this.CardPhotoPath);
             sw.WriteLine("***");
         }
     }
@@ -142,9 +148,9 @@ namespace dp2Circulation
             this.Items.Add(item);
         }
 #endif
-        public void AddItem(string strXml)
+        public void AddItem(string strXml, string strCardPhotoPath)
         {
-            ReaderSheetItem item = new ReaderSheetItem(strXml);
+            ReaderSheetItem item = new ReaderSheetItem(strXml, strCardPhotoPath);
             if (this.Items == null)
                 this.Items = new List<ReaderSheetItem>();
             this.Items.Add(item);
@@ -186,7 +192,7 @@ namespace dp2Circulation
             return null;
         }
 #endif
-        public void AddItem(string strGroup, string strXml)
+        public void AddItem(string strGroup, string strXml, string strCardPhotoPath)
         {
             ReaderSheetInfo info = this.Find(strGroup);
             if (info == null)
@@ -195,7 +201,7 @@ namespace dp2Circulation
                 this.Add(info);
             }
 
-            info.AddItem(strXml);
+            info.AddItem(strXml, strCardPhotoPath);
         }
 
         public ReaderSheetInfo Find(string strGroup)

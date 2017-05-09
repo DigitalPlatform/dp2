@@ -6122,6 +6122,60 @@ dlg.UiState);
             }
         }
 
+        static int GetCardPhotoFile(LibraryChannel channel,
+            Stop stop,
+            string strResPath,
+            string strLocalFilePath,
+            out string strError)
+        {
+            strError = "";
+
+            byte[] baOutputTimeStamp = null;
+            string strMetaData = "";
+            string strTempOutputPath = "";
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 0, 60);
+
+            try
+            {
+                long lRet = channel.GetRes(
+                    stop,
+                    strResPath,
+                    strLocalFilePath,
+                    out strMetaData,
+                    out baOutputTimeStamp,
+                    out strTempOutputPath,
+                    out strError);
+                return (int)lRet;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+            }
+        }
+
+        // 2017/5/8
+        // 从读者记录 XML 中获得读者卡片头像的路径。例如 "读者/1/object/0"
+        static string GetCardPhotoPath(XmlDocument readerdom,
+            string strRecPath)
+        {
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("//dprms:file[@usage='cardphoto']", nsmgr);
+
+            if (nodes.Count == 0)
+                return null;
+
+            string strID = DomUtil.GetAttr(nodes[0], "id");
+            if (string.IsNullOrEmpty(strID) == true)
+                return null;
+
+            string strResPath = strRecPath + "/object/" + strID;
+            return strResPath.Replace(":", "/");
+        }
+
         // 创建读者账簿
         // return:
         //      -1  出错
@@ -6176,16 +6230,48 @@ dlg.UiState);
                         {
                             this.ShowMessage("正在处理读者记录 " + strRecPath);
 
+
+                            // 下载读者照片
+                            string strCardPhotoPath = "";
+                            {
+                                string strError0 = "";
+                                string strObjectPath = GetCardPhotoPath(dom, strRecPath);
+                                if (string.IsNullOrEmpty(strObjectPath) == false)
+                                {
+                                    string strLocalFilePath = Path.Combine(Program.MainForm.UserTempDir, "~cp_" + Guid.NewGuid().ToString());
+                                    LibraryChannel channel = this.GetChannel();
+                                    try
+                                    {
+                                        int nRet0 = GetCardPhotoFile(channel,
+                        stop,
+                        strObjectPath,
+                        strLocalFilePath,
+                        out strError0);
+                                        if (nRet0 == -1)
+                                        {
+                                            MessageBox.Show(this, strError0);
+                                            // 删除临时文件
+                                        }
+                                        strCardPhotoPath = Path.GetFileName(strLocalFilePath);
+                                    }
+                                    finally
+                                    {
+                                        this.ReturnChannel(channel);
+                                    }
+                                }
+                            }
+
                             string strDepartment = DomUtil.GetElementText(dom.DocumentElement, "department");
 
                             if (dlg.GroupByDepartment == false)
                             {
-                                sheets.AddItem("", dom.OuterXml);
+                                sheets.AddItem("", dom.OuterXml, strCardPhotoPath);
                             }
                             else
                             {
-                                sheets.AddItem(strDepartment, dom.OuterXml);
+                                sheets.AddItem(strDepartment, dom.OuterXml, strCardPhotoPath);
                             }
+
 
                             nReaderCount++;
                             return true;
@@ -6206,7 +6292,6 @@ dlg.UiState);
                             }
                         }
                     }
-
 
                     this.ShowMessage("共处理读者记录 " + nReaderCount + " 个", "green", true);
                 }
