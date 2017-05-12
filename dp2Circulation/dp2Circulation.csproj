@@ -1367,6 +1367,12 @@
     <Compile Include="SearchForms\IssueSearchForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="SearchForms\ItemClassStatisDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\ItemClassStatisDialog.Designer.cs">
+      <DependentUpon>ItemClassStatisDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="SearchForms\ItemSearchForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -2127,6 +2133,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SearchForms\InvoiceSearchForm.resx">
       <DependentUpon>InvoiceSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\ItemClassStatisDialog.resx">
+      <DependentUpon>ItemClassStatisDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SearchForms\ItemSearchForm.resx">
       <SubType>Designer</SubType>

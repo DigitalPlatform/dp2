@@ -627,7 +627,7 @@ namespace dp2Circulation
                     strFieldName = "694";
                     strSubfieldName = "a";
                 }
-                else if (strClassType == "其它")
+                else if (strClassType == "其它" || strClassType == "红泥巴")
                 {
                     strFieldName = "686";
                     strSubfieldName = "a";
@@ -685,7 +685,7 @@ namespace dp2Circulation
                     strFieldName = "095";
                     strSubfieldName = "a";
                 }
-                else if (strClassType == "其它")
+                else if (strClassType == "其它" || strClassType == "红泥巴")
                 {
                     strFieldName = "084";
                     strSubfieldName = "a";

@@ -1710,14 +1710,19 @@ namespace DigitalPlatform.rms
         //		cols	out参数，返回浏览格式数组
         // 当出错时,错误信息也保存在列里
         // return:
-        //      cols中包含的字符总数
+        //      // cols中包含的字符总数
+        //      -1  出错
+        //      0   记录没有找到
+        //      其他  cols 中包含的字符总数。最少为 1，不会为 0
         public int GetCols(
             string strFormat,
             string strRecordID,
             string strXml,
             int nStartCol,
-            out string[] cols)
+            out string[] cols,
+            out string strError)
         {
+            strError = "";
             cols = null;
             int nRet = 0;
 
@@ -1731,7 +1736,6 @@ namespace DigitalPlatform.rms
 #endif
             try
             {
-                string strError = "";
                 BrowseCfg browseCfg = null;
                 string strColDef = "";
 
@@ -1765,12 +1769,14 @@ namespace DigitalPlatform.rms
 
                     if (browseCfg == null)
                     {
-                        // return 0;
-
+#if NO
                         // 2013/1/14
                         cols = new string[1];
                         cols[0] = strError;
                         return -1;
+#endif
+                        // 2017/5/11
+                        goto ERROR1;
                     }
                 }
 
@@ -1794,6 +1800,15 @@ namespace DigitalPlatform.rms
                         nRet = this.GetXmlData(strRecordID,
                             out strXml,
                             out strError);
+                        // 2017/5/11
+                        if (nRet == -4)
+                        {
+                            if (string.IsNullOrEmpty(strError))
+                                strError = "记录 '" + strRecordID + "' 不存在";
+                            cols = new string[1];
+                            cols[0] = strError;
+                            return 0;
+                        }
                         if (nRet <= -1)
                             goto ERROR1;
                     }
@@ -1814,7 +1829,7 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError = "加载'" + this.GetCaption("zh-CN") + "'库的'" + strRecordID + "'记录到dom时出错,原因: " + ex.Message;
+                    strError = "加载 '" + this.GetCaption("zh-CN") + "' 库的 '" + strRecordID + "' 记录到 dom 时出错,原因: " + ex.Message;
                     goto ERROR1;
                 }
 
@@ -1854,12 +1869,14 @@ namespace DigitalPlatform.rms
                         goto ERROR1;
                 }
 
-                return nRet;
-
+                return Math.Max(1, nRet);   // 避免返回 0 和没有找到的情况混淆
             ERROR1:
+#if NO
                 cols = new string[1];
                 cols[0] = strError;
                 return strError.Length;
+#endif
+                return -1;
             }
             finally
             {
@@ -1926,6 +1943,8 @@ namespace DigitalPlatform.rms
             for (int i = 0; i < xpaths.Length; i++)
             {
                 string strSegment = xpaths[i];
+
+#if NO
                 string strXpath = "";
                 string strConvert = "";
                 StringUtil.ParseTwoPart(strSegment, "->", out strXpath, out strConvert);
@@ -1935,20 +1954,46 @@ namespace DigitalPlatform.rms
                     continue;
                 }
 
-                XPathExpression expr = (XPathExpression)xpath_table[strXpath];
+                // -> 左边的部分又可被 !nl= 分为两部分。!nl= 后面的部分为名字空间对照表，格式为 prefix1=url;prefix2=url
+                string strNameList = "";
+                {
+                    List<string> parts = StringUtil.ParseTwoPart(strXpath, "!nl=");
+                    strXpath = parts[0];
+                    strNameList = parts[1];
+                }
+#endif
+                XPathInfo info = ParseSegment(strSegment);
+
+
+                // 2017/5/11
+                XmlNamespaceManager nsmgr = null;
+                if (string.IsNullOrEmpty(info.NameList) == false)
+                {
+                    nsmgr = (XmlNamespaceManager)xpath_table[info.NameList];
+
+                    if (nsmgr == null)
+                    {
+                        nsmgr = BuildNamespaceManager(info.NameList, domData);
+                        lock (xpath_table)
+                        {
+                            xpath_table[info.NameList] = nsmgr;
+                        }
+                    }
+                }
+
+                XPathExpression expr = (XPathExpression)xpath_table[info.XPath];
+                // TODO: nsmgr_table
 
                 if (expr == null)
                 {
                     // 创建Cache
-                    expr = nav.Compile(strXpath);
-                    /*
+                    expr = nav.Compile(info.XPath);
                     if (nsmgr != null)
                         expr.SetContext(nsmgr);
-                     * */
 
                     lock (xpath_table)
                     {
-                        xpath_table[strXpath] = expr;
+                        xpath_table[info.XPath] = expr;
                     }
                 }
 
@@ -1979,6 +2024,11 @@ namespace DigitalPlatform.rms
                         if (strOneText == "")
                             continue;
 
+                        // 2017/5/11
+                        if (string.IsNullOrEmpty(strText) == false
+                            && string.IsNullOrEmpty(info.Delimeter) == false)
+                            strText += info.Delimeter;
+
                         strText += strOneText;
                     }
                 }
@@ -1988,9 +2038,9 @@ namespace DigitalPlatform.rms
                     return -1;
                 }
 
-                if (string.IsNullOrEmpty(strConvert) == false)
+                if (string.IsNullOrEmpty(info.Convert) == false)
                 {
-                    List<string> convert_methods = StringUtil.SplitList(strConvert);
+                    List<string> convert_methods = StringUtil.SplitList(info.Convert);
                     strText = BrowseCfg.ConvertText(convert_methods, strText);
                 }
 
@@ -2003,6 +2053,87 @@ namespace DigitalPlatform.rms
             cols = new string[col_array.Count + nStartCol];
             col_array.CopyTo(cols, nStartCol);
             return nResultLength;
+        }
+
+        class XPathInfo
+        {
+            public string XPath { get; set; }
+            public string Convert { get; set; }
+            public string Delimeter { get; set; }
+            public string NameList { get; set; }
+        }
+
+        static XPathInfo ParseSegment(string strSegment)
+        {
+            XPathInfo info = new XPathInfo();
+
+            List<string> parts = StringUtil.SplitList(strSegment, "->");
+
+            foreach(string part in parts)
+            {
+                if (part.StartsWith("nl:"))
+                {
+                    info.NameList = part.Substring("nl:".Length);
+                    continue;
+                }
+                if (part.StartsWith("dm:"))
+                {
+                    info.Delimeter = part.Substring("dm:".Length);
+                    continue;
+                }
+                if (part.StartsWith("cv:"))
+                {
+                    info.Convert = part.Substring("cv:".Length);
+                    continue;
+                }
+
+                if (info.XPath == null)
+                {
+                    info.XPath = part;
+                    continue;
+                }
+                if (info.Convert == null)
+                {
+                    info.Convert = part;
+                    continue;
+                }
+            }
+
+            return info;
+#if NO
+            string strXpath = "";
+            string strConvert = "";
+            StringUtil.ParseTwoPart(strSegment, "->", out strXpath, out strConvert);
+            if (string.IsNullOrEmpty(strXpath) == true)
+            {
+                col_array.Add("");  // 空的 XPath 产生空的一列
+                continue;
+            }
+
+            // -> 左边的部分又可被 !nl= 分为两部分。!nl= 后面的部分为名字空间对照表，格式为 prefix1=url;prefix2=url
+            string strNameList = "";
+            {
+                List<string> parts = StringUtil.ParseTwoPart(strXpath, "!nl=");
+                strXpath = parts[0];
+                strNameList = parts[1];
+            }
+#endif
+        }
+
+        static XmlNamespaceManager BuildNamespaceManager(string strNameList, XmlDocument domData)
+        {
+            if (string.IsNullOrEmpty(strNameList))
+                return null;
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(domData.NameTable);
+            List<string> names = StringUtil.SplitList(strNameList);
+            foreach (string s in names)
+            {
+                List<string> parts = StringUtil.ParseTwoPart(s, "=");
+                nsmgr.AddNamespace(parts[0], parts[1]);
+            }
+
+            return nsmgr;
         }
 
         // 假写xml数据，得到检索点集合

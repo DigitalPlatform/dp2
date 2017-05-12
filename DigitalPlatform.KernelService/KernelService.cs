@@ -323,11 +323,18 @@ namespace dp2Kernel
         //      2.64 2016/1/6 MySQL 版本在删除和创建检索点的时候所使用的 SQL 语句多了一个分号。此 Bug 已经排除
         //      2.65 2016/5/14 WriteRecords() API 支持上载结果集。XML 检索式为 item 元素增加 resultset 属性，允许已有结果集参与逻辑运算。优化 resultset[] 操作符速度。
         //      2.66 2016/12/13 若干 API 支持 simulate style
+        //      2.67 2017/5/11 GetBrowse() API 支持 @coldef: 中使用名字空间和(匹配命中多个XmlNode时串接用的)分隔符号
+        //                      例如: "id,cols,format:@coldef://marc:record/marc:datafield[@tag='690']/marc:subfield[@code='a']->nl:marc=http://dp2003.com/UNIMARC->dm:\t|//marc:record/marc:datafield[@tag='093']/marc:subfield[@code='a']->nl:marc=http://www.loc.gov/MARC21/slim->dm:\t";
+        //                      | 分隔多个栏目的定义段落。每个栏目的定义中：
+        //                      ->nl:表示名字空间列表。多个名字空间之间用分号间隔
+        //                      ->dm:表示串接用的符号，当 XPath 匹配上多个 XmlNode 时用这种符号拼接结果字符串
+        //                      ->cv:表示转换方法。以前的方法，这样定义也是可以的 xxxx->cccc 其中 xxxx 是 XPath 部分，cccc 是 convert method 部分。新用法老用法都兼容
+        //                      '->' 分隔的第一个部分默认就是 XPath。
         public Result GetVersion()
         {
             Result result = new Result();
             result.Value = 0;
-            result.ErrorString = "2.66";
+            result.ErrorString = "2.67";
             return result;
         }
 

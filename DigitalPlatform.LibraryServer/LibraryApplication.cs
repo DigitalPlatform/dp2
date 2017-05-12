@@ -148,7 +148,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.105 (2017/4/14) 消除 SearchDup() API 中合并算法之前没有对结果集进行排序的 Bug
         //      2.106 (2017/4/20) CopyBiblioInfo() API 经过较为严格的测试，修正了一些 Bug，从此前端的移动书目记录功能要求必须使用这个版本
         //      2.107 (2017/4/25) 为 VerifyBarcode() API 扩充 strAction 和 out strOutputBarcode 参数，支持变换条码号功能
-        public static string Version = "2.107";
+        //      2.108 (2017/5/11) dp2Kernel 新版本 GetBrowse() API 支持 @coldef: 中使用名字空间和(匹配命中多个XmlNode时串接用的)分隔符号
+        public static string Version = "2.108";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -1879,7 +1880,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 Version version = new Version(strVersion);
-                Version base_version = new Version("2.66");
+                Version base_version = new Version("2.67");
                 if (version.CompareTo(base_version) < 0)
                 {
                     strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + version + ")。请立即升级 dp2Kernel 到最新版本。";
@@ -14905,7 +14906,7 @@ strLibraryCode);    // 读者所在的馆代码
         }
 
         // 验证码多长时间过期
-        static TimeSpan _expireLength = TimeSpan.FromMinutes(10);   // 10 分钟
+        static TimeSpan _expireLength = TimeSpan.FromHours(48);   // TimeSpan.FromMinutes(10);   // 10 分钟
 
         // 准备手机短信验证登录的第一阶段：产生验证码
         // return:

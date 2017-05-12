@@ -365,7 +365,12 @@ namespace DigitalPlatform.LibraryServer
                     out lAttachmentLength, // attachment,
                     out strError);
                 if (nRet == -1)
-                    return -1;
+                {
+                    // 2017/5/9
+                    this.AppendResultText("*** 获得日志记录 " + strFileName + " " + (lIndex).ToString() + " 时发生错误：" + strError + "\r\n");
+                    if (bContinueWhenError == false)
+                        return -1;
+                } 
                 if (nRet == 0)
                     return 0;
                 if (nRet == 2)

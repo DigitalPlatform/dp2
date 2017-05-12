@@ -203,6 +203,8 @@ namespace dp2Circulation
             if (o == null)
             {
                 ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
+                if (temp == null)
+                    return -1;
                 nCol = temp.FindColumnByType(strColumnType);
                 if (nCol == -1)
                     return -1;
@@ -359,10 +361,10 @@ namespace dp2Circulation
                     Application.DoEvents();	// 出让界面控制权
 
                     if (stop != null && stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return 0;
-                        }
+                    {
+                        MessageBox.Show(this, "用户中断");
+                        return 0;
+                    }
 
                     string strRecPath = sr.ReadLine();
 
@@ -699,6 +701,8 @@ namespace dp2Circulation
                 || this.DbType == "arrive",
                 "");
 
+            bool bShowed = false;
+
             List<string> biblio_recpaths = new List<string>();  // 尺寸可能比 items 数组小，没有包含里面不具有 parent id 列的事项
             List<int> colindex_list = new List<int>();  // 存储每个 item 对应的 parent id colindex。数组大小等于 items 数组大小
             foreach (ListViewItem item in items)
@@ -768,7 +772,16 @@ namespace dp2Circulation
                     out strBiblioRecPath,
                     out strError);
                 if (nRet == -1)
-                    return -1;
+                {
+                    if (bShowed == false)
+                    {
+                        MessageBox.Show(this, strError);
+                        bShowed = true;
+                    }
+                    colindex_list.Add(-1);
+                    continue;
+                    // return -1;
+                }
                 if (nRet == 0)
                 {
                     colindex_list.Add(-1);

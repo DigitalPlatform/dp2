@@ -1452,6 +1452,19 @@ namespace DigitalPlatform.LibraryServer
         //      strStyle    "opac" 把实体记录按照OPAC要求进行加工，增补一些元素
         //                  "onlygetpath"   仅返回每个路径
         //                  "getfirstxml"   是对onlygetpath的补充，仅获得第一个元素的XML记录，其余的依然只返回路径
+        // strStyle 中筛选分馆的册，有以下几种情况
+        // 全局用户，不过滤
+        //      什么都不用特意指定
+        // 分馆用户，获得全部分馆
+        //      style中要包含 getotherlibraryitem
+        // 分馆用户，只获得自己管辖的分馆
+        //      什么都不用特意指定
+        // 全局用户，只返回指定的分馆
+        //      style中要包含 librarycode:xxxx
+        // 分馆用户，只返回指定的分馆。注意，这不一定是指分馆用户管辖的分馆
+        //      style中要包含 librarycode:xxxx
+        // 注: librarycode:xxxx 中的 xxx 部分可以是多个馆代码的列表，用 | 分隔
+        //
         // 权限：需要有getentities权限
         // return:
         //      Result.Value    -1出错 0没有找到 其他 总的实体记录的个数(本次返回的，可以通过entities.Count得到)

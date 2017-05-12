@@ -24,6 +24,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
+using ClosedXML.Excel;
 
 // 2013/3/16 添加 XML 注释
 // 2017/4/16 将 this.Channel 改造为 this.GetChannel() 用法
@@ -1945,6 +1946,8 @@ out strError);
             if (e.Button != MouseButtons.Right)
                 return;
 
+            bool bLooping = (stop != null && stop.State == 0);    // 0 表示正在处理
+
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
@@ -2200,6 +2203,15 @@ out strError);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            if (this.DbType == "item")
+            {
+                menuItem = new MenuItem("粘贴册条码号");
+                menuItem.Click += new System.EventHandler(this.menu_pasteBarcodeFromClipboard_Click);
+                if (bHasClipboardObject == false || bLooping == true)
+                    menuItem.Enabled = false;
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
             // ---
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
@@ -2212,8 +2224,6 @@ out strError);
             // ---
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
-
-            bool bLooping = (stop != null && stop.State == 0);    // 0 表示正在处理
 
             {
                 menuItem = new MenuItem("功能(&F)");
@@ -2244,6 +2254,15 @@ out strError);
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
 
+                    // ---
+                    subMenuItem = new MenuItem("-");
+                    menuItem.MenuItems.Add(subMenuItem);
+
+                    subMenuItem = new MenuItem("分类统计 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&S)");
+                    subMenuItem.Click += new System.EventHandler(this.menu_classStatis_Click);
+                    if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
+                        subMenuItem.Enabled = false;
+                    menuItem.MenuItems.Add(subMenuItem);
 
                     // ---
                     subMenuItem = new MenuItem("-");
@@ -3048,7 +3067,7 @@ out strError);
             }
 
             nRet = VerifyBlankChar(itemdom,
-                new List<string>() {"barcode", "registerNo"},
+                new List<string>() { "barcode", "registerNo" },
     bAutoModify,
     ref bChanged,
     out strError);
@@ -3087,7 +3106,7 @@ out strError);
 
             string strBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
 
-            if (dlg.VerifyItemBarcode == true 
+            if (dlg.VerifyItemBarcode == true
                 && string.IsNullOrEmpty(strBarcode) == false)
             {
                 string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
@@ -3163,7 +3182,7 @@ out strError);
                     if (strTrimed == strValue)
                         continue;
 
-                    errors.Add(element_name + "元素内文本 '"+strValue+"' 中包含空格字符");
+                    errors.Add(element_name + "元素内文本 '" + strValue + "' 中包含空格字符");
                     if (bModify)
                     {
                         DomUtil.SetElementText(dom.DocumentElement, element_name, strTrimed);
@@ -6574,6 +6593,146 @@ MessageBoxDefaultButton.Button1);
             listView_records_SelectedIndexChanged(null, null);
         }
 
+
+        // 从剪贴板粘贴条码号。每行一个条码号
+        void menu_pasteBarcodeFromClipboard_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            this.listView_records.SelectedIndexChanged -= new System.EventHandler(this.listView_records_SelectedIndexChanged);
+
+            try
+            {
+                int nRet = PasteBarcodeLinesFromClipboard(
+         true,
+         out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                return;
+            }
+            finally
+            {
+                this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
+                listView_records_SelectedIndexChanged(null, null);
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        public int PasteBarcodeLinesFromClipboard(
+            bool bInsertBefore,
+            out string strError)
+        {
+            strError = "";
+
+            IDataObject ido = Clipboard.GetDataObject();
+            if (ido.GetDataPresent(DataFormats.UnicodeText) == false)
+            {
+                strError = "剪贴板中没有内容";
+                return -1;
+            }
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在粘贴条码号 ...");
+            stop.BeginLoop();
+
+            LibraryChannel channel = this.GetChannel();
+
+            try
+            {
+
+                string strWhole = (string)ido.GetData(DataFormats.UnicodeText);
+
+                int index = -1;
+
+                if (this.listView_records.SelectedIndices.Count > 0)
+                    index = this.listView_records.SelectedIndices[0];
+
+                List<ListViewItem> items = new List<ListViewItem>();
+
+                this.listView_records.SelectedItems.Clear();
+
+                //Cursor oldCursor = this.Cursor;
+                //this.Cursor = Cursors.WaitCursor;
+
+                // this.listView_records.BeginUpdate();
+                try
+                {
+                    string[] lines = strWhole.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+                    stop.SetProgressRange(0, lines.Length);
+                    int i = 0;
+                    foreach (string line in lines)
+                    {
+                        string strLine = "";
+                        if (string.IsNullOrEmpty(line))
+                            goto CONTINUE;
+                        strLine = line.Trim();
+                        if (string.IsNullOrEmpty(strLine))
+                            goto CONTINUE;
+
+                        ListViewItem item = new ListViewItem();
+                        item.Text = "";
+
+                        this.listView_records.Items.Add(item);
+
+                        FillLineByBarcode(channel,
+                            strLine,
+                            item);
+
+                        items.Add(item);
+
+                        item.Selected = true;
+
+                    CONTINUE:
+                        if (stop != null)
+                        {
+                            stop.SetMessage(strLine);
+                            stop.SetProgressValue(i);
+                        }
+                        i++;
+                    }
+
+                }
+                finally
+                {
+                    // this.listView_records.EndUpdate();
+
+                    // this.Cursor = oldCursor;
+                }
+
+                // 刷新浏览行
+                int nRet = RefreshListViewLines(
+                    channel,
+                    items,
+                    "",
+                    false,
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                // 刷新书目摘要
+                nRet = FillBiblioSummaryColumn(
+                    channel,
+                    items,
+                    false,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                return 0;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+            }
+        }
+
         // 往列表中追加若干册条码号
         // return:
         //      -1  出错
@@ -7174,6 +7333,559 @@ MessageBoxDefaultButton.Button1);
             }
 
             return 1;
+        }
+
+        public static int GetCallNumberClassSource(
+            string strClassType,
+            string strMarcSyntax,
+            out string strFieldName,
+            out string strSubfieldName,
+            out string strError)
+        {
+            strError = "";
+            strFieldName = "";
+            strSubfieldName = "";
+
+            if (strMarcSyntax == "unimarc")
+            {
+                if (strClassType == "中图法")
+                {
+                    strFieldName = "690";
+                    strSubfieldName = "a";
+                }
+                else if (strClassType == "科图法")
+                {
+                    strFieldName = "692";
+                    strSubfieldName = "a";
+                }
+                else if (strClassType == "人大法")
+                {
+                    strFieldName = "694";
+                    strSubfieldName = "a";
+                }
+                else if (strClassType == "其它" || strClassType == "红泥巴")
+                {
+                    strFieldName = "686";
+                    strSubfieldName = "a";
+                }
+                else if (strClassType == "石头汤分类法"
+                    || strClassType == "石头汤分类号"
+                    || strClassType == "石头汤")
+                {
+                    strFieldName = "687";
+                    strSubfieldName = "a";
+                }
+                else
+                {
+                    strError = "UNIMARC下未知的分类法 '" + strClassType + "'";
+                    return -1;
+                }
+            }
+            else if (strMarcSyntax == "usmarc")
+            {
+                if (strClassType == "杜威十进分类号"
+                    || strClassType == "杜威十进分类法"
+                    || strClassType == "DDC")
+                {
+                    strFieldName = "082";
+                    strSubfieldName = "a";
+                }
+                else if (strClassType == "国际十进分类号"
+                    || strClassType == "国际十进分类法"
+                    || strClassType == "UDC")
+                {
+                    strFieldName = "080";
+                    strSubfieldName = "a";
+                }
+                else if (strClassType == "国会图书馆分类法"
+                    || strClassType == "美国国会图书馆分类法"
+                    || strClassType == "LCC")
+                {
+                    strFieldName = "050";
+                    strSubfieldName = "a";
+                }
+                else if (strClassType == "中图法")
+                {
+                    strFieldName = "093";
+                    strSubfieldName = "a";
+                }
+                else if (strClassType == "科图法")
+                {
+                    strFieldName = "094";
+                    strSubfieldName = "a";
+                }
+                else if (strClassType == "人大法")
+                {
+                    strFieldName = "095";
+                    strSubfieldName = "a";
+                }
+                else if (strClassType == "其它" || strClassType == "红泥巴")
+                {
+                    strFieldName = "084";
+                    strSubfieldName = "a";
+                }
+                else if (strClassType == "石头汤分类法"
+                    || strClassType == "石头汤分类号"
+                    || strClassType == "石头汤")
+                {
+                    strFieldName = "087";
+                    strSubfieldName = "a";
+                }
+                else
+                {
+                    strError = "USMARC下未知的分类法 '" + strClassType + "'";
+                    return -1;
+                }
+            }
+            else
+            {
+                strError = "未知的MARC格式 '" + strMarcSyntax + "'";
+                return -1;
+            }
+
+            return 1;
+        }
+
+        // 一个分类法针对特定 MARC 格式的具体信息
+        class ClassTypeInfo
+        {
+            public string ClassType { get; set; }
+            public string MarcSyntax { get; set; }
+            public string FieldName { get; set; }
+            public string SubfieldName { get; set; }
+
+            public ClassTypeInfo(string strClassType,
+                string strMarcSyntax)
+            {
+                this.MarcSyntax = strMarcSyntax;
+                this.ClassType = strClassType;
+
+                string strFieldName = "";
+                string strSubfieldName = "";
+
+                string strError = "";
+                int nRet = GetCallNumberClassSource(
+                    this.ClassType,
+                    this.MarcSyntax,
+        out strFieldName,
+        out strSubfieldName,
+        out strError);
+                if (nRet == -1)
+                    throw new Exception(strError);
+
+                this.FieldName = strFieldName;
+                this.SubfieldName = strSubfieldName;
+            }
+        }
+
+        // 分类统计
+        void menu_classStatis_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.108") < 0)
+            {
+                strError = "本功能只能和 dp2library 2.08 或以上版本配套使用";
+                goto ERROR1;
+            }
+
+            List<string> biblioRecPathList = new List<string>();   // 按照出现先后的顺序存储书目记录路径
+
+            Hashtable groupTable = new Hashtable();   // 书目记录路径 --> List<string> (册记录路径列表)
+
+
+            if (stop.IsInLoop == true)
+            {
+                strError = "无法重复进入循环";
+                goto ERROR1;
+            }
+
+#if NO
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要输出的 Excel 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            // dlg.FileName = this.ExportExcelFilename;
+            // dlg.InitialDirectory = Environment.CurrentDirectory;
+            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+#endif
+
+            // 询问统计参数。按照什么分类法统计？统计表中的分类号截断为多少字符？是否有预置的分类表?
+
+            ItemClassStatisDialog dlg = new ItemClassStatisDialog();
+            MainForm.SetControlFont(dlg, Program.MainForm.Font, false);
+            dlg.UiState = Program.MainForm.AppInfo.GetString(
+        "ItemSearchForm_" + this.DbType,
+        "ItemClassStatisDialog_uiState",
+        "");
+
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ItemSearchForm_ItemClassStatisDialog_uiState_state");
+            dlg.ShowDialog(Program.MainForm);
+
+            Program.MainForm.AppInfo.SetString(
+        "ItemSearchForm_" + this.DbType,
+"ItemClassStatisDialog_uiState",
+dlg.UiState);
+
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            string strFileName = dlg.FileName;
+
+            ClassTypeInfo unimarc = new ClassTypeInfo(dlg.ClassType, "unimarc");
+            ClassTypeInfo marc21 = new ClassTypeInfo(dlg.ClassType, "usmarc");
+
+            // 切换到“操作历史”属性页
+            Program.MainForm.ActivateFixPage("history");
+
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+    + " 开始进行" + this.DbTypeCaption + "记录分类统计</div>");
+
+            Table table = new Table(3);	// 类号 种数 册数 价格
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在进行分类统计 ...");
+            stop.BeginLoop();
+
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+                nRet = GetSelectedBiblioRecPath(
+                    channel,
+                    ref biblioRecPathList,// 按照出现先后的顺序存储书目记录路径
+                    ref groupTable, // 书目记录路径 --> List<string> (册记录路径列表)
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 先行获得所有册记录信息
+                // 先建立一个没有重复的册记录路径列表
+                Hashtable item_recpath_table = new Hashtable();
+                List<string> all_item_recpaths = new List<string>();
+                foreach (string key in groupTable.Keys)
+                {
+                    List<string> item_recpaths = (List<string>)groupTable[key];
+                    foreach (string recpath in item_recpaths)
+                    {
+                        if (item_recpath_table.ContainsKey(recpath) == false)
+                        {
+                            item_recpath_table.Add(recpath, null);
+                            all_item_recpaths.Add(recpath);
+                        }
+                    }
+                }
+
+                item_recpath_table.Clear();
+
+                if (dlg.OutputPrice)
+                {
+                    stop.SetProgressRange(0, all_item_recpaths.Count);
+                    stop.SetMessage("正在获取册记录 ...");
+
+                    BrowseLoader item_loader = new BrowseLoader();
+                    item_loader.Channel = channel;
+                    item_loader.Stop = this.Progress;
+                    item_loader.Format = "id,cols,format:@coldef:*/price";
+
+                    item_loader.RecPaths = all_item_recpaths;
+
+                    item_loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+                    try
+                    {
+                        int i = 0;
+                        foreach (DigitalPlatform.LibraryClient.localhost.Record entity in item_loader)
+                        {
+                            string strPrice = "";
+                            if (entity.Cols != null && entity.Cols.Length > 0)
+                                strPrice = entity.Cols[0];
+                            if (string.IsNullOrEmpty(entity.Path))
+                                goto CONTINUE;
+                            item_recpath_table[entity.Path] = strPrice;
+                        CONTINUE:
+                            i++;
+                            stop.SetProgressValue(i);
+                        }
+
+                    }
+                    finally
+                    {
+                        item_loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                    }
+                }
+
+
+                stop.SetProgressRange(0, biblioRecPathList.Count);
+                stop.SetMessage("正在获取书目记录 ...");
+
+                // 获得书目记录
+#if NO
+                BiblioLoader loader = new BiblioLoader();
+                loader.Channel = channel;
+                loader.Stop = this.Progress;
+                loader.Format = "xml";
+                loader.GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp;
+                loader.RecPaths = biblioRecPathList;
+#endif
+                BrowseLoader loader = new BrowseLoader();
+                loader.Channel = channel;
+                loader.Stop = this.Progress;
+                // loader.Format = "id,cols,format:@coldef://marc:record/marc:datafield[@tag='690']/marc:subfield[@code='a']->nl:marc=http://dp2003.com/UNIMARC->dm:\t|//marc:record/marc:datafield[@tag='093']/marc:subfield[@code='a']->nl:marc=http://www.loc.gov/MARC21/slim->dm:\t";
+                loader.Format = "id,cols,format:@coldef://marc:record/marc:datafield[@tag='" + unimarc.FieldName + "']/marc:subfield[@code='" + unimarc.SubfieldName + "']->nl:marc=http://dp2003.com/UNIMARC->dm:\t|//marc:record/marc:datafield[@tag='" + marc21.FieldName + "']/marc:subfield[@code='" + marc21.SubfieldName + "']->nl:marc=http://www.loc.gov/MARC21/slim->dm:\t";
+                loader.RecPaths = biblioRecPathList;
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                {
+                    int i = 0;
+                    foreach (DigitalPlatform.LibraryClient.localhost.Record item in loader)
+                    {
+                        Application.DoEvents();
+
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+
+                        // stop.SetMessage("正在获取书目记录 " + item.Path);
+                        // Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(item.Path) + "</div>");
+
+#if NO
+                    bool bNullBiblio = false;   // 书目记录是否为空
+                    string strXml = item.Content;
+                    if (string.IsNullOrEmpty(strXml))
+                    {
+                        strXml = "<root />";
+                        bNullBiblio = true;
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("书目记录 " + item.RecPath + " 不存在。被当作空记录继续处理了") + "</div>");
+                    }
+
+                    string strMARC = "";
+                    string strMarcSyntax = "";
+                    // 将XML格式转换为MARC格式
+                    // 自动从数据记录中获得MARC语法
+                    nRet = MarcUtil.Xml2Marc(strXml,
+                        true,
+                        null,
+                        out strMarcSyntax,
+                        out strMARC,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "XML 转换到 MARC 记录时出错: " + strError;
+                        goto ERROR1;
+                    }
+
+                    if (bNullBiblio == true && string.IsNullOrEmpty(strMarcSyntax))
+                        strMarcSyntax = "unimarc";
+
+                    // 获得分类号
+                    string strFieldName = "";
+                    string strSubfieldName = "";
+
+                    nRet = GetCallNumberClassSource(
+                        strClassType,
+                        strMarcSyntax,
+            out strFieldName,
+            out strSubfieldName,
+            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    MarcRecord record = new MarcRecord(strMARC);
+                    string strClass = record.select("field[@name='" + strFieldName + "']/subfield[@name='" + strSubfieldName + "']").FirstContent;
+#endif
+                        string strClass = "";
+
+                        bool bNullBiblio = false;   // 书目记录是否为空
+                        if (item.RecordBody != null && item.RecordBody.Result != null
+                            && item.RecordBody.Result.ErrorCode == ErrorCodeValue.NotFound)
+                        {
+                            bNullBiblio = true;
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("书目记录 '" + item.Path + "' 不存在。被当作空记录继续处理了") + "</div>");
+                        }
+
+                        if (bNullBiblio == false && item.Cols != null)
+                        {
+                            if (item.Cols.Length > 0)
+                                strClass = item.Cols[0];
+                            if (string.IsNullOrEmpty(strClass) && item.Cols.Length > 1)
+                                strClass = item.Cols[1];
+                            // 多个分类号只取出第一个
+                            if (string.IsNullOrEmpty(strClass) == false)
+                            {
+                                nRet = strClass.IndexOf('\t');
+                                if (nRet != -1)
+                                    strClass = strClass.Substring(0, nRet);
+                            }
+                        }
+
+                        if (string.IsNullOrEmpty(strClass) == false)
+                            strClass = strClass.Substring(0, 1);
+
+                        if (string.IsNullOrEmpty(strClass) == true)
+                        {
+                            strClass = "(空)";
+                            // if (bNullBiblio == false)
+                            //    Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("书目记录 " + item.Path + " 中缺乏子字段 '" + strFieldName + "$" + strSubfieldName + "' ") + "</div>");
+                            if (bNullBiblio == false)
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("书目记录 " + item.Path + " 中缺乏分类号字段") + "</div>");
+                        }
+
+                        List<string> item_recpaths = (List<string>)groupTable[item.Path];
+
+                        // 种数 列号0
+                        table.IncValue(strClass, 0, 1, 1);
+
+                        // 册数 列号1
+                        table.IncValue(strClass, 1, item_recpaths.Count, item_recpaths.Count);
+
+                        // 遍历下属的册记录
+                        if (dlg.OutputPrice)
+                        {
+                            foreach (string recpath in item_recpaths)
+                            {
+                                string strPrice = (string)item_recpath_table[recpath];
+
+                                if (strPrice == null)
+                                {
+                                    strError = "路径为 '" + recpath + "' 的册信息在 hashtable 中没有找到";
+                                    goto ERROR1;
+                                }
+
+                                // 价格 列号2
+                                try
+                                {
+                                    table.IncCurrency(strClass, 2, strPrice, strPrice);
+                                }
+                                catch (Exception ex)
+                                {
+                                    //this.m_lErrorCount++;
+                                    //sw_error.Write("册记录 " + this.CurrentRecPath + " 中的价格字符串 '" + strPrice + "' 在汇总时出错：" + ex.Message + "\r\n");
+                                    Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("册记录 " + recpath + " 中的价格字符串 '" + strPrice + "' 在汇总时出错：" + ex.Message) + "</div>");
+                                }
+                            }
+                        }
+
+                        stop.SetProgressValue(++i);
+                    }
+                }
+
+            }
+            catch (ChannelException ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+    + " 结束执行" + this.DbTypeCaption + "记录分类统计</div>");
+            }
+
+            table.Sort();
+
+            Report report = Report.BuildReport(table,
+    "类目||class,种||title,册||item,价格||price",
+    "",
+    true);
+
+            if (report == null)	// 空表格
+                return;
+
+            report[3].DataType = DataType.Currency;
+
+            report.SumCell -= new SumCellEventHandler(SumCell);
+            report.SumCell += new SumCellEventHandler(SumCell);
+
+            DigitalPlatform.dp2.Statis.Report.ExcelTableConfig config = new DigitalPlatform.dp2.Statis.Report.ExcelTableConfig();
+            config.StartCol = 1;
+            config.StartRow = 1;
+
+
+            XLWorkbook doc = null;
+
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                strError = ExceptionUtil.GetAutoText(ex);
+                goto ERROR1;
+            }
+
+            try
+            {
+                IXLWorksheet sheet = null;
+                sheet = doc.Worksheets.Add("表格");
+
+                nRet = report.ExportToExcel(
+                table,
+                config,
+                sheet,
+                out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+
+                doc.SaveAs(dlg.FileName);
+            }
+            finally
+            {
+                doc.Dispose();
+            }
+
+            // 启动 Excel
+            if (string.IsNullOrEmpty(strFileName) == false)
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(strFileName);
+                }
+                catch
+                {
+
+                }
+            }
+
+            Program.MainForm.StatusBarMessage = "书目记录 " + groupTable.Count.ToString() + "个 已成功导出到文件 " + this.ExportBiblioDumpFilename;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+
+        void SumCell(object sender, SumCellEventArgs e)
+        {
+            if (String.IsNullOrEmpty(e.Line.Entry) == true)
+                return;
+
+            // 忽略多于1字符的类目名
+            if (e.Line.Entry.Length > 1 && e.Line.Entry != "(空)")
+                e.Value = null;
         }
 
         // 注: 本函数中要修改 stop 的 ProgressRange
