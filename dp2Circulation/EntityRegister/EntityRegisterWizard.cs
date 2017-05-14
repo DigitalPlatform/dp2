@@ -597,7 +597,7 @@ MessageBoxDefaultButton.Button1);
             // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
             string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName()) + "\\servers.xml");
 
-            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFileName));
+            PathUtil.TryCreateDir(Path.GetDirectoryName(strFileName));
 
             if (File.Exists(strFileName) == false
                 || MainForm.GetServersCfgFileVersion(strFileName) < MainForm.SERVERSXML_VERSION)
@@ -5043,7 +5043,7 @@ out strError);
                 // string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, "servers.xml");
                 // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
                 string strFileName = Path.Combine(Program.MainForm.ServerCfgDir, ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName()) + "\\servers.xml");
-                PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFileName));
+                PathUtil.TryCreateDir(Path.GetDirectoryName(strFileName));
 
                 // 创建 servers.xml 配置文件
                 int nRet = Program.MainForm.BuildServersCfgFile(strFileName,

@@ -4170,7 +4170,7 @@ MessageBoxDefaultButton.Button1);
             Hashtable timestamp_table = new Hashtable();    // recpath --> fingerprint timestamp
 
             string strDir = Program.MainForm.FingerPrintCacheDir;  // PathUtil.MergePath(Program.MainForm.DataDir, "fingerprintcache");
-            PathUtil.CreateDirIfNeed(strDir);
+            PathUtil.TryCreateDir(strDir);
 
             // 结果集文件名
             string strResultsetFilename = PathUtil.MergePath(strDir, strReaderDbName);

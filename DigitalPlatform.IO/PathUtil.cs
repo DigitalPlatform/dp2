@@ -783,7 +783,7 @@ namespace DigitalPlatform.IO
                 }
 #endif
 
-                CreateDirIfNeed(strTargetDir);
+                TryCreateDir(strTargetDir);
 
                 FileSystemInfo[] subs = di.GetFileSystemInfos();
 
@@ -877,7 +877,7 @@ namespace DigitalPlatform.IO
                         Directory.Delete(strTargetDir, true);
                 }
 
-                CreateDirIfNeed(strTargetDir);
+                TryCreateDir(strTargetDir);
 
                 FileSystemInfo[] subs = di.GetFileSystemInfos();
 
@@ -909,11 +909,17 @@ namespace DigitalPlatform.IO
             return 0;
         }
 
+        // 兼容原来函数名
+        public static bool CreateDirIfNeed(string strDir)
+        {
+            return TryCreateDir(strDir);
+        }
+
         // 如果目录不存在则创建之
         // return:
         //      false   已经存在
         //      true    刚刚新创建
-        public static bool CreateDirIfNeed(string strDir)
+        public static bool TryCreateDir(string strDir)
         {
             DirectoryInfo di = new DirectoryInfo(strDir);
             if (di.Exists == false)

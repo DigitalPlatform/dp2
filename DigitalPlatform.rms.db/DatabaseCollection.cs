@@ -192,7 +192,7 @@ namespace DigitalPlatform.rms
             string strObjectDir = this.DataDir + "\\object";
             try
             {
-                PathUtil.CreateDirIfNeed(strObjectDir);
+                PathUtil.TryCreateDir(strObjectDir);
             }
             catch (Exception ex)
             {
@@ -217,7 +217,7 @@ namespace DigitalPlatform.rms
 
             try
             {
-                PathUtil.CreateDirIfNeed(strTempDir);
+                PathUtil.TryCreateDir(strTempDir);
             }
             catch (Exception ex)
             {
@@ -3068,7 +3068,7 @@ namespace DigitalPlatform.rms
                 string strDir = DatabaseUtil.GetLocalDir(this.NodeDbs,
                     node);
                 strDir = this.DataDir + "\\" + strDir;
-                PathUtil.CreateDirIfNeed(strDir);
+                PathUtil.TryCreateDir(strDir);
 
                 this.Changed = true;
 

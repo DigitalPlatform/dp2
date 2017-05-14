@@ -7248,7 +7248,7 @@ MessageBoxDefaultButton.Button2);
         {
             // 2015/6/20 将数据库文件存储在和每个 dp2library 服务器和用户名相关的目录中
             string strDirectory = Path.Combine(Program.MainForm.ServerCfgDir, ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName()));
-            PathUtil.CreateDirIfNeed(strDirectory);
+            PathUtil.TryCreateDir(strDirectory);
             return strDirectory;
         }
 
@@ -11375,7 +11375,7 @@ MessageBoxDefaultButton.Button1);
             // 特定分馆的报表输出目录
             // string strReportsDir = Path.Combine(Program.MainForm.UserDir, "reports/" + (string.IsNullOrEmpty(strLibraryCode) == true ? "global" : strLibraryCode));
             string strReportsDir = GetReportOutputDir(strLibraryCode);
-            PathUtil.CreateDirIfNeed(strReportsDir);
+            PathUtil.TryCreateDir(strReportsDir);
 
             // 输出文件目录
             // string strOutputDir = Path.Combine(strReportsDir, time.Time);
@@ -12143,7 +12143,7 @@ MessageBoxDefaultButton.Button1);
                         }
                         catch (DirectoryNotFoundException)
                         {
-                            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(filename));
+                            PathUtil.TryCreateDir(Path.GetDirectoryName(filename));
                             dom.Save(filename);
                         }
                     }

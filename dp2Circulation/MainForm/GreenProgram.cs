@@ -154,7 +154,7 @@ Stack:
                 }
 #endif
 
-                PathUtil.CreateDirIfNeed(strTargetDir);
+                PathUtil.TryCreateDir(strTargetDir);
 
                 FileSystemInfo[] subs = di.GetFileSystemInfos();
 

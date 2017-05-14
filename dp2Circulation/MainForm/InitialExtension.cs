@@ -1050,7 +1050,7 @@ MessageBoxDefaultButton.Button1);
 
                 // 创建和删除子目录试验
                 string strTestDir = Path.Combine(this.UserDir, "_testdir_");
-                PathUtil.CreateDirIfNeed(strTestDir);
+                PathUtil.TryCreateDir(strTestDir);
 
                 if (Directory.Exists(strTestDir) == false)
                     goto ERROR1;
@@ -1177,7 +1177,7 @@ MessageBoxDefaultButton.Button1);
                 this.UserDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     "dp2Circulation_v2");
-                PathUtil.CreateDirIfNeed(this.UserDir);
+                PathUtil.TryCreateDir(this.UserDir);
 
                 // 2016/6/4
                 // 用户目录可以重定向
@@ -1202,11 +1202,11 @@ MessageBoxDefaultButton.Button1);
                 this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "dp2circulation.xml"));
 
                 this.UserTempDir = Path.Combine(this.UserDir, "temp");
-                PathUtil.CreateDirIfNeed(this.UserTempDir);
+                PathUtil.TryCreateDir(this.UserTempDir);
 
                 // 2015/7/8
                 this.UserLogDir = Path.Combine(this.UserDir, "log");
-                PathUtil.CreateDirIfNeed(this.UserLogDir);
+                PathUtil.TryCreateDir(this.UserLogDir);
 
                 // 启动时在日志中记载当前 dp2circulation 版本号
                 this.WriteErrorLog(Assembly.GetAssembly(this.GetType()).FullName);
@@ -3170,7 +3170,7 @@ Culture=neutral, PublicKeyToken=null
             {
                 string strServerMappedPath = PathUtil.MergePath(this.DataDir, "servermapped");
                 string strLocalFilePath = PathUtil.MergePath(strServerMappedPath, strFileName);
-                PathUtil.CreateDirIfNeed(PathUtil.PathPart(strLocalFilePath));
+                PathUtil.TryCreateDir(PathUtil.PathPart(strLocalFilePath));
 
                 // 观察本地是否有这个文件，最后修改时间是否和服务器吻合
                 if (File.Exists(strLocalFilePath) == true)

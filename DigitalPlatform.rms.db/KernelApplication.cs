@@ -327,7 +327,7 @@ namespace DigitalPlatform.rms
             string strLogDir = this.DataDir + "\\log";
             try
             {
-                PathUtil.CreateDirIfNeed(strLogDir);
+                PathUtil.TryCreateDir(strLogDir);
             }
             catch (Exception ex)
             {
@@ -352,7 +352,7 @@ namespace DigitalPlatform.rms
             string strResultSetDir = Path.Combine(this.DataDir, "resultsets");
             try
             {
-                PathUtil.CreateDirIfNeed(strResultSetDir);
+                PathUtil.TryCreateDir(strResultSetDir);
             }
             catch (Exception ex)
             {

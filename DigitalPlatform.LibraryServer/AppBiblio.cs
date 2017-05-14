@@ -2742,7 +2742,7 @@ out strError);
                 {
                     List<string> titles = record.select("field[@name='200']/subfield[@name='a' or @name='e']").Contents;
 
-                    CanonializeWideChars(titles);
+                    StringUtil.CanonializeWideChars(titles);
                     Sort(titles);
 
                     List<string> his = record.select("field[@name='200']/subfield[@name='h' or @name='i']").Contents;
@@ -2752,7 +2752,7 @@ out strError);
                         // $a 里面的数字和标点符号要归一化
                         // h 和 i 里面的数字等要归一化
                         // h 和 i 要根据内容排序
-                        CanonializeWideChars(his);
+                        StringUtil.CanonializeWideChars(his);
                         Sort(his);
                         titles.AddRange(his);
                     }
@@ -2764,7 +2764,7 @@ out strError);
                 {
                     List<string> authors = record.select("field[@name='701' or @name='711']/subfield[@name='a']").Contents;
 
-                    CanonializeWideChars(authors);
+                    StringUtil.CanonializeWideChars(authors);
                     // 要按照内容排序
                     Sort(authors);
                     segments.Add(StringUtil.MakePathList(authors));
@@ -2774,12 +2774,12 @@ out strError);
                 {
                     // 210 $c $d
                     List<string> publishers = record.select("field[@name='210']/subfield[@name='c']").Contents;
-                    CanonializeWideChars(publishers);
+                    StringUtil.CanonializeWideChars(publishers);
                     Sort(publishers);
 
                     List<string> dates = record.select("field[@name='210']/subfield[@name='d']").Contents;
                     // 日期需要归一化为 4 chars 形态
-                    CanonializeWideChars(dates);
+                    StringUtil.CanonializeWideChars(dates);
                     CanonializeDate(dates);
                     Sort(dates);
                     segments.Add(StringUtil.MakePathList(publishers) + "," + StringUtil.MakePathList(dates));
@@ -2969,44 +2969,6 @@ out strError);
                     values[i] = new_value;
                 }
             }
-        }
-
-        static void CanonializeWideChars(List<string> values)
-        {
-            for (int i = 0; i < values.Count; i++)
-            {
-                string value = values[i];
-                string new_value = ToDBC(value);
-                if (value != new_value)
-                {
-                    values[i] = new_value;
-                }
-            }
-        }
-
-        // /
-        // / 转半角的函数(DBC case)
-        // /
-        // /任意字符串
-        // /半角字符串
-        // /
-        // /全角空格为12288，半角空格为32
-        // /其他字符半角(33-126)与全角(65281-65374)的对应关系是：均相差65248
-        // /
-        public static String ToDBC(String input)
-        {
-            char[] c = input.ToCharArray();
-            for (int i = 0; i < c.Length; i++)
-            {
-                if (c[i] == 12288)
-                {
-                    c[i] = (char)32;
-                    continue;
-                }
-                if (c[i] > 65280 && c[i] < 65375)
-                    c[i] = (char)(c[i] - 65248);
-            }
-            return new String(c);
         }
 
         // 获得一个字符串里面的纯数字部分

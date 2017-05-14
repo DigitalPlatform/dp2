@@ -6292,7 +6292,7 @@ Keys keyData)
             bool bAccessLog = StringUtil.IsInList("accessLog", strStyle);
 
             if (string.IsNullOrEmpty(strCacheDir) == false)
-                PathUtil.CreateDirIfNeed(strCacheDir);
+                PathUtil.TryCreateDir(strCacheDir);
 
             // ProgressEstimate estimate = new ProgressEstimate();
             bool bAutoCache = StringUtil.IsInList("autocache", strStyle);
@@ -6340,7 +6340,7 @@ Keys keyData)
                         out strError);
                     if (nRet == -1)
                         return -1;
-                    PathUtil.CreateDirIfNeed(strCacheDir);  // 重新创建目录
+                    PathUtil.TryCreateDir(strCacheDir);  // 重新创建目录
 
                     // 创建版本文件
                     nRet = CreateCacheVersionFile(

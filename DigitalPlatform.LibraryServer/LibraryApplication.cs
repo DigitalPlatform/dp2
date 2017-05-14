@@ -605,40 +605,40 @@ namespace DigitalPlatform.LibraryServer
                     app.CfgDir = strCfgDir;
 
                     app.CfgMapDir = strCfgMapDir;
-                    PathUtil.CreateDirIfNeed(app.CfgMapDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.CfgMapDir);	// 确保目录创建
 
 
                     // log
                     app.LogDir = strLogDir;	// 日志存储目录
-                    PathUtil.CreateDirIfNeed(app.LogDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.LogDir);	// 确保目录创建
 
                     // zhengyuan 一卡通
                     app.ZhengyuanDir = strZhengyuanDir;
-                    PathUtil.CreateDirIfNeed(app.ZhengyuanDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.ZhengyuanDir);	// 确保目录创建
 
                     // dkyw 一卡通
                     app.DkywDir = strDkywDir;
-                    PathUtil.CreateDirIfNeed(app.DkywDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.DkywDir);	// 确保目录创建
 
                     // patron replication
                     app.PatronReplicationDir = strPatronReplicationDir;
-                    PathUtil.CreateDirIfNeed(app.PatronReplicationDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.PatronReplicationDir);	// 确保目录创建
 
 
                     // statis 统计文件
                     app.StatisDir = strStatisDir;
-                    PathUtil.CreateDirIfNeed(app.StatisDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.StatisDir);	// 确保目录创建
 
                     // session临时文件
                     app.SessionDir = strSessionDir;
-                    PathUtil.CreateDirIfNeed(app.SessionDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.SessionDir);	// 确保目录创建
 
                     if (bReload == false)
                         CleanSessionDir(this.SessionDir);
 
                     // 各种临时文件
                     app.TempDir = strTempDir;
-                    PathUtil.CreateDirIfNeed(app.TempDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.TempDir);	// 确保目录创建
 
                     if (bReload == false)
                     {

@@ -7208,7 +7208,7 @@ MessageBoxDefaultButton.Button1);
                     // metadata 写入外部文件
                     if (string.IsNullOrEmpty(strMetadataXml) == false)
                     {
-                        PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strMetadataFileName));
+                        PathUtil.TryCreateDir(Path.GetDirectoryName(strMetadataFileName));
                         using (StreamWriter sw = new StreamWriter(strMetadataFileName))
                         {
                             sw.Write(strMetadataXml);
@@ -7287,7 +7287,7 @@ MessageBoxDefaultButton.Button1);
         {
             strError = "";
 
-            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strOutputFileName));
+            PathUtil.TryCreateDir(Path.GetDirectoryName(strOutputFileName));
 
             TimeSpan old_timeout = channel.Timeout;
             channel.Timeout = new TimeSpan(0, 5, 0);

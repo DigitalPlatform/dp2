@@ -299,7 +299,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 m_strDirectory = strDirectory;
 
-                PathUtil.CreateDirIfNeed(m_strDirectory);
+                PathUtil.TryCreateDir(m_strDirectory);
 
                 // 2013/6/16
                 nRet = this.VerifyLogFiles(true, out strError);

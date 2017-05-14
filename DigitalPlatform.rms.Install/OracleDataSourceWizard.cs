@@ -599,7 +599,7 @@ namespace DigitalPlatform.rms
                         }
 
                         // 确保表空间文件名中用到的路径已经创建好目录
-                        PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strTableSpaceFileName));
+                        PathUtil.TryCreateDir(Path.GetDirectoryName(strTableSpaceFileName));
 
                         string strCommand = "";
 

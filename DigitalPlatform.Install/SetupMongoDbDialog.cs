@@ -33,7 +33,7 @@ namespace DigitalPlatform.Install
                 goto ERROR1;
             }
 
-            PathUtil.CreateDirIfNeed(this.textBox_dataDir.Text);
+            PathUtil.TryCreateDir(this.textBox_dataDir.Text);
 
             if (string.IsNullOrEmpty(this.textBox_binDir.Text))
             {

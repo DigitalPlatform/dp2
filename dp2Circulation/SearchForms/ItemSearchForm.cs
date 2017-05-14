@@ -7522,6 +7522,7 @@ MessageBoxDefaultButton.Button1);
 
             ItemClassStatisDialog dlg = new ItemClassStatisDialog();
             MainForm.SetControlFont(dlg, Program.MainForm.Font, false);
+            dlg.ClassListFileName = Path.Combine(Program.MainForm.UserDir, "class_list.xml");
             dlg.UiState = Program.MainForm.AppInfo.GetString(
         "ItemSearchForm_" + this.DbType,
         "ItemClassStatisDialog_uiState",
@@ -7539,6 +7540,7 @@ dlg.UiState);
                 return;
 
             string strFileName = dlg.FileName;
+            List<string> class_list = dlg.ClassList;
 
             ClassTypeInfo unimarc = new ClassTypeInfo(dlg.ClassType, "unimarc");
             ClassTypeInfo marc21 = new ClassTypeInfo(dlg.ClassType, "usmarc");
@@ -7558,6 +7560,8 @@ dlg.UiState);
             LibraryChannel channel = this.GetChannel();
             try
             {
+                stop.SetMessage("正在汇总书目和册记录路径 ...");
+
                 nRet = GetSelectedBiblioRecPath(
                     channel,
                     ref biblioRecPathList,// 按照出现先后的顺序存储书目记录路径
@@ -7729,9 +7733,27 @@ dlg.UiState);
                             }
                         }
 
+                        List<string> heads = new List<string>();
                         if (string.IsNullOrEmpty(strClass) == false)
-                            strClass = strClass.Substring(0, 1);
+                        {
+                            if (class_list.Count == 0)
+                                heads.Add(strClass.Substring(0, 1));
+                            else
+                            {
+                                // 从 class_list 中找到预定义的前缀字符串。可能会找到多个
+                                heads = ItemClassStatisDialog.GetClassHead(class_list,
+                                    strClass);
+                            }
+                        }
 
+                        if (heads.Count == 0)
+                        {
+                            heads.Add("(空)");
+                            if (bNullBiblio == false)
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("书目记录 " + item.Path + " 中缺乏分类号字段") + "</div>");
+                        }
+                        Debug.Assert(heads.Count > 0, "");
+#if NO
                         if (string.IsNullOrEmpty(strClass) == true)
                         {
                             strClass = "(空)";
@@ -7740,38 +7762,48 @@ dlg.UiState);
                             if (bNullBiblio == false)
                                 Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("书目记录 " + item.Path + " 中缺乏分类号字段") + "</div>");
                         }
+#endif
 
-                        List<string> item_recpaths = (List<string>)groupTable[item.Path];
-
-                        // 种数 列号0
-                        table.IncValue(strClass, 0, 1, 1);
-
-                        // 册数 列号1
-                        table.IncValue(strClass, 1, item_recpaths.Count, item_recpaths.Count);
-
-                        // 遍历下属的册记录
-                        if (dlg.OutputPrice)
+                        foreach (string head in heads)
                         {
-                            foreach (string recpath in item_recpaths)
+                            List<string> item_recpaths = (List<string>)groupTable[item.Path];
+
+                            // 种数 列号0
+                            table.IncValue(head, 0, 1, 1);
+
+                            // 册数 列号1
+                            table.IncValue(head, 1, item_recpaths.Count, item_recpaths.Count);
+
+                            // 遍历下属的册记录
+                            if (dlg.OutputPrice)
                             {
-                                string strPrice = (string)item_recpath_table[recpath];
+                                foreach (string recpath in item_recpaths)
+                                {
+                                    string strPrice = (string)item_recpath_table[recpath];
 
-                                if (strPrice == null)
-                                {
-                                    strError = "路径为 '" + recpath + "' 的册信息在 hashtable 中没有找到";
-                                    goto ERROR1;
-                                }
+                                    if (strPrice == null)
+                                    {
+                                        strError = "路径为 '" + recpath + "' 的册信息在 hashtable 中没有找到";
+                                        goto ERROR1;
+                                    }
 
-                                // 价格 列号2
-                                try
-                                {
-                                    table.IncCurrency(strClass, 2, strPrice, strPrice);
-                                }
-                                catch (Exception ex)
-                                {
-                                    //this.m_lErrorCount++;
-                                    //sw_error.Write("册记录 " + this.CurrentRecPath + " 中的价格字符串 '" + strPrice + "' 在汇总时出错：" + ex.Message + "\r\n");
-                                    Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("册记录 " + recpath + " 中的价格字符串 '" + strPrice + "' 在汇总时出错：" + ex.Message) + "</div>");
+                                    string strPricePure = strPrice;
+                                    if (ItemClassStatisDialog.CorrectPrice(ref strPricePure) == true)
+                                    {
+                                        Program.MainForm.OperHistory.AppendHtml("<div class='debug warning'>" + HttpUtility.HtmlEncode("册记录 " + recpath + " 中的价格字符串 '" + strPrice + "' 被自动变换为 '" + strPricePure + "'") + "</div>");
+                                    }
+
+                                    // 价格 列号2
+                                    try
+                                    {
+                                        table.IncCurrency(head, 2, strPricePure, strPricePure);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        //this.m_lErrorCount++;
+                                        //sw_error.Write("册记录 " + this.CurrentRecPath + " 中的价格字符串 '" + strPrice + "' 在汇总时出错：" + ex.Message + "\r\n");
+                                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("册记录 " + recpath + " 中的价格字符串 '" + strPrice + "' 在汇总时出错：" + ex.Message) + "</div>");
+                                    }
                                 }
                             }
                         }

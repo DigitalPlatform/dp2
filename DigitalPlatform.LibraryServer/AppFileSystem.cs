@@ -186,7 +186,7 @@ namespace DigitalPlatform.LibraryServer
             string strNewFilePath = GetNewFileName(strFilePath);
 
             // 确保文件的路径所经过的所有子目录已经创建
-            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFilePath));
+            PathUtil.TryCreateDir(Path.GetDirectoryName(strFilePath));
 
             //*************************************************
             // 检查时间戳,当目标文件存在时

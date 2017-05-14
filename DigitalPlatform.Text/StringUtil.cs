@@ -17,6 +17,45 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        // 规范为半角字符串
+        public static void CanonializeWideChars(List<string> values)
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                string value = values[i];
+                string new_value = ToDBC(value);
+                if (value != new_value)
+                {
+                    values[i] = new_value;
+                }
+            }
+        }
+
+        // /
+        // / 转半角的函数(DBC case)
+        // /
+        // /任意字符串
+        // /半角字符串
+        // /
+        // /全角空格为12288，半角空格为32
+        // /其他字符半角(33-126)与全角(65281-65374)的对应关系是：均相差65248
+        // /
+        public static string ToDBC(String input)
+        {
+            char[] c = input.ToCharArray();
+            for (int i = 0; i < c.Length; i++)
+            {
+                if (c[i] == 12288)
+                {
+                    c[i] = (char)32;
+                    continue;
+                }
+                if (c[i] > 65280 && c[i] < 65375)
+                    c[i] = (char)(c[i] - 65248);
+            }
+            return new String(c);
+        }
+
         public static bool IsHttpUrl(string url)
         {
             if (string.IsNullOrEmpty(url))

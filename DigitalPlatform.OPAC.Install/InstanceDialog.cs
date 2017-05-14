@@ -336,7 +336,7 @@ namespace DigitalPlatform.OPAC
                 {
                     strPhysicalPath = GetAppPhysicalPath(strSite,
                         strVirtualDir);
-                    PathUtil.CreateDirIfNeed(strPhysicalPath);
+                    PathUtil.TryCreateDir(strPhysicalPath);
                 }
 
                 // 创建程序目录，并复制进基本内容
@@ -727,7 +727,7 @@ namespace DigitalPlatform.OPAC
         {
             strError = "";
 
-            PathUtil.CreateDirIfNeed(strDataDir);
+            PathUtil.TryCreateDir(strDataDir);
 
             Debug.Assert(this.CopyFiles != null, "");
 
@@ -753,7 +753,7 @@ namespace DigitalPlatform.OPAC
         {
             strError = "";
 
-            PathUtil.CreateDirIfNeed(strAppDir);
+            PathUtil.TryCreateDir(strAppDir);
 
             Debug.Assert(this.CopyFiles != null, "");
 

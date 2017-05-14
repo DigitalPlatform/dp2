@@ -46,7 +46,7 @@ namespace dp2Circulation
                     return this.m_strInstanceDir;
 
                 this.m_strInstanceDir = PathUtil.MergePath(Program.MainForm.DataDir, "~bin_" + Guid.NewGuid().ToString());
-                PathUtil.CreateDirIfNeed(this.m_strInstanceDir);
+                PathUtil.TryCreateDir(this.m_strInstanceDir);
 
                 return this.m_strInstanceDir;
             }

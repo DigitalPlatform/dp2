@@ -43,7 +43,7 @@ namespace DigitalPlatform.CirculationClient
                 m_strTempDir = value;
                 // 创建目录
                 if (m_strTempDir != "")
-                    PathUtil.CreateDirIfNeed(m_strTempDir);
+                    PathUtil.TryCreateDir(m_strTempDir);
             }
         }
 
@@ -352,7 +352,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.5.5759.36671, Culture=neutral, 
             if (string.IsNullOrEmpty(this.m_strTempDir) == false)
             {
                 PathUtil.DeleteDirectory(this.m_strTempDir);
-                PathUtil.CreateDirIfNeed(this.m_strTempDir);
+                PathUtil.TryCreateDir(this.m_strTempDir);
             }
         }
 

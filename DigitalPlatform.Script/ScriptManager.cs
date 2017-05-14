@@ -2433,7 +2433,7 @@ namespace DigitalPlatform.Script
 
 
             // 试探磁盘目录中同名文件
-            PathUtil.CreateDirIfNeed(this.DefaultCodeFileDir);
+            PathUtil.TryCreateDir(this.DefaultCodeFileDir);
             DirectoryInfo di = new DirectoryInfo(this.DefaultCodeFileDir);
 
             FileSystemInfo[] fis = di.GetFileSystemInfos();
@@ -2479,7 +2479,7 @@ namespace DigitalPlatform.Script
                     + strPrefix + Convert.ToString(nPrefixNumber);
             }
 
-            PathUtil.CreateDirIfNeed(strNewPath);
+            PathUtil.TryCreateDir(strNewPath);
 
             return strNewPath;
         }
@@ -2536,7 +2536,7 @@ namespace DigitalPlatform.Script
 
 
             // 试探磁盘目录中同名文件
-            PathUtil.CreateDirIfNeed(this.DefaultCodeFileDir);
+            PathUtil.TryCreateDir(this.DefaultCodeFileDir);
             DirectoryInfo di = new DirectoryInfo(this.DefaultCodeFileDir);
 
             FileInfo[] fis = di.GetFiles();

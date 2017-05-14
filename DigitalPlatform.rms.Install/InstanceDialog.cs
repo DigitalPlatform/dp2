@@ -1759,7 +1759,7 @@ MessageBoxDefaultButton.Button1);
         {
             strError = "";
 
-            PathUtil.CreateDirIfNeed(strDataDir);
+            PathUtil.TryCreateDir(strDataDir);
 
             if (string.IsNullOrEmpty(this.SourceDir) == false)
             {

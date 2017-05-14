@@ -8622,7 +8622,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             // 确保目录存在
-            PathUtil.CreateDirIfNeed(strOutputDir);
+            PathUtil.TryCreateDir(strOutputDir);
 
             // 提示是否删除输出目录中的现有文件
             // 如果正好为当前数据记录，则不删除，以免无意删除很多有用的文件

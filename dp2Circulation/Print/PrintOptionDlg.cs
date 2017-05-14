@@ -708,7 +708,7 @@ namespace dp2Circulation
             string strFilePath = "";
             int nRedoCount = 0;
             string strDir = PathUtil.MergePath(this.DataDir, "print_templates");
-            PathUtil.CreateDirIfNeed(strDir);
+            PathUtil.TryCreateDir(strDir);
             for (int i = 0; ; i++)
             {
                 strFilePath = PathUtil.MergePath(strDir, "template_" + (i+1).ToString());

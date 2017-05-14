@@ -288,7 +288,7 @@ namespace dp2Circulation
                 throw new ArgumentException("OperLogLoader 的 LogType 只能使用一种类型");
 
             if (string.IsNullOrEmpty(this.CacheDir) == false)
-                PathUtil.CreateDirIfNeed(this.CacheDir);
+                PathUtil.TryCreateDir(this.CacheDir);
 
             // ProgressEstimate estimate = new ProgressEstimate();
             bool bAutoCache = this.AutoCache;
@@ -363,7 +363,7 @@ namespace dp2Circulation
                         throw new Exception(strError);
 #endif
 
-                    PathUtil.CreateDirIfNeed(this.CacheDir);  // 重新创建目录
+                    PathUtil.TryCreateDir(this.CacheDir);  // 重新创建目录
 
                     // 创建版本文件
                     nRet = CreateCacheVersionFile(

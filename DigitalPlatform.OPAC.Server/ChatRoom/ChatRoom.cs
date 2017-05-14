@@ -219,7 +219,7 @@ out string strError)
 
             this.Close();
 
-            PathUtil.CreateDirIfNeed(strDirectory);	// 确保目录创建
+            PathUtil.TryCreateDir(strDirectory);	// 确保目录创建
             this.DataDirectory = strDirectory;
 
             m_lock.EnterWriteLock();
@@ -510,7 +510,7 @@ out string strError)
 
             this.DataDirectory = strDirectory;
 
-            PathUtil.CreateDirIfNeed(strDirectory);	// 确保目录创建
+            PathUtil.TryCreateDir(strDirectory);	// 确保目录创建
 
             // 打开当天的内容文件
             int nRet = PrepareContentFileName(out strError);

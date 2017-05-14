@@ -95,7 +95,7 @@ namespace dp2Circulation
                     return this.m_strInstanceDir;
 
                 this.m_strInstanceDir = PathUtil.MergePath(this.DataDir, "~bin_" + Guid.NewGuid().ToString());
-                PathUtil.CreateDirIfNeed(this.m_strInstanceDir);
+                PathUtil.TryCreateDir(this.m_strInstanceDir);
 
                 return this.m_strInstanceDir;
             }
@@ -6284,7 +6284,7 @@ out strError);
             string strFilePath = "";
             int nRedoCount = 0;
             string strDir = PathUtil.MergePath(this.DataDir, strDirName);
-            PathUtil.CreateDirIfNeed(strDir);
+            PathUtil.TryCreateDir(strDir);
             for (int i = 0; ; i++)
             {
                 strFilePath = PathUtil.MergePath(strDir, strFilenamePrefix + (i + 1).ToString());
@@ -8467,7 +8467,7 @@ Keys keyData)
             {
                 string strServerUrl = ReportForm.GetValidPathString(this.LibraryServerUrl.Replace("/", "_"));
                 string strDirectory = Path.Combine(this.UserDir, "servers\\" + strServerUrl);
-                PathUtil.CreateDirIfNeed(strDirectory);
+                PathUtil.TryCreateDir(strDirectory);
                 return strDirectory;
             }
         }
@@ -8525,7 +8525,7 @@ Keys keyData)
             try
             {
                 string strTempDir = Path.Combine(this.UserTempDir, "~zip_events");
-                PathUtil.CreateDirIfNeed(strTempDir);
+                PathUtil.TryCreateDir(strTempDir);
 
                 string strZipFileName = Path.Combine(strTempDir, "dp2circulation_eventlog.zip");
 

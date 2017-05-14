@@ -222,7 +222,7 @@ namespace DigitalPlatform.rms
                         this.m_strObjectDir = PathUtil.MergePath(this.container.ObjectDir, this.m_strSqlDbName);
                         try
                         {
-                            PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                            PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
                         catch (Exception ex)
                         {
@@ -744,7 +744,7 @@ namespace DigitalPlatform.rms
                             if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                             {
                                 PathUtil.DeleteDirectory(this.m_strObjectDir);
-                                PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                                PathUtil.TryCreateDir(this.m_strObjectDir);
                             }
                         }
                         catch (Exception ex)
@@ -864,7 +864,7 @@ namespace DigitalPlatform.rms
                         {
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
 
-                            PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                            PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
                     }
                     catch (Exception ex)
@@ -1022,7 +1022,7 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
-                            PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                            PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
                     }
                     catch (Exception ex)
@@ -1145,7 +1145,7 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
-                            PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                            PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
                     }
                     catch (Exception ex)
@@ -1807,7 +1807,7 @@ namespace DigitalPlatform.rms
                     strCommand += " ON ( name = '" + this.m_strSqlDbName + "', filename = '" + strDatabaseFileName + "')\n";
 
                     // 确保子目录已经创建
-                    PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strDatabaseFileName));
+                    PathUtil.TryCreateDir(Path.GetDirectoryName(strDatabaseFileName));
                 }
 
                 strCommand += " use master " + "\n";
@@ -10251,7 +10251,7 @@ FileShare.ReadWrite))
                 if (nRedoCount == 0)
                 {
                     // 创建中间子目录
-                    PathUtil.CreateDirIfNeed(PathUtil.PathPart(strFileName));
+                    PathUtil.TryCreateDir(PathUtil.PathPart(strFileName));
                     nRedoCount++;
                     goto REDO;
                 }
@@ -13011,7 +13011,7 @@ start_time,
                         if (nRedoCount == 0)
                         {
                             // 创建中间子目录
-                            PathUtil.CreateDirIfNeed(PathUtil.PathPart(strFileName));
+                            PathUtil.TryCreateDir(PathUtil.PathPart(strFileName));
                             nRedoCount++;
                             goto REDO;
                         }
@@ -13134,7 +13134,7 @@ start_time,
                             if (nRedoCount == 0)
                             {
                                 // 创建中间子目录
-                                PathUtil.CreateDirIfNeed(PathUtil.PathPart(strFileName));
+                                PathUtil.TryCreateDir(PathUtil.PathPart(strFileName));
                                 nRedoCount++;
                                 goto REDO;
                             }

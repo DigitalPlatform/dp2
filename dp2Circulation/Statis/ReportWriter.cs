@@ -308,7 +308,7 @@ namespace dp2Circulation
             else
             {
                 // 确保目录被创建
-                PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strOutputFileName));
+                PathUtil.TryCreateDir(Path.GetDirectoryName(strOutputFileName));
             }
 
 #if NO

@@ -93,7 +93,7 @@ namespace dp2Circulation
 
             // *** dp2library 各个 instance
             string strInstanceDir = Path.Combine(strTempDir, "log");
-            PathUtil.CreateDirIfNeed(strInstanceDir);
+            PathUtil.TryCreateDir(strInstanceDir);
 
             foreach (string date in dates)
             {

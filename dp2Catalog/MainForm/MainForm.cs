@@ -144,14 +144,14 @@ namespace dp2Catalog
                 this.UserDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     "dp2Catalog_v2");
-                PathUtil.CreateDirIfNeed(this.UserDir);
+                PathUtil.TryCreateDir(this.UserDir);
 
                 this.UserTempDir = Path.Combine(this.UserDir, "temp");
-                PathUtil.CreateDirIfNeed(this.UserTempDir);
+                PathUtil.TryCreateDir(this.UserTempDir);
 
                 // 2015/8/8
                 this.UserLogDir = Path.Combine(this.UserDir, "log");
-                PathUtil.CreateDirIfNeed(this.UserLogDir);
+                PathUtil.TryCreateDir(this.UserLogDir);
 
                 // 将 dp2catalog.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
                 nRet = MoveDp2catalogXml(out strError);

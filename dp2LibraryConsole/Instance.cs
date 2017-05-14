@@ -77,7 +77,7 @@ namespace dp2LibraryConsole
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     "dp2LibraryConsole_v1");
             }
-            PathUtil.CreateDirIfNeed(this.UserDir);
+            PathUtil.TryCreateDir(this.UserDir);
 
             this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "settings.xml"));
 
@@ -1566,7 +1566,7 @@ value);
                 if (info.Size != -1)
                 {
                     string strLocalPath = Path.Combine(strTargetDir, strDelta);
-                    PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strLocalPath));
+                    PathUtil.TryCreateDir(Path.GetDirectoryName(strLocalPath));
 
                     // Console.WriteLine(info.Name);
                     Console.WriteLine(strLocalPath);

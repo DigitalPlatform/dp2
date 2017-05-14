@@ -48,7 +48,7 @@ namespace dp2Circulation
         {
             // 确保目录已经存在
             if (string.IsNullOrEmpty(this.CfgFileDir) == false)
-                PathUtil.CreateDirIfNeed(this.CfgFileDir);
+                PathUtil.TryCreateDir(this.CfgFileDir);
 
             SetButtonState();
 
@@ -201,7 +201,7 @@ namespace dp2Circulation
 
             string strUrl = "http://dp2003.com/dp2Circulation/report_def/" + strFileName;
 
-            PathUtil.CreateDirIfNeed(this.CfgFileDir);
+            PathUtil.TryCreateDir(this.CfgFileDir);
             strLocalFilePath = Path.Combine(this.CfgFileDir, strFileName);
             string strTempFileName = Path.Combine(this.CfgFileDir, "~temp_download_webfile");
 

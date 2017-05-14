@@ -274,7 +274,7 @@ namespace dp2Circulation
 
             string strUrl = "http://dp2003.com/dp2Circulation/report_def/" + strFileName;
 
-            PathUtil.CreateDirIfNeed(strCfgFileDir);
+            PathUtil.TryCreateDir(strCfgFileDir);
 
             strLocalFilePath = Path.Combine(strCfgFileDir, strFileName);
             string strTempFileName = Path.Combine(strCfgFileDir, "~temp_download_webfile");
