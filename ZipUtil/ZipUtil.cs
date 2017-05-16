@@ -297,7 +297,6 @@ namespace ZipUtil
                 return -1;
             }
 
-
             if (File.Exists(strZipFileName) == true)
             {
                 try

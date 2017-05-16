@@ -418,6 +418,8 @@ namespace dp2Circulation
                 nRet = GetSetEntityString(dom, out strHtml, out strError);
             else if (strOperation == "setUser")
                 nRet = GetSetUserString(dom, out strHtml, out strError);
+            else if (strOperation == "manageDatabase")
+                nRet = GetManageDatabaseString(dom, out strHtml, out strError);
             else
             {
                 strError = "未知的操作类型 '" + strOperation + "'";
@@ -1075,6 +1077,47 @@ namespace dp2Circulation
 
                 BuildHtmlEncodedLine("操作前的读者记录", strOldReaderRecPath, strOldReaderRecordHtml) +
                 BuildHtmlEncodedLine("操作后的读者记录", strReaderRecPath, strReaderRecordHtml) +
+
+                BuildHtmlLine("操作者", strOperator) +
+                BuildHtmlLine("操作时间", strOperTime) +
+                BuildClientAddressLine(dom) +
+                "</table>";
+
+            return 0;
+        }
+
+        // ManageDatabase
+        int GetManageDatabaseString(XmlDocument dom,
+    out string strHtml,
+    out string strError)
+        {
+            strHtml = "";
+            strError = "";
+            int nRet = 0;
+
+            /*
+            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode", out node);
+            if (node != null && string.IsNullOrEmpty(strLibraryCode) == true)
+                strLibraryCode = "<空>";
+             * */
+
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+            string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
+
+            string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
+            string strOperTime = GetRfc1123DisplayString(
+                DomUtil.GetElementText(dom.DocumentElement, "operTime"));
+
+            string strDatabases = "";
+            XmlNode node = dom.DocumentElement.SelectSingleNode("databases");
+            if (node != null)
+                strDatabases = node.InnerXml;   // TODO: 形成缩进效果
+
+            strHtml =
+                "<table class='operlog'>" +
+                BuildHtmlLine("操作类型", strOperation + " -- 数据库管理操作") +
+                BuildHtmlLine("动作", strAction + " -- " + GetActionName(strOperation, strAction)) +
+                BuildHtmlLine("数据库定义", strDatabases) +
 
                 BuildHtmlLine("操作者", strOperator) +
                 BuildHtmlLine("操作时间", strOperTime) +
@@ -1906,7 +1949,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 BuildHtmlLine("操作类型", strOperation + " -- 设置书目信息") +
                 BuildHtmlLine("动作", strAction + " -- " + GetActionName(strOperation, strAction)) +
 
-                (string .IsNullOrEmpty(strDirection) == false ?
+                (string.IsNullOrEmpty(strDirection) == false ?
                 BuildHtmlLine("源和目标", strDirection) : "") +
 
                 (string.IsNullOrEmpty(strDiffRecordHtml) == false ?
@@ -2015,6 +2058,18 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                     return "撤回结算";
                 if (strAction == "delete")
                     return "删除";
+            }
+
+            if (strOperation == "manageDatabase")
+            {
+                if (strAction == "createDatabase")
+                    return "创建数据库";
+                if (strAction == "deleteDatabase")
+                    return "删除数据库";
+                if (strAction == "initializeDatabase")
+                    return "初始化数据库";
+                if (strAction == "refreshDatabase")
+                    return "刷新数据库定义";
             }
 
             return strAction;
@@ -5218,6 +5273,13 @@ FileShare.ReadWrite))
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("导出附件(&A) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
+            menuItem.Click += new System.EventHandler(this.menu_exportAttachment_Click);
+            if (this.listView_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+
             menuItem = new MenuItem("导出 amerce 操作信息到 Excel 文件(&E) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
             menuItem.Click += new System.EventHandler(this.menu_exportAmerceExcel_Click);
             if (this.listView_records.SelectedItems.Count == 0)
@@ -5238,6 +5300,103 @@ FileShare.ReadWrite))
 
 
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
+        }
+
+        // 导出附件
+        void menu_exportAttachment_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            string strDirectory = "";
+            string strOutputFileName = "";
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选择要导出(附件)的事项";
+                goto ERROR1;
+            }
+
+
+            if (this.listView_records.SelectedItems.Count > 1)
+            {
+                FolderBrowserDialog dir_dlg = new FolderBrowserDialog();
+
+                dir_dlg.Description = "请指定对象文件所在目录:";
+                dir_dlg.RootFolder = Environment.SpecialFolder.MyComputer;
+                dir_dlg.ShowNewFolderButton = false;
+                // dir_dlg.SelectedPath = this.textBox_objectDirectoryName.Text;
+
+                if (dir_dlg.ShowDialog() != DialogResult.OK)
+                    return;
+
+                strDirectory = dir_dlg.SelectedPath;
+            }
+            else
+            {
+
+                // 询问文件名
+                SaveFileDialog dlg = new SaveFileDialog();
+
+                dlg.Title = "请指定要创建的附件文件名";
+                dlg.CreatePrompt = false;
+                dlg.OverwritePrompt = true;
+                dlg.FileName = "";
+                dlg.Filter = "附件文件 (*.bin)|*.bin|All files (*.*)|*.*";
+
+                dlg.RestoreDirectory = true;
+
+                if (dlg.ShowDialog() != DialogResult.OK)
+                    return;
+
+                strOutputFileName = dlg.FileName;
+            }
+
+            LibraryChannel channel = this.GetChannel();
+
+            try
+            {
+                int nCount = 0;
+                int nRet = ProcessSelectedRecords((date, index, dom, timestamp) =>
+                        {
+                            string strCurrentFileName = strOutputFileName;
+                            if (string.IsNullOrEmpty(strCurrentFileName))
+                                strCurrentFileName = Path.Combine(strDirectory, date.Substring(0, 8) + "_" + index.ToString() + ".bin");
+
+                            long lHintNext = 0;
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到日志记录
+                            //      >0  附件总长度
+                            long lRet = channel.DownloadOperlogAttachment(
+                                null,   // stop,
+                                date,
+                                index,
+                                -1, // lHint,
+                                strCurrentFileName,
+                                out lHintNext,
+                                out strError);
+                            if (lRet == -1)
+                                throw new Exception(strError);
+                            if (lRet > 0)
+                            {
+                                // TODO: 把文件创建和最后修改时间，修改为日志记录的操作时间
+                                nCount++;
+                            }
+                            return true;
+                        },
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                MessageBox.Show(this, "共导出 " + nCount + " 个附件");
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         // 导出到 XML 文件
@@ -5772,6 +5931,11 @@ FileShare.ReadWrite))
                 }
 
                 return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
             }
             finally
             {

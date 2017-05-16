@@ -8487,7 +8487,8 @@ namespace dp2Library
                 result.Value = nRet;
                 result.ErrorInfo = strError;
 
-                if (nRet == 1 && lAttachmentTotalLength > 0 && nAttachmentFragmentLength > 0)
+                if (nRet == 1 && lAttachmentTotalLength > 0
+                    && (nAttachmentFragmentLength > 0 || nAttachmentFragmentLength == -1))  // -1 是 2017/5/16 增加的
                 {
                     // 读出attachment片断
                     // attachment.Seek(0, SeekOrigin.Begin);    // 不必要了
@@ -8499,6 +8500,8 @@ namespace dp2Library
                     }
 
                     long lTemp = 0;
+                    // parameters:
+                    //      nAttachmentFragmentLength   要读出的附件内容字节数。如果为 -1，表示尽可能多读出内容
                     // return:
                     //      -1  error
                     //      0   file not found
@@ -8944,7 +8947,9 @@ Stack:
                 //      -1  出错
                 //      0   没有找到
                 //      1   成功
-                int nRet = app.ManageDatabase(sessioninfo.Channels,
+                int nRet = app.ManageDatabase(
+                    sessioninfo,
+                    sessioninfo.Channels,
                     sessioninfo.LibraryCodeList,
                     strAction,
                     strDatabaseName,

@@ -3617,6 +3617,82 @@ out strError);
             }
         }
 
+        // return:
+        //      -1  出错
+        //      0   没有找到日志记录，或者附件不存在
+        //      >0  附件总长度
+        public long DownloadOperlogAttachment(
+            DigitalPlatform.Stop stop,
+            string strFileName,
+            long lIndex,
+            long lHint,
+            string strOutputFileName,
+            out long lHintNext,
+            out string strError)
+        {
+            strError = "";
+            lHintNext = -1;
+
+            long lRet = -1;
+
+            using (Stream stream = File.Create(strOutputFileName))
+            {
+                long lAttachmentFragmentStart = 0;
+                int nAttachmentFragmentLength = -1;
+                byte[] attachment_data = null;
+                long lAttachmentTotalLength = 0;
+
+                for (; ; )
+                {
+                    string strXml = "";
+                    lRet = this.GetOperLog(
+                        stop,
+                        strFileName,
+                        lIndex,
+                        lHint,
+                "", // strStyle,
+                "", // strFilter,
+                out strXml,
+                out lHintNext,
+                lAttachmentFragmentStart,
+                nAttachmentFragmentLength,
+                out attachment_data,
+                out lAttachmentTotalLength,
+                out strError);
+                    if (lRet == -1)
+                    {
+                        goto DELETE_AND_RETURN;
+                    }
+                    // 日志记录不存在
+                    if (lRet == 0)
+                    {
+                        lRet = 0;
+                        goto DELETE_AND_RETURN;
+                    } 
+                    // 没有附件
+                    if (lAttachmentTotalLength == 0)
+                    {
+                        lRet = 0;
+                        strError = "附件不存在";
+                        goto DELETE_AND_RETURN;
+                    } 
+                    if (attachment_data == null || attachment_data.Length == 0)
+                    {
+                        lRet = -1;
+                        strError = "attachment_data == null || attachment_data.Length == 0";
+                        goto DELETE_AND_RETURN;
+                    }
+                    stream.Write(attachment_data, 0, attachment_data.Length);
+                    lAttachmentFragmentStart += attachment_data.Length;
+                    if (lAttachmentFragmentStart >= lAttachmentTotalLength)
+                        return lAttachmentTotalLength;
+                }
+            }
+        DELETE_AND_RETURN:
+            File.Delete(strOutputFileName);
+            return lRet;
+        }
+
         //
         // 获得日志
         // result.Value

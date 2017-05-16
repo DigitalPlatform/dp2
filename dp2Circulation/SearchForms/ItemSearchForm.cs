@@ -2706,6 +2706,8 @@ out strError);
             stop.BeginLoop();
 
             LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);  // 2017/5/16
 
             this.EnableControls(false);
             try
@@ -2776,7 +2778,13 @@ out strError);
                         // itemdom.LoadXml(info.OldXml);
                         if (bOldSource == true)
                         {
-                            itemdom.LoadXml(info.OldXml);
+                            if (string.IsNullOrEmpty(info.OldXml))
+                            {
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("册记录 '" + info.RecPath + "' XML 为空") + "</div>");
+                                continue;
+                            }
+
+                            itemdom.LoadXml(string.IsNullOrEmpty(info.OldXml) ? "<root />" : info.OldXml);
                             // 放弃上一次的修改
                             if (string.IsNullOrEmpty(info.NewXml) == false)
                             {
@@ -2852,6 +2860,7 @@ out strError);
             {
                 this.EnableControls(true);
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 
                 stop.EndLoop();
@@ -3119,6 +3128,7 @@ out strError);
             out strLibraryCode,
             out strRoom);
 
+            REDO_VERIFYBARCODE:
                 // <para>-2  服务器没有配置校验方法，无法校验</para>
                 // <para>-1  出错</para>
                 // <para>0   不是合法的条码号</para>
@@ -3131,6 +3141,19 @@ strLibraryCode,
 strBarcode,
 null,
 out strError);
+                if (nRet == -1)
+                {
+                    MessagePromptEventArgs e = new MessagePromptEventArgs();
+                    e.MessageText = "校验册条码号时发生错误： " + strError;
+                    e.Actions = "yes,no,cancel";
+                    loader_Prompt(this, e);
+                    if (e.ResultAction == "cancel")
+                        throw new ChannelException(Channel.ErrorCode, strError);
+                    else if (e.ResultAction == "yes")
+                        goto REDO_VERIFYBARCODE;
+                    //else
+                    //    throw new ChannelException(Channel.ErrorCode, strError);
+                }
                 if (nRet == -2)
                 {
                     // throw new Exception(strError);
@@ -3146,7 +3169,34 @@ out strError);
                 }
             }
 
-            //// 模拟删除
+            // 检查价格字段
+            {
+                string strPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
+                if (string.IsNullOrEmpty(strPrice))
+                    errors.Add("价格字段内容为空");
+                else
+                {
+                    CurrencyItem item = null;
+                    // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
+                    nRet = PriceUtil.ParseSinglePrice(strPrice,
+                        out item,
+                        out strError);
+                    if (nRet == -1)
+                        errors.Add(strError);
+
+                    string new_value = StringUtil.ToDBC(strPrice);
+                    if (new_value.IndexOfAny(new char[] { '(', ')' }) != -1)
+                    {
+                        errors.Add("价格字符串中不允许出现括号 '" + strPrice + "'");
+                    }
+
+                    // TODO: 检查常见的货币前缀符号
+                }
+            }
+
+            // 检查馆藏地字段
+
+            // 检查图书类型字段
 
             // 顺便清除空元素
             if (bChanged)

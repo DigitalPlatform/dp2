@@ -1171,7 +1171,8 @@ namespace DigitalPlatform.Text
                         return -1;
                     }
 
-                    value = (decimal)((double)value / multiper);
+                    // value = (decimal)((double)value / multiper);
+                    value = Convert.ToDecimal((double)value / multiper);
                 }
             }
 
@@ -1401,11 +1402,12 @@ namespace DigitalPlatform.Text
 
                 // 负号要放在最前面
                 if (value < 0)
-                    results.Add("-" + item.Prefix + (-value).ToString() + item.Postfix);
+                    results.Add("-" + item.Prefix + (-value).ToString("#.##") + item.Postfix);
                 else
-                    results.Add(item.Prefix + value.ToString() + item.Postfix);
+                    results.Add(item.Prefix + value.ToString("#.##") + item.Postfix);
             }
 
+            // 注: value.ToString("#.##") 采用的是四舍五入的方法
             return 0;
         }
 
@@ -1465,7 +1467,8 @@ namespace DigitalPlatform.Text
 
         public override string ToString()
         {
-            return this.Prefix + this.Value.ToString() + this.Postfix;
+            return this.Prefix + this.Value.ToString("#.##") + this.Postfix;
+            // 注: value.ToString("#.##") 采用的是四舍五入的方法
         }
     }
 }

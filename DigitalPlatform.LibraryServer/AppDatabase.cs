@@ -23,6 +23,7 @@ using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using Ionic.Zip;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -40,6 +41,7 @@ namespace DigitalPlatform.LibraryServer
         //      0   没有找到
         //      1   成功
         public int ManageDatabase(
+            SessionInfo sessioninfo,
             RmsChannelCollection Channels,
             string strLibraryCodeList,
             string strAction,
@@ -65,6 +67,7 @@ namespace DigitalPlatform.LibraryServer
             if (strAction == "create")
             {
                 return CreateDatabase(
+                    sessioninfo,
                     Channels,
                     strLibraryCodeList,
                     // strDatabaseNames,
@@ -78,6 +81,7 @@ namespace DigitalPlatform.LibraryServer
             if (strAction == "recreate")
             {
                 return CreateDatabase(
+                    sessioninfo,
                     Channels,
                     strLibraryCodeList,
                     // strDatabaseNames,
@@ -3585,6 +3589,7 @@ namespace DigitalPlatform.LibraryServer
         //      0   没有找到
         //      1   成功
         int CreateDatabase(
+            SessionInfo sessioninfo,
             RmsChannelCollection Channels,
             string strLibraryCodeList,
             string strDatabaseInfo,
@@ -3596,6 +3601,9 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
 
             int nRet = 0;
+
+            string strLogFileName = this.GetTempFileName("zip");
+            List<XmlNode> database_nodes = new List<XmlNode>(); // 已经创建的数据库的定义节点
 
             List<string> created_dbnames = new List<string>();  // 过程中，已经创建的数据库名
 
@@ -3645,7 +3653,7 @@ namespace DigitalPlatform.LibraryServer
                     XmlNode exist_database_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strName + "']");
                     if (bRecreate == true && exist_database_node == null)
                     {
-                        strError = "library.xml中并不存在书目库 '" + strName + "' 的定义，无法进行重新创建";
+                        strError = "library.xml 中并不存在书目库 '" + strName + "' 的定义，无法进行重新创建";
                         return 0;
                     }
 
@@ -3663,7 +3671,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (bRecreate == false)
                     {
-                        // 检查cfgdom中是否已经存在同名的书目库
+                        // 检查 cfgdom 中是否已经存在同名的书目库
                         if (this.IsBiblioDbName(strName) == true)
                         {
                             strError = "书目库 '" + strName + "' 的定义已经存在，不能重复创建";
@@ -3721,7 +3729,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (bRecreate == false)
                         {
-                            // 检查cfgdom中是否已经存在同名的实体库
+                            // 检查 cfgdom 中是否已经存在同名的实体库
                             if (this.IsItemDbName(strEntityDbName) == true)
                             {
                                 strError = "实体库 '" + strEntityDbName + "' 的定义已经存在，不能重复创建";
@@ -3839,6 +3847,7 @@ namespace DigitalPlatform.LibraryServer
                     nRet = CreateDatabase(channel,
                         strTemplateDir,
                         strName,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -3856,6 +3865,7 @@ namespace DigitalPlatform.LibraryServer
                         nRet = CreateDatabase(channel,
                             strTemplateDir,
                             strEntityDbName,
+                        strLogFileName,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -3874,6 +3884,7 @@ namespace DigitalPlatform.LibraryServer
                         nRet = CreateDatabase(channel,
                             strTemplateDir,
                             strOrderDbName,
+                        strLogFileName,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -3891,7 +3902,8 @@ namespace DigitalPlatform.LibraryServer
                         nRet = CreateDatabase(channel,
                             strTemplateDir,
                             strIssueDbName,
-                            out strError);
+                         strLogFileName,
+                           out strError);
                         if (nRet == -1)
                             goto ERROR1;
                         created_dbnames.Add(strIssueDbName);
@@ -3908,6 +3920,7 @@ namespace DigitalPlatform.LibraryServer
                         nRet = CreateDatabase(channel,
                             strTemplateDir,
                             strCommentDbName,
+                        strLogFileName,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -3978,6 +3991,7 @@ namespace DigitalPlatform.LibraryServer
 
                     created_dbnames.Clear();
 
+                    database_nodes.Add(node);
                     continue;
                 } // end of type biblio
                 else if (strType == "entity")
@@ -4026,6 +4040,7 @@ namespace DigitalPlatform.LibraryServer
                     nRet = CreateDatabase(channel,
                         strTemplateDir,
                         strName,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4047,6 +4062,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     this.Changed = true;
+                    database_nodes.Add(node);
                 }
                 else if (strType == "order")
                 {
@@ -4094,6 +4110,7 @@ namespace DigitalPlatform.LibraryServer
                     nRet = CreateDatabase(channel,
                         strTemplateDir,
                         strName,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4114,6 +4131,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     this.Changed = true;
+                    database_nodes.Add(node);
                 }
                 else if (strType == "issue")
                 {
@@ -4161,6 +4179,7 @@ namespace DigitalPlatform.LibraryServer
                     nRet = CreateDatabase(channel,
                         strTemplateDir,
                         strName,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4181,6 +4200,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     this.Changed = true;
+                    database_nodes.Add(node);
                 }
                 else if (strType == "comment")
                 {
@@ -4228,6 +4248,7 @@ namespace DigitalPlatform.LibraryServer
                     nRet = CreateDatabase(channel,
                         strTemplateDir,
                         strName,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4248,6 +4269,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     this.Changed = true;
+                    database_nodes.Add(node);
                 }
                 else if (strType == "reader")
                 {
@@ -4329,6 +4351,7 @@ namespace DigitalPlatform.LibraryServer
                     nRet = CreateDatabase(channel,
                         strTemplateDir,
                         strName,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4340,7 +4363,6 @@ namespace DigitalPlatform.LibraryServer
                         "inCirculation");
                     if (String.IsNullOrEmpty(strInCirculation) == true)
                         strInCirculation = "true";  // 缺省为true
-
 
                     // 检查一个单独的图书馆代码是否格式正确
                     // 要求不能为 '*'，不能包含逗号
@@ -4382,6 +4404,7 @@ namespace DigitalPlatform.LibraryServer
                     // <readerdbgroup>内容更新，刷新配套的内存结构
                     this.LoadReaderDbGroupParam(this.LibraryCfgDom);
                     this.Changed = true;
+                    database_nodes.Add(node);
                 }
                 else if (strType == "publisher"
                     || strType == "zhongcihao"
@@ -4441,6 +4464,7 @@ namespace DigitalPlatform.LibraryServer
                     nRet = CreateDatabase(channel,
                         strTemplateDir,
                         strName,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4469,6 +4493,7 @@ namespace DigitalPlatform.LibraryServer
                     DomUtil.SetAttr(nodeNewDatabase, "name", strName);
                     DomUtil.SetAttr(nodeNewDatabase, "type", strType);
                     this.Changed = true;
+                    database_nodes.Add(node);
                 }
                 else if (strType == "arrived")
                 {
@@ -4530,7 +4555,8 @@ namespace DigitalPlatform.LibraryServer
                     nRet = CreateDatabase(channel,
                         strTemplateDir,
                         strName,
-                        out strError);
+                         strLogFileName,
+                       out strError);
                     if (nRet == -1)
                         goto ERROR1;
                     created_dbnames.Add(strName);
@@ -4539,6 +4565,7 @@ namespace DigitalPlatform.LibraryServer
                     // 在CfgDom中增加相关的配置信息
                     this.ArrivedDbName = strName;
                     this.Changed = true;
+                    database_nodes.Add(node);
                 }
                 else if (strType == "amerce")
                 {
@@ -4600,6 +4627,7 @@ namespace DigitalPlatform.LibraryServer
                     nRet = CreateDatabase(channel,
                         strTemplateDir,
                         strName,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4609,6 +4637,7 @@ namespace DigitalPlatform.LibraryServer
                     // 在CfgDom中增加相关的配置信息
                     this.AmerceDbName = strName;
                     this.Changed = true;
+                    database_nodes.Add(node);
                 }
                 else if (strType == "message")
                 {
@@ -4670,6 +4699,7 @@ namespace DigitalPlatform.LibraryServer
                     nRet = CreateDatabase(channel,
                         strTemplateDir,
                         strName,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4679,6 +4709,7 @@ namespace DigitalPlatform.LibraryServer
                     // 在CfgDom中增加相关的配置信息
                     this.MessageDbName = strName;
                     this.Changed = true;
+                    database_nodes.Add(node);
                 }
                 else if (strType == "invoice")
                 {
@@ -4740,6 +4771,7 @@ namespace DigitalPlatform.LibraryServer
                     nRet = CreateDatabase(channel,
                         strTemplateDir,
                         strName,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -4749,6 +4781,7 @@ namespace DigitalPlatform.LibraryServer
                     // 在CfgDom中增加相关的配置信息
                     this.InvoiceDbName = strName;
                     this.Changed = true;
+                    database_nodes.Add(node);
                 }
                 else if (strType == "pinyin"
                     || strType == "gcat"
@@ -4778,6 +4811,7 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strLibraryCodeList,
                         bRecreate,
+                        strLogFileName,
                         ref bDbChanged,
                         ref created_dbnames,
                         ref strDbName,
@@ -4790,6 +4824,7 @@ namespace DigitalPlatform.LibraryServer
                         this.WordDbName = strDbName;
                     if (nRet == -1)
                         goto ERROR1;
+                    database_nodes.Add(node);
                 }
                 else
                 {
@@ -4801,6 +4836,49 @@ namespace DigitalPlatform.LibraryServer
                     this.ActivateManagerThread();
 
                 created_dbnames.Clear();
+            }
+
+            // 写入操作日志
+            {
+                XmlDocument domOperLog = new XmlDocument();
+                domOperLog.LoadXml("<root />");
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "operation",
+                    "manageDatabase");
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "action",
+    "createDatabase");
+
+                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
+"");
+                StringBuilder text = new StringBuilder();
+                foreach(XmlElement node in database_nodes)
+                {
+                    text.Append(node.OuterXml);
+                }
+                new_node.InnerXml = text.ToString();
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                    sessioninfo.UserID);
+
+                string strOperTime = this.Clock.GetClock();
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                    strOperTime);
+
+                using (Stream stream = File.OpenRead(strLogFileName))
+                {
+                    nRet = this.OperLog.WriteOperLog(domOperLog,
+                        sessioninfo.ClientAddress,
+                        stream,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "ManageDatabase() API createDatabase 写入日志时发生错误: " + strError;
+                        goto ERROR1;
+                    }
+                }
             }
 
             Debug.Assert(created_dbnames.Count == 0, "");
@@ -4854,6 +4932,7 @@ namespace DigitalPlatform.LibraryServer
             string strName,
             string strLibraryCodeList,
             bool bRecreate,
+            string strLogFileName,
             ref bool bDbChanged,
             ref List<string> created_dbnames,
             ref string strDbName,
@@ -4920,6 +4999,7 @@ namespace DigitalPlatform.LibraryServer
             nRet = CreateDatabase(channel,
                 strTemplateDir,
                 strName,
+                        strLogFileName,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -5176,146 +5256,228 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        static void CopyTempFile(string strSourcePath, string strTempDir, string strDatabaseName)
+        {
+            if (string.IsNullOrEmpty(strTempDir))
+                return;
+            string strTarget = Path.Combine(strTempDir, strDatabaseName, Path.GetFileName(strSourcePath));
+            PathUtil.TryCreateDir(Path.GetDirectoryName(strTarget));
+            File.Copy(strSourcePath, strTarget);
+        }
+
+        // 压缩一个目录到 .zip 文件
+        // parameters:
+        //      strBase 在 .zip 文件中的文件名要从全路径中去掉的前面部分
+        static int CompressDirectory(
+            string strDirectory,
+            string strBase,
+            string strZipFileName,
+            Encoding encoding,
+            bool bAppend,
+            out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(strDirectory);
+                if (di.Exists == false)
+                {
+                    strError = "directory '" + strDirectory + "' not exist";
+                    return -1;
+                }
+                strDirectory = di.FullName;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+
+            if (bAppend == false)
+            {
+                if (File.Exists(strZipFileName) == true)
+                {
+                    try
+                    {
+                        File.Delete(strZipFileName);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                    }
+                    catch (DirectoryNotFoundException)
+                    {
+
+                    }
+                }
+            }
+
+            List<string> filenames = GetFileNames(strDirectory);
+
+            if (filenames.Count == 0)
+                return 0;
+
+            // string strHead = Path.GetDirectoryName(strDirectory);
+            // Console.WriteLine("head=["+strHead+"]");
+
+            using (ZipFile zip = new ZipFile(strZipFileName, encoding))
+            {
+                // http://stackoverflow.com/questions/15337186/dotnetzip-badreadexception-on-extract
+                // https://dotnetzip.codeplex.com/workitem/14087
+                // uncommenting the following line can be used as a work-around
+                zip.ParallelDeflateThreshold = -1;
+
+                foreach (string filename in filenames)
+                {
+                    // string strShortFileName = filename.Substring(strHead.Length + 1);
+                    string strShortFileName = filename.Substring(strBase.Length + 1);
+                    string directoryPathInArchive = Path.GetDirectoryName(strShortFileName);
+                    zip.AddFile(filename, directoryPathInArchive);
+                }
+
+                zip.UseZip64WhenSaving = Zip64Option.AsNecessary;
+                zip.Save(strZipFileName);
+            }
+
+            return filenames.Count;
+        }
+
+        // 获得一个目录下的全部文件名。包括子目录中的
+        static List<string> GetFileNames(string strDataDir)
+        {
+            DirectoryInfo di = new DirectoryInfo(strDataDir);
+
+            List<string> result = new List<string>();
+
+            FileInfo[] fis = di.GetFiles();
+            foreach (FileInfo fi in fis)
+            {
+                result.Add(fi.FullName);
+            }
+
+            // 处理下级目录，递归
+            DirectoryInfo[] dis = di.GetDirectories();
+            foreach (DirectoryInfo subdir in dis)
+            {
+                result.AddRange(GetFileNames(subdir.FullName));
+            }
+
+            return result;
+        }
+
+
         // 根据数据库模板的定义，创建一个数据库
+        // parameters:
+        //      strLogFileName  日志文件路径。所谓日志文件，就是一个 .zip 文件，里面包含了创建数据库所需的定义和配套文件
+        //                      如果此参数为空，表示不创建日志文件
         int CreateDatabase(RmsChannel channel,
             string strTemplateDir,
             string strDatabaseName,
+            string strLogFileName,
             out string strError)
         {
             strError = "";
 
             int nRet = 0;
 
-            List<string[]> logicNames = new List<string[]>();
+            string strTempDir = "";
 
-            string[] cols = new string[2];
-            cols[1] = "zh";
-            cols[0] = strDatabaseName;
-            logicNames.Add(cols);
-
-
-            string strKeysDefFileName = PathUtil.MergePath(strTemplateDir, "keys");
-            string strBrowseDefFileName = PathUtil.MergePath(strTemplateDir, "browse");
-
-            nRet = ConvertGb2312TextfileToUtf8(strKeysDefFileName,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            nRet = ConvertGb2312TextfileToUtf8(strBrowseDefFileName,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            string strKeysDef = "";
-            string strBrowseDef = "";
+            if (string.IsNullOrEmpty(strLogFileName) == false)
+            {
+                strTempDir = Path.Combine(this.TempDir, "~" + Guid.NewGuid().ToString());
+                PathUtil.TryCreateDir(strTempDir);
+            }
 
             try
             {
-                using (StreamReader sr = new StreamReader(strKeysDefFileName, Encoding.UTF8))
-                {
-                    strKeysDef = sr.ReadToEnd();
-                }
-            }
-            catch (Exception ex)
-            {
-                strError = "装载文件 " + strKeysDefFileName + " 时发生错误: " + ex.Message;
-                return -1;
-            }
 
+                List<string[]> logicNames = new List<string[]>();
 
-            try
-            {
-                using (StreamReader sr = new StreamReader(strBrowseDefFileName, Encoding.UTF8))
-                {
-                    strBrowseDef = sr.ReadToEnd();
-                }
-            }
-            catch (Exception ex)
-            {
-                strError = "装载文件 " + strBrowseDefFileName + " 时发生错误: " + ex.Message;
-                return -1;
-            }
+                string[] cols = new string[2];
+                cols[1] = "zh";
+                cols[0] = strDatabaseName;
+                logicNames.Add(cols);
 
-            long lRet = channel.DoCreateDB(logicNames,
-                "", // strType,
-                "", // strSqlDbName,
-                strKeysDef,
-                strBrowseDef,
-                out strError);
-            if (lRet == -1)
-            {
-                strError = "创建数据库 " + strDatabaseName + " 时发生错误: " + strError;
-                return -1;
-            }
+                string strKeysDefFileName = PathUtil.MergePath(strTemplateDir, "keys");
+                string strBrowseDefFileName = PathUtil.MergePath(strTemplateDir, "browse");
 
-            lRet = channel.DoInitialDB(strDatabaseName,
-                out strError);
-            if (lRet == -1)
-            {
-                strError = "初始化数据库 " + strDatabaseName + " 时发生错误: " + strError;
-                return -1;
-            }
-
-            // 增补其他数据从属对象
-
-            /*
-            List<string> subdirs = new List<string>();
-            // 创建所有目录对象
-            GetSubdirs(strTemplateDir, ref subdirs);
-            for (int i = 0; i < subdirs.Count; i++)
-            {
-                string strDiskPath = subdirs[i];
-
-                // 反过来推算为逻辑路径
-                // 或者预先在获得的数组中就存放为部分(逻辑)路径？
-                string strPath = "";
-
-                // 在服务器端创建对象
-                // parameters:
-                //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
-                // return:
-                //		-1	错误
-                //		1	以及存在同名对象
-                //		0	正常返回
-                nRet = NewServerSideObject(
-                    channel,
-                    strPath,
-                    "createdir",
-                    null,
-                    null,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-            }
-                // 列出每个目录中的文件，并在服务器端创建之
-                // 注意模板目录下的文件，被当作cfgs中的文件来创建
-             * */
-
-            DirectoryInfo di = new DirectoryInfo(strTemplateDir);
-            FileInfo[] fis = di.GetFiles();
-
-            // 创建所有文件对象
-            for (int i = 0; i < fis.Length; i++)
-            {
-                string strName = fis[i].Name;
-                if (strName == "." || strName == "..")
-                    continue;
-
-                if (strName.ToLower() == "keys"
-                    || strName.ToLower() == "browse")
-                    continue;
-
-                string strFullPath = fis[i].FullName;
-
-                nRet = ConvertGb2312TextfileToUtf8(strFullPath,
+                nRet = ConvertGb2312TextfileToUtf8(strKeysDefFileName,
                     out strError);
                 if (nRet == -1)
                     return -1;
 
-                using (Stream s = new FileStream(strFullPath, FileMode.Open))
+                CopyTempFile(strKeysDefFileName, strTempDir, strDatabaseName);
+
+                nRet = ConvertGb2312TextfileToUtf8(strBrowseDefFileName,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                CopyTempFile(strBrowseDefFileName, strTempDir, strDatabaseName);
+
+                string strKeysDef = "";
+                string strBrowseDef = "";
+
+                try
                 {
-                    string strPath = strDatabaseName + "/cfgs/" + strName;
+                    using (StreamReader sr = new StreamReader(strKeysDefFileName, Encoding.UTF8))
+                    {
+                        strKeysDef = sr.ReadToEnd();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    strError = "装载文件 " + strKeysDefFileName + " 时发生错误: " + ex.Message;
+                    return -1;
+                }
+
+                try
+                {
+                    using (StreamReader sr = new StreamReader(strBrowseDefFileName, Encoding.UTF8))
+                    {
+                        strBrowseDef = sr.ReadToEnd();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    strError = "装载文件 " + strBrowseDefFileName + " 时发生错误: " + ex.Message;
+                    return -1;
+                }
+
+                long lRet = channel.DoCreateDB(logicNames,
+                    "", // strType,
+                    "", // strSqlDbName,
+                    strKeysDef,
+                    strBrowseDef,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "创建数据库 " + strDatabaseName + " 时发生错误: " + strError;
+                    return -1;
+                }
+
+                lRet = channel.DoInitialDB(strDatabaseName,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "初始化数据库 " + strDatabaseName + " 时发生错误: " + strError;
+                    return -1;
+                }
+
+                // 增补其他数据从属对象
+
+                /*
+                List<string> subdirs = new List<string>();
+                // 创建所有目录对象
+                GetSubdirs(strTemplateDir, ref subdirs);
+                for (int i = 0; i < subdirs.Count; i++)
+                {
+                    string strDiskPath = subdirs[i];
+
+                    // 反过来推算为逻辑路径
+                    // 或者预先在获得的数组中就存放为部分(逻辑)路径？
+                    string strPath = "";
+
                     // 在服务器端创建对象
                     // parameters:
                     //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
@@ -5326,15 +5488,82 @@ namespace DigitalPlatform.LibraryServer
                     nRet = NewServerSideObject(
                         channel,
                         strPath,
-                        "",
-                        s,
+                        "createdir",
+                        null,
                         null,
                         out strError);
                     if (nRet == -1)
                         return -1;
                 }
+                    // 列出每个目录中的文件，并在服务器端创建之
+                    // 注意模板目录下的文件，被当作cfgs中的文件来创建
+                 * */
+
+                DirectoryInfo di = new DirectoryInfo(strTemplateDir);
+                FileInfo[] fis = di.GetFiles();
+
+                // 创建所有文件对象
+                for (int i = 0; i < fis.Length; i++)
+                {
+                    string strName = fis[i].Name;
+                    if (strName == "." || strName == "..")
+                        continue;
+
+                    if (strName.ToLower() == "keys"
+                        || strName.ToLower() == "browse")
+                        continue;
+
+                    string strFullPath = fis[i].FullName;
+
+                    nRet = ConvertGb2312TextfileToUtf8(strFullPath,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    CopyTempFile(strFullPath, strTempDir, strDatabaseName);
+
+                    using (Stream s = new FileStream(strFullPath, FileMode.Open))
+                    {
+                        string strPath = strDatabaseName + "/cfgs/" + strName;
+                        // 在服务器端创建对象
+                        // parameters:
+                        //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
+                        // return:
+                        //		-1	错误
+                        //		1	以及存在同名对象
+                        //		0	正常返回
+                        nRet = NewServerSideObject(
+                            channel,
+                            strPath,
+                            "",
+                            s,
+                            null,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(strLogFileName) == false)
+                {
+                    nRet = CompressDirectory(
+                        strTempDir,
+                        strTempDir,
+                        strLogFileName,
+                        Encoding.UTF8,
+                        true,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+
+                return 0;
             }
-            return 0;
+            finally
+            {
+                if (string.IsNullOrEmpty(strTempDir) == false)
+                    PathUtil.DeleteDirectory(strTempDir);
+            }
         }
 
         void GetSubdirs(string strCurrentDir,

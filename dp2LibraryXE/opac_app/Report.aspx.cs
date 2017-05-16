@@ -476,7 +476,7 @@ var data = [
         if (strFileName != strOriginFileName)
         {
             string strTempDir = Path.Combine(app.DataDir, "temp");
-            PathUtil.CreateDirIfNeed(strTempDir);
+            PathUtil.TryCreateDir(strTempDir);
             strTempFileName = Path.Combine(strTempDir, "~temp_" + Guid.NewGuid().ToString());
             string strCssTemplate = @"BODY {
 	FONT-FAMILY: Microsoft YaHei, Verdana, 宋体;

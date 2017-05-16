@@ -1118,7 +1118,8 @@ namespace DigitalPlatform.LibraryServer
             // 1.03 (2015/9/13) SetReaderInfo 中增加了 changedEntityRecord 元素 
             // 1.04 (2017/1/12) Borrow() Return() 中，readerRecord 元素增加了 clipping 属性，如果值为 "true"，表示这里记载的读者记录是不完全的，不应用于快照恢复读者记录
             // 1.05 (2017/1/16) CopyBiblioINfo() API 的操作日志增加了 overwritedRecord 元素。记载被覆盖以前的记录内容
-            DomUtil.SetElementText(dom.DocumentElement, "version", "1.05");
+            // 1.06 (2017/5/16) 对 ManageDatabase() API 也写入日志了
+            DomUtil.SetElementText(dom.DocumentElement, "version", "1.06");
 
             if (start_time != new DateTime(0))
             {
@@ -1182,6 +1183,7 @@ namespace DigitalPlatform.LibraryServer
             Debug.Assert(this.m_streamSpare != null, "");
 
             WriteClientAddress(dom, strClientAddress);
+            DomUtil.SetElementText(dom.DocumentElement, "version", "1.06");
 
             int nRet = WriteEnventLog(dom.OuterXml,
                 attachment,
@@ -1922,7 +1924,7 @@ out strTargetLibraryCode);
             {
                 DomUtil.DeleteElement(dom.DocumentElement, "newPassword");
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("account | oldAccount");
-                foreach(XmlElement account in nodes)
+                foreach (XmlElement account in nodes)
                 {
                     account.RemoveAttribute("password");
                 }
@@ -2122,6 +2124,7 @@ out strTargetLibraryCode);
         //      lIndex  记录序号。从0开始计数。lIndex为-1时调用本函数，表示希望获得整个文件尺寸值，将返回在lHintNext中。
         //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
         //              目前的含义是记录起始位置。
+        //      nAttachmentFragmentLength   要读出的附件内容字节数。如果为 -1，表示尽可能多读出内容
         // return:
         //      -1  error
         //      0   file not found
@@ -2244,6 +2247,8 @@ out strTargetLibraryCode);
                 }
 
 
+                // parameters:
+                //      nAttachmentFragmentLength   要读出的附件内容字节数。如果为 -1，表示尽可能多读出内容
                 // return:
                 //      -1  出错
                 //      >=0 整个附件的尺寸
@@ -2910,6 +2915,8 @@ out strTargetLibraryCode);
 
         // 2012/9/23
         // 从日志文件当前位置读出一条日志记录的附件部分
+        // parameters:
+        //      nAttachmentFragmentLength   要读出的附件内容字节数。如果为 -1，表示尽可能多读出内容
         // return:
         //      -1  出错
         //      >=0 整个附件的尺寸
@@ -2958,6 +2965,8 @@ out strTargetLibraryCode);
                 return -1;
 
             // 读出attachment事项
+            // parameters:
+            //      nAttachmentFragmentLength   要读出的附件内容字节数。如果为 -1，表示尽可能多读出内容
             // return:
             //      -1  出错
             //      >=0 整个附件的尺寸
@@ -3219,6 +3228,7 @@ out strTargetLibraryCode);
         // 2012/9/23
         // 读出一个事项(byte []类型)
         // parameters:
+        //      nAttachmentFragmentLength   要读出的附件内容字节数。如果为 -1，表示尽可能多读出内容
         // return:
         //      -1  出错
         //      >=0 整个附件的尺寸
@@ -3295,14 +3305,19 @@ out strTargetLibraryCode);
 
             if (lBodyLength > 0)
             {
-                if (nAttachmentFragmentLength > 0)
+                if (nAttachmentFragmentLength > 0 || nAttachmentFragmentLength == -1)   // 2017/5/16 添加的 -1
                 {
+                    long lTemp = (lBodyLength - lAttachmentFragmentStart);
                     // 尽量多读入
                     if (nAttachmentFragmentLength == -1)
                     {
-                        long lTemp = (lBodyLength - lAttachmentFragmentStart);
                         // 看看是否超过每次的限制尺寸
                         nAttachmentFragmentLength = (int)Math.Min((long)(100 * 1024), lTemp);
+                    }
+                    else
+                    {
+                        // 2017/5/16 确保 nAttachmentFragmentLength 不超过附件剩余部分长度
+                        nAttachmentFragmentLength = (int)(Math.Min(lTemp, (long)nAttachmentFragmentLength));
                     }
 
                     attachment_data = new byte[nAttachmentFragmentLength];

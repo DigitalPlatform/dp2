@@ -8157,10 +8157,14 @@ out strError);
             if (this.Prompt != null)
                 m_loader.Prompt += m_loader_Prompt;
 
+            // 2017/5/15
+            // 用于在遍历中途临时存储 BiblioInfo 对象，避免(在直接用 CacheTable 的情况下)因为其他功能并发用到 CacheTable 而造成锁定关系被破坏
+            // 复制(快照)比锁定方法效果更好
+            Hashtable temp_cacheTable = new Hashtable();
             try
             {
 
-                List<string> recpaths = new List<string>(); // 缓存中么有包含的那些记录
+                List<string> recpaths = new List<string>(); // 缓存中没有包含的那些记录
                 foreach (ListViewItem item in this.Items)
                 {
                     string strRecPath = item.Text;
@@ -8169,6 +8173,8 @@ out strError);
                     BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];
                     if (info == null || string.IsNullOrEmpty(info.OldXml) == true)
                         recpaths.Add(strRecPath);
+                    else
+                        temp_cacheTable[strRecPath] = info;  // 临时存储
                 }
 
                 // 注： Hashtable 在这一段时间内不应该被修改。否则会破坏 m_loader 和 items 之间的锁定对应关系
@@ -8183,7 +8189,7 @@ out strError);
                     string strRecPath = item.Text;
                     Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
 
-                    BiblioInfo info = (BiblioInfo)this.CacheTable[strRecPath];
+                    BiblioInfo info = (BiblioInfo)temp_cacheTable[strRecPath]; // (BiblioInfo)this.CacheTable[strRecPath];
                     if (info == null || string.IsNullOrEmpty(info.OldXml) == true)
                     {
                         if (m_loader.Stop != null)
