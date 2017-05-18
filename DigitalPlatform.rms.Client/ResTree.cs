@@ -2006,6 +2006,11 @@ out strError);
                                 }
                                 nRedoOneCount = 0;
 
+                                // 2017/5/18
+                                if (record.RecordBody == null 
+                                    || string.IsNullOrEmpty(record.RecordBody.Xml))
+                                    continue;
+
                             REDO_ONE:
                                 nRet = export_util.ExportOneRecord(
                                     cur_channel,

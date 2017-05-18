@@ -971,7 +971,7 @@ MessageBoxDefaultButton.Button1);
             {
                 string strZipFileName = Path.Combine(this.DataDir, "jquery.zip");
                 string strTargetDirectory = Path.Combine(this.UserDir, "jquery");
-
+                bool bError = false;
                 try
                 {
                     using (ZipFile zip = ZipFile.Read(strZipFileName))
@@ -985,6 +985,23 @@ MessageBoxDefaultButton.Button1);
                 catch (Exception ex)
                 {
                     MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+                    bError = true;
+                }
+
+                // 2017/5/18
+                // 报错以后把目标目录删除，以便下次程序启动时候可以顺利运行
+                if (bError)
+                {
+                    try
+                    {
+                        PathUtil.DeleteDirectory(strTargetDirectory);
+                    }
+                    catch (Exception ex)
+                    {
+                        // TODO: 是否顺便检测一下当前安装了 360?
+                        MessageBox.Show(this, "自动删除文件夹 '" + strTargetDirectory + "' 时出错: " + ex.Message
+                            + "\r\n\r\n请在退出内务以后，想办法手动删除文件夹 '" + strTargetDirectory + "'");
+                    }
                 }
             }
 

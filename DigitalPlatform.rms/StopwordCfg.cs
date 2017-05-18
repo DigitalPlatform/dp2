@@ -280,7 +280,10 @@ namespace DigitalPlatform.rms
 				string strText = nodeSeparator.InnerText.Trim();  // 2012/2/16
 				if (string.IsNullOrEmpty(strText) == false)
 				{
-					if (strText == "_")
+                    // 2017/5/17
+                    if (strText == "\\_")   // \_ 被当作 _
+                        strText = "_";
+					else if (strText == "_")    // _ 被当作空格
 						strText = " ";
 
 					this.aSeparator.Add(strText);

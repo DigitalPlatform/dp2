@@ -90,6 +90,25 @@ namespace dp2Circulation
                 {
                     MessageBox.Show(this, strError);
                 }));
+
+                Program.MainForm.ReportError("dp2circulation 打开 report_def.xml 文件时出现错误", "(安静报错)" + strError);
+
+                // 2017/5/18
+                // 自动修正错误，清空配置文件
+                {
+                    string strFileName = Path.Combine(GetBaseDirectory(), "report_def.xml");
+                    // 备份一下出错了的配置文件内容，便于将来追查原因
+                    string strSavingFileName = Path.Combine(GetBaseDirectory(), "report_def.xml.error");
+                    try
+                    {
+                        File.Copy(strFileName, strSavingFileName, true);
+                    }
+                    catch
+                    {
+
+                    }
+                    _cfg.InitializeCfgDom();
+                }
             }
 
             _cfg.FillList(this.listView_libraryConfig);
@@ -9836,8 +9855,8 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
 
-            ListViewItem firsr_item = this.listView_libraryConfig.SelectedItems[0];
-            string strFirstLibraryCode = ListViewUtil.GetItemText(firsr_item, 0);
+            ListViewItem first_item = this.listView_libraryConfig.SelectedItems[0];
+            string strFirstLibraryCode = ListViewUtil.GetItemText(first_item, 0);
             strFirstLibraryCode = GetOriginLibraryCode(strFirstLibraryCode);
 
             XmlNode nodeFirstLibrary = this._cfg.GetLibraryNode(strFirstLibraryCode);

@@ -1953,26 +1953,26 @@ this.splitContainer_inAndOutof,
                 goto ERROR1;
             }
 
-#if NO
-            // 2009/11/27
-            if (this.checkBox_verify_autoUppercaseBarcode.Checked == true)
-            {
-                string strUpper = this.textBox_verify_itemBarcode.Text.ToUpper();
-                if (this.textBox_verify_itemBarcode.Text != strUpper)
-                    this.textBox_verify_itemBarcode.Text = strUpper;
-            }
-
-            // 2016/12/15
-            {
-                string strTrim = this.textBox_verify_itemBarcode.Text.Trim();
-                if (this.textBox_verify_itemBarcode.Text != strTrim)
-                    this.textBox_verify_itemBarcode.Text = strTrim;
-            }
-#endif
             {
                 string strUpper = Program.MainForm.GetUpperCase(this.textBox_verify_itemBarcode.Text);
                 if (this.textBox_verify_itemBarcode.Text != strUpper)
                     this.textBox_verify_itemBarcode.Text = strUpper;
+            }
+
+            // 2017/5/17
+            // 变换条码号
+            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+            {
+                string strText = this.textBox_verify_itemBarcode.Text;
+
+                int nRet = Program.MainForm.TransformBarcode(
+                    Program.MainForm.FocusLibraryCode,
+                    ref strText,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                this.textBox_verify_itemBarcode.Text = strText;
             }
 
             // TODO: 验证册条码号
@@ -6493,6 +6493,29 @@ MessageBoxDefaultButton.Button2);
                 return;
             }
 
+            // 2017/5/17
+            // 变换条码号
+            if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+            {
+                string strError = "";
+
+                string strText = e.Barcode;
+
+                int nRet = Program.MainForm.TransformBarcode(
+                    Program.MainForm.FocusLibraryCode,
+                    ref strText,
+                    out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    this._scanBarcodeForm.Activate();
+                    return;
+                }
+
+                e.Barcode = strText;
+            }
+
+
             // 把册条码号直接加入行中，然后等待专门的线程来装载刷新
             // 要查重
             ListViewItem dup = ListViewUtil.FindItem(this.listView_in, e.Barcode, COLUMN_BARCODE);
@@ -6500,6 +6523,7 @@ MessageBoxDefaultButton.Button2);
             {
                 Console.Beep();
                 ListViewUtil.SelectLine(dup, true);
+                dup.EnsureVisible();    // 2017/5/17
                 MessageBox.Show(this, "您扫入的册条码号 ‘" + e.Barcode + "’ 在列表中已经存在了，请注意不要重复扫入");
                 this._scanBarcodeForm.Activate();
                 return;

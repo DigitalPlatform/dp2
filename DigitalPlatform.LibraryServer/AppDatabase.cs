@@ -95,6 +95,7 @@ namespace DigitalPlatform.LibraryServer
             if (strAction == "delete")
             {
                 return DeleteDatabase(
+                    sessioninfo,
                     Channels,
                     strLibraryCodeList,
                     strDatabaseNames,
@@ -144,9 +145,13 @@ namespace DigitalPlatform.LibraryServer
         // 如果数据库不存在会当作出错-1来报错
         int DeleteDatabase(RmsChannel channel,
             string strDbName,
+            string strLogFileName,
             out string strError)
         {
             strError = "";
+
+            // 保存数据库的每个配置文件
+
             long lRet = channel.DoDeleteDB(strDbName, out strError);
             if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                 return -1;
@@ -1672,6 +1677,7 @@ namespace DigitalPlatform.LibraryServer
         //      0   没有找到
         //      1   成功
         int DeleteDatabase(
+            SessionInfo sessioninfo,
             RmsChannelCollection Channels,
             string strLibraryCodeList,
             string strDatabaseNames,
@@ -1682,7 +1688,9 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
 
             int nRet = 0;
-            // long lRet = 0;
+
+            string strLogFileName = this.GetTempFileName("zip");
+            List<XmlNode> database_nodes = new List<XmlNode>(); // 已经创建的数据库的定义节点
 
             bool bDbNameChanged = false;
 
@@ -1714,7 +1722,8 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除书目库
-                    nRet = DeleteDatabase(channel, strName, out strError);
+                    nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
                     if (nRet == -1)
                     {
                         strError = "删除书目库 '" + strName + "' 时发生错误: " + strError;
@@ -1727,7 +1736,10 @@ namespace DigitalPlatform.LibraryServer
                     string strEntityDbName = DomUtil.GetAttr(nodeDatabase, "name");
                     if (String.IsNullOrEmpty(strEntityDbName) == false)
                     {
-                        nRet = DeleteDatabase(channel, strEntityDbName, out strError);
+                        nRet = DeleteDatabase(channel, 
+                            strEntityDbName,
+                            strLogFileName,
+                            out strError);
                         if (nRet == -1)
                         {
                             strError = "删除书目库 '" + strName + "' 所从属的实体库 '" + strEntityDbName + "' 时发生错误: " + strError;
@@ -1739,7 +1751,8 @@ namespace DigitalPlatform.LibraryServer
                     string strOrderDbName = DomUtil.GetAttr(nodeDatabase, "orderDbName");
                     if (String.IsNullOrEmpty(strOrderDbName) == false)
                     {
-                        nRet = DeleteDatabase(channel, strOrderDbName, out strError);
+                        nRet = DeleteDatabase(channel, strOrderDbName, strLogFileName,
+out strError);
                         if (nRet == -1)
                         {
                             strError = "删除书目库 '" + strName + "' 所从属的订购库 '" + strOrderDbName + "' 时发生错误: " + strError;
@@ -1751,7 +1764,8 @@ namespace DigitalPlatform.LibraryServer
                     string strIssueDbName = DomUtil.GetAttr(nodeDatabase, "issueDbName");
                     if (String.IsNullOrEmpty(strIssueDbName) == false)
                     {
-                        nRet = DeleteDatabase(channel, strIssueDbName, out strError);
+                        nRet = DeleteDatabase(channel, strIssueDbName, strLogFileName,
+out strError);
                         if (nRet == -1)
                         {
                             strError = "删除书目库 '" + strName + "' 所从属的期库 '" + strIssueDbName + "' 时发生错误: " + strError;
@@ -1763,7 +1777,8 @@ namespace DigitalPlatform.LibraryServer
                     string strCommentDbName = DomUtil.GetAttr(nodeDatabase, "commentDbName");
                     if (String.IsNullOrEmpty(strCommentDbName) == false)
                     {
-                        nRet = DeleteDatabase(channel, strCommentDbName, out strError);
+                        nRet = DeleteDatabase(channel, strCommentDbName, strLogFileName,
+out strError);
                         if (nRet == -1)
                         {
                             strError = "删除书目库 '" + strName + "' 所从属的评注库 '" + strCommentDbName + "' 时发生错误: " + strError;
@@ -1805,7 +1820,8 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除实体库
-                    nRet = DeleteDatabase(channel, strName, out strError);
+                    nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
                     if (nRet == -1)
                     {
                         strError = "删除实体库 '" + strName + "' 时发生错误: " + strError;
@@ -1848,7 +1864,8 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除订购库
-                    nRet = DeleteDatabase(channel, strName, out strError);
+                    nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
                     if (nRet == -1)
                     {
                         strError = "删除订购库 '" + strName + "' 时发生错误: " + strError;
@@ -1891,7 +1908,8 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除期库
-                    nRet = DeleteDatabase(channel, strName, out strError);
+                    nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
                     if (nRet == -1)
                     {
                         strError = "删除期库 '" + strName + "' 时发生错误: " + strError;
@@ -1933,7 +1951,8 @@ namespace DigitalPlatform.LibraryServer
                         return 0;
                     }
 
-                    nRet = DeleteDatabase(channel, strName, out strError);
+                    nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
                     if (nRet == -1)
                     {
                         strError = "删除评注库 '" + strName + "' 时发生错误: " + strError;
@@ -1984,7 +2003,8 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除读者库
-                    nRet = DeleteDatabase(channel, strName, out strError);
+                    nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
                     if (nRet == -1)
                     {
                         strError = "删除读者库 '" + strName + "' 时发生错误: " + strError;
@@ -2013,7 +2033,8 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除预约到书库
-                    nRet = DeleteDatabase(channel, strName, out strError);
+                    nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
                     if (nRet == -1)
                     {
                         strError = "删除预约到书库 '" + strName + "' 时发生错误: " + strError;
@@ -2037,7 +2058,8 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除违约金库
-                    nRet = DeleteDatabase(channel, strName, out strError);
+                    nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
                     if (nRet == -1)
                     {
                         strError = "删除违约金库 '" + strName + "' 时发生错误: " + strError;
@@ -2060,7 +2082,8 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     }
 
-                    nRet = DeleteDatabase(channel, strName, out strError);
+                    nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
                     if (nRet == -1)
                     {
                         strError = "删除发票库 '" + strName + "' 时发生错误: " + strError;
@@ -2087,6 +2110,7 @@ namespace DigitalPlatform.LibraryServer
                         strTypeCaption,
                         strName,
                         strLibraryCodeList,
+                        strLogFileName,
                         ref strDbName,
                         out strError);
                     this.PinyinDbName = strDbName;
@@ -2111,6 +2135,7 @@ namespace DigitalPlatform.LibraryServer
                         strTypeCaption,
                         strName,
                         strLibraryCodeList,
+                        strLogFileName,
                         ref strDbName,
                         out strError);
                     this.GcatDbName = strDbName;
@@ -2135,6 +2160,7 @@ namespace DigitalPlatform.LibraryServer
                         strTypeCaption,
                         strName,
                         strLibraryCodeList,
+                        strLogFileName,
                         ref strDbName,
                         out strError);
                     this.WordDbName = strDbName;
@@ -2156,7 +2182,8 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除消息库
-                    nRet = DeleteDatabase(channel, strName, out strError);
+                    nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
                     if (nRet == -1)
                     {
                         strError = "删除消息库 '" + strName + "' 时发生错误: " + strError;
@@ -2187,7 +2214,8 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 删除实用库
-                    nRet = DeleteDatabase(channel, strName, out strError);
+                    nRet = DeleteDatabase(channel, strName, strLogFileName,
+out strError);
                     if (nRet == -1)
                     {
                         strError = "删除实用库 '" + strName + "' 时发生错误: " + strError;
@@ -2204,6 +2232,51 @@ namespace DigitalPlatform.LibraryServer
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
                 return 0;
             }
+
+#if NO
+            // 写入操作日志
+            {
+                XmlDocument domOperLog = new XmlDocument();
+                domOperLog.LoadXml("<root />");
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "operation",
+                    "manageDatabase");
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "action",
+    "deleteDatabase");
+
+                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
+"");
+                StringBuilder text = new StringBuilder();
+                foreach (XmlElement node in database_nodes)
+                {
+                    text.Append(node.OuterXml);
+                }
+                new_node.InnerXml = text.ToString();
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                    sessioninfo.UserID);
+
+                string strOperTime = this.Clock.GetClock();
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                    strOperTime);
+
+                using (Stream stream = File.OpenRead(strLogFileName))
+                {
+                    nRet = this.OperLog.WriteOperLog(domOperLog,
+                        sessioninfo.ClientAddress,
+                        stream,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "ManageDatabase() API createDatabase 写入日志时发生错误: " + strError;
+                        goto ERROR1;
+                    }
+                }
+            }
+#endif
 
             if (bDbNameChanged == true)
             {
@@ -2228,6 +2301,7 @@ namespace DigitalPlatform.LibraryServer
             string strTypeCaption,
             string strName,
             string strLibraryCodeList,
+            string strLogFileName,
             ref string strDbName,
             out string strError)
         {
@@ -2240,7 +2314,10 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // TODO: 关注数据库不存在时返回什么值
-            int nRet = DeleteDatabase(channel, strName, out strError);
+            int nRet = DeleteDatabase(channel, 
+                strName,
+                strLogFileName,
+                out strError);
             if (nRet == -1)
             {
                 strError = "删除" + strTypeCaption + "库 '" + strName + "' 时发生错误: " + strError;

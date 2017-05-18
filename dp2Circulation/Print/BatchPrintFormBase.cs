@@ -1253,6 +1253,8 @@ namespace dp2Circulation
                             continue;
                         }
 
+                        //
+
                         barcode_table[strLine] = true;
                         lines.Add(strLine);
                         nLineCount++;
@@ -1275,7 +1277,7 @@ namespace dp2Circulation
 
                     int i = 0;
                     List<string> temp_lines = new List<string>();
-                    foreach (string strLine in lines)
+                    foreach (string s in lines)
                     {
                         Application.DoEvents();
 
@@ -1286,6 +1288,24 @@ namespace dp2Circulation
                         }
 
                         stop.SetProgressValue(i++);
+
+                        string strLine = s;
+
+                        // 2017/5/17
+                        // 变换条码号
+                        if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+                        {
+                            string strText = strLine;
+
+                            nRet = Program.MainForm.TransformBarcode(
+                                Program.MainForm.FocusLibraryCode,
+                                ref strText,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            strLine = strText;
+                        }
 
                         // stop.SetMessage("正在装入册条码号 " + strLine + " 对应的记录...");
 
