@@ -386,7 +386,11 @@ namespace dp2Circulation
             GetChannelStyle style = GetChannelStyle.GUI)
         {
             LibraryChannel channel = Program.MainForm.GetChannel(strServerUrl, strUserName, style);
-            _channelList.Add(channel);
+
+            lock (_syncRoot_channelList)
+            {
+                _channelList.Add(channel);
+            }
             // TODO: 检查数组是否溢出
             return channel;
         }
@@ -394,21 +398,62 @@ namespace dp2Circulation
         public void ReturnChannel(LibraryChannel channel)
         {
             Program.MainForm.ReturnChannel(channel);
-            _channelList.Remove(channel);
+            lock (_syncRoot_channelList)
+            {
+                _channelList.Remove(channel);
+            }
         }
 
+        private static readonly Object _syncRoot_channelList = new Object(); // 2017/5/18
         List<LibraryChannel> _channelList = new List<LibraryChannel>();
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 huxh@xxx
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.InvalidOperationException
+Message: 集合已修改；可能无法执行枚举操作。
+Stack:
+在 System.ThrowHelper.ThrowInvalidOperationException(ExceptionResource resource)
+在 System.Collections.Generic.List`1.Enumerator.MoveNextRare()
+在 dp2Circulation.MyForm.DoStop(Object sender, StopEventArgs e)
+在 dp2Circulation.TaskList.DoStop(Object sender, StopEventArgs e)
+在 dp2Circulation.QuickChargingForm.ClearTaskByRows(List`1 rows, Boolean bWarning)
+在 dp2Circulation.QuickChargingForm.SmartSetFuncState(FuncState value, Boolean bClearInfoWindow, Boolean bDupAsClear)
+在 dp2Circulation.QuickChargingForm.set_SmartFuncState(FuncState value)
+在 dp2Circulation.MainForm.toolButton_borrow_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
+在 System.Windows.Forms.ToolStripButton.OnClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1
+本机 MAC 地址: F44D3077D567 
+操作时间 2017/5/18 13:25:07 (Thu, 18 May 2017 13:25:07 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+         * */
         internal void DoStop(object sender, StopEventArgs e)
         {
             // 兼容旧风格
             if (this.Channel != null)
                 this.Channel.Abort();
 
-            foreach (LibraryChannel channel in _channelList)
+            lock (_syncRoot_channelList)
             {
-                if (channel != null)
-                    channel.Abort();
+                foreach (LibraryChannel channel in _channelList)
+                {
+                    if (channel != null)
+                        channel.Abort();
+                }
             }
         }
 

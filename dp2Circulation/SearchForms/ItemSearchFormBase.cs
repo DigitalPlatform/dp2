@@ -705,6 +705,7 @@ namespace dp2Circulation
 
             List<string> biblio_recpaths = new List<string>();  // 尺寸可能比 items 数组小，没有包含里面不具有 parent id 列的事项
             List<int> colindex_list = new List<int>();  // 存储每个 item 对应的 parent id colindex。数组大小等于 items 数组大小
+
             foreach (ListViewItem item in items)
             {
 #if NO
@@ -869,6 +870,36 @@ namespace dp2Circulation
             return 1;
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 renyh@xxx 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.ArgumentException
+Message: RecPaths 中不应包含空元素
+Stack:
+在 dp2Circulation.CacheableBiblioLoader.<GetEnumerator>d__0.MoveNext()
+在 dp2Circulation.ItemSearchFormBase._fillBiblioSummaryColumn(LibraryChannel channel, List`1 items, Int64 lStartIndex, Boolean bDisplayMessage, Boolean bAutoSearch, String& strError)
+在 dp2Circulation.ItemSearchForm.FillBrowseList(LibraryChannel channel, ItemQueryParam query, Int64 lHitCount, Boolean bOutputKeyCount, Boolean bOutputKeyID, Boolean bQuickLoad, String& strError)
+在 dp2Circulation.ItemSearchForm.DoSearch(Boolean bOutputKeyCount, Boolean bOutputKeyID, ItemQueryParam input_query, Boolean bClearList)
+在 dp2Circulation.ItemSearchForm.toolStripButton_search_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
+在 System.Windows.Forms.ToolStripButton.OnClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.2.9200.0
+操作时间 2017/5/18 12:30:01 (Thu, 18 May 2017 12:30:01 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+         * * */
         // 获得事项所从属的书目记录的路径
         // parameters:
         //      bAutoSearch 当没有 parent id 列的时候，是否自动进行检索以便获得书目记录路径
@@ -1056,7 +1087,13 @@ namespace dp2Circulation
                 else
                     strBiblioRecPath = strText;
             }
-
+            else
+            {
+                // 2017/5/18
+                // 装载浏览格式的中途如果修改服务器相关数据库的 browse 配置文件可能会走到这里
+                strError = "parent id 列 (index=" + nCol + ") 内容为空";
+                return 0;
+            }
             return 1;
         }
 
@@ -1200,7 +1237,6 @@ namespace dp2Circulation
             strBiblioRecPath = "";
             strItemRecPath = "";
 
-
             string strItemText = "";
             string strBiblioText = "";
 
@@ -1240,6 +1276,7 @@ namespace dp2Circulation
             if (lRet == -1)
                 return -1;  // error
 
+            // TODO: 需要检查一下服务器代码，看看什么情况 strBiblioRecPath 会返回空？
             return (int)lRet;   // not found
         }
 
@@ -1319,9 +1356,8 @@ namespace dp2Circulation
             if (lRet == -1)
                 return -1;  // error
 
+            // TODO: 需要检查一下服务器代码，看什么时候 strBiblioRecPath 会返回空
             return (int)lRet;   // not found
         }
-
-
     }
 }

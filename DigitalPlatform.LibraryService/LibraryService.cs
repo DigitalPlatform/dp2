@@ -5095,7 +5095,7 @@ namespace dp2Library
                         nRet = app.ConvertBiblioXmlToHtml(
                                 strFilterFileName,
                                 strBiblioXml,
-                                    null,
+                                null,
                                 strBiblioRecPath,
                                 out strBiblio,
                                 out strError);

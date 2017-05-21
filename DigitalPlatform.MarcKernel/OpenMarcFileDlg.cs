@@ -327,7 +327,8 @@ namespace DigitalPlatform.Marc
             // OpenMarcFileDlg
             // 
             this.AcceptButton = this.button_OK;
-            this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(518, 341);
             this.Controls.Add(this.panel_main);
             this.Controls.Add(this.button_Cancel);

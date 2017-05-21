@@ -3636,18 +3636,18 @@ namespace dp2Circulation
                 {
                     // 2013/3/25
                     lRet = channel.SearchItem(
-                    stop,
-                    this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
+                        stop,
+                        this.comboBox_load_type.Text == "图书" ? "<all book>" : "<all series>",
                         //"<all>",
-                    "", // dlg.BatchNo,
-                    -1,
-                    "__id",
-                    "left",
-                    this.Lang,
-                    "batchno",   // strResultSetName
-                    "",    // strSearchStyle
-                    "", // strOutputStyle
-                    out strError);
+                        "", // dlg.BatchNo,
+                        -1,
+                        "__id",
+                        "left",
+                        this.Lang,
+                        "batchno",   // strResultSetName
+                        "",    // strSearchStyle
+                        "", // strOutputStyle
+                        out strError);
                     if (lRet == 0)
                     {
                         strError = "检索全部 '" + this.comboBox_load_type.Text + "' 类型的册记录没有命中记录。";
@@ -3687,6 +3687,7 @@ out strError);
                 stop.SetProgressRange(0, lHitCount);
                 // stop.SetProgressValue(0);
 
+                // TODO: 下面可以用 ResultSetLoader 改造
 
                 long lStart = 0;
                 long lCount = lHitCount;
@@ -3723,6 +3724,13 @@ out strError);
                     {
                         MessageBox.Show(this, "未命中");
                         return;
+                    }
+
+                    // 2017/5/18
+                    if (searchresults == null)
+                    {
+                        strError = "searchresults == null";
+                        goto ERROR1;
                     }
 
                     // 处理浏览结果

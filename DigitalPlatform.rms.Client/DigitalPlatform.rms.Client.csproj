@@ -240,6 +240,7 @@
     <Compile Include="DbNameMap\OriginNotFoundDlg.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DirLoader.cs" />
     <Compile Include="ImportExport\ExportDataDialog.cs">
       <SubType>Form</SubType>
     </Compile>

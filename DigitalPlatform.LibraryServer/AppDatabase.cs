@@ -141,6 +141,88 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
+        // 获得一个数据库的全部配置文件
+        int GetConfigFiles(RmsChannel channel,
+            string strDbName,
+            string strLogFileName,
+            out string strError)
+        {
+            strError = "";
+
+            string strTempDir = "";
+
+            if (string.IsNullOrEmpty(strLogFileName) == false)
+            {
+                strTempDir = Path.Combine(this.TempDir, "~" + Guid.NewGuid().ToString());
+                PathUtil.TryCreateDir(strTempDir);
+            }
+
+            try
+            {
+                DirLoader loader = new DirLoader(channel,
+                    null,
+                    strDbName + "/cfgs");
+                foreach (ResInfoItem item in loader)
+                {
+                    string strTargetFilePath = Path.Combine(strTempDir, strDbName, "cfgs\\" + item.Name);
+                    PathUtil.TryCreateDir(Path.GetDirectoryName(strTargetFilePath));
+
+                    using (Stream exist_stream = File.Create(strTargetFilePath))
+                    {
+                        string strPath = strDbName + "/cfgs/" + item.Name;
+                        string strStyle = "content,data,metadata,timestamp,outputpath";
+                        byte[] timestamp = null;
+                        string strOutputPath = "";
+                        string strMetaData = "";
+                        long lRet = channel.GetRes(
+                            strPath,    // item.Name,
+                            exist_stream,
+                            null,	// stop,
+                            strStyle,
+                            null,	// byte [] input_timestamp,
+                            out strMetaData,
+                            out timestamp,
+                            out strOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            // 配置文件不存在，怎么返回错误码的?
+                            if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                                continue;
+                            return -1;
+                        }
+
+#if NO
+                    exist_stream.Seek(0, SeekOrigin.Begin);
+                    using (StreamReader sr = new StreamReader(exist_stream, Encoding.UTF8))
+                    {
+                        strExistContent = ConvertCrLf(sr.ReadToEnd());
+                    }
+#endif
+
+                    }
+
+                }
+
+                int nRet = CompressDirectory(
+                    strTempDir,
+                    strTempDir,
+                    strLogFileName,
+                    Encoding.UTF8,
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                return 0;
+            }
+            finally
+            {
+                PathUtil.DeleteDirectory(strTempDir);
+            }
+        }
+
+
         // 删除一个数据库，并删除library.xml中相关OPAC检索库定义
         // 如果数据库不存在会当作出错-1来报错
         int DeleteDatabase(RmsChannel channel,
@@ -149,8 +231,18 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
+            int nRet = 0;
 
-            // 保存数据库的每个配置文件
+            // 获得一个数据库的全部配置文件
+            if (string.IsNullOrEmpty(strLogFileName) == false)
+            {
+                nRet = GetConfigFiles(channel,
+                strDbName,
+                strLogFileName,
+                out strError);
+                if (nRet == -1)
+                    return -1;
+            }
 
             long lRet = channel.DoDeleteDB(strDbName, out strError);
             if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
@@ -161,7 +253,7 @@ namespace DigitalPlatform.LibraryServer
             //      -1  error
             //      0   not change
             //      1   changed
-            int nRet = RemoveOpacDatabaseDef(
+            nRet = RemoveOpacDatabaseDef(
                 channel.Container,
                 strDbName,
                 out strError);
@@ -1736,7 +1828,7 @@ out strError);
                     string strEntityDbName = DomUtil.GetAttr(nodeDatabase, "name");
                     if (String.IsNullOrEmpty(strEntityDbName) == false)
                     {
-                        nRet = DeleteDatabase(channel, 
+                        nRet = DeleteDatabase(channel,
                             strEntityDbName,
                             strLogFileName,
                             out strError);
@@ -2233,7 +2325,6 @@ out strError);
                 return 0;
             }
 
-#if NO
             // 写入操作日志
             {
                 XmlDocument domOperLog = new XmlDocument();
@@ -2248,12 +2339,12 @@ out strError);
 
                 XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
 "");
-                StringBuilder text = new StringBuilder();
-                foreach (XmlElement node in database_nodes)
+                foreach(string name in names)
                 {
-                    text.Append(node.OuterXml);
+                    XmlElement database = domOperLog.CreateElement("database");
+                    new_node.AppendChild(database);
+                    database.SetAttribute("name", name);
                 }
-                new_node.InnerXml = text.ToString();
 
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
                     sessioninfo.UserID);
@@ -2272,11 +2363,10 @@ out strError);
                     if (nRet == -1)
                     {
                         strError = "ManageDatabase() API createDatabase 写入日志时发生错误: " + strError;
-                        goto ERROR1;
+                        return -1;
                     }
                 }
             }
-#endif
 
             if (bDbNameChanged == true)
             {
@@ -2314,7 +2404,7 @@ out strError);
             }
 
             // TODO: 关注数据库不存在时返回什么值
-            int nRet = DeleteDatabase(channel, 
+            int nRet = DeleteDatabase(channel,
                 strName,
                 strLogFileName,
                 out strError);
@@ -4930,7 +5020,7 @@ out strError);
                 XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
 "");
                 StringBuilder text = new StringBuilder();
-                foreach(XmlElement node in database_nodes)
+                foreach (XmlElement node in database_nodes)
                 {
                     text.Append(node.OuterXml);
                 }
@@ -5337,7 +5427,7 @@ out strError);
         {
             if (string.IsNullOrEmpty(strTempDir))
                 return;
-            string strTarget = Path.Combine(strTempDir, strDatabaseName, Path.GetFileName(strSourcePath));
+            string strTarget = Path.Combine(strTempDir, strDatabaseName + "\\cfgs", Path.GetFileName(strSourcePath));
             PathUtil.TryCreateDir(Path.GetDirectoryName(strTarget));
             File.Copy(strSourcePath, strTarget);
         }
