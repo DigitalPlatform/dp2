@@ -361,6 +361,7 @@
       <xs:element minOccurs="0" name="Operator" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="PatronBarcode" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Period" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Volume" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ChargingItem" nillable="true" type="tns:ChargingItem" />
@@ -1052,6 +1053,7 @@
       <xs:element minOccurs="0" name="OverdueString" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Period" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="ReturnOperator" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Volume" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ReturnInfo" nillable="true" type="tns:ReturnInfo" />

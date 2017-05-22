@@ -10400,7 +10400,8 @@ Stack:
                         // 必须在ReadersMonitor以前启动。否则其中用到脚本代码时会出错。2007/10/10 changed
                         // return:
                         //		-1	出错
-                        //		0	成功
+                        //		0	脚本代码没有找到
+                        //      1   成功
                         nRet = app.InitialLibraryHostAssembly(out strError);
                         if (nRet == -1)
                         {
@@ -14368,6 +14369,10 @@ true);
         [DataMember]
         public string No { get; set; }  // 续借次，序号
 
+        // 2017/5/22
+        [DataMember]
+        public string Volume { get; set; }  // 卷册
+
         [DataMember]
         public string ClientAddress { get; set; }  // 访问者的IP地址
 
@@ -14386,6 +14391,7 @@ true);
             this.PatronBarcode = item.PatronBarcode;
             this.BiblioRecPath = item.BiblioRecPath;
             this.Period = item.Period;
+            this.Volume = item.Volume;
             this.No = item.No;
             this.ClientAddress = item.ClientAddress;
             this.Operator = item.Operator;

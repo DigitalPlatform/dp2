@@ -484,19 +484,27 @@ namespace DigitalPlatform.LibraryServer
                     "no");
             }
 
+            // 2017/5/22
+            string strVolume = DomUtil.GetElementText(domOperLog.DocumentElement,
+    "volume");
+            if (string.IsNullOrEmpty(strVolume) == false)
+                item.Volume = strVolume;
+
+#if NO
             if (strOperation == "return" && strAction == "read")
             {
-                // no 用作卷册信息
+                // no 用作卷册信息 ???
                 item.No = DomUtil.GetElementText(domOperLog.DocumentElement,
     "no");
             }
+#endif
 
             item.ClientAddress = DomUtil.GetElementText(domOperLog.DocumentElement,
                 "clientAddress");
             item.Operator = DomUtil.GetElementText(domOperLog.DocumentElement,
-                    "operator");
+                "operator");
             string strOperTime = DomUtil.GetElementText(domOperLog.DocumentElement,
-                    "operTime");
+                "operTime");
             try
             {
                 item.OperTime = DateTimeUtil.FromRfc1123DateTimeString(strOperTime).ToLocalTime();

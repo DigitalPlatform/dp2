@@ -1331,7 +1331,8 @@ namespace DigitalPlatform.LibraryServer
                     // 必须在ReadersMonitor以前启动。否则其中用到脚本代码时会出错。2007/10/10 changed
                     // return:
                     //		-1	出错
-                    //		0	成功
+                    //		0	脚本代码没有找到
+                    //      1   成功
                     nRet = this.InitialLibraryHostAssembly(out strError);
                     if (nRet == -1)
                     {

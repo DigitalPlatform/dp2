@@ -10,6 +10,10 @@ using System.Threading;
 using System.Diagnostics;
 using System.Net.Mail;
 using System.Web;
+using System.Web.UI.WebControls;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Text.RegularExpressions;
 
 using System.Resources;
 using System.Globalization;
@@ -28,10 +32,6 @@ using DigitalPlatform.Drawing;  // ShrinkPic()
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using System.Web.UI.WebControls;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Text.RegularExpressions;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -5095,7 +5095,10 @@ start_time_1,
 
                             strVolume = DomUtil.GetElementText(itemdom.DocumentElement, "volume");
                             if (string.IsNullOrEmpty(strVolume) == false)
-                                DomUtil.SetElementText(domOperLog.DocumentElement, "no", strVolume);
+                            {
+                                DomUtil.SetElementText(domOperLog.DocumentElement, "volume", strVolume);
+                                // DomUtil.SetElementText(domOperLog.DocumentElement, "no", strVolume);
+                            }
                         }
                         else
                             strBiblioRecPath = strItemBarcodeParam.Substring("@biblioRecPath:".Length);
@@ -5393,7 +5396,7 @@ start_time_1,
                     if (itemdom != null)
                     {
                         node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                            "itemRecord", 
+                            "itemRecord",
                             ShrinkItemXml(itemdom)
                             // itemdom.OuterXml
                             );
@@ -7911,7 +7914,7 @@ out string strError)
             if (this.AcceptBlankRoomName == false)
             {
                 XmlNodeList nodes = source_dom.DocumentElement.SelectNodes("//item");
-                foreach(XmlElement item in nodes)
+                foreach (XmlElement item in nodes)
                 {
                     string text = item.InnerText;
                     if (string.IsNullOrEmpty(text) == true)
@@ -13007,6 +13010,7 @@ out string strError)
 
             // 图书类型
             string strBookType = DomUtil.GetElementText(itemdom.DocumentElement, "bookType");
+            string strVolume = DomUtil.GetElementText(itemdom.DocumentElement, "volume");
 
             string strBorrowDate = DomUtil.GetElementText(itemdom.DocumentElement, "borrowDate");
             string strPeriod = DomUtil.GetElementText(itemdom.DocumentElement, "borrowPeriod");
@@ -13677,6 +13681,8 @@ out string strError)
 #endif
 
             return_info.BookType = strBookType;
+            if (string.IsNullOrEmpty(strVolume) == false)
+                return_info.Volume = strVolume;
             /*
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement,
                 "location");
@@ -14624,6 +14630,8 @@ out string strError)
             // 从想要借阅的册信息中，找到图书类型
             string strBookType = DomUtil.GetElementText(itemdom.DocumentElement, "bookType");
 
+            string strVolume = DomUtil.GetElementText(itemdom.DocumentElement, "volume");
+
             // 从读者信息中, 找到读者类型
             string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement, "readerType");
 
@@ -15061,6 +15069,10 @@ out string strError)
             // 2007/11/5
             DomUtil.SetAttr(nodeBorrow, "type", strBookType);   // 在读者记录<borrows/borrow>元素中写入type属性，内容为图书册类型，便于后续借书的时候判断某一种册类型是否超过读者权限规定值。这种方式可以节省时间，不必从多个册记录中去获得册类型字段
 
+            // 2017/5/22
+            if (string.IsNullOrEmpty(strVolume) == false)
+                DomUtil.SetAttr(nodeBorrow, "volume", strVolume);
+
             // 2006/11/12
             string strBookPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
             DomUtil.SetAttr(nodeBorrow, "price", strBookPrice);   // 在读者记录<borrows/borrow>元素中写入price属性，内容为图书册价格类型，便于后续借书的时候判断已经借的和即将借的总价格是否超过读者的押金余额。这种方式可以节省时间，不必从多个册记录中去获得册价格字段
@@ -15173,6 +15185,11 @@ out string strError)
             // 2015/1/12
             DomUtil.SetElementText(domOperLog.DocumentElement, "type",
     strBookType);    // 图书类型
+            // 2017/5/22
+            if (string.IsNullOrEmpty(strVolume) == false)
+                DomUtil.SetElementText(domOperLog.DocumentElement, "volume",
+                    strVolume);
+
             DomUtil.SetElementText(domOperLog.DocumentElement, "price",
 strBookPrice);    // 图书价格
 
@@ -19781,6 +19798,13 @@ Value data: HEX 0x1
         /// </summary>
         [DataMember]
         public string Location = "";
+
+        // 2017/5/22
+        /// <summary>
+        /// 所还的册的卷册
+        /// </summary>
+        [DataMember]
+        public string Volume { get; set; }
     }
 
 }

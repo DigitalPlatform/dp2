@@ -5891,6 +5891,7 @@ MessageBoxDefaultButton.Button1);
             text.Append("<td class='nowrap'>类型</td>");
             text.Append("<td class='nowrap'>册条码号</td>");
             text.Append("<td class='nowrap'>书目摘要</td>");
+            text.Append("<td class='nowrap'>卷册</td>");
             text.Append("<td class='nowrap'>期限</td>");
             text.Append("<td class='nowrap'>借阅操作者</td>");
             text.Append("<td class='nowrap'>借阅操作时间</td>");
@@ -5917,6 +5918,14 @@ MessageBoxDefaultButton.Button1);
                     text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(strItemBarcode) + "</td>");
 
                 text.Append("<td class='summary pending'>BC:" + HttpUtility.HtmlEncode(strItemBarcode) + "</td>");
+
+                string strVolume = item.Volume;
+                if (string.IsNullOrEmpty(strVolume))
+                {
+                    if (wrapper.RelatedItem != null)
+                        strVolume = wrapper.RelatedItem.Volume;
+                }
+                text.Append("<td class='nowrap'>" + HttpUtility.HtmlEncode(strVolume) + "</td>");
 
                 string strPeriod = "";
                 if (wrapper.RelatedItem != null)

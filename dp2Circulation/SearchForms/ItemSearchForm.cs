@@ -3148,7 +3148,7 @@ out strError);
                     e.Actions = "yes,no,cancel";
                     loader_Prompt(this, e);
                     if (e.ResultAction == "cancel")
-                        throw new ChannelException(Channel.ErrorCode, strError);
+                        throw new Exception(strError);
                     else if (e.ResultAction == "yes")
                         goto REDO_VERIFYBARCODE;
                     //else
@@ -3749,7 +3749,15 @@ out strError);
     e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
     20 * 1000,
     "ItemSearchForm");
+#if NO
                 if (result == DialogResult.Cancel)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
+#endif
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "cancel";
+                else if (result == System.Windows.Forms.DialogResult.No)
                     e.ResultAction = "no";
                 else
                     e.ResultAction = "yes";

@@ -234,6 +234,7 @@ namespace DigitalPlatform.LibraryServer
                     out strWarning);
                 if (nRet == -1)
                 {
+                    strMD5 = "";   // 2017/5/22 迫使后面重新编译
                     strError = "library.xml中<script>元素内C#脚本编译时出错: \r\n" + strError;
                     return -1;
                 }
@@ -247,7 +248,8 @@ namespace DigitalPlatform.LibraryServer
         // 初始化Assembly对象
         // return:
         //		-1	出错
-        //		0	成功
+        //		0	脚本代码没有找到
+        //      1   成功
         public int InitialLibraryHostAssembly(out string strError)
         {
             strError = "";
@@ -293,6 +295,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
+                    this.m_strAssemblyLibraryHostError = "";    // 2017/5/22
                     if (nRet == 1)
                     {
                         Debug.Assert(assembly != null, "");

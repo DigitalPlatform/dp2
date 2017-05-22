@@ -1142,6 +1142,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string PeriodField;
         
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string VolumeField;
+        
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
             get {
@@ -1304,6 +1307,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.PeriodField, value) != true)) {
                     this.PeriodField = value;
                     this.RaisePropertyChanged("Period");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Volume {
+            get {
+                return this.VolumeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.VolumeField, value) != true)) {
+                    this.VolumeField = value;
+                    this.RaisePropertyChanged("Volume");
                 }
             }
         }
@@ -2066,6 +2082,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string ReturnOperatorField;
         
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string VolumeField;
+        
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
             get {
@@ -2189,6 +2208,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.ReturnOperatorField, value) != true)) {
                     this.ReturnOperatorField = value;
                     this.RaisePropertyChanged("ReturnOperator");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Volume {
+            get {
+                return this.VolumeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.VolumeField, value) != true)) {
+                    this.VolumeField = value;
+                    this.RaisePropertyChanged("Volume");
                 }
             }
         }
