@@ -1083,11 +1083,11 @@ namespace dp2Library
 
                     if (nPasswordRet == 1)
                     {
-                        string strMessage = "登录验证码为 " + code.Code + "。(用户 " + sessioninfo.Account.UserID + ") 十分钟以后失效";
+                        string strMessage = "登录验证码为 " + code.Code + "。(用户 " + sessioninfo.Account.UserID + ") " + Account.TempCodeExpireLength.TotalMinutes + "分钟以后失效";
                         string strLibraryName = app.LibraryName;
                         if (string.IsNullOrEmpty(strLibraryName) == false)
                         {
-                            strMessage = "登录验证码为 " + code.Code + "。(用户 " + sessioninfo.Account.UserID + " " + strLibraryName + ") 十分钟以后失效";
+                            strMessage = "登录验证码为 " + code.Code + "。(用户 " + sessioninfo.Account.UserID + " " + strLibraryName + ") " + Account.TempCodeExpireLength.TotalMinutes + "分钟以后失效";
                         }
 
                         // 通过 MSMQ 发送手机短信

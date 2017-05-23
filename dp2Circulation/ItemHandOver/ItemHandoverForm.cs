@@ -88,71 +88,77 @@ namespace dp2Circulation
         /// 列号: 错误信息
         /// </summary>
         public static int COLUMN_ERRORINFO = 1;  // 错误信息
+
+        /// <summary>
+        /// 列号: 卷册
+        /// </summary>
+        public static int COLUMN_VOLUME = 2;           // 卷册
+
         /// <summary>
         /// 列号: ISBN/ISSN
         /// </summary>
-        public static int COLUMN_ISBNISSN = 2;           // ISBN/ISSN
+        public static int COLUMN_ISBNISSN = 3;           // ISBN/ISSN
 
         /// <summary>
         /// 列号: 状态
         /// </summary>
-        public static int COLUMN_STATE = 3;      // 状态
+        public static int COLUMN_STATE = 4;      // 状态
         /// <summary>
         /// 列号: 馆藏地点
         /// </summary>
-        public static int COLUMN_LOCATION = 4;   // 馆藏地点
+        public static int COLUMN_LOCATION = 5;   // 馆藏地点
         /// <summary>
         /// 列号: 价格
         /// </summary>
-        public static int COLUMN_PRICE = 5;      // 价格
+        public static int COLUMN_PRICE = 6;      // 价格
         /// <summary>
         /// 列号: 册类型
         /// </summary>
-        public static int COLUMN_BOOKTYPE = 6;   // 册类型
+        public static int COLUMN_BOOKTYPE = 7;   // 册类型
         /// <summary>
         /// 列号: 登录号
         /// </summary>
-        public static int COLUMN_REGISTERNO = 7; // 登录号
+        public static int COLUMN_REGISTERNO = 8; // 登录号
         /// <summary>
         /// 列号: 注释
         /// </summary>
-        public static int COLUMN_COMMENT = 8;    // 注释
+        public static int COLUMN_COMMENT = 9;    // 注释
         /// <summary>
         /// 列号: 合并注释
         /// </summary>
-        public static int COLUMN_MERGECOMMENT = 9;   // 合并注释
+        public static int COLUMN_MERGECOMMENT = 10;   // 合并注释
         /// <summary>
         /// 列号: 批次号
         /// </summary>
-        public static int COLUMN_BATCHNO = 10;    // 批次号
+        public static int COLUMN_BATCHNO = 11;    // 批次号
         /// <summary>
         /// 列号: 借阅者
         /// </summary>
-        public static int COLUMN_BORROWER = 11;  // 借阅者
+        public static int COLUMN_BORROWER = 12;  // 借阅者
         /// <summary>
         /// 列号: 借阅日期
         /// </summary>
-        public static int COLUMN_BORROWDATE = 12;    // 借阅日期
+        public static int COLUMN_BORROWDATE = 13;    // 借阅日期
         /// <summary>
         /// 列号: 借阅期限
         /// </summary>
-        public static int COLUMN_BORROWPERIOD = 13;  // 借阅期限
+        public static int COLUMN_BORROWPERIOD = 14;  // 借阅期限
         /// <summary>
         /// 列号: 册记录路径
         /// </summary>
-        public static int COLUMN_RECPATH = 14;   // 册记录路径
+        public static int COLUMN_RECPATH = 15;   // 册记录路径
         /// <summary>
         /// 列号: 种记录路径
         /// </summary>
-        public static int COLUMN_BIBLIORECPATH = 15; // 种记录路径
+        public static int COLUMN_BIBLIORECPATH = 16; // 种记录路径
         /// <summary>
         /// 列号: 索取号
         /// </summary>
-        public static int COLUMN_ACCESSNO = 16; // 索取号
+        public static int COLUMN_ACCESSNO = 17; // 索取号
         /// <summary>
         /// 列号: 目标记录路径
         /// </summary>
-        public static int COLUMN_TARGETRECPATH = 17; // 目标记录路径
+        public static int COLUMN_TARGETRECPATH = 18; // 目标记录路径
 
         #endregion
 
@@ -947,6 +953,7 @@ this.splitContainer_inAndOutof,
         void CreateColumnHeader(ListView list)
         {
             ColumnHeader columnHeader_barcode = new ColumnHeader();
+            ColumnHeader columnHeader_volume = new ColumnHeader();
             ColumnHeader columnHeader_isbnIssn = new ColumnHeader();
             ColumnHeader columnHeader_state = new ColumnHeader();
             ColumnHeader columnHeader_location = new ColumnHeader();
@@ -972,6 +979,7 @@ this.splitContainer_inAndOutof,
             list.Columns.AddRange(new ColumnHeader[] {
             columnHeader_barcode,
             columnHeader_errorInfo,
+            columnHeader_volume,
             columnHeader_isbnIssn,
             columnHeader_state,
             columnHeader_location,
@@ -999,6 +1007,11 @@ this.splitContainer_inAndOutof,
             // 
             columnHeader_errorInfo.Text = "摘要/错误信息";
             columnHeader_errorInfo.Width = 200;
+            // 
+            // columnHeader_volume
+            // 
+            columnHeader_volume.Text = "卷册";
+            columnHeader_volume.Width = 160;
             // 
             // columnHeader_isbnIssn
             // 
@@ -1595,6 +1608,8 @@ this.splitContainer_inAndOutof,
                 "borrowDate");
             string strAccessNo = DomUtil.GetElementText(dom.DocumentElement,
                 "accessNo");
+            string strVolume = DomUtil.GetElementText(dom.DocumentElement,
+                "volume");
 
             // 2007/6/20
             strBorrowDate = DateTimeUtil.LocalTime(strBorrowDate, "u");
@@ -1606,6 +1621,7 @@ this.splitContainer_inAndOutof,
 
             ListViewUtil.ChangeItemText(item, COLUMN_ACCESSNO, strAccessNo);
             ListViewUtil.ChangeItemText(item, COLUMN_ISBNISSN, strISBnISSN);
+            ListViewUtil.ChangeItemText(item, COLUMN_VOLUME, strVolume);
 
             ListViewUtil.ChangeItemText(item, COLUMN_STATE, strState);
             ListViewUtil.ChangeItemText(item, COLUMN_LOCATION, strLocation);
@@ -2270,6 +2286,7 @@ MessageBoxDefaultButton.Button2);
                 "no -- 序号",
                 "barcode -- 册条码号",
                 "summary -- 摘要",
+                "volume -- 卷册",
                 "isbnIssn -- ISBN/ISSN",
                 "accessNo -- 索取号",
                 "state -- 状态",
@@ -2926,6 +2943,8 @@ MessageBoxDefaultButton.Button2);
                     case "isbnIssn":
                     case "ISBN/ISSN":
                         return item.SubItems[COLUMN_ISBNISSN].Text;
+                    case "volume":
+                        return item.SubItems[COLUMN_VOLUME].Text;
                     case "state":
                         return item.SubItems[COLUMN_STATE].Text;
                     case "location":
@@ -6920,6 +6939,12 @@ new string[] { "summary", "@isbnissn", "targetrecpath" });
             column.MaxChars = 50;
             this.Columns.Add(column);
 
+            // "volume -- 卷册"
+            column = new Column();
+            column.Name = "volume -- 卷册";
+            column.Caption = "卷册";
+            column.MaxChars = -1;
+            this.Columns.Add(column);
 
             // "location -- 馆藏地点"
             column = new Column();

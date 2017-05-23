@@ -11,6 +11,8 @@ using System.Diagnostics;
 using System.Net.Mail;
 using System.Web;
 
+using Ionic.Zip;
+
 using DigitalPlatform;	// Stop类
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
@@ -23,7 +25,6 @@ using DigitalPlatform.Range;
 
 using DigitalPlatform.Message;
 using DigitalPlatform.rms.Client.rmsws_localhost;
-using Ionic.Zip;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -106,6 +107,7 @@ namespace DigitalPlatform.LibraryServer
             if (strAction == "initialize")
             {
                 return InitializeDatabase(
+                    sessioninfo,
                     Channels,
                     strLibraryCodeList,
                     strDatabaseNames,
@@ -117,6 +119,7 @@ namespace DigitalPlatform.LibraryServer
             if (strAction == "refresh")
             {
                 return RefreshDatabaseDefs(
+                    sessioninfo,
                     Channels,
                     strLibraryCodeList,
                     strDatabaseNames,
@@ -204,22 +207,50 @@ namespace DigitalPlatform.LibraryServer
 
                 }
 
-                int nRet = CompressDirectory(
-                    strTempDir,
-                    strTempDir,
-                    strLogFileName,
-                    Encoding.UTF8,
-                    true,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
+                if (string.IsNullOrEmpty(strTempDir) == false)
+                {
+                    int nRet = CompressDirectory(
+                        strTempDir,
+                        strTempDir,
+                        strLogFileName,
+                        Encoding.UTF8,
+                        true,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
 
                 return 0;
             }
             finally
             {
-                PathUtil.DeleteDirectory(strTempDir);
+                if (string.IsNullOrEmpty(strTempDir) == false)
+                    PathUtil.DeleteDirectory(strTempDir);
             }
+        }
+
+        // 如果数据库不存在会当作出错-1来报错
+        int InitializeDatabase(RmsChannel channel,
+            string strDbName,
+            string strLogFileName,
+            out string strError)
+        {
+            strError = "";
+
+            // 获得一个数据库的全部配置文件
+            if (string.IsNullOrEmpty(strLogFileName) == false)
+            {
+                int nRet = GetConfigFiles(channel,
+                strDbName,
+                strLogFileName,
+                out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            // 初始化书目库
+            long lRet = channel.DoInitialDB(strDbName, out strError);
+            return (int)lRet;
         }
 
 
@@ -1782,7 +1813,6 @@ namespace DigitalPlatform.LibraryServer
             int nRet = 0;
 
             string strLogFileName = this.GetTempFileName("zip");
-            List<XmlNode> database_nodes = new List<XmlNode>(); // 已经创建的数据库的定义节点
 
             bool bDbNameChanged = false;
 
@@ -2339,7 +2369,7 @@ out strError);
 
                 XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
 "");
-                foreach(string name in names)
+                foreach (string name in names)
                 {
                     XmlElement database = domOperLog.CreateElement("database");
                     new_node.AppendChild(database);
@@ -2362,7 +2392,7 @@ out strError);
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "ManageDatabase() API createDatabase 写入日志时发生错误: " + strError;
+                        strError = "ManageDatabase() API deleteDatabase 写入日志时发生错误: " + strError;
                         return -1;
                     }
                 }
@@ -2428,6 +2458,7 @@ out strError);
         //      0   没有找到
         //      1   成功
         int RefreshDatabaseDefs(
+            SessionInfo sessioninfo,
             RmsChannelCollection Channels,
             string strLibraryCodeList,
             string strDatabaseNames,
@@ -2440,6 +2471,8 @@ out strError);
 
             int nRet = 0;
             // long lRet = 0;
+
+            string strLogFileName = this.GetTempFileName("zip");
 
             string strInclude = "";
             string strExclude = "";
@@ -2456,7 +2489,7 @@ out strError);
                 }
                 catch (Exception ex)
                 {
-                    strError = "参数strDatabaseInfo的值装入XMLDOM时出错: " + ex.Message;
+                    strError = "参数 strDatabaseInfo 的值装入 XMLDOM 时出错: " + ex.Message;
                     return -1;
                 }
                 XmlNode style_node = style_dom.DocumentElement.SelectSingleNode("//refreshStyle");
@@ -2474,10 +2507,13 @@ out strError);
 
             // bool bKeysDefChanged = false;    // 刷新后，keys配置可能被改变
             List<string> keyschanged_dbnames = new List<string>();  // keys定义发生了改变的数据库名
+            List<string> dbnames = new List<string>();  // 已经完成的数据库名集合
+            List<string> other_dbnames = new List<string>();    // 其他类型的数据库名集合
+            List<string> other_types = new List<string>();  // 和 other_dbnames 锁定对应的数据库类型集合
 
             RmsChannel channel = Channels.GetChannel(this.WsUrl);
 
-            string[] names = strDatabaseNames.Split(new char[] { ',' });
+            string[] names = strDatabaseNames.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < names.Length; i++)
             {
                 string strName = names[i].Trim();
@@ -2521,6 +2557,7 @@ out strError);
                         strInclude,
                         strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2529,6 +2566,8 @@ out strError);
                     }
                     if (nRet == 1)
                         keyschanged_dbnames.Add(strName);
+
+                    dbnames.Add(strName);
 
                     // 刷新实体库
                     string strEntityDbName = DomUtil.GetAttr(nodeDatabase, "name");
@@ -2542,6 +2581,7 @@ out strError);
                             strInclude,
                             strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                             out strError);
                         if (nRet == -1)
                         {
@@ -2550,6 +2590,7 @@ out strError);
                         }
                         if (nRet == 1)
                             keyschanged_dbnames.Add(strEntityDbName);
+                        dbnames.Add(strEntityDbName);
                     }
 
                     // 刷新订购库
@@ -2564,6 +2605,7 @@ out strError);
                             strInclude,
                             strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                             out strError);
                         if (nRet == -1)
                         {
@@ -2572,6 +2614,7 @@ out strError);
                         }
                         if (nRet == 1)
                             keyschanged_dbnames.Add(strOrderDbName);
+                        dbnames.Add(strOrderDbName);
                     }
 
                     // 刷新期库
@@ -2585,6 +2628,7 @@ out strError);
                             strInclude,
                             strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                             out strError);
                         if (nRet == -1)
                         {
@@ -2593,6 +2637,7 @@ out strError);
                         }
                         if (nRet == 1)
                             keyschanged_dbnames.Add(strIssueDbName);
+                        dbnames.Add(strIssueDbName);
                     }
 
                     // 刷新评注库
@@ -2607,6 +2652,7 @@ out strError);
                             strInclude,
                             strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                             out strError);
                         if (nRet == -1)
                         {
@@ -2615,6 +2661,7 @@ out strError);
                         }
                         if (nRet == 1)
                             keyschanged_dbnames.Add(strCommentDbName);
+                        dbnames.Add(strCommentDbName);
                     }
 
                     continue;
@@ -2646,6 +2693,7 @@ out strError);
                         strInclude,
                         strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2655,6 +2703,7 @@ out strError);
                     if (nRet == 1)
                         keyschanged_dbnames.Add(strName);
 
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -2683,6 +2732,7 @@ out strError);
                         strInclude,
                         strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2692,6 +2742,7 @@ out strError);
                     if (nRet == 1)
                         keyschanged_dbnames.Add(strName);
 
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -2721,6 +2772,7 @@ out strError);
                         strInclude,
                         strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2730,6 +2782,7 @@ out strError);
                     if (nRet == 1)
                         keyschanged_dbnames.Add(strName);
 
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -2759,6 +2812,7 @@ out strError);
                         strInclude,
                         strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2768,6 +2822,7 @@ out strError);
                     if (nRet == 1)
                         keyschanged_dbnames.Add(strName);
 
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -2805,6 +2860,7 @@ out strError);
                         strInclude,
                         strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2814,6 +2870,7 @@ out strError);
                     if (nRet == 1)
                         keyschanged_dbnames.Add(strName);
 
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -2834,6 +2891,7 @@ out strError);
                         strInclude,
                         strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2842,6 +2900,7 @@ out strError);
                     }
                     if (nRet == 1)
                         keyschanged_dbnames.Add(strName);
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -2862,6 +2921,7 @@ out strError);
                         strInclude,
                         strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2871,6 +2931,7 @@ out strError);
                     if (nRet == 1)
                         keyschanged_dbnames.Add(strName);
 
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -2891,6 +2952,7 @@ out strError);
                         strInclude,
                         strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2900,6 +2962,7 @@ out strError);
                     if (nRet == 1)
                         keyschanged_dbnames.Add(strName);
 
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -2920,6 +2983,7 @@ out strError);
                         strInclude,
                         strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2929,6 +2993,7 @@ out strError);
                     if (nRet == 1)
                         keyschanged_dbnames.Add(strName);
 
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -2969,6 +3034,7 @@ out strError);
                         strInclude,
                         strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2977,6 +3043,7 @@ out strError);
                     }
                     if (nRet == 1)
                         keyschanged_dbnames.Add(strName);
+                    dbnames.Add(strName);
 
                     continue;
                 }
@@ -3007,6 +3074,7 @@ out strError);
                         strInclude,
                         strExclude,
                         bRecoverModeKeys,
+                        strLogFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -3015,6 +3083,7 @@ out strError);
                     }
                     if (nRet == 1)
                         keyschanged_dbnames.Add(strName);
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -3034,6 +3103,8 @@ out strError);
                     }
 
                     this.AccessLogDatabase.CreateIndex();
+                    other_dbnames.Add(strName);
+                    other_types.Add("accessLog");
                     continue;
                 }
 
@@ -3053,6 +3124,8 @@ out strError);
                     }
 
                     this.HitCountDatabase.CreateIndex();
+                    other_dbnames.Add(strName);
+                    other_types.Add("hitcount");
                     continue;
                 }
 
@@ -3072,6 +3145,8 @@ out strError);
                     }
 
                     this.ChargingOperDatabase.CreateIndex();
+                    other_dbnames.Add(strName);
+                    other_types.Add("chargingOper");
                     continue;
                 }
 
@@ -3091,11 +3166,68 @@ out strError);
                     }
 
                     this.CreateBiblioSummaryIndex();
+                    other_dbnames.Add(strName);
+                    other_types.Add("biblioSummary");
                     continue;
                 }
 
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
                 return 0;
+            }
+
+            // 写入操作日志
+            {
+                XmlDocument domOperLog = new XmlDocument();
+                domOperLog.LoadXml("<root />");
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "operation",
+                    "manageDatabase");
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "action",
+    "refreshDatabase");
+
+                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
+"");
+                foreach (string name in dbnames)
+                {
+                    XmlElement database = domOperLog.CreateElement("database");
+                    new_node.AppendChild(database);
+                    database.SetAttribute("name", name);
+                }
+                {
+                    int i = 0;
+                    foreach (string name in other_dbnames)
+                    {
+                        string type = other_types[i];
+                        XmlElement database = domOperLog.CreateElement("database");
+                        new_node.AppendChild(database);
+                        database.SetAttribute("name", name);
+                        database.SetAttribute("type", type);
+                        i++;
+                    }
+                }
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                    sessioninfo.UserID);
+
+                string strOperTime = this.Clock.GetClock();
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                    strOperTime);
+
+                using (Stream stream = File.OpenRead(strLogFileName))
+                {
+                    nRet = this.OperLog.WriteOperLog(domOperLog,
+                        sessioninfo.ClientAddress,
+                        stream,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "ManageDatabase() API refreshDatabase 写入日志时发生错误: " + strError;
+                        return -1;
+                    }
+                }
             }
 
             // 2016/12/27
@@ -3192,6 +3324,7 @@ out strError);
         //      0   没有找到
         //      1   成功
         int InitializeDatabase(
+            SessionInfo sessioninfo,
             RmsChannelCollection Channels,
             string strLibraryCodeList,
             string strDatabaseNames,
@@ -3204,11 +3337,16 @@ out strError);
             int nRet = 0;
             long lRet = 0;
 
+            string strLogFileName = this.GetTempFileName("zip");
+            List<string> dbnames = new List<string>();  // 已经完成的数据库名集合
+            List<string> other_dbnames = new List<string>();    // 其他类型的数据库名集合
+            List<string> other_types = new List<string>();  // 和 other_dbnames 锁定对应的数据库类型集合
+
             bool bDbNameChanged = false;    // 初始化后，检索途径名等都可能被改变
 
             RmsChannel channel = Channels.GetChannel(this.WsUrl);
 
-            string[] names = strDatabaseNames.Split(new char[] { ',' });
+            string[] names = strDatabaseNames.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             for (int i = 0; i < names.Length; i++)
             {
                 string strName = names[i].Trim();
@@ -3234,61 +3372,81 @@ out strError);
                     }
 
                     // 初始化书目库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化小书目库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
 
+                    dbnames.Add(strName);
                     bDbNameChanged = true;
 
                     // 初始化实体库
                     string strEntityDbName = DomUtil.GetAttr(nodeDatabase, "name");
                     if (String.IsNullOrEmpty(strEntityDbName) == false)
                     {
-                        lRet = channel.DoInitialDB(strEntityDbName, out strError);
+                        lRet = InitializeDatabase(channel,
+                            strEntityDbName,
+                            strLogFileName,
+                            out strError);
                         if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                         {
                             strError = "初始化书目库 '" + strName + "' 所从属的实体库 '" + strEntityDbName + "' 时发生错误: " + strError;
                             return -1;
                         }
+                        dbnames.Add(strEntityDbName);
                     }
 
                     // 初始化订购库
                     string strOrderDbName = DomUtil.GetAttr(nodeDatabase, "orderDbName");
                     if (String.IsNullOrEmpty(strOrderDbName) == false)
                     {
-                        lRet = channel.DoInitialDB(strOrderDbName, out strError);
+                        lRet = InitializeDatabase(channel,
+                            strOrderDbName,
+                            strLogFileName,
+                            out strError);
                         if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                         {
                             strError = "初始化书目库 '" + strName + "' 所从属的订购库 '" + strOrderDbName + "' 时发生错误: " + strError;
                             return -1;
                         }
+                        dbnames.Add(strOrderDbName);
                     }
 
                     // 初始化期库
                     string strIssueDbName = DomUtil.GetAttr(nodeDatabase, "issueDbName");
                     if (String.IsNullOrEmpty(strIssueDbName) == false)
                     {
-                        lRet = channel.DoInitialDB(strIssueDbName, out strError);
+                        lRet = InitializeDatabase(channel,
+                            strIssueDbName,
+                            strLogFileName,
+                            out strError);
                         if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                         {
                             strError = "初始化书目库 '" + strName + "' 所从属的期库 '" + strIssueDbName + "' 时发生错误: " + strError;
                             return -1;
                         }
+                        dbnames.Add(strIssueDbName);
                     }
 
                     // 初始化评注库
                     string strCommentDbName = DomUtil.GetAttr(nodeDatabase, "commentDbName");
                     if (String.IsNullOrEmpty(strCommentDbName) == false)
                     {
-                        lRet = channel.DoInitialDB(strCommentDbName, out strError);
+                        lRet = InitializeDatabase(channel,
+                            strCommentDbName,
+                            strLogFileName,
+                            out strError);
                         if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                         {
                             strError = "初始化书目库 '" + strName + "' 所从属的评注库 '" + strCommentDbName + "' 时发生错误: " + strError;
                             return -1;
                         }
+                        dbnames.Add(strCommentDbName);
                     }
 
                     continue;
@@ -3312,15 +3470,18 @@ out strError);
                     }
 
                     // 初始化实体库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化实体库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
 
+                    dbnames.Add(strName);
                     bDbNameChanged = true;
-
                     continue;
                 }
 
@@ -3342,15 +3503,18 @@ out strError);
                     }
 
                     // 初始化订购库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化订购库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
 
+                    dbnames.Add(strName);
                     bDbNameChanged = true;
-
                     continue;
                 }
 
@@ -3372,15 +3536,18 @@ out strError);
                     }
 
                     // 初始化期库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化期库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
 
+                    dbnames.Add(strName);
                     bDbNameChanged = true;
-
                     continue;
                 }
 
@@ -3402,13 +3569,17 @@ out strError);
                     }
 
                     // 初始化评注库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化评注库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
 
+                    dbnames.Add(strName);
                     bDbNameChanged = true;
                     continue;
                 }
@@ -3439,13 +3610,17 @@ out strError);
                     }
 
                     // 初始化读者库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化读者库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
 
+                    dbnames.Add(strName);
                     bDbNameChanged = true;
                     continue;
                 }
@@ -3460,12 +3635,16 @@ out strError);
                     }
 
                     // 初始化预约到书库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化预约到书库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -3479,13 +3658,17 @@ out strError);
                     }
 
                     // 初始化违约金库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化违约金库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
 
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -3499,13 +3682,17 @@ out strError);
                     }
 
                     // 初始化发票库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化发票库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
 
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -3519,13 +3706,17 @@ out strError);
                     }
 
                     // 初始化消息库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化消息库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
 
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -3539,13 +3730,17 @@ out strError);
                     }
 
                     // 初始化拼音库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化拼音库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
 
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -3559,13 +3754,16 @@ out strError);
                     }
 
                     // 初始化著者号码库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化著者号码库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
-
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -3586,12 +3784,16 @@ out strError);
                     }
 
                     // 初始化实用库
-                    lRet = channel.DoInitialDB(strName, out strError);
+                    lRet = InitializeDatabase(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
                     if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                     {
                         strError = "初始化实用库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
+                    dbnames.Add(strName);
                     continue;
                 }
 
@@ -3617,6 +3819,8 @@ out strError);
                         strError = "初始化" + AccessLogDbName + "库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
+                    other_dbnames.Add(strName);
+                    other_types.Add("accessLog");
                     continue;
                 }
 
@@ -3642,6 +3846,8 @@ out strError);
                         strError = "初始化" + HitCountDbName + "库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
+                    other_dbnames.Add(strName);
+                    other_types.Add("hitcount");
                     continue;
                 }
 
@@ -3667,6 +3873,8 @@ out strError);
                         strError = "初始化" + ChargingHistoryDbName + "库 '" + strName + "' 时发生错误: " + strError;
                         return -1;
                     }
+                    other_dbnames.Add(strName);
+                    other_types.Add("chargingOper");
                     continue;
                 }
 
@@ -3687,12 +3895,71 @@ out strError);
 
                     // 初始化
                     this.ClearBiblioSummaryDb();
+                    other_dbnames.Add(strName);
+                    other_types.Add("biblioSummary");
                     continue;
                 }
 
                 strError = "数据库名 '" + strName + "' 不属于 dp2library 目前管辖的范围...";
                 return 0;
             }
+
+
+            // 写入操作日志
+            {
+                XmlDocument domOperLog = new XmlDocument();
+                domOperLog.LoadXml("<root />");
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "operation",
+                    "manageDatabase");
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "action",
+    "initializeDatabase");
+
+                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
+"");
+                foreach (string name in dbnames)
+                {
+                    XmlElement database = domOperLog.CreateElement("database");
+                    new_node.AppendChild(database);
+                    database.SetAttribute("name", name);
+                }
+                {
+                    int i = 0;
+                    foreach (string name in other_dbnames)
+                    {
+                        string type = other_types[i];
+                        XmlElement database = domOperLog.CreateElement("database");
+                        new_node.AppendChild(database);
+                        database.SetAttribute("name", name);
+                        database.SetAttribute("type", type);
+                        i++;
+                    }
+                }
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                    sessioninfo.UserID);
+
+                string strOperTime = this.Clock.GetClock();
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                    strOperTime);
+
+                using (Stream stream = File.OpenRead(strLogFileName))
+                {
+                    nRet = this.OperLog.WriteOperLog(domOperLog,
+                        sessioninfo.ClientAddress,
+                        stream,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "ManageDatabase() API refreshDatabase 写入日志时发生错误: " + strError;
+                        return -1;
+                    }
+                }
+            }
+
 
             if (bDbNameChanged == true)
             {
@@ -5242,77 +5509,86 @@ out strError);
             string strIncludeFilenames,
             string strExcludeFilenames,
             bool bRecoverModeKeys,
+            string strLogFileName,
             out string strError)
         {
             strError = "";
             int nRet = 0;
 
-            strIncludeFilenames = strIncludeFilenames.ToLower();
-            strExcludeFilenames = strExcludeFilenames.ToLower();
-
-            bool bKeysChanged = false;
-
-            DirectoryInfo di = new DirectoryInfo(strTemplateDir);
-            FileInfo[] fis = di.GetFiles();
-
-            // 创建所有文件对象
-            for (int i = 0; i < fis.Length; i++)
+            string strTempDir = "";
+            if (string.IsNullOrEmpty(strLogFileName) == false)
             {
-                string strName = fis[i].Name;
-                if (strName == "." || strName == "..")
-                    continue;
+                strTempDir = Path.Combine(this.TempDir, "~" + Guid.NewGuid().ToString());
+                PathUtil.TryCreateDir(strTempDir);
+            }
 
-                if (FileUtil.IsBackupFile(strName) == true)
-                    continue;
+            try
+            {
+                int nCfgFileCount = 0;
 
-                // 2015/9/28
-                if (strName.ToLower() == "keys_recover")
-                    continue;
+                strIncludeFilenames = strIncludeFilenames.ToLower();
+                strExcludeFilenames = strExcludeFilenames.ToLower();
 
-                /*
-                if (strName.ToLower() == "keys"
-                    || strName.ToLower() == "browse")
-                    continue;
-                 * */
+                bool bKeysChanged = false;
 
-                // 如果Include和exclude里面都有一个文件名，优先依exclude(排除)
-                if (StringUtil.IsInList(strName, strExcludeFilenames) == true)
-                    continue;
+                DirectoryInfo di = new DirectoryInfo(strTemplateDir);
+                FileInfo[] fis = di.GetFiles();
 
-                if (strIncludeFilenames != "*")
+                // 创建所有文件对象
+                for (int i = 0; i < fis.Length; i++)
                 {
-                    if (StringUtil.IsInList(strName, strIncludeFilenames) == false)
+                    string strName = fis[i].Name;
+                    if (strName == "." || strName == "..")
                         continue;
-                }
 
-                string strFullPath = fis[i].FullName;
+                    if (FileUtil.IsBackupFile(strName) == true)
+                        continue;
 
-                if (bRecoverModeKeys == true && strName == "keys")
-                {
-                    string strFullPathRecover = Path.Combine(Path.GetDirectoryName(strFullPath), "keys_recover");
-                    if (File.Exists(strFullPathRecover) == true)
-                        strFullPath = strFullPathRecover;
-                }
+                    // 2015/9/28
+                    if (strName.ToLower() == "keys_recover")
+                        continue;
 
-                nRet = ConvertGb2312TextfileToUtf8(strFullPath,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
 
-                string strExistContent = "";
-                string strNewContent = "";
+                    // 如果Include和exclude里面都有一个文件名，优先依exclude(排除)
+                    if (StringUtil.IsInList(strName, strExcludeFilenames) == true)
+                        continue;
 
-                using (Stream new_stream = new FileStream(strFullPath, FileMode.Open))
-                {
-                    using (StreamReader sr = new StreamReader(new_stream, Encoding.UTF8))
+                    if (strIncludeFilenames != "*")
                     {
-                        strNewContent = ConvertCrLf(sr.ReadToEnd());
+                        if (StringUtil.IsInList(strName, strIncludeFilenames) == false)
+                            continue;
                     }
-                }
 
+                    string strFullPath = fis[i].FullName;
+
+                    if (bRecoverModeKeys == true && strName == "keys")
+                    {
+                        string strFullPathRecover = Path.Combine(Path.GetDirectoryName(strFullPath), "keys_recover");
+                        if (File.Exists(strFullPathRecover) == true)
+                            strFullPath = strFullPathRecover;
+                    }
+
+                    nRet = ConvertGb2312TextfileToUtf8(strFullPath,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    string strExistContent = "";
+                    string strNewContent = "";
+
+                    using (Stream new_stream = new FileStream(strFullPath, FileMode.Open))
+                    {
+                        using (StreamReader sr = new StreamReader(new_stream, Encoding.UTF8))
+                        {
+                            strNewContent = ConvertCrLf(sr.ReadToEnd());
+                        }
+                    }
+
+#if NO
                 using (Stream new_stream = new FileStream(strFullPath, FileMode.Open))
                 {
                     new_stream.Seek(0, SeekOrigin.Begin);
+#endif
 
                     string strPath = strDatabaseName + "/cfgs/" + strName;
 
@@ -5350,77 +5626,112 @@ out strError);
                         {
                             strExistContent = ConvertCrLf(sr.ReadToEnd());
                         }
-                        // 注意，此后 exist_stream 已经被关闭
 
-#if NO
-                    }
-                    finally
-                    {
-                        if (exist_stream != null)
+                        // 比较本地的和服务器的有无区别，无区别就不要上载了
+                        if (strExistContent == strNewContent)
+                            continue;
+
+                        // 保存修改前的配置文件
+                        if (string.IsNullOrEmpty(strTempDir) == false)
                         {
-                            exist_stream.Close();
-                            exist_stream = null;
+                            string strTargetFilePath = Path.Combine(strTempDir, strDatabaseName, "old_cfgs\\" + strName);
+                            PathUtil.TryCreateDir(Path.GetDirectoryName(strTargetFilePath));
+
+                            // 注: exist_stream 此时已经被关闭了
+                            //exist_stream.Seek(0, SeekOrigin.Begin);
+                            using (Stream target_stream = File.Create(strTargetFilePath))
+                            {
+                                //StreamUtil.DumpStream(exist_stream, target_stream);
+                                byte[] buffer = Encoding.UTF8.GetBytes(strExistContent);
+                                target_stream.Write(buffer, 0, buffer.Length);
+                            }
+                            nCfgFileCount++;
                         }
                     }
-#endif
-                    }
 
+#if NO
                     // 比较本地的和服务器的有无区别，无区别就不要上载了
                     if (strExistContent == strNewContent)
                         continue;
+#endif
 
                 DO_CREATE:
-                    // 在服务器端创建对象
-                    // parameters:
-                    //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
-                    // return:
-                    //		-1	错误
-                    //		1	已经存在同名对象
-                    //		0	正常返回
-                    nRet = NewServerSideObject(
-                        channel,
-                        strPath,
-                        "",
-                        new_stream,
-                        timestamp,
-                        out strError);
-                    if (nRet == -1)
-                        return -1;
-                    if (nRet == 1)
+                    using (Stream new_stream = new FileStream(strFullPath, FileMode.Open))
                     {
-                        strError = "NewServerSideObject()发现已经存在同名对象: " + strError;
-                        return -1;
+                        new_stream.Seek(0, SeekOrigin.Begin);
+
+                        // 在服务器端创建对象
+                        // parameters:
+                        //      strStyle    风格。当创建目录的时候，为"createdir"，否则为空
+                        // return:
+                        //		-1	错误
+                        //		1	已经存在同名对象
+                        //		0	正常返回
+                        nRet = NewServerSideObject(
+                            channel,
+                            strPath,
+                            "",
+                            new_stream,
+                            timestamp,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        if (nRet == 1)
+                        {
+                            strError = "NewServerSideObject()发现已经存在同名对象: " + strError;
+                            return -1;
+                        }
+
+                        if (strName.ToLower() == "keys")
+                            bKeysChanged = true;
                     }
 
-                    if (strName.ToLower() == "keys")
-                        bKeysChanged = true;
-#if NO
+                    // 保存修改后的配置文件
+                    if (string.IsNullOrEmpty(strTempDir) == false)
+                    {
+                        string strNewTargetFilePath = Path.Combine(strTempDir, strDatabaseName, "cfgs\\" + strName);
+                        PathUtil.TryCreateDir(Path.GetDirectoryName(strNewTargetFilePath));
+                        File.Copy(strFullPath, strNewTargetFilePath);
+                        nCfgFileCount++;
+                    }
                 }
-                finally
-                {
-                    new_stream.Close();
-                }
-#endif
-                }
-            }
 
-            if (bKeysChanged == true)
+                if (nCfgFileCount > 0)
+                {
+                    nRet = CompressDirectory(
+        strTempDir,
+        strTempDir,
+        strLogFileName,
+        Encoding.UTF8,
+        true,
+        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+
+                if (bKeysChanged == true)
+                {
+                    // 对数据库及时调用刷新keys表的API
+                    long lRet = channel.DoRefreshDB(
+                        "begin",
+                        strDatabaseName,
+                        false,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        strError = "数据库 '" + strDatabaseName + "' 的定义已经被成功刷新，但在刷新内核Keys表操作时失败: " + strError;
+                        return -1;
+                    }
+                    return 1;
+                }
+
+                return 0;
+            }
+            finally
             {
-                // 对数据库及时调用刷新keys表的API
-                long lRet = channel.DoRefreshDB(
-                    "begin",
-                    strDatabaseName,
-                    false,
-                    out strError);
-                if (lRet == -1)
-                {
-                    strError = "数据库 '" + strDatabaseName + "' 的定义已经被成功刷新，但在刷新内核Keys表操作时失败: " + strError;
-                    return -1;
-                }
-                return 1;
+                if (string.IsNullOrEmpty(strTempDir) == false)
+                    PathUtil.DeleteDirectory(strTempDir);
             }
-
-            return 0;
         }
 
         static void CopyTempFile(string strSourcePath, string strTempDir, string strDatabaseName)

@@ -513,7 +513,6 @@ namespace dp2Circulation
                 long lPerCount = Math.Min(50, lHitCount);
                 Record[] searchresults = null;
 
-
                 // 获得结果集，装入listview
                 for (; ; )
                 {
@@ -712,7 +711,13 @@ namespace dp2Circulation
                     out strBiblioRecPath,
                     out strError);
                 if (nRet == -1)
-                    return -1;
+                {
+                    ListViewUtil.ChangeItemText(item,
+    this.m_bFirstColumnIsKey == false ? 1 : 2,
+    strError);
+                    continue;
+                    // return -1;
+                }
                 if (nRet == 0)
                 {
                     // colindex_list.Add(-1);
@@ -729,6 +734,9 @@ namespace dp2Circulation
 
                 biblio_recpaths.Add(strBiblioRecPath);
             }
+
+            if (biblio_recpaths.Count == 0)
+                return 1;
 
             CacheableBiblioLoader loader = new CacheableBiblioLoader();
             loader.Channel = channel;
@@ -2497,7 +2505,7 @@ null);
                     int v = 0;
                     if (Int32.TryParse(s, out v) == false)
                     {
-                        strError = "output_columns 数组中有非数字的字符串，格式错误";
+                        strError = "output_columns 数组中有非数字的字符串 '" + s + "'，格式错误";
                         return -1;
                     }
                     indices.Add(v - 1);   // 从 0 开始计数
@@ -3769,6 +3777,12 @@ MessageBoxDefaultButton.Button1);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("移除事项 [" + this.listView_inventoryList_records.SelectedItems.Count.ToString() + "] (&R)");
+            menuItem.Click += new System.EventHandler(this.menu_removeSelectedInventoryItems_Click);
+            if (this.listView_inventoryList_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("从盘点库中删除所选择事项 [" + this.listView_inventoryList_records.SelectedItems.Count.ToString() + "] (&D)");
             menuItem.Click += new System.EventHandler(this.menu_deleteSelectedInventoryItems_Click);
             if (this.listView_inventoryList_records.SelectedItems.Count == 0)
@@ -3783,6 +3797,20 @@ MessageBoxDefaultButton.Button1);
             this.listView_inventoryList_records.SelectedIndexChanged -= new System.EventHandler(this.listView_inventoryList_SelectedIndexChanged);
             ListViewUtil.SelectAllLines(this.listView_inventoryList_records);
             this.listView_inventoryList_records.SelectedIndexChanged += new System.EventHandler(this.listView_inventoryList_SelectedIndexChanged);
+        }
+
+        void menu_removeSelectedInventoryItems_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+"确实要移除所选定的 " + this.listView_inventoryList_records.SelectedItems.Count.ToString() + " 个记录? (移除只是从窗口内移走，不是从数据库中删除)",
+"InventoryForm",
+MessageBoxButtons.OKCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            ListViewUtil.DeleteSelectedItems(this.listView_inventoryList_records);
         }
 
         void menu_deleteSelectedInventoryItems_Click(object sender, EventArgs e)

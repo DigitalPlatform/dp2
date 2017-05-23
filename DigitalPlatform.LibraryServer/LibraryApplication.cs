@@ -149,7 +149,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.106 (2017/4/20) CopyBiblioInfo() API 经过较为严格的测试，修正了一些 Bug，从此前端的移动书目记录功能要求必须使用这个版本
         //      2.107 (2017/4/25) 为 VerifyBarcode() API 扩充 strAction 和 out strOutputBarcode 参数，支持变换条码号功能
         //      2.108 (2017/5/11) dp2Kernel 新版本 GetBrowse() API 支持 @coldef: 中使用名字空间和(匹配命中多个XmlNode时串接用的)分隔符号
-        public static string Version = "2.108";
+        //      2.109 (2017/5/23) 对 ManageDatabase() API 也写入日志了。但日志恢复功能会跳过这个类型的操作日志
+        public static string Version = "2.109";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -14907,7 +14908,7 @@ strLibraryCode);    // 读者所在的馆代码
         }
 
         // 验证码多长时间过期
-        static TimeSpan _expireLength = TimeSpan.FromHours(48);   // TimeSpan.FromMinutes(10);   // 10 分钟
+        public static TimeSpan TempCodeExpireLength = TimeSpan.FromHours(48);   // TimeSpan.FromMinutes(10);   // 10 分钟
 
         // 准备手机短信验证登录的第一阶段：产生验证码
         // return:
@@ -14963,7 +14964,7 @@ strLibraryCode);    // 读者所在的馆代码
                 else
                 {
                     // 失效期还没有到。主动延长一次失效期
-                    code.ExpireTime = DateTime.Now + _expireLength;
+                    code.ExpireTime = DateTime.Now + TempCodeExpireLength;
                     bExist = true;
                 }
             }
@@ -14975,7 +14976,7 @@ strLibraryCode);    // 读者所在的馆代码
                 code = new TempCode();
                 code.Key = strKey;
                 code.Code = rnd.Next(1, 999999).ToString();
-                code.ExpireTime = DateTime.Now + _expireLength;
+                code.ExpireTime = DateTime.Now + TempCodeExpireLength;
             }
 
             table.SetTempCode(code.Key, code);
