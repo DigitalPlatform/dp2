@@ -247,6 +247,10 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public class DupResultSet : ItemFileBase
     {
+        // 2017/4/14
+        // 辅助记忆是否排序过
+        public bool Sorted { get; set; }
+
         // 排序风格
         public DupResultSetSortStyle SortStyle = DupResultSetSortStyle.Path;
 

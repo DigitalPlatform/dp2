@@ -269,11 +269,13 @@ namespace dp2Circulation
             }
         }
 
+#if OLD_CHARGING_CHANNEL
         /// <summary>
         /// 通讯通道
         /// </summary>
         public LibraryChannel Channel = null;
         public DigitalPlatform.Stop stop = null;
+#endif
 
         ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
         static int m_nLockTimeout = 5000;	// 5000=5秒
@@ -318,9 +320,11 @@ namespace dp2Circulation
 
             if (tasks.Count > 0)
             {
+#if OLD_CHARGING_CHANNEL
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("进行一轮任务处理...");
                 stop.BeginLoop();
+#endif
                 try
                 {
 
@@ -332,12 +336,14 @@ namespace dp2Circulation
                             return;
                         }
 
+#if OLD_CHARGING_CHANNEL
                         if (stop != null && stop.State != 0)
                         {
                             this.Stopped = true;
                             this.Container.SetColorList();  // 促使“任务已经暂停”显示出来
                             return;
                         }
+#endif
 
                         // bool bStop = false;
                         // 执行任务
@@ -362,14 +368,18 @@ namespace dp2Circulation
                             Return(task);
                         }
 
+#if OLD_CHARGING_CHANNEL
                         stop.SetMessage("");
+#endif
                     }
                 }
                 finally
                 {
+#if OLD_CHARGING_CHANNEL
                     stop.EndLoop();
                     stop.OnStop -= new StopEventHandler(this.DoStop);
                     stop.Initial("");
+#endif
                 }
             }
 
@@ -414,14 +424,32 @@ namespace dp2Circulation
         // 将字符串中的宏 %datadir% 替换为实际的值
         string ReplaceMacro(string strText)
         {
-            strText = strText.Replace("%mappeddir%", PathUtil.MergePath(this.Container.MainForm.DataDir, "servermapped"));
-            return strText.Replace("%datadir%", this.Container.MainForm.DataDir);
+            strText = strText.Replace("%mappeddir%", PathUtil.MergePath(Program.MainForm.DataDir, "servermapped"));
+            return strText.Replace("%datadir%", Program.MainForm.DataDir);
         }
 
+#if OLD_CHARGING_CHANNEL
         internal void DoStop(object sender, StopEventArgs e)
         {
             if (this.Channel != null)
                 this.Channel.Abort();
+        }
+#else
+        internal void DoStop(object sender, StopEventArgs e)
+        {
+            if (this.Container != null)
+                this.Container.DoStop(sender, e);
+        }
+#endif
+
+        LibraryChannel GetChannel()
+        {
+            return this.Container.GetChannel();
+        }
+
+        void ReturnChannel(LibraryChannel channel)
+        {
+            this.Container.ReturnChannel(channel);
         }
 
         // 装载读者信息
@@ -435,15 +463,9 @@ namespace dp2Circulation
             this.Container.DisplayTask("refresh", task);
             this.Container.SetColorList();
 
-#if NO
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("装入读者信息 " +task.ReaderBarcode+ "...");
-            stop.BeginLoop();
-            try
-            {
-#endif
+#if OLD_CHARGING_CHANNEL
             stop.SetMessage("装入读者信息 " + task.ReaderBarcode + "...");
-
+#endif
             string strError = "";
 
             if (this.Container.IsCardMode == true)
@@ -456,7 +478,7 @@ namespace dp2Circulation
                 strStyle += ",summary";
             {
                 strStyle += ",xml";
-                if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.25") >= 0)
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.25") >= 0)
                     strStyle += ":noborrowhistory";
             }
 #if NO
@@ -464,19 +486,44 @@ namespace dp2Circulation
                 strStyle += ",summary";
 #endif
 
+#if OLD_CHARGING_CHANNEL
             stop.SetMessage("正在装入读者记录 " + task.ReaderBarcode + " ...");
+#endif
 
             string[] results = null;
             byte[] baTimestamp = null;
             string strRecPath = "";
-            long lRet = this.Channel.GetReaderInfo(
-                stop,
-                GetRequestPatronBarcode(task.ReaderBarcode),
-                strStyle,   // this.RenderFormat, // "html",
-                out results,
-                out strRecPath,
-                out baTimestamp,
-                out strError);
+
+            long lRet = 0;
+            {
+                LibraryChannel channel = this.GetChannel();
+                try
+                {
+#if OLD_CHARGING_CHANNEL
+                lRet = this.Channel.GetReaderInfo(
+                    stop,
+                    GetRequestPatronBarcode(task.ReaderBarcode),
+                    strStyle,   // this.RenderFormat, // "html",
+                    out results,
+                    out strRecPath,
+                    out baTimestamp,
+                    out strError);
+#else
+                    lRet = channel.GetReaderInfo(
+        null,
+        GetRequestPatronBarcode(task.ReaderBarcode),
+        strStyle,   // this.RenderFormat, // "html",
+        out results,
+        out strRecPath,
+        out baTimestamp,
+        out strError);
+#endif
+                }
+                finally
+                {
+                    this.ReturnChannel(channel);
+                }
+            }
 
             task.ErrorInfo = strError;
 
@@ -533,18 +580,39 @@ namespace dp2Circulation
                     strReaderXml = "";
 
                     strStyle = "xml";
-                    if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.25") >= 0)
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.25") >= 0)
                         strStyle += ":noborrowhistory";
                     results = null;
 
-                    lRet = this.Channel.GetReaderInfo(
-stop,
-strBarcode,
-strStyle,   // this.RenderFormat, // "html",
-out results,
-out strRecPath,
-out baTimestamp,
-out strError);
+                    {
+                        LibraryChannel channel = this.GetChannel();
+                        try
+                        {
+#if OLD_CHARGING_CHANNEL
+                        lRet = this.Channel.GetReaderInfo(
+    stop,
+    strBarcode,
+    strStyle,   // this.RenderFormat, // "html",
+    out results,
+    out strRecPath,
+    out baTimestamp,
+    out strError);
+#else
+                            lRet = channel.GetReaderInfo(
+        null,
+        strBarcode,
+        strStyle,   // this.RenderFormat, // "html",
+        out results,
+        out strRecPath,
+        out baTimestamp,
+        out strError);
+#endif
+                        }
+                        finally
+                        {
+                            this.ReturnChannel(channel);
+                        }
+                    }
                     if (lRet == 1 && results != null && results.Length >= 1)
                         strReaderXml = results[0];
                 }
@@ -597,7 +665,7 @@ out strError);
             if (this.Container.SpeakPatronName == true && results.Length >= 2)
             {
                 string strName = results[1];
-                this.Container.MainForm.Speak(strName);
+                Program.MainForm.Speak(strName);
             }
 
             // this.m_strCurrentBarcode = strBarcode;
@@ -659,7 +727,7 @@ out strError);
 
         string GetPostFix()
         {
-            if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.24") >= 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.24") >= 0)
                 return ":noborrowhistory";
             return "";
         }
@@ -679,15 +747,9 @@ out strError);
 
             string strOperText = task.ReaderBarcode + " 借 " + task.ItemBarcode;
 
-#if NO
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial(strOperText + " ...");
-            stop.BeginLoop();
-            try
-            {
-#endif
+#if OLD_CHARGING_CHANNEL
             stop.SetMessage(strOperText + " ...");
-
+#endif
             string strError = "";
 
             string strReaderRecord = "";
@@ -721,7 +783,7 @@ out strError);
             // item返回的格式
             string strItemReturnFormats = "";
 
-            if (this.Container.MainForm.ChargingNeedReturnItemXml == true)
+            if (Program.MainForm.ChargingNeedReturnItemXml == true)
             {
                 if (String.IsNullOrEmpty(strItemReturnFormats) == false)
                     strItemReturnFormats += ",";
@@ -734,7 +796,7 @@ out strError);
             // 读者返回格式
             string strReaderFormatList = "";
             bool bName = false; // 是否直接取得读者姓名，而不要获得读者 XML
-            if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.24") >= 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.24") >= 0)
             {
                 strReaderFormatList = this.Container.PatronRenderFormat + ",summary";
                 bName = true;
@@ -744,32 +806,63 @@ out strError);
 
             string strStyle = "reader";
 
-            if (this.Container.MainForm.ChargingNeedReturnItemXml)
+            if (Program.MainForm.ChargingNeedReturnItemXml)
                 strStyle += ",item";
 
             //if (this.Container.MainForm.TestMode == true)
             //    strStyle += ",testmode";
             times.Add(DateTime.Now);
 
-            long lRet = Channel.Borrow(
-stop,
-bRenew,
-task.ReaderBarcode,
-task.ItemBarcode,
-strConfirmItemRecPath,
-false,
-null,   // this.OneReaderItemBarcodes,
-strStyle,
-strItemReturnFormats,
-out item_records,
-strReaderFormatList,    // this.Container.PatronRenderFormat + ",xml" + GetPostFix(),
-out reader_records,
-strBiblioReturnFormats,
-out biblio_records,
-out aDupPath,
-out strOutputReaderBarcode,
-out borrow_info,
-out strError);
+            long lRet = 0;
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+#if OLD_CHARGING_CHANNEL
+                                lRet = Channel.Borrow(
+     stop,
+     bRenew,
+     task.ReaderBarcode,
+     task.ItemBarcode,
+     strConfirmItemRecPath,
+     false,
+     null,   // this.OneReaderItemBarcodes,
+     strStyle,
+     strItemReturnFormats,
+     out item_records,
+     strReaderFormatList,    // this.Container.PatronRenderFormat + ",xml" + GetPostFix(),
+     out reader_records,
+     strBiblioReturnFormats,
+     out biblio_records,
+     out aDupPath,
+     out strOutputReaderBarcode,
+     out borrow_info,
+     out strError);
+#else
+                lRet = channel.Borrow(
+     null,
+     bRenew,
+     task.ReaderBarcode,
+     task.ItemBarcode,
+     strConfirmItemRecPath,
+     false,
+     null,   // this.OneReaderItemBarcodes,
+     strStyle,
+     strItemReturnFormats,
+     out item_records,
+     strReaderFormatList,    // this.Container.PatronRenderFormat + ",xml" + GetPostFix(),
+     out reader_records,
+     strBiblioReturnFormats,
+     out biblio_records,
+     out aDupPath,
+     out strOutputReaderBarcode,
+     out borrow_info,
+     out strError);
+#endif
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
             task.ErrorInfo = strError;
 
             times.Add(DateTime.Now);
@@ -790,7 +883,7 @@ out strError);
             }
 
             string strItemXml = "";
-            if (this.Container.MainForm.ChargingNeedReturnItemXml == true
+            if (Program.MainForm.ChargingNeedReturnItemXml == true
                 && item_records != null)
             {
                 Debug.Assert(item_records != null, "");
@@ -833,7 +926,7 @@ out strError);
                 strConfirmItemRecPath,
                 task);
 
-            this.Container.MainForm.OperHistory.BorrowAsync(
+            Program.MainForm.OperHistory.BorrowAsync(
 this.Container,
 bRenew,
 strOutputReaderBarcode,
@@ -965,14 +1058,9 @@ end_time);
             else
                 strOperText = task.ReaderBarcode + " 还 " + task.ItemBarcode;
 
-#if NO
-            stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial(strOperText + " ...");
-            stop.BeginLoop();
-            try
-            {
-#endif
+#if OLD_CHARGING_CHANNEL
             stop.SetMessage(strOperText + " ...");
+#endif
 
             string strError = "";
 
@@ -1038,7 +1126,7 @@ end_time);
             // item返回的格式
             string strItemReturnFormats = "";
 
-            if (this.Container.MainForm.ChargingNeedReturnItemXml == true)
+            if (Program.MainForm.ChargingNeedReturnItemXml == true)
             {
                 if (String.IsNullOrEmpty(strItemReturnFormats) == false)
                     strItemReturnFormats += ",";
@@ -1051,7 +1139,7 @@ end_time);
             // 读者返回格式
             string strReaderFormatList = "";
             bool bName = false; // 是否直接取得读者姓名，而不要获得读者 XML
-            if (StringUtil.CompareVersion(this.Container.MainForm.ServerVersion, "2.24") >= 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.24") >= 0)
             {
                 strReaderFormatList = this.Container.PatronRenderFormat + ",summary";
                 bName = true;
@@ -1061,7 +1149,7 @@ end_time);
 
             string strStyle = "reader";
 
-            if (this.Container.MainForm.ChargingNeedReturnItemXml)
+            if (Program.MainForm.ChargingNeedReturnItemXml)
                 strStyle += ",item";
 
             if (string.IsNullOrEmpty(task.Parameters) == false)
@@ -1080,25 +1168,55 @@ end_time);
 
             times.Add(DateTime.Now);
 
-            long lRet = Channel.Return(
-                stop,
-                strAction,
-                strReaderBarcode,
-                task.ItemBarcode,
-                strConfirmItemRecPath,
-                false,
-                strStyle,   // this.NoBiblioAndItemInfo == false ? "reader,item,biblio" : "reader",
-                strItemReturnFormats,
-                out item_records,
-                strReaderFormatList,    // this.Container.PatronRenderFormat + ",xml" + GetPostFix(), // "html",
-                out reader_records,
-                strBiblioReturnFormats,
-                out biblio_records,
-                out aDupPath,
-                out strOutputReaderBarcode,
-                out return_info,
-                out strError);
+            long lRet = 0;
 
+            LibraryChannel channel = this.GetChannel();
+            try
+            {
+#if OLD_CHARGING_CHANNEL
+                                lRet = Channel.Return(
+                     stop,
+                     strAction,
+                     strReaderBarcode,
+                     task.ItemBarcode,
+                     strConfirmItemRecPath,
+                     false,
+                     strStyle,   // this.NoBiblioAndItemInfo == false ? "reader,item,biblio" : "reader",
+                     strItemReturnFormats,
+                     out item_records,
+                     strReaderFormatList,    // this.Container.PatronRenderFormat + ",xml" + GetPostFix(), // "html",
+                     out reader_records,
+                     strBiblioReturnFormats,
+                     out biblio_records,
+                     out aDupPath,
+                     out strOutputReaderBarcode,
+                     out return_info,
+                     out strError);
+#else
+                lRet = channel.Return(
+                     null,
+                     strAction,
+                     strReaderBarcode,
+                     task.ItemBarcode,
+                     strConfirmItemRecPath,
+                     false,
+                     strStyle,   // this.NoBiblioAndItemInfo == false ? "reader,item,biblio" : "reader",
+                     strItemReturnFormats,
+                     out item_records,
+                     strReaderFormatList,    // this.Container.PatronRenderFormat + ",xml" + GetPostFix(), // "html",
+                     out reader_records,
+                     strBiblioReturnFormats,
+                     out biblio_records,
+                     out aDupPath,
+                     out strOutputReaderBarcode,
+                     out return_info,
+                     out strError);
+#endif
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
             if (lRet != 0)
                 task.ErrorInfo = strError;
 
@@ -1126,7 +1244,7 @@ end_time);
             }
 
             string strItemXml = "";
-            if ((this.Container.MainForm.ChargingNeedReturnItemXml == true || strAction == "inventory")
+            if ((Program.MainForm.ChargingNeedReturnItemXml == true || strAction == "inventory")
                 && item_records != null)
             {
                 Debug.Assert(item_records != null, "");
@@ -1203,7 +1321,7 @@ end_time);
 
             DateTime end_time = DateTime.Now;
 
-            this.Container.MainForm.OperHistory.ReturnAsync(
+            Program.MainForm.OperHistory.ReturnAsync(
                 this.Container,
                 strAction,  // task.Action == "lost" || task.Action == "verify_lost",
                 strOutputReaderBarcode, // this.textBox_readerBarcode.Text,
@@ -1275,11 +1393,9 @@ end_time);
 
         public void Close(bool bForce = true)
         {
+#if OLD_CHARGING_CHANNEL
             if (stop != null)
                 stop.DoStop();
-#if NO
-            this.eventClose.Set();
-            Stopped = true;
 #endif
             this.StopThread(bForce);
         }

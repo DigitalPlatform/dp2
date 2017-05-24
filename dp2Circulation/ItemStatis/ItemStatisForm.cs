@@ -56,23 +56,6 @@ namespace dp2Circulation
         public HtmlViewerForm ErrorInfoForm = null;
 #endif
 
-        // bool Running = false;   // 正在执行运算
-
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm
-        {
-            get
-            {
-                return (MainForm)this.MdiParent;
-            }
-        }
-        
-        DigitalPlatform.Stop stop = null;
-#endif
-
 #if NO
         /// <summary>
         /// 脚本管理器
@@ -134,13 +117,13 @@ namespace dp2Circulation
 
         private void ItemStatisForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -149,14 +132,14 @@ namespace dp2Circulation
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
             ScriptManager.CfgFilePath = Path.Combine(
-    this.MainForm.UserDir,
+    Program.MainForm.UserDir,
     this.DbType + "_statis_projects.xml");
 
 #if NO
-            ScriptManager.applicationInfo = this.MainForm.AppInfo;
+            ScriptManager.applicationInfo = Program.MainForm.AppInfo;
             ScriptManager.CfgFilePath =
-                this.MainForm.DataDir + "\\"+this.DbType+"_statis_projects.xml";
-            ScriptManager.DataDir = this.MainForm.DataDir;
+                Program.MainForm.DataDir + "\\"+this.DbType+"_statis_projects.xml";
+            ScriptManager.DataDir = Program.MainForm.DataDir;
 
             ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
             ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
@@ -179,68 +162,68 @@ namespace dp2Circulation
             this.GetBatchNoTable -= new GetKeyCountListEventHandler(ItemStatisForm_GetBatchNoTable);
             this.GetBatchNoTable += new GetKeyCountListEventHandler(ItemStatisForm_GetBatchNoTable);
 
-            this.radioButton_inputStyle_barcodeFile.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_inputStyle_barcodeFile.Checked = Program.MainForm.AppInfo.GetBoolean(
                 this.DbType + "statisform",
                 "inputstyle_barcodefile",
                 false);
 
-            this.radioButton_inputStyle_recPathFile.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_inputStyle_recPathFile.Checked = Program.MainForm.AppInfo.GetBoolean(
                 this.DbType + "statisform",
                 "inputstyle_recpathfile",
                 false);
 
             /*
-            this.radioButton_inputStyle_batchNo.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_inputStyle_batchNo.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "itemstatisform",
                 "inputstyle_batchno",
                 false);
              * */
 
 
-            this.radioButton_inputStyle_readerDatabase.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_inputStyle_readerDatabase.Checked = Program.MainForm.AppInfo.GetBoolean(
                 this.DbType + "statisform",
                 "inputstyle_itemdatabase",
                 true);
 
 
             // 输入的条码号文件名
-            this.textBox_inputBarcodeFilename.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_inputBarcodeFilename.Text = Program.MainForm.AppInfo.GetString(
                 this.DbType + "statisform",
                 "input_barcode_filename",
                 "");
 
             // 输入的记录路径文件名
-            this.textBox_inputRecPathFilename.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_inputRecPathFilename.Text = Program.MainForm.AppInfo.GetString(
                 this.DbType + "statisform",
                 "input_recpath_filename",
                 "");
 
             // 批次号
-            this.tabComboBox_inputBatchNo.Text = this.MainForm.AppInfo.GetString(
+            this.tabComboBox_inputBatchNo.Text = Program.MainForm.AppInfo.GetString(
                 this.DbType + "statisform",
                 "input_batchno",
                 "");
 
             // 输入的实体库名
-            this.comboBox_inputItemDbName.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_inputItemDbName.Text = Program.MainForm.AppInfo.GetString(
                 this.DbType + "statisform",
                 "input_itemdbname",
                 "<全部>");
 
             // 方案名
-            this.textBox_projectName.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_projectName.Text = Program.MainForm.AppInfo.GetString(
                 this.DbType + "statisform",
                 "projectname",
                 "");
 
             // 馆藏地点列表
-            this.textBox_locationNames.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_locationNames.Text = Program.MainForm.AppInfo.GetString(
                  this.DbType + "statisform",
                  "locations",
                  "*");
 
             // 册类型列表
-            this.textBox_itemTypes.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_itemTypes.Text = Program.MainForm.AppInfo.GetString(
                  this.DbType + "statisform",
                  "itemtypes",
                  "*");
@@ -334,69 +317,69 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     this.DbType + "statisform",
                     "inputstyle_barcodefile",
                     this.radioButton_inputStyle_barcodeFile.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     this.DbType + "statisform",
                     "inputstyle_recpathfile",
                     this.radioButton_inputStyle_recPathFile.Checked);
 
                 /*
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "itemstatisform",
                     "inputstyle_batchno",
                     this.radioButton_inputStyle_batchNo.Checked);
                  * */
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     this.DbType + "statisform",
                     "inputstyle_itemdatabase",
                     this.radioButton_inputStyle_readerDatabase.Checked);
 
 
                 // 输入的条码号文件名
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     this.DbType + "statisform",
                     "input_barcode_filename",
                     this.textBox_inputBarcodeFilename.Text);
 
                 // 输入的记录路径文件名
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     this.DbType + "statisform",
                     "input_recpath_filename",
                     this.textBox_inputRecPathFilename.Text);
 
                 // 批次号
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     this.DbType + "statisform",
                     "input_batchno",
                     this.tabComboBox_inputBatchNo.Text);
 
                 // 输入的实体库名
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     this.DbType + "statisform",
                     "input_itemdbname",
                     this.comboBox_inputItemDbName.Text);
 
                 // 方案名
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     this.DbType + "statisform",
                     "projectname",
                     this.textBox_projectName.Text);
 
                 // 馆藏地点列表
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                      this.DbType + "statisform",
                      "locations",
                      this.textBox_locationNames.Text);
 
                 // 册类型列表
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                      this.DbType + "statisform",
                      "itemtypes",
                      this.textBox_itemTypes.Text);
@@ -559,8 +542,8 @@ namespace dp2Circulation
             else if (this.DbType == "comment")
                 dlg.HostName = "CommentStatisForm";
             dlg.scriptManager = this.ScriptManager;
-            dlg.AppInfo = this.MainForm.AppInfo;
-            dlg.DataDir = this.MainForm.DataDir;
+            dlg.AppInfo = Program.MainForm.AppInfo;
+            dlg.DataDir = Program.MainForm.DataDir;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
         }
@@ -581,10 +564,14 @@ namespace dp2Circulation
         }
 
         // TODO: OnEnd()有可能抛出异常，要能够截获和处理
-        int RunScript(string strProjectName,
-            string strProjectLocate,
-            out string strError)
+        public override int RunScript(string strProjectName,
+    string strProjectLocate,
+    string strInitialParamString,
+    out string strError,
+    out string strWarning)
         {
+            strWarning = "";
+
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -592,7 +579,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             _dllPaths.Clear();
             _dllPaths.Add(strProjectLocate);
@@ -634,6 +621,9 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                if (strInitialParamString == "test_compile")
+                    return 0;
 
                 //
                 if (filter != null)
@@ -730,7 +720,7 @@ namespace dp2Circulation
             string strWarning = "";
             string strMainCsDllName = PathUtil.MergePath(this.InstanceDir, "\\~item_statis_main_" + Convert.ToString(AssemblyVersion++) + ".dll");    // ++
 
-            string strLibPaths = "\"" + this.MainForm.DataDir + "\""
+            string strLibPaths = "\"" + Program.MainForm.DataDir + "\""
                 + ","
                 + "\"" + strProjectLocate + "\"";
 
@@ -1710,14 +1700,14 @@ namespace dp2Circulation
             HtmlPrintForm printform = new HtmlPrintForm();
 
             printform.Text = "打印统计结果";
-            printform.MainForm = this.MainForm;
+            // printform.MainForm = Program.MainForm;
 
             Debug.Assert(this.objStatis != null, "");
             printform.Filenames = this.objStatis.OutputFileNames;
 
-            this.MainForm.AppInfo.LinkFormState(printform, "printform_state");
+            Program.MainForm.AppInfo.LinkFormState(printform, "printform_state");
             printform.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(printform);
+            Program.MainForm.AppInfo.UnlinkFormState(printform);
 
         }
 
@@ -1731,9 +1721,9 @@ namespace dp2Circulation
             dlg.ProjectName = this.textBox_projectName.Text;
             dlg.NoneProject = false;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -1856,11 +1846,11 @@ namespace dp2Circulation
             this.comboBox_inputItemDbName.Items.Add("<全部期刊>");
             this.comboBox_inputItemDbName.Items.Add("<全部图书>");
 
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     string strDbName = "";
                     if (this.DbType == "item")
@@ -1930,7 +1920,7 @@ namespace dp2Circulation
         private void ItemStatisForm_Activated(object sender, EventArgs e)
         {
             // MyForm里面已经作了
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
         }
 
         int m_nInDropDown = 0;

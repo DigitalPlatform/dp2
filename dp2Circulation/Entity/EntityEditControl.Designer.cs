@@ -898,6 +898,7 @@ namespace dp2Circulation
             // 
             // button_getAccessNo
             // 
+            this.button_getAccessNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_getAccessNo.AutoSize = true;
             this.button_getAccessNo.Location = new System.Drawing.Point(343, 171);
             this.button_getAccessNo.Margin = new System.Windows.Forms.Padding(2);

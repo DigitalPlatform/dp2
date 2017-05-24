@@ -22,18 +22,6 @@ namespace dp2Circulation
     /// </summary>
     public partial class UrgentChargingForm : MyForm
     {
-#if NO
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-        DigitalPlatform.Stop stop = null;
-
-#endif
-
         FuncState m_funcstate = FuncState.Borrow;
 
         // 记载连续输入的册条码号
@@ -67,7 +55,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "verify_barcode",
                     false);
@@ -81,7 +69,7 @@ namespace dp2Circulation
         {
             get
             {
-                return (double)this.MainForm.AppInfo.GetInt(
+                return (double)Program.MainForm.AppInfo.GetInt(
                     "charging_form",
                     "info_dlg_opacity",
                     100) / (double)100;
@@ -92,7 +80,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_form",
                     "doubleItemInputAsEnd",
                     false);
@@ -102,15 +90,15 @@ namespace dp2Circulation
 
         private void UrgentChargingForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
 #if NO
             MainForm.AppInfo.LoadMdiChildFormStates(this,
     "mdi_form_state");
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -120,7 +108,7 @@ namespace dp2Circulation
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
 
-            this.MainForm.Urgent = true;
+            Program.MainForm.Urgent = true;
 
             this.FuncState = this.FuncState;    // 使"操作"按钮文字显示正确
             Global.WriteHtml(this.webBrowser_operationInfo,
@@ -149,15 +137,15 @@ namespace dp2Circulation
 
         private void UrgentChargingForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (this.MainForm != null)
-                this.MainForm.Urgent = false;
+            if (Program.MainForm != null)
+                Program.MainForm.Urgent = false;
         }
 
         string LogFileName
         {
             get
             {
-                return this.MainForm.DataDir + "\\urgent_charging.txt";
+                return Program.MainForm.DataDir + "\\urgent_charging.txt";
             }
         }
 
@@ -278,7 +266,7 @@ namespace dp2Circulation
     InfoColor.Green,
     "caption",
     this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                 this.SwitchFocus(ITEM_BARCODE, strFastInputText);
             }
 
@@ -297,7 +285,7 @@ namespace dp2Circulation
 InfoColor.Green,
 "caption",
 this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                 this.SwitchFocus(ITEM_BARCODE, strFastInputText);
 
             }
@@ -324,7 +312,7 @@ this.InfoDlgOpacity,
 InfoColor.Green,
 "caption",
 this.InfoDlgOpacity,
-                        this.MainForm.DefaultFont);
+                        Program.MainForm.DefaultFont);
                 this.SwitchFocus(ITEM_BARCODE, strFastInputText);
 
             }
@@ -625,26 +613,26 @@ this.InfoDlgOpacity,
 
         private void UrgentChargingForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.toolButton_amerce.Enabled = false;
+            Program.MainForm.toolButton_amerce.Enabled = false;
             /*
             this.toolButton_borrow.Enabled = true;
             this.toolButton_return.Enabled = true;
-            this.MainForm.toolButton_verifyReturn.Enabled = true;
+            Program.MainForm.toolButton_verifyReturn.Enabled = true;
              * */
-            this.MainForm.toolButton_lost.Enabled = false;
-            this.MainForm.toolButton_readerManage.Enabled = false;
-            this.MainForm.toolButton_renew.Enabled = false;
+            Program.MainForm.toolButton_lost.Enabled = false;
+            Program.MainForm.toolButton_readerManage.Enabled = false;
+            Program.MainForm.toolButton_renew.Enabled = false;
 
-            this.MainForm.toolStripDropDownButton_barcodeLoadStyle.Enabled = false;
-            this.MainForm.toolStripTextBox_barcode.Enabled = false;
+            Program.MainForm.toolStripDropDownButton_barcodeLoadStyle.Enabled = false;
+            Program.MainForm.toolStripTextBox_barcode.Enabled = false;
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = true;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = true;
 
-            this.MainForm.Urgent = true;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.Urgent = true;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
 #if NO
@@ -672,7 +660,7 @@ this.InfoDlgOpacity,
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             EnableControls(false);
 
@@ -816,7 +804,7 @@ this.InfoDlgOpacity,
             string strOperTime = cols[3];
 
             string strUserName =
-this.MainForm.AppInfo.GetString(
+Program.MainForm.AppInfo.GetString(
 "default_account",
 "username",
 "");

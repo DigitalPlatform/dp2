@@ -71,7 +71,7 @@ namespace DigitalPlatform.LibraryServer
                 nodes = field.select("subfield");
                 if (nodes.count > 0)
                 {
-                    results.Add(new NameValueLine("Personal name", ConcatSubfields(nodes)));
+                    results.Add(new NameValueLine("Personal name", ConcatSubfields(nodes), "author"));
                 }
             }
 
@@ -134,7 +134,7 @@ namespace DigitalPlatform.LibraryServer
                 nodes = field.select("subfield");
                 if (nodes.count > 0)
                 {
-                    results.Add(new NameValueLine("Published / Created", ConcatSubfields(nodes)));  // 附加的空格便于在 HTML 中自然折行
+                    results.Add(new NameValueLine("Published / Created", ConcatSubfields(nodes), "publisher"));  // 附加的空格便于在 HTML 中自然折行
                 }
             }
 
@@ -163,7 +163,7 @@ namespace DigitalPlatform.LibraryServer
             fields = record.select("field[@name='020']");
             if (fields.count > 0)
             {
-                results.Add(new NameValueLine("ISBN", BuildFields(fields)));
+                results.Add(new NameValueLine("ISBN", BuildFields(fields), "isbn"));
             }
 
             // Current frequency
@@ -198,7 +198,7 @@ namespace DigitalPlatform.LibraryServer
             MarcNodeList subfields = record.select("field[@name='022']/subfield[@name='a']");
             if (subfields.count > 0)
             {
-                results.Add(new NameValueLine("ISSN", ConcatSubfields(subfields)));
+                results.Add(new NameValueLine("ISSN", ConcatSubfields(subfields), "issn"));
             }
 
             // Linking ISSN

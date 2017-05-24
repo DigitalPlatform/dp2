@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DigitalPlatform.Text;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +13,11 @@ namespace DigitalPlatform.LibraryClient
     /// </summary>
     public class BrowseLoader : IEnumerable
     {
+        /// <summary>
+        /// 提示框事件
+        /// </summary>
+        public event MessagePromptEventHandler Prompt = null;
+
         List<string> m_recpaths = new List<string>();
 
         public List<string> RecPaths
@@ -61,7 +67,7 @@ namespace DigitalPlatform.LibraryClient
                     string[] paths = new string[batch.Count];
                     batch.CopyTo(paths);
 #endif
-                    string [] paths = batch.ToArray();
+                    string[] paths = batch.ToArray();
 
                     DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
                     string strError = "";
@@ -73,33 +79,29 @@ namespace DigitalPlatform.LibraryClient
                         out searchresults,
                         out strError);
                     if (lRet == -1)
-                        throw new Exception(strError);
-#if NO
-                    if (lRet == -1)
                     {
-                        if (lRet == 0 && String.IsNullOrEmpty(strError) == true)
-                        {
-                            foreach (string path in batch)
-                            {
-                                DigitalPlatform.LibraryClient.localhost.Record record = new DigitalPlatform.LibraryClient.localhost.Record();
-                                record.Path = path;
-                                // TODO: 是否需要设置 ErrorCode ?
-                                yield return record;
-                            }
-                            goto CONTINUE;
-                        }
+                        // throw new Exception(strError);
 
-                        // 如果results.Length表现正常，其实还可以继续处理?
-                        if (searchresults != null && searchresults.Length > 0)
+                        if (this.Prompt != null)
                         {
+                            MessagePromptEventArgs e = new MessagePromptEventArgs();
+                            e.MessageText = "获得浏览记录时发生错误： " + strError + "\r\npaths='" + StringUtil.MakePathList(paths) + "' (" + this.Format + ")";
+                            e.Actions = "yes,no,cancel";
+                            this.Prompt(this, e);
+                            if (e.ResultAction == "cancel")
+                                throw new ChannelException(Channel.ErrorCode, strError);
+                            else if (e.ResultAction == "yes")
+                                goto REDO;
+                            else
+                            {
+                                // no 也是抛出异常。因为继续下一批代价太大
+                                throw new ChannelException(Channel.ErrorCode, strError);
+                            }
                         }
                         else
-                        {
-                            strError = "获得浏览记录 '" + StringUtil.MakePathList(batch) + "' 时发生错误: " + strError;
-                            throw new Exception(strError);
-                        }
+                            throw new ChannelException(Channel.ErrorCode, strError);
+
                     }
-#endif
 
                     if (searchresults == null)
                     {
@@ -112,7 +114,7 @@ namespace DigitalPlatform.LibraryClient
                         DigitalPlatform.LibraryClient.localhost.Record record = searchresults[i];
                         if (batch[i] != record.Path)
                         {
-                            throw new Exception("下标 "+i+" 的 batch 元素 '"+batch[i]+"' 和返回的该下标位置 GetBrowseRecords() 结果路径 '"+record.Path+"' 不匹配");
+                            throw new Exception("下标 " + i + " 的 batch 元素 '" + batch[i] + "' 和返回的该下标位置 GetBrowseRecords() 结果路径 '" + record.Path + "' 不匹配");
                         }
                         Debug.Assert(batch[i] == record.Path, "");
                         yield return record;

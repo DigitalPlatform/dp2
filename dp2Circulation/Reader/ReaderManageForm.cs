@@ -52,15 +52,15 @@ namespace dp2Circulation
 
         private void ReaderManageForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
 #if NO
             MainForm.AppInfo.LoadMdiChildFormStates(this,
     "mdi_form_state");
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -72,7 +72,8 @@ namespace dp2Circulation
             this.GetValueTable += new GetValueTableEventHandler(ReaderManageForm_GetValueTable);
 
             // webbrowser
-            this.m_webExternalHost.Initial(this.MainForm, this.webBrowser_normalInfo);
+            this.m_webExternalHost.Initial(// Program.MainForm, 
+                this.webBrowser_normalInfo);
             this.webBrowser_normalInfo.ObjectForScripting = this.m_webExternalHost;
 
             this.commander = new Commander(this);
@@ -292,7 +293,7 @@ MessageBoxDefaultButton.Button2);
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             EnableControls(false);
 
@@ -336,18 +337,16 @@ MessageBoxDefaultButton.Button2);
 
                     dlg.Overflow = StringUtil.SplitList(strRecPath).Count < lRet;
                     nRet = dlg.Initial(
-                        this.MainForm,
-                        //this.Channel,
-                        //this.stop,
+                        // Program.MainForm,
                         StringUtil.SplitList(strRecPath),
                         "请选择一个读者记录",
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
                     // TODO: 保存窗口内的尺寸状态
-                    this.MainForm.AppInfo.LinkFormState(dlg, "ReaderManageForm_SelectPatronDialog_state");
+                    Program.MainForm.AppInfo.LinkFormState(dlg, "ReaderManageForm_SelectPatronDialog_state");
                     dlg.ShowDialog(this);
-                    this.MainForm.AppInfo.UnlinkFormState(dlg);
+                    Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
                     if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                     {
@@ -397,7 +396,7 @@ MessageBoxDefaultButton.Button2);
                     strXml);
                  * */
                 Global.SetXmlToWebbrowser(this.webBrowser_xml,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "xml",
                     strXml);
 
@@ -427,7 +426,7 @@ MessageBoxDefaultButton.Button2);
 #if NO
                 Global.SetHtmlString(this.webBrowser_normalInfo,
                     strHtml,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "readermanageform_reader");
 #endif
                 this.m_webExternalHost.SetHtmlString(strHtml,
@@ -499,12 +498,12 @@ MessageBoxDefaultButton.Button2);
         private void textBox_readerBarcode_Enter(object sender, EventArgs e)
         {
             this.AcceptButton = this.button_load;
-            this.MainForm.EnterPatronIdEdit(InputType.PQR);
+            Program.MainForm.EnterPatronIdEdit(InputType.PQR);
         }
 
         private void textBox_readerBarcode_Leave(object sender, EventArgs e)
         {
-            this.MainForm.LeavePatronIdEdit();
+            Program.MainForm.LeavePatronIdEdit();
         }
 
         private void textBox_comment_Enter(object sender, EventArgs e)
@@ -534,7 +533,7 @@ MessageBoxDefaultButton.Button2);
             this.textBox_comment.Text = DomUtil.GetElementText(dom.DocumentElement,
                 "comment");
 
-            this.textBox_operator.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_operator.Text = Program.MainForm.AppInfo.GetString(
                     "default_account",
                     "username",
                     "");
@@ -637,7 +636,7 @@ MessageBoxDefaultButton.Button2);
                     {
                         CompareReaderForm dlg = new CompareReaderForm();
                         dlg.Initial(
-                            this.MainForm,
+                            //Program.MainForm,
                             this.RecPath,
                             strExistingXml,
                             baNewTimestamp,
@@ -730,20 +729,20 @@ MessageBoxDefaultButton.Button2);
             this.textBox_comment.Text = "";
 
             Global.ClearHtmlPage(this.webBrowser_normalInfo,
-    this.MainForm.DataDir);
+    Program.MainForm.DataDir);
             Global.ClearHtmlPage(this.webBrowser_xml,
-    this.MainForm.DataDir);
+    Program.MainForm.DataDir);
             // this.webBrowser_xml.Navigate("about:blank");    // ??
 
         }
 
         private void ReaderManageForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
         /// <summary>
@@ -820,7 +819,7 @@ MessageBoxDefaultButton.Button2);
             // 判断它是不是读者记录路径
             string strDbName = Global.GetDbName(strRecPath);
 
-            if (this.MainForm.IsReaderDbName(strDbName) == true)
+            if (Program.MainForm.IsReaderDbName(strDbName) == true)
             {
                 string[] parts = strFirstLine.Split(new char[] { '\t' });
                 string strReaderBarcode = "";

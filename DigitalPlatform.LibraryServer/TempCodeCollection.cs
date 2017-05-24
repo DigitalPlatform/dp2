@@ -51,6 +51,9 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        /*
+2017/2/21 11:00:54 DefaultTread中 清除验证码集合 出现异常: Type: System.InvalidCastExceptionMessage: 无法将类型为“System.Collections.DictionaryEntry”的对象强制转换为类型“System.String”。Stack:   在 DigitalPlatform.LibraryServer.TempCodeCollection.CleanExpireItems()   在 DigitalPlatform.LibraryServer.DefaultThread.Worker()
+         * */
         // 清除已经失效的那些事项
         public void CleanExpireItems()
         {
@@ -61,7 +64,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 DateTime now = DateTime.Now;
-                foreach (string key in this._table)
+                foreach (string key in this._table.Keys)
                 {
                     TempCode code = (TempCode)this._table[key];
                     if (code == null || code.ExpireTime < now)

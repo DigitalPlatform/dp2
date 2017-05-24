@@ -30,14 +30,6 @@ namespace dp2Circulation
         /// </summary>
         public string ExportRecPathFilename = "";   // 使用过的导出路径文件
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-#endif
-
         /// <summary>
         /// 检索结束信号
         /// </summary>
@@ -75,7 +67,7 @@ namespace dp2Circulation
         void prop_GetColumnTitles(object sender, GetColumnTitlesEventArgs e)
         {
             e.ColumnTitles = new ColumnPropertyCollection();
-            ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(e.DbName);
+            ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(e.DbName);
             if (temp != null)
                 e.ColumnTitles.AddRange(temp);  // 要复制，不要直接使用，因为后面可能会修改。怕影响到原件
 
@@ -87,13 +79,13 @@ namespace dp2Circulation
 
         private void ZhongcihaoForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -105,7 +97,7 @@ namespace dp2Circulation
             // 类号
             if (String.IsNullOrEmpty(this.textBox_classNumber.Text) == true)
             {
-                this.textBox_classNumber.Text = this.MainForm.AppInfo.GetString(
+                this.textBox_classNumber.Text = Program.MainForm.AppInfo.GetString(
                     "zhongcihao_form",
                     "classnumber",
                     "");
@@ -114,19 +106,19 @@ namespace dp2Circulation
             // 线索书目库名
             if (String.IsNullOrEmpty(this.comboBox_biblioDbName.Text) == true)
             {
-                this.comboBox_biblioDbName.Text = this.MainForm.AppInfo.GetString(
+                this.comboBox_biblioDbName.Text = Program.MainForm.AppInfo.GetString(
                     "zhongcihao_form",
                     "biblio_dbname",
                     "");
             }
 
             // 是否要返回浏览列
-            this.checkBox_returnBrowseCols.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_returnBrowseCols.Checked = Program.MainForm.AppInfo.GetBoolean(
                     "zhongcihao_form",
                     "return_browse_cols",
                     true);
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
 "zhongcihao_form",
 "record_list_column_width",
 "");
@@ -187,28 +179,28 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 // 类号
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "zhongcihao_form",
                     "classnumber",
                     this.textBox_classNumber.Text);
 
                 // 线索书目库名
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "zhongcihao_form",
                     "biblio_dbname",
                     this.comboBox_biblioDbName.Text);
 
                 // 是否要返回浏览列
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
             "zhongcihao_form",
             "return_browse_cols",
             this.checkBox_returnBrowseCols.Checked);
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_number);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "zhongcihao_form",
                     "record_list_column_width",
                     strWidths);
@@ -419,7 +411,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -1023,11 +1015,11 @@ namespace dp2Circulation
 
             // this.comboBox_biblioDbName.Items.Add("<全部>");
 
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty property = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
                     this.comboBox_biblioDbName.Items.Add(property.DbName);
                 }
             }
@@ -1167,7 +1159,7 @@ namespace dp2Circulation
                     null,
                     "请输入类 '" + strClass + "' 的当前种次号最大号:",
                     "1",
-            this.MainForm.DefaultFont);
+            Program.MainForm.DefaultFont);
                 if (strNumber == null)
                     return 0;	// 放弃整个操作
 
@@ -1205,7 +1197,7 @@ namespace dp2Circulation
                         null,
                         "请输入类 '" + strClass + "' 的当前种次号最大号:",
                         strTestNumber,
-            this.MainForm.DefaultFont);
+            Program.MainForm.DefaultFont);
                     if (strNumber == null)
                         return 0;	// 放弃整个操作
 
@@ -1300,7 +1292,7 @@ namespace dp2Circulation
                         null,
                         "请输入类 '" + strClass + "' 的当前种次号最大号:",
                         strTestNumber,
-            this.MainForm.DefaultFont);
+            Program.MainForm.DefaultFont);
                     if (strNumber == null)
                         return 0;	// 放弃整个操作
 
@@ -1347,9 +1339,9 @@ namespace dp2Circulation
 
             EntityForm form = new EntityForm();
 
-            form.MdiParent = this.MainForm;
+            form.MdiParent = Program.MainForm;
 
-            form.MainForm = this.MainForm;
+            form.MainForm = Program.MainForm;
             form.Show();
             form.LoadRecordOld(strPath, "", true);
 
@@ -1357,7 +1349,7 @@ namespace dp2Circulation
 
         private void ZhongcihaoForm_Activated(object sender, EventArgs e)
         {
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
 
         }
 
@@ -1467,7 +1459,7 @@ namespace dp2Circulation
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            this.MainForm.StatusBarMessage = "书目记录路径 " + this.listView_number.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportRecPathFilename;
+            Program.MainForm.StatusBarMessage = "书目记录路径 " + this.listView_number.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportRecPathFilename;
         }
 
         private void listView_number_SelectedIndexChanged(object sender, EventArgs e)

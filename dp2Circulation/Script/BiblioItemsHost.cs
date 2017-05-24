@@ -349,7 +349,7 @@ namespace dp2Circulation
                 strLocation = StringUtil.GetPureLocationString(strLocation);
 
                 // 获得关于一个特定馆藏地点的索取号配置信息
-                nRet = this._detailWindow.MainForm.GetArrangementInfo(strLocation,
+                nRet = Program.MainForm.GetArrangementInfo(strLocation,
                     out info,
                     out strError);
                 if (nRet == 0)
@@ -424,9 +424,7 @@ namespace dp2Circulation
 
                 try
                 {
-                    dlg.MainForm = this._detailWindow.MainForm;
-                    // dlg.TopMost = true;
-                    //    dlg.Owner = owner;
+                    // dlg.MainForm = this._detailWindow.MainForm;
                     dlg.MyselfItemRecPath = strItemRecPath;
                     dlg.MyselfParentRecPath = this._detailWindow.BiblioRecPath;
                     dlg.MyselfCallNumberItems = callnumber_items;   // 2009/6/4 
@@ -629,7 +627,7 @@ namespace dp2Circulation
                     strFieldName = "694";
                     strSubfieldName = "a";
                 }
-                else if (strClassType == "其它")
+                else if (strClassType == "其它" || strClassType == "红泥巴")
                 {
                     strFieldName = "686";
                     strSubfieldName = "a";
@@ -687,7 +685,7 @@ namespace dp2Circulation
                     strFieldName = "095";
                     strSubfieldName = "a";
                 }
-                else if (strClassType == "其它")
+                else if (strClassType == "其它" || strClassType == "红泥巴")
                 {
                     strFieldName = "084";
                     strSubfieldName = "a";
@@ -910,7 +908,7 @@ namespace dp2Circulation
                 if (type == "GCAT")
                 {
                     // 获得著者号
-                    string strGcatWebServiceUrl = this._detailWindow.MainForm.GcatServerUrl;   // "http://dp2003.com/dp2libraryws/gcat.asmx";
+                    string strGcatWebServiceUrl = Program.MainForm.GcatServerUrl;   // "http://dp2003.com/dp2libraryws/gcat.asmx";
 
                     // 获得著者号
                     // return:
@@ -1555,7 +1553,7 @@ namespace dp2Circulation
                     out strError);
             }
 #endif
-            nRet = this._detailWindow.MainForm.GetPinyin(
+            nRet = Program.MainForm.GetPinyin(
                 this._detailWindow.Form,
                 strText,
                 PinyinStyle.None,
@@ -1892,10 +1890,10 @@ namespace dp2Circulation
             {
                 // 新的WebService
 
-                string strID = this._detailWindow.MainForm.AppInfo.GetString("DetailHost", "gcat_id", "");
-                bool bSaveID = this._detailWindow.MainForm.AppInfo.GetBoolean("DetailHost", "gcat_saveid", false);
+                string strID = Program.MainForm.AppInfo.GetString("DetailHost", "gcat_id", "");
+                bool bSaveID = Program.MainForm.AppInfo.GetBoolean("DetailHost", "gcat_saveid", false);
 
-                Hashtable question_table = (Hashtable)this._detailWindow.MainForm.ParamTable["question_table"];
+                Hashtable question_table = (Hashtable)Program.MainForm.ParamTable["question_table"];
                 if (question_table == null)
                     question_table = new Hashtable();
 
@@ -1931,7 +1929,7 @@ namespace dp2Circulation
                     {
                         IdLoginDialog login_dlg = new IdLoginDialog();
                         GuiUtil.SetControlFont(login_dlg,
-                            this._detailWindow.MainForm.DefaultFont,
+                            Program.MainForm.DefaultFont,
                             false);
                         login_dlg.Text = "获得著者号 -- "
                             + ((string.IsNullOrEmpty(strID) == true) ? "请输入ID" : strError);
@@ -1947,17 +1945,17 @@ namespace dp2Circulation
                         bSaveID = login_dlg.SaveID;
                         if (login_dlg.SaveID == true)
                         {
-                            this._detailWindow.MainForm.AppInfo.SetString("DetailHost", "gcat_id", strID);
+                            Program.MainForm.AppInfo.SetString("DetailHost", "gcat_id", strID);
                         }
                         else
                         {
-                            this._detailWindow.MainForm.AppInfo.SetString("DetailHost", "gcat_id", "");
+                            Program.MainForm.AppInfo.SetString("DetailHost", "gcat_id", "");
                         }
-                        this._detailWindow.MainForm.AppInfo.SetBoolean("DetailHost", "gcat_saveid", bSaveID);
+                        Program.MainForm.AppInfo.SetBoolean("DetailHost", "gcat_saveid", bSaveID);
                         goto REDO_GETNUMBER;
                     }
 
-                    this._detailWindow.MainForm.ParamTable["question_table"] = question_table;
+                    Program.MainForm.ParamTable["question_table"] = question_table;
 
                     return nRet;
                 }
@@ -2011,6 +2009,7 @@ namespace dp2Circulation
         // 外部调用
         // 特殊版本，具有缓存问题和答案的功能
         // return:
+        //      -4  著者字符串没有检索命中
         //      -2  strID验证失败
         //      -1  error
         //      0   canceled
@@ -2045,6 +2044,7 @@ namespace dp2Circulation
                 {
                     // 这个函数具有catch 通讯中 exeption的能力
                     // return:
+                    //      -4  "著者 'xxx' 的整体或局部均未检索命中" 2017/3/1
                     //		-3	需要回答问题
                     //      -2  strID验证失败
                     //      -1  出错
@@ -2094,15 +2094,16 @@ namespace dp2Circulation
                 return -1;
             if (nRet == -2)
                 return -2;  // strID验证失败
-
+            if (nRet == -4)
+                return -4;  // 2017/3/1
             return 1;
         }
 
         internal void gcat_channel_BeforeLogin(object sender,
     DigitalPlatform.GcatClient.BeforeLoginEventArgs e)
         {
-            string strUserName = (string)this._detailWindow.MainForm.ParamTable["author_number_account_username"];
-            string strPassword = (string)this._detailWindow.MainForm.ParamTable["author_number_account_password"];
+            string strUserName = (string)Program.MainForm.ParamTable["author_number_account_username"];
+            string strPassword = (string)Program.MainForm.ParamTable["author_number_account_password"];
 
             if (String.IsNullOrEmpty(strUserName) == true)
             {
@@ -2120,7 +2121,7 @@ namespace dp2Circulation
             }
 
             LoginDlg dlg = new LoginDlg();
-            GuiUtil.SetControlFont(dlg, this._detailWindow.MainForm.DefaultFont, false);
+            GuiUtil.SetControlFont(dlg, Program.MainForm.DefaultFont, false);
 
             if (e.Failed == true)
                 dlg.textBox_comment.Text = "登录失败。加著者号码功能需要重新登录";
@@ -2147,8 +2148,8 @@ namespace dp2Circulation
             e.UserName = strUserName;
             e.Password = strPassword;
 
-            this._detailWindow.MainForm.ParamTable["author_number_account_username"] = strUserName;
-            this._detailWindow.MainForm.ParamTable["author_number_account_password"] = strPassword;
+            Program.MainForm.ParamTable["author_number_account_username"] = strUserName;
+            Program.MainForm.ParamTable["author_number_account_password"] = strPassword;
         }
 
         #endregion
@@ -2187,7 +2188,7 @@ namespace dp2Circulation
             //      -1  出错
             //      0   用户希望中断
             //      1   正常
-            nRet = this._detailWindow.MainForm.HanziTextToSjhm(
+            nRet = Program.MainForm.HanziTextToSjhm(
                 true,
                 strResult,
                 out sjhms,
@@ -2252,7 +2253,7 @@ namespace dp2Circulation
             strError = "";
             strAuthorNumber = "";
 
-            int nRet = this._detailWindow.MainForm.LoadQuickCutter(true, out strError);
+            int nRet = Program.MainForm.LoadQuickCutter(true, out strError);
             if (nRet == -1)
                 return -1;
 
@@ -2262,7 +2263,7 @@ namespace dp2Circulation
             //      -1  error
             //      0   not found
             //      1   found
-            nRet = this._detailWindow.MainForm.QuickCutter.GetEntry(strAuthor,
+            nRet = Program.MainForm.QuickCutter.GetEntry(strAuthor,
                 out strText,
                 out strNumber,
                 out strError);

@@ -848,6 +848,11 @@ out strError);
 
             using (ZipFile zip = new ZipFile(encoding))
             {
+                // http://stackoverflow.com/questions/15337186/dotnetzip-badreadexception-on-extract
+                // https://dotnetzip.codeplex.com/workitem/14087
+                // uncommenting the following line can be used as a work-around
+                zip.ParallelDeflateThreshold = -1;
+
                 foreach (string filename in filenames)
                 {
                     string strShortFileName = filename.Substring(strBaseDir.Length + 1);

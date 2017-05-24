@@ -96,6 +96,9 @@ namespace dp2Circulation
             List<string> new_recpaths = new List<string>(); // 缓存中没有包含的那些记录
             foreach (string strRecPath in this.RecPaths)
             {
+                if (string.IsNullOrEmpty(strRecPath))
+                    throw new ArgumentException("RecPaths 中不应包含空元素");
+
                 Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
 
                 BiblioItem info = (BiblioItem)this.CacheTable[strRecPath];

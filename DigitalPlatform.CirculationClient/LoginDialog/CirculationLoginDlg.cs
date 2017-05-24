@@ -468,11 +468,15 @@ namespace DigitalPlatform.CirculationClient
                 strError = "尚未输入服务器地址";
                 goto ERROR1;
             }
-            if (textBox_userName.Text == "")
+            if (string.IsNullOrEmpty(textBox_userName.Text))
             {
                 strError = "尚未输入用户名";
                 goto ERROR1;
             }
+
+            // 2017/4/11
+            if (this.textBox_tempCode.Visible == false)
+                this.textBox_tempCode.Text = "";
 
             if (this.RetryLogin && string.IsNullOrEmpty(this.textBox_phoneNumber.Text) == false)
             {
@@ -931,6 +935,7 @@ Keys keyData)
                 controls.Add(save);
                 controls.Add(this.checkBox_savePasswordShort);
                 controls.Add(this.textBox_phoneNumber);
+                controls.Add(this.textBox_tempCode);    // 2017/4/11
                 return GuiState.GetUiState(controls);
             }
             set
@@ -942,6 +947,7 @@ Keys keyData)
                 controls.Add(save);
                 controls.Add(this.checkBox_savePasswordShort);
                 controls.Add(this.textBox_phoneNumber);
+                controls.Add(this.textBox_tempCode);    // 2017/4/11
                 GuiState.SetUiState(controls, value);
             }
         }

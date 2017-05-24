@@ -12,6 +12,7 @@ using DigitalPlatform.rms.Client;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -61,6 +62,7 @@ namespace DigitalPlatform.LibraryServer
             if (String.IsNullOrEmpty(strArrangeGroupName) == true)
                 return null;
 
+#if NO
             if (strArrangeGroupName[0] == '!')
             {
                 string strTemp = GetArrangeGroupName(strArrangeGroupName.Substring(1));
@@ -71,6 +73,11 @@ namespace DigitalPlatform.LibraryServer
                 }
                 strArrangeGroupName = strTemp;
             }
+#endif
+
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+            if (strArrangeGroupName == null)
+                return null;
 
             XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//callNumber/group[@name='" + strArrangeGroupName + "']");
             if (node == null)
@@ -101,6 +108,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
+#if NO
             if (strArrangeGroupName[0] == '!')
             {
                 string strTemp = GetArrangeGroupName(strArrangeGroupName.Substring(1));
@@ -112,6 +120,10 @@ namespace DigitalPlatform.LibraryServer
                 }
                 strArrangeGroupName = strTemp;
             }
+#endif
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+            if (strArrangeGroupName == null)
+                return null;
 
             // <location>元素数组
             XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("//callNumber/group[@name='" + strArrangeGroupName + "']/location");
@@ -235,6 +247,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
+#if NO
             if (strArrangeGroupName[0] == '!')
             {
                 string strTemp = GetArrangeGroupName(strArrangeGroupName.Substring(1));
@@ -246,7 +259,13 @@ namespace DigitalPlatform.LibraryServer
                 }
                 strArrangeGroupName = strTemp;
             }
-
+#endif
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+            if (strArrangeGroupName == null)
+            {
+                strError = "馆藏地点名 " + strArrangeGroupName.Substring(1) + " 没有找到对应的排架体系名";
+                goto ERROR1;
+            }
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
@@ -453,6 +472,18 @@ namespace DigitalPlatform.LibraryServer
             return result;
         }
 
+        // 获得正规化的排架体系名字
+        string CanonializeArrangeGroupName(string strArrangeGroupName)
+        {
+            if (string.IsNullOrEmpty(strArrangeGroupName))
+                return "";
+
+            if (strArrangeGroupName[0] == '!')
+                return GetArrangeGroupName(strArrangeGroupName.Substring(1));
+
+            return strArrangeGroupName;
+        }
+
         // 设置种次号尾号
         public LibraryServerResult SetOneClassTailNumber(
             SessionInfo sessioninfo,
@@ -467,6 +498,63 @@ namespace DigitalPlatform.LibraryServer
             string strError = "";
 
             LibraryServerResult result = new LibraryServerResult();
+
+            if (String.IsNullOrEmpty(strArrangeGroupName) == true)
+            {
+                strError = "strArrangeGroupName 参数值不能为空";
+                goto ERROR1;
+            }
+
+            if (strAction == "memo")
+            {
+                // 临时记忆用过的号码
+                SetTempNumber(strArrangeGroupName,
+            strClass,
+            strTestNumber,
+            "add");
+                goto END1;
+            }
+            else if (strAction == "unmemo")
+            {
+                // 删除记忆用过的号码
+                SetTempNumber(strArrangeGroupName,
+            strClass,
+            strTestNumber,
+            "remove");
+                goto END1;
+            }
+            else if (strAction == "skipmemo")
+            {
+                // 获得一个能避开先前记忆用过的号码
+                strOutputNumber = SkipTempNumber(strArrangeGroupName,
+            strClass,
+            strTestNumber);
+                goto END1;
+            }
+            else if (strAction == "protect")
+            {
+                // protect 可以理解为 skipmemo 和 memo 联合执行。锁定范围内防止其他请求重入
+                _lock_tempNumberTable.EnterWriteLock();
+                try
+                {
+                    // 获得一个能避开先前记忆用过的号码
+                    strOutputNumber = SkipTempNumber(strArrangeGroupName,
+                strClass,
+                strTestNumber,
+                false);
+                    // 记忆这个号码
+                    SetTempNumber(strArrangeGroupName,
+    strClass,
+    strOutputNumber,
+    "add",
+    false);
+                }
+                finally
+                {
+                    _lock_tempNumberTable.ExitWriteLock();
+                }
+                goto END1;
+            }
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -654,7 +742,7 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
-                strError = "无法识别的strAction参数值 '" + strAction + "'";
+                strError = "无法识别的 strAction 参数值 '" + strAction + "'";
                 goto ERROR1;
             }
 
@@ -667,6 +755,135 @@ namespace DigitalPlatform.LibraryServer
             result.ErrorInfo = strError;
             return result;
         }
+
+        #region 临时存储种次号
+
+        class MemoTailNumber
+        {
+            public string ArrangeGroupName { get; set; } // 排架体系名
+            public string Class { get; set; } // 类号
+            public string Number { get; set; }  // 区分号
+        }
+
+        const int MAX_TEMP_NUMBER = 10000;
+        Hashtable _tempNumberTable = new Hashtable();
+        // private static readonly Object syncRoot_tempNumberTable = new Object();
+        internal ReaderWriterLockSlim _lock_tempNumberTable = new ReaderWriterLockSlim();
+
+        void SetTempNumber(string strArrangeGroupName,
+            string strClass,
+            string strNumber,
+            string strAction,
+            bool bLock = true)
+        {
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+
+            if (strAction == "add")
+            {
+                MemoTailNumber item = new MemoTailNumber();
+                item.ArrangeGroupName = strArrangeGroupName;
+                item.Class = strClass;
+                item.Number = strNumber;
+
+                string strKey = item.ArrangeGroupName + "|" + item.Class + "|" + item.Number;
+
+                if (bLock)
+                    _lock_tempNumberTable.EnterWriteLock();
+                try
+                {
+                    // 保护动作，防止集合过大
+                    if (_tempNumberTable.Count > MAX_TEMP_NUMBER)
+                    {
+                        _tempNumberTable.Clear();
+                        this.WriteErrorLog("_tempNumberTable 因元素个数超过 " + MAX_TEMP_NUMBER + "，被强制清空一次(此举可能会造成取种次号防范重号功能短暂局部失效)");
+                    }
+
+                    _tempNumberTable[strKey] = item;
+                    return;
+                }
+                finally
+                {
+                    if (bLock)
+                        _lock_tempNumberTable.ExitWriteLock();
+                }
+            }
+
+            if (strAction == "remove")
+            {
+                string strKey = strArrangeGroupName + "|" + strClass + "|" + strNumber;
+
+                if (bLock)
+                    _lock_tempNumberTable.EnterWriteLock();
+                try
+                {
+                    if (_tempNumberTable.ContainsKey(strKey))
+                        _tempNumberTable.Remove(strKey);
+
+                    return;
+                }
+                finally
+                {
+                    if (bLock)
+                        _lock_tempNumberTable.ExitWriteLock();
+                }
+            }
+
+            throw new ArgumentException("未知的 strAction 值 '" + strAction + "'", "strAction");
+        }
+
+        bool ContainsTempNumber(string strArrangeGroupName,
+            string strClass,
+            string strNumber,
+            bool bLock = true)
+        {
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+
+            string strKey = strArrangeGroupName + "|" + strClass + "|" + strNumber;
+
+            if (bLock)
+                _lock_tempNumberTable.EnterReadLock();
+            try
+            {
+                return _tempNumberTable.ContainsKey(strKey);
+            }
+            finally
+            {
+                if (bLock)
+                    _lock_tempNumberTable.ExitReadLock();
+            }
+        }
+
+        // 检查临时存储的号码里面是否有指定的号码。如果有，则自动增量这个号码，直到在临时存储的号码里面找不到这个号码
+        string SkipTempNumber(string strArrangeGroupName,
+    string strClass,
+    string strNumber,
+            bool bLock = true)
+        {
+            strArrangeGroupName = CanonializeArrangeGroupName(strArrangeGroupName);
+
+            for (; ; )
+            {
+                if (ContainsTempNumber(strArrangeGroupName,
+        strClass,
+        strNumber,
+        bLock) == false)
+                    return strNumber;
+
+                {
+                    string strError = "";
+                    string strOutputNumber = "";
+                    int nRet = StringUtil.IncreaseLeadNumber(strNumber,
+    1,
+    out strOutputNumber,
+    out strError);
+                    if (nRet == -1)
+                        throw new Exception("为数字 '" + strNumber + "' 增量时发生错误: " + strError);
+                    strNumber = strOutputNumber;
+                }
+            }
+        }
+
+        #endregion
 
         // 检索尾号记录的路径和记录体
         // return:

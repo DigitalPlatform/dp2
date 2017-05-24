@@ -150,6 +150,11 @@ namespace DigitalPlatform
 				dlg.textBox_value.Text = strDefaultValue;
 
             dlg.StartPosition = FormStartPosition.CenterScreen; // 2008/10/17
+
+            // 2017/4/6
+            if (owner == null)
+                dlg.TopMost = true;
+
 			dlg.ShowDialog(owner);
 
 			if (dlg.DialogResult != DialogResult.OK)

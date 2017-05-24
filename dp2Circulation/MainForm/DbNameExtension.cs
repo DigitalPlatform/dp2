@@ -609,6 +609,30 @@ namespace dp2Circulation
             return null;
         }
 
+        // 2017/3/5
+        // 获得出版物类型
+        // return:
+        //      null    不清楚
+        //      "book"
+        //      "series"
+        public string GetPubTypeFromOrderDbName(string strOrderDbName)
+        {
+            // 订购库名为空，无法找书目库名。
+            if (String.IsNullOrEmpty(strOrderDbName) == true)
+                return null;
+
+            if (this.BiblioDbProperties != null)
+            {
+                foreach (BiblioDbProperty prop in this.BiblioDbProperties)
+                {
+                    if (prop.OrderDbName == strOrderDbName)
+                        return string.IsNullOrEmpty(prop.IssueDbName) ? "book" : "series";
+                }
+            }
+
+            return null;
+        }
+
         // 
         /// <summary>
         /// 根据订购库名获得对应的书目库名

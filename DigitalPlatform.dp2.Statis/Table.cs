@@ -679,6 +679,9 @@ namespace DigitalPlatform.dp2.Statis
         public Line EnsureLine(string strEntry,
             int nColumnsHint = -1)
         {
+            if (strEntry == null)
+                throw new ArgumentException("strEntry 参数值不应为 null", "strEntry");
+
             // 检查line事项是否存在
             Line line = (Line)lines[strEntry];
 

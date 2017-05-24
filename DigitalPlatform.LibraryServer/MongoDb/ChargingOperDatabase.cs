@@ -98,7 +98,10 @@ namespace DigitalPlatform.LibraryServer
 
             if (string.IsNullOrEmpty(volume) == false
                 && string.IsNullOrEmpty(itemBarcode) == true)   // 只有 itemBarcode 为空的时候，才匹配 volume
-                and_items.Add(Query.EQ("No", volume));
+            {
+                // and_items.Add(Query.EQ("No", volume));
+                and_items.Add(Query.EQ("Volume", volume));
+            }
 
             {
                 List<IMongoQuery> action_items = new List<IMongoQuery>();
@@ -335,6 +338,9 @@ return { None : '' };
 
         public string Period { get; set; }  // 期限
         public string No { get; set; }  // 续借次，序号
+
+        // 2017/5/22
+        public string Volume { get; set; }  // 卷册
 
         public string ClientAddress { get; set; }  // 访问者的IP地址
 

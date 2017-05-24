@@ -211,7 +211,7 @@ namespace DigitalPlatform.CirculationClient
         {
             get
             {
-                return Length;
+                return Length;  // TODO: ???
             }
         }
 

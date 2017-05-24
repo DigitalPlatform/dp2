@@ -30,6 +30,12 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        public string Url
+        {
+            get;
+            set;
+        }
+
         private void webBrowser1_ProgressChanged(object sender, WebBrowserProgressChangedEventArgs e)
         {
         }
@@ -92,6 +98,17 @@ namespace DigitalPlatform.CirculationClient
                 controls.Add(this);
                 GuiState.SetUiState(controls, value);
             }
+        }
+
+        private void ObjectViewerDialog_Load(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(this.Url) == false)
+                this.BeginInvoke(new Action<string>(Navigate), this.Url);
+        }
+
+        void Navigate(string url)
+        {
+            this.webBrowser1.Navigate(url, true);
         }
     }
 }

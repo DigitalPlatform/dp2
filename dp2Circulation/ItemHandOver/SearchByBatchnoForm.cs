@@ -19,7 +19,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 获取批次号key+count值列表
@@ -40,17 +40,17 @@ namespace dp2Circulation
 
         private void SearchByBatchnoForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
             if (this.comboBox_batchNo.Text == "")
             {
-                this.comboBox_batchNo.Text = this.MainForm.AppInfo.GetString(
+                this.comboBox_batchNo.Text = Program.MainForm.AppInfo.GetString(
                     this.CfgSectionName, // "SearchByBatchnoForm",
                     "batchno",
                     "");
-                this.comboBox_location.Text = this.MainForm.AppInfo.GetString(
+                this.comboBox_location.Text = Program.MainForm.AppInfo.GetString(
                     this.CfgSectionName, // "SearchByBatchnoForm",
                     "location",
                     "<不指定>");
@@ -64,11 +64,11 @@ namespace dp2Circulation
 
         private void SearchByBatchnoForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 this.CfgSectionName,    // "SearchByBatchnoForm",
                 "batchno",
                 this.comboBox_batchNo.Text);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 this.CfgSectionName,    // "SearchByBatchnoForm",
                 "location",
                 this.comboBox_location.Text);

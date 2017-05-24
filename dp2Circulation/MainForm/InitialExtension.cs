@@ -949,7 +949,11 @@ MessageBoxDefaultButton.Button1);
                     if (nRet == -1)
                         MessageBox.Show(this, "copy '" + strSourceDirectory + "' to '" + strTargetDirectory + "' error");
                 }
+                else
+                    MessageBox.Show(this, "复制 Javascript 目录时发生错误。目录 '" + strSourceDirectory + "' 不存在");
             }
+
+#if NO
             {
                 string strSourceDirectory = Path.Combine(this.DataDir, "jquery");
                 if (Directory.Exists(strSourceDirectory) == true)
@@ -958,6 +962,46 @@ MessageBoxDefaultButton.Button1);
                     int nRet = PathUtil.CopyDirectory(strSourceDirectory, strTargetDirectory, false, out strError);
                     if (nRet == -1)
                         MessageBox.Show(this, "copy '" + strSourceDirectory + "' to '" + strTargetDirectory + "' error");
+                }
+                else
+                    MessageBox.Show(this, "复制 Javascript 目录时发生错误。目录 '" + strSourceDirectory + "' 不存在");
+            }
+#endif
+
+            {
+                string strZipFileName = Path.Combine(this.DataDir, "jquery.zip");
+                string strTargetDirectory = Path.Combine(this.UserDir, "jquery");
+                bool bError = false;
+                try
+                {
+                    using (ZipFile zip = ZipFile.Read(strZipFileName))
+                    {
+                        foreach (ZipEntry e in zip)
+                        {
+                            e.Extract(strTargetDirectory, ExtractExistingFileAction.OverwriteSilently);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ExceptionUtil.GetAutoText(ex));
+                    bError = true;
+                }
+
+                // 2017/5/18
+                // 报错以后把目标目录删除，以便下次程序启动时候可以顺利运行
+                if (bError)
+                {
+                    try
+                    {
+                        PathUtil.DeleteDirectory(strTargetDirectory);
+                    }
+                    catch (Exception ex)
+                    {
+                        // TODO: 是否顺便检测一下当前安装了 360?
+                        MessageBox.Show(this, "自动删除文件夹 '" + strTargetDirectory + "' 时出错: " + ex.Message
+                            + "\r\n\r\n请在退出内务以后，想办法手动删除文件夹 '" + strTargetDirectory + "'");
+                    }
                 }
             }
 
@@ -1023,7 +1067,7 @@ MessageBoxDefaultButton.Button1);
 
                 // 创建和删除子目录试验
                 string strTestDir = Path.Combine(this.UserDir, "_testdir_");
-                PathUtil.CreateDirIfNeed(strTestDir);
+                PathUtil.TryCreateDir(strTestDir);
 
                 if (Directory.Exists(strTestDir) == false)
                     goto ERROR1;
@@ -1150,7 +1194,7 @@ MessageBoxDefaultButton.Button1);
                 this.UserDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     "dp2Circulation_v2");
-                PathUtil.CreateDirIfNeed(this.UserDir);
+                PathUtil.TryCreateDir(this.UserDir);
 
                 // 2016/6/4
                 // 用户目录可以重定向
@@ -1175,11 +1219,11 @@ MessageBoxDefaultButton.Button1);
                 this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "dp2circulation.xml"));
 
                 this.UserTempDir = Path.Combine(this.UserDir, "temp");
-                PathUtil.CreateDirIfNeed(this.UserTempDir);
+                PathUtil.TryCreateDir(this.UserTempDir);
 
                 // 2015/7/8
                 this.UserLogDir = Path.Combine(this.UserDir, "log");
-                PathUtil.CreateDirIfNeed(this.UserLogDir);
+                PathUtil.TryCreateDir(this.UserLogDir);
 
                 // 启动时在日志中记载当前 dp2circulation 版本号
                 this.WriteErrorLog(Assembly.GetAssembly(this.GetType()).FullName);
@@ -1509,7 +1553,7 @@ MessageBoxDefaultButton.Button1);
                 return;
             }
 
-            this.PropertyTaskList.MainForm = this;
+            // this.PropertyTaskList.MainForm = this;
             this.PropertyTaskList.BeginThread();
         }
 
@@ -1710,7 +1754,6 @@ MessageBoxDefaultButton.Button1);
 
                 try
                 {
-
                     HtmlDocument doc = m_backgroundForm.WebBrowser.Document;
 
                     if (doc == null)
@@ -2259,7 +2302,7 @@ MessageBoxDefaultButton.Button1);
 
                         FirstRunDialog first_dialog = new FirstRunDialog();
                         MainForm.SetControlFont(first_dialog, this.DefaultFont);
-                        first_dialog.MainForm = this;
+                        // first_dialog.MainForm = this;
                         first_dialog.StartPosition = FormStartPosition.CenterScreen;
                         if (first_dialog.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
                         {
@@ -2481,8 +2524,18 @@ AppInfo.GetString("config",
                 }
 #endif
 
+#if NO
                 // 安装条码字体
-                InstallBarcodeFont();
+                InstallExternalFont("C39HrP24DhTt", Path.Combine(this.DataDir, "b3901.ttf"));
+                // 安装 OCR-B 10 BT 字体
+                InstallExternalFont("OCR-B 10 BT", Path.Combine(this.DataDir, "ocr-b.ttf"));
+#endif
+                // 安装条码字体
+                InstallExternalFont(Path.Combine(this.DataDir, "b3901.ttf"));
+                // 安装 OCR-B 10 BT 字体
+                InstallExternalFont(Path.Combine(this.DataDir, "ocr-b.ttf"));
+
+
             END1:
 #if NO
                 Stop = new DigitalPlatform.Stop();
@@ -2571,7 +2624,7 @@ Culture=neutral, PublicKeyToken=null
                 if (this.OperHistory == null)
                 {
                     this.OperHistory = new OperHistory();
-                    nRet = this.OperHistory.Initial(this,
+                    nRet = this.OperHistory.Initial(// this,
                         this.webBrowser_history,
                         out strError);
                     if (nRet == -1)
@@ -2586,7 +2639,8 @@ Culture=neutral, PublicKeyToken=null
                 {
                     // 初始化 MessageHub
                     this.MessageHub = new MessageHub();
-                    this.MessageHub.Initial(this, this.webBrowser_messageHub);
+                    this.MessageHub.Initial(// this,
+                        this.webBrowser_messageHub);
                 }
                 else
                 {
@@ -3133,7 +3187,7 @@ Culture=neutral, PublicKeyToken=null
             {
                 string strServerMappedPath = PathUtil.MergePath(this.DataDir, "servermapped");
                 string strLocalFilePath = PathUtil.MergePath(strServerMappedPath, strFileName);
-                PathUtil.CreateDirIfNeed(PathUtil.PathPart(strLocalFilePath));
+                PathUtil.TryCreateDir(PathUtil.PathPart(strLocalFilePath));
 
                 // 观察本地是否有这个文件，最后修改时间是否和服务器吻合
                 if (File.Exists(strLocalFilePath) == true)

@@ -447,6 +447,18 @@ namespace DigitalPlatform.Marc
             return this;
         }
 
+        // 2017/2/23
+        /// <summary>
+        /// 对集合进行排序
+        /// </summary>
+        /// <param name="comparison">排序接口</param>
+        /// <returns>排序后的当前集合</returns>
+        public MarcNodeList sort(Comparison<MarcNode> comparison)
+        {
+            this.m_list.Sort(comparison);
+            return this;
+        }
+
         #region 获得元素
 
         // 返回第一个元素
@@ -761,7 +773,7 @@ namespace DigitalPlatform.Marc
             {
                 foreach (MarcNode node in this)
                 {
-                    node.Indicator = value;  // TODO: 修改indicator的长度不合适了是否高报错?
+                    node.Indicator = value;  // TODO: 修改indicator的长度不合适了是否报错?
                 }
             }
         }

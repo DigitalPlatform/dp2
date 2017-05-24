@@ -37,10 +37,6 @@ namespace dp2Circulation
         }
 
         ProgressEstimate estimate = new ProgressEstimate();
-        /*
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-         * */
 
         PrintCardDocument document = null;
 
@@ -56,14 +52,14 @@ namespace dp2Circulation
 
         private void CardPrintForm_Load(object sender, EventArgs e)
         {
-            this.checkBox_cardFile_indent.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_cardFile_indent.Checked = Program.MainForm.AppInfo.GetBoolean(
     "card_print_form",
     "indent",
     true);
 
             if (string.IsNullOrEmpty(this.textBox_cardFile_cardFilename.Text) == true)
             {
-                this.textBox_cardFile_cardFilename.Text = this.MainForm.AppInfo.GetString(
+                this.textBox_cardFile_cardFilename.Text = Program.MainForm.AppInfo.GetString(
         "card_print_form",
         "card_file_name",
         "");
@@ -71,7 +67,7 @@ namespace dp2Circulation
 
             if (m_bTestingGridSetted == false)
             {
-                this.checkBox_testingGrid.Checked = this.MainForm.AppInfo.GetBoolean(
+                this.checkBox_testingGrid.Checked = Program.MainForm.AppInfo.GetBoolean(
                     "card_print_form",
                     "print_testing_grid",
                     false);
@@ -79,7 +75,7 @@ namespace dp2Circulation
 
             if (this.PrinterInfo == null)
             {
-                this.PrinterInfo = this.MainForm.PreparePrinterInfo("缺省卡片");
+                this.PrinterInfo = Program.MainForm.PreparePrinterInfo("缺省卡片");
             }
 
             SetTitle();
@@ -87,19 +83,19 @@ namespace dp2Circulation
 
         private void CardPrintForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
     "card_print_form",
     "card_file_name",
     this.textBox_cardFile_cardFilename.Text);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "card_print_form",
                     "print_testing_grid",
                     this.checkBox_testingGrid.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
         "card_print_form",
         "indent",
         this.checkBox_cardFile_indent.Checked);
@@ -110,7 +106,7 @@ namespace dp2Circulation
                     if (string.IsNullOrEmpty(strType) == true)
                         strType = "缺省卡片";
 
-                    this.MainForm.SavePrinterInfo(strType,
+                    Program.MainForm.SavePrinterInfo(strType,
                         this.PrinterInfo);
                 }
             }
@@ -400,9 +396,9 @@ namespace dp2Circulation
 
                 printPreviewDialog1.Document = this.document;
 
-                this.MainForm.AppInfo.LinkFormState(printPreviewDialog1, "labelprintform_printpreviewdialog_state");
+                Program.MainForm.AppInfo.LinkFormState(printPreviewDialog1, "labelprintform_printpreviewdialog_state");
                 printPreviewDialog1.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(printPreviewDialog1);
+                Program.MainForm.AppInfo.UnlinkFormState(printPreviewDialog1);
 
             }
             finally
@@ -616,11 +612,11 @@ namespace dp2Circulation
 
         private void CardPrintForm_Activated(object sender, EventArgs e)
         {
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
 

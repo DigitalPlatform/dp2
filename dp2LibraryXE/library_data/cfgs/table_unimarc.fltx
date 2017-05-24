@@ -887,7 +887,7 @@ using DigitalPlatform.Text;
       // 责任者
       if (s24.Length > 0)
       {
-      	  lines.Add(new NameValueLine("责任者", s24));
+      	  lines.Add(new NameValueLine("责任者", s24, "author"));
       }
 
       // 版本
@@ -904,7 +904,7 @@ using DigitalPlatform.Text;
 			}
       
       // 出版发行项
-            	  lines.Add(new NameValueLine("出版发行", publication));
+            	  lines.Add(new NameValueLine("出版发行", publication, "publisher"));
       
       // 载体形态项
             	  lines.Add(new NameValueLine("载体形态", s06));
@@ -958,7 +958,7 @@ using DigitalPlatform.Text;
       }
       
       // 获得方式
-            	  lines.Add(new NameValueLine("获得方式", isbnandprice));
+            	  lines.Add(new NameValueLine("获得方式", isbnandprice, "isbnandprice"));
       
       // 提要文摘
       if (s11.Length > 0)

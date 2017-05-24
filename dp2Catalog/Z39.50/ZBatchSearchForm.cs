@@ -11,6 +11,7 @@ using System.IO;
 using System.Reflection;
 using System.Xml;
 using System.Threading;
+using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -24,12 +25,11 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
-using System.Collections;
 
 namespace dp2Catalog
 {
     public partial class ZBatchSearchForm : Form, ISearchForm, IZSearchForm
-	{
+    {
         // 检索词文件是否太大
         bool m_bExceed = false;
 
@@ -68,13 +68,13 @@ namespace dp2Catalog
         public string BinDir = "";
 
 
-		public ZBatchSearchForm()
-		{
-			InitializeComponent();
+        public ZBatchSearchForm()
+        {
+            InitializeComponent();
 
             this.dpTable_records.ImageList = this.imageList_browseItemType;
             this.dpTable_queryWords.ImageList = this.imageList_queryWords;
-		}
+        }
 
         private void ZBatchSearchForm_Load(object sender, EventArgs e)
         {
@@ -116,7 +116,7 @@ namespace dp2Catalog
 
             int nRet = 0;
             string strError = "";
-            nRet = this.zTargetControl1.Load(Path.Combine(m_mainForm.UserDir,"zserver.xml"),
+            nRet = this.zTargetControl1.Load(Path.Combine(m_mainForm.UserDir, "zserver.xml"),
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
@@ -482,7 +482,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     strError = "请选定数据格式";
                     goto ERROR1;
-                } 
+                }
                 if (String.IsNullOrEmpty(this.comboBox_features_elementSetName.Text) == true)
                 {
                     strError = "请选定元素集名";
@@ -663,7 +663,7 @@ MessageBoxDefaultButton.Button1);
                     {
                         strError = "针对服务器 '" + strServerName + "' 的连接和初始化操作失败：" + strError;
                         DialogResult result = MessageBox.Show(this,
-strError+"\r\n\r\n是否要重试连接和初始化?\r\n\r\n--------------------\r\n注：(是)重试  (否)跳过此服务器继续检索其他服务器  (取消)放弃整个检索操作",
+strError + "\r\n\r\n是否要重试连接和初始化?\r\n\r\n--------------------\r\n注：(是)重试  (否)跳过此服务器继续检索其他服务器  (取消)放弃整个检索操作",
 "ZBatchSearchForm",
 MessageBoxButtons.YesNoCancel,
 MessageBoxIcon.Question,
@@ -688,7 +688,7 @@ MessageBoxDefaultButton.Button1);
                                 return 1;
                             }
                         }
-                        
+
                         QueryLine line = lines[j];
 
                         if (line.ResultRows != null
@@ -700,7 +700,7 @@ MessageBoxDefaultButton.Button1);
                             continue;   // 已经命中的，不再检索
                         }
 
-                        stop.SetMessage("正在对服务器 " + strServerName + " 检索 '"+line.Word+"' ...");
+                        stop.SetMessage("正在对服务器 " + strServerName + " 检索 '" + line.Word + "' ...");
 
                         DpRow word_row = this.dpTable_queryWords.Rows[j];
                         // 检索一个服务器
@@ -978,8 +978,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     nRet = GetTargetNodes(node,
                         ref result_nodes,
                         out strError);
-                if (nRet == -1)
-                    return -1; 
+                    if (nRet == -1)
+                        return -1;
                 }
                 else if (ZTargetControl.IsDatabaseType(node) == true)
                 {
@@ -1348,7 +1348,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                     int nLineNo = -1;
 
                     if (Int32.TryParse(strLineNo, out nLineNo) == false)
-                        throw new Exception("行号数字 '"+strLineNo+"' 格式不正确");
+                        throw new Exception("行号数字 '" + strLineNo + "' 格式不正确");
 
                     if (nLineNo > line.LineNo)
                     {
@@ -1414,7 +1414,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                 line.ResultRows.Add(new_row);
             }
 
-            connection.Stop.SetMessage("检索结果 " + connection.VirtualItems.Count.ToString()+ " 项已填入表格 ...");
+            connection.Stop.SetMessage("检索结果 " + connection.VirtualItems.Count.ToString() + " 项已填入表格 ...");
             return 0;
         }
 
@@ -2122,7 +2122,7 @@ out string strError)
             DpRow current_row = this.dpTable_records.Rows[index];
             if (current_row.Style == DpRowStyle.Seperator)
             {
-                strError = "index值 "+index.ToString()+" 为分割条位置，需要跳过";
+                strError = "index值 " + index.ToString() + " 为分割条位置，需要跳过";
                 return 2;
             }
 
@@ -2446,7 +2446,7 @@ out string strError)
             if (brief_rows.Count > 0)
             {
                 DialogResult result = MessageBox.Show(this,
-"即将保存的记录中有 "+brief_rows.Count.ToString()+" 个 Brief(简要)格式的记录，是否在保存前重新获取为 Full(完整) 格式的记录?\r\n\r\n(Yes: 是，要完整格式的记录; No: 否，依然保存简明格式的记录； Cancel: 取消，放弃整个保存操作",
+"即将保存的记录中有 " + brief_rows.Count.ToString() + " 个 Brief(简要)格式的记录，是否在保存前重新获取为 Full(完整) 格式的记录?\r\n\r\n(Yes: 是，要完整格式的记录; No: 否，依然保存简明格式的记录； Cancel: 取消，放弃整个保存操作",
 "ZBatchSearchForm",
 MessageBoxButtons.YesNoCancel,
 MessageBoxIcon.Question,
@@ -2753,7 +2753,7 @@ MessageBoxDefaultButton.Button1);
 
                 this.EnableControlsInSearching(true);
             }
-            
+
             // 
             if (bAppend == true)
                 m_mainForm.MessageText = nCount.ToString()
@@ -2926,7 +2926,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 catch (Exception ex)
                 {
-                    strError = "写入文件 '" + this.textBox_saveResult_notHitFilename .Text+ "' 时出错: " + ex.Message;
+                    strError = "写入文件 '" + this.textBox_saveResult_notHitFilename.Text + "' 时出错: " + ex.Message;
                     goto ERROR1;
                 }
             }
@@ -3045,7 +3045,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5724.41026, Culture=neutral, PublicKe
                     if (dlg.ShowDialog() != DialogResult.OK)
                         return;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show(this, ex.Message);
                     return;
@@ -3354,7 +3354,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5724.41026, Culture=neutral, PublicKe
             string strError = "";
             int nRet = 0;
 
-            string strLastSavePath = m_mainForm.LastSavePath;
+            string strLastSavePath = Program.MainForm.LastSavePath;
             if (String.IsNullOrEmpty(strLastSavePath) == false)
             {
                 string strOutputPath = "";
@@ -3363,19 +3363,18 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5724.41026, Culture=neutral, PublicKe
                     out strError);
                 if (nRet == -1)
                 {
-                    m_mainForm.LastSavePath = ""; // 避免下次继续出错
+                    Program.MainForm.LastSavePath = ""; // 避免下次继续出错
                     goto ERROR1;
                 }
                 strLastSavePath = strOutputPath;
             }
-
 
             SaveRecordDlg dlg = new SaveRecordDlg();
             GuiUtil.SetControlFont(dlg, this.Font);
 
             dlg.SaveToDbMode = true;    // 不允许在textbox中修改路径
 
-            dlg.MainForm = this.m_mainForm;
+            dlg.MainForm = Program.MainForm;
             dlg.GetDtlpSearchParam += new GetDtlpSearchParamEventHandle(dlg_GetDtlpSearchParam);
             dlg.GetDp2SearchParam += new GetDp2SearchParamEventHandle(dlg_GetDp2SearchParam);
             {
@@ -3383,14 +3382,14 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5724.41026, Culture=neutral, PublicKe
                 dlg.Text = "请选择目标数据库";
             }
             // dlg.StartPosition = FormStartPosition.CenterScreen;
-            this.MainForm.AppInfo.LinkFormState(dlg, "SaveRecordDlg_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "SaveRecordDlg_state");
             dlg.UiState = this.MainForm.AppInfo.GetString("ZBatchSearchForm", "SaveRecordDlg_uiState", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString("ZBatchSearchForm", "SaveRecordDlg_uiState", dlg.UiState);
+            Program.MainForm.AppInfo.SetString("ZBatchSearchForm", "SaveRecordDlg_uiState", dlg.UiState);
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            m_mainForm.LastSavePath = dlg.RecPath;
+            Program.MainForm.LastSavePath = dlg.RecPath;
 
             string strProtocol = "";
             string strPath = "";
@@ -3401,6 +3400,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5724.41026, Culture=neutral, PublicKe
             if (nRet == -1)
                 goto ERROR1;
 
+            Debug.Assert(this.dpTable_records != null, "");
             if (this.dpTable_records.SelectedRows.Count == 0)
             {
                 strError = "尚未选定要保存记录的浏览行";
@@ -3410,8 +3410,8 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5724.41026, Culture=neutral, PublicKe
             bool bForceFull = false;
 
             List<DpRow> brief_rows = this.GetBriefRows();
-
-            if (brief_rows.Count > 0)
+            Debug.Assert(brief_rows != null, "");
+            if (brief_rows != null && brief_rows.Count > 0)
             {
                 DialogResult result = MessageBox.Show(this,
 "即将保存的记录中有 " + brief_rows.Count.ToString() + " 个 Brief(简要)格式的记录，是否在保存前重新获取为 Full(完整) 格式的记录?\r\n\r\n(Yes: 是，要完整格式的记录; No: 否，依然保存简明格式的记录； Cancel: 取消，放弃整个保存操作",
@@ -3426,32 +3426,35 @@ MessageBoxDefaultButton.Button1);
                     // bForceFull = true;
                     // 构造 servers
                     ServerCollection servers = new ServerCollection();
-                    foreach (DpRow row in brief_rows)
+                    Debug.Assert(servers != null, "");
+                    if (servers != null)
                     {
-                        servers.AddRow(row);
+                        foreach (DpRow row in brief_rows)
+                        {
+                            servers.AddRow(row);
+                        }
+                        // return:
+                        //      -1  出错
+                        //      0   成功
+                        //      1   中断
+                        nRet = DoUpdateSearch(servers,
+                            out strError);
+                        if (nRet != 0)
+                            goto ERROR1;
                     }
-                    // return:
-                    //      -1  出错
-                    //      0   成功
-                    //      1   中断
-                    nRet = DoUpdateSearch(servers,
-                        out strError);
-                    if (nRet != 0)
-                        goto ERROR1;
                 }
             }
 
             // TODO: 禁止问号以外的其它ID
             DigitalPlatform.Stop stop = null;
             stop = new DigitalPlatform.Stop();
-            stop.Register(m_mainForm.stopManager, true);	// 和容器关联
+            stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
 
             stop.BeginLoop();
 
             this.EnableControlsInSearching(false);
             try
             {
-
                 // dtlp协议的记录保存
                 if (strProtocol.ToLower() == "dtlp")
                 {
@@ -3462,6 +3465,8 @@ MessageBoxDefaultButton.Button1);
                         strError = "没有连接的或者打开的DTLP检索窗，无法保存记录";
                         goto ERROR1;
                     }
+
+                    Debug.Assert(dtlp_searchform != null, "");
 
                     for (int i = 0; i < this.dpTable_records.SelectedRowIndices.Count; i++)
                     {
@@ -3485,6 +3490,11 @@ MessageBoxDefaultButton.Button1);
                         Encoding currentEncoding = null;
                         string strMARC = "";
 
+                        // return:
+                        //      -1  error
+                        //      0   suceed
+                        //      1   为诊断记录
+                        //      2   分割条，需要跳过这条记录
                         nRet = this.GetOneRecord(
                             "marc",
                             index,  // 即将废止
@@ -3502,6 +3512,10 @@ MessageBoxDefaultButton.Button1);
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
+
+                        // 2017/4/15
+                        if (nRet == 2)
+                            continue;
 
                         string strMarcSyntax = "";
                         if (record.m_strSyntaxOID == "1.2.840.10003.5.1")
@@ -3537,6 +3551,8 @@ MessageBoxDefaultButton.Button1);
                         goto ERROR1;
                     }
 
+                    Debug.Assert(dp2_searchform != null, "");
+
                     string strDp2ServerName = "";
                     string strPurePath = "";
                     // 解析记录路径。
@@ -3549,6 +3565,7 @@ MessageBoxDefaultButton.Button1);
 
                     try
                     {
+                        // 可能会抛出异常
                         NormalDbProperty prop = dp2_searchform.GetDbProperty(strDp2ServerName,
              dp2SearchForm.GetDbName(strPurePath));
                         strTargetMarcSyntax = prop.Syntax;
@@ -3568,13 +3585,10 @@ MessageBoxDefaultButton.Button1);
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null)
+                        if (stop != null && stop.State != 0)
                         {
-                            if (stop.State != 0)
-                            {
-                                strError = "用户中断";
-                                goto ERROR1;
-                            }
+                            strError = "用户中断";
+                            goto ERROR1;
                         }
 
                         int index = this.dpTable_records.SelectedRowIndices[i];
@@ -3589,6 +3603,11 @@ MessageBoxDefaultButton.Button1);
                         Encoding currentEncoding = null;
                         string strMARC = "";
 
+                        // return:
+                        //      -1  error
+                        //      0   suceed
+                        //      1   为诊断记录
+                        //      2   分割条，需要跳过这条记录
                         nRet = this.GetOneRecord(
                             "marc",
                             index,  // 即将废止
@@ -3607,6 +3626,9 @@ MessageBoxDefaultButton.Button1);
                         if (nRet == -1)
                             goto ERROR1;
 
+                        // 2017/4/15
+                        if (nRet == 2)
+                            continue;
 #if NO
                         string strMarcSyntax = "";
                         if (record.m_strSyntaxOID == "1.2.840.10003.5.1")
@@ -3614,6 +3636,8 @@ MessageBoxDefaultButton.Button1);
                         if (record.m_strSyntaxOID == "1.2.840.10003.5.10")
                             strMarcSyntax = "usmarc";
 #endif
+                        Debug.Assert(record != null, "record == null");
+
                         string strMarcSyntax = MarcDetailForm.GetMarcSyntax(record.m_strSyntaxOID);
 
                         // 有些格式不适合保存到目标数据库
@@ -3655,7 +3679,6 @@ MessageBoxDefaultButton.Button1);
                         if (nRet == -1)
                             goto ERROR1;
                         nSavedCount++;
-
                     }
                     MessageBox.Show(this, "共保存记录 " + nSavedCount.ToString() + " 条");
                     return;
@@ -3840,7 +3863,7 @@ EventArgs e)
                     if (line.ResultRows != null
                         && line.ResultRows.Count == 0)
                         results.Add(word_row);
-                } 
+                }
                 else if (strStyle == "singlehit")
                 {
                     if (line.ResultRows != null
@@ -3859,7 +3882,7 @@ EventArgs e)
                         && line.ResultRows.Count > 0)
                         results.Add(word_row);
                 }
-                else throw new Exception("无法识别的 strStyle 值 '"+strStyle+"'");
+                else throw new Exception("无法识别的 strStyle 值 '" + strStyle + "'");
             }
 
             return results;
@@ -4058,10 +4081,10 @@ MessageBoxDefaultButton.Button1);
                         Application.DoEvents();	// 出让界面控制权
 
                         if (stop != null && stop.State != 0)
-                            {
-                                strError = "用户中断";
-                                return 1;
-                            }
+                        {
+                            strError = "用户中断";
+                            return 1;
+                        }
 
                         // QueryLine line = lines[j];
                         QueryResult q_line = server.Lines[j];
@@ -4243,8 +4266,8 @@ MessageBoxDefaultButton.Button1);
             if (rows.Count == 0)
                 MessageBox.Show(this, "当前没有任何没有命中的检索词行");
         }
-        
-	}
+
+    }
 
     public class QueryLine
     {
@@ -4362,7 +4385,7 @@ MessageBoxDefaultButton.Button1);
                 one_line.QueryLine = info.QueryLine;
                 this.Lines.Add(one_line);
             }
-                
+
             one_line.Rows.Add(row);
         }
     }

@@ -382,22 +382,22 @@ namespace DigitalPlatform.OPAC.Server
 
                 // 本地映射配置文件目录
                 app.CfgMapDir = Path.Combine(strDataDir, "cfgsmap");
-                PathUtil.CreateDirIfNeed(app.CfgMapDir);
+                PathUtil.TryCreateDir(app.CfgMapDir);
 
                 // 日志存储目录
                 app.LogDir = Path.Combine(strDataDir, "log");
-                PathUtil.CreateDirIfNeed(app.LogDir);
+                PathUtil.TryCreateDir(app.LogDir);
 
                 // session 临时文件目录
                 app.SessionDir = Path.Combine(strDataDir, "session");
-                PathUtil.CreateDirIfNeed(app.SessionDir);
+                PathUtil.TryCreateDir(app.SessionDir);
 
                 if (PathUtil.TryClearDir(app.SessionDir) == false)
                     this.WriteErrorLog("清除 Session 文件目录 " + app.SessionDir + " 时出错");
 
                 // 临时文件目录
                 app.TempDir = Path.Combine(strDataDir, "temp");
-                PathUtil.CreateDirIfNeed(app.TempDir);
+                PathUtil.TryCreateDir(app.TempDir);
 
                 if (PathUtil.TryClearDir(app.TempDir) == false)
                     this.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出错");
@@ -684,7 +684,7 @@ namespace DigitalPlatform.OPAC.Server
                 {
                     string strColumnDir = Path.Combine(strDataDir, "column");
 
-                    PathUtil.CreateDirIfNeed(strColumnDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(strColumnDir);	// 确保目录创建
                     nRet = LoadCommentColumn(
                         Path.Combine(strColumnDir, "comment"),
                         out strError);
@@ -1147,7 +1147,7 @@ namespace DigitalPlatform.OPAC.Server
                         Directory.Delete(strTargetDir, true);
                 }
 
-                PathUtil.CreateDirIfNeed(strTargetDir);
+                PathUtil.TryCreateDir(strTargetDir);
 
                 FileSystemInfo[] subs = di.GetFileSystemInfos();
 

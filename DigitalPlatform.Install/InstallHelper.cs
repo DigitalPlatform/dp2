@@ -15,6 +15,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Configuration.Install;
 using System.ServiceProcess;
+using System.ComponentModel;
 
 using Microsoft.Win32;
 
@@ -23,7 +24,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
-using System.ComponentModel;
 // using DigitalPlatform.CirculationClient;
 
 namespace DigitalPlatform.Install
@@ -1732,6 +1732,94 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
+        // 不但记忆字符串，也记忆其从属的实例名
+        class InstanceValue
+        {
+            public string Instance { get; set; }
+            public string Value { get; set; }
+        }
+
+        // 2017/2/9
+        // 检查不同实例的 dp2kernel 中所用的 SQL 数据库名是否发生了重复和冲突
+        // return:
+        //      -1  检查过程出错
+        //      0   没有冲突
+        //      1   发生了冲突。报错信息在 strError 中
+        public static int CheckDatabasesXml(
+            string strInstanceName,
+            string strDataDir,
+            Hashtable prefix_table,
+            Hashtable name_table,
+            out string strError)
+        {
+            strError = "";
+
+            string strFileName = Path.Combine(strDataDir, "databases.xml");
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strFileName);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return 0;   // 路径中某一级不存在
+            }
+            catch (FileNotFoundException)
+            {
+                return 0;   // 文件不存在
+            }
+            catch (Exception ex)
+            {
+                strError = "文件 '" + strFileName + "' 装入 XMLDOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            // 检查 dbs/@instancename
+            string strInstancePrefix = "";
+            XmlAttribute prefix = dom.DocumentElement.SelectSingleNode("dbs/@instancename") as XmlAttribute;
+            if (prefix != null)
+                strInstancePrefix = prefix.Value;
+
+            if (prefix_table.ContainsKey(strInstancePrefix))
+            {
+                InstanceValue data = (InstanceValue)prefix_table[strInstancePrefix];
+                strError = "实例 '" + strInstanceName + "' (配置文件 " + strFileName + ") 中 dbs 元素 instancename 属性值 '" + strInstancePrefix + "' 和实例 '" + data.Instance + "' 的用法重复了";
+                return 1;
+            }
+            else
+            {
+                InstanceValue data = new InstanceValue();
+                data.Instance = strInstanceName;
+                data.Value = strInstancePrefix;
+                prefix_table[strInstancePrefix] = data;
+            }
+
+            // 检查 sqlserverdb/@name
+            XmlNodeList name_nodes = dom.DocumentElement.SelectNodes("dbs/database/property/sqlserverdb/@name");
+            foreach (XmlAttribute attr in name_nodes)
+            {
+                string value = attr.Value;
+                if (string.IsNullOrEmpty(value))
+                    continue;
+                value = value.ToLower();
+                if (name_table.ContainsKey(value))
+                {
+                    InstanceValue data = (InstanceValue)name_table[value];
+                    strError = "实例 '" + strInstanceName + "' 中 SQL 数据库名 '" + value + "' 和实例 '" + data.Instance + "' 中另一 SQL 数据库名重复了";
+                    return 1;
+                }
+
+                {
+                    InstanceValue data = new InstanceValue();
+                    data.Instance = strInstanceName;
+                    data.Value = value;
+                    name_table[value] = data;
+                }
+            }
+
+            return 0;
+        }
+
 #if NOOOOOOOOOOOOOOOOOOO
         // 查找虚拟目录所从属的站点编号
         // return
@@ -2040,6 +2128,6 @@ MessageBoxDefaultButton.Button1);
 
             return null;
         }
-    } 
+    }
 
 }

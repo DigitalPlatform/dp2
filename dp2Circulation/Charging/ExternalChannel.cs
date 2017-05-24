@@ -15,7 +15,7 @@ namespace dp2Circulation
     /// </summary>
     public class ExternalChannel
     {
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         public DigitalPlatform.Stop stop = null;
 
@@ -23,13 +23,13 @@ namespace dp2Circulation
 
         bool _doEvents = false;
 
-        public void Initial(MainForm main_form,
+        public void Initial(// MainForm main_form,
             bool bDoEvents = false)
         {
             this._doEvents = bDoEvents;
-            this.MainForm = main_form;
+            // this.MainForm = main_form;
 
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -41,14 +41,14 @@ namespace dp2Circulation
             this.Channel.Idle += new IdleEventHandler(Channel_Idle);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
+            stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
 
             return;
         }
 
         void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
-            MainForm.Channel_AfterLogin(sender, e);    // 2015/11/8
+            Program.MainForm.Channel_AfterLogin(sender, e);    // 2015/11/8
         }
 
         void Channel_Idle(object sender, IdleEventArgs e)
@@ -62,7 +62,7 @@ namespace dp2Circulation
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
+            Program.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 
         public void Close()

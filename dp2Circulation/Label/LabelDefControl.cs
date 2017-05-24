@@ -282,7 +282,6 @@ namespace dp2Circulation
 
             param.Font = Global.BuildFont(strFontString);
 
-
             param.LineFormats.Clear();
             foreach (ListViewItem item in this.listView_lineFormats.Items)
             {
@@ -306,8 +305,10 @@ namespace dp2Circulation
                     format.Font = null;
 
                 format.Align = ListViewUtil.GetItemText(item, COLUMN_ALIGN);
+                format.Style = ListViewUtil.GetItemText(item, COLUMN_STYLE);
                 SetFormatStart(format, store.UniversalStart);
                 SetFormatOffset(format, store.UniversalOffset);
+                SetFormatSize(format, store.UniversalSize);
 
                 format.ForeColor = ListViewUtil.GetItemText(item, COLUMN_FORECOLOR);
                 format.BackColor = ListViewUtil.GetItemText(item, COLUMN_BACKCOLOR);
@@ -361,10 +362,31 @@ namespace dp2Circulation
                 format.StartY = double.Parse(strRight);
         }
 
+        // 可能会抛出异常
+        static void SetFormatSize(LineFormat format, string strSize)
+        {
+            string strWidth = "";
+            string strHeight = "";
+            StringUtil.ParseTwoPart(strSize,
+                ",",
+                out strWidth,
+                out strHeight);
+            if (string.IsNullOrEmpty(strWidth) == true)
+                format.Width = double.NaN;
+            else
+                format.Width = double.Parse(strWidth);
+
+            if (string.IsNullOrEmpty(strHeight) == true)
+                format.Height = double.NaN;
+            else
+                format.Height = double.Parse(strHeight);
+        }
+
         class LineStore
         {
             public string UniversalStart = "";
             public string UniversalOffset = "";
+            public string UniversalSize = "";
         }
 
         void SetLabelParam(LabelParam param)
@@ -409,15 +431,20 @@ namespace dp2Circulation
 
                 ListViewUtil.ChangeItemText(item, COLUMN_FONT, strFontString);
                 ListViewUtil.ChangeItemText(item, COLUMN_ALIGN, line.Align);
+                ListViewUtil.ChangeItemText(item, COLUMN_STYLE, line.Style);
 
                 string strStart = GetStartString(this._currentUnit, line.StartX, line.StartY);
                 ListViewUtil.ChangeItemText(item, COLUMN_START, strStart);
                 string strOffset = GetOffsetString(this._currentUnit, line.OffsetX, line.OffsetY);
                 ListViewUtil.ChangeItemText(item, COLUMN_OFFSET, strOffset);
+                string strSize = GetStartString(this._currentUnit, line.Width, line.Height);
+                ListViewUtil.ChangeItemText(item, COLUMN_SIZE, strSize);
+
 
                 LineStore store = new LineStore();
                 store.UniversalStart = GetStartString(GraphicsUnit.Display, line.StartX, line.StartY);
                 store.UniversalOffset = GetOffsetString(GraphicsUnit.Display, line.OffsetX, line.OffsetY);
+                store.UniversalSize = GetSizeString(GraphicsUnit.Display, line.Width, line.Height);
                 item.Tag = store;
 
                 ListViewUtil.ChangeItemText(item, COLUMN_FORECOLOR, line.ForeColor);
@@ -449,6 +476,15 @@ namespace dp2Circulation
             return LabelParam.ToString(x) + "," + LabelParam.ToString(y);
         }
 
+        static string GetSizeString(GraphicsUnit unit,
+    double x,
+    double y)
+        {
+            return GetStartString(unit,
+            x,
+            y);
+        }
+
         // 将 1/100 英寸的值转换为指定的单位的字符串值
         static string GetOffsetString(GraphicsUnit unit,
             double x,
@@ -470,8 +506,10 @@ namespace dp2Circulation
         const int COLUMN_ALIGN = 1;
         const int COLUMN_START = 2;
         const int COLUMN_OFFSET = 3;
-        const int COLUMN_FORECOLOR = 4;
-        const int COLUMN_BACKCOLOR = 5;
+        const int COLUMN_SIZE = 4;
+        const int COLUMN_FORECOLOR = 5;
+        const int COLUMN_BACKCOLOR = 6;
+        const int COLUMN_STYLE = 7;
 
         private void numericUpDown_labelWidth_ValueChanged(object sender, EventArgs e)
         {
@@ -732,17 +770,21 @@ namespace dp2Circulation
                 {
                     ListViewUtil.ChangeItemText(item, COLUMN_START, store.UniversalStart);
                     ListViewUtil.ChangeItemText(item, COLUMN_OFFSET, store.UniversalOffset);
+                    ListViewUtil.ChangeItemText(item, COLUMN_SIZE, store.UniversalSize);
                 }
                 else
                 {
                     LineFormat format = new LineFormat();
                     SetFormatStart(format, store.UniversalStart);
                     SetFormatOffset(format, store.UniversalOffset);
+                    SetFormatSize(format, store.UniversalSize);
 
                     string strStart = GetStartString(this._currentUnit, format.StartX, format.StartY);
                     ListViewUtil.ChangeItemText(item, COLUMN_START, strStart);
                     string strOffset = GetOffsetString(this._currentUnit, format.OffsetX, format.OffsetY);
                     ListViewUtil.ChangeItemText(item, COLUMN_OFFSET, strOffset);
+                    string strSize = GetSizeString(this._currentUnit, format.Width, format.Height);
+                    ListViewUtil.ChangeItemText(item, COLUMN_SIZE, strSize);
                 }
             }
         }
@@ -768,18 +810,19 @@ namespace dp2Circulation
             dlg.DecimalPlaces = this.DecimalPlaces;
             dlg.FontString = ListViewUtil.GetItemText(item, COLUMN_FONT);
             dlg.Align = ListViewUtil.GetItemText(item, COLUMN_ALIGN);
+            dlg.StyleString = ListViewUtil.GetItemText(item, COLUMN_STYLE);
 #if NO
             dlg.Start = ListViewUtil.GetItemText(item, COLUMN_START);
             dlg.Offset = ListViewUtil.GetItemText(item, COLUMN_OFFSET);
 #endif
             dlg.UniversalStart = store.UniversalStart;
             dlg.UniversalOffset = store.UniversalOffset;
+            dlg.UniversalSize = store.UniversalSize;
             dlg.ForeColorString = ListViewUtil.GetItemText(item, COLUMN_FORECOLOR);
             dlg.BackColorString = ListViewUtil.GetItemText(item, COLUMN_BACKCOLOR);
 
             dlg.StartPosition = FormStartPosition.CenterParent;
             dlg.ShowDialog(this);
-
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -788,13 +831,15 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item, COLUMN_ALIGN, dlg.Align);
             ListViewUtil.ChangeItemText(item, COLUMN_START, dlg.Start);
             ListViewUtil.ChangeItemText(item, COLUMN_OFFSET, dlg.Offset);
+            ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.Size);
+            ListViewUtil.ChangeItemText(item, COLUMN_STYLE, dlg.StyleString);
 
             store.UniversalStart = dlg.UniversalStart;
             store.UniversalOffset = dlg.UniversalOffset;
+            store.UniversalSize = dlg.UniversalSize;
 
             ListViewUtil.ChangeItemText(item, COLUMN_FORECOLOR, dlg.ForeColorString);
             ListViewUtil.ChangeItemText(item, COLUMN_BACKCOLOR, dlg.BackColorString);
-
 
             this.labelDesignControl1.LabelParam = this.GetLabelParam();
             _panelVersion++;
@@ -811,6 +856,7 @@ namespace dp2Circulation
             dlg.CurrentUnit = this._currentUnit;
             dlg.DecimalPlaces = this.DecimalPlaces;
             dlg.Align = "left";
+            dlg.StyleString = "";
             dlg.StartPosition = FormStartPosition.CenterParent;
             dlg.ShowDialog(this);
 
@@ -822,10 +868,13 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item, COLUMN_ALIGN, dlg.Align);
             ListViewUtil.ChangeItemText(item, COLUMN_START, dlg.Start);
             ListViewUtil.ChangeItemText(item, COLUMN_OFFSET, dlg.Offset);
+            ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.Size);
+            ListViewUtil.ChangeItemText(item, COLUMN_STYLE, dlg.StyleString);
 
             LineStore store = new LineStore();
             store.UniversalStart = dlg.UniversalStart;
             store.UniversalOffset = dlg.UniversalOffset;
+            store.UniversalSize = dlg.UniversalSize;
             item.Tag = store;
 
             ListViewUtil.ChangeItemText(item, COLUMN_FORECOLOR, dlg.ForeColorString);

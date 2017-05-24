@@ -459,7 +459,7 @@ ref sessioninfo) == false)
         string strPrefix = CacheBuilder.MakeNodePath(node);
         string strCacheDir = app.DataDir + "/browse/cache/" + strDataFile;
 
-        PathUtil.CreateDirIfNeed(strCacheDir);
+        PathUtil.TryCreateDir(strCacheDir);
         string strResultsetFilename = strCacheDir + "/" + strPrefix;
 
         string strRssString = "datafile=" + strDataFile + "&node=" + strPrefix;
@@ -840,7 +840,7 @@ ref sessioninfo) == false)
         string strPrefix = strNode;
         string strCacheDir = app.DataDir + "/browse/cache/" + strDataFile;
 
-        PathUtil.CreateDirIfNeed(strCacheDir);
+        PathUtil.TryCreateDir(strCacheDir);
         string strResultsetFilename = strCacheDir + "/" + strPrefix;
 
         // 如果RSS文件已经存在，就不要从 dp2library 获取了

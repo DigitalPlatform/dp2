@@ -13,7 +13,8 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
+
         public string OrderText = "";   // 期的HTML信息
         public string BiblioText = "";  // 种的HTML信息
 
@@ -39,13 +40,13 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(this.OrderText) == false)
                 Global.SetHtmlString(this.webBrowser_order,
                     this.OrderText,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "orderindexdup_order");
 
             if (String.IsNullOrEmpty(this.BiblioText) == false)
                 Global.SetHtmlString(this.webBrowser_biblio,
                     this.BiblioText,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "orderindexdup_biblio");
 
         }

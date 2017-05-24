@@ -29,14 +29,6 @@ namespace dp2Circulation
 
         WebExternalHost m_webExternalHost = new WebExternalHost();
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-#endif
-
         ReaderWriterLock m_lock = new ReaderWriterLock();
         static int m_nLockTimeout = 5000;	// 5000=5秒
 
@@ -70,13 +62,13 @@ namespace dp2Circulation
 
         private void PassGateForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -86,7 +78,8 @@ namespace dp2Circulation
 #endif
 
             // webbrowser
-            this.m_webExternalHost.Initial(this.MainForm, this.webBrowser_readerInfo);
+            this.m_webExternalHost.Initial(// Program.MainForm,
+                this.webBrowser_readerInfo);
             this.webBrowser_readerInfo.ObjectForScripting = this.m_webExternalHost;
 
             this.commander = new Commander(this);
@@ -95,19 +88,19 @@ namespace dp2Circulation
 
             this.AcceptButton = this.button_passGate;
 
-            this.textBox_gateName.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_gateName.Text = Program.MainForm.AppInfo.GetString(
                 "passgate_form",
                 "gate_name",
                 "");
-            this.checkBox_displayReaderDetailInfo.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_displayReaderDetailInfo.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "passgate_form",
                 "display_reader_detail_info",
                 true);
-            this.checkBox_hideBarcode.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_hideBarcode.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "passgate_form",
                 "hide_barcode",
                 false);
-            this.checkBox_hideReaderName.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_hideReaderName.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "passgate_form",
                 "hide_readername",
                 false);
@@ -134,22 +127,22 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "passgate_form",
                     "gate_name",
                     this.textBox_gateName.Text);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "passgate_form",
                     "display_reader_detail_info",
                     this.checkBox_displayReaderDetailInfo.Checked);
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "passgate_form",
                     "hide_barcode",
                     this.checkBox_hideBarcode.Checked);
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "passgate_form",
                     "hide_readername",
                     this.checkBox_hideReaderName.Checked);
@@ -290,7 +283,7 @@ namespace dp2Circulation
             catch (Exception ex)
             {
                 string strErrorText = "PassGateForm ThreadMain() 出现异常: " + ExceptionUtil.GetDebugText(ex);
-                this.MainForm.WriteErrorLog(strErrorText);
+                Program.MainForm.WriteErrorLog(strErrorText);
             }
         }
 
@@ -380,7 +373,7 @@ namespace dp2Circulation
                     {
                         strTypeList += ",html";
 
-                        if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.25") >= 0)
+                        if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.25") >= 0)
                             strTypeList += ":noborrowhistory";
 
                         nTypeCount = 2;
@@ -471,7 +464,7 @@ namespace dp2Circulation
             catch(Exception ex)
             {
                 string strErrorText = "PassGateForm Worker() 出现异常: " + ExceptionUtil.GetDebugText(ex);
-                this.MainForm.WriteErrorLog(strErrorText);
+                Program.MainForm.WriteErrorLog(strErrorText);
             }
         }
 
@@ -620,12 +613,12 @@ namespace dp2Circulation
 
         private void textBox_readerBarcode_Enter(object sender, EventArgs e)
         {
-            this.MainForm.EnterPatronIdEdit(InputType.PQR);
+            Program.MainForm.EnterPatronIdEdit(InputType.PQR);
         }
 
         private void textBox_readerBarcode_Leave(object sender, EventArgs e)
         {
-            this.MainForm.LeavePatronIdEdit();
+            Program.MainForm.LeavePatronIdEdit();
 
             if (m_bActive == false)
                 return;
@@ -638,11 +631,11 @@ namespace dp2Circulation
 
         private void PassGateForm_Activated(object sender, EventArgs e)
         {
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
 
             m_bActive = true;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
         private void PassGateForm_Deactivate(object sender, EventArgs e)
@@ -672,7 +665,7 @@ namespace dp2Circulation
         }
         void Window_Error(object sender, HtmlElementErrorEventArgs e)
         {
-            if (this.MainForm.SuppressScriptErrors == true)
+            if (Program.MainForm.SuppressScriptErrors == true)
                 e.Handled = true;
         }
     }

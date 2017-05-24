@@ -1192,9 +1192,60 @@ request).Result;
         public string binding { get; set; } // 绑定信息
     }
 
+    // 2016/10/23
+    public class LoginInfo
+    {
+        public string UserName { get; set; }    // 用户名。指 dp2library 的用户名。如果 Type 为 "Patron"，表示这是一个读者。2016/10/21
+        public string UserType { get; set; }    // 用户类型。patron 表示读者，其他表示工作人员
+        public string Password { get; set; }    // 密码。如果为 null，表示用代理方式登录
+        public string Style { get; set; }       // 登录方式
+
+        public LoginInfo()
+        {
+
+        }
+
+        public LoginInfo(string userName, bool isPatron)
+        {
+            this.UserName = userName;
+            if (isPatron)
+                this.UserType = "patron";
+        }
+
+        public LoginInfo(string userName,
+            bool isPatron,
+            string password,
+            string style)
+        {
+            this.UserName = userName;
+            if (isPatron)
+                this.UserType = "patron";
+            this.Password = password;
+            this.Style = style;
+        }
+
+        public override string ToString()
+        {
+            StringBuilder text = new StringBuilder();
+            if (string.IsNullOrEmpty(this.UserName) == false)
+                text.Append("UserName=" + this.UserName + ";");
+            if (string.IsNullOrEmpty(this.UserType) == false)
+                text.Append("UserType=" + this.UserType + ";");
+            if (string.IsNullOrEmpty(this.Password) == false)
+                text.Append("Password=" + this.Password + ";");
+            if (string.IsNullOrEmpty(this.Style) == false)
+                text.Append("Style=" + this.Style + ";");
+            return text.ToString();
+        }
+    }
+
+
     public class SearchRequest
     {
         public string TaskID { get; set; }    // 本次检索的任务 ID。由于一个 Connection 可以用于同时进行若干检索操作，本参数用于区分不同的检索操作
+
+        public LoginInfo LoginInfo { get; set; }    // 登录信息 2016/10/22
+
         public string Operation { get; set; }   // 操作名。
         public string DbNameList { get; set; }  // 数据库名列表。一般为 "<全部>"
         public string QueryWord { get; set; }   // 检索词。若为 !getResult 表示不检索、从已有结果集中获取记录
@@ -1208,6 +1259,7 @@ request).Result;
         public string ServerPushEncoding { get; set; }
 
         public SearchRequest(string taskID,
+            LoginInfo loginInfo,
             string operation,
             string dbNameList,
             string queryWord,
@@ -1221,6 +1273,7 @@ request).Result;
             string serverPushEncoding = "")
         {
             this.TaskID = taskID;
+            this.LoginInfo = loginInfo;
             this.Operation = operation;
             this.DbNameList = dbNameList;
             this.QueryWord = queryWord;

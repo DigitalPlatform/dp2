@@ -41,11 +41,26 @@ namespace dp2Circulation
         private void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
+
             if (string.IsNullOrEmpty(this.textBox_outputExcelFileName.Text) == true)
             {
                 strError = "尚未指定输出文件名";
                 goto ERROR1;
             }
+
+            string strOutputFileName = "";
+            // return:
+            //      -1  出错
+            //      0   文件名不合法
+            //      1   文件名合法
+            int nRet = CheckExcelFileName(this.textBox_outputExcelFileName.Text,
+                true,
+                out strOutputFileName,
+                out strError);
+            if (nRet == -1 || nRet == 0)
+                goto ERROR1;
+
+            this.textBox_outputExcelFileName.Text = strOutputFileName;
 
             // 提醒覆盖文件
             if (this.OverwritePrompt == true
@@ -273,6 +288,52 @@ namespace dp2Circulation
             else
             {
                 // 清除打勾标记
+            }
+        }
+
+        // return:
+        //      -1  出错
+        //      0   文件名不合法
+        //      1   文件名合法
+        public static int CheckExcelFileName(string strFileName,
+            bool bAutoCorrect,
+            out string strOutputFileName,
+            out string strError)
+        {
+            strError = "";
+            strOutputFileName = strFileName;
+
+            try
+            {
+                if (bAutoCorrect == true && Path.HasExtension(strFileName) == false)
+                {
+                    string strPath = Path.GetDirectoryName(strFileName);
+                    if (string.IsNullOrEmpty(strPath) == false)
+                        strOutputFileName = strPath + "\\" + Path.GetFileNameWithoutExtension(strFileName) + ".xlsx";
+                    else
+                        strOutputFileName = Path.GetFileNameWithoutExtension(strFileName) + ".xlsx";
+
+                    return 1;
+                }
+
+                string strExtension = Path.GetExtension(strFileName);
+                if (strExtension == null)
+                {
+                    strError = "文件名 '" + strFileName + "' 的扩展名部分不合法。应该为 '.xlsx'";
+                    return 0;
+                }
+                if (strExtension.ToLower() != ".xlsx")
+                {
+                    strError = "文件名 '" + strFileName + "' 的扩展名部分不合法。应该为 '.xlsx'";
+                    return 0;
+                }
+
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                strError = "检测文件名的过程出错: " + ex.Message;
+                return -1;
             }
         }
     }

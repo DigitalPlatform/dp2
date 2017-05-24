@@ -91,11 +91,15 @@ namespace DigitalPlatform.CommonControl
         {
             get
             {
-                return this.m_nMaxTextHeight;
+                // return this.m_nMaxTextHeight;
+                // 翻译为 96 DPI 下的数量
+                return DpiUtil.Get96ScalingY(DpiUtil.GetDpiXY(this), this.m_nMaxTextHeight);
             }
             set
             {
-                this.m_nMaxTextHeight = value;
+                // this.m_nMaxTextHeight = value;
+                // 从 96 DPI 下的数量翻译为物理像素数
+                this.m_nMaxTextHeight = DpiUtil.GetScalingY(DpiUtil.GetDpiXY(this), value);
 
                 {
                     long lOldContentHeight = this.m_lContentHeight;
@@ -109,6 +113,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        // TODO: DPI-ware 改造
         // 行间距
         internal int m_nLineDistance = 0;
         [DescriptionAttribute("Distance of Rows")]
@@ -3840,7 +3845,6 @@ nHeight);
         public object Tag = null;   // 存储附加的数据
 
         public bool OwnerDraw = false;  // 是否要定制绘制
-
 
         public DpRow Container = null;
 

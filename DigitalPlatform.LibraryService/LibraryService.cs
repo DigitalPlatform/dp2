@@ -47,6 +47,13 @@ namespace dp2Library
                 this.sessioninfo.CloseSession();
             }
 #endif
+            // 2017/5/7
+            if (this.sessioninfo != null)
+            {
+                if (this.RestMode)
+                    this.sessioninfo.Used--;
+            }
+
             if (this.RestMode == false)
             {
                 if (this.sessioninfo != null)
@@ -61,6 +68,7 @@ namespace dp2Library
                     this._ip = null;
                 }
             }
+
         }
 
         #region 基础函数
@@ -400,6 +408,10 @@ namespace dp2Library
 #endif
 
                 SetLang(sessioninfo.Lang);
+
+                // 2017/5/7
+                if (this.RestMode)
+                    this.sessioninfo.Used++;
             }
 
             if (bPrepareSessionInfo == false && this.sessioninfo == null)
@@ -918,7 +930,10 @@ namespace dp2Library
                 parameters,
                 alter_type_list,
                 result) == true)
+                    {
+                        sessioninfo.Account = null; // 2017/5/5 堵住漏洞
                         return result;
+                    }
                 }
 
                 // END1:
@@ -988,6 +1003,8 @@ namespace dp2Library
                     strTempCode,
                     out strError) == false)
                 {
+                    sessioninfo.Account = null; // 2017/5/5 堵住漏洞
+
                     result.Value = -1;
                     result.ErrorInfo = strError;
                     result.ErrorCode = ErrorCode.TempCodeMismatch;
@@ -1066,11 +1083,11 @@ namespace dp2Library
 
                     if (nPasswordRet == 1)
                     {
-                        string strMessage = "登录验证码为 " + code.Code + "。(用户 " + sessioninfo.Account.UserID + ") 十分钟以后失效";
+                        string strMessage = "登录验证码为 " + code.Code + "。(用户 " + sessioninfo.Account.UserID + ") " + Account.TempCodeExpireLength.TotalMinutes + "分钟以后失效";
                         string strLibraryName = app.LibraryName;
                         if (string.IsNullOrEmpty(strLibraryName) == false)
                         {
-                            strMessage = "登录验证码为 " + code.Code + "。(用户 " + sessioninfo.Account.UserID + " " + strLibraryName + ") 十分钟以后失效";
+                            strMessage = "登录验证码为 " + code.Code + "。(用户 " + sessioninfo.Account.UserID + " " + strLibraryName + ") " + Account.TempCodeExpireLength.TotalMinutes + "分钟以后失效";
                         }
 
                         // 通过 MSMQ 发送手机短信
@@ -1123,6 +1140,7 @@ namespace dp2Library
 
             return false;
         ERROR1:
+            sessioninfo.Account = null; // 2017/5/5 堵住漏洞
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
@@ -3594,7 +3612,7 @@ namespace dp2Library
         // 权限:   需要具有setbiblioinfo权限
         // parameters:
         //      strAction   动作。为"new" "change" "delete" "onlydeletebiblio" "onlydeletesubrecord"之一。"delete"在删除书目记录的同时，会自动删除下属的实体记录。不过要求实体均未被借出才能删除。
-        //      strBiblioType   目前只允许xml一种
+        //      strBiblioType   xml 或 iso2709。iso2709 格式可以包含编码方式，例如 iso2709:utf-8
         //      baTimestamp 时间戳。如果为新创建记录，可以为null 
         //      strOutputBiblioRecPath 输出的书目记录路径。当strBiblioRecPath中末级为问号，表示追加保存书目记录的时候，本参数返回实际保存的书目记录路径
         //                      此参数也用于，当保存前查重时发现了重复的书目记录，这里返回这些书目记录的路径
@@ -4172,6 +4190,9 @@ namespace dp2Library
 
             try
             {
+                // testing
+                // Thread.Sleep(1000*60*5);
+
                 // 权限判断
 
                 // 权限字符串
@@ -5074,7 +5095,7 @@ namespace dp2Library
                         nRet = app.ConvertBiblioXmlToHtml(
                                 strFilterFileName,
                                 strBiblioXml,
-                                    null,
+                                null,
                                 strBiblioRecPath,
                                 out strBiblio,
                                 out strError);
@@ -8466,7 +8487,8 @@ namespace dp2Library
                 result.Value = nRet;
                 result.ErrorInfo = strError;
 
-                if (nRet == 1 && lAttachmentTotalLength > 0 && nAttachmentFragmentLength > 0)
+                if (nRet == 1 && lAttachmentTotalLength > 0
+                    && (nAttachmentFragmentLength > 0 || nAttachmentFragmentLength == -1))  // -1 是 2017/5/16 增加的
                 {
                     // 读出attachment片断
                     // attachment.Seek(0, SeekOrigin.Begin);    // 不必要了
@@ -8478,6 +8500,8 @@ namespace dp2Library
                     }
 
                     long lTemp = 0;
+                    // parameters:
+                    //      nAttachmentFragmentLength   要读出的附件内容字节数。如果为 -1，表示尽可能多读出内容
                     // return:
                     //      -1  error
                     //      0   file not found
@@ -8919,7 +8943,13 @@ Stack:
                     }
                 }
 
-                int nRet = app.ManageDatabase(sessioninfo.Channels,
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   成功
+                int nRet = app.ManageDatabase(
+                    sessioninfo,
+                    sessioninfo.Channels,
                     sessioninfo.LibraryCodeList,
                     strAction,
                     strDatabaseName,
@@ -8927,13 +8957,20 @@ Stack:
                     out strOutputInfo,
                     out strError);
                 if (nRet == -1)
+                {
+                    result.ErrorCode = ErrorCode.SystemError;
                     goto ERROR1;
+                }
+                if (nRet == 0)
+                {
+                    result.ErrorCode = ErrorCode.NotFound;
+                    goto ERROR1;
+                }
 
-                result.Value = nRet;
+                result.Value = nRet;    // 原来这里返回 0
                 return result;
             ERROR1:
                 result.Value = -1;
-                result.ErrorCode = ErrorCode.SystemError;
                 result.ErrorInfo = strError;
                 return result;
             }
@@ -9404,9 +9441,13 @@ Stack:
         //      result.Value 0: 不是合法的条码号 1:合法的读者证条码号 2:合法的册条码号
         // 权限：暂时不需要任何权限
         public LibraryServerResult VerifyBarcode(
+            string strAction,
             string strLibraryCode,
-            string strBarcode)
+            string strBarcode,
+            out string strOutputBarcode)
         {
+            strOutputBarcode = "";
+
             // LibraryServerResult result = this.PrepareEnvironment(false);
             LibraryServerResult result = this.PrepareEnvironment("VerifyBarcode", true, true);
             if (result.Value == -1)
@@ -9426,6 +9467,7 @@ Stack:
                     return result;
                 }
 
+#if NO
                 if (app.m_assemblyLibraryHost == null)
                 {
                     result.Value = -1;
@@ -9433,16 +9475,57 @@ Stack:
                     result.ErrorCode = ErrorCode.NotFound;
                     return result;
                 }
+#endif
+                // 当前是否定义了脚本?
                 // return:
-                //      -2  not found script
-                //      -1  出错
-                //      0   成功
-                int nRet = app.DoVerifyBarcodeScriptFunction(
-                    null,
-                    strLibraryCode, // sessioninfo.LibraryCodeList,
-                    strBarcode,
-                    out nResultValue,
-                    out strError);
+                //      -1  定义了，但编译有错
+                //      0   没有定义
+                //      1   定义了
+                int nRet = app.HasScript(out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "没有配置<script>，无法校验条码号";
+                    result.ErrorCode = ErrorCode.NotFound;
+                    return result;
+                }
+
+                if (string.IsNullOrEmpty(strAction)
+                    || strAction == "verify" || strAction == "VerifyBarcode")
+                {
+                    // return:
+                    //      -2  not found script
+                    //      -1  出错
+                    //      0   成功
+                    nRet = app.DoVerifyBarcodeScriptFunction(
+                        null,
+                        strLibraryCode, // sessioninfo.LibraryCodeList,
+                        strBarcode,
+                        out nResultValue,
+                        out strError);
+                }
+                else if (strAction == "transform" || strAction == "TransformBarcode")
+                {
+                    // return:
+                    //      -2  not found script
+                    //      -1  出错
+                    //      0   成功
+                    nRet = app.DoTransformBarcodeScriptFunction(
+                        null,
+                        strLibraryCode, // sessioninfo.LibraryCodeList,
+                        ref strBarcode,
+                        out nResultValue,
+                        out strError);
+                    strOutputBarcode = strBarcode;
+                }
+                else
+                {
+                    strError = "无法识别的 strAction 参数值 '" + strAction + "'";
+                    goto ERROR1;
+                }
+
                 if (nRet == -1)
                     goto ERROR1;
                 if (nRet == -2)
@@ -9453,13 +9536,6 @@ Stack:
                     return result;
                 }
 
-                /*
-                // 脚本内可以使用出错字符串
-                if (nResultValue == -1)
-                {
-                    goto ERROR1;
-                }*/
-                // 2009/2/23 
                 result.ErrorInfo = strError;
                 result.Value = nResultValue;
                 return result;
@@ -10324,7 +10400,8 @@ Stack:
                         // 必须在ReadersMonitor以前启动。否则其中用到脚本代码时会出错。2007/10/10 changed
                         // return:
                         //		-1	出错
-                        //		0	成功
+                        //		0	脚本代码没有找到
+                        //      1   成功
                         nRet = app.InitialLibraryHostAssembly(out strError);
                         if (nRet == -1)
                         {
@@ -14061,6 +14138,7 @@ out strError);
         //		strNumber	返回号码
         //		strError	出错信息
         // return:
+        //      -4  "著者 'xxx' 的整体或局部均未检索命中" 2017/3/1
         //		-3	需要回答问题
         //      -2  strID验证失败
         //      -1  出错
@@ -14096,6 +14174,7 @@ out strError);
                 // TODO: 验证身份
                 StringBuilder debug_info = null;
                 // return:
+                //      -4  "著者 'xxx' 的整体或局部均未检索命中" 2017/3/1
                 //		-3	需要回答问题
                 //      -1  出错
                 //      0   成功
@@ -14290,6 +14369,10 @@ true);
         [DataMember]
         public string No { get; set; }  // 续借次，序号
 
+        // 2017/5/22
+        [DataMember]
+        public string Volume { get; set; }  // 卷册
+
         [DataMember]
         public string ClientAddress { get; set; }  // 访问者的IP地址
 
@@ -14308,6 +14391,7 @@ true);
             this.PatronBarcode = item.PatronBarcode;
             this.BiblioRecPath = item.BiblioRecPath;
             this.Period = item.Period;
+            this.Volume = item.Volume;
             this.No = item.No;
             this.ClientAddress = item.ClientAddress;
             this.Operator = item.Operator;

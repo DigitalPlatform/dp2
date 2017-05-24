@@ -23,7 +23,7 @@ namespace DigitalPlatform.LibraryServer
             string strServerUrl*/)
         {
             this.RootDir = strRootDir;
-            PathUtil.CreateDirIfNeed(this.RootDir);
+            PathUtil.TryCreateDir(this.RootDir);
 
             // this.ServerUrl = strServerUrl;
 
@@ -40,7 +40,7 @@ namespace DigitalPlatform.LibraryServer
             catch
             {
             }
-            PathUtil.CreateDirIfNeed(this.RootDir);
+            PathUtil.TryCreateDir(this.RootDir);
         }
 
         // 清除一个本地缓存的配置文件
@@ -95,7 +95,7 @@ namespace DigitalPlatform.LibraryServer
             strLocalPath = this.RootDir + "/" + strPath;
 
             // 确保目录存在
-            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strLocalPath));
+            PathUtil.TryCreateDir(Path.GetDirectoryName(strLocalPath));
 
             this.locks.LockForRead(strLocalPath);
             try {
@@ -113,7 +113,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 确保目录存在
-            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strLocalPath));
+            PathUtil.TryCreateDir(Path.GetDirectoryName(strLocalPath));
 
             this.locks.LockForWrite(strLocalPath);
             try

@@ -477,7 +477,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -551,7 +551,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -697,7 +697,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strRightsTableXml) == true)
             {
                 Global.ClearHtmlPage(this.webBrowser_rightsTableHtml,
-                    this.MainForm.DataDir);
+                    Program.MainForm.DataDir);
                 this.m_nRightsTableHtmlVersion = this.m_nRightsTableXmlVersion;
                 return 0;
             }
@@ -716,7 +716,7 @@ namespace dp2Circulation
             if (dom.DocumentElement == null)
             {
                 Global.ClearHtmlPage(this.webBrowser_rightsTableHtml,
-                    this.MainForm.DataDir);
+                    Program.MainForm.DataDir);
                 this.m_nRightsTableHtmlVersion = this.m_nRightsTableXmlVersion;
                 return 0;
             }
@@ -747,7 +747,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {

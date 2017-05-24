@@ -6356,6 +6356,7 @@ strElementName);
   <copyOrderRecords /> <moveOrderRecords />
   <copyIssueRecords /> <moveIssueRecords />
   <copyCommentRecords /> <moveCommentRecords />
+  <mergeStyle>...</mergeStyle> reserve_source 或者 reserve_target。缺省为 reserve_source
   <operator>test</operator> 
   <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
 </root>

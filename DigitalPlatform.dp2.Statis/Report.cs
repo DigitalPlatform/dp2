@@ -9,6 +9,11 @@ using DigitalPlatform.Text;
 using System.Xml;
 using System.Web.UI;
 using System.IO;
+using System.Windows.Forms;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml;
+using ClosedXML.Excel;
+using DigitalPlatform.Xml;
 
 
 namespace DigitalPlatform.dp2.Statis
@@ -579,7 +584,7 @@ The default behavior of an XmlWriter created using Create is to throw an Argumen
                             Indent = true,
                             OmitXmlDeclaration = true,
                             CheckCharacters = false // 2016/6/3
-                        }))   
+                        }))
                     {
                         writer.WriteDocType("html", "-//W3C//DTD XHTML 1.0 Transitional//EN", "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd", null);
                         writer.WriteStartElement("html", "http://www.w3.org/1999/xhtml");
@@ -1033,6 +1038,307 @@ The default behavior of an XmlWriter created using Create is to throw an Argumen
             }
 
             writer.WriteEndElement();   // </table>
+        }
+
+        // 构造 Excel 表格的一些参数
+        public class ExcelTableConfig
+        {
+            public string FontName { get; set; }    // 默认字体名
+            public int StartRow { get; set; }   // 表格开始的行号。最小是 1
+            public int StartCol { get; set; }   // 表格开始的列号。最小是 1
+        }
+
+        // return:
+        //      -1  出错
+        //      0   放弃或中断
+        //      1   成功
+        public int ExportToExcel(
+            Table table,
+            ExcelTableConfig config,
+            IXLWorksheet sheet,
+            out string strError)
+        {
+            strError = "";
+
+            // 每个列的最大字符数
+            List<int> column_max_chars = new List<int>();
+
+            List<XLAlignmentHorizontalValues> alignments = new List<XLAlignmentHorizontalValues>();
+            foreach (PrintColumn header in this)
+            {
+                alignments.Add(XLAlignmentHorizontalValues.Left);
+
+                column_max_chars.Add(0);
+            }
+
+
+            // string strFontName = list.Font.FontFamily.Name;
+
+            int nRowIndex = 0;
+            //int nColIndex = 1;
+            int i = 0;
+            foreach (PrintColumn header in this)
+            {
+                IXLCell cell = sheet.Cell(config.StartRow + nRowIndex, config.StartCol + i).SetValue(DomUtil.ReplaceControlCharsButCrLf(header.Title, '*'));
+                cell.Style.Alignment.WrapText = true;
+                cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                cell.Style.Font.Bold = true;
+                if (string.IsNullOrEmpty(config.FontName) == false)
+                    cell.Style.Font.FontName = config.FontName;
+                cell.Style.Alignment.Horizontal = alignments[i];
+                i++;
+            }
+            nRowIndex++;
+
+            // 合计数组
+            object[] sums = null;
+
+            if (this.SumLine)
+            {
+                sums = new object[this.Count];
+                for (i = 0; i < sums.Length; i++)
+                {
+                    sums[i] = null;
+                }
+            }
+
+            NumberFormatInfo nfi = new CultureInfo("zh-CN", false).NumberFormat;
+            nfi.NumberDecimalDigits = 2;
+
+            for (int line_index = 0; line_index < table.Count; line_index++)
+            {
+                Line line = table[line_index];
+
+                string strLineCssClass = "content";
+                if (this.OutputLine != null)
+                {
+                    OutputLineEventArgs e = new OutputLineEventArgs();
+                    e.Line = line;
+                    e.Index = line_index;
+                    e.LineCssClass = strLineCssClass;
+                    this.OutputLine(this, e);
+                    if (e.Output == false)
+                        continue;
+
+                    strLineCssClass = e.LineCssClass;
+                }
+
+                List<CellData> cells = new List<CellData>();
+
+                // 列循环
+                for (int j = 0; j < this.Count; j++)
+                {
+
+                    PrintColumn column = (PrintColumn)this[j];
+
+                    if (column.ColumnNumber < -1)
+                    {
+                        throw (new Exception("PrintColumn对象ColumnNumber列尚未初始化，位置" + Convert.ToString(j)));
+                    }
+
+
+                    string strText = "";
+                    if (column.ColumnNumber != -1)
+                    {
+                        if (column.DataType == DataType.PriceDouble)
+                        {
+                            if (line.IsNull(column.ColumnNumber) == true)
+                                strText = column.DefaultValue;
+                            else
+                            {
+                                double v = line.GetDouble(column.ColumnNumber);
+                                strText = v.ToString("N", nfi);
+                            }
+                        }
+                        else if (column.DataType == DataType.PriceDecimal)
+                        {
+                            if (line.IsNull(column.ColumnNumber) == true)
+                                strText = column.DefaultValue;
+                            else
+                            {
+                                decimal v = line.GetDecimal(column.ColumnNumber);
+                                strText = v.ToString("N", nfi);
+                            }
+                        }
+                        else if (column.DataType == DataType.PriceDecimal)
+                        {
+                            if (line.IsNull(column.ColumnNumber) == true)
+                                strText = column.DefaultValue;
+                            else
+                            {
+                                decimal v = line.GetDecimal(column.ColumnNumber);
+                                strText = v.ToString("N", nfi);
+                            }
+                        }
+                        else if (column.DataType == DataType.Price)
+                        {
+                            // Debug.Assert(false, "");
+                            if (line.IsNull(column.ColumnNumber) == true)
+                                strText = column.DefaultValue;	// 2005/5/26
+                            else
+                                strText = line.GetPriceString(column.ColumnNumber);
+                        }
+                        else
+                            strText = line.GetString(column.ColumnNumber, column.DefaultValue);
+                    }
+                    else
+                    {
+                        strText = line.Entry;
+                    }
+
+#if NO
+                    doc.WriteExcelCell(
+    _lineIndex,
+    j,
+    strText,
+    true);
+#endif
+                    {
+                        // 统计最大字符数
+                        int nChars = column_max_chars[j];
+                        if (strText != null && strText.Length > nChars)
+                        {
+                            column_max_chars[j] = strText.Length;
+                        }
+                        IXLCell cell = sheet.Cell(config.StartRow + nRowIndex, config.StartCol + j).SetValue(DomUtil.ReplaceControlCharsButCrLf(strText, '*'));
+
+                        // 尽可能用数字表达
+                        if (j > 0 && (column.DataType == DataType.Auto || column.DataType == DataType.Number))
+                        {
+                            Int64 v = 0;
+                            if (Int64.TryParse(strText, out v) == true)
+                                cell.SetValue(v);
+                        }
+
+                        cell.Style.Alignment.WrapText = true;
+                        cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                        if (string.IsNullOrEmpty(config.FontName) == false)
+                            cell.Style.Font.FontName = config.FontName;
+                        cell.Style.Alignment.Horizontal = alignments[j];
+                    }
+
+                    if (this.SumLine == true
+                        && column.Sum == true
+                        && column.ColumnNumber != -1)
+                    {
+                        try
+                        {
+                            object v = line.GetObject(column.ColumnNumber);
+                            if (this.SumCell != null)
+                            {
+                                SumCellEventArgs e = new SumCellEventArgs();
+                                e.DataType = column.DataType;
+                                e.ColumnNumber = column.ColumnNumber;
+                                e.LineIndex = line_index;
+                                e.Line = line;
+                                e.Value = v;
+                                this.SumCell(this, e);
+                                if (e.Value == null)
+                                    continue;
+
+                                v = e.Value;
+                            }
+
+                            if (sums[j] == null)
+                                sums[j] = v;
+                            else
+                            {
+                                sums[j] = AddValue(column.DataType,
+        sums[j],
+        v);
+                                // sums[j] = ((decimal)sums[j]) + v;
+                            }
+                        }
+                        catch (Exception ex)	// 俘获可能因字符串转换为整数抛出的异常
+                        {
+                            throw new Exception("在累加 行 " + line_index.ToString() + " 列 " + column.ColumnNumber.ToString() + " 值的时候，抛出异常: " + ex.Message);
+                        }
+                    }
+
+                }
+                nRowIndex++;
+            }
+
+            // 合计 行
+            if (this.SumLine == true)
+            {
+                for (int j = 0; j < this.Count; j++)
+                {
+                    PrintColumn column = (PrintColumn)this[j];
+                    string strText = "";
+
+                    if (j == 0)
+                        strText = "合计";
+                    else if (column.Sum == true
+                        && sums[j] != null)
+                    {
+                        if (column.DataType == DataType.PriceDouble)
+                            strText = ((double)sums[j]).ToString("N", nfi);
+                        else if (column.DataType == DataType.PriceDecimal)
+                            strText = ((decimal)sums[j]).ToString("N", nfi);
+                        else if (column.DataType == DataType.Price)
+                        {
+                            strText = StatisUtil.Int64ToPrice((Int64)sums[j]);
+                        }
+                        else
+                            strText = Convert.ToString(sums[j]);
+
+                        if (column.DataType == DataType.Currency)
+                        {
+                            string strSumPrice = "";
+                            // 汇总价格
+                            int nRet = PriceUtil.SumPrices(strText,
+            out strSumPrice,
+            out strError);
+                            if (nRet == -1)
+                                strText = strError;
+                            else
+                                strText = strSumPrice;
+                        }
+                    }
+                    else
+                        strText = column.DefaultValue;  //  "&nbsp;";
+
+                    IXLCell cell = sheet.Cell(config.StartRow + nRowIndex, config.StartCol + j).SetValue(DomUtil.ReplaceControlCharsButCrLf(strText, '*'));
+
+                    // 尽可能用数字表达
+                    if (j > 0 && (column.DataType == DataType.Auto || column.DataType == DataType.Number))
+                    {
+                        Int64 v = 0;
+                        if (Int64.TryParse(strText, out v) == true)
+                            cell.SetValue(v);
+                    }
+                    
+                    cell.Style.Alignment.WrapText = true;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    if (string.IsNullOrEmpty(config.FontName) == false)
+                        cell.Style.Font.FontName = config.FontName;
+                    cell.Style.Alignment.Horizontal = alignments[j];
+                }
+            }
+
+#if NO
+            double char_width = 20; // ClosedXmlUtil.GetAverageCharPixelWidth(list);
+
+            // 字符数太多的列不要做 width auto adjust
+            const int MAX_CHARS = 30;   // 60
+            int i = 0;
+            foreach (IXLColumn column in sheet.Columns())
+            {
+                int nChars = column_max_chars[i];
+                if (nChars < MAX_CHARS)
+                    column.AdjustToContents();
+                else
+                    column.Width = (double)list.Columns[i].Width / char_width;  // Math.Min(MAX_CHARS, nChars);
+                i++;
+            }
+#endif
+
+            // sheet.Columns().AdjustToContents();
+
+            // sheet.Rows().AdjustToContents();
+
+            return 1;
         }
 
         // 输出 Excel 格式的表格
@@ -1906,6 +2212,107 @@ true);
             }
 
             return strResult.ToString();
+        }
+
+        public string OutputToExcel(Table table)
+        {
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要输出的 Excel 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            // dlg.FileName = this.ExportExcelFilename;
+            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return null;
+
+            // this.ExportExcelFilename = dlg.FileName;
+
+            ExcelDocument doc = ExcelDocument.Create(dlg.FileName);
+            try
+            {
+                doc.Stylesheet = GenerateStyleSheet();
+
+                this.OutputExcelTable(table, doc, 2);
+            }
+            finally
+            {
+                doc.Close();
+            }
+
+            return dlg.FileName;
+        }
+
+        private static Stylesheet GenerateStyleSheet()
+        {
+            return new Stylesheet(
+                new Fonts(
+                    new DocumentFormat.OpenXml.Spreadsheet.Font(                                                               // Index 0 - The default font.
+                        new FontSize() { Val = 11 },
+                        new DocumentFormat.OpenXml.Spreadsheet.Color() { Rgb = new HexBinaryValue() { Value = "000000" } },
+                        new FontName() { Val = "Calibri" }),
+                    new DocumentFormat.OpenXml.Spreadsheet.Font(                                                               // Index 1 - The bold font.
+                        new Bold(),
+                        new FontSize() { Val = 11 },
+                        new DocumentFormat.OpenXml.Spreadsheet.Color() { Rgb = new HexBinaryValue() { Value = "000000" } },
+                        new FontName() { Val = "Calibri" }),
+                    new DocumentFormat.OpenXml.Spreadsheet.Font(                                                               // Index 2 - The Italic font.
+                        new Italic(),
+                        new FontSize() { Val = 11 },
+                        new DocumentFormat.OpenXml.Spreadsheet.Color() { Rgb = new HexBinaryValue() { Value = "000000" } },
+                        new FontName() { Val = "Calibri" }),
+                    new DocumentFormat.OpenXml.Spreadsheet.Font(                                                               // Index 2 - The Times Roman font. with 16 size
+                        new FontSize() { Val = 16 },
+                        new DocumentFormat.OpenXml.Spreadsheet.Color() { Rgb = new HexBinaryValue() { Value = "000000" } },
+                        new FontName() { Val = "Times New Roman" })
+                ),
+                new Fills(
+                    new Fill(                                                           // Index 0 - The default fill.
+                        new PatternFill() { PatternType = PatternValues.None }),
+                    new Fill(                                                           // Index 1 - The default fill of gray 125 (required)
+                        new PatternFill() { PatternType = PatternValues.Gray125 }),
+                    new Fill(                                                           // Index 2 - The yellow fill.
+                        new PatternFill(
+                            new ForegroundColor() { Rgb = new HexBinaryValue() { Value = "FFFFFF00" } }
+                        ) { PatternType = PatternValues.Solid })
+                ),
+                new Borders(
+                    new Border(                                                         // Index 0 - The default border.
+                        new LeftBorder(),
+                        new RightBorder(),
+                        new TopBorder(),
+                        new BottomBorder(),
+                        new DiagonalBorder()),
+                    new Border(                                                         // Index 1 - Applies a Left, Right, Top, Bottom border to a cell
+                        new LeftBorder(
+                            new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
+                        ) { Style = BorderStyleValues.Thin },
+                        new RightBorder(
+                            new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
+                        ) { Style = BorderStyleValues.Thin },
+                        new TopBorder(
+                            new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
+                        ) { Style = BorderStyleValues.Thin },
+                        new BottomBorder(
+                            new DocumentFormat.OpenXml.Spreadsheet.Color() { Auto = true }
+                        ) { Style = BorderStyleValues.Thin },
+                        new DiagonalBorder())
+                ),
+                new CellFormats(
+                    new CellFormat() { FontId = 0, FillId = 0, BorderId = 0 },                          // Index 0 - The default cell style.  If a cell does not have a style index applied it will use this style combination instead
+                    new CellFormat() { FontId = 1, FillId = 0, BorderId = 0, ApplyFont = true },       // Index 1 - Bold 
+                    new CellFormat() { FontId = 2, FillId = 0, BorderId = 0, ApplyFont = true },       // Index 2 - Italic
+                    new CellFormat() { FontId = 3, FillId = 0, BorderId = 0, ApplyFont = true },       // Index 3 - Times Roman
+                    new CellFormat() { FontId = 0, FillId = 2, BorderId = 0, ApplyFill = true },       // Index 4 - Yellow Fill
+                    new CellFormat(                                                                   // Index 5 - Alignment
+                        new Alignment() { Horizontal = HorizontalAlignmentValues.Center, Vertical = VerticalAlignmentValues.Center }
+                    ) { /*FontId = 1, FillId = 0, BorderId = 0, */ApplyAlignment = true },
+                    new CellFormat() { FontId = 0, FillId = 0, BorderId = 1, ApplyBorder = true }      // Index 6 - Border
+                )
+            ); // return
         }
 
     }

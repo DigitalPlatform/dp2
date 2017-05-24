@@ -31,16 +31,16 @@ namespace dp2Circulation
         // 检索响应的事件
         public event SearchResponseEventHandler SearchResponseEvent = null;
 
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         public WebBrowser webBrowser1 = null;
 
         internal LibraryChannelPool _channelPool = new LibraryChannelPool();
 
-        public void Initial(MainForm main_form,
+        public void Initial(// MainForm main_form,
             WebBrowser webBrowser)
         {
-            this.MainForm = main_form;
+            // this.MainForm = main_form;
             this.webBrowser1 = webBrowser;
 
             ClearHtml();
@@ -50,7 +50,7 @@ namespace dp2Circulation
 #if NO
             if (string.IsNullOrEmpty(this.dp2MServerUrl) == false)
             {
-                this.MainForm.BeginInvoke(new Action<string>(ConnectAsync), this.dp2MServerUrl);
+                Program.MainForm.BeginInvoke(new Action<string>(ConnectAsync), this.dp2MServerUrl);
             }
 
             _timer.Interval = 1000 * 30;
@@ -64,13 +64,13 @@ namespace dp2Circulation
         public void RefreshUserName()
         {
             // 2016/4/24
-            this.UserName = this.MainForm.MessageUserName;
-            this.Password = this.MainForm.MessagePassword;
+            this.UserName = Program.MainForm.MessageUserName;
+            this.Password = Program.MainForm.MessagePassword;
             Hashtable table = new Hashtable();
-            table["libraryUID"] = this.MainForm.ServerUID;    // 测试用 Guid.NewGuid().ToString(),
-            table["libraryName"] = this.MainForm.LibraryName;
+            table["libraryUID"] = Program.MainForm.ServerUID;    // 测试用 Guid.NewGuid().ToString(),
+            table["libraryName"] = Program.MainForm.LibraryName;
             table["propertyList"] = (this.ShareBiblio ? "biblio_search" : "");
-            table["libraryUserName"] = this.MainForm.GetCurrentUserName();
+            table["libraryUserName"] = Program.MainForm.GetCurrentUserName();
             this.Parameters = StringUtil.BuildParameterString(table,
                 ',',
                 '=',
@@ -89,28 +89,28 @@ namespace dp2Circulation
         {
             if (e.FirstTry == true)
             {
-                e.LibraryServerUrl = this.MainForm.LibraryServerUrl;
+                e.LibraryServerUrl = Program.MainForm.LibraryServerUrl;
                 bool bIsReader = false;
 
-                e.UserName = this.MainForm.AppInfo.GetString(
+                e.UserName = Program.MainForm.AppInfo.GetString(
                 "default_account",
                 "username",
                 "");
 
-                e.Password = this.MainForm.AppInfo.GetString(
+                e.Password = Program.MainForm.AppInfo.GetString(
 "default_account",
 "password",
 "");
-                e.Password = this.MainForm.DecryptPasssword(e.Password);
+                e.Password = Program.MainForm.DecryptPasssword(e.Password);
 
                 bIsReader =
-this.MainForm.AppInfo.GetBoolean(
+Program.MainForm.AppInfo.GetBoolean(
 "default_account",
 "isreader",
 false);
-                Debug.Assert(this.MainForm != null, "");
+                Debug.Assert(Program.MainForm != null, "");
 
-                string strLocation = this.MainForm.AppInfo.GetString(
+                string strLocation = Program.MainForm.AppInfo.GetString(
                 "default_account",
                 "location",
                 "");
@@ -123,7 +123,7 @@ false);
 
 #if SN
                 // 从序列号中获得 expire= 参数值
-                string strExpire = this.MainForm.GetExpireParam();
+                string strExpire = Program.MainForm.GetExpireParam();
                 if (string.IsNullOrEmpty(strExpire) == false)
                     e.Parameters += ",expire=" + strExpire;
 #endif
@@ -141,8 +141,8 @@ false);
 
         public LibraryChannel GetChannel()
         {
-            string strServerUrl = this.MainForm.LibraryServerUrl;
-            string strUserName = this.MainForm.DefaultUserName;
+            string strServerUrl = Program.MainForm.LibraryServerUrl;
+            string strUserName = Program.MainForm.DefaultUserName;
 
             return this._channelPool.GetChannel(strServerUrl, strUserName);
         }
@@ -152,13 +152,13 @@ false);
             get
             {
                 // dp2MServer URL
-                return this.MainForm.AppInfo.GetString("config",
+                return Program.MainForm.AppInfo.GetString("config",
                     "im_server_url",
                     "http://dp2003.com:8083/dp2MServer");
             }
             set
             {
-                this.MainForm.AppInfo.SetString("config",
+                Program.MainForm.AppInfo.SetString("config",
                     "im_server_url",
                     value);
             }
@@ -171,7 +171,7 @@ false);
         /// </summary>
         public void ClearHtml()
         {
-            string strCssUrl = Path.Combine(this.MainForm.DataDir, "history.css");
+            string strCssUrl = Path.Combine(Program.MainForm.DataDir, "history.css");
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
             string strJs = "";
 
@@ -531,7 +531,7 @@ strErrorCode);
     searchParam.TaskID,
     0,
     0,
-    this.MainForm.ServerUID,
+    Program.MainForm.ServerUID,
     records,
     strError,  // 出错信息大概为 not found。
     strErrorCode));
@@ -553,7 +553,7 @@ strErrorCode);
                             searchParam.TaskID,
                             lHitCount,
 0,
-    this.MainForm.ServerUID,
+    Program.MainForm.ServerUID,
 records,
 "本次没有返回任何记录",
 strErrorCode));
@@ -632,7 +632,7 @@ strErrorCode));
 searchParam.TaskID,
 lHitCount,
 lStart,
-    this.MainForm.ServerUID,
+    Program.MainForm.ServerUID,
 records,
 "",
 strErrorCode,
@@ -671,7 +671,7 @@ ref batch_size);
 searchParam.TaskID,
 -1,
 0,
-    this.MainForm.ServerUID,
+    Program.MainForm.ServerUID,
 records,
 strError,
 strErrorCode));
@@ -885,24 +885,24 @@ strError);
             get
             {
                 // 共享书目数据
-                if (this.MainForm == null || this.MainForm.AppInfo == null)
+                if (Program.MainForm == null || Program.MainForm.AppInfo == null)
                     return false;
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "message",
                     "share_biblio",
                     false);
             }
             set
             {
-                if (this.MainForm == null || this.MainForm.AppInfo == null)
+                if (Program.MainForm == null || Program.MainForm.AppInfo == null)
                     return;
-                bool bOldValue = this.MainForm.AppInfo.GetBoolean(
+                bool bOldValue = Program.MainForm.AppInfo.GetBoolean(
                     "message",
                     "share_biblio",
                     false);
                 if (bOldValue != value)
                 {
-                    this.MainForm.AppInfo.SetBoolean(
+                    Program.MainForm.AppInfo.SetBoolean(
                         "message",
                         "share_biblio",
                         value);
@@ -922,12 +922,12 @@ strError);
         public override void Login()
         {
             LoginRequest param = new LoginRequest();
-            param.UserName = this.MainForm.MessageUserName;
-            param.Password = this.MainForm.MessagePassword;
-            param.LibraryUID = this.MainForm.ServerUID;    // 测试用 Guid.NewGuid().ToString(),
-            param.LibraryName = this.MainForm.LibraryName;
+            param.UserName = Program.MainForm.MessageUserName;
+            param.Password = Program.MainForm.MessagePassword;
+            param.LibraryUID = Program.MainForm.ServerUID;    // 测试用 Guid.NewGuid().ToString(),
+            param.LibraryName = Program.MainForm.LibraryName;
             param.PropertyList = (this.ShareBiblio ? "biblio_search" : "");
-            param.LibraryUserName = this.MainForm.GetCurrentUserName();
+            param.LibraryUserName = Program.MainForm.GetCurrentUserName();
             Login(param);
         }
 #endif

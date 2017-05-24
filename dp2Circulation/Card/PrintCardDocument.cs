@@ -147,11 +147,10 @@ namespace dp2Circulation
 
             try
             {
-
                 bool bRet = false;
                 while (m_reader.Name != "document")
                 {
-                // REDO:
+                    // REDO:
                     while (true)
                     {
                         bRet = m_reader.Read();
@@ -206,7 +205,7 @@ namespace dp2Circulation
 
             bool bRet = false;
 
-            REDO:
+        REDO:
             while (true)
             {
                 bRet = m_reader.Read();
@@ -486,7 +485,7 @@ namespace dp2Circulation
 current_page,
 out strError);
                         if (nRet == -1)
-                            goto ERROR1;                       
+                            goto ERROR1;
 
                         // 绘制标签边界
                         // 黑色
@@ -524,7 +523,7 @@ out strError);
 #endif
 
 
-            END1:
+        END1:
             // If more lines exist, print another page.
             if (this.EOF == true && this.m_pages.Count == 0)
             {
@@ -585,7 +584,7 @@ out strError);
                     return 1;
                 }
 
-                Debug.Assert(nRet == 0, "GetOneDocument() 返回值 '"+nRet.ToString()+"' 超出预计范围");
+                Debug.Assert(nRet == 0, "GetOneDocument() 返回值 '" + nRet.ToString() + "' 超出预计范围");
 
                 List<Page> temp_pages = null;
                 nRet = BuildPages(
@@ -653,7 +652,7 @@ out strError);
                     {
                         float right_blank = line.Width - line.Indent - GetLineWidth(line);
                         // x += line.Indent;   // - 2012/4/23 change
-                        x += right_blank/2;
+                        x += right_blank / 2;
                     }
                     else if (line.HorzAlign == HorzAlign.LeftRight
                         && line.Boxes.Count > 1
@@ -661,7 +660,7 @@ out strError);
                     {
                         float right_blank = line.Width - line.Indent - GetLineWidth(line);
                         if (right_blank > 0)
-                            per_sep = right_blank / ( line.Boxes.Count - 1);
+                            per_sep = right_blank / (line.Boxes.Count - 1);
                     }
 
                     for (int j = 0; j < line.Boxes.Count; j++)
@@ -794,7 +793,7 @@ out strError);
 
             int nRet = 0;
 
-            Padding padding = new Padding(0,0,0,0);
+            Padding padding = new Padding(0, 0, 0, 0);
             string strPadding = DomUtil.GetAttr(dom.DocumentElement,
                 "padding");
             if (String.IsNullOrEmpty(strPadding) == false)
@@ -804,7 +803,7 @@ out strError);
                 out strError);
                 if (nRet == -1)
                 {
-                    strError = "元素<"+dom.DocumentElement.Name+">中padding属性值 '"+strPadding+"' 格式错误: " + strError;
+                    strError = "元素<" + dom.DocumentElement.Name + ">中padding属性值 '" + strPadding + "' 格式错误: " + strError;
                     return -1;
                 }
             }
@@ -1013,7 +1012,7 @@ out string strError)
         out strError);
                 if (nRet == -1)
                     return -1;
-            } 
+            }
             return 0;
         }
 
@@ -1069,7 +1068,7 @@ out string strError)
                 {
                     if (string.Compare(strWidth, "auto", true) != 0)
                     {
-                        strError = "<column>元素的width属性值 '"+strWidth+"' 格式错误";
+                        strError = "<column>元素的width属性值 '" + strWidth + "' 格式错误";
                         return -1;
                     }
                     rect.Width = -1;
@@ -1210,7 +1209,7 @@ out string strError)
                 }
 
                 line.X = rect_def.X + rect_def.Padding.Left;
-                line.Y = rect_def.Y + current_height - rect_def.Padding.Bottom -line.Height ;
+                line.Y = rect_def.Y + current_height - rect_def.Padding.Bottom - line.Height;
                 current_page.Lines.Add(line);
 
                 current_height -= line.Height;
@@ -1631,7 +1630,7 @@ out string strError)
 
             if (String.IsNullOrEmpty(strFontSize) == false)
                 strFontString += "," + strFontSize;
-            
+
             if (String.IsNullOrEmpty(strFontStyle) == false)
                 strFontString += ",style=" + strFontStyle;
 
@@ -1823,7 +1822,7 @@ out string strError)
             }
 
 
-            for (int j=0; ;j++ )
+            for (int j = 0; ; j++)
             {
                 if (String.IsNullOrEmpty(strTextParam) == true)
                     break;
@@ -1842,7 +1841,7 @@ out string strError)
                 }
 
                 StringFormat format = new StringFormat();
-                format.FormatFlags = StringFormatFlags.NoClip ;
+                format.FormatFlags = StringFormatFlags.NoClip;
                 format.SetMeasurableCharacterRanges(ranges);
 
 
@@ -2304,7 +2303,7 @@ out string strError)
 
                 strValue = DomUtil.GetAttr(nodeFont, "color");
                 if (String.IsNullOrEmpty(strValue) == false)
-                    this.FontColor = strValue; 
+                    this.FontColor = strValue;
             }
             nodeFont = null;
 
@@ -2383,7 +2382,7 @@ out string strError)
         public string VertAlign = "top";
         public Int64 MaxLines = -1; // 一个段落的最多显示行数。缺省为-1，表示不限制 
 
-        public Padding Padding = new Padding(0,0,0,0);
+        public Padding Padding = new Padding(0, 0, 0, 0);
     }
 
     // 一个独立的矩形区域

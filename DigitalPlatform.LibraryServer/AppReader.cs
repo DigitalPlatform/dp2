@@ -729,6 +729,27 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // 2017/3/2
+            if (strAction == "change"
+                    || strAction == "changestate"
+                    || strAction == "changeforegift"
+                    || strAction == "changereaderbarcode")
+            {
+                if (string.IsNullOrEmpty(strRecPath))
+                {
+                    strError = "修改读者记录的操作 '" + strAction + "' 不允许记录路径参数 strRecPath 值为空";
+                    goto ERROR1;
+                }
+
+                // 检查宜于早一点进行。如果这里不检查，则查重证条码号以后，命中了一条读者记录，但因为 strRecPath 中提交的不是合法的路径形态，那么判断的结果就是“证条码号已经在别的记录中存在了”，这种报错会误导用户或开发者
+                string strTargetRecId = ResPath.GetRecordId(strRecPath);
+                if (strTargetRecId == "?" || String.IsNullOrEmpty(strTargetRecId) == true)
+                {
+                    strError = "修改读者记录的操作 '" + strAction + "' 不允许使用追加形态的记录路径 '" + strRecPath + "'";
+                    goto ERROR1;
+                }
+            }
+
             // 把旧记录装载到DOM
             XmlDocument domOldRec = new XmlDocument();
             try
@@ -5385,32 +5406,6 @@ out strError);
                     return strText;
                 return strText + "," + strBinding;
             }
-        }
-
-        // 从读者记录 email 元素值中获得 email 地址部分
-        public static string GetEmailAddress(string strValue)
-        {
-            if (string.IsNullOrEmpty(strValue))
-                return "";
-
-            // 注: email 元素内容，现在是存储 email 和微信号等多种绑定途径 2016/4/16
-            // return:
-            //      null    没有找到前缀
-            //      ""      找到了前缀，并且值部分为空
-            //      其他     返回值部分
-            string strReaderEmailAddress = StringUtil.GetParameterByPrefix(strValue,
-    "email",
-    ":");
-            // 读者记录中没有email地址，就无法进行email方式的通知了
-            if (String.IsNullOrEmpty(strReaderEmailAddress) == true)
-            {
-                // 按照以前的 xxxx@xxxx 方式探索一下
-                if (strValue.IndexOf(":") != -1 || strValue.IndexOf("@") == -1)
-                    return "";
-                return strValue;
-            }
-
-            return strReaderEmailAddress;
         }
 
         // 在一个绑定信息字符串里面，找到一个特定的 xxxx:xxxx 部分的下标

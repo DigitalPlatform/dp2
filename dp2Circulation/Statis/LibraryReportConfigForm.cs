@@ -22,7 +22,7 @@ namespace dp2Circulation
     /// </summary>
     public partial class LibraryReportConfigForm : Form
     {
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         bool _changed = false;
 
@@ -63,9 +63,9 @@ namespace dp2Circulation
 
         private void LibraryReportConfigForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                List<string> librarycodes = this.MainForm.GetAllLibraryCode();
+                List<string> librarycodes = Program.MainForm.GetAllLibraryCode();
                 foreach (string c in librarycodes)
                 {
                     if (string.IsNullOrEmpty(c) == true)
@@ -93,7 +93,7 @@ namespace dp2Circulation
         {
             strError = "";
 
-            string strCfgFileDir = Path.Combine(this.MainForm.UserDir, "report_def");   //  Path.Combine(this.MainForm.UserDir, "report_def");
+            string strCfgFileDir = Path.Combine(Program.MainForm.UserDir, "report_def");   //  Path.Combine(Program.MainForm.UserDir, "report_def");
 
             DirectoryInfo di = new DirectoryInfo(strCfgFileDir);
             FileInfo[] fis = di.GetFiles("???.xml");
@@ -116,7 +116,7 @@ namespace dp2Circulation
             foreach (string strType in types)
             {
                 string strFileName = strType + ".xml";
-                string strLocalFilePath = Path.Combine(this.MainForm.UserDir, "report_def\\" + strFileName);
+                string strLocalFilePath = Path.Combine(Program.MainForm.UserDir, "report_def\\" + strFileName);
 
                 ReportConfigStruct config = null;
 
@@ -187,7 +187,7 @@ namespace dp2Circulation
             };
 #endif
 
-            string strCfgFileDir = Path.Combine(this.MainForm.UserDir, "report_def");   //  Path.Combine(this.MainForm.UserDir, "report_def");
+            string strCfgFileDir = Path.Combine(Program.MainForm.UserDir, "report_def");   //  Path.Combine(Program.MainForm.UserDir, "report_def");
 
             DirectoryInfo di = new DirectoryInfo(strCfgFileDir);
             FileInfo[] fis = di.GetFiles("???.xml");
@@ -204,7 +204,7 @@ namespace dp2Circulation
             {
                 // 从 dp2003.com 下载配置文件
                 string strFileName = strType + ".xml";
-                string strLocalFilePath = Path.Combine(this.MainForm.UserDir, "report_def\\" + strFileName);
+                string strLocalFilePath = Path.Combine(Program.MainForm.UserDir, "report_def\\" + strFileName);
 
 #if NO
                 int nRet = DownloadDataFile(
@@ -274,7 +274,7 @@ namespace dp2Circulation
 
             string strUrl = "http://dp2003.com/dp2Circulation/report_def/" + strFileName;
 
-            PathUtil.CreateDirIfNeed(strCfgFileDir);
+            PathUtil.TryCreateDir(strCfgFileDir);
 
             strLocalFilePath = Path.Combine(strCfgFileDir, strFileName);
             string strTempFileName = Path.Combine(strCfgFileDir, "~temp_download_webfile");
@@ -514,21 +514,21 @@ namespace dp2Circulation
             ReportApplyForm dlg = new ReportApplyForm();
 
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.ReportForm = this.ReportForm;
             dlg.LibraryCode = ReportForm.GetOriginLibraryCode(this.comboBox_general_libraryCode.Text);
-            dlg.CfgFileDir = Path.Combine(this.MainForm.UserDir, "report_def"); //  Path.Combine(this.MainForm.UserDir, "report_def");
+            dlg.CfgFileDir = Path.Combine(Program.MainForm.UserDir, "report_def"); //  Path.Combine(Program.MainForm.UserDir, "report_def");
             dlg.ReportName = ListViewUtil.GetItemText(item, COLUMN_REPORT_NAME);
             dlg.Freguency = ListViewUtil.GetItemText(item, COLUMN_REPORT_FREQ);
             dlg.ReportType = ListViewUtil.GetItemText(item, COLUMN_REPORT_TYPE);
             dlg.ReportCfgFileName = ListViewUtil.GetItemText(item, COLUMN_REPORT_CFGFILE);
             dlg.NameTable = ListViewUtil.GetItemText(item, COLUMN_REPORT_NAMETABLE);
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "ReportApplyForm_state");
-            dlg.UiState = this.MainForm.AppInfo.GetString("libraryreportconfig_form", "reportapplyform_ui_state", "");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ReportApplyForm_state");
+            dlg.UiState = Program.MainForm.AppInfo.GetString("libraryreportconfig_form", "reportapplyform_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString("libraryreportconfig_form", "reportapplyform_ui_state", dlg.UiState);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.SetString("libraryreportconfig_form", "reportapplyform_ui_state", dlg.UiState);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -550,16 +550,16 @@ namespace dp2Circulation
             ReportApplyForm dlg = new ReportApplyForm();
 
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.ReportForm = this.ReportForm;
             dlg.LibraryCode = ReportForm.GetOriginLibraryCode(this.comboBox_general_libraryCode.Text);
-            dlg.CfgFileDir = Path.Combine(this.MainForm.UserDir, "report_def"); //  Path.Combine(this.MainForm.UserDir, "report_def");
+            dlg.CfgFileDir = Path.Combine(Program.MainForm.UserDir, "report_def"); //  Path.Combine(Program.MainForm.UserDir, "report_def");
         REDO_INPUT:
-            this.MainForm.AppInfo.LinkFormState(dlg, "ReportApplyForm_state");
-            dlg.UiState = this.MainForm.AppInfo.GetString("libraryreportconfig_form", "reportapplyform_ui_state", "");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ReportApplyForm_state");
+            dlg.UiState = Program.MainForm.AppInfo.GetString("libraryreportconfig_form", "reportapplyform_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString("libraryreportconfig_form", "reportapplyform_ui_state", dlg.UiState);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.SetString("libraryreportconfig_form", "reportapplyform_ui_state", dlg.UiState);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;

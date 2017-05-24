@@ -24,18 +24,6 @@ namespace dp2Circulation
     /// </summary>
     public partial class CheckBorrowInfoForm : MyForm
     {
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
-
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -46,14 +34,14 @@ namespace dp2Circulation
 
         private void CheckBorrowInfoForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 #if NO
             MainForm.AppInfo.LoadMdiChildFormStates(this,
     "mdi_form_state");
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -64,17 +52,17 @@ namespace dp2Circulation
 
             Global.ClearForPureTextOutputing(this.webBrowser_resultInfo);
 
-            this.checkBox_displayPriceString.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_displayPriceString.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "check_borrowinfo_form",
                 "display_price_string",
                 true);
 
-            this.checkBox_forceCNY.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_forceCNY.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "check_borrowinfo_form",
                 "force_cny",
                 false);
 
-            this.checkBox_overwriteExistPrice.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_overwriteExistPrice.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "check_borrowinfo_form",
                 "overwrite_exist_price",
                 false);
@@ -99,19 +87,19 @@ namespace dp2Circulation
 
         private void CheckBorrowInfoForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "check_borrowinfo_form",
                     "display_price_string",
                     this.checkBox_displayPriceString.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "check_borrowinfo_form",
                     "force_cny",
                     this.checkBox_forceCNY.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "check_borrowinfo_form",
                     "overwrite_exist_price",
                     this.checkBox_overwriteExistPrice.Checked);
@@ -417,7 +405,7 @@ namespace dp2Circulation
                         }
                     }
 
-                    if (bFoundError 
+                    if (bFoundError
                         && bAutoRepair
                         && string.IsNullOrEmpty(strReaderXml) == false)
                     {
@@ -508,7 +496,9 @@ namespace dp2Circulation
             bool bAutoRepair = Control.ModifierKeys == Keys.Control;
 
             List<string> barcodes = null;
-            int nRet = SearchAllItemBarcode(out barcodes,
+            int nRet = SearchAllItemBarcode(
+                true,
+                out barcodes,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -526,12 +516,17 @@ namespace dp2Circulation
         }
 
         // 检索获得所有册条码号
-        int SearchAllItemBarcode(out List<string> barcodes,
+        int SearchAllItemBarcode(
+            bool bHasBorrower,
+            out List<string> barcodes,
             out string strError)
         {
             strError = "";
 
             barcodes = new List<string>();
+
+            TimeSpan old_timeout = this.Channel.Timeout;
+            this.Channel.Timeout = TimeSpan.FromMinutes(30);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索 ...");
@@ -549,7 +544,7 @@ namespace dp2Circulation
                     "册条码",
                     "left",
                     this.Lang,
-                    null,   // strResultSetName
+                    "check",   // strResultSetName
                     "",    // strSearchStyle
                     "", // strOutputStyle
                     out strError);
@@ -558,98 +553,65 @@ namespace dp2Circulation
 
                 long lHitCount = lRet;
 
-                long lStart = 0;
-                long lCount = lHitCount;
-
-                stop.SetProgressRange(0, lCount);
+                stop.SetProgressRange(0, lHitCount);
 
                 Global.WriteHtml(this.webBrowser_resultInfo,
     "共有 " + lHitCount.ToString() + " 条册记录。\r\n");
 
+                string strStyle = "id,cols,format:@coldef:*/barcode|*/borrower";
 
-                Record[] searchresults = null;
+                this.Channel.Timeout = TimeSpan.FromSeconds(60);
 
-                // 装入浏览格式
-                for (; ; )
+                ResultSetLoader loader = new ResultSetLoader(this.Channel,
+                    stop,
+                    "check",
+                    strStyle);
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                int geted = 0;
+                foreach (Record record in loader)
                 {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null && stop.State != 0)
+                    if ((geted % 100) == 0)
                     {
-                        strError = "用户中断";
-                        goto ERROR1;
+                        Application.DoEvents();	// 出让界面控制权
+
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
                     }
 
-                    lRet = Channel.GetSearchResult(
-                        stop,
-                        null,   // strResultSetName
-                        lStart,
-                        lCount,
-                        "id,cols",
-                        this.Lang,
-                        out searchresults,
-                        out strError);
-                    if (lRet == -1)
-                        goto ERROR1;
+                    geted++;
 
-                    if (lRet == 0)
-                    {
-                        strError = "未命中";
-                        goto ERROR1;
-                    }
+                    if (record.Cols == null || record.Cols.Length < 2)
+                        goto CONTINUE;
+                    string strBorrower = record.Cols[1];
+                    string strBarcode = record.Cols[0];
+                    if (string.IsNullOrEmpty(strBarcode))
+                        goto CONTINUE;
+                    if (bHasBorrower == true
+                        && string.IsNullOrEmpty(strBorrower))
+                        goto CONTINUE;
 
-                    Debug.Assert(searchresults != null, "");
+                    barcodes.Add(strBarcode);
 
-                    // 处理浏览结果
-                    for (int i = 0; i < searchresults.Length; i++)
-                    {
-                        /*
-                        NewLine(this.listView_records,
-                            searchresults[i].Path,
-                            searchresults[i].Cols);
-                         * */
-                        barcodes.Add(searchresults[i].Cols[0]);
-                    }
-
-
-                    lStart += searchresults.Length;
-                    lCount -= searchresults.Length;
-
-                    stop.SetMessage("共有条码 " + lHitCount.ToString() + " 个。已获得条码 " + lStart.ToString() + " 个");
-                    stop.SetProgressValue(lStart);
-
-                    if (lStart >= lHitCount || lCount <= 0)
-                        break;
+                CONTINUE:
+                    stop.SetMessage("共有条码 " + lHitCount.ToString() + " 个。已获得条码 " + barcodes.Count + " / " + geted.ToString() + " 个");
+                    stop.SetProgressValue(geted);
                 }
 
                 // 排序、去重
                 stop.SetMessage("正在排序和去重");
 
                 // 排序
-                barcodes.Sort();
-
-                // 去重
-                int nRemoved = 0;
-                for (int i = 0; i < barcodes.Count; i++)
-                {
-                    string strBarcode = barcodes[i];
-
-                    for (int j = i + 1; j < barcodes.Count; j++)
-                    {
-                        if (strBarcode == barcodes[j])
-                        {
-                            barcodes.RemoveAt(j);
-                            nRemoved++;
-                            j--;
-                        }
-                        else
-                        {
-                            break;
-                        }
-                    }
-                }
-
-                // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
+                StringUtil.RemoveDup(ref barcodes);
+            }
+            catch (Exception ex)
+            {
+                strError = "SearchAllItemBarcode() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
             }
             finally
             {
@@ -659,6 +621,8 @@ namespace dp2Circulation
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+
+                this.Channel.Timeout = old_timeout;
             }
 
             return 0;
@@ -667,11 +631,30 @@ namespace dp2Circulation
             return -1;
         }
 
+        void loader_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+            if (e.Actions == "yes,no,cancel")
+            {
+                DialogResult result = AutoCloseMessageBox.Show(this,
+    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    20 * 1000,
+    "CheckBorrowInfoForm");
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
+            }
+        }
+
         // 检索获得所有册条码号(另一版本，输出到文件)
         int SearchAllItemBarcode(string strBarcodeFilename,
+            bool bHasBorrower,
             out string strError)
         {
             strError = "";
+
+            string strStyle = "id,cols,format:@coldef:*/barcode|*/borrower";
 
             // 创建文件
             StreamWriter sw = new StreamWriter(strBarcodeFilename,
@@ -680,8 +663,6 @@ namespace dp2Circulation
 
             try
             {
-
-
                 stop.OnStop += new StopEventHandler(this.DoStop);
                 stop.Initial("正在检索 ...");
                 stop.BeginLoop();
@@ -732,7 +713,7 @@ namespace dp2Circulation
                             null,   // strResultSetName
                             lStart,
                             lCount,
-                            "id,cols",
+                            strStyle,   // "id,cols",
                             this.Lang,
                             out searchresults,
                             out strError);
@@ -748,12 +729,19 @@ namespace dp2Circulation
                         Debug.Assert(searchresults != null, "");
 
                         // 处理浏览结果
-                        for (int i = 0; i < searchresults.Length; i++)
+                        foreach (Record record in searchresults)
                         {
-                            // barcodes.Add(searchresults[i].Cols[0]);
-                            sw.Write(searchresults[i].Cols[0] + "\r\n");
+                            if (record.Cols == null || record.Cols.Length < 2)
+                                continue;
+                            string strBorrower = record.Cols[1];
+                            string strBarcode = record.Cols[0];
+                            if (string.IsNullOrEmpty(strBarcode))
+                                continue;
+                            if (bHasBorrower == true
+                                && string.IsNullOrEmpty(strBorrower))
+                                continue;
+                            sw.Write(strBarcode + "\r\n");
                         }
-
 
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
@@ -929,7 +917,7 @@ namespace dp2Circulation
                         {
                             Global.WriteHtml(this.webBrowser_resultInfo,
                                 "检查册记录 " + strItemBarcode + " 时发现问题: " + strError + "\r\n");
-                            
+
                             if (bAutoRepair)
                             {
                                 int nRet = RepairErrorFromItemSide(strItemBarcode,
@@ -1240,19 +1228,19 @@ out strError);
                 {
                     if (Channel.ErrorCode == ErrorCode.ItemBarcodeDup)
                     {
-                        // this.MainForm.PrepareSearch();
-                        LibraryChannel channel = this.MainForm.GetChannel();
+                        // Program.MainForm.PrepareSearch();
+                        LibraryChannel channel = Program.MainForm.GetChannel();
                         try
                         {
                             ItemBarcodeDupDlg dupdlg = new ItemBarcodeDupDlg();
                             MainForm.SetControlFont(dupdlg, this.Font, false);
                             string strErrorNew = "";
                             int nRet = dupdlg.Initial(
-                                this.MainForm,
+                                // Program.MainForm,
                                 aDupPath,
                                 "因册条码号发生重复，修复操作被拒绝。\r\n\r\n可根据下面列出的详细信息，选择适当的册记录，重试操作。\r\n\r\n原始出错信息:\r\n" + strError,
-                                channel,    // this.MainForm.Channel,
-                                this.MainForm.Stop,
+                                channel,    // Program.MainForm.Channel,
+                                Program.MainForm.Stop,
                                 out strErrorNew);
                             if (nRet == -1)
                             {
@@ -1261,9 +1249,9 @@ out strError);
                                 goto ERROR1;
                             }
 
-                            this.MainForm.AppInfo.LinkFormState(dupdlg, "CheckBorrowInfoForm_dupdlg_state");
+                            Program.MainForm.AppInfo.LinkFormState(dupdlg, "CheckBorrowInfoForm_dupdlg_state");
                             dupdlg.ShowDialog(this);
-                            this.MainForm.AppInfo.UnlinkFormState(dupdlg);
+                            Program.MainForm.AppInfo.UnlinkFormState(dupdlg);
 
                             if (dupdlg.DialogResult == DialogResult.Cancel)
                                 goto ERROR1;
@@ -1274,8 +1262,8 @@ out strError);
                         }
                         finally
                         {
-                            this.MainForm.ReturnChannel(channel);
-                            // this.MainForm.EndSearch();
+                            Program.MainForm.ReturnChannel(channel);
+                            // Program.MainForm.EndSearch();
                         }
                     }
 
@@ -1341,6 +1329,7 @@ out strError);
             try
             {
                 int nRet = SearchAllItemBarcode(strBarcodeFilename,
+                    false,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1930,7 +1919,7 @@ out strError);
 
         private void CheckBorrowInfoForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
         }
 
         private void button_single_checkFromReader_Click(object sender, EventArgs e)

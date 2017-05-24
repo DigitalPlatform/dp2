@@ -6,12 +6,14 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using DigitalPlatform;
-using DigitalPlatform.CommonControl;
 using System.Xml;
 using System.IO;
+
+using DigitalPlatform;
+using DigitalPlatform.CommonControl;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
+using DigitalPlatform.CirculationClient;
 
 namespace dp2Circulation
 {
@@ -30,7 +32,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 获得值列表
@@ -51,16 +53,16 @@ namespace dp2Circulation
         {
 #if NO
             // state
-            this.changeStateActionControl1.ActionString = this.MainForm.AppInfo.GetString(
+            this.changeStateActionControl1.ActionString = Program.MainForm.AppInfo.GetString(
                 "change_"+this.DbType+"_param",
                 "state",
                 "<不改变>");
 
-            this.changeStateActionControl1.AddString = this.MainForm.AppInfo.GetString(
+            this.changeStateActionControl1.AddString = Program.MainForm.AppInfo.GetString(
                 "change_" + this.DbType + "_param",
                 "state_add",
                 "");
-            this.changeStateActionControl1.RemoveString = this.MainForm.AppInfo.GetString(
+            this.changeStateActionControl1.RemoveString = Program.MainForm.AppInfo.GetString(
                 "change_" + this.DbType + "_param",
                 "state_remove",
                 "");
@@ -70,8 +72,8 @@ namespace dp2Circulation
 
             // 恢复 listview 中的内容
 
-            // string strCfgFileName = Path.Combine( this.MainForm.UserDir, this.DbType + "_change_actions.xml");
-            string strCfgFileName = Path.Combine(this.MainForm.DataDir, "default\\" + this.DbType + "_change_actions.xml");
+            // string strCfgFileName = Path.Combine( Program.MainForm.UserDir, this.DbType + "_change_actions.xml");
+            string strCfgFileName = Path.Combine(Program.MainForm.DataDir, "default\\" + this.DbType + "_change_actions.xml");
             string strError = "";
             int nRet = LoadCfgDom(strCfgFileName,
                 out strError);
@@ -212,17 +214,17 @@ namespace dp2Circulation
 
 #if NO
             // state
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "change_" + this.DbType + "_param",
                 "state",
                 this.changeStateActionControl1.ActionString);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "change_" + this.DbType + "_param",
                 "state_add",
                 this.changeStateActionControl1.AddString);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "change_" + this.DbType + "_param",
                 "state_remove",
                 this.changeStateActionControl1.RemoveString );
@@ -305,11 +307,11 @@ namespace dp2Circulation
         {
             MacroTableDialog dlg = new MacroTableDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.XmlFileName = Path.Combine(this.MainForm.UserDir, this.DbType + "_macrotable.xml");
+            dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, this.DbType + "_macrotable.xml");
 
-            this.MainForm.AppInfo.LinkFormState(dlg, this.DbType + "_MacroTableDialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, this.DbType + "_MacroTableDialog_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
         }
@@ -445,8 +447,8 @@ namespace dp2Circulation
 
             MainForm.SetControlFont(dlg, this.Font, false);
             dlg.ElementCaption = this.ElementCaption;
-            dlg.UserDir = this.MainForm.UserDir;
-            dlg.DataDir = this.MainForm.DataDir;
+            dlg.UserDir = Program.MainForm.UserDir;
+            dlg.DataDir = Program.MainForm.DataDir;
             dlg.CfgDom = this.CfgDom;
             dlg.UsedFieldNames = GetUsedFieldNames();
             dlg.RefDbName = this.RefDbName;
@@ -512,8 +514,8 @@ namespace dp2Circulation
 
             MainForm.SetControlFont(dlg, this.Font, false);
             dlg.ElementCaption = this.ElementCaption;
-            dlg.UserDir = this.MainForm.UserDir;
-            dlg.DataDir = this.MainForm.DataDir;
+            dlg.UserDir = Program.MainForm.UserDir;
+            dlg.DataDir = Program.MainForm.DataDir;
             dlg.CfgDom = this.CfgDom;
             dlg.UsedFieldNames = used_fieldnames;
             dlg.FieldName = ListViewUtil.GetItemText(item, 0);
@@ -549,7 +551,7 @@ namespace dp2Circulation
         {
             string strError = "";
             string[] values = null;
-            int nRet = MainForm.GetValueTable(e.TableName,
+            int nRet = Program.MainForm.GetValueTable(e.TableName,
                 e.DbName,
                 out values,
                 out strError);

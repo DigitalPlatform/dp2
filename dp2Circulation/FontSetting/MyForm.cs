@@ -37,8 +37,17 @@ namespace dp2Circulation
             {
                 if (this.Channel != null)
                     this.Channel.Dispose();
+
+                // 2017/4/24
+                if (stop != null) // 脱离关联
+                {
+                    stop.Unregister();	// 和容器关联
+                    stop = null;
+                }
+
                 CloseFloatingMessage();
             }
+
             base.Dispose(disposing);
         }
 
@@ -64,7 +73,7 @@ namespace dp2Circulation
             get
             {
                 if (this.Visible == false)
-                    return this.MainForm;
+                    return Program.MainForm;
                 return this;
             }
         }
@@ -196,10 +205,10 @@ namespace dp2Circulation
         /// </summary>
         public virtual void OnMyFormLoad()
         {
-            if (this.MainForm == null)
+            if (Program.MainForm == null)
                 return;
 
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -223,8 +232,8 @@ namespace dp2Circulation
 
                 // _floatingMessage.Text = "test";
                 //_floatingMessage.Clicked += _floatingMessage_Clicked;
-                if (this.MainForm != null)
-                    this.MainForm.Move += new EventHandler(MainForm_Move);
+                if (Program.MainForm != null)
+                    Program.MainForm.Move += new EventHandler(MainForm_Move);
             }
         }
 
@@ -285,8 +294,8 @@ namespace dp2Circulation
 
             // 原来
 
-            if (this.MainForm != null)
-                this.MainForm.Move -= new EventHandler(MainForm_Move);
+            if (Program.MainForm != null)
+                Program.MainForm.Move -= new EventHandler(MainForm_Move);
 
 #if NO
             if (_floatingMessage != null)
@@ -295,8 +304,8 @@ namespace dp2Circulation
             CloseFloatingMessage();
             /*
             // 如果MDI子窗口不是MainForm刚刚准备退出时的状态，恢复它。为了记忆尺寸做准备
-            if (this.WindowState != this.MainForm.MdiWindowState)
-                this.WindowState = this.MainForm.MdiWindowState;
+            if (this.WindowState != Program.MainForm.MdiWindowState)
+                this.WindowState = Program.MainForm.MdiWindowState;
              * */
         }
 
@@ -376,30 +385,75 @@ namespace dp2Circulation
             string strUserName = ".",
             GetChannelStyle style = GetChannelStyle.GUI)
         {
-            LibraryChannel channel = this.MainForm.GetChannel(strServerUrl, strUserName, style);
-            _channelList.Add(channel);
+            LibraryChannel channel = Program.MainForm.GetChannel(strServerUrl, strUserName, style);
+
+            lock (_syncRoot_channelList)
+            {
+                _channelList.Add(channel);
+            }
             // TODO: 检查数组是否溢出
             return channel;
         }
 
         public void ReturnChannel(LibraryChannel channel)
         {
-            this.MainForm.ReturnChannel(channel);
-            _channelList.Remove(channel);
+            Program.MainForm.ReturnChannel(channel);
+            lock (_syncRoot_channelList)
+            {
+                _channelList.Remove(channel);
+            }
         }
 
+        private static readonly Object _syncRoot_channelList = new Object(); // 2017/5/18
         List<LibraryChannel> _channelList = new List<LibraryChannel>();
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 huxh@xxx
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.InvalidOperationException
+Message: 集合已修改；可能无法执行枚举操作。
+Stack:
+在 System.ThrowHelper.ThrowInvalidOperationException(ExceptionResource resource)
+在 System.Collections.Generic.List`1.Enumerator.MoveNextRare()
+在 dp2Circulation.MyForm.DoStop(Object sender, StopEventArgs e)
+在 dp2Circulation.TaskList.DoStop(Object sender, StopEventArgs e)
+在 dp2Circulation.QuickChargingForm.ClearTaskByRows(List`1 rows, Boolean bWarning)
+在 dp2Circulation.QuickChargingForm.SmartSetFuncState(FuncState value, Boolean bClearInfoWindow, Boolean bDupAsClear)
+在 dp2Circulation.QuickChargingForm.set_SmartFuncState(FuncState value)
+在 dp2Circulation.MainForm.toolButton_borrow_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
+在 System.Windows.Forms.ToolStripButton.OnClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1
+本机 MAC 地址: F44D3077D567 
+操作时间 2017/5/18 13:25:07 (Thu, 18 May 2017 13:25:07 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+         * */
         internal void DoStop(object sender, StopEventArgs e)
         {
             // 兼容旧风格
             if (this.Channel != null)
                 this.Channel.Abort();
 
-            foreach (LibraryChannel channel in _channelList)
+            lock (_syncRoot_channelList)
             {
-                if (channel != null)
-                    channel.Abort();
+                foreach (LibraryChannel channel in _channelList)
+                {
+                    if (channel != null)
+                        channel.Abort();
+                }
             }
         }
 
@@ -407,7 +461,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm._currentUserName;
+                return Program.MainForm._currentUserName;
             }
         }
 
@@ -416,7 +470,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm._currentLibraryCodeList;
+                return Program.MainForm._currentLibraryCodeList;
             }
         }
 
@@ -424,7 +478,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm._currentUserRights;
+                return Program.MainForm._currentUserRights;
             }
         }
 
@@ -444,12 +498,12 @@ namespace dp2Circulation
         /// <param name="e">事件参数</param>
         public virtual void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            this.MainForm.Channel_BeforeLogin(sender, e); // 2015/11/4 原来是 this
+            Program.MainForm.Channel_BeforeLogin(sender, e); // 2015/11/4 原来是 this
         }
 
         public virtual void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
-            this.MainForm.Channel_AfterLogin(sender, e); // 2015/11/4 原来是 this
+            Program.MainForm.Channel_AfterLogin(sender, e); // 2015/11/4 原来是 this
         }
 
 #if NO
@@ -535,19 +589,19 @@ namespace dp2Circulation
         /// </summary>
         public void RestoreDefaultFont()
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
                 Size oldsize = this.Size;
-                if (this.MainForm.DefaultFont == null)
+                if (Program.MainForm.DefaultFont == null)
                     MainForm.SetControlFont(this, Control.DefaultFont);
                 else
-                    MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                    MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
                 this.Size = oldsize;
             }
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                    this.FormName,
                    "default_font",
                    "");
@@ -627,7 +681,7 @@ namespace dp2Circulation
         /// </summary>
         public void SaveFontSetting()
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 {
                     // Create the FontConverter.
@@ -636,7 +690,7 @@ namespace dp2Circulation
 
                     string strFontString = converter.ConvertToString(this.Font);
 
-                    this.MainForm.AppInfo.SetString(
+                    Program.MainForm.AppInfo.SetString(
                         this.FormName,
                         "default_font",
                         strFontString);
@@ -663,10 +717,10 @@ namespace dp2Circulation
         /// </summary>
         public void LoadFontSetting()
         {
-            if (this.MainForm == null)
+            if (Program.MainForm == null)
                 return;
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
                 string strFontString = MainForm.AppInfo.GetString(
                     this.FormName,
@@ -684,9 +738,9 @@ namespace dp2Circulation
                 else
                 {
                     // 沿用系统的缺省字体
-                    if (this.MainForm != null)
+                    if (Program.MainForm != null)
                     {
-                        MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                        MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
                     }
                 }
 
@@ -721,15 +775,15 @@ namespace dp2Circulation
             // 设置窗口尺寸状态
             // 一般派生类会在 EntityForm_Load() 函数中
             /*
-            this.MainForm.AppInfo.LoadMdiSize += new EventHandler(AppInfo_LoadMdiSize);
-            this.MainForm.AppInfo.SaveMdiSize += new EventHandler(AppInfo_SaveMdiSize);
+            Program.MainForm.AppInfo.LoadMdiSize += new EventHandler(AppInfo_LoadMdiSize);
+            Program.MainForm.AppInfo.SaveMdiSize += new EventHandler(AppInfo_SaveMdiSize);
              * 因此这里稍后一点处理尺寸初始化是必要的
              * 
              * * */
-            if (this.MainForm != null && this.MainForm.AppInfo != null
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null
                 && Floating == false)
             {
-                this.MainForm.AppInfo.LoadMdiChildFormStates(this,
+                Program.MainForm.AppInfo.LoadMdiChildFormStates(this,
                         "mdi_form_state",
                         this.SupressSizeSetting == true ? SizeStyle.Layout : SizeStyle.All);
 
@@ -743,7 +797,7 @@ namespace dp2Circulation
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             // 在这里保存。如果靠后调用，可能会遇到 base.OnFormClosed() 里面相关事件被卸掉的问题
-            if (this.MainForm != null && this.MainForm.AppInfo != null
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null
     && Floating == false )
             {
                 MainForm.AppInfo.SaveMdiChildFormStates(this,
@@ -784,13 +838,17 @@ namespace dp2Circulation
         /// <param name="e">事件参数</param>
         protected override void OnActivated(EventArgs e)
         {
-            if (this.MainForm != null)
+            // 2017/4/23
+            if (this.IsDisposed)
+                return;
+
+            if (Program.MainForm != null)
             {
                 // if (this.stop != null)
-                this.MainForm.stopManager.Active(this.stop);
+                Program.MainForm.stopManager.Active(this.stop);
 
-                this.MainForm.MenuItem_font.Enabled = true;
-                this.MainForm.MenuItem_restoreDefaultFont.Enabled = true;
+                Program.MainForm.MenuItem_font.Enabled = true;
+                Program.MainForm.MenuItem_restoreDefaultFont.Enabled = true;
             }
 
             base.OnActivated(e);
@@ -841,7 +899,7 @@ namespace dp2Circulation
 
             try
             {
-                return this.MainForm.VerifyBarcode(
+                return Program.MainForm.VerifyBarcode(
                     stop,
                     Channel,
                     strLibraryCodeList,
@@ -868,7 +926,7 @@ namespace dp2Circulation
         /// <param name="strHtml">要输出的 HTML 字符串</param>
         public void OutputHtml(string strHtml)
         {
-            this.MainForm.OperHistory.AppendHtml(strHtml);
+            Program.MainForm.OperHistory.AppendHtml(strHtml);
         }
 
         // parameters:
@@ -885,7 +943,7 @@ namespace dp2Circulation
                 strClass = "warning";
             else if (nWarningLevel >= 2)
                 strClass = "error";
-            this.MainForm.OperHistory.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
         /// <summary>
@@ -1150,6 +1208,75 @@ namespace dp2Circulation
 
         #endregion
 
+        #region 种次号尾号相关
+
+        public int ReleaseProtectedTailNumber(
+dp2Circulation.CallNumberForm.MemoTailNumber number,
+out string strError)
+        {
+            strError = "";
+
+            string strOutputNumber = "";
+
+            return ProtectTailNumber(
+                "unmemo",
+                number.ArrangeGroupName,
+                number.Class,
+                number.Number,
+                out strOutputNumber,
+                out strError);
+        }
+
+        // 保护或者释放保护一个尾号。
+        // 所谓保护，就是把一个尾号交给 dp2library 记忆在内存中，防止后面取号的时候再用到这个号。
+        // 注: 当用到这个号的册记录保存了，或者放弃了使用这个号，需要专门请求 dp2library 释放对这个号的保护
+        // parameters:
+        //      strAction   protect/unmemo 之一
+        public int ProtectTailNumber(
+            string strAction,
+            string strArrangeGroupName,
+            string strClass,
+            string strTestNumber,
+            out string strOutputNumber,
+            out string strError)
+        {
+            strOutputNumber = "";
+
+            // EnableControls(false);
+
+            Debug.Assert(strAction == "protect" || strAction == "unmemo", "");
+
+            LibraryChannel channel = this.GetChannel();
+            string strOldMessage = Progress.Initial(strAction == "protect"?"正在请求保护尾号 ...":"正在请求释放保护尾号 ...");
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
+
+            try
+            {
+                long lRet = Channel.SetOneClassTailNumber(
+                    stop,
+                    strAction,
+                    strArrangeGroupName,
+                    strClass,
+                    strTestNumber,
+                    out strOutputNumber,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return (int)lRet;
+            }
+            finally
+            {
+                Progress.Initial(strOldMessage);
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
+        }
+
+        #endregion
+
         #region 创建书目记录的浏览格式
 
         public int BuildBrowseText(string strXml,
@@ -1218,11 +1345,11 @@ namespace dp2Circulation
 
             FilterHost host = new FilterHost();
             host.ID = "";
-            host.MainForm = this.MainForm;
+            host.MainForm = Program.MainForm;
 
             BrowseFilterDocument filter = null;
 
-            string strFilterFileName = Path.Combine(this.MainForm.DataDir, strMarcSyntax.Replace(".", "_") + "_cfgs\\marc_browse.fltx");
+            string strFilterFileName = Path.Combine(Program.MainForm.DataDir, strMarcSyntax.Replace(".", "_") + "_cfgs\\marc_browse.fltx");
 
             int nRet = this.PrepareMarcFilter(
                 host,
@@ -1248,7 +1375,7 @@ namespace dp2Circulation
             {
                 // 归还对象
                 filter.FilterHost = null;   // 2016/1/23
-                this.MainForm.Filters.SetFilter(strFilterFileName, filter);
+                Program.MainForm.Filters.SetFilter(strFilterFileName, filter);
             }
 
             return 0;
@@ -1265,7 +1392,7 @@ out string strError)
             strError = "";
 
             // 看看是否有现成可用的对象
-            filter = (BrowseFilterDocument)this.MainForm.Filters.GetFilter(strFilterFileName);
+            filter = (BrowseFilterDocument)Program.MainForm.Filters.GetFilter(strFilterFileName);
 
             if (filter != null)
             {
@@ -1359,8 +1486,8 @@ out string strError)
         {
             get
             {
-                if (this.MainForm != null && this.MainForm.AppInfo != null)
-                    return this.MainForm.AppInfo.GetBoolean(
+                if (Program.MainForm != null && Program.MainForm.AppInfo != null)
+                    return Program.MainForm.AppInfo.GetBoolean(
         "biblio_search_form",
         "search_sharebiblio",
         true);
@@ -1368,9 +1495,9 @@ out string strError)
             }
             set
             {
-                if (this.MainForm != null && this.MainForm.AppInfo != null)
+                if (Program.MainForm != null && Program.MainForm.AppInfo != null)
                 {
-                    this.MainForm.AppInfo.SetBoolean(
+                    Program.MainForm.AppInfo.SetBoolean(
         "biblio_search_form",
         "search_sharebiblio",
         value);
@@ -1387,11 +1514,22 @@ out string strError)
         // 获得当前用户能管辖的全部馆代码
         public List<string> GetOwnerLibraryCodes()
         {
+            if (Global.IsGlobalUser(this.CurrentLibraryCodeList) == true)
+                return Program.MainForm.GetAllLibraryCode();
+
+            return StringUtil.SplitList(this.CurrentLibraryCodeList);
+        }
+
+#if NO
+        // 获得当前用户能管辖的全部馆代码
+        public List<string> GetOwnerLibraryCodes()
+        {
             if (Global.IsGlobalUser(this.Channel.LibraryCodeList) == true)
-                return this.MainForm.GetAllLibraryCode();
+                return Program.MainForm.GetAllLibraryCode();
 
             return StringUtil.SplitList(this.Channel.LibraryCodeList);
         }
+#endif
 
         #region 防止控件泄露
 
@@ -1414,6 +1552,149 @@ out string strError)
         }
 
         #endregion
+
+
+        public void ParseOneMacro(ParseOneMacroEventArgs e)
+        {
+            string strName = StringUtil.Unquote(e.Macro, "%%");  // 去掉百分号
+
+            // 函数名：
+            string strFuncName = "";
+            string strParams = "";
+
+            int nRet = strName.IndexOf(":");
+            if (nRet == -1)
+            {
+                strFuncName = strName.Trim();
+            }
+            else
+            {
+                strFuncName = strName.Substring(0, nRet).Trim();
+                strParams = strName.Substring(nRet + 1).Trim();
+            }
+
+            if (strName == "username")
+            {
+                e.Value = this.CurrentUserName;
+                return;
+            }
+
+            string strValue = "";
+            string strError = "";
+            // 从marceditor_macrotable.xml文件中解析宏
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            nRet = MacroUtil.GetFromLocalMacroTable(
+                Path.Combine(Program.MainForm.UserDir, "marceditor_macrotable.xml"),
+                strName,
+                e.Simulate,
+                out strValue,
+                out strError);
+            if (nRet == -1)
+            {
+                e.Canceled = true;
+                e.ErrorInfo = strError;
+                return;
+            }
+
+            if (nRet == 1)
+            {
+                e.Value = strValue;
+                return;
+            }
+
+            if (String.Compare(strFuncName, "IncSeed", true) == 0
+                || String.Compare(strFuncName, "IncSeed+", true) == 0
+                || String.Compare(strFuncName, "+IncSeed", true) == 0)
+            {
+                // 种次号库名, 指标名, 要填充到的位数
+                string[] aParam = strParams.Split(new char[] { ',' });
+                if (aParam.Length != 3 && aParam.Length != 2)
+                {
+                    strError = "IncSeed需要2或3个参数。";
+                    goto ERROR1;
+                }
+
+                bool IncAfter = false;  // 是否为先取后加
+                if (strFuncName[strFuncName.Length - 1] == '+')
+                    IncAfter = true;
+
+                string strZhongcihaoDbName = aParam[0].Trim();
+                string strEntryName = aParam[1].Trim();
+                strValue = "";
+
+                LibraryChannel channel = this.GetChannel();
+
+                try
+                {
+
+                    long lRet = 0;
+                    if (e.Simulate == true)
+                    {
+                        // parameters:
+                        //      strZhongcihaoGroupName  @引导种次号库名 !引导线索书目库名 否则就是 种次号组名
+                        lRet = channel.GetZhongcihaoTailNumber(
+        null,
+        strZhongcihaoDbName,
+        strEntryName,
+        out strValue,
+        out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+                        if (string.IsNullOrEmpty(strValue) == true)
+                        {
+                            strValue = "1";
+                        }
+                    }
+                    else
+                    {
+                        // parameters:
+                        //      strZhongcihaoGroupName  @引导种次号库名 !引导线索书目库名 否则就是 种次号组名
+                        lRet = channel.SetZhongcihaoTailNumber(
+        null,
+        IncAfter == true ? "increase+" : "increase",
+        strZhongcihaoDbName,
+        strEntryName,
+        "1",
+        out strValue,
+        out strError);
+                        if (lRet == -1)
+                            goto ERROR1;
+                    }
+                }
+                finally
+                {
+                    this.ReturnChannel(channel);
+                }
+
+                // 补足左方'0'
+                if (aParam.Length == 3)
+                {
+                    int nWidth = 0;
+                    try
+                    {
+                        nWidth = Convert.ToInt32(aParam[2]);
+                    }
+                    catch
+                    {
+                        strError = "第三参数应当为纯数字（表示补足的宽度）";
+                        goto ERROR1;
+                    }
+                    e.Value = strValue.PadLeft(nWidth, '0');
+                }
+                else
+                    e.Value = strValue;
+                return;
+            }
+
+            e.Canceled = true;  // 不能解释处理
+            return;
+        ERROR1:
+            e.Canceled = true;
+            e.ErrorInfo = strError;
+        }
 
     }
 

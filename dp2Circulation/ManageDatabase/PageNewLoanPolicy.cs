@@ -107,7 +107,7 @@ namespace dp2Circulation
 
             // 2014/5/27
             if (Global.IsGlobalUser(strLibraryCodeList) == true)
-                strLibraryCodeList = StringUtil.MakePathList(this.MainForm.GetAllLibraryCode());
+                strLibraryCodeList = StringUtil.MakePathList(Program.MainForm.GetAllLibraryCode());
 #endif
 
             nRet = this.loanPolicyControlWrapper1.LoanPolicyControl.SetData(
@@ -136,7 +136,7 @@ namespace dp2Circulation
 #if NO
             // 2014/5/27
             if (Global.IsGlobalUser(strLibraryCodeList) == true)
-                strLibraryCodeList = StringUtil.MakePathList(this.MainForm.GetAllLibraryCode());
+                strLibraryCodeList = StringUtil.MakePathList(Program.MainForm.GetAllLibraryCode());
 #endif
             if (Global.IsGlobalUser(strLibraryCodeList) == true)
             {
@@ -204,7 +204,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {

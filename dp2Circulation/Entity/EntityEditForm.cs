@@ -21,7 +21,7 @@ namespace dp2Circulation
     /// 册记录编辑对话框
     /// </summary>
     public partial class EntityEditForm : EntityEditFormBase
-        // ItemEditFormBase<BookItem, BookItemCollection>
+    // ItemEditFormBase<BookItem, BookItemCollection>
     {
         // Ctrl+A自动创建数据
         /// <summary>
@@ -119,12 +119,27 @@ namespace dp2Circulation
             }
 
             item.RecPath = this.entityEditControl_editing.RecPath;
+
+#if REF
+            // 2017/4/6
+            if (string.IsNullOrEmpty(item.RecPath))
+            {
+                if (string.IsNullOrEmpty(entityEditControl_editing.RefID) == true)
+                {
+                    // throw new Exception("entityEditControl_editing 的 RefID 成员不应为空"); // TODO: 可以考虑增加健壮性，当时发生 RefID 字符串
+                    entityEditControl_editing.RefID = Guid.NewGuid().ToString();
+                }
+
+                item.RecPath = "@refID:" + entityEditControl_editing.RefID;
+            }
+#endif
+
             item.Location = entityEditControl_editing.LocationString;
             item.Barcode = entityEditControl_editing.Barcode;
 
             return callnumber_items;
         }
-        
+
         private void EntityEditForm_Load(object sender, EventArgs e)
         {
             this.entityEditControl_editing.GetAccessNoButton.Click -= new EventHandler(button_getAccessNo_Click);
@@ -139,7 +154,8 @@ namespace dp2Circulation
             string strError = "";
 
             if (this.entityEditControl_editing.Initializing == false
-                && string.IsNullOrEmpty(this.entityEditControl_editing.AccessNo) == false)
+                && string.IsNullOrEmpty(this.entityEditControl_editing.AccessNo) == false
+                && this.entityEditControl_editing.AccessNo != "@accessNo")
             {
                 // MessageBox.Show(this, "修改 old '"+e.OldText+"' new '"+e.NewText+"'" );
 
@@ -147,7 +163,7 @@ namespace dp2Circulation
                 string strOldName = "[not found]";
                 // 获得关于一个特定馆藏地点的索取号配置信息
                 // <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
-                int nRet = this.MainForm.GetArrangementInfo(e.OldText,
+                int nRet = Program.MainForm.GetArrangementInfo(e.OldText,
                     out old_info,
                     out strError);
                 if (nRet == -1)
@@ -158,7 +174,7 @@ namespace dp2Circulation
                 ArrangementInfo new_info = null;
                 string strNewName = "[not found]";
                 // 获得关于一个特定馆藏地点的索取号配置信息
-                nRet = this.MainForm.GetArrangementInfo(e.NewText,
+                nRet = Program.MainForm.GetArrangementInfo(e.NewText,
                    out new_info,
                    out strError);
                 if (nRet == -1)
@@ -291,7 +307,7 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "价格字符串格式不合法: " +strError;
+                    strError = "价格字符串格式不合法: " + strError;
                     goto ERROR1;
                 }
             }
@@ -299,7 +315,7 @@ namespace dp2Circulation
             string strIssueDbName = "";
 
             if (string.IsNullOrEmpty(this.BiblioDbName) == false)
-                strIssueDbName = this.MainForm.GetIssueDbName(this.BiblioDbName);
+                strIssueDbName = Program.MainForm.GetIssueDbName(this.BiblioDbName);
 
             if (string.IsNullOrEmpty(strIssueDbName) == false)
             {
@@ -384,11 +400,11 @@ namespace dp2Circulation
 
         private void EntityEditForm_Activated(object sender, EventArgs e)
         {
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
         // 撤销标记删除状态
@@ -569,23 +585,23 @@ namespace dp2Circulation
                         DoAction(strAction, bookitem.Operations);
                     break;
                 case "Price":
-                    this.entityEditControl_editing.Price = 
-                        DoAction(strAction, bookitem.Price); 
+                    this.entityEditControl_editing.Price =
+                        DoAction(strAction, bookitem.Price);
                     break;
                 case "Barcode":
-                    this.entityEditControl_editing.Barcode =  
+                    this.entityEditControl_editing.Barcode =
                         DoAction(strAction, bookitem.Barcode);
                     break;
                 case "State":
-                    this.entityEditControl_editing.State =  
+                    this.entityEditControl_editing.State =
                         DoAction(strAction, bookitem.State);
                     break;
                 case "Location":
-                    this.entityEditControl_editing.LocationString =  
+                    this.entityEditControl_editing.LocationString =
                         DoAction(strAction, bookitem.Location);
                     break;
                 case "Comment":
-                    this.entityEditControl_editing.Comment =  
+                    this.entityEditControl_editing.Comment =
                         DoAction(strAction, bookitem.Comment);
                     break;
                 case "Borrower":
@@ -605,23 +621,23 @@ namespace dp2Circulation
                     //this.entityEditControl_editing.RecPath = bookitem.RecPath;
                     break;
                 case "BookType":
-                    this.entityEditControl_editing.BookType =  
+                    this.entityEditControl_editing.BookType =
                         DoAction(strAction, bookitem.BookType);
                     break;
                 case "RegisterNo":
-                    this.entityEditControl_editing.RegisterNo =  
+                    this.entityEditControl_editing.RegisterNo =
                         DoAction(strAction, bookitem.RegisterNo);
                     break;
                 case "MergeComment":
-                    this.entityEditControl_editing.MergeComment =  
+                    this.entityEditControl_editing.MergeComment =
                         DoAction(strAction, bookitem.MergeComment);
                     break;
                 case "BatchNo":
-                    this.entityEditControl_editing.BatchNo =  
+                    this.entityEditControl_editing.BatchNo =
                         DoAction(strAction, bookitem.BatchNo);
                     break;
                 case "Volume":
-                    this.entityEditControl_editing.Volume =  
+                    this.entityEditControl_editing.Volume =
                         DoAction(strAction, bookitem.Volume);
                     break;
                 case "AccessNo":
@@ -633,7 +649,7 @@ namespace dp2Circulation
                     // this.entityEditControl_editing.RefID = bookitem.RefID;  // 2009/6/2
                     break;
                 default:
-                    Debug.Assert(false, "未知的栏目名称 '" +e.Name+ "'");
+                    Debug.Assert(false, "未知的栏目名称 '" + e.Name + "'");
                     return;
             }
 
@@ -668,7 +684,7 @@ namespace dp2Circulation
         {
             EntityFormOptionDlg dlg = new EntityFormOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.DisplayStyle = "normal_entity";
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);

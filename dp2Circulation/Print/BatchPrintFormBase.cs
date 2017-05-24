@@ -25,6 +25,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -48,30 +49,31 @@ namespace dp2Circulation
         internal Assembly AssemblyFilter = null;
         internal ColumnFilterDocument MarcFilter = null;
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm
+        // 兼容以前的版本
+        public int GetMarc(
+    string strBiblioRecPath,
+    out string strMARC,
+    out string strOutMarcSyntax,
+    out string strError)
         {
-            get
+            LibraryChannel channel = this.GetChannel();
+
+            try
             {
-                return (MainForm)this.MdiParent;
+                return GetMarc(
+            channel,
+            strBiblioRecPath,
+        out strMARC,
+        out strOutMarcSyntax,
+        out strError);
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
             }
         }
-        
-        internal DigitalPlatform.Stop stop = null;
 
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public virtual void EnableControls(bool bEnable)
-        {
-            throw new Exception("尚未实现 EnableControls() ");
-        }
-#endif
-
+        // 2017/4/8 新版本，具有 channel 参数
         // 获得MARC格式书目记录
         // return:
         //      -1  出错
@@ -80,6 +82,7 @@ namespace dp2Circulation
         /// <summary>
         /// 获得书目记录的 MARC (机内)格式内容
         /// </summary>
+        /// <param name="channel">通讯通道</param>
         /// <param name="strBiblioRecPath">书目记录路径</param>
         /// <param name="strMARC">返回 MARC 机内格式字符串</param>
         /// <param name="strOutMarcSyntax">返回记录的 MARC 格式类型</param>
@@ -89,7 +92,9 @@ namespace dp2Circulation
         /// <para>0:   空记录</para>
         /// <para>1:   成功</para>
         /// </returns>
-        public int GetMarc(string strBiblioRecPath,
+        public int GetMarc(
+            LibraryChannel channel,
+            string strBiblioRecPath,
             out string strMARC,
             out string strOutMarcSyntax,
             out string strError)
@@ -107,7 +112,7 @@ namespace dp2Circulation
 
             Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "strBiblioRecPath值不能为空");
 
-            long lRet = Channel.GetBiblioInfos(
+            long lRet = channel.GetBiblioInfos(
                     null, // stop,
                     strBiblioRecPath,
                     "",
@@ -209,7 +214,7 @@ namespace dp2Circulation
 
             string strWarning = "";
 
-            string strLibPaths = "\"" + this.MainForm.DataDir + "\"";
+            string strLibPaths = "\"" + Program.MainForm.DataDir + "\"";
             Type entryClassType = this.GetType();
 
             filter = new ColumnFilterDocument();
@@ -391,6 +396,7 @@ namespace dp2Circulation
         /// <summary>
         /// 从记录路径文件装载
         /// </summary>
+        /// <param name="channel">通讯通道</param>
         /// <param name="strRecPathFilename">记录路径文件名(全路径)</param>
         /// <param name="strPubType">出版物类型</param>
         /// <param name="bFillSummaryColumn">是否填充书目摘要列</param>
@@ -398,7 +404,9 @@ namespace dp2Circulation
         /// <param name="bClearBefore">是否要在装载前情况浏览列表</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错，错误信息在 strError 参数返回; 0: 成功</returns>
-        public int LoadFromRecPathFile(string strRecPathFilename,
+        public int LoadFromRecPathFile(
+            LibraryChannel channel,
+            string strRecPathFilename,
             string strPubType,
             bool bFillSummaryColumn,
             string[] summary_col_names,
@@ -426,7 +434,7 @@ namespace dp2Circulation
                 stop.Initial("正在初始化浏览器组件 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -440,10 +448,10 @@ namespace dp2Circulation
                         Application.DoEvents();
 
                         if (stop != null && stop.State != 0)
-                            {
-                                strError = "用户中断1";
-                                goto ERROR1;
-                            }
+                        {
+                            strError = "用户中断1";
+                            goto ERROR1;
+                        }
 
                         string strLine = "";
                         strLine = sr.ReadLine();
@@ -519,7 +527,9 @@ namespace dp2Circulation
                                     + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(i)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
 
                             // 处理一小批记录的装入
-                            nRet = DoLoadRecords(lines,
+                            nRet = DoLoadRecords(
+                                channel,
+                                lines,
                                 null,
                                 bFillSummaryColumn,
                                 summary_col_names,
@@ -539,7 +549,9 @@ namespace dp2Circulation
                             stop.SetMessage("(" + nLineCount.ToString() + " / " + nLineCount.ToString() + ") 正在装入路径 " + lines[0] + " 等记录...");
 
                         // 处理一小批记录的装入
-                        nRet = DoLoadRecords(lines,
+                        nRet = DoLoadRecords(
+                            channel,
+                            lines,
                             null,
                             bFillSummaryColumn,
                             summary_col_names,
@@ -572,16 +584,18 @@ namespace dp2Circulation
                 sr.Close();
             }
 
-            this.MainForm.StatusBarMessage = strTimeMessage;
+            Program.MainForm.StatusBarMessage = strTimeMessage;
 
             return 0;
         ERROR1:
             return -1;
-        }        
-        
-        
+        }
+
+
         // 处理一小批记录的装入
-        internal virtual int DoLoadRecords(List<string> lines,
+        internal virtual int DoLoadRecords(
+            LibraryChannel channel,
+            List<string> lines,
             List<ListViewItem> items,
             bool bFillSummaryColumn,
             string[] summary_col_names,
@@ -611,15 +625,14 @@ namespace dp2Circulation
             public SummaryInfo SummaryInfo = null;  // 摘要信息
         }
 
-        // 准备DOM和书目摘要等
-        // parameters:
-        //      bFillSummaryColumn  是否要填充书目摘要列。如果为 false，则只设定 info.BiblioRecPath 的值
+        // 2017/4/8 新版本函数，使用了 channel 参数
         internal virtual int GetSummaries(
-            bool bFillSummaryColumn,
-            string [] summary_col_names,
-            List<DigitalPlatform.LibraryClient.localhost.Record> records,
-            out List<RecordInfo> infos,
-            out string strError)
+            LibraryChannel channel,
+    bool bFillSummaryColumn,
+    string[] summary_col_names,
+    List<DigitalPlatform.LibraryClient.localhost.Record> records,
+    out List<RecordInfo> infos,
+    out string strError)
         {
             strError = "";
             infos = new List<RecordInfo>();
@@ -630,10 +643,10 @@ namespace dp2Circulation
                 Application.DoEvents();
 
                 if (stop != null && stop.State != 0)
-                    {
-                        strError = "用户中断1";
-                        return -1;
-                    }
+                {
+                    strError = "用户中断1";
+                    return -1;
+                }
 
                 RecordInfo info = new RecordInfo();
                 info.Record = records[i];
@@ -662,7 +675,7 @@ namespace dp2Circulation
                 // 准备书目记录路径
                 string strParentID = DomUtil.GetElementText(info.Dom.DocumentElement,
 "parent");
-                string strBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName(Global.GetDbName(info.Record.Path));
+                string strBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName(Global.GetDbName(info.Record.Path));
                 if (string.IsNullOrEmpty(strBiblioDbName) == true)
                 {
                     strError = "根据册记录路径 '" + info.Record.Path + "' 获得书目库名时出错";
@@ -722,7 +735,7 @@ namespace dp2Circulation
 
                     // TODO: 有没有可能希望取的事项数目一次性取得没有取够?
                 REDO_GETBIBLIOINFO:
-                    long lRet = Channel.GetBiblioInfos(
+                    long lRet = channel.GetBiblioInfos(
                         stop,
                         strCommand,
                         "",
@@ -754,7 +767,6 @@ namespace dp2Circulation
                         else
                             return -1;
                     }
-
 
                     if (results != null/* && results.Length == 2 * bibliorecpaths.Count*/)
                     {
@@ -804,6 +816,26 @@ namespace dp2Circulation
             return 0;
         }
 
+        // 老版本，没有 channel 参数
+        // 准备DOM和书目摘要等
+        // parameters:
+        //      bFillSummaryColumn  是否要填充书目摘要列。如果为 false，则只设定 info.BiblioRecPath 的值
+        internal virtual int GetSummaries(
+            bool bFillSummaryColumn,
+            string[] summary_col_names,
+            List<DigitalPlatform.LibraryClient.localhost.Record> records,
+            out List<RecordInfo> infos,
+            out string strError)
+        {
+            return GetSummaries(
+                this.Channel,
+                bFillSummaryColumn,
+                summary_col_names,
+                records,
+                out infos,
+                out strError);
+        }
+
         internal virtual void SetError(ListView list,
             ref ListViewItem item,
             string strBarcodeOrRecPath,
@@ -850,6 +882,7 @@ namespace dp2Circulation
             return 0;
         }
 
+        // 2017/4/8 新版本，有 channel 参数
         // 根据册条码号或者记录路径，装入册记录
         // parameters:
         //      strBarcodeOrRecPath 册条码号或者记录路径。如果内容前缀为"@path:"则表示为路径
@@ -860,6 +893,7 @@ namespace dp2Circulation
         //      0   因为馆藏地点不匹配，没有加入list中
         //      1   成功
         internal virtual int LoadOneItem(
+            LibraryChannel channel,
             string strPubType,
             bool bFillSummaryColumn,
             string[] summary_col_names,
@@ -896,7 +930,7 @@ namespace dp2Circulation
             {
 
             REDO_GETITEMINFO:
-                lRet = Channel.GetItemInfo(
+                lRet = channel.GetItemInfo(
                     stop,
                     strBarcodeOrRecPath,
                     "xml",
@@ -946,7 +980,7 @@ namespace dp2Circulation
 
                     Debug.Assert(String.IsNullOrEmpty(strBiblioRecPath) == false, "strBiblioRecPath值不能为空");
                 REDO_GETBIBLIOINFO:
-                    lRet = Channel.GetBiblioInfos(
+                    lRet = channel.GetBiblioInfos(
                         stop,
                         strBiblioRecPath,
                         "",
@@ -974,7 +1008,6 @@ namespace dp2Circulation
                         summary = new SummaryInfo();
                         summary.Values = new string[1];
                         summary.Values[0] = "获得书目摘要时发生错误: " + strError;
-
                     }
                     else
                     {
@@ -1079,7 +1112,7 @@ namespace dp2Circulation
                     strBiblioSummary,
                     strISBnISSN,
 #endif
-                    summary_col_names,
+ summary_col_names,
                     summary);
 
 
@@ -1103,7 +1136,7 @@ namespace dp2Circulation
     strBiblioSummary,
     strISBnISSN,
 #endif
-                    summary_col_names,
+ summary_col_names,
                     summary,
                     item);
             }
@@ -1122,11 +1155,39 @@ namespace dp2Circulation
             return -1;
         }
 
+        // 老版本，没有 channel 参数
+        internal virtual int LoadOneItem(
+    string strPubType,
+    bool bFillSummaryColumn,
+    string[] summary_col_names,
+    string strBarcodeOrRecPath,
+    RecordInfo info,
+    ListView list,
+    string strMatchLocation,
+    out string strOutputItemRecPath,
+    ref ListViewItem item,
+    out string strError)
+        {
+            return LoadOneItem(
+                this.Channel,
+                        strPubType,
+                        bFillSummaryColumn,
+                        summary_col_names,
+                        strBarcodeOrRecPath,
+                        info,
+                        list,
+                        strMatchLocation,
+                        out strOutputItemRecPath,
+                        ref item,
+                        out strError);
+        }
 
         #region ConvertBarcodeFile 把册条码号翻译为记录路径
 
         // 根据册条码号文件得到记录路径文件
-        internal virtual int ConvertBarcodeFile(string strBarcodeFilename,
+        internal virtual int ConvertBarcodeFile(
+            LibraryChannel channel,
+            string strBarcodeFilename,
             string strRecPathFilename,
             out int nDupCount,
             out string strError)
@@ -1152,7 +1213,7 @@ namespace dp2Circulation
                 stop.Initial("正在将册条码号转换为记录路径 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -1168,10 +1229,10 @@ namespace dp2Circulation
                         Application.DoEvents();
 
                         if (stop != null && stop.State != 0)
-                            {
-                                strError = "用户中断1";
-                                goto ERROR1;
-                            }
+                        {
+                            strError = "用户中断1";
+                            goto ERROR1;
+                        }
 
                         string strLine = "";
                         strLine = sr.ReadLine();
@@ -1191,6 +1252,8 @@ namespace dp2Circulation
                             nDupCount++;
                             continue;
                         }
+
+                        //
 
                         barcode_table[strLine] = true;
                         lines.Add(strLine);
@@ -1214,7 +1277,7 @@ namespace dp2Circulation
 
                     int i = 0;
                     List<string> temp_lines = new List<string>();
-                    foreach (string strLine in lines)
+                    foreach (string s in lines)
                     {
                         Application.DoEvents();
 
@@ -1226,6 +1289,24 @@ namespace dp2Circulation
 
                         stop.SetProgressValue(i++);
 
+                        string strLine = s;
+
+                        // 2017/5/17
+                        // 变换条码号
+                        if (Program.MainForm.NeedTranformBarcode(Program.MainForm.FocusLibraryCode) == true)
+                        {
+                            string strText = strLine;
+
+                            nRet = Program.MainForm.TransformBarcode(
+                                Program.MainForm.FocusLibraryCode,
+                                ref strText,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            strLine = strText;
+                        }
+
                         // stop.SetMessage("正在装入册条码号 " + strLine + " 对应的记录...");
 
                         temp_lines.Add(strLine);
@@ -1234,6 +1315,7 @@ namespace dp2Circulation
                             // 将册条码号转换为册记录路径
                             List<string> recpaths = null;
                             nRet = ConvertItemBarcodeToRecPath(
+                                channel,
                                 temp_lines,
                                 out recpaths,
                                 out strError);
@@ -1253,6 +1335,7 @@ namespace dp2Circulation
                         // 将册条码号转换为册记录路径
                         List<string> recpaths = null;
                         nRet = ConvertItemBarcodeToRecPath(
+                            channel,
                             temp_lines,
                             out recpaths,
                             out strError);
@@ -1294,113 +1377,127 @@ namespace dp2Circulation
             return -1;
         }
 
+        // parameters:
+        //      channel_param   如果为空，则自动获得一个通道完成任务
         internal int ConvertItemBarcodeToRecPath(
-    List<string> barcodes,
-    out List<string> recpaths,
-    out string strError)
+            LibraryChannel channel_param,
+            List<string> barcodes,
+            out List<string> recpaths,
+            out string strError)
         {
             strError = "";
             recpaths = null;
 
-        REDO_GETITEMINFO:
-            string strBiblio = "";
-            string strResult = "";
-            long lRet = this.Channel.GetItemInfo(stop,
-                "@barcode-list:" + StringUtil.MakePathList(barcodes),
-                "get-path-list",
-                out strResult,
-                "", // strBiblioType,
-                out strBiblio,
-                out strError);
-            if (lRet == -1)
-                return -1;
-            recpaths = StringUtil.SplitList(strResult);
-
-            if (recpaths.Count == 0 && barcodes.Count == 1)
-                recpaths.Add("");
-            else
+            LibraryChannel channel = channel_param;
+            if (channel == null)
+                channel = this.GetChannel();
+            try
             {
-                Debug.Assert(barcodes.Count == recpaths.Count, "");
-            }
+            REDO_GETITEMINFO:
+                string strBiblio = "";
+                string strResult = "";
+                long lRet = channel.GetItemInfo(stop,
+                    "@barcode-list:" + StringUtil.MakePathList(barcodes),
+                    "get-path-list",
+                    out strResult,
+                    "", // strBiblioType,
+                    out strBiblio,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+                recpaths = StringUtil.SplitList(strResult);
 
-            if (this.InvokeRequired == true)
-            {
-                for (int i = 0; i < recpaths.Count; i++ )
+                if (recpaths.Count == 0 && barcodes.Count == 1)
+                    recpaths.Add("");
+                else
+                {
+                    Debug.Assert(barcodes.Count == recpaths.Count, "");
+                }
+
+                if (this.InvokeRequired == true)
+                {
+                    for (int i = 0; i < recpaths.Count; i++)
+                    {
+                        string recpath = recpaths[i];
+                        if (string.IsNullOrEmpty(recpath) == true)
+                            recpaths[i] = "!条码号 " + barcodes[i] + " 没有找到";
+                    }
+
+                    return 0;
+                }
+
+                List<string> notfound_barcodes = new List<string>();
+                List<string> errors = new List<string>();
+                {
+                    int i = 0;
+                    foreach (string recpath in recpaths)
+                    {
+                        if (string.IsNullOrEmpty(recpath) == true)
+                            notfound_barcodes.Add(barcodes[i]);
+                        else if (recpath[0] == '!')
+                            errors.Add(recpath.Substring(1));
+                        i++;
+                    }
+                }
+
+                if (errors.Count > 0)
+                {
+                    strError = "转换册条码号的过程发生错误: " + StringUtil.MakePathList(errors);
+
+                    DialogResult temp_result = MessageBox.Show(this,
+                        strError + "\r\n\r\n是否重试?",
+                        this.FormCaption,
+                        MessageBoxButtons.RetryCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1);
+                    if (temp_result == DialogResult.Retry)
+                        goto REDO_GETITEMINFO;
+                    return -1;
+                }
+
+                if (notfound_barcodes.Count > 0)
+                {
+                    if (string.IsNullOrEmpty(strError) == false)
+                        strError += ";\r\n";
+
+                    strError += "下列册条码号没有找到: " + StringUtil.MakePathList(notfound_barcodes);
+                    DialogResult temp_result = MessageBox.Show(this,
+                        strError + "\r\n\r\n是否继续处理?",
+                        this.FormCaption,
+                        MessageBoxButtons.OKCancel,
+                        MessageBoxIcon.Question,
+                        MessageBoxDefaultButton.Button1);
+                    if (temp_result == DialogResult.Cancel)
+                        return -1;
+                }
+
+                /*
+                if (string.IsNullOrEmpty(strError) == false)
+                    return -1;
+                 * */
+                // 把空字符串和 ！ 打头的都去掉
+                for (int i = 0; i < recpaths.Count; i++)
                 {
                     string recpath = recpaths[i];
                     if (string.IsNullOrEmpty(recpath) == true)
-                        recpaths[i] = "!条码号 " + barcodes[i] + " 没有找到";
+                    {
+                        recpaths.RemoveAt(i);
+                        i--;
+                    }
+                    else if (recpath[0] == '!')
+                    {
+                        recpaths.RemoveAt(i);
+                        i--;
+                    }
                 }
 
                 return 0;
             }
-
-            List<string> notfound_barcodes = new List<string>();
-            List<string> errors = new List<string>();
+            finally
             {
-                int i = 0;
-                foreach (string recpath in recpaths)
-                {
-                    if (string.IsNullOrEmpty(recpath) == true)
-                        notfound_barcodes.Add(barcodes[i]);
-                    else if (recpath[0] == '!')
-                        errors.Add(recpath.Substring(1));
-                    i++;
-                }
+                if (channel_param == null)
+                    this.ReturnChannel(channel);
             }
-
-            if (errors.Count > 0)
-            {
-                strError = "转换册条码号的过程发生错误: " + StringUtil.MakePathList(errors);
-
-                DialogResult temp_result = MessageBox.Show(this,
-                    strError + "\r\n\r\n是否重试?",
-                    this.FormCaption,
-                    MessageBoxButtons.RetryCancel,
-                    MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button1);
-                if (temp_result == DialogResult.Retry)
-                    goto REDO_GETITEMINFO;
-                return -1;
-            }
-
-            if (notfound_barcodes.Count > 0)
-            {
-                if (string.IsNullOrEmpty(strError) == false)
-                    strError += ";\r\n";
-
-                strError += "下列册条码号没有找到: " + StringUtil.MakePathList(notfound_barcodes);
-                DialogResult temp_result = MessageBox.Show(this,
-                    strError + "\r\n\r\n是否继续处理?",
-                    this.FormCaption,
-                    MessageBoxButtons.OKCancel,
-                    MessageBoxIcon.Question,
-                    MessageBoxDefaultButton.Button1);
-                if (temp_result == DialogResult.Cancel)
-                    return -1;
-            }
-
-            /*
-            if (string.IsNullOrEmpty(strError) == false)
-                return -1;
-             * */
-            // 把空字符串和 ！ 打头的都去掉
-            for (int i = 0; i < recpaths.Count; i++)
-            {
-                string recpath = recpaths[i];
-                if (string.IsNullOrEmpty(recpath) == true)
-                {
-                    recpaths.RemoveAt(i);
-                    i--;
-                }
-                else if (recpath[0] == '!')
-                {
-                    recpaths.RemoveAt(i);
-                    i--;
-                }
-            }
-
-            return 0;
         }
 
         #endregion
@@ -1414,6 +1511,7 @@ namespace dp2Circulation
         /// <summary>
         /// 检索 批次号 和 馆藏地点 将命中的记录路径写入文件
         /// </summary>
+        /// <param name="channel">通讯通道</param>
         /// <param name="strPubType">出版物类型</param>
         /// <param name="strBatchNo">批次号</param>
         /// <param name="strLocation">馆藏地点</param>
@@ -1421,6 +1519,7 @@ namespace dp2Circulation
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 没有命中; 其他: 命中的记录数</returns>
         public virtual int SearchBatchNoAndLocation(
+            LibraryChannel channel,
             string strPubType,
             string strBatchNo,
             string strLocation,
@@ -1443,7 +1542,7 @@ namespace dp2Circulation
                     && strLocation != null)
                 {
                     string strBatchNoQueryXml = "";
-                    lRet = Channel.SearchItem(
+                    lRet = channel.SearchItem(
         stop,
          strPubType == "图书" ? "<all book>" : "<all series>",
         strBatchNo,
@@ -1460,7 +1559,7 @@ namespace dp2Circulation
                     strBatchNoQueryXml = strError;
 
                     string strLocationQueryXml = "";
-                    lRet = Channel.SearchItem(
+                    lRet = channel.SearchItem(
         stop,
          strPubType == "图书" ? "<all book>" : "<all series>",
         strLocation,
@@ -1497,7 +1596,7 @@ namespace dp2Circulation
                 {
                     stop.SetMessage("正在检索批次号 '" + strBatchNo + "' ...");
 
-                    lRet = Channel.SearchItem(
+                    lRet = channel.SearchItem(
         stop,
          strPubType == "图书" ? "<all book>" : "<all series>",
         strBatchNo,
@@ -1517,7 +1616,7 @@ namespace dp2Circulation
                 {
                     stop.SetMessage("正在检索馆藏地点 '" + strLocation + "' ...");
 
-                    lRet = Channel.SearchItem(
+                    lRet = channel.SearchItem(
     stop,
     strPubType == "图书" ? "<all book>" : "<all series>",
     strLocation,    // strBatchNo, BUG !!!
@@ -1537,7 +1636,7 @@ namespace dp2Circulation
                 {
                     Debug.Assert(strBatchNo == null && strLocation == null,
                         "");
-                    lRet = Channel.SearchItem(
+                    lRet = channel.SearchItem(
     stop,
     strPubType == "图书" ? "<all book>" : "<all series>",
     "", // strBatchNo,
@@ -1558,7 +1657,7 @@ namespace dp2Circulation
 
                 using (StreamWriter sw = new StreamWriter(strOutputFilename))
                 {
-                    lRet = Channel.Search(stop,
+                    lRet = channel.Search(stop,
         strQueryXml,
         "default",
         "id",   // 只要记录路径
@@ -1588,7 +1687,7 @@ namespace dp2Circulation
 
                         // stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
 
-                        lRet = Channel.GetSearchResult(
+                        lRet = channel.GetSearchResult(
                             stop,
                             "default",   // strResultSetName
                             lStart,
@@ -1660,6 +1759,8 @@ namespace dp2Circulation
                 EnableControls(false);
             // MainForm.ShowProgress(true);
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             if (this.InvokeRequired == false)
                 stop.Initial("正在刷新 ...");
@@ -1669,7 +1770,6 @@ namespace dp2Circulation
             {
                 if (this.InvokeRequired == false)
                     stop.SetProgressRange(0, items.Count);
-
 
                 ProgressEstimate estimate = new ProgressEstimate();
                 estimate.SetRange(0, items.Count);
@@ -1713,7 +1813,9 @@ namespace dp2Circulation
                         }
 
                         // 处理一小批记录的装入
-                        nRet = DoLoadRecords(lines,
+                        nRet = DoLoadRecords(
+                            channel,
+                            lines,
                             part_items,
                             bFillBiblioSummary,
                             summary_col_names,
@@ -1735,7 +1837,9 @@ namespace dp2Circulation
                     }
 
                     // 处理一小批记录的装入
-                    nRet = DoLoadRecords(lines,
+                    nRet = DoLoadRecords(
+                        channel,
+                        lines,
                         part_items,
                         bFillBiblioSummary,
                         summary_col_names,
@@ -1757,6 +1861,8 @@ namespace dp2Circulation
                     stop.Initial("刷新完成。");
                     stop.HideProgress();
                 }
+
+                this.ReturnChannel(channel);
 
                 if (this.InvokeRequired == false)
                     EnableControls(true);

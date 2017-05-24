@@ -11,6 +11,7 @@ using System.IO;
 
 namespace dp2Circulation
 {
+#if NO
     /// <summary>
     /// 宏值编辑对话框
     /// </summary>
@@ -209,4 +210,6 @@ namespace dp2Circulation
         }
 #endif
     }
+
+#endif
 }

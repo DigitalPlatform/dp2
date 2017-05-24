@@ -19,7 +19,7 @@ namespace dp2Circulation
 {
     public partial class FirstRunDialog : Form
     {
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         public FirstRunDialog()
         {
@@ -122,40 +122,40 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 goto ERROR1;
 
-            this.MainForm.AppInfo.SetString("config",
+            Program.MainForm.AppInfo.SetString("config",
     "circulation_server_url",
     this.textBox_server_dp2LibraryServerUrl.Text);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "default_account",
     "username",
     this.textBox_server_userName.Text);
 
-            string strPassword = this.MainForm.EncryptPassword(this.textBox_server_password.Text);
-            this.MainForm.AppInfo.SetString(
+            string strPassword = Program.MainForm.EncryptPassword(this.textBox_server_password.Text);
+            Program.MainForm.AppInfo.SetString(
                 "default_account",
                 "password",
                 strPassword);
 
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
     "default_account",
     "savepassword_short",
     true);
 
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
     "default_account",
     "savepassword_long",
     true);
 
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
     "default_account",
     "isreader",
     false);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "default_account",
                 "location",
                 "");
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
                 "default_account",
                 "occur_per_start",
                 true);
@@ -370,7 +370,7 @@ MessageBoxDefaultButton.Button1);
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
             Stop = new DigitalPlatform.Stop();
-            Stop.Register(this.MainForm.stopManager, true);	// 和容器关联
+            Stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
 
             return 1;
         }
@@ -488,7 +488,7 @@ MessageBoxDefaultButton.Button1);
 
         void LoadEula()
         {
-            string strFileName = Path.Combine(this.MainForm.DataDir, "eula.txt");
+            string strFileName = Path.Combine(Program.MainForm.DataDir, "eula.txt");
             using (StreamReader sr = new StreamReader(strFileName, true))
             {
                 this.textBox_license.Text = sr.ReadToEnd().Replace("\r\n", "\n").Replace("\n", "\r\n");   // 两个 Replace() 会将只有 LF 结尾的行处理为 CR LF

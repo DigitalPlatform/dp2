@@ -217,6 +217,7 @@
     <Compile Include="ResultSetTable.cs" />
     <Compile Include="SessionInfo.cs" />
     <Compile Include="SqlDatabase.cs" />
+    <Compile Include="SqlImageStream.cs" />
     <Compile Include="SqliteBulkCopy.cs" />
     <Compile Include="TailNumberManager.cs" />
     <Compile Include="TestReaderWriterLock.cs" />

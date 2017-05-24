@@ -2006,6 +2006,11 @@ out strError);
                                 }
                                 nRedoOneCount = 0;
 
+                                // 2017/5/18
+                                if (record.RecordBody == null 
+                                    || string.IsNullOrEmpty(record.RecordBody.Xml))
+                                    continue;
+
                             REDO_ONE:
                                 nRet = export_util.ExportOneRecord(
                                     cur_channel,
@@ -2096,7 +2101,7 @@ out strError);
                 MessageBox.Show(this, "数据库内共有记录 " + lTotalCount.ToString() + " 条，本次导出 " + lExportCount.ToString() + " 条");
         }
 
-        DigitalPlatform.Stop PrepareStop(string strText)
+        public DigitalPlatform.Stop PrepareStop(string strText)
         {
             if (stopManager == null)
                 return null;
@@ -2112,7 +2117,7 @@ out strError);
             return stop;
         }
 
-        void EndStop(DigitalPlatform.Stop stop)
+        public void EndStop(DigitalPlatform.Stop stop)
         {
             if (stopManager == null || stop == null)
                 return;

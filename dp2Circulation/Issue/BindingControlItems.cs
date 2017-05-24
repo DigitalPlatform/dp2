@@ -1038,6 +1038,15 @@ namespace dp2Circulation
                             strError = "订购记录第 " + i.ToString() + " 个XML装入DOM时出错: " + ex.Message;
                             return -1;
                         }
+
+                        // 2017/2/28
+                        string strRefID = DomUtil.GetElementText(whole_dom.DocumentElement, "refID");
+                        if (string.IsNullOrEmpty(strRefID))
+                        {
+                            strError = "订购记录第 " + i.ToString() + " 个中缺乏 参考 ID 字段内容(XML refID 元素)";
+                            return -1;
+                        }
+
                         XmlNode node = this.dom.CreateElement("root");
                         root.AppendChild(node);
                         node.InnerXml = whole_dom.DocumentElement.InnerXml;
@@ -1165,6 +1174,15 @@ namespace dp2Circulation
                             strError = "订购记录第 " + i.ToString() + " 个XML装入DOM时出错: " + ex.Message;
                             return -1;
                         }
+
+                        // 2017/2/28
+                        string strRefID = DomUtil.GetElementText(whole_dom.DocumentElement, "refID");
+                        if (string.IsNullOrEmpty(strRefID))
+                        {
+                            strError = "订购记录第 " + i.ToString() + " 个中缺乏 参考 ID 字段内容(XML refID 元素)";
+                            return -1;
+                        }
+
                         XmlNode node = this.dom.CreateElement("root");
                         root.AppendChild(node);
                         node.InnerXml = whole_dom.DocumentElement.InnerXml;
@@ -1938,11 +1956,19 @@ namespace dp2Circulation
                             return -1;
                         }
 
+                        // 2017/2/28
+                        string strRefID = DomUtil.GetElementText(whole_dom.DocumentElement, "refID");
+                        if (string.IsNullOrEmpty(strRefID))
+                        {
+                            strError = "订购记录第 " + i.ToString() + " 个中缺乏 参考 ID 字段内容(XML refID 元素)";
+                            return -1;
+                        }
+
                         XmlNode node = null;
                         node = this.dom.CreateElement("root");
                         root.AppendChild(node);
 
-                        string strRefID = DomUtil.GetElementText(whole_dom.DocumentElement, "refID");
+                        // string strRefID = DomUtil.GetElementText(whole_dom.DocumentElement, "refID");
                         int index = exist_refids.IndexOf(strRefID);
 
                         // 以前就有

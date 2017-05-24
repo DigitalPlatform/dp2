@@ -348,10 +348,10 @@ namespace dp2Circulation
             strError = "";
             if (this._objects == null)
                 return 0;
-            return this._objects.Save(channel, 
-                stop, 
+            return this._objects.Save(channel,
+                stop,
                 this.RecPath,
-                dp2library_version, 
+                dp2library_version,
                 out strError);
         }
 
@@ -374,8 +374,7 @@ namespace dp2Circulation
 
             this.ListViewItem = item;
 
-            this.ListViewItem.Tag = this;   // 将BookItem对象引用保存在ListViewItem事项中
-
+            this.ListViewItem.Tag = this;   // 将 BookItem 对象引用保存在 ListViewItem 事项中
             return item;
         }
 
@@ -715,20 +714,23 @@ namespace dp2Circulation
             strError = "";
             // 检查每个事项的refID
             Hashtable table = new Hashtable();
+            int i = 0;
             foreach (BookItemBase item in this)
             {
-                if (String.IsNullOrEmpty(item.RefID) == true)
+                // 2017/3/2 启用对参考 ID 的检查
+                // .Normal 状态的暂时不检查了，避免给用户造成困扰
+                if (String.IsNullOrEmpty(item.RefID) == true
+                    && (item.ItemDisplayState == ItemDisplayState.New || item.ItemDisplayState == ItemDisplayState.Changed))    // 2017/3/9
                 {
-                    /*
-                    strError = "册事项中出现了空的RefID值";
+                    strError = "事项 " + (i + 1) + " 中出现了空的 RefID";
                     return -1;
-                     * */
-                    continue;
+                    // continue;
                 }
 
                 if (item.ItemDisplayState != ItemDisplayState.Deleted)  // 删除的可以例外
                 {
-                    if (table.Contains(item.RefID) == true)
+                    if (string.IsNullOrEmpty(item.RefID) == false    // 2017/3/9
+                        && table.Contains(item.RefID) == true)
                     {
                         strError = "册事项中出现了重复的参考ID值 '" + item.RefID + "'";
                         return -1;
@@ -737,8 +739,11 @@ namespace dp2Circulation
                 else
                     continue;
 
-                if (table.Contains(item.RefID) == false)
+                if (string.IsNullOrEmpty(item.RefID) == false    // 2017/3/9
+                    && table.Contains(item.RefID) == false)
                     table.Add(item.RefID, null);
+
+                i++;
             }
 
             return 0;

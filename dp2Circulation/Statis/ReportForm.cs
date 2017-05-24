@@ -51,19 +51,19 @@ namespace dp2Circulation
 
         private void ReportForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
-            this.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "ui_state", "");
+            this.UiState = Program.MainForm.AppInfo.GetString(GetReportSection(), "ui_state", "");
 
 #if NO
             string strError = "";
-            int nRet = this.MainForm.VerifySerialCode("report", out strError);
+            int nRet = Program.MainForm.VerifySerialCode("report", out strError);
             if (nRet == -1)
             {
-                MessageBox.Show(this.MainForm, "报表窗需要先设置序列号才能使用");
+                MessageBox.Show(Program.MainForm, "报表窗需要先设置序列号才能使用");
                 API.PostMessage(this.Handle, API.WM_CLOSE, 0, 0);
                 return;
             }
@@ -90,6 +90,25 @@ namespace dp2Circulation
                 {
                     MessageBox.Show(this, strError);
                 }));
+
+                Program.MainForm.ReportError("dp2circulation 打开 report_def.xml 文件时出现错误", "(安静报错)" + strError);
+
+                // 2017/5/18
+                // 自动修正错误，清空配置文件
+                {
+                    string strFileName = Path.Combine(GetBaseDirectory(), "report_def.xml");
+                    // 备份一下出错了的配置文件内容，便于将来追查原因
+                    string strSavingFileName = Path.Combine(GetBaseDirectory(), "report_def.xml.error");
+                    try
+                    {
+                        File.Copy(strFileName, strSavingFileName, true);
+                    }
+                    catch
+                    {
+
+                    }
+                    _cfg.InitializeCfgDom();
+                }
             }
 
             _cfg.FillList(this.listView_libraryConfig);
@@ -101,11 +120,11 @@ namespace dp2Circulation
 
             string dp2library_version = "2.60";
 
-            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, dp2library_version) < 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, dp2library_version) < 0)
             {
                 this.Invoke((Action)(() =>
                 {
-                    MessageBox.Show(this, "报表窗需要和 dp2library " + dp2library_version + " 以上版本配套使用。(当前 dp2library 版本为 " + this.MainForm.ServerVersion + ")\r\n\r\n请及时升级 dp2library 到最新版本");
+                    MessageBox.Show(this, "报表窗需要和 dp2library " + dp2library_version + " 以上版本配套使用。(当前 dp2library 版本为 " + Program.MainForm.ServerVersion + ")\r\n\r\n请及时升级 dp2library 到最新版本");
                 }));
             }
             else
@@ -159,8 +178,8 @@ namespace dp2Circulation
                 }
             }
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
-                this.MainForm.AppInfo.SetString(
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
+                Program.MainForm.AppInfo.SetString(
                     GetReportSection(),
                     "ui_state",
                     this.UiState);
@@ -232,7 +251,7 @@ namespace dp2Circulation
 
             // 删除不必要的索引
             {
-                this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+                this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
 
                 // TODO: 对于 AccessLog 只删除它相关的一个索引
                 foreach (string type in OperLogTable.DbTypes)
@@ -297,7 +316,7 @@ namespace dp2Circulation
                 // loader.owner = this;
                 loader.estimate = estimate;
                 loader.FileNames = filenames;
-                loader.Level = 2;  //  this.MainForm.OperLogLevel;
+                loader.Level = 2;  //  Program.MainForm.OperLogLevel;
                 loader.AutoCache = false;
                 loader.CacheDir = "";
                 loader.Filter = "borrow,return,setReaderInfo,setBiblioInfo,setEntity,setOrder,setIssue,setComment,amerce,passgate,getRes";
@@ -311,7 +330,7 @@ namespace dp2Circulation
                 // List<OperLogLine> circu_lines = new List<OperLogLine>();
                 MultiBuffer buffer = new MultiBuffer();
                 buffer.Initial();
-                OperLogLineBase.MainForm = this.MainForm;
+                // OperLogLineBase.MainForm = Program.MainForm;
 
                 try
                 {
@@ -361,7 +380,7 @@ namespace dp2Circulation
                                     continue;
                                 }
 #endif
-                            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.74") < 0
+                            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.74") < 0
                                 && strOperation == "amerce" && (strAction == "amerce" || strAction == "modifyprice"))
                             {
                                 // 重新获得当前日志记录，用最详细级别
@@ -662,7 +681,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         string strBiblioDbName = (string)dbname_table[strItemDbName];
                         if (string.IsNullOrEmpty(strBiblioDbName) == true)
                         {
-                            strBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName(strItemDbName);
+                            strBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName(strItemDbName);
                             dbname_table[strItemDbName] = strBiblioDbName;
                         }
 
@@ -849,7 +868,7 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
                         string strLibraryCode = (string)librarycode_table[strReaderDbName];
                         if (string.IsNullOrEmpty(strLibraryCode) == true)
                         {
-                            strLibraryCode = this.MainForm.GetReaderDbLibraryCode(strReaderDbName);
+                            strLibraryCode = Program.MainForm.GetReaderDbLibraryCode(strReaderDbName);
                             librarycode_table[strReaderDbName] = strLibraryCode;
                         }
                         line.LibraryCode = strLibraryCode;
@@ -1225,9 +1244,9 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
             strError = "";
             styles = new List<BiblioDbFromInfo>();
 
-            for (int i = 0; i < this.MainForm.BiblioDbFromInfos.Length; i++)
+            for (int i = 0; i < Program.MainForm.BiblioDbFromInfos.Length; i++)
             {
-                BiblioDbFromInfo info = this.MainForm.BiblioDbFromInfos[i];
+                BiblioDbFromInfo info = Program.MainForm.BiblioDbFromInfos[i];
                 if (StringUtil.IsInList("__class", info.Style) == true)
                 {
                     string strStyle = GetPureStyle(info.Style);
@@ -1254,9 +1273,9 @@ System.Exception: 浏览事项异常: (lStart=293600 index=143)  path=图书总�
             strError = "";
             styles = new List<string>();
 
-            for (int i = 0; i < this.MainForm.BiblioDbFromInfos.Length; i++)
+            for (int i = 0; i < Program.MainForm.BiblioDbFromInfos.Length; i++)
             {
-                BiblioDbFromInfo info = this.MainForm.BiblioDbFromInfos[i];
+                BiblioDbFromInfo info = Program.MainForm.BiblioDbFromInfos[i];
                 if (StringUtil.IsInList("__class", info.Style) == true)
                 {
                     string strStyle = GetPureStyle(info.Style);
@@ -3901,7 +3920,7 @@ out string strError)
                 text.Append("\r\n\r\n");
             }
 
-            this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+            this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
 
             using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
             {
@@ -3973,7 +3992,7 @@ out string strError)
                 text.Append("\r\n\r\n");
             }
 
-            this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+            this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
 
             using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
             {
@@ -4057,7 +4076,7 @@ out string strError)
                 text.Append("\r\n\r\n");
             }
 
-            this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+            this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
 
             using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
             {
@@ -4776,7 +4795,7 @@ out strError);
                      + " WHERE librarycode = '" + strLibraryCode + "' "
                      + " GROUP BY department ;";
 
-            this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+            this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
 
             using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
             {
@@ -4846,7 +4865,7 @@ out strError);
          + " WHERE " + strLibraryCodeFilter + " "
          + " GROUP BY location ;";
 
-            this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+            this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
 
             using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
             {
@@ -4927,7 +4946,7 @@ out strError);
                      + " WHERE librarycode = '" + strLibraryCode + "' "
                      + " ORDER BY department ;";
 
-            this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+            this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
 
             using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
             {
@@ -5444,13 +5463,13 @@ out strError);
             HtmlPrintForm printform = new HtmlPrintForm();
 
             printform.Text = "打印统计结果";
-            printform.MainForm = this.MainForm;
+            // printform.MainForm = Program.MainForm;
 
             Debug.Assert(this.OutputFileNames != null, "");
             printform.Filenames = this.OutputFileNames;
-            this.MainForm.AppInfo.LinkFormState(printform, "printform_state");
+            Program.MainForm.AppInfo.LinkFormState(printform, "printform_state");
             printform.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(printform);
+            Program.MainForm.AppInfo.UnlinkFormState(printform);
         }
 
         #region 统计结果 HTML 文件管理
@@ -5467,7 +5486,7 @@ out strError);
         /// <returns>输出文件名</returns>
         public string NewOutputFileName()
         {
-            string strFileNamePrefix = this.MainForm.DataDir + "\\~report_";
+            string strFileNamePrefix = Program.MainForm.DataDir + "\\~report_";
             // string strFileNamePrefix = GetOutputFileNamePrefix();
 
             string strFileName = strFileNamePrefix + "_" + this.m_nFileNameSeed.ToString() + ".html";
@@ -5646,7 +5665,7 @@ out strError);
 
                 LibraryReportConfigForm dlg = new LibraryReportConfigForm();
 
-                dlg.MainForm = this.MainForm;
+                // dlg.MainForm = Program.MainForm;
                 dlg.ReportForm = this;
                 dlg.LoadData(nodeLibrary);
                 dlg.ModifyMode = true;
@@ -5687,11 +5706,11 @@ out strError);
             LibraryReportConfigForm dlg = new LibraryReportConfigForm();
 
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.ReportForm = this;
 
 
-            List<string> librarycodes = this.MainForm.GetAllLibraryCode();
+            List<string> librarycodes = Program.MainForm.GetAllLibraryCode();
             foreach (string code in librarycodes)
             {
                 nRet = dlg.AutoCreate(code, out strError);
@@ -5756,16 +5775,16 @@ out strError);
             LibraryReportConfigForm dlg = new LibraryReportConfigForm();
 
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.ReportForm = this;
             dlg.LoadData(nodeLibrary);
             dlg.ModifyMode = true;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "LibraryReportConfigForm_state");
-            dlg.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "LibraryReportConfigForm_ui_state", "");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "LibraryReportConfigForm_state");
+            dlg.UiState = Program.MainForm.AppInfo.GetString(GetReportSection(), "LibraryReportConfigForm_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString(GetReportSection(), "LibraryReportConfigForm_ui_state", dlg.UiState);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.SetString(GetReportSection(), "LibraryReportConfigForm_ui_state", dlg.UiState);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -5794,7 +5813,7 @@ out strError);
             LibraryReportConfigForm dlg = new LibraryReportConfigForm();
 
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
             dlg.ReportForm = this;
 
             nRet = dlg.AutoCreate("", out strError);
@@ -5802,11 +5821,11 @@ out strError);
                 goto ERROR1;
 
         REDO:
-            this.MainForm.AppInfo.LinkFormState(dlg, "LibraryReportConfigForm_state");
-            dlg.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "LibraryReportConfigForm_ui_state", "");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "LibraryReportConfigForm_state");
+            dlg.UiState = Program.MainForm.AppInfo.GetString(GetReportSection(), "LibraryReportConfigForm_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString(GetReportSection(), "LibraryReportConfigForm_ui_state", dlg.UiState);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.SetString(GetReportSection(), "LibraryReportConfigForm_ui_state", dlg.UiState);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -5991,11 +6010,11 @@ MessageBoxDefaultButton.Button2);
                 {
                     // 获得全部实体库名
                     List<string> item_dbnames = new List<string>();
-                    if (this.MainForm.BiblioDbProperties != null)
+                    if (Program.MainForm.BiblioDbProperties != null)
                     {
-                        for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                        for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                         {
-                            BiblioDbProperty property = this.MainForm.BiblioDbProperties[i];
+                            BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
 
                             if (String.IsNullOrEmpty(property.ItemDbName) == false)
                                 item_dbnames.Add(property.ItemDbName);
@@ -6036,9 +6055,9 @@ MessageBoxDefaultButton.Button2);
                 {
                     // 获得全部读者库名
                     List<string> reader_dbnames = new List<string>();
-                    if (this.MainForm.ReaderDbNames != null)
+                    if (Program.MainForm.ReaderDbNames != null)
                     {
-                        foreach (string s in this.MainForm.ReaderDbNames)
+                        foreach (string s in Program.MainForm.ReaderDbNames)
                         {
                             if (String.IsNullOrEmpty(s) == false)
                                 reader_dbnames.Add(s);
@@ -6078,9 +6097,9 @@ MessageBoxDefaultButton.Button2);
                 {
                     // 获得全部书目库名
                     List<string> biblio_dbnames = new List<string>();
-                    if (this.MainForm.BiblioDbProperties != null)
+                    if (Program.MainForm.BiblioDbProperties != null)
                     {
-                        foreach (BiblioDbProperty prop in this.MainForm.BiblioDbProperties)
+                        foreach (BiblioDbProperty prop in Program.MainForm.BiblioDbProperties)
                         {
                             if (String.IsNullOrEmpty(prop.DbName) == false)
                                 biblio_dbnames.Add(prop.DbName);
@@ -6231,10 +6250,10 @@ MessageBoxDefaultButton.Button2);
                             "first_operlog_date",
                             strFirstDate);
 
-                        this.MainForm.AppInfo.SetString(GetReportSection(),
+                        Program.MainForm.AppInfo.SetString(GetReportSection(),
                             "daily_report_end_date",
                             strFirstDate);
-                        this.MainForm.AppInfo.Save();   // 为防止程序中途崩溃丢失记忆，这里预先保存一下
+                        Program.MainForm.AppInfo.Save();   // 为防止程序中途崩溃丢失记忆，这里预先保存一下
 
                         XmlNode node = task_dom.CreateElement("operlog");
                         task_dom.DocumentElement.AppendChild(node);
@@ -6433,7 +6452,7 @@ MessageBoxDefaultButton.Button2);
 
             try
             {
-                this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+                this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
 
                 // 初始化各种表，除了 operlogXXX 表以外
                 string strInitilized = DomUtil.GetAttr(task_dom.DocumentElement,
@@ -7248,7 +7267,7 @@ MessageBoxDefaultButton.Button2);
         {
             // 2015/6/20 将数据库文件存储在和每个 dp2library 服务器和用户名相关的目录中
             string strDirectory = Path.Combine(Program.MainForm.ServerCfgDir, ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName()));
-            PathUtil.CreateDirIfNeed(strDirectory);
+            PathUtil.TryCreateDir(strDirectory);
             return strDirectory;
         }
 
@@ -7259,7 +7278,7 @@ MessageBoxDefaultButton.Button2);
 
         string GetOperlogConnectionString()
         {
-            // return SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+            // return SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
 
             return SQLiteUtil.GetConnectionString(GetBaseDirectory(), "operlog.bin");
         }
@@ -7347,7 +7366,7 @@ MessageBoxDefaultButton.Button2);
 
                 this.Channel.Timeout = new TimeSpan(0, 1, 0);   // 一分钟
 
-                this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+                this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
 
                 using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
                 {
@@ -7361,7 +7380,7 @@ MessageBoxDefaultButton.Button2);
                     // loader.owner = this;
                     loader.estimate = estimate;
                     loader.FileNames = dates;
-                    loader.Level = 2;  // this.MainForm.OperLogLevel;
+                    loader.Level = 2;  // Program.MainForm.OperLogLevel;
                     loader.AutoCache = false;
                     loader.CacheDir = "";
                     loader.LogType = logType;
@@ -7372,7 +7391,7 @@ MessageBoxDefaultButton.Button2);
                     // List<OperLogLine> lines = new List<OperLogLine>();
                     MultiBuffer buffer = new MultiBuffer();
                     buffer.Initial();
-                    OperLogLineBase.MainForm = this.MainForm;
+                    // OperLogLineBase.MainForm = Program.MainForm;
 
                     int nRecCount = 0;
 
@@ -7461,7 +7480,7 @@ MessageBoxDefaultButton.Button2);
                             string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
 
                             OperLogItem current_item = item;
-                            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.74") < 0
+                            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.74") < 0
     && strOperation == "amerce" && (strAction == "amerce" || strAction == "modifyprice"))
                             {
                                 // 重新获得当前日志记录，用最详细级别
@@ -7883,7 +7902,7 @@ out strError);
             int nRet = 0;
 
             string strDbName = Global.GetDbName(strBiblioRecPath);
-            if (this.MainForm.IsBiblioDbName(strDbName) == false)
+            if (Program.MainForm.IsBiblioDbName(strDbName) == false)
                 return 0;
 
             // 把前面积累的关于删除书目记录的请求全部兑现了
@@ -9082,7 +9101,7 @@ out strError);
             string strParentID = DomUtil.GetElementText(dom.DocumentElement,
                 "parent");
             // 根据 册/订购/期/评注 记录路径和 parentid 构造所从属的书目记录路径
-            string strBiblioRecPath = this.MainForm.BuildBiblioRecPath("item",
+            string strBiblioRecPath = Program.MainForm.BuildBiblioRecPath("item",
                 strItemRecPath,
                 strParentID);
             if (string.IsNullOrEmpty(strBiblioRecPath) == true)
@@ -9170,7 +9189,7 @@ out strError);
             // 根据读者库名，得到馆代码
             string strReaderDbName = Global.GetDbName(strReaderRecPath);
 
-            string strLibraryCode = this.MainForm.GetReaderDbLibraryCode(strReaderDbName);
+            string strLibraryCode = Program.MainForm.GetReaderDbLibraryCode(strReaderDbName);
 
             ReaderLine line = null;
             //  XML 记录变换为 SQL 记录
@@ -9574,7 +9593,7 @@ Stack:
 
                 this.listView_query_results.Clear();
 
-                this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+                this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(Program.MainForm.UserDir, "operlog.bin");
 
                 using (SQLiteConnection connection = new SQLiteConnection(this._connectionString))
                 {
@@ -9789,7 +9808,7 @@ Stack:
             int nRet = 0;
 
 #if SN
-            nRet = this.MainForm.VerifySerialCode("report", false, out strError);
+            nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 MessageBox.Show("创建报表功能尚未被许可");
@@ -9836,8 +9855,8 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
 
-            ListViewItem firsr_item = this.listView_libraryConfig.SelectedItems[0];
-            string strFirstLibraryCode = ListViewUtil.GetItemText(firsr_item, 0);
+            ListViewItem first_item = this.listView_libraryConfig.SelectedItems[0];
+            string strFirstLibraryCode = ListViewUtil.GetItemText(first_item, 0);
             strFirstLibraryCode = GetOriginLibraryCode(strFirstLibraryCode);
 
             XmlNode nodeFirstLibrary = this._cfg.GetLibraryNode(strFirstLibraryCode);
@@ -9848,7 +9867,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-            string strLastDate = this.MainForm.AppInfo.GetString(GetReportSection(),
+            string strLastDate = Program.MainForm.AppInfo.GetString(GetReportSection(),
 "daily_report_end_date",
 "20130101");
 
@@ -9867,7 +9886,7 @@ MessageBoxDefaultButton.Button1);
             }
 #endif
 
-            string strReportNameList = this.MainForm.AppInfo.GetString(GetReportSection(),
+            string strReportNameList = Program.MainForm.AppInfo.GetString(GetReportSection(),
     "createwhat_reportnames",
     "");
 
@@ -9876,12 +9895,12 @@ MessageBoxDefaultButton.Button1);
             // 询问那些报表需要创建
             CreateWhatsReportDialog dlg = new CreateWhatsReportDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.DateRange = this.MainForm.AppInfo.GetString(GetReportSection(),
+            dlg.DateRange = Program.MainForm.AppInfo.GetString(GetReportSection(),
     "createwhat_daterange",
     "");
             if (string.IsNullOrEmpty(dlg.DateRange) == true)
                 dlg.DateRange = strLastDate + "-" + strEndDate; // 从上次最后处理时间，到今天
-            dlg.Freguency = this.MainForm.AppInfo.GetString(GetReportSection(),
+            dlg.Freguency = Program.MainForm.AppInfo.GetString(GetReportSection(),
     "createwhat_frequency",
     "year,month,day");
             // dlg.ReportsNames = report_names;
@@ -9889,19 +9908,19 @@ MessageBoxDefaultButton.Button1);
 
             if (string.IsNullOrEmpty(strReportNameList) == false)
                 dlg.SelectedReportsNames = StringUtil.SplitList(strReportNameList, "|||");
-            this.MainForm.AppInfo.LinkFormState(dlg, "CreateWhatsReportDialog_state");
-            dlg.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "CreateWhatsReportDialog_ui_state", "");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "CreateWhatsReportDialog_state");
+            dlg.UiState = Program.MainForm.AppInfo.GetString(GetReportSection(), "CreateWhatsReportDialog_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString(GetReportSection(), "CreateWhatsReportDialog_ui_state", dlg.UiState);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.SetString(GetReportSection(), "CreateWhatsReportDialog_ui_state", dlg.UiState);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
-            this.MainForm.AppInfo.SetString(GetReportSection(),
+            Program.MainForm.AppInfo.SetString(GetReportSection(),
 "createwhat_reportnames",
 StringUtil.MakePathList(dlg.SelectedReportsNames, "|||"));
-            this.MainForm.AppInfo.SetString(GetReportSection(),
+            Program.MainForm.AppInfo.SetString(GetReportSection(),
 "createwhat_frequency",
 dlg.Freguency);
-            this.MainForm.AppInfo.SetString(GetReportSection(),
+            Program.MainForm.AppInfo.SetString(GetReportSection(),
 "createwhat_daterange",
 dlg.DateRange);
 
@@ -10221,7 +10240,7 @@ this.button_start_dailyReport.Enabled = true
             int nRet = 0;
 
 #if SN
-            nRet = this.MainForm.VerifySerialCode("report", false, out strError);
+            nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 MessageBox.Show("创建报表功能尚未被许可");
@@ -10265,7 +10284,7 @@ MessageBoxDefaultButton.Button1);
 #if NO
             // 获得上次处理的末尾日期
             // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-            string strLastDay = this.MainForm.AppInfo.GetString(GetReportSection(),
+            string strLastDay = Program.MainForm.AppInfo.GetString(GetReportSection(),
     "daily_report_end_date",
     "");
             if (string.IsNullOrEmpty(strLastDay) == true)
@@ -10311,7 +10330,7 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 string strFirstDate = DomUtil.GetAttr(dom.DocumentElement, "first_operlog_date");
-                string strLastDay = this.MainForm.AppInfo.GetString(GetReportSection(),
+                string strLastDay = Program.MainForm.AppInfo.GetString(GetReportSection(),
                     "daily_report_end_date",
                     "");
                 if (strFirstDate == strLastDay)
@@ -10503,7 +10522,7 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strRealEndDate) == false)
             {
                 // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-                this.MainForm.AppInfo.SetString(GetReportSection(),
+                Program.MainForm.AppInfo.SetString(GetReportSection(),
                     "daily_report_end_date",
                     GetNextDate(strRealEndDate));
                 SetDailyReportButtonState();
@@ -10586,7 +10605,7 @@ MessageBoxDefaultButton.Button1);
             int nRet = 0;
 
 #if SN
-            nRet = this.MainForm.VerifySerialCode("report", false, out strError);
+            nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 strError = "创建报表功能尚未被许可";
@@ -10757,7 +10776,7 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strRealEndDate) == false)
             {
                 // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-                this.MainForm.AppInfo.SetString(GetReportSection(),
+                Program.MainForm.AppInfo.SetString(GetReportSection(),
                     "daily_report_end_date",
                     GetNextDate(strRealEndDate));
                 SetDailyReportButtonState();
@@ -10778,7 +10797,7 @@ MessageBoxDefaultButton.Button1);
 
             ClearCache();
             this.Invoke((Action)(() =>
-            this.MainForm.StatusBarMessage = "耗费时间 " + ProgressEstimate.Format(_estimate.delta_passed)
+            Program.MainForm.StatusBarMessage = "耗费时间 " + ProgressEstimate.Format(_estimate.delta_passed)
 ));
             return 1;
         ERROR1:
@@ -10802,9 +10821,9 @@ MessageBoxDefaultButton.Button1);
         // 获得和当前服务器、用户相关的报表窗配置 section 名字字符串
         string GetReportSection()
         {
-            string strServerUrl = ReportForm.GetValidPathString(this.MainForm.LibraryServerUrl.Replace("/", "_"));
+            string strServerUrl = ReportForm.GetValidPathString(Program.MainForm.LibraryServerUrl.Replace("/", "_"));
 
-            return "r_" + strServerUrl + "_" + ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName());
+            return "r_" + strServerUrl + "_" + ReportForm.GetValidPathString(Program.MainForm.GetCurrentUserName());
         }
 
         // 获得即将执行的每日报表的时间范围
@@ -10820,7 +10839,7 @@ MessageBoxDefaultButton.Button1);
 
             // 获得上次处理的末尾日期
             // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-            string strLastDay = this.MainForm.AppInfo.GetString(GetReportSection(),
+            string strLastDay = Program.MainForm.AppInfo.GetString(GetReportSection(),
     "daily_report_end_date",
     "");
             if (string.IsNullOrEmpty(strLastDay) == true)
@@ -11187,7 +11206,7 @@ MessageBoxDefaultButton.Button1);
         // 特定分馆的报表输出目录
         string GetReportOutputDir(string strLibraryCode)
         {
-            // return Path.Combine(this.MainForm.UserDir, "reports\\" + GetValidPathString(GetDisplayLibraryCode(strLibraryCode)));
+            // return Path.Combine(Program.MainForm.UserDir, "reports\\" + GetValidPathString(GetDisplayLibraryCode(strLibraryCode)));
 
             // 2015/6/20 将创建好的报表文件存储在和每个 dp2library 服务器和用户名相关的目录中
             return Path.Combine(GetBaseDirectory(), "reports\\" + GetValidPathString(GetDisplayLibraryCode(strLibraryCode)));
@@ -11202,7 +11221,7 @@ MessageBoxDefaultButton.Button1);
             strTemplate = "";
             strError = "";
 
-            string strCssTemplateDir = Path.Combine(this.MainForm.UserDir, "report_def");   //  Path.Combine(this.MainForm.UserDir, "report_def");
+            string strCssTemplateDir = Path.Combine(Program.MainForm.UserDir, "report_def");   //  Path.Combine(Program.MainForm.UserDir, "report_def");
 
             string strHtmlTemplate = "";
 
@@ -11281,7 +11300,7 @@ MessageBoxDefaultButton.Button1);
 
             this._doneTable.Clear();
 
-            string strBreakPointFileName = Path.Combine(this.MainForm.UserDir, "dailyreport_breakpoint.txt");
+            string strBreakPointFileName = Path.Combine(Program.MainForm.UserDir, "dailyreport_breakpoint.txt");
             if (File.Exists(strBreakPointFileName) == false)
                 return 0;
 
@@ -11305,7 +11324,7 @@ MessageBoxDefaultButton.Button1);
         {
             strError = "";
 
-            string strBreakPointFileName = Path.Combine(this.MainForm.UserDir, "dailyreport_breakpoint.txt");
+            string strBreakPointFileName = Path.Combine(Program.MainForm.UserDir, "dailyreport_breakpoint.txt");
             if (bDelete == true)
             {
                 this._doneTable.Clear();
@@ -11373,9 +11392,9 @@ MessageBoxDefaultButton.Button1);
 #endif
 
             // 特定分馆的报表输出目录
-            // string strReportsDir = Path.Combine(this.MainForm.UserDir, "reports/" + (string.IsNullOrEmpty(strLibraryCode) == true ? "global" : strLibraryCode));
+            // string strReportsDir = Path.Combine(Program.MainForm.UserDir, "reports/" + (string.IsNullOrEmpty(strLibraryCode) == true ? "global" : strLibraryCode));
             string strReportsDir = GetReportOutputDir(strLibraryCode);
-            PathUtil.CreateDirIfNeed(strReportsDir);
+            PathUtil.TryCreateDir(strReportsDir);
 
             // 输出文件目录
             // string strOutputDir = Path.Combine(strReportsDir, time.Time);
@@ -12143,7 +12162,7 @@ MessageBoxDefaultButton.Button1);
                         }
                         catch (DirectoryNotFoundException)
                         {
-                            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(filename));
+                            PathUtil.TryCreateDir(Path.GetDirectoryName(filename));
                             dom.Save(filename);
                         }
                     }
@@ -12854,7 +12873,7 @@ MessageBoxDefaultButton.Button1);
             // string strError = "";
 
             // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-            string strLastDate = this.MainForm.AppInfo.GetString(GetReportSection(),
+            string strLastDate = Program.MainForm.AppInfo.GetString(GetReportSection(),
 "daily_report_end_date",
 "20130101");
 
@@ -12864,7 +12883,7 @@ MessageBoxDefaultButton.Button1);
     "设置报表创建起点日期",
     "报表创建起点日期: ",
     strLastDate,
-    this.MainForm.DefaultFont);
+    Program.MainForm.DefaultFont);
             if (strLastDate == null)
                 return;
 
@@ -12877,7 +12896,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-            this.MainForm.AppInfo.SetString(GetReportSection(),
+            Program.MainForm.AppInfo.SetString(GetReportSection(),
     "daily_report_end_date",
     strLastDate);
             SetDailyReportButtonState();
@@ -12924,7 +12943,7 @@ MessageBoxDefaultButton.Button1);
             int nRet = 0;
 
 #if SN
-            nRet = this.MainForm.VerifySerialCode("report", false, out strError);
+            nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 strError = "上传报表功能尚未被许可";
@@ -13088,15 +13107,15 @@ MessageBoxDefaultButton.Button1);
 
             this.Invoke((Action)(() =>
             {
-                this.MainForm.StatusBarMessage = "完成上传 " + lUploadedFiles.ToString() + " 个文件, 总尺寸" + lUnzipFileLength.ToString() + "，压缩后尺寸 " + lZipFileLength.ToString();
+                Program.MainForm.StatusBarMessage = "完成上传 " + lUploadedFiles.ToString() + " 个文件, 总尺寸" + lUnzipFileLength.ToString() + "，压缩后尺寸 " + lZipFileLength.ToString();
                 if (this.DeleteReportFileAfterUpload == true && lUploadedFiles > 0)
-                    this.MainForm.StatusBarMessage += "。文件上传后，本地文件已经被删除";
+                    Program.MainForm.StatusBarMessage += "。文件上传后，本地文件已经被删除";
             }));
             return;
         NOT_FOUND:
             this.Invoke((Action)(() =>
             {
-                this.MainForm.StatusBarMessage = strError;
+                Program.MainForm.StatusBarMessage = strError;
             }));
             return;
         ERROR1:
@@ -13121,7 +13140,7 @@ MessageBoxDefaultButton.Button1);
 
             int nRet = 0;
 #if SN
-            nRet = this.MainForm.VerifySerialCode("report", false, out strError);
+            nRet = Program.MainForm.VerifySerialCode("report", false, out strError);
             if (nRet == -1)
             {
                 strError = "上传报表功能尚未被许可";
@@ -13132,12 +13151,12 @@ MessageBoxDefaultButton.Button1);
             FtpUploadDialog dlg = new FtpUploadDialog();
 
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.MainForm = this.MainForm;
-            this.MainForm.AppInfo.LinkFormState(dlg, "FtpUploadDialog_state");
-            dlg.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "FtpUploadDialog_ui_state", "");
+            // dlg.MainForm = Program.MainForm;
+            Program.MainForm.AppInfo.LinkFormState(dlg, "FtpUploadDialog_state");
+            dlg.UiState = Program.MainForm.AppInfo.GetString(GetReportSection(), "FtpUploadDialog_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString(GetReportSection(), "FtpUploadDialog_ui_state", dlg.UiState);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.SetString(GetReportSection(), "FtpUploadDialog_ui_state", dlg.UiState);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -13239,9 +13258,9 @@ MessageBoxDefaultButton.Button1);
                 // SetUploadButtonState();
                 BeginUpdateUploadButtonText();
             }
-            this.MainForm.StatusBarMessage = "完成上传 " + nUploadCount.ToString() + " 个文件";
+            Program.MainForm.StatusBarMessage = "完成上传 " + nUploadCount.ToString() + " 个文件";
             if (this.DeleteReportFileAfterUpload == true && nUploadCount > 0)
-                this.MainForm.StatusBarMessage += "。文件上传后，本地文件已经被删除";
+                Program.MainForm.StatusBarMessage += "。文件上传后，本地文件已经被删除";
             return;
         ERROR1:
             if (nUploadCount > 0)
@@ -13448,6 +13467,11 @@ MessageBoxDefaultButton.Button1);
             bool bRangeSetted = false;
             using (ZipFile zip = new ZipFile(encoding))
             {
+                // http://stackoverflow.com/questions/15337186/dotnetzip-badreadexception-on-extract
+                // https://dotnetzip.codeplex.com/workitem/14087
+                // uncommenting the following line can be used as a work-around
+                zip.ParallelDeflateThreshold = -1;
+
                 foreach (string filename in filenames)
                 {
                     if (Program.MainForm.InvokeRequired == false)
@@ -13549,9 +13573,9 @@ MessageBoxDefaultButton.Button1);
         private void listView_query_results_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (this.listView_query_results.SelectedIndices.Count == 0)
-                this.MainForm.StatusBarMessage = "";
+                Program.MainForm.StatusBarMessage = "";
             else
-                this.MainForm.StatusBarMessage = this.listView_query_results.SelectedIndices[0].ToString();
+                Program.MainForm.StatusBarMessage = this.listView_query_results.SelectedIndices[0].ToString();
         }
 
         /// <summary>
@@ -13615,12 +13639,12 @@ MessageBoxDefaultButton.Button1);
 
             ConvertReportFormatDialog dlg = new ConvertReportFormatDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.MainForm = this.MainForm;
-            this.MainForm.AppInfo.LinkFormState(dlg, "ConvertReportFormatDialog_state");
-            dlg.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "ConvertReportFormatDialog_ui_state", "");
+            // dlg.MainForm = Program.MainForm;
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ConvertReportFormatDialog_state");
+            dlg.UiState = Program.MainForm.AppInfo.GetString(GetReportSection(), "ConvertReportFormatDialog_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString(GetReportSection(), "ConvertReportFormatDialog_ui_state", dlg.UiState);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.SetString(GetReportSection(), "ConvertReportFormatDialog_ui_state", dlg.UiState);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -13755,7 +13779,7 @@ MessageBoxDefaultButton.Button1);
         private void tabPage_option_Enter(object sender, EventArgs e)
         {
             // Debug.WriteLine("Enter page");
-            this.checkBox_option_deleteReportFileAfterUpload.Checked = this.MainForm.AppInfo.GetBoolean(GetReportSection(),
+            this.checkBox_option_deleteReportFileAfterUpload.Checked = Program.MainForm.AppInfo.GetBoolean(GetReportSection(),
                 "deleteReportFileAfterUpload",
                 true);
         }
@@ -13763,7 +13787,7 @@ MessageBoxDefaultButton.Button1);
         private void tabPage_option_Leave(object sender, EventArgs e)
         {
             // Debug.WriteLine("Leave page");
-            this.MainForm.AppInfo.SetBoolean(GetReportSection(),
+            Program.MainForm.AppInfo.SetBoolean(GetReportSection(),
                 "deleteReportFileAfterUpload",
                 this.checkBox_option_deleteReportFileAfterUpload.Checked);
         }
@@ -13775,7 +13799,7 @@ MessageBoxDefaultButton.Button1);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(GetReportSection(),
+                return Program.MainForm.AppInfo.GetBoolean(GetReportSection(),
     "deleteReportFileAfterUpload",
     true);
             }
@@ -13896,7 +13920,7 @@ MessageBoxDefaultButton.Button1);
                 this.EnableControls(true);
             }
 
-            this.MainForm.StatusBarMessage = "导出成功。";
+            Program.MainForm.StatusBarMessage = "导出成功。";
             return;
         ERROR1:
             this.Invoke((Action)(() =>

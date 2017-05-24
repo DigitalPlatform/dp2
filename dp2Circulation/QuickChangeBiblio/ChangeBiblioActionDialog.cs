@@ -20,7 +20,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 获得值列表
@@ -38,32 +38,32 @@ namespace dp2Circulation
             // 装载值
 
             // state
-            this.comboBox_state.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_state.Text = Program.MainForm.AppInfo.GetString(
                 "change_biblio_param",
                 "state",
                 "<不改变>");
 
-            this.checkedComboBox_stateAdd.Text = this.MainForm.AppInfo.GetString(
+            this.checkedComboBox_stateAdd.Text = Program.MainForm.AppInfo.GetString(
                 "change_biblio_param",
                 "state_add",
                 "");
-            this.checkedComboBox_stateRemove.Text = this.MainForm.AppInfo.GetString(
+            this.checkedComboBox_stateRemove.Text = Program.MainForm.AppInfo.GetString(
     "change_biblio_param",
     "state_remove",
     "");
 
             // opertime
-            this.comboBox_opertime.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_opertime.Text = Program.MainForm.AppInfo.GetString(
     "change_biblio_param",
     "opertime",
     "<不改变>");
-            this.dateTimePicker1.Text = this.MainForm.AppInfo.GetString(
+            this.dateTimePicker1.Text = Program.MainForm.AppInfo.GetString(
     "change_biblio_param",
     "opertime_value",
     "");
 
             // batchno
-            this.comboBox_batchNo.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_batchNo.Text = Program.MainForm.AppInfo.GetString(
 "change_biblio_param",
 "batchNo",
 "<不改变>");
@@ -102,31 +102,31 @@ namespace dp2Circulation
             // 保存值
 
             // state
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "change_biblio_param",
                 "state",
                 this.comboBox_state.Text);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "change_biblio_param",
     "state_add",
     this.checkedComboBox_stateAdd.Text);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
 "change_biblio_param",
 "state_remove",
 this.checkedComboBox_stateRemove.Text);
 
             // opertime
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "change_biblio_param",
     "opertime",
     this.comboBox_opertime.Text);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
 "change_biblio_param",
 "opertime_value",
 this.dateTimePicker1.Text);
 
             // batchno
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "change_biblio_param",
     "batchNo",
     this.comboBox_batchNo.Text);

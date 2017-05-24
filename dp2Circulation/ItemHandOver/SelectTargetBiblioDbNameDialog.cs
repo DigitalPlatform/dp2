@@ -16,7 +16,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         public string SourceBiblioDbName = "";
 
@@ -87,7 +87,7 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(this.SourceBiblioDbName) == false)
             {
-                strSourceSyntax = this.MainForm.GetBiblioSyntax(this.SourceBiblioDbName);
+                strSourceSyntax = Program.MainForm.GetBiblioSyntax(this.SourceBiblioDbName);
                 if (strSourceSyntax == null)
                 {
                     strError = "源书目库名 '" + this.SourceBiblioDbName + "' 居然不存在";
@@ -97,18 +97,18 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strSourceSyntax) == true)
                     strSourceSyntax = "unimarc";
 
-                string strSourceIssueDbName = this.MainForm.GetIssueDbName(this.SourceBiblioDbName);
+                string strSourceIssueDbName = Program.MainForm.GetIssueDbName(this.SourceBiblioDbName);
                 if (String.IsNullOrEmpty(strSourceIssueDbName) == false)
                     bSourceIsIssueDb = true;
                 else
                     bSourceIsIssueDb = false;
             }
 
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     // 需要具备实体库
                     if (String.IsNullOrEmpty(prop.ItemDbName) == true)

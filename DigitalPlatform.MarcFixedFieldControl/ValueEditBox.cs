@@ -5,13 +5,13 @@ using DigitalPlatform;
 
 namespace DigitalPlatform.Marc
 {
-	public class ValueEditBox : TextBox
-	{
-		public MarcFixedFieldControl fixedFieldCtrl = null;
-		public int nIndex = -1;
-		
-		protected override void OnGotFocus(EventArgs e)
-		{
+    public class ValueEditBox : TextBox
+    {
+        public MarcFixedFieldControl fixedFieldCtrl = null;
+        public int nIndex = -1;
+
+        protected override void OnGotFocus(EventArgs e)
+        {
             base.OnGotFocus(e);    // ??
 
             /* 要变成异步的调用
@@ -24,14 +24,12 @@ namespace DigitalPlatform.Marc
                 this.SelectionStart,
                 this.MaxLength,
                 this.Text);
-
-		}
+        }
 
         // 接管Ctrl+各种键
         protected override bool ProcessDialogKey(
             Keys keyData)
         {
-
             // Ctrl + A 自动录入功能
             if ((keyData & Keys.Control) == Keys.Control
                 && (keyData & (~Keys.Control)) == Keys.A)
@@ -90,7 +88,8 @@ namespace DigitalPlatform.Marc
                 return true;
             }
 
-            return false;
+            // return false;
+            return base.ProcessDialogKey(keyData);  // 2017/3/12
         }
 
         // 按下键
@@ -246,8 +245,7 @@ namespace DigitalPlatform.Marc
             // 刷新值列表
             fixedFieldCtrl.ShowValueList(this.SelectionStart,
                 this.MaxLength,
-                this.Text); 
-
+                this.Text);
         }
 
         /// <summary>
@@ -283,32 +281,32 @@ namespace DigitalPlatform.Marc
                                 break;
                             default:
                                 {
-                                        if ((Control.ModifierKeys == Keys.Control)
-                                            // || Control.ModifierKeys == Keys.Shift    // 2009/9/18 changed
-                                            || Control.ModifierKeys == Keys.Alt)
-                                        {
-                                            break;
-                                        }
-                                        int nOldSelectionStart = this.SelectionStart;
-                                        if (nOldSelectionStart < this.Text.Length)
-                                        {
-                                            // 避免多余的TextChanged动作
-                                            this.fixedFieldCtrl.m_nDisableTextChanged++;
-                                            this.Text = this.Text.Remove(this.SelectionStart, 1);
-                                            this.fixedFieldCtrl.m_nDisableTextChanged--;
-                                            this.SelectionStart = nOldSelectionStart;
-                                        }
+                                    if ((Control.ModifierKeys == Keys.Control)
+                                        // || Control.ModifierKeys == Keys.Shift    // 2009/9/18 changed
+                                        || Control.ModifierKeys == Keys.Alt)
+                                    {
+                                        break;
+                                    }
+                                    int nOldSelectionStart = this.SelectionStart;
+                                    if (nOldSelectionStart < this.Text.Length)
+                                    {
+                                        // 避免多余的TextChanged动作
+                                        this.fixedFieldCtrl.m_nDisableTextChanged++;
+                                        this.Text = this.Text.Remove(this.SelectionStart, 1);
+                                        this.fixedFieldCtrl.m_nDisableTextChanged--;
+                                        this.SelectionStart = nOldSelectionStart;
+                                    }
 
-                                        base.DefWndProc(ref m);
+                                    base.DefWndProc(ref m);
 
-                                        if (this.SelectionStart >= this.MaxLength
-                                            && this.nIndex < fixedFieldCtrl.LineCount - 1)
-                                        {
-                                                fixedFieldCtrl.SwitchFocus(this.nIndex + 1,
-                                                    CaretPosition.FirstChar);
-                                        }
+                                    if (this.SelectionStart >= this.MaxLength
+                                        && this.nIndex < fixedFieldCtrl.LineCount - 1)
+                                    {
+                                        fixedFieldCtrl.SwitchFocus(this.nIndex + 1,
+                                            CaretPosition.FirstChar);
+                                    }
 
-                                        return;
+                                    return;
                                 }
                                 break;
                         }
@@ -336,9 +334,9 @@ namespace DigitalPlatform.Marc
                 // 刷新值列表
                 fixedFieldCtrl.ShowValueList(this.SelectionStart,
                     this.MaxLength,
-                    this.Text); 
+                    this.Text);
 
             }
         }
-	}
+    }
 }

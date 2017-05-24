@@ -32,7 +32,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         bool m_bServerCfgChanged = false; // 服务器配置信息修改过
 
@@ -59,10 +59,10 @@ namespace dp2Circulation
 
         private void CfgDlg_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null
+            if (Program.MainForm != null
                 && !(Control.ModifierKeys == Keys.Control))
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
             // *** 服务器
@@ -77,13 +77,13 @@ namespace dp2Circulation
             this.textBox_server_authorNumber_gcatUrl.Text =
                 ap.GetString("config",
                 "gcat_server_url",
-                "http://dp2003.com/gcatserver/");  // "http://dp2003.com/dp2libraryws/gcat.asmx"
+                "http://dp2003.com/dp2library/");  // "http://dp2003.com/gcatserver/" // "http://dp2003.com/dp2libraryws/gcat.asmx"
 
             // pinyin serverurl
             this.textBox_server_pinyin_gcatUrl.Text =
                 ap.GetString("config",
                 "pinyin_server_url",
-                "http://dp2003.com/gcatserver/");
+                "http://dp2003.com/dp2library/");   // "http://dp2003.com/gcatserver/"
 
             // 绿色安装包
             this.textBox_server_greenPackage.Text =
@@ -124,7 +124,7 @@ namespace dp2Circulation
         "default_account",
         "password",
         "");
-                strPassword = this.MainForm.DecryptPasssword(strPassword);
+                strPassword = Program.MainForm.DecryptPasssword(strPassword);
                 this.textBox_defaultAccount_password.Text = strPassword;
             }
 
@@ -227,7 +227,7 @@ namespace dp2Circulation
                 "charging_form",
                 "no_borrow_history",
                 true);
-            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.20") < 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.20") < 0)
                 this.checkBox_charging_noBorrowHistory.Enabled = false;
 
             // 启用 ISBN 借书还书功能
@@ -263,7 +263,7 @@ ap.GetString("quickcharging_form",
                 "quickcharging_form",
                 "no_borrow_history",
                 true);
-            if (StringUtil.CompareVersion(this.MainForm.ServerVersion, "2.20") < 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.20") < 0)
                 this.checkBox_quickCharging_noBorrowHistory.Enabled = false;
 
             // 朗读读者姓名
@@ -344,7 +344,7 @@ true);
 false);
 
             // 自动限定paste进入的图像宽度
-            this.textBox_itemManagement_maxPicWidth.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_itemManagement_maxPicWidth.Text = Program.MainForm.AppInfo.GetString(
     "entityform",
     "paste_pic_maxwidth",
     "-1");
@@ -352,7 +352,7 @@ false);
             // ui 外观
 
             // 停靠
-            this.comboBox_ui_fixedPanelDock.Text = this.MainForm.panel_fixed.Dock.ToString();
+            this.comboBox_ui_fixedPanelDock.Text = Program.MainForm.panel_fixed.Dock.ToString();
 
             this.checkBox_ui_hideFixedPanel.Checked = ap.GetBoolean(
                 "MainForm",
@@ -546,7 +546,7 @@ false);
                 string strPassword = ap.GetString("fingerprint",
                 "password",
                 "");
-                strPassword = this.MainForm.DecryptPasssword(strPassword);
+                strPassword = Program.MainForm.DecryptPasssword(strPassword);
                 this.textBox_fingerprint_password.Text = strPassword;
             }
 
@@ -661,7 +661,7 @@ false);
         "message",
         "password",
         "");
-                strPassword = this.MainForm.DecryptPasssword(strPassword);
+                strPassword = Program.MainForm.DecryptPasssword(strPassword);
                 this.textBox_message_password.Text = strPassword;
             }
 
@@ -741,7 +741,7 @@ false);
             if (this.checkBox_defaulAccount_savePasswordShort.Checked == true
                 || this.checkBox_defaulAccount_savePasswordLong.Checked == true)
             {
-                string strPassword = this.MainForm.EncryptPassword(this.textBox_defaultAccount_password.Text);
+                string strPassword = Program.MainForm.EncryptPassword(this.textBox_defaultAccount_password.Text);
                 ap.SetString(
                     "default_account",
                     "password",
@@ -1148,7 +1148,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 this.textBox_fingerprint_userName.Text);
             // 指纹代理帐户 密码
             {
-                string strPassword = this.MainForm.EncryptPassword(this.textBox_fingerprint_password.Text);
+                string strPassword = Program.MainForm.EncryptPassword(this.textBox_fingerprint_password.Text);
                 ap.SetString(
                     "fingerprint",
                 "password",
@@ -1248,7 +1248,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
     this.textBox_message_userName.Text);
 
             {
-                string strPassword = this.MainForm.EncryptPassword(this.textBox_message_password.Text);
+                string strPassword = Program.MainForm.EncryptPassword(this.textBox_message_password.Text);
                 ap.SetString(
                     "message",
                     "password",
@@ -1256,13 +1256,13 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             }
 
             if (m_bServerCfgChanged == true
-                && this.MainForm != null)
+                && Program.MainForm != null)
             {
                 // 重新获得各种库名、列表
-                this.MainForm.StartPrepareNames(false, false);
+                Program.MainForm.StartPrepareNames(false, false);
             }
 
-            this.MainForm.FixedPanelAnimationEnabled = this.checkBox_ui_fixedPanelAnimationEnabled.Checked;
+            Program.MainForm.FixedPanelAnimationEnabled = this.checkBox_ui_fixedPanelAnimationEnabled.Checked;
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -1277,7 +1277,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
 
         private void button_clearValueTableCache_Click(object sender, EventArgs e)
         {
-            this.MainForm.ClearValueTableCache();
+            Program.MainForm.ClearValueTableCache();
             MessageBox.Show(this, "OK");
         }
 
@@ -1286,7 +1286,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
         {
             this.Enabled = false;
 
-            this.MainForm.GetDbFromInfos();
+            Program.MainForm.GetDbFromInfos();
 
             MessageBox.Show(this, "OK");
 
@@ -1300,39 +1300,39 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
 
             if (strDock == "Top")
             {
-                this.MainForm.panel_fixed.Dock = DockStyle.Top;
-                this.MainForm.panel_fixed.Size = new Size(this.MainForm.panel_fixed.Width,
-                    this.MainForm.Size.Height / 3);
-                this.MainForm.splitter_fixed.Dock = DockStyle.Top;
+                Program.MainForm.panel_fixed.Dock = DockStyle.Top;
+                Program.MainForm.panel_fixed.Size = new Size(Program.MainForm.panel_fixed.Width,
+                    Program.MainForm.Size.Height / 3);
+                Program.MainForm.splitter_fixed.Dock = DockStyle.Top;
             }
             else if (strDock == "Bottom")
             {
-                this.MainForm.panel_fixed.Dock = DockStyle.Bottom;
-                this.MainForm.panel_fixed.Size = new Size(this.MainForm.panel_fixed.Width,
-                    this.MainForm.Size.Height / 3);
-                this.MainForm.splitter_fixed.Dock = DockStyle.Bottom;
+                Program.MainForm.panel_fixed.Dock = DockStyle.Bottom;
+                Program.MainForm.panel_fixed.Size = new Size(Program.MainForm.panel_fixed.Width,
+                    Program.MainForm.Size.Height / 3);
+                Program.MainForm.splitter_fixed.Dock = DockStyle.Bottom;
             }
             else if (strDock == "Left")
             {
-                this.MainForm.panel_fixed.Dock = DockStyle.Left;
-                this.MainForm.panel_fixed.Size = new Size(this.MainForm.Size.Width / 3,
-                    this.MainForm.panel_fixed.Size.Height);
-                this.MainForm.splitter_fixed.Dock = DockStyle.Left;
+                Program.MainForm.panel_fixed.Dock = DockStyle.Left;
+                Program.MainForm.panel_fixed.Size = new Size(Program.MainForm.Size.Width / 3,
+                    Program.MainForm.panel_fixed.Size.Height);
+                Program.MainForm.splitter_fixed.Dock = DockStyle.Left;
             }
             else if (strDock == "Right")
             {
-                this.MainForm.panel_fixed.Dock = DockStyle.Right;
-                this.MainForm.panel_fixed.Size = new Size(this.MainForm.Size.Width / 3,
-                    this.MainForm.panel_fixed.Size.Height);
-                this.MainForm.splitter_fixed.Dock = DockStyle.Right;
+                Program.MainForm.panel_fixed.Dock = DockStyle.Right;
+                Program.MainForm.panel_fixed.Size = new Size(Program.MainForm.Size.Width / 3,
+                    Program.MainForm.panel_fixed.Size.Height);
+                Program.MainForm.splitter_fixed.Dock = DockStyle.Right;
             }
             else
             {
                 // 缺省为右
-                this.MainForm.panel_fixed.Dock = DockStyle.Right;
-                this.MainForm.panel_fixed.Size = new Size(this.MainForm.Size.Width / 3,
-                    this.MainForm.panel_fixed.Size.Height);
-                this.MainForm.splitter_fixed.Dock = DockStyle.Right;
+                Program.MainForm.panel_fixed.Dock = DockStyle.Right;
+                Program.MainForm.panel_fixed.Size = new Size(Program.MainForm.Size.Width / 3,
+                    Program.MainForm.panel_fixed.Size.Height);
+                Program.MainForm.splitter_fixed.Dock = DockStyle.Right;
             }
         }
 
@@ -1341,18 +1341,18 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             if (this.checkBox_ui_hideFixedPanel.Checked == true)
             {
                 /*
-                this.MainForm.panel_fixed.Visible = false;
-                this.MainForm.splitter_fixed.Visible = false;
+                Program.MainForm.panel_fixed.Visible = false;
+                Program.MainForm.splitter_fixed.Visible = false;
                  * */
-                this.MainForm.PanelFixedVisible = false;
+                Program.MainForm.PanelFixedVisible = false;
             }
             else
             {
                 /*
-                this.MainForm.panel_fixed.Visible = true;
-                this.MainForm.splitter_fixed.Visible = true;
+                Program.MainForm.panel_fixed.Visible = true;
+                Program.MainForm.splitter_fixed.Visible = true;
                  * */
-                this.MainForm.PanelFixedVisible = true;
+                Program.MainForm.PanelFixedVisible = true;
             }
         }
 
@@ -1368,7 +1368,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
         {
             this.Enabled = false;
 
-            this.MainForm.InitialBiblioDbProperties();
+            Program.MainForm.InitialBiblioDbProperties();
             MessageBox.Show(this, "OK");
 
             this.Enabled = true;
@@ -1379,8 +1379,8 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
         {
             this.Enabled = false;
 
-            // this.MainForm.GetReaderDbNames();
-            this.MainForm.InitialReaderDbProperties();
+            // Program.MainForm.GetReaderDbNames();
+            Program.MainForm.InitialReaderDbProperties();
             MessageBox.Show(this, "OK");
 
             this.Enabled = true;
@@ -1391,7 +1391,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
         {
             this.Enabled = false;
 
-            this.MainForm.GetUtilDbProperties();
+            Program.MainForm.GetUtilDbProperties();
             MessageBox.Show(this, "OK");
 
             this.Enabled = true;
@@ -1400,33 +1400,33 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
         private void button_downloadPinyinXmlFile_Click(object sender, EventArgs e)
         {
             string strError = "";
-            this.MainForm.DownloadDataFile("pinyin.xml", out strError);
+            Program.MainForm.DownloadDataFile("pinyin.xml", out strError);
             MessageBox.Show(this, strError);
         }
 
         private void buttondownloadIsbnXmlFile_Click(object sender, EventArgs e)
         {
             string strError = "";
-            this.MainForm.DownloadDataFile("rangemessage.xml", out strError);   // 
+            Program.MainForm.DownloadDataFile("rangemessage.xml", out strError);   // 
             MessageBox.Show(this, strError);
         }
 
         private void MenuItem_print_editCharingPrintCs_Click(object sender, EventArgs e)
         {
-            string strFileName = Path.Combine(this.MainForm.DataDir, "charging_print.cs");
+            string strFileName = Path.Combine(Program.MainForm.DataDir, "charging_print.cs");
             System.Diagnostics.Process.Start("notepad.exe", strFileName);
         }
 
         private void MenuItem_print_editCharingPrintCsRef_Click(object sender, EventArgs e)
         {
-            string strFileName = Path.Combine(this.MainForm.DataDir, "charging_print.cs.ref");
+            string strFileName = Path.Combine(Program.MainForm.DataDir, "charging_print.cs.ref");
             System.Diagnostics.Process.Start("notepad.exe", strFileName);
         }
 
         // 打印方案管理
         private void button_print_projectManage_Click(object sender, EventArgs e)
         {
-            this.MainForm.OperHistory.OnProjectManager(this);
+            Program.MainForm.OperHistory.OnProjectManager(this);
         }
 
         private void textBox_print_projectName_TextChanged(object sender, EventArgs e)
@@ -1440,13 +1440,13 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             GetProjectNameDlg dlg = new GetProjectNameDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.scriptManager = this.MainForm.OperHistory.ScriptManager;
+            dlg.scriptManager = Program.MainForm.OperHistory.ScriptManager;
             dlg.ProjectName = this.textBox_print_projectName.Text;
             dlg.NoneProject = false;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -1512,14 +1512,14 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
         {
             string strError = "";
 
-            string strCacheDir = this.MainForm.OperLogCacheDir; //  PathUtil.MergePath(this.MainForm.DataDir, "operlogcache");
+            string strCacheDir = Program.MainForm.OperLogCacheDir; //  PathUtil.MergePath(Program.MainForm.DataDir, "operlogcache");
             int nRet = Global.DeleteDataDir(
                 this,
                 strCacheDir,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-            PathUtil.CreateDirIfNeed(strCacheDir);  // 重新创建目录
+            PathUtil.TryCreateDir(strCacheDir);  // 重新创建目录
 
             MessageBox.Show(this, "日志文件本地缓存目录 " + strCacheDir + " 已经被清空");
             return;
@@ -1545,7 +1545,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
 
         private void button_fingerprint_clearLocalCacheFiles_Click(object sender, EventArgs e)
         {
-            string strDir = this.MainForm.FingerPrintCacheDir;  // PathUtil.MergePath(this.MainForm.DataDir, "fingerprintcache");
+            string strDir = Program.MainForm.FingerPrintCacheDir;  // PathUtil.MergePath(Program.MainForm.DataDir, "fingerprintcache");
             DialogResult result = MessageBox.Show(this,
 "确实要删除文件夹 " + strDir + " (包括其中的的全部文件) ? ",
 "CfgDlg",

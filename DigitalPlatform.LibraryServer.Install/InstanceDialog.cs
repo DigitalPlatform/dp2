@@ -1288,7 +1288,7 @@ namespace DigitalPlatform.LibraryServer
                 string strTemplatesSourceDir = PathUtil.MergePath(this.SourceDir, "temp\\templates");
                 string strTemplatesTargetDir = PathUtil.MergePath(strDataDir, "templates");
 
-                PathUtil.CreateDirIfNeed(strTemplatesTargetDir);
+                PathUtil.TryCreateDir(strTemplatesTargetDir);
 
                 nRet = PathUtil.CopyDirectory(strTemplatesSourceDir,
                     strTemplatesTargetDir,
@@ -1331,7 +1331,7 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
-            PathUtil.CreateDirIfNeed(strDataDir);
+            PathUtil.TryCreateDir(strDataDir);
 
             if (string.IsNullOrEmpty(this.SourceDir) == false)
             {

@@ -41,7 +41,7 @@ namespace DigitalPlatform.rms.Client
 				m_strTempDir = value;
 				// 创建目录
 				if (m_strTempDir != "")
-					PathUtil.CreateDirIfNeed(m_strTempDir);
+					PathUtil.TryCreateDir(m_strTempDir);
 			}
 		}
 

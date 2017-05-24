@@ -158,14 +158,14 @@ FormWindowState.Normal);
                 WriteLibraryEventLog("普通方法得到, this.UserDir=" + this.UserDir, EventLogEntryType.Information);
 #endif
             }
-            PathUtil.CreateDirIfNeed(this.UserDir);
+            PathUtil.TryCreateDir(this.UserDir);
 
             this.TempDir = Path.Combine(this.UserDir, "temp");
-            PathUtil.CreateDirIfNeed(this.TempDir);
+            PathUtil.TryCreateDir(this.TempDir);
 
             // 2015/8/8
             this.UserLogDir = Path.Combine(this.UserDir, "log");
-            PathUtil.CreateDirIfNeed(this.UserLogDir);
+            PathUtil.TryCreateDir(this.UserLogDir);
 
             _versionManager.Load(Path.Combine(this.UserDir, "file_version.xml"));
 
@@ -700,7 +700,7 @@ FormWindowState.Normal);
                 try
                 {
                     // 确保目标目录已经创建
-                    PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strTargetPath));
+                    PathUtil.TryCreateDir(Path.GetDirectoryName(strTargetPath));
 
                     File.Copy(strTempPath, strTargetPath, true);
                 }
@@ -822,6 +822,7 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     AppendSectionTitle("配置实例结束");
+                    this.Refresh_dp2library_MenuItems();
                 }
 
                 CreateDefaultDatabases(new_instance_names);
@@ -2094,7 +2095,7 @@ MessageBoxDefaultButton.Button1);
 
                 // *** dp2library 各个 instance
                 string strLibraryTempDir = Path.Combine(strTempDir, "dp2library");
-                PathUtil.CreateDirIfNeed(strLibraryTempDir);
+                PathUtil.TryCreateDir(strLibraryTempDir);
 
                 for (int i = 0; ; i++)
                 {
@@ -2116,7 +2117,7 @@ MessageBoxDefaultButton.Button1);
                     if (string.IsNullOrEmpty(strInstanceName) == false)
                     {
                         strInstanceDir = Path.Combine(strLibraryTempDir, "instance_" + strInstanceName);
-                        PathUtil.CreateDirIfNeed(strInstanceDir);
+                        PathUtil.TryCreateDir(strInstanceDir);
                     }
 
                     // 复制 library.xml
@@ -2156,7 +2157,7 @@ MessageBoxDefaultButton.Button1);
 
                 // dp2kernel 各个 instance
                 string strKernelTempDir = Path.Combine(strTempDir, "dp2kernel");
-                PathUtil.CreateDirIfNeed(strKernelTempDir);
+                PathUtil.TryCreateDir(strKernelTempDir);
 
                 for (int i = 0; ; i++)
                 {
@@ -2178,7 +2179,7 @@ MessageBoxDefaultButton.Button1);
                     if (string.IsNullOrEmpty(strInstanceName) == false)
                     {
                         strInstanceDir = Path.Combine(strKernelTempDir, "instance_" + strInstanceName);
-                        PathUtil.CreateDirIfNeed(strInstanceDir);
+                        PathUtil.TryCreateDir(strInstanceDir);
                     }
 
                     // 复制 databases.xml
@@ -2218,7 +2219,7 @@ MessageBoxDefaultButton.Button1);
 
                 // dp2opac 各个 instance
                 string strOpacTempDir = Path.Combine(strTempDir, "dp2opac");
-                PathUtil.CreateDirIfNeed(strOpacTempDir);
+                PathUtil.TryCreateDir(strOpacTempDir);
 
                 List<OpacAppInfo> infos = null;
                 // 查找 dp2OPAC 路径
@@ -2262,7 +2263,7 @@ MessageBoxDefaultButton.Button1);
                             && infos1.Count != 1)
                         {
                             strInstanceDir = Path.Combine(strOpacTempDir, "instance_" + strInstanceName);
-                            PathUtil.CreateDirIfNeed(strInstanceDir);
+                            PathUtil.TryCreateDir(strInstanceDir);
                         }
 
                         // 复制 opac.xml
@@ -2324,6 +2325,11 @@ MessageBoxDefaultButton.Button1);
                     bool bRangeSetted = false;
                     using (ZipFile zip = new ZipFile(Encoding.UTF8))
                     {
+                        // http://stackoverflow.com/questions/15337186/dotnetzip-badreadexception-on-extract
+                        // https://dotnetzip.codeplex.com/workitem/14087
+                        // uncommenting the following line can be used as a work-around
+                        zip.ParallelDeflateThreshold = -1;
+
                         foreach (string filename in filenames)
                         {
                             Application.DoEvents();
@@ -2877,10 +2883,8 @@ MessageBoxDefaultButton.Button1);
                     AppendString("dp2kernel 服务已经停止\r\n");
                 }
 
-
                 try
                 {
-
                     DigitalPlatform.rms.InstanceDialog dlg = new DigitalPlatform.rms.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
 
@@ -2900,7 +2904,6 @@ MessageBoxDefaultButton.Button1);
                         // 兑现修改
 
                     }
-
                 }
                 finally
                 {
@@ -2923,6 +2926,7 @@ MessageBoxDefaultButton.Button1);
                     }
 
                     AppendSectionTitle("配置实例结束");
+                    Refresh_dp2kernel_MenuItems();
                 }
 
             }
@@ -2953,7 +2957,6 @@ MessageBoxDefaultButton.Button1);
 
             this.MenuItem_dp2kernel_openDataDir.DropDownItems.Clear();
             AddMenuItem(MenuItem_dp2kernel_openDataDir, "dp2Kernel");
-
         }
 
         // 刷新菜单状态
@@ -3038,7 +3041,7 @@ MessageBoxDefaultButton.Button1);
                 // program files (x86)/digitalplatform/dp2kernel
                 string strProgramDir = GetProductDirectory("dp2kernel");
 
-                PathUtil.CreateDirIfNeed(strProgramDir);
+                PathUtil.TryCreateDir(strProgramDir);
 
                 string strZipFileName = Path.Combine(this.DataDir, "kernel_app.zip");
 
@@ -3342,7 +3345,7 @@ out string strError)
                 // program files (x86)/digitalplatform/dp2library
                 string strProgramDir = GetProductDirectory("dp2library");
 
-                PathUtil.CreateDirIfNeed(strProgramDir);
+                PathUtil.TryCreateDir(strProgramDir);
 
                 string strZipFileName = Path.Combine(this.DataDir, "library_app.zip");
 
@@ -3364,7 +3367,7 @@ out string strError)
 
                 // 还需要把 library_data.zip 的内容都展开到程序目录的 temp 子目录中，以兼容以前的 Installer 功能
                 string strTempDir = Path.Combine(strProgramDir, "temp");
-                PathUtil.CreateDirIfNeed(strTempDir);
+                PathUtil.TryCreateDir(strTempDir);
                 nRet = dp2Library_extractPartDir(strTempDir,
         "cfgs,templates,other",
         out strError);
@@ -4695,8 +4698,8 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             string strDataDir = dlg.DataDir;
             string strConfigFileName = Path.Combine(strDataDir, "mongod.cfg");
 
-            PathUtil.CreateDirIfNeed(Path.Combine(strDataDir, "db"));
-            PathUtil.CreateDirIfNeed(Path.Combine(strDataDir, "log"));
+            PathUtil.TryCreateDir(Path.Combine(strDataDir, "db"));
+            PathUtil.TryCreateDir(Path.Combine(strDataDir, "log"));
 
             using (StreamWriter sw = new StreamWriter(strConfigFileName, false))
             {
@@ -4800,7 +4803,7 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
                 // program files (x86)/digitalplatform/dp2library
                 string strProgramDir = GetProductDirectory("dp2zserver");
 
-                PathUtil.CreateDirIfNeed(strProgramDir);
+                PathUtil.TryCreateDir(strProgramDir);
 
                 string strZipFileName = Path.Combine(this.DataDir, "zserver_app.zip");
 

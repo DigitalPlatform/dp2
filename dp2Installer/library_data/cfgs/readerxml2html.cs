@@ -22,6 +22,8 @@
 // 2015/10/2    借阅列表和借阅历史表格中，BC:xxxx 中增加了第三段 | 书目记录路径
 // 2015/10/18    this.Formats 中可以包含 style_dark 这样的风格名称。注意多个子串之间是用 ',' 分隔的
 // 2016/9/11    增加微信绑定标志 icon
+// 2016/12/4    预约到书区域显示增加了 boxing 状态显示
+// 2017/5/22	册信息显示增加了 卷册 列
 
 using System;
 using System.Collections.Generic;
@@ -363,7 +365,7 @@ public class MyConverter : ReaderConverter
 
         if (nodes.Count > 0)
         {
-            strResult.Append( "<tr class='columntitle'><td>册条码号</td><td>摘要</td><td>价格</td><td>续借次</td><td>借阅日期</td><td>期限</td><td>操作者</td><td>应还日期</td><td>续借注</td></tr>");
+            strResult.Append( "<tr class='columntitle'><td>册条码号</td><td>摘要</td><td>卷册</td><td>价格</td><td>续借次</td><td>借阅日期</td><td>期限</td><td>操作者</td><td>应还日期</td><td>续借注</td></tr>");
 
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -380,6 +382,7 @@ public class MyConverter : ReaderConverter
                 string strPrice = DomUtil.GetAttr(node, "price");
                 string strTimeReturning = DomUtil.GetAttr(node, "timeReturning");
 
+		string strVolume = DomUtil.GetAttr(node, "volume");
 
 #if NO
                 string strOverDue = "";
@@ -466,6 +469,8 @@ public class MyConverter : ReaderConverter
                 strResult.Append( "<td class='summary pending'><br/>BC:" + strBarcode + "|" + strConfirmItemRecPath 
                     + (string.IsNullOrEmpty(strBiblioRecPath) == true ? "" : "|" + strBiblioRecPath) + "</td>");
 
+		
+                strResult.Append( "<td class='volume' nowrap>" + HttpUtility.HtmlEncode(strVolume) + "</td>");
                 strResult.Append( "<td class='price' nowrap align='right'>" + strPrice + "</td>");
                 strResult.Append( "<td class='no' nowrap align='right'>" + strNo + "</td>");
                 strResult.Append( "<td class='borrowdate' >" + LocalDateOrTime(strBorrowDate, strPeriod) + "</td>");
@@ -492,12 +497,10 @@ public class MyConverter : ReaderConverter
             int nArriveCount = 0;
 
             strResult.Append( "<table class='reservation'>");
-            strResult.Append( "<tr class='columntitle'><td nowrap>册条码号</td><td nowrap>到达情况</td><td nowrap>摘要</td><td nowrap>请求日期</td><td nowrap>操作者</td></tr>");
+            strResult.Append( "<tr class='columntitle'><td nowrap>册条码号</td><td nowrap>到达情况</td><td nowrap>摘要</td><td nowrap>请求日期</td><td nowrap>操作者</td><td nowrap>配书情况</td></tr>");
 
-            for (int i = 0; i < nodes.Count; i++)
+            foreach (XmlElement node in nodes)
             {
-                XmlNode node = nodes[i];
-
                 string strBarcodes = DomUtil.GetAttr(node, "items");
                 string strRequestDate = LocalTime(DomUtil.GetAttr(node, "requestDate"));
 
@@ -508,8 +511,8 @@ public class MyConverter : ReaderConverter
                     this.SessionInfo,
                     strBarcodes,
                     strArrivedItemBarcode,
-            "html", // "html,forcelogin",
-            ""/*"target='_blank'"*/);
+                    "html", // "html,forcelogin",
+                    ""/*"target='_blank'"*/);
 
                 string strClass = "content";
 
@@ -531,6 +534,10 @@ public class MyConverter : ReaderConverter
 
                     nArriveCount++;
                 }
+                
+                string strBox = node.GetAttribute("box");
+                if (string.IsNullOrEmpty(strBox) == false)
+                    strClass += " boxing";
 
                 strResult.Append( "<tr class='" + strClass + "'>");
                 strResult.Append( "<td class='barcode'>"
@@ -541,8 +548,8 @@ public class MyConverter : ReaderConverter
                 strResult.Append( "<td class='summary'>" + strSummary + "</td>");
                 strResult.Append( "<td class='requestdate'>" + strRequestDate + "</td>");
                 strResult.Append( "<td class='operator'>" + strOperator + "</td>");
+                strResult.Append( "<td class='boxing'>" + strBox + "</td>");
                 strResult.Append( "</tr>");
-
             }
             strResult.Append( "</table>");
 
@@ -576,7 +583,7 @@ public class MyConverter : ReaderConverter
 
                 strResult.Append("</td></tr>");
 
-                strResult.Append("<tr class='columntitle'><td nowrap>序</td><td nowrap>册条码号</td><td nowrap>摘要</td><td nowrap>续借次</td><td nowrap>借阅日期</td><td nowrap>期限</td><td nowrap>借阅操作者</td><td nowrap>续借注</td><td nowrap>还书日期</td><td nowrap>还书操作者</td></tr>");
+                strResult.Append("<tr class='columntitle'><td nowrap>序</td><td nowrap>册条码号</td><td nowrap>摘要</td><td nowrap>卷册</td><td nowrap>续借次</td><td nowrap>借阅日期</td><td nowrap>期限</td><td nowrap>借阅操作者</td><td nowrap>续借注</td><td nowrap>还书日期</td><td nowrap>还书操作者</td></tr>");
 
                 for (int i = 0; i < nodes.Count; i++)
                 {
@@ -592,6 +599,7 @@ public class MyConverter : ReaderConverter
                     string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
                     string strBiblioRecPath = DomUtil.GetAttr(node, "biblioRecPath");
                     string strReturnDate = DomUtil.GetAttr(node, "returnDate");
+			string strVolume = DomUtil.GetAttr(node, "volume");
 
                     // string strBarcodeLink = "<a href='" + App.OpacServerUrl + "/book.aspx?barcode=" + strBarcode + "&borrower=" + strReaderBarcode + "&forcelogin=userid' target='_blank'>" + strBarcode + "</a>";
                     string strBarcodeLink = "<a href='javascript:void(0);'  onclick=\"window.external.OpenForm('ItemInfoForm', this.innerText, true);\" onmouseover=\"OnHover(this.innerText);\">" + strBarcode + "</a>";
@@ -602,6 +610,7 @@ public class MyConverter : ReaderConverter
                     strResult.Append("<td class='summary pending'>BC:" + strBarcode + "|" + strConfirmItemRecPath 
                         + (string.IsNullOrEmpty(strBiblioRecPath) == true ? "" : "|" + strBiblioRecPath) + "</td>");
 
+                    strResult.Append("<td class='volume' nowrap>" + HttpUtility.HtmlEncode(strVolume) + "</td>");
                     strResult.Append("<td class='no' nowrap align='right'>" + strNo + "</td>");
                     strResult.Append("<td class='borrowdate' >" + LocalDateOrTime(strBorrowDate, strPeriod) + "</td>");
                     strResult.Append("<td class='period' nowrap>" + LibraryApplication.GetDisplayTimePeriodString(strPeriod) + "</td>");

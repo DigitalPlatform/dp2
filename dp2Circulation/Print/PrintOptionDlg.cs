@@ -24,7 +24,7 @@ namespace dp2Circulation
         /// <summary>
         /// 本窗口从属的框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 打印参数
@@ -271,11 +271,11 @@ namespace dp2Circulation
                 dlg.ColumnItems = this.ColumnItems;
             }
 
-            if (this.MainForm != null)
-                this.MainForm.AppInfo.LinkFormState(dlg, "printorderdlg_formstate");
+            if (Program.MainForm != null)
+                Program.MainForm.AppInfo.LinkFormState(dlg, "printorderdlg_formstate");
             dlg.ShowDialog(this);
-            if (this.MainForm != null)
-                this.MainForm.AppInfo.UnlinkFormState(dlg);
+            if (Program.MainForm != null)
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -708,7 +708,7 @@ namespace dp2Circulation
             string strFilePath = "";
             int nRedoCount = 0;
             string strDir = PathUtil.MergePath(this.DataDir, "print_templates");
-            PathUtil.CreateDirIfNeed(strDir);
+            PathUtil.TryCreateDir(strDir);
             for (int i = 0; ; i++)
             {
                 strFilePath = PathUtil.MergePath(strDir, "template_" + (i+1).ToString());

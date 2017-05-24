@@ -183,21 +183,6 @@ namespace dp2Circulation
 
         #endregion
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
-
-
-        // bool m_bChanged = false;
-
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -220,12 +205,12 @@ namespace dp2Circulation
 
         private void AmerceForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -235,7 +220,8 @@ namespace dp2Circulation
 #endif
 
             // webbrowser
-            this.m_webExternalHost.Initial(this.MainForm, this.webBrowser_readerInfo);
+            this.m_webExternalHost.Initial(// Program.MainForm, 
+                this.webBrowser_readerInfo);
             this.webBrowser_readerInfo.ObjectForScripting = this.m_webExternalHost;
 
             this.commander = new Commander(this);
@@ -249,7 +235,7 @@ namespace dp2Circulation
             this.listView_amerced.LargeImageList = this.imageList_itemType;
              * */
 
-            this.checkBox_fillSummary.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_fillSummary.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "amerce_form",
                 "fill_summary",
                 true);
@@ -275,13 +261,13 @@ namespace dp2Circulation
             try
             {
                 // 获得splitContainer_main的状态
-                this.MainForm.LoadSplitterPos(
+                Program.MainForm.LoadSplitterPos(
     this.splitContainer_main,
     "amerceform_state",
     "splitContainer_main_ratio");
 
                 // 获得splitContainer_upper的状态
-                this.MainForm.LoadSplitterPos(
+                Program.MainForm.LoadSplitterPos(
 this.splitContainer_lists,
 "amerceform_state",
 "splitContainer_lists_ratio");
@@ -291,7 +277,7 @@ this.splitContainer_lists,
             {
             }
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
                 "amerce_form",
                 "amerced_list_column_width",
                 "");
@@ -302,7 +288,7 @@ this.splitContainer_lists,
                     true);
             }
 
-            strWidths = this.MainForm.AppInfo.GetString(
+            strWidths = Program.MainForm.AppInfo.GetString(
                 "amerce_form",
                 "overdues_list_column_width",
                 "");
@@ -325,27 +311,27 @@ this.splitContainer_lists,
         /*public*/
         void SaveSize()
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
                 // 保存splitContainer_main的状态
-                this.MainForm.SaveSplitterPos(
+                Program.MainForm.SaveSplitterPos(
                     this.splitContainer_main,
                     "amerceform_state",
                     "splitContainer_main_ratio");
                 // 保存splitContainer_upper的状态
-                this.MainForm.SaveSplitterPos(
+                Program.MainForm.SaveSplitterPos(
                     this.splitContainer_lists,
                     "amerceform_state",
                     "splitContainer_lists_ratio");
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_amerced);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "amerce_form",
                     "amerced_list_column_width",
                     strWidths);
 
                 strWidths = ListViewUtil.GetColumnWidthListString(this.listView_overdues);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "amerce_form",
                     "overdues_list_column_width",
                     strWidths);
@@ -360,7 +346,7 @@ this.splitContainer_lists,
         {
             get
             {
-                return this.MainForm.AppInfo.GetString("amerce_form",
+                return Program.MainForm.AppInfo.GetString("amerce_form",
         "layout",
         "左右分布");
             }
@@ -477,9 +463,9 @@ this.splitContainer_lists,
 
         private void AmerceForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
         "amerce_form",
         "fill_summary",
         this.checkBox_fillSummary.Checked);
@@ -555,14 +541,14 @@ this.splitContainer_lists,
 #endif
 
             //this.Update();
-            //this.MainForm.Update();
+            //Program.MainForm.Update();
 
             int nRecordCount = 0;
 
             try
             {
 
-                Global.ClearHtmlPage(this.webBrowser_readerInfo, this.MainForm.DataDir);
+                Global.ClearHtmlPage(this.webBrowser_readerInfo, Program.MainForm.DataDir);
 
                 byte[] baTimestamp = null;
                 string strOutputRecPath = "";
@@ -600,18 +586,16 @@ this.splitContainer_lists,
 
                     dlg.Overflow = StringUtil.SplitList(strOutputRecPath).Count < lRet;
                     nRet = dlg.Initial(
-                        this.MainForm,
-                        //this.Channel,
-                        //this.stop,
+                        // Program.MainForm,
                         StringUtil.SplitList(strOutputRecPath),
                         "请选择一个读者记录",
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
                     // TODO: 保存窗口内的尺寸状态
-                    this.MainForm.AppInfo.LinkFormState(dlg, "AmerceForm_SelectPatronDialog_state");
+                    Program.MainForm.AppInfo.LinkFormState(dlg, "AmerceForm_SelectPatronDialog_state");
                     dlg.ShowDialog(this);
-                    this.MainForm.AppInfo.UnlinkFormState(dlg);
+                    Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
                     if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                     {
@@ -654,7 +638,7 @@ this.splitContainer_lists,
 #if NO
                 Global.SetHtmlString(this.webBrowser_readerInfo,
                     strHtml,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "amercing_reader");
 #endif
                 this.m_webExternalHost.SetHtmlString(strHtml,
@@ -679,7 +663,7 @@ this.splitContainer_lists,
             //this.listView_overdues.Items.Clear();
             //this.listView_amerced.Items.Clear();
             Global.ClearHtmlPage(this.webBrowser_readerInfo,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
             /*
             this.button_amerced_undoAmerce.Enabled = false;
             this.button_amercingOverdue_submit.Enabled = false;
@@ -691,7 +675,7 @@ this.splitContainer_lists,
         void ClearAllDisplay1()
         {
             Global.ClearHtmlPage(this.webBrowser_readerInfo,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
 
             SetAmercedButtonsEnable();
             SetOverduesButtonsEnable();
@@ -701,7 +685,7 @@ this.splitContainer_lists,
         {
             //this.listView_overdues.Items.Clear();
             Global.ClearHtmlPage(this.webBrowser_readerInfo,
-                this.MainForm.DataDir);
+                Program.MainForm.DataDir);
             this.toolStripButton_submit.Enabled = false;
         }
 
@@ -881,7 +865,7 @@ this.splitContainer_lists,
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
 
             try
@@ -1030,7 +1014,7 @@ this.splitContainer_lists,
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
 
             try
@@ -1218,7 +1202,7 @@ this.splitContainer_lists,
             m_bStopFillAmerced = false;
 
             LibraryChannel channel = new LibraryChannel();
-            channel.Url = this.MainForm.LibraryServerUrl;
+            channel.Url = Program.MainForm.LibraryServerUrl;
 
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
@@ -1656,7 +1640,7 @@ this.splitContainer_lists,
             m_bStopFillAmercing = false;
 
             LibraryChannel channel = new LibraryChannel();
-            channel.Url = this.MainForm.LibraryServerUrl;
+            channel.Url = Program.MainForm.LibraryServerUrl;
 
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
@@ -1876,7 +1860,7 @@ this.splitContainer_lists,
             m_bStopFilling = false;
 
             LibraryChannel channel = new LibraryChannel();
-            channel.Url = this.MainForm.LibraryServerUrl;
+            channel.Url = Program.MainForm.LibraryServerUrl;
 
             channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -2163,7 +2147,7 @@ this.splitContainer_lists,
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
 
             try
@@ -2885,26 +2869,26 @@ this.splitContainer_lists,
             string strError = "";
 
             // 看看是不是符合服务器要求的交费接口
-            if (String.IsNullOrEmpty(this.MainForm.ClientFineInterfaceName) == false)
+            if (String.IsNullOrEmpty(Program.MainForm.ClientFineInterfaceName) == false)
             {
                 // 注：如果服务器端要配置要求前端不用接口，则应明显配置为“<无>”
                 string strThisInterface = this.AmerceInterface;
                 if (String.IsNullOrEmpty(strThisInterface) == true)
                     strThisInterface = "<无>";
 
-                if (string.Compare(this.MainForm.ClientFineInterfaceName, "cardCenter", true) == 0)
+                if (string.Compare(Program.MainForm.ClientFineInterfaceName, "cardCenter", true) == 0)
                 {
                     if (strThisInterface == "<无>")
                     {
-                        strError = "应用服务器要求前端必须采用 CardCenter 类型交费接口 '" + this.MainForm.ClientFineInterfaceName + "'。然而本前端当前配置的交费接口为'" + this.AmerceInterface + "'";
+                        strError = "应用服务器要求前端必须采用 CardCenter 类型交费接口 '" + Program.MainForm.ClientFineInterfaceName + "'。然而本前端当前配置的交费接口为'" + this.AmerceInterface + "'";
                         goto ERROR1;
                     }
 
                     // TODO: 是否要排除“迪科远望” 类型 ?
                 }
-                else if (this.MainForm.ClientFineInterfaceName != strThisInterface)
+                else if (Program.MainForm.ClientFineInterfaceName != strThisInterface)
                 {
-                    strError = "应用服务器要求前端必须采用交费接口 '" + this.MainForm.ClientFineInterfaceName + "'。然而本前端当前配置的交费接口为'" + this.AmerceInterface + "'";
+                    strError = "应用服务器要求前端必须采用交费接口 '" + Program.MainForm.ClientFineInterfaceName + "'。然而本前端当前配置的交费接口为'" + this.AmerceInterface + "'";
                     goto ERROR1;
                 }
             }
@@ -3101,7 +3085,7 @@ this.splitContainer_lists,
                     }
                 }
 
-                this.MainForm.OperHistory.AmerceAsync(
+                Program.MainForm.OperHistory.AmerceAsync(
                     this.textBox_readerBarcode.Text,
                     strReaderSummary,
                     overdue_infos,
@@ -3341,9 +3325,9 @@ this.splitContainer_lists,
             dlg.CardNumber = strReaderBarcode;
             dlg.SubmitPrice = strPrice; //  PriceUtil.GetPurePrice(strPrice); // 是否要去除货币单位?
             dlg.StartPosition = FormStartPosition.CenterScreen;
-            this.MainForm.AppInfo.LinkFormState(dlg, "AmerceCardDialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "AmerceCardDialog_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -3373,9 +3357,9 @@ this.splitContainer_lists,
             dlg.CardNumber = strReaderBarcode;
             dlg.SubmitPrice = PriceUtil.GetPurePrice(strPrice); // 是否要去除货币单位?
             dlg.StartPosition = FormStartPosition.CenterScreen;
-            this.MainForm.AppInfo.LinkFormState(dlg, "AmerceCardDialog_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "AmerceCardDialog_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -3546,7 +3530,7 @@ this.splitContainer_lists,
                     }
                 }
 
-                this.MainForm.OperHistory.AmerceAsync(
+                Program.MainForm.OperHistory.AmerceAsync(
                     this.textBox_readerBarcode.Text,
                     strReaderSummary,
                     overdue_infos,
@@ -3699,22 +3683,22 @@ COLUMN_AMERCED_STATE);
         private void textBox_readerBarcode_Enter(object sender, EventArgs e)
         {
             this.AcceptButton = this.button_load;
-            this.MainForm.EnterPatronIdEdit(InputType.PQR);
+            Program.MainForm.EnterPatronIdEdit(InputType.PQR);
         }
 
         private void textBox_readerBarcode_Leave(object sender, EventArgs e)
         {
             this.AcceptButton = null;
-            this.MainForm.LeavePatronIdEdit();
+            Program.MainForm.LeavePatronIdEdit();
         }
 
         private void AmerceForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
         // 右鼠标键菜单
@@ -4308,7 +4292,7 @@ COLUMN_AMERCED_STATE);
         public void Print()
         {
             // 触发历史动作
-            this.MainForm.OperHistory.Print();
+            Program.MainForm.OperHistory.Print();
         }
 
         /// <summary>
@@ -4319,7 +4303,7 @@ COLUMN_AMERCED_STATE);
             get
             {
                 // amerce
-                return this.MainForm.AppInfo.GetString("config",
+                return Program.MainForm.AppInfo.GetString("config",
                     "amerce_interface",
                     "<无>");
             }
@@ -4356,7 +4340,7 @@ COLUMN_AMERCED_STATE);
 
         void Window_Error(object sender, HtmlElementErrorEventArgs e)
         {
-            if (this.MainForm.SuppressScriptErrors == true)
+            if (Program.MainForm.SuppressScriptErrors == true)
                 e.Handled = true;
         }
 
@@ -4370,7 +4354,7 @@ COLUMN_AMERCED_STATE);
             // 优化，避免无谓地进行服务器调用
             if (bOpenWindow == false)
             {
-                if (this.MainForm.PanelFixedVisible == false
+                if (Program.MainForm.PanelFixedVisible == false
                     && (m_operlogViewer == null || m_operlogViewer.Visible == false))
                     return;
             }
@@ -4412,11 +4396,11 @@ COLUMN_AMERCED_STATE);
             {
                 m_operlogViewer = new CommentViewerForm();
                 MainForm.SetControlFont(m_operlogViewer, this.Font, false);
-                m_operlogViewer.SuppressScriptErrors = this.MainForm.SuppressScriptErrors;
+                m_operlogViewer.SuppressScriptErrors = Program.MainForm.SuppressScriptErrors;
                 bNew = true;
             }
 
-            m_operlogViewer.MainForm = this.MainForm;  // 必须是第一句
+            // m_operlogViewer.MainForm = Program.MainForm;  // 必须是第一句
 
             if (bNew == true)
                 m_operlogViewer.InitialWebBrowser();
@@ -4431,11 +4415,11 @@ COLUMN_AMERCED_STATE);
             {
                 if (m_operlogViewer.Visible == false)
                 {
-                    this.MainForm.AppInfo.LinkFormState(m_operlogViewer, "operlog_viewer_state");
+                    Program.MainForm.AppInfo.LinkFormState(m_operlogViewer, "operlog_viewer_state");
                     m_operlogViewer.Show(this);
                     m_operlogViewer.Activate();
 
-                    this.MainForm.CurrentPropertyControl = null;
+                    Program.MainForm.CurrentPropertyControl = null;
                 }
                 else
                 {
@@ -4452,7 +4436,7 @@ COLUMN_AMERCED_STATE);
                 }
                 else
                 {
-                    if (this.MainForm.CurrentPropertyControl != m_operlogViewer.MainControl)
+                    if (Program.MainForm.CurrentPropertyControl != m_operlogViewer.MainControl)
                         m_operlogViewer.DoDock(false); // 不会自动显示FixedPanel
                 }
             }
@@ -4465,7 +4449,7 @@ COLUMN_AMERCED_STATE);
         {
             if (m_operlogViewer != null)
             {
-                this.MainForm.AppInfo.UnlinkFormState(m_operlogViewer);
+                Program.MainForm.AppInfo.UnlinkFormState(m_operlogViewer);
                 this.m_operlogViewer = null;
             }
         }
@@ -4565,7 +4549,7 @@ COLUMN_AMERCED_STATE);
 
         string GetHeadString(bool bAjax = true)
         {
-            string strCssFilePath = PathUtil.MergePath(this.MainForm.DataDir, "amercehtml.css");
+            string strCssFilePath = PathUtil.MergePath(Program.MainForm.DataDir, "amercehtml.css");
 
             if (bAjax == true)
                 return

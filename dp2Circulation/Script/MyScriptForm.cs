@@ -5,11 +5,11 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 
 using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Script;
-using System.Reflection;
 
 namespace dp2Circulation
 {
@@ -45,8 +45,8 @@ namespace dp2Circulation
                 if (string.IsNullOrEmpty(this.m_strInstanceDir) == false)
                     return this.m_strInstanceDir;
 
-                this.m_strInstanceDir = PathUtil.MergePath(this.MainForm.DataDir, "~bin_" + Guid.NewGuid().ToString());
-                PathUtil.CreateDirIfNeed(this.m_strInstanceDir);
+                this.m_strInstanceDir = PathUtil.MergePath(Program.MainForm.DataDir, "~bin_" + Guid.NewGuid().ToString());
+                PathUtil.TryCreateDir(this.m_strInstanceDir);
 
                 return this.m_strInstanceDir;
             }
@@ -83,15 +83,15 @@ namespace dp2Circulation
         {
             base.OnLoad(e);
 
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                ScriptManager.applicationInfo = this.MainForm.AppInfo;
+                ScriptManager.applicationInfo = Program.MainForm.AppInfo;
 
                 /*
                 ScriptManager.CfgFilePath =
-                    this.MainForm.DataDir + "\\biblio_statis_projects.xml";
+                    Program.MainForm.DataDir + "\\biblio_statis_projects.xml";
                  * */
-                ScriptManager.DataDir = this.MainForm.UserDir;
+                ScriptManager.DataDir = Program.MainForm.UserDir;
 
                 ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
                 ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
@@ -126,6 +126,79 @@ namespace dp2Circulation
         internal virtual void CreateDefaultContent(CreateDefaultContentEventArgs e)
         {
 
+        }
+
+        public virtual void TestCompile(string strProjectName)
+        {
+            string strError = "";
+
+            if (String.IsNullOrEmpty(strProjectName) == true)
+            {
+                strError = "尚未指定方案名";
+                goto ERROR1;
+            }
+
+            string strProjectLocate = "";
+            // 获得方案参数
+            // strProjectNamePath	方案名，或者路径
+            // return:
+            //		-1	error
+            //		0	not found project
+            //		1	found
+            int nRet = this.ScriptManager.GetProjectData(
+                strProjectName,
+                out strProjectLocate);
+
+            if (nRet == 0)
+            {
+                strError = "方案 " + strProjectName + " 没有找到...";
+                goto ERROR1;
+            }
+            if (nRet == -1)
+            {
+                strError = "scriptManager.GetProjectData() error ...";
+                goto ERROR1;
+            }
+
+            string strWarning = "";
+
+            // TODO: 增加一个参数表示这是测试编译
+            nRet = RunScript(strProjectName,
+                strProjectLocate,
+                "test_compile", // strInitialParamString
+                out strError,
+                out strWarning);
+            if (nRet == -1)
+                goto ERROR1;
+
+            return;
+        ERROR1:
+            throw new Exception(strError);
+        }
+
+        // 兼容以前用法
+        public int RunScript(string strProjectName,
+            string strProjectLocate,
+            out string strError)
+        {
+            string strWarning = "";
+            return RunScript(strProjectName,
+            strProjectLocate,
+            "",
+            out strError,
+            out strWarning);
+        }
+
+        public virtual int RunScript(string strProjectName,
+            string strProjectLocate,
+            string strInitialParamString,
+            out string strError,
+            out string strWarning)
+        {
+            strError = "尚未重载 RunScript() 函数";
+            strWarning = "";
+
+            return -1;
         }
 
         /// <summary>

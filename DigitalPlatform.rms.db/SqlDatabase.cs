@@ -222,7 +222,7 @@ namespace DigitalPlatform.rms
                         this.m_strObjectDir = PathUtil.MergePath(this.container.ObjectDir, this.m_strSqlDbName);
                         try
                         {
-                            PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                            PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
                         catch (Exception ex)
                         {
@@ -744,7 +744,7 @@ namespace DigitalPlatform.rms
                             if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                             {
                                 PathUtil.DeleteDirectory(this.m_strObjectDir);
-                                PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                                PathUtil.TryCreateDir(this.m_strObjectDir);
                             }
                         }
                         catch (Exception ex)
@@ -864,7 +864,7 @@ namespace DigitalPlatform.rms
                         {
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
 
-                            PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                            PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
                     }
                     catch (Exception ex)
@@ -1022,7 +1022,7 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
-                            PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                            PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
                     }
                     catch (Exception ex)
@@ -1145,7 +1145,7 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
-                            PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                            PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
                     }
                     catch (Exception ex)
@@ -1807,7 +1807,7 @@ namespace DigitalPlatform.rms
                     strCommand += " ON ( name = '" + this.m_strSqlDbName + "', filename = '" + strDatabaseFileName + "')\n";
 
                     // 确保子目录已经创建
-                    PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strDatabaseFileName));
+                    PathUtil.TryCreateDir(Path.GetDirectoryName(strDatabaseFileName));
                 }
 
                 strCommand += " use master " + "\n";
@@ -9813,9 +9813,12 @@ DbType.String);
                         {
                             // 提交一次
                             bool bCommit = false;
-                            if (info.row_info == null && nParameters + 5 > 2100 - 1)
+
+                            // 2017/4/1
+                            // *** 注：MySQL 在 TCP/IP 方式下 2100 没有问题；在 Named Pipe 方式下 1400 没有问题，1500 就会抛出异常“connection must be valid and open to rollback transaction”，为保险这里用 1000
+                            if (info.row_info == null && nParameters + 5 > 1000 - 1)
                                 bCommit = true;
-                            if (info.row_info != null && nParameters + 5 > 2100 - 1)
+                            if (info.row_info != null && nParameters + 5 > 1000 - 1)
                                 bCommit = true;
 
                             if (bCommit == true)
@@ -10248,7 +10251,7 @@ FileShare.ReadWrite))
                 if (nRedoCount == 0)
                 {
                     // 创建中间子目录
-                    PathUtil.CreateDirIfNeed(PathUtil.PathPart(strFileName));
+                    PathUtil.TryCreateDir(PathUtil.PathPart(strFileName));
                     nRedoCount++;
                     goto REDO;
                 }
@@ -10262,10 +10265,53 @@ FileShare.ReadWrite))
             return 0;
         }
 
+        const int MYSQL_MAX_GETINFO_COUNT   = 1000;
+
+        // 这一层主要是把较大的数组分片进行调用
+        private int GetRowInfos(Connection connection,
+    bool bGetData,
+    List<string> ids,
+    out List<RecordRowInfo> row_infos,
+    out string strError)
+        {
+            strError = "";
+            row_infos = new List<RecordRowInfo>();
+
+            if (connection.SqlServerType == SqlServerType.MySql)
+            {
+                int nRet = 0;
+                List<RecordRowInfo> results = new List<RecordRowInfo>();
+                int start = 0;
+                int length = Math.Min(MYSQL_MAX_GETINFO_COUNT, ids.Count);
+                int count = 0;
+                while (count < ids.Count)
+                {
+                    nRet = _getRowInfos(connection,
+                    bGetData,
+                    ids.GetRange(start, length),
+                    out results,
+                    out strError);
+                    if (nRet == -1)
+                        return -1;
+                    row_infos.AddRange(results);
+                    count += length;
+                    start += length;
+                    length = Math.Min(MYSQL_MAX_GETINFO_COUNT, ids.Count - count);
+                }
+                return nRet;
+            }
+            else
+                return _getRowInfos(connection,
+                    bGetData,
+                    ids,
+                    out row_infos,
+                    out strError);
+        }
+
         // 获得 records表中 多个已存在的行信息
         // parameters:
         //      bGetData    是否需要获得记录体?
-        private int GetRowInfos(Connection connection,
+        private int _getRowInfos(Connection connection,
             bool bGetData,
             List<string> ids,
             out List<RecordRowInfo> row_infos,
@@ -10820,7 +10866,8 @@ out strError);
                         foreach (DelayTable table in tables)
                         {
                             var bulkCopy = new MySqlBulkCopy(connection.MySqlConnection);
-                            bulkCopy.BatchSize = 5000;
+                            // 2017/4/27 MySQL Named Pipe 方式下 1000 比较保险
+                            bulkCopy.BatchSize = 1000;  // 5000;
                             bulkCopy.DestinationTableName = "`" + this.m_strSqlDbName + "`." + table.TableName;
                             int nRet = table.OpenForRead(table.FileName, out strError);
                             if (nRet == -1)
@@ -12964,7 +13011,7 @@ start_time,
                         if (nRedoCount == 0)
                         {
                             // 创建中间子目录
-                            PathUtil.CreateDirIfNeed(PathUtil.PathPart(strFileName));
+                            PathUtil.TryCreateDir(PathUtil.PathPart(strFileName));
                             nRedoCount++;
                             goto REDO;
                         }
@@ -13087,7 +13134,7 @@ start_time,
                             if (nRedoCount == 0)
                             {
                                 // 创建中间子目录
-                                PathUtil.CreateDirIfNeed(PathUtil.PathPart(strFileName));
+                                PathUtil.TryCreateDir(PathUtil.PathPart(strFileName));
                                 nRedoCount++;
                                 goto REDO;
                             }
@@ -14922,7 +14969,8 @@ start_time,
 #if PARAMETERS
                         int nMaxLinesPerExecute = (2100 / 5) - 1;   // 4个参数，加上一个sql命令字符串
 #else
-                        int nMaxLinesPerExecute = 5000;
+                        // 2017/4/27 MySQL Named Pipe 情况下 1000 比较保险
+                        int nMaxLinesPerExecute = 1000;
 #endif
 
                         if (keysDelete != null)
@@ -17726,7 +17774,7 @@ bool bTempObject)
         // 删除记录,包括子文件,检索点,和本记录
         // parameter:
         //		strRecordID           记录ID
-        //      strStyle        可包含 fastmode
+        //      strStyle        可包含 fastmode。ignorechecktimestamp
         //		inputTimestamp  输入的时间戳
         //		outputTimestamp out参数,返回的实际的时间戳
         //		strError        out参数,返回出错信息

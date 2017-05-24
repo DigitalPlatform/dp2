@@ -18,7 +18,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         public event GetOrderInfoEventHandler GetOrderInfo = null;
 
@@ -49,9 +49,9 @@ namespace dp2Circulation
 
         private void IssueManageForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
             // 把事件挂到控件上面
             this.issueManageControl1.GetOrderInfo -= new GetOrderInfoEventHandler(issueManageControl1_GetOrderInfo);

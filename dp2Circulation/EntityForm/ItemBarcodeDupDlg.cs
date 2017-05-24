@@ -29,7 +29,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 通讯通道
@@ -50,7 +50,7 @@ namespace dp2Circulation
 
         // 初始化数据成员
         public int Initial(
-            MainForm mainform,
+            // MainForm mainform,
             string[] aPaths,
             string strMessage,
             LibraryChannel channel,
@@ -59,7 +59,7 @@ namespace dp2Circulation
         {
             strError = "";
 
-            this.MainForm = mainform;
+            // this.MainForm = mainform;
             this.Channel = channel;
             this.stop = stop;
             this.aPaths = aPaths;
@@ -78,7 +78,8 @@ namespace dp2Circulation
 
             EnableControls(false);
 
-            this.m_webExternalHost_biblio.Initial(this.MainForm, this.webBrowser_biblio);
+            this.m_webExternalHost_biblio.Initial(// Program.MainForm, 
+                this.webBrowser_biblio);
             this.webBrowser_biblio.ObjectForScripting = this.m_webExternalHost_biblio;
 
             API.PostMessage(this.Handle, WM_LOAD_ALL_DATA, 0, 0);
@@ -360,7 +361,7 @@ namespace dp2Circulation
 #if NO
             Global.SetHtmlString(this.webBrowser_biblio,
                 info.BiblioHtml,
-                this.MainForm.DataDir,
+                Program.MainForm.DataDir,
                 "itembarcodedup_biblio");
 #endif
             this.m_webExternalHost_biblio.SetHtmlString(info.BiblioHtml,

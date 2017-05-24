@@ -144,14 +144,14 @@ namespace dp2Catalog
                 this.UserDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     "dp2Catalog_v2");
-                PathUtil.CreateDirIfNeed(this.UserDir);
+                PathUtil.TryCreateDir(this.UserDir);
 
                 this.UserTempDir = Path.Combine(this.UserDir, "temp");
-                PathUtil.CreateDirIfNeed(this.UserTempDir);
+                PathUtil.TryCreateDir(this.UserTempDir);
 
                 // 2015/8/8
                 this.UserLogDir = Path.Combine(this.UserDir, "log");
-                PathUtil.CreateDirIfNeed(this.UserLogDir);
+                PathUtil.TryCreateDir(this.UserLogDir);
 
                 // 将 dp2catalog.xml 文件中绿色安装目录或者 ClickOnce 安装的数据目录移动到用户目录
                 nRet = MoveDp2catalogXml(out strError);
@@ -2893,7 +2893,7 @@ out string strError)
             {
                 return this.AppInfo.GetString("config",
                     "gcat_server_url",
-                    "http://dp2003.com/gcatserver/");
+                    "http://dp2003.com/dp2library/");
             }
         }
 
@@ -2903,7 +2903,7 @@ out string strError)
             {
                 return this.AppInfo.GetString("config",
                     "pinyin_server_url",
-                    "http://dp2003.com/gcatserver/");
+                    "http://dp2003.com/dp2library/");
             }
         }
 
@@ -5080,6 +5080,20 @@ out string strError)
         }
 
         #endregion
+
+        private void MenuItem_editMarcoTable_Click(object sender, EventArgs e)
+        {
+            MacroTableDialog dlg = new MacroTableDialog();
+            // MainForm.SetControlFont(dlg, this.Font, false);
+            GuiUtil.SetControlFont(dlg, this.DefaultFont);
+            dlg.XmlFileName = Path.Combine(Program.MainForm.UserDir, "marceditor_macrotable.xml");
+
+            this.AppInfo.LinkFormState(dlg, "MacroTableDialog_state");
+            dlg.ShowDialog(this);
+            this.AppInfo.UnlinkFormState(dlg);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+        }
     }
 
     public class EnableState

@@ -4598,7 +4598,7 @@ this.checkBox_import_fastMode.Checked);
                                 out strError);
                             if (nRet == -1)
                             {
-                                strError = "记录 " + strOutputPath + " 在将XML格式转换为MARC时出错: " + strError;
+                                strError = "记录 " + strOutputPath + " 在将 XML 格式转换为MARC时出错: " + strError;
                                 goto ERROR1;
                             }
                         }
@@ -4657,7 +4657,8 @@ this.checkBox_import_fastMode.Checked);
                         }
 
                         if (bFoundRecord == true
-                            && outputfile != null)
+                            && outputfile != null
+                            && string.IsNullOrEmpty(strXmlBody) == false)   // == false 2017/5/18
                         {
                             if (exportType == ExportFileType.BackupFile)
                             {

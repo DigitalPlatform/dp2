@@ -2579,7 +2579,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             strReaderEmailAddress =
-                LibraryApplication.GetEmailAddress(
+                LibraryServerUtil.GetEmailAddress(
                 DomUtil.GetElementText(readerdom.DocumentElement, "email")
                 );
 

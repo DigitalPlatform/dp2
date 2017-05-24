@@ -240,6 +240,7 @@
     <Compile Include="DbNameMap\OriginNotFoundDlg.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DirLoader.cs" />
     <Compile Include="ImportExport\ExportDataDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -254,6 +255,7 @@
     </Compile>
     <Compile Include="ImportExport\ExportUtil.cs" />
     <Compile Include="ImportExport\ImportUtil.cs" />
+    <Compile Include="RecordLoader.cs" />
     <Compile Include="RmsChannel.cs" />
     <Compile Include="RmsChannelCollection.cs">
       <SubType>Code</SubType>

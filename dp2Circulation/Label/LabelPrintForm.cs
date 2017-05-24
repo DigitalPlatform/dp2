@@ -10,15 +10,14 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Xml;
+using System.Web;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
-
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
-using System.Web;
 using DigitalPlatform.Drawing;
 using DigitalPlatform.Text;
 using DigitalPlatform.CommonControl;
@@ -71,14 +70,6 @@ namespace dp2Circulation
         /// </summary>
         public string ExportTextFilename = "";
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-#endif
-
         LabelParam label_param = new LabelParam();
 
         PrintLabelDocument document = null;
@@ -130,7 +121,7 @@ namespace dp2Circulation
 #if NO
         void prop_GetColumnTitles(object sender, GetColumnTitlesEventArgs e)
         {
-            e.ColumnTitles = this.MainForm.GetBrowseColumnProperties(e.DbName);
+            e.ColumnTitles = Program.MainForm.GetBrowseColumnProperties(e.DbName);
             e.ListViewProperty.SetSortStyle(2, ColumnSortStyle.LeftAlign);
         }
 #endif
@@ -147,7 +138,7 @@ namespace dp2Circulation
             }
 
             e.ColumnTitles = new ColumnPropertyCollection();
-            ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(e.DbName);
+            ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(e.DbName);
             if (temp != null)
             {
                 if (m_bBiblioSummaryColumn == true)
@@ -170,13 +161,13 @@ namespace dp2Circulation
         private void LabelPrintForm_Load(object sender, EventArgs e)
         {
 #if NO
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 #endif
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -187,7 +178,7 @@ namespace dp2Circulation
 
             if (string.IsNullOrEmpty(this.textBox_labelFile_labelFilename.Text) == true)
             {
-                this.textBox_labelFile_labelFilename.Text = this.MainForm.AppInfo.GetString(
+                this.textBox_labelFile_labelFilename.Text = Program.MainForm.AppInfo.GetString(
                     "label_print_form",
                     "label_file_name",
                     "");
@@ -195,7 +186,7 @@ namespace dp2Circulation
 
             if (string.IsNullOrEmpty(this.textBox_labelDefFilename.Text) == true)
             {
-                this.textBox_labelDefFilename.Text = this.MainForm.AppInfo.GetString(
+                this.textBox_labelDefFilename.Text = Program.MainForm.AppInfo.GetString(
                     "label_print_form",
                     "label_def_file_name",
                     "");
@@ -203,13 +194,13 @@ namespace dp2Circulation
 
             if (this.m_bTestingGridSetted == false)
             {
-                this.checkBox_testingGrid.Checked = this.MainForm.AppInfo.GetBoolean(
+                this.checkBox_testingGrid.Checked = Program.MainForm.AppInfo.GetBoolean(
                     "label_print_form",
                     "print_testing_grid",
                     false);
             }
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
                 "label_print_form",
                 "record_list_column_width",
                 "");
@@ -221,7 +212,7 @@ namespace dp2Circulation
             }
 
             // 当前活动的property page
-            string strActivePage = this.MainForm.AppInfo.GetString(
+            string strActivePage = Program.MainForm.AppInfo.GetString(
                 "label_print_form",
                 "active_page",
                 "");
@@ -236,7 +227,7 @@ namespace dp2Circulation
 
             if (this.PrinterInfo == null)
             {
-                this.PrinterInfo = this.MainForm.PreparePrinterInfo("缺省标签");
+                this.PrinterInfo = Program.MainForm.PreparePrinterInfo("缺省标签");
             }
             SetTitle();
         }
@@ -265,25 +256,25 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "label_print_form",
                     "label_file_name",
                     this.textBox_labelFile_labelFilename.Text);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "label_print_form",
                     "label_def_file_name",
                     this.textBox_labelDefFilename.Text);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "label_print_form",
                     "print_testing_grid",
                     this.checkBox_testingGrid.Checked);
 
                 string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_records);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "label_print_form",
                     "record_list_column_width",
                     strWidths);
@@ -296,7 +287,7 @@ namespace dp2Circulation
                 else if (this.tabControl_main.SelectedTab == this.tabPage_itemRecords)
                     strActivePage = "itemrecords";
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "label_print_form",
                     "active_page",
                     strActivePage);
@@ -307,7 +298,7 @@ namespace dp2Circulation
                     if (string.IsNullOrEmpty(strType) == true)
                         strType = "缺省标签";
 
-                    this.MainForm.SavePrinterInfo(strType,
+                    Program.MainForm.SavePrinterInfo(strType,
                         this.PrinterInfo);
                 }
             }
@@ -761,7 +752,7 @@ namespace dp2Circulation
 
             this.document.PreviewMode = true;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行打印预览</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行打印预览</div>");
             this.EnableControls(false);
             try
             {
@@ -843,9 +834,9 @@ namespace dp2Circulation
 
                 printPreviewDialog1.Document = this.document;
 
-                this.MainForm.AppInfo.LinkFormState(printPreviewDialog1, "labelprintform_printpreviewdialog_state");
+                Program.MainForm.AppInfo.LinkFormState(printPreviewDialog1, "labelprintform_printpreviewdialog_state");
                 printPreviewDialog1.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(printPreviewDialog1);
+                Program.MainForm.AppInfo.UnlinkFormState(printPreviewDialog1);
             }
             finally
             {
@@ -853,7 +844,7 @@ namespace dp2Circulation
 
                 this.EndPrint();
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行打印预览</div>");
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行打印预览</div>");
             }
 
             return 0;
@@ -962,20 +953,67 @@ namespace dp2Circulation
         {
             strError = "";
 
-            PaperSize old_papersize = document.DefaultPageSettings.PaperSize;
-
-            PaperSize paper_size = PrintUtil.BuildPaperSize(strPaperName);
-            if (paper_size != null)
+            try
             {
-                // 进行检查
-                if (bCheck == true)
+                PaperSize old_papersize = document.DefaultPageSettings.PaperSize;
+
+                PaperSize paper_size = PrintUtil.BuildPaperSize(strPaperName);
+                if (paper_size != null)
                 {
+                    // 进行检查
+                    if (bCheck == true)
+                    {
+                        PaperSize found = null;
+                        foreach (PaperSize ps in document.PrinterSettings.PaperSizes)
+                        {
+                            if (ps.PaperName.Equals(paper_size.PaperName)
+                                && ps.Width == paper_size.Width
+                                && ps.Height == paper_size.Height)
+                            {
+                                found = ps;
+                                break;
+                            }
+                        }
+
+                        if (found != null)
+                        {
+                            paper_size = found;
+                            goto END1;
+                        }
+
+                        // 如果没有匹配的，则退而求其次，用尺寸匹配一个
+                        found = null;
+                        foreach (PaperSize ps in document.PrinterSettings.PaperSizes)
+                        {
+                            if (ps.Width == paper_size.Width
+                                && ps.Height == paper_size.Height)
+                            {
+                                found = ps;
+                                break;
+                            }
+                        }
+
+                        if (found != null)
+                        {
+                            paper_size = found;
+                            goto END1;
+                        }
+
+                        strError = "打印机 " + document.PrinterSettings.PrinterName + " 的纸张类型 " + strPaperName + " 当前不可用，请重新选定纸张";
+                        return 1;
+                    }
+
+                END1:
+                    document.DefaultPageSettings.PaperSize = paper_size;    // 注：直接 new PaperSize 这样赋值，会导致打印机对话框中纸张名字为空。也许可以把 PrinterSetting 里面的也修改了就可以了?
+                    document.DefaultPageSettings.Landscape = bLandscape;
+                }
+                else
+                {
+                    // 试探用名字来查找
                     PaperSize found = null;
                     foreach (PaperSize ps in document.PrinterSettings.PaperSizes)
                     {
-                        if (ps.PaperName.Equals(paper_size.PaperName)
-                            && ps.Width == paper_size.Width
-                            && ps.Height == paper_size.Height)
+                        if (ps.PaperName.Equals(strPaperName) == true)
                         {
                             found = ps;
                             break;
@@ -985,59 +1023,14 @@ namespace dp2Circulation
                     if (found != null)
                     {
                         paper_size = found;
-                        goto END1;
-                    }
-
-                    // 如果没有匹配的，则退而求其次，用尺寸匹配一个
-                    found = null;
-                    foreach (PaperSize ps in document.PrinterSettings.PaperSizes)
-                    {
-                        if (ps.Width == paper_size.Width
-                            && ps.Height == paper_size.Height)
-                        {
-                            found = ps;
-                            break;
-                        }
-                    }
-
-                    if (found != null)
-                    {
-                        paper_size = found;
-                        goto END1;
+                        document.DefaultPageSettings.PaperSize = paper_size;
+                        document.DefaultPageSettings.Landscape = bLandscape;
+                        return 0;
                     }
 
                     strError = "打印机 " + document.PrinterSettings.PrinterName + " 的纸张类型 " + strPaperName + " 当前不可用，请重新选定纸张";
                     return 1;
                 }
-
-            END1:
-                document.DefaultPageSettings.PaperSize = paper_size;    // 注：直接 new PaperSize 这样赋值，会导致打印机对话框中纸张名字为空。也许可以把 PrinterSetting 里面的也修改了就可以了?
-                document.DefaultPageSettings.Landscape = bLandscape;
-            }
-            else
-            {
-                // 试探用名字来查找
-                PaperSize found = null;
-                foreach (PaperSize ps in document.PrinterSettings.PaperSizes)
-                {
-                    if (ps.PaperName.Equals(strPaperName) == true)
-                    {
-                        found = ps;
-                        break;
-                    }
-                }
-
-                if (found != null)
-                {
-                    paper_size = found;
-                    document.DefaultPageSettings.PaperSize = paper_size;
-                    document.DefaultPageSettings.Landscape = bLandscape;
-                    return 0;
-                }
-
-                strError = "打印机 " + document.PrinterSettings.PrinterName + " 的纸张类型 " + strPaperName + " 当前不可用，请重新选定纸张";
-                return 1;
-            }
 #if NO
             if ((string.IsNullOrEmpty(strPaperName) == false
                 && strPaperName != document.DefaultPageSettings.PaperSize.PaperName)
@@ -1065,7 +1058,14 @@ namespace dp2Circulation
             }
 #endif
 
-            return 0;
+                return 0;
+            }
+            catch(Exception ex)
+            {
+                // 2017/4/26
+                strError = ex.Message;
+                return -1;
+            }
         }
 
         /// <summary>
@@ -1087,7 +1087,7 @@ namespace dp2Circulation
             strError = "";
             int nRet = 0;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行打印"
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行打印"
                 + (bPrintPreview == true ? "预览" : "")
                 + "</div>");
 
@@ -1275,9 +1275,9 @@ namespace dp2Circulation
                                     MainForm.SetControlFont(paper_dialog, this.Font, false);
                                     paper_dialog.Comment = "纸张 " + this.PrinterInfo.PaperName + " 不在打印机 " + this.PrinterInfo.PrinterName + " 的可用纸张列表中。\r\n请重新选定纸张";
                                     paper_dialog.Document = this.document;
-                                    this.MainForm.AppInfo.LinkFormState(paper_dialog, "paper_dialog_state");
+                                    Program.MainForm.AppInfo.LinkFormState(paper_dialog, "paper_dialog_state");
                                     paper_dialog.ShowDialog(this);
-                                    this.MainForm.AppInfo.UnlinkFormState(paper_dialog);
+                                    Program.MainForm.AppInfo.UnlinkFormState(paper_dialog);
 
                                     if (paper_dialog.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                                         return 0;
@@ -1301,9 +1301,9 @@ namespace dp2Circulation
                     {
                         printPreviewDialog1.Document = this.document;
 
-                        this.MainForm.AppInfo.LinkFormState(printPreviewDialog1, "labelprintform_printpreviewdialog_state");
+                        Program.MainForm.AppInfo.LinkFormState(printPreviewDialog1, "labelprintform_printpreviewdialog_state");
                         printPreviewDialog1.ShowDialog(this);
-                        this.MainForm.AppInfo.UnlinkFormState(printPreviewDialog1);
+                        Program.MainForm.AppInfo.UnlinkFormState(printPreviewDialog1);
                     }
                     else
                     {
@@ -1321,7 +1321,7 @@ namespace dp2Circulation
             }
             finally
             {
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行打印"
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行打印"
                 + (bPrintPreview == true ? "预览" : "")
                 + "</div>");
             }
@@ -1343,14 +1343,14 @@ namespace dp2Circulation
             string strError = "";
 
             // 需要先创建标签文件
-            string strLabelFilename = this.MainForm.NewTempFilename(
+            string strLabelFilename = Program.MainForm.NewTempFilename(
                 "temp_labelfiles",
                 "~label_");
-            string strErrorFilename = this.MainForm.NewTempFilename(
+            string strErrorFilename = Program.MainForm.NewTempFilename(
                 "temp_labelfiles",
                 "~error_");
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行打印预览</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行打印预览</div>");
 
             this._processing++;
             try
@@ -1423,7 +1423,7 @@ namespace dp2Circulation
                 }
 
                 this._processing--;
-                // this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行打印预览</div>");
+                // Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行打印预览</div>");
             }
 
             return 0;
@@ -1575,10 +1575,10 @@ namespace dp2Circulation
             string strError = "";
 
             // 需要先创建标签文件
-            string strLabelFilename = this.MainForm.NewTempFilename(
+            string strLabelFilename = Program.MainForm.NewTempFilename(
                 "temp_labelfiles",
                 "~label_");
-            string strErrorFilename = this.MainForm.NewTempFilename(
+            string strErrorFilename = Program.MainForm.NewTempFilename(
     "temp_labelfiles",
     "~error_");
 
@@ -1652,7 +1652,7 @@ namespace dp2Circulation
                 }
 
                 this._processing--;
-                // this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行打印</div>");
+                // Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束执行打印</div>");
             }
 
             return 0;
@@ -1738,8 +1738,8 @@ namespace dp2Circulation
                     // strBarcode = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
                 }
 
-                bool bExistEntityForm = (this.MainForm.GetTopChildWindow<EntityForm>() != null);
-                bool bExistItemInfoForm = (this.MainForm.GetTopChildWindow<ItemInfoForm>() != null);
+                bool bExistEntityForm = (Program.MainForm.GetTopChildWindow<EntityForm>() != null);
+                bool bExistItemInfoForm = (Program.MainForm.GetTopChildWindow<ItemInfoForm>() != null);
 
                 //
                 menuItem = new MenuItem("打开方式(&T)");
@@ -2197,7 +2197,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "all_search_form",
                     "load_to_exist_detailwindow",
                     true);
@@ -2269,9 +2269,9 @@ namespace dp2Circulation
                 {
                     form = new EntityForm();
 
-                    form.MdiParent = this.MainForm;
+                    form.MdiParent = Program.MainForm;
 
-                    form.MainForm = this.MainForm;
+                    form.MainForm = Program.MainForm;
                     form.Show();
                 }
 
@@ -2320,9 +2320,9 @@ namespace dp2Circulation
                 {
                     form = new ItemInfoForm();
 
-                    form.MdiParent = this.MainForm;
+                    form.MdiParent = Program.MainForm;
 
-                    form.MainForm = this.MainForm;
+                    form.MainForm = Program.MainForm;
                     form.Show();
                 }
 
@@ -2498,7 +2498,6 @@ namespace dp2Circulation
 
                     // 
 
-
                     ListViewItem item = new ListViewItem();
                     item.Text = "";
                     // ListViewUtil.ChangeItemText(item, 1, strBarcode);
@@ -2506,13 +2505,17 @@ namespace dp2Circulation
                     this.listView_records.Items.Add(item);
 
                     FillLineByBarcode(
-                        strBarcode, item);
+                        this.Channel,
+                        strBarcode, 
+                        item);
 
                     items.Add(item);
                 }
 
                 // 刷新浏览行
-                int nRet = RefreshListViewLines(items,
+                int nRet = RefreshListViewLines(
+                    this.Channel,
+                    items,
                     "",
                     false,
                     true,
@@ -2522,7 +2525,9 @@ namespace dp2Circulation
 
                 // 2014/1/15
                 // 刷新书目摘要
-                nRet = FillBiblioSummaryColumn(items,
+                nRet = FillBiblioSummaryColumn(
+                    this.Channel,
+                    items,
                     false,
                     out strError);
                 if (nRet == -1)
@@ -2734,7 +2739,7 @@ namespace dp2Circulation
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            this.MainForm.StatusBarMessage = "册条码号 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBarcodeFilename;
+            Program.MainForm.StatusBarMessage = "册条码号 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBarcodeFilename;
         }
 #endif
 
@@ -2813,7 +2818,7 @@ namespace dp2Circulation
                     object o = m_tableBarcodeColIndex[strItemDbName];
                     if (o == null)
                     {
-                        ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                        ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                         nCol = temp.FindColumnByType("item_barcode");
                         if (nCol == -1)
                         {
@@ -2865,7 +2870,7 @@ namespace dp2Circulation
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            this.MainForm.StatusBarMessage = "册条码号 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBarcodeFilename;
+            Program.MainForm.StatusBarMessage = "册条码号 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportBarcodeFilename;
             return;
         ERROR1:
             MessageBox.Show(strError);
@@ -2943,7 +2948,7 @@ namespace dp2Circulation
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            this.MainForm.StatusBarMessage = "册记录路径 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportRecPathFilename;
+            Program.MainForm.StatusBarMessage = "册记录路径 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文件 " + this.ExportRecPathFilename;
 
 
         }
@@ -3020,7 +3025,7 @@ namespace dp2Circulation
             if (bAppend == true)
                 strExportStyle = "追加";
 
-            this.MainForm.StatusBarMessage = "行内容 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文本文件 " + this.ExportTextFilename;
+            Program.MainForm.StatusBarMessage = "行内容 " + this.listView_records.SelectedItems.Count.ToString() + "个 已成功" + strExportStyle + "到文本文件 " + this.ExportTextFilename;
         }
 
         // 从窗口中移走所选择的事项
@@ -3047,7 +3052,7 @@ namespace dp2Circulation
 
         private void LabelPrintForm_Activated(object sender, EventArgs e)
         {
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
         }
 
         private void textBox_errorInfo_DoubleClick(object sender, EventArgs e)
@@ -3169,16 +3174,16 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(this.textBox_labelFile_content.Text) == false)
                 dlg.SampleLabelText = this.textBox_labelFile_content.Text;
 
-            dlg.UiState = this.MainForm.AppInfo.GetString(
+            dlg.UiState = Program.MainForm.AppInfo.GetString(
                     "label_print_form",
                     "LabelDesignForm_uiState",
                     "");
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "LabelDesignForm_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "LabelDesignForm_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
         "label_print_form",
         "LabelDesignForm_uiState",
         dlg.UiState);
@@ -3268,7 +3273,7 @@ MessageBoxDefaultButton.Button1);
         {
             get
             {
-                return this.MainForm.AppInfo.GetString(
+                return Program.MainForm.AppInfo.GetString(
                 "labelprint",
                 "accessNo_source",
                 "从册记录");

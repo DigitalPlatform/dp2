@@ -20,7 +20,7 @@ namespace DigitalPlatform.OPAC.Server
             string strServerUrl)
         {
             this.RootDir = strRootDir;
-            PathUtil.CreateDirIfNeed(this.RootDir);
+            PathUtil.TryCreateDir(this.RootDir);
 
             this.ServerUrl = strServerUrl;
 
@@ -36,7 +36,7 @@ namespace DigitalPlatform.OPAC.Server
             catch
             {
             }
-            PathUtil.CreateDirIfNeed(this.RootDir);
+            PathUtil.TryCreateDir(this.RootDir);
         }
 
         // 将内核网络配置文件映射到本地
@@ -56,7 +56,7 @@ namespace DigitalPlatform.OPAC.Server
             strLocalPath = this.RootDir + "/" + strPath;
 
             // 确保目录存在
-            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strLocalPath));
+            PathUtil.TryCreateDir(Path.GetDirectoryName(strLocalPath));
 
             this.locks.LockForRead(strLocalPath);
             try
@@ -76,7 +76,7 @@ namespace DigitalPlatform.OPAC.Server
             }
 
             // 确保目录存在
-            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strLocalPath));
+            PathUtil.TryCreateDir(Path.GetDirectoryName(strLocalPath));
 
             this.locks.LockForWrite(strLocalPath);
             try

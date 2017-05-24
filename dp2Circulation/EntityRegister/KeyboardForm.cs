@@ -78,7 +78,7 @@ namespace dp2Circulation
                 if (this.Docked == false)
                     this._layer.SourceRect = this.DesktopBounds;
                 else
-                    this._layer.SourceRect = this.tableLayoutPanel1.RectangleToScreen(new Rectangle(new Point(0,0), this.tableLayoutPanel1.Size));
+                    this._layer.SourceRect = this.tableLayoutPanel1.RectangleToScreen(new Rectangle(new Point(0, 0), this.tableLayoutPanel1.Size));
             }
         }
 
@@ -329,7 +329,7 @@ namespace dp2Circulation
             if (step == Step.EditBiblio)
             {
                 this.textBox_input.SelectAll();
-                    this.SetTarget("MarcEdit");
+                this.SetTarget("MarcEdit");
 
                 if (StringUtil.IsInList("dont_hilight", strStyle) == false)
                 {
@@ -392,7 +392,7 @@ namespace dp2Circulation
                         this.EnableInput(false);
                     }
                 }
-                
+
                 DisplayInfo(step);
                 return true;
             }
@@ -618,7 +618,7 @@ namespace dp2Circulation
             string strTail = "</body></html>";
 
             string strHtml = strHead
-    + "<h2>"+strError+"</h2>"
+    + "<h2>" + strError + "</h2>"
     + strTail;
 
             if (strHtml == _lastHtml)
@@ -659,9 +659,9 @@ namespace dp2Circulation
             {
                 string strGifFileName = Path.Combine(this.BaseForm.MainForm.DataDir, "ajax-loader3.gif");
                 strHtml = strHead
-                    + "<h2 align='center'><img src='"+strGifFileName+"' /></h2>"
+                    + "<h2 align='center'><img src='" + strGifFileName + "' /></h2>"
                     + "<h2 align='center'>正在检索书目，请等待 ...</h2>"
-                    + strTail; 
+                    + strTail;
             }
             else if (step == Step.SearchBiblioCompleted)
             {
@@ -716,7 +716,7 @@ namespace dp2Circulation
                     + "<h1>编辑书目记录</h1>"
                     + "<li>请按照提示输入字段内容</li>"
                     + "<li>输入刚才用过的检索词，则可新添一个册记录</li>"
-                    + strTail; 
+                    + strTail;
             }
 
             // webBrowser_info.DocumentText = strHtml;
@@ -1066,6 +1066,12 @@ namespace dp2Circulation
 
         private void KeyboardForm_Resize(object sender, EventArgs e)
         {
+            ResetPanelBarcodeSize();
+            UpdateRectSource();
+        }
+
+        void ResetPanelBarcodeSize()
+        {
             int nWidth = this.tableLayoutPanel1.ClientSize.Width - this.tableLayoutPanel1.Padding.Horizontal - this.tableLayoutPanel1.Margin.Horizontal;
             this.webBrowser_info.Size = new System.Drawing.Size(nWidth, this.webBrowser_info.Size.Height);
             // this.panel_barcode.Size = new System.Drawing.Size(nWidth, this.panel_barcode.Size.Height);
@@ -1073,7 +1079,6 @@ namespace dp2Circulation
             this.button_scan.Location = new Point(this.textBox_input.Location.X + this.textBox_input.Width, this.textBox_input.Location.Y);
             // this.panel_barcode.BackColor = Color.Red;
             //this.tableLayoutPanel1.Width = this.ClientSize.Width;
-            UpdateRectSource();
         }
 
         // 从列表中选入上/下一个值
@@ -1169,6 +1174,8 @@ namespace dp2Circulation
                 this.tableLayoutPanel1.BackColor = Color.DimGray;
                 this.tableLayoutPanel1.ForeColor = Color.White;
             }
+
+            ResetPanelBarcodeSize();    // 2017/4/8
         }
 
         #endregion
@@ -1239,7 +1246,7 @@ namespace dp2Circulation
                 this._layer.Transparent = false;
             }
             else
-                throw new ArgumentException("未知的 strState 值 '"+strState+"'", "strState");
+                throw new ArgumentException("未知的 strState 值 '" + strState + "'", "strState");
         }
 
 #if NO
@@ -1284,72 +1291,6 @@ namespace dp2Circulation
                     this._layer.Transparent = false;
             }
         }
-
-#if NO
-        bool _bDrag = false;
-        Point _startPoint;
-        Point _currentPoint;
-        Rectangle _startRect;
-
-        Rectangle _lastFrameRect = new Rectangle(0, 0, 0, 0);
-
-        private void panel_main_MouseDown(object sender, MouseEventArgs e)
-        {
-            _bDrag = true;
-            _startPoint = e.Location;
-            _currentPoint = _startPoint;
-            _startRect = new Rectangle(this.panel_main.Location, this.panel_main.Size);
-        }
-
-        private void panel_main_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (_bDrag == true)
-            {
-                int x_delta = e.X - _startPoint.X;
-                int y_delta = e.Y - _startPoint.Y;
-                Rectangle rect = _startRect;
-                rect.Offset(x_delta, y_delta);
-                // 绘制虚框
-
-                if (_lastFrameRect != rect)
-                {
-                    // 擦除上次的
-                    if (_lastFrameRect != new Rectangle(0, 0, 0, 0))
-                    {
-                        ControlPaint.DrawReversibleFrame(_lastFrameRect, Color.White, FrameStyle.Thick);
-                    }
-                    // 绘制本次的
-                    ControlPaint.DrawReversibleFrame(rect, Color.White, FrameStyle.Thick);
-                    _lastFrameRect = rect;
-                }
-                _currentPoint = e.Location;
-            }
-        }
-
-        private void panel_main_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (_bDrag == true)
-            {
-                if (_lastFrameRect != new Rectangle(0, 0, 0, 0))
-                {
-                    ControlPaint.DrawReversibleFrame(_lastFrameRect, Color.White, FrameStyle.Thick);
-                    _lastFrameRect = new Rectangle(0, 0, 0, 0);
-                    this.Update();
-                }
-                int x_delta = e.X - _startPoint.X;
-                int y_delta = e.Y - _startPoint.Y;
-                Rectangle rect = _startRect;
-                rect.Offset(x_delta, y_delta);
-                this.panel_main.Location = new Point(rect.X, rect.Y);
-
-                _bDrag = false;
-
-                this.Invalidate();
-            }
-        }
-#endif
-
-
     }
 
 #if NO

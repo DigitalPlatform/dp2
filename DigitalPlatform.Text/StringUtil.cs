@@ -17,6 +17,45 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        // 规范为半角字符串
+        public static void CanonializeWideChars(List<string> values)
+        {
+            for (int i = 0; i < values.Count; i++)
+            {
+                string value = values[i];
+                string new_value = ToDBC(value);
+                if (value != new_value)
+                {
+                    values[i] = new_value;
+                }
+            }
+        }
+
+        // /
+        // / 转半角的函数(DBC case)
+        // /
+        // /任意字符串
+        // /半角字符串
+        // /
+        // /全角空格为12288，半角空格为32
+        // /其他字符半角(33-126)与全角(65281-65374)的对应关系是：均相差65248
+        // /
+        public static string ToDBC(String input)
+        {
+            char[] c = input.ToCharArray();
+            for (int i = 0; i < c.Length; i++)
+            {
+                if (c[i] == 12288)
+                {
+                    c[i] = (char)32;
+                    continue;
+                }
+                if (c[i] > 65280 && c[i] < 65375)
+                    c[i] = (char)(c[i] - 65248);
+            }
+            return new String(c);
+        }
+
         public static bool IsHttpUrl(string url)
         {
             if (string.IsNullOrEmpty(url))
@@ -144,7 +183,12 @@ namespace DigitalPlatform.Text
             string strDelimiter = ":")
         {
             if (string.IsNullOrEmpty(strList) == true)
-                return "";
+            {
+                if (strPrefix == "")
+                    return "";
+                return null;
+            }
+
             string[] list = strList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
             foreach (string s in list)
             {
@@ -712,6 +756,41 @@ string strTimestamp)
             string strLeft = "";
             string strRight = "";
             ParseTwoPart(strText, strSep, out strLeft, out strRight);
+            List<string> results = new List<string>();
+            results.Add(strLeft);
+            results.Add(strRight);
+            return results;
+        }
+
+        public static List<string> ParseTwoPart(string strText, string[] seps)
+        {
+            string strLeft = "";
+            string strRight = "";
+
+            if (string.IsNullOrEmpty(strText) == true)
+                goto END1;
+
+            int nRet = 0;
+            string strSep = "";
+            foreach (string sep in seps)
+            {
+                nRet = strText.IndexOf(sep);
+                if (nRet != -1)
+                {
+                    strSep = sep;
+                    goto FOUND;
+                }
+            }
+
+            strLeft = strText;
+            goto END1;
+
+        FOUND:
+            Debug.Assert(nRet != -1, "");
+            strLeft = strText.Substring(0, nRet).Trim();
+            strRight = strText.Substring(nRet + strSep.Length).Trim();
+
+        END1:
             List<string> results = new List<string>();
             results.Add(strLeft);
             results.Add(strRight);
@@ -2039,6 +2118,21 @@ string strTimestamp)
                     }
                 }
             }
+        }
+
+        public static bool HasDup(List<string> list)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                string strItem = list[i];
+                for (int j = i + 1; j < list.Count; j++)
+                {
+                    if (strItem == list[j])
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         /*

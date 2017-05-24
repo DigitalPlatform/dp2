@@ -338,7 +338,7 @@ DbType.Int64);
         public string OperTime = "";
         public string Operator = "";    // 2014/4/20
 
-        public static MainForm MainForm = null;
+        // public static MainForm MainForm = null;
 
         // 根据日志 XML 记录填充数据
         // 本函数负责填充基类的数据成员
@@ -1020,7 +1020,7 @@ this.Operator);
                     string strDbType = this.TableName.Substring("operlog".Length);
 
                     // 根据实体库名得到书目库名
-                    this.BiblioRecPath = MainForm.BuildBiblioRecPath(strDbType, // "item",
+                    this.BiblioRecPath = Program.MainForm.BuildBiblioRecPath(strDbType, // "item",
                         this.ItemRecPath,
                         strParentID);
                 }

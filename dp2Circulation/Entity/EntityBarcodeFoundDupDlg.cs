@@ -17,7 +17,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         Commander commander = null;
         WebExternalHost m_webExternalHostItem = new WebExternalHost();
@@ -48,10 +48,12 @@ namespace dp2Circulation
         private void EntityBarcodeFoundDupDlg_Load(object sender, EventArgs e)
         {
             // webbrowser
-            this.m_webExternalHostItem.Initial(this.MainForm, this.webBrowser_item);
+            this.m_webExternalHostItem.Initial(// Program.MainForm,
+                this.webBrowser_item);
             this.webBrowser_item.ObjectForScripting = this.m_webExternalHostItem;
 
-            this.m_webExternalHostBiblio.Initial(this.MainForm, this.webBrowser_biblio);
+            this.m_webExternalHostBiblio.Initial(//Program.MainForm, 
+                this.webBrowser_biblio);
             this.webBrowser_biblio.ObjectForScripting = this.m_webExternalHostBiblio;
 
             this.commander = new Commander(this);
@@ -64,7 +66,7 @@ namespace dp2Circulation
 #if NO
                 Global.SetHtmlString(this.webBrowser_item,
                     this.ItemText,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "entitybarcodedup_item");
 #endif
                 this.m_webExternalHostItem.SetHtmlString(this.ItemText,
@@ -76,7 +78,7 @@ namespace dp2Circulation
 #if NO
                 Global.SetHtmlString(this.webBrowser_biblio,
                     this.BiblioText,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "entitybarcodedup_item");
 #endif
                 this.m_webExternalHostBiblio.SetHtmlString(this.BiblioText,

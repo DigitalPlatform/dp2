@@ -152,7 +152,7 @@ true);
             {
                 string value = BuildContent(record,
 "606",
-new string[] { "a; " },
+new string[] { "a; ", "x--", "y--", "z--" },
 true);
                 if (string.IsNullOrEmpty(value) == false)
                     results.Add("subject", new MarcColumn("subject", value));
@@ -202,7 +202,7 @@ true);
             string[] subfieldList,
             bool trimStart)
         {
-            List<char> chars = new List<char>();    // 用于 TrimStart 的字符
+            List<char> chars = new List<char>() { ' ' };    // 用于 TrimStart 的字符
             Hashtable prefix_table = new Hashtable();  // name -> prefix 
             foreach (string s in subfieldList)
             {
@@ -246,7 +246,7 @@ true);
             string[] subfieldList,
             bool trimStart)
         {
-            List<char> chars = new List<char>();    // 用于 TrimStart 的字符
+            List<char> chars = new List<char>() {' '};    // 用于 TrimStart 的字符
             Hashtable prefix_table = new Hashtable();  // name -> prefix 
             StringBuilder xpath = new StringBuilder();
             xpath.Append("field[@name='200']/subfield[");

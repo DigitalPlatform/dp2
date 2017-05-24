@@ -309,7 +309,7 @@ namespace DigitalPlatform.OPAC.Server
         {
             Debug.Assert(this.m_strTempDir != "", "");
 
-            PathUtil.CreateDirIfNeed(this.m_strTempDir);	// 确保目录创建
+            PathUtil.TryCreateDir(this.m_strTempDir);	// 确保目录创建
             return this.m_strTempDir;
         }
 

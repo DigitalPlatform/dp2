@@ -336,7 +336,6 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-
         // 修改复本字符串中的套数部分
         // parameters:
         //      strText     待修改的整个复本字符串
@@ -392,7 +391,7 @@ namespace DigitalPlatform.CommonControl
         // return:
         //      -1  error
         //      0   succeed
-        static int VerifyDateRange(string strValue,
+        public static int VerifyDateRange(string strValue,
             out string strError)
         {
             strError = "";
@@ -1299,6 +1298,10 @@ namespace DigitalPlatform.CommonControl
                 return null;
             }
 
+            // 2017/2/28
+            if (string.IsNullOrEmpty(item.RefID))
+                item.RefID = Guid.NewGuid().ToString();
+
             return item;
         }
 
@@ -1646,6 +1649,10 @@ namespace DigitalPlatform.CommonControl
                     }
                 }
 
+                // 2017/2/28
+                if (string.IsNullOrEmpty(item.RefID))
+                    item.RefID = Guid.NewGuid().ToString();
+
                 item.State = ItemState.New;
                 return item;
             }
@@ -1683,6 +1690,10 @@ namespace DigitalPlatform.CommonControl
                     if (nRet == -1)
                         throw new Exception("装载订购记录缺省值时出错: " + strError);
                 }
+
+                // 2017/2/28
+                if (string.IsNullOrEmpty(item.RefID))
+                    item.RefID = Guid.NewGuid().ToString();
 
                 item.State = ItemState.New;
                 return item;

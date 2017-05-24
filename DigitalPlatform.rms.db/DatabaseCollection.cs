@@ -192,7 +192,7 @@ namespace DigitalPlatform.rms
             string strObjectDir = this.DataDir + "\\object";
             try
             {
-                PathUtil.CreateDirIfNeed(strObjectDir);
+                PathUtil.TryCreateDir(strObjectDir);
             }
             catch (Exception ex)
             {
@@ -217,7 +217,7 @@ namespace DigitalPlatform.rms
 
             try
             {
-                PathUtil.CreateDirIfNeed(strTempDir);
+                PathUtil.TryCreateDir(strTempDir);
             }
             catch (Exception ex)
             {
@@ -2241,7 +2241,9 @@ namespace DigitalPlatform.rms
         //		strOriginRecordPath	    源记录路径
         //		strTargetRecordPath	    目标记录路径
         //		bDeleteOriginRecord	    是否删除源记录
-        //      strMergeStyle           如何合并两条记录的元数据部分? reserve_source / reserve_target。 空表示 reserve_source
+        //      strMergeStyle           如何合并两条记录的 XML 部分和下属对象?
+        //                              关于 XML 部分: reserve_source / reserve_target 之一。 缺省两者，则表示 reserve_source
+        //                              关于下属对象部分：file_reserve_source 和 file_reserve_target 组合使用。如果两者都没有出现，表示最后的目标记录中会被去掉所有 file 元素。这是 2017/4/19 新增的参数值。以前版本都是自动合并源和目标的全部 files 元素
         //      strOutputRecordPath     返回目标记录的路径，用于目标记录是新建一条记录
         //      baOutputRecordTimestamp 返回目标记录的时间戳
         //      strChangeList           返回 id 修改的状况
@@ -2401,48 +2403,118 @@ namespace DigitalPlatform.rms
                 }
             }
 
+            // strMergeStyle    file_reserve_source 和 file_reserve_target 组合使用。如果两者都没有出现，表示最后的目标记录中被去掉所有 file 元素
+
             List<ChangeID> change_list = new List<ChangeID>();  // 发生过变动的 id
 
             XmlDocument target_dom = null;  // 即将写入目标位置的记录
             if (StringUtil.IsInList("reserve_source", strMergeStyle) == true
-                || string.IsNullOrEmpty(strMergeStyle) == true
+                || (StringUtil.IsInList("reserve_source", strMergeStyle) == false && StringUtil.IsInList("reserve_target", strMergeStyle) == false)
                 || existing_dom == null)
             {
                 target_dom = new XmlDocument();
-                target_dom.LoadXml(source_dom.OuterXml);
+                target_dom.LoadXml(source_dom.OuterXml);  // target_dom 是来自源记录的记录内容
 
                 if (existing_dom == null)
                 {
                 }
                 else
                 {
-                    // 需要删除全部 file 元素，重新加入 existing_dom 里面的全部 file 元素，并新加入 source_dom 中的 file 元素(id可能因为冲突而发生变化)
-                    List<string> file_outerxmls = GetFileOuterXmls(existing_dom);
-                    if (file_outerxmls.Count > 0)
+                    if (StringUtil.IsInList("file_reserve_source", strMergeStyle)
+                        && StringUtil.IsInList("file_reserve_target", strMergeStyle))
                     {
+                        // 目标记录中保留原来目标记录中的 file 元素，再合并上源记录的 file 元素
+                        // 算法是，先删除全部 file 元素，重新加入 existing_dom 里面的全部 file 元素，并新加入 source_dom 中的 file 元素(id可能因为冲突而发生变化)
+                        List<string> file_outerxmls = GetFileOuterXmls(existing_dom);
+                        if (file_outerxmls.Count > 0)
+                        {
+                            RemoveFiles(target_dom);
+                            AddFiles(target_dom, file_outerxmls);
+
+                            // 将 source_dom 中 file 元素加入 target_dom。如果 ID 已经存在，则更换 ID
+                            AddFiles(source_dom,
+                        ref target_dom,
+                        out change_list);
+                        }
+                    }
+                    else if (StringUtil.IsInList("file_reserve_source", strMergeStyle))
+                    {
+                        // 目标记录中只保留源记录中的 file 元素
                         RemoveFiles(target_dom);
-                        AddFiles(target_dom, file_outerxmls);
 
                         // 将 source_dom 中 file 元素加入 target_dom。如果 ID 已经存在，则更换 ID
                         AddFiles(source_dom,
                     ref target_dom,
                     out change_list);
                     }
+                    else if (StringUtil.IsInList("file_reserve_target", strMergeStyle))
+                    {
+                        // 目标记录中只保留原来目标记录中的 file 元素
+
+                        // 避免后面从 source 中复制对象
+                        RemoveFiles(source_dom);
+                    }
+                    else
+                    {
+                        // 所有 file 元素都不要
+                        RemoveFiles(target_dom);
+
+                        // 避免后面从 source 中复制对象
+                        RemoveFiles(source_dom);
+                    }
                 }
+
+                // 注：至此 target_dom 中有即将被覆盖记录的全部 file 元素，和来自 source_dom 的全部 file 元素
             }
             else
             {
                 Debug.Assert(existing_dom != null, "");
 
+                Debug.Assert(StringUtil.IsInList("reserve_target", strMergeStyle) == true, "");
+                
                 target_dom = new XmlDocument();
-                target_dom.LoadXml(existing_dom.OuterXml);
+                target_dom.LoadXml(existing_dom.OuterXml);  // target_dom 依然是目标位置的记录内容，意思就是目标位置元数据记录不会被源参数所提供的内容覆盖
 
-                // existing_dom 里面的全部 file 元素已经存在，需要新加入 source_dom 中的 file 元素
+                if (StringUtil.IsInList("file_reserve_source", strMergeStyle)
+    && StringUtil.IsInList("file_reserve_target", strMergeStyle))
+                {
+                    // 目标记录中保留原来目标记录中的 file 元素，再合并上源记录的 file 元素
 
-                // 将 source_dom 中 file 元素加入 target_dom。如果 ID 已经存在，则更换 ID
-                AddFiles(source_dom,
-            ref target_dom,
-            out change_list);
+                    // existing_dom 里面的全部 file 元素已经存在，需要新加入 source_dom 中的 file 元素
+
+                    // 将 source_dom 中 file 元素加入 target_dom。如果 ID 已经存在，则更换 ID
+                    AddFiles(source_dom,
+                ref target_dom,
+                out change_list);
+
+                    // 注：虽然此时目标位置记录基本内容不会被覆盖，但加入了来自源参数记录的 files 元素
+                }
+                else if (StringUtil.IsInList("file_reserve_source", strMergeStyle))
+                {
+                    // 目标记录中只保留源记录中的 file 元素
+                    RemoveFiles(target_dom);
+
+                    // 将 source_dom 中 file 元素加入 target_dom。如果 ID 已经存在，则更换 ID
+                    AddFiles(source_dom,
+                ref target_dom,
+                out change_list);
+                }
+                else if (StringUtil.IsInList("file_reserve_target", strMergeStyle))
+                {
+                    // 目标记录中只保留原来目标记录中的 file 元素
+
+                    // 避免后面从 source 中复制对象
+                    RemoveFiles(source_dom);
+                }
+                else
+                {
+                    // 所有 file 元素都不要
+                    RemoveFiles(target_dom);
+
+                    // 避免后面从 source 中复制对象
+                    RemoveFiles(source_dom);
+                }
+
             }
 
             Debug.Assert(target_dom != null, "");
@@ -2996,7 +3068,7 @@ namespace DigitalPlatform.rms
                 string strDir = DatabaseUtil.GetLocalDir(this.NodeDbs,
                     node);
                 strDir = this.DataDir + "\\" + strDir;
-                PathUtil.CreateDirIfNeed(strDir);
+                PathUtil.TryCreateDir(strDir);
 
                 this.Changed = true;
 

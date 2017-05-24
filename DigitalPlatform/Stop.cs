@@ -680,7 +680,7 @@ string strText)
             {
                 string strOldText = label.Text;
 
-                label.Text = strText;
+                label.Text = string.IsNullOrEmpty(strText) ? " " : strText; // 在某些情况下，空内容和非空内容会导致 label 高度变化，进而引起整个框架窗口刷新。为避免此情况，特意在空的时候设置一个空格字符。2017/4/24
 
                 // label.Owner.Update();    // 优化
 

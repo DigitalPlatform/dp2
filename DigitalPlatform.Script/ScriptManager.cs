@@ -274,6 +274,24 @@ namespace DigitalPlatform.Script
             }
         }
 
+        public List<string> GetAllProjectNames(out string strError)
+        {
+            strError = "";
+
+            List<string> results = new List<string>();
+
+            XmlNodeList nodes = this.dom.DocumentElement.SelectNodes("//project");
+
+            foreach (XmlElement node in nodes)
+            {
+                string strName = node.GetAttribute("name");
+                // TODO: 要考虑名字前面的路径
+                results.Add(strName);
+            }
+
+            return results;
+        }
+
         // 列出全部已经安装的URL
         public int GetInstalledUrls(out List<string> urls,
             out string strError)
@@ -893,7 +911,7 @@ namespace DigitalPlatform.Script
                 {
                     this.Save();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     strError = "保存方案配置文件时出现异常: " + ex.Message;
                     return -1;
@@ -2415,7 +2433,7 @@ namespace DigitalPlatform.Script
 
 
             // 试探磁盘目录中同名文件
-            PathUtil.CreateDirIfNeed(this.DefaultCodeFileDir);
+            PathUtil.TryCreateDir(this.DefaultCodeFileDir);
             DirectoryInfo di = new DirectoryInfo(this.DefaultCodeFileDir);
 
             FileSystemInfo[] fis = di.GetFileSystemInfos();
@@ -2461,7 +2479,7 @@ namespace DigitalPlatform.Script
                     + strPrefix + Convert.ToString(nPrefixNumber);
             }
 
-            PathUtil.CreateDirIfNeed(strNewPath);
+            PathUtil.TryCreateDir(strNewPath);
 
             return strNewPath;
         }
@@ -2518,7 +2536,7 @@ namespace DigitalPlatform.Script
 
 
             // 试探磁盘目录中同名文件
-            PathUtil.CreateDirIfNeed(this.DefaultCodeFileDir);
+            PathUtil.TryCreateDir(this.DefaultCodeFileDir);
             DirectoryInfo di = new DirectoryInfo(this.DefaultCodeFileDir);
 
             FileInfo[] fis = di.GetFiles();

@@ -14,6 +14,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
+using System.Globalization;
 
 namespace dp2LibraryConsole
 {
@@ -76,7 +77,7 @@ namespace dp2LibraryConsole
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     "dp2LibraryConsole_v1");
             }
-            PathUtil.CreateDirIfNeed(this.UserDir);
+            PathUtil.TryCreateDir(this.UserDir);
 
             this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "settings.xml"));
 
@@ -118,7 +119,7 @@ namespace dp2LibraryConsole
             Console.WriteLine();
             string strLocal = "本地 " + this._currentLocalDir;
             Console.Write(new string('*', strLocal.Length) + "\r\n远程 " + this._currentDir + "\r\n" + strLocal + "\r\n> ");
-            
+
             Console.ResetColor();
         }
 
@@ -191,7 +192,7 @@ namespace dp2LibraryConsole
                     // TODO: 是否先得到 FullName ，再根据起点目录截断显示后部
                     if (si is DirectoryInfo)
                     {
-                        AlignWrite(si.LastWriteTime.ToString("u") + " <dir>      ");
+                        AlignWrite(si.LastWriteTime.ToString("s").Replace("T", " ") + " <dir>      ");
                         Console.WriteLine(si.Name + "/");
                         dir_count++;
                     }
@@ -199,7 +200,7 @@ namespace dp2LibraryConsole
                     if (si is FileInfo)
                     {
                         FileInfo info = si as FileInfo;
-                        AlignWrite(info.LastWriteTime.ToString("u") + info.Length.ToString().PadLeft(10, ' ') + "  ");
+                        AlignWrite(info.LastWriteTime.ToString("s").Replace("T", " ") + info.Length.ToString().PadLeft(10, ' ') + "  ");
                         Console.WriteLine(info.Name);
                         file_count++;
                     }
@@ -316,13 +317,13 @@ namespace dp2LibraryConsole
                     if (info.Size == -1)
                     {
                         dir_count++;
-                        AlignWrite(info.CreateTime + " <dir>      ");
+                        AlignWrite(GetLocalTime(GetLastWriteTime(info)) + " <dir>      ");
                         Console.WriteLine(strName);
                     }
                     else
                     {
                         file_count++;
-                        AlignWrite(info.CreateTime + info.Size.ToString().PadLeft(10, ' ') + "  ");
+                        AlignWrite(GetLocalTime(GetLastWriteTime(info)) + info.Size.ToString().PadLeft(10, ' ') + "  ");
                         Console.WriteLine(strName);
                     }
                 }
@@ -369,9 +370,12 @@ namespace dp2LibraryConsole
 
                 // 检查这个远程目录是否存在
 
-                this._currentDir = strResultDirectory;
+                // 用 "/" rdir， strResultDirectory 为 "upload/"
 
-                Debug.Assert(string.IsNullOrEmpty(this._currentDir) == true || this._currentDir.IndexOf("\\") == -1, 
+                // this._currentDir = strResultDirectory;
+                this._currentDir = strResultDirectory.Substring("upload".Length);   // 2017/3/20
+
+                Debug.Assert(string.IsNullOrEmpty(this._currentDir) == true || this._currentDir.IndexOf("\\") == -1,
                     "this._currentDir 中不允许使用字符 '\\'");
 #if DEBUG
                 if (string.IsNullOrEmpty(this._currentDir) == false)
@@ -433,7 +437,7 @@ namespace dp2LibraryConsole
 
                 string strSource = parameters[1];   // strSource 可能为 "*.*" 这样的模式
                 string strTarget = "";  // strTarget 可能空缺
-                
+
                 if (parameters.Count > 2)
                     strTarget = parameters[2];
 
@@ -523,9 +527,24 @@ out strError);
             if (nRet == -1)
                 return -1;
 
-            nRet = DownloadFiles("", filenames, strLocalDir, out strError);
+            if (filenames == null || filenames.Count == 0)
+            {
+                strError = strSource + " 没有找到";
+                return -1;
+            }
+
+            // return:
+            //      -1  出错
+            //      其他  下载成功的文件数
+            nRet = DownloadFiles(
+                GetRemoteCurrentDir().Substring(1),  // "", 
+                filenames,
+                strLocalDir,
+                out strError);
             if (nRet == -1)
                 return -1;
+
+            Console.WriteLine("共下载文件 " + nRet + " 个");
 
             return 0;
         }
@@ -589,14 +608,15 @@ out strError);
                 if (si is DirectoryInfo)
                 {
                     string strServerFilePath = "!upload/" + GetFullDirectory(strTarget) + "/~" + Guid.NewGuid().ToString();
-                    string strZipFileName = Path.GetTempFileName(); // TODO: 建议在当前目录创建临时文件，便于观察是否有删除遗漏，和处理
+                    string strZipFileName = Path.GetTempFileName(); // "c:\\temp\\test.zip"; // TODO: 建议在当前目录创建临时文件，便于观察是否有删除遗漏，和处理
+                    File.Delete(strZipFileName);
                     try
                     {
                         // return:
                         //      -1  出错
                         //      0   没有发现需要上传的文件
                         //      1   成功压缩创建了 .zip 文件
-                        nRet = CompressDirecotry(
+                        nRet = CompressDirectory(
                     strSourcePath,
                     strZipFileName,
                     Encoding.UTF8,
@@ -631,6 +651,20 @@ out strError);
                 else if (si is FileInfo)
                 {
                     string strServerFilePath = "!upload/" + GetFullDirectory(strTarget);
+
+#if NO
+                    {
+                        DateTime time = File.GetLastWriteTime(strSourcePath);
+                        string strTemp = ByteArray.GetHexTimeStampString(BitConverter.GetBytes(time.Ticks));
+
+                        byte [] baTimeStamp = ByteArray.GetTimeStampByteArray(strTemp);
+                        long lTicks = BitConverter.ToInt64(baTimeStamp, 0);
+
+
+                        DateTime time1 = new DateTime(lTicks);
+                    }
+#endif
+
                     // return:
                     //		-1	出错
                     //		0   上传文件成功
@@ -639,7 +673,7 @@ out strError);
                 this.Channel,
                 strSourcePath,
                 strServerFilePath,
-                            "",
+                "last_write_time:" + ByteArray.GetHexTimeStampString(BitConverter.GetBytes((long)File.GetLastWriteTimeUtc(strSourcePath).Ticks)),
                 null,
                 true,
                 out strError);
@@ -667,7 +701,7 @@ out strError);
             strName = "";
             strTime = "";
             strSize = "";
-            string[] parts = strText.Split(new char[] {'|'});
+            string[] parts = strText.Split(new char[] { '|' });
             if (parts.Length > 0)
                 strName = parts[0];
             if (parts.Length > 1)
@@ -741,7 +775,7 @@ out strError);
             if (result1.Count > 0)
             {
                 string strText = result1[0];
-                int index = strText.IndexOfAny(new char[] {'.','/','\\' });
+                int index = strText.IndexOfAny(new char[] { '.', '/', '\\' });
                 if (index != -1)
                 {
                     result1[0] = strText.Substring(0, index);
@@ -914,7 +948,7 @@ value);
         }
 
         int _index = -1; // -1 表示不进行字符动画
-        char[] movingChars = new char[] {'/','-','\\','|' };
+        char[] movingChars = new char[] { '/', '-', '\\', '|' };
 
         void Channel_Idle(object sender, IdleEventArgs e)
         {
@@ -937,8 +971,8 @@ value);
         // return:
         //      -1  出错
         //      0   成功
-        public int Login(string strUrl, 
-            string strUserName, 
+        public int Login(string strUrl,
+            string strUserName,
             string strPassword,
             out string strError)
         {
@@ -1156,7 +1190,7 @@ value);
         //      -1  出错
         //      0   没有发现需要上传的文件
         //      1   成功压缩创建了 .zip 文件
-        int CompressDirecotry(
+        int CompressDirectory(
             string strDataDir,
             string strZipFileName,
             Encoding encoding,
@@ -1176,6 +1210,11 @@ value);
 
             using (ZipFile zip = new ZipFile(encoding))
             {
+                // http://stackoverflow.com/questions/15337186/dotnetzip-badreadexception-on-extract
+                // https://dotnetzip.codeplex.com/workitem/14087
+                // uncommenting the following line can be used as a work-around
+                zip.ParallelDeflateThreshold = -1;
+
                 foreach (string filename in filenames)
                 {
                     string strShortFileName = filename.Substring(strDataDir.Length + 1);
@@ -1391,7 +1430,7 @@ value);
                     ProgressMessage(nCursorLeft, nCursorTop,
                         "uploading "
                         // + ranges[j] + "/"  + Convert.ToString(fi.Length)
-                        + " " + strPercent + " " 
+                        + " " + strPercent + " "
                         + strUploadedSize + "/" + strTotalSize + " "
                         // + strClientFilePath
                         + strWarning + strWaiting);
@@ -1495,6 +1534,9 @@ value);
             return 0;
         }
 
+        // return:
+        //      -1  出错
+        //      其他  下载成功的文件数
         int DownloadFiles(
             string strRemoteBase,
             List<FileItemInfo> filenames,
@@ -1504,6 +1546,7 @@ value);
             strError = "";
             int nRet = 0;
 
+            int nCount = 0;
             foreach (FileItemInfo info in filenames)
             {
                 string strDelta = "";
@@ -1513,12 +1556,17 @@ value);
                     strRemoteBase = Path.GetDirectoryName(info.Name);
                 }
                 else
-                    strDelta = info.Name.Substring(strRemoteBase.Length + 1);
+                {
+                    if (string.IsNullOrEmpty(strRemoteBase) == false && strRemoteBase[strRemoteBase.Length - 1] == '/')
+                        strDelta = info.Name.Substring(strRemoteBase.Length);
+                    else
+                        strDelta = info.Name.Substring(strRemoteBase.Length + 1);
+                }
 
                 if (info.Size != -1)
                 {
                     string strLocalPath = Path.Combine(strTargetDir, strDelta);
-                    PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strLocalPath));
+                    PathUtil.TryCreateDir(Path.GetDirectoryName(strLocalPath));
 
                     // Console.WriteLine(info.Name);
                     Console.WriteLine(strLocalPath);
@@ -1531,19 +1579,24 @@ value);
                     nRet = DownloadFile(
             null,
             this.Channel,
-            "!upload" + info.Name.Replace("\\", "/"),
+                        // "!upload" + info.Name.Replace("\\", "/"),
+            "!" + info.Name.Replace("\\", "/"), // 2017/4/8
             strLocalPath,
             out strError);
                     if (nRet == -1)
                         return -1;
+
+                    SetFileTime(info, strLocalPath);
+
+                    nCount++;
                 }
                 else
                 {
                     List<FileItemInfo> filenames1 = null;
 
                     nRet = RemoteList(
-    "!upload", // GetRemoteCurrentDir(),  // "!upload/" + this._currentDir,
-    info.Name.Substring(1).Replace("\\", "/"),
+    "!", // GetRemoteCurrentDir(), // "!upload", // "!upload/" + this._currentDir,
+    info.Name.Replace("\\", "/"), // info.Name.Substring(1).Replace("\\", "/"),
     out filenames1,
     out strError);
                     if (nRet == -1)
@@ -1551,17 +1604,67 @@ value);
 
                     nRet = DownloadFiles(
                         Path.Combine(strRemoteBase, strDelta),
-            filenames1,
-            Path.Combine(strTargetDir, strDelta),
-            out strError);
+                        filenames1,
+                        Path.Combine(strTargetDir, strDelta),
+                        out strError);
                     if (nRet == -1)
                         return -1;
+                    nCount += nRet;
                 }
             }
 
-            return 0;
+            return nCount;
         }
 
+        // 将 U 格式的时间字符串转换为 g 格式的时间字符串(并用空格替换里面的 T)
+        // parameters:
+        //      strUniversalTime    u 格式的时间字符串。GMT 时间值
+        static string GetLocalTime(string strUniversalTime)
+        {
+            DateTime time;
+            if (string.IsNullOrEmpty(strUniversalTime) == false
+                && DateTime.TryParseExact(strUniversalTime,
+                "u",
+                CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None,
+                out time) == true)
+            {
+                return time.ToLocalTime().ToString("s").Replace("T", " ");
+            }
+
+            return strUniversalTime;
+        }
+
+        static string GetLastWriteTime(FileItemInfo info)
+        {
+            if (string.IsNullOrEmpty(info.LastWriteTime) == false)
+                return info.LastWriteTime;
+            return info.CreateTime;
+        }
+
+        static void SetFileTime(FileItemInfo info, string strLocalPath)
+        {
+            DateTime time;
+            if (string.IsNullOrEmpty(info.CreateTime) == false
+                && DateTime.TryParseExact(info.CreateTime,
+                "u",
+                CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None,
+                out time) == true)
+            {
+                File.SetCreationTimeUtc(strLocalPath, time);
+            }
+
+            if (string.IsNullOrEmpty(info.LastWriteTime) == false
+                && DateTime.TryParseExact(info.LastWriteTime,
+"u",
+CultureInfo.InvariantCulture,
+System.Globalization.DateTimeStyles.None,
+out time) == true)
+            {
+                File.SetLastWriteTimeUtc(strLocalPath, time);
+            }
+        }
 #if NO
         // 删除一个远程文件或者目录
         // return:

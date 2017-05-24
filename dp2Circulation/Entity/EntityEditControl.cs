@@ -1146,8 +1146,6 @@ namespace dp2Circulation
             this.Changed = false;
         }
 
-
-
         /// <summary>
         /// 刷新 记录 XMLDOM。即把控件中的内容更新到 XMLDOM 中
         /// </summary>
@@ -1209,7 +1207,56 @@ namespace dp2Circulation
             }
         }
 
+        public void FocusField(string name, bool bSelectAll)
+        {
+            if (name == "barcode")
+            {
+                if (bSelectAll == true)
+                    this.textBox_barcode.SelectAll();
 
+                this.textBox_barcode.Focus();
+            }
+
+            if (name == "state")
+            {
+                if (bSelectAll == true)
+                    this.checkedComboBox_state.SelectAll();
+
+                this.checkedComboBox_state.Focus();
+            }
+
+            if (name == "publishTime")
+            {
+                if (bSelectAll == true)
+                    this.textBox_publishTime.SelectAll();
+
+                this.textBox_publishTime.Focus();
+            }
+
+            if (name == "location")
+            {
+                if (bSelectAll == true)
+                    this.comboBox_location.SelectAll();
+
+                this.comboBox_location.Focus();
+            }
+
+            if (name == "seller")
+            {
+                if (bSelectAll == true)
+                    this.comboBox_seller.SelectAll();
+
+                this.comboBox_seller.Focus();
+            }
+
+            if (name == "bookType")
+            {
+                if (bSelectAll == true)
+                    this.comboBox_bookType.SelectAll();
+
+                this.comboBox_bookType.Focus();
+            }
+        }
 
         /// <summary>
         /// 将输入焦点设置到条码号输入域上

@@ -15,7 +15,8 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
+
         public string IssueText = "";   // 期的HTML信息
         public string BiblioText = "";  // 种的HTML信息
 
@@ -42,13 +43,13 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(this.IssueText) == false)
                 Global.SetHtmlString(this.webBrowser_issue,
                     this.IssueText,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "ossuepublishtimedup_item");
 
             if (String.IsNullOrEmpty(this.BiblioText) == false)
                 Global.SetHtmlString(this.webBrowser_biblio,
                     this.BiblioText,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "ossuepublishtimedup_item");
 
         }

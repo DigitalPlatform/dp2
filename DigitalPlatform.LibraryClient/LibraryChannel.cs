@@ -133,6 +133,7 @@ namespace DigitalPlatform.LibraryClient
 #else
                     this.m_ws.InnerChannel.OperationTimeout = value;
 #endif
+                    // RefreshContext();
                 }
             }
         }
@@ -228,6 +229,8 @@ namespace DigitalPlatform.LibraryClient
         public void Dispose()
         {
             this.Close();
+
+            // this.DisposeContext();
 
             this.BeforeLogin = null;
             this.AfterLogin = null;
@@ -398,10 +401,17 @@ out strError);
             {
                 if (channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
                 {
+                    // 2017/5/5
+                    // 通讯安全性问题，时钟问题
+                    // 极少可能是很早的 dp2library 版本不具备 GetVersion() API
+                    strError = strError + "\r\n\r\n有可能是前端机器时钟和服务器时钟差异过大造成的(也有极少可能是用了很旧的 dp2library 版本)";
+                    return -1;
+#if NO
                     // 原来的dp2Library不具备GetVersion() API，会走到这里
                     strVersion = "0.0";
                     strError = "dp2 前端需要和 dp2Library 2.1 或以上版本配套使用 (而当前 dp2Library 版本号为 '2.0或以下' )。请升级 dp2Library 到最新版本。";
                     return 0;
+#endif
                 }
 
                 strError = "针对服务器 " + channel.Url + " 获得版本号的过程发生错误：" + strError;
@@ -496,6 +506,11 @@ out strError);
 
 #endif
 
+        static string USER_AGENT = "User-Agent";
+        static string DP2LIBRARYCLIENT = "dp2LibraryClient";
+
+        static string TIMEOUT_HEADER = "_timeout";
+
         // public localhost.LibraryWse ws
         /// <summary>
         /// 获取 localhost.dp2libraryClient 对象。这是 WCF 层的通道对象
@@ -532,12 +547,21 @@ out strError);
 #else
                             throw new Exception("当前条件编译版本不支持 basic.http 协议方式");
 #endif
+
                         {
-                            HttpUserAgentEndpointBehavior behavior = new HttpUserAgentEndpointBehavior("dp2LibraryClient");
+                            HttpUserAgentEndpointBehavior behavior = new HttpUserAgentEndpointBehavior(
+                                () =>
+                                {
+                                    Dictionary<string, string> results = new Dictionary<string, string>();
+                                    results.Add(USER_AGENT, DP2LIBRARYCLIENT);
+                                    results.Add(TIMEOUT_HEADER, this.Timeout.ToString());
+                                    return results;
+                                }
+                                );
                             this.m_ws.Endpoint.Behaviors.Add(behavior);
                         }
 
-
+                        // RefreshContext();
                     }
                     else if (uri.Scheme.ToLower() == "rest.http")
                     {
@@ -557,19 +581,18 @@ out strError);
                         }
 
                         {
-                            HttpUserAgentEndpointBehavior behavior = new HttpUserAgentEndpointBehavior("dp2LibraryClient");
+                            HttpUserAgentEndpointBehavior behavior = new HttpUserAgentEndpointBehavior(
+                                () =>
+                                {
+                                    Dictionary<string, string> results = new Dictionary<string, string>();
+                                    results.Add(USER_AGENT, DP2LIBRARYCLIENT);
+                                    results.Add(TIMEOUT_HEADER, this.Timeout.ToString());
+                                    return results;
+                                }
+                                );
                             factory.Endpoint.Behaviors.Add(behavior);
                         }
 
-#if NO
-                        {
-                            var eab = new EndpointAddressBuilder(factory.Endpoint.Address);
-                            eab.Headers.Add(AddressHeader.CreateAddressHeader("ClientIdentification",  // Header Name
-                                                                                string.Empty,           // Namespace
-                                                                                "JabberwockyClient"));  // Header Value
-                            factory.Endpoint.Address = eab.ToEndpointAddress();
-                        }
-#endif
 
 #if BASIC_HTTP
                         this.m_ws = factory.CreateChannel();
@@ -577,6 +600,8 @@ out strError);
 #else
                             throw new Exception("当前条件编译版本不支持 rest.http 协议方式");
 #endif
+
+                        // RefreshContext();
                     }
                     else if (uri.Scheme.ToLower() == "net.tcp")
                     {
@@ -706,6 +731,61 @@ out strError);
                 return m_ws;
             }
         }
+
+#if NO
+        OperationContextScope _context = null;
+
+        void DisposeContext()
+        {
+            if (this._context != null)
+            {
+                this._context.Dispose();
+                this._context = null;
+            }
+        }
+
+        void RefreshContext()
+        {
+            if (this.m_ws is localhost.dp2libraryClient)
+            {
+                localhost.dp2libraryClient client = (this.m_ws as localhost.dp2libraryClient);
+                this.DisposeContext();
+                if (_context == null)
+                    _context = new OperationContextScope(client.InnerChannel);
+            }
+            else
+            {
+                IContextChannel channel = ((IContextChannel)this.m_ws);
+
+                this.DisposeContext();
+                if (_context == null)
+                    _context = new OperationContextScope(channel);
+
+                {
+                    // Add a HTTP Header to an outgoing request
+                    HttpRequestMessageProperty requestMessage = null;
+                    if (OperationContext.Current.OutgoingMessageProperties.ContainsKey(HttpRequestMessageProperty.Name))
+                        requestMessage = OperationContext.Current.OutgoingMessageProperties[HttpRequestMessageProperty.Name] as HttpRequestMessageProperty;
+                    if (requestMessage == null)
+                    {
+                        requestMessage = new HttpRequestMessageProperty();
+                        OperationContext.Current.OutgoingMessageProperties[HttpRequestMessageProperty.Name] = requestMessage;
+                    }
+                    requestMessage.Headers[USER_AGENT] = DP2LIBRARYCLIENT;
+                    requestMessage.Headers[TIMEOUT_HEADER] = this.OperationTimeout.ToString();
+                }
+#if NO
+                using (new OperationContextScope(channel))
+                {
+                    // Add a HTTP Header to an outgoing request
+                    HttpRequestMessageProperty requestMessage = new HttpRequestMessageProperty();
+                    requestMessage.Headers["timeout"] = timeout.ToString();
+                    OperationContext.Current.OutgoingMessageProperties[HttpRequestMessageProperty.Name] = requestMessage;
+                }
+#endif
+            }
+        }
+#endif
 
         /// <summary>
         /// 是否正在进行检索
@@ -3537,6 +3617,82 @@ out strError);
             }
         }
 
+        // return:
+        //      -1  出错
+        //      0   没有找到日志记录，或者附件不存在
+        //      >0  附件总长度
+        public long DownloadOperlogAttachment(
+            DigitalPlatform.Stop stop,
+            string strFileName,
+            long lIndex,
+            long lHint,
+            string strOutputFileName,
+            out long lHintNext,
+            out string strError)
+        {
+            strError = "";
+            lHintNext = -1;
+
+            long lRet = -1;
+
+            using (Stream stream = File.Create(strOutputFileName))
+            {
+                long lAttachmentFragmentStart = 0;
+                int nAttachmentFragmentLength = -1;
+                byte[] attachment_data = null;
+                long lAttachmentTotalLength = 0;
+
+                for (; ; )
+                {
+                    string strXml = "";
+                    lRet = this.GetOperLog(
+                        stop,
+                        strFileName,
+                        lIndex,
+                        lHint,
+                "", // strStyle,
+                "", // strFilter,
+                out strXml,
+                out lHintNext,
+                lAttachmentFragmentStart,
+                nAttachmentFragmentLength,
+                out attachment_data,
+                out lAttachmentTotalLength,
+                out strError);
+                    if (lRet == -1)
+                    {
+                        goto DELETE_AND_RETURN;
+                    }
+                    // 日志记录不存在
+                    if (lRet == 0)
+                    {
+                        lRet = 0;
+                        goto DELETE_AND_RETURN;
+                    } 
+                    // 没有附件
+                    if (lAttachmentTotalLength == 0)
+                    {
+                        lRet = 0;
+                        strError = "附件不存在";
+                        goto DELETE_AND_RETURN;
+                    } 
+                    if (attachment_data == null || attachment_data.Length == 0)
+                    {
+                        lRet = -1;
+                        strError = "attachment_data == null || attachment_data.Length == 0";
+                        goto DELETE_AND_RETURN;
+                    }
+                    stream.Write(attachment_data, 0, attachment_data.Length);
+                    lAttachmentFragmentStart += attachment_data.Length;
+                    if (lAttachmentFragmentStart >= lAttachmentTotalLength)
+                        return lAttachmentTotalLength;
+                }
+            }
+        DELETE_AND_RETURN:
+            File.Delete(strOutputFileName);
+            return lRet;
+        }
+
         //
         // 获得日志
         // result.Value
@@ -5040,6 +5196,23 @@ out strError);
             }
         }
 
+        // 兼容以前用法
+        public long VerifyBarcode(
+    DigitalPlatform.Stop stop,
+    string strLibraryCode,
+    string strBarcode,
+    out string strError)
+        {
+            string strOutputBarcode = "";
+            return VerifyBarcode(
+    stop,
+    "",
+    strLibraryCode,
+    strBarcode,
+    out strOutputBarcode,
+    out strError);
+        }
+
         // 校验条码
         /// <summary>
         /// 校验条码号
@@ -5054,16 +5227,20 @@ out strError);
         /// </returns>
         public long VerifyBarcode(
             DigitalPlatform.Stop stop,
+            string strAction,
             string strLibraryCode,
             string strBarcode,
+            out string strOutputBarcode,
             out string strError)
         {
             strError = "";
+            strOutputBarcode = "";
 
         REDO:
             try
             {
                 IAsyncResult soapresult = this.ws.BeginVerifyBarcode(
+                    strAction,
                     strLibraryCode,
                     strBarcode,
                     null,
@@ -5083,7 +5260,9 @@ out strError);
                     return -1;
                 }
 
-                LibraryServerResult result = this.ws.EndVerifyBarcode(soapresult);
+                LibraryServerResult result = this.ws.EndVerifyBarcode(
+                    out strOutputBarcode,
+                    soapresult);
                 if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
                 {
                     if (DoNotLogin(ref strError) == 1)

@@ -316,10 +316,10 @@ namespace EloamPicture
             this.UserDir = Path.Combine(
     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
     "eloamPicture_v1");
-            PathUtil.CreateDirIfNeed(this.UserDir);
+            PathUtil.TryCreateDir(this.UserDir);
 
             this.OutputDir = Path.Combine(this.UserDir, "pic");
-            PathUtil.CreateDirIfNeed(this.OutputDir);
+            PathUtil.TryCreateDir(this.OutputDir);
             this.pictureSavePath.Text = this.OutputDir;
 
             this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "eloamPicture.xml"));

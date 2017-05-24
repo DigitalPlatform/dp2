@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -14,20 +15,43 @@ namespace dp2Circulation
     public class MergePicture
     {
         // 书目记录
-        static int BIBLIO_WIDTH = 95;
-        static int BIBLIO_HEIGHT = 50;
+        static int _BIBLIO_WIDTH = 95;
+        static int _BIBLIO_HEIGHT = 50;
 
         // 下级记录
-        static int SUBREC_WIDTH = 90;
-        static int SUBREC_HEIGHT = 12;
+        static int _SUBREC_WIDTH = 90;
+        static int _SUBREC_HEIGHT = 12;
 
-        static int SEP = 7; // 普通间隔距离
-        static int PIC_SEP = 30;
+        static int _SEP = 7; // 普通间隔距离
+        static int _PIC_SEP = 30;
 
         static Color lineColor = Color.White;
         static Color leftColor = Color.DarkGreen;
         static Color rightColor = Color.DarkOrange;
 
+        static int BIBLIO_WIDTH = _BIBLIO_WIDTH;
+        static int BIBLIO_HEIGHT = _BIBLIO_HEIGHT;
+        static int SUBREC_WIDTH = _SUBREC_WIDTH;
+        static int SUBREC_HEIGHT = _SUBREC_HEIGHT;
+
+        static int SEP_X = _SEP;
+        static int PIC_SEP_X = _PIC_SEP;
+        static int SEP_Y = _SEP;
+        static int PIC_SEP_Y = _PIC_SEP;
+
+        public static void SetMetrics(SizeF dpi_ratio)
+        {
+            BIBLIO_WIDTH = DpiUtil.GetScalingX(dpi_ratio, _BIBLIO_WIDTH);
+            BIBLIO_HEIGHT = DpiUtil.GetScalingY(dpi_ratio, _BIBLIO_HEIGHT);
+
+            SUBREC_WIDTH = DpiUtil.GetScalingX(dpi_ratio, _SUBREC_WIDTH);
+            SUBREC_HEIGHT = DpiUtil.GetScalingY(dpi_ratio, _SUBREC_HEIGHT);
+
+            SEP_X = DpiUtil.GetScalingX(dpi_ratio, _SEP);
+            SEP_Y = DpiUtil.GetScalingY(dpi_ratio, _SEP);
+            PIC_SEP_X = DpiUtil.GetScalingX(dpi_ratio, _PIC_SEP);
+            PIC_SEP_Y = DpiUtil.GetScalingY(dpi_ratio, _PIC_SEP);
+        }
 
         // parameters:
         //      
@@ -38,35 +62,38 @@ namespace dp2Circulation
             string strTargetTitle,
             MergeStyle style)
         {
-            int x = SEP * 4;
-            int y = SEP * 4;
+            int x = SEP_X * 4;
+            int y = SEP_Y * 4;
 
             // 不含有边距的整个尺寸
-            Size content_size = new Size(BIBLIO_WIDTH + PIC_SEP + BIBLIO_WIDTH,
-    BIBLIO_HEIGHT + (SUBREC_HEIGHT + SEP) * 3 + PIC_SEP / 2 + BIBLIO_HEIGHT + (SUBREC_HEIGHT + SEP) * 5);
+            Size content_size = new Size(BIBLIO_WIDTH + PIC_SEP_X + BIBLIO_WIDTH,
+    BIBLIO_HEIGHT + (SUBREC_HEIGHT + SEP_Y) * 3 + PIC_SEP_Y / 2 + BIBLIO_HEIGHT + (SUBREC_HEIGHT + SEP_Y) * 5);
 
             int x_blank = bound.Width - content_size.Width;
             int y_blank = bound.Height - content_size.Height;
             if (x_blank > 0)
-                x = Math.Max(x_blank / 2, SEP * 4);
+                x = Math.Max(x_blank / 2, SEP_X * 4);
             if (y_blank > 0)
-                y = Math.Max(y_blank / 2, SEP * 4);
+                y = Math.Max(y_blank / 2, SEP_Y * 4);
 
-            Size total_size = new Size(content_size.Width + x + SEP * 4, content_size.Height + y + SEP * 4);
+            Size total_size = new Size(content_size.Width + x + SEP_X * 4, 
+                content_size.Height + y + SEP_Y * 4);
+
+            // testing
+            // e.Graphics.ScaleTransform(2.0F, 2.0F);
 
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
-
 
             // 绘制左边一个书目记录
             Size size = PaintRecord(e.Graphics, x, y,
                 ref_font,
                 strSouceTitle,
                 leftColor,
-                3, new Color[] { leftColor, leftColor, leftColor});
+                3, new Color[] { leftColor, leftColor, leftColor });
 
             // 绘制右边一个书目记录
-            int x2 = x + size.Width + PIC_SEP;
+            int x2 = x + size.Width + PIC_SEP_X;
             int y2 = y;
             PaintRecord(e.Graphics, x2, y2,
                 ref_font,
@@ -75,12 +102,12 @@ namespace dp2Circulation
                 2, new Color[] { rightColor, rightColor });
 
             // 绘制下边一个
-            int x3 = x + (size.Width*2 + PIC_SEP)/2 - size.Width / 2;
-            int y3 = y + size.Height + PIC_SEP / 2;
+            int x3 = x + (size.Width * 2 + PIC_SEP_X) / 2 - size.Width / 2;
+            int y3 = y + size.Height + PIC_SEP_Y / 2;
 
             Color biblio_color = leftColor;
             if ((style & MergeStyle.ReserveSourceBiblio) != 0)
-                            biblio_color = leftColor;
+                biblio_color = leftColor;
             if ((style & MergeStyle.ReserveTargetBiblio) != 0)
                 biblio_color = rightColor;
 
@@ -132,14 +159,18 @@ namespace dp2Circulation
             {
                 // 1 --> 3 subrecord
                 PaintCurve(e.Graphics,
-        x + SUBREC_WIDTH / 2 + SEP * 2, y + BIBLIO_HEIGHT + 3 * (SUBREC_HEIGHT + SEP) / 2,
-        x3 + SUBREC_WIDTH / 2 + SEP * 2, y3 + BIBLIO_HEIGHT + 3 * (SUBREC_HEIGHT + SEP) / 2,
+        x + SUBREC_WIDTH / 2 + SEP_X * 2, 
+        y + BIBLIO_HEIGHT + 3 * (SUBREC_HEIGHT + SEP_Y) / 2,
+        x3 + SUBREC_WIDTH / 2 + SEP_X * 2, 
+        y3 + BIBLIO_HEIGHT + 3 * (SUBREC_HEIGHT + SEP_Y) / 2,
         "left");
 
                 // 2 --> 3 cubrecord
                 PaintCurve(e.Graphics,
-    x2 + SUBREC_WIDTH / 2 + SEP * 2, y2 + BIBLIO_HEIGHT + 0 * (SUBREC_HEIGHT + SEP) + 2 * (SUBREC_HEIGHT + SEP) / 2,
-    x3 + SUBREC_WIDTH / 2 + SEP * 2, y3 + BIBLIO_HEIGHT + 3 * (SUBREC_HEIGHT + SEP) + 2 * (SUBREC_HEIGHT + SEP) / 2,
+    x2 + SUBREC_WIDTH / 2 + SEP_X * 2, 
+    y2 + BIBLIO_HEIGHT + 0 * (SUBREC_HEIGHT + SEP_Y) + 2 * (SUBREC_HEIGHT + SEP_Y) / 2,
+    x3 + SUBREC_WIDTH / 2 + SEP_X * 2, 
+    y3 + BIBLIO_HEIGHT + 3 * (SUBREC_HEIGHT + SEP_Y) + 2 * (SUBREC_HEIGHT + SEP_Y) / 2,
     "right");
             }
 
@@ -147,16 +178,20 @@ namespace dp2Circulation
             {
                 // 1 --> 3 subrecord
                 PaintCurve(e.Graphics,
-        x + SUBREC_WIDTH / 2 + SEP * 2, y + BIBLIO_HEIGHT + 3 * (SUBREC_HEIGHT + SEP) / 2,
-        x3 + SUBREC_WIDTH / 2 + SEP * 2, y3 + BIBLIO_HEIGHT + 3 * (SUBREC_HEIGHT + SEP) / 2,
+        x + SUBREC_WIDTH / 2 + SEP_X * 2, 
+        y + BIBLIO_HEIGHT + 3 * (SUBREC_HEIGHT + SEP_Y) / 2,
+        x3 + SUBREC_WIDTH / 2 + SEP_X * 2,
+        y3 + BIBLIO_HEIGHT + 3 * (SUBREC_HEIGHT + SEP_Y) / 2,
         "left");
             }
             if ((style & MergeStyle.MissingSourceSubrecord) != 0)
             {
                 // 2 --> 3 cubrecord
                 PaintCurve(e.Graphics,
-    x2 + SUBREC_WIDTH / 2 + SEP * 2, y2 + BIBLIO_HEIGHT + 0 * (SUBREC_HEIGHT + SEP) + 2 * (SUBREC_HEIGHT + SEP) / 2,
-    x3 + SUBREC_WIDTH / 2 + SEP * 2, y3 + BIBLIO_HEIGHT + 0 * (SUBREC_HEIGHT + SEP) + 2 * (SUBREC_HEIGHT + SEP) / 2,
+    x2 + SUBREC_WIDTH / 2 + SEP_X * 2,
+    y2 + BIBLIO_HEIGHT + 0 * (SUBREC_HEIGHT + SEP_Y) + 2 * (SUBREC_HEIGHT + SEP_Y) / 2,
+    x3 + SUBREC_WIDTH / 2 + SEP_X * 2, 
+    y3 + BIBLIO_HEIGHT + 0 * (SUBREC_HEIGHT + SEP_Y) + 2 * (SUBREC_HEIGHT + SEP_Y) / 2,
     "right");
             }
 
@@ -205,44 +240,47 @@ namespace dp2Circulation
             string strTitle,
             Color biblio_body_color,
             int nSubRecordCount,
-            Color [] sub_colors)
+            Color[] sub_colors)
         {
             Size size = new Size();
 
             int x = x0;
             int y = y0;
 
-            PaintBiblio(g, x, y, 
+            PaintBiblio(g, x, y,
                 font, strTitle,
                 biblio_body_color);
-            x += SEP * 2;
+            x += SEP_X * 2;
             y += BIBLIO_HEIGHT;
 
             for (int i = 0; i < nSubRecordCount; i++)
             {
                 Color color = sub_colors[i];
-                y += SEP;
+                y += SEP_Y;
                 PaintSubRecord(g, x, y, color);
                 y += SUBREC_HEIGHT;
             }
 
             size.Width = BIBLIO_WIDTH;
-            size.Height = BIBLIO_HEIGHT + SUBREC_HEIGHT * nSubRecordCount + SEP * nSubRecordCount
-                ;
+            size.Height = BIBLIO_HEIGHT + SUBREC_HEIGHT * nSubRecordCount + SEP_Y * nSubRecordCount;
 
             // 画线条
             using (Pen pen = new Pen(lineColor, 1.0F))
             {
                 {
-                    Point pt1 = new Point(x0 + SEP, y0 + BIBLIO_HEIGHT);
-                    Point pt2 = new Point(x0 + SEP, y0 + BIBLIO_HEIGHT + SUBREC_HEIGHT * nSubRecordCount + SEP * nSubRecordCount - SUBREC_HEIGHT / 2);
+                    Point pt1 = new Point(x0 + SEP_X, 
+                        y0 + BIBLIO_HEIGHT);
+                    Point pt2 = new Point(x0 + SEP_X,
+                        y0 + BIBLIO_HEIGHT + SUBREC_HEIGHT * nSubRecordCount + SEP_Y * nSubRecordCount - SUBREC_HEIGHT / 2);
                     g.DrawLine(pen, pt1, pt2);
                 }
 
                 for (int i = 0; i < nSubRecordCount; i++)
                 {
-                    Point pt1 = new Point(x0 + SEP, y0 + BIBLIO_HEIGHT + SUBREC_HEIGHT * i + SEP * i + SEP + SUBREC_HEIGHT / 2);
-                    Point pt2 = new Point(x0 + SEP + SEP, y0 + BIBLIO_HEIGHT + SUBREC_HEIGHT * i + SEP * i + SEP + SUBREC_HEIGHT / 2);
+                    Point pt1 = new Point(x0 + SEP_X, 
+                        y0 + BIBLIO_HEIGHT + SUBREC_HEIGHT * i + SEP_Y * i + SEP_Y + SUBREC_HEIGHT / 2);
+                    Point pt2 = new Point(x0 + SEP_X + SEP_X, 
+                        y0 + BIBLIO_HEIGHT + SUBREC_HEIGHT * i + SEP_Y * i + SEP_Y + SUBREC_HEIGHT / 2);
                     g.DrawLine(pen, pt1, pt2);
                 }
             }
@@ -266,7 +304,7 @@ namespace dp2Circulation
         }
 
         // 绘制一个书目记录的图像
-        static void PaintBiblio(Graphics g, 
+        static void PaintBiblio(Graphics g,
             int x, int y,
             Font font,
             string strTitle,
@@ -304,5 +342,6 @@ namespace dp2Circulation
         ReserveSourceBiblio = 0x08,     // 书目记录，采用源书目记录 (对象都全部合并)
         ReserveTargetBiblio = 0x10,     // 书目记录，采用目标书目记录 (对象都全部合并)
 
+        SubRecordMask = 0x01 | 0x02 | 0x04, // 下级记录部分的掩码
     }
 }

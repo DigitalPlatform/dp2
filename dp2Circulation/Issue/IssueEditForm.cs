@@ -21,32 +21,6 @@ namespace dp2Circulation
     public partial class IssueEditForm : IssueEditFormBase
         // ItemEditFormBase<IssueItem, IssueItemCollection>
     {
-#if NO
-        /// <summary>
-        /// 起始事项
-        /// </summary>
-        public IssueItem StartIssueItem = null;   // 最开始时的对象
-
-        /// <summary>
-        /// 当前事项
-        /// </summary>
-        public IssueItem IssueItem = null;
-
-        /// <summary>
-        /// 事项集合
-        /// </summary>
-        public IssueItemCollection IssueItems = null;
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        /// <summary>
-        /// 期控件
-        /// </summary>
-        public IssueControl IssueControl = null;
-#endif
         /* 一定要放到倒数第二个 PerformLayout()
             this.tableLayoutPanel_main.ResumeLayout(false);
             this.tableLayoutPanel_main.PerformLayout();
@@ -109,9 +83,9 @@ namespace dp2Circulation
         private void IssueEditForm_Load(object sender, EventArgs e)
         {
 #if NO
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
             LoadIssueItem(this.IssueItem);
             EnablePrevNextRecordButtons();

@@ -38,6 +38,13 @@ namespace dp2Circulation
             try
             {
                 this.CfgDom.Load(this.CfgFileName);
+
+                // 2017/5/17
+                if (this.CfgDom.DocumentElement == null)
+                {
+                    strError = "文件 '" + this.CfgFileName + "' 缺乏根元素。\r\n内容为 [" + this.CfgDom.OuterXml + "]";
+                    return -1;
+                }
             }
             catch (FileNotFoundException)
             {
@@ -46,11 +53,19 @@ namespace dp2Circulation
             catch (Exception ex)
             {
                 this.CfgDom = null;
-                strError = "报表配置文件 "+this.CfgFileName+" 打开错误: " + ex.Message;
+                strError = "报表配置文件 " + this.CfgFileName + " 打开错误: " + ex.Message;
                 return -1;
             }
 
             return 0;
+        }
+
+        // 2017/5/17
+        // 在 XML 文件装载时发现格式不正确，可用本函数初始化 CfgDom，达到清空内容，重新配置的准备状态
+        public void InitializeCfgDom()
+        {
+            this.CfgDom = new XmlDocument();
+            this.CfgDom.LoadXml("<root />");
         }
 
         public void Save()
@@ -126,10 +141,10 @@ namespace dp2Circulation
                 return -1;
             }
 
-            node = this.CfgDom.DocumentElement.SelectSingleNode("library[@code='"+strLibraryCode+"']");
+            node = this.CfgDom.DocumentElement.SelectSingleNode("library[@code='" + strLibraryCode + "']");
             if (node != null)
             {
-                strError = "已经存在馆代码 '"+strLibraryCode+"' 的配置事项了，不能重复创建";
+                strError = "已经存在馆代码 '" + strLibraryCode + "' 的配置事项了，不能重复创建";
                 return 1;
             }
 

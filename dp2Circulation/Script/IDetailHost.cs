@@ -50,11 +50,13 @@ namespace dp2Circulation
     // 抽象的种册窗 App-DOM 结构接口
     public interface IBiblioItemsWindow
     {
+#if NO
         MainForm MainForm
         {
             get;
             set;
         }
+#endif
 
         string GetMarc();
 

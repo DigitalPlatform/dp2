@@ -24,7 +24,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口对象
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 用于存储报表配置文件的目录
@@ -48,7 +48,7 @@ namespace dp2Circulation
         {
             // 确保目录已经存在
             if (string.IsNullOrEmpty(this.CfgFileDir) == false)
-                PathUtil.CreateDirIfNeed(this.CfgFileDir);
+                PathUtil.TryCreateDir(this.CfgFileDir);
 
             SetButtonState();
 
@@ -201,7 +201,7 @@ namespace dp2Circulation
 
             string strUrl = "http://dp2003.com/dp2Circulation/report_def/" + strFileName;
 
-            PathUtil.CreateDirIfNeed(this.CfgFileDir);
+            PathUtil.TryCreateDir(this.CfgFileDir);
             strLocalFilePath = Path.Combine(this.CfgFileDir, strFileName);
             string strTempFileName = Path.Combine(this.CfgFileDir, "~temp_download_webfile");
 
@@ -256,14 +256,14 @@ namespace dp2Circulation
             ReportDefForm dlg = new ReportDefForm();
 
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.AppInfo = this.MainForm.AppInfo;
+            dlg.AppInfo = Program.MainForm.AppInfo;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "ReportDefForm_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "ReportDefForm_state");
             dlg.CfgFileName = strLocalFileName;
-            dlg.UiState = this.MainForm.AppInfo.GetString("reportapply_form", "reportdefform_ui_state", "");
+            dlg.UiState = Program.MainForm.AppInfo.GetString("reportapply_form", "reportdefform_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString("reportapply_form", "reportdefform_ui_state", dlg.UiState);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.SetString("reportapply_form", "reportdefform_ui_state", dlg.UiState);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -528,7 +528,7 @@ namespace dp2Circulation
             if (this.comboBox_reportType.Items.Count > 0)
                 return;
 
-            string strCfgDir = Path.Combine(this.MainForm.UserDir, "report_def");
+            string strCfgDir = Path.Combine(Program.MainForm.UserDir, "report_def");
             DirectoryInfo di = new DirectoryInfo(strCfgDir);
 
             List<FileInfo> array = new List<FileInfo>();

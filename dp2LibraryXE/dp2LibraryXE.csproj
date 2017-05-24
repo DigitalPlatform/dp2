@@ -36,7 +36,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>165</ApplicationRevision>
+    <ApplicationRevision>190</ApplicationRevision>
     <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -65,10 +65,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>B8D09834D83AD2740F5BEA6295A24D7AB66B72B4</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>99BD6DA51B692BB60616F7C52E11427F6CE19A3B</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>dp2LibraryXE_3_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>dp2LibraryXE_4_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -219,6 +219,7 @@
     <None Include="dp2LibraryXE_1_TemporaryKey.pfx" />
     <None Include="dp2LibraryXE_2_TemporaryKey.pfx" />
     <None Include="dp2LibraryXE_3_TemporaryKey.pfx" />
+    <None Include="dp2LibraryXE_4_TemporaryKey.pfx" />
     <None Include="dp2LibraryXE_TemporaryKey.pfx" />
     <Content Include="opac_app.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

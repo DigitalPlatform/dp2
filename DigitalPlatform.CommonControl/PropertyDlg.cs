@@ -8,6 +8,7 @@ using System.Collections.Generic;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using System.Text;
 
 namespace DigitalPlatform.CommonControl
 {
@@ -89,16 +90,16 @@ namespace DigitalPlatform.CommonControl
             this.button_uncheckAll = new System.Windows.Forms.Button();
             this.splitContainer_main = new System.Windows.Forms.SplitContainer();
             this.panel_up = new System.Windows.Forms.Panel();
-            this.panel_down = new System.Windows.Forms.Panel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripDropDownButton_quickSet = new System.Windows.Forms.ToolStripDropDownButton();
+            this.panel_down = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
             this.splitContainer_main.SuspendLayout();
             this.panel_up.SuspendLayout();
-            this.panel_down.SuspendLayout();
             this.toolStrip1.SuspendLayout();
+            this.panel_down.SuspendLayout();
             this.SuspendLayout();
             // 
             // label_property
@@ -113,8 +114,8 @@ namespace DigitalPlatform.CommonControl
             // 
             // textBox_property
             // 
-            this.textBox_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_property.Location = new System.Drawing.Point(0, 18);
             this.textBox_property.MaxLength = 0;
@@ -149,11 +150,12 @@ namespace DigitalPlatform.CommonControl
             // 
             // listView_property
             // 
-            this.listView_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.listView_property.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_property.CheckBoxes = true;
             this.listView_property.FullRowSelect = true;
+            this.listView_property.HideSelection = false;
             this.listView_property.Location = new System.Drawing.Point(0, 0);
             this.listView_property.Name = "listView_property";
             this.listView_property.Size = new System.Drawing.Size(586, 207);
@@ -200,8 +202,8 @@ namespace DigitalPlatform.CommonControl
             // 
             // splitContainer_main
             // 
-            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainer_main.Location = new System.Drawing.Point(9, 10);
             this.splitContainer_main.Name = "splitContainer_main";
@@ -231,25 +233,15 @@ namespace DigitalPlatform.CommonControl
             this.panel_up.Size = new System.Drawing.Size(586, 234);
             this.panel_up.TabIndex = 0;
             // 
-            // panel_down
-            // 
-            this.panel_down.Controls.Add(this.label_property);
-            this.panel_down.Controls.Add(this.textBox_property);
-            this.panel_down.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel_down.Location = new System.Drawing.Point(0, 0);
-            this.panel_down.Name = "panel_down";
-            this.panel_down.Size = new System.Drawing.Size(586, 99);
-            this.panel_down.TabIndex = 0;
-            // 
             // toolStrip1
             // 
             this.toolStrip1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.toolStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripDropDownButton_quickSet});
-            this.toolStrip1.Location = new System.Drawing.Point(474, 209);
+            this.toolStrip1.Location = new System.Drawing.Point(505, 209);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(112, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(81, 25);
             this.toolStrip1.TabIndex = 7;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -261,6 +253,16 @@ namespace DigitalPlatform.CommonControl
             this.toolStripDropDownButton_quickSet.Name = "toolStripDropDownButton_quickSet";
             this.toolStripDropDownButton_quickSet.Size = new System.Drawing.Size(69, 22);
             this.toolStripDropDownButton_quickSet.Text = "快速设定";
+            // 
+            // panel_down
+            // 
+            this.panel_down.Controls.Add(this.label_property);
+            this.panel_down.Controls.Add(this.textBox_property);
+            this.panel_down.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel_down.Location = new System.Drawing.Point(0, 0);
+            this.panel_down.Name = "panel_down";
+            this.panel_down.Size = new System.Drawing.Size(586, 99);
+            this.panel_down.TabIndex = 0;
             // 
             // PropertyDlg
             // 
@@ -280,10 +282,10 @@ namespace DigitalPlatform.CommonControl
             this.splitContainer_main.ResumeLayout(false);
             this.panel_up.ResumeLayout(false);
             this.panel_up.PerformLayout();
-            this.panel_down.ResumeLayout(false);
-            this.panel_down.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.panel_down.ResumeLayout(false);
+            this.panel_down.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -314,6 +316,12 @@ namespace DigitalPlatform.CommonControl
             listView.Columns.Add("说明", 900, HorizontalAlignment.Left);
         }
 
+        // 一个事项的附加数据
+        class ItemInfo
+        {
+            public List<string> AliasList { get; set; }
+        }
+
         // 装载一个 XML 文件
         int LoadOneXml(string strFileName,
             out string strError)
@@ -334,12 +342,12 @@ namespace DigitalPlatform.CommonControl
             XmlNodeList propertyList = dom.SelectNodes("root/property");
 
             // int j;
-            foreach (XmlNode node in propertyList)
+            foreach (XmlElement node in propertyList)
             {
                 // 找到事项名字
                 string strName = DomUtil.GetAttr(node, "name");
 
-                if (strName == "")
+                if (string.IsNullOrEmpty(strName))
                     continue;
 
                 // 按照语言找到comment字符串
@@ -361,11 +369,18 @@ namespace DigitalPlatform.CommonControl
                     strComment = DomUtil.GetNodeText(nodeComment);
                 }
 
-                ListViewItem item =
-                    new ListViewItem(strName,
-                    0);
 
+                ListViewItem item = new ListViewItem(strName, 0);
                 item.SubItems.Add(strComment);
+
+                // 2017/4/20
+                string strAlias = node.GetAttribute("alias");
+                if (string.IsNullOrEmpty(strAlias) == false)
+                {
+                    ItemInfo info = new ItemInfo();
+                    info.AliasList = StringUtil.SplitList(strAlias);
+                    item.Tag = info;
+                }
 
                 listView_property.Items.Add(item);
             }
@@ -499,6 +514,18 @@ namespace DigitalPlatform.CommonControl
                 // _propertyNameList.Add(item.Text);
 
                 _propertyNameTable[item.Text.ToLower()] = item;
+
+                // 2017/4/20
+                // 别名也要加入 hashtable
+                ItemInfo info = (ItemInfo)item.Tag;
+                if (info != null && info.AliasList != null)
+                {
+                    foreach (string alias in info.AliasList)
+                    {
+                        if (string.IsNullOrEmpty(alias) == false)
+                            _propertyNameTable[alias.ToLower()] = item;
+                    }
+                }
             }
 
 #if NO
@@ -566,17 +593,17 @@ namespace DigitalPlatform.CommonControl
         }
 
         // 获得一个列表中属于当前没有定义的属性名
-        ArrayList GetNoDefinedPropertyNames(string strList)
+        List<string> GetNoDefinedPropertyNames(string strList)
         {
-            ArrayList aResult = new ArrayList();
-            string[] aName = strList.Split(new Char[] { ',' });
+            List<string> aResult = new List<string>();
+            List<string> names = StringUtil.SplitList(strList);
+            // string[] aName = strList.Split(new Char[] { ',' });
 
-            for (int i = 0; i < aName.Length; i++)
+            // for (int i = 0; i < aName.Length; i++)
+            foreach (string name in names)
             {
-                string strName = aName[i];
-
-                strName = strName.Trim();
-                if (strName == "")
+                string strName = name.Trim();
+                if (string.IsNullOrEmpty(strName))
                     continue;
 
                 if (IsDefinedPropertyName(strName) == true)
@@ -618,42 +645,36 @@ namespace DigitalPlatform.CommonControl
                 return;
 
             // 得到checked事项
-            ArrayList checkedItems = GetCheckedItems(listView_property, e);
-
+            List<ListViewItem> checkedItems = GetCheckedItems(listView_property, e);
 
             // 获得edit中属于没有定义的部分
-            ArrayList aNotDefined = GetNoDefinedPropertyNames(textBox_property.Text);
+            List<string> aNotDefined = GetNoDefinedPropertyNames(textBox_property.Text);
 
-            string strText = "";
+            StringBuilder text = new StringBuilder();
 
             // checked组合为字符串
-            for (int i = 0; i < checkedItems.Count; i++)
+            foreach (ListViewItem item in checkedItems)
             {
-                if (strText != "")
-                    strText += ",";
-                strText += ((ListViewItem)checkedItems[i]).Text;
+                if (text.Length > 0)
+                    text.Append(",");
+                text.Append(item.Text);
             }
 
             // 没有定义部分组合为字符串
-            for (int j = 0; j < aNotDefined.Count; j++)
+            foreach (string s in aNotDefined)
             {
-                if (strText != "")
-                    strText += ",";
-                strText += (string)aNotDefined[j];
+                if (text.Length > 0)
+                    text.Append(",");
+                text.Append(s);
             }
-
-            /*
-            if (textBox_property.Text != strText)
-                textBox_property.Text = strText;
-            */
             string[] aOld = textBox_property.Text.Split(new Char[] { ',' });
-            string[] aNew = strText.Split(new Char[] { ',' });
+            string[] aNew = text.ToString().Split(new Char[] { ',' });
             Array.Sort(aOld);
             Array.Sort(aNew);
 
             if (String.Compare(String.Join(",", aOld), String.Join(",", aNew), true) != 0)
             {
-                textBox_property.Text = strText;
+                textBox_property.Text = text.ToString();
             }
 
             ChangeColor();
@@ -676,6 +697,28 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        bool FindNameInList(string strItemName, List<string> aDefined)
+        {
+            for (int k = 0; k < aDefined.Count; k++)
+            {
+                if (String.Compare(strItemName, (string)aDefined[k], true) == 0)
+                    return true;
+            }
+
+            return false;
+        }
+
+        bool FindNamesInList(List<string> names, List<string> list)
+        {
+            foreach (string name in names)
+            {
+                if (FindNameInList(name, list))
+                    return true;
+            }
+
+            return false;
+        }
+
         private void textBox_property_TextChanged(object sender, System.EventArgs e)
         {
             //bool bChanged = false;
@@ -696,8 +739,14 @@ namespace DigitalPlatform.CommonControl
             // uncheck
             foreach (ListViewItem item in listView_property.Items)
             {
-                string strItemName = item.Text;
+                List<string> alias_list = new List<string>();
+                ItemInfo info = (ItemInfo)item.Tag;
+                if (info != null)
+                    alias_list = info.AliasList;
 
+                alias_list.Insert(0, item.Text);
+
+#if NO
                 bool bFound = false;
                 for (int k = 0; k < aDefined.Count; k++)
                 {
@@ -707,6 +756,8 @@ namespace DigitalPlatform.CommonControl
                         break;
                     }
                 }
+#endif
+                bool bFound = FindNamesInList(alias_list, aDefined);
 
                 // 属于需要off的事项
                 if (bFound == false)
@@ -763,11 +814,15 @@ namespace DigitalPlatform.CommonControl
         // 得到所有checked Item
         // 是当前的所有checked item加上考虑e参数中可能增加和减除的item，合并而成
         // e可以为null，表示不关心这个特殊情况
-        ArrayList GetCheckedItems(System.Windows.Forms.ListView listview,
+        List<ListViewItem> GetCheckedItems(System.Windows.Forms.ListView listview,
             System.Windows.Forms.ItemCheckEventArgs e)
         {
-            ArrayList selectedItems = new ArrayList();
-            selectedItems.AddRange(listview.CheckedItems);
+            List<ListViewItem> selectedItems = new List<ListViewItem>();
+            foreach (ListViewItem item in listview.CheckedItems)
+            {
+                selectedItems.Add(item);
+            }
+            // selectedItems.AddRange(listview.CheckedItems);
 
             if (e != null)
             {

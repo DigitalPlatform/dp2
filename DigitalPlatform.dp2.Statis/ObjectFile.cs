@@ -181,7 +181,7 @@ namespace DigitalPlatform.dp2.Statis
             if (String.IsNullOrEmpty(this.TempDir) == true)
                 return Path.GetTempFileName();
 
-            PathUtil.CreateDirIfNeed(this.TempDir);
+            PathUtil.TryCreateDir(this.TempDir);
 
             for (int i = 0; ; i++)
             {

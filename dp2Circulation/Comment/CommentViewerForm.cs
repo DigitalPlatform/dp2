@@ -29,7 +29,20 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
+
+        // 为了让脚本代码能够兼容
+        public virtual MainForm MainForm
+        {
+            get
+            {
+                return Program.MainForm;
+            }
+            set
+            {
+                // 为了让脚本代码能兼容
+            }
+        }
 
         string m_strHtmlString = "";
 
@@ -48,12 +61,12 @@ namespace dp2Circulation
                 {
                     this.webBrowser_html.Stop();
                     m_strHtmlString = value;
-                    Debug.Assert(this.MainForm != null, "");
+                    Debug.Assert(Program.MainForm != null, "");
 
 #if NO
                     Global.SetHtmlString(this.webBrowser_html,
                         value,
-                        this.MainForm.DataDir,
+                        Program.MainForm.DataDir,
                         "comment_viewer_html");
 #endif
                     this.m_webExternalHost.SetHtmlString(value,
@@ -77,15 +90,15 @@ namespace dp2Circulation
             {
                 m_strXmlString = value;
 
-                Debug.Assert(this.MainForm != null, "");
+                Debug.Assert(Program.MainForm != null, "");
                 /*
                 Global.SetXmlString(this.webBrowser_xml,  // ()
                     value,
-                    this.MainForm.DataDir,
+                    Program.MainForm.DataDir,
                     "comment_viewer_xml");
                  * */
                 Global.SetXmlToWebbrowser(this.webBrowser_xml,
-    this.MainForm.DataDir,
+    Program.MainForm.DataDir,
     "comment_viewer_xml",
     value
     );
@@ -110,7 +123,8 @@ namespace dp2Circulation
             this.m_webExternalHost.IsBelongToHoverWindow = true;    // 表示自己就是hover窗口
 
             // webbrowser
-            this.m_webExternalHost.Initial(this.MainForm, this.webBrowser_html);
+            this.m_webExternalHost.Initial(// Program.MainForm, 
+                this.webBrowser_html);
             this.webBrowser_html.ObjectForScripting = this.m_webExternalHost;
         }
 
@@ -164,7 +178,7 @@ namespace dp2Circulation
 
             DoDock(true);
 
-            this.MainForm.ActivatePropertyPage();
+            Program.MainForm.ActivatePropertyPage();
         }
 
         /// <summary>
@@ -198,16 +212,16 @@ namespace dp2Circulation
         public void DoDock(bool bShowFixedPanel)
         {
             // return; // 测试内存泄漏
-            if (this.MainForm.CurrentPropertyControl != this.tabControl_main)
+            if (Program.MainForm.CurrentPropertyControl != this.tabControl_main)
             {
-                this.MainForm.CurrentPropertyControl = this.tabControl_main;
+                Program.MainForm.CurrentPropertyControl = this.tabControl_main;
                 // 防止内存泄漏
                 ControlExtention.AddFreeControl(_freeControls, this.tabControl_main);
             }
 
             if (bShowFixedPanel == true
-                && this.MainForm.PanelFixedVisible == false)
-                this.MainForm.PanelFixedVisible = true;
+                && Program.MainForm.PanelFixedVisible == false)
+                Program.MainForm.PanelFixedVisible = true;
 
             this.Docked = true;
             this.Visible = false;
@@ -230,9 +244,9 @@ namespace dp2Circulation
         public void Clear()
         {
             Global.ClearHtmlPage(this.webBrowser_html,
-                this.MainForm != null ? this.MainForm.DataDir : null);
+                Program.MainForm != null ? Program.MainForm.DataDir : null);
             Global.ClearHtmlPage(this.webBrowser_xml,
-                this.MainForm != null ? this.MainForm.DataDir : null);
+                Program.MainForm != null ? Program.MainForm.DataDir : null);
         }
 
         /// <summary>
@@ -241,7 +255,7 @@ namespace dp2Circulation
         public void ClearHtml()
         {
             Global.ClearHtmlPage(this.webBrowser_html,
-this.MainForm != null ? this.MainForm.DataDir : null);
+Program.MainForm != null ? Program.MainForm.DataDir : null);
         }
 
         /// <summary>
@@ -250,7 +264,7 @@ this.MainForm != null ? this.MainForm.DataDir : null);
         public void ClearXml()
         {
             Global.ClearHtmlPage(this.webBrowser_xml,
-this.MainForm != null ? this.MainForm.DataDir : null);
+Program.MainForm != null ? Program.MainForm.DataDir : null);
         }
 
         bool m_bSuppressScriptErrors = false;
@@ -284,11 +298,11 @@ this.MainForm != null ? this.MainForm.DataDir : null);
         void DisposeFreeControls()
         {
             // 2015/11/7
-            if (this.tabControl_main != null && this.MainForm != null)
+            if (this.tabControl_main != null && Program.MainForm != null)
             {
                 // 如果当前固定面板拥有 tabcontrol，则要先解除它的拥有关系，否则怕本 Form 摧毁的时候无法 Dispose() 它
-                if (this.MainForm.CurrentPropertyControl == this.tabControl_main)
-                    this.MainForm.CurrentPropertyControl = null;
+                if (Program.MainForm.CurrentPropertyControl == this.tabControl_main)
+                    Program.MainForm.CurrentPropertyControl = null;
             }
 
             ControlExtention.DisposeFreeControls(_freeControls);

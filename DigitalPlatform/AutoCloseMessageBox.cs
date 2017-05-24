@@ -123,7 +123,6 @@ namespace DigitalPlatform
             this.threadWaitMessage =
                 new Thread(new ThreadStart(this.ThreadMain));
             this.threadWaitMessage.Start();
-
         }
 
         public override string Text

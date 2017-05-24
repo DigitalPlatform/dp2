@@ -53,16 +53,19 @@ namespace dp2Circulation
             this.textBox_barcodeFile = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.button_beginByBarcodeFile = new System.Windows.Forms.Button();
-            this.splitContainer_main = new System.Windows.Forms.SplitContainer();
-            this.label3 = new System.Windows.Forms.Label();
-            this.button_saveToBarcodeFile = new System.Windows.Forms.Button();
-            this.textBox_outputBarcodes = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
             this.tabPage_recPathFile = new System.Windows.Forms.TabPage();
             this.button_getRecPathFileName = new System.Windows.Forms.Button();
             this.textBox_recPathFile = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.button_beginByRecPathFile = new System.Windows.Forms.Button();
+            this.splitContainer_main = new System.Windows.Forms.SplitContainer();
+            this.label3 = new System.Windows.Forms.Label();
+            this.button_saveToBarcodeFile = new System.Windows.Forms.Button();
+            this.textBox_outputBarcodes = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.tableLayoutPanel_itemInfo = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel_batchInfo = new System.Windows.Forms.TableLayoutPanel();
             this.contextMenuStrip_loadAction.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_itemInfo)).BeginInit();
             this.splitContainer_itemInfo.Panel1.SuspendLayout();
@@ -71,11 +74,14 @@ namespace dp2Circulation
             this.tabControl_input.SuspendLayout();
             this.tabPage_barcodeInput.SuspendLayout();
             this.tabPage_barcodeFile.SuspendLayout();
+            this.tabPage_recPathFile.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
             this.splitContainer_main.SuspendLayout();
-            this.tabPage_recPathFile.SuspendLayout();
+            this.panel1.SuspendLayout();
+            this.tableLayoutPanel_itemInfo.SuspendLayout();
+            this.tableLayoutPanel_batchInfo.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -90,11 +96,13 @@ namespace dp2Circulation
             // 
             // textBox_barcode
             // 
+            this.textBox_barcode.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.textBox_barcode.Location = new System.Drawing.Point(4, 22);
             this.textBox_barcode.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_barcode.Name = "textBox_barcode";
             this.textBox_barcode.Size = new System.Drawing.Size(138, 21);
             this.textBox_barcode.TabIndex = 1;
+            this.textBox_barcode.Enter += new System.EventHandler(this.textBox_barcode_Enter);
             // 
             // button_loadBarcode
             // 
@@ -132,10 +140,10 @@ namespace dp2Circulation
             // 
             // splitContainer_itemInfo
             // 
-            this.splitContainer_itemInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.splitContainer_itemInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer_itemInfo.Location = new System.Drawing.Point(0, 19);
+            this.splitContainer_itemInfo.Location = new System.Drawing.Point(2, 14);
             this.splitContainer_itemInfo.Margin = new System.Windows.Forms.Padding(2);
             this.splitContainer_itemInfo.Name = "splitContainer_itemInfo";
             // 
@@ -146,8 +154,8 @@ namespace dp2Circulation
             // splitContainer_itemInfo.Panel2
             // 
             this.splitContainer_itemInfo.Panel2.Controls.Add(this.webBrowser_biblio);
-            this.splitContainer_itemInfo.Size = new System.Drawing.Size(312, 178);
-            this.splitContainer_itemInfo.SplitterDistance = 167;
+            this.splitContainer_itemInfo.Size = new System.Drawing.Size(345, 208);
+            this.splitContainer_itemInfo.SplitterDistance = 184;
             this.splitContainer_itemInfo.SplitterWidth = 6;
             this.splitContainer_itemInfo.TabIndex = 4;
             // 
@@ -155,16 +163,22 @@ namespace dp2Circulation
             // 
             this.entityEditControl1.AccessNo = "";
             this.entityEditControl1.AutoScroll = true;
+            this.entityEditControl1.BackColor = System.Drawing.SystemColors.Control;
             this.entityEditControl1.Barcode = "";
             this.entityEditControl1.BatchNo = "";
             this.entityEditControl1.Binding = "";
+            this.entityEditControl1.BindingCost = "";
             this.entityEditControl1.BookType = "";
             this.entityEditControl1.BorrowDate = "";
             this.entityEditControl1.Borrower = "";
             this.entityEditControl1.BorrowPeriod = "";
             this.entityEditControl1.Changed = false;
             this.entityEditControl1.Comment = "";
+            this.entityEditControl1.CreateState = dp2Circulation.ItemDisplayState.Normal;
+            this.entityEditControl1.DisplayMode = "full";
             this.entityEditControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.entityEditControl1.ErrorInfo = "";
+            this.entityEditControl1.ForeColor = System.Drawing.SystemColors.ControlText;
             this.entityEditControl1.Initializing = true;
             this.entityEditControl1.Intact = "";
             this.entityEditControl1.Location = new System.Drawing.Point(0, 0);
@@ -183,11 +197,14 @@ namespace dp2Circulation
             this.entityEditControl1.RefID = "";
             this.entityEditControl1.RegisterNo = "";
             this.entityEditControl1.Seller = "";
-            this.entityEditControl1.Size = new System.Drawing.Size(167, 178);
+            this.entityEditControl1.Size = new System.Drawing.Size(184, 208);
             this.entityEditControl1.Source = "";
             this.entityEditControl1.State = "";
             this.entityEditControl1.TabIndex = 3;
+            this.entityEditControl1.TableMargin = new System.Windows.Forms.Padding(3, 0, 3, 0);
+            this.entityEditControl1.TablePadding = new System.Windows.Forms.Padding(12, 13, 12, 13);
             this.entityEditControl1.Volume = "";
+            this.entityEditControl1.Enter += new System.EventHandler(this.entityEditControl1_Enter);
             // 
             // webBrowser_biblio
             // 
@@ -196,27 +213,26 @@ namespace dp2Circulation
             this.webBrowser_biblio.Margin = new System.Windows.Forms.Padding(2);
             this.webBrowser_biblio.MinimumSize = new System.Drawing.Size(15, 16);
             this.webBrowser_biblio.Name = "webBrowser_biblio";
-            this.webBrowser_biblio.Size = new System.Drawing.Size(139, 178);
+            this.webBrowser_biblio.Size = new System.Drawing.Size(155, 208);
             this.webBrowser_biblio.TabIndex = 0;
             // 
             // textBox_message
             // 
-            this.textBox_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_message.BackColor = System.Drawing.SystemColors.Info;
             this.textBox_message.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_message.ForeColor = System.Drawing.SystemColors.InfoText;
-            this.textBox_message.Location = new System.Drawing.Point(0, 199);
+            this.textBox_message.Location = new System.Drawing.Point(2, 226);
             this.textBox_message.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_message.Name = "textBox_message";
             this.textBox_message.ReadOnly = true;
-            this.textBox_message.Size = new System.Drawing.Size(312, 14);
+            this.textBox_message.Size = new System.Drawing.Size(345, 14);
             this.textBox_message.TabIndex = 5;
             // 
             // button_changeParam
             // 
-            this.button_changeParam.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_changeParam.Location = new System.Drawing.Point(129, 218);
+            this.button_changeParam.Location = new System.Drawing.Point(120, 0);
             this.button_changeParam.Margin = new System.Windows.Forms.Padding(2);
             this.button_changeParam.Name = "button_changeParam";
             this.button_changeParam.Size = new System.Drawing.Size(105, 22);
@@ -227,8 +243,7 @@ namespace dp2Circulation
             // 
             // button_saveCurrentRecord
             // 
-            this.button_saveCurrentRecord.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_saveCurrentRecord.Location = new System.Drawing.Point(0, 218);
+            this.button_saveCurrentRecord.Location = new System.Drawing.Point(0, 0);
             this.button_saveCurrentRecord.Margin = new System.Windows.Forms.Padding(2);
             this.button_saveCurrentRecord.Name = "button_saveCurrentRecord";
             this.button_saveCurrentRecord.Size = new System.Drawing.Size(116, 22);
@@ -239,7 +254,7 @@ namespace dp2Circulation
             // 
             // tabControl_input
             // 
-            this.tabControl_input.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.tabControl_input.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl_input.Controls.Add(this.tabPage_barcodeInput);
             this.tabControl_input.Controls.Add(this.tabPage_barcodeFile);
@@ -248,7 +263,7 @@ namespace dp2Circulation
             this.tabControl_input.Margin = new System.Windows.Forms.Padding(2);
             this.tabControl_input.Name = "tabControl_input";
             this.tabControl_input.SelectedIndex = 0;
-            this.tabControl_input.Size = new System.Drawing.Size(464, 74);
+            this.tabControl_input.Size = new System.Drawing.Size(529, 74);
             this.tabControl_input.TabIndex = 8;
             // 
             // tabPage_barcodeInput
@@ -260,7 +275,7 @@ namespace dp2Circulation
             this.tabPage_barcodeInput.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_barcodeInput.Name = "tabPage_barcodeInput";
             this.tabPage_barcodeInput.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_barcodeInput.Size = new System.Drawing.Size(456, 48);
+            this.tabPage_barcodeInput.Size = new System.Drawing.Size(521, 48);
             this.tabPage_barcodeInput.TabIndex = 0;
             this.tabPage_barcodeInput.Text = "键盘 / 条码阅读器";
             this.tabPage_barcodeInput.UseVisualStyleBackColor = true;
@@ -294,7 +309,7 @@ namespace dp2Circulation
             // 
             // textBox_barcodeFile
             // 
-            this.textBox_barcodeFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_barcodeFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_barcodeFile.Location = new System.Drawing.Point(4, 22);
             this.textBox_barcodeFile.Margin = new System.Windows.Forms.Padding(2);
@@ -325,81 +340,6 @@ namespace dp2Circulation
             this.button_beginByBarcodeFile.UseVisualStyleBackColor = true;
             this.button_beginByBarcodeFile.Click += new System.EventHandler(this.button_beginByBarcodeFile_Click);
             // 
-            // splitContainer_main
-            // 
-            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.splitContainer_main.Location = new System.Drawing.Point(0, 88);
-            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(2);
-            this.splitContainer_main.Name = "splitContainer_main";
-            // 
-            // splitContainer_main.Panel1
-            // 
-            this.splitContainer_main.Panel1.Controls.Add(this.label3);
-            this.splitContainer_main.Panel1.Controls.Add(this.splitContainer_itemInfo);
-            this.splitContainer_main.Panel1.Controls.Add(this.textBox_message);
-            this.splitContainer_main.Panel1.Controls.Add(this.button_changeParam);
-            this.splitContainer_main.Panel1.Controls.Add(this.button_saveCurrentRecord);
-            // 
-            // splitContainer_main.Panel2
-            // 
-            this.splitContainer_main.Panel2.Controls.Add(this.button_saveToBarcodeFile);
-            this.splitContainer_main.Panel2.Controls.Add(this.textBox_outputBarcodes);
-            this.splitContainer_main.Panel2.Controls.Add(this.label4);
-            this.splitContainer_main.Size = new System.Drawing.Size(464, 241);
-            this.splitContainer_main.SplitterDistance = 314;
-            this.splitContainer_main.SplitterWidth = 3;
-            this.splitContainer_main.TabIndex = 9;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label3.Location = new System.Drawing.Point(3, 3);
-            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(44, 12);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "册信息";
-            // 
-            // button_saveToBarcodeFile
-            // 
-            this.button_saveToBarcodeFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button_saveToBarcodeFile.Location = new System.Drawing.Point(2, 218);
-            this.button_saveToBarcodeFile.Margin = new System.Windows.Forms.Padding(2);
-            this.button_saveToBarcodeFile.Name = "button_saveToBarcodeFile";
-            this.button_saveToBarcodeFile.Size = new System.Drawing.Size(134, 22);
-            this.button_saveToBarcodeFile.TabIndex = 8;
-            this.button_saveToBarcodeFile.Text = "保存到文件(&E)";
-            this.button_saveToBarcodeFile.UseVisualStyleBackColor = true;
-            this.button_saveToBarcodeFile.Click += new System.EventHandler(this.button_saveToBarcodeFile_Click);
-            // 
-            // textBox_outputBarcodes
-            // 
-            this.textBox_outputBarcodes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_outputBarcodes.Location = new System.Drawing.Point(-1, 19);
-            this.textBox_outputBarcodes.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox_outputBarcodes.MaxLength = 0;
-            this.textBox_outputBarcodes.Multiline = true;
-            this.textBox_outputBarcodes.Name = "textBox_outputBarcodes";
-            this.textBox_outputBarcodes.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_outputBarcodes.Size = new System.Drawing.Size(150, 195);
-            this.textBox_outputBarcodes.TabIndex = 1;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label4.Location = new System.Drawing.Point(3, 3);
-            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(109, 12);
-            this.label4.TabIndex = 0;
-            this.label4.Text = "已处理条码或路径";
-            // 
             // tabPage_recPathFile
             // 
             this.tabPage_recPathFile.Controls.Add(this.button_getRecPathFileName);
@@ -427,7 +367,7 @@ namespace dp2Circulation
             // 
             // textBox_recPathFile
             // 
-            this.textBox_recPathFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            this.textBox_recPathFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_recPathFile.Location = new System.Drawing.Point(7, 20);
             this.textBox_recPathFile.Margin = new System.Windows.Forms.Padding(2);
@@ -458,11 +398,126 @@ namespace dp2Circulation
             this.button_beginByRecPathFile.UseVisualStyleBackColor = true;
             this.button_beginByRecPathFile.Click += new System.EventHandler(this.button_beginByRecPathFile_Click);
             // 
+            // splitContainer_main
+            // 
+            this.splitContainer_main.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer_main.Location = new System.Drawing.Point(0, 88);
+            this.splitContainer_main.Margin = new System.Windows.Forms.Padding(2);
+            this.splitContainer_main.Name = "splitContainer_main";
+            // 
+            // splitContainer_main.Panel1
+            // 
+            this.splitContainer_main.Panel1.Controls.Add(this.tableLayoutPanel_itemInfo);
+            // 
+            // splitContainer_main.Panel2
+            // 
+            this.splitContainer_main.Panel2.Controls.Add(this.tableLayoutPanel_batchInfo);
+            this.splitContainer_main.Size = new System.Drawing.Size(529, 271);
+            this.splitContainer_main.SplitterDistance = 349;
+            this.splitContainer_main.SplitterWidth = 8;
+            this.splitContainer_main.TabIndex = 9;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label3.Location = new System.Drawing.Point(2, 0);
+            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(44, 12);
+            this.label3.TabIndex = 5;
+            this.label3.Text = "册信息";
+            // 
+            // button_saveToBarcodeFile
+            // 
+            this.button_saveToBarcodeFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_saveToBarcodeFile.Location = new System.Drawing.Point(2, 247);
+            this.button_saveToBarcodeFile.Margin = new System.Windows.Forms.Padding(2);
+            this.button_saveToBarcodeFile.Name = "button_saveToBarcodeFile";
+            this.button_saveToBarcodeFile.Size = new System.Drawing.Size(134, 22);
+            this.button_saveToBarcodeFile.TabIndex = 8;
+            this.button_saveToBarcodeFile.Text = "保存到文件(&E)";
+            this.button_saveToBarcodeFile.UseVisualStyleBackColor = true;
+            this.button_saveToBarcodeFile.Click += new System.EventHandler(this.button_saveToBarcodeFile_Click);
+            // 
+            // textBox_outputBarcodes
+            // 
+            this.textBox_outputBarcodes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_outputBarcodes.Location = new System.Drawing.Point(2, 14);
+            this.textBox_outputBarcodes.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_outputBarcodes.MaxLength = 0;
+            this.textBox_outputBarcodes.Multiline = true;
+            this.textBox_outputBarcodes.Name = "textBox_outputBarcodes";
+            this.textBox_outputBarcodes.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_outputBarcodes.Size = new System.Drawing.Size(168, 229);
+            this.textBox_outputBarcodes.TabIndex = 1;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label4.Location = new System.Drawing.Point(2, 0);
+            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(109, 12);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "已处理条码或路径";
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.button_saveCurrentRecord);
+            this.panel1.Controls.Add(this.button_changeParam);
+            this.panel1.Location = new System.Drawing.Point(3, 245);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(242, 23);
+            this.panel1.TabIndex = 8;
+            // 
+            // tableLayoutPanel_itemInfo
+            // 
+            this.tableLayoutPanel_itemInfo.ColumnCount = 1;
+            this.tableLayoutPanel_itemInfo.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_itemInfo.Controls.Add(this.label3, 0, 0);
+            this.tableLayoutPanel_itemInfo.Controls.Add(this.panel1, 0, 3);
+            this.tableLayoutPanel_itemInfo.Controls.Add(this.splitContainer_itemInfo, 0, 1);
+            this.tableLayoutPanel_itemInfo.Controls.Add(this.textBox_message, 0, 2);
+            this.tableLayoutPanel_itemInfo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_itemInfo.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_itemInfo.Name = "tableLayoutPanel_itemInfo";
+            this.tableLayoutPanel_itemInfo.RowCount = 4;
+            this.tableLayoutPanel_itemInfo.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_itemInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_itemInfo.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_itemInfo.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_itemInfo.Size = new System.Drawing.Size(349, 271);
+            this.tableLayoutPanel_itemInfo.TabIndex = 9;
+            // 
+            // tableLayoutPanel_batchInfo
+            // 
+            this.tableLayoutPanel_batchInfo.ColumnCount = 1;
+            this.tableLayoutPanel_batchInfo.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_batchInfo.Controls.Add(this.label4, 0, 0);
+            this.tableLayoutPanel_batchInfo.Controls.Add(this.button_saveToBarcodeFile, 0, 2);
+            this.tableLayoutPanel_batchInfo.Controls.Add(this.textBox_outputBarcodes, 0, 1);
+            this.tableLayoutPanel_batchInfo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_batchInfo.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_batchInfo.Name = "tableLayoutPanel_batchInfo";
+            this.tableLayoutPanel_batchInfo.RowCount = 3;
+            this.tableLayoutPanel_batchInfo.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_batchInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_batchInfo.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_batchInfo.Size = new System.Drawing.Size(172, 271);
+            this.tableLayoutPanel_batchInfo.TabIndex = 9;
+            // 
             // QuickChangeEntityForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(464, 338);
+            this.ClientSize = new System.Drawing.Size(529, 368);
             this.Controls.Add(this.splitContainer_main);
             this.Controls.Add(this.tabControl_input);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -484,14 +539,17 @@ namespace dp2Circulation
             this.tabPage_barcodeInput.PerformLayout();
             this.tabPage_barcodeFile.ResumeLayout(false);
             this.tabPage_barcodeFile.PerformLayout();
-            this.splitContainer_main.Panel1.ResumeLayout(false);
-            this.splitContainer_main.Panel1.PerformLayout();
-            this.splitContainer_main.Panel2.ResumeLayout(false);
-            this.splitContainer_main.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).EndInit();
-            this.splitContainer_main.ResumeLayout(false);
             this.tabPage_recPathFile.ResumeLayout(false);
             this.tabPage_recPathFile.PerformLayout();
+            this.splitContainer_main.Panel1.ResumeLayout(false);
+            this.splitContainer_main.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).EndInit();
+            this.splitContainer_main.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            this.tableLayoutPanel_itemInfo.ResumeLayout(false);
+            this.tableLayoutPanel_itemInfo.PerformLayout();
+            this.tableLayoutPanel_batchInfo.ResumeLayout(false);
+            this.tableLayoutPanel_batchInfo.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -527,5 +585,8 @@ namespace dp2Circulation
         private System.Windows.Forms.TextBox textBox_recPathFile;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button button_beginByRecPathFile;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_itemInfo;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_batchInfo;
     }
 }

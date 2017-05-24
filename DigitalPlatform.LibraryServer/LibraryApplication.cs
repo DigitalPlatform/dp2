@@ -143,7 +143,14 @@ namespace DigitalPlatform.LibraryServer
         //      2.100 (2017/1/16) CopyBiblioInfo() API 写入操作日志的时候，增加了 overwritedRecord 元素用于存储被覆盖位置覆盖前的记录内容
         //      2.101 (2017/1/17) Login() API 在代理登录的时候，从上一个版本的做法(被代理账户为工作人员账户的时候，登录成功后使用代理账户权限)改为登录成功后使用被代理账户的权限、会自动过滤掉高于代理账户的危险权限
         //      2.102 (2017/1/20) locationTypes 定义是否允许 item 元素文本值为空，要看 library.xml 中 <circulation 元素 acceptBlankRoomName 属性，缺省为 false。SetEntities() API 保存册记录时根据 locationTypes 元素对册记录的馆藏地内容进行检查，如果 locationTypes 定义允许 room 部分为空，这个版本也是不会出现(保存时拒绝的) bug 了
-        public static string Version = "2.102";
+        //      2.103 (2017/3/14) SetBiblioInfo() 的 strStyle 支持 “bibliotoitem” 在修改记录以前保存旧书目记录到现有册记录的 biblio 元素
+        //      2.104 (2017/3/29) 为 SetOneClassTailNumber() API 增加 memo unmemo skipmemo 三个新功能
+        //      2.105 (2017/4/14) 消除 SearchDup() API 中合并算法之前没有对结果集进行排序的 Bug
+        //      2.106 (2017/4/20) CopyBiblioInfo() API 经过较为严格的测试，修正了一些 Bug，从此前端的移动书目记录功能要求必须使用这个版本
+        //      2.107 (2017/4/25) 为 VerifyBarcode() API 扩充 strAction 和 out strOutputBarcode 参数，支持变换条码号功能
+        //      2.108 (2017/5/11) dp2Kernel 新版本 GetBrowse() API 支持 @coldef: 中使用名字空间和(匹配命中多个XmlNode时串接用的)分隔符号
+        //      2.109 (2017/5/23) 对 ManageDatabase() API 也写入日志了。但日志恢复功能会跳过这个类型的操作日志
+        public static string Version = "2.109";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -599,40 +606,40 @@ namespace DigitalPlatform.LibraryServer
                     app.CfgDir = strCfgDir;
 
                     app.CfgMapDir = strCfgMapDir;
-                    PathUtil.CreateDirIfNeed(app.CfgMapDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.CfgMapDir);	// 确保目录创建
 
 
                     // log
                     app.LogDir = strLogDir;	// 日志存储目录
-                    PathUtil.CreateDirIfNeed(app.LogDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.LogDir);	// 确保目录创建
 
                     // zhengyuan 一卡通
                     app.ZhengyuanDir = strZhengyuanDir;
-                    PathUtil.CreateDirIfNeed(app.ZhengyuanDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.ZhengyuanDir);	// 确保目录创建
 
                     // dkyw 一卡通
                     app.DkywDir = strDkywDir;
-                    PathUtil.CreateDirIfNeed(app.DkywDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.DkywDir);	// 确保目录创建
 
                     // patron replication
                     app.PatronReplicationDir = strPatronReplicationDir;
-                    PathUtil.CreateDirIfNeed(app.PatronReplicationDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.PatronReplicationDir);	// 确保目录创建
 
 
                     // statis 统计文件
                     app.StatisDir = strStatisDir;
-                    PathUtil.CreateDirIfNeed(app.StatisDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.StatisDir);	// 确保目录创建
 
                     // session临时文件
                     app.SessionDir = strSessionDir;
-                    PathUtil.CreateDirIfNeed(app.SessionDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.SessionDir);	// 确保目录创建
 
                     if (bReload == false)
                         CleanSessionDir(this.SessionDir);
 
                     // 各种临时文件
                     app.TempDir = strTempDir;
-                    PathUtil.CreateDirIfNeed(app.TempDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.TempDir);	// 确保目录创建
 
                     if (bReload == false)
                     {
@@ -945,6 +952,10 @@ namespace DigitalPlatform.LibraryServer
 
                         this.AcceptBlankReaderBarcode = DomUtil.GetBooleanParam(node, "acceptBlankReaderBarcode", true);
 
+                        // 2017/5/4
+                        this.UpperCaseItemBarcode = DomUtil.GetBooleanParam(node, "upperCaseItemBarcode", true);
+                        this.UpperCaseReaderBarcode = DomUtil.GetBooleanParam(node, "upperCaseReaderBarcode", true);
+
                         this.VerifyBookType = DomUtil.GetBooleanParam(node, "verifyBookType", false);
                         this.VerifyReaderType = DomUtil.GetBooleanParam(node, "verifyReaderType", false);
                         this.BorrowCheckOverdue = DomUtil.GetBooleanParam(node, "borrowCheckOverdue", true);
@@ -962,6 +973,11 @@ namespace DigitalPlatform.LibraryServer
                         this.VerifyBarcode = false;
                         this.AcceptBlankItemBarcode = true;
                         this.AcceptBlankReaderBarcode = true;
+
+                        // 2017/5/4
+                        this.UpperCaseItemBarcode = true;
+                        this.UpperCaseReaderBarcode = true;
+
                         this.VerifyBookType = false;
                         this.VerifyReaderType = false;
                         this.BorrowCheckOverdue = true;
@@ -1316,7 +1332,8 @@ namespace DigitalPlatform.LibraryServer
                     // 必须在ReadersMonitor以前启动。否则其中用到脚本代码时会出错。2007/10/10 changed
                     // return:
                     //		-1	出错
-                    //		0	成功
+                    //		0	脚本代码没有找到
+                    //      1   成功
                     nRet = this.InitialLibraryHostAssembly(out strError);
                     if (nRet == -1)
                     {
@@ -1753,7 +1770,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (this.MaxClients != 255) // 255 通道情况下不再检查版本失效日期 2016/11/3
                     {
-                        DateTime expire = new DateTime(2017, 3, 1); // 上一个版本是 2016/11/1
+                        DateTime expire = new DateTime(2017, 9, 1); // 上一个版本是 2017/6/1 2017/3/1 2016/11/1
                         if (DateTime.Now > expire)
                         {
                             if (this.MaxClients == 255)
@@ -1865,7 +1882,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 Version version = new Version(strVersion);
-                Version base_version = new Version("2.66");
+                Version base_version = new Version("2.67");
                 if (version.CompareTo(base_version) < 0)
                 {
                     strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + version + ")。请立即升级 dp2Kernel 到最新版本。";
@@ -14891,7 +14908,7 @@ strLibraryCode);    // 读者所在的馆代码
         }
 
         // 验证码多长时间过期
-        static TimeSpan _expireLength = TimeSpan.FromMinutes(10);   // 10 分钟
+        public static TimeSpan TempCodeExpireLength = TimeSpan.FromHours(48);   // TimeSpan.FromMinutes(10);   // 10 分钟
 
         // 准备手机短信验证登录的第一阶段：产生验证码
         // return:
@@ -14947,7 +14964,7 @@ strLibraryCode);    // 读者所在的馆代码
                 else
                 {
                     // 失效期还没有到。主动延长一次失效期
-                    code.ExpireTime = DateTime.Now + _expireLength;
+                    code.ExpireTime = DateTime.Now + TempCodeExpireLength;
                     bExist = true;
                 }
             }
@@ -14959,7 +14976,7 @@ strLibraryCode);    // 读者所在的馆代码
                 code = new TempCode();
                 code.Key = strKey;
                 code.Code = rnd.Next(1, 999999).ToString();
-                code.ExpireTime = DateTime.Now + _expireLength;
+                code.ExpireTime = DateTime.Now + TempCodeExpireLength;
             }
 
             table.SetTempCode(code.Key, code);
@@ -15529,6 +15546,13 @@ strLibraryCode);    // 读者所在的馆代码
         public string Name = ""; // 文件(或目录)名
         [DataMember]
         public string CreateTime = "";   // 创建时间。本地时间 "u" 字符串
+
+        // 2017/4/8
+        [DataMember]
+        public string LastWriteTime = "";   // 本地时间 "u" 字符串
+        [DataMember]
+        public string LastAccessTime = "";   // 本地时间 "u" 字符串
+
         [DataMember]
         public long Size = 0;   // 尺寸。-1 表示这是目录对象
     }

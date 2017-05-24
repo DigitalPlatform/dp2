@@ -17,7 +17,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         string m_strXmlString = "";
 
@@ -52,7 +52,7 @@ namespace dp2Circulation
         void SetXmlToWebbrowser(WebBrowser webbrowser,
              string strXml)
         {
-            string strTargetFileName = Path.Combine(this.MainForm.DataDir, "xml.xml");
+            string strTargetFileName = Path.Combine(Program.MainForm.DataDir, "xml.xml");
 
             using (StreamWriter sw = new StreamWriter(strTargetFileName,
                 false,	// append
@@ -66,14 +66,14 @@ namespace dp2Circulation
 
         private void XmlViewerForm_Activated(object sender, EventArgs e)
         {
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
         }
 
         private void XmlViewerForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
         }
     }

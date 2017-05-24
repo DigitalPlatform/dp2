@@ -38,18 +38,6 @@ namespace dp2Circulation
         WebExternalHost m_webExternalHost_new = new WebExternalHost();
         WebExternalHost m_webExternalHost_old = new WebExternalHost();
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
-
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -60,14 +48,14 @@ namespace dp2Circulation
 
         private void ActivateForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 #if NO
             MainForm.AppInfo.LoadMdiChildFormStates(this,
     "mdi_form_state");
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -86,10 +74,12 @@ namespace dp2Circulation
 
 
             // webbrowser
-            this.m_webExternalHost_new.Initial(this.MainForm, this.webBrowser_newReaderInfo);
+            this.m_webExternalHost_new.Initial(// Program.MainForm, 
+                this.webBrowser_newReaderInfo);
             this.webBrowser_newReaderInfo.ObjectForScripting = this.m_webExternalHost_new;
 
-            this.m_webExternalHost_old.Initial(this.MainForm, this.webBrowser_oldReaderInfo);
+            this.m_webExternalHost_old.Initial(// Program.MainForm, 
+                this.webBrowser_oldReaderInfo);
             this.webBrowser_oldReaderInfo.ObjectForScripting = this.m_webExternalHost_old;
 
             // commander
@@ -184,12 +174,12 @@ namespace dp2Circulation
         private void textBox_oldBarcode_Enter(object sender, EventArgs e)
         {
             this.AcceptButton = this.button_loadOldUserInfo;
-            this.MainForm.EnterPatronIdEdit(InputType.PQR);
+            Program.MainForm.EnterPatronIdEdit(InputType.PQR);
         }
 
         private void textBox_oldBarcode_Leave(object sender, EventArgs e)
         {
-            this.MainForm.LeavePatronIdEdit();
+            Program.MainForm.LeavePatronIdEdit();
 
         }
 
@@ -197,12 +187,12 @@ namespace dp2Circulation
         {
             this.AcceptButton = this.button_loadNewUserInfo;
 
-            this.MainForm.EnterPatronIdEdit(InputType.PQR);
+            Program.MainForm.EnterPatronIdEdit(InputType.PQR);
         }
 
         private void textBox_newBarcode_Leave(object sender, EventArgs e)
         {
-            this.MainForm.LeavePatronIdEdit();
+            Program.MainForm.LeavePatronIdEdit();
         }
 
         /// <summary>
@@ -391,7 +381,7 @@ MessageBoxDefaultButton.Button2);
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             EnableControls(false);
 
@@ -401,7 +391,7 @@ MessageBoxDefaultButton.Button2);
             if (webbHtml != null)
             {
                 Global.ClearHtmlPage(webbHtml,
-                    this.MainForm.DataDir);
+                    Program.MainForm.DataDir);
             }
 #endif
             if (external_html != null)
@@ -412,7 +402,7 @@ MessageBoxDefaultButton.Button2);
             if (webbXml != null)
             {
                 Global.ClearHtmlPage(webbXml,
-                    this.MainForm.DataDir);
+                    Program.MainForm.DataDir);
             }
 
             try
@@ -452,18 +442,16 @@ MessageBoxDefaultButton.Button2);
 
                     dlg.Overflow = StringUtil.SplitList(strRecPath).Count < lRet;
                     nRet = dlg.Initial(
-                        this.MainForm,
-                        //this.Channel,
-                        //this.stop,
+                        // Program.MainForm,
                         StringUtil.SplitList(strRecPath),
                         "请选择一个读者记录",
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
                     // TODO: 保存窗口内的尺寸状态
-                    this.MainForm.AppInfo.LinkFormState(dlg, "ActivateForm_SelectPatronDialog_state");
+                    Program.MainForm.AppInfo.LinkFormState(dlg, "ActivateForm_SelectPatronDialog_state");
                     dlg.ShowDialog(this);
-                    this.MainForm.AppInfo.UnlinkFormState(dlg);
+                    Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
                     if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                     {
@@ -510,7 +498,7 @@ MessageBoxDefaultButton.Button2);
                         strXml);
                      * */
                     Global.SetXmlToWebbrowser(webbXml,
-                        this.MainForm.DataDir,
+                        Program.MainForm.DataDir,
                         "xml",
                         strXml);
                 }
@@ -522,7 +510,7 @@ MessageBoxDefaultButton.Button2);
                 {
                     Global.SetHtmlString(webbHtml,
                             strHtml,
-                            this.MainForm.DataDir,
+                            Program.MainForm.DataDir,
                             "activateform_html");
                 }
 #endif
@@ -744,7 +732,7 @@ MessageBoxDefaultButton.Button2);
                     {
                         CompareReaderForm dlg = new CompareReaderForm();
                         dlg.Initial(
-                            this.MainForm,
+                            //Program.MainForm,
                             edit.RecPath,
                             strExistingXml,
                             baNewTimestamp,
@@ -828,7 +816,7 @@ MessageBoxDefaultButton.Button2);
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             this.EnableControls(false);
 
@@ -981,11 +969,11 @@ MessageBoxDefaultButton.Button2);
 
         private void ActivateForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
         // 从源记录中复制除了条码号和记录路径以外的其他全部内容。
@@ -1036,7 +1024,7 @@ MessageBoxDefaultButton.Button2);
             // 判断它是不是读者记录路径
             string strDbName = Global.GetDbName(strRecPath);
 
-            if (this.MainForm.IsReaderDbName(strDbName) == true)
+            if (Program.MainForm.IsReaderDbName(strDbName) == true)
             {
                 string[] parts = strFirstLine.Split(new char[] { '\t' });
                 string strReaderBarcode = "";
@@ -1103,7 +1091,7 @@ MessageBoxDefaultButton.Button2);
             // 判断它是不是读者记录路径
             string strDbName = Global.GetDbName(strRecPath);
 
-            if (this.MainForm.IsReaderDbName(strDbName) == true)
+            if (Program.MainForm.IsReaderDbName(strDbName) == true)
             {
                 string[] parts = strFirstLine.Split(new char[] { '\t' });
                 string strReaderBarcode = "";
@@ -1169,12 +1157,12 @@ MessageBoxDefaultButton.Button2);
 
         private void readerEditControl_old_GetLibraryCode(object sender, GetLibraryCodeEventArgs e)
         {
-            e.LibraryCode = this.MainForm.GetReaderDbLibraryCode(e.DbName);
+            e.LibraryCode = Program.MainForm.GetReaderDbLibraryCode(e.DbName);
         }
 
         private void readerEditControl_new_GetLibraryCode(object sender, GetLibraryCodeEventArgs e)
         {
-            e.LibraryCode = this.MainForm.GetReaderDbLibraryCode(e.DbName);
+            e.LibraryCode = Program.MainForm.GetReaderDbLibraryCode(e.DbName);
         }
 
     }

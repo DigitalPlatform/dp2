@@ -218,7 +218,7 @@ namespace dp2Circulation
         /// <summary>
         ///  册条码号
         /// </summary>
-        public string Barcode 
+        public string Barcode
         {
             get
             {
@@ -250,7 +250,7 @@ namespace dp2Circulation
         /// <summary>
         /// 册状态
         /// </summary>
-        public string State 
+        public string State
         {
             get
             {
@@ -260,7 +260,7 @@ namespace dp2Circulation
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "state", value);
                 this.Changed = true; // 2009/3/5
-            }            
+            }
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace dp2Circulation
         /// <summary>
         /// 册价格
         /// </summary>
-        public string Price 
+        public string Price
         {
             get
             {
@@ -350,7 +350,7 @@ namespace dp2Circulation
         /// <summary>
         /// 册类型
         /// </summary>
-        public string BookType 
+        public string BookType
         {
             get
             {
@@ -366,7 +366,7 @@ namespace dp2Circulation
         /// <summary>
         /// 注释
         /// </summary>
-        public string Comment 
+        public string Comment
         {
             get
             {
@@ -376,7 +376,7 @@ namespace dp2Circulation
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "comment", value);
                 this.Changed = true; // 2009/3/5
-            }            
+            }
         }
 
         /// <summary>
@@ -446,7 +446,7 @@ namespace dp2Circulation
         /// <summary>
         /// 借书人条码
         /// </summary>
-        public string Borrower 
+        public string Borrower
         {
             get
             {
@@ -733,6 +733,18 @@ namespace dp2Circulation
             {
                 CallNumberItem item = new CallNumberItem();
                 item.RecPath = book_item.RecPath;
+
+#if REF
+                // 2017/4/6
+                if (string.IsNullOrEmpty(item.RecPath))
+                {
+                    if (string.IsNullOrEmpty(book_item.RefID) == true)
+                        throw new Exception("BookItem 的 RefID 成员不应为空"); // TODO: 可以考虑增加健壮性，当时发生 RefID 字符串
+
+                    item.RecPath = "@refID:" + book_item.RefID;
+                }
+#endif
+
                 item.CallNumber = DomUtil.GetElementText(book_item.RecordDom.DocumentElement, "accessNo");
                 item.Location = DomUtil.GetElementText(book_item.RecordDom.DocumentElement, "location");
                 item.Barcode = DomUtil.GetElementText(book_item.RecordDom.DocumentElement, "barcode");

@@ -205,7 +205,7 @@ namespace dp2Manager
 
             try
             {
-                PathUtil.CreateDirIfNeed(this.LocalPath);
+                PathUtil.TryCreateDir(this.LocalPath);
             }
             catch (Exception ex)
             {

@@ -832,7 +832,7 @@ namespace dp2Circulation
                 return -1;
             }
 
-            _clientHost.MainForm = this;
+            // _clientHost.MainForm = this;
 
             return 0;
         }
@@ -1066,10 +1066,54 @@ namespace dp2Circulation
             return ScriptManager.ResolveAssembly(args.Name, _dllPaths);
         }
 
+        // 2017/4/24
+        public void TestCompile(string strProjectName)
+        {
+            string strError = "";
+
+            if (String.IsNullOrEmpty(strProjectName) == true)
+            {
+                strError = "尚未指定方案名";
+                goto ERROR1;
+            }
+
+            string strProjectLocate = "";
+            // 获得方案参数
+            // strProjectNamePath	方案名，或者路径
+            // return:
+            //		-1	error
+            //		0	not found project
+            //		1	found
+            int nRet = this.ScriptManager.GetProjectData(
+                strProjectName,
+                out strProjectLocate);
+            if (nRet == 0)
+            {
+                strError = "凭条打印方案 " + strProjectName + " 没有找到...";
+                goto ERROR1;
+            }
+            if (nRet == -1)
+            {
+                strError = "scriptManager.GetProjectData() error ...";
+                goto ERROR1;
+            }
+
+            nRet = PrepareScript(strProjectName,
+    strProjectLocate,
+    out this.objStatis,
+    out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            return;
+        ERROR1:
+            throw new Exception(strError);
+        }
+
         // 注: Stop 的使用有 Bug 2016/6/28
-        int RunScript(string strProjectName,
-            string strProjectLocate,
-            out string strError)
+        public int RunScript(string strProjectName,
+    string strProjectLocate,
+    out string strError)
         {
             EnableControls(false);
 
@@ -1101,7 +1145,7 @@ namespace dp2Circulation
 
                 nRet = PrepareScript(strProjectName,
                     strProjectLocate,
-                    out objStatis,
+                    out this.objStatis,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;

@@ -13,7 +13,6 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -120,7 +119,7 @@ namespace dp2Circulation
             object o = m_tableBarcodeColIndex[strItemDbName];
             if (o == null)
             {
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                 nCol = temp.FindColumnByType("item_barcode");
                 if (nCol == -1)
                 {
@@ -158,7 +157,7 @@ namespace dp2Circulation
             object o = m_tableBarcodeColIndex[strItemDbName];
             if (o == null)
             {
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                 nCol = temp.FindColumnByType("item_barcode");
                 if (nCol == -1)
                 {
@@ -203,7 +202,9 @@ namespace dp2Circulation
             object o = _columnIndexTable[strCacheKey];
             if (o == null)
             {
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
+                if (temp == null)
+                    return -1;
                 nCol = temp.FindColumnByType(strColumnType);
                 if (nCol == -1)
                     return -1;
@@ -327,6 +328,8 @@ namespace dp2Circulation
             stop.Initial("正在导入记录路径 ...");
             stop.BeginLoop();
 
+            LibraryChannel channel = this.GetChannel();
+
             this.EnableControls(false);
             try
             {
@@ -357,13 +360,10 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            MessageBox.Show(this, "用户中断");
-                            return 0;
-                        }
+                        MessageBox.Show(this, "用户中断");
+                        return 0;
                     }
 
                     string strRecPath = sr.ReadLine();
@@ -383,7 +383,7 @@ namespace dp2Circulation
 
                     if (this.DbType == "item")
                     {
-                        if (this.MainForm.IsItemDbName(strDbName) == false)
+                        if (Program.MainForm.IsItemDbName(strDbName) == false)
                         {
                             strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的实体库名。很可能所指定的文件不是实体库的记录路径文件";
                             goto ERROR1;
@@ -391,7 +391,7 @@ namespace dp2Circulation
                     }
                     else if (this.DbType == "comment")
                     {
-                        if (this.MainForm.IsCommentDbName(strDbName) == false)
+                        if (Program.MainForm.IsCommentDbName(strDbName) == false)
                         {
                             strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的评注库名。很可能所指定的文件不是评注库的记录路径文件";
                             goto ERROR1;
@@ -399,7 +399,7 @@ namespace dp2Circulation
                     }
                     else if (this.DbType == "order")
                     {
-                        if (this.MainForm.IsOrderDbName(strDbName) == false)
+                        if (Program.MainForm.IsOrderDbName(strDbName) == false)
                         {
                             strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的订购库名。很可能所指定的文件不是订购库的记录路径文件";
                             goto ERROR1;
@@ -407,7 +407,7 @@ namespace dp2Circulation
                     }
                     else if (this.DbType == "issue")
                     {
-                        if (this.MainForm.IsIssueDbName(strDbName) == false)
+                        if (Program.MainForm.IsIssueDbName(strDbName) == false)
                         {
                             strError = "路径 '" + strRecPath + "' 中的数据库名 '" + strDbName + "' 不是合法的期库名。很可能所指定的文件不是期库的记录路径文件";
                             goto ERROR1;
@@ -451,7 +451,9 @@ namespace dp2Circulation
                 }
 
                 // 刷新浏览行
-                int nRet = RefreshListViewLines(items,
+                int nRet = RefreshListViewLines(
+                    channel,
+                    items,
                     "",
                     false,
                     true,
@@ -461,7 +463,9 @@ namespace dp2Circulation
 
                 // 2014/1/15
                 // 刷新书目摘要
-                nRet = FillBiblioSummaryColumn(items,
+                nRet = FillBiblioSummaryColumn(
+                    channel,
+                    items,
                     false,
                     out strError);
                 if (nRet == -1)
@@ -469,13 +473,15 @@ namespace dp2Circulation
             }
             finally
             {
+                this.EnableControls(true);
+
+                this.ReturnChannel(channel);
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
-
-                this.EnableControls(true);
 
                 if (sr != null)
                     sr.Close();
@@ -564,7 +570,9 @@ namespace dp2Circulation
         //      -1  出错
         //      0   用户中断
         //      1   完成
-        internal int FillBiblioSummaryColumn(List<ListViewItem> items,
+        internal int FillBiblioSummaryColumn(
+            LibraryChannel channel,
+            List<ListViewItem> items,
             bool bBeginLoop,
             out string strError)
         {
@@ -606,7 +614,9 @@ namespace dp2Circulation
                         //      -1  出错
                         //      0   用户中断
                         //      1   完成
-                        nRet = _fillBiblioSummaryColumn(batch,
+                        nRet = _fillBiblioSummaryColumn(
+                            channel,
+                            batch,
                             lStartIndex,
                             bBeginLoop,
                             true,
@@ -627,7 +637,9 @@ namespace dp2Circulation
                     //      -1  出错
                     //      0   用户中断
                     //      1   完成
-                    nRet = _fillBiblioSummaryColumn(batch,
+                    nRet = _fillBiblioSummaryColumn(
+                        channel,
+                        batch,
                         lStartIndex,
                         bBeginLoop,
                         true,
@@ -668,7 +680,9 @@ namespace dp2Circulation
         //      -1  出错
         //      0   用户中断
         //      1   完成
-        internal int _fillBiblioSummaryColumn(List<ListViewItem> items,
+        internal int _fillBiblioSummaryColumn(
+            LibraryChannel channel,
+            List<ListViewItem> items,
             long lStartIndex,
             bool bDisplayMessage,
             bool bAutoSearch,
@@ -687,8 +701,11 @@ namespace dp2Circulation
                 || this.DbType == "arrive",
                 "");
 
+            bool bShowed = false;
+
             List<string> biblio_recpaths = new List<string>();  // 尺寸可能比 items 数组小，没有包含里面不具有 parent id 列的事项
             List<int> colindex_list = new List<int>();  // 存储每个 item 对应的 parent id colindex。数组大小等于 items 数组大小
+
             foreach (ListViewItem item in items)
             {
 #if NO
@@ -701,7 +718,7 @@ namespace dp2Circulation
                 object o = m_tableSummaryColIndex[strItemDbName];
                 if (o == null)
                 {
-                    ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                    ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                     nCol = temp.FindColumnByType("parent_id");
                     if (nCol == -1)
                     {
@@ -728,7 +745,7 @@ namespace dp2Circulation
                 if (strText.IndexOf("/") == -1)
                 {
                     // 获得对应的书目库名
-                    strBiblioRecPath = this.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
+                    strBiblioRecPath = Program.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
                     if (string.IsNullOrEmpty(strBiblioRecPath) == true)
                     {
                         strError = "数据库名 '" + strItemDbName + "' 没有找到对应的书目库名";
@@ -748,13 +765,24 @@ namespace dp2Circulation
                 //      -1  出错
                 //      0   相关数据库没有配置 parent id 浏览列
                 //      1   找到
-                nRet = GetBiblioRecPath(item,
+                nRet = GetBiblioRecPath(
+                    channel,
+                    item,
                     bAutoSearch,   // true 如果遇到没有 parent id 列的时候速度较慢
                     out nCol,
                     out strBiblioRecPath,
                     out strError);
                 if (nRet == -1)
-                    return -1;
+                {
+                    if (bShowed == false)
+                    {
+                        MessageBox.Show(this, strError);
+                        bShowed = true;
+                    }
+                    colindex_list.Add(-1);
+                    continue;
+                    // return -1;
+                }
                 if (nRet == 0)
                 {
                     colindex_list.Add(-1);
@@ -771,7 +799,7 @@ namespace dp2Circulation
             }
 
             CacheableBiblioLoader loader = new CacheableBiblioLoader();
-            loader.Channel = this.Channel;
+            loader.Channel = channel;
             loader.Stop = this.stop;
             loader.Format = "summary";
             loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
@@ -842,6 +870,36 @@ namespace dp2Circulation
             return 1;
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 renyh@xxx 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.ArgumentException
+Message: RecPaths 中不应包含空元素
+Stack:
+在 dp2Circulation.CacheableBiblioLoader.<GetEnumerator>d__0.MoveNext()
+在 dp2Circulation.ItemSearchFormBase._fillBiblioSummaryColumn(LibraryChannel channel, List`1 items, Int64 lStartIndex, Boolean bDisplayMessage, Boolean bAutoSearch, String& strError)
+在 dp2Circulation.ItemSearchForm.FillBrowseList(LibraryChannel channel, ItemQueryParam query, Int64 lHitCount, Boolean bOutputKeyCount, Boolean bOutputKeyID, Boolean bQuickLoad, String& strError)
+在 dp2Circulation.ItemSearchForm.DoSearch(Boolean bOutputKeyCount, Boolean bOutputKeyID, ItemQueryParam input_query, Boolean bClearList)
+在 dp2Circulation.ItemSearchForm.toolStripButton_search_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.ToolStripItem.RaiseEvent(Object key, EventArgs e)
+在 System.Windows.Forms.ToolStripButton.OnClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleClick(EventArgs e)
+在 System.Windows.Forms.ToolStripItem.HandleMouseUp(MouseEventArgs e)
+在 System.Windows.Forms.ToolStrip.OnMouseUp(MouseEventArgs mea)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ToolStrip.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.2.9200.0
+操作时间 2017/5/18 12:30:01 (Thu, 18 May 2017 12:30:01 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+         * * */
         // 获得事项所从属的书目记录的路径
         // parameters:
         //      bAutoSearch 当没有 parent id 列的时候，是否自动进行检索以便获得书目记录路径
@@ -849,7 +907,9 @@ namespace dp2Circulation
         //      -1  出错
         //      0   相关数据库没有配置 parent id 浏览列
         //      1   找到
-        public virtual int GetBiblioRecPath(ListViewItem item,
+        public virtual int GetBiblioRecPath(
+            LibraryChannel channel,
+            ListViewItem item,
             bool bAutoSearch,
             out int nCol,
             out string strBiblioRecPath,
@@ -876,12 +936,12 @@ namespace dp2Circulation
             object o = m_tableSummaryColIndex[strItemDbName];
             if (o == null)
             {
-                if (this.MainForm.NormalDbProperties == null)
+                if (Program.MainForm.NormalDbProperties == null)
                 {
                     strError = "普通数据库属性尚未初始化";
                     return -1;
                 }
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                ColumnPropertyCollection temp = Program.MainForm.GetBrowseColumnProperties(strItemDbName);
                 if (temp == null)
                 {
                     strError = "实体库 '" + strItemDbName + "' 没有找到列定义";
@@ -945,7 +1005,7 @@ namespace dp2Circulation
 
                         nRet = SearchTwoRecPathByBarcode(
                             this.stop,
-                            this.Channel,
+                            channel,
                             strQueryString,    // "@path:" + strRecPath,
                             out strItemRecPath,
                             out strBiblioRecPath,
@@ -970,7 +1030,7 @@ namespace dp2Circulation
                     {
                         nRet = SearchBiblioRecPath(
                             this.stop,
-                            this.Channel,
+                            channel,
                             this.DbType,
                             strRecPath,
                             out strBiblioRecPath,
@@ -1008,23 +1068,32 @@ namespace dp2Circulation
             // 获得 parent id
             string strText = ListViewUtil.GetItemText(item, nCol);
 
-            // 看看是否已经是路径 ?
-            if (strText.IndexOf("/") == -1)
+            if (string.IsNullOrEmpty(strText) == false)
             {
-                // 获得对应的书目库名
-                strBiblioRecPath = this.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
-                if (string.IsNullOrEmpty(strBiblioRecPath) == true)
+                // 看看是否已经是路径 ?
+                if (strText.IndexOf("/") == -1)
                 {
-                    strError = this.DbTypeCaption + "类型的数据库名 '" + strItemDbName + "' 没有找到对应的书目库名";
-                    return -1;
-                }
-                strBiblioRecPath = strBiblioRecPath + "/" + strText;
+                    // 获得对应的书目库名
+                    strBiblioRecPath = Program.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
+                    if (string.IsNullOrEmpty(strBiblioRecPath) == true)
+                    {
+                        strError = this.DbTypeCaption + "类型的数据库名 '" + strItemDbName + "' 没有找到对应的书目库名";
+                        return -1;
+                    }
+                    strBiblioRecPath = strBiblioRecPath + "/" + strText;
 
-                ListViewUtil.ChangeItemText(item, nCol, strBiblioRecPath);
+                    ListViewUtil.ChangeItemText(item, nCol, strBiblioRecPath);
+                }
+                else
+                    strBiblioRecPath = strText;
             }
             else
-                strBiblioRecPath = strText;
-
+            {
+                // 2017/5/18
+                // 装载浏览格式的中途如果修改服务器相关数据库的 browse 配置文件可能会走到这里
+                strError = "parent id 列 (index=" + nCol + ") 内容为空";
+                return 0;
+            }
             return 1;
         }
 
@@ -1032,8 +1101,9 @@ namespace dp2Circulation
         //      false   出现错误
         //      true    成功
         internal bool FillLineByBarcode(
-    string strBarcode,
-    ListViewItem item)
+            LibraryChannel channel,
+            string strBarcode,
+            ListViewItem item)
         {
             string strError = "";
             string strBiblioRecPath = "";
@@ -1044,7 +1114,7 @@ namespace dp2Circulation
             // 检索册条码号，检索出其从属的书目记录路径。
             int nRet = SearchTwoRecPathByBarcode(
                 this.stop,
-                this.Channel,
+                channel,
                 strBarcode,
                 out strItemRecPath,
                 out strBiblioRecPath,
@@ -1083,7 +1153,7 @@ namespace dp2Circulation
         // 根据册条码号，检索出其册记录路径和从属的书目记录路径，以及馆藏地点信息。
         public static int SearchTwoRecPathByBarcode(
             Stop stop,
-            LibraryChannel Channel,
+            LibraryChannel channel,
             string strBarcode,
             out string strItemRecPath,
             out string strLocation,
@@ -1120,7 +1190,7 @@ namespace dp2Circulation
             else
                 throw new Exception("SearchTwoRecPathByBarcode()只能在DbType=='item'时使用");
 #endif
-            lRet = Channel.GetItemInfo(
+            lRet = channel.GetItemInfo(
      stop,
      strBarcode,
      "xml",
@@ -1157,7 +1227,7 @@ namespace dp2Circulation
         // 根据册条码号，检索出其册记录路径和从属的书目记录路径。
         public static int SearchTwoRecPathByBarcode(
             Stop stop,
-            LibraryChannel Channel,
+            LibraryChannel channel,
             string strBarcode,
             out string strItemRecPath,
             out string strBiblioRecPath,
@@ -1166,7 +1236,6 @@ namespace dp2Circulation
             strError = "";
             strBiblioRecPath = "";
             strItemRecPath = "";
-
 
             string strItemText = "";
             string strBiblioText = "";
@@ -1193,7 +1262,7 @@ namespace dp2Circulation
             else
                 throw new Exception("SearchTwoRecPathByBarcode()只能在DbType=='item'时使用");
 #endif
-            lRet = Channel.GetItemInfo(
+            lRet = channel.GetItemInfo(
      stop,
      strBarcode,
      null,
@@ -1207,13 +1276,14 @@ namespace dp2Circulation
             if (lRet == -1)
                 return -1;  // error
 
+            // TODO: 需要检查一下服务器代码，看看什么情况 strBiblioRecPath 会返回空？
             return (int)lRet;   // not found
         }
 
         // 根据册记录路径，检索出从属的书目记录路径。
         public static int SearchBiblioRecPath(
             Stop stop,
-            LibraryChannel Channel,
+            LibraryChannel channel,
             string strDbType,
             string strItemRecPath,
             out string strBiblioRecPath,
@@ -1230,7 +1300,7 @@ namespace dp2Circulation
             long lRet = 0;
 
             if (strDbType == "item")
-                lRet = Channel.GetItemInfo(
+                lRet = channel.GetItemInfo(
                      stop,
                      "@path:" + strItemRecPath,
                      null,
@@ -1242,7 +1312,7 @@ namespace dp2Circulation
                      out strBiblioRecPath,
                      out strError);
             else if (strDbType == "comment")
-                lRet = Channel.GetCommentInfo(
+                lRet = channel.GetCommentInfo(
                      stop,
                      "@path:" + strItemRecPath,
                     // "",
@@ -1255,7 +1325,7 @@ namespace dp2Circulation
                      out strBiblioRecPath,
                      out strError);
             else if (strDbType == "order")
-                lRet = Channel.GetOrderInfo(
+                lRet = channel.GetOrderInfo(
                      stop,
                      "@path:" + strItemRecPath,
                     // "",
@@ -1268,7 +1338,7 @@ namespace dp2Circulation
                      out strBiblioRecPath,
                      out strError);
             else if (strDbType == "issue")
-                lRet = Channel.GetIssueInfo(
+                lRet = channel.GetIssueInfo(
                      stop,
                      "@path:" + strItemRecPath,
                     // "",
@@ -1286,9 +1356,8 @@ namespace dp2Circulation
             if (lRet == -1)
                 return -1;  // error
 
+            // TODO: 需要检查一下服务器代码，看什么时候 strBiblioRecPath 会返回空
             return (int)lRet;   // not found
         }
-
-
     }
 }

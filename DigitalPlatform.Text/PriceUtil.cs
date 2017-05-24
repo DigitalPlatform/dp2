@@ -1171,7 +1171,8 @@ namespace DigitalPlatform.Text
                         return -1;
                     }
 
-                    value = (decimal)((double)value / multiper);
+                    // value = (decimal)((double)value / multiper);
+                    value = Convert.ToDecimal((double)value / multiper);
                 }
             }
 
@@ -1203,9 +1204,13 @@ namespace DigitalPlatform.Text
             List<CurrencyItem> items = new List<CurrencyItem>();
 
             // 变换为PriceItem
-            for (int i = 0; i < prices.Count; i++)
+            // for (int i = 0; i < prices.Count; i++)
+            foreach(string price in prices)
             {
-                string strText = prices[i].Trim();
+                // string strText = prices[i].Trim();
+                if (price == null)
+                    continue;
+                string strText = price.Trim();
 
                 if (String.IsNullOrEmpty(strText) == true)
                     continue;
@@ -1397,11 +1402,12 @@ namespace DigitalPlatform.Text
 
                 // 负号要放在最前面
                 if (value < 0)
-                    results.Add("-" + item.Prefix + (-value).ToString() + item.Postfix);
+                    results.Add("-" + item.Prefix + (-value).ToString("#.##") + item.Postfix);
                 else
-                    results.Add(item.Prefix + value.ToString() + item.Postfix);
+                    results.Add(item.Prefix + value.ToString("#.##") + item.Postfix);
             }
 
+            // 注: value.ToString("#.##") 采用的是四舍五入的方法
             return 0;
         }
 
@@ -1424,5 +1430,45 @@ namespace DigitalPlatform.Text
         /// 数值
         /// </summary>
         public decimal Value = 0;
+
+        public static CurrencyItem Parse(string strText)
+        {
+            string strError = "";
+
+            string strPrefix = "";
+            string strValue = "";
+            string strPostfix = "";
+            int nRet = PriceUtil.ParsePriceUnit(strText,
+                out strPrefix,
+                out strValue,
+                out strPostfix,
+                out strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+
+            decimal value = 0;
+            try
+            {
+                value = Convert.ToDecimal(strValue);
+            }
+            catch
+            {
+                strError = "数字 '" + strValue + "' 格式不正确";
+                throw new Exception(strError);
+            }
+
+            CurrencyItem item = new CurrencyItem();
+            item.Prefix = strPrefix;
+            item.Postfix = strPostfix;
+            item.Value = value;
+
+            return item;
+        }
+
+        public override string ToString()
+        {
+            return this.Prefix + this.Value.ToString("#.##") + this.Postfix;
+            // 注: value.ToString("#.##") 采用的是四舍五入的方法
+        }
     }
 }

@@ -290,6 +290,8 @@
   <xs:complexType name="FileItemInfo">
     <xs:sequence>
       <xs:element minOccurs="0" name="CreateTime" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="LastAccessTime" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="LastWriteTime" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Name" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Size" type="xs:long" />
     </xs:sequence>
@@ -359,6 +361,7 @@
       <xs:element minOccurs="0" name="Operator" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="PatronBarcode" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Period" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Volume" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ChargingItem" nillable="true" type="tns:ChargingItem" />
@@ -1050,6 +1053,7 @@
       <xs:element minOccurs="0" name="OverdueString" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Period" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="ReturnOperator" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Volume" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ReturnInfo" nillable="true" type="tns:ReturnInfo" />
@@ -1690,6 +1694,7 @@
   <xs:element name="VerifyBarcode">
     <xs:complexType>
       <xs:sequence>
+        <xs:element minOccurs="0" name="strAction" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strLibraryCode" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="strBarcode" nillable="true" type="xs:string" />
       </xs:sequence>
@@ -1699,6 +1704,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element xmlns:q104="http://schemas.datacontract.org/2004/07/DigitalPlatform.LibraryServer" minOccurs="0" name="VerifyBarcodeResult" nillable="true" type="q104:LibraryServerResult" />
+        <xs:element minOccurs="0" name="strOutputBarcode" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

@@ -226,8 +226,6 @@ namespace DigitalPlatform.rms
                 throw new ApplicationException("为 DelayTable 加写锁时失败。Timeout=" + this.m_nLockTimeout.ToString());
             try
             {
-
-
                 try
                 {
                     Stream = File.Create(strOutputFileName);
@@ -244,7 +242,6 @@ namespace DigitalPlatform.rms
 
                 _writer.WriteStartDocument();
                 _writer.WriteStartElement("collection");
-
 
                 this.FileName = strOutputFileName;
                 return 0;
@@ -284,7 +281,6 @@ namespace DigitalPlatform.rms
             FileMode.Open,
             FileAccess.Read,
             FileShare.ReadWrite);
-
                 }
                 catch (Exception ex)
                 {
@@ -357,24 +353,28 @@ namespace DigitalPlatform.rms
             try
             {
 #endif
-                if (_reader.NodeType != XmlNodeType.Element && _reader.Name != "item")
-                {
-                    if (_reader.ReadToFollowing("item") == false)
-                        return false;
-                }
+            if (_reader.NodeType != XmlNodeType.Element && _reader.Name != "item")
+            {
+                if (_reader.ReadToFollowing("item") == false)
+                    return false;
+            }
 
-                while (_reader.Read())
+            while (_reader.Read())
+            {
+                while (_reader.NodeType == XmlNodeType.Element)
                 {
-                    while (_reader.NodeType == XmlNodeType.Element)
-                    {
-                        if (_reader.Name == "item")
-                            return true;
-                        // 字段名
-                        table[_reader.Name] = _reader.ReadElementContentAsString();
-                    }
+                    if (_reader.Name == "item")
+                        return true;
+                    // 字段名
+                    table[_reader.Name] = _reader.ReadElementContentAsString();
                 }
+            }
 
-                return false;
+            // 2017/4/30 增加。以前少了这一句，造成每个 XML 文件最后一组遗漏了没有导入 SQL 数据库
+            if (table.Count > 0)
+                return true;
+
+            return false;
 #if NO
             }
             finally
@@ -550,7 +550,7 @@ namespace DigitalPlatform.rms
                     if (s == "keystringnum")
                         type = typeof(long);
 
-                    m_schemeTable.Columns.Add(new DataColumn(s, type)); 
+                    m_schemeTable.Columns.Add(new DataColumn(s, type));
                 }
             }
             return m_schemeTable;
@@ -601,7 +601,7 @@ namespace DigitalPlatform.rms
         // 返回结果:
         //     如果未放在有效的记录集中，则为 0；如果放在了有效的记录集中，则为当前记录的列数。默认值为 -1。
         public int FieldCount
-        { 
+        {
             get
             {
                 // (keystring,fromstring,idstring,keystringnum)
@@ -783,7 +783,7 @@ namespace DigitalPlatform.rms
             string s = GetString(i);
             int start = (int)fieldoffset;
             int nCount = 0;
-            for (int index = bufferoffset; index < bufferoffset + length; index++,start++,nCount ++)
+            for (int index = bufferoffset; index < bufferoffset + length; index++, start++, nCount++)
             {
                 if (start >= s.Length)
                     break;
@@ -871,7 +871,7 @@ namespace DigitalPlatform.rms
         // 异常:
         //   System.IndexOutOfRangeException:
         //     传递的索引位于 0 至 System.Data.IDataRecord.FieldCount 的范围之外。
-        public  decimal GetDecimal(int i)
+        public decimal GetDecimal(int i)
         {
             string strColumnName = column_names[i];
             if (strColumnName == "keystringnum")

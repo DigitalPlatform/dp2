@@ -45,7 +45,7 @@ namespace DigitalPlatform.LibraryClient
                 out temp_results,
                 out strError);
             if (lRet == -1)
-                throw new Exception(strError);
+                throw new ChannelException(this.Channel.ErrorCode, strError);
             return lRet;
         }
 
@@ -71,7 +71,7 @@ namespace DigitalPlatform.LibraryClient
                     out temp_results,
                     out strError);
                 if (lRet == -1)
-                    throw new Exception(strError);
+                    throw new ChannelException(this.Channel.ErrorCode, strError);
                 lHitCount = lRet;
                 if (temp_results == null || temp_results.Length == 0)
                     break;

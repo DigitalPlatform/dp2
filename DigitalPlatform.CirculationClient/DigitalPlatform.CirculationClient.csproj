@@ -212,6 +212,12 @@
     <Compile Include="LoginDialog\InputTempPasswordDialog.Designer.cs">
       <DependentUpon>InputTempPasswordDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="MacroTableDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MacroTableDialog.Designer.cs">
+      <DependentUpon>MacroTableDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="ManageHelper.cs" />
     <Compile Include="ObjectViewerDialog.cs">
       <SubType>Form</SubType>
@@ -383,6 +389,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="LoginDialog\InputTempPasswordDialog.resx">
       <DependentUpon>InputTempPasswordDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MacroTableDialog.resx">
+      <DependentUpon>MacroTableDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ObjectViewerDialog.resx">
       <DependentUpon>ObjectViewerDialog.cs</DependentUpon>

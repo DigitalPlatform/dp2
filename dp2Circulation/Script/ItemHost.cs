@@ -16,7 +16,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         /// <summary>
         /// 数据库类型。"item" 表示查询实体库；"order" 表示查询订购库；"issue" 表示查询期库；"comment" 表示查询评注库
@@ -67,7 +67,7 @@ namespace dp2Circulation
 
         internal override string GetOutputFileNamePrefix()
         {
-            return Path.Combine(this.MainForm.DataDir, "~item_statis");
+            return Path.Combine(Program.MainForm.DataDir, "~item_statis");
         }
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace dp2Circulation
         /// <param name="strHtml">要输出的 HTML 字符串</param>
         public void OutputHtml(string strHtml)
         {
-            this.MainForm.OperHistory.AppendHtml(strHtml);
+            Program.MainForm.OperHistory.AppendHtml(strHtml);
         }
 
         // parameters:
@@ -193,7 +193,7 @@ namespace dp2Circulation
                 strClass = "warning";
             else if (nWarningLevel >= 2)
                 strClass = "error";
-            this.MainForm.OperHistory.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
     }
 }

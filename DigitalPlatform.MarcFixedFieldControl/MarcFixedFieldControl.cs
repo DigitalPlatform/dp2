@@ -1142,8 +1142,6 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyT
 			}
 		}
 
-
-
 		#endregion
 
         private void MarcFixedFieldControl_Enter(object sender, EventArgs e)

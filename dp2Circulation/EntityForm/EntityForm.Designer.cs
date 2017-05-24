@@ -591,7 +591,7 @@ namespace dp2Circulation
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
             this.toolStripLabel1.Size = new System.Drawing.Size(71, 26);
-            this.toolStripLabel1.Text = "种记录路径:";
+            this.toolStripLabel1.Text = "书目:";
             this.toolStripLabel1.MouseDown += toolStripLabel1_MouseDown;
             // 
             // textBox_biblioRecPath

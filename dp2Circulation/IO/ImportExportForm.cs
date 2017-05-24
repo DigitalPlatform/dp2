@@ -39,6 +39,11 @@ namespace dp2Circulation
 
         private void ImportExportForm_Load(object sender, EventArgs e)
         {
+            if (Control.ModifierKeys == Keys.Control)
+                this.SpecialState = true;
+            else
+                this.SpecialState = false;
+
             FillBiblioDbNameList();
 
             this.UiState = Program.MainForm.AppInfo.GetString(
@@ -255,7 +260,7 @@ strStringTable);
                 }));
                 info.AddBiblioToItemOnMerging = (bool)this.Invoke(new Func<bool>(() =>
                 {
-                    return this.checkBox_convert_addBiblioToItemOnMergin.Checked;
+                    return this.checkBox_convert_addBiblioToItemOnMerging.Checked;
                 }));
                 info.OverwriteBiblio = (bool)this.Invoke(new Func<bool>(() =>
                 {
@@ -290,13 +295,13 @@ strStringTable);
                     return this.textBox_target_dbNameList.Text;
                 }));
                 info.AutoMergeRegistry = new MergeRegistry();
-                info.AutoMergeRegistry.DbNames = StringUtil.SplitList(strDbNameList.Replace("\r\n","\r"), '\r');
+                info.AutoMergeRegistry.DbNames = StringUtil.SplitList(strDbNameList.Replace("\r\n", "\r"), '\r');
                 // 这里验证一下书目库名的有效性
-                foreach(string dbName in info.AutoMergeRegistry.DbNames)
+                foreach (string dbName in info.AutoMergeRegistry.DbNames)
                 {
                     if (Program.MainForm.IsBiblioDbName(dbName) == false)
                     {
-                        strError = "“自动选择目标数据库顺序”参数中的名字 '"+dbName+"' 不是当前服务器合法的书目库名";
+                        strError = "“自动选择目标数据库顺序”参数中的名字 '" + dbName + "' 不是当前服务器合法的书目库名";
                         goto ERROR1;
                     }
                 }
@@ -339,7 +344,7 @@ strStringTable);
             }
 
             this.Invoke((Action)(() =>
-this.MainForm.ActivateFixPage("history")
+Program.MainForm.ActivateFixPage("history")
     ));
 
             this.Invoke((Action)(() =>
@@ -438,7 +443,7 @@ this.MainForm.ActivateFixPage("history")
                 {
                     strError = strOperName + "完成。共发生 " + info.ItemErrorCount + " 次错误。详情请见固定面板的操作历史属性页";
                     this.Invoke((Action)(() =>
-                    this.MainForm.ActivateFixPage("history")
+                    Program.MainForm.ActivateFixPage("history")
                         ));
                     goto ERROR1;
                 }
@@ -655,12 +660,15 @@ this.MainForm.ActivateFixPage("history")
 
             // 2016/12/22
             List<string> styles = new List<string>();
-            if (info.DontChangeOperations)
-                styles.Add("nooperations");
-            if (info.DontSearchDup)
-                styles.Add("nocheckdup");
-            if (info.SuppressOperLog)
-                styles.Add("noeventlog");
+            if (this.SpecialState)
+            {
+                if (info.DontChangeOperations)
+                    styles.Add("nooperations");
+                if (info.DontSearchDup)
+                    styles.Add("nocheckdup");
+                if (info.SuppressOperLog)
+                    styles.Add("noeventlog");
+            }
             string strStyle = StringUtil.MakePathList(styles);
 
             if (info.Collect == true)
@@ -697,7 +705,7 @@ this.MainForm.ActivateFixPage("history")
                         // 提示是否强行覆盖?
                     }
 
-                    info.MergeStyle = "";
+                    info.MergeAction = "";
                     if (info.Channel.ErrorCode == ErrorCode.BiblioDup)
                     {
                         string strDialogAction = "";
@@ -709,6 +717,8 @@ this.MainForm.ActivateFixPage("history")
     using (BiblioDupDialog dup_dialog = new BiblioDupDialog())
     {
         MainForm.SetControlFont(dup_dialog, this.Font, false);
+        dup_dialog.MergeStyle = info.UsedMergeStyle;    // 这个值会被持久存储
+
         dup_dialog.AutoMergeRegistry = info.AutoMergeRegistry;
         dup_dialog.AutoSelectMode = info.AutoSelectMode;
         dup_dialog.TempDir = Program.MainForm.UserTempDir;
@@ -720,6 +730,7 @@ this.MainForm.ActivateFixPage("history")
         dup_dialog.ShowDialog(this);
         Program.MainForm.AppInfo.SetString("ImportExportForm", "BiblioDupDialog_uiState", dup_dialog.UiState);
         info.AutoSelectMode = dup_dialog.AutoSelectMode;    // 记忆
+        info.UsedMergeStyle = dup_dialog.MergeStyle;
 
         strDialogAction = dup_dialog.Action;
         strTargetRecPath = dup_dialog.SelectedRecPath;
@@ -751,7 +762,7 @@ this.MainForm.ActivateFixPage("history")
                             // 合并源文件中的册到目标位置
                             Debug.Assert(string.IsNullOrEmpty(strTargetRecPath) == false, "");
                             strOutputPath = strTargetRecPath;
-                            info.MergeStyle = strDialogAction;
+                            info.MergeAction = strDialogAction;
                             goto CONTINUE;
                         }
                         if (strDialogAction == "mergeToUseSourceBiblio")
@@ -765,7 +776,7 @@ this.MainForm.ActivateFixPage("history")
                             //      0   跳过本条处理
                             //      1   成功。后面继续处理
                             int nRet = OverwriteBiblio(info,
-                                strAction,
+                                // strAction,
                                 strTargetRecPath,
                                 strStyle,
                                 baTargetTimestamp,
@@ -794,7 +805,7 @@ out strError);
                             if (nRet == 0)
                                 return false;
 
-                            info.MergeStyle = strDialogAction;
+                            info.MergeAction = strDialogAction;
                             goto CONTINUE;
                         }
                     }
@@ -930,13 +941,15 @@ new string[] { "重试", "跳过", "中断" });
         //      0   跳过本条处理
         //      1   成功。后面继续处理
         int OverwriteBiblio(ProcessInfo info,
-            string strAction,
+            // string strAction,
             string strTargetRecPath,
             string strStyle,
             byte[] baTargetTimestamp,
             out string strError)
         {
             strError = "";
+
+            string strAction = "change";
 
             string strOutputPath = "";
             byte[] baNewTimestamp = null;
@@ -950,7 +963,7 @@ strTargetRecPath,
 info.BiblioXml,
 baTargetTimestamp,
 "",
-strStyle,
+strStyle + ",bibliotoitem",
 out strOutputPath,
 out baNewTimestamp,
 out strError);
@@ -1118,12 +1131,15 @@ new string[] { "重试", "跳过", "中断" });
 
             // 2016/12/22
             List<string> styles = new List<string>();
-            if (info.DontChangeOperations)
-                styles.Add("nooperations");
-            if (info.DontSearchDup)
-                styles.Add("nocheckdup");
-            if (info.SuppressOperLog)
-                styles.Add("noeventlog");
+            if (this.SpecialState)
+            {
+                if (info.DontChangeOperations)
+                    styles.Add("nooperations");
+                if (info.DontSearchDup)
+                    styles.Add("nocheckdup");
+                if (info.SuppressOperLog)
+                    styles.Add("noeventlog");
+            }
 
             // 2017/1/4
             if (info.Simulate)
@@ -1188,7 +1204,7 @@ new string[] { "重试", "跳过", "中断" });
                     }
 
                     if (info.AddBiblioToItem
-                        || (info.AddBiblioToItemOnMerging == true && info.MergeStyle.StartsWith("mergeTo"))
+                        || (info.AddBiblioToItemOnMerging == true && info.MergeAction.StartsWith("mergeTo"))
                         )
                         AddBiblioToItem(item_dom, info.BiblioXml);
 
@@ -1444,8 +1460,9 @@ new string[] { "继续", "中断" });
             public MergeRegistry AutoMergeRegistry = null;
 
             // *** 以下成员都是在运行中动态设定和变化的
-            public string MergeStyle = "";  // 书目记录合并策略
+            public string MergeAction = "";  // 书目记录合并策略
             public bool AutoSelectMode = false; // (发现书目重复时)是否自动选择目标
+            public dp2Circulation.MergeStyle UsedMergeStyle = dp2Circulation.MergeStyle.None;
             public bool Start = true;   // 是否进入开始处理状态
             public string StartBiblioRecPath = "";  // 定位源文件中需开始处理的一条记录的路径
             public RangeList RangeList = null;
@@ -1476,7 +1493,7 @@ new string[] { "继续", "中断" });
                 this.OrderRefIDTable.Clear();
                 this.BiblioRecPath = "";
                 this.UploadedSubItems = 0;
-                this.MergeStyle = "";
+                this.MergeAction = "";
             }
         }
 
@@ -1534,7 +1551,7 @@ new string[] { "继续", "中断" });
         {
             this.comboBox_target_targetBiblioDbName.Items.Clear();
 
-            foreach (BiblioDbProperty prop in this.MainForm.BiblioDbProperties)
+            foreach (BiblioDbProperty prop in Program.MainForm.BiblioDbProperties)
             {
                 string strDbName = prop.DbName;
                 if (string.IsNullOrEmpty(strDbName) == true)
@@ -1562,7 +1579,7 @@ new string[] { "继续", "中断" });
                 controls.Add(this.textBox_source_range);
 
                 controls.Add(this.checkBox_convert_addBiblioToItem);
-                controls.Add(this.checkBox_convert_addBiblioToItemOnMergin);
+                controls.Add(this.checkBox_convert_addBiblioToItemOnMerging);
                 controls.Add(this.textBox_convert_itemBatchNo);
 
                 controls.Add(this.comboBox_target_targetBiblioDbName);
@@ -1592,7 +1609,7 @@ new string[] { "继续", "中断" });
                 controls.Add(this.textBox_source_range);
 
                 controls.Add(this.checkBox_convert_addBiblioToItem);
-                controls.Add(this.checkBox_convert_addBiblioToItemOnMergin);
+                controls.Add(this.checkBox_convert_addBiblioToItemOnMerging);
                 controls.Add(this.textBox_convert_itemBatchNo);
 
                 controls.Add(this.comboBox_target_targetBiblioDbName);
@@ -1702,5 +1719,24 @@ new string[] { "继续", "中断" });
             Task.Factory.StartNew(() => DoImport("collect"));
         }
 #endif
+        bool _specialState = false; // 是否为特殊状态？特殊状态允许使用一些有危险的 checkbox
+
+        public bool SpecialState
+        {
+            get
+            {
+                return _specialState;
+            }
+            set
+            {
+                _specialState = value;
+
+                {
+                    this.checkBox_target_suppressOperLog.Visible = value;
+                    this.checkBox_target_dontSearchDup.Visible = value;
+                    this.checkBox_target_dontChangeOperations.Visible = value;
+                }
+            }
+        }
     }
 }

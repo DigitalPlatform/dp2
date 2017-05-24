@@ -617,7 +617,9 @@ out strError);
                             path.ID10,
                             strXml,
                             0,
-                            out cols);
+                            out cols,
+                            out strError);
+#if NO
                         // 2013/1/14
                         if (nRet == -1)
                         {
@@ -626,6 +628,17 @@ out strError);
                             else
                                 strError = "GetCols() error";
                             return -1;
+                        }
+#endif
+                        if (nRet == -1)
+                            return -1;
+                        if (nRet == 0)
+                        {
+                            record.RecordBody = new RecordBody();
+                            if (record.RecordBody.Result == null)
+                                record.RecordBody.Result = new Result();
+                            record.RecordBody.Result.ErrorCode = ErrorCodeValue.NotFound;
+                            record.RecordBody.Result.ErrorString = strError;
                         }
                         record.Cols = cols;
 
@@ -657,7 +670,9 @@ out strError);
                             path.ID10,
                             strXml,
                             0,
-                            out cols);
+                            out cols,
+                            out strError);
+#if NO
                         // 2013/1/14
                         if (nRet == -1)
                         {
@@ -666,6 +681,17 @@ out strError);
                             else
                                 strError = "GetCols() error";
                             return -1;
+                        }
+#endif
+                        if (nRet == -1)
+                            return -1;
+                        if (nRet == 0)
+                        {
+                            record.RecordBody = new RecordBody();
+                            if (record.RecordBody.Result == null)
+                                record.RecordBody.Result = new Result();
+                            record.RecordBody.Result.ErrorCode = ErrorCodeValue.NotFound;
+                            record.RecordBody.Result.ErrorString = strError;
                         }
                         record.Cols = cols;
                         // lTotalPackageLength += nRet;
@@ -863,7 +889,9 @@ out strError);
                                 dbpath.ID10,
                                 "",
                                 0,
-                                out cols);
+                                out cols,
+                                out strError);
+#if NO
                             // 2013/1/14
                             if (nRet == -1)
                             {
@@ -873,7 +901,14 @@ out strError);
                                     strError = "GetCols() error";
                                 return -1;
                             }
-
+#endif
+                            if (nRet == 0)
+                            {
+                                if (richRecord.Result == null)
+                                    richRecord.Result = new Result();
+                                richRecord.Result.ErrorCode = ErrorCodeValue.NotFound;
+                                richRecord.Result.ErrorString = strError;
+                            }
                             richRecord.Cols = cols;
                         }
 
@@ -1104,12 +1139,18 @@ out strError);
                         return -1;
                     }
                     string[] cols;
+                    // return:
+                    //      -1  出错
+                    //      0   记录没有找到
+                    //      其他  cols 中包含的字符总数
                     nRet = info.Database.GetCols(
                         strFormat,
                         info.RecordID10,    // path.ID10,
                         "",
                         0,
-                        out cols);
+                        out cols,
+                        out strError);
+#if NO
                     if (nRet == -1)
                     {
                         if (cols != null && cols.Length > 0)
@@ -1117,6 +1158,17 @@ out strError);
                         else
                             strError = "GetCols() error";
                         return -1;
+                    }
+#endif
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 0)
+                    {
+                        record.RecordBody = new RecordBody();
+                        if (record.RecordBody.Result == null)
+                            record.RecordBody.Result = new Result();
+                        record.RecordBody.Result.ErrorCode = ErrorCodeValue.NotFound;
+                        record.RecordBody.Result.ErrorString = "1 " + strError;
                     }
                     record.Cols = cols;
                 }
@@ -1151,7 +1203,7 @@ out strError);
                         Result result = new Result();
                         result.Value = -1;
                         result.ErrorCode = KernelApplication.Ret2ErrorCode((int)lRet);
-                        result.ErrorString = strError;
+                        result.ErrorString = "2 " + strError;
                         record.RecordBody.Result = result;
                         // return (int)lRet;
                     }
@@ -1193,7 +1245,7 @@ out strError);
                         Result result = new Result();
                         result.Value = -1;
                         result.ErrorCode = KernelApplication.Ret2ErrorCode((int)lRet);
-                        result.ErrorString = strError;
+                        result.ErrorString = "3 " + strError;
                         record.RecordBody.Result = result;
                         // return (int)lRet;
                     }

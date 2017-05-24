@@ -207,6 +207,8 @@ namespace DigitalPlatform.LibraryServer
 
             int nRet = 0;
 
+            // TODO: bReturnRecordXml 为 false 的时候，还有必要在获取浏览记录阶段 style 里面包含 'xml' 么？
+
             bool bCheckBorrowInfo = StringUtil.IsInList("check_borrow_info", strStyle);
             bool bCountBorrowInfo = StringUtil.IsInList("count_borrow_info", strStyle);
             bool bReturnRecordXml = StringUtil.IsInList("return_record_xml", strStyle);
@@ -1450,6 +1452,19 @@ namespace DigitalPlatform.LibraryServer
         //      strStyle    "opac" 把实体记录按照OPAC要求进行加工，增补一些元素
         //                  "onlygetpath"   仅返回每个路径
         //                  "getfirstxml"   是对onlygetpath的补充，仅获得第一个元素的XML记录，其余的依然只返回路径
+        // strStyle 中筛选分馆的册，有以下几种情况
+        // 全局用户，不过滤
+        //      什么都不用特意指定
+        // 分馆用户，获得全部分馆
+        //      style中要包含 getotherlibraryitem
+        // 分馆用户，只获得自己管辖的分馆
+        //      什么都不用特意指定
+        // 全局用户，只返回指定的分馆
+        //      style中要包含 librarycode:xxxx
+        // 分馆用户，只返回指定的分馆。注意，这不一定是指分馆用户管辖的分馆
+        //      style中要包含 librarycode:xxxx
+        // 注: librarycode:xxxx 中的 xxx 部分可以是多个馆代码的列表，用 | 分隔
+        //
         // 权限：需要有getentities权限
         // return:
         //      Result.Value    -1出错 0没有找到 其他 总的实体记录的个数(本次返回的，可以通过entities.Count得到)
@@ -2580,18 +2595,22 @@ namespace DigitalPlatform.LibraryServer
                                 }
                             }
 
-                            nRet = this.DoVerifyItemFunction(
-                                sessioninfo,
-                                strAction,
-                                domNewRec,
-                                out strError);
-                            if (nRet != 0)
+                            // 2017/5/4 restore 的时候不要执行校验册记录的函数
+                            if (bForce == false)
                             {
-                                EntityInfo error = new EntityInfo(info);
-                                error.ErrorInfo = strError;
-                                error.ErrorCode = ErrorCodeValue.CommonError;
-                                ErrorInfos.Add(error);
-                                continue;
+                                nRet = this.DoVerifyItemFunction(
+                                    sessioninfo,
+                                    strAction,
+                                    domNewRec,
+                                    out strError);
+                                if (nRet != 0)
+                                {
+                                    EntityInfo error = new EntityInfo(info);
+                                    error.ErrorInfo = strError;
+                                    error.ErrorCode = ErrorCodeValue.CommonError;
+                                    ErrorInfos.Add(error);
+                                    continue;
+                                }
                             }
                         }
 
@@ -5492,6 +5511,216 @@ namespace DigitalPlatform.LibraryServer
         END1:
             strResult = StringUtil.MakePathList(results);
             return 1;
+        }
+
+        // 为册记录 XML 内添加 biblio 元素
+        // 如果必要，补充 refID 元素
+        // return:
+        //      -1  出错
+        //      0   没有发生修改
+        //      1   发生了修改
+        static int AddBiblio(string strBiblioXml,
+            bool bOverwrite,
+            ref string strXml,
+            out string strRefID,
+            out string strError)
+        {
+            strError = "";
+            strRefID = "";
+
+            XmlDocument item_dom = new XmlDocument();
+            try
+            {
+                item_dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "册记录 XML 装入 XMLDOM 出错: " + ex.Message;
+                return -1;
+            }
+            XmlElement exist_biblio = item_dom.DocumentElement.SelectSingleNode("biblio") as XmlElement;
+            if (exist_biblio != null && bOverwrite == false)
+                return 0;
+
+            if (exist_biblio == null)
+            {
+                exist_biblio = item_dom.CreateElement("biblio");
+                item_dom.DocumentElement.AppendChild(exist_biblio);
+            }
+
+            XmlDocument biblio_dom = new XmlDocument();
+            try
+            {
+                biblio_dom.LoadXml(strBiblioXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "书目记录 XML 装入 XMLDOM 出错: " + ex.Message;
+                return -1;
+            }
+
+            if (biblio_dom.DocumentElement == null)
+            {
+                strError = "书目记录缺乏 XML 根元素";
+                return -1;
+            }
+
+            exist_biblio.InnerXml = biblio_dom.DocumentElement.OuterXml;
+
+            // TODO: 是否删除书目部分的 file operations 元素?
+
+            DomUtil.RemoveEmptyElements(item_dom.DocumentElement, false);
+
+            strRefID = DomUtil.GetElementText(item_dom.DocumentElement, "refID");
+            if (string.IsNullOrEmpty(strRefID))
+            {
+                strRefID = Guid.NewGuid().ToString();
+                DomUtil.SetElementText(item_dom.DocumentElement, "refID", strRefID);
+            }
+
+            strXml = item_dom.DocumentElement.OuterXml;
+            return 1;
+        }
+
+        // 为实体记录添加 biblio 元素
+        // return:
+        //      -1  error
+        //      0   没有找到属于书目记录的任何实体记录，因此也就无从修改
+        //      >0  实际修改的实体记录数
+        public int AddBiblioToChildEntities(RmsChannel channel,
+            List<DeleteEntityInfo> entityinfos,
+            string strBiblioXml,
+            bool bOverwrite,
+            XmlDocument domOperLog,
+            out string strError)
+        {
+            strError = "";
+            long lRet = 0;
+
+            if (entityinfos == null || entityinfos.Count == 0)
+                return 0;
+
+            int nDeletedCount = 0;
+
+            XmlNode root = null;
+
+            if (domOperLog != null)
+            {
+                root = domOperLog.CreateElement("changedEntityRecords");
+                domOperLog.DocumentElement.AppendChild(root);
+            }
+
+            for (int i = 0; i < entityinfos.Count; i++)
+            {
+                DeleteEntityInfo info = entityinfos[i];
+
+                byte[] output_timestamp = null;
+                int nRedoCount = 0;
+                string strRefID = "";
+
+            REDO_CHANGE:
+
+                string strXml = info.OldRecord;
+                // 为册记录 XML 内添加 biblio 元素
+                // return:
+                //      -1  出错
+                //      0   没有发生修改
+                //      1   发生了修改
+                int nRet = AddBiblio(strBiblioXml,
+                    bOverwrite,
+                    ref strXml,
+                    out strRefID,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                    continue;
+
+                this.EntityLocks.LockForWrite(info.ItemBarcode);
+                try
+                {
+                    byte[] baOutputTimestamp = null;
+                    string strOutputRecPath = "";
+                    lRet = channel.DoSaveTextRes(info.RecPath,
+                        strXml,
+                        false,
+                        "content", // ,ignorechecktimestamp
+                        info.OldTimestamp,
+                        out baOutputTimestamp,
+                        out strOutputRecPath,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                            continue;
+
+                        // 如果不重试，让时间戳出错暴露出来。
+                        // 如果要重试，也得加上重新读入册记录并判断重新判断无借还信息才能删除
+
+                        if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
+                        {
+                            if (nRedoCount > 10)
+                            {
+                                strError = "重试了10次还不行。修改实体记录 '" + info.RecPath + "' 时发生错误: " + strError;
+                                goto ERROR1;
+                            }
+                            nRedoCount++;
+
+                            // 重新读入记录
+                            string strMetaData = "";
+                            string strOutputPath = "";
+                            string strError_1 = "";
+
+                            lRet = channel.GetRes(info.RecPath,
+                                out strXml,
+                                out strMetaData,
+                                out output_timestamp,
+                                out strOutputPath,
+                                out strError_1);
+                            if (lRet == -1)
+                            {
+                                if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                                    continue;
+
+                                strError = "在修改实体记录 '" + info.RecPath + "' 时发生时间戳冲突，于是自动重新获取记录，但又发生错误: " + strError_1;
+                                goto ERROR1;
+                            }
+
+                            info.OldRecord = strXml;
+                            info.OldTimestamp = output_timestamp;
+                            goto REDO_CHANGE;
+                        }
+
+                        strError = "修改实体记录 '" + info.RecPath + "' 时发生错误: " + strError;
+                        goto ERROR1;
+                    }
+                }
+                finally
+                {
+                    this.EntityLocks.UnlockForWrite(info.ItemBarcode);
+                }
+
+                // 增补到日志DOM中
+                if (domOperLog != null)
+                {
+                    Debug.Assert(root != null, "");
+
+                    XmlNode node = domOperLog.CreateElement("record");
+                    root.AppendChild(node);
+
+                    DomUtil.SetAttr(node, "recPath", info.RecPath);
+                    // 2017/3/11
+                    if (string.IsNullOrEmpty(strRefID) == false)
+                        DomUtil.SetAttr(node, "refID", strRefID);
+                    DomUtil.SetAttr(node, "action", "storeBiblio"); // 表示创建了 biblio 元素
+                }
+
+                nDeletedCount++;
+            }
+
+            return nDeletedCount;
+        ERROR1:
+            return -1;
         }
     }
 

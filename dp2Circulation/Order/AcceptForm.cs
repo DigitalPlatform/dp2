@@ -54,7 +54,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         DigitalPlatform.Stop stop = null;
 
@@ -110,7 +110,7 @@ namespace dp2Circulation
                 return;
             }
 
-            e.ColumnTitles = this.MainForm.GetBrowseColumnProperties(e.DbName);
+            e.ColumnTitles = Program.MainForm.GetBrowseColumnProperties(e.DbName);
         }
 
         /*
@@ -128,11 +128,11 @@ namespace dp2Circulation
 
         private void AcceptForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -141,12 +141,12 @@ namespace dp2Circulation
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
+            stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
 
             bool bRet = InitialSizeParam();
             Debug.Assert(bRet == true, "");
 
-            int nAcceptWindowHeight = this.MainForm.AppInfo.GetInt(
+            int nAcceptWindowHeight = Program.MainForm.AppInfo.GetInt(
                 "AcceptForm",
                 "accept_window_height",
                 0);
@@ -163,7 +163,7 @@ namespace dp2Circulation
             this.StartPosition = FormStartPosition.Manual;
 
             this.db_infos = new OrderDbInfos();
-            this.db_infos.Build(this.MainForm);
+            this.db_infos.Build(Program.MainForm);
 
             // batchno
             this.GetBatchNoTable -= new GetKeyCountListEventHandler(AcceptForm_GetBatchNoTable);
@@ -174,46 +174,46 @@ namespace dp2Circulation
 #endif
 
 #if NO
-            this.tabComboBox_prepare_batchNo.Text = this.MainForm.AppInfo.GetString(
+            this.tabComboBox_prepare_batchNo.Text = Program.MainForm.AppInfo.GetString(
                 "accept_form",
                 "batchno",
                 "");
 
-            this.comboBox_prepare_type.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_prepare_type.Text = Program.MainForm.AppInfo.GetString(
                 "accept_form",
                 "item_type",
                 "图书");
 
-            this.comboBox_prepare_priceDefault.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_prepare_priceDefault.Text = Program.MainForm.AppInfo.GetString(
     "accept_form",
     "price_default",
     "验收价");
 
 
-            this.checkBox_prepare_inputItemBarcode.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_prepare_inputItemBarcode.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "accept_form",
                 "input_item_barcode",
                 true);
 
-            this.checkBox_prepare_setProcessingState.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_prepare_setProcessingState.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "accept_form",
                 "set_processing_state",
                 true);
 
-            this.checkBox_prepare_createCallNumber.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_prepare_createCallNumber.Checked = Program.MainForm.AppInfo.GetBoolean(
     "accept_form",
     "create_callnumber",
     false);
 
 
-            string strFrom = this.MainForm.AppInfo.GetString(
+            string strFrom = Program.MainForm.AppInfo.GetString(
                 "accept_form",
                 "search_from",
                 "");
             if (String.IsNullOrEmpty(strFrom) == false)
                 this.comboBox_accept_from.Text = strFrom;
 
-            this.comboBox_accept_matchStyle.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_accept_matchStyle.Text = Program.MainForm.AppInfo.GetString(
                 "accept_form",
                 "match_style",
                 "精确一致");
@@ -223,7 +223,7 @@ namespace dp2Circulation
 #endif
             FillDbNameList();
 
-            this.UiState = this.MainForm.AppInfo.GetString(
+            this.UiState = Program.MainForm.AppInfo.GetString(
                 "accept_form",
                 "ui_state",
                 "");
@@ -235,7 +235,7 @@ namespace dp2Circulation
             this.SetNextButtonEnable();
 
 #if NO
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
                 "accept_form",
                 "record_list_column_width",
                 "");
@@ -247,7 +247,7 @@ namespace dp2Circulation
             }
 #endif
 
-            this.MainForm.FillBiblioFromList(this.comboBox_accept_from);
+            Program.MainForm.FillBiblioFromList(this.comboBox_accept_from);
             comboBox_accept_matchStyle_TextChanged(null, null);
 
         }
@@ -278,10 +278,10 @@ namespace dp2Circulation
             this.m_nMdiClientHeight = cli.Height - 4;
              * */
 
-            if (this.MainForm == null)
+            if (Program.MainForm == null)
                 return false;
 
-            MdiClient cli = this.MainForm.MdiClient;
+            MdiClient cli = Program.MainForm.MdiClient;
             this.m_nMdiClientWidth = cli.Width - 4;
             this.m_nMdiClientHeight = cli.Height - 4;
             return true;
@@ -315,71 +315,74 @@ namespace dp2Circulation
                 stop = null;
             }
 
+            // 2017/4/23
+            this.m_detailWindow = null;
+
             // 2015/11/7
-            if (this.panel_main != null && this.MainForm != null)
+            if (this.panel_main != null && Program.MainForm != null)
             {
                 // 如果当前固定面板拥有 panel_main，则要先解除它的拥有关系，否则怕本 Form 摧毁的时候无法 Dispose() 它
-                if (this.MainForm.CurrentAcceptControl == this.panel_main)
-                    this.MainForm.CurrentAcceptControl = null;
+                if (Program.MainForm.CurrentAcceptControl == this.panel_main)
+                    Program.MainForm.CurrentAcceptControl = null;
             }
 
 
             //
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetInt(
+                Program.MainForm.AppInfo.SetInt(
                     "AcceptForm",
                     "accept_window_height",
                     this.Size.Height);
 
 #if NO
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "accept_form",
                 "batchno",
                 this.tabComboBox_prepare_batchNo.Text);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "accept_form",
                 "item_type",
                 this.comboBox_prepare_type.Text);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
 "accept_form",
 "price_default",
 this.comboBox_prepare_priceDefault.Text);
 
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
                 "accept_form",
                 "input_item_barcode",
                 this.checkBox_prepare_inputItemBarcode.Checked);
 
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
                 "accept_form",
                 "set_processing_state",
                 this.checkBox_prepare_setProcessingState.Checked);
 
-            this.MainForm.AppInfo.SetBoolean(
+            Program.MainForm.AppInfo.SetBoolean(
 "accept_form",
 "create_callnumber",
 this.checkBox_prepare_createCallNumber.Checked);
 
             string strWidths = ListViewUtil.GetColumnWidthListString(this.listView_accept_records);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "accept_form",
                 "record_list_column_width",
                 strWidths);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "accept_form",
                 "search_from",
                 this.comboBox_accept_from.Text);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "accept_form",
                 "match_style",
                 this.comboBox_accept_matchStyle.Text);
 #endif
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
         "accept_form",
         "ui_state",
         this.UiState);
@@ -427,12 +430,12 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            this.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
+            Program.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 
         void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
-            this.MainForm.Channel_AfterLogin(sender, e);    // 2015/11/8
+            Program.MainForm.Channel_AfterLogin(sender, e);    // 2015/11/8
         }
 
         void DoStop(object sender, StopEventArgs e)
@@ -688,7 +691,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 try
                 {
-                    strFromStyle = this.MainForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
+                    strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
                 }
                 catch (Exception ex)
                 {
@@ -1499,7 +1502,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             if (m_detailWindow == null)
             {
                 bool bExistOldEntityForm = false;
-                if (this.MainForm.GetTopChildWindow<EntityForm>() != null)
+                if (Program.MainForm.GetTopChildWindow<EntityForm>() != null)
                 {
                     bExistOldEntityForm = true;
                 }
@@ -1507,8 +1510,8 @@ this.checkBox_prepare_createCallNumber.Checked);
                 m_detailWindow = new EntityForm();
 
                 m_detailWindow.AcceptMode = true;
-                m_detailWindow.MainForm = this.MainForm;
-                m_detailWindow.MdiParent = this.MainForm;
+                m_detailWindow.MainForm = Program.MainForm;
+                m_detailWindow.MdiParent = Program.MainForm;
                 #if ACCEPT_MODE
 
                 m_detailWindow.FormBorderStyle = FormBorderStyle.None;
@@ -1792,7 +1795,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 dlg.SeriesMode = bSeriesMode;
                 dlg.Text = "请选定一个目标书目库，验收时将在其中创建一条新的书目记录";
-                dlg.MainForm = this.MainForm;
+                // dlg.MainForm = Program.MainForm;
                 dlg.MarcSyntax = source_dbinfo.Syntax;
                 dlg.StartPosition = FormStartPosition.CenterScreen;
                 dlg.ShowDialog(this);
@@ -2278,14 +2281,14 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         public void EnableProgress()
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
         }
 
         private void AcceptForm_Activated(object sender, EventArgs e)
         {
 #if NO
             // 2009/8/13
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 #endif
             EnableProgress();
 
@@ -2299,7 +2302,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             if (m_detailWindow != null)
             {
-                if (MainForm.IsTopTwoChildWindow(m_detailWindow) == false)
+                if (Program.MainForm.IsTopTwoChildWindow(m_detailWindow) == false)
                     m_detailWindow.Activate();
             }
         }
@@ -2978,7 +2981,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             XmlViewerForm xml_viewer = new XmlViewerForm();
 
-            xml_viewer.MainForm = this.MainForm;
+            // xml_viewer.MainForm = Program.MainForm;
             xml_viewer.XmlString = strOutputInfo;
             xml_viewer.ShowDialog(this);
 
@@ -2999,7 +3002,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -3085,7 +3088,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             if (this.tabControl_main.SelectedTab == this.tabPage_finish)
             {
 #if !ACCEPT_MODE
-                this.MainForm.CurrentAcceptControl = null;
+                Program.MainForm.CurrentAcceptControl = null;
 #endif
                 this.Close();
                 return;
@@ -4239,9 +4242,9 @@ this.checkBox_prepare_createCallNumber.Checked);
         List<string> GetOrderSourceDbNames()
         {
             List<string> results = new List<string>();
-            for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+            for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
             {
-                BiblioDbProperty property = this.MainForm.BiblioDbProperties[i];
+                BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
                 if (String.IsNullOrEmpty(property.OrderDbName) == false)
                     results.Add(property.DbName);
             }
@@ -4255,9 +4258,9 @@ this.checkBox_prepare_createCallNumber.Checked);
         List<string> GetOrderTargetDbNames(string strSourceSyntax)
         {
             List<string> results = new List<string>();
-            for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+            for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
             {
-                BiblioDbProperty property = this.MainForm.BiblioDbProperties[i];
+                BiblioDbProperty property = Program.MainForm.BiblioDbProperties[i];
                 if (String.IsNullOrEmpty(property.ItemDbName) == false)
                 {
                     if (String.IsNullOrEmpty(strSourceSyntax) == false)
@@ -4293,7 +4296,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -4464,7 +4467,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 try
                 {
-                    strFromStyle = this.MainForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
+                    strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
                 }
                 catch
                 {
@@ -4493,14 +4496,14 @@ this.checkBox_prepare_createCallNumber.Checked);
                     string strFromStyle = "";
                     string strFromCaption = "";
 
-                    strFromStyle = this.MainForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
+                    strFromStyle = Program.MainForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
 
 
                     if (this.comboBox_prepare_type.Text == "图书")
                     {
                         if (strFromStyle.ToLower() == "issn")
                         {
-                            strFromCaption = this.MainForm.GetBiblioFromCaption("isbn");
+                            strFromCaption = Program.MainForm.GetBiblioFromCaption("isbn");
                             if (String.IsNullOrEmpty(strFromCaption) == false)
                                 this.comboBox_accept_from.Text = strFromCaption;
                         }
@@ -4509,7 +4512,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     {
                         if (strFromStyle.ToLower() == "isbn")
                         {
-                            strFromCaption = this.MainForm.GetBiblioFromCaption("issn");
+                            strFromCaption = Program.MainForm.GetBiblioFromCaption("issn");
                             if (String.IsNullOrEmpty(strFromCaption) == false)
                                 this.comboBox_accept_from.Text = strFromCaption;
                         }
@@ -4535,7 +4538,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         private void button_finish_printAcceptList_Click(object sender, EventArgs e)
         {
-            PrintAcceptForm print_form = this.MainForm.EnsurePrintAcceptForm();
+            PrintAcceptForm print_form = Program.MainForm.EnsurePrintAcceptForm();
 
             Debug.Assert(print_form != null, "");
 
@@ -4676,7 +4679,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                     // 检查数据库名是否为合法书目库名
                     string strDbName = Global.GetDbName(strPath);
-                    if (MainForm.IsBiblioDbName(strDbName) == false)
+                    if (Program.MainForm.IsBiblioDbName(strDbName) == false)
                     {
                         nSkipCount++;
                         continue;
@@ -4800,11 +4803,11 @@ this.checkBox_prepare_createCallNumber.Checked);
         {
             this.checkedListBox_prepare_dbNames.Items.Clear();
 
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     if (this.comboBox_prepare_type.Text == "图书")
                     {
@@ -4870,7 +4873,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "accept_form",
                     "single_click_load_detail",
                     false);
@@ -4919,18 +4922,18 @@ this.checkBox_prepare_createCallNumber.Checked);
         {
             // return; // 测试内存泄漏
 
-            if (this.MainForm.CurrentAcceptControl != this.panel_main)
+            if (Program.MainForm.CurrentAcceptControl != this.panel_main)
             {
-                this.MainForm.CurrentAcceptControl = this.panel_main;
+                Program.MainForm.CurrentAcceptControl = this.panel_main;
                 // 防止内存泄漏
                 ControlExtention.AddFreeControl(_freeControls, this.panel_main);
             }
 
             if (bShowFixedPanel == true
-                && this.MainForm.PanelFixedVisible == false)
-                this.MainForm.PanelFixedVisible = true;
+                && Program.MainForm.PanelFixedVisible == false)
+                Program.MainForm.PanelFixedVisible = true;
 
-            this.MainForm.ActivateAcceptPage();
+            Program.MainForm.ActivateAcceptPage();
 
             this.Docked = true;
             this.Visible = false;
@@ -4939,11 +4942,11 @@ this.checkBox_prepare_createCallNumber.Checked);
         void DisposeFreeControls()
         {
             // 2015/11/7
-            if (this.panel_main != null && this.MainForm != null)
+            if (this.panel_main != null && Program.MainForm != null)
             {
                 // 如果当前固定面板拥有 tabcontrol，则要先解除它的拥有关系，否则怕本 Form 摧毁的时候无法 Dispose() 它
-                if (this.MainForm.CurrentAcceptControl == this.panel_main)
-                    this.MainForm.CurrentAcceptControl = null;
+                if (Program.MainForm.CurrentAcceptControl == this.panel_main)
+                    Program.MainForm.CurrentAcceptControl = null;
             }
 
             ControlExtention.DisposeFreeControls(_freeControls);
@@ -4956,8 +4959,8 @@ this.checkBox_prepare_createCallNumber.Checked);
         {
             if (this.Docked == true)
             {
-                if (this.MainForm.CurrentAcceptControl == this.panel_main)
-                    this.MainForm.CurrentAcceptControl = null;
+                if (Program.MainForm.CurrentAcceptControl == this.panel_main)
+                    Program.MainForm.CurrentAcceptControl = null;
 
                 this.Docked = false;
 

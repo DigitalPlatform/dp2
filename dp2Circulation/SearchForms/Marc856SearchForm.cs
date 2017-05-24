@@ -51,8 +51,8 @@ namespace dp2Circulation
 
         private void Marc856SearchForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
-                this.UiState = this.MainForm.AppInfo.GetString(
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
+                this.UiState = Program.MainForm.AppInfo.GetString(
                     "marc856searchform", 
                     "uistate", "");
 
@@ -86,8 +86,8 @@ namespace dp2Circulation
                 this.m_commentViewer.Close();
             }
 
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
-                this.MainForm.AppInfo.SetString("marc856searchform",
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
+                Program.MainForm.AppInfo.SetString("marc856searchform",
                     "uistate",
                     this.UiState);
         }
@@ -1117,20 +1117,18 @@ MessageBoxDefaultButton.Button1);
                 dlg.ElementCaption = "子字段";
                 dlg.DbType = "856";
                 dlg.Text = "快速修改 856 字段 -- 请指定动作参数";
-                dlg.MainForm = this.MainForm;
-                //dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
-                //dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
+                // dlg.MainForm = Program.MainForm;
 
-                dlg.UiState = this.MainForm.AppInfo.GetString(
+                dlg.UiState = Program.MainForm.AppInfo.GetString(
 "marc856search_form",
 "ChangeItemActionDialog_uiState",
 "");
 
-                this.MainForm.AppInfo.LinkFormState(dlg, "marc856searchform_quickchangedialog_state");
+                Program.MainForm.AppInfo.LinkFormState(dlg, "marc856searchform_quickchangedialog_state");
                 dlg.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(dlg);
+                Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
 "marc856search_form",
 "ChangeItemActionDialog_uiState",
 dlg.UiState);
@@ -1145,7 +1143,7 @@ dlg.UiState);
             DateTime now = DateTime.Now;
 
             // TODO: 检查一下，看看是否一项修改动作都没有
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行快速修改 856 字段</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始执行快速修改 856 字段</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1257,7 +1255,7 @@ dlg.UiState);
 
                     string strBiblioRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
 
-                    this.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(strBiblioRecPath + ":" + info.Index) + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(strBiblioRecPath + ":" + info.Index) + "</div>");
 
                     string strDebugInfo = "";
 
@@ -1276,7 +1274,7 @@ dlg.UiState);
                     if (nRet == -1)
                         return -1;
 
-                    this.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(strDebugInfo).Replace("\r\n", "<br/>") + "</div>");
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(strDebugInfo).Replace("\r\n", "<br/>") + "</div>");
 
                     nProcessCount++;
 
@@ -1313,7 +1311,7 @@ dlg.UiState);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束快速修改 856 字段</div>");
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束快速修改 856 字段</div>");
             }
 
             DoViewComment(false);
@@ -1369,7 +1367,7 @@ dlg.UiState);
                 string strFieldValue = action.FieldValue;
                 if (strFieldValue.IndexOf("%") != -1)
                 {
-                    this._macroFileName = Path.Combine(this.MainForm.UserDir, "856_macrotable.xml");
+                    this._macroFileName = Path.Combine(Program.MainForm.UserDir, "856_macrotable.xml");
                     if (File.Exists(this._macroFileName) == false)
                     {
                         strError = "宏定义文件 '" + this._macroFileName + "' 不存在，无法进行宏替换";
@@ -1584,7 +1582,7 @@ dlg.UiState);
             //      0   not found
             //      1   found
             int nRet = MacroUtil.GetFromLocalMacroTable(
-                _macroFileName, // Path.Combine(this.MainForm.DataDir, "marceditor_macrotable.xml"),
+                _macroFileName, // Path.Combine(Program.MainForm.DataDir, "marceditor_macrotable.xml"),
                 strName,
                 bSimulate,
                 out strValue,
@@ -1685,7 +1683,7 @@ out string strError)
 
         internal string GetHeadString(bool bAjax = true)
         {
-            string strCssFilePath = Path.Combine(this.MainForm.DataDir, "default\\fieldhtml.css");
+            string strCssFilePath = Path.Combine(Program.MainForm.DataDir, "default\\fieldhtml.css");
 
             if (bAjax == true)
                 return
@@ -1712,11 +1710,11 @@ out string strError)
             // 优化，避免无谓地进行服务器调用
             if (bOpenWindow == false)
             {
-                if (this.MainForm.PanelFixedVisible == false
+                if (Program.MainForm.PanelFixedVisible == false
                     && (m_commentViewer == null || m_commentViewer.Visible == false))
                     return;
                 // 2013/3/7
-                if (this.MainForm.CanDisplayItemProperty() == false)
+                if (Program.MainForm.CanDisplayItemProperty() == false)
                     return;
             }
 
@@ -1759,7 +1757,7 @@ out string strError)
                 bNew = true;
             }
 
-            m_commentViewer.MainForm = this.MainForm;  // 必须是第一句
+            // m_commentViewer.MainForm = Program.MainForm;  // 必须是第一句
 
             if (bNew == true)
                 m_commentViewer.InitialWebBrowser();
@@ -1771,18 +1769,18 @@ out string strError)
             m_commentViewer.XmlString = strXml; //  MergeXml(strXml1, strXml2);
             m_commentViewer.FormClosed -= new FormClosedEventHandler(marc_viewer_FormClosed);
             m_commentViewer.FormClosed += new FormClosedEventHandler(marc_viewer_FormClosed);
-            // this.MainForm.AppInfo.LinkFormState(m_viewer, "comment_viewer_state");
+            // Program.MainForm.AppInfo.LinkFormState(m_viewer, "comment_viewer_state");
             // m_viewer.ShowDialog(this);
-            // this.MainForm.AppInfo.UnlinkFormState(m_viewer);
+            // Program.MainForm.AppInfo.UnlinkFormState(m_viewer);
             if (bOpenWindow == true)
             {
                 if (m_commentViewer.Visible == false)
                 {
-                    this.MainForm.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
+                    Program.MainForm.AppInfo.LinkFormState(m_commentViewer, "marc_viewer_state");
                     m_commentViewer.Show(this);
                     m_commentViewer.Activate();
 
-                    this.MainForm.CurrentPropertyControl = null;
+                    Program.MainForm.CurrentPropertyControl = null;
                 }
                 else
                 {
@@ -1799,7 +1797,7 @@ out string strError)
                 }
                 else
                 {
-                    if (this.MainForm.CurrentPropertyControl != m_commentViewer.MainControl)
+                    if (Program.MainForm.CurrentPropertyControl != m_commentViewer.MainControl)
                         m_commentViewer.DoDock(false); // 不会自动显示FixedPanel
                 }
             }
@@ -1812,7 +1810,7 @@ out string strError)
         {
             if (m_commentViewer != null)
             {
-                this.MainForm.AppInfo.UnlinkFormState(m_commentViewer);
+                Program.MainForm.AppInfo.UnlinkFormState(m_commentViewer);
                 this.m_commentViewer = null;
             }
         }

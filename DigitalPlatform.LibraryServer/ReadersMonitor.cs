@@ -451,7 +451,7 @@ namespace DigitalPlatform.LibraryServer
                         strReaderEmailAddress = strValue;
                     }
 #endif
-                    strReaderEmailAddress = LibraryApplication.GetEmailAddress(strValue);
+                    strReaderEmailAddress = LibraryServerUtil.GetEmailAddress(strValue);
                     // 读者记录中没有email地址，就无法进行email方式的通知了
                     if (String.IsNullOrEmpty(strReaderEmailAddress) == true)
                         continue;

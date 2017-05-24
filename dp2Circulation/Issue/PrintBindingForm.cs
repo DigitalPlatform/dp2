@@ -48,17 +48,6 @@ namespace dp2Circulation
         string BatchNo = "";    // 面板输入的批次号
         string LocationString = ""; // 面板输入的馆藏地点
 
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
         /// <summary>
         /// 事项图标下标: 出错
         /// </summary>
@@ -224,16 +213,16 @@ namespace dp2Circulation
 
         private void PrintBindingForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
             CreateColumnHeader(this.listView_parent);
 
             CreateColumnHeader(this.listView_member);
 
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -242,26 +231,26 @@ namespace dp2Circulation
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
 
-            this.BarcodeFilePath = this.MainForm.AppInfo.GetString(
+            this.BarcodeFilePath = Program.MainForm.AppInfo.GetString(
                 "printbindingform",
                 "barcode_filepath",
                 "");
 
-            this.BatchNo = this.MainForm.AppInfo.GetString(
+            this.BatchNo = Program.MainForm.AppInfo.GetString(
                 "printbindingform",
                 "batchno",
                 "");
 
-            this.LocationString = this.MainForm.AppInfo.GetString(
+            this.LocationString = Program.MainForm.AppInfo.GetString(
                 "printbindingform",
                 "location_string",
                 "");
-            this.comboBox_sort_sortStyle.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_sort_sortStyle.Text = Program.MainForm.AppInfo.GetString(
                 "printbindingform",
                 "sort_style",
                 "书目记录路径");
 
-            this.checkBox_print_barcodeFix.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.checkBox_print_barcodeFix.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "printbindingform",
                 "barcode_fix",
                 false);
@@ -278,29 +267,29 @@ namespace dp2Circulation
                 stop = null;
             }
 #endif
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "printbindingform",
                     "barcode_filepath",
                     this.BarcodeFilePath);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "printbindingform",
                     "batchno",
                     this.BatchNo);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "printbindingform",
                     "location_string",
                     this.LocationString);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
         "printbindingform",
         "sort_style",
         this.comboBox_sort_sortStyle.Text);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
         "printbindingform",
         "barcode_fix",
         this.checkBox_print_barcodeFix.Checked);
@@ -362,7 +351,7 @@ namespace dp2Circulation
                 "mdi_form_state");
 #endif
 
-            string strWidths = this.MainForm.AppInfo.GetString(
+            string strWidths = Program.MainForm.AppInfo.GetString(
                 "printbindingform",
                 "list_parent_width",
                 "");
@@ -373,7 +362,7 @@ namespace dp2Circulation
                     true);
             }
 
-            strWidths = this.MainForm.AppInfo.GetString(
+            strWidths = Program.MainForm.AppInfo.GetString(
     "printbindingform",
     "list_member_width",
     "");
@@ -393,18 +382,18 @@ namespace dp2Circulation
 #endif
             /*
             // 如果MDI子窗口不是MainForm刚刚准备退出时的状态，恢复它。为了记忆尺寸做准备
-            if (this.WindowState != this.MainForm.MdiWindowState)
-                this.WindowState = this.MainForm.MdiWindowState;
+            if (this.WindowState != Program.MainForm.MdiWindowState)
+                this.WindowState = Program.MainForm.MdiWindowState;
              * */
 
             string strWidths = ListViewUtil.GetColumnWidthListStringExt(this.listView_parent);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "printbindingform",
                 "list_parent_width",
                 strWidths);
 
             strWidths = ListViewUtil.GetColumnWidthListStringExt(this.listView_member);
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
                 "printbindingform",
                 "list_member_width",
                 strWidths);
@@ -540,7 +529,7 @@ namespace dp2Circulation
             dlg.GetBatchNoTable += new GetKeyCountListEventHandler(dlg_GetBatchNoTable);
             dlg.RefDbName = "";
 
-            dlg.MainForm = this.MainForm;
+            // dlg.MainForm = Program.MainForm;
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -1786,7 +1775,7 @@ namespace dp2Circulation
 
             string strWarning = "";
 
-            string strLibPaths = "\"" + this.MainForm.DataDir + "\"";
+            string strLibPaths = "\"" + Program.MainForm.DataDir + "\"";
             Type entryClassType = this.GetType();
 
 
@@ -1948,16 +1937,16 @@ namespace dp2Circulation
             // 批次号或文件名 多个宏不方便判断后选用，只好合并为一个宏
             macro_table["%sourcedescription%"] = this.SourceDescription;
 
-            macro_table["%libraryname%"] = this.MainForm.LibraryName;
+            macro_table["%libraryname%"] = Program.MainForm.LibraryName;
             macro_table["%date%"] = DateTime.Now.ToLongDateString();
-            macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
-            ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
+            macro_table["%datadir%"] = Program.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
+            ////macro_table["%libraryserverdir%"] = Program.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
 
             // 获得打印参数
             string strPubType = "连续出版物";
-            PrintBindingPrintOption option = new PrintBindingPrintOption(this.MainForm.DataDir,
+            PrintBindingPrintOption option = new PrintBindingPrintOption(Program.MainForm.DataDir,
                 strPubType);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 "printbinding_printoption");
 
             /*
@@ -2056,7 +2045,7 @@ namespace dp2Circulation
                 {
                     // TODO: 如果警告文字的行数太多，需要截断，以便正常显示在MessageBox()中。但是进入文件的内容没有必要截断
                     MessageBox.Show(this, "警告:\r\n" + strWarning);
-                    string strErrorFilename = this.MainForm.DataDir + "\\~printbinding_" + "warning.txt";
+                    string strErrorFilename = Program.MainForm.DataDir + "\\~printbinding_" + "warning.txt";
                     StreamUtil.WriteText(strErrorFilename, "警告:\r\n" + strWarning);
                     filenames.Insert(0, strErrorFilename);
                 }
@@ -2064,11 +2053,11 @@ namespace dp2Circulation
                 HtmlPrintForm printform = new HtmlPrintForm();
 
                 printform.Text = "打印装订单";
-                printform.MainForm = this.MainForm;
+                // printform.MainForm = Program.MainForm;
                 printform.Filenames = filenames;
-                this.MainForm.AppInfo.LinkFormState(printform, "printbinding_htmlprint_formstate");
+                Program.MainForm.AppInfo.LinkFormState(printform, "printbinding_htmlprint_formstate");
                 printform.ShowDialog(this);
-                this.MainForm.AppInfo.UnlinkFormState(printform);
+                Program.MainForm.AppInfo.UnlinkFormState(printform);
 
             }
             finally
@@ -2180,7 +2169,7 @@ namespace dp2Circulation
 
             // 需要将属于合订册的文件名前缀区别开来
             string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
-            string strFileNamePrefix = this.MainForm.DataDir + "\\~printbinding_" + strRecPath.Replace("/", "_") + "_";
+            string strFileNamePrefix = Program.MainForm.DataDir + "\\~printbinding_" + strRecPath.Replace("/", "_") + "_";
 
             strFilename = strFileNamePrefix + "0" + ".html";
 
@@ -2484,8 +2473,8 @@ namespace dp2Circulation
                 return strCssFilePath;
             else
             {
-                // return this.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // 缺省的
-                return PathUtil.MergePath(this.MainForm.DataDir, strDefaultCssFileName);    // 缺省的
+                // return Program.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // 缺省的
+                return PathUtil.MergePath(Program.MainForm.DataDir, strDefaultCssFileName);    // 缺省的
             }
         }
 
@@ -2994,16 +2983,16 @@ namespace dp2Circulation
             string strNamePath = "printbinding_printoption";
             string strPubType = "连续出版物";
 
-            PrintBindingPrintOption option = new PrintBindingPrintOption(this.MainForm.DataDir,
+            PrintBindingPrintOption option = new PrintBindingPrintOption(Program.MainForm.DataDir,
                 strPubType);
-            option.LoadData(this.MainForm.AppInfo,
+            option.LoadData(Program.MainForm.AppInfo,
                 strNamePath);
 
 
             PrintOptionDlg dlg = new PrintOptionDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.MainForm = this.MainForm;
-            dlg.DataDir = this.MainForm.DataDir;
+            // dlg.MainForm = Program.MainForm;
+            dlg.DataDir = Program.MainForm.DataDir;
             dlg.Text = strPubType + " 装订单 打印参数";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
@@ -3016,14 +3005,14 @@ namespace dp2Circulation
             };
 
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "printbinding_printoption_formstate");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "printbinding_printoption_formstate");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            option.SaveData(this.MainForm.AppInfo,
+            option.SaveData(Program.MainForm.AppInfo,
                 strNamePath);
         }
 
@@ -3076,14 +3065,14 @@ namespace dp2Circulation
             strError = "";
 
             string strItemDbName = Global.GetDbName(strItemRecPath);
-            string strBiblioDbName = this.MainForm.GetBiblioDbNameFromItemDbName(strItemDbName);
+            string strBiblioDbName = Program.MainForm.GetBiblioDbNameFromItemDbName(strItemDbName);
             if (String.IsNullOrEmpty(strBiblioDbName) == true)
             {
                 strError = "实体库 '" + strItemDbName + "' 未找到对应的书目库名";
                 return -1;
             }
 
-            string strIssueDbName = this.MainForm.GetIssueDbName(strBiblioDbName);
+            string strIssueDbName = Program.MainForm.GetIssueDbName(strBiblioDbName);
 
             if (strLoadType == "图书")
             {
@@ -3142,7 +3131,7 @@ namespace dp2Circulation
                 stop.Initial("正在初始化浏览器组件 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -3335,7 +3324,7 @@ namespace dp2Circulation
                 stop.Initial("正在初始化浏览器组件 ...");
                 stop.BeginLoop();
                 this.Update();
-                this.MainForm.Update();
+                Program.MainForm.Update();
 
                 try
                 {
@@ -3596,8 +3585,8 @@ namespace dp2Circulation
 
             EntityForm form = new EntityForm();
 
-            form.MainForm = this.MainForm;
-            form.MdiParent = this.MainForm;
+            form.MainForm = Program.MainForm;
+            form.MdiParent = Program.MainForm;
             form.Show();
 
             if (String.IsNullOrEmpty(strBarcode) == false)

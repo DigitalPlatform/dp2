@@ -177,7 +177,7 @@ namespace DigitalPlatform.Script
 
             // 是否先删除目录中原来的全部文件?
 
-            PathUtil.CreateDirIfNeed(strLocate);
+            PathUtil.TryCreateDir(strLocate);
 
             for (int i = 0; i < this.Count; i++)
             {

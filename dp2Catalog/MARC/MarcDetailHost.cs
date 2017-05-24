@@ -471,7 +471,7 @@ namespace dp2Catalog
             strAuthorNumber = "";
 
             if (String.IsNullOrEmpty(strGcatWebServiceUrl) == true)
-                strGcatWebServiceUrl = "http://dp2003.com/gcatserver/";  //  "http://dp2003.com/dp2libraryws/gcat.asmx";
+                strGcatWebServiceUrl = "http://dp2003.com/dp2library/";  // "http://dp2003.com/gcatserver/" //  "http://dp2003.com/dp2libraryws/gcat.asmx";
 
             if (strGcatWebServiceUrl.IndexOf(".asmx") != -1)
             {
@@ -978,7 +978,7 @@ namespace dp2Catalog
                     //      -1  error
                     //      0   not found
                     //      1   found
-                    nRet = MacroUtil.GetFromLocalMacroTable(PathUtil.MergePath(this.DetailForm.MainForm.DataDir, "marceditor_macrotable.xml"),
+                    nRet = MacroUtil.GetFromLocalMacroTable(PathUtil.MergePath(this.DetailForm.MainForm.UserDir, "marceditor_macrotable.xml"),
             "catalog_batchno",
             false,
             out strValue,

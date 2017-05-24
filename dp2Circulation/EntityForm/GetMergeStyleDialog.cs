@@ -6,8 +6,10 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading;
 
 using DigitalPlatform.CommonControl;
+using DigitalPlatform;
 
 namespace dp2Circulation
 {
@@ -16,6 +18,19 @@ namespace dp2Circulation
     /// </summary>
     public partial class GetMergeStyleDialog : Form
     {
+        // 自动设置的风格，若为 .None 以外的值，对话框会自动关闭、继续
+        MergeStyle _autoMergeStyle = MergeStyle.None;
+        public MergeStyle AutoMergeStyle
+        {
+            get
+            {
+                return _autoMergeStyle;
+            }
+            set
+            {
+                _autoMergeStyle = value;
+            }
+        }
         /// <summary>
         /// 源书目记录路径
         /// </summary>
@@ -23,6 +38,31 @@ namespace dp2Circulation
         {
             get;
             set;
+        }
+
+        string _strOperation = "";
+
+        // 复制 移动
+        public string Operation
+        {
+            get
+            {
+                return this._strOperation;
+            }
+            set
+            {
+                this._strOperation = value;
+                SetTitle();
+            }
+        }
+
+        void SetTitle()
+        {
+            string strText = this.Operation;
+            if (string.IsNullOrEmpty(strText) == false)
+                strText += " ";
+            strText += " 请指定合并方式";
+            this.Text = strText;
         }
 
         /// <summary>
@@ -41,19 +81,45 @@ namespace dp2Circulation
 
         private void GetMergeStyleDialog_Load(object sender, EventArgs e)
         {
+            this.BeginInvoke(new Action(AutoSet));
+        }
 
+        void AutoSet()
+        {
+            if (this._autoMergeStyle != MergeStyle.None)
+            {
+                this.SetMergeStyle(this._autoMergeStyle);
+
+                // 延时 五秒
+                DateTime start_time = DateTime.Now;
+                while(DateTime.Now - start_time < TimeSpan.FromSeconds(5))
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(500);
+                }
+
+                // MessageBox.Show(this, "Pause");
+                button_OK_Click(this, new EventArgs());
+                return;
+            }
         }
 
         private void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
-            MergeStyle style = GetMergeStyle();
-            // 如果 missing 和 reservetarget 同时出现，表示没有必要操作了
-            if ((style & MergeStyle.MissingSourceSubrecord) != 0
-                && (style & MergeStyle.ReserveTargetBiblio) != 0)
+
+            // 测试的时候不经过这个检查
+            if (this._autoMergeStyle == MergeStyle.None)
             {
-                strError = "若不采纳来自源记录的书目和子记录，意味着没有必要进行此次合并操作";
-                goto ERROR1;
+                // 检查操作必要性
+                MergeStyle style = GetMergeStyle();
+                // 如果 missing 和 reservetarget 同时出现，表示没有必要操作了
+                if ((style & MergeStyle.MissingSourceSubrecord) != 0
+                    && (style & MergeStyle.ReserveTargetBiblio) != 0)
+                {
+                    strError = "若不采纳来自源记录的书目和子记录，意味着没有必要进行此次合并操作";
+                    goto ERROR1;
+                }
             }
 
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
@@ -74,6 +140,8 @@ namespace dp2Circulation
         {
             Point pt = this.panel1.AutoScrollPosition;
             e.Graphics.TranslateTransform(pt.X, pt.Y);
+
+            MergePicture.SetMetrics(DpiUtil.GetDpiXY(this));
 
             Size size = MergePicture.Paint(e,
                 this.panel1.ClientSize,

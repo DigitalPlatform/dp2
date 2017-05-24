@@ -44,7 +44,7 @@ namespace DigitalPlatform.Install
                     return;
                 }
 
-                PathUtil.CreateDirIfNeed(this.DataDir);
+                PathUtil.TryCreateDir(this.DataDir);
 
                 if (Directory.Exists(this.DataDir) == false)
                 {

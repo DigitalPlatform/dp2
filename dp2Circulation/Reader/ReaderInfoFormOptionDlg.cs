@@ -16,7 +16,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         public ReaderInfoFormOptionDlg()
         {
@@ -27,7 +27,7 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            string strNewDefault = this.MainForm.AppInfo.GetString(
+            string strNewDefault = Program.MainForm.AppInfo.GetString(
                 "readerinfoform_optiondlg",
                 "newreader_default",
                 "<root />");
@@ -38,12 +38,12 @@ namespace dp2Circulation
             if (nRet == -1)
                 MessageBox.Show(this, strError);
 
-            this.textBox_cardPhoto_maxWidth.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_cardPhoto_maxWidth.Text = Program.MainForm.AppInfo.GetString(
                 "readerinfoform_optiondlg",
                 "cardphoto_maxwidth",
                 "120");
 
-            string strSelection = this.MainForm.AppInfo.GetString(
+            string strSelection = Program.MainForm.AppInfo.GetString(
                 "readerinfoform_optiondlg",
                 "idcardfield_filter_list",
                 "name,gender,nation,dateOfBirth,address,idcardnumber,agency,validaterange,photo");
@@ -58,7 +58,7 @@ namespace dp2Circulation
         {
             string strError = "";
             string[] values = null;
-            int nRet = MainForm.GetValueTable(e.TableName,
+            int nRet = Program.MainForm.GetValueTable(e.TableName,
                 e.DbName,
                 out values,
                 out strError);
@@ -84,20 +84,20 @@ namespace dp2Circulation
                 MessageBox.Show(this, strError);
             else
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                 "readerinfoform_optiondlg",
                 "newreader_default",
         strNewDefault);
             }
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
     "readerinfoform_optiondlg",
     "cardphoto_maxwidth",
     this.textBox_cardPhoto_maxWidth.Text);
 
             string strSelection = GetIdcardFieldSelection();
             
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
      "readerinfoform_optiondlg",
      "idcardfield_filter_list",
      strSelection);
@@ -186,7 +186,7 @@ StringUtil.IsInList("photo", strSelection);
 
         private void readerEditControl_newReaderDefault_GetLibraryCode(object sender, GetLibraryCodeEventArgs e)
         {
-            e.LibraryCode = this.MainForm.GetReaderDbLibraryCode(e.DbName);
+            e.LibraryCode = Program.MainForm.GetReaderDbLibraryCode(e.DbName);
         }
     }
 }

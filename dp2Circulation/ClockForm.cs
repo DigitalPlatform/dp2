@@ -21,25 +21,6 @@ namespace dp2Circulation
     public partial class ClockForm : MyForm
     {
 #if NO
-        /// <summary>
-        /// 通讯通道
-        /// </summary>
-        public LibraryChannel Channel = new LibraryChannel();
-        // public ApplicationInfo ap = null;
-        /// <summary>
-        /// 当前界面语言
-        /// </summary>
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
-
-#if NO
         int m_nIn = 0;  // 正在和服务器打交道的层数
 
         const int WM_PREPARE = API.WM_USER + 200;
@@ -55,15 +36,15 @@ namespace dp2Circulation
 
         private void ClockForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
             this.dateTimePicker1.Value = DateTime.Now;
 
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -84,12 +65,12 @@ namespace dp2Circulation
 #if NO
         void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
-            this.MainForm.Channel_AfterLogin(sender, e);    // 2015/11/8
+            Program.MainForm.Channel_AfterLogin(sender, e);    // 2015/11/8
         }
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            this.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
+            Program.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 #endif
 
@@ -374,11 +355,11 @@ MessageBoxDefaultButton.Button2);
 
         private void ClockForm_Activated(object sender, EventArgs e)
         {
-            this.MainForm.stopManager.Active(this.stop);
+            Program.MainForm.stopManager.Active(this.stop);
 
-            this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
-            this.MainForm.MenuItem_font.Enabled = false;
-            this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
+            Program.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
+            Program.MainForm.MenuItem_font.Enabled = false;
+            Program.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
         private void checkBox_autoGet_CheckedChanged(object sender, EventArgs e)

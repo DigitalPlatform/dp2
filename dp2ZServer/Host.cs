@@ -988,7 +988,7 @@ EventLogEntryType.Information);
 
                 string strDbName = prop.DbName;
 
-                XmlNode nodeDatabase = this.CfgDom.DocumentElement.SelectSingleNode("//databases/database[@name='" + strDbName + "']");
+                XmlElement nodeDatabase = this.CfgDom.DocumentElement.SelectSingleNode("//databases/database[@name='" + strDbName + "']") as XmlElement;
                 if (nodeDatabase == null)
                     continue;
 
@@ -1026,6 +1026,11 @@ EventLogEntryType.Information);
                     strError = "为数据库 '" + strDbName + "' 配置的<databases/database>元素的" + strError;
                     return -1;
                 }
+
+                if (nodeDatabase.GetAttributeNode("removeFields") == null)
+                    prop.RemoveFields = "997";
+                else
+                    prop.RemoveFields = nodeDatabase.GetAttribute("removeFields");
             }
 
             return 0;
@@ -1143,5 +1148,8 @@ EventLogEntryType.Information);
         public string DbNameAlias = ""; // 数据库别名
 
         public bool AddField901 = false;    // 是否在MARC字段中加入表示记录路径和时间戳的的901字段
+
+        // 2017/4/15
+        public string RemoveFields = "997"; // 返回前要删除的字段名列表，逗号分隔。缺省为 "997"
     }
 }

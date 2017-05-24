@@ -132,7 +132,7 @@ namespace DigitalPlatform.CommonControl
                     this.BackColor = this.m_savedBackColor;
                  * */
 
-                base.Enabled = Enabled;
+                base.Enabled = value;   //  Enabled; BUG!!! 2017/3/5 消除
 
                 this.Invalidate();
                 this.Update();

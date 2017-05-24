@@ -1351,7 +1351,6 @@ out strError);
 
             // 先读出数据库中即将覆盖位置的已有记录
         REDOLOAD:
-
             lRet = channel.GetRes(info.NewRecPath,
                 out strExistXml,
                 out strMetaData,
@@ -1474,6 +1473,13 @@ out strError);
                     error.ErrorCode = ErrorCodeValue.AccessDenied;
                     ErrorInfos.Add(error);
                     return -1;
+                }
+
+                // 2017/3/2
+                {
+                    string strOldRefID = DomUtil.GetElementText(domNew.DocumentElement, "refID");
+                    if (string.IsNullOrEmpty(strOldRefID))
+                        DomUtil.SetElementText(domNew.DocumentElement, "refID", Guid.NewGuid().ToString());
                 }
 
                 // 2010/4/8
@@ -1947,7 +1953,6 @@ out strError);
                         else
                             bIsOldNewLocateSame = false;
 
-
                         if (info.Action == "new"
                             || info.Action == "change"
                             || info.Action == "move")
@@ -2208,6 +2213,13 @@ out strError);
                                 continue;
                             }
 
+                            // 2017/3/2
+                            {
+                                string strOldRefID = DomUtil.GetElementText(domNew.DocumentElement, "refID");
+                                if (string.IsNullOrEmpty(strOldRefID))
+                                    DomUtil.SetElementText(domNew.DocumentElement, "refID", Guid.NewGuid().ToString());
+                            }
+
                             // 2011/4/11
                             nRet = CanCreate(
                 sessioninfo,
@@ -2425,6 +2437,25 @@ out strError);
             out string strError)
         {
             strError = "";
+
+            Assembly assembly = null;
+            // return:
+            //      -1  出错
+            //      0   Assembly 为空
+            //      1   找到 Assembly
+            int nRet = this.App.GetAssembly("findBase",
+        out assembly,
+        out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "未定义<script>脚本代码，无法校验 " + this.ItemName + " 记录。";
+                return -2;
+            }
+
+            Debug.Assert(assembly != null, "");
+#if NO
             if (this.App.m_strAssemblyLibraryHostError != "")
             {
                 strError = this.App.m_strAssemblyLibraryHostError;
@@ -2436,6 +2467,7 @@ out strError);
                 strError = "未定义<script>脚本代码，无法校验册记录。";
                 return -2;
             }
+#endif
 
             Type hostEntryClassType = ScriptManager.GetDerivedClassType(
                 this.App.m_assemblyLibraryHost,

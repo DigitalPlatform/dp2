@@ -1,9 +1,10 @@
-﻿using DigitalPlatform.rms.Client.rmsws_localhost;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
+using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -68,6 +69,9 @@ namespace DigitalPlatform.rms.Client
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
+                // 2017/5/3
+                if (lRet == 0)
+                    yield break;
                 if (searchresults == null)
                 {
                     strError = "searchresults == null";
@@ -86,6 +90,7 @@ namespace DigitalPlatform.rms.Client
                         || this.ElementType == "KernelRecord")
                     {
                         KernelRecord k = KernelRecord.From(record);
+                        k.Url = this.Channel.Url;   // 2017/5/3
                         yield return k;
                     }
                     else

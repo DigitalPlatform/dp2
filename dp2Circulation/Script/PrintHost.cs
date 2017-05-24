@@ -31,7 +31,20 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
+
+        // 为了让脚本代码能够兼容
+        public virtual MainForm MainForm
+        {
+            get
+            {
+                return Program.MainForm;
+            }
+            set
+            {
+                // 为了让脚本代码能兼容
+            }
+        }
 
         /// <summary>
         /// 脚本编译后的 Assembly
@@ -667,7 +680,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetString(
+                return Program.MainForm.AppInfo.GetString(
                     "charging_print",
                     "prnPort",
                     "LPT1");
@@ -682,7 +695,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean(
+                return Program.MainForm.AppInfo.GetBoolean(
                     "charging_print",
                     "pausePrint",
                     false);
@@ -748,7 +761,7 @@ namespace dp2Circulation
         /// <summary>
         /// 册记录 XML 字符串
         /// </summary>
-        public string ItemXml = ""; // 册记录XML。根据OnInitial()中是否设置了this.MainForm.ChargingNeedReturnItemXml = true，这个值可能为空
+        public string ItemXml = ""; // 册记录XML。根据OnInitial()中是否设置了Program.MainForm.ChargingNeedReturnItemXml = true，这个值可能为空
 
         // 2011/6/26
         /// <summary>
@@ -832,7 +845,7 @@ namespace dp2Circulation
         /// <summary>
         /// 册记录 XML 字符串
         /// </summary>
-        public string ItemXml = ""; // 册记录XML。根据OnInitial()中是否设置了this.MainForm.ChargingNeedReturnItemXml = true，这个值可能为空
+        public string ItemXml = ""; // 册记录XML。根据OnInitial()中是否设置了Program.MainForm.ChargingNeedReturnItemXml = true，这个值可能为空
 
         // 2011/6/26
         /// <summary>

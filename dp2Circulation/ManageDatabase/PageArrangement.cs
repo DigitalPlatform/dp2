@@ -195,7 +195,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -237,7 +237,7 @@ namespace dp2Circulation
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             try
             {
@@ -280,8 +280,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 return -1;
 
-            this.MainForm.GetCallNumberInfo();  // 2009/6/5 刷新内存中残留的旧定义信息
-
+            Program.MainForm.GetCallNumberInfo();  // 2009/6/5 刷新内存中残留的旧定义信息
             return 0;
         }
 

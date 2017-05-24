@@ -5,6 +5,7 @@ using System.Text;
 using System.Data;
 
 using MySql.Data.MySqlClient;
+using System.Diagnostics;
 
 namespace DigitalPlatform.rms
 {
@@ -133,8 +134,8 @@ namespace DigitalPlatform.rms
         }
 #endif
 
-
-        //
+#if OLDVERSION
+        // 老版本，在 MySQL Named Pipe 情况下会抛出异常
         // 摘要:
         //     将所提供的 System.Data.IDataReader 中的所有行复制到 System.Data.SqlClient.SqlBulkCopy
         //     对象的 System.Data.SqlClient.SqlBulkCopy.DestinationTableName 属性指定的目标表中。
@@ -162,9 +163,9 @@ namespace DigitalPlatform.rms
                 try
                 {
 #endif
-                    StringBuilder strCommand = new StringBuilder(4096);
-                    while (reader.Read())
-                    {
+                StringBuilder strCommand = new StringBuilder(4096);
+                while (reader.Read())
+                {
 #if PARAMETERS
                         string strIndex = index.ToString();
                         string strKeyParamName = "@k" + strIndex;
@@ -173,25 +174,25 @@ namespace DigitalPlatform.rms
                         string strKeynumParamName = "@n" + strIndex;
 #endif
 
-                        string strKeyString = (string)reader["keystring"];
+                    string strKeyString = (string)reader["keystring"];
 
-                        string strFromString = (string)reader["fromstring"];
+                    string strFromString = (string)reader["fromstring"];
 
-                        string strIdString = (string)reader["idstring"];
+                    string strIdString = (string)reader["idstring"];
 
-                        string strKeyStringNum = (string)reader["keystringnum"];
+                    string strKeyStringNum = (string)reader["keystringnum"];
 
-                        if (strCommand.Length == 0)
-                        {
+                    if (strCommand.Length == 0)
+                    {
 #if !PARAMETERS
-                            strCommand.Append(
-                                " INSERT INTO " + strTableName
-                                + " (keystring,fromstring,idstring,keystringnum) "
-                                + " VALUES (N'" + MySqlHelper.EscapeString(strKeyString) + "',N'"
-                                + MySqlHelper.EscapeString(strFromString) + "',N'"
-                                + MySqlHelper.EscapeString(strIdString) + "',N'"
-                                + MySqlHelper.EscapeString(strKeyStringNum) + "') "
-                                );
+                        strCommand.Append(
+                            " INSERT INTO " + strTableName
+                            + " (keystring,fromstring,idstring,keystringnum) "
+                            + " VALUES (N'" + MySqlHelper.EscapeString(strKeyString) + "',N'"
+                            + MySqlHelper.EscapeString(strFromString) + "',N'"
+                            + MySqlHelper.EscapeString(strIdString) + "',N'"
+                            + MySqlHelper.EscapeString(strKeyStringNum) + "') "
+                            );
 #else 
                             strCommand.Append(
                                 " INSERT INTO " + strTableName
@@ -202,16 +203,16 @@ namespace DigitalPlatform.rms
                                 + strKeynumParamName + ") "
                                 );
 #endif
-                        }
-                        else
-                        {
+                    }
+                    else
+                    {
 #if !PARAMETERS
-                            strCommand.Append(
-                                ",(N'" + MySqlHelper.EscapeString(strKeyString) + "',N'"
-                                + MySqlHelper.EscapeString(strFromString) + "',N'"
-                                + MySqlHelper.EscapeString(strIdString) + "',N'"
-                                + MySqlHelper.EscapeString(strKeyStringNum) + "') "
-                                );
+                        strCommand.Append(
+                            ",(N'" + MySqlHelper.EscapeString(strKeyString) + "',N'"
+                            + MySqlHelper.EscapeString(strFromString) + "',N'"
+                            + MySqlHelper.EscapeString(strIdString) + "',N'"
+                            + MySqlHelper.EscapeString(strKeyStringNum) + "') "
+                            );
 #else
                             strCommand.Append(
                                 ",(" + strKeyParamName + ","
@@ -220,7 +221,7 @@ namespace DigitalPlatform.rms
                                 + strKeynumParamName + ") "
                                 );
 #endif
-                        }
+                    }
 
 #if PARAMETERS
                         command.Parameters.AddWithValue(strKeyParamName, strKeyString);
@@ -230,32 +231,10 @@ namespace DigitalPlatform.rms
                         command.Parameters.AddWithValue(strKeynumParamName, strKeyStringNum);
 #endif
 
-                        nCount++;
+                    nCount++;
 
-                        if (nCount >= this.BatchSize && this.BatchSize != 0)
-                        {
-                            command.CommandText = "use " + strDbName + " ;\n"
-                                + strCommand + " ;\n";
-
-                            command.ExecuteNonQuery();
-
-                            strCommand.Clear();
-                            command.Parameters.Clear();
-                            nCount = 0;
-                            index = 0;
-                            continue;
-                        }
-
-
-
-
-                        index++;
-                    }
-
-                    // 最后一次
-                    if (strCommand.Length > 0)
+                    if (nCount >= this.BatchSize && this.BatchSize != 0)
                     {
-
                         command.CommandText = "use " + strDbName + " ;\n"
                             + strCommand + " ;\n";
 
@@ -265,8 +244,175 @@ namespace DigitalPlatform.rms
                         command.Parameters.Clear();
                         nCount = 0;
                         index = 0;
-
+                        continue;
                     }
+
+                    index++;
+                }
+
+                // 最后一次
+                if (strCommand.Length > 0)
+                {
+
+                    command.CommandText = "use " + strDbName + " ;\n"
+                        + strCommand + " ;\n";
+
+                    command.ExecuteNonQuery();
+
+                    strCommand.Clear();
+                    command.Parameters.Clear();
+                    nCount = 0;
+                    index = 0;
+                }
+
+#if NO
+                    if (trans != null)
+                    {
+                        trans.Commit();
+                        trans = null;
+                    }
+                }
+                finally
+                {
+                    if (trans != null)
+                        trans.Rollback();
+                }
+#endif
+            } // end of using command
+        }
+#endif
+
+        // 获得一个字符串的 UTF-8 字节数
+        static int GetLength(StringBuilder text)
+        {
+            return Encoding.UTF8.GetByteCount(text.ToString());
+        }
+
+        // 新版本，针对 Named Pipe 情况测试过
+        // 摘要:
+        //     将所提供的 System.Data.IDataReader 中的所有行复制到 System.Data.SqlClient.SqlBulkCopy
+        //     对象的 System.Data.SqlClient.SqlBulkCopy.DestinationTableName 属性指定的目标表中。
+        //
+        // 参数:
+        //   reader:
+        //     一个 System.Data.IDataReader，它的行将被复制到目标表中。
+        public void WriteToServer(IDataReader reader)
+        {
+            int index = 0;
+            int nCount = 0;
+
+            string strDbName = "";
+            string strTableName = "";
+
+            ParseName(this.DestinationTableName,
+                out strDbName,
+                out strTableName);
+
+            using (MySqlCommand command = new MySqlCommand("",
+    m_connection))
+            {
+#if NO
+                MySqlTransaction trans = m_connection.BeginTransaction();
+                try
+                {
+#endif
+                string strHead =
+    " INSERT INTO " + strTableName
+    + " (keystring,fromstring,idstring,keystringnum) "
+    + " VALUES ";
+
+                StringBuilder strFragment = new StringBuilder();    // 残余的片段
+
+                StringBuilder strCommand = new StringBuilder(4096);
+                while (reader.Read())
+                {
+#if PARAMETERS
+                        string strIndex = index.ToString();
+                        string strKeyParamName = "@k" + strIndex;
+                        string strFromParamName = "@f" + strIndex;
+                        string strIdParamName = "@i" + strIndex;
+                        string strKeynumParamName = "@n" + strIndex;
+#endif
+
+                    string strKeyString = (string)reader["keystring"];
+
+                    string strFromString = (string)reader["fromstring"];
+
+                    string strIdString = (string)reader["idstring"];
+
+                    string strKeyStringNum = (string)reader["keystringnum"];
+
+                    {
+#if !PARAMETERS
+                        strFragment.Append(
+                            "(N'" + MySqlHelper.EscapeString(strKeyString) + "',N'"
+                            + MySqlHelper.EscapeString(strFromString) + "',N'"
+                            + MySqlHelper.EscapeString(strIdString) + "',N'"
+                            + MySqlHelper.EscapeString(strKeyStringNum) + "') "
+                            );
+#else
+                            strCommand.Append(
+                                ",(" + strKeyParamName + ","
+                                + strFromParamName + ","
+                                + strIdParamName + ","
+                                + strKeynumParamName + ") "
+                                );
+#endif
+                    }
+
+#if PARAMETERS
+                        command.Parameters.AddWithValue(strKeyParamName, strKeyString);
+                        command.Parameters.AddWithValue(strFromParamName, strFromString);
+                        command.Parameters.AddWithValue(strIdParamName, strIdString);
+
+                        command.Parameters.AddWithValue(strKeynumParamName, strKeyStringNum);
+#endif
+
+                    nCount++;
+
+                    // TODO: 可能需要用 UTF-8 bytes 长度来限制，比如 65535
+                    if ((nCount >= this.BatchSize
+                        && this.BatchSize != 0)
+                        || strHead.Length + GetLength(strCommand) + GetLength(strFragment) + 1 >= 64000)  // 32000 是可以的; 4000 是可以的; 60000 不行
+                    {
+                        command.CommandText = "use " + strDbName + " ;\n"
+                            + strHead + strCommand + " ;\n";
+
+                        // Debug.WriteLine("command length=" + command.CommandText.Length);
+                        command.ExecuteNonQuery();
+
+                        strCommand.Clear();
+                        command.Parameters.Clear();
+                        nCount = 0;
+                        index = 0;
+                    }
+                    else
+                        index++;
+
+                    if (strCommand.Length > 0)
+                    {
+                        strCommand.Append(",");
+                    }
+                    strCommand.Append(strFragment.ToString());
+                    strFragment.Clear();
+                }
+
+                // 最后一次
+                if (strCommand.Length > 0)
+                {
+                    Debug.Assert(strFragment.Length == 0, "");
+
+                    command.CommandText = "use " + strDbName + " ;\n"
+                        + strHead + strCommand + " ;\n";
+
+                    // Debug.WriteLine("(last) command length=" + command.CommandText.Length);
+                    command.ExecuteNonQuery();
+
+                    strCommand.Clear();
+                    command.Parameters.Clear();
+                    nCount = 0;
+                    index = 0;
+                }
 
 #if NO
                     if (trans != null)

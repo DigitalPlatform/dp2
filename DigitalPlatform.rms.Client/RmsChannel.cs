@@ -6191,6 +6191,8 @@ ref strNewStyle);	// 不要数据体和metadata
         public string Metadata = "";
         public byte[] Timestamp = null;
 
+        public string Url = ""; // 2017/5/3
+
         public static KernelRecord From(Record record)
         {
             KernelRecord result = new KernelRecord();

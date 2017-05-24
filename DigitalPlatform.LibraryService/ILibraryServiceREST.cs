@@ -525,8 +525,10 @@ SessionMode = SessionMode.NotAllowed)]
 
         [OperationContract]
         LibraryServerResult VerifyBarcode(
-            string strLibraryCode,
-            string strBarcode);
+    string strAction,
+    string strLibraryCode,
+    string strBarcode,
+            out string strOutputBarcode);
 
         [OperationContract]
         LibraryServerResult GetSystemParameter(

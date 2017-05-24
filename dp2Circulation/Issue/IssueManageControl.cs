@@ -352,7 +352,6 @@ namespace dp2Circulation
             item.OrderedCount = nRet;
 
             this.m_currentTreeNode = e.Node;
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);

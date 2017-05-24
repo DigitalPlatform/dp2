@@ -72,6 +72,7 @@ namespace dp2Circulation
             }
         }
 
+#if NO
         /// <summary>
         /// 获得框架窗口
         /// </summary>
@@ -82,6 +83,22 @@ namespace dp2Circulation
                 return this.AccountBookForm.MainForm;
             }
         }
+#endif
+
+        /// <summary>
+        /// 当前窗口所从属的框架窗口
+        /// </summary>
+        public virtual MainForm MainForm
+        {
+            get
+            {
+                return Program.MainForm;
+            }
+            set
+            {
+                // 为了让脚本代码能兼容
+            }
+        }
 
         /// <summary>
         /// 向控制台输出 HTML
@@ -89,7 +106,7 @@ namespace dp2Circulation
         /// <param name="strHtml">要输出的 HTML 字符串</param>
         public void OutputHtml(string strHtml)
         {
-            this.MainForm.OperHistory.AppendHtml(strHtml);
+            Program.MainForm.OperHistory.AppendHtml(strHtml);
         }
 
         // parameters:
@@ -106,7 +123,7 @@ namespace dp2Circulation
                 strClass = "warning";
             else if (nWarningLevel >= 2)
                 strClass = "error";
-            this.MainForm.OperHistory.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
     }
 }

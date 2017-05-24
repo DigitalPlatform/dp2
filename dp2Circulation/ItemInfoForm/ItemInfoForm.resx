@@ -147,12 +147,12 @@
   <data name="toolStripButton_addSubject.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAETSURBVDhPY/jSJW/wpVNpytd62U+kYJAekF6Gj20KU17N
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAETSURBVDhPY/jSJW/wpVNpytd62U+kYJAekF6Gj20KU57N
         tvv1dbn/f1IwSA9IL8MHkIlAgY9NrCRhkB6QXoa3yAY0MuPEMPB1ZTDcAJBehof1UgQNAAEUNtQAkF6G
         hzUSeA0Aa0DnwwwA6mV4UCGK14Cfp6dDNAHZMBpmAEgvw51sTpwGwDQjGwLGUANAehnOYjEABJA1wzXC
         MNQAkF4MA0AARmPVDMIoBmQhDAABZIXofDiGGQDUy3AqnQOrAchsDAw1AKSX4VgyK9wAUCKBAawaYRhq
-        AEgvw+FE5vdflvkBBdnAEsRhtv8gPSC9DAdiGfseNKiRnJlAekB6GfbGMWjvi2Xo2xXB8IkUDNKzN45B
-        GwCiM5/hPAN82QAAAABJRU5ErkJggg==
+        AEgvw+FE5vdflvkBBdnAEsRhtv8gPSC9DAdiGfse1CuRnJlAekB6GfbGMWjvi2Xo2xXB8IkUDNKzN45B
+        GwCA55/PSakhAAAAAABJRU5ErkJggg==
 </value>
   </data>
   <data name="toolStripButton_nextRecord.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

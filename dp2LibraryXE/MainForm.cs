@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Web;
 using System.Reflection;
+using System.Threading.Tasks;
 
 using Ionic.Zip;
 
@@ -34,7 +35,6 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
 using dp2LibraryXE.Properties;
-using System.Threading.Tasks;
 
 namespace dp2LibraryXE
 {
@@ -211,31 +211,31 @@ namespace dp2LibraryXE
                 WriteLibraryEventLog("普通方法得到, this.UserDir=" + this.UserDir, EventLogEntryType.Information);
 #endif
             }
-            PathUtil.CreateDirIfNeed(this.UserDir);
+            PathUtil.TryCreateDir(this.UserDir);
 
             this.TempDir = Path.Combine(this.UserDir, "temp");
-            PathUtil.CreateDirIfNeed(this.TempDir);
+            PathUtil.TryCreateDir(this.TempDir);
 
             // 2015/8/8
             this.UserLogDir = Path.Combine(this.UserDir, "log");
-            PathUtil.CreateDirIfNeed(this.UserLogDir);
+            PathUtil.TryCreateDir(this.UserLogDir);
 
             this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "settings.xml"));
 
             this.KernelDataDir = Path.Combine(this.UserDir, "kernel_data");
-            PathUtil.CreateDirIfNeed(this.KernelDataDir);
+            PathUtil.TryCreateDir(this.KernelDataDir);
 
             this.LibraryDataDir = Path.Combine(this.UserDir, "library_data");
-            PathUtil.CreateDirIfNeed(this.LibraryDataDir);
+            PathUtil.TryCreateDir(this.LibraryDataDir);
 
             this.OpacDataDir = Path.Combine(this.UserDir, "opac_data");
-            PathUtil.CreateDirIfNeed(this.OpacDataDir);
+            PathUtil.TryCreateDir(this.OpacDataDir);
 
             this.OpacAppDir = Path.Combine(this.UserDir, "opac_app");
-            PathUtil.CreateDirIfNeed(this.OpacAppDir);
+            PathUtil.TryCreateDir(this.OpacAppDir);
 
             this.dp2SiteDir = Path.Combine(this.UserDir, "dp2_site");
-            PathUtil.CreateDirIfNeed(this.dp2SiteDir);
+            PathUtil.TryCreateDir(this.dp2SiteDir);
 
             stopManager.Initial(this.toolButton_stop,
     (object)this.toolStripStatusLabel_main,
@@ -3677,7 +3677,7 @@ this.Font);
                 try
                 {
                     // 确保目标目录已经创建
-                    PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strTargetPath));
+                    PathUtil.TryCreateDir(Path.GetDirectoryName(strTargetPath));
 
                     File.Copy(strTempPath, strTargetPath, true);
                 }
@@ -3751,7 +3751,14 @@ MessageBoxDefaultButton.Button2);
 
                             AppendString(e.FileName + "\r\n");
 
-                            e.Extract(this.UserDir, ExtractExistingFileAction.OverwriteSilently);
+                            // e.Extract(this.UserDir, ExtractExistingFileAction.OverwriteSilently);
+                            string strTargetDir = this.UserDir;
+                            if ((e.Attributes & FileAttributes.Directory) == 0)
+                            {
+                                ExtractFile(e, strTargetDir);
+                            }
+                            else
+                                e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
                         }
                     }
                 }
@@ -5081,8 +5088,8 @@ C:\WINDOWS\SysNative\dism.exe /NoRestart /Online /Enable-Feature /FeatureName:MS
             string strDataDir = dlg.DataDir;
             string strConfigFileName = Path.Combine(strDataDir, "mongod.cfg");
 
-            PathUtil.CreateDirIfNeed(Path.Combine(strDataDir, "db"));
-            PathUtil.CreateDirIfNeed(Path.Combine(strDataDir, "log"));
+            PathUtil.TryCreateDir(Path.Combine(strDataDir, "db"));
+            PathUtil.TryCreateDir(Path.Combine(strDataDir, "log"));
 
             using (StreamWriter sw = new StreamWriter(strConfigFileName, false))
             {

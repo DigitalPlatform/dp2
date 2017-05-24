@@ -69,7 +69,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
 #if USE_LOCAL_CHANNEL
         // 2011/12/5
@@ -121,7 +121,7 @@ namespace dp2Circulation
         {
             get
             {
-                return this.MainForm.AppInfo.GetString(
+                return Program.MainForm.AppInfo.GetString(
                 "charging_print",
                 "projectName",
                 "");
@@ -142,8 +142,8 @@ namespace dp2Circulation
         /// </summary>
         public void ClearHtml()
         {
-            // string strCssUrl = this.MainForm.LibraryServerDir + "/history.css";
-            string strCssUrl = PathUtil.MergePath(this.MainForm.DataDir, "/history.css");
+            // string strCssUrl = Program.MainForm.LibraryServerDir + "/history.css";
+            string strCssUrl = PathUtil.MergePath(Program.MainForm.DataDir, "/history.css");
 
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
 
@@ -151,10 +151,10 @@ namespace dp2Circulation
 
             /*
             // 2009/2/11
-            if (String.IsNullOrEmpty(this.MainForm.LibraryServerDir) == false)
-                strJs = "<SCRIPT language='javaSCRIPT' src='" + this.MainForm.LibraryServerDir + "/getsummary.js" + "'></SCRIPT>";
+            if (String.IsNullOrEmpty(Program.MainForm.LibraryServerDir) == false)
+                strJs = "<SCRIPT language='javaSCRIPT' src='" + Program.MainForm.LibraryServerDir + "/getsummary.js" + "'></SCRIPT>";
             */
-            // strJs = "<SCRIPT language='javaSCRIPT' src='" + PathUtil.MergePath(this.MainForm.DataDir, "getsummary.js") + "'></SCRIPT>";
+            // strJs = "<SCRIPT language='javaSCRIPT' src='" + PathUtil.MergePath(Program.MainForm.DataDir, "getsummary.js") + "'></SCRIPT>";
 
             {
                 HtmlDocument doc = WebBrowser.Document;
@@ -179,24 +179,24 @@ namespace dp2Circulation
         /// <param name="webbrowser">用于显示操作历史信息的 IE 浏览器控件</param>
         /// <param name="strError">出错信息</param>
         /// <returns>-1: 出错，错误信息在 strError中；0: 成功</returns>
-        public int Initial(MainForm main_form,
+        public int Initial(// MainForm main_form,
             WebBrowser webbrowser,
             out string strError)
         {
             int nRet = 0;
             strError = "";
 
-            this.MainForm = main_form;
+            // this.MainForm = main_form;
 
 #if USE_LOCAL_CHANNEL
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 #endif
 
 
             /*
-            string strLibraryServerUrl = this.MainForm.AppInfo.GetString(
+            string strLibraryServerUrl = Program.MainForm.AppInfo.GetString(
 "config",
 "circulation_server_url",
 "");
@@ -209,7 +209,8 @@ namespace dp2Circulation
             this.WebBrowser = webbrowser;
 
             // webbrowser
-            this.m_webExternalHost.Initial(this.MainForm, this.WebBrowser);
+            this.m_webExternalHost.Initial(// Program.MainForm, 
+                this.WebBrowser);
             this.WebBrowser.ObjectForScripting = this.m_webExternalHost;
 
             this.ClearHtml();
@@ -226,8 +227,8 @@ namespace dp2Circulation
             /*
 
             // 准备script代码
-            string strCsFileName = this.MainForm.DataDir + "\\charging_print.cs";
-            string strRefFileName = this.MainForm.DataDir + "\\charging_print.cs.ref";
+            string strCsFileName = Program.MainForm.DataDir + "\\charging_print.cs";
+            string strRefFileName = Program.MainForm.DataDir + "\\charging_print.cs.ref";
 
             if (File.Exists(strCsFileName) == true)
             {
@@ -292,11 +293,11 @@ namespace dp2Circulation
             }
              * */
 
-            ScriptManager.applicationInfo = this.MainForm.AppInfo;
+            ScriptManager.applicationInfo = Program.MainForm.AppInfo;
 #if NO
             ScriptManager.CfgFilePath =
-                Path.Combine(this.MainForm.DataDir, "charging_print_projects.xml");
-            ScriptManager.DataDir = this.MainForm.DataDir;
+                Path.Combine(Program.MainForm.DataDir, "charging_print_projects.xml");
+            ScriptManager.DataDir = Program.MainForm.DataDir;
 #endif
             ScriptManager.CfgFilePath =
     Path.Combine(Program.MainForm.UserDir, "charging_print_projects.xml");
@@ -360,10 +361,54 @@ namespace dp2Circulation
             return 0;
         }
 
+        // 2017/4/24
+        public void TestCompile(string strProjectName)
+        {
+            string strError = "";
+
+            if (String.IsNullOrEmpty(strProjectName) == true)
+            {
+                strError = "尚未指定方案名";
+                goto ERROR1;
+            }
+
+            string strProjectLocate = "";
+            // 获得方案参数
+            // strProjectNamePath	方案名，或者路径
+            // return:
+            //		-1	error
+            //		0	not found project
+            //		1	found
+            int nRet = this.ScriptManager.GetProjectData(
+                strProjectName,
+                out strProjectLocate);
+            if (nRet == 0)
+            {
+                strError = "凭条打印方案 " + strProjectName + " 没有找到...";
+                goto ERROR1;
+            }
+            if (nRet == -1)
+            {
+                strError = "scriptManager.GetProjectData() error ...";
+                goto ERROR1;
+            }
+
+            // 
+            nRet = PrepareScript(strProjectName,
+                strProjectLocate,
+                out strError);
+            if (nRet == -1)
+               goto ERROR1;
+
+            return;
+        ERROR1:
+            throw new Exception(strError);
+        }
+
 #if USE_LOCAL_CHANNEL
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
-            MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
+            Program.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 #endif
 
@@ -451,12 +496,12 @@ namespace dp2Circulation
         public void OnProjectManager(IWin32Window owner)
         {
             ProjectManageDlg dlg = new ProjectManageDlg();
-            MainForm.SetControlFont(dlg, this.MainForm.DefaultFont, false);
+            MainForm.SetControlFont(dlg, Program.MainForm.DefaultFont, false);
             dlg.ProjectsUrl = "http://dp2003.com/dp2circulation/projects/projects.xml";
             dlg.HostName = "OperHistory";
             dlg.scriptManager = this.ScriptManager;
-            dlg.AppInfo = this.MainForm.AppInfo;
-            dlg.DataDir = this.MainForm.DataDir;
+            dlg.AppInfo = Program.MainForm.AppInfo;
+            dlg.DataDir = Program.MainForm.DataDir;
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
             this.m_bNeedReload = false;
@@ -498,7 +543,7 @@ namespace dp2Circulation
             {
                 EventArgs e = new EventArgs();
 
-                this.PrintHostObj.MainForm = this.MainForm;
+                // this.PrintHostObj.MainForm = Program.MainForm;
                 this.PrintHostObj.Assembly = this.PrintAssembly;
                 try
                 {
@@ -524,7 +569,7 @@ namespace dp2Circulation
                 ReaderBarcodeScanedEventArgs e = new ReaderBarcodeScanedEventArgs();
                 e.ReaderBarcode = strReaderBarcode;
 
-                this.PrintHostObj.MainForm = this.MainForm;
+                // this.PrintHostObj.MainForm = Program.MainForm;
                 this.PrintHostObj.Assembly = this.PrintAssembly;
                 try
                 {
@@ -551,7 +596,7 @@ namespace dp2Circulation
                 e.PrintInfo = this.PrintHostObj.PrintInfo;
                 e.Action = "print";
 
-                this.PrintHostObj.MainForm = this.MainForm;
+                // this.PrintHostObj.MainForm = Program.MainForm;
                 this.PrintHostObj.Assembly = this.PrintAssembly;
                 try
                 {
@@ -579,7 +624,7 @@ namespace dp2Circulation
                 e.PrintInfo = info;
                 e.Action = "print";
 
-                this.PrintHostObj.MainForm = this.MainForm;
+                // this.PrintHostObj.MainForm = Program.MainForm;
                 this.PrintHostObj.Assembly = this.PrintAssembly;
                 try
                 {
@@ -614,7 +659,7 @@ namespace dp2Circulation
                 e.PrintInfo = info;
                 e.Action = "create";
 
-                this.PrintHostObj.MainForm = this.MainForm;
+                // this.PrintHostObj.MainForm = Program.MainForm;
                 this.PrintHostObj.Assembly = this.PrintAssembly;
                 try
                 {
@@ -643,7 +688,7 @@ namespace dp2Circulation
                 PrintEventArgs e = new PrintEventArgs();
                 e.PrintInfo = this.PrintHostObj.PrintInfo;
 
-                this.PrintHostObj.MainForm = this.MainForm;
+                // this.PrintHostObj.MainForm = Program.MainForm;
                 this.PrintHostObj.Assembly = this.PrintAssembly;
                 try
                 {
@@ -668,7 +713,7 @@ namespace dp2Circulation
                 PrintEventArgs e = new PrintEventArgs();
                 e.PrintInfo = this.PrintHostObj.PrintInfo;
 
-                this.PrintHostObj.MainForm = this.MainForm;
+                // this.PrintHostObj.MainForm = Program.MainForm;
                 this.PrintHostObj.Assembly = this.PrintAssembly;
                 try
                 {
@@ -709,7 +754,7 @@ namespace dp2Circulation
         // 工作线程每一轮循环的实质性工作
         public override void Worker()
         {
-            this.MainForm.FixedPanelAnimation(this.MainForm.PageOperHistory);
+            Program.MainForm.FixedPanelAnimation(Program.MainForm.PageOperHistory);
 
             try
             {
@@ -739,7 +784,7 @@ namespace dp2Circulation
                     {
                         /*
                         Delegate_Borrow d = (Delegate_Borrow)call.func;
-                        this.MainForm.Invoke(d, call.parameters);
+                        Program.MainForm.Invoke(d, call.parameters);
                          * */
                         // 此调用可能因为网络原因，耗时好几秒
                         Borrow((IChargingForm)call.parameters[0],
@@ -757,7 +802,7 @@ namespace dp2Circulation
                     {
                         /*
                         Delegate_Return d = (Delegate_Return)call.func;
-                        this.MainForm.Invoke(d, call.parameters);
+                        Program.MainForm.Invoke(d, call.parameters);
                          * */
                         // throw new Exception("test error");
                         Return((IChargingForm)call.parameters[0],
@@ -775,7 +820,7 @@ namespace dp2Circulation
                     {
                         /*
                         Delegate_Amerce d = (Delegate_Amerce)call.func;
-                        this.MainForm.Invoke(d, call.parameters);
+                        Program.MainForm.Invoke(d, call.parameters);
                          * */
                         Amerce((string)call.parameters[0],
         (string)call.parameters[1],
@@ -786,10 +831,10 @@ namespace dp2Circulation
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 string strError = "OperHistory 的工作线程出现异常: \r\n" + ExceptionUtil.GetDebugText(ex);
-                this.MainForm.WriteErrorLog(strError);
+                Program.MainForm.WriteErrorLog(strError);
 
                 string strText = "<div class='item error'>"
                 + "<div class='item_line'>"
@@ -937,17 +982,17 @@ namespace dp2Circulation
                     if (call.name == "borrow")
                     {
                         Delegate_Borrow d = (Delegate_Borrow)call.func;
-                        this.MainForm.Invoke(d, call.parameters);
+                        Program.MainForm.Invoke(d, call.parameters);
                     }
                     else if (call.name == "return")
                     {
                         Delegate_Return d = (Delegate_Return)call.func;
-                        this.MainForm.Invoke(d, call.parameters);
+                        Program.MainForm.Invoke(d, call.parameters);
                     }
                     else if (call.name == "amerce")
                     {
                         Delegate_Amerce d = (Delegate_Amerce)call.func;
-                        this.MainForm.Invoke(d, call.parameters);
+                        Program.MainForm.Invoke(d, call.parameters);
                     }
                 }
 
@@ -967,7 +1012,7 @@ namespace dp2Circulation
             string strItemBarcode,
             string strConfirmItemRecPath,
             string strReaderSummary,
-            string strItemXml, 
+            string strItemXml,
             BorrowInfo borrow_info,
             DateTime start_time,
             DateTime end_time);
@@ -987,7 +1032,7 @@ namespace dp2Circulation
 
 #if !USE_THREAD
             Delegate_Borrow d = new Delegate_Borrow(Borrow);
-            this.MainForm.BeginInvoke(d, new object[] { charging_form,
+            Program.MainForm.BeginInvoke(d, new object[] { charging_form,
             bRenew,
             strReaderBarcode,
             strItemBarcode,
@@ -1037,7 +1082,7 @@ namespace dp2Circulation
 #if USE_LOCAL_CHANNEL
             string strBiblioRecPath = "";
 
-            int nRet = this.MainForm.GetCachedBiblioSummary(strItemBarcode,
+            int nRet = Program.MainForm.GetCachedBiblioSummary(strItemBarcode,
 strConfirmItemRecPath,
 out strSummary,
 out strError);
@@ -1068,13 +1113,13 @@ out strError);
             else
             {
                 // 2013/12/13
-                this.MainForm.SetBiblioSummaryCache(strItemBarcode,
+                Program.MainForm.SetBiblioSummaryCache(strItemBarcode,
                      strConfirmItemRecPath,
                      strSummary);
             }
             return (int)lRet;
 #else
-            return this.MainForm.GetBiblioSummary(strItemBarcode,
+            return Program.MainForm.GetBiblioSummary(strItemBarcode,
                         strConfirmItemRecPath,
                         out strSummary,
                         out strError);
@@ -1183,7 +1228,7 @@ out strError);
                     e.BorrowOperator = borrow_info.BorrowOperator;
                 }
 
-                this.PrintHostObj.MainForm = this.MainForm;
+                // this.PrintHostObj.MainForm = Program.MainForm;
                 this.PrintHostObj.Assembly = this.PrintAssembly;
                 try
                 {
@@ -1234,7 +1279,7 @@ out strError);
 #if !USE_THREAD
 
             Delegate_Return d = new Delegate_Return(Return);
-            this.MainForm.BeginInvoke(d, new object[] {charging_form,
+            Program.MainForm.BeginInvoke(d, new object[] {charging_form,
             bLost,
             strReaderBarcode,
             strItemBarcode,
@@ -1333,7 +1378,7 @@ out strError);
                 + "\r\n\t\t<div class='clear'></div>"
                 + "\r\n\t</div>") : ""
                 )
-                
+
                 + "\r\n\t<div class='opername_line'>"
                 + "\r\n\t\t<div class='opername'>" + HttpUtility.HtmlEncode(strOperName) + "</div>"
                 + "\r\n\t\t<div class='clear'></div>"
@@ -1400,7 +1445,7 @@ out strError);
                     e.BookType = return_info.BookType;
                 }
 
-                this.PrintHostObj.MainForm = this.MainForm;
+                // this.PrintHostObj.MainForm = Program.MainForm;
                 this.PrintHostObj.Assembly = this.PrintAssembly;
                 try
                 {
@@ -1467,7 +1512,7 @@ out strError);
 
 #if !USE_THREAD
             Delegate_Amerce d = new Delegate_Amerce(Amerce);
-            this.MainForm.BeginInvoke(d, new object[] {strReaderBarcode,
+            Program.MainForm.BeginInvoke(d, new object[] {strReaderBarcode,
                 strReaderSummary,
                 overdue_infos,
                 strAmerceOperator,
@@ -1574,7 +1619,7 @@ out strError);
 
                 e.AmerceOperator = strAmerceOperator;
 
-                this.PrintHostObj.MainForm = this.MainForm;
+                // this.PrintHostObj.MainForm = Program.MainForm;
                 this.PrintHostObj.Assembly = this.PrintAssembly;
                 try
                 {
@@ -1688,8 +1733,8 @@ out strError);
                 if (string.IsNullOrEmpty(this.m_strInstanceDir) == false)
                     return this.m_strInstanceDir;
 
-                this.m_strInstanceDir = PathUtil.MergePath(this.MainForm.DataDir, "~bin_" + Guid.NewGuid().ToString());
-                PathUtil.CreateDirIfNeed(this.m_strInstanceDir);
+                this.m_strInstanceDir = PathUtil.MergePath(Program.MainForm.DataDir, "~bin_" + Guid.NewGuid().ToString());
+                PathUtil.TryCreateDir(this.m_strInstanceDir);
 
                 return this.m_strInstanceDir;
             }
@@ -1710,7 +1755,7 @@ out strError);
 
             string strMainCsDllName = PathUtil.MergePath(this.InstanceDir, "\\~charging_print_main_" + Convert.ToString(AssemblyVersion++) + ".dll");    // ++
 
-            string strLibPaths = "\"" + this.MainForm.DataDir + "\""
+            string strLibPaths = "\"" + Program.MainForm.DataDir + "\""
                 + ","
                 + "\"" + strProjectLocate + "\"";
 
@@ -1748,7 +1793,7 @@ out strError);
             {
                 if (strWarning == "")
                     goto ERROR1;
-                MessageBox.Show(this.MainForm, strWarning);
+                MessageBox.Show(Program.MainForm, strWarning);
             }
 
 
@@ -1794,6 +1839,6 @@ out strError);
     {
         public string name = "";
         public object func = null;
-        public object [] parameters = null;
+        public object[] parameters = null;
     }
 }

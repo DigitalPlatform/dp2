@@ -95,7 +95,7 @@ namespace dp2Circulation
                     return this.m_strInstanceDir;
 
                 this.m_strInstanceDir = PathUtil.MergePath(this.DataDir, "~bin_" + Guid.NewGuid().ToString());
-                PathUtil.CreateDirIfNeed(this.m_strInstanceDir);
+                PathUtil.TryCreateDir(this.m_strInstanceDir);
 
                 return this.m_strInstanceDir;
             }
@@ -448,20 +448,29 @@ Stack:
             this.DefaultFontString = "微软雅黑, 9pt";
         }
 
-        void RemoveBarcodeFont()
-        {
-            GlobalVars.PrivateFonts.Dispose();
 
-            string strFontFilePath = Path.Combine(this.DataDir, "b3901.ttf");
-            API.RemoveFontResourceA(strFontFilePath);
+        void RemoveExternalFonts(List<string> paths)
+        {
+
+            foreach (string path in paths)
+            {
+                API.RemoveFontResourceA(path);
+            }
+
+            GlobalVars.PrivateFonts.Dispose();
         }
 
-        void InstallBarcodeFont()
+        // "C39HrP24DhTt"   string strFontFilePath = Path.Combine(this.DataDir, "b3901.ttf");
+        // "OCR-B 10 BT" string strFontFilePath = Path.Combine(this.DataDir, "ocr-b.ttf");
+        void InstallExternalFont(
+            // string strFontName, 
+            string strFontFilePath)
         {
+#if NO
             bool bInstalled = true;
             try
             {
-                FontFamily family = new FontFamily("C39HrP24DhTt");
+                FontFamily family = new FontFamily(strFontName);
             }
             catch
             {
@@ -473,52 +482,29 @@ Stack:
                 // 已经安装
                 return;
             }
-
-            // 
-            string strFontFilePath = Path.Combine(this.DataDir, "b3901.ttf");
-            int nRet = API.AddFontResourceA(strFontFilePath);
-            if (nRet == 0)
+#endif
+            if (File.Exists(strFontFilePath) == false
+                // && ApplicationDeployment.IsNetworkDeployed
+                )
             {
-                // 失败
-                MessageBox.Show(this, "安装字体文件 " + strFontFilePath + " 失败");
-                return;
+                if (Detect360() == true)
+                {
+                    Program.PromptAndExit(this, "dp2Circulation (内务)受到 360 软件干扰而无法启动 [文件" + strFontFilePath + "不存在]。请关闭或者卸载 360 软件然后再重新启动 dp2Circulation (内务)");
+                    return;
+                }
             }
 
             {
-                // 成功
+                int nRet = API.AddFontResourceA(strFontFilePath);
+                if (nRet == 0)
+                {
+                    // 失败
+                    MessageBox.Show(this, "安装字体文件 " + strFontFilePath + " 失败");
+                    return;
+                }
 
-                // 为了解决 GDI+ 的一个 BUG
-                // PrivateFontCollection m_pfc = new PrivateFontCollection();
                 GlobalVars.PrivateFonts.AddFontFile(strFontFilePath);
-#if NO
-                API.SendMessage((IntPtr)0xffff,0x001d, IntPtr.Zero, IntPtr.Zero);
-                API.SendMessage(this.Handle, 0x001d, IntPtr.Zero, IntPtr.Zero);
-#endif
             }
-
-#if NO
-            /*
-            try
-            {
-                FontFamily family = new FontFamily("C39HrP24DhTt");
-            }
-            catch (Exception ex)
-            {
-                bInstalled = false;
-            }
-             * */
-            InstalledFontCollection enumFonts = new InstalledFontCollection();
-            FontFamily[] fonts = enumFonts.Families;
-
-            string strResult = "";
-            foreach (FontFamily m in fonts)
-            {
-                strResult += m.Name + "\r\n";
-            }
-
-            int i = 0;
-            i++;
-#endif
         }
 
         void MdiClient_ClientSizeChanged(object sender, EventArgs e)
@@ -724,7 +710,13 @@ Stack:
                 TryReportPromptLines();
             }
 
-            RemoveBarcodeFont();
+            {
+                List<string> paths = new List<string>();
+                paths.Add(Path.Combine(this.DataDir, "b3901.ttf"));
+                paths.Add(Path.Combine(this.DataDir, "ocr-b.ttf"));
+
+                RemoveExternalFonts(paths);
+            }
 
             this.PropertyTaskList.Close();
 
@@ -1467,7 +1459,7 @@ Stack:
 
             dlg.ParamChanged += new ParamChangedEventHandler(CfgDlg_ParamChanged);
             dlg.ap = this.AppInfo;
-            dlg.MainForm = this;
+            // dlg.MainForm = this;
 
             dlg.UiState = this.AppInfo.GetString(
                     "main_form",
@@ -1720,14 +1712,14 @@ Stack:
 
         private void MenuItem_openTestForm_Click(object sender, EventArgs e)
         {
-#if NO
-            TestForm form = new TestForm();
-            form.MdiParent = this;
-            form.MainForm = this;
-            form.Show();
-#endif
-            OpenWindow<TestForm>();
-
+            {
+                if (Control.ModifierKeys == Keys.Control
+                    && StringUtil.IsDevelopMode() == true)
+                    OpenWindow<TestingForm>();
+                else
+                    OpenWindow<TestForm>();
+            }
+            // OpenWindow<TestingForm>();
         }
 
         // 打开种次号窗
@@ -1954,7 +1946,7 @@ Stack:
             if (_acceptForm == null || _acceptForm.IsDisposed == true)
             {
                 _acceptForm = new AcceptForm();
-                _acceptForm.MainForm = this;
+                // _acceptForm.MainForm = this;
                 _acceptForm.FormClosed -= new FormClosedEventHandler(accept_FormClosed);
                 _acceptForm.FormClosed += new FormClosedEventHandler(accept_FormClosed);
 
@@ -2252,12 +2244,12 @@ Stack:
                 dynamic o = form;
                 o.MdiParent = this;
 
-                // 2013/3/26
-                if (o.MainForm == null)
                 {
                     try
                     {
-                        o.MainForm = this;
+                        // 2017/4/25
+                        if (o.MainForm == null)
+                            o.MainForm = this;
                     }
                     catch
                     {
@@ -2679,12 +2671,18 @@ Stack:
             else
                 owner = this;
 
-            CirculationLoginDlg dlg = SetDefaultAccount(
-                e.LibraryServerUrl,
-                null,
-                e.ErrorInfo,
-                e.LoginFailCondition,
-                owner);
+            CirculationLoginDlg dlg = null;
+            this.Invoke((Action)(() =>
+{
+    dlg = SetDefaultAccount(
+        e.LibraryServerUrl,
+        null,
+        e.ErrorInfo,
+        e.LoginFailCondition,
+        owner);
+
+}
+));
             if (dlg == null)
             {
                 e.Cancel = true;
@@ -2731,6 +2729,8 @@ Stack:
             }
         }
 
+        bool _virusScanned = false;
+
         internal string _currentUserName = "";
         internal string _currentUserRights = "";
         internal string _currentLibraryCodeList = "";
@@ -2755,6 +2755,20 @@ Stack:
                 }
             }
             _verified = true;
+
+            if (_virusScanned == false)
+            {
+                if (StringUtil.IsInList("clientscanvirus", channel.Rights) == true)
+                {
+                    if (Detect360() == true)
+                    {
+                        channel.Close();
+                        Program.PromptAndExit(this, "dp2Circulation 被木马软件干扰，无法启动。");
+                        return;
+                    }
+                }
+                _virusScanned = true;
+            }
 #endif
         }
 
@@ -3204,7 +3218,7 @@ Stack:
             strAccessNo = StringUtil.BuildLocationClassEntry(strAccessNo);
             string[] lines = strAccessNo.Split(new char[] { '/' });
 
-            if (info != null 
+            if (info != null
                 && (info.CallNumberStyle == "馆藏代码+索取类号+区分号"
     || info.CallNumberStyle == "三行")
                 )
@@ -3858,7 +3872,7 @@ Stack:
 
                 form = new HtmlPrintForm();
                 form.MdiParent = this;
-                form.MainForm = this;
+                // form.MainForm = this;
                 if (bMinimized == true)
                     form.WindowState = FormWindowState.Minimized;
                 form.Show();
@@ -4739,7 +4753,7 @@ Stack:
 
             /*
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
              * */
             EnableControls(false);
 
@@ -5143,10 +5157,17 @@ Stack:
 
             // 2016/11/11
             if (dlg.SavePasswordShort == true || dlg.SavePasswordLong == true)
+            {
                 dlg.PhoneNumber = AppInfo.GetString(
 "default_account",
 "phoneNumber",
 "");
+                // 2017/4/11
+                dlg.TempCode = AppInfo.GetString(
+"default_account",
+"tempCode",
+"");
+            }
 
             this.AppInfo.LinkFormState(dlg,
                 "logindlg_state");
@@ -5227,6 +5248,11 @@ dlg.UsedList);
     "phoneNumber",
     dlg.PhoneNumber);
 
+            // 2017/4/11
+            AppInfo.SetString(
+"default_account",
+"tempCode",
+dlg.TempCode);
             return dlg;
         }
 
@@ -6169,7 +6195,7 @@ out strError);
         // 
         /// <summary>
         /// GCAT通用汉语著者号码表 WebService URL
-        /// 缺省为 http://dp2003.com/gcatserver/
+        /// 缺省为 http://dp2003.com/dp2library/
         /// </summary>
         public string GcatServerUrl
         {
@@ -6177,13 +6203,13 @@ out strError);
             {
                 return this.AppInfo.GetString("config",
                     "gcat_server_url",
-                    "http://dp2003.com/gcatserver/");
+                    "http://dp2003.com/dp2library/");
             }
         }
 
         /// <summary>
         /// 拼音服务器 URL。
-        /// 缺省为 http://dp2003.com/gcatserver/
+        /// 缺省为 http://dp2003.com/dp2library/
         /// </summary>
         public string PinyinServerUrl
         {
@@ -6191,7 +6217,7 @@ out strError);
             {
                 return this.AppInfo.GetString("config",
                     "pinyin_server_url",
-                    "http://dp2003.com/gcatserver/");
+                    "http://dp2003.com/dp2library/");
             }
         }
 
@@ -6258,7 +6284,7 @@ out strError);
             string strFilePath = "";
             int nRedoCount = 0;
             string strDir = PathUtil.MergePath(this.DataDir, strDirName);
-            PathUtil.CreateDirIfNeed(strDir);
+            PathUtil.TryCreateDir(strDir);
             for (int i = 0; ; i++)
             {
                 strFilePath = PathUtil.MergePath(strDir, strFilenamePrefix + (i + 1).ToString());
@@ -6524,7 +6550,7 @@ out strError);
             if (m_propertyViewer.Text == strTitle)
                 return;
 
-            m_propertyViewer.MainForm = this;  // 必须是第一句
+            // m_propertyViewer.MainForm = this;  // 必须是第一句
 
             if (string.IsNullOrEmpty(strTitle) == true
                 && string.IsNullOrEmpty(strHtml) == true
@@ -7238,7 +7264,7 @@ out strError);
         {
             get
             {
-                // string strDir = PathUtil.MergePath(this.MainForm.DataDir, "fingerprintcache");
+                // string strDir = PathUtil.MergePath(Program.MainForm.DataDir, "fingerprintcache");
                 return PathUtil.MergePath(this.UserDir, "fingerprintcache");   // 2013/6/16
             }
         }
@@ -8415,11 +8441,11 @@ Keys keyData)
                 // Blocks all the messages relating to the left mouse button. 
                 if (m.Msg >= 513 && m.Msg <= 515)
                 {
-                    if (this.MainForm.MessageFilter != null)
+                    if (Program.MainForm.MessageFilter != null)
                     {
                         MessageFilterEventArgs e = new MessageFilterEventArgs();
                         e.Message = m;
-                        this.MainForm.MessageFilter(this, e);
+                        Program.MainForm.MessageFilter(this, e);
                         m = e.Message;
                         return e.ReturnValue;
                     }
@@ -8441,7 +8467,7 @@ Keys keyData)
             {
                 string strServerUrl = ReportForm.GetValidPathString(this.LibraryServerUrl.Replace("/", "_"));
                 string strDirectory = Path.Combine(this.UserDir, "servers\\" + strServerUrl);
-                PathUtil.CreateDirIfNeed(strDirectory);
+                PathUtil.TryCreateDir(strDirectory);
                 return strDirectory;
             }
         }
@@ -8499,7 +8525,7 @@ Keys keyData)
             try
             {
                 string strTempDir = Path.Combine(this.UserTempDir, "~zip_events");
-                PathUtil.CreateDirIfNeed(strTempDir);
+                PathUtil.TryCreateDir(strTempDir);
 
                 string strZipFileName = Path.Combine(strTempDir, "dp2circulation_eventlog.zip");
 
@@ -8685,7 +8711,7 @@ Keys keyData)
             {
                 bNew = true;
                 m_commentViewer = new CommentViewerForm();
-                m_commentViewer.MainForm = this;  // 必须是第一句
+                // m_commentViewer.MainForm = this;  // 必须是第一句
 
                 m_commentViewer.FormClosed -= new FormClosedEventHandler(marc_viewer_FormClosed);
                 m_commentViewer.FormClosed += new FormClosedEventHandler(marc_viewer_FormClosed);
@@ -8729,7 +8755,7 @@ Keys keyData)
         {
             if (m_commentViewer != null)
             {
-                // this.MainForm.AppInfo.UnlinkFormState(m_commentViewer);
+                // Program.MainForm.AppInfo.UnlinkFormState(m_commentViewer);
                 this.m_commentViewer = null;
             }
         }
@@ -9023,6 +9049,10 @@ Keys keyData)
         /// 私有字体集合
         /// </summary>
         public static PrivateFontCollection PrivateFonts = new PrivateFontCollection();
+
+        // 2017/2/27 注：私有字体用一般的 new Font(strFontName 方法无法正确创建字体，要用特定的 FontFamily 创建才行
+        //public static FontFamily BarcodeFontFamily = null;
+        //public static FontFamily OcrBFontFamily = null;
     }
 
     /// <summary>

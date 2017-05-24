@@ -53,7 +53,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         public Stop stop = null;
         /// <summary>
@@ -95,7 +95,7 @@ namespace dp2Circulation
             }
 
             if (e.DbName.IndexOf("@") == -1)
-                e.ColumnTitles = this.MainForm.GetBrowseColumnProperties(e.DbName);
+                e.ColumnTitles = Program.MainForm.GetBrowseColumnProperties(e.DbName);
             else
             {
                 string strFormat = "";

@@ -652,7 +652,7 @@ namespace DigitalPlatform.OPAC.Server
             string strPrefix = strNode;
             string strCacheDir = this.App.DataDir + "/browse/cache/" + strDataFile;
 
-            PathUtil.CreateDirIfNeed(strCacheDir);
+            PathUtil.TryCreateDir(strCacheDir);
             string strResultsetFilename = strCacheDir + "/" + strPrefix;
             string strTempResultsetFilename = strCacheDir + "/_temp_" + strPrefix;
 
@@ -1077,7 +1077,7 @@ namespace DigitalPlatform.OPAC.Server
                     // strDataFile 中为纯文件名
                     string strCacheDir = app.DataDir + "/browse/cache/" + strDataFile;
 
-                    PathUtil.CreateDirIfNeed(strCacheDir);
+                    PathUtil.TryCreateDir(strCacheDir);
                     string strResultsetFilename = strCacheDir + "/" + strPrefix;
 
                     string strRssString = "datafile=" + strDataFile + "&node=" + strPrefix;
@@ -1345,7 +1345,7 @@ namespace DigitalPlatform.OPAC.Server
             if (sessioninfo.IsReader == false)
                 strType = "worker";
             string strDir = PathUtil.MergePath(app.DataDir + "/personaldata/" + strType, strUserID);
-            PathUtil.CreateDirIfNeed(strDir);
+            PathUtil.TryCreateDir(strDir);
             return PathUtil.MergePath(strDir, "mybookshelf.resultset");
         }
 

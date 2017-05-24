@@ -293,9 +293,34 @@ namespace dp2Circulation
 
                 // if (families.Exists(f => string.Compare(f.Name, font.OriginalFontName, true) == 0) == true)
                 if (t != null)
-                    font = new Font(t, font.Size, font.Style);
+                {
+                    Font new_font = new Font(t, font.Size, font.Style);
+                    font.Dispose(); // 2017/2/27
+                    return new_font;
+                }
             }
 
+            return font;
+        }
+
+        // 会自动从 PrivateFonts 中寻找
+        public static Font BuildFont(string font_name, float height, GraphicsUnit unit)
+        {
+            Font font = new Font(
+               font_name,    // "OCR-B 10 BT", 
+               height, unit);
+            if (string.IsNullOrEmpty(font.OriginalFontName) == false
+    && font.OriginalFontName != font.Name)
+            {
+                List<FontFamily> families = new List<FontFamily>(GlobalVars.PrivateFonts.Families);
+
+                FontFamily t = families.Find(f => string.Compare(f.Name, font.OriginalFontName, true) == 0);
+                if (t != null)
+                {
+                    font.Dispose();
+                    return new Font(t, font.Size, font.Style);
+                }
+            }
             return font;
         }
 
@@ -446,7 +471,7 @@ namespace dp2Circulation
             MarcRecord record = new MarcRecord(strMARC);
 
             MarcNodeList subfields = record.select("field/subfield");
-            foreach(MarcSubfield subfield in subfields)
+            foreach (MarcSubfield subfield in subfields)
             {
                 if (subfield.Name == "*")
                     results.Add(subfield.Content.Trim());
@@ -461,7 +486,7 @@ namespace dp2Circulation
                 }
             }
 
-            foreach(MarcField field in record.ChildNodes)
+            foreach (MarcField field in record.ChildNodes)
             {
                 string strField = field.Text;
 
@@ -2212,7 +2237,7 @@ namespace dp2Circulation
             string strPubType,  // 出版物类型
             string strType,
             Stop stop,
-            LibraryChannel Channel)
+            LibraryChannel channel)
         {
             string strError = "";
             long lRet = 0;
@@ -2231,8 +2256,11 @@ namespace dp2Circulation
             else
                 throw new Exception("未知的strType '" + strType + "' 值");
 
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(5);
+
             // EnableControls(false);
-            stop.OnStop += new StopEventHandler(Channel.DoStop);
+            stop.OnStop += new StopEventHandler(channel.DoStop);
             stop.Initial("正在列出全部" + strName + "批次号 ...");
             stop.BeginLoop();
 
@@ -2251,7 +2279,7 @@ namespace dp2Circulation
 
                 if (strType == "order")
                 {
-                    lRet = Channel.SearchOrder(
+                    lRet = channel.SearchOrder(
                         stop,
                         strDbName,  // "<all>",
                         "", // strBatchNo
@@ -2268,7 +2296,7 @@ namespace dp2Circulation
                 {
                     string strQueryXml = "";
 
-                    lRet = Channel.SearchBiblio(
+                    lRet = channel.SearchBiblio(
                         stop,
                         strDbName,  // "<all>",    // 尽管可以用 this.comboBox_inputBiblioDbName.Text, 以便获得和少数书目库相关的批次号实例，但是容易造成误会：因为数据库名列表刷新后，这里却不会刷新？
                         "", // strBatchNo,
@@ -2286,7 +2314,7 @@ namespace dp2Circulation
                 else if (strType == "item")
                 {
 
-                    lRet = Channel.SearchItem(
+                    lRet = channel.SearchItem(
                         stop,
                         strDbName,   // "<all>",
                         "", // strBatchNo
@@ -2325,16 +2353,13 @@ namespace dp2Circulation
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            goto ERROR1;
-                        }
+                        strError = "用户中断";
+                        goto ERROR1;
                     }
 
-                    lRet = Channel.GetSearchResult(
+                    lRet = channel.GetSearchResult(
                         stop,
                         "batchno",   // strResultSetName
                         lStart,
@@ -2382,10 +2407,12 @@ namespace dp2Circulation
             finally
             {
                 stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(Channel.DoStop);
+                stop.OnStop -= new StopEventHandler(channel.DoStop);
                 stop.Initial("");
 
                 // EnableControls(true);
+
+                channel.Timeout = old_timeout;
             }
             return;
         ERROR1:

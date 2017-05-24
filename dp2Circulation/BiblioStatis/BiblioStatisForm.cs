@@ -37,20 +37,6 @@ namespace dp2Circulation
         /// </summary>
         public event GetKeyCountListEventHandler GetBatchNoTable = null;
 
-        // public HtmlViewerForm ErrorInfoForm = null;
-
-        // bool Running = false;   // 正在执行运算
-
-        /*
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        public MainForm MainForm = null;
-        DigitalPlatform.Stop stop = null;
-         * */
-
-        // public ScriptManager ScriptManager = new ScriptManager();
-
         BiblioStatis objStatis = null;
         Assembly AssemblyMain = null;
 
@@ -101,13 +87,13 @@ namespace dp2Circulation
 
         private void BiblioStatisForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
 
             /*
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
+            this.Channel.Url = Program.MainForm.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -117,13 +103,13 @@ namespace dp2Circulation
              * */
 
             ScriptManager.CfgFilePath =
-                Path.Combine(this.MainForm.UserDir, "biblio_statis_projects.xml");
+                Path.Combine(Program.MainForm.UserDir, "biblio_statis_projects.xml");
 
 #if NO
-            ScriptManager.applicationInfo = this.MainForm.AppInfo;
+            ScriptManager.applicationInfo = Program.MainForm.AppInfo;
             ScriptManager.CfgFilePath =
-                this.MainForm.DataDir + "\\biblio_statis_projects.xml";
-            ScriptManager.DataDir = this.MainForm.DataDir;
+                Program.MainForm.DataDir + "\\biblio_statis_projects.xml";
+            ScriptManager.DataDir = Program.MainForm.DataDir;
 
             ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
             ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
@@ -147,45 +133,45 @@ namespace dp2Circulation
             this.GetBatchNoTable -= new GetKeyCountListEventHandler(BiblioStatisForm_GetBatchNoTable);
             this.GetBatchNoTable += new GetKeyCountListEventHandler(BiblioStatisForm_GetBatchNoTable);
 
-            this.radioButton_inputStyle_recPathFile.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_inputStyle_recPathFile.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "bibliostatisform",
                 "inputstyle_recpathfile",
                 false);
 
 
-            this.radioButton_inputStyle_biblioDatabase.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_inputStyle_biblioDatabase.Checked = Program.MainForm.AppInfo.GetBoolean(
                 "bibliostatisform",
                 "inputstyle_bibliodatabase",
                 true);
 
-            this.radioButton_inputStyle_recPaths.Checked = this.MainForm.AppInfo.GetBoolean(
+            this.radioButton_inputStyle_recPaths.Checked = Program.MainForm.AppInfo.GetBoolean(
     "bibliostatisform",
     "inputstyle_recpaths",
     false);
 
 
             // 输入的记录路径文件名
-            this.textBox_inputRecPathFilename.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_inputRecPathFilename.Text = Program.MainForm.AppInfo.GetString(
                 "bibliostatisform",
                 "input_recpath_filename",
                 "");
 
 
             // 输入的书目库名
-            this.comboBox_inputBiblioDbName.Text = this.MainForm.AppInfo.GetString(
+            this.comboBox_inputBiblioDbName.Text = Program.MainForm.AppInfo.GetString(
                 "bibliostatisform",
                 "input_bibliodbname",
                 "<全部>");
 
             // 方案名
-            this.textBox_projectName.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_projectName.Text = Program.MainForm.AppInfo.GetString(
                 "bibliostatisform",
                 "projectname",
                 "");
 
 
             // 记录路径
-            this.textBox_inputStyle_recPaths.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_inputStyle_recPaths.Text = Program.MainForm.AppInfo.GetString(
                 "bibliostatisform",
                 "recpaths",
                 "").Replace(",", "\r\n");
@@ -348,44 +334,44 @@ namespace dp2Circulation
 
         private void BiblioStatisForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "bibliostatisform",
                     "inputstyle_recpathfile",
                     this.radioButton_inputStyle_recPathFile.Checked);
 
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
                     "bibliostatisform",
                     "inputstyle_bibliodatabase",
                     this.radioButton_inputStyle_biblioDatabase.Checked);
 
-                this.MainForm.AppInfo.SetBoolean(
+                Program.MainForm.AppInfo.SetBoolean(
     "bibliostatisform",
     "inputstyle_recpaths",
     this.radioButton_inputStyle_recPaths.Checked);
 
                 // 输入的记录路径文件名
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliostatisform",
                     "input_recpath_filename",
                     this.textBox_inputRecPathFilename.Text);
 
                 // 输入的书目库名
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliostatisform",
                     "input_bibliodbname",
                     this.comboBox_inputBiblioDbName.Text);
 
                 // 方案名
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliostatisform",
                     "projectname",
                     this.textBox_projectName.Text);
 
                 // 记录路径
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "bibliostatisform",
                     "recpaths",
                     this.textBox_inputStyle_recPaths.Text.Replace("\r\n", ","));
@@ -519,8 +505,8 @@ namespace dp2Circulation
             dlg.ProjectsUrl = "http://dp2003.com/dp2circulation/projects/projects.xml";
             dlg.HostName = "BiblioStatisForm";
             dlg.scriptManager = this.ScriptManager;
-            dlg.AppInfo = this.MainForm.AppInfo;
-            dlg.DataDir = this.MainForm.DataDir;
+            dlg.AppInfo = Program.MainForm.AppInfo;
+            dlg.DataDir = Program.MainForm.DataDir;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
         }
@@ -555,7 +541,7 @@ Stack:
 在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
 
          * */
-        int RunScript(string strProjectName,
+        public override int RunScript(string strProjectName,
             string strProjectLocate,
             string strInitialParamString,
             out string strError,
@@ -571,7 +557,7 @@ Stack:
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
             _dllPaths.Clear();
             _dllPaths.Add(strProjectLocate);
@@ -599,6 +585,9 @@ Stack:
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                if (strInitialParamString == "test_compile")
+                    return 0;
 
                 //
                 if (filter != null)
@@ -704,7 +693,7 @@ Stack:
 
             string strMainCsDllName = Path.Combine(this.InstanceDir, "~biblio_statis_main_" + Convert.ToString(AssemblyVersion++) + ".dll");    // ++
 
-            string strLibPaths = "\"" + this.MainForm.DataDir + "\""
+            string strLibPaths = "\"" + Program.MainForm.DataDir + "\""
                 + ","
                 + "\"" + strProjectLocate + "\"";
 
@@ -1156,7 +1145,7 @@ Stack:
                         // strXml中为书目记录
                         string strBiblioDbName = Global.GetDbName(strRecPath);
 
-                        string strSyntax = this.MainForm.GetBiblioSyntax(strBiblioDbName);
+                        string strSyntax = Program.MainForm.GetBiblioSyntax(strBiblioDbName);
                         if (String.IsNullOrEmpty(strSyntax) == true)
                             strSyntax = "unimarc";
 
@@ -1582,14 +1571,14 @@ Stack:
             HtmlPrintForm printform = new HtmlPrintForm();
 
             printform.Text = "打印统计结果";
-            printform.MainForm = this.MainForm;
+            // printform.MainForm = Program.MainForm;
             if (this.objStatis != null)
                 printform.Filenames = this.objStatis.OutputFileNames;
             else
                 printform.Filenames = null;
-            this.MainForm.AppInfo.LinkFormState(printform, "printform_state");
+            Program.MainForm.AppInfo.LinkFormState(printform, "printform_state");
             printform.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(printform);
+            Program.MainForm.AppInfo.UnlinkFormState(printform);
 
         }
 
@@ -1603,9 +1592,9 @@ Stack:
             dlg.ProjectName = this.textBox_projectName.Text;
             dlg.NoneProject = false;
 
-            this.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "GetProjectNameDlg_state");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
 
             if (dlg.DialogResult != DialogResult.OK)
@@ -1706,11 +1695,11 @@ Stack:
 
             this.comboBox_inputBiblioDbName.Items.Add("<全部>");
 
-            if (this.MainForm.BiblioDbProperties != null)
+            if (Program.MainForm.BiblioDbProperties != null)
             {
-                for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
+                for (int i = 0; i < Program.MainForm.BiblioDbProperties.Count; i++)
                 {
-                    BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
+                    BiblioDbProperty prop = Program.MainForm.BiblioDbProperties[i];
 
                     this.comboBox_inputBiblioDbName.Items.Add(prop.DbName);
                 }
@@ -1755,7 +1744,7 @@ Stack:
         private void BiblioStatisForm_Activated(object sender, EventArgs e)
         {
             // MyForm里面已经作了
-            // this.MainForm.stopManager.Active(this.stop);
+            // Program.MainForm.stopManager.Active(this.stop);
         }
 
         int m_nInDropDown = 0;
@@ -1908,7 +1897,7 @@ Stack:
             stop.BeginLoop();
 
             this.Update();
-            this.MainForm.Update();
+            Program.MainForm.Update();
 
 
             try

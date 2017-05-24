@@ -47,6 +47,8 @@ namespace dp2Circulation
             this.webBrowser_itemXml = new System.Windows.Forms.WebBrowser();
             this.tabPage_object = new System.Windows.Forms.TabPage();
             this.binaryResControl1 = new DigitalPlatform.CirculationClient.BinaryResControl();
+            this.tabPage_editor = new System.Windows.Forms.TabPage();
+            this.textBox_editor = new System.Windows.Forms.TextBox();
             this.webBrowser_biblio = new System.Windows.Forms.WebBrowser();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBox_from = new System.Windows.Forms.ComboBox();
@@ -63,6 +65,8 @@ namespace dp2Circulation
             this.toolStripLabel_message = new System.Windows.Forms.ToolStripLabel();
             this.toolStripDropDownButton_edit = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_pasteXmlRecord = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_edit_indentXml = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_edit_removeEmptyElements = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
             this.splitContainer_main.Panel2.SuspendLayout();
@@ -72,6 +76,7 @@ namespace dp2Circulation
             this.tabPage_borrowHistory.SuspendLayout();
             this.tabPage_xml.SuspendLayout();
             this.tabPage_object.SuspendLayout();
+            this.tabPage_editor.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -102,6 +107,7 @@ namespace dp2Circulation
             this.tabControl_item.Controls.Add(this.tabPage_borrowHistory);
             this.tabControl_item.Controls.Add(this.tabPage_xml);
             this.tabControl_item.Controls.Add(this.tabPage_object);
+            this.tabControl_item.Controls.Add(this.tabPage_editor);
             this.tabControl_item.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_item.Location = new System.Drawing.Point(0, 0);
             this.tabControl_item.Margin = new System.Windows.Forms.Padding(0);
@@ -195,6 +201,28 @@ namespace dp2Circulation
             this.binaryResControl1.Size = new System.Drawing.Size(179, 229);
             this.binaryResControl1.TabIndex = 0;
             this.binaryResControl1.TempDir = null;
+            // 
+            // tabPage_editor
+            // 
+            this.tabPage_editor.Controls.Add(this.textBox_editor);
+            this.tabPage_editor.Location = new System.Drawing.Point(4, 25);
+            this.tabPage_editor.Name = "tabPage_editor";
+            this.tabPage_editor.Size = new System.Drawing.Size(179, 229);
+            this.tabPage_editor.TabIndex = 4;
+            this.tabPage_editor.Text = "±à¼­Æ÷";
+            this.tabPage_editor.UseVisualStyleBackColor = true;
+            // 
+            // textBox_editor
+            // 
+            this.textBox_editor.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_editor.Location = new System.Drawing.Point(0, 0);
+            this.textBox_editor.MaxLength = 0;
+            this.textBox_editor.Multiline = true;
+            this.textBox_editor.Name = "textBox_editor";
+            this.textBox_editor.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_editor.Size = new System.Drawing.Size(179, 229);
+            this.textBox_editor.TabIndex = 0;
+            this.textBox_editor.TextChanged += new System.EventHandler(this.textBox_editor_TextChanged);
             // 
             // webBrowser_biblio
             // 
@@ -352,7 +380,9 @@ namespace dp2Circulation
             // 
             this.toolStripDropDownButton_edit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.toolStripDropDownButton_edit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ToolStripMenuItem_pasteXmlRecord});
+            this.ToolStripMenuItem_pasteXmlRecord,
+            this.ToolStripMenuItem_edit_indentXml,
+            this.ToolStripMenuItem_edit_removeEmptyElements});
             this.toolStripDropDownButton_edit.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_edit.Image")));
             this.toolStripDropDownButton_edit.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_edit.Name = "toolStripDropDownButton_edit";
@@ -365,6 +395,20 @@ namespace dp2Circulation
             this.ToolStripMenuItem_pasteXmlRecord.Size = new System.Drawing.Size(206, 22);
             this.ToolStripMenuItem_pasteXmlRecord.Text = "´Ó¼ôÌù°åÕ³Ìù XML ¼ÇÂ¼";
             this.ToolStripMenuItem_pasteXmlRecord.Click += new System.EventHandler(this.ToolStripMenuItem_pasteXmlRecord_Click);
+            // 
+            // ToolStripMenuItem_edit_indentXml
+            // 
+            this.ToolStripMenuItem_edit_indentXml.Name = "ToolStripMenuItem_edit_indentXml";
+            this.ToolStripMenuItem_edit_indentXml.Size = new System.Drawing.Size(206, 22);
+            this.ToolStripMenuItem_edit_indentXml.Text = "¹æÕû XML";
+            this.ToolStripMenuItem_edit_indentXml.Click += new System.EventHandler(this.ToolStripMenuItem_edit_indentXml_Click);
+            // 
+            // ToolStripMenuItem_edit_removeEmptyElements
+            // 
+            this.ToolStripMenuItem_edit_removeEmptyElements.Name = "ToolStripMenuItem_edit_removeEmptyElements";
+            this.ToolStripMenuItem_edit_removeEmptyElements.Size = new System.Drawing.Size(206, 22);
+            this.ToolStripMenuItem_edit_removeEmptyElements.Text = "É¾³ý¿ÕÔªËØ";
+            this.ToolStripMenuItem_edit_removeEmptyElements.Click += new System.EventHandler(this.ToolStripMenuItem_edit_removeEmptyElements_Click);
             // 
             // ItemInfoForm
             // 
@@ -395,6 +439,8 @@ namespace dp2Circulation
             this.tabPage_borrowHistory.ResumeLayout(false);
             this.tabPage_xml.ResumeLayout(false);
             this.tabPage_object.ResumeLayout(false);
+            this.tabPage_editor.ResumeLayout(false);
+            this.tabPage_editor.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -430,5 +476,9 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_clearCoverImage;
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton_edit;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_pasteXmlRecord;
+        private System.Windows.Forms.TabPage tabPage_editor;
+        private System.Windows.Forms.TextBox textBox_editor;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_edit_indentXml;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_edit_removeEmptyElements;
     }
 }

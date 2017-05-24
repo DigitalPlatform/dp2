@@ -43,7 +43,7 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
 
         public TestForm()
         {
@@ -53,15 +53,15 @@ namespace dp2Circulation
 
         private void TestForm_Load(object sender, EventArgs e)
         {
-            if (this.MainForm != null)
+            if (Program.MainForm != null)
             {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
             }
-            this.textBox_diskSpace_tempFileName.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_diskSpace_tempFileName.Text = Program.MainForm.AppInfo.GetString(
                 "TestForm",
                 "diskspace_tempfilename",
                 "");
-            this.textBox_diskSpace_size.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_diskSpace_size.Text = Program.MainForm.AppInfo.GetString(
                 "TestForm",
                 "diskspace_size",
                 "");
@@ -70,21 +70,21 @@ namespace dp2Circulation
             this.checkBox_fromEditControl_hasCaptionsTitleLine.Checked = this.fromEditControl1.HasCaptionsTitleLine;
 
             // CheckedComboBox page
-            this.textBox_checkedComboBox_listValues.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_checkedComboBox_listValues.Text = Program.MainForm.AppInfo.GetString(
                 "TestForm",
                 "checkedcombobox_listvalues",
                 "");
 
-            this.textBox_serverFilePath.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_serverFilePath.Text = Program.MainForm.AppInfo.GetString(
                 "TestForm",
                 "ftp_server_path",
                 "");
-            this.textBox_clientFilePath.Text = this.MainForm.AppInfo.GetString(
+            this.textBox_clientFilePath.Text = Program.MainForm.AppInfo.GetString(
                 "TestForm",
                 "ftp_client_path",
                 "");
 
-            this.UiState = this.MainForm.AppInfo.GetString(
+            this.UiState = Program.MainForm.AppInfo.GetString(
                 "TestForm",
                 "ui_state",
                 "");
@@ -95,33 +95,33 @@ namespace dp2Circulation
 
         private void TestForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (this.MainForm != null && this.MainForm.AppInfo != null)
+            if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "TestForm",
                     "diskspace_tempfilename",
                     this.textBox_diskSpace_tempFileName.Text);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "TestForm",
                     "diskspace_size",
                     this.textBox_diskSpace_size.Text);
 
                 // CheckedComboBox page
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "TestForm",
                     "checkedcombobox_listvalues",
                     this.textBox_checkedComboBox_listValues.Text);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
         "TestForm",
         "ftp_server_path",
         this.textBox_serverFilePath.Text);
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
                     "TestForm",
                     "ftp_client_path",
                     this.textBox_clientFilePath.Text);
 
-                this.MainForm.AppInfo.SetString(
+                Program.MainForm.AppInfo.SetString(
         "TestForm",
         "ui_state",
         this.UiState);
@@ -387,7 +387,7 @@ namespace dp2Circulation
             try
             {
                 webClient.DownloadFile(this.textBox_webClient_url.Text,
-                    this.MainForm.DataDir + "\\temp.temp");
+                    Program.MainForm.DataDir + "\\temp.temp");
 
                 foreach (string key in webClient.ResponseHeaders.AllKeys)
                 {
@@ -654,7 +654,7 @@ namespace dp2Circulation
                 }
             }
 
-            string strImageFileName = Path.Combine(this.MainForm.DataDir, "ajax-loader.gif");
+            string strImageFileName = Path.Combine(Program.MainForm.DataDir, "ajax-loader.gif");
             Image image = Image.FromFile(strImageFileName);
 
             for (int i = 0; i < 10; i++)
@@ -963,13 +963,13 @@ namespace dp2Circulation
             string strError = "";
             this.textBox_cutter_resultString.Text = "";
 
-            int nRet = this.MainForm.LoadQuickCutter(true, out strError);
+            int nRet = Program.MainForm.LoadQuickCutter(true, out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             string strText = "";
             string strNumber = "";
-            nRet = this.MainForm.QuickCutter.GetEntry(this.textBox_cutter_authorString.Text,
+            nRet = Program.MainForm.QuickCutter.GetEntry(this.textBox_cutter_authorString.Text,
                 out strText,
                 out strNumber,
                 out strError);
@@ -986,11 +986,11 @@ namespace dp2Circulation
         private void button_cutter_verify_Click(object sender, EventArgs e)
         {
             string strError = "";
-            int nRet = this.MainForm.LoadQuickCutter(true, out strError);
+            int nRet = Program.MainForm.LoadQuickCutter(true, out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            nRet = this.MainForm.QuickCutter.Verify(out strError);
+            nRet = Program.MainForm.QuickCutter.Verify(out strError);
             if (nRet == -1)
                 goto ERROR1;
 
@@ -1003,11 +1003,11 @@ namespace dp2Circulation
         private void button_cutter_exchange_Click(object sender, EventArgs e)
         {
             string strError = "";
-            int nRet = this.MainForm.LoadQuickCutter(true, out strError);
+            int nRet = Program.MainForm.LoadQuickCutter(true, out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            nRet = this.MainForm.QuickCutter.Exchange(out strError);
+            nRet = Program.MainForm.QuickCutter.Exchange(out strError);
             if (nRet == -1)
                 goto ERROR1;
 
@@ -1358,7 +1358,7 @@ ref bHideMessageBox);
 
         void Channel_BeforeLogin(object sender, DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
         {
-            MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
+            Program.MainForm.Channel_BeforeLogin(sender, e);    // 2015/11/8
         }
 
         Stop _stop = null;
@@ -1366,7 +1366,7 @@ ref bHideMessageBox);
         {
 
             _stop = new DigitalPlatform.Stop();
-            _stop.Register(this.MainForm.stopManager, true);	// 和容器关联
+            _stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Style = StopStyle.EnableHalfStop;
@@ -1386,7 +1386,7 @@ ref bHideMessageBox);
 
                     using (LibraryChannel channel = new LibraryChannel())
                     {
-                        channel.Url = this.MainForm.LibraryServerUrl;
+                        channel.Url = Program.MainForm.LibraryServerUrl;
 
                         channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
                         channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
@@ -1503,7 +1503,7 @@ ref bHideMessageBox);
         {
             SelectItemDialog dlg = new SelectItemDialog();
 
-            dlg.MainForm = this.MainForm;
+            dlg.MainForm = Program.MainForm;
             dlg.ShowDialog(this);
         }
 
@@ -1559,7 +1559,7 @@ ref bHideMessageBox);
         private void easyMarcControl1_GetConfigDom(object sender, GetConfigDomEventArgs e)
         {
 
-            string strFileName = Path.Combine(this.MainForm.DataDir, "marcdef");
+            string strFileName = Path.Combine(Program.MainForm.DataDir, "marcdef");
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -1606,23 +1606,23 @@ ref bHideMessageBox);
             AmazonSearchForm dlg = new AmazonSearchForm();
 
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.TempFileDir = this.MainForm.UserTempDir;
+            dlg.TempFileDir = Program.MainForm.UserTempDir;
             dlg.AutoSearch = true;
 
-            dlg.UiState = this.MainForm.AppInfo.GetString(
+            dlg.UiState = Program.MainForm.AppInfo.GetString(
 "TestForm",
 "AmazonSearchForm_uiState",
 "");
             //dlg.QueryWord = "7-02-003343-1";
             //dlg.From = "isbn";
             // TODO: 保存窗口内的尺寸状态
-            this.MainForm.AppInfo.LinkFormState(dlg, "TestForm_AmazonSearchForm_state");
+            Program.MainForm.AppInfo.LinkFormState(dlg, "TestForm_AmazonSearchForm_state");
 
             dlg.ShowDialog(this);
 
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            Program.MainForm.AppInfo.UnlinkFormState(dlg);
 
-            this.MainForm.AppInfo.SetString(
+            Program.MainForm.AppInfo.SetString(
 "TestForm",
 "AmazonSearchForm_uiState",
 dlg.UiState);
@@ -1677,14 +1677,14 @@ dlg.UiState);
         {
             using (LibraryChannel channel = new LibraryChannel())
             {
-                channel.Url = this.MainForm.LibraryServerUrl;
+                channel.Url = Program.MainForm.LibraryServerUrl;
 
                 channel.BeforeLogin -= new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
                 channel.BeforeLogin += new DigitalPlatform.LibraryClient.BeforeLoginEventHandle(Channel_BeforeLogin);
 
 
                 _stop = new DigitalPlatform.Stop();
-                _stop.Register(this.MainForm.stopManager, true);	// 和容器关联
+                _stop.Register(Program.MainForm.stopManager, true);	// 和容器关联
 
                 _stop.OnStop += new StopEventHandler(this.DoStop);
                 _stop.Style = StopStyle.EnableHalfStop;
@@ -1776,7 +1776,7 @@ dlg.UiState);
             ref List<string> results,
             out string strError)
         {
-            return this.MainForm.SearchDictionary(
+            return Program.MainForm.SearchDictionary(
                 channel,
             stop,
             strDbName,
@@ -1792,7 +1792,7 @@ dlg.UiState);
             string strError = "";
 
 #if NO
-            LibraryChannel channel = this.MainForm.GetChannel();
+            LibraryChannel channel = Program.MainForm.GetChannel();
             try
             {
                 int nRet = this.kernelResTree1.Fill(channel, out strError);
@@ -1801,7 +1801,7 @@ dlg.UiState);
             }
             finally
             {
-                this.MainForm.ReturnChannel(channel);
+                Program.MainForm.ReturnChannel(channel);
             }
 #endif
             this.kernelResTree1.Fill();
@@ -1812,13 +1812,13 @@ dlg.UiState);
 
         private void kernelResTree1_GetChannel(object sender, GetChannelEventArgs e)
         {
-            e.Channel = this.MainForm.GetChannel();
+            e.Channel = Program.MainForm.GetChannel();
 
         }
 
         private void kernelResTree1_ReturnChannel(object sender, ReturnChannelEventArgs e)
         {
-            this.MainForm.ReturnChannel(e.Channel);
+            Program.MainForm.ReturnChannel(e.Channel);
         }
 
         private void button_setBiblioInfo_request_Click(object sender, EventArgs e)
@@ -1882,7 +1882,7 @@ dlg.UiState);
         {
             using (LibraryChannel channel = new LibraryChannel())
             {
-                channel.Url = this.MainForm.LibraryServerUrl;
+                channel.Url = Program.MainForm.LibraryServerUrl;
 
                 string strOutputUserName = "";
                 string strRights = "";

@@ -261,7 +261,6 @@ namespace DigitalPlatform.LibraryServer
                 // BUG!!! 以前缺乏排序。2008/2/1
                 Array.Sort(fis, new FileInfoCompare());
 
-
                 for (int i = 0; i < fis.Length; i++)
                 {
                     if (this.Stopped == true)
@@ -604,6 +603,10 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 注记 2015/9/8
             }
+            else if (strOperation == "manageDatabase")
+            {
+                // 管理数据库 2017/5/23
+            }
             else
             {
                 strError = "不能识别的日志操作类型 '" + strOperation + "'";
@@ -620,7 +623,5 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
-
-
     }
 }

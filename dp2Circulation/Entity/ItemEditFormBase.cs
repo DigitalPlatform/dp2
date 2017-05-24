@@ -38,7 +38,22 @@ namespace dp2Circulation
         /// <summary>
         /// 框架窗口
         /// </summary>
-        public MainForm MainForm = null;
+        // public MainForm MainForm = null;
+
+        /// <summary>
+        /// 当前窗口所从属的框架窗口
+        /// </summary>
+        public virtual MainForm MainForm
+        {
+            get
+            {
+                return Program.MainForm;
+            }
+            set
+            {
+                // 为了让脚本代码能兼容
+            }
+        }
 
         /// <summary>
         /// 订购控件
@@ -161,7 +176,7 @@ namespace dp2Circulation
         {
             string strError = "";
             string[] values = null;
-            int nRet = MainForm.GetValueTable(e.TableName,
+            int nRet = Program.MainForm.GetValueTable(e.TableName,
                 e.DbName,
                 out values,
                 out strError);
@@ -545,10 +560,9 @@ namespace dp2Circulation
         /// <param name="e">一个包含事件数据的 System.EventArgs</param>
         protected override void OnLoad(EventArgs e)
         {
-            if (this.MainForm != null)
-            {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
-            }
+            if (Program.MainForm != null)
+                MainForm.SetControlFont(this, Program.MainForm.DefaultFont);
+
             if (this._editing != null)
             {
                 LoadItem(this.Item);
@@ -567,12 +581,10 @@ namespace dp2Circulation
                     if (nRet == -1)
                         MessageBox.Show(this, strError);
 
-
                     this._existing.SetReadOnly("all");
 
                     // 突出差异内容
                     this._editing.HighlightDifferences(this._existing);
-
                 }
                 else
                 {
@@ -584,6 +596,7 @@ namespace dp2Circulation
                     this._existing.Enabled = false;
                 }
             }
+
             base.OnLoad(e);
         }
 

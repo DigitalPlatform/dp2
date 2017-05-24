@@ -74,6 +74,9 @@
             this.columnHeader_alignment = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_start = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_offset = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_size = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_foreColor = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_backColor = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.label3 = new System.Windows.Forms.Label();
             this.tabPage_xml = new System.Windows.Forms.TabPage();
             this.textBox_xml = new System.Windows.Forms.TextBox();
@@ -82,8 +85,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.textBox_sampleText = new DigitalPlatform.CommonControl.MyTextBox();
             this.labelDesignControl1 = new dp2Circulation.LabelRenderControl();
-            this.columnHeader_foreColor = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader_backColor = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_style = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -342,7 +344,7 @@
             this.textBox_printerInfo.Enabled = false;
             this.textBox_printerInfo.Location = new System.Drawing.Point(29, 160);
             this.textBox_printerInfo.Name = "textBox_printerInfo";
-            this.textBox_printerInfo.Size = new System.Drawing.Size(956, 21);
+            this.textBox_printerInfo.Size = new System.Drawing.Size(1222, 21);
             this.textBox_printerInfo.TabIndex = 7;
             this.textBox_printerInfo.DelayTextChanged += new System.EventHandler(this.textBox_printerInfo_DelayTextChanged);
             this.textBox_printerInfo.SizeChanged += new System.EventHandler(this.textBox_printerInfo_SizeChanged);
@@ -653,8 +655,10 @@
             this.columnHeader_alignment,
             this.columnHeader_start,
             this.columnHeader_offset,
+            this.columnHeader_size,
             this.columnHeader_foreColor,
-            this.columnHeader_backColor});
+            this.columnHeader_backColor,
+            this.columnHeader_style});
             this.listView_lineFormats.FullRowSelect = true;
             this.listView_lineFormats.HideSelection = false;
             this.listView_lineFormats.Location = new System.Drawing.Point(6, 30);
@@ -684,6 +688,21 @@
             // 
             this.columnHeader_offset.Text = "偏移";
             this.columnHeader_offset.Width = 100;
+            // 
+            // columnHeader_size
+            // 
+            this.columnHeader_size.Text = "尺寸";
+            this.columnHeader_size.Width = 100;
+            // 
+            // columnHeader_foreColor
+            // 
+            this.columnHeader_foreColor.Text = "前景色";
+            this.columnHeader_foreColor.Width = 100;
+            // 
+            // columnHeader_backColor
+            // 
+            this.columnHeader_backColor.Text = "背景色";
+            this.columnHeader_backColor.Width = 100;
             // 
             // label3
             // 
@@ -801,15 +820,10 @@
             this.labelDesignControl1.Size = new System.Drawing.Size(342, 311);
             this.labelDesignControl1.TabIndex = 0;
             // 
-            // columnHeader_foreColor
+            // columnHeader_style
             // 
-            this.columnHeader_foreColor.Text = "前景色";
-            this.columnHeader_foreColor.Width = 100;
-            // 
-            // columnHeader_backColor
-            // 
-            this.columnHeader_backColor.Text = "背景色";
-            this.columnHeader_backColor.Width = 100;
+            this.columnHeader_style.Text = "风格";
+            this.columnHeader_style.Width = 100;
             // 
             // LabelDefControl
             // 
@@ -909,5 +923,7 @@
         private System.Windows.Forms.ColumnHeader columnHeader_offset;
         private System.Windows.Forms.ColumnHeader columnHeader_foreColor;
         private System.Windows.Forms.ColumnHeader columnHeader_backColor;
+        private System.Windows.Forms.ColumnHeader columnHeader_size;
+        private System.Windows.Forms.ColumnHeader columnHeader_style;
     }
 }
