@@ -5263,7 +5263,7 @@ out strError);
                             this.WriteErrorLog("用户 '" + sessioninfo.UserID + "' 删除书目记录 '" + strBiblioRecPath + "' (已被拒绝) 最后一步剩下的记录 XML 内容 '" + tempdom.OuterXml + "'");
 
                             result.Value = -1;
-                            result.ErrorInfo = "当前用户的权限不足以删除所有MARC字段，因此删除操作被拒绝。可改用修改操作。";
+                            result.ErrorInfo = "当前用户的权限不足以删除所有MARC字段，因此删除操作被拒绝。可改用修改操作。\r\n\r\n权限不足以删除的记录部分内容如下: \r\n" + tempdom.OuterXml;  // TODO: 可以考虑用更友好的显示 MARC 工作单格式的方式来报错
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
@@ -6429,6 +6429,7 @@ out strError);
                         if (nRet == -1)
                         {
                             // Undo Copy biblio record
+                            // TODO: 写入错误日志
 
                             // 移动回去
                             if (strAction == "onlymovebiblio" || strAction == "move")

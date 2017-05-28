@@ -644,6 +644,7 @@ namespace dp2Circulation
             Debug.Assert(this.DbType == "inventory",
                 "");
 
+            List<ListViewItem> all_items = new List<ListViewItem>();
             List<string> biblio_recpaths = new List<string>();  // 尺寸可能比 items 数组小，没有包含里面不具有 parent id 列的事项
             // List<int> colindex_list = new List<int>();  // 存储每个 item 对应的 parent id colindex。数组大小等于 items 数组大小
             foreach (ListViewItem item in items)
@@ -714,7 +715,7 @@ namespace dp2Circulation
                 {
                     ListViewUtil.ChangeItemText(item,
     this.m_bFirstColumnIsKey == false ? 1 : 2,
-    strError);
+    "!error: " + strError);
                     continue;
                     // return -1;
                 }
@@ -733,6 +734,7 @@ namespace dp2Circulation
 #endif
 
                 biblio_recpaths.Add(strBiblioRecPath);
+                all_items.Add(item);
             }
 
             if (biblio_recpaths.Count == 0)
@@ -748,7 +750,7 @@ namespace dp2Circulation
             var enumerator = loader.GetEnumerator();
 
             int i = 0;
-            foreach (ListViewItem item in items)
+            foreach (ListViewItem item in all_items)
             {
                 Application.DoEvents();	// 出让界面控制权
 

@@ -90,8 +90,11 @@ namespace dp2Circulation
         {
             Debug.Assert(m_loader != null, "");
 
+#if NO
             if (this.CacheTable == null)
                 this.CacheTable = new Hashtable();  // 如果调主没有给出 CacheTable， 则临时分配一个
+#endif
+            Hashtable tempTable = new Hashtable();
 
             List<string> new_recpaths = new List<string>(); // 缓存中没有包含的那些记录
             foreach (string strRecPath in this.RecPaths)
@@ -101,11 +104,25 @@ namespace dp2Circulation
 
                 Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
 
-                BiblioItem info = (BiblioItem)this.CacheTable[strRecPath];
+                BiblioItem info = null;
+                if (this.CacheTable != null)
+                {
+                    info = (BiblioItem)this.CacheTable[strRecPath];
+                    if (info != null)
+                    {
+                        tempTable[strRecPath] = info;
+                        continue;
+                    }
+
+                }
+                if (info == null)
+                    info = (BiblioItem)tempTable[strRecPath];   // 注： tempTable 自带去重效果
+
                 if (info == null)
                 {
                     new_recpaths.Add(strRecPath);
 
+#if NO
                     // 需要放入缓存，便于后面的发现
                     // 但放入缓存的是 .Content 为空的对象
                     if (info == null)
@@ -114,6 +131,10 @@ namespace dp2Circulation
                         info.RecPath = strRecPath;
                     }
                     this.CacheTable[strRecPath] = info;
+#endif
+                    info = new BiblioItem();
+                    info.RecPath = strRecPath;
+                    tempTable[strRecPath] = info;
                 }
             }
 
@@ -129,18 +150,21 @@ namespace dp2Circulation
                 Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
 
                 BiblioItem info = null;
-                
+
+#if NO
                 if (this.CacheTable != null)
                     info = (BiblioItem)this.CacheTable[strRecPath];
-
-                if (info == null || string.IsNullOrEmpty(info.Content) == true)
-                {
-#if NO
-                    if (m_loader.Stop != null)
-                    {
-                        m_loader.Stop.SetMessage("正在获取书目记录 " + strRecPath);
-                    }
 #endif
+                info = (BiblioItem)tempTable[strRecPath];   // 注： tempTable 自带去重效果
+                if (info != null && string.IsNullOrEmpty(info.Content) == false)
+                {
+                    yield return info;
+                    continue;
+                }
+
+                if (new_recpaths.IndexOf(strRecPath) != -1)
+                // if (info == null || string.IsNullOrEmpty(info.Content) == true)
+                {
                     bool bRet = enumerator.MoveNext();
                     if (bRet == false)
                     {
@@ -164,11 +188,22 @@ namespace dp2Circulation
                         info.Content = biblio.Content;
                     info.Metadata = biblio.Metadata;
                     info.Timestamp = biblio.Timestamp;
-                    this.CacheTable[strRecPath] = info;
+                    if (tempTable.ContainsKey(strRecPath) == false)
+                        tempTable[strRecPath] = info;
+                    if (this.CacheTable != null)
+                    {
+                        if (this.CacheTable.ContainsKey(strRecPath) == false)
+                            this.CacheTable[strRecPath] = info;
+                    }
                     yield return info;
                 }
                 else
+                {
+                    info = (BiblioItem)tempTable[strRecPath];   // 注： tempTable 自带去重效果
+                    if (info == null)
+                        throw new Exception("tempTable 里面没有找到 '" + strRecPath + "'");
                     yield return info;
+                }
             }
         }
     }

@@ -99,6 +99,7 @@ namespace dp2Circulation
             this.checkBox_quickCharging_noBorrowHistory = new System.Windows.Forms.CheckBox();
             this.checkBox_quickCharging_verifyBarcode = new System.Windows.Forms.CheckBox();
             this.tabPage_itemManagement = new System.Windows.Forms.TabPage();
+            this.label_forceVerifyDataComment = new System.Windows.Forms.Label();
             this.textBox_itemManagement_maxPicWidth = new System.Windows.Forms.TextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.checkBox_itemManagement_displayOtherLibraryItem = new System.Windows.Forms.CheckBox();
@@ -189,6 +190,7 @@ namespace dp2Circulation
             this.checkBox_operLog_displayItemBorrowHistory = new System.Windows.Forms.CheckBox();
             this.checkBox_operLog_displayReaderBorrowHistory = new System.Windows.Forms.CheckBox();
             this.tabPage_global = new System.Windows.Forms.TabPage();
+            this.checkBox_global_upperInputBarcode = new System.Windows.Forms.CheckBox();
             this.checkBox_global_saveOriginCoverImage = new System.Windows.Forms.CheckBox();
             this.label26 = new System.Windows.Forms.Label();
             this.checkBox_global_autoSelPinyin = new System.Windows.Forms.CheckBox();
@@ -218,7 +220,6 @@ namespace dp2Circulation
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.checkBox_global_upperInputBarcode = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -1062,6 +1063,7 @@ namespace dp2Circulation
             // tabPage_itemManagement
             // 
             this.tabPage_itemManagement.AutoScroll = true;
+            this.tabPage_itemManagement.Controls.Add(this.label_forceVerifyDataComment);
             this.tabPage_itemManagement.Controls.Add(this.textBox_itemManagement_maxPicWidth);
             this.tabPage_itemManagement.Controls.Add(this.label23);
             this.tabPage_itemManagement.Controls.Add(this.checkBox_itemManagement_displayOtherLibraryItem);
@@ -1079,6 +1081,15 @@ namespace dp2Circulation
             this.tabPage_itemManagement.TabIndex = 5;
             this.tabPage_itemManagement.Text = "种册";
             this.tabPage_itemManagement.UseVisualStyleBackColor = true;
+            // 
+            // label_forceVerifyDataComment
+            // 
+            this.label_forceVerifyDataComment.AutoSize = true;
+            this.label_forceVerifyDataComment.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label_forceVerifyDataComment.Location = new System.Drawing.Point(212, 64);
+            this.label_forceVerifyDataComment.Name = "label_forceVerifyDataComment";
+            this.label_forceVerifyDataComment.Size = new System.Drawing.Size(0, 12);
+            this.label_forceVerifyDataComment.TabIndex = 10;
             // 
             // textBox_itemManagement_maxPicWidth
             // 
@@ -2161,6 +2172,16 @@ namespace dp2Circulation
             this.tabPage_global.Text = "全局";
             this.tabPage_global.UseVisualStyleBackColor = true;
             // 
+            // checkBox_global_upperInputBarcode
+            // 
+            this.checkBox_global_upperInputBarcode.AutoSize = true;
+            this.checkBox_global_upperInputBarcode.Location = new System.Drawing.Point(3, 127);
+            this.checkBox_global_upperInputBarcode.Name = "checkBox_global_upperInputBarcode";
+            this.checkBox_global_upperInputBarcode.Size = new System.Drawing.Size(222, 16);
+            this.checkBox_global_upperInputBarcode.TabIndex = 18;
+            this.checkBox_global_upperInputBarcode.Text = "将键盘输入的条码号自动转为大写(&U)";
+            this.checkBox_global_upperInputBarcode.UseVisualStyleBackColor = true;
+            // 
             // checkBox_global_saveOriginCoverImage
             // 
             this.checkBox_global_saveOriginCoverImage.AutoSize = true;
@@ -2268,7 +2289,7 @@ namespace dp2Circulation
             this.groupBox7.Controls.Add(this.textBox_fingerprint_readerUrl);
             this.groupBox7.Location = new System.Drawing.Point(3, 14);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(348, 84);
+            this.groupBox7.Size = new System.Drawing.Size(314, 84);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2276,7 +2297,7 @@ namespace dp2Circulation
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(237, 47);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(203, 47);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(105, 23);
             this.button_fingerprint_setDefaultValue.TabIndex = 1;
@@ -2290,7 +2311,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(6, 20);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(336, 21);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(302, 21);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2461,16 +2482,6 @@ namespace dp2Circulation
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
-            // 
-            // checkBox_global_upperInputBarcode
-            // 
-            this.checkBox_global_upperInputBarcode.AutoSize = true;
-            this.checkBox_global_upperInputBarcode.Location = new System.Drawing.Point(3, 127);
-            this.checkBox_global_upperInputBarcode.Name = "checkBox_global_upperInputBarcode";
-            this.checkBox_global_upperInputBarcode.Size = new System.Drawing.Size(222, 16);
-            this.checkBox_global_upperInputBarcode.TabIndex = 18;
-            this.checkBox_global_upperInputBarcode.Text = "将键盘输入的条码号自动转为大写(&U)";
-            this.checkBox_global_upperInputBarcode.UseVisualStyleBackColor = true;
             // 
             // CfgDlg
             // 
@@ -2756,5 +2767,6 @@ namespace dp2Circulation
         private System.Windows.Forms.Button button_message_setDefaultUrl;
         private System.Windows.Forms.CheckBox checkBox_global_saveOriginCoverImage;
         private System.Windows.Forms.CheckBox checkBox_global_upperInputBarcode;
+        private System.Windows.Forms.Label label_forceVerifyDataComment;
     }
 }

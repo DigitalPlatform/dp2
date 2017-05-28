@@ -5777,12 +5777,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
         {
             get
             {
-#if NO
-                return Program.MainForm.AppInfo.GetBoolean(
-    "entity_form",
-    "verify_data_when_saving",
-    false);
-#endif
                 if (this.Channel == null)
                     return false;
                 return StringUtil.IsInList("client_forceverifydata",
@@ -8913,7 +8907,7 @@ MessageBoxDefaultButton.Button1);
                         out strError);
                     if (nRet == 0)
                     {
-                        strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件，虽然定义了.cs配置文件。数据校验无法进行";
+                        strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件，虽然定义了 .cs 配置文件。数据校验无法进行";
                         goto ERROR1;
                     }
                     if (nRet == -1 || nRet == 0)

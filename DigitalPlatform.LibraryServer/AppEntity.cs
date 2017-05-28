@@ -763,6 +763,8 @@ namespace DigitalPlatform.LibraryServer
             return nOperCount;
         ERROR1:
             // Undo已经进行过的操作
+            // TODO: 写入错误日志
+
             if (strAction == "copy")
             {
                 string strWarning = "";

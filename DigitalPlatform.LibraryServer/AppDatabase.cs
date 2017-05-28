@@ -3216,17 +3216,26 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                     strOperTime);
 
-                using (Stream stream = File.OpenRead(strLogFileName))
+                if (File.Exists(strLogFileName))
+                {
+                    using (Stream stream = File.OpenRead(strLogFileName))
+                    {
+                        nRet = this.OperLog.WriteOperLog(domOperLog,
+                            sessioninfo.ClientAddress,
+                            stream,
+                            out strError);
+                    }
+                }
+                else
                 {
                     nRet = this.OperLog.WriteOperLog(domOperLog,
                         sessioninfo.ClientAddress,
-                        stream,
                         out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "ManageDatabase() API refreshDatabase 写入日志时发生错误: " + strError;
-                        return -1;
-                    }
+                }
+                if (nRet == -1)
+                {
+                    strError = "ManageDatabase() API refreshDatabase 写入日志时发生错误: " + strError;
+                    return -1;
                 }
             }
 
@@ -3946,18 +3955,28 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                     strOperTime);
 
-                using (Stream stream = File.OpenRead(strLogFileName))
+                if (File.Exists(strLogFileName))
                 {
-                    nRet = this.OperLog.WriteOperLog(domOperLog,
-                        sessioninfo.ClientAddress,
-                        stream,
-                        out strError);
-                    if (nRet == -1)
+                    using (Stream stream = File.OpenRead(strLogFileName))
                     {
-                        strError = "ManageDatabase() API refreshDatabase 写入日志时发生错误: " + strError;
-                        return -1;
+                        nRet = this.OperLog.WriteOperLog(domOperLog,
+                            sessioninfo.ClientAddress,
+                            stream,
+                            out strError);
                     }
                 }
+                else
+                {
+                    nRet = this.OperLog.WriteOperLog(domOperLog,
+    sessioninfo.ClientAddress,
+    out strError);
+                }
+                if (nRet == -1)
+                {
+                    strError = "ManageDatabase() API refreshDatabase 写入日志时发生错误: " + strError;
+                    return -1;
+                }
+
             }
 
 
