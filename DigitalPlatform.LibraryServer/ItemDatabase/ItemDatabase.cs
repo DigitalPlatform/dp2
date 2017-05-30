@@ -3183,8 +3183,6 @@ out strError);
                 return -1;
             }
 
-
-
             List<string> newrecordpaths = new List<string>();
             List<string> oldrecordpaths = new List<string>();
             for (int i = 0; i < entityinfos.Count; i++)
@@ -3272,6 +3270,9 @@ out strError);
                 nOperCount++;
             }
 
+            // 2017/5/30
+            if (nOperCount == 0)
+                root.ParentNode.RemoveChild(root);
 
             return nOperCount;
         ERROR1:

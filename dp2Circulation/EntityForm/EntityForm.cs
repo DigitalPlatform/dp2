@@ -3127,7 +3127,7 @@ true);
 
             bool bMarcEditorContentChanged = false; // MARC编辑器内的内容可曾修改?
             bool bBiblioRecordExist = false;    // 书目记录是否存在?
-            bool bSubrecordExist = false;   // 至少有一个从属的记录存在
+            // bool bSubrecordExist = false;   // 至少有一个从属的记录存在
             bool bSubrecordListCleared = false; // 子记录的list是否被清除了?
 
             string strOutputBiblioRecPath = "";
@@ -3334,11 +3334,11 @@ true);
                         this.m_strUsedActiveItemPage = "";
                 }
 
-                if (bBiblioRecordExist == false && bSubrecordExist == true)
+                if (bBiblioRecordExist == false && info.bSubrecordExist == true)
                     this.BiblioRecPath = strOutputBiblioRecPath;
 
                 if (bBiblioRecordExist == false
-                    && bSubrecordExist == false
+                    && info.bSubrecordExist == false
                     && bSubrecordListCleared == true)
                 {
                     if (bMarcEditorContentChanged == false)
@@ -3364,7 +3364,7 @@ true);
 
                 // 2013/11/13
                 if (bBiblioRecordExist == false
-&& bSubrecordExist == false
+&& info.bSubrecordExist == false
 && bSubrecordListCleared == true)
                     return -1;
 
@@ -13794,6 +13794,28 @@ strMARC);
                         this.DoDragDrop("move:" + this.textBox_biblioRecPath.Text, DragDropEffects.Move);
                     }));
                 });
+        }
+
+        // 装载指定的书目记录
+        void MenuItem_marcEditor_loadRecord_Click(object sender, EventArgs e)
+        {
+            string strBiblioRecPath = InputDlg.GetInput(
+this,
+"请指定书目记录路径",
+"书目记录路径(格式'书目库名/ID'): ",
+"",
+Program.MainForm.DefaultFont);
+            if (strBiblioRecPath == null)
+                return;
+
+            // return:
+            //      -1  出错。已经用MessageBox报错
+            //      0   没有装载(例如发现窗口内的记录没有保存，出现警告对话框后，操作者选择了Cancel)
+            //      1   成功装载
+            //      2   通道被占用
+            LoadRecordOld(strBiblioRecPath,
+                "",
+                true);
         }
 
 #if NO

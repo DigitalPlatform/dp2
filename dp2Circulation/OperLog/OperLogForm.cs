@@ -5299,8 +5299,263 @@ FileShare.ReadWrite))
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("补做 SetBiblioInfo-move (&M) [" + this.listView_records.SelectedItems.Count.ToString() + "]");
+            menuItem.Click += new System.EventHandler(this.menu_redoSetBiblioInfoMove_Click);
+            if (this.listView_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));
+        }
+
+        // 补做 SetBiblioInfo-move
+        void menu_redoSetBiblioInfoMove_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要补做 SetBiblioInfo 的行";
+                goto ERROR1;
+            }
+
+            // 检查是否具备足够权限
+            string[] rights = new string[] { 
+            "setbiblioinfo",
+            "setiteminfo",
+            "setissueinfo",
+            "setorderinfo",
+            "setcommentinfo"};
+
+            string strRights = Program.MainForm._currentUserRights;
+            foreach (string right in rights)
+            {
+                if (StringUtil.IsInList(right, strRights) == false)
+                {
+                    strError = "当前用户缺乏 '" + right + "' 权限";
+                    goto ERROR1;
+                }
+            }
+
+            LibraryChannel channel = this.GetChannel();
+
+            Stop stop = new DigitalPlatform.Stop();
+            stop.Register(MainForm.stopManager, true);	// 和容器关联
+
+            stop.OnStop += new StopEventHandler(this.DoStopPrint);
+            stop.Initial("正在补做 SetBiblioInfo-move ...");
+            stop.BeginLoop();
+
+            try
+            {
+                stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
+                int i = 0;
+                foreach (ListViewItem item in this.listView_records.SelectedItems)
+                {
+                    Application.DoEvents();
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        goto ERROR1;
+                    }
+
+                    OperLogItemInfo info = (OperLogItemInfo)item.Tag;
+
+                    string strLogFileName = ListViewUtil.GetItemText(item, COLUMN_FILENAME);
+                    string strIndex = ListViewUtil.GetItemText(item, COLUMN_INDEX);
+
+                    string strXml = "";
+                    // 从服务器获得
+                    // return:
+                    //      -1  出错
+                    //      0   正常
+                    //      1   用户中断
+                    int nRet = GetXml(item,
+            out strXml,
+            out strError);
+                    if (nRet == 1)
+                        return;
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml(strXml);
+
+                    string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+                    if (strOperation != "setBiblioInfo")
+                        continue;
+                    string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
+                    if (strAction != "move")
+                        continue;
+
+                    XmlNode node = null;
+
+                    string strOldRecord = DomUtil.GetElementText(dom.DocumentElement, "oldRecord", out node);
+                    string strOldRecPath = "";
+                    if (node != null)
+                        strOldRecPath = DomUtil.GetAttr(node, "recPath");
+
+                    string strRecord = DomUtil.GetElementText(dom.DocumentElement, "record", out node);
+                    string strRecPath = "";
+                    if (node != null)
+                        strRecPath = DomUtil.GetAttr(node, "recPath");
+
+                    if (string.IsNullOrEmpty(strOldRecPath) || string.IsNullOrEmpty(strRecPath))
+                        continue;
+
+                    string strMergeStyle = DomUtil.GetElementText(dom.DocumentElement, "mergeStyle");
+
+                    // 观察 strOldRecPath 位置是否还有记录
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到
+                    //      1   找到
+                    nRet = DetectBiblioRecord(channel,
+                        stop,
+                strOldRecPath,
+                out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                        continue;
+
+                    // TODO: 检查源和目标库的下级库定义情况，对少于源的情况进行警告
+                    strError = Program.MainForm.CompareTwoBiblioDbDef(Global.GetDbName(strOldRecPath), Global.GetDbName(strRecPath));
+                    if (string.IsNullOrEmpty(strError) == false)
+                    {
+                        strError += "\r\n这样可能会导致移动操作后某些下级记录丢失。为避免出现此类报错，请修改相关书目库定义，以满足移动操作要求";
+                        DialogResult result = MessageBox.Show(this,
+strError + "\r\n\r\n是否强行处理本条?\r\n(Yes 强行处理本条; No 跳过本条记录处理后面的记录; No 退出全部处理)",
+"OperLogForm",
+MessageBoxButtons.YesNoCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                        if (result == System.Windows.Forms.DialogResult.Cancel)
+                            goto ERROR1;
+                        if (result == System.Windows.Forms.DialogResult.No)
+                            goto CONTINUE;
+                    }
+
+                    stop.SetMessage(" " + strOldRecPath + " --> " + strRecPath + " (" + strMergeStyle + ")");
+
+                    // return:
+                    //      -1  出错
+                    //      0   成功，没有警告信息。
+                    //      1   成功，有警告信息。警告信息在 strError 中
+                    nRet = DoMove(channel,
+                        stop,
+            strOldRecPath,
+            strRecPath,
+            strMergeStyle,
+            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    if (nRet == 1)
+                    {
+                        MessageBox.Show(this, "移动 " + strOldRecPath + " --> " + strRecPath + " 的过程中出现警告：" + strError);
+                    }
+
+                CONTINUE:
+                    stop.SetProgressValue(i + 1);
+                    i++;
+                }
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStopPrint);
+                stop.Initial("");
+                stop.HideProgress();
+
+                if (stop != null) // 脱离关联
+                {
+                    stop.Unregister();	// 和容器关联
+                    stop = null;
+                }
+
+                this.ReturnChannel(channel);
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // return:
+        //      -1  出错
+        //      0   成功，没有警告信息。
+        //      1   成功，有警告信息。警告信息在 strError 中
+        static int DoMove(LibraryChannel channel,
+            Stop stop,
+            string strSourceRecPath,
+            string strTargetRecPath,
+            string strMergeStyle,
+            out string strError)
+        {
+            strError = "";
+
+            string strOutputBiblio = "";
+            string strOutputBiblioRecPath = "";
+            byte[] baOutputTimestamp = null;
+            // result.Value:
+            //      -1  出错
+            //      0   成功，没有警告信息。
+            //      1   成功，有警告信息。警告信息在 result.ErrorInfo 中
+            long lRet = channel.CopyBiblioInfo(
+                stop,
+                "move",
+                strSourceRecPath,
+                "xml",
+                null,
+                null,   // this.BiblioTimestamp,
+                strTargetRecPath,
+                null,
+                strMergeStyle,
+                out strOutputBiblio,
+                out strOutputBiblioRecPath,
+                out baOutputTimestamp,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            return (int)lRet;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        static int DetectBiblioRecord(LibraryChannel channel,
+            Stop stop,
+            string strBiblioRecPath,
+            out string strError)
+        {
+            strError = "";
+
+            string[] results = null;
+            byte[] baTimestamp = null;
+            long lRet = channel.GetBiblioInfos(
+                stop,
+                strBiblioRecPath,
+                "",
+                new string[] { "xml" },   // formats
+                out results,
+                out baTimestamp,
+                out strError);
+            if (lRet == 0)
+                return 0;
+
+            if (lRet == -1)
+                return -1;
+            if (results == null || results.Length == 0)
+            {
+                strError = "results error";
+                return -1;
+            }
+
+            return 1;
         }
 
         // 导出附件

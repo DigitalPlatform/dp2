@@ -150,7 +150,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.107 (2017/4/25) 为 VerifyBarcode() API 扩充 strAction 和 out strOutputBarcode 参数，支持变换条码号功能
         //      2.108 (2017/5/11) dp2Kernel 新版本 GetBrowse() API 支持 @coldef: 中使用名字空间和(匹配命中多个XmlNode时串接用的)分隔符号
         //      2.109 (2017/5/23) 对 ManageDatabase() API 也写入日志了。但日志恢复功能会跳过这个类型的操作日志
-        public static string Version = "2.109";
+        //      2.110 (2017/5/30) 消除 CopyBiblioInfo() API 中账户权限不够时会发生移动不完整的 Bug。
+        public static string Version = "2.110";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

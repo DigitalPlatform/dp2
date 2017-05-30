@@ -575,6 +575,63 @@ namespace DigitalPlatform.LibraryServer
         }
 #endif
 
+        // return:
+        //      -2  目标实体库不存在
+        //      -1  出错
+        //      0   存在
+        public int DetectTargetChildDbExistence(
+            string strDbType,
+            string strTargetBiblioDbName,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+            // 获得目标书目库下属的实体库名
+            string strTargetItemDbName = "";
+            // string strTargetBiblioDbName = ResPath.GetDbName(strTargetBiblioRecPath);
+
+            if (strDbType == "item")
+            {
+                // return:
+                //      -1  出错
+                //      0   没有找到
+                //      1   找到
+                nRet = this.GetItemDbName(strTargetBiblioDbName,
+                    out strTargetItemDbName,
+                    out strError);
+            }
+            else if (strDbType == "order")
+            {
+                nRet = this.GetOrderDbName(strTargetBiblioDbName,
+                    out strTargetItemDbName,
+                    out strError);
+            }
+            else if (strDbType == "issue")
+            {
+                nRet = this.GetIssueDbName(strTargetBiblioDbName,
+                    out strTargetItemDbName,
+                    out strError);
+            }
+            else if (strDbType == "comment")
+            {
+                nRet = this.GetCommentDbName(strTargetBiblioDbName,
+                    out strTargetItemDbName,
+                    out strError);
+            }
+            else
+            {
+                strError = "无法识别的数据库类型 '" + strDbType + "'";
+                return -1;
+            }
+
+            if (nRet == 0 || string.IsNullOrEmpty(strTargetItemDbName) == true)
+            {
+                return -2;   // 目标实体库不存在
+            }
+
+            return 0;
+        }
+
         // 复制属于同一书目记录的全部实体记录
         // TODO: 返回记录路径变迁信息
         // parameters:
