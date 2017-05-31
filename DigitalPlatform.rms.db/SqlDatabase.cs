@@ -11308,16 +11308,15 @@ out strError);
                                 out temp,
                                 out strError);
                             if (nRet == -1)
-                            {
-                                // 2017/5/31
-                                if (temp != null)
-                                {
-                                    foreach (WriteInfo info in temp)
-                                    {
-                                        outputs.Add(info.record);
-                                    }
-                                }
                                 return -1;
+
+                            // 2017/5/31
+                            if (temp != null)
+                            {
+                                foreach (WriteInfo info in temp)
+                                {
+                                    outputs.Add(info.record);
+                                }
                             }
                         }
                     }
