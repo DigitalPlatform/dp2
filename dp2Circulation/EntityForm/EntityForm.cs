@@ -9817,9 +9817,9 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             int nRet = 0;
 
-            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.39") < 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.110") < 0)  // "2.39"
             {
-                strError = "本功能需要配合 dp2library 2.39 或以上版本才能使用";
+                strError = "本功能需要配合 dp2library 2.110 或以上版本才能使用";
                 goto ERROR1;
             }
 
@@ -12194,9 +12194,9 @@ value);
                 goto ERROR1;
             }
 #endif
-            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.106") < 0)   // "2.39"
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.110") < 0)   // "2.39"
             {
-                strError = "本功能需要配合 dp2library 2.106 或以上版本才能使用";
+                strError = "本功能需要配合 dp2library 2.110 或以上版本才能使用";
                 goto ERROR1;
             }
 

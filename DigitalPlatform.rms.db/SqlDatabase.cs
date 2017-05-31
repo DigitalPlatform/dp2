@@ -9040,11 +9040,11 @@ namespace DigitalPlatform.rms
             bool bDeleteKeys,
             bool bDelayCreateKeys,
             List<WriteInfo> records,
-            //out List<WriteInfo> results,
+            out List<WriteInfo> errors,
             out string strError)
         {
             strError = "";
-            //results = new List<WriteInfo>();
+            errors = new List<WriteInfo>();
             int nRet = 0;
 
             if (records == null || records.Count == 0)
@@ -9066,7 +9066,6 @@ namespace DigitalPlatform.rms
                 KeyCollection oldKeys = null;
                 XmlDocument newDom = null;
                 XmlDocument oldDom = null;
-
 
                 string strNewXml = info.record.Xml;
                 string strOldXml = "";
@@ -9113,7 +9112,19 @@ namespace DigitalPlatform.rms
                     out oldDom,
                     out strError);
                 if (nRet == -1)
-                    return -1;
+                {
+                    // return -1;
+
+                    // 2017/5/14
+                    if (info.record == null)
+                        info.record = new RecordBody();
+                    if (info.record.Result == null)
+                        info.record.Result = new Result();
+                    info.record.Result.ErrorCode = ErrorCodeValue.CommonError;
+                    info.record.Result.ErrorString = strError;
+                    errors.Add(info);
+                    continue;
+                }
 
                 // 处理子文件
                 // return:
@@ -9125,8 +9136,19 @@ namespace DigitalPlatform.rms
                     oldDom,
                     out strError);
                 if (nRet == -1)
-                    return -1;
+                {
+                    // return -1;
 
+                    // 2017/5/14
+                    if (info.record == null)
+                        info.record = new RecordBody();
+                    if (info.record.Result == null)
+                        info.record.Result = new Result();
+                    info.record.Result.ErrorCode = ErrorCodeValue.CommonError;
+                    info.record.Result.ErrorString = strError;
+                    errors.Add(info);
+                    continue;
+                }
                 total_newkeys.AddRange(newKeys);
                 total_oldkeys.AddRange(oldKeys);
             }
@@ -11276,18 +11298,27 @@ out strError);
 
                         if (results != null && results.Count > 0)
                         {
-                            //List<WriteInfo> temp = null;
+                            List<WriteInfo> temp = null;
                             // 更新 Keys
                             nRet = UpdateKeysRows(
-                                // sessioninfo,
                                 connection,
                                 true,   // 始终要立即删除旧的 keys
                                 bFastMode,
                                 results,
-                                //out temp,
+                                out temp,
                                 out strError);
                             if (nRet == -1)
+                            {
+                                // 2017/5/31
+                                if (temp != null)
+                                {
+                                    foreach (WriteInfo info in temp)
+                                    {
+                                        outputs.Add(info.record);
+                                    }
+                                }
                                 return -1;
+                            }
                         }
                     }
                     catch (SqlException sqlEx)
