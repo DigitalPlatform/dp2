@@ -274,7 +274,7 @@ namespace DigitalPlatform.CommonControl
     + StringUtil.GetXmlStringSimple(strFromList)
     + "'><item>"
     + "<word>"
-    + StringUtil.GetXmlStringSimple(line.WordString)
+    + StringUtil.GetXmlStringSimple(line.WordString.Trim())
     + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 
                 if (string.IsNullOrEmpty(strQueryXml) == false)
@@ -361,7 +361,7 @@ namespace DigitalPlatform.CommonControl
                         strRelation = "draw";
                         strDataType = "number";
                     }
-                    else if (String.IsNullOrEmpty(line.WordString) == false)
+                    else if (String.IsNullOrEmpty(line.WordString.Trim()) == false)
                     {
                         strDataType = "number";
                     }
@@ -397,7 +397,7 @@ namespace DigitalPlatform.CommonControl
     + StringUtil.GetXmlStringSimple(strFromList)
     + "'><item>"
     + "<word>"
-    + StringUtil.GetXmlStringSimple(line.WordString)
+    + StringUtil.GetXmlStringSimple(line.WordString.Trim())
     + "</word><match>" + strMatchStyle + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
 
                 if (string.IsNullOrEmpty(item.QueryXml) == false)

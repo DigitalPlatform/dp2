@@ -5450,7 +5450,12 @@ MessageBoxDefaultButton.Button1);
             strMergeStyle,
             out strError);
                     if (nRet == -1)
-                        goto ERROR1;
+                    {
+                        // TODO: 询问是否重试、跳过、放弃
+                        MessageBox.Show(this, " '" + strOldRecPath + "' --> '" + strRecPath + "' " + strError);
+                        continue;
+                        // goto ERROR1;
+                    }
 
                     if (nRet == 1)
                     {
@@ -8848,7 +8853,7 @@ MessageBoxDefaultButton.Button1);
                     }
 
                     // 至少产生一个 record
-                    if (records.Count == 0)
+                    if (records.Count == 0 && string.IsNullOrEmpty(strBiblioRecPath) == false)
                     {
                         RecoverBiblioItem record = new RecoverBiblioItem();
                         record.BiblioRecPath = strBiblioRecPath;

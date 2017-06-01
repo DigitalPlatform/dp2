@@ -10822,7 +10822,6 @@ Keys keyData)
             if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
                 bClear = false;
 
-
             // 修改窗口标题
             // this.Text = "书目查询 逻辑检索";
 

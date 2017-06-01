@@ -290,6 +290,28 @@ strStringTable);
                     return this.textBox_convert_itemBatchNo.Text;
                 }));
 
+                //
+                info.IncludeSubItems = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_subRecords_entity.Checked;
+                }));
+                info.IncludeSubOrders = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_subRecords_order.Checked;
+                }));
+                info.IncludeSubIssues = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_subRecords_issue.Checked;
+                }));
+                info.IncludeSubComments = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_subRecords_comment.Checked;
+                }));
+                info.IncludeSubObjects = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_subRecords_object.Checked;
+                }));
+
                 string strDbNameList = (string)this.Invoke(new Func<string>(() =>
                 {
                     return this.textBox_target_dbNameList.Text;
@@ -1156,6 +1178,15 @@ new string[] { "重试", "跳过", "中断" });
 
                 strRootElementName = item_dom.DocumentElement.LocalName;
 
+                if (info.IncludeSubItems == false && strRootElementName == "item")
+                    continue;
+                if (info.IncludeSubOrders == false && strRootElementName == "order")
+                    continue;
+                if (info.IncludeSubIssues == false && strRootElementName == "issue")
+                    continue;
+                if (info.IncludeSubComments == false && strRootElementName == "comment")
+                    continue;
+
                 string strPath = item_dom.DocumentElement.GetAttribute("path");
                 string strTimestamp = item_dom.DocumentElement.GetAttribute("timestamp");
 
@@ -1447,6 +1478,12 @@ new string[] { "继续", "中断" });
             public bool DontChangeOperations = false;
             public bool SuppressOperLog = false;
             public bool DontSearchDup = false;
+
+            public bool IncludeSubItems = true;
+            public bool IncludeSubOrders = true;
+            public bool IncludeSubIssues = true;
+            public bool IncludeSubComments = true;
+            public bool IncludeSubObjects = true;
 
             public string ItemBatchNo = ""; // 设定给册记录的批次号。如果为空，表示不修改册记录中的批次号，否则会覆盖记录中的批次号
 

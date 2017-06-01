@@ -908,7 +908,7 @@ namespace dp2Circulation
             if (errors.Count == 0)
                 return null;
 
-            return "源书目库具有下属的" + StringUtil.MakePathList(errors, "、") + "，而目标书目库缺乏";
+            return "源书目库 '" + strSourceDbName + "' 具有下属的" + StringUtil.MakePathList(errors, "、") + "，而目标书目库 '" + strTargetDbName + "' 缺乏";
         }
 
     }

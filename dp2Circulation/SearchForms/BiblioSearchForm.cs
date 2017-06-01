@@ -7036,7 +7036,8 @@ MessageBoxDefaultButton.Button1);
                         }
 
                         nRet = 0;
-                        if (string.IsNullOrEmpty(prop.OrderDbName) == false)
+                        if (string.IsNullOrEmpty(prop.OrderDbName) == false
+                            && dlg.IncludeOrders)
                         {
                             // dprms:orderCollection
                             nRet = OutputEntities(
@@ -7047,7 +7048,8 @@ MessageBoxDefaultButton.Button1);
                                 writer,
                                 out strError);
                         }
-                        if (string.IsNullOrEmpty(prop.IssueDbName) == false)
+                        if (string.IsNullOrEmpty(prop.IssueDbName) == false
+                            && dlg.IncludeIssues)
                         {
                             // dprms:issueCollection
                             nRet = OutputEntities(
@@ -7058,7 +7060,8 @@ MessageBoxDefaultButton.Button1);
                                 writer,
                                 out strError);
                         }
-                        if (string.IsNullOrEmpty(prop.ItemDbName) == false)
+                        if (string.IsNullOrEmpty(prop.ItemDbName) == false
+                            && dlg.IncludeEntities)
                         {
                             // dprms:itemCollection
                             nRet = OutputEntities(
@@ -7069,7 +7072,8 @@ MessageBoxDefaultButton.Button1);
                                 writer,
                                 out strError);
                         }
-                        if (string.IsNullOrEmpty(prop.CommentDbName) == false)
+                        if (string.IsNullOrEmpty(prop.CommentDbName) == false
+                            && dlg.IncludeComments)
                         {
                             // dprms:commentCollection
                             nRet = OutputEntities(
