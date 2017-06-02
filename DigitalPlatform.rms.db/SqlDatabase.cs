@@ -7409,7 +7409,8 @@ namespace DigitalPlatform.rms
 
                     if (bTempField == false)
                     {
-                        if (string.IsNullOrEmpty(row_info.FileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
                             strError = "行信息中没有对象文件 正式文件名";
@@ -7426,7 +7427,8 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        if (string.IsNullOrEmpty(row_info.NewFileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
                             // 尚没有临时的对象文件
                             destBuffer = new byte[0];
@@ -8112,7 +8114,8 @@ namespace DigitalPlatform.rms
 
                     if (bTempField == false)
                     {
-                        if (string.IsNullOrEmpty(row_info.FileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
                             strError = "行信息中没有对象文件 正式文件名";
@@ -8129,7 +8132,8 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        if (string.IsNullOrEmpty(row_info.NewFileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
                             // 尚没有临时的对象文件
                             destBuffer = new byte[0];
@@ -8428,7 +8432,8 @@ namespace DigitalPlatform.rms
 
                     if (bTempField == false)
                     {
-                        if (string.IsNullOrEmpty(row_info.FileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
                             strError = "行信息中没有对象文件 正式文件名";
@@ -8445,7 +8450,8 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        if (string.IsNullOrEmpty(row_info.NewFileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
                             // 尚没有临时的对象文件
                             destBuffer = new byte[0];

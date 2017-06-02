@@ -2331,6 +2331,10 @@ out strError);
 
                     // 删除new中的全部<dprms:file>元素，然后将old记录中的全部<dprms:file>元素插入到new记录中
 
+                    // TODO: 如果前端提交的关于 dprms:file 元素的修改被拒绝，则要通过设置 bChangePartDenied = true 来反映这种情况
+
+                    string strRequstFragments = GetAllFileElements(domNew);
+
                     XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
                     nsmgr.AddNamespace("dprms", DpNs.dprms);
 
@@ -2354,6 +2358,20 @@ out strError);
 
                         domNew.DocumentElement.AppendChild(fragment);
                     }
+
+                    // 2017/6/2
+                    string strAcceptedFragments = GetAllFileElements(domNew);
+                    if (strRequstFragments != strAcceptedFragments)
+                    {
+                        bChangePartDenied = true;
+                        if (string.IsNullOrEmpty(strComment) == false)
+                            strComment += "; ";
+                        if (string.IsNullOrEmpty(strAcceptedFragments) && string.IsNullOrEmpty(strRequstFragments) == false)
+                            strComment += "创建 dprms:file (数字对象)元素被拒绝";
+                        else
+                            strComment += "修改 dprms:file (数字对象)元素被拒绝";
+                    }
+
                 }
 
                 if (StringUtil.IsInList("905", strUnionCatalogStyle) == true)
@@ -2502,6 +2520,23 @@ out strError);
                 if (bChangePartDenied == true)
                     bChangePartDeniedParam = true;
             }
+        }
+
+        // 获得全部 dprms:file 元素的字符串拼接。返回前先排序。这样不同元素顺序的表示法被当作等同的
+        static string GetAllFileElements(XmlDocument domNew)
+        {
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            XmlNodeList nodes = domNew.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            List<string> results = new List<string>();
+            foreach (XmlElement node in nodes)
+            {
+                results.Add(node.OuterXml.Trim());
+            }
+
+            results.Sort();
+            return StringUtil.MakePathList(results, "\r\n");
         }
 
         // 获得交叉的馆代码的第一个

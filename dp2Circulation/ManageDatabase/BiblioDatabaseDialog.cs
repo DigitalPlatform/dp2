@@ -1009,7 +1009,7 @@ namespace dp2Circulation
                             bConfirmed = true;
                             // 删除数据库
                             nRet = this.ManagerForm.DeleteDatabase(
-                                MakeListString(delete_dbnames),
+                                StringUtil.MakePathList(delete_dbnames),    // 2017/6/2 从 MakeListString() 修改为 MakePathList()
                                 out strOutputInfo,
                                 out strError);
                             if (nRet == -1)

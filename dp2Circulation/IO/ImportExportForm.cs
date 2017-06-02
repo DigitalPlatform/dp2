@@ -23,6 +23,9 @@ using DigitalPlatform.Text;
 using DigitalPlatform.Range;
 using DigitalPlatform.Marc;
 
+using DigitalPlatform.CirculationClient;
+
+
 namespace dp2Circulation
 {
     public partial class ImportExportForm : MyForm
@@ -310,6 +313,10 @@ strStringTable);
                 info.IncludeSubObjects = (bool)this.Invoke(new Func<bool>(() =>
                 {
                     return this.checkBox_subRecords_object.Checked;
+                }));
+                info.ObjectDirectoryName = (string)this.Invoke(new Func<string>(() =>
+                {
+                    return this.textBox_objectDirectoryName.Text;
                 }));
 
                 string strDbNameList = (string)this.Invoke(new Func<string>(() =>
@@ -887,7 +894,69 @@ new string[] { "重试", "跳过", "中断" });
                 this.OutputText(strMessage, 0);
             }
 
+            // 上传数字对象
+            if (info.IncludeSubObjects)
+                UploadObjects(info);
+
             return true;
+        }
+
+        /*
+            <dprms:file id="0" xmlns:dprms="http://dp2003.com/dprms" _timestamp="9d4c3d9950a9d4080000000000000002" _metadataFile="a0b54269-1f2f-4750-911e-1e213f71b238.met" _objectFile="a0b54269-1f2f-4750-911e-1e213f71b238.bin" />
+         * */
+        // 上传数字对象
+        void UploadObjects(ProcessInfo info)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(info.BiblioXml);
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            foreach (XmlElement node in nodes)
+            {
+                string strObjectFile = node.GetAttribute("_objectFile");
+                if (string.IsNullOrEmpty(strObjectFile))
+                    continue;
+                string strMetadataFile = node.GetAttribute("_metadataFile");
+                if (string.IsNullOrEmpty(strMetadataFile))
+                    continue;
+                string strTimestamp = node.GetAttribute("_timestamp");
+                if (string.IsNullOrEmpty(strTimestamp))
+                    continue;
+                string strID = node.GetAttribute("id");
+                if (string.IsNullOrEmpty(strID))
+                    continue;
+
+                string strClientFilePath = Path.Combine(info.ObjectDirectoryName, strObjectFile);
+                string strServerFilePath = info.BiblioRecPath + "/object/" + strID;
+
+                string strMetadata = "";
+                using (StreamReader sr = new StreamReader(Path.Combine(info.ObjectDirectoryName, strMetadataFile)))
+                {
+                    strMetadata = sr.ReadToEnd();
+                }
+
+                string strError = "";
+                // 上传文件到到 dp2lbrary 服务器
+                // parameters:
+                //      timestamp   时间戳。如果为 null，函数会自动根据文件信息得到一个时间戳
+                //      bRetryOverwiteExisting   是否自动在时间戳不一致的情况下覆盖已经存在的服务器文件。== true，表示当发现时间戳不一致的时候，自动用返回的时间戳重试覆盖
+                // return:
+                //		-1	出错
+                //		0   上传文件成功
+                int nRet = info.Channel.UploadFile(
+            info.stop,
+            strClientFilePath,
+            strServerFilePath,
+            strMetadata,
+            ByteArray.GetTimeStampByteArray(strTimestamp),
+            true,
+            out strError);
+                if (nRet == -1)
+                    throw new Exception(strError);
+            }
         }
 
         // 修改书目记录的题名，增加一个随机字符串部分
@@ -1301,7 +1370,8 @@ new string[] { "重试", "跳过", "中断" });
 
             info.UploadedSubItems += entityArray.Count;
 
-            if (info.Collect == false)
+            if (info.Collect == false
+                && entityArray.Count > 0)
             {
                 EntityInfo[] errorinfos = null;
 
@@ -1484,6 +1554,7 @@ new string[] { "继续", "中断" });
             public bool IncludeSubIssues = true;
             public bool IncludeSubComments = true;
             public bool IncludeSubObjects = true;
+            public string ObjectDirectoryName = "";
 
             public string ItemBatchNo = ""; // 设定给册记录的批次号。如果为空，表示不修改册记录中的批次号，否则会覆盖记录中的批次号
 
