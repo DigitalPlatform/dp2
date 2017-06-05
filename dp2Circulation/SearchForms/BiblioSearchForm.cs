@@ -6985,6 +6985,7 @@ MessageBoxDefaultButton.Button1);
 
                     if (dlg.IncludeObjectFile && bRemote == false)
                     {
+                    REDO_WRITEOBJECTS:
                         // 将书目记录中的对象资源写入外部文件
                         nRet = WriteObjectFiles(stop,
                 channel,
@@ -6998,11 +6999,13 @@ MessageBoxDefaultButton.Button1);
                                 goto ERROR1;
 
                             DialogResult temp_result = MessageBox.Show(this,
-strError + "\r\n\r\n是否继续处理?",
+strError + "\r\n\r\n是否重试?\r\n\r\n(Yes: 重试; No: 放弃导出本记录的对象，但继续后面的处理; Cancel: 放弃全部处理)",
 "BiblioSearchForm",
-MessageBoxButtons.OKCancel,
+MessageBoxButtons.YesNoCancel,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button1);
+                            if (temp_result == System.Windows.Forms.DialogResult.Yes)
+                                goto REDO_WRITEOBJECTS;
                             if (temp_result == DialogResult.Cancel)
                                 goto ERROR1;
                         }
@@ -7046,6 +7049,7 @@ MessageBoxDefaultButton.Button1);
                                 item.BiblioInfo.RecPath,
                                 "order",
                                 writer,
+                                dlg,
                                 out strError);
                         }
                         if (string.IsNullOrEmpty(prop.IssueDbName) == false
@@ -7058,6 +7062,7 @@ MessageBoxDefaultButton.Button1);
                                 item.BiblioInfo.RecPath,
                                 "issue",
                                 writer,
+                                dlg,
                                 out strError);
                         }
                         if (string.IsNullOrEmpty(prop.ItemDbName) == false
@@ -7070,6 +7075,7 @@ MessageBoxDefaultButton.Button1);
                                 item.BiblioInfo.RecPath,
                                 "item",
                                 writer,
+                                dlg,
                                 out strError);
                         }
                         if (string.IsNullOrEmpty(prop.CommentDbName) == false
@@ -7082,6 +7088,7 @@ MessageBoxDefaultButton.Button1);
                                 item.BiblioInfo.RecPath,
                                 "comment",
                                 writer,
+                                dlg,
                                 out strError);
                         }
 
@@ -7137,11 +7144,11 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-        // 将书目记录中的对象资源写入外部文件
+        // 将 XML 记录中的对象资源写入外部文件
         public static int WriteObjectFiles(Stop stop,
             LibraryChannel channel,
-            string strBiblioRecPath,
-            ref XmlDocument biblio_dom,
+            string strRecPath,
+            ref XmlDocument dom,
             string strOutputDir,
             out string strError)
         {
@@ -7153,7 +7160,7 @@ MessageBoxDefaultButton.Button1);
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
 
-            XmlNodeList nodes = biblio_dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
 
             foreach (XmlElement node in nodes)
             {
@@ -7161,10 +7168,13 @@ MessageBoxDefaultButton.Button1);
                 string strUsage = DomUtil.GetAttr(node, "usage");
                 string strRights = DomUtil.GetAttr(node, "rights");
 
-                string strResPath = strBiblioRecPath + "/object/" + strID;
+                string strResPath = strRecPath + "/object/" + strID;
                 strResPath = strResPath.Replace(":", "/");
                 recpaths.Add(strResPath);
             }
+
+            if (recpaths.Count == 0)
+                return 0;
 
             try
             {
@@ -7206,8 +7216,17 @@ MessageBoxDefaultButton.Button1);
 
                     // TODO: 另一种方法是用 URL 数据库名 ObjectID 等共同构造一个文件名
                     string strGUID = Guid.NewGuid().ToString();
-                    string strMetadataFileName = Path.Combine(strOutputDir, strGUID + ".met");
-                    string strObjectFileName = Path.Combine(strOutputDir, strGUID + ".bin");
+                    string strName = record.Path.Replace("/", "_");
+                    string strMetadataFileName = Path.Combine(strOutputDir, strName + ".met");
+                    if (File.Exists(strMetadataFileName))
+                        strMetadataFileName = Path.Combine(strOutputDir, strName + "_" + strGUID + ".met");
+
+                    string strObjectFileName = Path.Combine(strOutputDir, strName + ".bin");
+                    if (File.Exists(strObjectFileName))
+                        strObjectFileName = Path.Combine(strOutputDir, strName + "_" + strGUID + ".bin");
+
+                    //string strMetadataFileName = Path.Combine(strOutputDir, strGUID + ".met");
+                    //string strObjectFileName = Path.Combine(strOutputDir, strGUID + ".bin");
 
                     // metadata 写入外部文件
                     if (string.IsNullOrEmpty(strMetadataXml) == false)
@@ -7333,6 +7352,7 @@ LibraryChannel channel,
 string strBiblioRecPath,
 string strDbType,
 XmlTextWriter writer,
+            OpenBiblioDumpFileDialog dlg,
 out string strError)
         {
             strError = "";
@@ -7364,6 +7384,34 @@ out string strError)
 
                 XmlDocument item_dom = new XmlDocument();
                 item_dom.LoadXml(info.OldRecord);
+
+                if (dlg.IncludeObjectFile)
+                {
+                REDO_WRITEOBJECTS:
+                    // 将记录中的对象资源写入外部文件
+                    int nRet = WriteObjectFiles(stop,
+            channel,
+            info.OldRecPath,
+            ref item_dom,
+            dlg.ObjectDirectoryName,
+            out strError);
+                    if (nRet == -1)
+                    {
+                        if (stop != null && stop.State != 0)
+                            return -1;
+
+                        DialogResult temp_result = MessageBox.Show(this,
+strError + "\r\n\r\n是否重试?\r\n\r\n(Yes: 重试; No: 放弃导出本记录的对象，但继续后面的处理; Cancel: 放弃全部处理)",
+"BiblioSearchForm",
+MessageBoxButtons.YesNoCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                        if (temp_result == System.Windows.Forms.DialogResult.Yes)
+                            goto REDO_WRITEOBJECTS;
+                        if (temp_result == DialogResult.Cancel)
+                            return -1;
+                    }
+                }
 
                 if (item_dom.DocumentElement != null)
                 {

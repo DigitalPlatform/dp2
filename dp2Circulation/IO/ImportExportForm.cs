@@ -894,9 +894,9 @@ new string[] { "重试", "跳过", "中断" });
                 this.OutputText(strMessage, 0);
             }
 
-            // 上传数字对象
+            // 上传书目记录的数字对象
             if (info.IncludeSubObjects)
-                UploadObjects(info);
+                UploadObjects(info, info.BiblioRecPath, info.BiblioXml);
 
             return true;
         }
@@ -905,10 +905,15 @@ new string[] { "重试", "跳过", "中断" });
             <dprms:file id="0" xmlns:dprms="http://dp2003.com/dprms" _timestamp="9d4c3d9950a9d4080000000000000002" _metadataFile="a0b54269-1f2f-4750-911e-1e213f71b238.met" _objectFile="a0b54269-1f2f-4750-911e-1e213f71b238.bin" />
          * */
         // 上传数字对象
-        void UploadObjects(ProcessInfo info)
+        void UploadObjects(ProcessInfo info,
+            string strRecPath,
+            string strXml)
         {
+            if (string.IsNullOrEmpty(strXml))
+                return;
+
             XmlDocument dom = new XmlDocument();
-            dom.LoadXml(info.BiblioXml);
+            dom.LoadXml(strXml);  // info.BiblioXml
 
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
@@ -930,7 +935,7 @@ new string[] { "重试", "跳过", "中断" });
                     continue;
 
                 string strClientFilePath = Path.Combine(info.ObjectDirectoryName, strObjectFile);
-                string strServerFilePath = info.BiblioRecPath + "/object/" + strID;
+                string strServerFilePath = strRecPath + "/object/" + strID;
 
                 string strMetadata = "";
                 using (StreamReader sr = new StreamReader(Path.Combine(info.ObjectDirectoryName, strMetadataFile)))
@@ -1373,7 +1378,10 @@ new string[] { "重试", "跳过", "中断" });
             if (info.Collect == false
                 && entityArray.Count > 0)
             {
+#if NO
                 EntityInfo[] errorinfos = null;
+
+                // TODO: entityArray 中元素太多一次发送不完怎么办? 是否需要循环处理？
 
                 long lRet = 0;
 
@@ -1440,6 +1448,12 @@ new string[] { "重试", "跳过", "中断" });
                     if (AskContinue(info, strError) == false)
                         throw new Exception(strError);
                 }
+#endif
+                WriteEntities(
+    info,
+    strRootElementName,
+    entityArray,
+    out strError);
             }
 
             if (dupInfo.Length > 0)
@@ -1449,6 +1463,102 @@ new string[] { "重试", "跳过", "中断" });
 
                 if (AskContinue(info, strError) == false)
                     throw new Exception(strError);
+            }
+        }
+
+        internal static EntityInfo[] GetPart(List<EntityInfo> source,
+int nStart,
+int nCount)
+        {
+            EntityInfo[] result = new EntityInfo[nCount];
+            for (int i = 0; i < nCount; i++)
+            {
+                result[i] = source[i + nStart];
+            }
+            return result;
+        }
+
+        void WriteEntities(
+            ProcessInfo info,
+            string strRootElementName,
+            List<EntityInfo> entities,
+            out string strError)
+        {
+            strError = "";
+
+            int nBatch = 100;
+            for (int i = 0; i < (entities.Count / nBatch) + ((entities.Count % nBatch) != 0 ? 1 : 0); i++)
+            {
+                int nCurrentCount = Math.Min(nBatch, entities.Count - i * nBatch);
+                EntityInfo[] current = GetPart(entities, i * nBatch, nCurrentCount);
+
+                EntityInfo[] errorinfos = null;
+
+                long lRet = 0;
+
+                if (strRootElementName == "item")
+                    lRet = info.Channel.SetEntities(
+                         info.stop,
+                         info.BiblioRecPath,
+                         current.ToArray(),
+                         out errorinfos,
+                         out strError);
+                else if (strRootElementName == "order")
+                    lRet = info.Channel.SetOrders(
+                         info.stop,
+                         info.BiblioRecPath,
+                         current.ToArray(),
+                         out errorinfos,
+                         out strError);
+                else if (strRootElementName == "issue")
+                    lRet = info.Channel.SetIssues(
+                         info.stop,
+                         info.BiblioRecPath,
+                         current.ToArray(),
+                         out errorinfos,
+                         out strError);
+                else if (strRootElementName == "comment")
+                    lRet = info.Channel.SetComments(
+                         info.stop,
+                         info.BiblioRecPath,
+                         current.ToArray(),
+                         out errorinfos,
+                         out strError);
+                else
+                {
+                    strError = "未知的 strRootElementName '" + strRootElementName + "'";
+                    throw new Exception(strError);
+                }
+                if (lRet == -1)
+                    throw new Exception(strError);
+
+                if (errorinfos == null || errorinfos.Length == 0)
+                    continue;
+
+                StringBuilder text = new StringBuilder();
+                foreach (EntityInfo error in errorinfos)
+                {
+                    if (String.IsNullOrEmpty(error.RefID) == true)
+                        throw new Exception("服务器返回的EntityInfo结构中RefID为空");
+
+                    // 正常信息处理
+                    if (error.ErrorCode == ErrorCodeValue.NoError)
+                        continue;
+
+                    text.Append(error.RefID + "在提交保存过程中发生错误 -- " + error.ErrorInfo + "\r\n");
+                    info.ItemErrorCount++;
+                }
+
+                if (text.Length > 0)
+                {
+                    strError = "在为书目记录 '" + info.BiblioRecPath + "' 导入下属 '" + strRootElementName + "' 记录的阶段出现错误:\r\n" + text.ToString();
+
+                    this.OutputText(strError, 2);
+
+                    // 询问是否忽略错误继续向后处理? 此后全部忽略?
+                    if (AskContinue(info, strError) == false)
+                        throw new Exception(strError);
+                }
             }
         }
 
