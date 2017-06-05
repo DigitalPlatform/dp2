@@ -7327,6 +7327,67 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        public int OutputEntities(
+Stop stop,
+LibraryChannel channel,
+string strBiblioRecPath,
+string strDbType,
+XmlTextWriter writer,
+out string strError)
+        {
+            strError = "";
+
+            bool bBegin = false;
+
+            SubItemLoader loader = new SubItemLoader();
+            loader.BiblioRecPath = strBiblioRecPath;
+            loader.Channel = channel;
+            loader.Stop = stop;
+            loader.DbType = strDbType;
+
+            loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+            loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+            foreach (EntityInfo info in loader)
+            {
+                if (info.ErrorCode != ErrorCodeValue.NoError)
+                {
+                    strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo; // NewRecPath
+                    return -1;
+                }
+
+                if (bBegin == false)
+                {
+                    writer.WriteStartElement("dprms", strDbType + "Collection", DpNs.dprms);
+                    bBegin = true;
+                }
+
+                XmlDocument item_dom = new XmlDocument();
+                item_dom.LoadXml(info.OldRecord);
+
+                if (item_dom.DocumentElement != null)
+                {
+                    writer.WriteStartElement("dprms", strDbType, DpNs.dprms);
+                    writer.WriteAttributeString("path", info.OldRecPath);
+                    writer.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(info.OldTimestamp));
+                    DomUtil.RemoveEmptyElements(item_dom.DocumentElement);
+                    item_dom.DocumentElement.WriteContentTo(writer);
+                    writer.WriteEndElement();
+                }
+                else
+                {
+                    // TODO: 是否警告 DocumentElement 为空
+                    Debug.Assert(false, "");
+                }
+            }
+
+            if (bBegin == true)
+                writer.WriteEndElement();
+
+            return 1;
+        }
+
+#if NO
         public static int OutputEntities(
             Stop stop,
             LibraryChannel channel,
@@ -7455,6 +7516,8 @@ MessageBoxDefaultButton.Button1);
 
             return 1;
         }
+
+#endif
 
         void menu_saveToXmlFile_Click(object sender, EventArgs e)
         {
