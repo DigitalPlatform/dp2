@@ -49,6 +49,10 @@ namespace DigitalPlatform.rms.Client
         out strError);
                 if (lRet == -1)
                 {
+                    // 2017/6/7
+                    if (this.Channel.OriginErrorCode == ErrorCodeValue.NotFound)
+                        yield break;
+
                     throw new Exception(strError);
                 }
                 if (results == null)

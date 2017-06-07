@@ -268,20 +268,18 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(strLogFileName) == false)
             {
                 nRet = GetConfigFiles(channel,
-                strDbName,
-                strLogFileName,
-                out strError);
+                    strDbName,
+                    strLogFileName,
+                    out strError);
                 if (nRet == -1)
                     return -1;
             }
 
-            bool bNotFound = false;
             long lRet = channel.DoDeleteDB(strDbName, out strError);
             if (lRet == -1)
             {
                 if (channel.ErrorCode != ChannelErrorCode.NotFound)
                     return -1;
-                bNotFound = true;
             }
 
             // 删除一个数据库在OPAC可检索库中的定义
@@ -2389,17 +2387,32 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                     strOperTime);
 
-                using (Stream stream = File.OpenRead(strLogFileName))
+                if (File.Exists(strLogFileName))
+                {
+
+                    using (Stream stream = File.OpenRead(strLogFileName))
+                    {
+                        nRet = this.OperLog.WriteOperLog(domOperLog,
+                            sessioninfo.ClientAddress,
+                            stream,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "ManageDatabase() API deleteDatabase 写入日志时发生错误: " + strError;
+                            return -1;
+                        }
+                    }
+                }
+                else
                 {
                     nRet = this.OperLog.WriteOperLog(domOperLog,
-                        sessioninfo.ClientAddress,
-                        stream,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "ManageDatabase() API deleteDatabase 写入日志时发生错误: " + strError;
-                        return -1;
-                    }
+    sessioninfo.ClientAddress,
+    out strError);
+                }
+                if (nRet == -1)
+                {
+                    strError = "ManageDatabase() API deleteDatabase 写入日志时发生错误: " + strError;
+                    return -1;
                 }
             }
 
