@@ -7913,6 +7913,32 @@ out strError);
             return 0;
         }
 
+        // 包装后的版本。少了一个 strStyle 参数
+                public long SaveResObject(
+    DigitalPlatform.Stop stop,
+    string strPath,
+    string strObjectFileName,  // 该参数代表存放对象数据的文件名
+    string strMetadata,
+    string strRange,
+    bool bTailHint,
+    byte[] timestamp,
+            // string strStyle,
+    out byte[] output_timestamp,
+    out string strError)
+        {
+            return SaveResObject(
+        stop,
+        strPath,
+        strObjectFileName,  // 该参数代表存放对象数据的文件名
+        strMetadata,
+        strRange,
+        bTailHint,
+        timestamp,
+        "",
+        out output_timestamp,
+        out strError);
+        }
+
         // 2016/10/16
         public long SaveResObject(
     DigitalPlatform.Stop stop,
@@ -7922,6 +7948,7 @@ out strError);
     string strRange,
     bool bTailHint,
     byte[] timestamp,
+            string strStyle,
     out byte[] output_timestamp,
     out string strError)
         {
@@ -7976,7 +8003,7 @@ out strError);
                 lTotalLength,   // fi.Length,	// 这是整个包尺寸，不是本次chunk的尺寸。因为服务器显然可以从baChunk中看出其尺寸，不必再专门用一个参数表示这个尺寸了
                 baTotal,
                 strMetadata,
-                "", // strStyle,
+                strStyle,
                 timestamp,
                 out strOutputResPath,
                 out output_timestamp,

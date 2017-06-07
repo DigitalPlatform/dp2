@@ -27,7 +27,7 @@ namespace DigitalPlatform.CirculationClient
             string strClientFilePath,
             string strServerFilePath,
             string strMetadata,
-            //string strStyle,
+            string strStyle,
             //string strMime,
             byte[] timestamp,
             bool bRetryOverwiteExisting,
@@ -136,7 +136,7 @@ namespace DigitalPlatform.CirculationClient
     ranges[j],
     j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
     timestamp,
-                        // strStyle,
+    strStyle,
     out output_timestamp,
     out strError);
                     timestamp = output_timestamp;

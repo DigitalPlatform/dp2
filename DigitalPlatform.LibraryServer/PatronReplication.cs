@@ -1108,8 +1108,12 @@ out kernel_errorcode);
                                     goto REDO;
                                 }
 
-                                strError = "修改保存读者记录 '" + strOutputPath + "' 时出错: " + result.ErrorInfo;
-                                return -1;
+                                strError = "WriteToReaderDb() 修改保存读者记录 '" + strOutputPath + "' 时出错: " + result.ErrorInfo;
+                                // return -1;
+                                // 2017/6/7
+                                this.App.WriteErrorLog(strError);
+                                this.AppendResultText(strError + "\r\n");
+                                continue;
                             }
                             // this.AppendResultText("更新读者记录 " + strSavedRecPath + "\r\n");
                             this.SetProgressText("更新读者记录 " + strSavedRecPath);
@@ -1289,8 +1293,12 @@ out kernel_errorcode);
                                 goto REDO;
                             }
 
-                            strError = "修改保存读者记录 '" + strOutputPath + "' 时出错: " + result.ErrorInfo;
-                            return -1;
+                            strError = "MaskDeleteRecords() 修改保存读者记录 '" + strOutputPath + "' 时出错: " + result.ErrorInfo;
+                            // return -1;
+                            // 2017/6/7
+                            this.App.WriteErrorLog(strError);
+                            this.AppendResultText(strError + "\r\n");
+                            continue;
                         }
 
                         // this.AppendResultText("标记删除读者记录 '" + strOutputPath + "'\r\n");

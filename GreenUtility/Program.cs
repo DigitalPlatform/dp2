@@ -10,9 +10,9 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
+using System.Collections;
 
 using Ionic.Zip;
-using System.Collections;
 
 /*
  * 制作和解压绿色更新安装包的实用工具程序

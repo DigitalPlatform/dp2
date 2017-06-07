@@ -330,11 +330,12 @@ namespace dp2Kernel
         //                      ->dm:表示串接用的符号，当 XPath 匹配上多个 XmlNode 时用这种符号拼接结果字符串
         //                      ->cv:表示转换方法。以前的方法，这样定义也是可以的 xxxx->cccc 其中 xxxx 是 XPath 部分，cccc 是 convert method 部分。新用法老用法都兼容
         //                      '->' 分隔的第一个部分默认就是 XPath。
+        //      2.68 2017/6/7 为 WriteRes() API 的 strStyle 参数增加 simulate 用法 (当写入对象资源时)
         public Result GetVersion()
         {
             Result result = new Result();
             result.Value = 0;
-            result.ErrorString = "2.67";
+            result.ErrorString = "2.68";
             return result;
         }
 
@@ -1073,6 +1074,7 @@ namespace dp2Kernel
                 int nRet = 0;
                 // return:
                 //		-1  出错
+                //      -4  strResPath 对应的对象没有找到
                 //      -6  权限不够
                 //		0   正常
                 nRet = app.Dbs.API_Dir(strResPath,

@@ -12379,6 +12379,10 @@ Stack:
         ref result);
                 }
 
+                // 2017/6/7
+                if (StringUtil.IsInList("simulate", strStyle))
+                    bWriteOperLog = false;
+
                 if (bWriteOperLog == true
                     && result.Value != -1)  // 2014/4/21 调用出错的情况就不要写入日志了
                 {

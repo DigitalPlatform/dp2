@@ -599,8 +599,30 @@ namespace dp2Circulation
                 return -1;
             }
 
-            bool bChanged = false;
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes("item");
+            int nChangeCount = ReplaceBindingItemRefID(item_refid_change_table,
+            dom.DocumentElement,
+            out strError);
+
+            if (nChangeCount > 0)
+            {
+                this.Binding = dom.DocumentElement.InnerXml;
+                return 1;
+            }
+
+            return 0;
+        }
+
+        // parameters:
+        //      root    指 binding 元素
+        public static int ReplaceBindingItemRefID(Hashtable item_refid_change_table,
+            XmlElement binding,
+            out string strError)
+        {
+            strError = "";
+
+            // bool bChanged = false;
+            int nChangeCount = 0;
+            XmlNodeList nodes = binding.SelectNodes("item");
             for (int i = 0; i < nodes.Count; i++)
             {
                 XmlNode node = nodes[i];
@@ -610,19 +632,15 @@ namespace dp2Circulation
                     if (item_refid_change_table.Contains(strRefID) == true)
                     {
                         DomUtil.SetAttr(node, "refID", (string)item_refid_change_table[strRefID]);
-                        bChanged = true;
+                        // bChanged = true;
+                        nChangeCount++;
                     }
                 }
             }
 
-            if (bChanged == true)
-            {
-                this.Binding = dom.DocumentElement.InnerXml;
-                return 1;
-            }
-
-            return 0;
+            return nChangeCount;
         }
+
 
         /// <summary>
         /// 将内存值更新到显示的栏目

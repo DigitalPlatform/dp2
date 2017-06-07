@@ -12140,6 +12140,8 @@ start_time,
             strError = "";
             int nRet = 0;
 
+            bool bSimulate = StringUtil.IsInList("simulate", strStyle);
+
             if (StringUtil.IsInList("fastmode", strStyle) == true)
                 this.FastMode = true;
             bool bFastMode = StringUtil.IsInList("fastmode", strStyle) || this.FastMode;
@@ -12234,6 +12236,14 @@ start_time,
 #endif
 
                         strObjectID = strRecordID + "_" + strObjectID;
+
+                        // 2017/6/7
+                        // 模拟写入
+                        if (bSimulate == true)
+                        {
+                            outputTimestamp = inputTimestamp;
+                            return 0;
+                        }
 
                         /*
                         // 2. 当记录为空记录时,用update更改文本指针

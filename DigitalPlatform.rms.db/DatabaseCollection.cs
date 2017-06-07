@@ -5677,6 +5677,7 @@ namespace DigitalPlatform.rms
         //		items	 out参数，返回下级事项数组
         // return:
         //		-1  出错
+        //      -4  strResPath 对应的对象没有找到
         //      -6  权限不够
         //		0   正常
         // 说明	只有当前帐户对事项有"list"权限时，才能列出来。
@@ -5781,6 +5782,7 @@ namespace DigitalPlatform.rms
                     {
                         // return:
                         //		-1	出错
+                        //      -4  strCfgItemPath 对应的对象没有找到
                         //		0	成功
                         nRet = this.DirCfgItem(user,
                             strResPath,
@@ -5847,6 +5849,7 @@ namespace DigitalPlatform.rms
         //		strError	out参数，出错信息
         // return:
         //		-1	出错
+        //      -4  strCfgItemPath 对应的对象没有找到
         //		0	成功
         private int DirCfgItem(User user,
             string strCfgItemPath,
@@ -5865,8 +5868,9 @@ namespace DigitalPlatform.rms
                 strCfgItemPath);
             if (list.Count == 0)
             {
-                strError = "未找到路径为'" + strCfgItemPath + "'对应的事项。";
-                return -1;
+                strError = "未找到路径 '" + strCfgItemPath + "' 对应的事项";
+                // return -1;
+                return -4;  // 2017/6/7
             }
 
             if (list.Count > 1)

@@ -282,6 +282,10 @@ strStringTable);
                 {
                     return this.checkBox_target_dontSearchDup.Checked;
                 }));
+                info.NewRefID = (bool)this.Invoke(new Func<bool>(() =>
+                {
+                    return this.checkBox_convert_refreshRefID.Checked;
+                }));
 
                 info.RecordRange = (string)this.Invoke(new Func<string>(() =>
                 {
@@ -543,6 +547,7 @@ Program.MainForm.ActivateFixPage("history")
                 if (reader.NodeType == XmlNodeType.EndElement)
                 {
                     Debug.Assert(reader.LocalName == "record" && reader.NamespaceURI == DpNs.dprms, "");
+                    PrecessItemXmls(info);
                     return;
                 }
 
@@ -565,7 +570,7 @@ Program.MainForm.ActivateFixPage("history")
                         if (bSkip)
                             reader.ReadOuterXml();
                         else
-                            DoItemCollection(reader, info);
+                            DoItemCollection(reader, info); // 搜集 item xmls
                     }
                     else
                     {
@@ -573,6 +578,69 @@ Program.MainForm.ActivateFixPage("history")
                     }
                 }
             }
+
+
+        }
+
+        void PrecessItemXmls(ProcessInfo info)
+        {
+            // 处理 item xmls
+            if (info.ItemCollectionTable.Count > 0)
+            {
+                // 2017/6/5
+                // 按照特定顺序处理
+                {
+                    List<string> item_xmls = (List<string>)info.ItemCollectionTable["item"];
+                    if (item_xmls != null)
+                    {
+                        // 先把包含 binding 元素的册记录放在最后
+                        item_xmls = AdjustBindingItems(item_xmls);
+
+                        DoItems(item_xmls, info);
+                    }
+                }
+
+                {
+                    List<string> item_xmls = (List<string>)info.ItemCollectionTable["order"];
+                    if (item_xmls != null)
+                        DoItems(item_xmls, info);
+                }
+
+                {
+                    List<string> item_xmls = (List<string>)info.ItemCollectionTable["issue"];
+                    if (item_xmls != null)
+                        DoItems(item_xmls, info);
+                }
+
+                {
+                    List<string> item_xmls = (List<string>)info.ItemCollectionTable["comment"];
+                    if (item_xmls != null)
+                        DoItems(item_xmls, info);
+                }
+
+                info.ItemCollectionTable.Clear();
+            }
+        }
+
+        static List<string> AdjustBindingItems(List<string> item_xmls)
+        {
+            List<string> normal_list = new List<string>();  // 普通 XML
+            List<string> binding_list = new List<string>(); // 包含 binding/item 元素的 XML
+
+            foreach (string xml in item_xmls)
+            {
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(xml);
+
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes("binding/item");
+                if (nodes.Count > 0)
+                    binding_list.Add(xml);
+                else
+                    normal_list.Add(xml);
+            }
+
+            normal_list.AddRange(binding_list);
+            return normal_list;
         }
 
         static string GetShortPath(string strPath)
@@ -943,24 +1011,28 @@ new string[] { "重试", "跳过", "中断" });
                     strMetadata = sr.ReadToEnd();
                 }
 
-                string strError = "";
-                // 上传文件到到 dp2lbrary 服务器
-                // parameters:
-                //      timestamp   时间戳。如果为 null，函数会自动根据文件信息得到一个时间戳
-                //      bRetryOverwiteExisting   是否自动在时间戳不一致的情况下覆盖已经存在的服务器文件。== true，表示当发现时间戳不一致的时候，自动用返回的时间戳重试覆盖
-                // return:
-                //		-1	出错
-                //		0   上传文件成功
-                int nRet = info.Channel.UploadFile(
-            info.stop,
-            strClientFilePath,
-            strServerFilePath,
-            strMetadata,
-            ByteArray.GetTimeStampByteArray(strTimestamp),
-            true,
-            out strError);
-                if (nRet == -1)
-                    throw new Exception(strError);
+                // if (info.Simulate == false)
+                {
+                    string strError = "";
+                    // 上传文件到到 dp2lbrary 服务器
+                    // parameters:
+                    //      timestamp   时间戳。如果为 null，函数会自动根据文件信息得到一个时间戳
+                    //      bRetryOverwiteExisting   是否自动在时间戳不一致的情况下覆盖已经存在的服务器文件。== true，表示当发现时间戳不一致的时候，自动用返回的时间戳重试覆盖
+                    // return:
+                    //		-1	出错
+                    //		0   上传文件成功
+                    int nRet = info.Channel.UploadFile(
+                info.stop,
+                strClientFilePath,
+                strServerFilePath,
+                strMetadata,
+                info.Simulate ? "simulate" : "",
+                ByteArray.GetTimeStampByteArray(strTimestamp),
+                true,
+                out strError);
+                    if (nRet == -1)
+                        throw new Exception(strError);  // TODO: 空对象不存在怎么办?
+                }
             }
         }
 
@@ -1113,6 +1185,7 @@ new string[] { "重试", "跳过", "中断" });
             return 1;
         }
 
+#if NO
         static int ITEM_BATCH_SIZE = 10;
 
         void DoItemCollection(XmlTextReader reader, ProcessInfo info)
@@ -1163,6 +1236,51 @@ new string[] { "重试", "跳过", "中断" });
                 DoItems(item_xmls, info);
                 item_xmls.Clear();
             }
+        }
+#endif
+
+        void DoItemCollection(XmlTextReader reader, ProcessInfo info)
+        {
+            string strRootElementName = reader.Name;
+            string strSubElementName = reader.LocalName.Replace("Collection", "");
+
+            List<string> item_xmls = new List<string>();
+
+            // 对下级元素进行循环处理
+            while (true)
+            {
+                bool bRet = reader.Read();
+                if (bRet == false)
+                    break;
+
+                if (reader.NodeType == XmlNodeType.EndElement)
+                {
+                    Debug.Assert(reader.Name == strRootElementName, "");
+                    break;
+                }
+
+                if (reader.NodeType == XmlNodeType.Element)
+                {
+                    // xxx 元素
+                    // 应当是同级元素中的第一个。因为后面写入册记录等需要知道书目记录的实际写入路径
+                    if (reader.LocalName == strSubElementName
+                        && reader.NamespaceURI == DpNs.dprms)
+                    {
+                        item_xmls.Add(reader.ReadOuterXml());
+                    }
+                    else
+                    {
+                        // 越过不认识的当前元素
+                        reader.ReadEndElement();
+                    }
+                }
+            }
+
+            List<string> existing = (List<string>)info.ItemCollectionTable[strSubElementName];
+            if (existing == null)
+                info.ItemCollectionTable[strSubElementName] = item_xmls;
+            else
+                existing.AddRange(item_xmls);
         }
 
         static void RefreshRefID(Hashtable table, ref string strRefID)
@@ -1219,6 +1337,7 @@ new string[] { "重试", "跳过", "中断" });
         void DoItems(List<string> item_xmls, ProcessInfo info)
         {
             string strError = "";
+            int nRet = 0;
 
             StringBuilder dupInfo = new StringBuilder();
 
@@ -1270,7 +1389,24 @@ new string[] { "重试", "跳过", "中断" });
 
                 if (strRootElementName == "item")
                 {
-                    RefreshRefID(info.ItemRefIDTable, ref strRefID);
+                    if (info.NewRefID)
+                    {
+                        RefreshRefID(info.ItemRefIDTable, ref strRefID);
+
+                        // 更换<binding>元素内<item>元素的refID属性值
+                        // TODO: 含有 binding 元素的册记录应该在最后统一替换其内部的 refid。不过，一般情况下，含有 binding 的册记录会自然排列在其他册记录的后面，这是由装订流程的特点造成的
+                        {
+                            XmlNodeList nodes = item_dom.DocumentElement.SelectNodes("binding");
+                            foreach (XmlElement node in nodes)
+                            {
+                                nRet = BookItem.ReplaceBindingItemRefID(info.ItemRefIDTable,
+                        node,
+                        out strError);
+                                if (nRet == -1)
+                                    throw new Exception(strError);
+                            }
+                        }
+                    }
 
                     if (info.RandomItemBarcode)
                         RandomItemBarcode(item_dom);
@@ -1321,28 +1457,65 @@ new string[] { "重试", "跳过", "中断" });
                 }
                 else if (strRootElementName == "order")
                 {
-                    RefreshRefID(info.OrderRefIDTable, ref strRefID);
-
-                    // 记录中 distribute 元素中的 refid 要被替换
-                    string strDistribute = DomUtil.GetElementText(item_dom.DocumentElement, "distribute");
-                    if (string.IsNullOrEmpty(strDistribute) == false)
+                    if (info.NewRefID)
                     {
-                        LocationCollection collection = new LocationCollection();
-                        int nRet = collection.Build(strDistribute, out strError);
-                        if (nRet != -1)
+                        RefreshRefID(info.OrderRefIDTable, ref strRefID);
+
+                        // 记录中 distribute 元素中的 refid 要被替换
+                        string strDistribute = DomUtil.GetElementText(item_dom.DocumentElement, "distribute");
+                        if (string.IsNullOrEmpty(strDistribute) == false)
                         {
-                            collection.RefreshRefIDs(ref info.ItemRefIDTable);
+                            LocationCollection collection = new LocationCollection();
+                            nRet = collection.Build(strDistribute, out strError);
+                            if (nRet != -1)
+                            {
+                                collection.RefreshRefIDs(ref info.ItemRefIDTable);
+                            }
+                            string strNewDistribute = collection.ToString();
+                            if (strNewDistribute != strDistribute)
+                            {
+                                DomUtil.SetElementText(item_dom.DocumentElement, "distribute", strNewDistribute);
+                            }
                         }
-                        string strNewDistribute = collection.ToString();
-                        if (strNewDistribute != strDistribute)
+                    }
+                }
+                else if (strRootElementName == "issue")
+                {
+                    if (info.NewRefID)
+                    {
+                        RefreshRefID(info.IssueRefIDTable, ref strRefID);
+
+                        // TODO: 要确保册记录和订购记录先替换 refid
+                        // orderInfo/root/distribute
+                        XmlNodeList nodes = item_dom.DocumentElement.SelectNodes("orderInfo");
+                        foreach (XmlElement node in nodes)
                         {
-                            DomUtil.SetElementText(item_dom.DocumentElement, "distribute", strNewDistribute);
+                            // 更换 orderInfo 元素里的 distribute 元素中的 refid 字符串
+                            // return:
+                            //      -1  出错
+                            //      >=0 发生替换的个数
+                            nRet = IssueItem.ReplaceOrderInfoItemRefID(info.ItemRefIDTable,
+                                node,
+                                out strError);
+                            if (nRet == -1)
+                                throw new Exception(strError);
+
+                            // 更换 orderInfo 元素里的 refID 元素中的 参考 ID 字符串
+                            // return:
+                            //      -1  出错
+                            //      >=0 发生替换的个数
+                            nRet = IssueItem.ReplaceOrderInfoRefID(info.OrderRefIDTable,
+                    node,
+                    out strError);
+                            if (nRet == -1)
+                                throw new Exception(strError);
                         }
                     }
                 }
                 else
                 {
-                    RefreshRefID(null, ref strRefID);
+                    if (info.NewRefID)
+                        RefreshRefID(null, ref strRefID);
                 }
 
                 item.RefID = strRefID;
@@ -1486,6 +1659,9 @@ int nCount)
         {
             strError = "";
 
+            // refid --> 记录路径
+            Hashtable refid_table = new Hashtable();
+
             int nBatch = 100;
             for (int i = 0; i < (entities.Count / nBatch) + ((entities.Count % nBatch) != 0 ? 1 : 0); i++)
             {
@@ -1535,6 +1711,8 @@ int nCount)
                 if (errorinfos == null || errorinfos.Length == 0)
                     continue;
 
+                // TODO: 建立保存成功的记录的 参考 ID 和记录路径的对照表
+
                 StringBuilder text = new StringBuilder();
                 foreach (EntityInfo error in errorinfos)
                 {
@@ -1543,7 +1721,12 @@ int nCount)
 
                     // 正常信息处理
                     if (error.ErrorCode == ErrorCodeValue.NoError)
+                    {
+                        if (string.IsNullOrEmpty(error.RefID) == false
+                            && string.IsNullOrEmpty(error.NewRecPath) == false)
+                            refid_table[error.RefID] = error.NewRecPath;
                         continue;
+                    }
 
                     text.Append(error.RefID + "在提交保存过程中发生错误 -- " + error.ErrorInfo + "\r\n");
                     info.ItemErrorCount++;
@@ -1559,7 +1742,20 @@ int nCount)
                     if (AskContinue(info, strError) == false)
                         throw new Exception(strError);
                 }
+
             }
+
+            // 上载对象
+            foreach (EntityInfo item in entities)
+            {
+                // 上传下属记录的数字对象
+                if (info.IncludeSubObjects)
+                {
+                    string strRecPath = (string)refid_table[item.RefID];
+                    UploadObjects(info, strRecPath, item.NewRecord);
+                }
+            }
+
         }
 
         public override void OutputText(string strText, int nWarningLevel = 0)
@@ -1666,6 +1862,8 @@ new string[] { "继续", "中断" });
             public bool IncludeSubObjects = true;
             public string ObjectDirectoryName = "";
 
+            public bool NewRefID = true;
+
             public string ItemBatchNo = ""; // 设定给册记录的批次号。如果为空，表示不修改册记录中的批次号，否则会覆盖记录中的批次号
 
             public string RecordRange = ""; // 导入源文件中的书目记录范围
@@ -1694,6 +1892,9 @@ new string[] { "继续", "中断" });
 
             public Hashtable ItemRefIDTable = new Hashtable();  // 册记录 refID 替换情况表。旧 refID --> 新 refID 
             public Hashtable OrderRefIDTable = new Hashtable();  // 订购记录 refID 替换情况表。旧 refID --> 新 refID 
+            public Hashtable IssueRefIDTable = new Hashtable();  // 期记录 refID 替换情况表。旧 refID --> 新 refID 
+
+            public Hashtable ItemCollectionTable = new Hashtable(); // strRootElementName --> List<string> XML 字符串列表
 
             public int UploadedSubItems = 0;    // 当前书目记录累计已经上传的子记录个数
 
@@ -1709,6 +1910,7 @@ new string[] { "继续", "中断" });
             {
                 this.ItemRefIDTable.Clear();
                 this.OrderRefIDTable.Clear();
+                this.IssueRefIDTable.Clear();
                 this.BiblioRecPath = "";
                 this.UploadedSubItems = 0;
                 this.MergeAction = "";
@@ -1798,6 +2000,7 @@ new string[] { "继续", "中断" });
 
                 controls.Add(this.checkBox_convert_addBiblioToItem);
                 controls.Add(this.checkBox_convert_addBiblioToItemOnMerging);
+                controls.Add(this.checkBox_convert_refreshRefID);
                 controls.Add(this.textBox_convert_itemBatchNo);
 
                 controls.Add(this.comboBox_target_targetBiblioDbName);
@@ -1828,6 +2031,7 @@ new string[] { "继续", "中断" });
 
                 controls.Add(this.checkBox_convert_addBiblioToItem);
                 controls.Add(this.checkBox_convert_addBiblioToItemOnMerging);
+                controls.Add(this.checkBox_convert_refreshRefID);
                 controls.Add(this.textBox_convert_itemBatchNo);
 
                 controls.Add(this.comboBox_target_targetBiblioDbName);

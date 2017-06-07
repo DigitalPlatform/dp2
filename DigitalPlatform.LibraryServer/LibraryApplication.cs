@@ -151,7 +151,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.108 (2017/5/11) dp2Kernel 新版本 GetBrowse() API 支持 @coldef: 中使用名字空间和(匹配命中多个XmlNode时串接用的)分隔符号
         //      2.109 (2017/5/23) 对 ManageDatabase() API 也写入日志了。但日志恢复功能会跳过这个类型的操作日志
         //      2.110 (2017/5/30) 消除 CopyBiblioInfo() API 中账户权限不够时会发生移动不完整的 Bug。
-        public static string Version = "2.110";
+        //      2.111 (2017/6/7) WriteRes() API 的 strStyle 参数允许使用 simulate。此时不会产生操作日志
+        public static string Version = "2.111";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -1883,7 +1884,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 Version version = new Version(strVersion);
-                Version base_version = new Version("2.67");
+                Version base_version = new Version("2.68");
                 if (version.CompareTo(base_version) < 0)
                 {
                     strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + version + ")。请立即升级 dp2Kernel 到最新版本。";
