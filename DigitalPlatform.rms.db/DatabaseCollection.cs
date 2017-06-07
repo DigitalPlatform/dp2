@@ -5788,8 +5788,10 @@ namespace DigitalPlatform.rms
                             strResPath,
                             out aItem,
                             out strError);
-                        if (nRet == -1)
-                            return -1;
+                        //if (nRet == -1)
+                        //    return -1;
+                        if (nRet < 0)
+                            return nRet;
                     }
                 }
 

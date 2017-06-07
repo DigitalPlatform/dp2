@@ -275,9 +275,14 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
             }
 
+            bool bNotFound = false;
             long lRet = channel.DoDeleteDB(strDbName, out strError);
-            if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                return -1;
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode != ChannelErrorCode.NotFound)
+                    return -1;
+                bNotFound = true;
+            }
 
             // 删除一个数据库在OPAC可检索库中的定义
             // return:
@@ -1674,8 +1679,6 @@ namespace DigitalPlatform.LibraryServer
             XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("virtualDatabases");
             if (root != null)
             {
-
-
                 // 虚拟成员库定义
                 XmlNodeList nodes = root.SelectNodes("virtualDatabase/database[@name='" + strDatabaseName + "']");
                 for (int i = 0; i < nodes.Count; i++)
@@ -1697,8 +1700,10 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 重新初始化虚拟库定义
+                string strWarning = "";
                 this.vdbs = null;
                 int nRet = this.InitialVdbs(Channels,
+                    out strWarning,
                     out strError);
                 if (nRet == -1)
                     return -1;

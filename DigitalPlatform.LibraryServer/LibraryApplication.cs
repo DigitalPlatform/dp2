@@ -3749,12 +3749,33 @@ namespace DigitalPlatform.LibraryServer
             disposed = true;
         }
 
+        // 兼容以前用法
+        public int InitialVdbs(
+    RmsChannelCollection Channels,
+    out string strError)
+        {
+            string strWarning = "";
+            int nRet = InitialVdbs(
+    Channels,
+    out strWarning,
+    out strError);
+            if (string.IsNullOrEmpty(strWarning) == false)
+            {
+                strError = strWarning;
+                return -1;
+            }
+
+            return nRet;
+        }
+
         // 初始化虚拟库集合定义对象
         public int InitialVdbs(
             RmsChannelCollection Channels,
+            out string strWarning,
             out string strError)
         {
             strError = "";
+            strWarning = "";
 
             if (this.vdbs != null)
                 return 0;   // 优化
@@ -3780,12 +3801,12 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
                  * */
-
                 this.vdbs = new VirtualDatabaseCollection();
                 int nRet = vdbs.Initial(root,
                     Channels,
                     this.WsUrl,
                     biblio_dbs_root,
+                    out strWarning,
                     out strError);
                 if (nRet == -1)
                 {

@@ -234,6 +234,7 @@ namespace DigitalPlatform.LibraryServer
         // 在<database>元素下要插入若干<from>元素
         // 这些信息属于软件初始化的范畴, 避免人工去配置
         // return:
+        //      -2  有数据库没有找到
         //      -1  出错
         //      0   对DOM没有修改
         //      1   对DOM发生了修改
@@ -270,7 +271,8 @@ namespace DigitalPlatform.LibraryServer
             if (dbitem == null)
             {
                 strError = "数据库内核根目录下没有找到名字为 '" +strDbName+ "' 的数据库事项。如果该数据库已经被删除，请修改dp2Library的library.xml文件中<virtualDatabases>元素下的有关内容";
-                return -1;
+                // return -1;
+                return -2;  // 2017/6/7
             }
                 
             // 在下级加入<caption>元素
@@ -719,9 +721,11 @@ namespace DigitalPlatform.LibraryServer
             RmsChannelCollection Channels,
             string strServerUrl,
             XmlNode biblio_dbs_root,
+            out string strWarning,
             out string strError)
         {
             strError = "";
+            strWarning = "";
 
             this.ServerUrl = strServerUrl;
 
@@ -786,12 +790,19 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
+                    // return:
+                    //      -2  有数据库没有找到
+                    //      -1  出错
+                    //      0   对DOM没有修改
+                    //      1   对DOM发生了修改
                     nRet = vdb.InitialAllProperty(
                         root_dir_results,
                         db_dir_results,
                         out strError);
                     if (nRet == -1)
                         return -1;
+                    if (nRet == -2)
+                        strWarning = strError;
 
                     this.Add(vdb);
                     continue;
