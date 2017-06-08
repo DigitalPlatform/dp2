@@ -1985,6 +1985,8 @@ namespace dp2Circulation
             login_dlg.Comment = "重要操作前，需要验证您的身份";
 
             login_dlg.StartPosition = FormStartPosition.CenterScreen;
+
+        REDO_LOGIN:
             login_dlg.ShowDialog(this);
 
             if (login_dlg.DialogResult != DialogResult.OK)
@@ -1996,6 +1998,13 @@ namespace dp2Circulation
                 "");
             string strParameters = "location=" + strLocation + ",type=worker";
             strParameters += ",client=dp2circulation|" + Program.ClientVersion;
+
+            if (string.IsNullOrEmpty(login_dlg.TempCode) == false)
+                strParameters += ",tempCode=" + login_dlg.TempCode;
+
+            // 以手机短信验证方式登录
+            if (string.IsNullOrEmpty(login_dlg.PhoneNumber) == false)
+                strParameters += ",phoneNumber=" + login_dlg.PhoneNumber;
 
             // return:
             //      -1  error
@@ -2010,6 +2019,21 @@ namespace dp2Circulation
 
             if (lRet == 0)
             {
+                if (this.Channel.ErrorCode == ErrorCode.TempCodeMismatch
+                    || this.Channel.ErrorCode == ErrorCode.RetryLogin)
+                {
+                    login_dlg.ActivateTempCode();
+                    login_dlg.RetryLogin = true;  // 尝试再次登录
+                    login_dlg.Comment = strError;
+                    goto REDO_LOGIN;
+                }
+                if (this.Channel.ErrorCode == ErrorCode.NeedSmsLogin)
+                {
+                    login_dlg.ActivatePhoneNumber();
+                    login_dlg.Comment = strError;
+                    goto REDO_LOGIN;
+                }
+
                 // strError = "";
                 return -1;
             }

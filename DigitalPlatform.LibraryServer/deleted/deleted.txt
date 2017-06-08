@@ -2586,3 +2586,1350 @@
         ERROR1:
             return -1;
         }
+
+
+		        // 创建数据库
+        // parameters:
+        //      strLibraryCodeList  当前用户的管辖分馆代码列表
+        //      bRecreate   是否为重新创建？如果为重新创建，则允许已经存在定义；如果不是重新创建，即首次创建，则不允许已经存在定义
+        //                  注: 重新创建的意思, 是 library.xml 中有定义，但 dp2kernel 中没有对应的数据库，要根据定义重新创建这些 dp2kernel 数据库
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   成功
+        int CreateDatabase(
+            SessionInfo sessioninfo,
+            RmsChannelCollection Channels,
+            string strLibraryCodeList,
+            string strDatabaseInfo,
+            bool bRecreate,
+            out string strOutputInfo,
+            out string strError)
+        {
+            strOutputInfo = "";
+            strError = "";
+
+            int nRet = 0;
+
+            string strLogFileName = this.GetTempFileName("zip");
+            List<XmlNode> database_nodes = new List<XmlNode>(); // 已经创建的数据库的定义节点
+
+            List<string> created_dbnames = new List<string>();  // 过程中，已经创建的数据库名
+
+            bool bDbChanged = false;    // 数据库名是否发生过改变？或者新创建过数据库? 如果发生过，需要重新初始化kdbs
+
+            XmlDocument request_dom = new XmlDocument();
+            try
+            {
+                request_dom.LoadXml(strDatabaseInfo);
+            }
+            catch (Exception ex)
+            {
+                strError = "strDatabaseInfo内容装入XMLDOM时出错: " + ex.Message;
+                return -1;
+            }
+
+            RmsChannel channel = Channels.GetChannel(this.WsUrl);
+
+            XmlNodeList nodes = request_dom.DocumentElement.SelectNodes("database");
+            // for (int i = 0; i < nodes.Count; i++)
+            foreach (XmlElement request_node in nodes)
+            {
+                // XmlNode node = nodes[i];
+                string strType = DomUtil.GetAttr(request_node, "type").ToLower();
+
+                string strName = DomUtil.GetAttr(request_node, "name");
+
+                // 创建书目数据库
+                if (strType == "biblio")
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许创建或重新创建书目库";
+                        return -1;
+                    }
+
+                    if (this.TestMode == true)
+                    {
+                        XmlNodeList existing_nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("itemdbgroup/database");
+                        if (existing_nodes.Count >= 4)
+                        {
+                            strError = "dp2Library XE 评估模式下只能创建最多 4 个书目库";
+                            goto ERROR1;
+                        }
+                    }
+
+                    // 2009/11/13
+                    XmlNode exist_database_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strName + "']");
+                    if (bRecreate == true && exist_database_node == null)
+                    {
+                        strError = "library.xml 中并不存在书目库 '" + strName + "' 的定义，无法进行重新创建";
+                        return 0;
+                    }
+
+                    string strSyntax = DomUtil.GetAttr(request_node, "syntax");
+                    if (String.IsNullOrEmpty(strSyntax) == true)
+                        strSyntax = "unimarc";
+
+                    // usage: book series
+                    string strUsage = DomUtil.GetAttr(request_node, "usage");
+                    if (String.IsNullOrEmpty(strUsage) == true)
+                        strUsage = "book";
+
+                    // 2009/10/23
+                    string strRole = DomUtil.GetAttr(request_node, "role");
+
+                    if (bRecreate == false)
+                    {
+                        // 检查 cfgdom 中是否已经存在同名的书目库
+                        if (this.IsBiblioDbName(strName) == true)
+                        {
+                            strError = "书目库 '" + strName + "' 的定义已经存在，不能重复创建";
+                            goto ERROR1;
+                        }
+                    }
+
+                    // 检查dp2kernel中是否有和书目库同名的数据库存在
+                    {
+                        // 数据库是否已经存在？
+                        // return:
+                        //      -1  error
+                        //      0   not exist
+                        //      1   exist
+                        //      2   其他类型的同名对象已经存在
+                        nRet = IsDatabaseExist(
+                            channel,
+                            strName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet >= 1)
+                            goto ERROR1;
+                    }
+
+                    string strEntityDbName = DomUtil.GetAttr(request_node, "entityDbName");
+
+                    string strOrderDbName = DomUtil.GetAttr(request_node, "orderDbName");
+
+                    string strIssueDbName = DomUtil.GetAttr(request_node, "issueDbName");
+
+                    string strCommentDbName = DomUtil.GetAttr(request_node, "commentDbName");
+
+                    if (strEntityDbName == "<default>")
+                        strEntityDbName = strName + "实体";
+
+                    if (strOrderDbName == "<default>")
+                        strOrderDbName = strName + "订购";
+
+                    if (strIssueDbName == "<default>")
+                        strIssueDbName = strName + "期";
+
+                    if (strCommentDbName == "<default>")
+                        strCommentDbName = strName + "评注";
+
+                    string strInCirculation = DomUtil.GetAttr(request_node, "inCirculation");
+                    if (String.IsNullOrEmpty(strInCirculation) == true)
+                        strInCirculation = "true";  // 缺省为true
+
+                    string strUnionCatalogStyle = DomUtil.GetAttr(request_node, "unionCatalogStyle");
+
+                    string strReplication = DomUtil.GetAttr(request_node, "replication");
+
+                    if (String.IsNullOrEmpty(strEntityDbName) == false)
+                    {
+                        if (bRecreate == false)
+                        {
+                            // 检查 cfgdom 中是否已经存在同名的实体库
+                            if (this.IsItemDbName(strEntityDbName) == true)
+                            {
+                                strError = "实体库 '" + strEntityDbName + "' 的定义已经存在，不能重复创建";
+                                goto ERROR1;
+                            }
+                        }
+
+                        // 数据库是否已经存在？
+                        // return:
+                        //      -1  error
+                        //      0   not exist
+                        //      1   exist
+                        //      2   其他类型的同名对象已经存在
+                        nRet = IsDatabaseExist(
+                            channel,
+                            strEntityDbName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet >= 1)
+                            goto ERROR1;
+                    }
+
+                    if (String.IsNullOrEmpty(strOrderDbName) == false)
+                    {
+                        if (bRecreate == false)
+                        {
+                            // 检查cfgdom中是否已经存在同名的订购库
+                            if (this.IsOrderDbName(strOrderDbName) == true)
+                            {
+                                strError = "订购库 '" + strOrderDbName + "' 的定义已经存在，不能重复创建";
+                                goto ERROR1;
+                            }
+                        }
+
+                        // 数据库是否已经存在？
+                        // return:
+                        //      -1  error
+                        //      0   not exist
+                        //      1   exist
+                        //      2   其他类型的同名对象已经存在
+                        nRet = IsDatabaseExist(
+                            channel,
+                            strOrderDbName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet >= 1)
+                            goto ERROR1;
+                    }
+
+
+                    if (String.IsNullOrEmpty(strIssueDbName) == false)
+                    {
+                        if (bRecreate == false)
+                        {
+                            // 检查cfgdom中是否已经存在同名的期库
+                            if (this.IsOrderDbName(strIssueDbName) == true)
+                            {
+                                strError = "期库 '" + strIssueDbName + "' 的定义已经存在，不能重复创建";
+                                goto ERROR1;
+                            }
+                        }
+
+                        // 数据库是否已经存在？
+                        // return:
+                        //      -1  error
+                        //      0   not exist
+                        //      1   exist
+                        //      2   其他类型的同名对象已经存在
+                        nRet = IsDatabaseExist(
+                            channel,
+                            strIssueDbName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet >= 1)
+                            goto ERROR1;
+                    }
+
+                    if (String.IsNullOrEmpty(strCommentDbName) == false)
+                    {
+                        if (bRecreate == false)
+                        {
+                            // 检查cfgdom中是否已经存在同名的评注库
+                            if (this.IsCommentDbName(strCommentDbName) == true)
+                            {
+                                strError = "评注库 '" + strCommentDbName + "' 的定义已经存在，不能重复创建";
+                                goto ERROR1;
+                            }
+                        }
+
+                        // 数据库是否已经存在？
+                        // return:
+                        //      -1  error
+                        //      0   not exist
+                        //      1   exist
+                        //      2   其他类型的同名对象已经存在
+                        nRet = IsDatabaseExist(
+                            channel,
+                            strCommentDbName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet >= 1)
+                            goto ERROR1;
+                    }
+
+                    // 开始创建
+
+                    // 创建书目库
+                    string strTemplateDir = this.DataDir + "\\templates\\" + "biblio_" + strSyntax + "_" + strUsage;
+
+                    // 根据预先的定义，创建一个数据库
+                    nRet = CreateDatabase(channel,
+                        strTemplateDir,
+                        strName,
+                        strLogFileName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    created_dbnames.Add(strName);
+
+                    bDbChanged = true;
+
+                    // 创建实体库
+                    if (String.IsNullOrEmpty(strEntityDbName) == false)
+                    {
+                        strTemplateDir = this.DataDir + "\\templates\\" + "item";
+
+                        // 根据预先的定义，创建一个数据库
+                        nRet = CreateDatabase(channel,
+                            strTemplateDir,
+                            strEntityDbName,
+                        strLogFileName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        created_dbnames.Add(strEntityDbName);
+
+                        bDbChanged = true;
+                    }
+
+                    // 创建订购库
+                    if (String.IsNullOrEmpty(strOrderDbName) == false)
+                    {
+                        strTemplateDir = this.DataDir + "\\templates\\" + "order";
+
+                        // 根据预先的定义，创建一个数据库
+                        nRet = CreateDatabase(channel,
+                            strTemplateDir,
+                            strOrderDbName,
+                        strLogFileName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        created_dbnames.Add(strOrderDbName);
+
+                        bDbChanged = true;
+                    }
+
+                    // 创建期库
+                    if (String.IsNullOrEmpty(strIssueDbName) == false)
+                    {
+                        strTemplateDir = this.DataDir + "\\templates\\" + "issue";
+
+                        // 根据预先的定义，创建一个数据库
+                        nRet = CreateDatabase(channel,
+                            strTemplateDir,
+                            strIssueDbName,
+                         strLogFileName,
+                           out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        created_dbnames.Add(strIssueDbName);
+
+                        bDbChanged = true;
+                    }
+
+                    // 创建评注库
+                    if (String.IsNullOrEmpty(strCommentDbName) == false)
+                    {
+                        strTemplateDir = this.DataDir + "\\templates\\" + "comment";
+
+                        // 根据预先的定义，创建一个数据库
+                        nRet = CreateDatabase(channel,
+                            strTemplateDir,
+                            strCommentDbName,
+                        strLogFileName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        created_dbnames.Add(strCommentDbName);
+
+                        bDbChanged = true;
+                    }
+
+                    // 在CfgDom中增加相关的配置信息
+                    XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup");
+                    if (root == null)
+                    {
+                        root = this.LibraryCfgDom.CreateElement("itemdbgroup");
+                        this.LibraryCfgDom.DocumentElement.AppendChild(root);
+                    }
+
+                    XmlNode nodeNewDatabase = null;
+
+                    if (bRecreate == false)
+                    {
+                        nodeNewDatabase = this.LibraryCfgDom.CreateElement("database");
+                        root.AppendChild(nodeNewDatabase);
+                    }
+                    else
+                    {
+                        nodeNewDatabase = exist_database_node;
+                    }
+
+                    DomUtil.SetAttr(nodeNewDatabase, "name", strEntityDbName);
+                    DomUtil.SetAttr(nodeNewDatabase, "biblioDbName", strName);
+                    if (String.IsNullOrEmpty(strOrderDbName) == false)
+                    {
+                        DomUtil.SetAttr(nodeNewDatabase, "orderDbName", strOrderDbName);
+                    }
+                    if (String.IsNullOrEmpty(strIssueDbName) == false)
+                    {
+                        DomUtil.SetAttr(nodeNewDatabase, "issueDbName", strIssueDbName);
+                    }
+                    if (String.IsNullOrEmpty(strCommentDbName) == false)
+                    {
+                        DomUtil.SetAttr(nodeNewDatabase, "commentDbName", strCommentDbName);
+                    }
+                    DomUtil.SetAttr(nodeNewDatabase, "syntax", strSyntax);
+
+                    // 2009/10/23
+                    DomUtil.SetAttr(nodeNewDatabase, "role", strRole);
+
+                    DomUtil.SetAttr(nodeNewDatabase, "inCirculation", strInCirculation);
+
+                    // 2012/4/30
+                    if (string.IsNullOrEmpty(strUnionCatalogStyle) == false)
+                        DomUtil.SetAttr(nodeNewDatabase, "unionCatalogStyle", strUnionCatalogStyle);
+
+                    if (string.IsNullOrEmpty(strReplication) == false)
+                        DomUtil.SetAttr(nodeNewDatabase, "replication", strReplication);
+
+                    // <itemdbgroup>内容更新，刷新配套的内存结构
+                    nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        this.WriteErrorLog(strError);
+                        goto ERROR1;
+                    }
+
+                    this.Changed = true;
+                    this.ActivateManagerThread();
+
+                    created_dbnames.Clear();
+
+                    database_nodes.Add(request_node);
+                    continue;
+                } // end of type biblio
+                else if (strType == "entity")
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许创建或重新创建实体库";
+                        return -1;
+                    }
+                    // TODO: 增加recreate能力
+
+                    // 单独创建实体库
+                    string strBiblioDbName = DomUtil.GetAttr(request_node, "biblioDbName");
+                    if (String.IsNullOrEmpty(strBiblioDbName) == true)
+                    {
+                        strError = "请求创建实体库的<database>元素中，应包含biblioDbName属性";
+                        goto ERROR1;
+                    }
+
+                    // 获得相关配置小节
+                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+                    if (nodeDatabase == null)
+                    {
+                        strError = "配置DOM中名字为 '" + strBiblioDbName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到，无法在其下创建实体库 " + strName;
+                        return 0;
+                    }
+
+                    string strOldEntityDbName = DomUtil.GetAttr(nodeDatabase,
+                        "name");
+                    if (strOldEntityDbName == strName)
+                    {
+                        strError = "从属于书目库 '" + strBiblioDbName + "' 的实体库 '" + strName + "' 定义已经存在，不能重复创建";
+                        goto ERROR1;
+                    }
+
+                    if (String.IsNullOrEmpty(strOldEntityDbName) == false)
+                    {
+                        strError = "要创建从属于书目库 '" + strBiblioDbName + "' 的新实体库 '" + strName + "'，必须先删除已经存在的实体库 '"
+                            + strOldEntityDbName + "'";
+                        goto ERROR1;
+                    }
+
+                    string strTemplateDir = this.DataDir + "\\templates\\" + "item";
+
+                    // 根据预先的定义，创建一个数据库
+                    nRet = CreateDatabase(channel,
+                        strTemplateDir,
+                        strName,
+                        strLogFileName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    created_dbnames.Add(strName);
+
+                    bDbChanged = true;
+
+                    DomUtil.SetAttr(nodeDatabase, "name", strName);
+
+                    // 2008/12/4
+                    // <itemdbgroup>内容更新，刷新配套的内存结构
+                    nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        this.WriteErrorLog(strError);
+                        goto ERROR1;
+                    }
+
+                    this.Changed = true;
+                    database_nodes.Add(request_node);
+                }
+                else if (strType == "order")
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许创建或重新创建订购库";
+                        return -1;
+                    }
+                    // TODO: 增加recreate能力
+
+                    // 单独创建订购库
+                    string strBiblioDbName = DomUtil.GetAttr(request_node, "biblioDbName");
+                    if (String.IsNullOrEmpty(strBiblioDbName) == true)
+                    {
+                        strError = "创建订购库的<database>元素中，应包含biblioDbName属性";
+                        goto ERROR1;
+                    }
+
+                    // 获得相关配置小节
+                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+                    if (nodeDatabase == null)
+                    {
+                        strError = "配置DOM中名字为 '" + strBiblioDbName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到，无法在其下创建订购库 " + strName;
+                        return 0;
+                    }
+
+                    string strOldOrderDbName = DomUtil.GetAttr(nodeDatabase,
+                        "orderDbName");
+                    if (strOldOrderDbName == strName)
+                    {
+                        strError = "从属于书目库 '" + strBiblioDbName + "' 的订购库 '" + strName + "' 定义已经存在，不能重复创建";
+                        goto ERROR1;
+                    }
+
+                    if (String.IsNullOrEmpty(strOldOrderDbName) == false)
+                    {
+                        strError = "要创建从属于书目库 '" + strBiblioDbName + "' 的新订购库 '" + strName + "'，必须先删除已经存在的订购库 '"
+                            + strOldOrderDbName + "'";
+                        goto ERROR1;
+                    }
+
+                    string strTemplateDir = this.DataDir + "\\templates\\" + "order";
+
+                    // 根据预先的定义，创建一个数据库
+                    nRet = CreateDatabase(channel,
+                        strTemplateDir,
+                        strName,
+                        strLogFileName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    created_dbnames.Add(strName);
+
+                    bDbChanged = true;
+
+                    DomUtil.SetAttr(nodeDatabase, "orderDbName", strName);
+
+                    // 2008/12/4
+                    // <itemdbgroup>内容更新，刷新配套的内存结构
+                    nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        this.WriteErrorLog(strError);
+                        goto ERROR1;
+                    }
+
+                    this.Changed = true;
+                    database_nodes.Add(request_node);
+                }
+                else if (strType == "issue")
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许创建或重新创建期库";
+                        goto ERROR1;
+                    }
+                    // TODO: 增加recreate能力
+
+                    // 单独创建期库
+                    string strBiblioDbName = DomUtil.GetAttr(request_node, "biblioDbName");
+                    if (String.IsNullOrEmpty(strBiblioDbName) == true)
+                    {
+                        strError = "创建期库的<database>元素中，应包含biblioDbName属性";
+                        goto ERROR1;
+                    }
+
+                    // 获得相关配置小节
+                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+                    if (nodeDatabase == null)
+                    {
+                        strError = "配置DOM中名字为 '" + strBiblioDbName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到，无法在其下创建期库 " + strName;
+                        return 0;
+                    }
+
+                    string strOldIssueDbName = DomUtil.GetAttr(nodeDatabase,
+                        "issueDbName");
+                    if (strOldIssueDbName == strName)
+                    {
+                        strError = "从属于书目库 '" + strBiblioDbName + "' 的期库 '" + strName + "' 定义已经存在，不能重复创建";
+                        goto ERROR1;
+                    }
+
+                    if (String.IsNullOrEmpty(strOldIssueDbName) == false)
+                    {
+                        strError = "要创建从属于书目库 '" + strBiblioDbName + "' 的新期库 '" + strName + "'，必须先删除已经存在的期库 '"
+                            + strOldIssueDbName + "'";
+                        goto ERROR1;
+                    }
+
+                    string strTemplateDir = this.DataDir + "\\templates\\" + "issue";
+
+                    // 根据预先的定义，创建一个数据库
+                    nRet = CreateDatabase(channel,
+                        strTemplateDir,
+                        strName,
+                        strLogFileName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    created_dbnames.Add(strName);
+
+                    bDbChanged = true;
+
+                    DomUtil.SetAttr(nodeDatabase, "issueDbName", strName);
+
+                    // 2008/12/4
+                    // <itemdbgroup>内容更新，刷新配套的内存结构
+                    nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        this.WriteErrorLog(strError);
+                        goto ERROR1;
+                    }
+
+                    this.Changed = true;
+                    database_nodes.Add(request_node);
+                }
+                else if (strType == "comment")
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许创建或重新创建评注库";
+                        goto ERROR1;
+                    }
+                    // TODO: 增加recreate能力
+
+                    // 单独创建评注库
+                    string strBiblioDbName = DomUtil.GetAttr(request_node, "biblioDbName");
+                    if (String.IsNullOrEmpty(strBiblioDbName) == true)
+                    {
+                        strError = "创建评注库的<database>元素中，应包含biblioDbName属性";
+                        goto ERROR1;
+                    }
+
+                    // 获得相关配置小节
+                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+                    if (nodeDatabase == null)
+                    {
+                        strError = "配置DOM中名字为 '" + strBiblioDbName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到，无法在其下创建评注库 " + strName;
+                        return 0;
+                    }
+
+                    string strOldCommentDbName = DomUtil.GetAttr(nodeDatabase,
+                        "commentDbName");
+                    if (strOldCommentDbName == strName)
+                    {
+                        strError = "从属于书目库 '" + strBiblioDbName + "' 的评注库 '" + strName + "' 定义已经存在，不能重复创建";
+                        goto ERROR1;
+                    }
+
+                    if (String.IsNullOrEmpty(strOldCommentDbName) == false)
+                    {
+                        strError = "要创建从属于书目库 '" + strBiblioDbName + "' 的新评注库 '" + strName + "'，必须先删除已经存在的评注库 '"
+                            + strOldCommentDbName + "'";
+                        goto ERROR1;
+                    }
+
+                    string strTemplateDir = this.DataDir + "\\templates\\" + "comment";
+
+                    // 根据预先的定义，创建一个数据库
+                    nRet = CreateDatabase(channel,
+                        strTemplateDir,
+                        strName,
+                        strLogFileName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    created_dbnames.Add(strName);
+
+                    bDbChanged = true;
+
+                    DomUtil.SetAttr(nodeDatabase, "commentDbName", strName);
+
+                    // 2008/12/4
+                    // <itemdbgroup>内容更新，刷新配套的内存结构
+                    nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        this.WriteErrorLog(strError);
+                        goto ERROR1;
+                    }
+
+                    this.Changed = true;
+                    database_nodes.Add(request_node);
+                }
+                else if (strType == "reader")
+                {
+                    // 创建读者库
+
+                    // 2009/11/13
+                    XmlNode exist_database_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup/database[@name='" + strName + "']");
+                    if (bRecreate == true && exist_database_node == null)
+                    {
+                        strError = "library.xml中并不存在读者库 '" + strName + "' 的定义，无法进行重新创建";
+                        return 0;
+                    }
+
+                    if (bRecreate == false)
+                    {
+                        // 检查cfgdom中是否已经存在同名的读者库
+                        if (this.IsReaderDbName(strName) == true)
+                        {
+                            strError = "读者库 '" + strName + "' 的定义已经存在，不能重复创建";
+                            goto ERROR1;
+                        }
+                    }
+                    else
+                    {
+                        if (exist_database_node != null)
+                        {
+                            string strExistLibraryCode = DomUtil.GetAttr(exist_database_node, "libraryCode");
+
+                            // 2012/9/9
+                            // 分馆用户只允许修改馆代码属于管辖分馆的读者库
+                            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                            {
+                                if (string.IsNullOrEmpty(strExistLibraryCode) == true
+                                    || StringUtil.IsInList(strExistLibraryCode, strLibraryCodeList) == false)
+                                {
+                                    strError = "重新创建读者库 '" + strName + "' 被拒绝。当前用户只能重新创建图书馆代码完全完全属于 '" + strLibraryCodeList + "' 范围的读者库";
+                                    goto ERROR1;
+                                }
+                            }
+                        }
+                    }
+
+                    string strLibraryCode = DomUtil.GetAttr(request_node,
+    "libraryCode");
+
+                    // 2012/9/9
+                    // 分馆用户只允许处理馆代码为特定范围的读者库
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        if (string.IsNullOrEmpty(strLibraryCode) == true
+                            || IsListInList(strLibraryCode, strLibraryCodeList) == false)
+                        {
+                            strError = "当前用户只能创建馆代码完全属于 '" + strLibraryCodeList + "' 范围内的读者库";
+                            return -1;
+                        }
+                    }
+
+                    // 检查dp2kernel中是否有和读者库同名的数据库存在
+                    {
+                        // 数据库是否已经存在？
+                        // return:
+                        //      -1  error
+                        //      0   not exist
+                        //      1   exist
+                        //      2   其他类型的同名对象已经存在
+                        nRet = IsDatabaseExist(
+                            channel,
+                            strName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet >= 1)
+                            goto ERROR1;
+                    }
+
+                    string strTemplateDir = this.DataDir + "\\templates\\" + "reader";
+
+                    // 根据预先的定义，创建一个数据库
+                    nRet = CreateDatabase(channel,
+                        strTemplateDir,
+                        strName,
+                        strLogFileName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    created_dbnames.Add(strName);
+
+                    bDbChanged = true;
+
+                    string strInCirculation = DomUtil.GetAttr(request_node,
+                        "inCirculation");
+                    if (String.IsNullOrEmpty(strInCirculation) == true)
+                        strInCirculation = "true";  // 缺省为true
+
+                    // 检查一个单独的图书馆代码是否格式正确
+                    // 要求不能为 '*'，不能包含逗号
+                    // return:
+                    //      -1  校验函数本身出错了
+                    //      0   校验正确
+                    //      1   校验发现问题。strError中有描述
+                    nRet = VerifySingleLibraryCode(strLibraryCode,
+        out strError);
+                    if (nRet != 0)
+                    {
+                        strError = "图书馆代码 '" + strLibraryCode + "' 格式错误: " + strError;
+                        goto ERROR1;
+                    }
+
+                    // 在CfgDom中增加相关的配置信息
+                    XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup");
+                    if (root == null)
+                    {
+                        root = this.LibraryCfgDom.CreateElement("readerdbgroup");
+                        this.LibraryCfgDom.DocumentElement.AppendChild(root);
+                    }
+
+                    XmlNode nodeNewDatabase = null;
+                    if (bRecreate == false)
+                    {
+                        nodeNewDatabase = this.LibraryCfgDom.CreateElement("database");
+                        root.AppendChild(nodeNewDatabase);
+                    }
+                    else
+                    {
+                        nodeNewDatabase = exist_database_node;
+                    }
+
+                    DomUtil.SetAttr(nodeNewDatabase, "name", strName);
+                    DomUtil.SetAttr(nodeNewDatabase, "inCirculation", strInCirculation);
+                    DomUtil.SetAttr(nodeNewDatabase, "libraryCode", strLibraryCode);    // 2012/9/7
+
+                    // <readerdbgroup>内容更新，刷新配套的内存结构
+                    this.LoadReaderDbGroupParam(this.LibraryCfgDom);
+                    this.Changed = true;
+                    database_nodes.Add(request_node);
+                }
+                else if (strType == "publisher"
+                    || strType == "zhongcihao"
+                    || strType == "dictionary"
+                    || strType == "inventory")
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许创建或重新创建出版者库、种次号库、字典库和盘点库";
+                        goto ERROR1;
+                    }
+
+                    // 看看同名的 publisher/zhongcihao/dictionary/inventory 数据库是否已经存在?
+                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
+                    if (bRecreate == false)
+                    {
+                        if (nodeDatabase != null)
+                        {
+                            strError = strType + "库 '" + strName + "' 的定义已经存在，不能重复创建";
+                            goto ERROR1;
+                        }
+                    }
+                    else
+                    {
+                        if (nodeDatabase == null)
+                        {
+                            strError = strType + "库 '" + strName + "' 的定义并不存在，无法进行重复创建";
+                            return 0;
+                        }
+                    }
+
+                    // TODO: 是否限定publisher库只能创建一个？
+                    // 而zhongcihao库显然是可以创建多个的
+
+                    // 检查dp2kernel中是否有和 publisher/zhongcihao/dictionary/inventory 库同名的数据库存在
+                    {
+                        // 数据库是否已经存在？
+                        // return:
+                        //      -1  error
+                        //      0   not exist
+                        //      1   exist
+                        //      2   其他类型的同名对象已经存在
+                        nRet = IsDatabaseExist(
+                            channel,
+                            strName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet >= 1)
+                            goto ERROR1;
+                    }
+
+
+                    string strTemplateDir = this.DataDir + "\\templates\\" + strType;
+
+                    // 根据预先的定义，创建一个数据库
+                    nRet = CreateDatabase(channel,
+                        strTemplateDir,
+                        strName,
+                        strLogFileName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    created_dbnames.Add(strName);
+                    bDbChanged = true;  // 2012/12/12
+
+                    // 在CfgDom中增加相关的配置信息
+                    XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb");
+                    if (root == null)
+                    {
+                        root = this.LibraryCfgDom.CreateElement("utilDb");
+                        this.LibraryCfgDom.DocumentElement.AppendChild(root);
+                    }
+
+                    XmlNode nodeNewDatabase = null;
+                    if (bRecreate == false)
+                    {
+                        nodeNewDatabase = this.LibraryCfgDom.CreateElement("database");
+                        root.AppendChild(nodeNewDatabase);
+                    }
+                    else
+                    {
+                        nodeNewDatabase = nodeDatabase;
+                    }
+
+                    DomUtil.SetAttr(nodeNewDatabase, "name", strName);
+                    DomUtil.SetAttr(nodeNewDatabase, "type", strType);
+                    this.Changed = true;
+                    database_nodes.Add(request_node);
+                }
+                else if (strType == "arrived")
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许创建或重新创建预约到书库";
+                        goto ERROR1;
+                    }
+
+                    // 看看同名的 arrived 数据库是否已经存在?
+                    if (bRecreate == false)
+                    {
+                        if (this.ArrivedDbName == strName)
+                        {
+                            strError = "预约到书库 '" + strName + "' 的定义已经存在，不能重复创建";
+                            goto ERROR1;
+                        }
+                    }
+
+                    if (String.IsNullOrEmpty(this.ArrivedDbName) == false)
+                    {
+                        if (bRecreate == true)
+                        {
+                            if (this.ArrivedDbName != strName)
+                            {
+                                strError = "已经存在一个预约到书库 '" + this.ArrivedDbName + "' 定义，和您请求重新创建的预约到书库 '" + strName + "' 名字不同。无法直接进行重新创建。请先删除已存在的数据库再进行创建";
+                                goto ERROR1;
+                            }
+                        }
+                        else
+                        {
+                            strError = "要创建新的预约到书库 '" + strName + "'，必须先删除已经存在的预约到书库 '"
+                                + this.ArrivedDbName + "'";
+                            goto ERROR1;
+                        }
+                    }
+
+                    // 检查dp2kernel中是否有和arrived库同名的数据库存在
+                    {
+                        // 数据库是否已经存在？
+                        // return:
+                        //      -1  error
+                        //      0   not exist
+                        //      1   exist
+                        //      2   其他类型的同名对象已经存在
+                        nRet = IsDatabaseExist(
+                            channel,
+                            strName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet >= 1)
+                            goto ERROR1;
+                    }
+
+                    string strTemplateDir = this.DataDir + "\\templates\\" + "arrived";
+
+                    // 根据预先的定义，创建一个数据库
+                    nRet = CreateDatabase(channel,
+                        strTemplateDir,
+                        strName,
+                         strLogFileName,
+                       out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    created_dbnames.Add(strName);
+                    bDbChanged = true;  // 2012/12/12
+
+                    // 在CfgDom中增加相关的配置信息
+                    this.ArrivedDbName = strName;
+                    this.Changed = true;
+                    database_nodes.Add(request_node);
+                }
+                else if (strType == "amerce")
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许创建或重新创建违约金库";
+                        goto ERROR1;
+                    }
+
+                    // 看看同名的amerce数据库是否已经存在?
+                    if (bRecreate == false)
+                    {
+                        if (this.AmerceDbName == strName)
+                        {
+                            strError = "违约金库 '" + strName + "' 的定义已经存在，不能重复创建";
+                            goto ERROR1;
+                        }
+                    }
+
+                    if (String.IsNullOrEmpty(this.AmerceDbName) == false)
+                    {
+                        if (bRecreate == true)
+                        {
+                            if (this.AmerceDbName != strName)
+                            {
+                                strError = "已经存在一个违约金库 '" + this.AmerceDbName + "' 定义，和您请求重新创建的违约金库 '" + strName + "' 名字不同。无法直接进行重新创建。请先删除已存在的数据库再进行创建";
+                                goto ERROR1;
+                            }
+                        }
+                        else
+                        {
+                            strError = "要创建新的违约金库 '" + strName + "'，必须先删除已经存在的违约金库 '"
+                                + this.AmerceDbName + "'";
+                            goto ERROR1;
+                        }
+                    }
+
+                    // 检查dp2kernel中是否有和amerce库同名的数据库存在
+                    {
+                        // 数据库是否已经存在？
+                        // return:
+                        //      -1  error
+                        //      0   not exist
+                        //      1   exist
+                        //      2   其他类型的同名对象已经存在
+                        nRet = IsDatabaseExist(
+                            channel,
+                            strName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet >= 1)
+                            goto ERROR1;
+                    }
+
+                    string strTemplateDir = this.DataDir + "\\templates\\" + "amerce";
+
+                    // 根据预先的定义，创建一个数据库
+                    nRet = CreateDatabase(channel,
+                        strTemplateDir,
+                        strName,
+                        strLogFileName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    created_dbnames.Add(strName);
+                    bDbChanged = true;  // 2012/12/12
+
+                    // 在CfgDom中增加相关的配置信息
+                    this.AmerceDbName = strName;
+                    this.Changed = true;
+                    database_nodes.Add(request_node);
+                }
+                else if (strType == "message")
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许创建或重新创建消息库";
+                        goto ERROR1;
+                    }
+
+                    // 看看同名的message数据库是否已经存在?
+                    if (bRecreate == false)
+                    {
+                        if (this.MessageDbName == strName)
+                        {
+                            strError = "消息库 '" + strName + "' 的定义已经存在，不能重复创建";
+                            goto ERROR1;
+                        }
+                    }
+
+                    if (String.IsNullOrEmpty(this.MessageDbName) == false)
+                    {
+                        if (bRecreate == true)
+                        {
+                            if (this.MessageDbName != strName)
+                            {
+                                strError = "已经存在一个消息库 '" + this.MessageDbName + "' 定义，和您请求重新创建的消息库 '" + strName + "' 名字不同。无法直接进行重新创建。请先删除已存在的数据库再进行创建";
+                                goto ERROR1;
+                            }
+                        }
+                        else
+                        {
+                            strError = "要创建新的消息库 '" + strName + "'，必须先删除已经存在的消息库 '"
+                                + this.MessageDbName + "'";
+                            goto ERROR1;
+                        }
+                    }
+
+                    // 检查dp2kernel中是否有和message库同名的数据库存在
+                    {
+                        // 数据库是否已经存在？
+                        // return:
+                        //      -1  error
+                        //      0   not exist
+                        //      1   exist
+                        //      2   其他类型的同名对象已经存在
+                        nRet = IsDatabaseExist(
+                            channel,
+                            strName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet >= 1)
+                            goto ERROR1;
+                    }
+
+                    string strTemplateDir = this.DataDir + "\\templates\\" + "message";
+
+                    // 根据预先的定义，创建一个数据库
+                    nRet = CreateDatabase(channel,
+                        strTemplateDir,
+                        strName,
+                        strLogFileName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    created_dbnames.Add(strName);
+                    bDbChanged = true;  // 2012/12/12
+
+                    // 在CfgDom中增加相关的配置信息
+                    this.MessageDbName = strName;
+                    this.Changed = true;
+                    database_nodes.Add(request_node);
+                }
+                else if (strType == "invoice")
+                {
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                    {
+                        strError = "当前用户不是全局用户，不允许创建或重新创建发票库";
+                        goto ERROR1;
+                    }
+
+                    // 看看同名的invoice数据库是否已经存在?
+                    if (bRecreate == false)
+                    {
+                        if (this.InvoiceDbName == strName)
+                        {
+                            strError = "发票库 '" + strName + "' 的定义已经存在，不能重复创建";
+                            goto ERROR1;
+                        }
+                    }
+
+                    if (String.IsNullOrEmpty(this.InvoiceDbName) == false)
+                    {
+                        if (bRecreate == true)
+                        {
+                            if (this.InvoiceDbName != strName)
+                            {
+                                strError = "已经存在一个发票库 '" + this.InvoiceDbName + "' 定义，和您请求重新创建的发票库 '" + strName + "' 名字不同。无法直接进行重新创建。请先删除已存在的数据库再进行创建";
+                                goto ERROR1;
+                            }
+                        }
+                        else
+                        {
+                            strError = "要创建新的发票库 '" + strName + "'，必须先删除已经存在的发票库 '"
+                                + this.InvoiceDbName + "'";
+                            goto ERROR1;
+                        }
+                    }
+
+                    // 检查dp2kernel中是否有和invoice库同名的数据库存在
+                    {
+                        // 数据库是否已经存在？
+                        // return:
+                        //      -1  error
+                        //      0   not exist
+                        //      1   exist
+                        //      2   其他类型的同名对象已经存在
+                        nRet = IsDatabaseExist(
+                            channel,
+                            strName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet >= 1)
+                            goto ERROR1;
+                    }
+
+                    string strTemplateDir = this.DataDir + "\\templates\\" + "invoice";
+
+                    // 根据预先的定义，创建一个数据库
+                    nRet = CreateDatabase(channel,
+                        strTemplateDir,
+                        strName,
+                        strLogFileName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    created_dbnames.Add(strName);
+                    bDbChanged = true;  // 2012/12/12
+
+                    // 在CfgDom中增加相关的配置信息
+                    this.InvoiceDbName = strName;
+                    this.Changed = true;
+                    database_nodes.Add(request_node);
+                }
+                else if (strType == "pinyin"
+                    || strType == "gcat"
+                    || strType == "word")
+                {
+                    string strTypeCaption = "";
+                    string strDbName = "";
+                    if (strType == "pinyin")
+                    {
+                        strTypeCaption = "拼音";
+                        strDbName = this.PinyinDbName;
+                    }
+                    if (strType == "gcat")
+                    {
+                        strTypeCaption = "著者号码";
+                        strDbName = this.GcatDbName;
+                    }
+                    if (strType == "word")
+                    {
+                        strTypeCaption = "词";
+                        strDbName = this.WordDbName;
+                    }
+                    nRet = CreateDatabase(
+                        channel,
+                        strType,
+                        strTypeCaption,
+                        strName,
+                        strLibraryCodeList,
+                        bRecreate,
+                        strLogFileName,
+                        ref bDbChanged,
+                        ref created_dbnames,
+                        ref strDbName,
+                        out strError);
+                    if (strType == "pinyin")
+                        this.PinyinDbName = strDbName;
+                    if (strType == "gcat")
+                        this.GcatDbName = strDbName;
+                    if (strType == "word")
+                        this.WordDbName = strDbName;
+                    if (nRet == -1)
+                        goto ERROR1;
+                    database_nodes.Add(request_node);
+                }
+                else
+                {
+                    strError = "未知的数据库类型 '" + strType + "'";
+                    goto ERROR1;
+                }
+
+                if (this.Changed == true)
+                    this.ActivateManagerThread();
+
+                created_dbnames.Clear();
+            }
+
+            // 写入操作日志
+            {
+                XmlDocument domOperLog = new XmlDocument();
+                domOperLog.LoadXml("<root />");
+
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "operation",
+                    "manageDatabase");
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "action",
+    "createDatabase");
+
+                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
+"");
+                StringBuilder text = new StringBuilder();
+                foreach (XmlElement node in database_nodes)
+                {
+                    text.Append(node.OuterXml);
+                }
+                new_node.InnerXml = text.ToString();
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                    sessioninfo.UserID);
+
+                string strOperTime = this.Clock.GetClock();
+
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                    strOperTime);
+
+                using (Stream stream = File.OpenRead(strLogFileName))
+                {
+                    nRet = this.OperLog.WriteOperLog(domOperLog,
+                        sessioninfo.ClientAddress,
+                        stream,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "ManageDatabase() API createDatabase 写入日志时发生错误: " + strError;
+                        goto ERROR1;
+                    }
+                }
+            }
+
+            Debug.Assert(created_dbnames.Count == 0, "");
+
+            if (bDbChanged == true)
+            {
+                nRet = InitialKdbs(
+                    Channels,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                // 重新初始化虚拟库定义
+                this.vdbs = null;
+                nRet = this.InitialVdbs(Channels,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            return 1;
+        ERROR1:
+            List<string> error_deleting_dbnames = new List<string>();
+            // 将本次已经创建的数据库在返回前删除掉
+            for (int i = 0; i < created_dbnames.Count; i++)
+            {
+                string strDbName = created_dbnames[i];
+
+                string strError_1 = "";
+
+                long lRet = channel.DoDeleteDB(strDbName, out strError_1);
+                if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                    continue;
+                if (lRet == -1)
+                    error_deleting_dbnames.Add(strDbName + "[错误:" + strError_1 + "]");
+            }
+
+            if (error_deleting_dbnames.Count > 0)
+            {
+                strError = strError + ";\r\n并在删除刚创建的数据库时发生错误，下列数据库未被删除:" + StringUtil.MakePathList(error_deleting_dbnames);
+                return -1;
+            }
+
+            return -1;
+        }

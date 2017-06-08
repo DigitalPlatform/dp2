@@ -2222,7 +2222,6 @@ namespace DigitalPlatform.LibraryServer
                     out infos,
                     out strError);
                 this.ArrivedDbFroms = infos;
-
                 return 0;
             }
             finally

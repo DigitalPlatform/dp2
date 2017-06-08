@@ -1923,7 +1923,7 @@ out strError);
                     }
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -1967,7 +1967,7 @@ out strError);
                     }
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2011,7 +2011,7 @@ out strError);
                     }
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2055,7 +2055,7 @@ out strError);
                     }
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2098,7 +2098,7 @@ out strError);
                     }
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2144,7 +2144,7 @@ out strError);
                     this.LoadReaderDbGroupParam(this.LibraryCfgDom);
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2169,7 +2169,7 @@ out strError);
                     this.ArrivedDbName = "";
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2194,7 +2194,7 @@ out strError);
                     this.AmerceDbName = "";
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2218,7 +2218,7 @@ out strError);
                     this.InvoiceDbName = "";
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2243,7 +2243,7 @@ out strError);
                         return -1;
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2268,7 +2268,7 @@ out strError);
                         return -1;
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2293,7 +2293,7 @@ out strError);
                         return -1;
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2318,7 +2318,7 @@ out strError);
                     this.MessageDbName = "";
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2350,7 +2350,7 @@ out strError);
                     nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
                     continue;
                 }
 
@@ -2415,6 +2415,10 @@ out strError);
                     return -1;
                 }
             }
+
+            // 2017/6/7
+            if (this.Changed == true)
+                this.ActivateManagerThread();
 
             if (bDbNameChanged == true)
             {
@@ -4050,6 +4054,155 @@ out strError);
             return false;
         }
 
+        // 请求创建书目库的参数信息
+        class RequestBiblioDatabase
+        {
+            public string Name { get; set; }
+            public string Type { get; set; }
+
+            public string Syntax { get; set; }
+            public string Usage { get; set; }
+            public string Role { get; set; }
+
+            public string EntityDbName { get; set; }
+            public string OrderDbName { get; set; }
+            public string IssueDbName { get; set; }
+            public string CommentDbName { get; set; }
+
+            public bool InCirculation { get; set; }
+            public string UnionCatalogStyle { get; set; }
+            public string Replication { get; set; }
+
+            // 从请求 XML 中构建
+            public static RequestBiblioDatabase FromRequest(XmlElement request_node)
+            {
+                RequestBiblioDatabase info = new RequestBiblioDatabase();
+
+                info.Type = DomUtil.GetAttr(request_node, "type").ToLower();
+                info.Name = DomUtil.GetAttr(request_node, "name");
+
+                if (info.Type != "biblio")
+                    return info;
+
+                info.Syntax = DomUtil.GetAttr(request_node, "syntax");
+                if (String.IsNullOrEmpty(info.Syntax) == true)
+                    info.Syntax = "unimarc";
+
+                // usage: book series
+                info.Usage = DomUtil.GetAttr(request_node, "usage");
+                if (String.IsNullOrEmpty(info.Usage) == true)
+                    info.Usage = "book";
+
+                info.Role = DomUtil.GetAttr(request_node, "role");
+                info.EntityDbName = DomUtil.GetAttr(request_node, "entityDbName");
+
+                info.OrderDbName = DomUtil.GetAttr(request_node, "orderDbName");
+
+                info.IssueDbName = DomUtil.GetAttr(request_node, "issueDbName");
+
+                info.CommentDbName = DomUtil.GetAttr(request_node, "commentDbName");
+
+                if (info.EntityDbName == "<default>")
+                    info.EntityDbName = info.Name + "实体";
+
+                if (info.OrderDbName == "<default>")
+                    info.OrderDbName = info.Name + "订购";
+
+                if (info.IssueDbName == "<default>")
+                    info.IssueDbName = info.Name + "期";
+
+                if (info.CommentDbName == "<default>")
+                    info.CommentDbName = info.Name + "评注";
+
+                string strInCirculation = DomUtil.GetAttr(request_node, "inCirculation");
+                if (String.IsNullOrEmpty(strInCirculation) == true)
+                    strInCirculation = "true";  // 缺省为true
+
+                info.InCirculation = DomUtil.IsBooleanTrue(strInCirculation);
+
+                info.UnionCatalogStyle = DomUtil.GetAttr(request_node, "unionCatalogStyle");
+
+                info.Replication = DomUtil.GetAttr(request_node, "replication");
+                return info;
+            }
+
+            // 从 library.xml XML 中构建
+            public static RequestBiblioDatabase FromCfgNode(XmlElement cfg_node)
+            {
+                RequestBiblioDatabase info = new RequestBiblioDatabase();
+
+                info.Type = "biblio";
+                info.Name = DomUtil.GetAttr(cfg_node, "biblioDbName");
+
+                info.EntityDbName = DomUtil.GetAttr(cfg_node, "name");
+                info.OrderDbName = DomUtil.GetAttr(cfg_node, "orderDbName");
+                info.IssueDbName = DomUtil.GetAttr(cfg_node, "issueDbName");
+                info.CommentDbName = DomUtil.GetAttr(cfg_node, "commentDbName");
+
+                info.Syntax = DomUtil.GetAttr(cfg_node, "syntax");
+                if (String.IsNullOrEmpty(info.Syntax) == true)
+                    info.Syntax = "unimarc";
+
+                // usage: book series
+                if (string.IsNullOrEmpty(info.IssueDbName))
+                    info.Usage = "book";
+                else
+                    info.Usage = "series";
+
+                info.Role = DomUtil.GetAttr(cfg_node, "role");
+
+                string strInCirculation = DomUtil.GetAttr(cfg_node, "inCirculation");
+                if (String.IsNullOrEmpty(strInCirculation) == true)
+                    strInCirculation = "true";  // 缺省为true
+
+                info.InCirculation = DomUtil.IsBooleanTrue(strInCirculation);
+
+                info.UnionCatalogStyle = DomUtil.GetAttr(cfg_node, "unionCatalogStyle");
+
+                info.Replication = DomUtil.GetAttr(cfg_node, "replication");
+                return info;
+            }
+
+            // 在 library.xml 中添加配置节点
+            public void WriteCfgNode(XmlElement nodeNewDatabase)
+            {
+                DomUtil.SetAttr(nodeNewDatabase, "name", this.EntityDbName);
+                DomUtil.SetAttr(nodeNewDatabase, "biblioDbName", this.Name);
+                if (String.IsNullOrEmpty(this.OrderDbName) == false)
+                    DomUtil.SetAttr(nodeNewDatabase, "orderDbName", this.OrderDbName);
+                else
+                    nodeNewDatabase.RemoveAttribute("orderDbName");
+
+                if (String.IsNullOrEmpty(this.IssueDbName) == false)
+                    DomUtil.SetAttr(nodeNewDatabase, "issueDbName", this.IssueDbName);
+                else
+                    nodeNewDatabase.RemoveAttribute("issueDbName");
+
+                if (String.IsNullOrEmpty(this.CommentDbName) == false)
+                    DomUtil.SetAttr(nodeNewDatabase, "commentDbName", this.CommentDbName);
+                else
+                    nodeNewDatabase.RemoveAttribute("commentDbName");
+
+                DomUtil.SetAttr(nodeNewDatabase, "syntax", this.Syntax);
+
+                // 2009/10/23
+                DomUtil.SetAttr(nodeNewDatabase, "role", this.Role);
+
+                DomUtil.SetAttr(nodeNewDatabase, "inCirculation", this.InCirculation ? "true" : "false");
+
+                // 2012/4/30
+                if (string.IsNullOrEmpty(this.UnionCatalogStyle) == false)
+                    DomUtil.SetAttr(nodeNewDatabase, "unionCatalogStyle", this.UnionCatalogStyle);
+                else
+                    nodeNewDatabase.RemoveAttribute("unionCatalogStyle");
+
+                if (string.IsNullOrEmpty(this.Replication) == false)
+                    DomUtil.SetAttr(nodeNewDatabase, "replication", this.Replication);
+                else
+                    nodeNewDatabase.RemoveAttribute("replication");
+            }
+        }
+
         // 创建数据库
         // parameters:
         //      strLibraryCodeList  当前用户的管辖分馆代码列表
@@ -4080,10 +4233,10 @@ out strError);
 
             bool bDbChanged = false;    // 数据库名是否发生过改变？或者新创建过数据库? 如果发生过，需要重新初始化kdbs
 
-            XmlDocument dom = new XmlDocument();
+            XmlDocument request_dom = new XmlDocument();
             try
             {
-                dom.LoadXml(strDatabaseInfo);
+                request_dom.LoadXml(strDatabaseInfo);
             }
             catch (Exception ex)
             {
@@ -4093,13 +4246,16 @@ out strError);
 
             RmsChannel channel = Channels.GetChannel(this.WsUrl);
 
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes("database");
-            for (int i = 0; i < nodes.Count; i++)
+            XmlNodeList nodes = request_dom.DocumentElement.SelectNodes("database");
+            // for (int i = 0; i < nodes.Count; i++)
+            foreach (XmlElement request_node in nodes)
             {
-                XmlNode node = nodes[i];
-                string strType = DomUtil.GetAttr(node, "type").ToLower();
+                // XmlNode node = nodes[i];
+                string strType = DomUtil.GetAttr(request_node, "type").ToLower();
 
-                string strName = DomUtil.GetAttr(node, "name");
+                string strName = DomUtil.GetAttr(request_node, "name");
+
+                string strInfo = request_node.GetAttribute("info");
 
                 // 创建书目数据库
                 if (strType == "biblio")
@@ -4121,24 +4277,12 @@ out strError);
                     }
 
                     // 2009/11/13
-                    XmlNode exist_database_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strName + "']");
+                    XmlElement exist_database_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strName + "']") as XmlElement;
                     if (bRecreate == true && exist_database_node == null)
                     {
                         strError = "library.xml 中并不存在书目库 '" + strName + "' 的定义，无法进行重新创建";
                         return 0;
                     }
-
-                    string strSyntax = DomUtil.GetAttr(node, "syntax");
-                    if (String.IsNullOrEmpty(strSyntax) == true)
-                        strSyntax = "unimarc";
-
-                    // usage: book series
-                    string strUsage = DomUtil.GetAttr(node, "usage");
-                    if (String.IsNullOrEmpty(strUsage) == true)
-                        strUsage = "book";
-
-                    // 2009/10/23
-                    string strRole = DomUtil.GetAttr(node, "role");
 
                     if (bRecreate == false)
                     {
@@ -4168,42 +4312,21 @@ out strError);
                             goto ERROR1;
                     }
 
-                    string strEntityDbName = DomUtil.GetAttr(node, "entityDbName");
+                    RequestBiblioDatabase info = null;
 
-                    string strOrderDbName = DomUtil.GetAttr(node, "orderDbName");
+                    if (strInfo == "*" || strInfo == "existing")    // 使用已经存在的 database 定义
+                        info = RequestBiblioDatabase.FromCfgNode(exist_database_node);
+                    else
+                        info = RequestBiblioDatabase.FromRequest(request_node);
 
-                    string strIssueDbName = DomUtil.GetAttr(node, "issueDbName");
-
-                    string strCommentDbName = DomUtil.GetAttr(node, "commentDbName");
-
-                    if (strEntityDbName == "<default>")
-                        strEntityDbName = strName + "实体";
-
-                    if (strOrderDbName == "<default>")
-                        strOrderDbName = strName + "订购";
-
-                    if (strIssueDbName == "<default>")
-                        strIssueDbName = strName + "期";
-
-                    if (strCommentDbName == "<default>")
-                        strCommentDbName = strName + "评注";
-
-                    string strInCirculation = DomUtil.GetAttr(node, "inCirculation");
-                    if (String.IsNullOrEmpty(strInCirculation) == true)
-                        strInCirculation = "true";  // 缺省为true
-
-                    string strUnionCatalogStyle = DomUtil.GetAttr(node, "unionCatalogStyle");
-
-                    string strReplication = DomUtil.GetAttr(node, "replication");
-
-                    if (String.IsNullOrEmpty(strEntityDbName) == false)
+                    if (String.IsNullOrEmpty(info.EntityDbName) == false)
                     {
                         if (bRecreate == false)
                         {
                             // 检查 cfgdom 中是否已经存在同名的实体库
-                            if (this.IsItemDbName(strEntityDbName) == true)
+                            if (this.IsItemDbName(info.EntityDbName) == true)
                             {
-                                strError = "实体库 '" + strEntityDbName + "' 的定义已经存在，不能重复创建";
+                                strError = "实体库 '" + info.EntityDbName + "' 的定义已经存在，不能重复创建";
                                 goto ERROR1;
                             }
                         }
@@ -4216,7 +4339,7 @@ out strError);
                         //      2   其他类型的同名对象已经存在
                         nRet = IsDatabaseExist(
                             channel,
-                            strEntityDbName,
+                            info.EntityDbName,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -4224,14 +4347,14 @@ out strError);
                             goto ERROR1;
                     }
 
-                    if (String.IsNullOrEmpty(strOrderDbName) == false)
+                    if (String.IsNullOrEmpty(info.OrderDbName) == false)
                     {
                         if (bRecreate == false)
                         {
                             // 检查cfgdom中是否已经存在同名的订购库
-                            if (this.IsOrderDbName(strOrderDbName) == true)
+                            if (this.IsOrderDbName(info.OrderDbName) == true)
                             {
-                                strError = "订购库 '" + strOrderDbName + "' 的定义已经存在，不能重复创建";
+                                strError = "订购库 '" + info.OrderDbName + "' 的定义已经存在，不能重复创建";
                                 goto ERROR1;
                             }
                         }
@@ -4244,7 +4367,7 @@ out strError);
                         //      2   其他类型的同名对象已经存在
                         nRet = IsDatabaseExist(
                             channel,
-                            strOrderDbName,
+                            info.OrderDbName,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -4253,14 +4376,14 @@ out strError);
                     }
 
 
-                    if (String.IsNullOrEmpty(strIssueDbName) == false)
+                    if (String.IsNullOrEmpty(info.IssueDbName) == false)
                     {
                         if (bRecreate == false)
                         {
                             // 检查cfgdom中是否已经存在同名的期库
-                            if (this.IsOrderDbName(strIssueDbName) == true)
+                            if (this.IsOrderDbName(info.IssueDbName) == true)
                             {
-                                strError = "期库 '" + strIssueDbName + "' 的定义已经存在，不能重复创建";
+                                strError = "期库 '" + info.IssueDbName + "' 的定义已经存在，不能重复创建";
                                 goto ERROR1;
                             }
                         }
@@ -4273,7 +4396,7 @@ out strError);
                         //      2   其他类型的同名对象已经存在
                         nRet = IsDatabaseExist(
                             channel,
-                            strIssueDbName,
+                            info.IssueDbName,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -4281,14 +4404,14 @@ out strError);
                             goto ERROR1;
                     }
 
-                    if (String.IsNullOrEmpty(strCommentDbName) == false)
+                    if (String.IsNullOrEmpty(info.CommentDbName) == false)
                     {
                         if (bRecreate == false)
                         {
                             // 检查cfgdom中是否已经存在同名的评注库
-                            if (this.IsCommentDbName(strCommentDbName) == true)
+                            if (this.IsCommentDbName(info.CommentDbName) == true)
                             {
-                                strError = "评注库 '" + strCommentDbName + "' 的定义已经存在，不能重复创建";
+                                strError = "评注库 '" + info.CommentDbName + "' 的定义已经存在，不能重复创建";
                                 goto ERROR1;
                             }
                         }
@@ -4301,7 +4424,7 @@ out strError);
                         //      2   其他类型的同名对象已经存在
                         nRet = IsDatabaseExist(
                             channel,
-                            strCommentDbName,
+                            info.CommentDbName,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -4312,7 +4435,7 @@ out strError);
                     // 开始创建
 
                     // 创建书目库
-                    string strTemplateDir = this.DataDir + "\\templates\\" + "biblio_" + strSyntax + "_" + strUsage;
+                    string strTemplateDir = this.DataDir + "\\templates\\" + "biblio_" + info.Syntax + "_" + info.Usage;
 
                     // 根据预先的定义，创建一个数据库
                     nRet = CreateDatabase(channel,
@@ -4328,74 +4451,74 @@ out strError);
                     bDbChanged = true;
 
                     // 创建实体库
-                    if (String.IsNullOrEmpty(strEntityDbName) == false)
+                    if (String.IsNullOrEmpty(info.EntityDbName) == false)
                     {
                         strTemplateDir = this.DataDir + "\\templates\\" + "item";
 
                         // 根据预先的定义，创建一个数据库
                         nRet = CreateDatabase(channel,
                             strTemplateDir,
-                            strEntityDbName,
-                        strLogFileName,
+                            info.EntityDbName,
+                            strLogFileName,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
 
-                        created_dbnames.Add(strEntityDbName);
+                        created_dbnames.Add(info.EntityDbName);
 
                         bDbChanged = true;
                     }
 
                     // 创建订购库
-                    if (String.IsNullOrEmpty(strOrderDbName) == false)
+                    if (String.IsNullOrEmpty(info.OrderDbName) == false)
                     {
                         strTemplateDir = this.DataDir + "\\templates\\" + "order";
 
                         // 根据预先的定义，创建一个数据库
                         nRet = CreateDatabase(channel,
                             strTemplateDir,
-                            strOrderDbName,
+                            info.OrderDbName,
                         strLogFileName,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        created_dbnames.Add(strOrderDbName);
+                        created_dbnames.Add(info.OrderDbName);
 
                         bDbChanged = true;
                     }
 
                     // 创建期库
-                    if (String.IsNullOrEmpty(strIssueDbName) == false)
+                    if (String.IsNullOrEmpty(info.IssueDbName) == false)
                     {
                         strTemplateDir = this.DataDir + "\\templates\\" + "issue";
 
                         // 根据预先的定义，创建一个数据库
                         nRet = CreateDatabase(channel,
                             strTemplateDir,
-                            strIssueDbName,
+                            info.IssueDbName,
                          strLogFileName,
                            out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        created_dbnames.Add(strIssueDbName);
+                        created_dbnames.Add(info.IssueDbName);
 
                         bDbChanged = true;
                     }
 
                     // 创建评注库
-                    if (String.IsNullOrEmpty(strCommentDbName) == false)
+                    if (String.IsNullOrEmpty(info.CommentDbName) == false)
                     {
                         strTemplateDir = this.DataDir + "\\templates\\" + "comment";
 
                         // 根据预先的定义，创建一个数据库
                         nRet = CreateDatabase(channel,
                             strTemplateDir,
-                            strCommentDbName,
+                            info.CommentDbName,
                         strLogFileName,
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        created_dbnames.Add(strCommentDbName);
+                        created_dbnames.Add(info.CommentDbName);
 
                         bDbChanged = true;
                     }
@@ -4408,7 +4531,7 @@ out strError);
                         this.LibraryCfgDom.DocumentElement.AppendChild(root);
                     }
 
-                    XmlNode nodeNewDatabase = null;
+                    XmlElement nodeNewDatabase = null;
 
                     if (bRecreate == false)
                     {
@@ -4420,33 +4543,7 @@ out strError);
                         nodeNewDatabase = exist_database_node;
                     }
 
-                    DomUtil.SetAttr(nodeNewDatabase, "name", strEntityDbName);
-                    DomUtil.SetAttr(nodeNewDatabase, "biblioDbName", strName);
-                    if (String.IsNullOrEmpty(strOrderDbName) == false)
-                    {
-                        DomUtil.SetAttr(nodeNewDatabase, "orderDbName", strOrderDbName);
-                    }
-                    if (String.IsNullOrEmpty(strIssueDbName) == false)
-                    {
-                        DomUtil.SetAttr(nodeNewDatabase, "issueDbName", strIssueDbName);
-                    }
-                    if (String.IsNullOrEmpty(strCommentDbName) == false)
-                    {
-                        DomUtil.SetAttr(nodeNewDatabase, "commentDbName", strCommentDbName);
-                    }
-                    DomUtil.SetAttr(nodeNewDatabase, "syntax", strSyntax);
-
-                    // 2009/10/23
-                    DomUtil.SetAttr(nodeNewDatabase, "role", strRole);
-
-                    DomUtil.SetAttr(nodeNewDatabase, "inCirculation", strInCirculation);
-
-                    // 2012/4/30
-                    if (string.IsNullOrEmpty(strUnionCatalogStyle) == false)
-                        DomUtil.SetAttr(nodeNewDatabase, "unionCatalogStyle", strUnionCatalogStyle);
-
-                    if (string.IsNullOrEmpty(strReplication) == false)
-                        DomUtil.SetAttr(nodeNewDatabase, "replication", strReplication);
+                    info.WriteCfgNode(nodeNewDatabase);
 
                     // <itemdbgroup>内容更新，刷新配套的内存结构
                     nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
@@ -4458,11 +4555,11 @@ out strError);
                     }
 
                     this.Changed = true;
-                    this.ActivateManagerThread();
+                    // this.ActivateManagerThread();
 
                     created_dbnames.Clear();
 
-                    database_nodes.Add(node);
+                    database_nodes.Add(request_node);
                     continue;
                 } // end of type biblio
                 else if (strType == "entity")
@@ -4475,7 +4572,7 @@ out strError);
                     // TODO: 增加recreate能力
 
                     // 单独创建实体库
-                    string strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
+                    string strBiblioDbName = DomUtil.GetAttr(request_node, "biblioDbName");
                     if (String.IsNullOrEmpty(strBiblioDbName) == true)
                     {
                         strError = "请求创建实体库的<database>元素中，应包含biblioDbName属性";
@@ -4533,7 +4630,7 @@ out strError);
                     }
 
                     this.Changed = true;
-                    database_nodes.Add(node);
+                    database_nodes.Add(request_node);
                 }
                 else if (strType == "order")
                 {
@@ -4545,7 +4642,7 @@ out strError);
                     // TODO: 增加recreate能力
 
                     // 单独创建订购库
-                    string strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
+                    string strBiblioDbName = DomUtil.GetAttr(request_node, "biblioDbName");
                     if (String.IsNullOrEmpty(strBiblioDbName) == true)
                     {
                         strError = "创建订购库的<database>元素中，应包含biblioDbName属性";
@@ -4602,7 +4699,7 @@ out strError);
                     }
 
                     this.Changed = true;
-                    database_nodes.Add(node);
+                    database_nodes.Add(request_node);
                 }
                 else if (strType == "issue")
                 {
@@ -4614,7 +4711,7 @@ out strError);
                     // TODO: 增加recreate能力
 
                     // 单独创建期库
-                    string strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
+                    string strBiblioDbName = DomUtil.GetAttr(request_node, "biblioDbName");
                     if (String.IsNullOrEmpty(strBiblioDbName) == true)
                     {
                         strError = "创建期库的<database>元素中，应包含biblioDbName属性";
@@ -4671,7 +4768,7 @@ out strError);
                     }
 
                     this.Changed = true;
-                    database_nodes.Add(node);
+                    database_nodes.Add(request_node);
                 }
                 else if (strType == "comment")
                 {
@@ -4683,7 +4780,7 @@ out strError);
                     // TODO: 增加recreate能力
 
                     // 单独创建评注库
-                    string strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
+                    string strBiblioDbName = DomUtil.GetAttr(request_node, "biblioDbName");
                     if (String.IsNullOrEmpty(strBiblioDbName) == true)
                     {
                         strError = "创建评注库的<database>元素中，应包含biblioDbName属性";
@@ -4740,7 +4837,7 @@ out strError);
                     }
 
                     this.Changed = true;
-                    database_nodes.Add(node);
+                    database_nodes.Add(request_node);
                 }
                 else if (strType == "reader")
                 {
@@ -4783,7 +4880,7 @@ out strError);
                         }
                     }
 
-                    string strLibraryCode = DomUtil.GetAttr(node,
+                    string strLibraryCode = DomUtil.GetAttr(request_node,
     "libraryCode");
 
                     // 2012/9/9
@@ -4830,7 +4927,7 @@ out strError);
 
                     bDbChanged = true;
 
-                    string strInCirculation = DomUtil.GetAttr(node,
+                    string strInCirculation = DomUtil.GetAttr(request_node,
                         "inCirculation");
                     if (String.IsNullOrEmpty(strInCirculation) == true)
                         strInCirculation = "true";  // 缺省为true
@@ -4875,7 +4972,7 @@ out strError);
                     // <readerdbgroup>内容更新，刷新配套的内存结构
                     this.LoadReaderDbGroupParam(this.LibraryCfgDom);
                     this.Changed = true;
-                    database_nodes.Add(node);
+                    database_nodes.Add(request_node);
                 }
                 else if (strType == "publisher"
                     || strType == "zhongcihao"
@@ -4964,7 +5061,7 @@ out strError);
                     DomUtil.SetAttr(nodeNewDatabase, "name", strName);
                     DomUtil.SetAttr(nodeNewDatabase, "type", strType);
                     this.Changed = true;
-                    database_nodes.Add(node);
+                    database_nodes.Add(request_node);
                 }
                 else if (strType == "arrived")
                 {
@@ -5036,7 +5133,7 @@ out strError);
                     // 在CfgDom中增加相关的配置信息
                     this.ArrivedDbName = strName;
                     this.Changed = true;
-                    database_nodes.Add(node);
+                    database_nodes.Add(request_node);
                 }
                 else if (strType == "amerce")
                 {
@@ -5108,7 +5205,7 @@ out strError);
                     // 在CfgDom中增加相关的配置信息
                     this.AmerceDbName = strName;
                     this.Changed = true;
-                    database_nodes.Add(node);
+                    database_nodes.Add(request_node);
                 }
                 else if (strType == "message")
                 {
@@ -5180,7 +5277,7 @@ out strError);
                     // 在CfgDom中增加相关的配置信息
                     this.MessageDbName = strName;
                     this.Changed = true;
-                    database_nodes.Add(node);
+                    database_nodes.Add(request_node);
                 }
                 else if (strType == "invoice")
                 {
@@ -5252,7 +5349,7 @@ out strError);
                     // 在CfgDom中增加相关的配置信息
                     this.InvoiceDbName = strName;
                     this.Changed = true;
-                    database_nodes.Add(node);
+                    database_nodes.Add(request_node);
                 }
                 else if (strType == "pinyin"
                     || strType == "gcat"
@@ -5295,7 +5392,7 @@ out strError);
                         this.WordDbName = strDbName;
                     if (nRet == -1)
                         goto ERROR1;
-                    database_nodes.Add(node);
+                    database_nodes.Add(request_node);
                 }
                 else
                 {
@@ -5353,6 +5450,9 @@ out strError);
             }
 
             Debug.Assert(created_dbnames.Count == 0, "");
+
+            if (this.Changed == true)
+                this.ActivateManagerThread();
 
             if (bDbChanged == true)
             {
