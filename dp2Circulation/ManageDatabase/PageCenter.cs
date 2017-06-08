@@ -35,6 +35,10 @@ namespace dp2Circulation
         {
             strError = "";
 
+            // 2017/6/8
+            strError = "本功能暂时不允许使用";
+            return -1;
+
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);

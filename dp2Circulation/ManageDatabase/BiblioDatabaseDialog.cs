@@ -555,7 +555,6 @@ namespace dp2Circulation
                     {
                         strError = "创建数据库的操作被放弃";
                         MessageBox.Show(this, strError);
-
                     }
                     else
                     {

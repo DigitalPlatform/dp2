@@ -752,6 +752,7 @@ namespace dp2Circulation
             return 0;
         }
 
+        const int DATABASE_COLUMN_NAME = 0;
         const int DATABASE_COLUMN_TYPENAME = 1;
         const int DATABASE_COLUMN_SHUOMING = 2;
 
@@ -1265,6 +1266,119 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
+        // 重新创建多个数据库
+        // return:
+        //      -1  出错
+        //      0   放弃
+        //      其他  重新创建的个数
+        int recreateDatabases(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (this.listView_databases.SelectedIndices.Count == 0)
+            {
+                strError = "尚未选择要重新创建的数据库事项";
+                return -1;
+            }
+
+            string strLibraryCodeList = this.GetLibraryCodeList();
+
+            string strDbNameList = ListViewUtil.GetItemNameList(this.listView_databases.SelectedItems);
+
+            // 对话框警告
+            DialogResult result = MessageBox.Show(this,
+                "确实要重新创建数据库 " + strDbNameList + "?",
+                "ManagerForm",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return 0;
+
+            // 为确认身份而登录
+            // return:
+            //      -1  出错
+            //      0   放弃登录
+            //      1   登录成功
+            nRet = ConfirmLogin(out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "重新创建数据库操作被放弃";
+                return -1;
+            }
+
+            EnableControls(false);
+            try
+            {
+                int nCount = 0;
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml("<root />");
+
+                foreach (ListViewItem item in this.listView_databases.SelectedItems)
+                {
+                    XmlNode nodeDatabase = dom.CreateElement("database");
+                    dom.DocumentElement.AppendChild(nodeDatabase);
+
+                    string strName = ListViewUtil.GetItemText(item, DATABASE_COLUMN_NAME);
+                    string strTypeName = ListViewUtil.GetItemText(item, DATABASE_COLUMN_TYPENAME);
+
+                    string strXml = (string)item.Tag;
+                    XmlDocument node_dom = new XmlDocument();
+                    node_dom.LoadXml(strXml);
+
+                    string strType = node_dom.DocumentElement.GetAttribute("type");
+
+                    DomUtil.SetAttr(nodeDatabase, "name", strName);
+                    // type
+                    DomUtil.SetAttr(nodeDatabase, "type", strType);
+                    DomUtil.SetAttr(nodeDatabase, "info", "existing");
+
+                    nCount++;
+                }
+
+                string strDatabaseInfo = dom.OuterXml;
+                string strOutputInfo = "";
+                // 创建数据库
+                nRet = this.CreateDatabase(
+                    strDatabaseInfo,
+                    true,
+                    out strOutputInfo,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+#if NO
+                nRet = RefreshAllDatabaseXml(out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+#endif
+
+                // 刷新库名列表
+                nRet = ListAllDatabases(out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
+
+                RefreshOpacDatabaseList();
+                RefreshOpacBrowseFormatTree();
+
+                // 如果馆代码列表发生了变化
+                if (this.GetLibraryCodeList() != strLibraryCodeList)
+                    UpdateLoanPolicyLibraryCode();
+
+                // 重新获得各种库名、列表
+                Program.MainForm.StartPrepareNames(false, false);
+                return nCount;
+            }
+            finally
+            {
+                EnableControls(true);
+            }
+        }
+
         // 重新创建数据库
         private void menu_recreateDatabase_Click(object sender, EventArgs e)
         {
@@ -1276,6 +1390,20 @@ namespace dp2Circulation
                 strError = "尚未选定要重新创建的数据库";
                 goto ERROR1;
             }
+
+            if (this.listView_databases.SelectedItems.Count > 0)
+            {
+                // 重新创建多个数据库
+                // return:
+                //      -1  出错
+                //      0   放弃
+                //      其他  重新创建的个数
+                if (recreateDatabases(out strError) == -1)
+                    goto ERROR1;
+                return;
+            }
+
+            // 重新创建单个数据库。可以在创建前观察到数据库的参数
             ListViewItem item = this.listView_databases.SelectedItems[0];
             string strTypeName = ListViewUtil.GetItemText(item, DATABASE_COLUMN_TYPENAME);
             string strName = item.Text;

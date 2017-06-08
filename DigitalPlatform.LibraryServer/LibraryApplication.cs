@@ -1599,6 +1599,7 @@ namespace DigitalPlatform.LibraryServer
                             }
                         }
 
+#if NO  // 暂时不允许使用这个验证性的功能 2017/6/8
                         // 启动 LibraryReplication
 
 #if LOG_INFO
@@ -1649,6 +1650,8 @@ namespace DigitalPlatform.LibraryServer
                                 goto ERROR1;
                             }
                         }
+
+#endif
 
                         // 启动 RebuildKeys
 
