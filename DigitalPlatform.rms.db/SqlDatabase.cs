@@ -248,7 +248,7 @@ namespace DigitalPlatform.rms
                 // 线: 不安全的
                 nRet = this.InternalGetConnectionString(
                     30,
-                    "",
+                    "pooling", // "",   2017/6/13 注：不知以前这里为何区分了 pooling 和 没有 pooling 的两种连接字符串，权且改为都用 pooling 的尝试一下
                     out this.m_strConnString,
                     out strError);
                 if (nRet == -1)

@@ -4074,6 +4074,46 @@ out strError);
             public string UnionCatalogStyle { get; set; }
             public string Replication { get; set; }
 
+            // 根据本对象的属性，将一个 database 请求元素的属性填充完善
+            public void FillRequestNode(XmlElement request_node)
+            {
+                request_node.SetAttribute("name", this.Name);
+                request_node.SetAttribute("type", this.Type.ToLower());
+
+                if (this.Type == "biblio" || this.Type == "reader")
+                    request_node.SetAttribute("inCirculation", this.InCirculation ? "true" : "false");
+
+                if (this.Type == "reader")
+                    request_node.SetAttribute("libraryCode", this.LibraryCode);
+
+                if (this.Type != "biblio")
+                    return;
+
+                request_node.SetAttribute("syntax", this.Syntax);
+                if (string.IsNullOrEmpty(this.IssueDbName))
+                    request_node.SetAttribute("usage", "series");
+                else
+                    request_node.SetAttribute("usage", "book");
+
+                SetAttribute(request_node, "role", this.Role);
+                SetAttribute(request_node, "entityDbName", this.EntityDbName);
+                SetAttribute(request_node, "orderDbName", this.OrderDbName);
+                SetAttribute(request_node, "issueDbName", this.IssueDbName);
+                SetAttribute(request_node, "commentDbName", this.CommentDbName);
+
+                SetAttribute(request_node, "unionCatalogStyle", this.UnionCatalogStyle);
+                SetAttribute(request_node, "replication", this.Replication);
+            }
+
+            // 设置属性值，或者删除属性(如果 value 为空)
+            static void SetAttribute(XmlElement element, string name, string value)
+            {
+                if (string.IsNullOrEmpty(value))
+                    element.RemoveAttribute(name);
+                else
+                    element.SetAttribute(name, value);
+            }
+
             // 从请求 XML 中构建
             public static RequestBiblioDatabase FromRequest(XmlElement request_node)
             {
@@ -4126,7 +4166,6 @@ out strError);
 
                 if (info.CommentDbName == "<default>")
                     info.CommentDbName = info.Name + "评注";
-
 
                 info.UnionCatalogStyle = DomUtil.GetAttr(request_node, "unionCatalogStyle");
 
@@ -4188,6 +4227,17 @@ out strError);
                 return info;
             }
 
+            // 从 library.xml XML 中构建
+            public static RequestBiblioDatabase FromUtilityCfgNode(XmlElement cfg_node)
+            {
+                RequestBiblioDatabase info = new RequestBiblioDatabase();
+
+                info.Name = DomUtil.GetAttr(cfg_node, "name");
+                info.Type = DomUtil.GetAttr(cfg_node, "type");
+
+                return info;
+            }
+
             // 在 library.xml 中为 biblio 类型的 database 配置节点写入参数
             public void WriteBiblioCfgNode(XmlElement nodeNewDatabase)
             {
@@ -4235,6 +4285,12 @@ out strError);
                 DomUtil.SetAttr(nodeNewDatabase, "libraryCode", this.LibraryCode);
             }
 
+            // 在 library.xml 中为 utility 类型的 database 配置节点写入参数
+            public void WriteUtilityCfgNode(XmlElement nodeNewDatabase)
+            {
+                DomUtil.SetAttr(nodeNewDatabase, "name", this.Name);
+                DomUtil.SetAttr(nodeNewDatabase, "type", this.Type);
+            }
         }
 
         // 创建数据库
@@ -4595,7 +4651,10 @@ out strError);
 
                     created_dbnames.Clear();
 
-                    // TODO: 在重新创建时，最好记载下全部参数。这样可以避免日志恢复时候依赖当时的 library.xml 中的内容
+                    //在重新创建时，记载下全部参数。这样可以避免日志恢复时候依赖当时的 library.xml 中的内容
+                    if (bRecreate)
+                        info.FillRequestNode(request_node);
+
                     database_nodes.Add(request_node);
                     continue;
                 } // end of type biblio
@@ -5033,7 +5092,10 @@ out strError);
                     this.LoadReaderDbGroupParam(this.LibraryCfgDom);
                     this.Changed = true;
 
-                    // TODO: 在重新创建时，最好记载下全部参数。这样可以避免日志恢复时候依赖当时的 library.xml 中的内容
+                    // 在重新创建时，记载下全部参数。这样可以避免日志恢复时候依赖当时的 library.xml 中的内容
+                    if (bRecreate)
+                        info.FillRequestNode(request_node);
+
                     database_nodes.Add(request_node);
                 }
                 #endregion
@@ -5050,10 +5112,10 @@ out strError);
                     }
 
                     // 看看同名的 publisher/zhongcihao/dictionary/inventory 数据库是否已经存在?
-                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']");
+                    XmlElement exist_database_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strName + "']") as XmlElement;
                     if (bRecreate == false)
                     {
-                        if (nodeDatabase != null)
+                        if (exist_database_node != null)
                         {
                             strError = strType + "库 '" + strName + "' 的定义已经存在，不能重复创建";
                             goto ERROR1;
@@ -5061,11 +5123,24 @@ out strError);
                     }
                     else
                     {
-                        if (nodeDatabase == null)
+                        if (exist_database_node == null)
                         {
                             strError = strType + "库 '" + strName + "' 的定义并不存在，无法进行重复创建";
                             return 0;
                         }
+                    }
+
+                    RequestBiblioDatabase info = null;
+
+                    if (strInfo == "*" || strInfo == "existing")    // 使用已经存在的 database 定义
+                        info = RequestBiblioDatabase.FromUtilityCfgNode(exist_database_node);
+                    else
+                        info = RequestBiblioDatabase.FromRequest(request_node);
+
+                    if (info.Type != strType)
+                    {
+                        strError = strType + "库 '" + strName + "' 的现有类型 '" + info.Type + "' 和参数 strType '" + strType + "' 不符";
+                        goto ERROR1;
                     }
 
                     // TODO: 是否限定publisher库只能创建一个？
@@ -5111,7 +5186,7 @@ out strError);
                         this.LibraryCfgDom.DocumentElement.AppendChild(root);
                     }
 
-                    XmlNode nodeNewDatabase = null;
+                    XmlElement nodeNewDatabase = null;
                     if (bRecreate == false)
                     {
                         nodeNewDatabase = this.LibraryCfgDom.CreateElement("database");
@@ -5119,11 +5194,15 @@ out strError);
                     }
                     else
                     {
-                        nodeNewDatabase = nodeDatabase;
+                        nodeNewDatabase = exist_database_node;
                     }
 
+                    info.WriteUtilityCfgNode(nodeNewDatabase);
+
+#if NO
                     DomUtil.SetAttr(nodeNewDatabase, "name", strName);
                     DomUtil.SetAttr(nodeNewDatabase, "type", strType);
+#endif
                     this.Changed = true;
                     database_nodes.Add(request_node);
                 }
