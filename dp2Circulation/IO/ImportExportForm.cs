@@ -1283,13 +1283,31 @@ new string[] { "重试", "跳过", "中断" });
                 existing.AddRange(item_xmls);
         }
 
+        // return:
+        //      false   没有发生填充
+        //      true    发生了填充
+        static bool FillEmptyRefID(ref string strRefID)
+        {
+            if (String.IsNullOrEmpty(strRefID) == true)
+            {
+                strRefID = Guid.NewGuid().ToString();
+                return true;
+            }
+
+            return false;
+        }
+
         static void RefreshRefID(Hashtable table, ref string strRefID)
         {
+#if NO
             if (String.IsNullOrEmpty(strRefID) == true)
             {
                 strRefID = Guid.NewGuid().ToString();
                 return;
             }
+#endif
+            if (FillEmptyRefID(ref strRefID) == true)
+                return;
 
             if (table == null)
                 return;
@@ -1517,6 +1535,13 @@ new string[] { "重试", "跳过", "中断" });
                     if (info.NewRefID)
                         RefreshRefID(null, ref strRefID);
                 }
+
+                // 2017/6/13
+                // 即便不要求替换 refid，也要确保当 refid 为空的时候发生它
+                if (string.IsNullOrEmpty(strRefID))
+                    FillEmptyRefID(ref strRefID);
+
+                Debug.Assert(string.IsNullOrEmpty(strRefID) == false, "");
 
                 item.RefID = strRefID;
                 DomUtil.SetElementText(item_dom.DocumentElement, "refID", strRefID);
