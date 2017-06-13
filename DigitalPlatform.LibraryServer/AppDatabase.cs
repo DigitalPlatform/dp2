@@ -4090,7 +4090,7 @@ out strError);
                     return;
 
                 request_node.SetAttribute("syntax", this.Syntax);
-                if (string.IsNullOrEmpty(this.IssueDbName))
+                if (string.IsNullOrEmpty(this.IssueDbName) == false)
                     request_node.SetAttribute("usage", "series");
                 else
                     request_node.SetAttribute("usage", "book");
