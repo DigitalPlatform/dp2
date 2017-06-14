@@ -2127,7 +2127,7 @@ namespace DigitalPlatform.LibraryServer
                     bool bNullable = DomUtil.GetBooleanParam(item, "itemBarcodeNullable", true);
                     if (bNullable == false)
                     {
-                        strError = "册条码号不能为空(根据 <locationTypes> 定义)";
+                        strError = "册条码号不能为空(根据馆藏地 '" + strLocation + "' 的 <locationTypes> 定义)";
                         return 1;
                     }
                 }

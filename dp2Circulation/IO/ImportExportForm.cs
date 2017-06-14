@@ -24,6 +24,7 @@ using DigitalPlatform.Range;
 using DigitalPlatform.Marc;
 
 using DigitalPlatform.CirculationClient;
+using System.Web;
 
 
 namespace dp2Circulation
@@ -390,7 +391,7 @@ Program.MainForm.ActivateFixPage("history")
             else if (info.Collect)
                 strText = ("正在从书目转储文件搜集信息 ...");
 
-            WriteHtml(strText + "\r\n");
+            WriteText(strText + "\r\n");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -1787,7 +1788,7 @@ int nCount)
         {
             base.OutputText(strText, nWarningLevel);
             if (nWarningLevel == 2)
-                WriteHtml(strText + "\r\n");
+                WriteHtml(HttpUtility.HtmlEncode(strText) + "\r\n");
         }
 
         Hashtable _itemBarcodeTable = new Hashtable();  // itemBarcode --> count
@@ -2150,6 +2151,11 @@ new string[] { "继续", "中断" });
                     strHtml);
                 webBrowser1.ScrollToEnd();
             }));
+        }
+
+        void WriteText(string strText)
+        {
+            WriteHtml(HttpUtility.HtmlEncode(strText));
         }
 
         public void ClearHtml()
