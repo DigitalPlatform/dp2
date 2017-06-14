@@ -16,6 +16,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Collections;
 
 namespace dp2Circulation
 {
@@ -525,6 +526,8 @@ namespace dp2Circulation
 
             barcodes = new List<string>();
 
+            Hashtable dup_table = new Hashtable();  // barcode --> 记录路径
+
             TimeSpan old_timeout = this.Channel.Timeout;
             this.Channel.Timeout = TimeSpan.FromMinutes(30);
 
@@ -591,6 +594,26 @@ namespace dp2Circulation
                     string strBarcode = record.Cols[0];
                     if (string.IsNullOrEmpty(strBarcode))
                         goto CONTINUE;
+
+                    strBarcode = strBarcode.Trim();
+                    if (string.IsNullOrEmpty(strBarcode))
+                        goto CONTINUE;
+
+                    // 判重
+                    if (this.checkBox_checkItemBarcodeDup.Checked
+                        && string.IsNullOrEmpty(strBarcode) == false)
+                    {
+                        if (dup_table.ContainsKey(strBarcode))
+                        {
+                            string strOldRecPath = (string)dup_table[strBarcode];
+                            Global.WriteHtml(this.webBrowser_resultInfo,
+    "册条码号 " + strBarcode + " 发现重复。记录 " + strOldRecPath + " 和 " + record.Path + "\r\n");
+
+                        }
+                        else
+                            dup_table[strBarcode] = record.Path;
+                    }
+
                     if (bHasBorrower == true
                         && string.IsNullOrEmpty(strBorrower))
                         goto CONTINUE;

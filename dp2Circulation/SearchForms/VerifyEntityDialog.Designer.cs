@@ -32,6 +32,7 @@
             this.checkBox_verifyItemBarcode = new System.Windows.Forms.CheckBox();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
+            this.checkBox_serverVerify = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // checkBox_autoModify
@@ -79,6 +80,16 @@
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
+            // checkBox_serverVerify
+            // 
+            this.checkBox_serverVerify.AutoSize = true;
+            this.checkBox_serverVerify.Location = new System.Drawing.Point(13, 86);
+            this.checkBox_serverVerify.Name = "checkBox_serverVerify";
+            this.checkBox_serverVerify.Size = new System.Drawing.Size(96, 16);
+            this.checkBox_serverVerify.TabIndex = 12;
+            this.checkBox_serverVerify.Text = "服务器端校验";
+            this.checkBox_serverVerify.UseVisualStyleBackColor = true;
+            // 
             // VerifyEntityDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -86,6 +97,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(284, 261);
+            this.Controls.Add(this.checkBox_serverVerify);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.checkBox_verifyItemBarcode);
@@ -105,5 +117,6 @@
         private System.Windows.Forms.CheckBox checkBox_verifyItemBarcode;
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;
+        private System.Windows.Forms.CheckBox checkBox_serverVerify;
     }
 }

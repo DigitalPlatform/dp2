@@ -1092,7 +1092,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
                 // 2017/5/18
                 // 装载浏览格式的中途如果修改服务器相关数据库的 browse 配置文件可能会走到这里
                 strError = "parent id 列 (index=" + nCol + ") 内容为空";
-                return 0;
+                return 1;   // 找到了列号，但是该列内容为空
             }
             return 1;
         }

@@ -25,6 +25,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
 using ClosedXML.Excel;
+using DigitalPlatform.rms.Client;
 
 // 2013/3/16 添加 XML 注释
 // 2017/4/16 将 this.Channel 改造为 this.GetChannel() 用法
@@ -2667,6 +2668,8 @@ out strError);
                 return -1;
             }
 
+            _verifyBarcodeFuncTable.Clear();
+
             VerifyEntityDialog dlg = new VerifyEntityDialog();
             MainForm.SetControlFont(dlg, this.Font);
 
@@ -2685,6 +2688,15 @@ out strError);
                 "ItemSearchForm",
                 "VerifyEntityDialog_uiState",
                 dlg.UiState);
+
+            if (dlg.ServerVerify == true)
+            {
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.112") < 0)
+                {
+                    strError = "服务器端校验功能只能和 dp2library 2.112 或以上版本配套使用";
+                    return -1;
+                }
+            }
 
             // 切换到“操作历史”属性页
             Program.MainForm.ActivateFixPage("history");
@@ -3014,6 +3026,9 @@ out strError);
 
         }
 
+        // 没有提供校验条码号函数的馆藏地列表
+        Hashtable _verifyBarcodeFuncTable = new Hashtable();    // 馆藏地 --> -2
+
         // 校验一条册记录
         void VerifyOneEntity(
             object param,
@@ -3121,52 +3136,86 @@ out strError);
                 string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
                 strLocation = StringUtil.GetPureLocationString(strLocation);
 
-                string strLibraryCode = "";
-                string strRoom = "";
-                // 解析
-                Global.ParseCalendarName(strLocation,
-            out strLibraryCode,
-            out strRoom);
+                if (_verifyBarcodeFuncTable.ContainsKey(strLocation) == false)
+                {
 
-            REDO_VERIFYBARCODE:
-                // <para>-2  服务器没有配置校验方法，无法校验</para>
-                // <para>-1  出错</para>
-                // <para>0   不是合法的条码号</para>
-                // <para>1   是合法的读者证条码号</para>
-                // <para>2   是合法的册条码号</para>
-                nRet = Program.MainForm.VerifyBarcode(
-this.stop,
-channel,
-strLibraryCode,
-strBarcode,
-null,
-out strError);
+                    string strLibraryCode = "";
+                    string strRoom = "";
+                    // 解析
+                    Global.ParseCalendarName(strLocation,
+                out strLibraryCode,
+                out strRoom);
+
+                REDO_VERIFYBARCODE:
+                    // <para>-2  服务器没有配置校验方法，无法校验</para>
+                    // <para>-1  出错</para>
+                    // <para>0   不是合法的条码号</para>
+                    // <para>1   是合法的读者证条码号</para>
+                    // <para>2   是合法的册条码号</para>
+                    nRet = Program.MainForm.VerifyBarcode(
+    this.stop,
+    channel,
+    strLibraryCode,
+    strBarcode,
+    null,
+    out strError);
+                    if (nRet == -1)
+                    {
+                        MessagePromptEventArgs e = new MessagePromptEventArgs();
+                        e.MessageText = "校验册条码号时发生错误： " + strError;
+                        e.Actions = "yes,no,cancel";
+                        loader_Prompt(this, e);
+                        if (e.ResultAction == "cancel")
+                            throw new Exception(strError);
+                        else if (e.ResultAction == "yes")
+                            goto REDO_VERIFYBARCODE;
+                        //else
+                        //    throw new ChannelException(Channel.ErrorCode, strError);
+                    }
+                    if (nRet == -2)
+                    {
+                        // throw new Exception(strError);
+                        errors.Add(strError + "(后面将不会对来自馆藏地 '" + strLocation + "' 的册记录进行册条码号校验)");   // TODO: 是否可以统一报错(不要每个册都报错)?
+                        _verifyBarcodeFuncTable[strLocation] = -2;
+                    }
+                    else if (nRet != 2)
+                    {
+                        if (nRet == 1 && string.IsNullOrEmpty(strError) == true)
+                            strError = strLibraryCode + ": 这看起来是一个证条码号";
+
+                        errors.Add("册条码号 '" + strBarcode + "' 不合法: " + strError);
+                    }
+                }
+            }
+
+            // 服务器端校验
+            if (dlg.ServerVerify == true)
+            {
+            REDO_SERVERVERIFY:
+                // 调用服务器端校验册记录功能
+                // return:
+                //      -1  校验过程出错
+                //      0   校验没有发现错误
+                //      1   校验发现了错误
+                nRet = ServerVerifyEntity(
+                    channel,
+                    "item",
+                    strItemRecPath,
+                    itemdom.OuterXml,
+                    out strError);
                 if (nRet == -1)
                 {
                     MessagePromptEventArgs e = new MessagePromptEventArgs();
-                    e.MessageText = "校验册条码号时发生错误： " + strError;
+                    e.MessageText = "册条码号查重时发生错误： " + strError;
                     e.Actions = "yes,no,cancel";
                     loader_Prompt(this, e);
                     if (e.ResultAction == "cancel")
                         throw new Exception(strError);
                     else if (e.ResultAction == "yes")
-                        goto REDO_VERIFYBARCODE;
-                    //else
-                    //    throw new ChannelException(Channel.ErrorCode, strError);
+                        goto REDO_SERVERVERIFY;
                 }
-                if (nRet == -2)
-                {
-                    // throw new Exception(strError);
-                    errors.Add(strError);   // TODO: 是否可以统一报错(不要每个册都报错)?
-                }
-
-                if (nRet != 2)
-                {
-                    if (nRet == 1 && string.IsNullOrEmpty(strError) == true)
-                        strError = strLibraryCode + ": 这看起来是一个证条码号";
-
-                    errors.Add("册条码号 '" + strBarcode + "' 不合法: " + strError);
-                }
+                if (nRet == 1)
+                    errors.Add(strError);
             }
 
             // 检查价格字段
@@ -3203,6 +3252,117 @@ out strError);
             {
                 DomUtil.RemoveEmptyElements(itemdom.DocumentElement, false);
             }
+        }
+
+        // 调用服务器端校验册记录功能
+        // return:
+        //      -1  校验过程出错
+        //      0   校验没有发现错误
+        //      1   校验发现了错误
+        public int ServerVerifyEntity(
+            LibraryChannel channel,
+            string strDbType,
+            string strRecPath,
+            string strXml,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
+
+            string strRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+            if (string.IsNullOrEmpty(strRefID))
+            {
+                strRefID = Guid.NewGuid().ToString();
+                DomUtil.SetElementText(dom.DocumentElement, "refID", strRefID);
+                strXml = dom.OuterXml;
+            }
+
+            List<EntityInfo> entityArray = new List<EntityInfo>();
+
+            {
+                EntityInfo info = new EntityInfo();
+
+                info.RefID = strRefID;
+
+                info.OldRecPath = strRecPath;
+                info.Action = "verify";
+
+                info.OldRecord = strXml;
+                entityArray.Add(info);
+            }
+
+            EntityInfo[] errorinfos = null;
+
+            long lRet = 0;
+
+            if (strDbType == "item")
+                lRet = channel.SetEntities(
+                     null,
+                     "",
+                     entityArray.ToArray(),
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "order")
+                lRet = channel.SetOrders(
+                     null,
+                     "",
+                     entityArray.ToArray(),
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "issue")
+                lRet = channel.SetIssues(
+                     null,
+                     "",
+                     entityArray.ToArray(),
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "comment")
+                lRet = channel.SetComments(
+                     null,
+                     "",
+                     entityArray.ToArray(),
+                     out errorinfos,
+                     out strError);
+            else
+            {
+                strError = "未知的 strDbType '" + strDbType + "'";
+                return -1;
+            }
+
+            if (lRet == -1)
+                return -1;
+
+            // string strWarning = ""; // 警告信息
+
+            if (errorinfos == null)
+                return 0;
+
+            List<string> errors = new List<string>();
+            foreach (EntityInfo error in errorinfos)
+            {
+                if (String.IsNullOrEmpty(error.RefID) == true)
+                {
+                    strError = "服务器返回的 EntityInfo 结构中 RefID 为空";
+                    return -1;
+                }
+
+                // 正常信息处理
+                if (error.ErrorCode == ErrorCodeValue.NoError)
+                    continue;
+
+                if (string.IsNullOrEmpty(error.ErrorInfo) == false)
+                    errors.Add(error.ErrorInfo);
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return 1;
+            }
+
+            return 0;
         }
 
         // return:
@@ -7544,7 +7704,7 @@ MessageBoxDefaultButton.Button1);
 
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.108") < 0)
             {
-                strError = "本功能只能和 dp2library 2.08 或以上版本配套使用";
+                strError = "本功能只能和 dp2library 2.108 或以上版本配套使用";
                 goto ERROR1;
             }
 

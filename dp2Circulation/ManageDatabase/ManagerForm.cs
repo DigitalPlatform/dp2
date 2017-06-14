@@ -1391,7 +1391,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            if (this.listView_databases.SelectedItems.Count > 0)
+            if (this.listView_databases.SelectedItems.Count > 1)
             {
                 // 重新创建多个数据库
                 // return:
@@ -1758,9 +1758,16 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            string strText = "";
+
             // 重新创建数据库
             {
-                menuItem = new MenuItem("重新创建" + strType + "库 '" + strName + "'(&M)");
+                if (this.listView_databases.SelectedItems.Count == 1)
+                    strText = "重新创建" + strType + "库 '" + strName + "'(&M)";
+                else
+                    strText = "重新创建所选 " + this.listView_databases.SelectedItems.Count.ToString() + " 个数据库(&M)";
+
+                menuItem = new MenuItem(strText);
                 menuItem.Click += new System.EventHandler(this.menu_recreateDatabase_Click);
                 if (this.listView_databases.SelectedItems.Count == 0)
                     menuItem.Enabled = false;
@@ -1828,7 +1835,6 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            string strText = "";
             if (this.listView_databases.SelectedItems.Count == 1)
                 strText = "删除" + strType + "库 '" + strName + "'(&D)";
             else

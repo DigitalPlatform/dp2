@@ -2176,6 +2176,157 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        // 校验一个册记录
+        // return:
+        //      -1  出错。出错信息在 strError 中返回
+        //      0   校验没有发现错误。result 中返回了校验结果
+        //      1   校验发现了错误。result 中返回了校验结果
+        int VerifyEntity(
+            SessionInfo sessioninfo,
+            EntityInfo info,
+            out EntityInfo result,
+            out string strError)
+        {
+            strError = "";
+            result = new EntityInfo();
+            result.OldRecPath = info.OldRecPath;
+            result.RefID = info.RefID;
+            result.ErrorCode = ErrorCodeValue.CommonError;
+
+            List<string> errors = new List<string>();
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
+
+            string strRecPath = info.OldRecPath;
+            string strXml = info.OldRecord;
+            if (string.IsNullOrEmpty(strXml))
+            {
+                // 检查路径中的库名部分
+                if (String.IsNullOrEmpty(strRecPath) == false)
+                {
+                    strError = "";
+
+                    string strDbName = ResPath.GetDbName(strRecPath);
+
+                    if (String.IsNullOrEmpty(strDbName) == true)
+                    {
+                        strError = "OldRecPath中数据库名不应为空";
+                        goto ERROR1;
+                    }
+
+                    // 要检查看看 strDbName 是否为一个实体库名
+                    if (this.IsItemDbName(strDbName) == false)
+                    {
+                        strError = "OldRecPath中数据库名 '" + strDbName + "' 不正确，应为实体库名";
+                        goto ERROR1;
+                    }
+                }
+
+
+                // 从数据库中读出记录
+                byte[] exist_timestamp = null;
+                string strOutputPath = "";
+                string strMetaData = "";
+
+                long lRet = channel.GetRes(info.NewRecPath,
+                    out strXml,
+                    out strMetaData,
+                    out exist_timestamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                    {
+                        result.ErrorCode = ErrorCodeValue.NotFound;
+                        goto ERROR1;
+                    }
+
+                    goto ERROR1;
+                }
+            }
+
+            XmlDocument domExist = new XmlDocument();
+            try
+            {
+                domExist.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "strXml 装载进入 DOM 时发生错误: " + ex.Message;
+                goto ERROR1;
+            }
+
+            int nRet = this.DoVerifyItemFunction(
+    sessioninfo,
+    "", // strAction,
+    domExist,
+    out strError);
+            if (nRet != 0)
+                errors.Add(strError);
+
+            string strBarcode = DomUtil.GetElementText(domExist.DocumentElement, "barcode");
+            if (string.IsNullOrEmpty(strBarcode) == false)
+            {
+                // 查重
+                List<string> aPath = null;
+                // 根据册条码号对实体库进行查重
+                // 本函数只负责查重, 并不获得记录体
+                // return:
+                //      -1  error
+                //      其他    命中记录条数(不超过nMax规定的极限)
+                nRet = SearchItemRecDup(
+                    channel,
+                    strBarcode,
+                    100,
+                    out aPath,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                bool bDup = false;
+                if (nRet == 0)
+                {
+                    bDup = false;
+                }
+                else if (nRet == 1) // 命中一条
+                {
+                    Debug.Assert(aPath.Count == 1, "");
+
+                    if (aPath[0] == strRecPath) // 正好是自己
+                        bDup = false;
+                    else
+                        bDup = true;// 别的记录中已经使用了这个条码号
+                } // end of if (nRet == 1)
+                else
+                {
+                    Debug.Assert(nRet > 1, "");
+                    bDup = true;
+                }
+
+                // 报错
+                if (bDup == true)
+                    errors.Add("册条码号 '" + strBarcode + "' 已经被下列册记录使用了: " + StringUtil.MakePathList(aPath));
+            }
+
+            if (errors.Count > 0)
+            {
+                result.ErrorInfo = StringUtil.MakePathList(errors, "; ");
+                return 1;
+            }
+
+            result.ErrorCode = ErrorCodeValue.NoError;
+            return 0;
+        ERROR1:
+            result.ErrorInfo = strError;
+            return -1;
+        }
+
         // 设置/保存册信息
         // parameters:
         //      strBiblioRecPath    书目记录路径，仅包含库名和id部分。库名可以用来确定书目库，id可以被实体记录用来设置<parent>元素内容。另外书目库名和EntityInfo中的NewRecPath形成映照关系，需要检查它们是否正确对应
@@ -2257,6 +2408,26 @@ namespace DigitalPlatform.LibraryServer
             foreach (EntityInfo info in entityinfos)
             {
                 string strAction = info.Action;
+
+                if (strAction == "verify")
+                {
+                    EntityInfo verify_result = null;
+                    nRet = VerifyEntity(
+                        sessioninfo,
+                        info,
+                        out verify_result,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        EntityInfo error = new EntityInfo(info);
+                        error.ErrorInfo = strError;
+                        error.ErrorCode = ErrorCodeValue.CommonError;
+                        ErrorInfos.Add(error);
+                        continue;
+                    }
+                    ErrorInfos.Add(verify_result);
+                    continue;
+                }
 
                 bool bForce = false;    // 是否为强制操作(强制操作不去除源记录中的流通信息字段内容)
                 bool bNoCheckDup = false;   // 是否为不查重?

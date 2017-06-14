@@ -1,5 +1,4 @@
-﻿using DigitalPlatform.CommonControl;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +6,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -36,6 +37,7 @@ namespace dp2Circulation
                 List<object> controls = new List<object>();
                 controls.Add(this.checkBox_autoModify);
                 controls.Add(this.checkBox_verifyItemBarcode);
+                controls.Add(this.checkBox_serverVerify);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -43,7 +45,20 @@ namespace dp2Circulation
                 List<object> controls = new List<object>();
                 controls.Add(this.checkBox_autoModify);
                 controls.Add(this.checkBox_verifyItemBarcode);
+                controls.Add(this.checkBox_serverVerify);
                 GuiState.SetUiState(controls, value);
+            }
+        }
+
+        public bool ServerVerify
+        {
+            get
+            {
+                return this.checkBox_serverVerify.Checked;
+            }
+            set
+            {
+                this.checkBox_serverVerify.Checked = value;
             }
         }
 
