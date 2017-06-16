@@ -805,6 +805,8 @@ namespace dp2Circulation
             loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
             loader.RecPaths = biblio_recpaths;
 
+            loader.Prompt += loader_Prompt;
+
             var enumerator = loader.GetEnumerator();
 
             int i = 0;
@@ -868,6 +870,23 @@ namespace dp2Circulation
             }
 
             return 1;
+        }
+
+        void loader_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            if (e.Actions == "yes,no,cancel")
+            {
+                DialogResult result = AutoCloseMessageBox.Show(this,
+    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    20 * 1000,
+    "ItemSearchForm");
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "cancel";
+                else if (result == System.Windows.Forms.DialogResult.No)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
+            }
         }
 
         /*

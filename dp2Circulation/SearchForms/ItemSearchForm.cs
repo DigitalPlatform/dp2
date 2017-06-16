@@ -1197,6 +1197,7 @@ this.DbType + "_search_form",
                     strTempBrowseStyle += ",format:@coldef:*/parent";
                 }
 
+            REDO_GETRECORDS:
                 long lRet = channel.GetSearchResult(
                     stop,
                     null,   // strResultSetName
@@ -1208,8 +1209,19 @@ this.DbType + "_search_form",
                     out strError);
                 if (lRet == -1)
                 {
-                    this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，" + strError;
-                    goto ERROR1;
+                    MessagePromptEventArgs e = new MessagePromptEventArgs();
+                    e.MessageText = "获得浏览记录时发生错误： " + strError;
+                    e.Actions = "yes,no,cancel";
+                    loader_Prompt(this, e);
+                    if (e.ResultAction == "cancel")
+                    {
+                        this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，" + strError;
+                        goto ERROR1;
+                    }
+                    else if (e.ResultAction == "yes")
+                        goto REDO_GETRECORDS;
+
+                    continue;
                 }
 
                 if (lRet == 0)

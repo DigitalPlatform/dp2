@@ -31,6 +31,8 @@ namespace dp2Catalog
 {
     public partial class AmazonSearchForm : Form, ISearchForm
     {
+        public const string API_VERSION = "2013-08-01"; // "2011-08-01";
+
         // 浏览事项的类型下标
         public const int BROWSE_TYPE_NORMAL = 0;   // 普通记录
         public const int BROWSE_TYPE_DIAG = 1;     // 诊断记录 或者 4
@@ -714,7 +716,7 @@ this.CurrentServer);
             IDictionary<string, string> parameters = new Dictionary<string, String>();
 
             parameters["Service"] = "AWSECommerceService";
-            parameters["Version"] = "2011-08-01";
+            parameters["Version"] = API_VERSION;    // "2011-08-01";
             parameters["Operation"] = "ItemSearch";
             parameters["SearchIndex"] = "Books";
             parameters["Power"] = strText;
@@ -798,7 +800,7 @@ this.CurrentServer);
             IDictionary<string, string> parameters = new Dictionary<string, String>();
 
             parameters["Service"] = "AWSECommerceService";
-            parameters["Version"] = "2011-08-01";
+            parameters["Version"] = API_VERSION;    // "2011-08-01";
             parameters["Operation"] = "ItemLookup";
             parameters["ItemId"] = asin.ToString();
             parameters["IdType"] = "ASIN";
@@ -957,7 +959,7 @@ value);
         long m_nTotalPages = 0;     // 命中结果的总页数
         string m_strError = ""; // 异步操作中用于保存出错信息
 
-        private const string NAMESPACE = "http://webservices.amazon.com/AWSECommerceService/2011-08-01";
+        private const string NAMESPACE = "http://webservices.amazon.com/AWSECommerceService/2013-08-01";
 
         WebClient webClient = null;
         public string TempFilename = "";
@@ -1134,7 +1136,7 @@ this.CurrentServer);
             IDictionary<string, string> parameters = new Dictionary<string, String>();
 
             parameters["Service"] = "AWSECommerceService";
-            parameters["Version"] = "2011-08-01";
+            parameters["Version"] = API_VERSION;    // "2011-08-01";
             parameters["Operation"] = "ItemSearch";
             parameters["SearchIndex"] = "Books";
             parameters["Power"] = strText;

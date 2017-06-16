@@ -747,6 +747,9 @@ namespace dp2Circulation
             loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
             loader.RecPaths = biblio_recpaths;
 
+            loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+            loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
             var enumerator = loader.GetEnumerator();
 
             int i = 0;

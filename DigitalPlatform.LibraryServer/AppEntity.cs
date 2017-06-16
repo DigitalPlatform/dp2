@@ -54,6 +54,7 @@ namespace DigitalPlatform.LibraryServer
                 "bindingCost",  // 2012/6/1 装订费
                 "biblio",   //  2016/12/8
                 "oldRefID", // 2016/12/19
+                "shelfNo", // 2017/6/15 架号。例如 10-1 表示第十个架的第一排
             };
 
         // <DoEntityOperChange()的下级函数>
@@ -67,23 +68,6 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
 
             // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
-
-            /*
-            // 要害元素名列表
-            string[] element_names = new string[] {
-                "parent",
-                "barcode",
-                "state",
-                "location",
-                "price",
-                "bookType",
-                "registerNo",
-                "comment",
-                "mergeComment",
-                "batchNo",
-            };
-             * */
-
             foreach (string name in core_entity_element_names)
             {
                 /*
