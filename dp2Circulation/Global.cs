@@ -1869,6 +1869,7 @@ namespace dp2Circulation
             foreach (ListViewItem item in list.SelectedItems)
             {
                 string strLine = nColumnIndex >= item.SubItems.Count ? "" : item.SubItems[nColumnIndex].Text;
+                strLine = strLine.Replace("\r", "\\r").Replace("\n", "\\n");    // 避免内容中的回车换行干扰 paste 进入 Excel 等的行数
                 strTotal.Append(strLine + "\r\n");
             }
 
@@ -2107,7 +2108,9 @@ namespace dp2Circulation
             {
                 if (i != 0)
                     strLine.Append("\t");
-                strLine.Append(item.SubItems[i].Text);
+
+                string strText = item.SubItems[i].Text.Replace("\r", "\\r").Replace("\n", "\\n");    // 避免内容中的回车换行干扰 paste 进入 Excel 等的行数
+                strLine.Append(strText);
             }
 
             return strLine.ToString();
@@ -2135,7 +2138,6 @@ namespace dp2Circulation
             for (int i = 0; i < parts.Length; i++)
             {
                 ListViewUtil.ChangeItemText(item, i, parts[i]);
-
             }
 
             // 确保列标题数目够
