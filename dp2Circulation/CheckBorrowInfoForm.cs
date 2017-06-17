@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
 using System.IO;
+using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
@@ -16,7 +17,6 @@ using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Collections;
 
 namespace dp2Circulation
 {
@@ -1368,7 +1368,6 @@ out strError);
             }
 
             MessageBox.Show(this, "OK");
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1537,10 +1536,10 @@ out strError);
                     }
 
                     // 保存册记录
-
                     EntityInfo[] entities = new EntityInfo[1];
                     EntityInfo info = new EntityInfo();
 
+                    // TODO: 册记录如果已经有 refid 要沿用已有的
                     info.RefID = Guid.NewGuid().ToString(); // 2008/4/14 
                     info.Action = "change";
                     info.OldRecPath = strItemRecPath;    // 2007/6/2 
@@ -1613,8 +1612,6 @@ out strError);
 
                 Global.WriteHtml(this.webBrowser_resultInfo,
                     "处理结束。共增补价格字符串 " + nCount.ToString() + " 个。\r\n");
-
-
             }
             finally
             {

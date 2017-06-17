@@ -38,6 +38,7 @@ namespace dp2Circulation
                 controls.Add(this.checkBox_autoModify);
                 controls.Add(this.checkBox_verifyItemBarcode);
                 controls.Add(this.checkBox_serverVerify);
+                controls.Add(this.checkBox_addPrice);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -46,6 +47,7 @@ namespace dp2Circulation
                 controls.Add(this.checkBox_autoModify);
                 controls.Add(this.checkBox_verifyItemBarcode);
                 controls.Add(this.checkBox_serverVerify);
+                controls.Add(this.checkBox_addPrice);
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -84,6 +86,23 @@ namespace dp2Circulation
             {
                 this.checkBox_autoModify.Checked = value;
             }
+        }
+
+        public bool AddPrice
+        {
+            get
+            {
+                return this.checkBox_addPrice.Checked;
+            }
+            set
+            {
+                this.checkBox_addPrice.Checked = value;
+            }
+        }
+
+        private void checkBox_autoModify_CheckedChanged(object sender, EventArgs e)
+        {
+            this.checkBox_addPrice.Enabled = this.checkBox_autoModify.Checked;
         }
     }
 }

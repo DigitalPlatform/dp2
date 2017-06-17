@@ -2721,6 +2721,15 @@ out strError);
                 }
             }
 
+            if (dlg.AddPrice == true)
+            {
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.113") < 0)
+                {
+                    strError = "添加价格功能只能和 dp2library 2.113 或以上版本配套使用";
+                    return -1;
+                }
+            }
+
             // 切换到“操作历史”属性页
             Program.MainForm.ActivateFixPage("history");
 
@@ -2859,7 +2868,10 @@ out strError);
                         Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
                         foreach (string error in errors)
                         {
-                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                            if (string.IsNullOrEmpty(error) == false && error[0] == '^')
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(error.Substring(1)) + "</div>");
+                            else
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
                         }
 
                         {
@@ -3266,6 +3278,22 @@ out strError);
                 }
             }
 
+            // 对空的价格字段，从书目记录里面获得价格填充
+            if (dlg.AddPrice && dlg.AutoModify)
+            {
+                nRet = AddPrice(
+                    channel,
+                    itemdom,
+                    strItemRecPath,
+                    bAutoModify,
+                    ref bChanged,
+                    out strError);
+                if (nRet == -1)
+                    errors.Add(strError);
+                else if (string.IsNullOrEmpty(strError) == false)
+                    errors.Add("^" + strError); // ^ 开头表示修改提示，而不是错误信息
+            }
+
             // 检查馆藏地字段
 
             // 检查图书类型字段
@@ -3275,6 +3303,135 @@ out strError);
             {
                 DomUtil.RemoveEmptyElements(itemdom.DocumentElement, false);
             }
+        }
+
+        // return:
+        //      -1  发现错误
+        //      0   没有发现错误
+        int AddPrice(
+            LibraryChannel channel,
+            XmlDocument dom,
+            string strItemRecPath,
+            bool bModify,
+            ref bool bChanged,
+            out string strError)
+        {
+            strError = "";
+
+            if (bModify == false)
+                return 0;
+
+            if (dom.DocumentElement == null)
+            {
+                strError = "XML 记录为空";
+                return -1;
+            }
+
+            string strPrice = DomUtil.GetElementText(dom.DocumentElement, "price");
+            if (string.IsNullOrEmpty(strPrice) || strPrice == "CNY")
+            {
+
+                string strParentID = DomUtil.GetElementText(dom.DocumentElement, "parent");
+                if (string.IsNullOrEmpty(strParentID))
+                {
+                    strError = "缺乏 parent 元素";
+                    return -1;
+                }
+
+                string strBiblioRecPath = Program.MainForm.BuildBiblioRecPath(
+                    this.DbType,
+                    strItemRecPath,
+                    strParentID);
+                if (string.IsNullOrEmpty(strBiblioRecPath))
+                {
+                    strError = "获取对应的书目记录路径时出错";
+                    return -1;
+                }
+
+            REDO_GETBIBLIOINFO:
+                string[] results = null;
+                byte[] baTimestamp = null;
+
+                long lRet = channel.GetBiblioInfos(
+                    stop,
+                    strBiblioRecPath,
+                    "",
+                    new string[] { "marc:syntax" },   // formats
+                    out results,
+                    out baTimestamp,
+                    out strError);
+                if (lRet == 0)
+                    return 0;   // 书目记录不存在，无法为册记录添加价格
+                if (lRet == -1)
+                {
+                    MessagePromptEventArgs e = new MessagePromptEventArgs();
+                    e.MessageText = "获取书目记录 '" + strBiblioRecPath + "' 时发生错误： " + strError;
+                    e.Actions = "yes,no,cancel";
+                    loader_Prompt(this, e);
+                    if (e.ResultAction == "cancel")
+                        throw new Exception(strError);
+                    else if (e.ResultAction == "yes")
+                        goto REDO_GETBIBLIOINFO;
+                    return -1;
+                }
+
+                if (results == null || results.Length == 0)
+                {
+                    strError = "results error";
+                    return -1;
+                }
+
+                List<string> parts = StringUtil.ParseTwoPart(results[0], "|");
+                string strSyntax = parts[0];
+                string strMarc = parts[1];
+
+                MarcRecord record = new MarcRecord(strMarc);
+                string strBiblioPrice = "";
+                if (strSyntax == "usmarc")
+                {
+                    strBiblioPrice = record.select("field[@name='020']/subfield[@name='c']").FirstContent;
+                }
+                else
+                {
+                    strBiblioPrice = record.select("field[@name='010']/subfield[@name='d']").FirstContent;
+                    if (string.IsNullOrEmpty(strBiblioPrice))
+                        strBiblioPrice = record.select("field[@name='020']/subfield[@name='d']").FirstContent;
+                    if (string.IsNullOrEmpty(strBiblioPrice))
+                        strBiblioPrice = record.select("field[@name='091']/subfield[@name='d']").FirstContent;
+                }
+
+                if (string.IsNullOrEmpty(strBiblioPrice))
+                    return 0;
+
+                // 正规化 strBiblioPrice。不合法的则不使用
+
+                // (全10册) 转为除法形态
+                ItemClassStatisDialog.CorrectPrice(ref strBiblioPrice);
+                if (IsPriceCorrect(strBiblioPrice) == false)
+                    return 0;
+
+                DomUtil.SetElementText(dom.DocumentElement, "price", strBiblioPrice);
+                bChanged = true;
+                strError = "为册记录添加价格字符串 '" + strBiblioPrice + "'";
+            }
+
+            return 0;
+        }
+
+        public static bool IsPriceCorrect(string strPrice)
+        {
+            if (string.IsNullOrEmpty(strPrice))
+                return false;
+            string strError = "";
+            CurrencyItem item = null;
+            // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
+            int nRet = PriceUtil.ParseSinglePrice(strPrice,
+                out item,
+                out strError);
+            if (nRet == -1)
+                return false;
+
+            return true;
         }
 
         // 调用服务器端校验册记录功能
@@ -3388,7 +3545,7 @@ out strError);
             return 0;
         }
 
-        // return:
+
         //      -1  发现错误
         //      0   没有发现错误
         int VerifyBlankChar(XmlDocument dom,

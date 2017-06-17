@@ -388,6 +388,9 @@ Z";
 
         // 去掉价格字符串中的 "(...)" 部分
         // TODO: 检查小数点后的位数，多于 2 位的要删除
+        // return:
+        //      false   没有发生修改
+        //      true    发生了修改
         public static bool CorrectPrice(ref string strText)
         {
             strText = strText.Trim();

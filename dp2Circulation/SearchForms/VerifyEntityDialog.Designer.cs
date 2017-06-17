@@ -33,6 +33,7 @@
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.checkBox_serverVerify = new System.Windows.Forms.CheckBox();
+            this.checkBox_addPrice = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // checkBox_autoModify
@@ -44,11 +45,12 @@
             this.checkBox_autoModify.TabIndex = 0;
             this.checkBox_autoModify.Text = "自动修正";
             this.checkBox_autoModify.UseVisualStyleBackColor = true;
+            this.checkBox_autoModify.CheckedChanged += new System.EventHandler(this.checkBox_autoModify_CheckedChanged);
             // 
             // checkBox_verifyItemBarcode
             // 
             this.checkBox_verifyItemBarcode.AutoSize = true;
-            this.checkBox_verifyItemBarcode.Location = new System.Drawing.Point(13, 64);
+            this.checkBox_verifyItemBarcode.Location = new System.Drawing.Point(13, 88);
             this.checkBox_verifyItemBarcode.Name = "checkBox_verifyItemBarcode";
             this.checkBox_verifyItemBarcode.Size = new System.Drawing.Size(96, 16);
             this.checkBox_verifyItemBarcode.TabIndex = 1;
@@ -83,12 +85,22 @@
             // checkBox_serverVerify
             // 
             this.checkBox_serverVerify.AutoSize = true;
-            this.checkBox_serverVerify.Location = new System.Drawing.Point(13, 86);
+            this.checkBox_serverVerify.Location = new System.Drawing.Point(13, 110);
             this.checkBox_serverVerify.Name = "checkBox_serverVerify";
             this.checkBox_serverVerify.Size = new System.Drawing.Size(96, 16);
             this.checkBox_serverVerify.TabIndex = 12;
             this.checkBox_serverVerify.Text = "服务器端校验";
             this.checkBox_serverVerify.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_addPrice
+            // 
+            this.checkBox_addPrice.AutoSize = true;
+            this.checkBox_addPrice.Location = new System.Drawing.Point(37, 35);
+            this.checkBox_addPrice.Name = "checkBox_addPrice";
+            this.checkBox_addPrice.Size = new System.Drawing.Size(228, 16);
+            this.checkBox_addPrice.TabIndex = 13;
+            this.checkBox_addPrice.Text = "为册记录添加所缺的价格(从书目记录)";
+            this.checkBox_addPrice.UseVisualStyleBackColor = true;
             // 
             // VerifyEntityDialog
             // 
@@ -97,6 +109,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(284, 261);
+            this.Controls.Add(this.checkBox_addPrice);
             this.Controls.Add(this.checkBox_serverVerify);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
@@ -118,5 +131,6 @@
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.CheckBox checkBox_serverVerify;
+        private System.Windows.Forms.CheckBox checkBox_addPrice;
     }
 }

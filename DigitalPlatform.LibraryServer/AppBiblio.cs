@@ -897,6 +897,25 @@ namespace DigitalPlatform.LibraryServer
                     }
                     strBiblio = Convert.ToBase64String(result);
                 }
+                // 2017/6/16
+                else if (IsResultType(strBiblioType, "marc") == true)
+                {
+                    // marc:syntax 表示希望返回 syntax|marc机内格式 这样的字符串；marc 表示只返回 marc机内格式
+                    List<string> parts = StringUtil.ParseTwoPart(strBiblioType, ":");
+                    string strParam = parts[1];
+
+                    nRet = GetMarc(strBiblioXml,
+                        strParam,
+                        out strBiblio,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        if (String.IsNullOrEmpty(strErrorText) == false)
+                            strErrorText += ";\r\n";
+                        strErrorText += strError;
+                        goto CONTINUE;
+                    }
+                }
                 // 模拟创建检索点
                 else if (String.Compare(strBiblioType, "keys", true) == 0)
                 {
@@ -1335,6 +1354,43 @@ namespace DigitalPlatform.LibraryServer
             }
             return 0;
         }
+
+        // 2017/6/16
+        static int GetMarc(string strXml,
+            string strParam,
+            out string strResult,
+            out string strError)
+        {
+            strError = "";
+            strResult = "";
+            int nRet = 0;
+
+            string strMARC = "";
+            string strMarcSyntax = "";
+            // 将XML格式转换为MARC格式
+            // 自动从数据记录中获得MARC语法
+            nRet = MarcUtil.Xml2Marc(strXml,
+                true,
+                null,
+                out strMarcSyntax,
+                out strMARC,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "XML 转换到 MARC 记录时出错: " + strError;
+                return -1;
+            }
+
+            if (string.IsNullOrEmpty(strMarcSyntax))
+                strMarcSyntax = "unimarc";
+
+            if (strParam == "syntax")
+                strResult = strMarcSyntax + "|" + strMARC;
+            else
+                strResult = strMARC;
+            return 0;
+        }
+
 
         static int GetIso2709(string strXml,
             Encoding targetEncoding,

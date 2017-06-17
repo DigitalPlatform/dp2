@@ -55,6 +55,12 @@ A:hover
     color: White;
 }
 
+.debug.green
+{
+    background-color: #009900;
+    color: White;
+}
+
 DIV.item
 {
     padding: 2px;

@@ -153,7 +153,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.110 (2017/5/30) 消除 CopyBiblioInfo() API 中账户权限不够时会发生移动不完整的 Bug。
         //      2.111 (2017/6/7) WriteRes() API 的 strStyle 参数允许使用 simulate。此时不会产生操作日志
         //      2.112 (2017/6/14) SetEntities() API 增加了一种 Action 为 verify
-        public static string Version = "2.112";
+        //      2.113 (2017/6/16) GetBiblioInfos() API 增加了一种格式 marc。也可以用作 marc:syntax
+        public static string Version = "2.113";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
