@@ -19571,6 +19571,12 @@ bool bTempObject)
                 }
                 catch (MySqlException ex)
                 {
+                    // 异常记入日志
+                    if (database != null
+                        && database.container != null
+                        && database.container.KernelApplication != null)
+                        database.container.KernelApplication.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex));
+
                     exception = ex;
                     if (ex.Message.StartsWith("Unable to connect to any of") // "Unable to connect to any of specified MySQL hosts."
                         && ex.InnerException is ArgumentException)
@@ -19579,7 +19585,8 @@ bool bTempObject)
                         if (database != null
                             && database.container != null
                             && database.container.KernelApplication != null)
-                            database.container.KernelApplication.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex) + "\r\n将自动重试 Open() (i=" + i + ")");
+                            database.container.KernelApplication.WriteErrorLog("*** 将自动重试 Open() (i=" + i + ")");
+                        
                         {
                             Thread.Sleep(500);
                             continue;
@@ -19605,6 +19612,12 @@ bool bTempObject)
                 }
                 catch (MySqlException ex)
                 {
+                    // 异常记入日志
+                    if (this.SqlDatabase != null
+                        && this.SqlDatabase.container != null
+                        && this.SqlDatabase.container.KernelApplication != null)
+                        this.SqlDatabase.container.KernelApplication.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex));
+
                     exception = ex;
                     if (ex.Message.StartsWith("Unable to connect to any of") // "Unable to connect to any of specified MySQL hosts."
                         && ex.InnerException is ArgumentException)
@@ -19613,7 +19626,8 @@ bool bTempObject)
                         if (this.SqlDatabase != null 
                             && this.SqlDatabase.container != null
                             && this.SqlDatabase.container.KernelApplication != null)
-                            this.SqlDatabase.container.KernelApplication.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex) + "\r\n将自动重试 Open() (i=" + i + ")");
+                            this.SqlDatabase.container.KernelApplication.WriteErrorLog("*** 将自动重试 Open() (i=" + i + ")");
+                        
                         {
                             Thread.Sleep(500);
                             continue;
@@ -19627,7 +19641,7 @@ bool bTempObject)
                 throw exception;
         }
 
-        public void _open()
+        /*public*/ void _open()
         {
             if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
                 this.SqlConnection.Open();
