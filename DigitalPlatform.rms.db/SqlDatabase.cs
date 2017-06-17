@@ -939,7 +939,8 @@ namespace DigitalPlatform.rms
                 else if (this.container.SqlServerType == SqlServerType.MySql)
                 {
                     MySqlConnection connection = new MySqlConnection(this.m_strConnString);
-                    connection.Open();
+                    // connection.Open();// TODO: TryOpen
+                    Connection.TryOpen(connection, this);
                     try //连接
                     {
                         string strCommand = "";
@@ -1381,7 +1382,7 @@ namespace DigitalPlatform.rms
             {
                 Connection connection = new Connection(this,
                     this.m_strConnString);
-                connection.Open();
+                connection.TryOpen();
                 try //连接
                 {
                     string strCommand = "";
@@ -1596,7 +1597,7 @@ namespace DigitalPlatform.rms
             {
                 Connection connection = new Connection(this,
                     this.m_strConnString);
-                connection.Open();
+                connection.TryOpen();
                 try //连接
                 {
                     string strCommand = "";
@@ -2850,7 +2851,7 @@ namespace DigitalPlatform.rms
 
                 Connection connection = new Connection(this,
                     this.m_strConnString);
-                connection.Open();
+                connection.TryOpen();
                 try //连接
                 {
                     if (connection.SqlServerType == SqlServerType.MsSqlServer)
@@ -3006,7 +3007,7 @@ namespace DigitalPlatform.rms
             // SQLite采用保守连接
             Connection connection = new Connection(this,
                 this.m_strConnString);
-            connection.Open();
+            connection.TryOpen();
             try
             {
                 string strPattern = "N'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'";
@@ -5197,7 +5198,8 @@ namespace DigitalPlatform.rms
                 {
                     MySqlConnection connection =
                         new MySqlConnection(this.m_strConnString/*Pooling*/);
-                    connection.Open();
+                    // connection.Open();  // TODO: TryOpen
+                    Connection.TryOpen(connection, this);
                     try
                     {
                         MySqlCommand command = new MySqlCommand(strCommand,
@@ -6029,7 +6031,7 @@ namespace DigitalPlatform.rms
             Connection connection = new Connection(
                 this,
                 this.m_strConnStringPooling);
-            connection.Open();
+            connection.TryOpen();
             try
             {
                 // return:
@@ -6162,7 +6164,7 @@ namespace DigitalPlatform.rms
 #endif
 );
 
-                    connection.Open();
+                    connection.TryOpen();
                     try
                     {
                         // return:
@@ -6253,7 +6255,7 @@ namespace DigitalPlatform.rms
                         this.container.SqlServerType == SqlServerType.SQLite && this.FastMode == true ? ConnectionStyle.Global : ConnectionStyle.None
 #endif
 );
-                    connection.Open();
+                    connection.TryOpen();
 
                     /*
                     // 调试用
@@ -6705,7 +6707,7 @@ namespace DigitalPlatform.rms
                 this.container.SqlServerType == SqlServerType.SQLite && this.FastMode == true ? ConnectionStyle.Global : ConnectionStyle.None
 #endif
 );
-            connection.Open();
+            connection.TryOpen();
             try
             {
                 // return:
@@ -6858,7 +6860,7 @@ namespace DigitalPlatform.rms
 
                     Connection connection = new Connection(this,
                         this.m_strConnString);
-                    connection.Open();
+                    connection.TryOpen();
                     try // 连接
                     {
                         string strObjectFullID = strRecordID + "_" + strObjectID;
@@ -10293,7 +10295,7 @@ FileShare.ReadWrite))
             return 0;
         }
 
-        const int MYSQL_MAX_GETINFO_COUNT   = 1000;
+        const int MYSQL_MAX_GETINFO_COUNT = 1000;
 
         // 这一层主要是把较大的数组分片进行调用
         private int GetRowInfos(Connection connection,
@@ -10816,7 +10818,7 @@ out strError);
                 Connection connection = GetConnection(
     this.m_strLongConnString,   // this.m_strConnString,
     this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
-                connection.Open();
+                connection.TryOpen();
                 try
                 {
                     #region MS SQL Server
@@ -11167,7 +11169,7 @@ out strError);
                     Connection connection = GetConnection(
         this.m_strConnString,
         this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
-                    connection.Open();
+                    connection.TryOpen();
                     try
                     {
                         // select 已经存在的行信息
@@ -11634,7 +11636,7 @@ out strError);
                     Connection connection = GetConnection(
                         this.m_strConnString,
                         this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
-                    connection.Open();
+                    connection.TryOpen();
                     try
                     {
 
@@ -12198,7 +12200,7 @@ start_time,
                     Connection connection = GetConnection(
                         this.m_strConnString,
                         this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
-                    connection.Open();
+                    connection.TryOpen();
                     try // 连接
                     {
                         // TODO: 是否可以改进为，如果对象SQL记录行存在，就直接进行写入，只有当SQL记录行不存在的时候才对从属的XML记录进行检查，如果必要补充创建SQL记录行。这样可以提高执行速度
@@ -17874,7 +17876,7 @@ bool bTempObject)
                     Connection connection = GetConnection(
                         this.m_strConnString,
                         this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
-                    connection.Open();
+                    connection.TryOpen();
                     try
                     {
                         connection.m_nOpenCount += 10;
@@ -18130,7 +18132,7 @@ bool bTempObject)
             {
                 Connection connection = new Connection(this,
                     this.m_strConnString);
-                connection.Open();
+                connection.TryOpen();
                 try // connection
                 {
                     // 检查ID
@@ -19556,7 +19558,76 @@ bool bTempObject)
 
         }
 
-        public void Open()
+        public static void TryOpen(MySqlConnection connection,
+            SqlDatabase database)
+        {
+            Exception exception = null;
+            int nMax = 2;
+            for (int i = 0; i < nMax; i++)
+            {
+                try
+                {
+                    connection.Open();
+                }
+                catch (MySqlException ex)
+                {
+                    exception = ex;
+                    if (ex.Message.StartsWith("Unable to connect to any of") // "Unable to connect to any of specified MySQL hosts."
+                        && ex.InnerException is ArgumentException)
+                    {
+                        // 重试过程记入日志
+                        if (database != null
+                            && database.container != null
+                            && database.container.KernelApplication != null)
+                            database.container.KernelApplication.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex) + "\r\n将自动重试 Open() (i=" + i + ")");
+                        {
+                            Thread.Sleep(500);
+                            continue;
+                        }
+                    }
+                    throw ex;
+                }
+                return;
+            }
+            if (exception != null)
+                throw exception;
+        }
+
+        public void TryOpen()
+        {
+            Exception exception = null;
+            int nMax = 2;
+            for (int i = 0; i < nMax; i++)
+            {
+                try
+                {
+                    this._open();
+                }
+                catch (MySqlException ex)
+                {
+                    exception = ex;
+                    if (ex.Message.StartsWith("Unable to connect to any of") // "Unable to connect to any of specified MySQL hosts."
+                        && ex.InnerException is ArgumentException)
+                    {
+                        // 重试过程记入日志
+                        if (this.SqlDatabase != null 
+                            && this.SqlDatabase.container != null
+                            && this.SqlDatabase.container.KernelApplication != null)
+                            this.SqlDatabase.container.KernelApplication.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex) + "\r\n将自动重试 Open() (i=" + i + ")");
+                        {
+                            Thread.Sleep(500);
+                            continue;
+                        }
+                    }
+                    throw ex;
+                }
+                return;
+            }
+            if (exception != null)
+                throw exception;
+        }
+
+        public void _open()
         {
             if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
                 this.SqlConnection.Open();

@@ -394,6 +394,10 @@ Z";
         public static bool CorrectPrice(ref string strText)
         {
             strText = strText.Trim();
+
+            //2017/6/17
+            strText.Replace("￥","CNY");
+
             strText = StringUtil.ToDBC(strText);
 
             int nStart = strText.IndexOf("(");
