@@ -526,7 +526,8 @@ namespace dp2Circulation
             // AcceptForm
             // 
             this.AcceptButton = this.button_next;
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(396, 308);
             this.Controls.Add(this.panel_main);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
