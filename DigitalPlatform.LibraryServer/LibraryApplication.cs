@@ -14816,6 +14816,7 @@ strLibraryCode);    // 读者所在的馆代码
         BiblioDup = 32,     // 书目记录发生重复
         Borrowing = 33,    // 图书尚未还回(盘点前需修正此问题)
         ClientVersionTooOld = 34, // 前端版本太旧
+        NotBorrowed = 35,   // 册记录处于未被借出状态 2017/6/20
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容

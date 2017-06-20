@@ -467,6 +467,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         ClientVersionTooOld = 34,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotBorrowed = 35,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         AlreadyExist = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]

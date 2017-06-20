@@ -20,7 +20,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
@@ -588,7 +587,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 for (int i = 0; i < others.Length; i++)
                 {
                     ListViewUtil.ChangeItemText(item,
-                        i + RESERVE_COLUMN_COUNT ,
+                        i + RESERVE_COLUMN_COUNT,
                         others[i]);
                 }
             }
@@ -675,7 +674,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             stop.HideProgress();
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("正在检索 "+this.textBox_accept_queryWord.Text+" ...");
+            stop.Initial("正在检索 " + this.textBox_accept_queryWord.Text + " ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -1068,7 +1067,8 @@ this.checkBox_prepare_createCallNumber.Checked);
         //      -1  出错
         //      0   没有(符合要求的)订购信息
         //      >0  有这么多条符合要求的订购信息
-        /*public*/ int LoadOrderRecords(string strBiblioRecPath,
+        /*public*/
+        int LoadOrderRecords(string strBiblioRecPath,
             string strSellerList,
             out string strError)
         {
@@ -1263,7 +1263,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                         if (this.listView_accept_records.Enabled == false)
                             return; // 丢失
                          * */
-                        
+
                         int index = m.LParam.ToInt32();
 
                         if (index == -1)
@@ -1389,8 +1389,9 @@ this.checkBox_prepare_createCallNumber.Checked);
             item.Selected = true;
         }
 
-        /*public*/ delegate int Delegate_SafeLoadRecord(string strBiblioRecPath,
-    string strPrevNextStyle);
+        /*public*/
+        delegate int Delegate_SafeLoadRecord(string strBiblioRecPath,
+            string strPrevNextStyle);
 
         bool LoadDetail(int index)
         {
@@ -1512,7 +1513,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 m_detailWindow.AcceptMode = true;
                 m_detailWindow.MainForm = Program.MainForm;
                 m_detailWindow.MdiParent = Program.MainForm;
-                #if ACCEPT_MODE
+#if ACCEPT_MODE
 
                 m_detailWindow.FormBorderStyle = FormBorderStyle.None;
 
@@ -1784,7 +1785,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 if (target_dbnames.Count == 1)
                 {
                     strTargetRecPath = target_dbnames[0] + "/?";
-                    strError = "将在 "+target_dbnames[0]+" 中创建一个新的目标记录";
+                    strError = "将在 " + target_dbnames[0] + " 中创建一个新的目标记录";
                     return 1;
                 }
 
@@ -1807,7 +1808,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 strTargetRecPath = dlg.DbName + "/?";
 
-                strError = "将在 "+dlg.DbName+" 中创建一个新的目标记录";
+                strError = "将在 " + dlg.DbName + " 中创建一个新的目标记录";
                 return 1;
             }
 
@@ -1850,7 +1851,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         //  3) 当前没有潜在目标记录，并且可以充当目标库的有多个。这时候需要出现对话框，让操作者选择一个目标库。对话框需要保持先前选过的状态，以便操作者提高操作速度
         //  4) 当前没有潜在目标记录，并且没有任何库可以充当目标库。报错，放弃操作。
         // 应当可以允许从其他窗口拖入一个记录路径到当前列表中。这样，就为设定源或者目标库提供了更多的条件。可以避免单纯通过ISBN检索的局限性。
-        void m_detailWindow_PrepareAccept(object sender, 
+        void m_detailWindow_PrepareAccept(object sender,
             PrepareAcceptEventArgs e)
         {
             // MessageBox.Show(this, "Prepare accept");
@@ -2073,7 +2074,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             {
                 if (e.TargetRecPath != e.SourceRecPath)
                 {
-                    strError = "验收操作被拒绝。出版物类型为期刊时，源记录和目标记录必须为同一条。(可是现在源记录为 "+e.SourceRecPath+"，目标记录为 "+e.TargetRecPath+")";
+                    strError = "验收操作被拒绝。出版物类型为期刊时，源记录和目标记录必须为同一条。(可是现在源记录为 " + e.SourceRecPath + "，目标记录为 " + e.TargetRecPath + ")";
                     goto ERROR1;
                 }
             }
@@ -2245,7 +2246,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         private void AcceptForm_SizeChanged(object sender, EventArgs e)
         {
-            #if ACCEPT_MODE
+#if ACCEPT_MODE
 
             bool bRet = InitialSizeParam();
 
@@ -2444,7 +2445,7 @@ this.checkBox_prepare_createCallNumber.Checked);
              * 
              * */
 
-            menuItem = new MenuItem("移除所选择的 "+this.listView_accept_records.SelectedItems.Count.ToString()+" 个事项(&R)");
+            menuItem = new MenuItem("移除所选择的 " + this.listView_accept_records.SelectedItems.Count.ToString() + " 个事项(&R)");
             menuItem.Click += new System.EventHandler(this.menu_removeSelectedItems_Click);
             if (this.listView_accept_records.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -2505,13 +2506,14 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         // 调用前，记录路径列已经有值
-        /*public*/ int RefreshBrowseLine(ListViewItem item,
+        /*public*/
+        int RefreshBrowseLine(ListViewItem item,
             out string strError)
         {
             strError = "";
 
             string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
-            string [] paths = new string[1];
+            string[] paths = new string[1];
             paths[0] = strRecPath;
             Record[] searchresults = null;
 
@@ -2602,7 +2604,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                             this.m_detailWindow.ReadOnly = true;
                         else
 #endif
-                            CloseDetailWindow();
+                        CloseDetailWindow();
                     }
 
                     this.listView_accept_records.Items.RemoveAt(this.listView_accept_records.SelectedIndices[i]);
@@ -2831,7 +2833,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             RecordInfo info = GetRecordInfo(item);
 
-            
+
 
             if (StringUtil.IsInList("源", strRole) == true)
             {
@@ -4629,7 +4631,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         {
             ListViewItem item = new ListViewItem();
             string[] parts = strLine.Split(new char[] { '\t' });
-            for (int i = 0,j=0; i < parts.Length; i++,j++)
+            for (int i = 0, j = 0; i < parts.Length; i++, j++)
             {
                 // 跳过第二列
                 if (j == 1)
@@ -4735,7 +4737,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             if (nSkipCount > 0)
             {
-                MessageBox.Show(this, "有 " +nSkipCount.ToString()+" 个不是书目库的事项被忽略");
+                MessageBox.Show(this, "有 " + nSkipCount.ToString() + " 个不是书目库的事项被忽略");
             }
         }
 
@@ -4745,7 +4747,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             this.listView_accept_records.Items.Clear();
 
             // 迫使重新获得验收批次号列表
-            this.tabComboBox_prepare_batchNo.Items.Clear(); 
+            this.tabComboBox_prepare_batchNo.Items.Clear();
 
             // 刷新参与检索的书目库名列表
             this.FillDbNameList();
@@ -4765,7 +4767,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 if (strText.Length > 0 && strText[0] == '<')
                 {
                     // 将其余事项的checked清除
-                    for(int i=0;i<this.checkedListBox_prepare_dbNames.Items.Count;i++)
+                    for (int i = 0; i < this.checkedListBox_prepare_dbNames.Items.Count; i++)
                     {
                         if (i == e.Index)
                             continue;
@@ -4896,7 +4898,8 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         // 记录信息
         // 包括：title
-        /*public*/ class RecordInfo
+        /*public*/
+        class RecordInfo
         {
             public string BiblioTitle = "";
 
@@ -5021,7 +5024,8 @@ Keys keyData)
 
 
     // 采购数据库信息容器
-    /*public*/ class OrderDbInfos : List<OrderDbInfo>
+    /*public*/
+    class OrderDbInfos : List<OrderDbInfo>
     {
         public void Build(MainForm mainform)
         {
@@ -5177,7 +5181,8 @@ Keys keyData)
     }
 
     // 采购数据库信息
-    /*public*/ class OrderDbInfo
+    /*public*/
+    class OrderDbInfo
     {
         public string BiblioDbName = "";
         public string OrderDbName = "";
