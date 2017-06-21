@@ -4482,6 +4482,7 @@ start_time_1,
                                 strError = strError + " (册记录路径为 '" + strOutputItemRecPath + "')";
                                 if (nRet == 0)
                                 {
+                                    result.Value = -1;
                                     result.ErrorInfo = strError;
                                     result.ErrorCode = ErrorCode.NotBorrowed;
                                     strOutputItemXml = itemdom.OuterXml;    // TODO: 是否放在更靠前位置，提前设置好

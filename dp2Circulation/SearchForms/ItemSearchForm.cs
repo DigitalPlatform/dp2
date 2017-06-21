@@ -3330,7 +3330,6 @@ out strError);
             string strPrice = DomUtil.GetElementText(dom.DocumentElement, "price");
             if (string.IsNullOrEmpty(strPrice) || strPrice == "CNY")
             {
-
                 string strParentID = DomUtil.GetElementText(dom.DocumentElement, "parent");
                 if (string.IsNullOrEmpty(strParentID))
                 {
@@ -3409,6 +3408,20 @@ out strError);
                 ItemClassStatisDialog.CorrectPrice(ref strBiblioPrice);
                 if (IsPriceCorrect(strBiblioPrice) == false)
                     return 0;
+
+                {
+                    CurrencyItem item = null;
+                    // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
+                    int nRet = PriceUtil.ParseSinglePrice(strBiblioPrice,
+                        out item,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        // TODO: 设法显示为黄色，表示提醒。和数据出错的红色不同
+                        strError = "从书目记录 '" + strBiblioRecPath + "' 获得的价格字符串 '" + strBiblioPrice + "' 格式不正确，无法用于自动添加";
+                        return -1;
+                    }
+                }
 
                 DomUtil.SetElementText(dom.DocumentElement, "price", strBiblioPrice);
                 bChanged = true;

@@ -396,7 +396,7 @@ Z";
             strText = strText.Trim();
 
             //2017/6/17
-            strText.Replace("￥","CNY");
+            strText = strText.Replace("￥","CNY");
 
             strText = StringUtil.ToDBC(strText);
 
