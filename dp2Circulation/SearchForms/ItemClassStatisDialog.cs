@@ -400,6 +400,10 @@ Z";
 
             strText = StringUtil.ToDBC(strText);
 
+            // 截掉逗号右侧的部分
+            List<string> parts = StringUtil.ParseTwoPart(strText, ",");
+            strText = parts[0];
+
             int nStart = strText.IndexOf("(");
             if (nStart == -1)
                 return false;
