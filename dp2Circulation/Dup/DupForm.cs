@@ -15,6 +15,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -209,6 +210,8 @@ namespace dp2Circulation
                     true);
             }
 
+            this.Channel = null;
+
             // 自动启动查重
             if (this.AutoBeginSearch == true)
             {
@@ -347,7 +350,7 @@ namespace dp2Circulation
             this.textBox_recordPath.Enabled = bEnable;
         }
 
- 
+
         // 检索
         // return:
         //      -1  error
@@ -378,12 +381,16 @@ namespace dp2Circulation
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在进行查重 ...");
             stop.BeginLoop();
 
-            this.Update();
-            Program.MainForm.Update();
+            //this.Update();
+            //Program.MainForm.Update();
 
             try
             {
@@ -398,7 +405,7 @@ namespace dp2Circulation
                 if (this.checkBox_includeLowCols.Checked == false)
                     strBrowseStyle += ",excludecolsoflowthreshold";
 
-                long lRet = Channel.SearchDup(
+                long lRet = channel.SearchDup(
                     stop,
                     strRecPath,
                     strXml,
@@ -434,7 +441,7 @@ namespace dp2Circulation
 
                     DupSearchResult[] searchresults = null;
 
-                    lRet = Channel.GetDupSearchResult(
+                    lRet = channel.GetDupSearchResult(
                         stop,
                         lStart,
                         lPerCount,
@@ -477,8 +484,6 @@ namespace dp2Circulation
                         }
                         this.listView_browse.Items.Add(item);
 
-
-
                         if (item.Text == this.RecordPath)
                         {
                             // 如果就是发起记录自己  2008/2/29 
@@ -519,6 +524,9 @@ namespace dp2Circulation
                 stop.HideProgress();
 
                 EventFinish.Set();
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
@@ -564,13 +572,15 @@ namespace dp2Circulation
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; >=0: 成功</returns>
         public int ListProjectNames(string strRecPath,
-            out string [] projectnames,
+            out string[] projectnames,
             out string strError)
         {
             strError = "";
             projectnames = null;
 
             EnableControls(false);
+
+            LibraryChannel channel = this.GetChannel();
 
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在获取可用的查重方案名 ...");
@@ -582,7 +592,7 @@ namespace dp2Circulation
 
                 string strBiblioDbName = Global.GetDbName(strRecPath);
 
-                long lRet = Channel.ListDupProjectInfos(
+                long lRet = channel.ListDupProjectInfos(
                     stop,
                     strBiblioDbName,
                     out dpis,
@@ -603,6 +613,8 @@ namespace dp2Circulation
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
@@ -921,6 +933,8 @@ namespace dp2Circulation
 
             EnableControls(false);
 
+            LibraryChannel channel = this.GetChannel();
+
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在填充浏览列 ...");
             stop.BeginLoop();
@@ -930,8 +944,6 @@ namespace dp2Circulation
 
             try
             {
-
-
                 int nStart = 0;
                 int nCount = 0;
                 for (; ; )
@@ -944,26 +956,20 @@ namespace dp2Circulation
 
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            return -1;
-                        }
+                        strError = "用户中断";
+                        return -1;
                     }
 
                     stop.SetMessage("正在装入浏览信息 " + (nStart + 1).ToString() + " - " + (nStart + nCount).ToString());
-
-
-
 
                     string[] paths = new string[nCount];
                     pathlist.CopyTo(nStart, paths, 0, nCount);
 
                     Record[] searchresults = null;
 
-                    long lRet = this.Channel.GetBrowseRecords(
+                    long lRet = channel.GetBrowseRecords(
                         this.stop,
                         paths,
                         "id,cols",
@@ -997,7 +1003,6 @@ namespace dp2Circulation
                         }
                     }
 
-
                     nStart += searchresults.Length;
                 }
             }
@@ -1006,6 +1011,8 @@ namespace dp2Circulation
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
+
+                this.ReturnChannel(channel);
 
                 EnableControls(true);
             }
