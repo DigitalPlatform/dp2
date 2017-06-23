@@ -5306,7 +5306,9 @@ namespace dp2Library
         //      strItemBarcode  册条码号
         //      strConfirmItemRecPath  册记录路径。在册条码号重复的情况下，才需要使用这个参数，平时为null即可
         //      saBorrowedItemBarcode   同一读者先前已经借阅成功的册条码号集合。用于在返回的读者html中显示出特定的颜色而已。
-        //      strStyle    操作风格。"item"表示将返回册记录；"reader"表示将返回读者记录
+        //      strStyle    操作风格。
+        //                  "item"表示将返回册记录；"reader"表示将返回读者记录
+        //                  "auto_renew"  表示如果当前处在已经借出状态，并且发起借书的又是同一人，自动当作续借请求进行操作
         //      strItemFormatList   规定strItemRecord参数所返回的数据格式
         //      item_records   返回册记录
         //      strReaderFormatList 规定strReaderRecord参数所返回的数据格式
