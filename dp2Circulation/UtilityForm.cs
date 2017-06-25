@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
 using System.IO;
+using System.Web;
 
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
@@ -19,7 +20,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Range;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CommonControl;
-using System.Web;
+using System.Collections;
 
 namespace dp2Circulation
 {
@@ -1382,7 +1383,7 @@ MessageBoxDefaultButton.Button2);
 
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.83") < 0)
             {
-                strError = "当前连接的 dp2library 版本必须在 2.83 以上才能使用本功能 (但它是 "+Program.MainForm.ServerVersion+")";
+                strError = "当前连接的 dp2library 版本必须在 2.83 以上才能使用本功能 (但它是 " + Program.MainForm.ServerVersion + ")";
                 goto ERROR1;
             }
 
@@ -1422,6 +1423,103 @@ MessageBoxDefaultButton.Button2);
             }
 
             return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 取 GCAT 著者号
+        private void toolStripButton_textLines_getAuthorNumber_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            this.textBox_textLines_target.Text = "";
+            this.textBox_textLines_source2.Text = "";
+
+            string strGcatWebServiceUrl = Program.MainForm.GcatServerUrl;   // "http://dp2003.com/dp2libraryws/gcat.asmx";
+
+            if (string.IsNullOrEmpty(strGcatWebServiceUrl))
+            {
+                strError = "尚未配置 GCAT 服务器地址";
+                goto ERROR1;
+            }
+
+            StringBuilder result1 = new StringBuilder();
+            StringBuilder result2 = new StringBuilder();
+
+            this.EnableControls(false);
+
+            this.stop.OnStop += new StopEventHandler(this.DoStop);
+            this.stop.Initial("正在取著者号 ...");
+            this.stop.BeginLoop();
+            try
+            {
+                foreach (string line in this.textBox_textLines_source1.Lines)
+                {
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+                    string strLine = line.Trim();
+                    if (string.IsNullOrEmpty(strLine))
+                        continue;
+
+#if NO
+                    Hashtable question_table = (Hashtable)Program.MainForm.ParamTable["question_table"];
+                    if (question_table == null)
+                        question_table = new Hashtable();
+#endif
+                    Hashtable question_table = new Hashtable();
+
+                    stop.SetMessage("正在取著者号 '" + strLine + "' ...");
+
+                    string strDebugInfo = "";
+                    string strAuthorNumber = "";
+                    // return:
+                    //      -4  著者字符串没有检索命中
+                    //      -2  strID验证失败
+                    //      -1  error
+                    //      0   canceled
+                    //      1   succeed
+                    long nRet = BiblioItemsHost.GetAuthorNumber(
+                        ref question_table,
+                        this.stop,
+                        this,
+                        strGcatWebServiceUrl,
+                        strLine,
+                        true,	// bSelectPinyin
+                        true,	// bSelectEntry
+                        false,	// bOutputDebugInfo
+                        out strAuthorNumber,
+                        out strDebugInfo,
+                        out strError);
+#if NO
+                    Program.MainForm.ParamTable["question_table"] = question_table;
+#endif
+
+                    if (nRet == 0)
+                        goto ERROR1;
+                    if (nRet == 1)
+                    {
+                        result1.Append(strAuthorNumber + "\r\n");
+                        result2.Append(strLine + "\t" + strAuthorNumber + "\r\n");
+                    }
+                    else
+                    {
+                        result1.Append("error: " + strError + "\r\n");
+                        result2.Append(strLine + "\terror: " + strError + "\r\n");
+                    }
+                }
+
+                this.textBox_textLines_source2.Text = result1.ToString();
+                this.textBox_textLines_target.Text = result2.ToString();
+                return;
+            }
+            finally
+            {
+                this.stop.EndLoop();
+                this.stop.OnStop -= new StopEventHandler(this.DoStop);
+                this.stop.Initial("");
+
+                this.EnableControls(true);
+            }
         ERROR1:
             MessageBox.Show(this, strError);
         }

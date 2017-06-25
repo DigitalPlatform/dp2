@@ -4960,3 +4960,821 @@
 
             return 0;
         }
+
+
+		////////////////////
+
+		        // 修改检索点keys
+        // return:
+        //      -1  出错
+        //      0   成功
+        public int ModifyKeys(Connection connection,
+            KeyCollection keysAdd,
+            KeyCollection keysDelete,
+            bool bFastMode,
+            out string strError)
+        {
+            strError = "";
+            StringBuilder strCommand = new StringBuilder(4096);
+
+            int nCount1 = 0;
+            int nCount2 = 0;
+
+            if (keysAdd != null)
+                nCount1 = keysAdd.Count;
+            if (keysDelete != null)
+                nCount2 = keysDelete.Count;
+
+            if (nCount1 == 0 && nCount2 == 0)
+                return 0;
+
+            string strRecordID = "";
+            if (keysAdd != null && keysAdd.Count > 0)
+                strRecordID = ((KeyItem)keysAdd[0]).RecordID;
+            else if (keysDelete != null && keysDelete.Count > 0)
+                strRecordID = ((KeyItem)keysDelete[0]).RecordID;
+
+            #region MS SQL Server
+            if (connection.SqlServerType == SqlServerType.MsSqlServer)
+            {
+                using (SqlCommand command = new SqlCommand("",
+                    connection.SqlConnection))
+                {
+                    SqlTransaction trans = null;
+                    // trans = connection.SqlConnection.BeginTransaction();
+                    // command.Transaction = trans;
+
+                    int nExecuted = 0;   // 已经发出执行的命令行数 2008/10/21 
+                    try
+                    {
+                        int i = 0;
+                        int nNameIndex = 0;
+
+                        int nCount = 0; // 累积的尚未发出的命令行数 2008/10/21 
+
+                        int nMaxLinesPerExecute = (2100 / 5) - 1;   // 4个参数，加上一个sql命令字符串 2008/10/23 
+
+                        // 2006/12/8 把删除提前到增加以前
+                        if (keysDelete != null)
+                        {
+                            // 删除keys
+                            for (i = 0; i < keysDelete.Count; i++)
+                            {
+                                KeyItem oneKey = (KeyItem)keysDelete[i];
+
+                                string strKeysTableName = oneKey.SqlTableName;
+
+                                string strIndex = Convert.ToString(nNameIndex++);
+
+                                string strKeyParamName = "@key" + strIndex;
+                                string strFromParamName = "@from" + strIndex;
+                                string strIdParamName = "@id" + strIndex;
+                                string strKeynumParamName = "@keynum" + strIndex;
+
+                                strCommand.Append(" DELETE FROM " + strKeysTableName
+                                    + " WHERE keystring = " + strKeyParamName
+                                    + " AND fromstring = " + strFromParamName
+                                    + " AND idstring = " + strIdParamName
+                                    + " AND keystringnum = " + strKeynumParamName);
+
+                                SqlParameter keyParam =
+                                    command.Parameters.Add(strKeyParamName,
+                                    SqlDbType.NVarChar);
+                                keyParam.Value = oneKey.Key;
+
+                                SqlParameter fromParam =
+                                    command.Parameters.Add(strFromParamName,
+                                    SqlDbType.NVarChar);
+                                fromParam.Value = oneKey.FromValue;
+
+                                SqlParameter idParam =
+                                    command.Parameters.Add(strIdParamName,
+                                    SqlDbType.NVarChar);
+                                idParam.Value = oneKey.RecordID;
+
+                                SqlParameter keynumParam =
+                                    command.Parameters.Add(strKeynumParamName,
+                                    SqlDbType.NVarChar);
+                                keynumParam.Value = oneKey.Num;
+
+                                if (nCount >= nMaxLinesPerExecute)
+                                {
+                                    command.CommandText = "use " + this.m_strSqlDbName + " \n"
+                                        + strCommand
+                                        + " use master " + "\n";
+                                    command.CommandTimeout = 20 * 60;  // 把超时时间放大 2013/2/19
+
+                                    command.ExecuteNonQuery();
+
+                                    strCommand.Clear();
+                                    nExecuted += nCount;
+                                    nCount = 0;
+                                    command.Parameters.Clear();
+                                }
+                                else
+                                {
+                                    nCount++;
+                                }
+                            }
+                        }
+
+                        if (keysAdd != null)
+                        {
+                            // nCount = keysAdd.Count;
+
+                            // 增加keys
+                            for (i = 0; i < keysAdd.Count; i++)
+                            {
+                                KeyItem oneKey = (KeyItem)keysAdd[i];
+
+                                string strKeysTableName = oneKey.SqlTableName;
+
+                                // string strIndex = Convert.ToString(i);
+                                string strIndex = Convert.ToString(nNameIndex++);
+
+                                string strKeyParamName = "@key" + strIndex;
+                                string strFromParamName = "@from" + strIndex;
+                                string strIdParamName = "@id" + strIndex;
+                                string strKeynumParamName = "@keynum" + strIndex;
+
+                                //加keynum
+                                strCommand.Append(" INSERT INTO " + strKeysTableName
+                                    + " (keystring,fromstring,idstring,keystringnum) "
+                                    + " VALUES (" + strKeyParamName + ","
+                                    + strFromParamName + ","
+                                    + strIdParamName + ","
+                                    + strKeynumParamName + ")");
+
+                                SqlParameter keyParam =
+                                    command.Parameters.Add(strKeyParamName,
+                                    SqlDbType.NVarChar);
+                                keyParam.Value = oneKey.Key;
+
+                                SqlParameter fromParam =
+                                    command.Parameters.Add(strFromParamName,
+                                    SqlDbType.NVarChar);
+                                fromParam.Value = oneKey.FromValue;
+
+                                SqlParameter idParam =
+                                    command.Parameters.Add(strIdParamName,
+                                    SqlDbType.NVarChar);
+                                idParam.Value = oneKey.RecordID;
+
+                                SqlParameter keynumParam =
+                                    command.Parameters.Add(strKeynumParamName,
+                                    SqlDbType.NVarChar);
+                                keynumParam.Value = oneKey.Num;
+
+                                if (nCount >= nMaxLinesPerExecute)
+                                {
+                                    command.CommandText = "use " + this.m_strSqlDbName + " \n"
+                                        + strCommand
+                                        + " use master " + "\n";
+                                    command.CommandTimeout = 20 * 60;  // 把超时时间放大 2013/2/19
+
+                                    command.ExecuteNonQuery();
+
+                                    strCommand.Clear();
+                                    nExecuted += nCount;
+                                    nCount = 0;
+                                    command.Parameters.Clear();
+                                }
+                                else
+                                {
+                                    nCount++;
+                                }
+                            }
+                        }
+
+                        // 最后可能剩下的命令
+                        if (strCommand.Length > 0)
+                        {
+                            command.CommandText = "use " + this.m_strSqlDbName + " \n"
+                                + strCommand
+                                + " use master " + "\n";
+                            command.CommandTimeout = 20 * 60;  // 把超时时间放大 2013/2/19
+
+                            command.ExecuteNonQuery();
+
+                            strCommand.Clear();
+                            nExecuted += nCount;
+                            nCount = 0;
+                            command.Parameters.Clear();
+                        }
+                        if (trans != null)
+                        {
+                            trans.Commit();
+                            trans = null;
+                        }
+                    }
+                    catch (SqlException ex)
+                    {
+                        strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+
+                        // 检查 SQL 错误码
+                        if (ContainsErrorCode(ex, 1105))
+                        {
+                            // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
+                            this.container.KernelApplication.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                        }
+
+                        return -1;
+                    }
+                    catch (Exception ex)
+                    {
+                        // TODO: 如果出现超时错，可能其实在 SQL Server 一端已经正确执行，可以不顾这个错误继续执行下去
+                        // 如果非要重试处理这种情况，则可能需要把语句拆开成为一个一个单独的动作语句，然后重新插入和删除，插入的时候遇到重复，就当作正常情况处理，删除的时候遇到行不存在，也当作正常处理
+                        strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                        return -1;
+                    }
+                    finally
+                    {
+                        if (trans != null)
+                            trans.Rollback();
+                    }
+                } // end of using command
+
+                return 0;
+            }
+            #endregion // MS SQL Server
+
+            #region SQLite
+            else if (connection.SqlServerType == SqlServerType.SQLite)
+            {
+                using (SQLiteCommand command = new SQLiteCommand("",
+                    connection.SQLiteConnection))
+                {
+
+                    IDbTransaction trans = null;
+
+                    if (bFastMode == false)
+                        trans = connection.SQLiteConnection.BeginTransaction();
+                    try
+                    {
+
+                        int i = 0;
+                        int nNameIndex = 0;
+                        int nCount = 0; // 累积的尚未发出的命令行数
+
+                        // 把删除提前到增加以前
+                        if (keysDelete != null)
+                        {
+                            // 删除keys
+                            for (i = 0; i < keysDelete.Count; i++)
+                            {
+                                KeyItem oneKey = (KeyItem)keysDelete[i];
+
+                                string strKeysTableName = oneKey.SqlTableName;
+
+                                string strIndex = Convert.ToString(nNameIndex++);
+
+                                string strKeyParamName = "@key" + strIndex;
+                                string strFromParamName = "@from" + strIndex;
+                                string strIdParamName = "@id" + strIndex;
+                                string strKeynumParamName = "@keynum" + strIndex;
+
+                                strCommand.Append(" DELETE FROM " + strKeysTableName
+                                    + " WHERE keystring = " + strKeyParamName
+                                    + " AND fromstring = " + strFromParamName
+                                    + " AND idstring = " + strIdParamName
+                                    + " AND keystringnum = " + strKeynumParamName
+                                    + " ; ");
+
+                                SQLiteParameter keyParam =
+                                    command.Parameters.Add(strKeyParamName,
+                                    DbType.String);
+                                keyParam.Value = oneKey.Key;
+
+                                SQLiteParameter fromParam =
+                                    command.Parameters.Add(strFromParamName,
+                                    DbType.String);
+                                fromParam.Value = oneKey.FromValue;
+
+                                SQLiteParameter idParam =
+                                    command.Parameters.Add(strIdParamName,
+                                    DbType.String);
+                                idParam.Value = oneKey.RecordID;
+
+                                SQLiteParameter keynumParam =
+                                    command.Parameters.Add(strKeynumParamName,
+                                    DbType.String);
+                                keynumParam.Value = oneKey.Num;
+
+                                command.CommandText = strCommand.ToString();
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "创建检索点出错, 偏移 " + (nCount).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                    return -1;
+                                }
+                                strCommand.Clear();
+
+                                command.Parameters.Clear();
+
+                                nCount++;
+                            }
+                        }
+
+                        if (keysAdd != null)
+                        {
+                            // nCount = keysAdd.Count;
+
+                            // 增加keys
+                            for (i = 0; i < keysAdd.Count; i++)
+                            {
+                                KeyItem oneKey = (KeyItem)keysAdd[i];
+
+                                string strKeysTableName = oneKey.SqlTableName;
+
+                                // string strIndex = Convert.ToString(i);
+                                string strIndex = Convert.ToString(nNameIndex++);
+
+                                string strKeyParamName = "@key" + strIndex;
+                                string strFromParamName = "@from" + strIndex;
+                                string strIdParamName = "@id" + strIndex;
+                                string strKeynumParamName = "@keynum" + strIndex;
+
+                                //加keynum
+                                strCommand.Append(" INSERT INTO " + strKeysTableName
+                                    + " (keystring,fromstring,idstring,keystringnum) "
+                                    + " VALUES (" + strKeyParamName + ","
+                                    + strFromParamName + ","
+                                    + strIdParamName + ","
+                                    + strKeynumParamName + ") ; ");
+
+                                SQLiteParameter keyParam =
+                                    command.Parameters.Add(strKeyParamName,
+                                    DbType.String);
+                                keyParam.Value = oneKey.Key;
+
+                                SQLiteParameter fromParam =
+                                    command.Parameters.Add(strFromParamName,
+                                    DbType.String);
+                                fromParam.Value = oneKey.FromValue;
+
+                                SQLiteParameter idParam =
+                                    command.Parameters.Add(strIdParamName,
+                                    DbType.String);
+                                idParam.Value = oneKey.RecordID;
+
+                                SQLiteParameter keynumParam =
+                                    command.Parameters.Add(strKeynumParamName,
+                                    DbType.String);
+                                keynumParam.Value = oneKey.Num;
+
+                                command.CommandText = strCommand.ToString();
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "创建检索点出错,偏移 " + (nCount).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                    return -1;
+                                }
+                                strCommand.Clear();
+
+                                command.Parameters.Clear();
+
+                                nCount++;
+                            }
+                        }
+                        if (trans != null)
+                        {
+                            trans.Commit();
+                            trans = null;
+                        }
+                    }
+                    finally
+                    {
+                        if (trans != null)
+                            trans.Rollback();
+                    }
+                } // end of using command
+            }
+            #endregion // SQLite
+
+            #region MySql
+            else if (connection.SqlServerType == SqlServerType.MySql)
+            {
+                using (MySqlCommand command = new MySqlCommand("",
+                    connection.MySqlConnection))
+                {
+                    MySqlTransaction trans = null;
+
+                    trans = connection.MySqlConnection.BeginTransaction();
+                    try
+                    {
+                        int i = 0;
+#if PARAMETERS
+                        int nNameIndex = 0;
+#endif
+
+                        int nCount = 0; // 累积的尚未发出的命令行数 
+                        int nExecuted = 0;   // 已经发出执行的命令行数 
+
+#if PARAMETERS
+                        int nMaxLinesPerExecute = (2100 / 5) - 1;   // 4个参数，加上一个sql命令字符串
+#else
+                        // 2017/4/27 MySQL Named Pipe 情况下 1000 比较保险
+                        int nMaxLinesPerExecute = 1000;
+#endif
+
+                        if (keysDelete != null)
+                        {
+                            // 删除keys
+                            for (i = 0; i < keysDelete.Count; i++)
+                            {
+                                KeyItem oneKey = (KeyItem)keysDelete[i];
+
+                                string strKeysTableName = oneKey.SqlTableName;
+
+#if PARAMETERS
+                                string strIndex = Convert.ToString(nNameIndex++);
+
+                                string strKeyParamName = "@key" + strIndex;
+                                string strFromParamName = "@from" + strIndex;
+                                string strIdParamName = "@id" + strIndex;
+                                string strKeynumParamName = "@keynum" + strIndex;
+
+                                strCommand.Append(" DELETE FROM " + strKeysTableName
+                                    + " WHERE keystring = " + strKeyParamName
+                                    + " AND fromstring = " + strFromParamName 
+                                    + " AND idstring = " + strIdParamName 
+                                    + " AND keystringnum = " + strKeynumParamName + " ;\n");
+
+                                MySqlParameter keyParam =
+                                    command.Parameters.Add(strKeyParamName,
+                                    MySqlDbType.String);
+                                keyParam.Value = oneKey.Key;
+
+                                MySqlParameter fromParam =
+                                    command.Parameters.Add(strFromParamName,
+                                    MySqlDbType.String);
+                                fromParam.Value = oneKey.FromValue;
+
+                                MySqlParameter idParam =
+                                    command.Parameters.Add(strIdParamName,
+                                    MySqlDbType.String);
+                                idParam.Value = oneKey.RecordID;
+
+                                MySqlParameter keynumParam =
+                                    command.Parameters.Add(strKeynumParamName,
+                                    MySqlDbType.String);
+                                keynumParam.Value = oneKey.Num;
+#else
+
+                                // 2016/1/6 加入 N
+                                strCommand.Append(" DELETE FROM " + strKeysTableName
+    + " WHERE keystring = N'" + MySqlHelper.EscapeString(oneKey.Key)
+    + "' AND fromstring = N'" + MySqlHelper.EscapeString(oneKey.FromValue)
+    + "' AND idstring = N'" + MySqlHelper.EscapeString(oneKey.RecordID)
+    + "' AND keystringnum = N'" + MySqlHelper.EscapeString(oneKey.Num) + "' ;\n");
+
+#endif
+
+
+                                if (nCount >= nMaxLinesPerExecute)
+                                {
+                                    // 每100个命令发出一次
+                                    command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
+                                        + strCommand
+#if !PARAMETERS
+                                        // + " ;\n"
+#endif
+;
+                                    try
+                                    {
+                                        command.ExecuteNonQuery();
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        strError = "创建检索点出错, 偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                        return -1;
+                                    }
+                                    strCommand.Clear();
+                                    nExecuted += nCount;
+                                    nCount = 0;
+                                    command.Parameters.Clear();
+                                }
+                                else
+                                {
+                                    nCount++;
+                                }
+                            }
+                        }
+
+                        if (keysAdd != null)
+                        {
+                            // nCount = keysAdd.Count;
+#if !PARAMETERS
+                            string strPrevSqlTableName = "";
+#endif
+
+                            // 增加keys
+                            for (i = 0; i < keysAdd.Count; i++)
+                            {
+                                KeyItem oneKey = (KeyItem)keysAdd[i];
+
+                                string strKeysTableName = oneKey.SqlTableName;
+
+#if PARAMETERS
+                                // string strIndex = Convert.ToString(i);
+                                string strIndex = Convert.ToString(nNameIndex++);
+
+                                string strKeyParamName = "@key" + strIndex;
+                                string strFromParamName = "@from" + strIndex;
+                                string strIdParamName = "@id" + strIndex;
+                                string strKeynumParamName = "@keynum" + strIndex;
+
+                                //加keynum
+                                strCommand.Append(" INSERT INTO " + strKeysTableName
+                                    + " (keystring,fromstring,idstring,keystringnum) "
+                                    + " VALUES (" + strKeyParamName + ","
+                                    + strFromParamName + ","
+                                    + strIdParamName + ","
+                                    + strKeynumParamName + ") ;\n");
+
+                                MySqlParameter keyParam =
+                                    command.Parameters.Add(strKeyParamName,
+                                    MySqlDbType.String);
+                                keyParam.Value = oneKey.Key;
+
+                                MySqlParameter fromParam =
+                                    command.Parameters.Add(strFromParamName,
+                                    MySqlDbType.String);
+                                fromParam.Value = oneKey.FromValue;
+
+                                MySqlParameter idParam =
+                                    command.Parameters.Add(strIdParamName,
+                                    MySqlDbType.String);
+                                idParam.Value = oneKey.RecordID;
+
+                                MySqlParameter keynumParam =
+                                    command.Parameters.Add(strKeynumParamName,
+                                    MySqlDbType.String);
+                                keynumParam.Value = oneKey.Num;
+#else
+                                if (strCommand.Length == 0
+                                    || strKeysTableName != strPrevSqlTableName)
+                                {
+                                    if (strCommand.Length > 0 && i > 0) // 2016/1/6 增加 i>0 限制。否则会多产生一个分号，导致 SQL 语法错误
+                                        strCommand.Append(" ; ");
+
+                                    // 2016/1/6 加入 N
+                                    strCommand.Append(" INSERT INTO " + strKeysTableName
+        + " (keystring,fromstring,idstring,keystringnum) "
+        + " VALUES (N'" + MySqlHelper.EscapeString(oneKey.Key) + "',N'"
+        + MySqlHelper.EscapeString(oneKey.FromValue) + "',N'"
+        + MySqlHelper.EscapeString(oneKey.RecordID) + "',N'"
+        + MySqlHelper.EscapeString(oneKey.Num) + "') ");
+                                }
+                                else
+                                {
+                                    // 2016/1/6 加入 N
+                                    strCommand.Append(", (N'" + MySqlHelper.EscapeString(oneKey.Key) + "',N'"
+        + MySqlHelper.EscapeString(oneKey.FromValue) + "',N'"
+        + MySqlHelper.EscapeString(oneKey.RecordID) + "',N'"
+        + MySqlHelper.EscapeString(oneKey.Num) + "') ");
+                                }
+
+                                strPrevSqlTableName = strKeysTableName;
+#endif
+
+                                if (nCount >= nMaxLinesPerExecute)
+                                {
+                                    // 每100个命令发出一次
+                                    command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
+                                        + strCommand
+#if !PARAMETERS
+ + " ;\n"
+#endif
+;
+                                    try
+                                    {
+                                        command.ExecuteNonQuery();
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                        this.container.KernelApplication.WriteErrorLog(strError + "\r\n\r\nSQL 语句: " + command.CommandText);
+                                        return -1;
+                                    }
+                                    strCommand.Clear();
+                                    nExecuted += nCount;
+                                    nCount = 0;
+                                    command.Parameters.Clear();
+                                }
+                                else
+                                {
+                                    nCount++;
+                                }
+                            }
+                        }
+
+                        // 最后可能剩下的命令
+                        if (strCommand.Length > 0)
+                        {
+                            command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
+                                + strCommand
+#if !PARAMETERS
+ + " ;\n"
+#endif
+;
+                            try
+                            {
+                                command.ExecuteNonQuery();
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                this.container.KernelApplication.WriteErrorLog(strError + "\r\n\r\nSQL 语句: " + command.CommandText);
+                                return -1;
+                            }
+
+                            strCommand.Clear();
+                            nExecuted += nCount;
+                            nCount = 0;
+                            command.Parameters.Clear();
+                        }
+                        if (trans != null)
+                        {
+                            trans.Commit();
+                            trans = null;
+                        }
+                    }
+                    finally
+                    {
+                        if (trans != null)
+                            trans.Rollback();
+                    }
+                } // end of using command
+
+                return 0;
+            }
+            #endregion // MySql
+
+            #region Oracle
+            else if (connection.SqlServerType == SqlServerType.Oracle)
+            {
+                using (OracleCommand command = new OracleCommand("", connection.OracleConnection))
+                {
+                    command.BindByName = true;
+
+                    IDbTransaction trans = null;
+
+                    trans = connection.OracleConnection.BeginTransaction();
+                    try
+                    {
+
+                        int i = 0;
+                        int nNameIndex = 0;
+                        int nCount = 0; // 累积的尚未发出的命令行数
+
+                        // 把删除提前到增加以前
+                        if (keysDelete != null)
+                        {
+                            // 删除keys
+                            for (i = 0; i < keysDelete.Count; i++)
+                            {
+                                KeyItem oneKey = (KeyItem)keysDelete[i];
+
+                                string strKeysTableName = oneKey.SqlTableName;
+
+                                string strIndex = Convert.ToString(nNameIndex++);
+
+                                string strKeyParamName = ":key" + strIndex;
+                                string strFromParamName = ":from" + strIndex;
+                                string strIdParamName = ":id" + strIndex;
+                                string strKeynumParamName = ":keynum" + strIndex;
+
+                                strCommand.Append(" DELETE FROM " + this.m_strSqlDbName + "_" + strKeysTableName
+                                    + " WHERE keystring = " + strKeyParamName
+                                    + " AND fromstring = " + strFromParamName
+                                    + " AND idstring = " + strIdParamName
+                                    + " AND keystringnum = " + strKeynumParamName
+                                    + " ");
+
+                                OracleParameter keyParam =
+                                    command.Parameters.Add(strKeyParamName,
+                                    OracleDbType.NVarchar2);
+                                keyParam.Value = oneKey.Key;
+
+                                OracleParameter fromParam =
+                                    command.Parameters.Add(strFromParamName,
+                                    OracleDbType.NVarchar2);
+                                fromParam.Value = oneKey.FromValue;
+
+                                OracleParameter idParam =
+                                    command.Parameters.Add(strIdParamName,
+                                    OracleDbType.NVarchar2);
+                                idParam.Value = oneKey.RecordID;
+
+                                OracleParameter keynumParam =
+                                    command.Parameters.Add(strKeynumParamName,
+                                    OracleDbType.NVarchar2);
+                                keynumParam.Value = oneKey.Num;
+
+                                command.CommandText = strCommand.ToString();
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "删除检索点出错, 偏移 " + (nCount).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                    return -1;
+                                }
+                                strCommand.Clear();
+
+                                // 每行都发出命令，不累积参数值
+                                command.Parameters.Clear();
+                                nCount++;
+                            }
+                        }
+
+                        if (keysAdd != null)
+                        {
+                            // nCount = keysAdd.Count;
+
+                            // 增加keys
+                            for (i = 0; i < keysAdd.Count; i++)
+                            {
+                                KeyItem oneKey = (KeyItem)keysAdd[i];
+
+                                string strKeysTableName = oneKey.SqlTableName;
+
+                                // string strIndex = Convert.ToString(i);
+                                string strIndex = Convert.ToString(nNameIndex++);
+
+                                string strKeyParamName = ":key" + strIndex;
+                                string strFromParamName = ":from" + strIndex;
+                                string strIdParamName = ":id" + strIndex;
+                                string strKeynumParamName = ":keynum" + strIndex;
+
+                                //加keynum
+                                strCommand.Append(" INSERT INTO " + this.m_strSqlDbName + "_" + strKeysTableName
+                                    + " (keystring,fromstring,idstring,keystringnum) "
+                                    + " VALUES(" + strKeyParamName + ","
+                                    + strFromParamName + ","
+                                    + strIdParamName + ","
+                                    + strKeynumParamName + ")  ");
+
+                                OracleParameter keyParam =
+                                    command.Parameters.Add(strKeyParamName,
+                                    OracleDbType.NVarchar2);
+                                keyParam.Value = oneKey.Key;
+
+                                OracleParameter fromParam =
+                                    command.Parameters.Add(strFromParamName,
+                                    OracleDbType.NVarchar2);
+                                fromParam.Value = oneKey.FromValue;
+
+                                OracleParameter idParam =
+                                    command.Parameters.Add(strIdParamName,
+                                    OracleDbType.NVarchar2);
+                                idParam.Value = oneKey.RecordID;
+
+                                OracleParameter keynumParam =
+                                    command.Parameters.Add(strKeynumParamName,
+                                    OracleDbType.NVarchar2);
+                                keynumParam.Value = oneKey.Num;
+
+                                command.CommandText = strCommand.ToString();
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "创建检索点出错,偏移 " + (nCount).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                    return -1;
+                                }
+                                strCommand.Clear();
+
+                                // 每行都发出命令，不累积参数值
+                                command.Parameters.Clear();
+
+                                nCount++;
+                            }
+                        }
+                        if (trans != null)
+                        {
+                            trans.Commit();
+                            trans = null;
+                        }
+                    }
+                    finally
+                    {
+                        if (trans != null)
+                            trans.Rollback();
+                    }
+                } // end of using command
+            }
+            #endregion // Oracle
+
+            return 0;
+        }

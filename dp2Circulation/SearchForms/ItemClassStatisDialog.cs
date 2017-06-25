@@ -398,6 +398,9 @@ Z";
             //2017/6/17
             strText = strText.Replace("￥","CNY");
 
+            // 2017/6/17
+            strText = strText.Replace("精装", "").Replace("平装","").Replace("每册","");
+
             strText = StringUtil.ToDBC(strText);
 
             // 截掉逗号右侧的部分

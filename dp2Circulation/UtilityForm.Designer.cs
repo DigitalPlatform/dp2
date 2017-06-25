@@ -64,8 +64,10 @@
             this.tabPage_textLines = new System.Windows.Forms.TabPage();
             this.splitContainer_textLines_main = new System.Windows.Forms.SplitContainer();
             this.splitContainer_textLines_up = new System.Windows.Forms.SplitContainer();
+            this.tableLayoutPanel_text_source1 = new System.Windows.Forms.TableLayoutPanel();
             this.label7 = new System.Windows.Forms.Label();
             this.textBox_textLines_source1 = new System.Windows.Forms.TextBox();
+            this.tableLayoutPanel_text_source2 = new System.Windows.Forms.TableLayoutPanel();
             this.label8 = new System.Windows.Forms.Label();
             this.textBox_textLines_source2 = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel_textLines_down = new System.Windows.Forms.TableLayoutPanel();
@@ -74,6 +76,7 @@
             this.toolStripButton_textLines_and = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_textLines_sort1 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_textLines_sort1removedup = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_textLines_getAuthorNumber = new System.Windows.Forms.ToolStripButton();
             this.textBox_textLines_target = new System.Windows.Forms.TextBox();
             this.tabPage_isbn = new System.Windows.Forms.TabPage();
             this.toolStrip_isbn = new System.Windows.Forms.ToolStrip();
@@ -97,6 +100,7 @@
             this.textBox_serverFilePath = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
             this.tabPage_systemInfo = new System.Windows.Forms.TabPage();
+            this.button_systemInfo_getClientIP = new System.Windows.Forms.Button();
             this.textBox_systemInfo_mac = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.tabPage_worToIso = new System.Windows.Forms.TabPage();
@@ -107,7 +111,8 @@
             this.label13 = new System.Windows.Forms.Label();
             this.textBox_worToIso_worFilename = new System.Windows.Forms.TextBox();
             this.button_worToIso_findFileName = new System.Windows.Forms.Button();
-            this.button_systemInfo_getClientIP = new System.Windows.Forms.Button();
+            this.tableLayoutPanel_currency_source = new System.Windows.Forms.TableLayoutPanel();
+            this.tableLayoutPanel_currency_target = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl_main.SuspendLayout();
             this.tabPage_sjhm.SuspendLayout();
             this.tabPage_xmlEditor.SuspendLayout();
@@ -127,6 +132,8 @@
             this.splitContainer_textLines_up.Panel1.SuspendLayout();
             this.splitContainer_textLines_up.Panel2.SuspendLayout();
             this.splitContainer_textLines_up.SuspendLayout();
+            this.tableLayoutPanel_text_source1.SuspendLayout();
+            this.tableLayoutPanel_text_source2.SuspendLayout();
             this.tableLayoutPanel_textLines_down.SuspendLayout();
             this.toolStrip_textLines.SuspendLayout();
             this.tabPage_isbn.SuspendLayout();
@@ -135,6 +142,8 @@
             this.tabPage_serverFileSystem.SuspendLayout();
             this.tabPage_systemInfo.SuspendLayout();
             this.tabPage_worToIso.SuspendLayout();
+            this.tableLayoutPanel_currency_source.SuspendLayout();
+            this.tableLayoutPanel_currency_target.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -444,14 +453,11 @@
             // 
             // splitContainer_currency.Panel1
             // 
-            this.splitContainer_currency.Panel1.Controls.Add(this.label5);
-            this.splitContainer_currency.Panel1.Controls.Add(this.textBox_currency_source);
+            this.splitContainer_currency.Panel1.Controls.Add(this.tableLayoutPanel_currency_source);
             // 
             // splitContainer_currency.Panel2
             // 
-            this.splitContainer_currency.Panel2.Controls.Add(this.button_currency_sum);
-            this.splitContainer_currency.Panel2.Controls.Add(this.label6);
-            this.splitContainer_currency.Panel2.Controls.Add(this.textBox_currency_target);
+            this.splitContainer_currency.Panel2.Controls.Add(this.tableLayoutPanel_currency_target);
             this.splitContainer_currency.Size = new System.Drawing.Size(465, 321);
             this.splitContainer_currency.SplitterDistance = 175;
             this.splitContainer_currency.SplitterWidth = 8;
@@ -469,20 +475,18 @@
             // textBox_currency_source
             // 
             this.textBox_currency_source.AcceptsReturn = true;
-            this.textBox_currency_source.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_currency_source.Location = new System.Drawing.Point(-1, 15);
+            this.textBox_currency_source.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_currency_source.Location = new System.Drawing.Point(3, 15);
             this.textBox_currency_source.MaxLength = 0;
             this.textBox_currency_source.Multiline = true;
             this.textBox_currency_source.Name = "textBox_currency_source";
             this.textBox_currency_source.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_currency_source.Size = new System.Drawing.Size(173, 303);
+            this.textBox_currency_source.Size = new System.Drawing.Size(169, 303);
             this.textBox_currency_source.TabIndex = 0;
             // 
             // button_currency_sum
             // 
-            this.button_currency_sum.Location = new System.Drawing.Point(4, 15);
+            this.button_currency_sum.Location = new System.Drawing.Point(3, 15);
             this.button_currency_sum.Name = "button_currency_sum";
             this.button_currency_sum.Size = new System.Drawing.Size(75, 23);
             this.button_currency_sum.TabIndex = 4;
@@ -493,7 +497,7 @@
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(83, 0);
+            this.label6.Location = new System.Drawing.Point(84, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(53, 12);
             this.label6.TabIndex = 3;
@@ -505,12 +509,12 @@
             this.textBox_currency_target.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_currency_target.Location = new System.Drawing.Point(85, 15);
+            this.textBox_currency_target.Location = new System.Drawing.Point(84, 15);
             this.textBox_currency_target.MaxLength = 0;
             this.textBox_currency_target.Multiline = true;
             this.textBox_currency_target.Name = "textBox_currency_target";
             this.textBox_currency_target.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_currency_target.Size = new System.Drawing.Size(168, 303);
+            this.textBox_currency_target.Size = new System.Drawing.Size(195, 303);
             this.textBox_currency_target.TabIndex = 2;
             // 
             // tabPage_textLines
@@ -552,22 +556,35 @@
             // 
             // splitContainer_textLines_up.Panel1
             // 
-            this.splitContainer_textLines_up.Panel1.Controls.Add(this.label7);
-            this.splitContainer_textLines_up.Panel1.Controls.Add(this.textBox_textLines_source1);
+            this.splitContainer_textLines_up.Panel1.Controls.Add(this.tableLayoutPanel_text_source1);
             // 
             // splitContainer_textLines_up.Panel2
             // 
-            this.splitContainer_textLines_up.Panel2.Controls.Add(this.label8);
-            this.splitContainer_textLines_up.Panel2.Controls.Add(this.textBox_textLines_source2);
+            this.splitContainer_textLines_up.Panel2.Controls.Add(this.tableLayoutPanel_text_source2);
             this.splitContainer_textLines_up.Size = new System.Drawing.Size(477, 162);
             this.splitContainer_textLines_up.SplitterDistance = 235;
             this.splitContainer_textLines_up.SplitterWidth = 8;
             this.splitContainer_textLines_up.TabIndex = 5;
             // 
+            // tableLayoutPanel_text_source1
+            // 
+            this.tableLayoutPanel_text_source1.ColumnCount = 1;
+            this.tableLayoutPanel_text_source1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_text_source1.Controls.Add(this.label7, 0, 0);
+            this.tableLayoutPanel_text_source1.Controls.Add(this.textBox_textLines_source1, 0, 1);
+            this.tableLayoutPanel_text_source1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_text_source1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_text_source1.Name = "tableLayoutPanel_text_source1";
+            this.tableLayoutPanel_text_source1.RowCount = 2;
+            this.tableLayoutPanel_text_source1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_text_source1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_text_source1.Size = new System.Drawing.Size(235, 162);
+            this.tableLayoutPanel_text_source1.TabIndex = 2;
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(1, 0);
+            this.label7.Location = new System.Drawing.Point(3, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(35, 12);
             this.label7.TabIndex = 1;
@@ -576,21 +593,34 @@
             // textBox_textLines_source1
             // 
             this.textBox_textLines_source1.AcceptsReturn = true;
-            this.textBox_textLines_source1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_textLines_source1.Location = new System.Drawing.Point(-1, 15);
+            this.textBox_textLines_source1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textBox_textLines_source1.Location = new System.Drawing.Point(3, 15);
             this.textBox_textLines_source1.MaxLength = 0;
             this.textBox_textLines_source1.Multiline = true;
             this.textBox_textLines_source1.Name = "textBox_textLines_source1";
             this.textBox_textLines_source1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_textLines_source1.Size = new System.Drawing.Size(233, 144);
+            this.textBox_textLines_source1.Size = new System.Drawing.Size(229, 144);
             this.textBox_textLines_source1.TabIndex = 0;
+            // 
+            // tableLayoutPanel_text_source2
+            // 
+            this.tableLayoutPanel_text_source2.ColumnCount = 1;
+            this.tableLayoutPanel_text_source2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_text_source2.Controls.Add(this.label8, 0, 0);
+            this.tableLayoutPanel_text_source2.Controls.Add(this.textBox_textLines_source2, 0, 1);
+            this.tableLayoutPanel_text_source2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_text_source2.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_text_source2.Name = "tableLayoutPanel_text_source2";
+            this.tableLayoutPanel_text_source2.RowCount = 2;
+            this.tableLayoutPanel_text_source2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_text_source2.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_text_source2.Size = new System.Drawing.Size(234, 162);
+            this.tableLayoutPanel_text_source2.TabIndex = 4;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(1, 0);
+            this.label8.Location = new System.Drawing.Point(3, 0);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(35, 12);
             this.label8.TabIndex = 3;
@@ -599,15 +629,13 @@
             // textBox_textLines_source2
             // 
             this.textBox_textLines_source2.AcceptsReturn = true;
-            this.textBox_textLines_source2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_textLines_source2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBox_textLines_source2.Location = new System.Drawing.Point(3, 15);
             this.textBox_textLines_source2.MaxLength = 0;
             this.textBox_textLines_source2.Multiline = true;
             this.textBox_textLines_source2.Name = "textBox_textLines_source2";
             this.textBox_textLines_source2.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_textLines_source2.Size = new System.Drawing.Size(189, 144);
+            this.textBox_textLines_source2.Size = new System.Drawing.Size(228, 144);
             this.textBox_textLines_source2.TabIndex = 2;
             // 
             // tableLayoutPanel_textLines_down
@@ -633,7 +661,8 @@
             this.toolStripButton_textLines_sub,
             this.toolStripButton_textLines_and,
             this.toolStripButton_textLines_sort1,
-            this.toolStripButton_textLines_sort1removedup});
+            this.toolStripButton_textLines_sort1removedup,
+            this.toolStripButton_textLines_getAuthorNumber});
             this.toolStrip_textLines.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_textLines.Name = "toolStrip_textLines";
             this.toolStrip_textLines.Size = new System.Drawing.Size(479, 25);
@@ -683,6 +712,16 @@
             this.toolStripButton_textLines_sort1removedup.Text = "排序 1 并去重";
             this.toolStripButton_textLines_sort1removedup.ToolTipText = "排序集合1(去重)";
             this.toolStripButton_textLines_sort1removedup.Click += new System.EventHandler(this.toolStripButton_textLines_sort1removedup_Click);
+            // 
+            // toolStripButton_textLines_getAuthorNumber
+            // 
+            this.toolStripButton_textLines_getAuthorNumber.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton_textLines_getAuthorNumber.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_textLines_getAuthorNumber.Image")));
+            this.toolStripButton_textLines_getAuthorNumber.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_textLines_getAuthorNumber.Name = "toolStripButton_textLines_getAuthorNumber";
+            this.toolStripButton_textLines_getAuthorNumber.Size = new System.Drawing.Size(100, 22);
+            this.toolStripButton_textLines_getAuthorNumber.Text = "取 GCAT 著者号";
+            this.toolStripButton_textLines_getAuthorNumber.Click += new System.EventHandler(this.toolStripButton_textLines_getAuthorNumber_Click);
             // 
             // textBox_textLines_target
             // 
@@ -930,6 +969,18 @@
             this.tabPage_systemInfo.Text = "系统信息";
             this.tabPage_systemInfo.UseVisualStyleBackColor = true;
             // 
+            // button_systemInfo_getClientIP
+            // 
+            this.button_systemInfo_getClientIP.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_systemInfo_getClientIP.Location = new System.Drawing.Point(11, 52);
+            this.button_systemInfo_getClientIP.Name = "button_systemInfo_getClientIP";
+            this.button_systemInfo_getClientIP.Size = new System.Drawing.Size(458, 23);
+            this.button_systemInfo_getClientIP.TabIndex = 2;
+            this.button_systemInfo_getClientIP.Text = "显示本机(相对于 dp2library 服务器)的 IP 地址";
+            this.button_systemInfo_getClientIP.UseVisualStyleBackColor = true;
+            this.button_systemInfo_getClientIP.Click += new System.EventHandler(this.button_systemInfo_getClientIP_Click);
+            // 
             // textBox_systemInfo_mac
             // 
             this.textBox_systemInfo_mac.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -1036,17 +1087,37 @@
             this.button_worToIso_findFileName.Text = "...";
             this.button_worToIso_findFileName.Click += new System.EventHandler(this.button_worToIso_findWorFileName_Click);
             // 
-            // button_systemInfo_getClientIP
+            // tableLayoutPanel_currency_source
             // 
-            this.button_systemInfo_getClientIP.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_systemInfo_getClientIP.Location = new System.Drawing.Point(11, 52);
-            this.button_systemInfo_getClientIP.Name = "button_systemInfo_getClientIP";
-            this.button_systemInfo_getClientIP.Size = new System.Drawing.Size(458, 23);
-            this.button_systemInfo_getClientIP.TabIndex = 2;
-            this.button_systemInfo_getClientIP.Text = "显示本机(相对于 dp2library 服务器)的 IP 地址";
-            this.button_systemInfo_getClientIP.UseVisualStyleBackColor = true;
-            this.button_systemInfo_getClientIP.Click += new System.EventHandler(this.button_systemInfo_getClientIP_Click);
+            this.tableLayoutPanel_currency_source.ColumnCount = 1;
+            this.tableLayoutPanel_currency_source.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_currency_source.Controls.Add(this.label5, 0, 0);
+            this.tableLayoutPanel_currency_source.Controls.Add(this.textBox_currency_source, 0, 1);
+            this.tableLayoutPanel_currency_source.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_currency_source.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_currency_source.Name = "tableLayoutPanel_currency_source";
+            this.tableLayoutPanel_currency_source.RowCount = 2;
+            this.tableLayoutPanel_currency_source.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_currency_source.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_currency_source.Size = new System.Drawing.Size(175, 321);
+            this.tableLayoutPanel_currency_source.TabIndex = 2;
+            // 
+            // tableLayoutPanel_currency_target
+            // 
+            this.tableLayoutPanel_currency_target.ColumnCount = 2;
+            this.tableLayoutPanel_currency_target.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_currency_target.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_currency_target.Controls.Add(this.label6, 1, 0);
+            this.tableLayoutPanel_currency_target.Controls.Add(this.button_currency_sum, 0, 1);
+            this.tableLayoutPanel_currency_target.Controls.Add(this.textBox_currency_target, 1, 1);
+            this.tableLayoutPanel_currency_target.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_currency_target.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_currency_target.Name = "tableLayoutPanel_currency_target";
+            this.tableLayoutPanel_currency_target.RowCount = 2;
+            this.tableLayoutPanel_currency_target.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_currency_target.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_currency_target.Size = new System.Drawing.Size(282, 321);
+            this.tableLayoutPanel_currency_target.TabIndex = 5;
             // 
             // UtilityForm
             // 
@@ -1071,9 +1142,7 @@
             this.tabPage_webCamera.ResumeLayout(false);
             this.tabPage_currency.ResumeLayout(false);
             this.splitContainer_currency.Panel1.ResumeLayout(false);
-            this.splitContainer_currency.Panel1.PerformLayout();
             this.splitContainer_currency.Panel2.ResumeLayout(false);
-            this.splitContainer_currency.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_currency)).EndInit();
             this.splitContainer_currency.ResumeLayout(false);
             this.tabPage_textLines.ResumeLayout(false);
@@ -1082,11 +1151,13 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_textLines_main)).EndInit();
             this.splitContainer_textLines_main.ResumeLayout(false);
             this.splitContainer_textLines_up.Panel1.ResumeLayout(false);
-            this.splitContainer_textLines_up.Panel1.PerformLayout();
             this.splitContainer_textLines_up.Panel2.ResumeLayout(false);
-            this.splitContainer_textLines_up.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_textLines_up)).EndInit();
             this.splitContainer_textLines_up.ResumeLayout(false);
+            this.tableLayoutPanel_text_source1.ResumeLayout(false);
+            this.tableLayoutPanel_text_source1.PerformLayout();
+            this.tableLayoutPanel_text_source2.ResumeLayout(false);
+            this.tableLayoutPanel_text_source2.PerformLayout();
             this.tableLayoutPanel_textLines_down.ResumeLayout(false);
             this.tableLayoutPanel_textLines_down.PerformLayout();
             this.toolStrip_textLines.ResumeLayout(false);
@@ -1102,6 +1173,10 @@
             this.tabPage_systemInfo.PerformLayout();
             this.tabPage_worToIso.ResumeLayout(false);
             this.tabPage_worToIso.PerformLayout();
+            this.tableLayoutPanel_currency_source.ResumeLayout(false);
+            this.tableLayoutPanel_currency_source.PerformLayout();
+            this.tableLayoutPanel_currency_target.ResumeLayout(false);
+            this.tableLayoutPanel_currency_target.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -1187,5 +1262,10 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_xmlEditor_htmlEncode;
         private System.Windows.Forms.ToolStripButton toolStripButton_xmlEditor_htmlDecode;
         private System.Windows.Forms.Button button_systemInfo_getClientIP;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_text_source1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_text_source2;
+        private System.Windows.Forms.ToolStripButton toolStripButton_textLines_getAuthorNumber;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_currency_source;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_currency_target;
     }
 }

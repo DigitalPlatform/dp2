@@ -2237,6 +2237,19 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
+            strPrice = StringUtil.ToDBC(strPrice);
+            if (strPrice.IndexOfAny(new char[] { '(', ')' }) != -1)
+            {
+                strError = "价格字符串中不允许出现括号 '" + strPrice + "'";
+                return 1;
+            }
+
+            if (strPrice.IndexOf(',') != -1)
+            {
+                strError = "价格字符串中不允许出现逗号 '" + strPrice + "'";
+                return 1;
+            }
+
             CurrencyItem item = null;
             // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
             int nRet = PriceUtil.ParseSinglePrice(strPrice,

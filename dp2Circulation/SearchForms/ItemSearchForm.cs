@@ -2694,39 +2694,42 @@ out strError);
             _verifyBarcodeFuncTable.Clear();
 
             VerifyEntityDialog dlg = new VerifyEntityDialog();
-            MainForm.SetControlFont(dlg, this.Font);
-
-            dlg.UiState = Program.MainForm.AppInfo.GetString(
-                "ItemSearchForm",
-                "VerifyEntityDialog_uiState",
-                "");
-
             if (bControl == true)
                 dlg.AutoModify = true;
 
-            Program.MainForm.AppInfo.LinkFormState(dlg, "ItemSearchForm_VerifyEntityDialog_state");
-            dlg.ShowDialog(this);
-
-            Program.MainForm.AppInfo.SetString(
-                "ItemSearchForm",
-                "VerifyEntityDialog_uiState",
-                dlg.UiState);
-
-            if (dlg.ServerVerify == true)
+            if (this.DbType == "item")
             {
-                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.112") < 0)
+                MainForm.SetControlFont(dlg, this.Font);
+
+                dlg.UiState = Program.MainForm.AppInfo.GetString(
+                    "ItemSearchForm",
+                    "VerifyEntityDialog_uiState",
+                    "");
+
+                Program.MainForm.AppInfo.LinkFormState(dlg, "ItemSearchForm_VerifyEntityDialog_state");
+                dlg.ShowDialog(this);
+
+                Program.MainForm.AppInfo.SetString(
+                    "ItemSearchForm",
+                    "VerifyEntityDialog_uiState",
+                    dlg.UiState);
+
+                if (dlg.ServerVerify == true)
                 {
-                    strError = "服务器端校验功能只能和 dp2library 2.112 或以上版本配套使用";
-                    return -1;
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.112") < 0)
+                    {
+                        strError = "服务器端校验功能只能和 dp2library 2.112 或以上版本配套使用";
+                        return -1;
+                    }
                 }
-            }
 
-            if (dlg.AddPrice == true)
-            {
-                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.113") < 0)
+                if (dlg.AddPrice == true)
                 {
-                    strError = "添加价格功能只能和 dp2library 2.113 或以上版本配套使用";
-                    return -1;
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.113") < 0)
+                    {
+                        strError = "添加价格功能只能和 dp2library 2.113 或以上版本配套使用";
+                        return -1;
+                    }
                 }
             }
 
@@ -3260,6 +3263,7 @@ out strError);
                     errors.Add("价格字段内容为空");
                 else
                 {
+#if NO
                     CurrencyItem item = null;
                     // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
                     nRet = PriceUtil.ParseSinglePrice(strPrice,
@@ -3273,6 +3277,14 @@ out strError);
                     {
                         errors.Add("价格字符串中不允许出现括号 '" + strPrice + "'");
                     }
+
+                    if (strPrice.IndexOf(',') != -1)
+                    {
+                        strError = "价格字符串中不允许出现逗号 '" + strPrice + "'";
+                        return 1;
+                    }
+#endif
+                    errors.AddRange(VerifyPrice(strPrice));
 
                     // TODO: 检查常见的货币前缀符号
                 }
@@ -3303,6 +3315,33 @@ out strError);
             {
                 DomUtil.RemoveEmptyElements(itemdom.DocumentElement, false);
             }
+        }
+
+        public static List<string> VerifyPrice(string strPrice)
+        {
+            List<string> errors = new List<string>();
+
+            string strError = "";
+            CurrencyItem item = null;
+            // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
+            int nRet = PriceUtil.ParseSinglePrice(strPrice,
+                out item,
+                out strError);
+            if (nRet == -1)
+                errors.Add(strError);
+
+            string new_value = StringUtil.ToDBC(strPrice);
+            if (new_value.IndexOfAny(new char[] { '(', ')' }) != -1)
+            {
+                errors.Add("价格字符串中不允许出现括号 '" + strPrice + "'");
+            }
+
+            if (new_value.IndexOf(',') != -1)
+            {
+                errors.Add("价格字符串中不允许出现逗号 '" + strPrice + "'");
+            }
+
+            return errors;
         }
 
         // return:
