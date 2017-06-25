@@ -15030,7 +15030,7 @@ start_time,
 + " VALUES " + new string((char)1, 1) + "(N'" + MySqlHelper.EscapeString(oneKey.Key) + "',N'"
 + MySqlHelper.EscapeString(oneKey.FromValue) + "',N'"
 + MySqlHelper.EscapeString(oneKey.RecordID) + "',N'"
-+ MySqlHelper.EscapeString(oneKey.Num) + "') ;\n");
++ MySqlHelper.EscapeString(oneKey.Num) + "') ");
                     }
                 }
 
@@ -15072,6 +15072,7 @@ start_time,
 
                                 strCommand.Clear();
                                 command.Parameters.Clear();
+                                strInsertHead = "";
                             }
 
                             int nPos = line.IndexOf((char)1);
@@ -15083,7 +15084,11 @@ start_time,
                                 if (strLeft == strInsertHead)
                                     strCommand.Append("," + strRight);
                                 else
-                                    strCommand.Append(line);
+                                {
+                                    if (strCommand.Length > 0 && strCommand[strCommand.Length - 1] != ';')
+                                        strCommand.Append(";");
+                                    strCommand.Append(strLeft + strRight + ";");
+                                }
 
                                 strInsertHead = strLeft;
                             }
