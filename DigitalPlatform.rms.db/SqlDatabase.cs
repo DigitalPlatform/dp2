@@ -15018,7 +15018,6 @@ start_time,
 
                 if (keysAdd != null)
                 {
-
                     // 增加keys
                     for (int i = 0; i < keysAdd.Count; i++)
                     {
@@ -15028,11 +15027,10 @@ start_time,
 
                         lines.Add(" INSERT INTO " + strKeysTableName
 + " (keystring,fromstring,idstring,keystringnum) "
-+ " VALUES (N'" + MySqlHelper.EscapeString(oneKey.Key) + "',N'"
++ " VALUES " + new string((char)1, 1) + "(N'" + MySqlHelper.EscapeString(oneKey.Key) + "',N'"
 + MySqlHelper.EscapeString(oneKey.FromValue) + "',N'"
 + MySqlHelper.EscapeString(oneKey.RecordID) + "',N'"
 + MySqlHelper.EscapeString(oneKey.Num) + "') ;\n");
-
                     }
                 }
 
@@ -15044,13 +15042,15 @@ start_time,
                     trans = connection.MySqlConnection.BeginTransaction();
                     try
                     {
+                        string strInsertHead = "";
                         int nExecuted = 0;
+                        lines.Add("");
                         foreach (string line in lines)
                         {
                             // 最后可能剩下的命令
                             if (strCommand.Length > 0
                                 && (GetLength(strCommand.ToString()) + GetLength(line) + 1 >= 64000
-                                || nExecuted == lines.Count - 1)
+                                || nExecuted >= lines.Count - 1)
                                 )
                             {
                                 command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
@@ -15074,9 +15074,27 @@ start_time,
                                 command.Parameters.Clear();
                             }
 
-                            strCommand.Append(line);
+                            int nPos = line.IndexOf((char)1);
+                            if (nPos != -1)
+                            {
+                                string strLeft = line.Substring(0, nPos);
+                                string strRight = line.Substring(nPos + 1);
+
+                                if (strLeft == strInsertHead)
+                                    strCommand.Append("," + strRight);
+                                else
+                                    strCommand.Append(line);
+
+                                strInsertHead = strLeft;
+                            }
+                            else
+                                strCommand.Append(line);
+
                             nExecuted++;
                         }
+
+                        if (strCommand.Length > 0)
+                            throw new Exception("循环遗漏了最后一行的处理");
 
                         if (trans != null)
                         {
@@ -19432,7 +19450,7 @@ bool bTempObject)
                             && database.container != null
                             && database.container.KernelApplication != null)
                             database.container.KernelApplication.WriteErrorLog("*** 将自动重试 Open() (i=" + i + ")");
-                        
+
                         {
                             Thread.Sleep(500);
                             continue;
@@ -19469,11 +19487,11 @@ bool bTempObject)
                         && ex.InnerException is ArgumentException)
                     {
                         // 重试过程记入日志
-                        if (this.SqlDatabase != null 
+                        if (this.SqlDatabase != null
                             && this.SqlDatabase.container != null
                             && this.SqlDatabase.container.KernelApplication != null)
                             this.SqlDatabase.container.KernelApplication.WriteErrorLog("*** 将自动重试 Open() (i=" + i + ")");
-                        
+
                         {
                             Thread.Sleep(500);
                             continue;
@@ -19487,7 +19505,8 @@ bool bTempObject)
                 throw exception;
         }
 
-        /*public*/ void _open()
+        /*public*/
+        void _open()
         {
             if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
                 this.SqlConnection.Open();
