@@ -126,6 +126,7 @@
     <Reference Include="System.Drawing">
       <Name>System.Drawing</Name>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms">
       <Name>System.Windows.Forms</Name>
     </Reference>
@@ -166,6 +167,9 @@
   <ItemGroup>
     <Content Include="App.ico" />
     <Content Include="Design.txt" />
+    <Content Include="history.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="quickrights.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

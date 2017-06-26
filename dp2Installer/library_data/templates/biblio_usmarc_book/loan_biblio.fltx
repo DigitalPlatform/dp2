@@ -9,7 +9,6 @@
 // 2011/2/15	%datadir%
 // 2011/9/7   采用servermapped新体系结构
 // 2014/12/27 增加显示封面图片功能
-// 2016/12/27 StringUtil.IsHttpUrl()
 
 using System;
 using System.IO;

@@ -11,16 +11,15 @@ using System.Net;   // for WebClient class
 using System.IO;
 using System.Web;
 using System.Threading;
+using System.Xml;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Script;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Xml;
 
 // 2013/3/16 添加 XML 注释
 

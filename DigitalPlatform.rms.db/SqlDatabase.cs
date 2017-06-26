@@ -15012,7 +15012,7 @@ start_time,
 + " WHERE keystring = N'" + MySqlHelper.EscapeString(oneKey.Key)
 + "' AND fromstring = N'" + MySqlHelper.EscapeString(oneKey.FromValue)
 + "' AND idstring = N'" + MySqlHelper.EscapeString(oneKey.RecordID)
-+ "' AND keystringnum = N'" + MySqlHelper.EscapeString(oneKey.Num) + "' ;\n");
++ "' AND keystringnum = N'" + MySqlHelper.EscapeString(oneKey.Num) + "' ;");
                     }
                 }
 
@@ -15049,7 +15049,7 @@ start_time,
                         {
                             // 最后可能剩下的命令
                             if (strCommand.Length > 0
-                                && (GetLength(strCommand.ToString()) + GetLength(line) + 1 >= 64000
+                                && (StringUtil.GetUtf8Bytes(strCommand.ToString()) + StringUtil.GetUtf8Bytes(line) + 1 >= 64000
                                 || nExecuted >= lines.Count - 1)
                                 )
                             {
@@ -15087,7 +15087,7 @@ start_time,
                                 {
                                     if (strCommand.Length > 0 && strCommand[strCommand.Length - 1] != ';')
                                         strCommand.Append(";");
-                                    strCommand.Append(strLeft + strRight + ";");
+                                    strCommand.Append(strLeft + strRight);
                                 }
 
                                 strInsertHead = strLeft;
@@ -15278,12 +15278,6 @@ start_time,
             #endregion // Oracle
 
             return 0;
-        }
-
-        // 获得一个字符串的 UTF-8 字节数
-        static int GetLength(string text)
-        {
-            return Encoding.UTF8.GetByteCount(text);
         }
 
         // 处理子文件

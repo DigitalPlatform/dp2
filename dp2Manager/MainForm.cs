@@ -11,6 +11,9 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using System.Deployment.Application;
+using System.IO;
+using System.Web;
+using System.Threading;
 
 using DigitalPlatform;
 using DigitalPlatform.Text;
@@ -66,6 +69,8 @@ namespace dp2Manager
         private ToolStripStatusLabel toolStripStatusLabel_main;
         private ToolStripProgressBar toolStripProgressBar_main;
         private MenuItem menuItem_testAccessKey;
+        private SplitContainer splitContainer1;
+        private WebBrowser webBrowser1;
         private System.ComponentModel.IContainer components;
 
         public MainForm()
@@ -123,6 +128,7 @@ namespace dp2Manager
             this.menuItem_deleteDatabase = new System.Windows.Forms.MenuItem();
             this.menuItem_refresh = new System.Windows.Forms.MenuItem();
             this.menuItem_test = new System.Windows.Forms.MenuItem();
+            this.menuItem_testAccessKey = new System.Windows.Forms.MenuItem();
             this.toolBar1 = new System.Windows.Forms.ToolBar();
             this.toolBarButton_stop = new System.Windows.Forms.ToolBarButton();
             this.imageList_toolbar = new System.Windows.Forms.ImageList(this.components);
@@ -130,8 +136,13 @@ namespace dp2Manager
             this.statusStrip_main = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
-            this.menuItem_testAccessKey = new System.Windows.Forms.MenuItem();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.statusStrip_main.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
             this.SuspendLayout();
             // 
             // mainMenu1
@@ -224,6 +235,12 @@ namespace dp2Manager
             this.menuItem_test.Visible = false;
             this.menuItem_test.Click += new System.EventHandler(this.menuItem_test_Click);
             // 
+            // menuItem_testAccessKey
+            // 
+            this.menuItem_testAccessKey.Index = 6;
+            this.menuItem_testAccessKey.Text = "测试检索点";
+            this.menuItem_testAccessKey.Click += new System.EventHandler(this.menuItem_testAccessKey_Click);
+            // 
             // toolBar1
             // 
             this.toolBar1.Appearance = System.Windows.Forms.ToolBarAppearance.Flat;
@@ -258,10 +275,10 @@ namespace dp2Manager
             this.treeView_res.Dock = System.Windows.Forms.DockStyle.Fill;
             this.treeView_res.HideSelection = false;
             this.treeView_res.ImageIndex = 0;
-            this.treeView_res.Location = new System.Drawing.Point(0, 34);
+            this.treeView_res.Location = new System.Drawing.Point(0, 0);
             this.treeView_res.Name = "treeView_res";
             this.treeView_res.SelectedImageIndex = 0;
-            this.treeView_res.Size = new System.Drawing.Size(481, 340);
+            this.treeView_res.Size = new System.Drawing.Size(279, 318);
             this.treeView_res.TabIndex = 0;
             this.treeView_res.OnSetMenu += new DigitalPlatform.GUI.GuiAppendMenuEventHandle(this.treeView_res_OnSetMenu);
             this.treeView_res.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_res_AfterSelect);
@@ -289,19 +306,40 @@ namespace dp2Manager
             this.toolStripProgressBar_main.Name = "toolStripProgressBar_main";
             this.toolStripProgressBar_main.Size = new System.Drawing.Size(172, 16);
             // 
-            // menuItem_testAccessKey
+            // splitContainer1
             // 
-            this.menuItem_testAccessKey.Index = 6;
-            this.menuItem_testAccessKey.Text = "测试检索点";
-            this.menuItem_testAccessKey.Click += new System.EventHandler(this.menuItem_testAccessKey_Click);
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 34);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.treeView_res);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.webBrowser1);
+            this.splitContainer1.Size = new System.Drawing.Size(481, 318);
+            this.splitContainer1.SplitterDistance = 279;
+            this.splitContainer1.SplitterWidth = 8;
+            this.splitContainer1.TabIndex = 6;
+            // 
+            // webBrowser1
+            // 
+            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser1.Location = new System.Drawing.Point(0, 0);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser1.Name = "webBrowser1";
+            this.webBrowser1.Size = new System.Drawing.Size(194, 318);
+            this.webBrowser1.TabIndex = 0;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(481, 374);
+            this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.statusStrip_main);
-            this.Controls.Add(this.treeView_res);
             this.Controls.Add(this.toolBar1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Menu = this.mainMenu1;
@@ -312,6 +350,10 @@ namespace dp2Manager
             this.Load += new System.EventHandler(this.Form1_Load);
             this.statusStrip_main.ResumeLayout(false);
             this.statusStrip_main.PerformLayout();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -392,9 +434,6 @@ namespace dp2Manager
 
             }
 
-
-
-
             // 设置窗口尺寸状态
             if (AppInfo != null)
             {
@@ -440,6 +479,7 @@ namespace dp2Manager
             if (nRet == -1)
                 MessageBox.Show(this, strError);
 
+            this.ClearHtml();
         }
 
         void Servers_ServerChanged(object sender, ServerChangedEventArgs e)
@@ -1340,8 +1380,11 @@ namespace dp2Manager
 
             DigitalPlatform.Stop stop = this.treeView_res.PrepareStop("正在导出数据");
 
+            this.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 开始检查检索点</div>");
             try
             {
+
                 RecordLoader loader = new RecordLoader(this.Channels,
                     stop,
                     paths,
@@ -1351,6 +1394,8 @@ namespace dp2Manager
                 {
                     string path = record.RecPath;
                     string url = record.Url;
+
+                    // this.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(path) + "</div>");
 
                     // return:
                     //      -1  出错
@@ -1368,7 +1413,8 @@ namespace dp2Manager
                     if (nRet == 0)
                     {
                         strError = "验证检索点发现问题: " + strError;
-                        goto ERROR1;
+                        this.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
+                        // goto ERROR1;
                     }
                 }
             }
@@ -1376,6 +1422,9 @@ namespace dp2Manager
             {
                 this.treeView_res.EndStop(stop);
             }
+
+            this.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 结束检查检索点</div>");
 
             return;
         ERROR1:
@@ -1438,7 +1487,7 @@ namespace dp2Manager
                         return -1;
                     if (nRet == 0)
                     {
-                        string strError1= "";
+                        string strError1 = "";
                         nRet = VerifyOneKey(
     channel,
     strDbName,
@@ -1510,5 +1559,103 @@ out strError);
             strError = "检索点 '" + strKey + "' (" + strFromName + ") 没有命中记录 '" + path + "'";
             return 0;
         }
+
+
+        #region 操作历史显示区
+
+        delegate void Delegate_AppendHtml(string strText);
+        /// <summary>
+        /// 向 IE 控件中追加一段 HTML 内容
+        /// </summary>
+        /// <param name="strText">HTML 内容</param>
+        public void AppendHtml(string strText)
+        {
+            if (this.webBrowser1.InvokeRequired)
+            {
+                Delegate_AppendHtml d = new Delegate_AppendHtml(AppendHtml);
+                this.webBrowser1.BeginInvoke(d, new object[] { strText });
+                return;
+            }
+
+            WriteHtml(this.webBrowser1,
+                strText);
+
+            // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
+            this.webBrowser1.Document.Window.ScrollTo(0,
+    this.webBrowser1.Document.Body.ScrollRectangle.Height);
+        }
+
+        public static void WriteHtml(WebBrowser webBrowser,
+string strHtml)
+        {
+            HtmlDocument doc = webBrowser.Document;
+
+            if (doc == null)
+            {
+                // webBrowser.Navigate("about:blank");
+                Navigate(webBrowser, "about:blank");  // 2015/7/28
+
+                doc = webBrowser.Document;
+            }
+
+            doc.Write(strHtml);
+        }
+
+        internal static void Navigate(WebBrowser webBrowser, string urlString)
+        {
+            int nRedoCount = 0;
+        REDO:
+            try
+            {
+                webBrowser.Navigate(urlString);
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                /*
+System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (异常来自 HRESULT:0x800700AA)
+   在 System.Windows.Forms.UnsafeNativeMethods.IWebBrowser2.Navigate2(Object& URL, Object& flags, Object& targetFrameName, Object& postData, Object& headers)
+   在 System.Windows.Forms.WebBrowser.PerformNavigate2(Object& URL, Object& flags, Object& targetFrameName, Object& postData, Object& headers)
+   在 System.Windows.Forms.WebBrowser.Navigate(String urlString)
+   在 dp2Circulation.QuickChargingForm._setReaderRenderString(String strText) 位置 F:\cs4.0\dp2Circulation\Charging\QuickChargingForm.cs:行号 394
+                 * */
+                if ((uint)ex.ErrorCode == 0x800700AA)
+                {
+                    nRedoCount++;
+                    if (nRedoCount < 5)
+                    {
+                        Application.DoEvents(); // 2015/8/13
+                        Thread.Sleep(200);
+                        goto REDO;
+                    }
+                }
+
+                throw ex;
+            }
+        }
+
+        public void ClearHtml()
+        {
+            string strCssUrl = Path.Combine(this.DataDir, "history.css");
+
+            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+
+            string strJs = "";
+
+            {
+                HtmlDocument doc = this.webBrowser1.Document;
+
+                if (doc == null)
+                {
+                    webBrowser1.Navigate("about:blank");
+                    doc = webBrowser1.Document;
+                }
+                doc = doc.OpenNew(true);
+            }
+
+            WriteHtml(this.webBrowser1,
+                 "<html><head>" + strLink + strJs + "</head><body>");
+        }
+
+        #endregion
     }
 }
