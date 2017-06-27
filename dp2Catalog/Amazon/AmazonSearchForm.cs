@@ -706,11 +706,24 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 return -1;
 
-            AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
-                //MY_AWS_ACCESS_KEY_ID,
-                //MY_AWS_SECRET_KEY,
-this.CurrentServer);
+            dp2Catalog.SystemCfgForm.SecretInfo info = SystemCfgForm.GetSecretInfo(this.MainForm.UserDir,
+                "");
 
+            AmazonSignedRequestHelper helper = null;
+            if (info == null || string.IsNullOrEmpty(info.AwsAccessKeyID) == true)
+            {
+                helper = new AmazonSignedRequestHelper(
+                    //MY_AWS_ACCESS_KEY_ID,
+                    //MY_AWS_SECRET_KEY,
+     this.CurrentServer);
+            }
+            else
+            {
+                helper = new AmazonSignedRequestHelper(
+                    info.AwsAccessKeyID,
+                    info.AwsSecretKey,
+                this.CurrentServer);
+            }
             // IDictionary<string, string> r1 = this.amazonQueryControl1.ParameterTable;   // new Dictionary<string, String>();
 
             IDictionary<string, string> parameters = new Dictionary<string, String>();
@@ -750,10 +763,25 @@ this.CurrentServer);
                 return -1;
             }
 
-            AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
-                //MY_AWS_ACCESS_KEY_ID,
-                //MY_AWS_SECRET_KEY,
-this.m_strCurrentSearchedServer);    //  this.CurrentServer
+            dp2Catalog.SystemCfgForm.SecretInfo info = SystemCfgForm.GetSecretInfo(this.MainForm.UserDir,
+    "");
+
+            AmazonSignedRequestHelper helper = null;
+            
+            if (info == null || string.IsNullOrEmpty(info.AwsAccessKeyID) == true)
+            {
+                helper = new AmazonSignedRequestHelper(
+                    //MY_AWS_ACCESS_KEY_ID,
+                    //MY_AWS_SECRET_KEY,
+                    this.m_strCurrentSearchedServer);    //  this.CurrentServer
+            }
+            else
+            {
+                helper = new AmazonSignedRequestHelper(
+                    info.AwsAccessKeyID,
+                    info.AwsSecretKey,
+                    this.m_strCurrentSearchedServer);
+            }
 
             if (this.m_nCurrentPageNo == -1)
             {

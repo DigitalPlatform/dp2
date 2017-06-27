@@ -156,6 +156,42 @@ false);
             }
         }
 
+        public class SecretInfo
+        {
+            public string AwsAccessKeyID = "";
+            public string AwsSecretKey = "";
+        }
+
+        // 可能会抛出异常
+        public static SecretInfo GetSecretInfo(
+            string strUserDir,
+            string name)
+        {
+            string strCfgFileName = Path.Combine(strUserDir, "amazon.xml");
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strCfgFileName);
+            }
+            catch(FileNotFoundException)
+            {
+                return null;
+            }
+            catch(DirectoryNotFoundException)
+            {
+                return null;
+            }
+
+            SecretInfo info = new SecretInfo();
+            if (dom.DocumentElement != null)
+            {
+                info.AwsAccessKeyID = dom.DocumentElement.GetAttribute("AwsAccessKeyID");
+                info.AwsSecretKey = dom.DocumentElement.GetAttribute("AwsSecretKey");
+            }
+
+            return info;
+        }
+
         // 可能会抛出异常
         public static List<string> ListAmazonServers(string strDataDir,
             string strLang)
