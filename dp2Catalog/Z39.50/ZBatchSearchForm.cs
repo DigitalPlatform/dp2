@@ -1509,6 +1509,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             foreach (DpRow row in result_line.Rows)
             {
                 string strText = row[0].Text;
+                // 获得在结果集中的偏移，基于 0
                 int index = GetOffset(strText);
                 if (index == -1)
                     throw new Exception("行号数字 '" + strText + "' 格式不正确");
@@ -1521,7 +1522,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                         if (row.Count >= 2)
                             strLineText += "  " + row[1].Text;
                         MessageDialog.Show(this,
-                            "记录 '" + strLineText + "' 在刷新的过程中发现重新检索的结果集发生了变化，此行被迫放弃刷新。解决办法是重新发起检索",
+                            "记录 '" + strLineText + "' 在刷新的过程中发现重新检索的结果集发生了变化，此行被迫放弃刷新。解决办法是重新发起检索\r\n\r\n(index '" + index + "' >= connection.ResultCount '" + connection.ResultCount + "')",
                             "后面不再提示",
                             ref bDontAsk);
                     }

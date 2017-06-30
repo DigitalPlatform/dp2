@@ -1715,7 +1715,7 @@ out strError);
                 if (bFixed)
                 {
                     form.Fixed = true;
-                    form.SupressSizeSetting = true;
+                    form.SuppressSizeSetting = true;
                     Program.MainForm.SetMdiToNormal();
                 }
                 else
@@ -1723,7 +1723,7 @@ out strError);
                     // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
                     if (exist_fixed != null)
                     {
-                        form.SupressSizeSetting = true;
+                        form.SuppressSizeSetting = true;
                         Program.MainForm.SetMdiToNormal();
                     }
                 }

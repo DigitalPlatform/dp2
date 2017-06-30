@@ -469,7 +469,7 @@ namespace dp2Catalog
 
         public void LoadSize()
         {
-            if (this.SupressSizeSetting == false)
+            if (this.SuppressSizeSetting == false)
             {
                 // 设置窗口尺寸状态
                 MainForm.AppInfo.LoadMdiChildFormStates(this,
@@ -500,7 +500,7 @@ namespace dp2Catalog
         {
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-                if (this.SupressSizeSetting == false)
+                if (this.SuppressSizeSetting == false)
                 {
                     MainForm.AppInfo.SaveMdiChildFormStates(this,
                         "mdi_form_state");

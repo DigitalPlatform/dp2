@@ -112,7 +112,7 @@ namespace dp2Circulation
             {
                 this._bAcceptMode = value;
 #if ACCEPT_MODE
-                this.SupressSizeSetting = value;
+                this.SuppressSizeSetting = value;
 #endif
             }
         }
@@ -1285,7 +1285,7 @@ true);
             // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
             if (exist_fixed != null)
             {
-                form.SupressSizeSetting = true;
+                form.SuppressSizeSetting = true;
                 Program.MainForm.SetMdiToNormal();
             }
 
@@ -9860,7 +9860,10 @@ MessageBoxDefaultButton.Button1);
 
             // dlg.MainForm = Program.MainForm;
             if (string.IsNullOrEmpty(strTargetRecPath) == false)
+            {
                 dlg.RecPath = strTargetRecPath;
+                dlg.SuppressAutoClipboard = true;
+            }
             else
             {
                 dlg.RecPath = Program.MainForm.AppInfo.GetString(
@@ -12100,7 +12103,10 @@ value);
             dlg.Text = "移动书目记录到 ...";
             // dlg.MainForm = Program.MainForm;
             if (string.IsNullOrEmpty(strTargetRecPath) == false)
+            {
                 dlg.RecPath = strTargetRecPath;
+                dlg.SuppressAutoClipboard = true;
+            }
             else
             {
                 dlg.RecPath = Program.MainForm.AppInfo.GetString(
@@ -12348,6 +12354,8 @@ merge_dlg.UiState);
 
                         merge_style = merge_dlg.GetMergeStyle();
                     }
+                    else
+                        merge_style = MergeStyle.CombineSubrecord | MergeStyle.ReserveTargetBiblio;
 
                     // 检查参数
                     // 删除记录前先检查
@@ -13739,13 +13747,13 @@ strMARC);
             if (this.Fixed == false)
             {
                 this.Fixed = true;
-                this.SupressSizeSetting = true;
+                this.SuppressSizeSetting = true;
                 Program.MainForm.SetFixedPosition(this, "left");
             }
             else
             {
                 this.Fixed = false;
-                this.SupressSizeSetting = false;
+                this.SuppressSizeSetting = false;
 
                 //尺寸要发生明显变化，让人知道不再是左侧固定
                 Program.MainForm.AppInfo.LoadMdiChildFormStates(this,

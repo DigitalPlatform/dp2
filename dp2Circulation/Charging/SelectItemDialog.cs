@@ -67,7 +67,7 @@ namespace dp2Circulation
 
             this.statusStrip1.Renderer = new TransparentToolStripRenderer(this.statusStrip1);
 
-            this.SupressSizeSetting = true;  // 不需要基类 MyForm 的尺寸设定功能
+            this.SuppressSizeSetting = true;  // 不需要基类 MyForm 的尺寸设定功能
         }
 
         private void SelectItemDialog_Load(object sender, EventArgs e)

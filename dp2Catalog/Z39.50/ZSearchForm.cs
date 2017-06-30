@@ -3495,7 +3495,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
                 if (exist_fixed != null)
                     exist_fixed.Activate();
 
-                form.SupressSizeSetting = true;
+                form.SuppressSizeSetting = true;
                 this.MainForm.SetMdiToNormal();
             }
             form.Show();
@@ -3693,7 +3693,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5775.22847, Culture=neutral, PublicKe
                     if (exist_fixed != null)
                         exist_fixed.Activate();
 
-                    form.SupressSizeSetting = true;
+                    form.SuppressSizeSetting = true;
                     this.MainForm.SetMdiToNormal();
                 }
                 form.Show();

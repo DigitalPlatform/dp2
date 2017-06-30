@@ -3257,6 +3257,11 @@ out strError);
             }
 
             // 检查价格字段
+            VerifyPrice(itemdom,
+            bAutoModify,
+            errors,
+            ref bChanged);
+#if NO
             {
                 string strPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
                 if (string.IsNullOrEmpty(strPrice))
@@ -3289,6 +3294,7 @@ out strError);
                     // TODO: 检查常见的货币前缀符号
                 }
             }
+#endif
 
             // 对空的价格字段，从书目记录里面获得价格填充
             if (dlg.AddPrice && dlg.AutoModify)
@@ -3315,6 +3321,59 @@ out strError);
             {
                 DomUtil.RemoveEmptyElements(itemdom.DocumentElement, false);
             }
+        }
+
+        // return:
+        //      -1  发现错误
+        //      0   没有发现错误
+        void VerifyPrice(XmlDocument itemdom,
+            bool bModify,
+            List<string> errors,
+            ref bool bChanged)
+        {
+            if (itemdom.DocumentElement == null)
+            {
+                errors.Add("XML 记录为空");
+                return;
+            }
+
+            string strPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
+            if (string.IsNullOrEmpty(strPrice))
+            {
+                errors.Add("价格字段内容为空");
+                return;
+            }
+            else
+            {
+                List<string> temp = VerifyPrice(strPrice);
+                if (temp.Count > 0)
+                {
+                    errors.AddRange(temp);
+
+                    if (bModify)
+                    {
+                        // (全10册) 转为除法形态
+                        string strOldPrice = strPrice;
+                        ItemClassStatisDialog.CorrectPrice(ref strPrice);
+                        if (strOldPrice != strPrice)
+                        {
+                            if (IsPriceCorrect(strPrice) == true)
+                            {
+                                DomUtil.SetElementText(itemdom.DocumentElement, "price", strPrice);
+                                bChanged = true;
+                                errors.Add("^价格字符串 '" + strOldPrice + "' 被自动修改为 '" + strPrice + "'"); // ^ 开头表示修改提示，而不是错误信息
+                            }
+                            else
+                                errors.Add("*** 价格字符串 '" + strOldPrice + "' 无法被自动修改 2");
+                        }
+                        else
+                            errors.Add("*** 价格字符串 '" + strOldPrice + "' 无法被自动修改 1");
+                    }
+                }
+
+                // TODO: 检查常见的货币前缀符号
+            }
+
         }
 
         public static List<string> VerifyPrice(string strPrice)
@@ -3474,6 +3533,8 @@ out strError);
         {
             if (string.IsNullOrEmpty(strPrice))
                 return false;
+
+#if NO
             string strError = "";
             CurrencyItem item = null;
             // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
@@ -3483,6 +3544,10 @@ out strError);
             if (nRet == -1)
                 return false;
 
+            return true;
+#endif
+            if (VerifyPrice(strPrice).Count > 0)
+                return false;
             return true;
         }
 
@@ -3654,6 +3719,14 @@ out strError);
             if (dom.DocumentElement == null)
             {
                 strError = "XML 记录为空";
+                return -1;
+            }
+
+            // 2017/6/30
+            string strParent = DomUtil.GetElementText(dom.DocumentElement, "parent");
+            if (string.IsNullOrEmpty(strParent))
+            {
+                strError = "parent 元素为空";
                 return -1;
             }
 

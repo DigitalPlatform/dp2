@@ -132,12 +132,12 @@ namespace dp2Manager
             this.toolBar1 = new System.Windows.Forms.ToolBar();
             this.toolBarButton_stop = new System.Windows.Forms.ToolBarButton();
             this.imageList_toolbar = new System.Windows.Forms.ImageList(this.components);
-            this.treeView_res = new DigitalPlatform.rms.Client.ResTree();
             this.statusStrip_main = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.treeView_res = new DigitalPlatform.rms.Client.ResTree();
             this.statusStrip_main.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -269,26 +269,12 @@ namespace dp2Manager
             this.imageList_toolbar.Images.SetKeyName(0, "");
             this.imageList_toolbar.Images.SetKeyName(1, "");
             // 
-            // treeView_res
-            // 
-            this.treeView_res.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.treeView_res.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.treeView_res.HideSelection = false;
-            this.treeView_res.ImageIndex = 0;
-            this.treeView_res.Location = new System.Drawing.Point(0, 0);
-            this.treeView_res.Name = "treeView_res";
-            this.treeView_res.SelectedImageIndex = 0;
-            this.treeView_res.Size = new System.Drawing.Size(279, 318);
-            this.treeView_res.TabIndex = 0;
-            this.treeView_res.OnSetMenu += new DigitalPlatform.GUI.GuiAppendMenuEventHandle(this.treeView_res_OnSetMenu);
-            this.treeView_res.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_res_AfterSelect);
-            // 
             // statusStrip_main
             // 
             this.statusStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel_main,
             this.toolStripProgressBar_main});
-            this.statusStrip_main.Location = new System.Drawing.Point(0, 352);
+            this.statusStrip_main.Location = new System.Drawing.Point(0, 310);
             this.statusStrip_main.Name = "statusStrip_main";
             this.statusStrip_main.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
             this.statusStrip_main.Size = new System.Drawing.Size(481, 22);
@@ -319,7 +305,7 @@ namespace dp2Manager
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.webBrowser1);
-            this.splitContainer1.Size = new System.Drawing.Size(481, 318);
+            this.splitContainer1.Size = new System.Drawing.Size(481, 276);
             this.splitContainer1.SplitterDistance = 279;
             this.splitContainer1.SplitterWidth = 8;
             this.splitContainer1.TabIndex = 6;
@@ -330,14 +316,28 @@ namespace dp2Manager
             this.webBrowser1.Location = new System.Drawing.Point(0, 0);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(194, 318);
+            this.webBrowser1.Size = new System.Drawing.Size(194, 276);
             this.webBrowser1.TabIndex = 0;
+            // 
+            // treeView_res
+            // 
+            this.treeView_res.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.treeView_res.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.treeView_res.HideSelection = false;
+            this.treeView_res.ImageIndex = 0;
+            this.treeView_res.Location = new System.Drawing.Point(0, 0);
+            this.treeView_res.Name = "treeView_res";
+            this.treeView_res.SelectedImageIndex = 0;
+            this.treeView_res.Size = new System.Drawing.Size(279, 276);
+            this.treeView_res.TabIndex = 0;
+            this.treeView_res.OnSetMenu += new DigitalPlatform.GUI.GuiAppendMenuEventHandle(this.treeView_res_OnSetMenu);
+            this.treeView_res.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.treeView_res_AfterSelect);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(481, 374);
+            this.ClientSize = new System.Drawing.Size(481, 332);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.statusStrip_main);
             this.Controls.Add(this.toolBar1);

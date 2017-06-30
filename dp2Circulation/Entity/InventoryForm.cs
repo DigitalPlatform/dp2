@@ -190,7 +190,7 @@ namespace dp2Circulation
 
         private void InventoryForm_Load(object sender, EventArgs e)
         {
-            this._chargingForm.SupressSizeSetting = true; // 避免保存窗口尺寸
+            this._chargingForm.SuppressSizeSetting = true; // 避免保存窗口尺寸
             this._chargingForm.MainForm = Program.MainForm;
             this._chargingForm.ShowInTaskbar = false;
             this._chargingForm.Show();  // 有了此句对话框的 xxx_load 才能被执行

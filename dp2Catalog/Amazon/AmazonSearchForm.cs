@@ -2116,7 +2116,7 @@ nsmgr,
                     if (exist_fixed != null)
                         exist_fixed.Activate();
 
-                    form.SupressSizeSetting = true;
+                    form.SuppressSizeSetting = true;
                     this.MainForm.SetMdiToNormal();
                 }
                 form.Show();

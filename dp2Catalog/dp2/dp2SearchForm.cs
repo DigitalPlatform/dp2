@@ -3631,7 +3631,7 @@ namespace dp2Catalog
                     if (strStyle == "fixed")
                     {
                         form.Fixed = true;
-                        form.SupressSizeSetting = true;
+                        form.SuppressSizeSetting = true;
                         this.MainForm.SetMdiToNormal();
                     }
                     else
@@ -3639,7 +3639,7 @@ namespace dp2Catalog
                         // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
                         if (exist_fixed != null)
                         {
-                            form.SupressSizeSetting = true;
+                            form.SuppressSizeSetting = true;
                             this.MainForm.SetMdiToNormal();
                         }
                     }
