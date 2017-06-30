@@ -1200,7 +1200,7 @@ end_time);
                      task.ItemBarcode,
                      strConfirmItemRecPath,
                      false,
-                     strStyle,   // this.NoBiblioAndItemInfo == false ? "reader,item,biblio" : "reader",
+                     strStyle,   // "reader,item,biblio",    //// this.NoBiblioAndItemInfo == false ? "reader,item,biblio" : "reader",
                      strItemReturnFormats,
                      out item_records,
                      strReaderFormatList,    // this.Container.PatronRenderFormat + ",xml" + GetPostFix(), // "html",

@@ -1817,7 +1817,8 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                 {
                     // text-level: 用户提示
-                    strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                    if (result.ErrorCode == ErrorCode.NoError)
+                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                         strError);
                     // "虽然出现了下列错误，但是借阅操作已经成功: " + strError;
                     goto ERROR1;
@@ -1862,7 +1863,8 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             // text-level: 用户提示
-                            strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                          if (result.ErrorCode == ErrorCode.NoError)
+                          strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                                 strError);
                             // "虽然出现了下列错误，但是借阅操作已经成功: " + strError;
                             goto ERROR1;
@@ -1891,6 +1893,7 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             // text-level: 用户提示
+                        if (result.ErrorCode == ErrorCode.NoError)
                             strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                                 strError);
                             goto ERROR1;
@@ -1909,6 +1912,7 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             // text-level: 用户提示
+                        if (result.ErrorCode == ErrorCode.NoError)
                             strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                                 strError);
                             goto ERROR1;
@@ -1927,6 +1931,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             strError = "读者 XML 装入 DOM 出错: " + ex.Message;
                             // text-level: 用户提示
+                        if (result.ErrorCode == ErrorCode.NoError)
                             strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                                 strError);
                             goto ERROR1;
@@ -1937,6 +1942,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         strError = "strReaderFormatList参数出现了不支持的数据格式类型 '" + strReaderFormat + "'";
                         // text-level: 用户提示
+                        if (result.ErrorCode == ErrorCode.NoError)
                         strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                             strError);
                         goto ERROR1;
@@ -1978,7 +1984,8 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             // text-level: 用户提示
-                            strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                                 strError);
                             goto ERROR1;
                         }
@@ -1999,7 +2006,8 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             // text-level: 用户提示
-                            strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                                 strError);
                             goto ERROR1;
                         }
@@ -2016,7 +2024,8 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             // text-level: 用户提示
-                            strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                                 strError);
                             goto ERROR1;
                         }
@@ -2026,7 +2035,8 @@ namespace DigitalPlatform.LibraryServer
                     {
                         strError = "strItemFormatList参数出现了不支持的数据格式类型 '" + strItemFormat + "'";
                         // text-level: 用户提示
-                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                        if (result.ErrorCode == ErrorCode.NoError)
+                            strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                             strError);
                         goto ERROR1;
                     }
@@ -2047,7 +2057,8 @@ namespace DigitalPlatform.LibraryServer
                 {
                     strError = "册记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录ID";
                     // text-level: 用户提示
-                    strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                    if (result.ErrorCode == ErrorCode.NoError)
+                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                         strError);
                     goto ERROR1;
                 }
@@ -2069,7 +2080,8 @@ namespace DigitalPlatform.LibraryServer
                 {
                     strError = "实体库名 '" + strItemDbName + "' 没有找到对应的书目库名";
                     // text-level: 用户提示
-                    strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                    if (result.ErrorCode == ErrorCode.NoError)
+                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                         strError);
                     goto ERROR1;
                 }
@@ -2090,7 +2102,8 @@ namespace DigitalPlatform.LibraryServer
                     {
                         strError = "get channel error";
                         // text-level: 用户提示
-                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                        if (result.ErrorCode == ErrorCode.NoError)
+                            strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                             strError);
                         goto ERROR1;
                     }
@@ -2108,7 +2121,8 @@ namespace DigitalPlatform.LibraryServer
                     {
                         strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
                         // text-level: 用户提示
-                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                        if (result.ErrorCode == ErrorCode.NoError)
+                            strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                             strError);
                         goto ERROR1;
                     }
@@ -2135,7 +2149,8 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             // text-level: 用户提示
-                            strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                                 strError);
                             goto ERROR1;
                         }
@@ -2154,7 +2169,8 @@ namespace DigitalPlatform.LibraryServer
                             if (nRet == -1)
                             {
                                 // text-level: 用户提示
-                                strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                                if (result.ErrorCode == ErrorCode.NoError)
+                                    strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                                     strError);
                                 goto ERROR1;
                             }
@@ -2177,7 +2193,8 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             // text-level: 用户提示
-                            strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                                 strError);
                             goto ERROR1;
                         }
@@ -2195,7 +2212,8 @@ namespace DigitalPlatform.LibraryServer
                             if (nRet == -1)
                             {
                                 // text-level: 用户提示
-                                strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                                if (result.ErrorCode == ErrorCode.NoError)
+                                    strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                                     strError);
                                 goto ERROR1;
                             }
@@ -2222,7 +2240,8 @@ namespace DigitalPlatform.LibraryServer
                     {
                         strError = "strBiblioFormatList参数出现了不支持的数据格式类型 '" + strBiblioFormat + "'";
                         // text-level: 用户提示
-                        strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
+                        if (result.ErrorCode == ErrorCode.NoError)
+                            strError = string.Format(this.GetString("虽然出现了下列错误，但是借阅操作已经成功s"),   // "虽然出现了下列错误，但是借阅操作已经成功: {0}";
                             strError);
                         goto ERROR1;
                     }
@@ -4419,6 +4438,9 @@ start_time_1,
                             strError = "装载册记录进入 XML DOM 时发生错误: " + strError;
                             goto ERROR1;
                         }
+
+                        // 2017/6/30
+                        strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
                     }
 
                     WriteTimeUsed(
@@ -5851,7 +5873,8 @@ start_time_1,
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                             goto ERROR1;
                         }
                         item_records[i] = strItemRecord;
@@ -5870,7 +5893,8 @@ start_time_1,
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                             goto ERROR1;
                         }
                         item_records[i] = strItemRecord;
@@ -5886,7 +5910,8 @@ start_time_1,
             out strError);
                         if (nRet == -1)
                         {
-                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                             goto ERROR1;
                         }
                         item_records[i] = strResultXml;
@@ -5894,7 +5919,8 @@ start_time_1,
                     else
                     {
                         strError = "strItemFormatList参数出现了不支持的数据格式类型 '" + strItemFormat + "'";
-                        strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                        if (result.ErrorCode == ErrorCode.NoError)
+                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                         goto ERROR1;
                     }
                 } // end of for
@@ -5919,7 +5945,8 @@ start_time_1,
                     if (String.IsNullOrEmpty(strBiblioRecID) == true)
                     {
                         strError = "册记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录ID";
-                        strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                        if (result.ErrorCode == ErrorCode.NoError)
+                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                         goto ERROR1;
                     }
 
@@ -5939,7 +5966,8 @@ start_time_1,
                     if (nRet == 0)
                     {
                         strError = "实体库名 '" + strItemDbName + "' 没有找到对应的书目库名";
-                        strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                        if (result.ErrorCode == ErrorCode.NoError)
+                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                         goto ERROR1;
                     }
 
@@ -5960,6 +5988,7 @@ start_time_1,
                     if (channel == null)
                     {
                         strError = "get channel error";
+                        if (result.ErrorCode == ErrorCode.NoError)
                         strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                         goto ERROR1;
                     }
@@ -5977,7 +6006,8 @@ start_time_1,
                     if (lRet == -1)
                     {
                         strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
-                        strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                        if (result.ErrorCode == ErrorCode.NoError)
+                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                         goto ERROR1;
                     }
                 }
@@ -6002,7 +6032,8 @@ start_time_1,
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                             goto ERROR1;
                         }
 
@@ -6020,7 +6051,8 @@ start_time_1,
                                 out strError);
                             if (nRet == -1)
                             {
-                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                                if (result.ErrorCode == ErrorCode.NoError)
+                                    strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                                 goto ERROR1;
                             }
 
@@ -6042,7 +6074,8 @@ start_time_1,
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                            if (result.ErrorCode == ErrorCode.NoError)
+                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                             goto ERROR1;
                         }
                         // 将种记录数据从XML格式转换为TEXT格式
@@ -6058,7 +6091,8 @@ start_time_1,
                                 out strError);
                             if (nRet == -1)
                             {
-                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                                if (result.ErrorCode == ErrorCode.NoError)
+                                    strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                                 goto ERROR1;
                             }
 
@@ -6082,8 +6116,10 @@ start_time_1,
                     }
                     else
                     {
+                        // TODO: 注意出错信息是可能需要叠加的，即 result.ErrorInfo 里面已经有错误信息了
                         strError = "strBiblioFormatList参数出现了不支持的数据格式类型 '" + strBiblioFormat + "'";
-                        strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                        if (result.ErrorCode == ErrorCode.NoError)
+                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                         goto ERROR1;
                     }
                 } // end of for
@@ -6133,8 +6169,11 @@ start_time_1,
             return result;
         ERROR1:
             result.Value = -1;
-            result.ErrorInfo = strError;
-            result.ErrorCode = ErrorCode.SystemError;
+            if (string.IsNullOrEmpty(result.ErrorInfo) == false)
+                result.ErrorInfo += "; ";
+            result.ErrorInfo += strError;
+            if (result.ErrorCode == ErrorCode.NoError)  // 2017/6/30
+                result.ErrorCode = ErrorCode.SystemError;
             return result;
         }
 
