@@ -1165,6 +1165,7 @@ namespace dp2Circulation
             long lCount = lHitCount;
 
             long lMaxPerCount = 500;
+            int nSingleGetCount = 0;    // 单条记录重试累积次数
 
             DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
@@ -1246,7 +1247,14 @@ namespace dp2Circulation
 
                     // 只要有一次获得成功，就又改为大批量获取
                     if (lMaxPerCount == 1)
-                        lMaxPerCount = 500;
+                    {
+                        nSingleGetCount++;
+                        if (nSingleGetCount > 500)
+                        {
+                            lMaxPerCount = 500; // 恢复大批次
+                            nSingleGetCount = 0;
+                        }
+                    }
 
                     // 处理浏览结果
                     this.listView_records.BeginUpdate();
