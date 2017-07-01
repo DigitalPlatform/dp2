@@ -1208,6 +1208,8 @@ namespace dp2Circulation
                         this.Lang,
                         out searchresults,
                         out strError);
+                    // lRet = -1;
+                    // strError = "test";
                     if (lRet == -1)
                     {
                         MessagePromptEventArgs e = new MessagePromptEventArgs();
@@ -1224,6 +1226,9 @@ namespace dp2Circulation
 
                         // 2017/7/1
                         // 起点跳过一条，继续向后做
+                        if (lMaxPerCount > 1)
+                            lMaxPerCount = 1;
+                        else
                         {
                             lStart++;
                             lCount--;
@@ -1238,6 +1243,10 @@ namespace dp2Circulation
                         MessageBox.Show(this, "未命中");
                         return 0;
                     }
+
+                    // 只要有一次获得成功，就又改为大批量获取
+                    if (lMaxPerCount == 1)
+                        lMaxPerCount = 500;
 
                     // 处理浏览结果
                     this.listView_records.BeginUpdate();
@@ -4242,7 +4251,7 @@ out strError);
     null,
     ref bHideMessageBox,
     new string[] { "重试", "跳过", "放弃" },
-    20 * 1000);
+    20);
                 if (result == DialogResult.Cancel)
                     e.ResultAction = "cancel";
                 else if (result == System.Windows.Forms.DialogResult.No)
