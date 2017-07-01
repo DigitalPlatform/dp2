@@ -1222,6 +1222,14 @@ namespace dp2Circulation
                         else if (e.ResultAction == "yes")
                             goto REDO_GETRECORDS;
 
+                        // 2017/7/1
+                        // 起点跳过一条，继续向后做
+                        {
+                            lStart++;
+                            lCount--;
+                            if (lStart >= lHitCount || lCount <= 0)
+                                break;
+                        }
                         continue;
                     }
 
@@ -4202,6 +4210,7 @@ out strError);
 
         void loader_Prompt(object sender, MessagePromptEventArgs e)
         {
+#if NO
             // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
             if (e.Actions == "yes,no,cancel")
             {
@@ -4215,6 +4224,25 @@ out strError);
                 else
                     e.ResultAction = "yes";
 #endif
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "cancel";
+                else if (result == System.Windows.Forms.DialogResult.No)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
+            }
+#endif
+            if (e.Actions == "yes,no,cancel")
+            {
+                bool bHideMessageBox = true;
+                DialogResult result = MessageDialog.Show(this,
+                    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxDefaultButton.Button1,
+    null,
+    ref bHideMessageBox,
+    new string[] { "重试", "跳过", "放弃" },
+    20 * 1000);
                 if (result == DialogResult.Cancel)
                     e.ResultAction = "cancel";
                 else if (result == System.Windows.Forms.DialogResult.No)

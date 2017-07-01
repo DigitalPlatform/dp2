@@ -141,6 +141,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "MessageDialog";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MessageDialog_FormClosed);
             this.Load += new System.EventHandler(this.MessageDialog_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panel1.ResumeLayout(false);
