@@ -990,7 +990,7 @@ namespace DigitalPlatform.Text
             if (strPrefix.IndexOfAny(new char[] { '+', '-' }) != -1
                 || strPostfix.IndexOfAny(new char[] { '+', '-' }) != -1)
             {
-                strError = "符号 + 或 - 只应出现在单个金额字符串的第一个字符位置";
+                strError = "金额字符串 '" + strString + "' 格式错误：符号 + 或 - 只应出现在单个金额字符串的第一个字符位置 (strPrefix='" + strPrefix + "' strPostfix='" + strPostfix + "')";
                 return -1;
             }
 
@@ -1205,7 +1205,7 @@ namespace DigitalPlatform.Text
 
             // 变换为PriceItem
             // for (int i = 0; i < prices.Count; i++)
-            foreach(string price in prices)
+            foreach (string price in prices)
             {
                 // string strText = prices[i].Trim();
                 if (price == null)

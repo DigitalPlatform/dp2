@@ -112,7 +112,7 @@ namespace dp2Circulation
             {
                 this._bAcceptMode = value;
 #if ACCEPT_MODE
-                this.SupressSizeSetting = value;
+                this.SuppressSizeSetting = value;
 #endif
             }
         }
@@ -1285,7 +1285,7 @@ true);
             // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
             if (exist_fixed != null)
             {
-                form.SupressSizeSetting = true;
+                form.SuppressSizeSetting = true;
                 Program.MainForm.SetMdiToNormal();
             }
 
@@ -3127,7 +3127,7 @@ true);
 
             bool bMarcEditorContentChanged = false; // MARC编辑器内的内容可曾修改?
             bool bBiblioRecordExist = false;    // 书目记录是否存在?
-            bool bSubrecordExist = false;   // 至少有一个从属的记录存在
+            // bool bSubrecordExist = false;   // 至少有一个从属的记录存在
             bool bSubrecordListCleared = false; // 子记录的list是否被清除了?
 
             string strOutputBiblioRecPath = "";
@@ -3334,11 +3334,11 @@ true);
                         this.m_strUsedActiveItemPage = "";
                 }
 
-                if (bBiblioRecordExist == false && bSubrecordExist == true)
+                if (bBiblioRecordExist == false && info.bSubrecordExist == true)
                     this.BiblioRecPath = strOutputBiblioRecPath;
 
                 if (bBiblioRecordExist == false
-                    && bSubrecordExist == false
+                    && info.bSubrecordExist == false
                     && bSubrecordListCleared == true)
                 {
                     if (bMarcEditorContentChanged == false)
@@ -3364,7 +3364,7 @@ true);
 
                 // 2013/11/13
                 if (bBiblioRecordExist == false
-&& bSubrecordExist == false
+&& info.bSubrecordExist == false
 && bSubrecordListCleared == true)
                     return -1;
 
@@ -5777,12 +5777,6 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
         {
             get
             {
-#if NO
-                return Program.MainForm.AppInfo.GetBoolean(
-    "entity_form",
-    "verify_data_when_saving",
-    false);
-#endif
                 if (this.Channel == null)
                     return false;
                 return StringUtil.IsInList("client_forceverifydata",
@@ -8913,7 +8907,7 @@ MessageBoxDefaultButton.Button1);
                         out strError);
                     if (nRet == 0)
                     {
-                        strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件，虽然定义了.cs配置文件。数据校验无法进行";
+                        strError = "服务器上没有定义路径为 '" + strBiblioDbName + "/" + strCfgFileName + "' 的配置文件，虽然定义了 .cs 配置文件。数据校验无法进行";
                         goto ERROR1;
                     }
                     if (nRet == -1 || nRet == 0)
@@ -9823,9 +9817,9 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             int nRet = 0;
 
-            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.39") < 0)
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.110") < 0)  // "2.39"
             {
-                strError = "本功能需要配合 dp2library 2.39 或以上版本才能使用";
+                strError = "本功能需要配合 dp2library 2.110 或以上版本才能使用";
                 goto ERROR1;
             }
 
@@ -9866,7 +9860,10 @@ MessageBoxDefaultButton.Button1);
 
             // dlg.MainForm = Program.MainForm;
             if (string.IsNullOrEmpty(strTargetRecPath) == false)
+            {
                 dlg.RecPath = strTargetRecPath;
+                dlg.SuppressAutoClipboard = true;
+            }
             else
             {
                 dlg.RecPath = Program.MainForm.AppInfo.GetString(
@@ -12106,7 +12103,10 @@ value);
             dlg.Text = "移动书目记录到 ...";
             // dlg.MainForm = Program.MainForm;
             if (string.IsNullOrEmpty(strTargetRecPath) == false)
+            {
                 dlg.RecPath = strTargetRecPath;
+                dlg.SuppressAutoClipboard = true;
+            }
             else
             {
                 dlg.RecPath = Program.MainForm.AppInfo.GetString(
@@ -12200,9 +12200,9 @@ value);
                 goto ERROR1;
             }
 #endif
-            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.106") < 0)   // "2.39"
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.110") < 0)   // "2.39"
             {
-                strError = "本功能需要配合 dp2library 2.106 或以上版本才能使用";
+                strError = "本功能需要配合 dp2library 2.110 或以上版本才能使用";
                 goto ERROR1;
             }
 
@@ -12354,6 +12354,8 @@ merge_dlg.UiState);
 
                         merge_style = merge_dlg.GetMergeStyle();
                     }
+                    else
+                        merge_style = MergeStyle.CombineSubrecord | MergeStyle.ReserveTargetBiblio;
 
                     // 检查参数
                     // 删除记录前先检查
@@ -13745,13 +13747,13 @@ strMARC);
             if (this.Fixed == false)
             {
                 this.Fixed = true;
-                this.SupressSizeSetting = true;
+                this.SuppressSizeSetting = true;
                 Program.MainForm.SetFixedPosition(this, "left");
             }
             else
             {
                 this.Fixed = false;
-                this.SupressSizeSetting = false;
+                this.SuppressSizeSetting = false;
 
                 //尺寸要发生明显变化，让人知道不再是左侧固定
                 Program.MainForm.AppInfo.LoadMdiChildFormStates(this,
@@ -13800,6 +13802,28 @@ strMARC);
                         this.DoDragDrop("move:" + this.textBox_biblioRecPath.Text, DragDropEffects.Move);
                     }));
                 });
+        }
+
+        // 装载指定的书目记录
+        void MenuItem_marcEditor_loadRecord_Click(object sender, EventArgs e)
+        {
+            string strBiblioRecPath = InputDlg.GetInput(
+this,
+"请指定书目记录路径",
+"书目记录路径(格式'书目库名/ID'): ",
+"",
+Program.MainForm.DefaultFont);
+            if (strBiblioRecPath == null)
+                return;
+
+            // return:
+            //      -1  出错。已经用MessageBox报错
+            //      0   没有装载(例如发现窗口内的记录没有保存，出现警告对话框后，操作者选择了Cancel)
+            //      1   成功装载
+            //      2   通道被占用
+            LoadRecordOld(strBiblioRecPath,
+                "",
+                true);
         }
 
 #if NO

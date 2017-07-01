@@ -344,14 +344,11 @@ using DigitalPlatform.IO;
  
 
 public class MyKeysHost : KeysHost
-
 {
 
   public void convertISBN()
-
   {
-
-       string isbn = this.InputString;
+       string isbn = this.InputString.Trim();
 
        isbn = isbn.Replace("-", "");   //去除ISBN中的"-"连接符号
 

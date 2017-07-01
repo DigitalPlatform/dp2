@@ -18,6 +18,9 @@
   <col title="索取号" type="call_number">
     <xpath>*/accessNo</xpath>
   </col>
+  <col title="架号" type="shelf_number">
+    <xpath>*/shelfNo</xpath>
+  </col>
   <col title="价格">
     <xpath>*/price</xpath>
   </col>

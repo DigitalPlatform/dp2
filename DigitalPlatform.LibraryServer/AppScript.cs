@@ -2071,6 +2071,8 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             int nRet = 0;
 
+            List<string> errors = new List<string>();
+
             string strNewBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
 
             string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
@@ -2106,7 +2108,8 @@ namespace DigitalPlatform.LibraryServer
                 if (item == null)
                 {
                     strError = "馆代码 '" + strLibraryCode + "' 没有定义馆藏地点 '" + strRoom + "'(根据 <locationTypes> 定义)";
-                    return 1;
+                    // return 1;
+                    errors.Add(strError);
                 }
             }
 
@@ -2127,8 +2130,9 @@ namespace DigitalPlatform.LibraryServer
                     bool bNullable = DomUtil.GetBooleanParam(item, "itemBarcodeNullable", true);
                     if (bNullable == false)
                     {
-                        strError = "册条码号不能为空(根据 <locationTypes> 定义)";
-                        return 1;
+                        strError = "册条码号不能为空(根据馆藏地 '" + strLocation + "' 的 <locationTypes> 定义)";
+                        // return 1;
+                        errors.Add(strError);
                     }
                 }
                 else
@@ -2136,7 +2140,8 @@ namespace DigitalPlatform.LibraryServer
                     if (this.App.AcceptBlankItemBarcode == false)
                     {
                         strError = "册条码号不能为空(根据 AcceptBlankItemBarcode 定义)";
-                        return 1;
+                        // return 1;
+                        errors.Add(strError);
                     }
                 }
 
@@ -2150,7 +2155,8 @@ namespace DigitalPlatform.LibraryServer
                     if (strNewBarcode.ToUpper() != strNewBarcode)
                     {
                         strError = "册条码号 '" + strNewBarcode + "' 中的字母应为大写";
-                        return 1;
+                        // return 1;
+                        errors.Add(strError);
                     }
                 }
 
@@ -2161,7 +2167,12 @@ namespace DigitalPlatform.LibraryServer
                 //      1   校验发现错误
                 nRet = VerifyItemBarcode(strLibraryCode, strNewBarcode, out strError);
                 if (nRet != 0 && nRet != -2)
-                    return nRet;
+                {
+                    // return nRet;
+                    if (nRet == -1)
+                        return -1;
+                    errors.Add(strError);
+                }
             }
 
             // 检查价格字符串
@@ -2179,7 +2190,12 @@ namespace DigitalPlatform.LibraryServer
                     //      1   校验发现错误
                     nRet = VerifyItemPrice(strLibraryCode, strPrice, out strError);
                     if (nRet != 0)
-                        return nRet;
+                    {
+                        // return nRet;
+                        if (nRet == -1)
+                            return -1;
+                        errors.Add(strError);
+                    }
                 }
             }
 
@@ -2195,9 +2211,16 @@ namespace DigitalPlatform.LibraryServer
                     if (StringUtil.HasHead(strAccessNo, "@accessNo") == true)
                     {
                         strError = "索取号字符串中的宏尚未兑现";
-                        return 1;
+                        // return 1;
+                        errors.Add(strError);
                     }
                 }
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return 1;
             }
 
             return 0;
@@ -2213,6 +2236,19 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
+
+            strPrice = StringUtil.ToDBC(strPrice);
+            if (strPrice.IndexOfAny(new char[] { '(', ')' }) != -1)
+            {
+                strError = "价格字符串中不允许出现括号 '" + strPrice + "'";
+                return 1;
+            }
+
+            if (strPrice.IndexOf(',') != -1)
+            {
+                strError = "价格字符串中不允许出现逗号 '" + strPrice + "'";
+                return 1;
+            }
 
             CurrencyItem item = null;
             // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7

@@ -314,6 +314,16 @@ public class MyKeysHost : KeysHost
     <caption lang="en">CreateTime</caption>
   </table>
 
+  <key>
+    <xpath>*/shelfNo</xpath>
+    <from>shelfno</from>
+    <table ref="shelfno" />
+  </key>
+  <table name="shelfno" id="12">
+    <caption lang="zh-CN">架号</caption>
+    <caption lang="en">Shelf No</caption>
+  </table>
+
   <!-- ******************配置非用字**************************************** -->
   <stopword>
     <stopwordTable name="title">

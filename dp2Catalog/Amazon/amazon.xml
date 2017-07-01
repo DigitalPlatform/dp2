@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<root>
+<root AwsAccessKeyID="" AwsSecretKey="">
   <endpoints>
     <endpoint name="CA" host="webservices.amazon.ca">
       <caption lang="zh-CN">加拿大</caption>

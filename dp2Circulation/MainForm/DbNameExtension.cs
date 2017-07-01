@@ -294,6 +294,7 @@ namespace dp2Circulation
             return false;
         }
 
+
         // 
         // 如果返回""，表示该书目库的下属库没有定义
         /// <summary>
@@ -876,6 +877,39 @@ namespace dp2Circulation
             return false;
         }
 
+        public string CompareTwoBiblioDbDef(string strSourceDbName, string strTargetDbName)
+        {
+            BiblioDbProperty source = this.GetBiblioDbProperty(strSourceDbName);
+            BiblioDbProperty target = this.GetBiblioDbProperty(strTargetDbName);
+
+            if (source == null)
+                return "源书目库名 '" + strSourceDbName + "' 不存在";
+            if (target == null)
+                return "目标书目库名 '" + strTargetDbName + "' 不存在";
+
+            List<string> errors = new List<string>();
+
+            if (string.IsNullOrEmpty(source.ItemDbName) == false
+&& string.IsNullOrEmpty(target.ItemDbName) == true)
+                errors.Add("实体库 '" + source.ItemDbName + "' ");   // 左边大于右边
+
+            if (string.IsNullOrEmpty(source.OrderDbName) == false
+&& string.IsNullOrEmpty(target.OrderDbName) == true)
+                errors.Add("订购库 '" + source.OrderDbName + "' ");   // 左边大于右边
+
+            if (string.IsNullOrEmpty(source.IssueDbName) == false
+                && string.IsNullOrEmpty(target.IssueDbName) == true)
+                errors.Add("期库 '" + source.IssueDbName + "' ");   // 左边大于右边
+
+            if (string.IsNullOrEmpty(source.CommentDbName) == false
+&& string.IsNullOrEmpty(target.CommentDbName) == true)
+                errors.Add("评注库 '" + source.CommentDbName + "' ");   // 左边大于右边
+
+            if (errors.Count == 0)
+                return null;
+
+            return "源书目库 '" + strSourceDbName + "' 具有下属的" + StringUtil.MakePathList(errors, "、") + "，而目标书目库 '" + strTargetDbName + "' 缺乏";
+        }
 
     }
 }

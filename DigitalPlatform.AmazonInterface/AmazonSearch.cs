@@ -28,6 +28,8 @@ namespace DigitalPlatform.AmazonInterface
     /// </summary>
     public class AmazonSearch : IDisposable
     {
+        public const string API_VERSION = "2013-08-01"; // "2011-08-01";
+
         public int SleepTime = 2000;
 
         /// <summary>
@@ -49,7 +51,7 @@ namespace DigitalPlatform.AmazonInterface
         {
             Dispose(true);
             // This object will be cleaned up by the Dispose method.
-            // Therefore, you should call GC.SupressFinalize to
+            // Therefore, you should call GC.SuppressFinalize to
             // take this object off the finalization queue 
             // and prevent finalization code for this object
             // from executing a second time.
@@ -162,7 +164,7 @@ strServerUrl);
             IDictionary<string, string> parameters = new Dictionary<string, String>();
 
             parameters["Service"] = "AWSECommerceService";
-            parameters["Version"] = "2011-08-01";
+            parameters["Version"] = API_VERSION;    // "2011-08-01";
             parameters["Operation"] = "ItemSearch";
             parameters["SearchIndex"] = "Books";
             parameters["Power"] = strText;
@@ -210,7 +212,7 @@ strServerUrl);
             return 0;
         }
 
-        public const string NAMESPACE = "http://webservices.amazon.com/AWSECommerceService/2011-08-01";
+        public const string NAMESPACE = "http://webservices.amazon.com/AWSECommerceService/2013-08-01";
 
         WebClient webClient = null;
         public string TempFilename = "";

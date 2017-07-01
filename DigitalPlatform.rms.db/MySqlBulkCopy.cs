@@ -6,6 +6,7 @@ using System.Data;
 
 using MySql.Data.MySqlClient;
 using System.Diagnostics;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.rms
 {
@@ -282,11 +283,13 @@ namespace DigitalPlatform.rms
         }
 #endif
 
+#if NO
         // 获得一个字符串的 UTF-8 字节数
         static int GetLength(StringBuilder text)
         {
             return Encoding.UTF8.GetByteCount(text.ToString());
         }
+#endif
 
         // 新版本，针对 Named Pipe 情况测试过
         // 摘要:
@@ -373,7 +376,7 @@ namespace DigitalPlatform.rms
                     // TODO: 可能需要用 UTF-8 bytes 长度来限制，比如 65535
                     if ((nCount >= this.BatchSize
                         && this.BatchSize != 0)
-                        || strHead.Length + GetLength(strCommand) + GetLength(strFragment) + 1 >= 64000)  // 32000 是可以的; 4000 是可以的; 60000 不行
+                        || strHead.Length + StringUtil.GetUtf8Bytes(strCommand.ToString()) + StringUtil.GetUtf8Bytes(strFragment.ToString()) + 1 >= 64000)  // 32000 是可以的; 4000 是可以的; 60000 不行
                     {
                         command.CommandText = "use " + strDbName + " ;\n"
                             + strHead + strCommand + " ;\n";

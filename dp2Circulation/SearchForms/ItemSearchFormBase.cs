@@ -805,6 +805,8 @@ namespace dp2Circulation
             loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
             loader.RecPaths = biblio_recpaths;
 
+            loader.Prompt += loader_Prompt;
+
             var enumerator = loader.GetEnumerator();
 
             int i = 0;
@@ -868,6 +870,23 @@ namespace dp2Circulation
             }
 
             return 1;
+        }
+
+        void loader_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            if (e.Actions == "yes,no,cancel")
+            {
+                DialogResult result = AutoCloseMessageBox.Show(this,
+    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    20 * 1000,
+    "ItemSearchForm");
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "cancel";
+                else if (result == System.Windows.Forms.DialogResult.No)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
+            }
         }
 
         /*
@@ -1092,7 +1111,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6347.382, Culture=neutral, P
                 // 2017/5/18
                 // 装载浏览格式的中途如果修改服务器相关数据库的 browse 配置文件可能会走到这里
                 strError = "parent id 列 (index=" + nCol + ") 内容为空";
-                return 0;
+                return 1;   // 找到了列号，但是该列内容为空
             }
             return 1;
         }

@@ -17,6 +17,12 @@ namespace DigitalPlatform.Text
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        // 获得一个字符串的 UTF-8 字节数
+        public static int GetUtf8Bytes(string text)
+        {
+            return Encoding.UTF8.GetByteCount(text);
+        }
+
         // 规范为半角字符串
         public static void CanonializeWideChars(List<string> values)
         {

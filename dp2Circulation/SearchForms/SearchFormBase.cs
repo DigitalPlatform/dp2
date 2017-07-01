@@ -1062,6 +1062,8 @@ namespace dp2Circulation
             int nReloadCount = 0;
             int nSavedCount = 0;
 
+            bool bHideMessageBox = false;
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在保存" + this.DbTypeCaption + "记录 ...");
@@ -1140,14 +1142,30 @@ namespace dp2Circulation
 #endif
                         if (nRet == -1)
                         {
+                            DialogResult result = System.Windows.Forms.DialogResult.No;
+                            if (bHideMessageBox == false)
+                            {
+                                result = MessageDialog.Show(this,
+                "保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时出错: " + strError + "。\r\n\r\n请问是否要重试保存此记录? \r\n\r\n([重试] 重试保存；\r\n[跳过] 不保存此记录、但继续处理后面的记录保存; \r\n[取消] 中断整批保存操作)",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxDefaultButton.Button1,
+                "下次遇到同类情况不再出现本对话框",
+                ref bHideMessageBox,
+                new string[] { "重试", "跳过", "取消" });
+                            }
+                            /*
                             DialogResult result = MessageBox.Show(this,
     "保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时出错: " + strError + "。\r\n\r\n请问是否要重试保存此记录? \r\n\r\n([是] 重试；\r\n[否] 不保存此记录、但继续处理后面的记录保存; \r\n[取消] 中断整批保存操作)",
     this.DbTypeCaption + "查询",
     MessageBoxButtons.YesNoCancel,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button1);
+                             * */
                             if (result == System.Windows.Forms.DialogResult.Yes)
+                            {
+                                bHideMessageBox = false;    // TODO: 也可在 重试+不出现对话框状态下自动重试特定次数而不出现对话框
                                 goto REDO_SAVE;
+                            }
                             if (result == System.Windows.Forms.DialogResult.Cancel)
                                 return -1;
                             error_items.Add(item);

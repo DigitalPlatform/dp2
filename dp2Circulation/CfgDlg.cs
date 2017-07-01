@@ -322,6 +322,10 @@ ap.GetString("quickcharging_form",
     "verify_data_when_saving",
     false);
 
+            // 2017/5/25
+            if (StringUtil.IsInList("client_forceverifydata", Program.MainForm._currentUserRights))
+                this.label_forceVerifyDataComment.Text = "注: 当前账户 " + Program.MainForm._currentUserName + " 的权限中已包含 client_forceverifydata";
+
             this.checkBox_itemManagement_showQueryPanel.Checked = ap.GetBoolean(
 "entityform",
 "queryPanel_visibie",
@@ -1220,7 +1224,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "global",
                 "save_orign_cover_image",
                 this.checkBox_global_saveOriginCoverImage.Checked);
-            
+
             // 将键盘输入的条码号自动转为大写
             ap.SetBoolean(
     "global",

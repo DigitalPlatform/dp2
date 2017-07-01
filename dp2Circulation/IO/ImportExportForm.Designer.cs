@@ -44,12 +44,13 @@
             this.checkBox_subRecords_order = new System.Windows.Forms.CheckBox();
             this.checkBox_subRecords_entity = new System.Windows.Forms.CheckBox();
             this.tabPage_convert = new System.Windows.Forms.TabPage();
+            this.checkBox_convert_addBiblioToItemOnMerging = new System.Windows.Forms.CheckBox();
             this.textBox_convert_itemBatchNo = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.checkBox_convert_addBiblioToItem = new System.Windows.Forms.CheckBox();
             this.panel_map = new System.Windows.Forms.Panel();
             this.button_convert_initialMapString = new System.Windows.Forms.Button();
-            this.checkBox_target_newRefID = new System.Windows.Forms.CheckBox();
+            this.checkBox_convert_refreshRefID = new System.Windows.Forms.CheckBox();
             this.checkBox_target_randomItemBarcode = new System.Windows.Forms.CheckBox();
             this.tabPage_target = new System.Windows.Forms.TabPage();
             this.textBox_target_dbNameList = new System.Windows.Forms.TextBox();
@@ -64,7 +65,6 @@
             this.tabPage_run = new System.Windows.Forms.TabPage();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
             this.button_next = new System.Windows.Forms.Button();
-            this.checkBox_convert_addBiblioToItemOnMerging = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_source.SuspendLayout();
             this.tabPage_convert.SuspendLayout();
@@ -258,7 +258,7 @@
             this.tabPage_convert.Controls.Add(this.checkBox_convert_addBiblioToItem);
             this.tabPage_convert.Controls.Add(this.panel_map);
             this.tabPage_convert.Controls.Add(this.button_convert_initialMapString);
-            this.tabPage_convert.Controls.Add(this.checkBox_target_newRefID);
+            this.tabPage_convert.Controls.Add(this.checkBox_convert_refreshRefID);
             this.tabPage_convert.Controls.Add(this.checkBox_target_randomItemBarcode);
             this.tabPage_convert.Location = new System.Drawing.Point(4, 22);
             this.tabPage_convert.Name = "tabPage_convert";
@@ -266,6 +266,16 @@
             this.tabPage_convert.TabIndex = 3;
             this.tabPage_convert.Text = "转换";
             this.tabPage_convert.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_convert_addBiblioToItemOnMerging
+            // 
+            this.checkBox_convert_addBiblioToItemOnMerging.AutoSize = true;
+            this.checkBox_convert_addBiblioToItemOnMerging.Location = new System.Drawing.Point(177, 38);
+            this.checkBox_convert_addBiblioToItemOnMerging.Name = "checkBox_convert_addBiblioToItemOnMerging";
+            this.checkBox_convert_addBiblioToItemOnMerging.Size = new System.Drawing.Size(204, 16);
+            this.checkBox_convert_addBiblioToItemOnMerging.TabIndex = 16;
+            this.checkBox_convert_addBiblioToItemOnMerging.Text = "为合并的册记录添加书目信息元素";
+            this.checkBox_convert_addBiblioToItemOnMerging.UseVisualStyleBackColor = true;
             // 
             // textBox_convert_itemBatchNo
             // 
@@ -299,7 +309,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel_map.Location = new System.Drawing.Point(3, 138);
             this.panel_map.Name = "panel_map";
-            this.panel_map.Size = new System.Drawing.Size(310, 122);
+            this.panel_map.Size = new System.Drawing.Size(293, 122);
             this.panel_map.TabIndex = 12;
             // 
             // button_convert_initialMapString
@@ -314,16 +324,15 @@
             // 
             // checkBox_target_newRefID
             // 
-            this.checkBox_target_newRefID.AutoSize = true;
-            this.checkBox_target_newRefID.Checked = true;
-            this.checkBox_target_newRefID.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox_target_newRefID.Location = new System.Drawing.Point(3, 60);
-            this.checkBox_target_newRefID.Name = "checkBox_target_newRefID";
-            this.checkBox_target_newRefID.Size = new System.Drawing.Size(108, 16);
-            this.checkBox_target_newRefID.TabIndex = 9;
-            this.checkBox_target_newRefID.Text = "重新生成参考ID";
-            this.checkBox_target_newRefID.UseVisualStyleBackColor = true;
-            this.checkBox_target_newRefID.Visible = false;
+            this.checkBox_convert_refreshRefID.AutoSize = true;
+            this.checkBox_convert_refreshRefID.Checked = true;
+            this.checkBox_convert_refreshRefID.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox_convert_refreshRefID.Location = new System.Drawing.Point(3, 60);
+            this.checkBox_convert_refreshRefID.Name = "checkBox_target_newRefID";
+            this.checkBox_convert_refreshRefID.Size = new System.Drawing.Size(108, 16);
+            this.checkBox_convert_refreshRefID.TabIndex = 9;
+            this.checkBox_convert_refreshRefID.Text = "重新生成参考ID";
+            this.checkBox_convert_refreshRefID.UseVisualStyleBackColor = true;
             // 
             // checkBox_target_randomItemBarcode
             // 
@@ -474,16 +483,6 @@
             this.button_next.UseVisualStyleBackColor = true;
             this.button_next.Click += new System.EventHandler(this.button_next_Click);
             // 
-            // checkBox_convert_addBiblioToItemOnMergin
-            // 
-            this.checkBox_convert_addBiblioToItemOnMerging.AutoSize = true;
-            this.checkBox_convert_addBiblioToItemOnMerging.Location = new System.Drawing.Point(177, 38);
-            this.checkBox_convert_addBiblioToItemOnMerging.Name = "checkBox_convert_addBiblioToItemOnMergin";
-            this.checkBox_convert_addBiblioToItemOnMerging.Size = new System.Drawing.Size(204, 16);
-            this.checkBox_convert_addBiblioToItemOnMerging.TabIndex = 16;
-            this.checkBox_convert_addBiblioToItemOnMerging.Text = "为合并的册记录添加书目信息元素";
-            this.checkBox_convert_addBiblioToItemOnMerging.UseVisualStyleBackColor = true;
-            // 
             // ImportExportForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -533,7 +532,7 @@
         private System.Windows.Forms.Button button_target_simulateImport;
         private System.Windows.Forms.TabPage tabPage_convert;
         private System.Windows.Forms.Button button_convert_initialMapString;
-        private System.Windows.Forms.CheckBox checkBox_target_newRefID;
+        private System.Windows.Forms.CheckBox checkBox_convert_refreshRefID;
         private System.Windows.Forms.CheckBox checkBox_target_randomItemBarcode;
         private System.Windows.Forms.Panel panel_map;
         private System.Windows.Forms.WebBrowser webBrowser1;

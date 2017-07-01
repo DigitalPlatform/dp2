@@ -7,11 +7,165 @@ using System.IO;
 
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
+using DigitalPlatform.IO;
+using DigitalPlatform.Range;
 
 namespace DigitalPlatform.CirculationClient
 {
     public static class LibraryChannelExtension
     {
+        // 上传文件到到 dp2lbrary 服务器
+        // parameters:
+        //      timestamp   时间戳。如果为 null，函数会自动根据文件信息得到一个时间戳
+        //      bRetryOverwiteExisting   是否自动在时间戳不一致的情况下覆盖已经存在的服务器文件。== true，表示当发现时间戳不一致的时候，自动用返回的时间戳重试覆盖
+        // return:
+        //		-1	出错
+        //		0   上传文件成功
+        public static int UploadFile(
+            this LibraryChannel channel,
+            Stop stop,
+            string strClientFilePath,
+            string strServerFilePath,
+            string strMetadata,
+            string strStyle,
+            //string strMime,
+            byte[] timestamp,
+            bool bRetryOverwiteExisting,
+            out string strError)
+        {
+            strError = "";
+
+            string strResPath = strServerFilePath;
+
+#if NO
+            if (string.IsNullOrEmpty(strMime))
+                strMime = PathUtil.MimeTypeFrom(strClientFilePath);
+#endif
+
+            // 检测文件尺寸
+            FileInfo fi = new FileInfo(strClientFilePath);
+            if (fi.Exists == false)
+            {
+                strError = "文件 '" + strClientFilePath + "' 不存在...";
+                return -1;
+            }
+
+            string[] ranges = null;
+
+            if (fi.Length == 0)
+            {
+                // 空文件
+                ranges = new string[1];
+                ranges[0] = "";
+            }
+            else
+            {
+                string strRange = "";
+                strRange = "0-" + Convert.ToString(fi.Length - 1);
+
+                // 按照100K作为一个chunk
+                // TODO: 实现滑动窗口，根据速率来决定chunk尺寸
+                ranges = RangeList.ChunkRange(strRange,
+                    channel.UploadResChunkSize // 500 * 1024
+                    );
+            }
+
+            if (timestamp == null)
+                timestamp = FileUtil.GetFileTimestamp(strClientFilePath);
+
+            byte[] output_timestamp = null;
+
+            // REDOWHOLESAVE:
+            string strWarning = "";
+
+            TimeSpan old_timeout = channel.Timeout;
+            try
+            {
+                for (int j = 0; j < ranges.Length; j++)
+                {
+                    //if (Program.MainForm.InvokeRequired == false)
+                    //    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    string strWaiting = "";
+                    if (j == ranges.Length - 1)
+                    {
+                        strWaiting = " 请耐心等待...";
+                        channel.Timeout = new TimeSpan(0, 40, 0);   // 40 分钟
+                    }
+
+                    string strPercent = "";
+                    RangeList rl = new RangeList(ranges[j]);
+                    if (rl.Count >= 1)
+                    {
+                        double ratio = (double)((RangeItem)rl[0]).lStart / (double)fi.Length;
+                        strPercent = String.Format("{0,3:N}", ratio * (double)100) + "%";
+                    }
+
+                    if (stop != null)
+                        stop.SetMessage( // strMessagePrefix + 
+                            "正在上载 " + ranges[j] + "/"
+                            + Convert.ToString(fi.Length)
+                            + " " + strPercent + " " + strClientFilePath + strWarning + strWaiting);
+                    int nRedoCount = 0;
+                REDO:
+#if NO
+                    long lRet = channel.SaveResObject(
+                        stop,
+                        strResPath,
+                        strClientFilePath,
+                        strClientFilePath,
+                        strMime,
+                        ranges[j],
+                        // j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
+                        timestamp,
+                        strStyle,
+                        out output_timestamp,
+                        out strError);
+#endif
+                    long lRet = channel.SaveResObject(
+    stop,
+    strResPath,
+    strClientFilePath,
+    strMetadata,
+    ranges[j],
+    j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
+    timestamp,
+    strStyle,
+    out output_timestamp,
+    out strError);
+                    timestamp = output_timestamp;
+
+                    strWarning = "";
+
+                    if (lRet == -1)
+                    {
+                        // 如果是第一个 chunk，自动用返回的时间戳重试一次覆盖
+                        if (bRetryOverwiteExisting == true
+                            && j == 0
+                            && channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch
+                            && nRedoCount == 0)
+                        {
+                            nRedoCount++;
+                            goto REDO;
+                        }
+                        return -1;
+                    }
+                }
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+            }
+
+            return 0;
+        }
+
         // 获得资源。包装版本 -- 返回字符串版本、Cache版本。
         // parameters:
         //      remote_timestamp    远端时间戳。如果为 null，表示要从服务器实际获取时间戳

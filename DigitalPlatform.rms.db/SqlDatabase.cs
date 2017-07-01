@@ -248,7 +248,7 @@ namespace DigitalPlatform.rms
                 // 线: 不安全的
                 nRet = this.InternalGetConnectionString(
                     30,
-                    "",
+                    "pooling", // "",   2017/6/13 注：不知以前这里为何区分了 pooling 和 没有 pooling 的两种连接字符串，权且改为都用 pooling 的尝试一下
                     out this.m_strConnString,
                     out strError);
                 if (nRet == -1)
@@ -939,7 +939,8 @@ namespace DigitalPlatform.rms
                 else if (this.container.SqlServerType == SqlServerType.MySql)
                 {
                     MySqlConnection connection = new MySqlConnection(this.m_strConnString);
-                    connection.Open();
+                    // connection.Open();// TODO: TryOpen
+                    Connection.TryOpen(connection, this);
                     try //连接
                     {
                         string strCommand = "";
@@ -1381,7 +1382,7 @@ namespace DigitalPlatform.rms
             {
                 Connection connection = new Connection(this,
                     this.m_strConnString);
-                connection.Open();
+                connection.TryOpen();
                 try //连接
                 {
                     string strCommand = "";
@@ -1596,7 +1597,7 @@ namespace DigitalPlatform.rms
             {
                 Connection connection = new Connection(this,
                     this.m_strConnString);
-                connection.Open();
+                connection.TryOpen();
                 try //连接
                 {
                     string strCommand = "";
@@ -2850,7 +2851,7 @@ namespace DigitalPlatform.rms
 
                 Connection connection = new Connection(this,
                     this.m_strConnString);
-                connection.Open();
+                connection.TryOpen();
                 try //连接
                 {
                     if (connection.SqlServerType == SqlServerType.MsSqlServer)
@@ -3006,7 +3007,7 @@ namespace DigitalPlatform.rms
             // SQLite采用保守连接
             Connection connection = new Connection(this,
                 this.m_strConnString);
-            connection.Open();
+            connection.TryOpen();
             try
             {
                 string strPattern = "N'[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'";
@@ -5197,7 +5198,8 @@ namespace DigitalPlatform.rms
                 {
                     MySqlConnection connection =
                         new MySqlConnection(this.m_strConnString/*Pooling*/);
-                    connection.Open();
+                    // connection.Open();  // TODO: TryOpen
+                    Connection.TryOpen(connection, this);
                     try
                     {
                         MySqlCommand command = new MySqlCommand(strCommand,
@@ -6029,7 +6031,7 @@ namespace DigitalPlatform.rms
             Connection connection = new Connection(
                 this,
                 this.m_strConnStringPooling);
-            connection.Open();
+            connection.TryOpen();
             try
             {
                 // return:
@@ -6162,7 +6164,7 @@ namespace DigitalPlatform.rms
 #endif
 );
 
-                    connection.Open();
+                    connection.TryOpen();
                     try
                     {
                         // return:
@@ -6253,7 +6255,7 @@ namespace DigitalPlatform.rms
                         this.container.SqlServerType == SqlServerType.SQLite && this.FastMode == true ? ConnectionStyle.Global : ConnectionStyle.None
 #endif
 );
-                    connection.Open();
+                    connection.TryOpen();
 
                     /*
                     // 调试用
@@ -6705,7 +6707,7 @@ namespace DigitalPlatform.rms
                 this.container.SqlServerType == SqlServerType.SQLite && this.FastMode == true ? ConnectionStyle.Global : ConnectionStyle.None
 #endif
 );
-            connection.Open();
+            connection.TryOpen();
             try
             {
                 // return:
@@ -6858,7 +6860,7 @@ namespace DigitalPlatform.rms
 
                     Connection connection = new Connection(this,
                         this.m_strConnString);
-                    connection.Open();
+                    connection.TryOpen();
                     try // 连接
                     {
                         string strObjectFullID = strRecordID + "_" + strObjectID;
@@ -7409,7 +7411,8 @@ namespace DigitalPlatform.rms
 
                     if (bTempField == false)
                     {
-                        if (string.IsNullOrEmpty(row_info.FileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
                             strError = "行信息中没有对象文件 正式文件名";
@@ -7426,7 +7429,8 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        if (string.IsNullOrEmpty(row_info.NewFileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
                             // 尚没有临时的对象文件
                             destBuffer = new byte[0];
@@ -8112,7 +8116,8 @@ namespace DigitalPlatform.rms
 
                     if (bTempField == false)
                     {
-                        if (string.IsNullOrEmpty(row_info.FileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
                             strError = "行信息中没有对象文件 正式文件名";
@@ -8129,7 +8134,8 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        if (string.IsNullOrEmpty(row_info.NewFileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
                             // 尚没有临时的对象文件
                             destBuffer = new byte[0];
@@ -8428,7 +8434,8 @@ namespace DigitalPlatform.rms
 
                     if (bTempField == false)
                     {
-                        if (string.IsNullOrEmpty(row_info.FileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
                             strError = "行信息中没有对象文件 正式文件名";
@@ -8445,7 +8452,8 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        if (string.IsNullOrEmpty(row_info.NewFileName) == true)
+                        if (row_info == null || // 2017/6/2
+                            string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
                             // 尚没有临时的对象文件
                             destBuffer = new byte[0];
@@ -9040,11 +9048,11 @@ namespace DigitalPlatform.rms
             bool bDeleteKeys,
             bool bDelayCreateKeys,
             List<WriteInfo> records,
-            //out List<WriteInfo> results,
+            out List<WriteInfo> errors,
             out string strError)
         {
             strError = "";
-            //results = new List<WriteInfo>();
+            errors = new List<WriteInfo>();
             int nRet = 0;
 
             if (records == null || records.Count == 0)
@@ -9066,7 +9074,6 @@ namespace DigitalPlatform.rms
                 KeyCollection oldKeys = null;
                 XmlDocument newDom = null;
                 XmlDocument oldDom = null;
-
 
                 string strNewXml = info.record.Xml;
                 string strOldXml = "";
@@ -9113,7 +9120,19 @@ namespace DigitalPlatform.rms
                     out oldDom,
                     out strError);
                 if (nRet == -1)
-                    return -1;
+                {
+                    // return -1;
+
+                    // 2017/5/14
+                    if (info.record == null)
+                        info.record = new RecordBody();
+                    if (info.record.Result == null)
+                        info.record.Result = new Result();
+                    info.record.Result.ErrorCode = ErrorCodeValue.CommonError;
+                    info.record.Result.ErrorString = strError;
+                    errors.Add(info);
+                    continue;
+                }
 
                 // 处理子文件
                 // return:
@@ -9125,8 +9144,19 @@ namespace DigitalPlatform.rms
                     oldDom,
                     out strError);
                 if (nRet == -1)
-                    return -1;
+                {
+                    // return -1;
 
+                    // 2017/5/14
+                    if (info.record == null)
+                        info.record = new RecordBody();
+                    if (info.record.Result == null)
+                        info.record.Result = new Result();
+                    info.record.Result.ErrorCode = ErrorCodeValue.CommonError;
+                    info.record.Result.ErrorString = strError;
+                    errors.Add(info);
+                    continue;
+                }
                 total_newkeys.AddRange(newKeys);
                 total_oldkeys.AddRange(oldKeys);
             }
@@ -10265,7 +10295,7 @@ FileShare.ReadWrite))
             return 0;
         }
 
-        const int MYSQL_MAX_GETINFO_COUNT   = 1000;
+        const int MYSQL_MAX_GETINFO_COUNT = 1000;
 
         // 这一层主要是把较大的数组分片进行调用
         private int GetRowInfos(Connection connection,
@@ -10788,7 +10818,7 @@ out strError);
                 Connection connection = GetConnection(
     this.m_strLongConnString,   // this.m_strConnString,
     this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
-                connection.Open();
+                connection.TryOpen();
                 try
                 {
                     #region MS SQL Server
@@ -11139,7 +11169,7 @@ out strError);
                     Connection connection = GetConnection(
         this.m_strConnString,
         this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
-                    connection.Open();
+                    connection.TryOpen();
                     try
                     {
                         // select 已经存在的行信息
@@ -11276,18 +11306,26 @@ out strError);
 
                         if (results != null && results.Count > 0)
                         {
-                            //List<WriteInfo> temp = null;
+                            List<WriteInfo> temp = null;
                             // 更新 Keys
                             nRet = UpdateKeysRows(
-                                // sessioninfo,
                                 connection,
                                 true,   // 始终要立即删除旧的 keys
                                 bFastMode,
                                 results,
-                                //out temp,
+                                out temp,
                                 out strError);
                             if (nRet == -1)
                                 return -1;
+
+                            // 2017/5/31
+                            if (temp != null)
+                            {
+                                foreach (WriteInfo info in temp)
+                                {
+                                    outputs.Add(info.record);
+                                }
+                            }
                         }
                     }
                     catch (SqlException sqlEx)
@@ -11598,7 +11636,7 @@ out strError);
                     Connection connection = GetConnection(
                         this.m_strConnString,
                         this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
-                    connection.Open();
+                    connection.TryOpen();
                     try
                     {
 
@@ -12104,6 +12142,8 @@ start_time,
             strError = "";
             int nRet = 0;
 
+            bool bSimulate = StringUtil.IsInList("simulate", strStyle);
+
             if (StringUtil.IsInList("fastmode", strStyle) == true)
                 this.FastMode = true;
             bool bFastMode = StringUtil.IsInList("fastmode", strStyle) || this.FastMode;
@@ -12160,7 +12200,7 @@ start_time,
                     Connection connection = GetConnection(
                         this.m_strConnString,
                         this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
-                    connection.Open();
+                    connection.TryOpen();
                     try // 连接
                     {
                         // TODO: 是否可以改进为，如果对象SQL记录行存在，就直接进行写入，只有当SQL记录行不存在的时候才对从属的XML记录进行检查，如果必要补充创建SQL记录行。这样可以提高执行速度
@@ -12198,6 +12238,14 @@ start_time,
 #endif
 
                         strObjectID = strRecordID + "_" + strObjectID;
+
+                        // 2017/6/7
+                        // 模拟写入
+                        if (bSimulate == true)
+                        {
+                            outputTimestamp = inputTimestamp;
+                            return 0;
+                        }
 
                         /*
                         // 2. 当记录为空记录时,用update更改文本指针
@@ -14950,6 +14998,42 @@ start_time,
             #region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
+                List<string> lines = new List<string>();
+                if (keysDelete != null)
+                {
+                    // 删除keys
+                    for (int i = 0; i < keysDelete.Count; i++)
+                    {
+                        KeyItem oneKey = (KeyItem)keysDelete[i];
+
+                        string strKeysTableName = oneKey.SqlTableName;
+
+                        lines.Add(" DELETE FROM " + strKeysTableName
++ " WHERE keystring = N'" + MySqlHelper.EscapeString(oneKey.Key)
++ "' AND fromstring = N'" + MySqlHelper.EscapeString(oneKey.FromValue)
++ "' AND idstring = N'" + MySqlHelper.EscapeString(oneKey.RecordID)
++ "' AND keystringnum = N'" + MySqlHelper.EscapeString(oneKey.Num) + "' ;");
+                    }
+                }
+
+                if (keysAdd != null)
+                {
+                    // 增加keys
+                    for (int i = 0; i < keysAdd.Count; i++)
+                    {
+                        KeyItem oneKey = (KeyItem)keysAdd[i];
+
+                        string strKeysTableName = oneKey.SqlTableName;
+
+                        lines.Add(" INSERT INTO " + strKeysTableName
++ " (keystring,fromstring,idstring,keystringnum) "
++ " VALUES " + new string((char)1, 1) + "(N'" + MySqlHelper.EscapeString(oneKey.Key) + "',N'"
++ MySqlHelper.EscapeString(oneKey.FromValue) + "',N'"
++ MySqlHelper.EscapeString(oneKey.RecordID) + "',N'"
++ MySqlHelper.EscapeString(oneKey.Num) + "') ");
+                    }
+                }
+
                 using (MySqlCommand command = new MySqlCommand("",
                     connection.MySqlConnection))
                 {
@@ -14958,238 +15042,65 @@ start_time,
                     trans = connection.MySqlConnection.BeginTransaction();
                     try
                     {
-                        int i = 0;
-#if PARAMETERS
-                        int nNameIndex = 0;
-#endif
-
-                        int nCount = 0; // 累积的尚未发出的命令行数 
-                        int nExecuted = 0;   // 已经发出执行的命令行数 
-
-#if PARAMETERS
-                        int nMaxLinesPerExecute = (2100 / 5) - 1;   // 4个参数，加上一个sql命令字符串
-#else
-                        // 2017/4/27 MySQL Named Pipe 情况下 1000 比较保险
-                        int nMaxLinesPerExecute = 1000;
-#endif
-
-                        if (keysDelete != null)
+                        string strInsertHead = "";
+                        int nExecuted = 0;
+                        lines.Add("");
+                        foreach (string line in lines)
                         {
-                            // 删除keys
-                            for (i = 0; i < keysDelete.Count; i++)
+                            // 最后可能剩下的命令
+                            if (strCommand.Length > 0
+                                && (StringUtil.GetUtf8Bytes(strCommand.ToString()) + StringUtil.GetUtf8Bytes(line) + 1 >= 64000
+                                || nExecuted >= lines.Count - 1)
+                                )
                             {
-                                KeyItem oneKey = (KeyItem)keysDelete[i];
-
-                                string strKeysTableName = oneKey.SqlTableName;
-
-#if PARAMETERS
-                                string strIndex = Convert.ToString(nNameIndex++);
-
-                                string strKeyParamName = "@key" + strIndex;
-                                string strFromParamName = "@from" + strIndex;
-                                string strIdParamName = "@id" + strIndex;
-                                string strKeynumParamName = "@keynum" + strIndex;
-
-                                strCommand.Append(" DELETE FROM " + strKeysTableName
-                                    + " WHERE keystring = " + strKeyParamName
-                                    + " AND fromstring = " + strFromParamName 
-                                    + " AND idstring = " + strIdParamName 
-                                    + " AND keystringnum = " + strKeynumParamName + " ;\n");
-
-                                MySqlParameter keyParam =
-                                    command.Parameters.Add(strKeyParamName,
-                                    MySqlDbType.String);
-                                keyParam.Value = oneKey.Key;
-
-                                MySqlParameter fromParam =
-                                    command.Parameters.Add(strFromParamName,
-                                    MySqlDbType.String);
-                                fromParam.Value = oneKey.FromValue;
-
-                                MySqlParameter idParam =
-                                    command.Parameters.Add(strIdParamName,
-                                    MySqlDbType.String);
-                                idParam.Value = oneKey.RecordID;
-
-                                MySqlParameter keynumParam =
-                                    command.Parameters.Add(strKeynumParamName,
-                                    MySqlDbType.String);
-                                keynumParam.Value = oneKey.Num;
-#else
-
-                                // 2016/1/6 加入 N
-                                strCommand.Append(" DELETE FROM " + strKeysTableName
-    + " WHERE keystring = N'" + MySqlHelper.EscapeString(oneKey.Key)
-    + "' AND fromstring = N'" + MySqlHelper.EscapeString(oneKey.FromValue)
-    + "' AND idstring = N'" + MySqlHelper.EscapeString(oneKey.RecordID)
-    + "' AND keystringnum = N'" + MySqlHelper.EscapeString(oneKey.Num) + "' ;\n");
-
-#endif
-
-
-                                if (nCount >= nMaxLinesPerExecute)
-                                {
-                                    // 每100个命令发出一次
-                                    command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
-                                        + strCommand
-#if !PARAMETERS
-                                        // + " ;\n"
-#endif
-;
-                                    try
-                                    {
-                                        command.ExecuteNonQuery();
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        strError = "创建检索点出错, 偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
-                                        return -1;
-                                    }
-                                    strCommand.Clear();
-                                    nExecuted += nCount;
-                                    nCount = 0;
-                                    command.Parameters.Clear();
-                                }
-                                else
-                                {
-                                    nCount++;
-                                }
-                            }
-                        }
-
-                        if (keysAdd != null)
-                        {
-                            // nCount = keysAdd.Count;
-#if !PARAMETERS
-                            string strPrevSqlTableName = "";
-#endif
-
-                            // 增加keys
-                            for (i = 0; i < keysAdd.Count; i++)
-                            {
-                                KeyItem oneKey = (KeyItem)keysAdd[i];
-
-                                string strKeysTableName = oneKey.SqlTableName;
-
-#if PARAMETERS
-                                // string strIndex = Convert.ToString(i);
-                                string strIndex = Convert.ToString(nNameIndex++);
-
-                                string strKeyParamName = "@key" + strIndex;
-                                string strFromParamName = "@from" + strIndex;
-                                string strIdParamName = "@id" + strIndex;
-                                string strKeynumParamName = "@keynum" + strIndex;
-
-                                //加keynum
-                                strCommand.Append(" INSERT INTO " + strKeysTableName
-                                    + " (keystring,fromstring,idstring,keystringnum) "
-                                    + " VALUES (" + strKeyParamName + ","
-                                    + strFromParamName + ","
-                                    + strIdParamName + ","
-                                    + strKeynumParamName + ") ;\n");
-
-                                MySqlParameter keyParam =
-                                    command.Parameters.Add(strKeyParamName,
-                                    MySqlDbType.String);
-                                keyParam.Value = oneKey.Key;
-
-                                MySqlParameter fromParam =
-                                    command.Parameters.Add(strFromParamName,
-                                    MySqlDbType.String);
-                                fromParam.Value = oneKey.FromValue;
-
-                                MySqlParameter idParam =
-                                    command.Parameters.Add(strIdParamName,
-                                    MySqlDbType.String);
-                                idParam.Value = oneKey.RecordID;
-
-                                MySqlParameter keynumParam =
-                                    command.Parameters.Add(strKeynumParamName,
-                                    MySqlDbType.String);
-                                keynumParam.Value = oneKey.Num;
-#else
-                                if (strCommand.Length == 0
-                                    || strKeysTableName != strPrevSqlTableName)
-                                {
-                                    if (strCommand.Length > 0 && i > 0) // 2016/1/6 增加 i>0 限制。否则会多产生一个分号，导致 SQL 语法错误
-                                        strCommand.Append(" ; ");
-
-                                    // 2016/1/6 加入 N
-                                    strCommand.Append(" INSERT INTO " + strKeysTableName
-        + " (keystring,fromstring,idstring,keystringnum) "
-        + " VALUES (N'" + MySqlHelper.EscapeString(oneKey.Key) + "',N'"
-        + MySqlHelper.EscapeString(oneKey.FromValue) + "',N'"
-        + MySqlHelper.EscapeString(oneKey.RecordID) + "',N'"
-        + MySqlHelper.EscapeString(oneKey.Num) + "') ");
-                                }
-                                else
-                                {
-                                    // 2016/1/6 加入 N
-                                    strCommand.Append(", (N'" + MySqlHelper.EscapeString(oneKey.Key) + "',N'"
-        + MySqlHelper.EscapeString(oneKey.FromValue) + "',N'"
-        + MySqlHelper.EscapeString(oneKey.RecordID) + "',N'"
-        + MySqlHelper.EscapeString(oneKey.Num) + "') ");
-                                }
-
-                                strPrevSqlTableName = strKeysTableName;
-#endif
-
-                                if (nCount >= nMaxLinesPerExecute)
-                                {
-                                    // 每100个命令发出一次
-                                    command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
-                                        + strCommand
+                                command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
+                                    + strCommand
 #if !PARAMETERS
  + " ;\n"
 #endif
 ;
-                                    try
-                                    {
-                                        command.ExecuteNonQuery();
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
-                                        this.container.KernelApplication.WriteErrorLog(strError + "\r\n\r\nSQL 语句: " + command.CommandText);
-                                        return -1;
-                                    }
-                                    strCommand.Clear();
-                                    nExecuted += nCount;
-                                    nCount = 0;
-                                    command.Parameters.Clear();
+                                try
+                                {
+                                    command.ExecuteNonQuery();
                                 }
+                                catch (Exception ex)
+                                {
+                                    strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                                    this.container.KernelApplication.WriteErrorLog(strError + "\r\n\r\nSQL 语句: " + command.CommandText);
+                                    return -1;
+                                }
+
+                                strCommand.Clear();
+                                command.Parameters.Clear();
+                                strInsertHead = "";
+                            }
+
+                            int nPos = line.IndexOf((char)1);
+                            if (nPos != -1)
+                            {
+                                string strLeft = line.Substring(0, nPos);
+                                string strRight = line.Substring(nPos + 1);
+
+                                if (strLeft == strInsertHead)
+                                    strCommand.Append("," + strRight);
                                 else
                                 {
-                                    nCount++;
+                                    if (strCommand.Length > 0 && strCommand[strCommand.Length - 1] != ';')
+                                        strCommand.Append(";");
+                                    strCommand.Append(strLeft + strRight);
                                 }
+
+                                strInsertHead = strLeft;
                             }
+                            else
+                                strCommand.Append(line);
+
+                            nExecuted++;
                         }
 
-                        // 最后可能剩下的命令
                         if (strCommand.Length > 0)
-                        {
-                            command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
-                                + strCommand
-#if !PARAMETERS
- + " ;\n"
-#endif
-;
-                            try
-                            {
-                                command.ExecuteNonQuery();
-                            }
-                            catch (Exception ex)
-                            {
-                                strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
-                                this.container.KernelApplication.WriteErrorLog(strError + "\r\n\r\nSQL 语句: " + command.CommandText);
-                                return -1;
-                            }
+                            throw new Exception("循环遗漏了最后一行的处理");
 
-                            strCommand.Clear();
-                            nExecuted += nCount;
-                            nCount = 0;
-                            command.Parameters.Clear();
-                        }
                         if (trans != null)
                         {
                             trans.Commit();
@@ -17828,7 +17739,7 @@ bool bTempObject)
                     Connection connection = GetConnection(
                         this.m_strConnString,
                         this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
-                    connection.Open();
+                    connection.TryOpen();
                     try
                     {
                         connection.m_nOpenCount += 10;
@@ -18084,7 +17995,7 @@ bool bTempObject)
             {
                 Connection connection = new Connection(this,
                     this.m_strConnString);
-                connection.Open();
+                connection.TryOpen();
                 try // connection
                 {
                     // 检查ID
@@ -19510,7 +19421,91 @@ bool bTempObject)
 
         }
 
-        public void Open()
+        public static void TryOpen(MySqlConnection connection,
+            SqlDatabase database)
+        {
+            Exception exception = null;
+            int nMax = 2;
+            for (int i = 0; i < nMax; i++)
+            {
+                try
+                {
+                    connection.Open();
+                }
+                catch (MySqlException ex)
+                {
+                    // 异常记入日志
+                    if (database != null
+                        && database.container != null
+                        && database.container.KernelApplication != null)
+                        database.container.KernelApplication.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex));
+
+                    exception = ex;
+                    if (ex.Message.StartsWith("Unable to connect to any of") // "Unable to connect to any of specified MySQL hosts."
+                        && ex.InnerException is ArgumentException)
+                    {
+                        // 重试过程记入日志
+                        if (database != null
+                            && database.container != null
+                            && database.container.KernelApplication != null)
+                            database.container.KernelApplication.WriteErrorLog("*** 将自动重试 Open() (i=" + i + ")");
+
+                        {
+                            Thread.Sleep(500);
+                            continue;
+                        }
+                    }
+                    throw ex;
+                }
+                return;
+            }
+            if (exception != null)
+                throw exception;
+        }
+
+        public void TryOpen()
+        {
+            Exception exception = null;
+            int nMax = 2;
+            for (int i = 0; i < nMax; i++)
+            {
+                try
+                {
+                    this._open();
+                }
+                catch (MySqlException ex)
+                {
+                    // 异常记入日志
+                    if (this.SqlDatabase != null
+                        && this.SqlDatabase.container != null
+                        && this.SqlDatabase.container.KernelApplication != null)
+                        this.SqlDatabase.container.KernelApplication.WriteErrorLog("*** connection.Open() 发生异常: \r\n" + ExceptionUtil.GetDebugText(ex));
+
+                    exception = ex;
+                    if (ex.Message.StartsWith("Unable to connect to any of") // "Unable to connect to any of specified MySQL hosts."
+                        && ex.InnerException is ArgumentException)
+                    {
+                        // 重试过程记入日志
+                        if (this.SqlDatabase != null
+                            && this.SqlDatabase.container != null
+                            && this.SqlDatabase.container.KernelApplication != null)
+                            this.SqlDatabase.container.KernelApplication.WriteErrorLog("*** 将自动重试 Open() (i=" + i + ")");
+
+                        {
+                            Thread.Sleep(500);
+                            continue;
+                        }
+                    }
+                    throw ex;
+                }
+                return;
+            }
+            if (exception != null)
+                throw exception;
+        }
+
+        /*public*/
+        void _open()
         {
             if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
                 this.SqlConnection.Open();

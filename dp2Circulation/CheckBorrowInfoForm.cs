@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
 using System.IO;
+using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
@@ -525,6 +526,8 @@ namespace dp2Circulation
 
             barcodes = new List<string>();
 
+            Hashtable dup_table = new Hashtable();  // barcode --> 记录路径
+
             TimeSpan old_timeout = this.Channel.Timeout;
             this.Channel.Timeout = TimeSpan.FromMinutes(30);
 
@@ -591,6 +594,26 @@ namespace dp2Circulation
                     string strBarcode = record.Cols[0];
                     if (string.IsNullOrEmpty(strBarcode))
                         goto CONTINUE;
+
+                    strBarcode = strBarcode.Trim();
+                    if (string.IsNullOrEmpty(strBarcode))
+                        goto CONTINUE;
+
+                    // 判重
+                    if (this.checkBox_checkItemBarcodeDup.Checked
+                        && string.IsNullOrEmpty(strBarcode) == false)
+                    {
+                        if (dup_table.ContainsKey(strBarcode))
+                        {
+                            string strOldRecPath = (string)dup_table[strBarcode];
+                            Global.WriteHtml(this.webBrowser_resultInfo,
+    "册条码号 " + strBarcode + " 发现重复。记录 " + strOldRecPath + " 和 " + record.Path + "\r\n");
+
+                        }
+                        else
+                            dup_table[strBarcode] = record.Path;
+                    }
+
                     if (bHasBorrower == true
                         && string.IsNullOrEmpty(strBorrower))
                         goto CONTINUE;
@@ -1345,7 +1368,6 @@ out strError);
             }
 
             MessageBox.Show(this, "OK");
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1514,10 +1536,10 @@ out strError);
                     }
 
                     // 保存册记录
-
                     EntityInfo[] entities = new EntityInfo[1];
                     EntityInfo info = new EntityInfo();
 
+                    // TODO: 册记录如果已经有 refid 要沿用已有的
                     info.RefID = Guid.NewGuid().ToString(); // 2008/4/14 
                     info.Action = "change";
                     info.OldRecPath = strItemRecPath;    // 2007/6/2 
@@ -1590,8 +1612,6 @@ out strError);
 
                 Global.WriteHtml(this.webBrowser_resultInfo,
                     "处理结束。共增补价格字符串 " + nCount.ToString() + " 个。\r\n");
-
-
             }
             finally
             {

@@ -198,12 +198,12 @@ namespace dp2Catalog
         /// <summary>
         /// 在 FormClosing 阶段，是否要越过 this.OnMyFormClosing(e)
         /// </summary>
-        public bool SupressFormClosing = false;
+        public bool SuppressFormClosing = false;
 
         /// <summary>
         /// 是否需要忽略尺寸设定的过程
         /// </summary>
-        public bool SupressSizeSetting = false;
+        public bool SuppressSizeSetting = false;
 
         /// <summary>
         /// Form 即将关闭事件
@@ -212,7 +212,7 @@ namespace dp2Catalog
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            if (this.SupressFormClosing == false)
+            if (this.SuppressFormClosing == false)
                 this.OnMyFormClosing(e);
         }
 

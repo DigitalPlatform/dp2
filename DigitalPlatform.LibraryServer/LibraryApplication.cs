@@ -150,7 +150,11 @@ namespace DigitalPlatform.LibraryServer
         //      2.107 (2017/4/25) 为 VerifyBarcode() API 扩充 strAction 和 out strOutputBarcode 参数，支持变换条码号功能
         //      2.108 (2017/5/11) dp2Kernel 新版本 GetBrowse() API 支持 @coldef: 中使用名字空间和(匹配命中多个XmlNode时串接用的)分隔符号
         //      2.109 (2017/5/23) 对 ManageDatabase() API 也写入日志了。但日志恢复功能会跳过这个类型的操作日志
-        public static string Version = "2.109";
+        //      2.110 (2017/5/30) 消除 CopyBiblioInfo() API 中账户权限不够时会发生移动不完整的 Bug。
+        //      2.111 (2017/6/7) WriteRes() API 的 strStyle 参数允许使用 simulate。此时不会产生操作日志
+        //      2.112 (2017/6/14) SetEntities() API 增加了一种 Action 为 verify
+        //      2.113 (2017/6/16) GetBiblioInfos() API 增加了一种格式 marc。也可以用作 marc:syntax
+        public static string Version = "2.113";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -484,7 +488,7 @@ namespace DigitalPlatform.LibraryServer
         {
             Dispose(true);
             // This object will be cleaned up by the Dispose method.
-            // Therefore, you should call GC.SupressFinalize to
+            // Therefore, you should call GC.SuppressFinalize to
             // take this object off the finalization queue 
             // and prevent finalization code for this object
             // from executing a second time.
@@ -1597,6 +1601,7 @@ namespace DigitalPlatform.LibraryServer
                             }
                         }
 
+#if NO  // 暂时不允许使用这个验证性的功能 2017/6/8
                         // 启动 LibraryReplication
 
 #if LOG_INFO
@@ -1647,6 +1652,8 @@ namespace DigitalPlatform.LibraryServer
                                 goto ERROR1;
                             }
                         }
+
+#endif
 
                         // 启动 RebuildKeys
 
@@ -1882,7 +1889,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 Version version = new Version(strVersion);
-                Version base_version = new Version("2.67");
+                Version base_version = new Version("2.68");
                 if (version.CompareTo(base_version) < 0)
                 {
                     strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + version + ")。请立即升级 dp2Kernel 到最新版本。";
@@ -2220,7 +2227,6 @@ namespace DigitalPlatform.LibraryServer
                     out infos,
                     out strError);
                 this.ArrivedDbFroms = infos;
-
                 return 0;
             }
             finally
@@ -3747,12 +3753,33 @@ namespace DigitalPlatform.LibraryServer
             disposed = true;
         }
 
+        // 兼容以前用法
+        public int InitialVdbs(
+    RmsChannelCollection Channels,
+    out string strError)
+        {
+            string strWarning = "";
+            int nRet = InitialVdbs(
+    Channels,
+    out strWarning,
+    out strError);
+            if (string.IsNullOrEmpty(strWarning) == false)
+            {
+                strError = strWarning;
+                return -1;
+            }
+
+            return nRet;
+        }
+
         // 初始化虚拟库集合定义对象
         public int InitialVdbs(
             RmsChannelCollection Channels,
+            out string strWarning,
             out string strError)
         {
             strError = "";
+            strWarning = "";
 
             if (this.vdbs != null)
                 return 0;   // 优化
@@ -3778,12 +3805,12 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
                  * */
-
                 this.vdbs = new VirtualDatabaseCollection();
                 int nRet = vdbs.Initial(root,
                     Channels,
                     this.WsUrl,
                     biblio_dbs_root,
+                    out strWarning,
                     out strError);
                 if (nRet == -1)
                 {
@@ -14789,6 +14816,7 @@ strLibraryCode);    // 读者所在的馆代码
         BiblioDup = 32,     // 书目记录发生重复
         Borrowing = 33,    // 图书尚未还回(盘点前需修正此问题)
         ClientVersionTooOld = 34, // 前端版本太旧
+        NotBorrowed = 35,   // 册记录处于未被借出状态 2017/6/20
 
         // 以下为兼容内核错误码而设立的同名错误码
         AlreadyExist = 100, // 兼容

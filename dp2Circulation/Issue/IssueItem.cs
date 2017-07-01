@@ -478,12 +478,10 @@ namespace dp2Circulation
             out string strError)
         {
             strError = "";
-            // int nRet = 0;
 
             string strOrderInfo = this.OrderInfo;
             if (String.IsNullOrEmpty(strOrderInfo) == true)
                 return 0;
-
 
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<orderInfo/>");
@@ -497,9 +495,32 @@ namespace dp2Circulation
                 return -1;
             }
 
+            int nChangedCount = ReplaceOrderInfoRefID(order_refid_change_table,
+                dom.DocumentElement,
+                out strError);
+            if (nChangedCount == -1)
+                return -1;
+
+            if (nChangedCount > 0)
+                this.OrderInfo = dom.DocumentElement.InnerXml;
+
+            return nChangedCount;
+        }
+
+        // 更换 orderInfo 元素里的 refID 元素中的 参考 ID 字符串
+        // return:
+        //      -1  出错
+        //      >=0 发生替换的个数
+        public static int ReplaceOrderInfoRefID(Hashtable order_refid_change_table,
+            XmlElement root,
+            out string strError)
+        {
+            strError = "";
+            // int nRet = 0;
+
             int nChangedCount = 0;
 
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes("*/refID");
+            XmlNodeList nodes = root.SelectNodes("*/refID");
             foreach (XmlNode node in nodes)
             {
                 string strOldValue = node.InnerText;
@@ -513,9 +534,6 @@ namespace dp2Circulation
                     nChangedCount++;
                 }
             }
-
-            if (nChangedCount > 0)
-                this.OrderInfo = dom.DocumentElement.InnerXml;
 
             return nChangedCount;
         }
@@ -541,7 +559,6 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strOrderInfo) == true)
                 return 0;
 
-
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<orderInfo/>");
             try
@@ -554,8 +571,30 @@ namespace dp2Circulation
                 return -1;
             }
 
+            int nChangedCount = ReplaceOrderInfoItemRefID(item_refid_change_table, 
+                dom.DocumentElement, out strError);
+            if (nChangedCount == -1)
+                return -1;
+
+            if (nChangedCount > 0)
+                this.OrderInfo = dom.DocumentElement.InnerXml;
+
+            return nChangedCount;
+        }
+
+        // 更换 orderInfo 元素里的 distribute 元素中的 refid 字符串
+        // return:
+        //      -1  出错
+        //      >=0 发生替换的个数
+        public static int ReplaceOrderInfoItemRefID(Hashtable item_refid_change_table,
+            XmlElement root,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
             int nChangedCount = 0;
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes("*/distribute");
+            XmlNodeList nodes = root.SelectNodes("*/distribute");
             for (int i = 0; i < nodes.Count; i++)
             {
                 string strDistribute = nodes[i].InnerText;
@@ -588,11 +627,9 @@ namespace dp2Circulation
 
             }
 
-            if (nChangedCount > 0)
-                this.OrderInfo = dom.DocumentElement.InnerXml;
-
             return nChangedCount;
         }
+
 
 #if NO
         /// <summary>

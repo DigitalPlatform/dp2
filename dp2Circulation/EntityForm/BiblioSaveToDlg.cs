@@ -15,6 +15,9 @@ namespace dp2Circulation
     /// </summary>
     internal partial class BiblioSaveToDlg : Form
     {
+        // 是否越过 从剪贴板自动复制记录路径 的动作
+        public bool SuppressAutoClipboard = false;
+
         /// <summary>
         /// 框架窗口
         /// </summary>
@@ -45,6 +48,7 @@ namespace dp2Circulation
 
             comboBox_biblioDbName_TextChanged(null, null);
 
+            if (this.SuppressAutoClipboard == false)
             TrySetRecPathFromClipboard();
         }
 

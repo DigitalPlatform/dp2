@@ -89,7 +89,7 @@ namespace dp2Circulation
             this.tabControl_main.Multiline = true;
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(396, 308);
+            this.tabControl_main.Size = new System.Drawing.Size(309, 256);
             this.tabControl_main.TabIndex = 0;
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
             // 
@@ -113,7 +113,7 @@ namespace dp2Circulation
             this.tabPage_prepare.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_prepare.Name = "tabPage_prepare";
             this.tabPage_prepare.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_prepare.Size = new System.Drawing.Size(388, 282);
+            this.tabPage_prepare.Size = new System.Drawing.Size(289, 220);
             this.tabPage_prepare.TabIndex = 0;
             this.tabPage_prepare.Text = "准备";
             this.tabPage_prepare.UseVisualStyleBackColor = true;
@@ -122,7 +122,7 @@ namespace dp2Circulation
             // 
             this.checkBox_prepare_createCallNumber.AutoSize = true;
             this.checkBox_prepare_createCallNumber.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_prepare_createCallNumber.Location = new System.Drawing.Point(7, 99);
+            this.checkBox_prepare_createCallNumber.Location = new System.Drawing.Point(5, 79);
             this.checkBox_prepare_createCallNumber.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_prepare_createCallNumber.Name = "checkBox_prepare_createCallNumber";
             this.checkBox_prepare_createCallNumber.Size = new System.Drawing.Size(171, 16);
@@ -133,7 +133,7 @@ namespace dp2Circulation
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(4, 122);
+            this.label4.Location = new System.Drawing.Point(3, 98);
             this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(89, 12);
@@ -149,27 +149,27 @@ namespace dp2Circulation
             "订购价",
             "验收价",
             "空白"});
-            this.comboBox_prepare_priceDefault.Location = new System.Drawing.Point(119, 119);
+            this.comboBox_prepare_priceDefault.Location = new System.Drawing.Point(89, 95);
             this.comboBox_prepare_priceDefault.Margin = new System.Windows.Forms.Padding(2);
             this.comboBox_prepare_priceDefault.Name = "comboBox_prepare_priceDefault";
-            this.comboBox_prepare_priceDefault.Size = new System.Drawing.Size(116, 20);
+            this.comboBox_prepare_priceDefault.Size = new System.Drawing.Size(88, 20);
             this.comboBox_prepare_priceDefault.TabIndex = 8;
             this.comboBox_prepare_priceDefault.Text = "验收价";
             // 
             // groupBox1
             // 
-            this.groupBox1.Location = new System.Drawing.Point(259, 2);
+            this.groupBox1.Location = new System.Drawing.Point(194, 2);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(2);
-            this.groupBox1.Size = new System.Drawing.Size(1, 170);
+            this.groupBox1.Size = new System.Drawing.Size(1, 136);
             this.groupBox1.TabIndex = 10;
             this.groupBox1.TabStop = false;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(4, 162);
+            this.label2.Location = new System.Drawing.Point(3, 130);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(125, 12);
@@ -183,10 +183,10 @@ namespace dp2Circulation
             this.checkedListBox_prepare_dbNames.FormattingEnabled = true;
             this.checkedListBox_prepare_dbNames.HorizontalScrollbar = true;
             this.checkedListBox_prepare_dbNames.IntegralHeight = false;
-            this.checkedListBox_prepare_dbNames.Location = new System.Drawing.Point(6, 181);
+            this.checkedListBox_prepare_dbNames.Location = new System.Drawing.Point(4, 145);
             this.checkedListBox_prepare_dbNames.Margin = new System.Windows.Forms.Padding(2);
             this.checkedListBox_prepare_dbNames.Name = "checkedListBox_prepare_dbNames";
-            this.checkedListBox_prepare_dbNames.Size = new System.Drawing.Size(229, 124);
+            this.checkedListBox_prepare_dbNames.Size = new System.Drawing.Size(172, 100);
             this.checkedListBox_prepare_dbNames.TabIndex = 12;
             this.checkedListBox_prepare_dbNames.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.checkedListBox_prepare_dbNames_ItemCheck);
             // 
@@ -194,7 +194,7 @@ namespace dp2Circulation
             // 
             this.checkBox_prepare_setProcessingState.AutoSize = true;
             this.checkBox_prepare_setProcessingState.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_prepare_setProcessingState.Location = new System.Drawing.Point(7, 79);
+            this.checkBox_prepare_setProcessingState.Location = new System.Drawing.Point(5, 63);
             this.checkBox_prepare_setProcessingState.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_prepare_setProcessingState.Name = "checkBox_prepare_setProcessingState";
             this.checkBox_prepare_setProcessingState.Size = new System.Drawing.Size(219, 16);
@@ -208,11 +208,11 @@ namespace dp2Circulation
             this.tabComboBox_prepare_batchNo.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.tabComboBox_prepare_batchNo.FormattingEnabled = true;
             this.tabComboBox_prepare_batchNo.LeftFontStyle = System.Drawing.FontStyle.Bold;
-            this.tabComboBox_prepare_batchNo.Location = new System.Drawing.Point(119, 6);
+            this.tabComboBox_prepare_batchNo.Location = new System.Drawing.Point(89, 5);
             this.tabComboBox_prepare_batchNo.Margin = new System.Windows.Forms.Padding(2);
             this.tabComboBox_prepare_batchNo.Name = "tabComboBox_prepare_batchNo";
             this.tabComboBox_prepare_batchNo.RightFontStyle = System.Drawing.FontStyle.Italic;
-            this.tabComboBox_prepare_batchNo.Size = new System.Drawing.Size(116, 22);
+            this.tabComboBox_prepare_batchNo.Size = new System.Drawing.Size(88, 22);
             this.tabComboBox_prepare_batchNo.TabIndex = 1;
             this.tabComboBox_prepare_batchNo.DropDown += new System.EventHandler(this.tabComboBox_prepare_batchNo_DropDown);
             this.tabComboBox_prepare_batchNo.TextChanged += new System.EventHandler(this.tabComboBox_prepare_batchNo_TextChanged);
@@ -221,7 +221,7 @@ namespace dp2Circulation
             // 
             this.checkBox_prepare_inputItemBarcode.AutoSize = true;
             this.checkBox_prepare_inputItemBarcode.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_prepare_inputItemBarcode.Location = new System.Drawing.Point(7, 59);
+            this.checkBox_prepare_inputItemBarcode.Location = new System.Drawing.Point(5, 47);
             this.checkBox_prepare_inputItemBarcode.Margin = new System.Windows.Forms.Padding(2);
             this.checkBox_prepare_inputItemBarcode.Name = "checkBox_prepare_inputItemBarcode";
             this.checkBox_prepare_inputItemBarcode.Size = new System.Drawing.Size(171, 16);
@@ -232,7 +232,7 @@ namespace dp2Circulation
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 34);
+            this.label3.Location = new System.Drawing.Point(3, 27);
             this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(89, 12);
@@ -246,10 +246,10 @@ namespace dp2Circulation
             this.comboBox_prepare_type.Items.AddRange(new object[] {
             "图书",
             "连续出版物"});
-            this.comboBox_prepare_type.Location = new System.Drawing.Point(119, 31);
+            this.comboBox_prepare_type.Location = new System.Drawing.Point(89, 25);
             this.comboBox_prepare_type.Margin = new System.Windows.Forms.Padding(2);
             this.comboBox_prepare_type.Name = "comboBox_prepare_type";
-            this.comboBox_prepare_type.Size = new System.Drawing.Size(116, 20);
+            this.comboBox_prepare_type.Size = new System.Drawing.Size(88, 20);
             this.comboBox_prepare_type.TabIndex = 3;
             this.comboBox_prepare_type.Text = "图书";
             this.comboBox_prepare_type.SelectedIndexChanged += new System.EventHandler(this.comboBox_prepare_type_SelectedIndexChanged);
@@ -259,10 +259,10 @@ namespace dp2Circulation
             // 
             this.button_viewDatabaseDefs.AutoSize = true;
             this.button_viewDatabaseDefs.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_viewDatabaseDefs.Location = new System.Drawing.Point(6, 331);
+            this.button_viewDatabaseDefs.Location = new System.Drawing.Point(4, 265);
             this.button_viewDatabaseDefs.Margin = new System.Windows.Forms.Padding(2);
             this.button_viewDatabaseDefs.Name = "button_viewDatabaseDefs";
-            this.button_viewDatabaseDefs.Size = new System.Drawing.Size(134, 24);
+            this.button_viewDatabaseDefs.Size = new System.Drawing.Size(119, 24);
             this.button_viewDatabaseDefs.TabIndex = 9;
             this.button_viewDatabaseDefs.Text = "观察数据库定义...";
             this.button_viewDatabaseDefs.UseVisualStyleBackColor = true;
@@ -271,7 +271,7 @@ namespace dp2Circulation
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(4, 8);
+            this.label1.Location = new System.Drawing.Point(3, 6);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(89, 12);
@@ -292,7 +292,7 @@ namespace dp2Circulation
             this.tabPage_accept.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_accept.Name = "tabPage_accept";
             this.tabPage_accept.Padding = new System.Windows.Forms.Padding(2);
-            this.tabPage_accept.Size = new System.Drawing.Size(388, 282);
+            this.tabPage_accept.Size = new System.Drawing.Size(301, 230);
             this.tabPage_accept.TabIndex = 1;
             this.tabPage_accept.Text = "验收";
             this.tabPage_accept.UseVisualStyleBackColor = true;
@@ -303,10 +303,10 @@ namespace dp2Circulation
             this.label_biblioSource.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.label_biblioSource.Image = ((System.Drawing.Image)(resources.GetObject("label_biblioSource.Image")));
             this.label_biblioSource.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.label_biblioSource.Location = new System.Drawing.Point(2, 67);
+            this.label_biblioSource.Location = new System.Drawing.Point(2, 54);
             this.label_biblioSource.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_biblioSource.Name = "label_biblioSource";
-            this.label_biblioSource.Size = new System.Drawing.Size(74, 18);
+            this.label_biblioSource.Size = new System.Drawing.Size(56, 14);
             this.label_biblioSource.TabIndex = 13;
             this.label_biblioSource.Text = "外源(空)";
             this.label_biblioSource.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -327,10 +327,10 @@ namespace dp2Circulation
             "后方一致",
             "精确一致",
             "空值"});
-            this.comboBox_accept_matchStyle.Location = new System.Drawing.Point(100, 5);
+            this.comboBox_accept_matchStyle.Location = new System.Drawing.Point(75, 4);
             this.comboBox_accept_matchStyle.Margin = new System.Windows.Forms.Padding(2);
             this.comboBox_accept_matchStyle.Name = "comboBox_accept_matchStyle";
-            this.comboBox_accept_matchStyle.Size = new System.Drawing.Size(92, 20);
+            this.comboBox_accept_matchStyle.Size = new System.Drawing.Size(70, 20);
             this.comboBox_accept_matchStyle.TabIndex = 12;
             this.comboBox_accept_matchStyle.TextChanged += new System.EventHandler(this.comboBox_accept_matchStyle_TextChanged);
             // 
@@ -341,10 +341,10 @@ namespace dp2Circulation
             this.comboBox_accept_from.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox_accept_from.FormattingEnabled = true;
             this.comboBox_accept_from.IntegralHeight = false;
-            this.comboBox_accept_from.Location = new System.Drawing.Point(4, 5);
+            this.comboBox_accept_from.Location = new System.Drawing.Point(3, 4);
             this.comboBox_accept_from.Margin = new System.Windows.Forms.Padding(2);
             this.comboBox_accept_from.Name = "comboBox_accept_from";
-            this.comboBox_accept_from.Size = new System.Drawing.Size(92, 20);
+            this.comboBox_accept_from.Size = new System.Drawing.Size(70, 20);
             this.comboBox_accept_from.TabIndex = 11;
             // 
             // label_target
@@ -353,10 +353,10 @@ namespace dp2Circulation
             this.label_target.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.label_target.Image = ((System.Drawing.Image)(resources.GetObject("label_target.Image")));
             this.label_target.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.label_target.Location = new System.Drawing.Point(2, 49);
+            this.label_target.Location = new System.Drawing.Point(2, 39);
             this.label_target.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_target.Name = "label_target";
-            this.label_target.Size = new System.Drawing.Size(74, 18);
+            this.label_target.Size = new System.Drawing.Size(56, 14);
             this.label_target.TabIndex = 10;
             this.label_target.Text = "目标(空)";
             this.label_target.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -372,10 +372,10 @@ namespace dp2Circulation
             this.label_source.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.label_source.Image = ((System.Drawing.Image)(resources.GetObject("label_source.Image")));
             this.label_source.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.label_source.Location = new System.Drawing.Point(2, 30);
+            this.label_source.Location = new System.Drawing.Point(2, 24);
             this.label_source.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_source.Name = "label_source";
-            this.label_source.Size = new System.Drawing.Size(74, 18);
+            this.label_source.Size = new System.Drawing.Size(56, 14);
             this.label_source.TabIndex = 9;
             this.label_source.Text = "源(空)";
             this.label_source.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -400,9 +400,10 @@ namespace dp2Circulation
             this.listView_accept_records.FullRowSelect = true;
             this.listView_accept_records.HideSelection = false;
             this.listView_accept_records.LargeImageList = this.imageList_lineType;
-            this.listView_accept_records.Location = new System.Drawing.Point(77, 30);
+            this.listView_accept_records.Location = new System.Drawing.Point(58, 24);
+            this.listView_accept_records.Margin = new System.Windows.Forms.Padding(2);
             this.listView_accept_records.Name = "listView_accept_records";
-            this.listView_accept_records.Size = new System.Drawing.Size(310, 247);
+            this.listView_accept_records.Size = new System.Drawing.Size(245, 208);
             this.listView_accept_records.SmallImageList = this.imageList_lineType;
             this.listView_accept_records.TabIndex = 8;
             this.listView_accept_records.UseCompatibleStateImageBehavior = false;
@@ -450,10 +451,10 @@ namespace dp2Circulation
             // 
             this.button_accept_searchISBN.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_accept_searchISBN.AutoSize = true;
-            this.button_accept_searchISBN.Location = new System.Drawing.Point(324, 5);
+            this.button_accept_searchISBN.Location = new System.Drawing.Point(244, 2);
             this.button_accept_searchISBN.Margin = new System.Windows.Forms.Padding(2);
             this.button_accept_searchISBN.Name = "button_accept_searchISBN";
-            this.button_accept_searchISBN.Size = new System.Drawing.Size(64, 24);
+            this.button_accept_searchISBN.Size = new System.Drawing.Size(57, 22);
             this.button_accept_searchISBN.TabIndex = 4;
             this.button_accept_searchISBN.Text = "检索(&S)";
             this.button_accept_searchISBN.UseVisualStyleBackColor = true;
@@ -464,10 +465,10 @@ namespace dp2Circulation
             this.textBox_accept_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_accept_queryWord.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_accept_queryWord.Location = new System.Drawing.Point(195, 5);
+            this.textBox_accept_queryWord.Location = new System.Drawing.Point(146, 4);
             this.textBox_accept_queryWord.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_accept_queryWord.Name = "textBox_accept_queryWord";
-            this.textBox_accept_queryWord.Size = new System.Drawing.Size(125, 21);
+            this.textBox_accept_queryWord.Size = new System.Drawing.Size(98, 21);
             this.textBox_accept_queryWord.TabIndex = 3;
             this.textBox_accept_queryWord.Enter += new System.EventHandler(this.textBox_accept_isbn_Enter);
             this.textBox_accept_queryWord.Leave += new System.EventHandler(this.textBox_accept_isbn_Leave);
@@ -478,7 +479,7 @@ namespace dp2Circulation
             this.tabPage_finish.Location = new System.Drawing.Point(4, 4);
             this.tabPage_finish.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_finish.Name = "tabPage_finish";
-            this.tabPage_finish.Size = new System.Drawing.Size(388, 282);
+            this.tabPage_finish.Size = new System.Drawing.Size(289, 220);
             this.tabPage_finish.TabIndex = 2;
             this.tabPage_finish.Text = "结尾";
             this.tabPage_finish.UseVisualStyleBackColor = true;
@@ -488,7 +489,7 @@ namespace dp2Circulation
             this.button_finish_printAcceptList.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.button_finish_printAcceptList.AutoSize = true;
             this.button_finish_printAcceptList.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_finish_printAcceptList.Location = new System.Drawing.Point(134, 110);
+            this.button_finish_printAcceptList.Location = new System.Drawing.Point(100, 88);
             this.button_finish_printAcceptList.Margin = new System.Windows.Forms.Padding(2);
             this.button_finish_printAcceptList.Name = "button_finish_printAcceptList";
             this.button_finish_printAcceptList.Size = new System.Drawing.Size(125, 24);
@@ -504,10 +505,10 @@ namespace dp2Circulation
             this.button_next.Enabled = false;
             this.button_next.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.button_next.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_next.Location = new System.Drawing.Point(302, 277);
+            this.button_next.Location = new System.Drawing.Point(220, 226);
             this.button_next.Margin = new System.Windows.Forms.Padding(2);
             this.button_next.Name = "button_next";
-            this.button_next.Size = new System.Drawing.Size(94, 29);
+            this.button_next.Size = new System.Drawing.Size(88, 29);
             this.button_next.TabIndex = 1;
             this.button_next.Text = "下一环节(&N)";
             this.button_next.UseVisualStyleBackColor = true;
@@ -519,15 +520,17 @@ namespace dp2Circulation
             this.panel_main.Controls.Add(this.tabControl_main);
             this.panel_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_main.Location = new System.Drawing.Point(0, 0);
+            this.panel_main.Margin = new System.Windows.Forms.Padding(2);
             this.panel_main.Name = "panel_main";
-            this.panel_main.Size = new System.Drawing.Size(396, 308);
+            this.panel_main.Size = new System.Drawing.Size(309, 256);
             this.panel_main.TabIndex = 2;
             // 
             // AcceptForm
             // 
             this.AcceptButton = this.button_next;
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.ClientSize = new System.Drawing.Size(396, 308);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(309, 256);
             this.Controls.Add(this.panel_main);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));

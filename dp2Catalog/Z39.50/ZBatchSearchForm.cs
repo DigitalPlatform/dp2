@@ -680,14 +680,13 @@ MessageBoxDefaultButton.Button1);
                     {
                         Application.DoEvents();	// 出让界面控制权
 
-                        if (stop != null)
+                        if (stop != null && stop.State != 0)
                         {
-                            if (stop.State != 0)
-                            {
-                                strError = "用户中断";
-                                return 1;
-                            }
+                            strError = "用户中断";
+                            return 1;
                         }
+
+                        // Thread.Sleep(1000); // testing
 
                         QueryLine line = lines[j];
 
@@ -1509,6 +1508,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             foreach (DpRow row in result_line.Rows)
             {
                 string strText = row[0].Text;
+                // 获得在结果集中的偏移，基于 0
                 int index = GetOffset(strText);
                 if (index == -1)
                     throw new Exception("行号数字 '" + strText + "' 格式不正确");
@@ -1520,10 +1520,16 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
                         string strLineText = row[0].Text;
                         if (row.Count >= 2)
                             strLineText += "  " + row[1].Text;
+                        string strError = "记录 '" + strLineText + "' 在刷新的过程中发现重新检索的结果集发生了变化，此行被迫放弃刷新。解决办法是重新发起检索\r\n\r\n(index '" + index + "' >= connection.ResultCount '" + connection.ResultCount + "' connection.ErrorInfo '" + connection.ErrorInfo + "')";
+                        
+                        // 2017/6/30 增加安静报错
+                        Program.MainForm.ReportError("dp2catalog 在刷新的过程中发现重新检索的结果集发生了变化", "(安静报错)" + strError);
+
                         MessageDialog.Show(this,
-                            "记录 '" + strLineText + "' 在刷新的过程中发现重新检索的结果集发生了变化，此行被迫放弃刷新。解决办法是重新发起检索",
+                            strError,
                             "后面不再提示",
                             ref bDontAsk);
+
                     }
                     continue;
                 }
@@ -3147,7 +3153,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5724.41026, Culture=neutral, PublicKe
 
             ToolStripMenuItem menuItem = null;
             ToolStripSeparator sep = null;
-
 
             int nSelectedCount = this.dpTable_records.SelectedRows.Count;
 

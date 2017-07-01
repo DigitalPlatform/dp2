@@ -785,7 +785,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             {
                 Program.MainForm.AppInfo.LoadMdiChildFormStates(this,
                         "mdi_form_state",
-                        this.SupressSizeSetting == true ? SizeStyle.Layout : SizeStyle.All);
+                        this.SuppressSizeSetting == true ? SizeStyle.Layout : SizeStyle.All);
 
             }
         }
@@ -802,7 +802,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
             {
                 MainForm.AppInfo.SaveMdiChildFormStates(this,
                     "mdi_form_state",
-                    this.SupressSizeSetting == true ? SizeStyle.Layout : SizeStyle.All);
+                    this.SuppressSizeSetting == true ? SizeStyle.Layout : SizeStyle.All);
             }
 
             base.OnFormClosed(e);
@@ -814,12 +814,12 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         /// <summary>
         /// 在 FormClosing 阶段，是否要越过 this.OnMyFormClosing(e)
         /// </summary>
-        public bool SupressFormClosing = false;
+        public bool SuppressFormClosing = false;
 
         /// <summary>
         /// 是否需要忽略尺寸设定的过程
         /// </summary>
-        public bool SupressSizeSetting = false;
+        public bool SuppressSizeSetting = false;
 
         /// <summary>
         /// Form 即将关闭事件
@@ -828,7 +828,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            if (this.SupressFormClosing == false)
+            if (this.SuppressFormClosing == false)
                 this.OnMyFormClosing(e);
         }
 

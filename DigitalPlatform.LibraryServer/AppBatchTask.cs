@@ -193,7 +193,11 @@ namespace DigitalPlatform.LibraryServer
                 else if (strName == "日志恢复")
                     task = new OperLogRecover(this, strName);
                 else if (strName == "dp2Library 同步")
-                    task = new LibraryReplication(this, strName);
+                {
+                    // task = new LibraryReplication(this, strName);
+                    strError = "尚未正式提供服务";  // 2017/6/8
+                    return -1;
+                }
                 else if (strName == "重建检索点")
                     task = new RebuildKeys(this, strName);
                 /*

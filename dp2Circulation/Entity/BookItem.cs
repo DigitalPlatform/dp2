@@ -64,63 +64,67 @@ namespace dp2Circulation
         /// </summary>
         public const int COLUMN_ACCESSNO = 9;
         /// <summary>
+        /// ListView 栏目下标：架号
+        /// </summary>
+        public const int COLUMN_SHELFNO = 10;
+        /// <summary>
         /// ListView 栏目下标：图书类型
         /// </summary>
-        public const int COLUMN_BOOKTYPE = 10;
+        public const int COLUMN_BOOKTYPE = 11;
         /// <summary>
         /// ListView 栏目下标：登录号
         /// </summary>
-        public const int COLUMN_REGISTERNO = 11;
+        public const int COLUMN_REGISTERNO = 12;
         /// <summary>
         /// ListView 栏目下标：注释
         /// </summary>
-        public const int COLUMN_COMMENT = 12;
+        public const int COLUMN_COMMENT = 13;
         /// <summary>
         /// ListView 栏目下标：合并注释
         /// </summary>
-        public const int COLUMN_MERGECOMMENT = 13;
+        public const int COLUMN_MERGECOMMENT = 14;
         /// <summary>
         /// ListView 栏目下标：批次号
         /// </summary>
-        public const int COLUMN_BATCHNO = 14;
+        public const int COLUMN_BATCHNO = 15;
         /// <summary>
         /// ListView 栏目下标：借阅者
         /// </summary>
-        public const int COLUMN_BORROWER = 15;
+        public const int COLUMN_BORROWER = 16;
         /// <summary>
         /// ListView 栏目下标：借阅日期
         /// </summary>
-        public const int COLUMN_BORROWDATE = 16;
+        public const int COLUMN_BORROWDATE = 17;
         /// <summary>
         /// ListView 栏目下标：借阅期限
         /// </summary>
-        public const int COLUMN_BORROWPERIOD = 17;
+        public const int COLUMN_BORROWPERIOD = 18;
 
         /// <summary>
         /// ListView 栏目下标：完好率
         /// </summary>
-        public const int COLUMN_INTACT = 18;
+        public const int COLUMN_INTACT = 19;
         /// <summary>
         /// ListView 栏目下标：装订费用
         /// </summary>
-        public const int COLUMN_BINDINGCOST = 19;
+        public const int COLUMN_BINDINGCOST = 20;
         /// <summary>
         /// ListView 栏目下标：装订信息
         /// </summary>
-        public const int COLUMN_BINDING = 20;
+        public const int COLUMN_BINDING = 21;
         /// <summary>
         /// ListView 栏目下标：操作历史信息
         /// </summary>
-        public const int COLUMN_OPERATIONS = 21;
+        public const int COLUMN_OPERATIONS = 22;
 
         /// <summary>
         /// ListView 栏目下标：册记录路径
         /// </summary>
-        public const int COLUMN_RECPATH = 22;
+        public const int COLUMN_RECPATH = 23;
         /// <summary>
         /// ListView 栏目下标：参考 ID
         /// </summary>
-        public const int COLUMN_REFID = 23;
+        public const int COLUMN_REFID = 24;
 
         /// <summary>
         /// 根据当前对象克隆出一个新对象
@@ -161,6 +165,8 @@ namespace dp2Circulation
                 this.Volume = strText;
             else if (nCol == COLUMN_ACCESSNO)
                 this.AccessNo = strText;
+            else if (nCol == COLUMN_SHELFNO)
+                this.ShelfNo = strText;
             else if (nCol == COLUMN_BOOKTYPE)
                 this.BookType = strText;
             else if (nCol == COLUMN_REGISTERNO)
@@ -428,7 +434,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// 卷号 (2008/12/12 增加)
+        /// 索取号 (2008/12/12 增加)
         /// </summary>
         public string AccessNo
         {
@@ -440,6 +446,22 @@ namespace dp2Circulation
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "accessNo", value);
                 this.Changed = true; // 2009/3/5
+            }
+        }
+
+        /// <summary>
+        /// 架号 (2017/6/15 增加)
+        /// </summary>
+        public string ShelfNo
+        {
+            get
+            {
+                return DomUtil.GetElementText(this.RecordDom.DocumentElement, "shelfNo");
+            }
+            set
+            {
+                DomUtil.SetElementText(this.RecordDom.DocumentElement, "shelfNo", value);
+                this.Changed = true; 
             }
         }
 
@@ -599,8 +621,30 @@ namespace dp2Circulation
                 return -1;
             }
 
-            bool bChanged = false;
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes("item");
+            int nChangeCount = ReplaceBindingItemRefID(item_refid_change_table,
+            dom.DocumentElement,
+            out strError);
+
+            if (nChangeCount > 0)
+            {
+                this.Binding = dom.DocumentElement.InnerXml;
+                return 1;
+            }
+
+            return 0;
+        }
+
+        // parameters:
+        //      root    指 binding 元素
+        public static int ReplaceBindingItemRefID(Hashtable item_refid_change_table,
+            XmlElement binding,
+            out string strError)
+        {
+            strError = "";
+
+            // bool bChanged = false;
+            int nChangeCount = 0;
+            XmlNodeList nodes = binding.SelectNodes("item");
             for (int i = 0; i < nodes.Count; i++)
             {
                 XmlNode node = nodes[i];
@@ -610,19 +654,15 @@ namespace dp2Circulation
                     if (item_refid_change_table.Contains(strRefID) == true)
                     {
                         DomUtil.SetAttr(node, "refID", (string)item_refid_change_table[strRefID]);
-                        bChanged = true;
+                        // bChanged = true;
+                        nChangeCount++;
                     }
                 }
             }
 
-            if (bChanged == true)
-            {
-                this.Binding = dom.DocumentElement.InnerXml;
-                return 1;
-            }
-
-            return 0;
+            return nChangeCount;
         }
+
 
         /// <summary>
         /// 将内存值更新到显示的栏目
@@ -663,6 +703,9 @@ namespace dp2Circulation
             ListViewUtil.ChangeItemText(item,
                 COLUMN_ACCESSNO,
                 this.AccessNo);
+            ListViewUtil.ChangeItemText(item,
+    COLUMN_SHELFNO,
+    this.ShelfNo);
 
 
             ListViewUtil.ChangeItemText(item,

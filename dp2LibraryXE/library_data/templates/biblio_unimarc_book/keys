@@ -418,7 +418,7 @@ public class MyKeysHost : KeysHost
 
   public void convertISBN()
   {
-       string isbn = this.InputString;
+       string isbn = this.InputString.Trim(); // 2017/6/26 增加 Trim()
        isbn = isbn.Replace("-", "");   //去除ISBN中的"-"连接符号
        isbn = isbn.Replace("—", ""); //为稳妥，去除ISBN中的全角"—"连接符号
  
@@ -453,7 +453,7 @@ public class MyKeysHost : KeysHost
 
   public void convertISSN()
   {
-       string issn = this.InputString;
+       string issn = this.InputString.Trim();
        issn = issn.Replace("-", "");   //去除ISSN中的"-"连接符号
        issn = issn.Replace("—", ""); //为稳妥，去除ISSN中的全角"—"连接符号
  

@@ -1715,7 +1715,7 @@ out strError);
                 if (bFixed)
                 {
                     form.Fixed = true;
-                    form.SupressSizeSetting = true;
+                    form.SuppressSizeSetting = true;
                     Program.MainForm.SetMdiToNormal();
                 }
                 else
@@ -1723,7 +1723,7 @@ out strError);
                     // 在已经有左侧窗口的情况下，普通窗口需要显示在右侧
                     if (exist_fixed != null)
                     {
-                        form.SupressSizeSetting = true;
+                        form.SuppressSizeSetting = true;
                         Program.MainForm.SetMdiToNormal();
                     }
                 }
@@ -6985,6 +6985,7 @@ MessageBoxDefaultButton.Button1);
 
                     if (dlg.IncludeObjectFile && bRemote == false)
                     {
+                    REDO_WRITEOBJECTS:
                         // 将书目记录中的对象资源写入外部文件
                         nRet = WriteObjectFiles(stop,
                 channel,
@@ -6998,11 +6999,13 @@ MessageBoxDefaultButton.Button1);
                                 goto ERROR1;
 
                             DialogResult temp_result = MessageBox.Show(this,
-strError + "\r\n\r\n是否继续处理?",
+strError + "\r\n\r\n是否重试?\r\n\r\n(Yes: 重试; No: 放弃导出本记录的对象，但继续后面的处理; Cancel: 放弃全部处理)",
 "BiblioSearchForm",
-MessageBoxButtons.OKCancel,
+MessageBoxButtons.YesNoCancel,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button1);
+                            if (temp_result == System.Windows.Forms.DialogResult.Yes)
+                                goto REDO_WRITEOBJECTS;
                             if (temp_result == DialogResult.Cancel)
                                 goto ERROR1;
                         }
@@ -7036,7 +7039,8 @@ MessageBoxDefaultButton.Button1);
                         }
 
                         nRet = 0;
-                        if (string.IsNullOrEmpty(prop.OrderDbName) == false)
+                        if (string.IsNullOrEmpty(prop.OrderDbName) == false
+                            && dlg.IncludeOrders)
                         {
                             // dprms:orderCollection
                             nRet = OutputEntities(
@@ -7045,9 +7049,11 @@ MessageBoxDefaultButton.Button1);
                                 item.BiblioInfo.RecPath,
                                 "order",
                                 writer,
+                                dlg,
                                 out strError);
                         }
-                        if (string.IsNullOrEmpty(prop.IssueDbName) == false)
+                        if (string.IsNullOrEmpty(prop.IssueDbName) == false
+                            && dlg.IncludeIssues)
                         {
                             // dprms:issueCollection
                             nRet = OutputEntities(
@@ -7056,9 +7062,11 @@ MessageBoxDefaultButton.Button1);
                                 item.BiblioInfo.RecPath,
                                 "issue",
                                 writer,
+                                dlg,
                                 out strError);
                         }
-                        if (string.IsNullOrEmpty(prop.ItemDbName) == false)
+                        if (string.IsNullOrEmpty(prop.ItemDbName) == false
+                            && dlg.IncludeEntities)
                         {
                             // dprms:itemCollection
                             nRet = OutputEntities(
@@ -7067,9 +7075,11 @@ MessageBoxDefaultButton.Button1);
                                 item.BiblioInfo.RecPath,
                                 "item",
                                 writer,
+                                dlg,
                                 out strError);
                         }
-                        if (string.IsNullOrEmpty(prop.CommentDbName) == false)
+                        if (string.IsNullOrEmpty(prop.CommentDbName) == false
+                            && dlg.IncludeComments)
                         {
                             // dprms:commentCollection
                             nRet = OutputEntities(
@@ -7078,6 +7088,7 @@ MessageBoxDefaultButton.Button1);
                                 item.BiblioInfo.RecPath,
                                 "comment",
                                 writer,
+                                dlg,
                                 out strError);
                         }
 
@@ -7133,11 +7144,11 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-        // 将书目记录中的对象资源写入外部文件
+        // 将 XML 记录中的对象资源写入外部文件
         public static int WriteObjectFiles(Stop stop,
             LibraryChannel channel,
-            string strBiblioRecPath,
-            ref XmlDocument biblio_dom,
+            string strRecPath,
+            ref XmlDocument dom,
             string strOutputDir,
             out string strError)
         {
@@ -7149,7 +7160,7 @@ MessageBoxDefaultButton.Button1);
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
 
-            XmlNodeList nodes = biblio_dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
 
             foreach (XmlElement node in nodes)
             {
@@ -7157,10 +7168,13 @@ MessageBoxDefaultButton.Button1);
                 string strUsage = DomUtil.GetAttr(node, "usage");
                 string strRights = DomUtil.GetAttr(node, "rights");
 
-                string strResPath = strBiblioRecPath + "/object/" + strID;
+                string strResPath = strRecPath + "/object/" + strID;
                 strResPath = strResPath.Replace(":", "/");
                 recpaths.Add(strResPath);
             }
+
+            if (recpaths.Count == 0)
+                return 0;
 
             try
             {
@@ -7202,8 +7216,17 @@ MessageBoxDefaultButton.Button1);
 
                     // TODO: 另一种方法是用 URL 数据库名 ObjectID 等共同构造一个文件名
                     string strGUID = Guid.NewGuid().ToString();
-                    string strMetadataFileName = Path.Combine(strOutputDir, strGUID + ".met");
-                    string strObjectFileName = Path.Combine(strOutputDir, strGUID + ".bin");
+                    string strName = record.Path.Replace("/", "_");
+                    string strMetadataFileName = Path.Combine(strOutputDir, strName + ".met");
+                    if (File.Exists(strMetadataFileName))
+                        strMetadataFileName = Path.Combine(strOutputDir, strName + "_" + strGUID + ".met");
+
+                    string strObjectFileName = Path.Combine(strOutputDir, strName + ".bin");
+                    if (File.Exists(strObjectFileName))
+                        strObjectFileName = Path.Combine(strOutputDir, strName + "_" + strGUID + ".bin");
+
+                    //string strMetadataFileName = Path.Combine(strOutputDir, strGUID + ".met");
+                    //string strObjectFileName = Path.Combine(strOutputDir, strGUID + ".bin");
 
                     // metadata 写入外部文件
                     if (string.IsNullOrEmpty(strMetadataXml) == false)
@@ -7323,6 +7346,96 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        public int OutputEntities(
+Stop stop,
+LibraryChannel channel,
+string strBiblioRecPath,
+string strDbType,
+XmlTextWriter writer,
+            OpenBiblioDumpFileDialog dlg,
+out string strError)
+        {
+            strError = "";
+
+            bool bBegin = false;
+
+            SubItemLoader loader = new SubItemLoader();
+            loader.BiblioRecPath = strBiblioRecPath;
+            loader.Channel = channel;
+            loader.Stop = stop;
+            loader.DbType = strDbType;
+
+            loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+            loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+            foreach (EntityInfo info in loader)
+            {
+                if (info.ErrorCode != ErrorCodeValue.NoError)
+                {
+                    strError = "路径为 '" + info.OldRecPath + "' 的册记录装载中发生错误: " + info.ErrorInfo; // NewRecPath
+                    return -1;
+                }
+
+                if (bBegin == false)
+                {
+                    writer.WriteStartElement("dprms", strDbType + "Collection", DpNs.dprms);
+                    bBegin = true;
+                }
+
+                XmlDocument item_dom = new XmlDocument();
+                item_dom.LoadXml(info.OldRecord);
+
+                if (dlg.IncludeObjectFile)
+                {
+                REDO_WRITEOBJECTS:
+                    // 将记录中的对象资源写入外部文件
+                    int nRet = WriteObjectFiles(stop,
+            channel,
+            info.OldRecPath,
+            ref item_dom,
+            dlg.ObjectDirectoryName,
+            out strError);
+                    if (nRet == -1)
+                    {
+                        if (stop != null && stop.State != 0)
+                            return -1;
+
+                        DialogResult temp_result = MessageBox.Show(this,
+strError + "\r\n\r\n是否重试?\r\n\r\n(Yes: 重试; No: 放弃导出本记录的对象，但继续后面的处理; Cancel: 放弃全部处理)",
+"BiblioSearchForm",
+MessageBoxButtons.YesNoCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                        if (temp_result == System.Windows.Forms.DialogResult.Yes)
+                            goto REDO_WRITEOBJECTS;
+                        if (temp_result == DialogResult.Cancel)
+                            return -1;
+                    }
+                }
+
+                if (item_dom.DocumentElement != null)
+                {
+                    writer.WriteStartElement("dprms", strDbType, DpNs.dprms);
+                    writer.WriteAttributeString("path", info.OldRecPath);
+                    writer.WriteAttributeString("timestamp", ByteArray.GetHexTimeStampString(info.OldTimestamp));
+                    DomUtil.RemoveEmptyElements(item_dom.DocumentElement);
+                    item_dom.DocumentElement.WriteContentTo(writer);
+                    writer.WriteEndElement();
+                }
+                else
+                {
+                    // TODO: 是否警告 DocumentElement 为空
+                    Debug.Assert(false, "");
+                }
+            }
+
+            if (bBegin == true)
+                writer.WriteEndElement();
+
+            return 1;
+        }
+
+#if NO
         public static int OutputEntities(
             Stop stop,
             LibraryChannel channel,
@@ -7451,6 +7564,8 @@ MessageBoxDefaultButton.Button1);
 
             return 1;
         }
+
+#endif
 
         void menu_saveToXmlFile_Click(object sender, EventArgs e)
         {

@@ -50,15 +50,16 @@ namespace dp2Circulation
             this.columnHeader_borrowDate = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_borrowPeriod = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_intact = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_bindingCost = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_binding = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_operations = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_recpath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_refID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.imageList_itemType = new System.Windows.Forms.ImageList(this.components);
-            this.columnHeader_bindingCost = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_shelfNo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
-            // ListView
+            // listView
             // 
             this.listView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -72,6 +73,7 @@ namespace dp2Circulation
             this.columnHeader_price,
             this.columnHeader_volume,
             this.columnHeader_accessNo,
+            this.columnHeader_shelfNo,
             this.columnHeader_bookType,
             this.columnHeader_registerNo,
             this.columnHeader_comment,
@@ -93,7 +95,7 @@ namespace dp2Circulation
             this.listView.LargeImageList = this.imageList_itemType;
             this.listView.Location = new System.Drawing.Point(0, 0);
             this.listView.Margin = new System.Windows.Forms.Padding(0);
-            this.listView.Name = "ListView";
+            this.listView.Name = "listView";
             this.listView.Size = new System.Drawing.Size(424, 104);
             this.listView.SmallImageList = this.imageList_itemType;
             this.listView.TabIndex = 1;
@@ -198,6 +200,11 @@ namespace dp2Circulation
             this.columnHeader_intact.Text = "完好率";
             this.columnHeader_intact.Width = 150;
             // 
+            // columnHeader_bindingCost
+            // 
+            this.columnHeader_bindingCost.Text = "装订费";
+            this.columnHeader_bindingCost.Width = 150;
+            // 
             // columnHeader_binding
             // 
             this.columnHeader_binding.Text = "装订";
@@ -228,17 +235,17 @@ namespace dp2Circulation
             this.imageList_itemType.Images.SetKeyName(3, "deleted_entity.bmp");
             this.imageList_itemType.Images.SetKeyName(4, "error_entity.bmp");
             // 
-            // columnHeader_bindingCost
+            // columnHeader_shelfNo
             // 
-            this.columnHeader_bindingCost.Text = "装订费";
-            this.columnHeader_bindingCost.Width = 150;
+            this.columnHeader_shelfNo.Text = "架号";
+            this.columnHeader_shelfNo.Width = 100;
             // 
             // EntityControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.listView);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "EntityControl";
             this.Size = new System.Drawing.Size(424, 104);
             this.ResumeLayout(false);
@@ -273,5 +280,6 @@ namespace dp2Circulation
         private System.Windows.Forms.ColumnHeader columnHeader_binding;
         private System.Windows.Forms.ColumnHeader columnHeader_operations;
         private System.Windows.Forms.ColumnHeader columnHeader_bindingCost;
+        private System.Windows.Forms.ColumnHeader columnHeader_shelfNo;
     }
 }

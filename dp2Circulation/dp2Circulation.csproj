@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>225</ApplicationRevision>
+    <ApplicationRevision>236</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -2277,6 +2277,9 @@
     <EmbeddedResource Include="Statis\LibraryReportConfigForm.resx">
       <DependentUpon>LibraryReportConfigForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Statis\RecoverRecordDialog.resx">
+      <DependentUpon>RecoverRecordDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Statis\ReportApplyForm.resx">
       <DependentUpon>ReportApplyForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -2507,6 +2510,12 @@
     </Compile>
     <Compile Include="Statis\LibraryReportConfigForm.Designer.cs">
       <DependentUpon>LibraryReportConfigForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Statis\RecoverRecordDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Statis\RecoverRecordDialog.Designer.cs">
+      <DependentUpon>RecoverRecordDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Statis\ReportApplyForm.cs">
       <SubType>Form</SubType>

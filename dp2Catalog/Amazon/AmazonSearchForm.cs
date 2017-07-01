@@ -31,6 +31,8 @@ namespace dp2Catalog
 {
     public partial class AmazonSearchForm : Form, ISearchForm
     {
+        public const string API_VERSION = "2013-08-01"; // "2011-08-01";
+
         // 浏览事项的类型下标
         public const int BROWSE_TYPE_NORMAL = 0;   // 普通记录
         public const int BROWSE_TYPE_DIAG = 1;     // 诊断记录 或者 4
@@ -704,17 +706,30 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 return -1;
 
-            AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
-                //MY_AWS_ACCESS_KEY_ID,
-                //MY_AWS_SECRET_KEY,
-this.CurrentServer);
+            dp2Catalog.SystemCfgForm.SecretInfo info = SystemCfgForm.GetSecretInfo(this.MainForm.UserDir,
+                "");
 
+            AmazonSignedRequestHelper helper = null;
+            if (info == null || string.IsNullOrEmpty(info.AwsAccessKeyID) == true)
+            {
+                helper = new AmazonSignedRequestHelper(
+                    //MY_AWS_ACCESS_KEY_ID,
+                    //MY_AWS_SECRET_KEY,
+     this.CurrentServer);
+            }
+            else
+            {
+                helper = new AmazonSignedRequestHelper(
+                    info.AwsAccessKeyID,
+                    info.AwsSecretKey,
+                this.CurrentServer);
+            }
             // IDictionary<string, string> r1 = this.amazonQueryControl1.ParameterTable;   // new Dictionary<string, String>();
 
             IDictionary<string, string> parameters = new Dictionary<string, String>();
 
             parameters["Service"] = "AWSECommerceService";
-            parameters["Version"] = "2011-08-01";
+            parameters["Version"] = API_VERSION;    // "2011-08-01";
             parameters["Operation"] = "ItemSearch";
             parameters["SearchIndex"] = "Books";
             parameters["Power"] = strText;
@@ -748,10 +763,25 @@ this.CurrentServer);
                 return -1;
             }
 
-            AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
-                //MY_AWS_ACCESS_KEY_ID,
-                //MY_AWS_SECRET_KEY,
-this.m_strCurrentSearchedServer);    //  this.CurrentServer
+            dp2Catalog.SystemCfgForm.SecretInfo info = SystemCfgForm.GetSecretInfo(this.MainForm.UserDir,
+    "");
+
+            AmazonSignedRequestHelper helper = null;
+            
+            if (info == null || string.IsNullOrEmpty(info.AwsAccessKeyID) == true)
+            {
+                helper = new AmazonSignedRequestHelper(
+                    //MY_AWS_ACCESS_KEY_ID,
+                    //MY_AWS_SECRET_KEY,
+                    this.m_strCurrentSearchedServer);    //  this.CurrentServer
+            }
+            else
+            {
+                helper = new AmazonSignedRequestHelper(
+                    info.AwsAccessKeyID,
+                    info.AwsSecretKey,
+                    this.m_strCurrentSearchedServer);
+            }
 
             if (this.m_nCurrentPageNo == -1)
             {
@@ -798,7 +828,7 @@ this.CurrentServer);
             IDictionary<string, string> parameters = new Dictionary<string, String>();
 
             parameters["Service"] = "AWSECommerceService";
-            parameters["Version"] = "2011-08-01";
+            parameters["Version"] = API_VERSION;    // "2011-08-01";
             parameters["Operation"] = "ItemLookup";
             parameters["ItemId"] = asin.ToString();
             parameters["IdType"] = "ASIN";
@@ -957,7 +987,7 @@ value);
         long m_nTotalPages = 0;     // 命中结果的总页数
         string m_strError = ""; // 异步操作中用于保存出错信息
 
-        private const string NAMESPACE = "http://webservices.amazon.com/AWSECommerceService/2011-08-01";
+        private const string NAMESPACE = "http://webservices.amazon.com/AWSECommerceService/2013-08-01";
 
         WebClient webClient = null;
         public string TempFilename = "";
@@ -1134,7 +1164,7 @@ this.CurrentServer);
             IDictionary<string, string> parameters = new Dictionary<string, String>();
 
             parameters["Service"] = "AWSECommerceService";
-            parameters["Version"] = "2011-08-01";
+            parameters["Version"] = API_VERSION;    // "2011-08-01";
             parameters["Operation"] = "ItemSearch";
             parameters["SearchIndex"] = "Books";
             parameters["Power"] = strText;
@@ -2086,7 +2116,7 @@ nsmgr,
                     if (exist_fixed != null)
                         exist_fixed.Activate();
 
-                    form.SupressSizeSetting = true;
+                    form.SuppressSizeSetting = true;
                     this.MainForm.SetMdiToNormal();
                 }
                 form.Show();

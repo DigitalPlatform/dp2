@@ -388,10 +388,24 @@ Z";
 
         // 去掉价格字符串中的 "(...)" 部分
         // TODO: 检查小数点后的位数，多于 2 位的要删除
+        // return:
+        //      false   没有发生修改
+        //      true    发生了修改
         public static bool CorrectPrice(ref string strText)
         {
             strText = strText.Trim();
+
+            //2017/6/17
+            strText = strText.Replace("￥", "CNY");
+
+            // 2017/6/17
+            strText = strText.Replace("精装", "").Replace("平装", "").Replace("每册", "");
+
             strText = StringUtil.ToDBC(strText);
+
+            // 截掉逗号右侧的部分
+            List<string> parts = StringUtil.ParseTwoPart(strText, ",");
+            strText = parts[0];
 
             int nStart = strText.IndexOf("(");
             if (nStart == -1)
@@ -411,14 +425,41 @@ Z";
             // 判断是否为 全5册 情况
             if (string.IsNullOrEmpty(strFragment) == false)
             {
-                string strNumber = StringUtil.Unquote(strFragment, "全册");
-                if (strNumber != strFragment)
+                bool bChanged = false;
+
+                if (strFragment == "上下册")
                 {
+                    strText += "/2";
+                    bChanged = true;
+                }
+                else if (strFragment == "上中下册")
+                {
+                    strText += "/3";
+                    bChanged = true;
+                }
+                else if (strFragment.EndsWith("册"))
+                {
+                    // 数字+册
+                    string strNumber = strFragment.Substring(0, strFragment.Length - 1).Trim();
                     int v = 0;
                     if (StringUtil.IsPureNumber(strNumber) && Int32.TryParse(strNumber, out v))
                     {
                         strText += "/" + strNumber;
-                        // strError = "被变换为每册平均价格形态";
+                        bChanged = true;
+                    }
+                }
+                
+                if (bChanged == false)
+                {
+                    string strNumber = StringUtil.Unquote(strFragment, "全册共册全卷共卷");
+                    if (strNumber != strFragment)
+                    {
+                        int v = 0;
+                        if (StringUtil.IsPureNumber(strNumber) && Int32.TryParse(strNumber, out v))
+                        {
+                            strText += "/" + strNumber;
+                            // strError = "被变换为每册平均价格形态";
+                        }
                     }
                 }
             }

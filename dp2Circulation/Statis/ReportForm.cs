@@ -4420,7 +4420,8 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
             }
 
             string strLibraryCode = Global.GetLibraryCode(strLocation);
-            string strLocationLike = " operlogcircu.librarycode like '%," + strLibraryCode + ",%' ";
+            // string strLocationLike = " operlogcircu.librarycode like '%," + strLibraryCode + ",%' "; // 不知何时用的这种方法。这种方法的问题是，如果一些图书中途被划拨给某个其他分馆，用这种方式就会导致 [全部] 的几个表统计出来的数量偏少。而用 item.location 判断就没有这个问题 
+            string strLocationLike = " item.location like '" + strLocation + "%' "; // 2017/6/21 改回用这种方式。因为要统计洞庭湖校区的 2017 2 到 6 月的数据
             if (string.IsNullOrEmpty(Global.GetLocationRoom(strLocation)) == false)
             {
                 // 改为沿用以前的方法

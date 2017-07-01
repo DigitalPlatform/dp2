@@ -75,6 +75,7 @@ namespace DigitalPlatform.LibraryClient
                     if (this.Stop != null && this.Stop.State != 0)
                         throw new InterruptException("用户中断");
 
+                    int nRedoCount = 0;
                 REDO:
                     EntityInfo[] entities = null;
 
@@ -156,6 +157,18 @@ namespace DigitalPlatform.LibraryClient
                             throw new ChannelException(Channel.ErrorCode, strError);
                     }
 
+                    // 发现 dp2library GetEntities() API 非常偶然地会在 entities 数组中返回一个 info.OldRecPath 为空的元素。这里试图重试获取
+                    // 2017/6/5
+                    // return:
+                    //      true    出现了反常的情况
+                    //      false   没有发现反常的情况
+                    if (VerifyItems(entities) == true
+                        && nRedoCount < 2)
+                    {
+                        nRedoCount++;
+                        goto REDO;
+                    }
+
                     lResultCount = lRet;
                     this.TotalCount = lRet; // 记载下级记录总数
 
@@ -190,6 +203,23 @@ namespace DigitalPlatform.LibraryClient
             {
                 this.Channel.Timeout = old_timeout;
             }
+        }
+
+        // 2017/6/5
+        // return:
+        //      true    出现了反常的情况
+        //      false   没有发现反常的情况
+        static bool VerifyItems(EntityInfo[] entities)
+        {
+            if (entities == null)
+                return false;
+            foreach (EntityInfo info in entities)
+            {
+                if (string.IsNullOrEmpty(info.OldRecPath))
+                    return true;
+            }
+
+            return false;
         }
     }
 }

@@ -24,6 +24,8 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryServer;
+using DigitalPlatform.rms.Client;
+
 using ClosedXML.Excel;
 
 // 2013/3/16 添加 XML 注释
@@ -36,7 +38,7 @@ namespace dp2Circulation
     /// </summary>
     public partial class ItemSearchForm : ItemSearchFormBase
     {
-        // const int WM_SELECT_INDEX_CHANGED = API.WM_USER + 200;
+        string _globalResultSetName = "#" + Guid.NewGuid().ToString();
 
         List<ItemQueryParam> m_queries = new List<ItemQueryParam>();
         int m_nQueryIndex = -1;
@@ -501,12 +503,8 @@ this.DbType + "_search_form",
 
         private void ItemSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            /*
-            if (stop != null) // 脱离关联
-            {
-                stop.Unregister();	// 和容器关联
-                stop = null;
-            }*/
+            // TODO: 删除用过的全局结果集
+
 
             if (Program.MainForm != null && Program.MainForm.AppInfo != null)
             {
@@ -855,6 +853,9 @@ this.DbType + "_search_form",
                 strError = "无法重复进入循环";
                 goto ERROR1;
             }
+
+            string strResultSetName = _globalResultSetName;
+
             stop.Style = StopStyle.None;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索 ...");
@@ -911,7 +912,7 @@ this.DbType + "_search_form",
                         this.comboBox_from.Text,
                         strMatchStyle, // this.textBox_queryWord.Text == "" ? "left" : "exact",    // 原来为left 2007/10/18 changed
                         this.Lang,
-                        null,   // strResultSetName
+                        strResultSetName,   // strResultSetName
                         "",    // strSearchStyle
                         strOutputStyle, // (bOutputKeyCount == true ? "keycount" : ""),
                         out strError);
@@ -925,7 +926,7 @@ this.DbType + "_search_form",
                         this.comboBox_from.Text,
                         strMatchStyle,
                         this.Lang,
-                        null,
+                        strResultSetName,
                         "",
                         strOutputStyle,
                         out strError);
@@ -939,7 +940,7 @@ this.DbType + "_search_form",
                         this.comboBox_from.Text,
                         strMatchStyle,
                         this.Lang,
-                        null,
+                        strResultSetName,
                         "",
                         strOutputStyle,
                         out strError);
@@ -953,7 +954,7 @@ this.DbType + "_search_form",
                         this.comboBox_from.Text,
                         strMatchStyle,
                         this.Lang,
-                        null,
+                        strResultSetName,
                         "",
                         strOutputStyle,
                         out strError);
@@ -983,7 +984,7 @@ this.DbType + "_search_form",
                     // strOutputStyle ?
                     lRet = channel.Search(stop,
                         strQueryXml,
-                        "",
+                        strResultSetName,
                         strOutputStyle,
                         out strError);
                 }
@@ -1002,6 +1003,7 @@ this.DbType + "_search_form",
                 nRet = FillBrowseList(
                     channel,
                     query,
+                    strResultSetName,
                     lHitCount,
                     bOutputKeyCount,
                     bOutputKeyID,
@@ -1135,6 +1137,7 @@ this.DbType + "_search_form",
         int FillBrowseList(
             LibraryChannel channel,
             ItemQueryParam query,
+            string strResultSetName,
             long lHitCount,
             bool bOutputKeyCount,
             bool bOutputKeyID,
@@ -1172,108 +1175,124 @@ this.DbType + "_search_form",
 
             bool bPushFillingBrowse = this.PushFillingBrowse;
 
-            // 装入浏览格式
-            for (; ; )
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(2);  // 2017/6/16 获取浏览格式的时候，只要较短的超时值。以避免过长的超时值导致不必要的等待
+            try
             {
-                Application.DoEvents();	// 出让界面控制权
-
-                if (stop != null && stop.State != 0)
+                // 装入浏览格式
+                for (; ; )
                 {
-                    // MessageBox.Show(this, "用户中断");
-                    this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
-                    return 0;
-                }
+                    Application.DoEvents();	// 出让界面控制权
 
-                bool bTempQuickLoad = bQuickLoad;
-
-                if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
-                    bTempQuickLoad = true;
-
-                string strTempBrowseStyle = strBrowseStyle;
-                if (bTempQuickLoad)
-                {
-                    // StringUtil.RemoveFromInList("cols", false, ref strTempBrowseStyle);
-                    strTempBrowseStyle += ",format:@coldef:*/parent";
-                }
-
-                long lRet = channel.GetSearchResult(
-                    stop,
-                    null,   // strResultSetName
-                    lStart,
-                    Math.Min(lMaxPerCount, lCount),
-                    strTempBrowseStyle, // bOutputKeyCount == true ? "keycount" : "id,cols",
-                    this.Lang,
-                    out searchresults,
-                    out strError);
-                if (lRet == -1)
-                {
-                    this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，" + strError;
-                    goto ERROR1;
-                }
-
-                if (lRet == 0)
-                {
-                    MessageBox.Show(this, "未命中");
-                    return 0;
-                }
-
-                // 处理浏览结果
-                this.listView_records.BeginUpdate();
-                try
-                {
-                    List<ListViewItem> items = new List<ListViewItem>();
-                    for (int i = 0; i < searchresults.Length; i++)
+                    if (stop != null && stop.State != 0)
                     {
-                        ListViewItem item = null;
+                        // MessageBox.Show(this, "用户中断");
+                        this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
+                        return 0;
+                    }
 
-                        DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
+                    bool bTempQuickLoad = bQuickLoad;
 
-                        if (bOutputKeyCount == false
-                            && bOutputKeyID == false)
+                    if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+                        bTempQuickLoad = true;
+
+                    string strTempBrowseStyle = strBrowseStyle;
+                    if (bTempQuickLoad)
+                    {
+                        // StringUtil.RemoveFromInList("cols", false, ref strTempBrowseStyle);
+                        strTempBrowseStyle += ",format:@coldef:*/parent";
+                    }
+
+                REDO_GETRECORDS:
+                    long lRet = channel.GetSearchResult(
+                        stop,
+                        strResultSetName,
+                        lStart,
+                        Math.Min(lMaxPerCount, lCount),
+                        strTempBrowseStyle, // bOutputKeyCount == true ? "keycount" : "id,cols",
+                        this.Lang,
+                        out searchresults,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        MessagePromptEventArgs e = new MessagePromptEventArgs();
+                        e.MessageText = "获得浏览记录时发生错误： " + strError;
+                        e.Actions = "yes,no,cancel";
+                        loader_Prompt(this, e);
+                        if (e.ResultAction == "cancel")
                         {
-                            if (bPushFillingBrowse == true)
-                                item = Global.InsertNewLine(
-                                    this.listView_records,
-                                    searchresult.Path,
-                                    this.m_bBiblioSummaryColumn == true ? Global.InsertBlankColumn(searchresult.Cols) : searchresult.Cols);
-                            else
-                                item = Global.AppendNewLine(
-                                    this.listView_records,
-                                    searchresult.Path,
-                                    this.m_bBiblioSummaryColumn == true ? Global.InsertBlankColumn(searchresult.Cols) : searchresult.Cols);
+                            this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，" + strError;
+                            goto ERROR1;
                         }
-                        else if (bOutputKeyCount == true)
-                        {
-                            // 输出keys
-                            if (searchresult.Cols == null)
-                            {
-                                strError = "要使用获取检索点功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本";
-                                goto ERROR1;
-                            }
-                            string[] cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
-                            cols[0] = searchresult.Path;
-                            if (cols.Length > 1)
-                                Array.Copy(searchresult.Cols, 0, cols, 1, cols.Length - 1);
+                        else if (e.ResultAction == "yes")
+                            goto REDO_GETRECORDS;
 
-                            if (bPushFillingBrowse == true)
-                                item = Global.InsertNewLine(
-                                    this.listView_records,
-                                    "",
-                                    cols);
-                            else
-                                item = Global.AppendNewLine(
-                                    this.listView_records,
-                                    "",
-                                    cols);
-                            item.Tag = query;
-                        }
-                        else if (bOutputKeyID == true)
+                        continue;
+                    }
+
+                    if (lRet == 0)
+                    {
+                        MessageBox.Show(this, "未命中");
+                        return 0;
+                    }
+
+                    // 处理浏览结果
+                    this.listView_records.BeginUpdate();
+                    try
+                    {
+                        List<ListViewItem> items = new List<ListViewItem>();
+                        for (int i = 0; i < searchresults.Length; i++)
                         {
-                            if (searchresult.Cols == null)
+                            ListViewItem item = null;
+
+                            DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
+
+                            if (bOutputKeyCount == false
+                                && bOutputKeyID == false)
                             {
-                                strError = "要使用带有检索点的检索功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本";
-                                goto ERROR1;
+                                if (bPushFillingBrowse == true)
+                                    item = Global.InsertNewLine(
+                                        this.listView_records,
+                                        searchresult.Path,
+                                        this.m_bBiblioSummaryColumn == true ? Global.InsertBlankColumn(searchresult.Cols) : searchresult.Cols);
+                                else
+                                    item = Global.AppendNewLine(
+                                        this.listView_records,
+                                        searchresult.Path,
+                                        this.m_bBiblioSummaryColumn == true ? Global.InsertBlankColumn(searchresult.Cols) : searchresult.Cols);
                             }
+                            else if (bOutputKeyCount == true)
+                            {
+                                // 输出keys
+                                if (searchresult.Cols == null)
+                                {
+                                    strError = "要使用获取检索点功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本";
+                                    goto ERROR1;
+                                }
+                                string[] cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
+                                cols[0] = searchresult.Path;
+                                if (cols.Length > 1)
+                                    Array.Copy(searchresult.Cols, 0, cols, 1, cols.Length - 1);
+
+                                if (bPushFillingBrowse == true)
+                                    item = Global.InsertNewLine(
+                                        this.listView_records,
+                                        "",
+                                        cols);
+                                else
+                                    item = Global.AppendNewLine(
+                                        this.listView_records,
+                                        "",
+                                        cols);
+                                item.Tag = query;
+                            }
+                            else if (bOutputKeyID == true)
+                            {
+                                if (searchresult.Cols == null)
+                                {
+                                    strError = "要使用带有检索点的检索功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本";
+                                    goto ERROR1;
+                                }
 
 
 #if NO
@@ -1282,104 +1301,109 @@ this.DbType + "_search_form",
                                 if (cols.Length > 1)
                                     Array.Copy(searchresult.Cols, 0, cols, 1, cols.Length - 1);
 #endif
-                            string[] cols = this.m_bBiblioSummaryColumn == true ? Global.InsertBlankColumn(searchresult.Cols, 2) : searchresult.Cols;
-                            cols[0] = LibraryChannel.BuildDisplayKeyString(searchresult.Keys);
+                                string[] cols = this.m_bBiblioSummaryColumn == true ? Global.InsertBlankColumn(searchresult.Cols, 2) : searchresult.Cols;
+                                cols[0] = LibraryChannel.BuildDisplayKeyString(searchresult.Keys);
 
-                            if (bPushFillingBrowse == true)
-                                item = Global.InsertNewLine(
-                                    this.listView_records,
-                                    searchresult.Path,
-                                    cols);
-                            else
-                                item = Global.AppendNewLine(
-                                    this.listView_records,
-                                    searchresult.Path,
-                                    cols);
-                            item.Tag = query;
+                                if (bPushFillingBrowse == true)
+                                    item = Global.InsertNewLine(
+                                        this.listView_records,
+                                        searchresult.Path,
+                                        cols);
+                                else
+                                    item = Global.AppendNewLine(
+                                        this.listView_records,
+                                        searchresult.Path,
+                                        cols);
+                                item.Tag = query;
+                            }
+
+                            // 2017/2/21
+                            // 填入 parent_id 列内容
+                            if (bTempQuickLoad)
+                            {
+                                int nCol = -1;
+                                string strBiblioRecPath = "";
+                                // 获得事项所从属的书目记录的路径
+                                // parameters:
+                                //      bAutoSearch 当没有 parent id 列的时候，是否自动进行检索以便获得书目记录路径
+                                // return:
+                                //      -1  出错
+                                //      0   相关数据库没有配置 parent id 浏览列
+                                //      1   找到
+                                int nRet = GetBiblioRecPath(
+                                    channel,
+                                    item,
+                false,
+                out nCol,
+                out strBiblioRecPath,
+                out strError);
+                                if (nRet == 1)
+                                {
+                                    int nTempCol = this.m_bBiblioSummaryColumn == true ? 2 : 1;
+                                    string strParentID = ListViewUtil.GetItemText(item, nTempCol);
+                                    ListViewUtil.ChangeItemText(item, nCol, strParentID);
+                                    ListViewUtil.ChangeItemText(item, nTempCol, "");
+                                }
+                            }
+
+                            query.Items.Add(item);
+                            items.Add(item);
+                            stop.SetProgressValue(lStart + i);
                         }
 
-                        // 2017/2/21
-                        // 填入 parent_id 列内容
-                        if (bTempQuickLoad)
+                        if (bOutputKeyCount == false
+                            && bAccessBiblioSummaryDenied == false
+                            && bTempQuickLoad == false)
                         {
-                            int nCol = -1;
-                            string strBiblioRecPath = "";
-                            // 获得事项所从属的书目记录的路径
-                            // parameters:
-                            //      bAutoSearch 当没有 parent id 列的时候，是否自动进行检索以便获得书目记录路径
                             // return:
+                            //      -2  获得书目摘要的权限不够
                             //      -1  出错
-                            //      0   相关数据库没有配置 parent id 浏览列
-                            //      1   找到
-                            int nRet = GetBiblioRecPath(
+                            //      0   用户中断
+                            //      1   完成
+                            int nRet = _fillBiblioSummaryColumn(
                                 channel,
-                                item,
-            false,
-            out nCol,
-            out strBiblioRecPath,
-            out strError);
-                            if (nRet == 1)
+                                items,
+                                0,
+                                false,
+                                true,   // false,  // bAutoSearch
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet == -2)
+                                bAccessBiblioSummaryDenied = true;
+
+                            if (nRet == 0)
                             {
-                                int nTempCol = this.m_bBiblioSummaryColumn == true ? 2 : 1;
-                                string strParentID = ListViewUtil.GetItemText(item, nTempCol);
-                                ListViewUtil.ChangeItemText(item, nCol, strParentID);
-                                ListViewUtil.ChangeItemText(item, nTempCol, "");
+                                this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
+                                return 0;
                             }
                         }
-
-                        query.Items.Add(item);
-                        items.Add(item);
-                        stop.SetProgressValue(lStart + i);
                     }
-
-                    if (bOutputKeyCount == false
-                        && bAccessBiblioSummaryDenied == false
-                        && bTempQuickLoad == false)
+                    finally
                     {
-                        // return:
-                        //      -2  获得书目摘要的权限不够
-                        //      -1  出错
-                        //      0   用户中断
-                        //      1   完成
-                        int nRet = _fillBiblioSummaryColumn(
-                            channel,
-                            items,
-                            0,
-                            false,
-                            true,   // false,  // bAutoSearch
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                        if (nRet == -2)
-                            bAccessBiblioSummaryDenied = true;
-
-                        if (nRet == 0)
-                        {
-                            this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，用户中断...";
-                            return 0;
-                        }
+                        this.listView_records.EndUpdate();
                     }
+
+                    if (bSelectFirstLine == false && this.listView_records.Items.Count > 0)
+                    {
+                        if (this.listView_records.SelectedItems.Count == 0)
+                            this.listView_records.Items[0].Selected = true;
+                        bSelectFirstLine = true;
+                    }
+
+                    lStart += searchresults.Length;
+                    lCount -= searchresults.Length;
+
+                    stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
+
+                    if (lStart >= lHitCount || lCount <= 0)
+                        break;
+                    stop.SetProgressValue(lStart);
                 }
-                finally
-                {
-                    this.listView_records.EndUpdate();
-                }
-
-                if (bSelectFirstLine == false && this.listView_records.Items.Count > 0)
-                {
-                    if (this.listView_records.SelectedItems.Count == 0)
-                        this.listView_records.Items[0].Selected = true;
-                    bSelectFirstLine = true;
-                }
-
-                lStart += searchresults.Length;
-                lCount -= searchresults.Length;
-
-                stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
-
-                if (lStart >= lHitCount || lCount <= 0)
-                    break;
-                stop.SetProgressValue(lStart);
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
             }
 
             if (bAccessBiblioSummaryDenied == true)
@@ -2667,24 +2691,47 @@ out strError);
                 return -1;
             }
 
+            _verifyBarcodeFuncTable.Clear();
+
             VerifyEntityDialog dlg = new VerifyEntityDialog();
-            MainForm.SetControlFont(dlg, this.Font);
-
-            dlg.UiState = Program.MainForm.AppInfo.GetString(
-                "ItemSearchForm",
-                "VerifyEntityDialog_uiState",
-                "");
-
             if (bControl == true)
                 dlg.AutoModify = true;
 
-            Program.MainForm.AppInfo.LinkFormState(dlg, "ItemSearchForm_VerifyEntityDialog_state");
-            dlg.ShowDialog(this);
+            if (this.DbType == "item")
+            {
+                MainForm.SetControlFont(dlg, this.Font);
 
-            Program.MainForm.AppInfo.SetString(
-                "ItemSearchForm",
-                "VerifyEntityDialog_uiState",
-                dlg.UiState);
+                dlg.UiState = Program.MainForm.AppInfo.GetString(
+                    "ItemSearchForm",
+                    "VerifyEntityDialog_uiState",
+                    "");
+
+                Program.MainForm.AppInfo.LinkFormState(dlg, "ItemSearchForm_VerifyEntityDialog_state");
+                dlg.ShowDialog(this);
+
+                Program.MainForm.AppInfo.SetString(
+                    "ItemSearchForm",
+                    "VerifyEntityDialog_uiState",
+                    dlg.UiState);
+
+                if (dlg.ServerVerify == true)
+                {
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.112") < 0)
+                    {
+                        strError = "服务器端校验功能只能和 dp2library 2.112 或以上版本配套使用";
+                        return -1;
+                    }
+                }
+
+                if (dlg.AddPrice == true)
+                {
+                    if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.113") < 0)
+                    {
+                        strError = "添加价格功能只能和 dp2library 2.113 或以上版本配套使用";
+                        return -1;
+                    }
+                }
+            }
 
             // 切换到“操作历史”属性页
             Program.MainForm.ActivateFixPage("history");
@@ -2824,7 +2871,10 @@ out strError);
                         Program.MainForm.OperHistory.AppendHtml("<div class='debug recpath'>" + HttpUtility.HtmlEncode(info.RecPath) + "</div>");
                         foreach (string error in errors)
                         {
-                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
+                            if (string.IsNullOrEmpty(error) == false && error[0] == '^')
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode(error.Substring(1)) + "</div>");
+                            else
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(error) + "</div>");
                         }
 
                         {
@@ -3014,6 +3064,9 @@ out strError);
 
         }
 
+        // 没有提供校验条码号函数的馆藏地列表
+        Hashtable _verifyBarcodeFuncTable = new Hashtable();    // 馆藏地 --> -2
+
         // 校验一条册记录
         void VerifyOneEntity(
             object param,
@@ -3121,61 +3174,101 @@ out strError);
                 string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
                 strLocation = StringUtil.GetPureLocationString(strLocation);
 
-                string strLibraryCode = "";
-                string strRoom = "";
-                // 解析
-                Global.ParseCalendarName(strLocation,
-            out strLibraryCode,
-            out strRoom);
+                if (_verifyBarcodeFuncTable.ContainsKey(strLocation) == false)
+                {
 
-            REDO_VERIFYBARCODE:
-                // <para>-2  服务器没有配置校验方法，无法校验</para>
-                // <para>-1  出错</para>
-                // <para>0   不是合法的条码号</para>
-                // <para>1   是合法的读者证条码号</para>
-                // <para>2   是合法的册条码号</para>
-                nRet = Program.MainForm.VerifyBarcode(
-this.stop,
-channel,
-strLibraryCode,
-strBarcode,
-null,
-out strError);
+                    string strLibraryCode = "";
+                    string strRoom = "";
+                    // 解析
+                    Global.ParseCalendarName(strLocation,
+                out strLibraryCode,
+                out strRoom);
+
+                REDO_VERIFYBARCODE:
+                    // <para>-2  服务器没有配置校验方法，无法校验</para>
+                    // <para>-1  出错</para>
+                    // <para>0   不是合法的条码号</para>
+                    // <para>1   是合法的读者证条码号</para>
+                    // <para>2   是合法的册条码号</para>
+                    nRet = Program.MainForm.VerifyBarcode(
+    this.stop,
+    channel,
+    strLibraryCode,
+    strBarcode,
+    null,
+    out strError);
+                    if (nRet == -1)
+                    {
+                        MessagePromptEventArgs e = new MessagePromptEventArgs();
+                        e.MessageText = "校验册条码号时发生错误： " + strError;
+                        e.Actions = "yes,no,cancel";
+                        loader_Prompt(this, e);
+                        if (e.ResultAction == "cancel")
+                            throw new Exception(strError);
+                        else if (e.ResultAction == "yes")
+                            goto REDO_VERIFYBARCODE;
+                        //else
+                        //    throw new ChannelException(Channel.ErrorCode, strError);
+                    }
+                    if (nRet == -2)
+                    {
+                        // throw new Exception(strError);
+                        errors.Add(strError + "(后面将不会对来自馆藏地 '" + strLocation + "' 的册记录进行册条码号校验)");   // TODO: 是否可以统一报错(不要每个册都报错)?
+                        _verifyBarcodeFuncTable[strLocation] = -2;
+                    }
+                    else if (nRet != 2)
+                    {
+                        if (nRet == 1 && string.IsNullOrEmpty(strError) == true)
+                            strError = strLibraryCode + ": 这看起来是一个证条码号";
+
+                        errors.Add("册条码号 '" + strBarcode + "' 不合法: " + strError);
+                    }
+                }
+            }
+
+            // 服务器端校验
+            if (dlg.ServerVerify == true)
+            {
+            REDO_SERVERVERIFY:
+                // 调用服务器端校验册记录功能
+                // return:
+                //      -1  校验过程出错
+                //      0   校验没有发现错误
+                //      1   校验发现了错误
+                nRet = ServerVerifyEntity(
+                    channel,
+                    "item",
+                    strItemRecPath,
+                    itemdom.OuterXml,
+                    out strError);
                 if (nRet == -1)
                 {
                     MessagePromptEventArgs e = new MessagePromptEventArgs();
-                    e.MessageText = "校验册条码号时发生错误： " + strError;
+                    e.MessageText = "册条码号查重时发生错误： " + strError;
                     e.Actions = "yes,no,cancel";
                     loader_Prompt(this, e);
                     if (e.ResultAction == "cancel")
                         throw new Exception(strError);
                     else if (e.ResultAction == "yes")
-                        goto REDO_VERIFYBARCODE;
-                    //else
-                    //    throw new ChannelException(Channel.ErrorCode, strError);
+                        goto REDO_SERVERVERIFY;
                 }
-                if (nRet == -2)
-                {
-                    // throw new Exception(strError);
-                    errors.Add(strError);   // TODO: 是否可以统一报错(不要每个册都报错)?
-                }
-
-                if (nRet != 2)
-                {
-                    if (nRet == 1 && string.IsNullOrEmpty(strError) == true)
-                        strError = strLibraryCode + ": 这看起来是一个证条码号";
-
-                    errors.Add("册条码号 '" + strBarcode + "' 不合法: " + strError);
-                }
+                if (nRet == 1)
+                    errors.Add(strError);
             }
 
             // 检查价格字段
+            VerifyPrice(itemdom,
+            bAutoModify,
+            errors,
+            ref bChanged);
+#if NO
             {
                 string strPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
                 if (string.IsNullOrEmpty(strPrice))
                     errors.Add("价格字段内容为空");
                 else
                 {
+#if NO
                     CurrencyItem item = null;
                     // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
                     nRet = PriceUtil.ParseSinglePrice(strPrice,
@@ -3190,8 +3283,33 @@ out strError);
                         errors.Add("价格字符串中不允许出现括号 '" + strPrice + "'");
                     }
 
+                    if (strPrice.IndexOf(',') != -1)
+                    {
+                        strError = "价格字符串中不允许出现逗号 '" + strPrice + "'";
+                        return 1;
+                    }
+#endif
+                    errors.AddRange(VerifyPrice(strPrice));
+
                     // TODO: 检查常见的货币前缀符号
                 }
+            }
+#endif
+
+            // 对空的价格字段，从书目记录里面获得价格填充
+            if (dlg.AddPrice && dlg.AutoModify)
+            {
+                nRet = AddPrice(
+                    channel,
+                    itemdom,
+                    strItemRecPath,
+                    bAutoModify,
+                    ref bChanged,
+                    out strError);
+                if (nRet == -1)
+                    errors.Add(strError);
+                else if (string.IsNullOrEmpty(strError) == false)
+                    errors.Add("^" + strError); // ^ 开头表示修改提示，而不是错误信息
             }
 
             // 检查馆藏地字段
@@ -3206,6 +3324,345 @@ out strError);
         }
 
         // return:
+        //      -1  发现错误
+        //      0   没有发现错误
+        void VerifyPrice(XmlDocument itemdom,
+            bool bModify,
+            List<string> errors,
+            ref bool bChanged)
+        {
+            if (itemdom.DocumentElement == null)
+            {
+                errors.Add("XML 记录为空");
+                return;
+            }
+
+            string strPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
+            if (string.IsNullOrEmpty(strPrice))
+            {
+                errors.Add("价格字段内容为空");
+                return;
+            }
+            else
+            {
+                List<string> temp = VerifyPrice(strPrice);
+                if (temp.Count > 0)
+                {
+                    errors.AddRange(temp);
+
+                    if (bModify)
+                    {
+                        // (全10册) 转为除法形态
+                        string strOldPrice = strPrice;
+                        ItemClassStatisDialog.CorrectPrice(ref strPrice);
+                        if (strOldPrice != strPrice)
+                        {
+                            if (IsPriceCorrect(strPrice) == true)
+                            {
+                                DomUtil.SetElementText(itemdom.DocumentElement, "price", strPrice);
+                                bChanged = true;
+                                errors.Add("^价格字符串 '" + strOldPrice + "' 被自动修改为 '" + strPrice + "'"); // ^ 开头表示修改提示，而不是错误信息
+                            }
+                            else
+                                errors.Add("*** 价格字符串 '" + strOldPrice + "' 无法被自动修改 2");
+                        }
+                        else
+                            errors.Add("*** 价格字符串 '" + strOldPrice + "' 无法被自动修改 1");
+                    }
+                }
+
+                // TODO: 检查常见的货币前缀符号
+            }
+
+        }
+
+        public static List<string> VerifyPrice(string strPrice)
+        {
+            List<string> errors = new List<string>();
+
+            string strError = "";
+            CurrencyItem item = null;
+            // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
+            int nRet = PriceUtil.ParseSinglePrice(strPrice,
+                out item,
+                out strError);
+            if (nRet == -1)
+                errors.Add(strError);
+
+            string new_value = StringUtil.ToDBC(strPrice);
+            if (new_value.IndexOfAny(new char[] { '(', ')' }) != -1)
+            {
+                errors.Add("价格字符串中不允许出现括号 '" + strPrice + "'");
+            }
+
+            if (new_value.IndexOf(',') != -1)
+            {
+                errors.Add("价格字符串中不允许出现逗号 '" + strPrice + "'");
+            }
+
+            return errors;
+        }
+
+        // return:
+        //      -1  发现错误
+        //      0   没有发现错误
+        int AddPrice(
+            LibraryChannel channel,
+            XmlDocument dom,
+            string strItemRecPath,
+            bool bModify,
+            ref bool bChanged,
+            out string strError)
+        {
+            strError = "";
+
+            if (bModify == false)
+                return 0;
+
+            if (dom.DocumentElement == null)
+            {
+                strError = "XML 记录为空";
+                return -1;
+            }
+
+            string strPrice = DomUtil.GetElementText(dom.DocumentElement, "price");
+            if (string.IsNullOrEmpty(strPrice) || strPrice == "CNY")
+            {
+                string strParentID = DomUtil.GetElementText(dom.DocumentElement, "parent");
+                if (string.IsNullOrEmpty(strParentID))
+                {
+                    strError = "缺乏 parent 元素";
+                    return -1;
+                }
+
+                string strBiblioRecPath = Program.MainForm.BuildBiblioRecPath(
+                    this.DbType,
+                    strItemRecPath,
+                    strParentID);
+                if (string.IsNullOrEmpty(strBiblioRecPath))
+                {
+                    strError = "获取对应的书目记录路径时出错";
+                    return -1;
+                }
+
+            REDO_GETBIBLIOINFO:
+                string[] results = null;
+                byte[] baTimestamp = null;
+
+                long lRet = channel.GetBiblioInfos(
+                    stop,
+                    strBiblioRecPath,
+                    "",
+                    new string[] { "marc:syntax" },   // formats
+                    out results,
+                    out baTimestamp,
+                    out strError);
+                if (lRet == 0)
+                    return 0;   // 书目记录不存在，无法为册记录添加价格
+                if (lRet == -1)
+                {
+                    MessagePromptEventArgs e = new MessagePromptEventArgs();
+                    e.MessageText = "获取书目记录 '" + strBiblioRecPath + "' 时发生错误： " + strError;
+                    e.Actions = "yes,no,cancel";
+                    loader_Prompt(this, e);
+                    if (e.ResultAction == "cancel")
+                        throw new Exception(strError);
+                    else if (e.ResultAction == "yes")
+                        goto REDO_GETBIBLIOINFO;
+                    return -1;
+                }
+
+                if (results == null || results.Length == 0)
+                {
+                    strError = "results error";
+                    return -1;
+                }
+
+                List<string> parts = StringUtil.ParseTwoPart(results[0], "|");
+                string strSyntax = parts[0];
+                string strMarc = parts[1];
+
+                MarcRecord record = new MarcRecord(strMarc);
+                string strBiblioPrice = "";
+                if (strSyntax == "usmarc")
+                {
+                    strBiblioPrice = record.select("field[@name='020']/subfield[@name='c']").FirstContent;
+                }
+                else
+                {
+                    strBiblioPrice = record.select("field[@name='010']/subfield[@name='d']").FirstContent;
+                    if (string.IsNullOrEmpty(strBiblioPrice))
+                        strBiblioPrice = record.select("field[@name='020']/subfield[@name='d']").FirstContent;
+                    if (string.IsNullOrEmpty(strBiblioPrice))
+                        strBiblioPrice = record.select("field[@name='091']/subfield[@name='d']").FirstContent;
+                }
+
+                if (string.IsNullOrEmpty(strBiblioPrice))
+                    return 0;
+
+                // 正规化 strBiblioPrice。不合法的则不使用
+
+                // (全10册) 转为除法形态
+                ItemClassStatisDialog.CorrectPrice(ref strBiblioPrice);
+                if (IsPriceCorrect(strBiblioPrice) == false)
+                    return 0;
+
+                {
+                    CurrencyItem item = null;
+                    // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
+                    int nRet = PriceUtil.ParseSinglePrice(strBiblioPrice,
+                        out item,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        // TODO: 设法显示为黄色，表示提醒。和数据出错的红色不同
+                        strError = "从书目记录 '" + strBiblioRecPath + "' 获得的价格字符串 '" + strBiblioPrice + "' 格式不正确，无法用于自动添加";
+                        return -1;
+                    }
+                }
+
+                DomUtil.SetElementText(dom.DocumentElement, "price", strBiblioPrice);
+                bChanged = true;
+                strError = "为册记录添加价格字符串 '" + strBiblioPrice + "'";
+            }
+
+            return 0;
+        }
+
+        public static bool IsPriceCorrect(string strPrice)
+        {
+            if (string.IsNullOrEmpty(strPrice))
+                return false;
+
+#if NO
+            string strError = "";
+            CurrencyItem item = null;
+            // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
+            int nRet = PriceUtil.ParseSinglePrice(strPrice,
+                out item,
+                out strError);
+            if (nRet == -1)
+                return false;
+
+            return true;
+#endif
+            if (VerifyPrice(strPrice).Count > 0)
+                return false;
+            return true;
+        }
+
+        // 调用服务器端校验册记录功能
+        // return:
+        //      -1  校验过程出错
+        //      0   校验没有发现错误
+        //      1   校验发现了错误
+        public int ServerVerifyEntity(
+            LibraryChannel channel,
+            string strDbType,
+            string strRecPath,
+            string strXml,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(strXml);
+
+            string strRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+            if (string.IsNullOrEmpty(strRefID))
+            {
+                strRefID = Guid.NewGuid().ToString();
+                DomUtil.SetElementText(dom.DocumentElement, "refID", strRefID);
+                strXml = dom.OuterXml;
+            }
+
+            List<EntityInfo> entityArray = new List<EntityInfo>();
+
+            {
+                EntityInfo info = new EntityInfo();
+
+                info.RefID = strRefID;
+
+                info.OldRecPath = strRecPath;
+                info.Action = "verify";
+
+                info.OldRecord = strXml;
+                entityArray.Add(info);
+            }
+
+            EntityInfo[] errorinfos = null;
+
+            long lRet = 0;
+
+            if (strDbType == "item")
+                lRet = channel.SetEntities(
+                     null,
+                     "",
+                     entityArray.ToArray(),
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "order")
+                lRet = channel.SetOrders(
+                     null,
+                     "",
+                     entityArray.ToArray(),
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "issue")
+                lRet = channel.SetIssues(
+                     null,
+                     "",
+                     entityArray.ToArray(),
+                     out errorinfos,
+                     out strError);
+            else if (strDbType == "comment")
+                lRet = channel.SetComments(
+                     null,
+                     "",
+                     entityArray.ToArray(),
+                     out errorinfos,
+                     out strError);
+            else
+            {
+                strError = "未知的 strDbType '" + strDbType + "'";
+                return -1;
+            }
+
+            if (lRet == -1)
+                return -1;
+
+            // string strWarning = ""; // 警告信息
+
+            if (errorinfos == null)
+                return 0;
+
+            List<string> errors = new List<string>();
+            foreach (EntityInfo error in errorinfos)
+            {
+                if (String.IsNullOrEmpty(error.RefID) == true)
+                {
+                    strError = "服务器返回的 EntityInfo 结构中 RefID 为空";
+                    return -1;
+                }
+
+                // 正常信息处理
+                if (error.ErrorCode == ErrorCodeValue.NoError)
+                    continue;
+
+                if (string.IsNullOrEmpty(error.ErrorInfo) == false)
+                    errors.Add(error.ErrorInfo);
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return 1;
+            }
+
+            return 0;
+        }
+
+
         //      -1  发现错误
         //      0   没有发现错误
         int VerifyBlankChar(XmlDocument dom,
@@ -3262,6 +3719,14 @@ out strError);
             if (dom.DocumentElement == null)
             {
                 strError = "XML 记录为空";
+                return -1;
+            }
+
+            // 2017/6/30
+            string strParent = DomUtil.GetElementText(dom.DocumentElement, "parent");
+            if (string.IsNullOrEmpty(strParent))
+            {
+                strError = "parent 元素为空";
                 return -1;
             }
 
@@ -7544,7 +8009,7 @@ MessageBoxDefaultButton.Button1);
 
             if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.108") < 0)
             {
-                strError = "本功能只能和 dp2library 2.08 或以上版本配套使用";
+                strError = "本功能只能和 dp2library 2.108 或以上版本配套使用";
                 goto ERROR1;
             }
 
@@ -10822,7 +11287,6 @@ Keys keyData)
             if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
                 bClear = false;
 
-
             // 修改窗口标题
             // this.Text = "书目查询 逻辑检索";
 
@@ -10861,6 +11325,9 @@ Keys keyData)
                 strError = "无法重复进入循环";
                 goto ERROR1;
             }
+
+            string strResultSetName = _globalResultSetName;
+
             stop.Style = StopStyle.None;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在检索 ...");
@@ -10912,6 +11379,7 @@ Keys keyData)
                 nRet = FillBrowseList(
                     channel,
                     query,
+                    strResultSetName,
                     lHitCount,
                     bOutputKeyCount,
                     bOutputKeyID,
