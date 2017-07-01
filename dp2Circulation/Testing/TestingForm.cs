@@ -1883,6 +1883,82 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             }
             return nCompileCount;
         }
+
+        static string[] _prices = new string[] {
+            "CNY|12.00",
+            "^CNY|12.00.00",
+            "人民币|12.00|元",
+        };
+
+        // 测试 PriceUtil.ParsePriceUnit
+        private void ToolStripMenuItem_parsePriceUnit_Click(object sender, EventArgs e)
+        {
+            foreach (string s in _prices)
+            {
+                string strText = s;
+
+                bool bError = false;
+                if (strText[0] == '^')
+                {
+                    bError = true;
+                    strText = strText.Substring(1);
+                }
+
+                string strSamplePrefix = "";
+                string strSampleValue = "";
+                string strSamplePostfix = "";
+                string strError = "";
+
+                string[] parts = s.Split(new char[] { '|' });
+                if (parts.Length > 0)
+                    strSamplePrefix = parts[0];
+                if (parts.Length > 1)
+                    strSampleValue = parts[1];
+                if (parts.Length > 2)
+                    strSamplePostfix = parts[2];
+
+                string strPrefix = "";
+                string strValue = "";
+                string strPostfix = "";
+
+                strText = strText.Replace("|", "");
+                // 分析价格参数
+                // 允许前面出现+ -号
+                // return:
+                //      -1  出错
+                //      0   成功
+                int nRet = PriceUtil.ParsePriceUnit(strText,
+            out strPrefix,
+            out strValue,
+            out strPostfix,
+            out strError);
+
+                if (bError)
+                {
+                    if (nRet != -1)
+                    {
+                        MessageBox.Show(this, "样例字符串 '" + strText + "' 应该返回 -1，但返回了 " + nRet);
+                    }
+                }
+                else
+                {
+                    List<string> errors = new List<string>();
+                    if (strPrefix != strSamplePrefix)
+                        errors.Add("解析出的前缀应该为 '" + strSamplePrefix + "'，但却是 '" + strPrefix + "'");
+                    if (strValue != strSampleValue)
+                        errors.Add("解析出的值应该为 '" + strSampleValue + "'，但却是 '" + strValue + "'");
+                    if (strPostfix != strSamplePostfix)
+                        errors.Add("解析出的后缀应该为 '" + strSamplePostfix + "'，但却是 '" + strPostfix + "'");
+
+                    if (errors.Count > 0)
+                        MessageBox.Show(this, "样例字符串 '" + strText + "' 解析结果不符合预期。" + StringUtil.MakePathList(errors));
+                }
+
+
+            }
+
+            MessageBox.Show(this, "OK");
+        }
     }
 
     // 验证异常

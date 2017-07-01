@@ -464,6 +464,10 @@ Z";
                 }
             }
 
+            // 2017/7/1
+            if (strText.EndsWith(".00.00"))
+                strText = strText.Substring(0, strText.Length - 3);
+
             return true;
         }
 

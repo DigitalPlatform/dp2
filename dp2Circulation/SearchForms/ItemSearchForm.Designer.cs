@@ -40,7 +40,7 @@ namespace dp2Circulation
             this.tabControl_query = new System.Windows.Forms.TabControl();
             this.tabPage_simple = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel_query = new System.Windows.Forms.TableLayoutPanel();
-            this.comboBox_entityDbName = new System.Windows.Forms.ComboBox();
+            this.comboBox_entityDbName = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.label_entityDbName = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -79,7 +79,7 @@ namespace dp2Circulation
             // button_search
             // 
             this.button_search.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_search.Location = new System.Drawing.Point(372, 55);
+            this.button_search.Location = new System.Drawing.Point(372, 61);
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(0, 0);
             this.button_search.TabIndex = 11;
@@ -139,7 +139,7 @@ namespace dp2Circulation
             "父记录",
             "状态",
             "__id"});
-            this.comboBox_from.Location = new System.Drawing.Point(86, 55);
+            this.comboBox_from.Location = new System.Drawing.Point(86, 61);
             this.comboBox_from.Name = "comboBox_from";
             this.comboBox_from.Size = new System.Drawing.Size(160, 20);
             this.comboBox_from.TabIndex = 9;
@@ -250,23 +250,23 @@ namespace dp2Circulation
             // 
             this.comboBox_entityDbName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.comboBox_entityDbName.DropDownHeight = 300;
+            this.comboBox_entityDbName.BackColor = System.Drawing.SystemColors.Window;
             this.comboBox_entityDbName.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.comboBox_entityDbName.FormattingEnabled = true;
-            this.comboBox_entityDbName.IntegralHeight = false;
-            this.comboBox_entityDbName.Location = new System.Drawing.Point(85, 30);
-            this.comboBox_entityDbName.Margin = new System.Windows.Forms.Padding(2);
+            this.comboBox_entityDbName.Location = new System.Drawing.Point(87, 32);
+            this.comboBox_entityDbName.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_entityDbName.Name = "comboBox_entityDbName";
-            this.comboBox_entityDbName.Size = new System.Drawing.Size(162, 20);
+            this.comboBox_entityDbName.Padding = new System.Windows.Forms.Padding(4);
+            this.comboBox_entityDbName.Size = new System.Drawing.Size(158, 22);
             this.comboBox_entityDbName.TabIndex = 4;
             this.comboBox_entityDbName.DropDown += new System.EventHandler(this.comboBox_entityDbName_DropDown);
+            this.comboBox_entityDbName.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.comboBox_entityDbName_ItemChecked);
             this.comboBox_entityDbName.SizeChanged += new System.EventHandler(this.comboBox_entityDbName_SizeChanged);
             // 
             // label3
             // 
             this.label3.AutoSize = true;
             this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Location = new System.Drawing.Point(3, 52);
+            this.label3.Location = new System.Drawing.Point(3, 58);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 26);
             this.label3.TabIndex = 5;
@@ -280,7 +280,7 @@ namespace dp2Circulation
             this.label_entityDbName.Location = new System.Drawing.Point(2, 28);
             this.label_entityDbName.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_entityDbName.Name = "label_entityDbName";
-            this.label_entityDbName.Size = new System.Drawing.Size(79, 24);
+            this.label_entityDbName.Size = new System.Drawing.Size(79, 30);
             this.label_entityDbName.TabIndex = 3;
             this.label_entityDbName.Text = "实体库(&D):";
             this.label_entityDbName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -301,7 +301,7 @@ namespace dp2Circulation
             // 
             this.label_matchStyle.AutoSize = true;
             this.label_matchStyle.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_matchStyle.Location = new System.Drawing.Point(3, 78);
+            this.label_matchStyle.Location = new System.Drawing.Point(3, 84);
             this.label_matchStyle.Name = "label_matchStyle";
             this.label_matchStyle.Size = new System.Drawing.Size(77, 26);
             this.label_matchStyle.TabIndex = 7;
@@ -320,7 +320,7 @@ namespace dp2Circulation
             "后方一致",
             "精确一致",
             "空值"});
-            this.comboBox_matchStyle.Location = new System.Drawing.Point(86, 81);
+            this.comboBox_matchStyle.Location = new System.Drawing.Point(86, 87);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
             this.comboBox_matchStyle.Size = new System.Drawing.Size(160, 20);
             this.comboBox_matchStyle.TabIndex = 8;
@@ -541,7 +541,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ComboBox comboBox_from;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_main;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_query;
-        private System.Windows.Forms.ComboBox comboBox_entityDbName;
+        private DigitalPlatform.CommonControl.CheckedComboBox comboBox_entityDbName;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label_entityDbName;
         private System.Windows.Forms.Label label5;

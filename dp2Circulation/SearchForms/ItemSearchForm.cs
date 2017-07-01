@@ -177,23 +177,26 @@ namespace dp2Circulation
             else
                 throw new Exception("未知的DbType '" + this.DbType + "'");
 
+            if (Program.MainForm.AppInfo != null)
+            {
+                this.comboBox_from.Text = Program.MainForm.AppInfo.GetString(
+                    this.DbType + "_search_form",
+                    "from",
+                    strDefaultFrom);
 
-            this.comboBox_from.Text = Program.MainForm.AppInfo.GetString(
-                this.DbType + "_search_form",
-                "from",
-                strDefaultFrom);
+                this.comboBox_entityDbName.Text = Program.MainForm.AppInfo.GetString(
+                    this.DbType + "_search_form",
+                    "entity_db_name",
+                    "<全部>");
 
-            this.comboBox_entityDbName.Text = Program.MainForm.AppInfo.GetString(
-                this.DbType + "_search_form",
-                "entity_db_name",
-                "<全部>");
+                this.comboBox_matchStyle.Text = Program.MainForm.AppInfo.GetString(
+                    this.DbType + "_search_form",
+                    "match_style",
+                    "精确一致");
+            }
 
-            this.comboBox_matchStyle.Text = Program.MainForm.AppInfo.GetString(
-                this.DbType + "_search_form",
-                "match_style",
-                "精确一致");
-
-            if (this.DbType != "arrive")
+            if (this.DbType != "arrive"
+                && Program.MainForm.AppInfo != null)
             {
                 bool bHideMatchStyle = Program.MainForm.AppInfo.GetBoolean(
                     this.DbType + "_search_form",
@@ -217,27 +220,19 @@ namespace dp2Circulation
                 }
             }
 
-#if NO
-            string strWidths = Program.MainForm.AppInfo.GetString(
-                this.DbType + "_search_form",
-                "record_list_column_width",
-                "");
-            if (String.IsNullOrEmpty(strWidths) == false)
+            if (Program.MainForm.AppInfo != null)
             {
-                ListViewUtil.SetColumnHeaderWidth(this.listView_records,
-                    strWidths,
-                    true);
-            }
-#endif
-            this.UiState = Program.MainForm.AppInfo.GetString(
+                this.UiState = Program.MainForm.AppInfo.GetString(
+        this.DbType + "_search_form",
+        "ui_state",
+        "");
+                string strSaveString = Program.MainForm.AppInfo.GetString(
     this.DbType + "_search_form",
-    "ui_state",
-    "");
-            string strSaveString = Program.MainForm.AppInfo.GetString(
-this.DbType + "_search_form",
-"query_lines",
-"^^^");
-            this.dp2QueryControl1.Restore(strSaveString);
+    "query_lines",
+    "^^^");
+
+                this.dp2QueryControl1.Restore(strSaveString);
+            }
 
             comboBox_matchStyle_TextChanged(null, null);
 
@@ -11803,6 +11798,44 @@ out strError);
         private void tabComboBox_queryWord_DropDown(object sender, EventArgs e)
         {
             ListKeys();
+        }
+
+        private void comboBox_entityDbName_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            ListView list = e.Item.ListView;
+
+            if (e.Item.Text.StartsWith("<全部") || e.Item.Text.ToLower().StartsWith("<all"))
+            {
+                if (e.Item.Checked == true)
+                {
+                    // 如果当前勾选了“全部”，则清除其余全部事项的勾选
+                    for (int i = 0; i < list.Items.Count; i++)
+                    {
+                        ListViewItem item = list.Items[i];
+                        if (item.Text.StartsWith("<全部") || item.Text.ToLower().StartsWith("<all"))
+                            continue;
+                        if (item.Checked != false)
+                            item.Checked = false;
+                    }
+                }
+            }
+            else
+            {
+                if (e.Item.Checked == true)
+                {
+                    // 如果勾选的不是“全部”，则要清除“全部”上可能的勾选
+                    for (int i = 0; i < list.Items.Count; i++)
+                    {
+                        ListViewItem item = list.Items[i];
+                        if (item.Text.StartsWith("<全部") || item.Text.ToLower().StartsWith("<all"))
+                        {
+                            if (item.Checked != false)
+                                item.Checked = false;
+                        }
+                    }
+                }
+            }
+
         }
     }
 

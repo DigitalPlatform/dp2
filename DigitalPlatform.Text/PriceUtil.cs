@@ -1092,7 +1092,6 @@ namespace DigitalPlatform.Text
                     return -1;
                 }
 
-
                 if (StringUtil.IsDouble(strLeft) == false)
                 {
                     strPrice = strLeft;

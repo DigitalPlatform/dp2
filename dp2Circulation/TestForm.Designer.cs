@@ -219,13 +219,13 @@ namespace dp2Circulation
             this.textBox_setBiblioInfo_action = new System.Windows.Forms.TextBox();
             this.label31 = new System.Windows.Forms.Label();
             this.tabPage_login = new System.Windows.Forms.TabPage();
-            this.label35 = new System.Windows.Forms.Label();
-            this.textBox_login_userName = new System.Windows.Forms.TextBox();
-            this.textBox_login_password = new System.Windows.Forms.TextBox();
-            this.label36 = new System.Windows.Forms.Label();
+            this.button_login_login = new System.Windows.Forms.Button();
             this.textBox_login_parameters = new System.Windows.Forms.TextBox();
             this.label37 = new System.Windows.Forms.Label();
-            this.button_login_login = new System.Windows.Forms.Button();
+            this.textBox_login_password = new System.Windows.Forms.TextBox();
+            this.label36 = new System.Windows.Forms.Label();
+            this.textBox_login_userName = new System.Windows.Forms.TextBox();
+            this.label35 = new System.Windows.Forms.Label();
             this.tabControl_main.SuspendLayout();
             this.tabPage_diskSpace.SuspendLayout();
             this.tabPage_windowsEventLog.SuspendLayout();
@@ -2409,37 +2409,15 @@ namespace dp2Circulation
             this.tabPage_login.Text = "Login()";
             this.tabPage_login.UseVisualStyleBackColor = true;
             // 
-            // label35
+            // button_login_login
             // 
-            this.label35.AutoSize = true;
-            this.label35.Location = new System.Drawing.Point(18, 19);
-            this.label35.Name = "label35";
-            this.label35.Size = new System.Drawing.Size(59, 12);
-            this.label35.TabIndex = 0;
-            this.label35.Text = "user name";
-            // 
-            // textBox_login_userName
-            // 
-            this.textBox_login_userName.Location = new System.Drawing.Point(92, 16);
-            this.textBox_login_userName.Name = "textBox_login_userName";
-            this.textBox_login_userName.Size = new System.Drawing.Size(194, 21);
-            this.textBox_login_userName.TabIndex = 1;
-            // 
-            // textBox_login_password
-            // 
-            this.textBox_login_password.Location = new System.Drawing.Point(92, 43);
-            this.textBox_login_password.Name = "textBox_login_password";
-            this.textBox_login_password.Size = new System.Drawing.Size(194, 21);
-            this.textBox_login_password.TabIndex = 3;
-            // 
-            // label36
-            // 
-            this.label36.AutoSize = true;
-            this.label36.Location = new System.Drawing.Point(18, 46);
-            this.label36.Name = "label36";
-            this.label36.Size = new System.Drawing.Size(53, 12);
-            this.label36.TabIndex = 2;
-            this.label36.Text = "password";
+            this.button_login_login.Location = new System.Drawing.Point(92, 98);
+            this.button_login_login.Name = "button_login_login";
+            this.button_login_login.Size = new System.Drawing.Size(75, 23);
+            this.button_login_login.TabIndex = 6;
+            this.button_login_login.Text = "button1";
+            this.button_login_login.UseVisualStyleBackColor = true;
+            this.button_login_login.Click += new System.EventHandler(this.button_login_login_Click);
             // 
             // textBox_login_parameters
             // 
@@ -2457,15 +2435,37 @@ namespace dp2Circulation
             this.label37.TabIndex = 4;
             this.label37.Text = "parameters";
             // 
-            // button_login_login
+            // textBox_login_password
             // 
-            this.button_login_login.Location = new System.Drawing.Point(92, 98);
-            this.button_login_login.Name = "button_login_login";
-            this.button_login_login.Size = new System.Drawing.Size(75, 23);
-            this.button_login_login.TabIndex = 6;
-            this.button_login_login.Text = "button1";
-            this.button_login_login.UseVisualStyleBackColor = true;
-            this.button_login_login.Click += new System.EventHandler(this.button_login_login_Click);
+            this.textBox_login_password.Location = new System.Drawing.Point(92, 43);
+            this.textBox_login_password.Name = "textBox_login_password";
+            this.textBox_login_password.Size = new System.Drawing.Size(194, 21);
+            this.textBox_login_password.TabIndex = 3;
+            // 
+            // label36
+            // 
+            this.label36.AutoSize = true;
+            this.label36.Location = new System.Drawing.Point(18, 46);
+            this.label36.Name = "label36";
+            this.label36.Size = new System.Drawing.Size(53, 12);
+            this.label36.TabIndex = 2;
+            this.label36.Text = "password";
+            // 
+            // textBox_login_userName
+            // 
+            this.textBox_login_userName.Location = new System.Drawing.Point(92, 16);
+            this.textBox_login_userName.Name = "textBox_login_userName";
+            this.textBox_login_userName.Size = new System.Drawing.Size(194, 21);
+            this.textBox_login_userName.TabIndex = 1;
+            // 
+            // label35
+            // 
+            this.label35.AutoSize = true;
+            this.label35.Location = new System.Drawing.Point(18, 19);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(59, 12);
+            this.label35.TabIndex = 0;
+            this.label35.Text = "user name";
             // 
             // TestForm
             // 
