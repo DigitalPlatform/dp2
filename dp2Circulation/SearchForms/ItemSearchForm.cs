@@ -3445,9 +3445,24 @@ out strError);
                 return -1;
             }
 
-            string strPrice = DomUtil.GetElementText(dom.DocumentElement, "price");
+            string strPrice = DomUtil.GetElementText(dom.DocumentElement, "price").Trim();
             if (string.IsNullOrEmpty(strPrice) || strPrice == "CNY")
             {
+                // 不管后面是否成功从书目记录中添加了字段内容，这里都预先清除这个字段的内容
+                if (strPrice == "CNY")
+                {
+                    DomUtil.SetElementText(dom.DocumentElement, "price", "");
+                    bChanged = true;
+                }
+
+                // 期刊库的册记录，不从书目记录找价格来添加
+                // return:
+                //      -1  不是实体库
+                //      0   图书类型
+                //      1   期刊类型
+                if (Program.MainForm.IsSeriesTypeFromItemDbName(Global.GetDbName(strItemRecPath)) == 1)
+                    return 0;
+
                 string strParentID = DomUtil.GetElementText(dom.DocumentElement, "parent");
                 if (string.IsNullOrEmpty(strParentID))
                 {
