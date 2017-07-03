@@ -849,6 +849,9 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+    + " 开始进行检索</div>");
+
             string strResultSetName = _globalResultSetName;
 
             stop.Style = StopStyle.None;
@@ -1024,6 +1027,9 @@ namespace dp2Circulation
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+    + " 结束执行检索</div>");
             }
 
             return 1;
@@ -1155,6 +1161,8 @@ namespace dp2Circulation
                 //strOutputStyle = "keyid";
                 strBrowseStyle = "keyid,key,id,cols";
             }
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("检索共命中 " + lHitCount.ToString() + " 条") + "</div>");
+
             //
             this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条";
             stop.SetProgressRange(0, lHitCount);
@@ -1213,6 +1221,8 @@ namespace dp2Circulation
                     // strError = "test";
                     if (lRet == -1)
                     {
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("获得浏览记录时发生错误: " + strError) + "</div>");
+
                         MessagePromptEventArgs e = new MessagePromptEventArgs();
                         e.MessageText = "获得浏览记录时发生错误： " + strError;
                         e.Actions = "yes,no,cancel";
@@ -1220,10 +1230,14 @@ namespace dp2Circulation
                         if (e.ResultAction == "cancel")
                         {
                             this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，" + strError;
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("放弃检索") + "</div>");
                             goto ERROR1;
                         }
                         else if (e.ResultAction == "yes")
+                        {
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("重试获取浏览记录") + "</div>");
                             goto REDO_GETRECORDS;
+                        }
 
                         // 2017/7/1
                         // 起点跳过一条，继续向后做
@@ -1236,6 +1250,7 @@ namespace dp2Circulation
                             if (lStart >= lHitCount || lCount <= 0)
                                 break;
                         }
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("跳过一条，继续向后处理 (lStart=" + lStart + ", lMaxPerCount=" + lMaxPerCount + ")") + "</div>");
                         continue;
                     }
 
