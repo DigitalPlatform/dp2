@@ -1,10 +1,12 @@
-﻿using DigitalPlatform.Text;
+﻿using DigitalPlatform.rms.Client;
+using DigitalPlatform.Text;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -177,6 +179,9 @@ namespace DigitalPlatform.LibraryServer
 
                     // 采纳先前创建好的复制并继续的断点信息
                     breakpoints = all_breakpoints;
+
+                    // 建立要获取的记录路径文件
+
                 }
 
                 Debug.Assert(breakpoints != null, "");
@@ -471,6 +476,109 @@ out string strError)
 
                 return text.ToString();
             }
+        }
+
+        int CreateRecPathFile(RmsChannel channel,
+            BreakPointCollection infos,
+            string strOutputFileName,
+            out string strError)
+        {
+            strError = "";
+
+            List<string> dbnames = new List<string>();
+
+
+            foreach (BreakPointInfo info in infos)
+            {
+                string strDbName = info.DbName;
+                if (strDbName == "*")
+                {
+                    // 如果数据库名为 *，表示希望获取所有的数据库
+                    List<string> temp = null;
+                    // 获得所有数据库名
+                    int nRet = GetAllDbNames(out temp,
+            out strError);
+                    if (nRet == -1)
+                        return -1;
+                    dbnames.AddRange(temp);
+                }
+                else if (string.IsNullOrEmpty(strDbName) == false)
+                    dbnames.Add(strDbName);
+            }
+
+            foreach(string dbname in dbnames)
+            {
+
+            }
+
+            return 0;
+        }
+
+        // 获得所有数据库名
+        int GetAllDbNames(out List<string> dbnames,
+            out string strError)
+        {
+            strError = "";
+            dbnames = new List<string>();
+
+            // 书目库
+            foreach (ItemDbCfg cfg in this.App.ItemDbs)
+            {
+                if (string.IsNullOrEmpty(cfg.BiblioDbName) == false)
+                    dbnames.Add(cfg.BiblioDbName);
+
+                if (string.IsNullOrEmpty(cfg.DbName) == false)
+                    dbnames.Add(cfg.DbName);
+
+                if (string.IsNullOrEmpty(cfg.OrderDbName) == false)
+                    dbnames.Add(cfg.OrderDbName);
+
+                if (string.IsNullOrEmpty(cfg.IssueDbName) == false)
+                    dbnames.Add(cfg.IssueDbName);
+
+                if (string.IsNullOrEmpty(cfg.CommentDbName) == false)
+                    dbnames.Add(cfg.CommentDbName);
+            }
+
+            // 读者库
+            foreach (DigitalPlatform.LibraryServer.LibraryApplication.ReaderDbCfg cfg in this.App.ReaderDbs)
+            {
+                dbnames.Add(cfg.DbName);
+            }
+
+            // 其他库
+            if (string.IsNullOrEmpty(this.App.AmerceDbName) == false)
+                dbnames.Add(this.App.AmerceDbName);
+
+            if (string.IsNullOrEmpty(this.App.ArrivedDbName) == false)
+                dbnames.Add(this.App.ArrivedDbName);
+
+            if (string.IsNullOrEmpty(this.App.InvoiceDbName) == false)
+                dbnames.Add(this.App.InvoiceDbName);
+
+            if (string.IsNullOrEmpty(this.App.MessageDbName) == false)
+                dbnames.Add(this.App.MessageDbName);
+
+            if (string.IsNullOrEmpty(this.App.PinyinDbName) == false)
+                dbnames.Add(this.App.PinyinDbName);
+
+            if (string.IsNullOrEmpty(this.App.GcatDbName) == false)
+                dbnames.Add(this.App.GcatDbName);
+
+            if (string.IsNullOrEmpty(this.App.WordDbName) == false)
+                dbnames.Add(this.App.WordDbName);
+
+            // 实用库
+            if (this.App.LibraryCfgDom != null
+                && this.App.LibraryCfgDom.DocumentElement != null)
+            {
+                XmlNodeList nodes = this.App.LibraryCfgDom.DocumentElement.SelectNodes("utilDb/database/@name");
+                foreach (XmlNode node in nodes)
+                {
+                    dbnames.Add(node.Value);
+                }
+            }
+            return 0;
         }
 
     }

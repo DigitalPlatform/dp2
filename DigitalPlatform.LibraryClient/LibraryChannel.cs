@@ -672,7 +672,7 @@ out strError);
 #if BASIC_HTTP
                     SetInnerChannelOperationTimeout(this.OperationTimeout);
 #else
-                    this.m_ws.InnerChannel.OperationTimeout = value;
+                    this.m_ws.InnerChannel.OperationTimeout = this.OperationTimeout;
 #endif
                 }
                 if (String.IsNullOrEmpty(this.Url) == true)

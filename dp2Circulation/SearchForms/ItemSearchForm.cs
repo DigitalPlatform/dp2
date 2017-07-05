@@ -1149,7 +1149,7 @@ namespace dp2Circulation
 
             bool bAccessBiblioSummaryDenied = false;
 
-            string strBrowseStyle = "id, cols";
+            string strBrowseStyle = "id,cols";
             //string strOutputStyle = "";
             if (bOutputKeyCount == true)
             {
@@ -1282,6 +1282,17 @@ namespace dp2Circulation
 
                             DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
 
+                            ErrorCodeValue error_code = ErrorCodeValue.NoError;
+                            string error_string = "";
+                            if (searchresult.RecordBody != null
+                                && searchresult.RecordBody.Result != null)
+                            {
+                                error_code = searchresult.RecordBody.Result.ErrorCode;
+                                error_string = searchresult.RecordBody.Result.ErrorString;
+
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("册记录 '" + searchresult.Path + "' 装入浏览信息时出错: " + error_string) + "</div>");
+                            }
+
                             if (bOutputKeyCount == false
                                 && bOutputKeyID == false)
                             {
@@ -1352,33 +1363,51 @@ namespace dp2Circulation
                                 item.Tag = query;
                             }
 
+                            if (error_code != ErrorCodeValue.NoError)
+                            {
+                                SetError(item, "{" + error_string + "}");
+                            }
+
                             // 2017/2/21
                             // 填入 parent_id 列内容
                             if (bTempQuickLoad)
                             {
-                                int nCol = -1;
-                                string strBiblioRecPath = "";
-                                // 获得事项所从属的书目记录的路径
-                                // parameters:
-                                //      bAutoSearch 当没有 parent id 列的时候，是否自动进行检索以便获得书目记录路径
-                                // return:
-                                //      -1  出错
-                                //      0   相关数据库没有配置 parent id 浏览列
-                                //      1   找到
-                                int nRet = GetBiblioRecPath(
-                                    channel,
-                                    item,
-                                    false,
-                                    out nCol,
-                                    out strBiblioRecPath,
-                                    out strError);
-                                if (nRet == 1)
+                                int nTempCol = this.m_bBiblioSummaryColumn == true ? 2 : 1;
+                                string strParentID = ListViewUtil.GetItemText(item, nTempCol);
+
                                 {
-                                    int nTempCol = this.m_bBiblioSummaryColumn == true ? 2 : 1;
-                                    string strParentID = ListViewUtil.GetItemText(item, nTempCol);
-                                    ListViewUtil.ChangeItemText(item, nCol, strParentID);
-                                    ListViewUtil.ChangeItemText(item, nTempCol, "");
+                                    int nCol = -1;
+                                    string strBiblioRecPath = "";
+                                    // 获得事项所从属的书目记录的路径
+                                    // parameters:
+                                    //      bAutoSearch 当没有 parent id 列的时候，是否自动进行检索以便获得书目记录路径
+                                    // return:
+                                    //      -1  出错
+                                    //      0   相关数据库没有配置 parent id 浏览列
+                                    //      1   找到
+                                    int nRet = GetBiblioRecPath(
+                                        channel,
+                                        item,
+                                        false,
+                                        out nCol,
+                                        out strBiblioRecPath,
+                                        out strError);
+                                    if (nRet == -1)
+                                        SetError(item, error_string + strError);
+                                    if (nRet == 1)
+                                    {
+                                        if (error_code == ErrorCodeValue.NotFound)
+                                        {
+                                            // ListViewUtil.ChangeItemText(item, nCol, "!" + strParentID);
+                                            ListViewUtil.ChangeItemText(item, nCol, "");
+                                            // SetError(item, "!记录体不存在");
+                                        }
+                                        else
+                                            ListViewUtil.ChangeItemText(item, nCol, strParentID);
+                                    }
                                 }
+
+                                ListViewUtil.ChangeItemText(item, nTempCol, "");
                             }
 
                             query.Items.Add(item);
@@ -1447,6 +1476,15 @@ namespace dp2Circulation
             return 1;
         ERROR1:
             return -1;
+        }
+
+        void SetError(ListViewItem item, string strError)
+        {
+            if (this.m_bBiblioSummaryColumn == true)
+                ListViewUtil.ChangeItemText(item, 1, strError);
+
+            item.BackColor = Color.DarkRed;
+            item.ForeColor = Color.White;
         }
 
         /// <summary>

@@ -789,13 +789,25 @@ namespace dp2Circulation
                     continue;
                 }
 
+                // 2017/7/5
+                if (string.IsNullOrEmpty(strBiblioRecPath) == true)
+                {
+                    colindex_list.Add(-1);
+                    continue;
+                }
+
                 if (string.IsNullOrEmpty(strBiblioRecPath) == false
                     && nCol == -1)
                     colindex_list.Add(0);
                 else
                     colindex_list.Add(nCol);
 
-                biblio_recpaths.Add(strBiblioRecPath);
+                if (string.IsNullOrEmpty(strBiblioRecPath) == false)
+                    biblio_recpaths.Add(strBiblioRecPath);
+                else
+                {
+                    Debug.Assert(false, "");
+                }
             }
 
             CacheableBiblioLoader loader = new CacheableBiblioLoader();
