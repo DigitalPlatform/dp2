@@ -4874,6 +4874,8 @@ true);
                 this.browseWindow.RecordsList.Items.Clear();
 
                 LibraryChannel channel = this.GetChannel();
+                TimeSpan old_timeout = channel.Timeout;
+                channel.Timeout = TimeSpan.FromMinutes(2);
 
                 Progress.Style = StopStyle.EnableHalfStop;
                 Progress.OnStop += new StopEventHandler(this.DoStop);
@@ -5143,6 +5145,7 @@ true);
                     Progress.Initial("");
                     Progress.Style = StopStyle.None;
 
+                    channel.Timeout = old_timeout;
                     this.ReturnChannel(channel);
 
                     // this.button_search.Enabled = true;

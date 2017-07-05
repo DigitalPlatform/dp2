@@ -1064,6 +1064,9 @@ namespace dp2Circulation
 
             bool bHideMessageBox = false;
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 开始保存</div>");
+
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
             stop.Initial("正在保存" + this.DbTypeCaption + "记录 ...");
@@ -1142,6 +1145,8 @@ namespace dp2Circulation
 #endif
                         if (nRet == -1)
                         {
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时出错: " + strError) + "</div>");
+
                             DialogResult result = System.Windows.Forms.DialogResult.No;
                             if (bHideMessageBox == false)
                             {
@@ -1164,26 +1169,39 @@ namespace dp2Circulation
                             if (result == System.Windows.Forms.DialogResult.Yes)
                             {
                                 bHideMessageBox = false;    // TODO: 也可在 重试+不出现对话框状态下自动重试特定次数而不出现对话框
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("重试保存记录") + "</div>");
                                 goto REDO_SAVE;
                             }
                             if (result == System.Windows.Forms.DialogResult.Cancel)
+                            {
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("放弃保存其余记录") + "</div>");
                                 return -1;
+                            }
                             error_items.Add(item);
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("跳过一条，继续向后处理") + "</div>");
                             goto CONTINUE;
                         }
 
                         if (nRet == -2)
                         {
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时遭遇时间戳不匹配: " + strError) + "</div>");
+
                             DialogResult result = MessageBox.Show(this,
-    "保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时遭遇时间戳不匹配: " + strError + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
+    "保存" + this.DbTypeCaption + "记录 " + strRecPath + " 时遭遇时间戳不匹配: " + strError + "。\r\n\r\n此记录已无法被保存。\r\n\r\n请问现在是否要顺便重新装载此记录? \r\n\r\n(Yes 重新装载(但修改没有保存)；\r\nNo 不重新装载、但继续处理后面的记录保存; \r\nCancel 中断整批保存操作)",
     this.DbTypeCaption + "查询",
     MessageBoxButtons.YesNoCancel,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button1);
                             if (result == System.Windows.Forms.DialogResult.Cancel)
+                            {
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("中断保存操作") + "</div>");
                                 break;
+                            }
                             if (result == System.Windows.Forms.DialogResult.No)
+                            {
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("跳过一条，继续向后处理") + "</div>");
                                 goto CONTINUE;
+                            }
 
                             // 重新装载书目记录到 OldXml
 
@@ -1210,6 +1228,7 @@ namespace dp2Circulation
                             info.OldXml = strXml;
                             info.Timestamp = baNewTimestamp;
                             nReloadCount++;
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("重新装载记录(但没有保存修改部分)，继续向后处理") + "</div>");
                             goto CONTINUE;
                         }
 
@@ -1242,27 +1261,31 @@ namespace dp2Circulation
                     stop.HideProgress();
                     stop.Style = StopStyle.None;
 
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ " 结束保存</div>");
                     // this._listviewRecords.Enabled = true;
                 }
             }
 
-            // 从 items 中去掉那些已经报错的
-            foreach (ListViewItem item in error_items)
             {
-                items.Remove(item);
-            }
+                // 从 items 中去掉那些已经报错的
+                foreach (ListViewItem item in error_items)
+                {
+                    items.Remove(item);
+                }
 
-            {
-                // 2013/10/22
-                nRet = RefreshListViewLines(
-                    null,
-                    items,
-                    "",
-                    true,
-                    true,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
+                {
+                    // 2013/10/22
+                    nRet = RefreshListViewLines(
+                        null,
+                        items,
+                        "",
+                        true,
+                        true,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
             }
 
             DoViewComment(false);
@@ -1280,7 +1303,7 @@ namespace dp2Circulation
             {
                 if (string.IsNullOrEmpty(strError) == false)
                     strError += " ; ";
-                strError += "有 " + error_items.Count + " 条" + this.DbTypeCaption + "记录在保存时出错(可排除故障后后重新保存)";
+                strError += "有 " + error_items.Count + " 条" + this.DbTypeCaption + "记录在保存时出错(可排除故障后后重新保存)。详情请看固定面板区的“操作历史”属性页";
             }
             return 0;
         }

@@ -1368,10 +1368,10 @@ namespace dp2Circulation
                                 int nRet = GetBiblioRecPath(
                                     channel,
                                     item,
-                false,
-                out nCol,
-                out strBiblioRecPath,
-                out strError);
+                                    false,
+                                    out nCol,
+                                    out strBiblioRecPath,
+                                    out strError);
                                 if (nRet == 1)
                                 {
                                     int nTempCol = this.m_bBiblioSummaryColumn == true ? 2 : 1;
