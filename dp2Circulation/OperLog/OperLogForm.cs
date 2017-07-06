@@ -3734,52 +3734,56 @@ FileShare.ReadWrite))
             if (string.IsNullOrEmpty(this.m_strFilters) == false
                 && !(this.m_strFilters == "<无>" || this.m_strFilters == "<none>"))
             {
-                if (StringUtil.IsInList("增998$t", this.m_strFilters)
-                    && strOperation == "setBiblioInfo"
-                    && strAction == "change")
+                if (StringUtil.IsInList("增998$t", this.m_strFilters))
                 {
-                    // 比较新旧记录的 998 字段，看看是否增加了 $t
-                    string strOldRecord = DomUtil.GetElementText(dom.DocumentElement, "oldRecord");
-                    string strNewRecord = DomUtil.GetElementText(dom.DocumentElement, "record");
-
-                    string strOutMarcSyntax = "";
-                    string strOldMarc = "";
-                    string strNewMarc = "";
-                    // 将XML格式转换为MARC格式
-                    // 自动从数据记录中获得MARC语法
-                    nRet = MarcUtil.Xml2Marc(strOldRecord,
-                        false,
-                        null,
-                        out strOutMarcSyntax,
-                        out strOldMarc,
-                        out strError);
-                    if (nRet == -1)
+                    if (strOperation == "setBiblioInfo"
+                    && (strAction == "change" || strAction == "new"))
                     {
-                        strError = "XML转换到MARC记录时出错: " + strError;
-                        return true;
-                    }
+                        // 比较新旧记录的 998 字段，看看是否增加了 $t
+                        string strOldRecord = DomUtil.GetElementText(dom.DocumentElement, "oldRecord");
+                        string strNewRecord = DomUtil.GetElementText(dom.DocumentElement, "record");
 
-                    nRet = MarcUtil.Xml2Marc(strNewRecord,
-    false,
-    null,
-    out strOutMarcSyntax,
-    out strNewMarc,
-    out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "XML转换到MARC记录时出错: " + strError;
-                        return true;
-                    }
+                        string strOutMarcSyntax = "";
+                        string strOldMarc = "";
+                        string strNewMarc = "";
+                        // 将XML格式转换为MARC格式
+                        // 自动从数据记录中获得MARC语法
+                        nRet = MarcUtil.Xml2Marc(strOldRecord,
+                            false,
+                            null,
+                            out strOutMarcSyntax,
+                            out strOldMarc,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "XML转换到MARC记录时出错: " + strError;
+                            return true;
+                        }
 
-                    MarcRecord old_record = new MarcRecord(strOldMarc);
-                    MarcRecord new_record = new MarcRecord(strNewMarc);
+                        nRet = MarcUtil.Xml2Marc(strNewRecord,
+        false,
+        null,
+        out strOutMarcSyntax,
+        out strNewMarc,
+        out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "XML转换到MARC记录时出错: " + strError;
+                            return true;
+                        }
 
-                    string strOldContent = old_record.select("field[@name='998']/subfield[@name='t']").FirstContent;
-                    string strNewContent = new_record.select("field[@name='998']/subfield[@name='t']").FirstContent;
+                        MarcRecord old_record = new MarcRecord(strOldMarc);
+                        MarcRecord new_record = new MarcRecord(strNewMarc);
 
-                    if (string.IsNullOrEmpty(strOldContent) == true
-                        && string.IsNullOrEmpty(strNewContent) == false)
-                    {
+                        string strOldContent = old_record.select("field[@name='998']/subfield[@name='t']").FirstContent;
+                        string strNewContent = new_record.select("field[@name='998']/subfield[@name='t']").FirstContent;
+
+                        if (string.IsNullOrEmpty(strOldContent) == true
+                            && string.IsNullOrEmpty(strNewContent) == false)
+                        {
+                        }
+                        else
+                            return false;
                     }
                     else
                         return false;
