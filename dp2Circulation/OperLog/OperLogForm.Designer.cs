@@ -441,6 +441,14 @@ namespace dp2Circulation
             "最近 30 天",
             "最近 31 天",
             "最近 365 天",
+            "最近 2 年",
+            "最近 3 年",
+            "最近 4 年",
+            "最近 5 年",
+            "最近 6 年",
+            "最近 7 年",
+            "最近 8 年",
+            "最近 9 年",
             "最近 10 年"});
             this.comboBox_quickSetFilenames.Location = new System.Drawing.Point(89, 30);
             this.comboBox_quickSetFilenames.Name = "comboBox_quickSetFilenames";

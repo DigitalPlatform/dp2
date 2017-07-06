@@ -284,6 +284,9 @@ namespace dp2Circulation
 #endif
             this.Clear();
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+    + "开始装入日志文件 " + strLogFileName + " 中的记录" + "</div>");
+
             stop.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录...");
 #if DELAY_UPDATE
             this.listView_records.BeginUpdate();
@@ -323,6 +326,10 @@ namespace dp2Circulation
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ "结束装入日志文件 " + strLogFileName + " 中的记录" + "</div>");
+
 
                 EnableControls(true);
             }
@@ -3642,6 +3649,37 @@ FileShare.ReadWrite))
         // 获得日志文件名
         private void button_loadFilenams_Click(object sender, EventArgs e)
         {
+            GetOperLogFilenameDlg dlg = new GetOperLogFilenameDlg();
+            MainForm.SetControlFont(dlg, this.Font, false);
+
+            // TODO: 可以抽取第一行和最后一行的日期，设置到 dlg.OperLogFilenames 中
+
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            string strText = "";
+            if (dlg.OperLogFilenames.Count == 1)
+                strText = dlg.OperLogFilenames[0];
+            else
+            {
+                for (int i = 0; i < dlg.OperLogFilenames.Count; i++)
+                {
+                    if (i != 0)
+                        strText += "\r\n";
+                    strText += dlg.OperLogFilenames[i];
+                }
+            }
+            this.textBox_filenames.Text = strText;
+            this.textBox_filenames.Focus();
+        }
+
+
+#if NO
+        // 获得日志文件名
+        private void button_loadFilenams_Click(object sender, EventArgs e)
+        {
             int x = 0;
             int y = 0;
             API.GetEditCurrentCaretPos(
@@ -3684,6 +3722,8 @@ FileShare.ReadWrite))
             // API.PostMessage(this.Handle, WM_SETCARETPOS, x, y);
         }
 
+#endif
+
         /*
         protected override void DefWndProc(ref Message m)
         {
@@ -3702,11 +3742,14 @@ FileShare.ReadWrite))
         }*/
 
         // 进行过滤
+        // parameters:
+        //      strLocation 用于报错的文件名和偏移量文字内容
         // return:
         //      true    满足过滤条件
         //      false   不满足过滤条件
-        bool DoFilter(string strXml)
+        bool DoFilter(string strXml, string strLocation)
         {
+            List<string> errors = new List<string>();
             string strError = "";
             int nRet = 0;
 
@@ -3749,27 +3792,29 @@ FileShare.ReadWrite))
                         // 将XML格式转换为MARC格式
                         // 自动从数据记录中获得MARC语法
                         nRet = MarcUtil.Xml2Marc(strOldRecord,
-                            false,
+                            true,
                             null,
                             out strOutMarcSyntax,
                             out strOldMarc,
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "XML转换到MARC记录时出错: " + strError;
-                            return true;
+                            strError = strLocation + " oldRecord 元素内 XML 转换到 MARC 记录时出错: " + strError;
+                            errors.Add(strError);
+                            goto ERROR1;
                         }
 
                         nRet = MarcUtil.Xml2Marc(strNewRecord,
-        false,
+        true,
         null,
         out strOutMarcSyntax,
         out strNewMarc,
         out strError);
                         if (nRet == -1)
                         {
-                            strError = "XML转换到MARC记录时出错: " + strError;
-                            return true;
+                            strError = strLocation + " record 元素内 XML 转换到 MARC 记录时出错: " + strError;
+                            errors.Add(strError);
+                            goto ERROR1;
                         }
 
                         MarcRecord old_record = new MarcRecord(strOldMarc);
@@ -3791,7 +3836,16 @@ FileShare.ReadWrite))
             }
 
             return true;
+
+        ERROR1:
+            foreach (string error in errors)
+            {
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
+            }
+            return true;
         }
+
+        DateTime _lastUpdateTime = DateTime.Now;
 
         ProgressEstimate estimate = new ProgressEstimate();
 
@@ -3813,7 +3867,7 @@ FileShare.ReadWrite))
             // return:
             //      true    满足过滤条件
             //      false   不满足过滤条件
-            if (DoFilter(strXml) == false)
+            if (DoFilter(strXml, strLogFileName + ":" + lIndex) == false)
                 return 0;
 
             OperLogItemInfo info = new OperLogItemInfo();
@@ -3850,9 +3904,12 @@ FileShare.ReadWrite))
             if (nRet == -1)
                 return -1;
 
-            if ((lIndex % 100) == 0)
+            if ((lIndex % 100) == 0
+                || DateTime.Now - _lastUpdateTime > TimeSpan.FromSeconds(5))
+            {
                 this.listView_records.ForceUpdate();
-
+                _lastUpdateTime = DateTime.Now;
+            }
             return 0;
         }
 
@@ -3898,6 +3955,10 @@ FileShare.ReadWrite))
                 Program.MainForm.DataDir);
 #endif
             this.Clear();
+
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ "开始装入日志文件中的记录" + "</div>");
+
 
             try
             {
@@ -3949,6 +4010,10 @@ FileShare.ReadWrite))
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ "结束装入日志文件中的记录" + "</div>");
+
 
                 EnableControls(true);
             }
@@ -4272,6 +4337,9 @@ FileShare.ReadWrite))
 #endif
             this.Clear();
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ "开始装入日志文件中的记录" + "</div>");
+
             try
             {
                 stop.SetMessage("正在准备日志文件名 ...");
@@ -4327,6 +4395,9 @@ FileShare.ReadWrite))
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ "结束装入日志文件中的记录" + "</div>");
 
                 EnableControls(true);
             }
@@ -5172,10 +5243,45 @@ FileShare.ReadWrite))
             }
             else if (strName == "最近十年" || strName == "最近10年")
             {
+#if NO
                 DateTime now = DateTime.Now;
                 DateTime start = now - new TimeSpan(10 * 365 - 1, 0, 0, 0);
                 strStartDate = DateTimeUtil.DateTimeToString8(start);
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
+#endif
+                GetYearsRange(10, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近九年" || strName == "最近9年")
+            {
+                GetYearsRange(9, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近八年" || strName == "最近8年")
+            {
+                GetYearsRange(8, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近七年" || strName == "最近7年")
+            {
+                GetYearsRange(7, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近六年" || strName == "最近6年")
+            {
+                GetYearsRange(6, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近五年" || strName == "最近5年")
+            {
+                GetYearsRange(5, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近四年" || strName == "最近4年")
+            {
+                GetYearsRange(4, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近三年" || strName == "最近3年")
+            {
+                GetYearsRange(3, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近二年" || strName == "最近2年")
+            {
+                GetYearsRange(2, out strStartDate, out strEndDate);
             }
             else
             {
@@ -5218,6 +5324,13 @@ FileShare.ReadWrite))
             MessageBox.Show(this, strError);
         }
 
+        void GetYearsRange(int n, out string strStartDate, out string strEndDate)
+        {
+            DateTime now = DateTime.Now;
+            DateTime start = now - new TimeSpan(n * 365 - 1, 0, 0, 0);
+            strStartDate = DateTimeUtil.DateTimeToString8(start);
+            strEndDate = DateTimeUtil.DateTimeToString8(now);
+        }
 
         private void comboBox_quickSetFilenames_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -9034,8 +9147,12 @@ MessageBoxDefaultButton.Button1);
 
 #endif
 
-                    if ((count % 100) == 0)
+                    if ((count % 100) == 0
+                || DateTime.Now - _lastUpdateTime > TimeSpan.FromSeconds(5))
+                    {
                         this.listView_restoreList.ForceUpdate();
+                        _lastUpdateTime = DateTime.Now;
+                    }
 
                     count++;
                 }

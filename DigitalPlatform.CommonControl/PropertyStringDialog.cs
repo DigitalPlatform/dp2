@@ -104,6 +104,7 @@ namespace DigitalPlatform.CommonControl
         }
 
         // 根据ValueTable先建立未勾选的全部列表事项
+        // TODO: 测算两列的最大内容宽度
         void BuildList()
         {
             this.listView1.Items.Clear();
@@ -472,12 +473,10 @@ namespace DigitalPlatform.CommonControl
 
     public class NumberdStringCompare : IComparer<NumberedString>
     {
-
         int IComparer<NumberedString>.Compare(NumberedString x, NumberedString y)
         {
             return x.Index - y.Index;
         }
-
     }
 
     /*
