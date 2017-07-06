@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -25,6 +27,7 @@ namespace dp2Circulation
                 return;
 
             this.checkedComboBox_operations.Items.AddRange(new string[] { 
+                "<all>\t全部",
             "borrow\t借书(或续借)",
             "return\t还书(或声明丢失)",
             "reservation\t预约",
@@ -59,16 +62,77 @@ namespace dp2Circulation
             }
         }
 
+        public string Filters
+        {
+            get
+            {
+                return this.checkedComboBox_filter.Text;
+            }
+            set
+            {
+                this.checkedComboBox_filter.Text = value;
+            }
+        }
+
         private void button_OK_Click(object sender, EventArgs e)
         {
+            string strError = "";
+
+            if (StringUtil.IsInList("<all>", this.checkedComboBox_operations.Text)
+                && this.checkedComboBox_operations.Text.IndexOf(",") != -1)
+            {
+                strError = "操作类型一旦选择了 <all>，就不应该再包含其他值了";
+                goto ERROR1;
+            }
+
+            if ((StringUtil.IsInList("<无>", this.checkedComboBox_filter.Text) || StringUtil.IsInList("<none>", this.checkedComboBox_filter.Text))
+    && this.checkedComboBox_filter.Text.IndexOf(",") != -1)
+            {
+                strError = "过滤方式一旦选择了 <无>，就不应该再包含其他值了";
+                goto ERROR1;
+            }
+
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.Close();
+        }
+
+        private void checkedComboBox_filter_DropDown(object sender, EventArgs e)
+        {
+            if (this.checkedComboBox_filter.Items.Count > 0)
+                return;
+
+            this.checkedComboBox_filter.Items.AddRange(new string[] { 
+            "<无>",
+            "增998$t\t书目记录",
+            });
+
+        }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.checkedComboBox_operations);
+                controls.Add(this.checkedComboBox_filter);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.checkedComboBox_operations);
+                controls.Add(this.checkedComboBox_filter);
+                GuiState.SetUiState(controls, value);
+            }
         }
     }
 }

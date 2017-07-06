@@ -33,6 +33,8 @@
             this.checkedComboBox_operations = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
+            this.checkedComboBox_filter = new DigitalPlatform.CommonControl.CheckedComboBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -81,6 +83,29 @@
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
+            // checkedComboBox_filter
+            // 
+            this.checkedComboBox_filter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkedComboBox_filter.BackColor = System.Drawing.SystemColors.Window;
+            this.checkedComboBox_filter.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.checkedComboBox_filter.Location = new System.Drawing.Point(88, 104);
+            this.checkedComboBox_filter.Margin = new System.Windows.Forms.Padding(4);
+            this.checkedComboBox_filter.Name = "checkedComboBox_filter";
+            this.checkedComboBox_filter.Padding = new System.Windows.Forms.Padding(4);
+            this.checkedComboBox_filter.Size = new System.Drawing.Size(375, 22);
+            this.checkedComboBox_filter.TabIndex = 5;
+            this.checkedComboBox_filter.DropDown += new System.EventHandler(this.checkedComboBox_filter_DropDown);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 109);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(53, 12);
+            this.label2.TabIndex = 4;
+            this.label2.Text = "过滤方式";
+            // 
             // OperLogFindDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -88,6 +113,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(476, 264);
+            this.Controls.Add(this.checkedComboBox_filter);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.checkedComboBox_operations);
@@ -107,5 +134,7 @@
         private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_operations;
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.Button button_Cancel;
+        private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_filter;
+        private System.Windows.Forms.Label label2;
     }
 }
