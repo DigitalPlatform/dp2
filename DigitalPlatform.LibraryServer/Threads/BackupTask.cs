@@ -1,12 +1,15 @@
-﻿using DigitalPlatform.rms.Client;
-using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Xml;
+
+using DigitalPlatform.rms.Client;
+using DigitalPlatform.Text;
+using System.IO;
+using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -142,7 +145,8 @@ namespace DigitalPlatform.LibraryServer
                     return;
                 }
 
-                if (String.IsNullOrEmpty(strDbNameList) == true)
+                // if (String.IsNullOrEmpty(strDbNameList) == true)
+                if (strDbNameList == "continue")
                 {
                     // 从断点继续循环
                     strDbNameList = "continue";
@@ -155,6 +159,8 @@ namespace DigitalPlatform.LibraryServer
                 BreakPointCollection breakpoints = null;
 
                 this.AppendResultText("*********\r\n");
+
+                RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
 
                 if (strDbNameList == "continue")
                 {
@@ -170,7 +176,10 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                         goto ERROR1;
                     if (nRet == 0)
-                        return;
+                    {
+                        // return;
+                        goto ERROR1;
+                    }
                 }
                 else
                 {
@@ -181,7 +190,16 @@ namespace DigitalPlatform.LibraryServer
                     breakpoints = all_breakpoints;
 
                     // 建立要获取的记录路径文件
-
+                    string strOutputFileName = Path.Combine(this.App.TempDir, "~test.txt");
+                    nRet = CreateRecPathFile(channel,
+                        breakpoints,
+                        strOutputFileName,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        this.AppendResultText("创建记录路径文件失败: " + strError + "\r\n");
+                        return;
+                    }
                 }
 
                 Debug.Assert(breakpoints != null, "");
@@ -478,6 +496,7 @@ out string strError)
             }
         }
 
+        // TODO: 中途要显示进度信息
         int CreateRecPathFile(RmsChannel channel,
             BreakPointCollection infos,
             string strOutputFileName,
@@ -487,31 +506,78 @@ out string strError)
 
             List<string> dbnames = new List<string>();
 
-
             foreach (BreakPointInfo info in infos)
             {
                 string strDbName = info.DbName;
-                if (strDbName == "*")
-                {
-                    // 如果数据库名为 *，表示希望获取所有的数据库
-                    List<string> temp = null;
-                    // 获得所有数据库名
-                    int nRet = GetAllDbNames(out temp,
-            out strError);
-                    if (nRet == -1)
-                        return -1;
-                    dbnames.AddRange(temp);
-                }
-                else if (string.IsNullOrEmpty(strDbName) == false)
+                if (string.IsNullOrEmpty(strDbName) == false)
                     dbnames.Add(strDbName);
             }
 
-            foreach(string dbname in dbnames)
-            {
+            if (dbnames.Count == 0)
+                dbnames.Add("*");
 
+            {
+                List<string> results = new List<string>();
+                foreach (string dbname in dbnames)
+                {
+                    if (string.IsNullOrEmpty(dbname) == true || dbname == "*")
+                    {
+                        // 如果数据库名为 *，表示希望获取所有的数据库
+                        List<string> temp = null;
+                        // 获得所有数据库名
+                        int nRet = GetAllDbNames(out temp,
+                out strError);
+                        if (nRet == -1)
+                            return -1;
+                        results.AddRange(temp);
+                    }
+                    else
+                        results.Add(dbname);
+                }
+
+                StringUtil.RemoveDupNoSort(ref results);
+                dbnames = results;
             }
 
-            return 0;
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(strOutputFileName, false, Encoding.UTF8))
+                {
+                    foreach (string dbname in dbnames)
+                    {
+                        string strQueryXml = "<target list='"
+                            + dbname
+                            + ":" + "__id'><item><word>1-9999999999</word><match>exact</match><relation>range</relation><dataType>number</dataType><maxCount>-1</maxCount></item><lang>chi</lang></target>";
+
+                        long lRet = channel.DoSearch(strQueryXml, "default", out strError);
+                        if (lRet == -1)
+                            return -1;
+                        if (lRet == 0)
+                            continue;
+
+                        SearchResultLoader loader = new SearchResultLoader(channel,
+                        null,
+                        "default",
+                        "id");
+                        loader.ElementType = "Record";
+
+                        foreach (Record record in loader)
+                        {
+                            if (record.RecordBody != null && record.RecordBody.Result != null
+                                && record.RecordBody.Result.ErrorCode == ErrorCodeValue.NotFound)
+                                continue;
+                            sw.WriteLine(record.Path);
+                        }
+                    }
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
         }
 
         // 获得所有数据库名
