@@ -111,6 +111,30 @@ namespace DigitalPlatform.CommonControl
         {
             return radio.GetType().ToString() + ":" + (radio.Checked == true ? "1" : "0");
         }
+
+        static void SetCheckedComboBoxState(CheckedComboBox combobox, string strText, object default_value)
+        {
+            if (string.IsNullOrEmpty(strText) == true
+    && default_value != null)
+            {
+                if (default_value is string)
+                    combobox.Text = (default_value as string);
+                else
+                    throw new ArgumentException("CheckedComboBox 的缺省值应当为 string 类型", "default_value");
+                return;
+            }
+
+            string strState = "";
+            if (IsType(strText, combobox, out strState) == false)
+                return;
+            combobox.Text = StringUtil.UnescapeString(strState);
+        }
+
+        static string GetCheckedComboBoxState(CheckedComboBox combobox)
+        {
+            return combobox.GetType().ToString() + ":" + StringUtil.EscapeString(combobox.Text, ":;,");
+        }
+
         //
         static void SetTextBoxState(TextBox textbox, string strText, object default_value)
         {
@@ -664,6 +688,10 @@ namespace DigitalPlatform.CommonControl
                 {
                     SetFormState(control as Form, strState);
                 }
+                else if (control is CheckedComboBox)
+                {
+                    SetCheckedComboBoxState(control as CheckedComboBox, strState, default_value);
+                }
                 else
                     throw new ArgumentException("不支持的类型 " + control.GetType().ToString());
 
@@ -781,6 +809,12 @@ GetTextBoxState(control as TextBox)
                     text.Append(
 GetFormState(control as Form)
 );
+                else if (control is CheckedComboBox)
+                {
+                    text.Append(
+GetCheckedComboBoxState(control as CheckedComboBox)
+    );
+                }
                 else
                     throw new ArgumentException("不支持的类型 " + control.GetType().ToString());
             }
