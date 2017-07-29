@@ -14,12 +14,18 @@ namespace DigitalPlatform.CommonControl
 {
     public partial class MessageDialog : Form
     {
+        // 自动关闭时间。单位秒
+        // 0 表示不自动关闭
+        public int AutoCloseSeconds { get; set; }
+
         List<ButtonInfo> m_buttonInfos = new List<ButtonInfo>();
 
         internal string[] button_texts = null;
 
         public MessageBoxButtons m_buttonDef = MessageBoxButtons.OK;
         public MessageBoxDefaultButton m_defautButton = MessageBoxDefaultButton.Button1;
+
+        Timer _timer = null;
 
         public MessageDialog()
         {
@@ -32,6 +38,43 @@ namespace DigitalPlatform.CommonControl
 
             this.textBox_message.SelectionStart = this.textBox_message.Text.Length;
             this.textBox_message.DeselectAll();
+
+            if (this.AutoCloseSeconds > 0)
+            {
+                this.SetTitle();
+
+                _timer = new Timer();
+                _timer.Interval = 1000;
+                _timer.Tick += _timer_Tick;
+                _timer.Start();
+            }
+        }
+
+        void SetTitle()
+        {
+            this.Text = this.AutoCloseSeconds + " 秒后自动关闭";
+            Application.DoEvents();
+            this.Update();
+        }
+
+        int _inTick = 0;
+
+        void _timer_Tick(object sender, EventArgs e)
+        {
+            if (_inTick > 0)
+                return;
+            _inTick++;
+            try
+            {
+                this.AutoCloseSeconds--;
+                this.SetTitle();
+                if (this.AutoCloseSeconds <= 0)
+                    button_1_Click(sender, e);
+            }
+            finally
+            {
+                _inTick--;
+            }
         }
 
         void SetButtonState(string[] button_texts = null)
@@ -425,7 +468,8 @@ namespace DigitalPlatform.CommonControl
             MessageBoxDefaultButton defaultbutton,
             string strCheckBoxText,
             ref bool bCheckBox,
-            string[] button_texts = null)
+            string[] button_texts = null,
+            int nAutoCloseSeconds = 0)
         {
             MessageDialog dlg = new MessageDialog();
             GuiUtil.AutoSetDefaultFont(dlg);
@@ -442,11 +486,20 @@ namespace DigitalPlatform.CommonControl
             dlg.m_defautButton = defaultbutton;
 
             dlg.button_texts = button_texts;
-
+            dlg.AutoCloseSeconds = nAutoCloseSeconds;
             dlg.ShowDialog(owner);
 
             bCheckBox = dlg.CheckBoxValue;
             return dlg.DialogResult;
+        }
+
+        private void MessageDialog_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (_timer != null)
+            {
+                _timer.Dispose();
+                _timer = null;
+            }
         }
     }
 

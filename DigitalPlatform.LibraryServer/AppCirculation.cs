@@ -5944,7 +5944,10 @@ start_time_1,
                 {
                     if (String.IsNullOrEmpty(strBiblioRecID) == true)
                     {
-                        strError = "册记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录ID";
+                        strError = "册记录 '" + strOutputItemRecPath + "' XML 中 parent 元素缺乏或者值为空, 因此无法定位种记录 ID";
+
+                        this.WriteErrorLog("*** " + strError);
+
                         if (result.ErrorCode == ErrorCode.NoError)
                             strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                         goto ERROR1;

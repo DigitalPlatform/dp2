@@ -177,23 +177,26 @@ namespace dp2Circulation
             else
                 throw new Exception("未知的DbType '" + this.DbType + "'");
 
+            if (Program.MainForm.AppInfo != null)
+            {
+                this.comboBox_from.Text = Program.MainForm.AppInfo.GetString(
+                    this.DbType + "_search_form",
+                    "from",
+                    strDefaultFrom);
 
-            this.comboBox_from.Text = Program.MainForm.AppInfo.GetString(
-                this.DbType + "_search_form",
-                "from",
-                strDefaultFrom);
+                this.comboBox_entityDbName.Text = Program.MainForm.AppInfo.GetString(
+                    this.DbType + "_search_form",
+                    "entity_db_name",
+                    "<全部>");
 
-            this.comboBox_entityDbName.Text = Program.MainForm.AppInfo.GetString(
-                this.DbType + "_search_form",
-                "entity_db_name",
-                "<全部>");
+                this.comboBox_matchStyle.Text = Program.MainForm.AppInfo.GetString(
+                    this.DbType + "_search_form",
+                    "match_style",
+                    "精确一致");
+            }
 
-            this.comboBox_matchStyle.Text = Program.MainForm.AppInfo.GetString(
-                this.DbType + "_search_form",
-                "match_style",
-                "精确一致");
-
-            if (this.DbType != "arrive")
+            if (this.DbType != "arrive"
+                && Program.MainForm.AppInfo != null)
             {
                 bool bHideMatchStyle = Program.MainForm.AppInfo.GetBoolean(
                     this.DbType + "_search_form",
@@ -217,27 +220,19 @@ namespace dp2Circulation
                 }
             }
 
-#if NO
-            string strWidths = Program.MainForm.AppInfo.GetString(
-                this.DbType + "_search_form",
-                "record_list_column_width",
-                "");
-            if (String.IsNullOrEmpty(strWidths) == false)
+            if (Program.MainForm.AppInfo != null)
             {
-                ListViewUtil.SetColumnHeaderWidth(this.listView_records,
-                    strWidths,
-                    true);
-            }
-#endif
-            this.UiState = Program.MainForm.AppInfo.GetString(
+                this.UiState = Program.MainForm.AppInfo.GetString(
+        this.DbType + "_search_form",
+        "ui_state",
+        "");
+                string strSaveString = Program.MainForm.AppInfo.GetString(
     this.DbType + "_search_form",
-    "ui_state",
-    "");
-            string strSaveString = Program.MainForm.AppInfo.GetString(
-this.DbType + "_search_form",
-"query_lines",
-"^^^");
-            this.dp2QueryControl1.Restore(strSaveString);
+    "query_lines",
+    "^^^");
+
+                this.dp2QueryControl1.Restore(strSaveString);
+            }
 
             comboBox_matchStyle_TextChanged(null, null);
 
@@ -854,6 +849,9 @@ this.DbType + "_search_form",
                 goto ERROR1;
             }
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+    + " 开始进行检索</div>");
+
             string strResultSetName = _globalResultSetName;
 
             stop.Style = StopStyle.None;
@@ -1029,6 +1027,9 @@ this.DbType + "_search_form",
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+    + " 结束执行检索</div>");
             }
 
             return 1;
@@ -1148,7 +1149,7 @@ this.DbType + "_search_form",
 
             bool bAccessBiblioSummaryDenied = false;
 
-            string strBrowseStyle = "id, cols";
+            string strBrowseStyle = "id,cols";
             //string strOutputStyle = "";
             if (bOutputKeyCount == true)
             {
@@ -1160,6 +1161,8 @@ this.DbType + "_search_form",
                 //strOutputStyle = "keyid";
                 strBrowseStyle = "keyid,key,id,cols";
             }
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("检索共命中 " + lHitCount.ToString() + " 条") + "</div>");
+
             //
             this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条";
             stop.SetProgressRange(0, lHitCount);
@@ -1170,6 +1173,7 @@ this.DbType + "_search_form",
             long lCount = lHitCount;
 
             long lMaxPerCount = 500;
+            int nSingleGetCount = 0;    // 单条记录重试累积次数
 
             DigitalPlatform.LibraryClient.localhost.Record[] searchresults = null;
 
@@ -1213,8 +1217,12 @@ this.DbType + "_search_form",
                         this.Lang,
                         out searchresults,
                         out strError);
+                    // lRet = -1;
+                    // strError = "test";
                     if (lRet == -1)
                     {
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("获得浏览记录时发生错误: " + strError) + "</div>");
+
                         MessagePromptEventArgs e = new MessagePromptEventArgs();
                         e.MessageText = "获得浏览记录时发生错误： " + strError;
                         e.Actions = "yes,no,cancel";
@@ -1222,11 +1230,27 @@ this.DbType + "_search_form",
                         if (e.ResultAction == "cancel")
                         {
                             this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条，" + strError;
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("放弃检索") + "</div>");
                             goto ERROR1;
                         }
                         else if (e.ResultAction == "yes")
+                        {
+                            Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("重试获取浏览记录") + "</div>");
                             goto REDO_GETRECORDS;
+                        }
 
+                        // 2017/7/1
+                        // 起点跳过一条，继续向后做
+                        if (lMaxPerCount > 1)
+                            lMaxPerCount = 1;
+                        else
+                        {
+                            lStart++;
+                            lCount--;
+                            if (lStart >= lHitCount || lCount <= 0)
+                                break;
+                        }
+                        Program.MainForm.OperHistory.AppendHtml("<div class='debug green'>" + HttpUtility.HtmlEncode("跳过一条，继续向后处理 (lStart=" + lStart + ", lMaxPerCount=" + lMaxPerCount + ")") + "</div>");
                         continue;
                     }
 
@@ -1234,6 +1258,17 @@ this.DbType + "_search_form",
                     {
                         MessageBox.Show(this, "未命中");
                         return 0;
+                    }
+
+                    // 只要有一次获得成功，就又改为大批量获取
+                    if (lMaxPerCount == 1)
+                    {
+                        nSingleGetCount++;
+                        if (nSingleGetCount > 500)
+                        {
+                            lMaxPerCount = 500; // 恢复大批次
+                            nSingleGetCount = 0;
+                        }
                     }
 
                     // 处理浏览结果
@@ -1246,6 +1281,17 @@ this.DbType + "_search_form",
                             ListViewItem item = null;
 
                             DigitalPlatform.LibraryClient.localhost.Record searchresult = searchresults[i];
+
+                            ErrorCodeValue error_code = ErrorCodeValue.NoError;
+                            string error_string = "";
+                            if (searchresult.RecordBody != null
+                                && searchresult.RecordBody.Result != null)
+                            {
+                                error_code = searchresult.RecordBody.Result.ErrorCode;
+                                error_string = searchresult.RecordBody.Result.ErrorString;
+
+                                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode("册记录 '" + searchresult.Path + "' 装入浏览信息时出错: " + error_string) + "</div>");
+                            }
 
                             if (bOutputKeyCount == false
                                 && bOutputKeyID == false)
@@ -1317,33 +1363,51 @@ this.DbType + "_search_form",
                                 item.Tag = query;
                             }
 
+                            if (error_code != ErrorCodeValue.NoError)
+                            {
+                                SetError(item, "{" + error_string + "}");
+                            }
+
                             // 2017/2/21
                             // 填入 parent_id 列内容
                             if (bTempQuickLoad)
                             {
-                                int nCol = -1;
-                                string strBiblioRecPath = "";
-                                // 获得事项所从属的书目记录的路径
-                                // parameters:
-                                //      bAutoSearch 当没有 parent id 列的时候，是否自动进行检索以便获得书目记录路径
-                                // return:
-                                //      -1  出错
-                                //      0   相关数据库没有配置 parent id 浏览列
-                                //      1   找到
-                                int nRet = GetBiblioRecPath(
-                                    channel,
-                                    item,
-                false,
-                out nCol,
-                out strBiblioRecPath,
-                out strError);
-                                if (nRet == 1)
+                                int nTempCol = this.m_bBiblioSummaryColumn == true ? 2 : 1;
+                                string strParentID = ListViewUtil.GetItemText(item, nTempCol);
+
                                 {
-                                    int nTempCol = this.m_bBiblioSummaryColumn == true ? 2 : 1;
-                                    string strParentID = ListViewUtil.GetItemText(item, nTempCol);
-                                    ListViewUtil.ChangeItemText(item, nCol, strParentID);
-                                    ListViewUtil.ChangeItemText(item, nTempCol, "");
+                                    int nCol = -1;
+                                    string strBiblioRecPath = "";
+                                    // 获得事项所从属的书目记录的路径
+                                    // parameters:
+                                    //      bAutoSearch 当没有 parent id 列的时候，是否自动进行检索以便获得书目记录路径
+                                    // return:
+                                    //      -1  出错
+                                    //      0   相关数据库没有配置 parent id 浏览列
+                                    //      1   找到
+                                    int nRet = GetBiblioRecPath(
+                                        channel,
+                                        item,
+                                        false,
+                                        out nCol,
+                                        out strBiblioRecPath,
+                                        out strError);
+                                    if (nRet == -1)
+                                        SetError(item, error_string + strError);
+                                    if (nRet == 1)
+                                    {
+                                        if (error_code == ErrorCodeValue.NotFound)
+                                        {
+                                            // ListViewUtil.ChangeItemText(item, nCol, "!" + strParentID);
+                                            ListViewUtil.ChangeItemText(item, nCol, "");
+                                            // SetError(item, "!记录体不存在");
+                                        }
+                                        else
+                                            ListViewUtil.ChangeItemText(item, nCol, strParentID);
+                                    }
                                 }
+
+                                ListViewUtil.ChangeItemText(item, nTempCol, "");
                             }
 
                             query.Items.Add(item);
@@ -1412,6 +1476,15 @@ this.DbType + "_search_form",
             return 1;
         ERROR1:
             return -1;
+        }
+
+        void SetError(ListViewItem item, string strError)
+        {
+            if (this.m_bBiblioSummaryColumn == true)
+                ListViewUtil.ChangeItemText(item, 1, strError);
+
+            item.BackColor = Color.DarkRed;
+            item.ForeColor = Color.White;
         }
 
         /// <summary>
@@ -3425,9 +3498,24 @@ out strError);
                 return -1;
             }
 
-            string strPrice = DomUtil.GetElementText(dom.DocumentElement, "price");
+            string strPrice = DomUtil.GetElementText(dom.DocumentElement, "price").Trim();
             if (string.IsNullOrEmpty(strPrice) || strPrice == "CNY")
             {
+                // 不管后面是否成功从书目记录中添加了字段内容，这里都预先清除这个字段的内容
+                if (strPrice == "CNY")
+                {
+                    DomUtil.SetElementText(dom.DocumentElement, "price", "");
+                    bChanged = true;
+                }
+
+                // 期刊库的册记录，不从书目记录找价格来添加
+                // return:
+                //      -1  不是实体库
+                //      0   图书类型
+                //      1   期刊类型
+                if (Program.MainForm.IsSeriesTypeFromItemDbName(Global.GetDbName(strItemRecPath)) == 1)
+                    return 0;
+
                 string strParentID = DomUtil.GetElementText(dom.DocumentElement, "parent");
                 if (string.IsNullOrEmpty(strParentID))
                 {
@@ -4207,6 +4295,7 @@ out strError);
 
         void loader_Prompt(object sender, MessagePromptEventArgs e)
         {
+#if NO
             // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
             if (e.Actions == "yes,no,cancel")
             {
@@ -4220,6 +4309,25 @@ out strError);
                 else
                     e.ResultAction = "yes";
 #endif
+                if (result == DialogResult.Cancel)
+                    e.ResultAction = "cancel";
+                else if (result == System.Windows.Forms.DialogResult.No)
+                    e.ResultAction = "no";
+                else
+                    e.ResultAction = "yes";
+            }
+#endif
+            if (e.Actions == "yes,no,cancel")
+            {
+                bool bHideMessageBox = true;
+                DialogResult result = MessageDialog.Show(this,
+                    e.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxDefaultButton.Button1,
+    null,
+    ref bHideMessageBox,
+    new string[] { "重试", "跳过", "放弃" },
+    20);
                 if (result == DialogResult.Cancel)
                     e.ResultAction = "cancel";
                 else if (result == System.Windows.Forms.DialogResult.No)
@@ -11803,6 +11911,44 @@ out strError);
         private void tabComboBox_queryWord_DropDown(object sender, EventArgs e)
         {
             ListKeys();
+        }
+
+        private void comboBox_entityDbName_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            ListView list = e.Item.ListView;
+
+            if (e.Item.Text.StartsWith("<全部") || e.Item.Text.ToLower().StartsWith("<all"))
+            {
+                if (e.Item.Checked == true)
+                {
+                    // 如果当前勾选了“全部”，则清除其余全部事项的勾选
+                    for (int i = 0; i < list.Items.Count; i++)
+                    {
+                        ListViewItem item = list.Items[i];
+                        if (item.Text.StartsWith("<全部") || item.Text.ToLower().StartsWith("<all"))
+                            continue;
+                        if (item.Checked != false)
+                            item.Checked = false;
+                    }
+                }
+            }
+            else
+            {
+                if (e.Item.Checked == true)
+                {
+                    // 如果勾选的不是“全部”，则要清除“全部”上可能的勾选
+                    for (int i = 0; i < list.Items.Count; i++)
+                    {
+                        ListViewItem item = list.Items[i];
+                        if (item.Text.StartsWith("<全部") || item.Text.ToLower().StartsWith("<all"))
+                        {
+                            if (item.Checked != false)
+                                item.Checked = false;
+                        }
+                    }
+                }
+            }
+
         }
     }
 

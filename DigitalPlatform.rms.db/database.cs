@@ -1811,6 +1811,15 @@ namespace DigitalPlatform.rms
                         }
                         if (nRet <= -1)
                             goto ERROR1;
+
+                        // 2017/7/1
+                        if (string.IsNullOrEmpty(strXml))
+                        {
+                            strError = "记录 '" + strRecordID + "' 的 XML 为空";
+                            cols = new string[1];
+                            cols[0] = strError;
+                            return 0;
+                        }
                     }
                     finally
                     {
@@ -2069,7 +2078,7 @@ namespace DigitalPlatform.rms
 
             List<string> parts = StringUtil.SplitList(strSegment, "->");
 
-            foreach(string part in parts)
+            foreach (string part in parts)
             {
                 if (part.StartsWith("nl:"))
                 {

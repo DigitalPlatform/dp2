@@ -983,6 +983,8 @@ namespace dp2Circulation
                         return;
                 }
             }
+            else
+                this.TargetRecPath = "";    // 2017/7/6
 
             // 
             if (this.Items == null)

@@ -8835,6 +8835,7 @@ out strError);
                     return -1;
                 }
                 string strOldRecPath = DomUtil.GetAttr(node, "recPath");
+                bool bOldExist = DomUtil.GetBooleanParam(node, "exist", true);
 
                 string strMergeStyle = DomUtil.GetElementText(domLog.DocumentElement,
     "mergeStyle");
@@ -8887,11 +8888,14 @@ out strError);
                 {
                     if (String.IsNullOrEmpty(strOldRecord) == true)
                     {
-                        strError = "源记录 '" + strOldRecPath + "' 不存在，并且<record>元素无文本内容，这时<oldRecord>元素也无文本内容，无法获得要写入的记录内容";
-                        return -1;
+                        if (bOldExist == true)
+                        {
+                            strError = "源记录 '" + strOldRecPath + "' 不存在，并且<record>元素无文本内容，这时<oldRecord>元素也无文本内容，无法获得要写入的记录内容";
+                            return -1;
+                        }
                     }
-
-                    strTargetRecord = strOldRecord;
+                    else
+                        strTargetRecord = strOldRecord;
                 }
 
                 // 如果有“新记录”内容

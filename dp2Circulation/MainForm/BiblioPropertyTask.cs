@@ -67,7 +67,7 @@ namespace dp2Circulation
                     string[] results = null;
                     byte[] baTimestamp = null;
                     // 获得书目记录
-                    channel.Timeout = new TimeSpan(0, 0, 5);
+                    channel.Timeout = new TimeSpan(0, 0, 10);
                     long lRet = channel.GetBiblioInfos(
                         Stop,
                         strRecPath,

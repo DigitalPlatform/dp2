@@ -6587,6 +6587,16 @@ namespace DigitalPlatform.rms
                                 }
                             }
                         } // end if (dom != null)
+                        else
+                        {
+                            // 2017/7/5
+                            // XML 记录体为空
+                            if (baWholeXml != null && baWholeXml.Length == 0)
+                            {
+                                destBuffer = new byte[0];
+                                return 0;
+                            }
+                        }
 
                         if (baWholeXml != null)
                         {

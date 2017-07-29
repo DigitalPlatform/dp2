@@ -349,6 +349,18 @@ namespace dp2Circulation
                     return -1;
                 }
             }
+            else if (strTaskName == "大备份")
+            {
+                StartBackupDialog dlg = new StartBackupDialog();
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.StartInfo = startinfo;
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult != DialogResult.OK)
+                {
+                    strError = "用户放弃启动";
+                    return -1;
+                }
+            }
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try

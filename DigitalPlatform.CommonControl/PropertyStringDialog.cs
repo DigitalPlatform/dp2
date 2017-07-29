@@ -82,6 +82,8 @@ namespace DigitalPlatform.CommonControl
             this.PropertyString = GetValue();
         }
 
+        bool _withSetted = false;
+
         // 根据列的多少，智能设置列宽度
         void SetColumnWidth()
         {
@@ -100,10 +102,22 @@ namespace DigitalPlatform.CommonControl
                     this.columnHeader_name.Width = this.listView1.Width - SystemInformation.Border3DSize.Height * 4 - SystemInformation.VerticalScrollBarWidth;
                     this.columnHeader_comment.Width = 0;
                 }
+                else if (_withSetted == false)
+                {
+                    // 从 96 DPI 下的数量翻译为物理像素数
+                    int value = DpiUtil.GetScalingX(DpiUtil.GetDpiXY(this), this.columnHeader_name.Width);
+                    this.columnHeader_name.Width = value;
+
+                    value = DpiUtil.GetScalingX(DpiUtil.GetDpiXY(this), this.columnHeader_comment.Width);
+                    this.columnHeader_comment.Width = value;
+
+                    _withSetted = true;
+                }
             }
         }
 
         // 根据ValueTable先建立未勾选的全部列表事项
+        // TODO: 测算两列的最大内容宽度
         void BuildList()
         {
             this.listView1.Items.Clear();
@@ -472,12 +486,10 @@ namespace DigitalPlatform.CommonControl
 
     public class NumberdStringCompare : IComparer<NumberedString>
     {
-
         int IComparer<NumberedString>.Compare(NumberedString x, NumberedString y)
         {
             return x.Index - y.Index;
         }
-
     }
 
     /*

@@ -2725,7 +2725,8 @@ Culture=neutral, PublicKeyToken=null
             }
 #endif
             LibraryChannel channel = this.GetChannel();
-
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 1, 0);
             string strError = "";
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
@@ -2735,7 +2736,6 @@ Culture=neutral, PublicKeyToken=null
             try
             {
                 string strTime = "";
-                channel.Timeout = new TimeSpan(0, 1, 0);
                 long lRet = channel.GetClock(Stop,
                     out strTime,
                     out strError);
@@ -2755,6 +2755,7 @@ Culture=neutral, PublicKeyToken=null
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
 
+                channel.Timeout = old_timeout;
                 this.ReturnChannel(channel);
 #if NO
                 if (bPrepareSearch == true)

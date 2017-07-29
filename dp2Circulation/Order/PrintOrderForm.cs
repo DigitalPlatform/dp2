@@ -999,7 +999,6 @@ namespace dp2Circulation
             return -1;
         }
 
-#if OLDVERSION
 
         // 获得书目数据(XML格式)
         // return:
@@ -1025,47 +1024,54 @@ namespace dp2Circulation
             strError = "";
             strXmlRecord = "";
 
-            string[] formats = new string[1];
-            formats[0] = "xml";
-            string[] results = null;
-            byte[] timestamp = null;
+            LibraryChannel channel = this.GetChannel();
 
-            if (String.IsNullOrEmpty(strBiblioRecPath) == true)
+            try
             {
-                strError = "strBiblioRecPath参数值不能为空";
-                return -1;
-            }
+                string[] formats = new string[1];
+                formats[0] = "xml";
+                string[] results = null;
+                byte[] timestamp = null;
 
-            long lRet = Channel.GetBiblioInfos(
-                stop,
-                strBiblioRecPath,
-                "",
-                formats,
-                out results,
-                out timestamp,
-                out strError);
-            if (lRet == 0)
-            {
-                if (String.IsNullOrEmpty(strError) == true)
-                    strError = "记录 " + strBiblioRecPath + " 没有找到";
+                if (String.IsNullOrEmpty(strBiblioRecPath) == true)
+                {
+                    strError = "strBiblioRecPath参数值不能为空";
+                    return -1;
+                }
 
-                return 0;   // not found
-            }
-            if (lRet == -1)
-            {
-                strError = "获得书目记录时发生错误: " + strError;
-                return -1;
-            }
-            else
-            {
-                Debug.Assert(results != null && results.Length == 1, "results必须包含1个元素");
-                strXmlRecord = results[0];
-            }
+                long lRet = channel.GetBiblioInfos(
+                    stop,
+                    strBiblioRecPath,
+                    "",
+                    formats,
+                    out results,
+                    out timestamp,
+                    out strError);
+                if (lRet == 0)
+                {
+                    if (String.IsNullOrEmpty(strError) == true)
+                        strError = "记录 " + strBiblioRecPath + " 没有找到";
 
-            return (int)lRet;
+                    return 0;   // not found
+                }
+                if (lRet == -1)
+                {
+                    strError = "获得书目记录时发生错误: " + strError;
+                    return -1;
+                }
+                else
+                {
+                    Debug.Assert(results != null && results.Length == 1, "results必须包含1个元素");
+                    strXmlRecord = results[0];
+                }
+
+                return (int)lRet;
+            }
+            finally
+            {
+                this.ReturnChannel(channel);
+            }
         }
-
-#endif
 
         // 根据记录路径，装入订购记录
         // return: 

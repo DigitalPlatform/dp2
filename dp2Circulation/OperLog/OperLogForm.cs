@@ -66,6 +66,7 @@ namespace dp2Circulation
         const int COLUMN_OPERTIME = 5;
         const int COLUMN_SECONDS = 6;
         const int COLUMN_ATTACHMENT = 7;
+        const int COLUMN_COMMENT = 8;
 
         bool StoreInTempFile = false;
 
@@ -222,12 +223,47 @@ namespace dp2Circulation
                 Program.MainForm.DataDir);
         }
 
+        bool PrepareFilter(ref int nLevel)
+        {
+            OperLogFindDialog dlg = new OperLogFindDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.Text = "请指定筛选方式";
+            //dlg.Operations = m_strFindOperations;
+            //dlg.Filters = this.m_strFilters;
+
+            Program.MainForm.AppInfo.LinkFormState(dlg, "operlogform_finddialog_formstate");
+            dlg.UiState = Program.MainForm.AppInfo.GetString("OperLogForm", "OperLogFindDialog_ui_state", "");
+            dlg.ShowDialog(this);
+            Program.MainForm.AppInfo.SetString("OperLogForm", "OperLogFindDialog_ui_state", dlg.UiState);
+            // Program.MainForm.AppInfo.UnlinkFormState(dlg);
+
+            if (dlg.DialogResult != DialogResult.OK)
+                return false;
+
+            if (StringUtil.IsInList("增998$t", dlg.Filters))
+                nLevel = 0;
+
+            m_strFindOperations = dlg.Operations;
+            m_strFilters = dlg.Filters;
+            m_recPathList = dlg.RecPathList;
+            return true;
+        }
+
+        string GetFilterParamString()
+        {
+            string strText = this.m_strFilters;
+            if (string.IsNullOrEmpty(strText)
+                || StringUtil.IsInList("<all>", strText))
+                return "";
+            return strText;
+        }
+
         // 
         /// <summary>
         /// 装入一个日志文件中的全部记录
         /// </summary>
         /// <param name="strLogFileName">日志文件名。纯文件名</param>
-        /// <returns>-1: 出错; 1: 成功</returns>
+        /// <returns>-1: 出错; 0: 放弃处理; 1: 成功</returns>
         public int LoadRecordsFromSingleLogFile(string strLogFileName)
         {
             string strError = "";
@@ -236,6 +272,11 @@ namespace dp2Circulation
             this.AccessLog = bControl;
 
             this.tabControl_main.SelectedTab = this.tabPage_logRecords;
+
+            int nLevel = Program.MainForm.OperLogLevel;
+
+            if (PrepareFilter(ref nLevel) == false)
+                return 0;
 
             EnableControls(false);
 
@@ -261,6 +302,9 @@ namespace dp2Circulation
 #endif
             this.Clear();
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
+    + "开始装入日志文件 " + strLogFileName + " 中的记录" + "</div>");
+
             stop.SetMessage("正在装入日志文件 " + strLogFileName + " 中的记录...");
 #if DELAY_UPDATE
             this.listView_records.BeginUpdate();
@@ -281,9 +325,9 @@ namespace dp2Circulation
     this.estimate,
     Channel,
     lines,
-    Program.MainForm.OperLogLevel,
+    nLevel, // Program.MainForm.OperLogLevel,
     strStyle,
-    this.textBox_filter.Text,
+    GetFilterParamString(),   // this.textBox_filter.Text,
     Program.MainForm.OperLogCacheDir,
     null,   // param,
     DoRecord,
@@ -300,6 +344,10 @@ namespace dp2Circulation
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ "结束装入日志文件 " + strLogFileName + " 中的记录" + "</div>");
+
 
                 EnableControls(true);
             }
@@ -3619,6 +3667,37 @@ FileShare.ReadWrite))
         // 获得日志文件名
         private void button_loadFilenams_Click(object sender, EventArgs e)
         {
+            GetOperLogFilenameDlg dlg = new GetOperLogFilenameDlg();
+            MainForm.SetControlFont(dlg, this.Font, false);
+
+            // TODO: 可以抽取第一行和最后一行的日期，设置到 dlg.OperLogFilenames 中
+
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            string strText = "";
+            if (dlg.OperLogFilenames.Count == 1)
+                strText = dlg.OperLogFilenames[0];
+            else
+            {
+                for (int i = 0; i < dlg.OperLogFilenames.Count; i++)
+                {
+                    if (i != 0)
+                        strText += "\r\n";
+                    strText += dlg.OperLogFilenames[i];
+                }
+            }
+            this.textBox_filenames.Text = strText;
+            this.textBox_filenames.Focus();
+        }
+
+
+#if NO
+        // 获得日志文件名
+        private void button_loadFilenams_Click(object sender, EventArgs e)
+        {
             int x = 0;
             int y = 0;
             API.GetEditCurrentCaretPos(
@@ -3661,6 +3740,8 @@ FileShare.ReadWrite))
             // API.PostMessage(this.Handle, WM_SETCARETPOS, x, y);
         }
 
+#endif
+
         /*
         protected override void DefWndProc(ref Message m)
         {
@@ -3678,7 +3759,173 @@ FileShare.ReadWrite))
             base.DefWndProc(ref m);
         }*/
 
+        class FilterParam
+        {
+            public string Xml { get; set; }
+            //      strLocation 用于报错的文件名和偏移量文字内容
+            public string Location { get; set; }
 
+            // [out] 过滤过程中创建的注释文字
+            public string Comment { get; set; }
+        }
+
+        // 进行过滤
+        // parameters:
+        // return:
+        //      true    满足过滤条件
+        //      false   不满足过滤条件
+        bool DoFilter(
+            // string strXml, string strLocation
+            FilterParam param
+            )
+        {
+            List<string> errors = new List<string>();
+            string strError = "";
+            int nRet = 0;
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(param.Xml);
+            }
+            catch
+            {
+                return true;
+            }
+
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+            string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
+
+            if (string.IsNullOrEmpty(this.m_strFindOperations) == false
+                && this.m_strFindOperations != "<all>")
+            {
+                if (StringUtil.IsInList(strOperation, this.m_strFindOperations) == false)
+                    return false;
+            }
+
+            // TODO: 如果对话框中 operation 没有选择包含 setBiblioInfo，而又要筛选 增998$t，要警告
+            if (string.IsNullOrEmpty(this.m_strFilters) == false
+                && !(this.m_strFilters == "<无>" || this.m_strFilters == "<none>"))
+            {
+                if (StringUtil.IsInList("册修改历史", this.m_strFilters))
+                {
+                    if (strOperation == "setEntity")
+                    {
+                        XmlNode node = null;
+
+                        string strOldRecord = DomUtil.GetElementText(dom.DocumentElement, "oldRecord", out node);
+                        string strOldRecPath = "";
+                        if (node != null)
+                            strOldRecPath = DomUtil.GetAttr(node, "recPath");
+
+                        string strRecord = DomUtil.GetElementText(dom.DocumentElement, "record", out node);
+                        string strRecPath = "";
+                        if (node != null)
+                            strRecPath = DomUtil.GetAttr(node, "recPath");
+
+                        if (string.IsNullOrEmpty(strRecPath) == false
+                            && this.m_recPathList.IndexOf(strRecPath) != -1)
+                        {
+                            param.Comment = "path:" + strRecPath;
+                        }
+                        else if (string.IsNullOrEmpty(strOldRecPath) == false
+                            && this.m_recPathList.IndexOf(strOldRecPath) != -1)
+                        {
+                            param.Comment = "path:" + strOldRecPath;
+                        }
+                        else
+                            return false;
+                    }
+                    else if (strOperation == "borrow" || strOperation == "return")
+                    {
+                        XmlNode node = null;
+
+                        string strRecord = DomUtil.GetElementText(dom.DocumentElement, "itemRecord", out node);
+                        string strRecPath = "";
+                        if (node != null)
+                            strRecPath = DomUtil.GetAttr(node, "recPath");
+
+                        if (string.IsNullOrEmpty(strRecPath) == false
+                            && this.m_recPathList.IndexOf(strRecPath) != -1)
+                        {
+                            param.Comment = "path:" + strRecPath;
+                        }
+                        else
+                            return false;
+                    }
+                    else
+                        return false;
+                }
+
+                if (StringUtil.IsInList("增998$t", this.m_strFilters))
+                {
+                    if (strOperation == "setBiblioInfo"
+                    && (strAction == "change" || strAction == "new"))
+                    {
+                        // 比较新旧记录的 998 字段，看看是否增加了 $t
+                        string strOldRecord = DomUtil.GetElementText(dom.DocumentElement, "oldRecord");
+                        string strNewRecord = DomUtil.GetElementText(dom.DocumentElement, "record");
+
+                        string strOutMarcSyntax = "";
+                        string strOldMarc = "";
+                        string strNewMarc = "";
+                        // 将XML格式转换为MARC格式
+                        // 自动从数据记录中获得MARC语法
+                        nRet = MarcUtil.Xml2Marc(strOldRecord,
+                            true,
+                            null,
+                            out strOutMarcSyntax,
+                            out strOldMarc,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = param.Location + " oldRecord 元素内 XML 转换到 MARC 记录时出错: " + strError;
+                            errors.Add(strError);
+                            goto ERROR1;
+                        }
+
+                        nRet = MarcUtil.Xml2Marc(strNewRecord,
+        true,
+        null,
+        out strOutMarcSyntax,
+        out strNewMarc,
+        out strError);
+                        if (nRet == -1)
+                        {
+                            strError = param.Location + " record 元素内 XML 转换到 MARC 记录时出错: " + strError;
+                            errors.Add(strError);
+                            goto ERROR1;
+                        }
+
+                        MarcRecord old_record = new MarcRecord(strOldMarc);
+                        MarcRecord new_record = new MarcRecord(strNewMarc);
+
+                        string strOldContent = old_record.select("field[@name='998']/subfield[@name='t']").FirstContent;
+                        string strNewContent = new_record.select("field[@name='998']/subfield[@name='t']").FirstContent;
+
+                        if (string.IsNullOrEmpty(strOldContent) == true
+                            && string.IsNullOrEmpty(strNewContent) == false)
+                        {
+                        }
+                        else
+                            return false;
+                    }
+                    else
+                        return false;
+                }
+            }
+
+            return true;
+
+        ERROR1:
+            foreach (string error in errors)
+            {
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug error'>" + HttpUtility.HtmlEncode(strError) + "</div>");
+            }
+            return true;
+        }
+
+        DateTime _lastUpdateTime = DateTime.Now;
 
         ProgressEstimate estimate = new ProgressEstimate();
 
@@ -3694,6 +3941,16 @@ FileShare.ReadWrite))
             strError = "";
 
             if (string.IsNullOrEmpty(strXml) == true)
+                return 0;
+
+            FilterParam filter = new FilterParam();
+            filter.Xml = strXml;
+            filter.Location = strLogFileName + ":" + lIndex;
+            // 进行过滤
+            // return:
+            //      true    满足过滤条件
+            //      false   不满足过滤条件
+            if (DoFilter(filter) == false)
                 return 0;
 
             OperLogItemInfo info = new OperLogItemInfo();
@@ -3730,9 +3987,14 @@ FileShare.ReadWrite))
             if (nRet == -1)
                 return -1;
 
-            if ((lIndex % 100) == 0)
-                this.listView_records.ForceUpdate();
+            ListViewUtil.ChangeItemText(item, COLUMN_COMMENT, filter.Comment);
 
+            if ((lIndex % 100) == 0
+                || DateTime.Now - _lastUpdateTime > TimeSpan.FromSeconds(5))
+            {
+                this.listView_records.ForceUpdate();
+                _lastUpdateTime = DateTime.Now;
+            }
             return 0;
         }
 
@@ -3746,6 +4008,11 @@ FileShare.ReadWrite))
             this.AccessLog = bControl;
 
             this.tabControl_main.SelectedTab = this.tabPage_logRecords;
+
+            int nLevel = Program.MainForm.OperLogLevel;
+
+            if (PrepareFilter(ref nLevel) == false)
+                return;
 
             EnableControls(false);
 
@@ -3776,6 +4043,10 @@ FileShare.ReadWrite))
 #endif
             this.Clear();
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ "开始装入日志文件中的记录" + "</div>");
+
+
             try
             {
                 stop.SetMessage("正在准备日志文件名 ...");
@@ -3805,9 +4076,9 @@ FileShare.ReadWrite))
                     this.estimate,
                     Channel,
                     lines,
-                    Program.MainForm.OperLogLevel,
+                    nLevel, // Program.MainForm.OperLogLevel,
                     strStyle,
-                    this.textBox_filter.Text,
+                    GetFilterParamString(),   // this.textBox_filter.Text,
                     Program.MainForm.OperLogCacheDir,
                     null,   // param,
                     DoRecord,
@@ -3826,6 +4097,10 @@ FileShare.ReadWrite))
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
+
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ "结束装入日志文件中的记录" + "</div>");
+
 
                 EnableControls(true);
             }
@@ -4096,13 +4371,18 @@ FileShare.ReadWrite))
         /// </summary>
         /// <param name="strFilename">日志文件名的文件</param>
         /// <param name="strError">返回出错信息</param>
-        /// <returns>-1: 出错; 0: 成功</returns>
+        /// <returns>-1: 出错; 0: 放弃; 1: 成功</returns>
         public int LoadFromFilenamesFile(
             string strFilename,
             out string strError)
         {
             strError = "";
             int nRet = 0;
+
+            int nLevel = Program.MainForm.OperLogLevel;
+
+            if (PrepareFilter(ref nLevel) == false)
+                return 0;
 
             StreamReader sr = null;
             try
@@ -4146,6 +4426,9 @@ FileShare.ReadWrite))
 #endif
             this.Clear();
 
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ "开始装入日志文件中的记录" + "</div>");
+
             try
             {
                 stop.SetMessage("正在准备日志文件名 ...");
@@ -4178,15 +4461,17 @@ FileShare.ReadWrite))
     this.estimate,
     Channel,
     lines,
-    Program.MainForm.OperLogLevel,
+    nLevel,     // Program.MainForm.OperLogLevel,
     strStyle,
-    this.textBox_filter.Text,
+    GetFilterParamString(),   // this.textBox_filter.Text,
     Program.MainForm.OperLogCacheDir,
     null,   // param,
     DoRecord,
     out strError);
                 if (nRet == -1)
                     return -1;
+
+                return 1;
             }
             finally
             {
@@ -4200,14 +4485,11 @@ FileShare.ReadWrite))
                 stop.Initial("");
                 stop.HideProgress();
 
+                Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString())
++ "结束装入日志文件中的记录" + "</div>");
+
                 EnableControls(true);
             }
-
-            return 0;
-            /*
-        ERROR1:
-            return -1;
-             * */
         }
 
         private void button_repair_findSourceFilename_Click(object sender, EventArgs e)
@@ -5050,10 +5332,45 @@ FileShare.ReadWrite))
             }
             else if (strName == "最近十年" || strName == "最近10年")
             {
+#if NO
                 DateTime now = DateTime.Now;
                 DateTime start = now - new TimeSpan(10 * 365 - 1, 0, 0, 0);
                 strStartDate = DateTimeUtil.DateTimeToString8(start);
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
+#endif
+                GetYearsRange(10, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近九年" || strName == "最近9年")
+            {
+                GetYearsRange(9, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近八年" || strName == "最近8年")
+            {
+                GetYearsRange(8, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近七年" || strName == "最近7年")
+            {
+                GetYearsRange(7, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近六年" || strName == "最近6年")
+            {
+                GetYearsRange(6, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近五年" || strName == "最近5年")
+            {
+                GetYearsRange(5, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近四年" || strName == "最近4年")
+            {
+                GetYearsRange(4, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近三年" || strName == "最近3年")
+            {
+                GetYearsRange(3, out strStartDate, out strEndDate);
+            }
+            else if (strName == "最近二年" || strName == "最近2年")
+            {
+                GetYearsRange(2, out strStartDate, out strEndDate);
             }
             else
             {
@@ -5096,6 +5413,13 @@ FileShare.ReadWrite))
             MessageBox.Show(this, strError);
         }
 
+        void GetYearsRange(int n, out string strStartDate, out string strEndDate)
+        {
+            DateTime now = DateTime.Now;
+            DateTime start = now - new TimeSpan(n * 365 - 1, 0, 0, 0);
+            strStartDate = DateTimeUtil.DateTimeToString8(start);
+            strEndDate = DateTimeUtil.DateTimeToString8(now);
+        }
 
         private void comboBox_quickSetFilenames_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -6380,7 +6704,6 @@ MessageBoxDefaultButton.Button1);
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-
             m_strFindOperations = dlg.Operations;
 
             List<string> operations = StringUtil.FromListString(dlg.Operations);
@@ -6441,7 +6764,10 @@ MessageBoxDefaultButton.Button1);
             return;
         }
 
+        // *** 过滤所用的特性参数
         string m_strFindOperations = "";    // 曾经用过的查找参数
+        string m_strFilters = "";   // 过滤器
+        List<string> m_recPathList = new List<string>();    // 相关记录路径
 
         void menu_find_Click(object sender, EventArgs e)
         {
@@ -6570,7 +6896,6 @@ Keys keyData)
 
             try
             {
-
                 List<string> operations = StringUtil.FromListString(m_strFindOperations);
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.Items)
@@ -6585,7 +6910,8 @@ Keys keyData)
 
                     foreach (string o in operations)
                     {
-                        if (strOperation.IndexOf(o) != -1)
+                        if (o == "<all>"
+                            || strOperation.IndexOf(o) != -1)
                         {
                             found_item = item;
                             goto FOUND;
@@ -7853,7 +8179,7 @@ MessageBoxDefaultButton.Button1);
                 controls.Add(this.textBox_repair_sourceFilename);
                 controls.Add(this.textBox_repair_targetFilename);
                 controls.Add(this.textBox_repair_verifyFolderName);
-                controls.Add(this.textBox_filter);
+                //controls.Add(this.textBox_filter);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -7865,7 +8191,7 @@ MessageBoxDefaultButton.Button1);
                 controls.Add(this.textBox_repair_sourceFilename);
                 controls.Add(this.textBox_repair_targetFilename);
                 controls.Add(this.textBox_repair_verifyFolderName);
-                controls.Add(this.textBox_filter);
+                //controls.Add(this.textBox_filter);
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -8912,8 +9238,12 @@ MessageBoxDefaultButton.Button1);
 
 #endif
 
-                    if ((count % 100) == 0)
+                    if ((count % 100) == 0
+                || DateTime.Now - _lastUpdateTime > TimeSpan.FromSeconds(5))
+                    {
                         this.listView_restoreList.ForceUpdate();
+                        _lastUpdateTime = DateTime.Now;
+                    }
 
                     count++;
                 }

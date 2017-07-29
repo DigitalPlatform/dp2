@@ -668,7 +668,12 @@ out strError);
 #endif
                      * */
 
-
+                    // 2017/7/5
+#if BASIC_HTTP
+                    SetInnerChannelOperationTimeout(this.OperationTimeout);
+#else
+                    this.m_ws.InnerChannel.OperationTimeout = this.OperationTimeout;
+#endif
                 }
                 if (String.IsNullOrEmpty(this.Url) == true)
                 {
@@ -728,6 +733,7 @@ out strError);
 #endif
 
                 this.WcfException = null;
+
                 return m_ws;
             }
         }

@@ -216,6 +216,8 @@ namespace DigitalPlatform.LibraryServer
                     task = new MessageMonitor(this, strName);
                 else if (strName == "创建 MongoDB 日志库")
                     task = new BuildMongoOperDatabase(this, strName);
+                else if (strName == "大备份")
+                    task = new BackupTask(this, strName);
                 else
                 {
                     strError = "系统不能识别任务名 '" + strName + "'";
@@ -235,7 +237,6 @@ namespace DigitalPlatform.LibraryServer
             else
             {
                 bool bOldStoppedValue = task.Stopped;
-
 
                 if (bOldStoppedValue == false)
                 {

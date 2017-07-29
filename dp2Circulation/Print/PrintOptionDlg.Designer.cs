@@ -50,6 +50,7 @@ namespace dp2Circulation
             this.listView_columns = new DigitalPlatform.GUI.ListViewNF();
             this.columnHeader_name = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_caption = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_widthChars = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_maxChars = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_evalue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tabPage_templates = new System.Windows.Forms.TabPage();
@@ -61,7 +62,7 @@ namespace dp2Circulation
             this.label7 = new System.Windows.Forms.Label();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.columnHeader_widthChars = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.tableLayoutPanel_template_bottom = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl_main.SuspendLayout();
             this.tabPage_normal.SuspendLayout();
             this.tabPage_columns.SuspendLayout();
@@ -70,6 +71,7 @@ namespace dp2Circulation
             this.splitContainer_templates.Panel1.SuspendLayout();
             this.splitContainer_templates.Panel2.SuspendLayout();
             this.splitContainer_templates.SuspendLayout();
+            this.tableLayoutPanel_template_bottom.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -331,6 +333,12 @@ namespace dp2Circulation
             this.columnHeader_caption.Text = "±êÌâÎÄ×Ö";
             this.columnHeader_caption.Width = 150;
             // 
+            // columnHeader_widthChars
+            // 
+            this.columnHeader_widthChars.DisplayIndex = 4;
+            this.columnHeader_widthChars.Text = "À¸¿í×Ö·ûšH";
+            this.columnHeader_widthChars.Width = 100;
+            // 
             // columnHeader_maxChars
             // 
             this.columnHeader_maxChars.DisplayIndex = 2;
@@ -368,8 +376,7 @@ namespace dp2Circulation
             // 
             // splitContainer_templates.Panel2
             // 
-            this.splitContainer_templates.Panel2.Controls.Add(this.textBox_templates_content);
-            this.splitContainer_templates.Panel2.Controls.Add(this.label7);
+            this.splitContainer_templates.Panel2.Controls.Add(this.tableLayoutPanel_template_bottom);
             this.splitContainer_templates.Size = new System.Drawing.Size(391, 188);
             this.splitContainer_templates.SplitterDistance = 78;
             this.splitContainer_templates.SplitterWidth = 6;
@@ -377,19 +384,17 @@ namespace dp2Circulation
             // 
             // listView_templates
             // 
-            this.listView_templates.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_templates.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.listView_templates.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_template_name,
             this.columnHeader_template_filepath});
+            this.listView_templates.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_templates.FullRowSelect = true;
             this.listView_templates.HideSelection = false;
-            this.listView_templates.Location = new System.Drawing.Point(2, 14);
+            this.listView_templates.Location = new System.Drawing.Point(0, 0);
             this.listView_templates.Margin = new System.Windows.Forms.Padding(2);
             this.listView_templates.Name = "listView_templates";
-            this.listView_templates.Size = new System.Drawing.Size(388, 62);
+            this.listView_templates.Size = new System.Drawing.Size(391, 78);
             this.listView_templates.TabIndex = 1;
             this.listView_templates.UseCompatibleStateImageBehavior = false;
             this.listView_templates.View = System.Windows.Forms.View.Details;
@@ -423,14 +428,14 @@ namespace dp2Circulation
             this.textBox_templates_content.Multiline = true;
             this.textBox_templates_content.Name = "textBox_templates_content";
             this.textBox_templates_content.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_templates_content.Size = new System.Drawing.Size(388, 85);
+            this.textBox_templates_content.Size = new System.Drawing.Size(387, 88);
             this.textBox_templates_content.TabIndex = 2;
             this.textBox_templates_content.TextChanged += new System.EventHandler(this.textBox_templates_content_TextChanged);
             // 
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(-1, 0);
+            this.label7.Location = new System.Drawing.Point(2, 0);
             this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(77, 12);
@@ -462,11 +467,20 @@ namespace dp2Circulation
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // columnHeader_widthChars
+            // tableLayoutPanel_template_bottom
             // 
-            this.columnHeader_widthChars.DisplayIndex = 4;
-            this.columnHeader_widthChars.Text = "À¸¿í×Ö·ûšH";
-            this.columnHeader_widthChars.Width = 100;
+            this.tableLayoutPanel_template_bottom.ColumnCount = 1;
+            this.tableLayoutPanel_template_bottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_template_bottom.Controls.Add(this.label7, 0, 0);
+            this.tableLayoutPanel_template_bottom.Controls.Add(this.textBox_templates_content, 0, 1);
+            this.tableLayoutPanel_template_bottom.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_template_bottom.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_template_bottom.Name = "tableLayoutPanel_template_bottom";
+            this.tableLayoutPanel_template_bottom.RowCount = 2;
+            this.tableLayoutPanel_template_bottom.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_template_bottom.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_template_bottom.Size = new System.Drawing.Size(391, 104);
+            this.tableLayoutPanel_template_bottom.TabIndex = 3;
             // 
             // PrintOptionDlg
             // 
@@ -493,9 +507,10 @@ namespace dp2Circulation
             this.tabPage_templates.ResumeLayout(false);
             this.splitContainer_templates.Panel1.ResumeLayout(false);
             this.splitContainer_templates.Panel2.ResumeLayout(false);
-            this.splitContainer_templates.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_templates)).EndInit();
             this.splitContainer_templates.ResumeLayout(false);
+            this.tableLayoutPanel_template_bottom.ResumeLayout(false);
+            this.tableLayoutPanel_template_bottom.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -535,6 +550,7 @@ namespace dp2Circulation
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ColumnHeader columnHeader_evalue;
         private System.Windows.Forms.ColumnHeader columnHeader_widthChars;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_template_bottom;
 
     }
 }

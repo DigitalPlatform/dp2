@@ -45,6 +45,7 @@ namespace dp2Circulation
             this.columnHeader_operTime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_seconds = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_attachment = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_comment = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel_record = new System.Windows.Forms.Panel();
             this.toolStrip_panelFixed = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_closeDownPanel = new System.Windows.Forms.ToolStripButton();
@@ -178,7 +179,8 @@ namespace dp2Circulation
             this.columnHeader_operator,
             this.columnHeader_operTime,
             this.columnHeader_seconds,
-            this.columnHeader_attachment});
+            this.columnHeader_attachment,
+            this.columnHeader_comment});
             this.listView_records.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_records.FullRowSelect = true;
             this.listView_records.HideSelection = false;
@@ -233,6 +235,11 @@ namespace dp2Circulation
             // 
             this.columnHeader_attachment.Text = "附件";
             this.columnHeader_attachment.Width = 87;
+            // 
+            // columnHeader_comment
+            // 
+            this.columnHeader_comment.Text = "附注";
+            this.columnHeader_comment.Width = 160;
             // 
             // panel_record
             // 
@@ -378,6 +385,7 @@ namespace dp2Circulation
             this.label7.Size = new System.Drawing.Size(77, 12);
             this.label7.TabIndex = 5;
             this.label7.Text = "日志类型(&F):";
+            this.label7.Visible = false;
             // 
             // textBox_filter
             // 
@@ -388,6 +396,7 @@ namespace dp2Circulation
             this.textBox_filter.Name = "textBox_filter";
             this.textBox_filter.Size = new System.Drawing.Size(183, 21);
             this.textBox_filter.TabIndex = 6;
+            this.textBox_filter.Visible = false;
             // 
             // button_getTodayFilename
             // 
@@ -441,6 +450,14 @@ namespace dp2Circulation
             "最近 30 天",
             "最近 31 天",
             "最近 365 天",
+            "最近 2 年",
+            "最近 3 年",
+            "最近 4 年",
+            "最近 5 年",
+            "最近 6 年",
+            "最近 7 年",
+            "最近 8 年",
+            "最近 9 年",
             "最近 10 年"});
             this.comboBox_quickSetFilenames.Location = new System.Drawing.Point(89, 30);
             this.comboBox_quickSetFilenames.Name = "comboBox_quickSetFilenames";
@@ -996,5 +1013,6 @@ namespace dp2Circulation
         private System.Windows.Forms.ColumnHeader columnHeader6;
         private System.Windows.Forms.ColumnHeader columnHeader7;
         private System.Windows.Forms.ColumnHeader columnHeader8;
+        private System.Windows.Forms.ColumnHeader columnHeader_comment;
     }
 }
