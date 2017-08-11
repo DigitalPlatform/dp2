@@ -9,7 +9,7 @@ namespace DigitalPlatform.rms.Client
 {
     // 2017/5/3
     /// <summary>
-    /// 数据库记录枚举器。用于枚举整个数据库内的所有记录
+    /// 数据库记录枚举器。用于枚举若干个数据库，整个数据库内的所有记录
     /// </summary>
     public class RecordLoader : IEnumerable
     {

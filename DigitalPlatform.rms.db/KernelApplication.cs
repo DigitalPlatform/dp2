@@ -467,6 +467,8 @@ namespace DigitalPlatform.rms
                 return ErrorCodeValue.PartNotFound;
             else if (nRet == -11)
                 return ErrorCodeValue.ExistDbInfo;
+            else if (nRet == -100)
+                return ErrorCodeValue.NotFoundObjectFile; // 对象文件不存在
             else
                 return ErrorCodeValue.CommonError;
         }
@@ -757,6 +759,9 @@ namespace DigitalPlatform.rms
 
         [EnumMember]
         PartialDenied = 23,  // 部分被拒绝 2012/10/9 本来是为了dp2library准备的
+
+        [EnumMember]
+        NotFoundObjectFile = 24,  // 对象文件不存在 -100
 
         //
 

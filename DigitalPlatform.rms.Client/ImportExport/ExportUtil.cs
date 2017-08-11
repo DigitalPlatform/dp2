@@ -74,39 +74,49 @@ namespace DigitalPlatform.rms.Client
                     if (FileType == ExportFileType.BackupFile
                         || FileType == ExportFileType.ISO2709File)
                     {
-                        DialogResult result = MessageBox.Show(owner,
-                            "文件 '" + strOutputFileName + "' 已存在，是否追加?\r\n\r\n--------------------\r\n注：(是)追加  (否)覆盖  (取消)中断处理",
-                            "导出数据",
-                            MessageBoxButtons.YesNoCancel,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button1);
-                        if (result == DialogResult.Yes)
+                        if (owner != null)
                         {
+                            DialogResult result = MessageBox.Show(owner,
+                                "文件 '" + strOutputFileName + "' 已存在，是否追加?\r\n\r\n--------------------\r\n注：(是)追加  (否)覆盖  (取消)中断处理",
+                                "导出数据",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxIcon.Question,
+                                MessageBoxDefaultButton.Button1);
+                            if (result == DialogResult.Yes)
+                            {
+                                bAppend = true;
+                            }
+                            if (result == DialogResult.No)
+                            {
+                                bAppend = false;
+                            }
+                            if (result == DialogResult.Cancel)
+                            {
+                                strError = "放弃处理...";
+                                return -1;
+                            }
+                        }
+                        else
                             bAppend = true;
-                        }
-                        if (result == DialogResult.No)
-                        {
-                            bAppend = false;
-                        }
-                        if (result == DialogResult.Cancel)
-                        {
-                            strError = "放弃处理...";
-                            return -1;
-                        }
                     }
                     else if (FileType == ExportFileType.XmlFile)
                     {
-                        DialogResult result = MessageBox.Show(owner,
-                            "文件 '" + strOutputFileName + "' 已存在，是否覆盖?\r\n\r\n--------------------\r\n注：(是)覆盖  (否)中断处理",
-                            "导出数据",
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button2);
-                        if (result != DialogResult.Yes)
+                        if (owner != null)
                         {
-                            strError = "放弃处理...";
-                            return -1;
+                            DialogResult result = MessageBox.Show(owner,
+                                "文件 '" + strOutputFileName + "' 已存在，是否覆盖?\r\n\r\n--------------------\r\n注：(是)覆盖  (否)中断处理",
+                                "导出数据",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxIcon.Question,
+                                MessageBoxDefaultButton.Button2);
+                            if (result != DialogResult.Yes)
+                            {
+                                strError = "放弃处理...";
+                                return -1;
+                            }
                         }
+                        else
+                            bAppend = false;
                     }
                 }
 
@@ -352,7 +362,7 @@ namespace DigitalPlatform.rms.Client
                 byte[] data = BitConverter.GetBytes(lTotalLength);
 
                 // 返回记录最开头位置
-                outputfile.Seek(lStart - outputfile.Position,SeekOrigin.Current);
+                outputfile.Seek(lStart - outputfile.Position, SeekOrigin.Current);
                 Debug.Assert(outputfile.Position == lStart, "");
 
                 // outputfile.Seek(lStart, SeekOrigin.Begin);   // 文件大了以后这句话的性能会很差
@@ -392,24 +402,33 @@ namespace DigitalPlatform.rms.Client
 
             for (int i = 0; i < res_ids.Length; i++)
             {
-                Application.DoEvents();	// 出让界面控制权
+                if (owner != null)
+                    Application.DoEvents();	// 出让界面控制权
 
-                if (stop.State != 0)
+                if (stop != null && stop.State != 0)
                 {
-                    DialogResult result = MessageBox.Show(owner,
-                        "确实要中断当前批处理操作?",
-                        "导出数据",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question,
-                        MessageBoxDefaultButton.Button2);
-                    if (result == DialogResult.Yes)
+                    if (owner != null)
                     {
-                        strError = "用户中断";
-                        return -1;
+                        DialogResult result = MessageBox.Show(owner,
+                            "确实要中断当前批处理操作?",
+                            "导出数据",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question,
+                            MessageBoxDefaultButton.Button2);
+                        if (result == DialogResult.Yes)
+                        {
+                            strError = "用户中断";
+                            return -1;
+                        }
+                        else
+                        {
+                            stop.Continue();
+                        }
                     }
                     else
                     {
-                        stop.Continue();
+                        strError = "用户中断";
+                        return -1;
                     }
                 }
 
@@ -424,16 +443,6 @@ namespace DigitalPlatform.rms.Client
 
                 if (stop != null)
                     stop.SetMessage("正在下载 " + strResPath);
-
-                long lResStart = 0;
-                // 写res的头。
-                // 如果不能预先确知整个res的长度，可以用随便一个lTotalLength值调用本函数，
-                // 但是需要记忆下函数所返回的lStart，最后调用EndWriteResToBackupFile()。
-                // 如果能预先确知整个res的长度，则最后不必调用EndWriteResToBackupFile()
-                lRet = Backup.BeginWriteResToBackupFile(
-                    outputfile,
-                    0,	// 未知
-                    out lResStart);
 
                 byte[] baOutputTimeStamp = null;
                 string strOutputPath;
@@ -450,18 +459,36 @@ namespace DigitalPlatform.rms.Client
                     out strError);
                 if (lRet == -1)
                 {
-                    // TODO: 允许重试
-                    DialogResult redo_result = MessageBox.Show(owner,
-                        "获取记录 '" + strResPath + "' 时出现错误: " + strError + "\r\n\r\n重试，还是中断当前批处理操作?\r\n(Retry 重试；Cancel 中断批处理)",
-                        "导出数据",
-                        MessageBoxButtons.RetryCancel,
-                        MessageBoxIcon.Question,
-                        MessageBoxDefaultButton.Button1);
-                    if (redo_result == DialogResult.Cancel)
+                    if (channel.OriginErrorCode == rmsws_localhost.ErrorCodeValue.NotFoundObjectFile)
+                        continue;   // TODO: 返回警告信息
+
+                    if (owner != null)
+                    {
+                        // TODO: 允许重试
+                        DialogResult redo_result = MessageBox.Show(owner,
+                            "获取记录 '" + strResPath + "' 时出现错误: " + strError + "\r\n\r\n重试，还是中断当前批处理操作?\r\n(Retry 重试；Cancel 中断批处理)",
+                            "导出数据",
+                            MessageBoxButtons.RetryCancel,
+                            MessageBoxIcon.Question,
+                            MessageBoxDefaultButton.Button1);
+                        if (redo_result == DialogResult.Cancel)
+                            return -1;
+                        goto
+                            REDO_GETRES;
+                    }
+                    else
                         return -1;
-                    goto
-                        REDO_GETRES;
                 }
+
+                long lResStart = 0;
+                // 写res的头。
+                // 如果不能预先确知整个res的长度，可以用随便一个lTotalLength值调用本函数，
+                // 但是需要记忆下函数所返回的lStart，最后调用EndWriteResToBackupFile()。
+                // 如果能预先确知整个res的长度，则最后不必调用EndWriteResToBackupFile()
+                long lRet0 = Backup.BeginWriteResToBackupFile(
+                    outputfile,
+                    0,	// 未知
+                    out lResStart);
 
                 byte[] timestamp = baOutputTimeStamp;
 
@@ -477,7 +504,6 @@ namespace DigitalPlatform.rms.Client
                     null,
                     respath.FullPath,
                     ByteArray.GetHexTimeStampString(baOutputTimeStamp));
-
 
                 lRet = Backup.WriteResMetadataToBackupFile(outputfile,
                     strMetaData);
@@ -511,23 +537,29 @@ namespace DigitalPlatform.rms.Client
                     out strError);
                 if (lRet == -1)
                 {
-                    if (channel.ErrorCode == ChannelErrorCode.EmptyRecord)
+                    if (channel.ErrorCode == ChannelErrorCode.EmptyRecord
+                        || channel.ErrorCode == ChannelErrorCode.NotFoundObjectFile)    // 2017/7/13
                     {
                         // 空记录
                     }
                     else
                     {
-                        // TODO: 允许重试
-                        DialogResult redo_result = MessageBox.Show(owner,
-                            "获取记录 '" + strResPath + "' 时出现错误: " + strError + "\r\n\r\n重试，还是中断当前批处理操作?\r\n(Retry 重试；Cancel 中断批处理)",
-                            "导出数据",
-                            MessageBoxButtons.RetryCancel,
-                            MessageBoxIcon.Question,
-                            MessageBoxDefaultButton.Button1);
-                        if (redo_result == DialogResult.Cancel)
+                        if (owner != null)
+                        {
+                            // TODO: 允许重试
+                            DialogResult redo_result = MessageBox.Show(owner,
+                                "获取记录 '" + strResPath + "' 时出现错误: " + strError + "\r\n\r\n重试，还是中断当前批处理操作?\r\n(Retry 重试；Cancel 中断批处理)",
+                                "导出数据",
+                                MessageBoxButtons.RetryCancel,
+                                MessageBoxIcon.Question,
+                                MessageBoxDefaultButton.Button1);
+                            if (redo_result == DialogResult.Cancel)
+                                return -1;
+                            goto
+                                REDO_GETRES_1;
+                        }
+                        else
                             return -1;
-                        goto
-                            REDO_GETRES_1;
                     }
                 }
 
@@ -550,14 +582,8 @@ namespace DigitalPlatform.rms.Client
 
             }
 
-            /*
-            if (stop != null)
-                stop.SetMessage("保存资源到备份文件全部完成");
-            */
-
             return 0;
         }
-
 
         #endregion
     }

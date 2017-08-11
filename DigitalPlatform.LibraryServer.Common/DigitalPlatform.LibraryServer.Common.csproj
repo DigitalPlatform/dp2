@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BackupTaskParam.cs" />
     <Compile Include="LibraryServerUtil.cs" />
     <Compile Include="LoanParam.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

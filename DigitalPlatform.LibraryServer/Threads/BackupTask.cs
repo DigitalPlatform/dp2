@@ -5,10 +5,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Xml;
-
-using DigitalPlatform.rms.Client;
-using DigitalPlatform.Text;
 using System.IO;
+
+using DigitalPlatform.Text;
+using DigitalPlatform.LibraryServer.Common;
+using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.LibraryServer
@@ -32,6 +33,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+#if NO
         #region 参数字符串处理
         // 这些函数也被 dp2Library 前端使用
 
@@ -46,6 +48,12 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.IsNullOrEmpty(strStart) == true)
                 return 0;
+
+            if (strStart == "continue")
+            {
+                strDbNameList = "continue";
+                return 0;
+            }
 
             Hashtable table = StringUtil.ParseParameters(strStart);
             strDbNameList = (string)table["dbnamelist"];
@@ -98,6 +106,8 @@ namespace DigitalPlatform.LibraryServer
 
         #endregion
 
+#endif
+
         // 一次操作循环
         public override void Worker()
         {
@@ -108,10 +118,11 @@ namespace DigitalPlatform.LibraryServer
             if (this.App.PauseBatchTask == true)
                 return;
 
-        REDO_TASK:
+            // REDO_TASK:
             try
             {
                 string strError = "";
+                int nRet = 0;
 
                 if (this.App.LibraryCfgDom == null
                     || this.App.LibraryCfgDom.DocumentElement == null)
@@ -121,6 +132,9 @@ namespace DigitalPlatform.LibraryServer
                 if (startinfo == null)
                     startinfo = new BatchTaskStartInfo();   // 按照缺省值来
 
+                BackupTaskStart param = BackupTaskStart.FromString(startinfo.Start);
+                string strDbNameList = param.DbNameList;
+#if NO
                 string strDbNameList = "";
                 int nRet = ParseStart(startinfo.Start,
                     out strDbNameList,
@@ -130,10 +144,12 @@ namespace DigitalPlatform.LibraryServer
                     this.AppendResultText("启动失败: " + strError + "\r\n");
                     return;
                 }
+#endif
 
                 // 下一次 loop 进入的时候自动就是 continue (从断点继续)
                 startinfo.Start = "";
 
+#if NO
                 //
                 string strFunction = "";
                 nRet = ParseTaskParam(startinfo.Param,
@@ -144,6 +160,7 @@ namespace DigitalPlatform.LibraryServer
                     this.AppendResultText("启动失败: " + strError + "\r\n");
                     return;
                 }
+#endif
 
                 // if (String.IsNullOrEmpty(strDbNameList) == true)
                 if (strDbNameList == "continue")
@@ -152,11 +169,19 @@ namespace DigitalPlatform.LibraryServer
                     strDbNameList = "continue";
                 }
 
+                string strRecPathFileName = Path.Combine(this.App.BackupDir, "recpath.txt");
+                string strBackupFileName = "";
+
+                if (string.IsNullOrEmpty(param.BackupFileName) == true)
+                    strBackupFileName = Path.Combine(this.App.BackupDir, BackupTaskStart.GetDefaultBackupFileName());
+                else
+                    strBackupFileName = Path.Combine(this.App.BackupDir, param.BackupFileName); // TODO: 如果没有扩展名部分，要自动加上 .dp2bak
+
                 // 构造用于复制然后同步的断点信息
-                BreakPointCollection all_breakpoints = BreakPointCollection.BuildFromDbNameList(strDbNameList, strFunction);
+                // BreakPointCollection all_breakpoints = BreakPointCollection.BuildFromDbNameList(strDbNameList, strFunction);
 
                 // 进行处理
-                BreakPointCollection breakpoints = null;
+                BreakPointInfo breakpoint = null;
 
                 this.AppendResultText("*********\r\n");
 
@@ -171,7 +196,7 @@ namespace DigitalPlatform.LibraryServer
                     //      -1  出错
                     //      0   没有发现断点信息
                     //      1   成功
-                    nRet = ReadBreakPoint(out breakpoints,
+                    nRet = ReadBreakPoint(out breakpoint,
             out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -180,20 +205,28 @@ namespace DigitalPlatform.LibraryServer
                         // return;
                         goto ERROR1;
                     }
+
+                    strBackupFileName = breakpoint.BackupFileName;
+                    if (string.IsNullOrEmpty(strBackupFileName))
+                    {
+                        strError = "从上次断点开始运行时，发现 BackupFileName 为空，只好放弃运行";
+                        goto ERROR1;
+                    }
                 }
                 else
                 {
                     // 先从远端复制整个数据库，然后从开始复制时的日志末尾进行同步
                     this.AppendResultText("指定的数据库\r\n");
 
+                    File.Delete(strBackupFileName);
+
                     // 采纳先前创建好的复制并继续的断点信息
-                    breakpoints = all_breakpoints;
+                    // breakpoints = all_breakpoints;
 
                     // 建立要获取的记录路径文件
-                    string strOutputFileName = Path.Combine(this.App.TempDir, "~test.txt");
                     nRet = CreateRecPathFile(channel,
-                        breakpoints,
-                        strOutputFileName,
+                        strDbNameList,
+                        strRecPathFileName,
                         out strError);
                     if (nRet == -1)
                     {
@@ -202,33 +235,53 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                Debug.Assert(breakpoints != null, "");
+                // Debug.Assert(breakpoints != null, "");
 
-                this.AppendResultText("计划进行的处理：\r\n---\r\n" + breakpoints.GetSummary() + "\r\n---\r\n\r\n");
-                if (this.StartInfos.Count > 0)
-                    this.AppendResultText("等待队列：\r\n---\r\n" + GetSummary(this.StartInfos) + "\r\n---\r\n\r\n");
+                this.AppendResultText("计划进行的处理：\r\n---\r\n"
+                    + (breakpoint == null ? "备份全部数据库" : breakpoint.GetSummary())
+                    + "\r\n---\r\n\r\n");
 
                 m_nRecordCount = 0;
 
-                for (int i = 0; i < breakpoints.Count; i++)
-                {
-                    BreakPointInfo info = breakpoints[i];
+                BreakPointInfo output_breakpoint = null;
 
-                    nRet = BackupDatabase(info,
+                // for (int i = 0; i < breakpoints.Count; i++)
+                {
+                    // BreakPointInfo info = breakpoints[i];
+
+                    // return:
+                    //      -1  出错
+                    //      0   处理被中断
+                    //      1   成功
+                    nRet = BackupDatabase(
+                        channel,
+                        strRecPathFileName,
+                        breakpoint,
+                        strBackupFileName,
+                        out output_breakpoint,
                         out strError);
 
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == 0)
                     {
                         // 保存断点文件
-                        SaveBreakPoint(breakpoints, true);
+                        SaveBreakPoint(output_breakpoint, true);
                         goto ERROR1;
                     }
 
-                    breakpoints.Remove(info);
-                    i--;
+                    // breakpoints.Remove(info);
+                    // i--;
 
                     // 保存断点文件
-                    SaveBreakPoint(breakpoints, false);
+                    SaveBreakPoint(output_breakpoint, false);
+
+                    try
+                    {
+                        File.Delete(strRecPathFileName);
+                    }
+                    catch
+                    {
+
+                    }
                 }
 
                 // TODO: 如果集合为空，需要删除断点信息文件
@@ -242,8 +295,9 @@ namespace DigitalPlatform.LibraryServer
 
                 // TODO: 在断点文件中记载 StartInfos 内容
 
-                this.AppendResultText("本轮处理结束\r\n");
+                this.AppendResultText("大备份结束。结果在文件 " + strBackupFileName + " 中\r\n");
 
+#if NO
                 {
                     // return:
                     //      -1  出错
@@ -262,11 +316,12 @@ out strError);
                         goto REDO_TASK;
                     }
                 }
+#endif
 
                 return;
-
             ERROR1:
                 this.AppendResultText(strError + "\r\n");
+                this.SetProgressText(strError);
                 return;
             }
             finally
@@ -327,12 +382,11 @@ out strError);
         //      -1  出错
         //      0   没有发现断点信息
         //      1   成功
-        int ReadBreakPoint(out BreakPointCollection breakpoints,
+        int ReadBreakPoint(out BreakPointInfo breakpoint,
             out string strError)
         {
             strError = "";
-            breakpoints = null;
-            List<BatchTaskStartInfo> start_infos = null;
+            breakpoint = null;
 
             string strText = "";
             // 从断点记忆文件中读出信息
@@ -351,30 +405,26 @@ out strError);
                 return 0;
             }
 
-            string strStartInfos = "";
-            string strBreakPoint = "";
-            StringUtil.ParseTwoPart(strText,
-                "|||",
-                out strBreakPoint,
-                out strStartInfos);
-
             // 可能会抛出异常
-            breakpoints = BreakPointCollection.Build(strBreakPoint);
-            start_infos = FromString(strStartInfos);
-
-            if (start_infos != null)
-                this.StartInfos = start_infos;
-
+            breakpoint = BreakPointInfo.Build(strText);
             return 1;
         }
 
-        // 保存断点信息，并保存 this.StartInfos
-        void SaveBreakPoint(BreakPointCollection infos,
+        // 保存断点信息
+        void SaveBreakPoint(BreakPointInfo info,
             bool bClearStartInfos)
         {
-            // 写入断点文件
-            this.App.WriteBatchTaskBreakPointFile(this.Name,
-                infos.ToString() + "|||" + ToString(this.StartInfos));
+            if (info == null
+                || (info != null && string.IsNullOrEmpty(info.DbName) == true && string.IsNullOrEmpty(info.RecID) == true))
+            {
+                this.App.RemoveBatchTaskBreakPointFile(this.Name);
+            }
+            else
+            {
+                // 写入断点文件
+                this.App.WriteBatchTaskBreakPointFile(this.Name,
+                    info.ToString());
+            }
 
             if (bClearStartInfos)
                 this.StartInfos = new List<BatchTaskStartInfo>();   // 避免残余信息对后一轮运行发生影响
@@ -382,12 +432,144 @@ out strError);
 
         int m_nRecordCount = 0;
 
-        int BackupDatabase(BreakPointInfo info,
-out string strError)
+        const int BATCH_SIZE = 1000;
+
+        // parameters:
+        //      strBackupFileName   备份文件名。扩展名应为 .dp2bak
+        // return:
+        //      -1  出错
+        //      0   处理被中断
+        //      1   成功
+        int BackupDatabase(
+            RmsChannel channel,
+            string strRecPathFileName,
+            BreakPointInfo info,
+            string strBackupFileName,
+            out BreakPointInfo breakpoint,
+            out string strError)
         {
             strError = "";
 
-            return 0;
+            breakpoint = new BreakPointInfo();
+            breakpoint.BackupFileName = strBackupFileName;
+
+            try
+            {
+                ExportUtil export_util = new ExportUtil();
+                int nRet = export_util.Begin(null,
+    strBackupFileName,
+    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                try
+                {
+
+                    List<string> lines = new List<string>();
+                    using (StreamReader sr = new StreamReader(strRecPathFileName, Encoding.UTF8))
+                    {
+                        // 跳过断点位置前，以前已经处理过的行
+                        if (info != null
+                            && string.IsNullOrEmpty(info.DbName) == false
+                            && string.IsNullOrEmpty(info.RecID) == false)
+                        {
+                            while (true)
+                            {
+                                if (this.Stopped == true)
+                                {
+                                    strError = "中断";
+                                    return 0;
+                                }
+
+                                string line = sr.ReadLine();
+                                if (line == null)
+                                    break;
+                                string strDbName = ResPath.GetDbName(line);
+                                string strID = ResPath.GetRecordId(line);
+
+                                if (info.DbName == strDbName && info.RecID == strID)
+                                    break;
+                            }
+                        }
+
+                        this.AppendResultText("开始写入大备份文件" + strBackupFileName + "\r\n");
+
+                        while (true)
+                        {
+                            if (this.Stopped == true)
+                            {
+                                strError = "中断";
+                                return 0;
+                            }
+
+                            string line = sr.ReadLine();
+                            if (line != null)
+                                lines.Add(line);
+
+                            if (lines.Count >= BATCH_SIZE
+                                || (line == null && lines.Count > 0))
+                            {
+                                RmsBrowseLoader loader = new RmsBrowseLoader();
+                                loader.Channel = channel;
+                                loader.Format = "id,xml,timestamp,metadata";
+                                loader.RecPaths = lines;
+
+                                foreach (Record record in loader)
+                                {
+                                    if (this.Stopped == true)
+                                    {
+                                        strError = "中断";
+                                        return 0;
+                                    }
+
+                                    // TODO: 检查 RecordBody 是否为 null
+                                    nRet = export_util.ExportOneRecord(
+        channel,
+        null,
+        this.App.WsUrl,
+        record.Path,
+        record.RecordBody.Xml,
+        record.RecordBody.Metadata,
+        record.RecordBody.Timestamp,
+        out strError);
+                                    if (nRet == -1)
+                                        return -1;
+
+                                    breakpoint.DbName = ResPath.GetDbName(record.Path);
+                                    breakpoint.RecID = ResPath.GetRecordId(record.Path);
+
+                                    SetProgressText(m_nRecordCount.ToString() + " " + record.Path);
+
+                                    // 每 100 条显示一行
+                                    if ((m_nRecordCount % 100) == 0)
+                                        this.AppendResultText("已输出记录 " + record.Path + "  " + (m_nRecordCount + 1).ToString() + "\r\n");
+                                    m_nRecordCount++;
+
+                                }
+
+                                lines.Clear();
+                            }
+
+                            if (line == null)
+                                break;
+                        }
+
+                        Debug.Assert(lines.Count == 0, "");
+                        breakpoint = null;
+                    }
+                }
+                finally
+                {
+                    export_util.End();
+                }
+
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                strError = "BackupDatabase() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                return -1;
+            }
         }
 
         // 一个服务器的断点信息
@@ -398,6 +580,8 @@ out string strError)
 
             public string Function = "";    // 功能。
 
+            public string BackupFileName = "";
+
             // 通过字符串构造
             public static BreakPointInfo Build(string strText)
             {
@@ -407,6 +591,7 @@ out string strError)
                 info.DbName = (string)table["dbname"];
                 info.RecID = (string)table["recid"];
                 info.Function = (string)table["function"];
+                info.BackupFileName = (string)table["backup_filename"];
                 return info;
             }
 
@@ -417,6 +602,7 @@ out string strError)
                 table["dbname"] = this.DbName;
                 table["recid"] = this.RecID;
                 table["function"] = this.Function;
+                table["backup_filename"] = this.BackupFileName;
                 return StringUtil.BuildParameterString(table);
             }
 
@@ -424,12 +610,11 @@ out string strError)
             public string GetSummary()
             {
                 string strResult = "";
-                strResult += this.DbName;
-                strResult += "(功能=" + this.Function + ")";
                 if (string.IsNullOrEmpty(this.RecID) == false)
                 {
-                    strResult += " : 从ID " + this.RecID.ToString() + " 开始";
+                    strResult += "从断点 " + this.DbName + "/" + this.RecID.ToString() + " 开始";
                 }
+                strResult += " (备份文件名=" + this.BackupFileName + ")";
 
                 return strResult;
             }
@@ -453,7 +638,9 @@ out string strError)
             }
 
             // 通过数据库名列表字符串构造
-            public static BreakPointCollection BuildFromDbNameList(string strText, string strFunction)
+            public static BreakPointCollection BuildFromDbNameList(string strText,
+                string strFunction,
+                string strBackupFileName)
             {
                 BreakPointCollection infos = new BreakPointCollection();
 
@@ -463,6 +650,7 @@ out string strError)
                     BreakPointInfo info = new BreakPointInfo();
                     info.DbName = dbname;
                     info.Function = strFunction;
+                    info.BackupFileName = strBackupFileName;
                     infos.Add(info);
                 }
 
@@ -498,20 +686,18 @@ out string strError)
 
         // TODO: 中途要显示进度信息
         int CreateRecPathFile(RmsChannel channel,
-            BreakPointCollection infos,
+            string strDbNameList,
             string strOutputFileName,
             out string strError)
         {
             strError = "";
 
-            List<string> dbnames = new List<string>();
+            int nRecordCount = 0;
 
-            foreach (BreakPointInfo info in infos)
-            {
-                string strDbName = info.DbName;
-                if (string.IsNullOrEmpty(strDbName) == false)
-                    dbnames.Add(strDbName);
-            }
+            List<string> dbnames = StringUtil.SplitList(strDbNameList);
+
+            StringUtil.RemoveBlank(ref dbnames);
+            StringUtil.RemoveDupNoSort(ref dbnames);
 
             if (dbnames.Count == 0)
                 dbnames.Add("*");
@@ -538,6 +724,8 @@ out string strError)
                 StringUtil.RemoveDupNoSort(ref results);
                 dbnames = results;
             }
+
+            this.AppendResultText("正在准备路径\r\n");
 
             try
             {
@@ -567,6 +755,15 @@ out string strError)
                                 && record.RecordBody.Result.ErrorCode == ErrorCodeValue.NotFound)
                                 continue;
                             sw.WriteLine(record.Path);
+
+                            SetProgressText(nRecordCount.ToString());
+
+#if NO
+                            // 每 1000 条显示一行
+                            if ((nRecordCount % 1000) == 0)
+                                this.AppendResultText("已准备路径 " + record.Path + "  " + (nRecordCount + 1).ToString() + "\r\n");
+#endif
+                            nRecordCount++;
                         }
                     }
                 }
@@ -577,6 +774,10 @@ out string strError)
             {
                 strError = ex.Message;
                 return -1;
+            }
+            finally
+            {
+                this.AppendResultText("结束准备路径。共 " + nRecordCount + "\r\n");
             }
         }
 

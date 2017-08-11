@@ -11472,7 +11472,7 @@ Keys keyData)
 
                 long lRet = channel.Search(stop,
                     strQueryXml,
-                    "default",
+                    strResultSetName,   // "default",
                     strOutputStyle,
                     out strError);
                 if (lRet == -1)

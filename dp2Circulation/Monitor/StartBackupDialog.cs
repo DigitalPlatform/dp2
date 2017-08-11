@@ -11,6 +11,7 @@ using System.Diagnostics;
 
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.LibraryServer.Common;
 
 namespace dp2Circulation
 {
@@ -25,10 +26,16 @@ namespace dp2Circulation
 
         private void StartBackupDialog_Load(object sender, EventArgs e)
         {
+            this.comboBox_backupFileName.Items.Add(BackupTaskStart.GetDefaultBackupFileName());
+
             // 起始位置参数
-            string strDbNameList = "";
             string strError = "";
 
+            try
+            {
+                BackupTaskStart param = BackupTaskStart.FromString(this.StartInfo.Start);
+#if NO
+            string strDbNameList = "";
             int nRet = ParseStart(this.StartInfo.Start,
                 out strDbNameList,
                 out strError);
@@ -37,7 +44,12 @@ namespace dp2Circulation
 
             Debug.Assert(strDbNameList != null, "");
             this.textBox_dbNameList.Text = strDbNameList.Replace(",", "\r\n");
+#endif
 
+                this.textBox_dbNameList.Text = param.DbNameList;
+                this.comboBox_backupFileName.Text = param.BackupFileName;
+
+#if NO
             // 通用启动参数
             string strFunction = "";
 
@@ -49,12 +61,21 @@ namespace dp2Circulation
 
             //if (string.IsNullOrEmpty(strFunction) == false)
             //    this.comboBox_function.Text = strFunction;
+#endif
 
-            return;
+                return;
+            }
+            catch(Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
+
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
+#if NO
         #region 参数字符串处理
         // 这些函数也被 dp2Library 前端使用
 
@@ -120,14 +141,23 @@ namespace dp2Circulation
         }
 
         #endregion
+#endif
 
         private void button_OK_Click(object sender, EventArgs e)
         {
             // 合成参数
             if (this.checkBox_startAtServerBreakPoint.Checked == true)
-                this.StartInfo.Start = "continue";
+                this.StartInfo.Start = "dbnamelist=continue";
             else
-                this.StartInfo.Start = BuildStart(this.textBox_dbNameList.Text.Replace("\r\n", ","));
+            {
+                // this.StartInfo.Start = BuildStart(this.textBox_dbNameList.Text.Replace("\r\n", ","));
+
+                BackupTaskStart param = new BackupTaskStart();
+                param.BackupFileName = this.comboBox_backupFileName.Text;
+                param.DbNameList = this.textBox_dbNameList.Text;
+
+                this.StartInfo.Start = param.ToString();
+            }
 
             // 通用启动参数
             this.StartInfo.Param = "";  // BuildTaskParam(this.comboBox_function.Text, false);
@@ -148,10 +178,14 @@ namespace dp2Circulation
             {
                 this.textBox_dbNameList.Text = "";
                 this.textBox_dbNameList.Enabled = false;
+
+                this.comboBox_backupFileName.Enabled = false;
             }
             else
             {
                 this.textBox_dbNameList.Enabled = true;
+
+                this.comboBox_backupFileName.Enabled = true;
             }
         }
 

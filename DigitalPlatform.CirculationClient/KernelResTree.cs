@@ -313,6 +313,12 @@ namespace DigitalPlatform.CirculationClient
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("下载文件(&W)");
+            menuItem.Click += new System.EventHandler(this.menu_downloadFile);
+            if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
 #if NO
             menuItem = new MenuItem("刷新(&R)");
             menuItem.Click += new System.EventHandler(this.menu_refresh);
@@ -431,6 +437,30 @@ namespace DigitalPlatform.CirculationClient
 
             if (contextMenu != null)
                 contextMenu.Show(this, new Point(e.X, e.Y));
+        }
+
+        // 下载文件
+        void menu_downloadFile(object sender, System.EventArgs e)
+        {
+            string strError = "";
+
+            if (this.SelectedNode == null)
+            {
+                strError = "尚未选择要编辑的配置文件节点";
+                goto ERROR1;
+            }
+
+            if (this.SelectedNode.ImageIndex != RESTYPE_FILE)
+            {
+                strError = "所选择的节点不是配置文件类型。请选择要编辑的配置文件节点";
+                goto ERROR1;
+            }
+
+            string strPath = GetNodePath(this.SelectedNode);
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         // 编辑配置文件

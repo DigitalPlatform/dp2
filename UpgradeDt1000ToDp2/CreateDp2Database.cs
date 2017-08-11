@@ -244,9 +244,10 @@ namespace UpgradeDt1000ToDp2
             return -1;
         }
 
-        // 创建dp2系统的简单库(除种次号库外)
+        // 创建 dp2 系统的简单库(除种次号库外)
         int CreateDp2SimpleDatabases(out string strError)
         {
+            strError = "";
             int nRet = 0;
 
             AppendHtml(
@@ -276,7 +277,6 @@ namespace UpgradeDt1000ToDp2
             creating_dbnames.Add("种次号库");
             dbtypes.Add("zhongcihao");
              * */
-
 
             string strDatabaseInfo = "";
             string strOutputInfo = "";
@@ -313,15 +313,18 @@ namespace UpgradeDt1000ToDp2
                 created_dbnames.Add(strDatabaseName);
             }
 
-            strDatabaseInfo = dom.OuterXml;
+            if (created_dbnames.Count > 0)  // 2017/8/11
+            {
+                strDatabaseInfo = dom.OuterXml;
 
-            // 创建数据库
-            nRet = this.CreateDatabase(
-                strDatabaseInfo,
-                out strOutputInfo,
-                out strError);
-            if (nRet == -1)
-                return -1;
+                // 创建数据库
+                nRet = this.CreateDatabase(
+                    strDatabaseInfo,
+                    out strOutputInfo,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
 
             string strInfo = "";
             if (created_dbnames.Count > 0)

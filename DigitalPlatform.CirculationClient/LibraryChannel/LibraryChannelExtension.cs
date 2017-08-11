@@ -14,6 +14,7 @@ namespace DigitalPlatform.CirculationClient
 {
     public static class LibraryChannelExtension
     {
+
         // 上传文件到到 dp2lbrary 服务器
         // parameters:
         //      timestamp   时间戳。如果为 null，函数会自动根据文件信息得到一个时间戳

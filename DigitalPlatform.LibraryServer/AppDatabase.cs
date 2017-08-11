@@ -5164,7 +5164,6 @@ out strError);
                             goto ERROR1;
                     }
 
-
                     string strTemplateDir = this.DataDir + "\\templates\\" + strType;
 
                     // 根据预先的定义，创建一个数据库
@@ -5578,17 +5577,27 @@ out strError);
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                     strOperTime);
 
-                using (Stream stream = File.OpenRead(strLogFileName))
+                if (File.Exists(strLogFileName))
                 {
-                    nRet = this.OperLog.WriteOperLog(domOperLog,
-                        sessioninfo.ClientAddress,
-                        stream,
-                        out strError);
-                    if (nRet == -1)
+                    using (Stream stream = File.OpenRead(strLogFileName))
                     {
-                        strError = "ManageDatabase() API createDatabase 写入日志时发生错误: " + strError;
-                        goto ERROR1;
+                        nRet = this.OperLog.WriteOperLog(domOperLog,
+                            sessioninfo.ClientAddress,
+                            stream,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "ManageDatabase() API createDatabase 写入日志时发生错误: " + strError;
+                            goto ERROR1;
+                        }
                     }
+                }
+                else
+                {
+                    // 2017/8/11 增加
+                    nRet = this.OperLog.WriteOperLog(domOperLog,
+    sessioninfo.ClientAddress,
+    out strError);
                 }
             }
 
