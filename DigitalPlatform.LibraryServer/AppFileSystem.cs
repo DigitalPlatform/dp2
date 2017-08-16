@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Diagnostics;
+
+using Ionic.Zip;
+
 using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
-using System.Diagnostics;
-using Ionic.Zip;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -619,12 +621,13 @@ namespace DigitalPlatform.LibraryServer
                     destBuffer = new byte[0];
                     return lTotalLength;
                 }
+
                 // 检查范围是否合法
                 long lOutputLength;
                 // return:
                 //		-1  出错
                 //		0   成功
-                int nRet = ConvertUtil.GetRealLength(lStart,
+                int nRet = ConvertUtil.GetRealLengthNew(lStart,
                     nLength,
                     lTotalLength,
                     nMaxLength,
@@ -633,17 +636,24 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     return -1;
 
-                using(FileStream s = new FileStream(strFilePath,
-                    FileMode.Open))
+                if (lOutputLength == 0)
                 {
                     destBuffer = new byte[lOutputLength];
+                }
+                else
+                {
+                    using (FileStream s = new FileStream(strFilePath,
+                        FileMode.Open))
+                    {
+                        destBuffer = new byte[lOutputLength];
 
-                    Debug.Assert(lStart >= 0, "");
+                        Debug.Assert(lStart >= 0, "");
 
-                    s.Seek(lStart, SeekOrigin.Begin);
-                    s.Read(destBuffer,
-                        0,
-                        (int)lOutputLength);
+                        s.Seek(lStart, SeekOrigin.Begin);
+                        s.Read(destBuffer,
+                            0,
+                            (int)lOutputLength);
+                    }
                 }
             }
             return lTotalLength;

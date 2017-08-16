@@ -379,6 +379,29 @@ namespace DigitalPlatform
             return nTemp;
         }
 
+        // 兼容以前的效果： lStart == lTotalLength 会当作出错返回
+        public static int GetRealLength(long lStart,
+    int nNeedLength,
+    long lTotalLength,
+    int nMaxLength,
+    out long lOutputLength,
+    out string strError)
+        {
+            if (lStart == lTotalLength)
+            {
+                lOutputLength = 0;
+                strError = "范围错误: 起始值 " + lStart.ToString() + " 大于总长度 " + lTotalLength.ToString() + "\r\n";
+                return -1;
+            }
+
+            return GetRealLengthNew(lStart,
+                nNeedLength,
+                lTotalLength,
+                nMaxLength,
+                out lOutputLength,
+                out strError);
+        }
+
         // 检索范围是否合法,并返回真正能够取的长度
         // parameter:
         //		nStart          起始位置 不能小于0
@@ -386,11 +409,12 @@ namespace DigitalPlatform
         //		lTotalLength    数据实际总长度 不能小于0
         //		nMaxLength      限制的最大长度	等于-1，表示不限制
         //		lOutputLength   out参数，返回的可以用的长度 2012/8/26 修改为long类型
+        //                      2017/8/15 当 lStart == lTotalLength 时，lOutputLength 返回 0，不当作出错情形
         //		strError        out参数，返回出错信息
         // return:
         //		-1  出错
         //		0   成功
-        public static int GetRealLength(long lStart,
+        public static int GetRealLengthNew(long lStart,
             int nNeedLength,
             long lTotalLength,
             int nMaxLength,
@@ -408,7 +432,7 @@ namespace DigitalPlatform
                 return -1;
             }
             if (lStart != 0
-                && lStart >= lTotalLength)
+                && lStart > lTotalLength)   // >= 2017/8/15 修改
             {
                 strError = "范围错误: 起始值 " + lStart.ToString() + " 大于总长度 " + lTotalLength.ToString() + "\r\n";
                 return -1;

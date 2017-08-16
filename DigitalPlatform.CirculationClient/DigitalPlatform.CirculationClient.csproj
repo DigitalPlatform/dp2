@@ -159,6 +159,12 @@
       <DependentUpon>dp2ResTree.cs</DependentUpon>
     </Compile>
     <Compile Include="dp2ServerCollection.cs" />
+    <Compile Include="FileDownloadDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FileDownloadDialog.Designer.cs">
+      <DependentUpon>FileDownloadDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="GetDp2ResDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -357,6 +363,9 @@
     <EmbeddedResource Include="BinaryResControl.resx">
       <SubType>Designer</SubType>
       <DependentUpon>BinaryResControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FileDownloadDialog.resx">
+      <DependentUpon>FileDownloadDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LoginDialog\CirculationLoginDlg.resx">
       <DependentUpon>CirculationLoginDlg.cs</DependentUpon>

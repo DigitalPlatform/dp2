@@ -481,6 +481,7 @@ namespace DigitalPlatform.rms
                     dpRecord = resultSet.GetNextRecord(
                         ref lPos);
                 }
+
                 if (dpRecord == null)
                     break;
 

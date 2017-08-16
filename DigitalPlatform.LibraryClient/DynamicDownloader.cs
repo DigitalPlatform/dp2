@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net;
 
 using DigitalPlatform.Text;
 
@@ -16,6 +17,13 @@ namespace DigitalPlatform.LibraryClient
     /// </summary>
     public class DynamicDownloader
     {
+        // 附加的数据
+        public object Tag { get; set; }
+
+        public event EventHandler Closed = null;
+
+        public event DownloadProgressChangedEventHandler ProgressChanged = null;
+
         CancellationToken _token = new CancellationToken();
 
         public string State { get; set; }
@@ -48,7 +56,17 @@ namespace DigitalPlatform.LibraryClient
             {
                 _stream.Close();
                 _stream = null;
+
+                TriggerClosedEvent();
             }
+
+        }
+
+        void TriggerClosedEvent()
+        {
+            if (this.Closed != null)
+                this.Closed(this, new EventArgs());
+
         }
 
         public void StartDownload(bool bContinue)
@@ -195,13 +213,18 @@ namespace DigitalPlatform.LibraryClient
                     Debug.Assert(baContent != null, "返回的baContent不能为null");
                     Debug.Assert(baContent.Length <= lRet, "每次返回的包尺寸[" + Convert.ToString(baContent.Length) + "]应当小于result.Value[" + Convert.ToString(lRet) + "]");
 
-                    _stream.Write(baContent, 0, baContent.Length);
-                    _stream.Flush(); // 2013/5/17
-                    lStart += baContent.Length;
-
-                    if (lRet > 0)
+                    if (baContent.Length > 0)
                     {
-                        Debug.Assert(baContent.Length > 0, "");
+                        _stream.Write(baContent, 0, baContent.Length);
+                        _stream.Flush(); // 2013/5/17
+                        lStart += baContent.Length;
+
+                        var func = this.ProgressChanged;
+                        if (func != null)
+                        {
+                            DownloadProgressChangedEventArgs e = new DownloadProgressChangedEventArgs(lStart, lTotalLength);
+                            func(this, e);
+                        }
                     }
                 }
 
@@ -276,5 +299,43 @@ namespace DigitalPlatform.LibraryClient
             return 0;
         }
 
+    }
+
+    // 摘要: 
+    //     表示将要处理 System.Net.WebClient 的 System.Net.WebClient.DownloadProgressChanged
+    //     事件的方法。
+    //
+    // 参数: 
+    //   sender:
+    //     事件源。
+    //
+    //   e:
+    //     包含事件数据的 System.Net.DownloadProgressChangedEventArgs。
+    public delegate void DownloadProgressChangedEventHandler(object sender, DownloadProgressChangedEventArgs e);
+
+    // 摘要: 
+    //     为 System.Net.WebClient 的 System.Net.WebClient.DownloadProgressChanged 事件提供数据。
+    public class DownloadProgressChangedEventArgs
+    {
+
+        public DownloadProgressChangedEventArgs(long recieved, long total)
+        {
+            this.BytesReceived = recieved;
+            this.TotalBytesToReceive = total;
+        }
+
+        // 摘要: 
+        //     获取收到的字节数。
+        //
+        // 返回结果: 
+        //     一个指示收到的字节数的 System.Int64 值。
+        public long BytesReceived { get; set; }
+        //
+        // 摘要: 
+        //     获取 System.Net.WebClient 数据下载操作中的字节总数。
+        //
+        // 返回结果: 
+        //     一个指示将要接收的字节数的 System.Int64 值。
+        public long TotalBytesToReceive { get; set; }
     }
 }

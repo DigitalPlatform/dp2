@@ -319,6 +319,12 @@ namespace DigitalPlatform.CirculationClient
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            menuItem = new MenuItem("下载动态文件(&Y)");
+            menuItem.Click += new System.EventHandler(this.menu_downloadDynamicFile);
+            if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
 #if NO
             menuItem = new MenuItem("刷新(&R)");
             menuItem.Click += new System.EventHandler(this.menu_refresh);
@@ -439,6 +445,78 @@ namespace DigitalPlatform.CirculationClient
                 contextMenu.Show(this, new Point(e.X, e.Y));
         }
 
+        List<DynamicDownloader> _downloaders = new List<DynamicDownloader>();
+
+        // 下载动态文件
+        // 动态文件就是一直在不断增长的文件。允许一边增长一边下载
+        void menu_downloadDynamicFile(object sender, System.EventArgs e)
+        {
+            string strError = "";
+
+            if (this.SelectedNode == null)
+            {
+                strError = "尚未选择要下载的配置文件节点";
+                goto ERROR1;
+            }
+
+            if (this.SelectedNode.ImageIndex != RESTYPE_FILE)
+            {
+                strError = "所选择的节点不是配置文件类型。请选择要下载的配置文件节点";
+                goto ERROR1;
+            }
+
+            string strPath = GetNodePath(this.SelectedNode);
+
+            FolderBrowserDialog dir_dlg = new FolderBrowserDialog();
+
+            dir_dlg.Description = "请指定下载目标文件夹";
+            dir_dlg.RootFolder = Environment.SpecialFolder.MyComputer;
+            dir_dlg.ShowNewFolderButton = true;
+            // dir_dlg.SelectedPath = this.textBox_dataDir.Text;
+
+            if (dir_dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            string strTargetPath = Path.Combine(dir_dlg.SelectedPath, Path.GetFileName(strPath));
+
+            LibraryChannel channel = null;
+            TimeSpan old_timeout = new TimeSpan(0);
+
+            channel = this.CallGetChannel(true);
+
+            old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+
+            FileDownloadDialog dlg = new FileDownloadDialog();
+            dlg.TopMost = true;
+            dlg.Show(this);
+
+            DynamicDownloader downloader = new DynamicDownloader(channel, 
+                strPath,
+                strTargetPath);
+            downloader.Tag = dlg;
+
+            _downloaders.Add(downloader);
+
+            downloader.Closed += new EventHandler(delegate ( object o1, EventArgs e1)
+                {
+                    channel.Timeout = old_timeout;
+                    this.CallReturnChannel(channel, true);
+                    _downloaders.Remove(downloader);
+                });
+
+            downloader.StartDownload(false);
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void downloader_Closed(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         // 下载文件
         void menu_downloadFile(object sender, System.EventArgs e)
         {
@@ -446,13 +524,13 @@ namespace DigitalPlatform.CirculationClient
 
             if (this.SelectedNode == null)
             {
-                strError = "尚未选择要编辑的配置文件节点";
+                strError = "尚未选择要下载的配置文件节点";
                 goto ERROR1;
             }
 
             if (this.SelectedNode.ImageIndex != RESTYPE_FILE)
             {
-                strError = "所选择的节点不是配置文件类型。请选择要编辑的配置文件节点";
+                strError = "所选择的节点不是配置文件类型。请选择要下载的配置文件节点";
                 goto ERROR1;
             }
 
