@@ -11,11 +11,14 @@ using DigitalPlatform.Text;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
+using DigitalPlatform.IO;
 
 namespace DigitalPlatform.LibraryServer
 {
     public class BackupTask : BatchTask
     {
+        public string OutputFileNames { get; set; }  // 备份文件、数据库定义文件的逻辑路径列表。即，从前端角度看，可以用 GetRes() API 来获取文件的参数路径
+
         public BackupTask(LibraryApplication app,
             string strName)
             : base(app, strName)
@@ -173,9 +176,9 @@ namespace DigitalPlatform.LibraryServer
                 string strBackupFileName = "";
 
                 if (string.IsNullOrEmpty(param.BackupFileName) == true)
-                    strBackupFileName = Path.Combine(this.App.BackupDir, BackupTaskStart.GetDefaultBackupFileName());
+                    strBackupFileName = Path.Combine(this.App.BackupDir, this.App.LibraryName + "_" + BackupTaskStart.GetDefaultBackupFileName());
                 else
-                    strBackupFileName = Path.Combine(this.App.BackupDir, param.BackupFileName); // TODO: 如果没有扩展名部分，要自动加上 .dp2bak
+                    strBackupFileName = Path.Combine(this.App.BackupDir, CanonializeBackupFileName(param.BackupFileName));
 
                 // 构造用于复制然后同步的断点信息
                 // BreakPointCollection all_breakpoints = BreakPointCollection.BuildFromDbNameList(strDbNameList, strFunction);
@@ -203,6 +206,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == 0)
                     {
                         // return;
+                        // TODO: 此时如何让等待结束？并且返回启动出错信息
                         goto ERROR1;
                     }
 
@@ -212,16 +216,62 @@ namespace DigitalPlatform.LibraryServer
                         strError = "从上次断点开始运行时，发现 BackupFileName 为空，只好放弃运行";
                         goto ERROR1;
                     }
+
+                    // WriteStateFile(strBackupFileName, "creating");  // 表示文件正在创建中
+                    PrepareBackupFileName(strBackupFileName, true);
+                    this.AppendResultText("(从断点继续)本次大备份文件为 " + strBackupFileName + "\r\n");
                 }
                 else
                 {
+                    {
+                        BreakPointInfo temp_breakpoint = null;
+                        // 删除上次的大备份文件
+                        // return:
+                        //      -1  出错
+                        //      0   没有发现断点信息
+                        //      1   成功
+                        nRet = ReadBreakPoint(out temp_breakpoint,
+                out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 1)
+                        {
+                            string strLastBackupFileName = temp_breakpoint.BackupFileName;
+                            if (string.IsNullOrEmpty(strLastBackupFileName) == false)
+                            {
+                                DeleteDataFiles(strLastBackupFileName);
+
+                                this.AppendResultText("自动删除上次创建的大备份文件 " + strLastBackupFileName + "\r\n");
+                            }
+                        }
+                        temp_breakpoint = null;
+                    }
+
                     // 先从远端复制整个数据库，然后从开始复制时的日志末尾进行同步
                     this.AppendResultText("指定的数据库\r\n");
 
-                    File.Delete(strBackupFileName);
+                    DeleteDataFiles(strBackupFileName);
+
+                    PrepareBackupFileName(strBackupFileName, false);
+                    this.AppendResultText("本次大备份文件为 " + strBackupFileName + "\r\n");
 
                     // 采纳先前创建好的复制并继续的断点信息
                     // breakpoints = all_breakpoints;
+
+                    // 建立数据库定义文件
+                    {
+                        string strDefFileName = GetDatabaseDefFileName(strBackupFileName);
+                        nRet = CreateDatabaseDefFile(channel,
+                            strDbNameList,
+                            strDefFileName,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            this.AppendResultText("创建数据库定义文件失败: " + strError + "\r\n");
+                            WriteStateFile(strDefFileName, null);  // 表示文件创建出错
+                            return;
+                        }
+                    }
 
                     // 建立要获取的记录路径文件
                     nRet = CreateRecPathFile(channel,
@@ -231,6 +281,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                     {
                         this.AppendResultText("创建记录路径文件失败: " + strError + "\r\n");
+                        WriteStateFile(strBackupFileName, null);  // 表示文件创建出错
                         return;
                     }
                 }
@@ -320,6 +371,7 @@ out strError);
 
                 return;
             ERROR1:
+                this.ErrorInfo = strError;
                 this.AppendResultText(strError + "\r\n");
                 this.SetProgressText(strError);
                 return;
@@ -329,6 +381,88 @@ out strError);
 
             }
 
+        }
+
+        // 删除 .dp2bak 文件和 .dbdef.zip 文件。包括状态文件
+        static void DeleteDataFiles(string strFileName)
+        {
+            DeleteDataFile(strFileName);
+
+            DeleteDataFile(GetDatabaseDefFileName(strFileName));
+        }
+
+        // 删除一个数据文件和它的状态文件
+        static void DeleteDataFile(string strFileName)
+        {
+            File.Delete(strFileName);
+            File.Delete(strFileName + LibraryServerUtil.STATE_EXTENSION);
+        }
+
+        // 根据备份文件名，构造数据库定义文件名
+        static string GetDatabaseDefFileName(string strBackupFileName)
+        {
+            return Path.GetDirectoryName(strBackupFileName) + "\\" + Path.GetFileNameWithoutExtension(strBackupFileName) + ".dbdef.zip";
+        }
+
+        // 如果没有扩展名部分，要自动加上 .dp2bak
+        static string CanonializeBackupFileName(string strFileName)
+        {
+            string ext = Path.GetExtension(strFileName);
+            if (string.IsNullOrEmpty(ext))
+                return strFileName + ".dp2bak";
+            return strFileName;
+        }
+
+        // parameters:
+        //      bContinue   是否为从断点位置继续模式。
+        void PrepareBackupFileName(string strBackupFileName,
+            bool bContinue)
+        {
+            List<string> filenames = new List<string>();
+
+            {
+                string strDefFileName = GetDatabaseDefFileName(strBackupFileName);
+                if (bContinue == false)
+                    WriteStateFile(strDefFileName, "creating");  // 表示文件正在创建中
+
+                filenames.Add(GetLogicPath(strDefFileName));
+            }
+
+            {
+                WriteStateFile(strBackupFileName, "creating");  // 表示文件正在创建中
+
+                filenames.Add(GetLogicPath(strBackupFileName));
+            }
+
+            this.OutputFileNames = StringUtil.MakePathList(filenames);
+#if NO
+            this.OutputFileNames = GetLogicPath(strDefFileName)
+                + ","
+                + GetLogicPath(strBackupFileName);
+#endif
+
+            this.eventStarted.Set();
+        }
+
+        string GetLogicPath(string strBackupFileName)
+        {
+            string strBackupFilePath = strBackupFileName.Substring(this.App.DataDir.Length).Replace("\\", "/");
+            if (strBackupFilePath.Length > 0 && strBackupFilePath[0] == '/')
+                strBackupFilePath = "!" + strBackupFilePath.Substring(1);
+
+            return strBackupFilePath;
+        }
+
+        // parameters:
+        //      strState    finish/abort/error 表示文件写入完成
+        //                  creating 表示文件正在创建中
+        static void WriteStateFile(string strBackupFileName, string strState)
+        {
+            string strFileName = strBackupFileName + LibraryServerUtil.STATE_EXTENSION;
+            if (strState == null || strState == "finish")
+                File.Delete(strFileName);
+            else
+                File.WriteAllText(strFileName, strState);
         }
 
         static string ToString(List<BatchTaskStartInfo> start_infos)
@@ -401,7 +535,7 @@ out strError);
                 return -1;
             if (nRet == 0)
             {
-                strError = "启动失败。因当前还没有断点信息，请指定为其他方式运行";
+                strError = "从断点位置启动失败，因当前还没有断点信息。请改以从头方式来启动";
                 return 0;
             }
 
@@ -468,6 +602,8 @@ out strError);
                     List<string> lines = new List<string>();
                     using (StreamReader sr = new StreamReader(strRecPathFileName, Encoding.UTF8))
                     {
+                        long lTotalLength = sr.BaseStream.Length;
+
                         // 跳过断点位置前，以前已经处理过的行
                         if (info != null
                             && string.IsNullOrEmpty(info.DbName) == false
@@ -478,6 +614,7 @@ out strError);
                                 if (this.Stopped == true)
                                 {
                                     strError = "中断";
+                                    WriteStateFile(strBackupFileName, "abort");  // 表示文件创建过程被中断。文件内容不完整
                                     return 0;
                                 }
 
@@ -499,6 +636,7 @@ out strError);
                             if (this.Stopped == true)
                             {
                                 strError = "中断";
+                                WriteStateFile(strBackupFileName, "abort");  // 表示文件创建过程被中断。文件内容不完整
                                 return 0;
                             }
 
@@ -519,6 +657,7 @@ out strError);
                                     if (this.Stopped == true)
                                     {
                                         strError = "中断";
+                                        WriteStateFile(strBackupFileName, "abort");  // 表示文件创建过程被中断。文件内容不完整
                                         return 0;
                                     }
 
@@ -533,12 +672,17 @@ out strError);
         record.RecordBody.Timestamp,
         out strError);
                                     if (nRet == -1)
+                                    {
+                                        WriteStateFile(strBackupFileName, "error");  // 表示文件创建过程出错
                                         return -1;
+                                    }
 
                                     breakpoint.DbName = ResPath.GetDbName(record.Path);
                                     breakpoint.RecID = ResPath.GetRecordId(record.Path);
 
-                                    SetProgressText(m_nRecordCount.ToString() + " " + record.Path);
+                                    long lCurrent = sr.BaseStream.Position;
+
+                                    SetProgressText(m_nRecordCount.ToString() + " " + record.Path + " " + GetPercent((double)lCurrent, lTotalLength));
 
                                     // 每 100 条显示一行
                                     if ((m_nRecordCount % 100) == 0)
@@ -563,13 +707,22 @@ out strError);
                     export_util.End();
                 }
 
+                WriteStateFile(strBackupFileName, "finish");  // 表示文件已经创建完成
                 return 1;
             }
             catch (Exception ex)
             {
                 strError = "BackupDatabase() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                WriteStateFile(strBackupFileName, "error");  // 表示文件创建过程出错
                 return -1;
             }
+        }
+
+        static string GetPercent(double v1, double v2)
+        {
+            double ratio = v1 / v2;
+            // return String.Format("{0,3:N}", ratio * (double)100) + "%";
+            return String.Format("{0:0%}", ratio);
         }
 
         // 一个服务器的断点信息
@@ -681,6 +834,110 @@ out strError);
                 }
 
                 return text.ToString();
+            }
+        }
+
+        // 建立数据库定义文件
+        // 注：调用前要确保 .~state 文件已经存在，内容为 creating。这样可以保证前端在下载过程中会一直等待内容文件创建
+        int CreateDatabaseDefFile(RmsChannel channel,
+    string strDbNameList,
+    string strOutputFileName,
+    out string strError)
+        {
+            strError = "";
+            /*
+            File.Delete(strOutputFileName);
+            File.Delete(strOutputFileName + LibraryServerUtil.STATE_EXTENSION);
+             * */
+
+            List<string> dbnames = StringUtil.SplitList(strDbNameList);
+
+            StringUtil.RemoveBlank(ref dbnames);
+            StringUtil.RemoveDupNoSort(ref dbnames);
+
+            if (dbnames.Count == 0)
+                dbnames.Add("*");
+
+            {
+                List<string> results = new List<string>();
+                foreach (string dbname in dbnames)
+                {
+                    if (string.IsNullOrEmpty(dbname) == true || dbname == "*")
+                    {
+                        // 如果数据库名为 *，表示希望获取所有的数据库
+                        List<string> temp = null;
+                        // 获得所有数据库名
+                        int nRet = GetAllDbNames(out temp,
+                out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        results.AddRange(temp);
+                    }
+                    else
+                        results.Add(dbname);
+                }
+
+                StringUtil.RemoveDupNoSort(ref results);
+                dbnames = results;
+            }
+
+            this.AppendResultText("正在准备数据库定义文件\r\n");
+
+            try
+            {
+                string strTempFile = strOutputFileName + ".tmp";
+                try
+                {
+                    int nRet = this.App.BackupDatabaseDefinition(
+                        channel,
+                        StringUtil.MakePathList(dbnames),
+                        strTempFile,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    // File.Copy(strTempFile, strOutputFileName, true);
+                    CopyFile(strTempFile, strOutputFileName);
+                }
+                finally
+                {
+                    File.Delete(strTempFile);
+                }
+
+                WriteStateFile(strOutputFileName, "finish");  // 表示文件已经创建完成
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                this.AppendResultText("结束准备数据库定义\r\n");
+            }
+
+        ERROR1:
+            WriteStateFile(strOutputFileName, "error");
+            return -1;
+        }
+
+        // 特指的拷贝文件的功能。确保打开写入目标文件的中途，其他线程依然可以共享打开同一文件
+        static void CopyFile(string strSourceFileName,
+            string strTargetFileName)
+        {
+            using (Stream outputfile = File.Open(
+    strTargetFileName,
+    FileMode.Create,
+    FileAccess.Write,
+    FileShare.ReadWrite))
+            using (FileStream fileSource = File.Open(
+                strSourceFileName,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite))
+            {
+                StreamUtil.DumpStream(fileSource, outputfile);
             }
         }
 

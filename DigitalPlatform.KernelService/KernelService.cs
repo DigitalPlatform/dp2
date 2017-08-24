@@ -670,7 +670,7 @@ namespace dp2Kernel
 
                     // GC.Collect();    // 可以确认结果集临时文件立即删除了
 
-                    if (lRecordCount != 0)
+                    if (lRecordCount != 0 && resultSet.Count > 0)
                     {
                         // 获得若干记录
                         // result:
@@ -692,6 +692,11 @@ namespace dp2Kernel
                             return result;
                         }
                     }
+                    else
+                    {
+                        records = new Record[0];    // 2017/8/23
+                    }
+
                 } // end of lock
             }
             catch (Exception ex)    // TODO: 将来把异常处理在中层函数内

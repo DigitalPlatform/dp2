@@ -26,10 +26,13 @@ namespace dp2Circulation
 
         private void StartBackupDialog_Load(object sender, EventArgs e)
         {
-            this.comboBox_backupFileName.Items.Add(BackupTaskStart.GetDefaultBackupFileName());
+            this.comboBox_backupFileName.Items.Add(
+                Program.MainForm.LibraryName + "_" + BackupTaskStart.GetDefaultBackupFileName());
 
             // 起始位置参数
             string strError = "";
+
+            this.checkBox_downloadFile.Checked = this.StartInfo.WaitForBegin;
 
             try
             {
@@ -145,6 +148,8 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            this.StartInfo.WaitForBegin = this.checkBox_downloadFile.Checked;
+
             // 合成参数
             if (this.checkBox_startAtServerBreakPoint.Checked == true)
                 this.StartInfo.Start = "dbnamelist=continue";

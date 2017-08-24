@@ -8844,9 +8844,12 @@ namespace dp2Circulation
             Program.MainForm.ReturnChannel(e.Channel);
             if (e.EndLoop == true)
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                if (stop != null)
+                {
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                }
                 this.ClearMessage();
             }
         }

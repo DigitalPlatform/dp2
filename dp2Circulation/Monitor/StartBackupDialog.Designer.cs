@@ -35,6 +35,7 @@
             this.checkBox_startAtServerBreakPoint = new System.Windows.Forms.CheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.comboBox_backupFileName = new System.Windows.Forms.ComboBox();
+            this.checkBox_downloadFile = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // label2
@@ -43,9 +44,9 @@
             this.label2.Location = new System.Drawing.Point(6, 70);
             this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(143, 12);
+            this.label2.Size = new System.Drawing.Size(263, 12);
             this.label2.TabIndex = 3;
-            this.label2.Text = "数据库名(&D) [每行一个]:";
+            this.label2.Text = "数据库名(&D) [每行一个。全空表示全部数据库]:";
             // 
             // textBox_dbNameList
             // 
@@ -57,18 +58,18 @@
             this.textBox_dbNameList.Multiline = true;
             this.textBox_dbNameList.Name = "textBox_dbNameList";
             this.textBox_dbNameList.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_dbNameList.Size = new System.Drawing.Size(307, 100);
+            this.textBox_dbNameList.Size = new System.Drawing.Size(312, 100);
             this.textBox_dbNameList.TabIndex = 4;
             // 
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(261, 214);
+            this.button_Cancel.Location = new System.Drawing.Point(266, 261);
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(56, 22);
-            this.button_Cancel.TabIndex = 6;
+            this.button_Cancel.TabIndex = 7;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
@@ -76,11 +77,11 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(200, 214);
+            this.button_OK.Location = new System.Drawing.Point(205, 261);
             this.button_OK.Margin = new System.Windows.Forms.Padding(2);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(56, 22);
-            this.button_OK.TabIndex = 5;
+            this.button_OK.TabIndex = 6;
             this.button_OK.Text = "确定";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
@@ -113,8 +114,19 @@
             this.comboBox_backupFileName.FormattingEnabled = true;
             this.comboBox_backupFileName.Location = new System.Drawing.Point(85, 39);
             this.comboBox_backupFileName.Name = "comboBox_backupFileName";
-            this.comboBox_backupFileName.Size = new System.Drawing.Size(232, 20);
+            this.comboBox_backupFileName.Size = new System.Drawing.Size(237, 20);
             this.comboBox_backupFileName.TabIndex = 2;
+            // 
+            // checkBox_downloadFile
+            // 
+            this.checkBox_downloadFile.AutoSize = true;
+            this.checkBox_downloadFile.Location = new System.Drawing.Point(8, 212);
+            this.checkBox_downloadFile.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_downloadFile.Name = "checkBox_downloadFile";
+            this.checkBox_downloadFile.Size = new System.Drawing.Size(138, 16);
+            this.checkBox_downloadFile.TabIndex = 5;
+            this.checkBox_downloadFile.Text = "同时启动下载文件(&D)";
+            this.checkBox_downloadFile.UseVisualStyleBackColor = true;
             // 
             // StartBackupDialog
             // 
@@ -122,7 +134,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(326, 246);
+            this.ClientSize = new System.Drawing.Size(331, 293);
+            this.Controls.Add(this.checkBox_downloadFile);
             this.Controls.Add(this.comboBox_backupFileName);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.checkBox_startAtServerBreakPoint);
@@ -149,5 +162,6 @@
         private System.Windows.Forms.CheckBox checkBox_startAtServerBreakPoint;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox comboBox_backupFileName;
+        private System.Windows.Forms.CheckBox checkBox_downloadFile;
     }
 }

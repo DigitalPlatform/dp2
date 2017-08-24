@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>243</ApplicationRevision>
+    <ApplicationRevision>247</ApplicationRevision>
     <ApplicationVersion>2.10.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -465,6 +465,9 @@
     </Compile>
     <Compile Include="MainForm\BiblioPropertyTask.cs" />
     <Compile Include="MainForm\DbNameExtension.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm\DownloadExtension.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm\FirstRunDialog.cs">

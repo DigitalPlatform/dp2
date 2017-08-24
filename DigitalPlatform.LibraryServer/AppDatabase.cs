@@ -1797,6 +1797,43 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+        public int BackupDatabaseDefinition(
+            RmsChannel channel,
+            string strDatabaseNames,
+            string strLogFileName,
+            out string strError)
+        {
+            strError = "";
+
+            int nRet = 0;
+
+            if (string.IsNullOrEmpty(strLogFileName))
+            {
+                strError = "strLogFileName 参数不应为空";
+                return -1;
+            }
+
+            string[] names = strDatabaseNames.Split(new char[] { ',' });
+            for (int i = 0; i < names.Length; i++)
+            {
+                string strName = names[i].Trim();
+                if (String.IsNullOrEmpty(strName) == true)
+                    continue;
+
+                // 获得一个数据库的全部配置文件
+                {
+                    nRet = GetConfigFiles(channel,
+                        strName,
+                        strLogFileName,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+            }
+
+            return 0;
+        }
+
         // 删除数据库
         // return:
         //      -1  出错

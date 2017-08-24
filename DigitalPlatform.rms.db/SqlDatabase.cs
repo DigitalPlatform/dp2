@@ -7477,7 +7477,7 @@ namespace DigitalPlatform.rms
                     // return:
                     //		-1  出错
                     //		0   成功
-                    nRet = ConvertUtil.GetRealLength(lStart,
+                    nRet = ConvertUtil.GetRealLengthNew(lStart,
                         nReadLength,
                         lTotalLength,
                         nMaxLength,
@@ -7864,7 +7864,7 @@ namespace DigitalPlatform.rms
                     // return:
                     //		-1  出错
                     //		0   成功
-                    nRet = ConvertUtil.GetRealLength(lStart,
+                    nRet = ConvertUtil.GetRealLengthNew(lStart,
                         nReadLength,
                         lTotalLength,
                         nMaxLength,
@@ -8182,7 +8182,7 @@ namespace DigitalPlatform.rms
                     // return:
                     //		-1  出错
                     //		0   成功
-                    nRet = ConvertUtil.GetRealLength(lStart,
+                    nRet = ConvertUtil.GetRealLengthNew(lStart,
                         nReadLength,
                         lTotalLength,
                         nMaxLength,
@@ -8500,7 +8500,7 @@ namespace DigitalPlatform.rms
                     // return:
                     //		-1  出错
                     //		0   成功
-                    nRet = ConvertUtil.GetRealLength(lStart,
+                    nRet = ConvertUtil.GetRealLengthNew(lStart,
                         nReadLength,
                         lTotalLength,
                         nMaxLength,

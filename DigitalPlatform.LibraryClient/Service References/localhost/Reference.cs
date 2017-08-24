@@ -281,6 +281,15 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
         PartialDenied = 23,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NotFoundObjectFile = 24,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RequestError = 100,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RequestTimeOut = 112,
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
@@ -2690,10 +2699,16 @@ namespace DigitalPlatform.LibraryClient.localhost {
         private string CountField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string OutputParamField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string ParamField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string StartField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private bool WaitForBeginField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -2732,6 +2747,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
+        public string OutputParam {
+            get {
+                return this.OutputParamField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.OutputParamField, value) != true)) {
+                    this.OutputParamField = value;
+                    this.RaisePropertyChanged("OutputParam");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
         public string Param {
             get {
                 return this.ParamField;
@@ -2753,6 +2781,19 @@ namespace DigitalPlatform.LibraryClient.localhost {
                 if ((object.ReferenceEquals(this.StartField, value) != true)) {
                     this.StartField = value;
                     this.RaisePropertyChanged("Start");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public bool WaitForBegin {
+            get {
+                return this.WaitForBeginField;
+            }
+            set {
+                if ((this.WaitForBeginField.Equals(value) != true)) {
+                    this.WaitForBeginField = value;
+                    this.RaisePropertyChanged("WaitForBegin");
                 }
             }
         }

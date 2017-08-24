@@ -35,6 +35,8 @@
             // 
             // progressBar1
             // 
+            this.progressBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar1.Location = new System.Drawing.Point(12, 38);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(479, 14);
@@ -43,6 +45,8 @@
             // 
             // label_message
             // 
+            this.label_message.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label_message.Location = new System.Drawing.Point(13, 12);
             this.label_message.Name = "label_message";
             this.label_message.Size = new System.Drawing.Size(478, 23);
@@ -58,6 +62,7 @@
             this.button_cancel.TabIndex = 3;
             this.button_cancel.Text = "取消";
             this.button_cancel.UseVisualStyleBackColor = true;
+            this.button_cancel.Click += new System.EventHandler(this.button_cancel_Click);
             // 
             // FileDownloadDialog
             // 

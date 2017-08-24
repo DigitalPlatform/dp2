@@ -643,7 +643,7 @@ namespace DigitalPlatform.LibraryServer
                 else
                 {
                     using (FileStream s = new FileStream(strFilePath,
-                        FileMode.Open))
+                        FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
                         destBuffer = new byte[lOutputLength];
 

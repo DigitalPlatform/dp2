@@ -43,6 +43,8 @@ namespace DigitalPlatform.LibraryServer
 
         internal bool m_bClosed = true;
 
+        public string ErrorInfo { get; set; }   // 线程结束的出错原因。如果为空，表示线程正常结束
+
         internal LibraryApplication App = null;
         internal RmsChannelCollection RmsChannels = new RmsChannelCollection();
 
@@ -55,6 +57,8 @@ namespace DigitalPlatform.LibraryServer
         internal AutoResetEvent eventActive = new AutoResetEvent(false);	// 激活信号
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 
+        internal AutoResetEvent eventStarted = new AutoResetEvent(false);	// 首次启动起来
+
         public int PerTime = 60 * 60 * 1000;	// 1小时
 
         public virtual void Dispose()
@@ -66,6 +70,7 @@ namespace DigitalPlatform.LibraryServer
             eventClose.Dispose();
             eventActive.Dispose();
             eventFinished.Dispose();
+            eventStarted.Dispose();
         }
 
         public void Activate()
@@ -361,13 +366,16 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.eventActive.Set();
                 this.eventClose.Reset();    // 2006/11/24
+                this.eventStarted.Reset();  // 2017/8/23
                 return;
             }
 
+            this.ErrorInfo = "";
             this.m_bClosed = false;
 
             this.eventActive.Set();
             this.eventClose.Reset();    // 2006/11/24
+            this.eventStarted.Reset();  // 2017/8/23
 
             this.threadWorker =
                 new Thread(new ThreadStart(this.ThreadMain));
@@ -463,6 +471,8 @@ namespace DigitalPlatform.LibraryServer
 
         public void Stop()
         {
+            // this.eventStarted.Reset();
+          
             this.eventClose.Set();
             this.m_bClosed = true;
 
@@ -684,6 +694,7 @@ namespace DigitalPlatform.LibraryServer
                 try
                 {
                     eventFinished.Set();
+                    eventStarted.Set(); // 2017/8/23
                 }
                 catch(ObjectDisposedException)  // 2016/4/19
                 {

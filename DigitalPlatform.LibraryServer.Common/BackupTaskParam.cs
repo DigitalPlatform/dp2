@@ -56,7 +56,7 @@ namespace DigitalPlatform.LibraryServer.Common
 
         public static string GetDefaultBackupFileName()
         {
-            return DateTime.Now.ToString("u").Replace(":", "_").Replace(" ", "_") + ".dp2bak";
+            return DateTime.Now.ToString("u").Replace(":", "_").Replace(" ", "_").Replace("Z", "") + ".dp2bak";
         }
     }
 }

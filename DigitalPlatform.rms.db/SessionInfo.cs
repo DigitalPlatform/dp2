@@ -421,6 +421,13 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
+            // 2017/8/23
+            if (resultSet.Count == 0 && lLength > 0)
+            {
+                strError = "结果集为空，无法取出任何记录";
+                return -1;
+            }
+
             long lTotalPackageLength = 0;   // 累计计算要输出的XML记录占据的空间
 
             long lOutputLength;

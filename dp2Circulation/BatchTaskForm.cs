@@ -15,6 +15,9 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonControl;
+using System.IO;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -405,6 +408,29 @@ namespace dp2Circulation
                     }
 
                     this.label_progress.Text = resultInfo.ProgressText;
+
+                    if (strTaskName == "大备份"
+                        && resultInfo.StartInfo != null)
+                    {
+                        string strOutputFolder = "";
+                        List<string> paths = StringUtil.SplitList(resultInfo.StartInfo.OutputParam);
+                        foreach (string path in paths)
+                        {
+                            if (string.IsNullOrEmpty(path) == false)
+                            {
+                                // parameters:
+                                //      strOutputFolder 输出目录。
+                                //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
+                                //                      [out] 实际使用的目录
+                                int nRet = Program.MainForm.BeginDownloadFile(path,
+                                    ref strOutputFolder,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                            }
+
+                        }
+                    }
                 }
                 finally
                 {
@@ -424,6 +450,7 @@ namespace dp2Circulation
                 this.m_lock.ReleaseWriterLock();
             }
         }
+
 
         // 停止批处理任务
         int StopBatchTask(string strTaskName,

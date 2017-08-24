@@ -953,6 +953,7 @@ namespace dp2Circulation
                             else
                                 s_format.Alignment = StringAlignment.Near;
 
+                            // TODO: 可否做成可以配置的
                             s_format.Trimming = StringTrimming.EllipsisCharacter;
                             // s_format.LineAlignment = StringAlignment.Center;
                         }
@@ -972,6 +973,11 @@ namespace dp2Circulation
                         string picture_type = StringUtil.GetParameterByPrefix(strLineStyle,
                                 "picture",
                                 ":");
+
+                        // 文字的风格
+                        string text_style = StringUtil.GetParameterByPrefix(strLineStyle,
+        "text_style",
+        ":");
 
                         // 条码下方文字的风格
                         string barcode_text_style = StringUtil.GetParameterByPrefix(strLineStyle,
@@ -1087,7 +1093,7 @@ namespace dp2Circulation
                                         g.DrawImage(image, target, source, GraphicsUnit.Pixel);
                                     }
                                 }
-                                catch(Exception ex)
+                                catch (Exception ex)
                                 {
                                     using (Brush brush = new SolidBrush(Color.Red))
                                     {
@@ -1111,11 +1117,54 @@ namespace dp2Circulation
                                 if (bIsBarcodeFont == true && string.IsNullOrEmpty(strText) == false)
                                     strText = "*" + strText + "*";
 
-                                g.DrawString(strText,
-                                    this_font,
-                                    brushText,
-                                    rect,
-                                    s_format);
+                                if (StringUtil.IsInList("auto_fit", text_style) == true)
+                                {
+                                    float old_height = this_font.Height;
+                                    // 自动填充风格
+                                    float auto_height = GetAutoFitTextHeight(
+                g,
+                this_font,
+                rect,
+                strText);
+                                    if (auto_height == 0)
+                                    {
+                                        // 普通风格
+                                        g.DrawString(strText,
+                                            this_font,
+                                            brushText,
+                                            rect,
+                                            s_format);
+                                    }
+                                    else
+                                    {
+                                        float delta = old_height - auto_height;
+                                        RectangleF temp_rect = rect;
+                                        // 调整 rect
+                                        // temp_rect.Inflate(0, -delta);
+                                        temp_rect.Offset(0, delta / 2);
+
+                                        using (Font font = new Font(this_font.FontFamily,
+            auto_height,
+            this_font.Style,
+            GraphicsUnit.Pixel))
+                                        {
+                                            g.DrawString(strText,
+            font,
+            brushText,
+            temp_rect,
+            s_format);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    // 普通风格
+                                    g.DrawString(strText,
+                                        this_font,
+                                        brushText,
+                                        rect,
+                                        s_format);
+                                }
                             }
                             finally
                             {
@@ -1160,7 +1209,7 @@ namespace dp2Circulation
         }
 
         // 将 picture 纵横等比例缩放，放入 rect 中央
-        static RectangleF GetPictureRect(RectangleF picture, 
+        static RectangleF GetPictureRect(RectangleF picture,
             RectangleF area,
             StringFormat format)
         {
@@ -1233,6 +1282,60 @@ namespace dp2Circulation
             return (display * g.DpiY) / 100;
         }
 #endif
+
+#if NO
+        static float GetFontSizeInPixels(Graphics g, Font font)
+        {
+            var points = font.SizeInPoints;
+            return points * g.DpiX / 72;
+        }
+#endif
+
+        // parameters:
+        //      rect    注意这是 Graphics 当前单位的值
+        static float GetAutoFitTextHeight(
+            Graphics g,
+            Font ref_font,
+            RectangleF rect,
+            string strText)
+        {
+            // GraphicsUnit unit = g.PageUnit;
+            float height = ref_font.GetHeight(g);    //  GetFontSizeInPixels(g, ref_font); // 初始的文字高度
+            float ratio = 0F;
+            for (; ; )
+            {
+                using (Font font = new Font(ref_font.FontFamily,
+                    height,
+                    ref_font.Style,
+                    GraphicsUnit.Pixel))
+                {
+                    SizeF size = g.MeasureString(strText, font);
+                    if (size.Width <= rect.Width)
+                    {
+                        // return height;
+                        if (ratio == 0)
+                            return 0;   // 表示不必发生变化
+                        return height;
+                    }
+                    // 宽高比例
+                    if (ratio != 0)
+                        ratio *= 0.9F;
+                    else
+                        ratio = size.Height / size.Width;
+                    // ratio = ((size.Width - rect.Width) / rect.Width) + 0.04F; // 超过的百分比
+                }
+
+                height = rect.Width * ratio;
+
+                // 减小 height
+                // 每次减小 1/3
+                // height -= height * ratio;
+
+                if (height <= 1)
+                    return Math.Max(1, height);
+            }
+        }
+
 
         static float MeasureOcrTextHeight(
     Graphics g,
