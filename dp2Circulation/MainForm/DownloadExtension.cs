@@ -51,13 +51,14 @@ namespace dp2Circulation
 
         void DisplayDownloaderErrorInfo(DynamicDownloader downloader)
         {
-            if (string.IsNullOrEmpty(downloader.ErrorInfo) == false)
+            if (string.IsNullOrEmpty(downloader.ErrorInfo) == false
+                && downloader.ErrorInfo.StartsWith("~") == false)
             {
                 this.Invoke((Action)(() =>
                 {
                     MessageBox.Show(this, "下载 " + downloader.ServerFilePath + "-->" + downloader.LocalFilePath + " 过程中出错: " + downloader.ErrorInfo);
                 }));
-                downloader.ErrorInfo = "";  // 只显示一次
+                downloader.ErrorInfo = "~" + downloader.ErrorInfo;  // 只显示一次
             }
         }
 
@@ -99,12 +100,29 @@ namespace dp2Circulation
 
             string strTargetPath = Path.Combine(strOutputFolder, Path.GetFileName(strPath));
 
+            string strTargetTempPath = DynamicDownloader.GetTempFileName(strTargetPath);
+
             bool bAppend = false;   // 是否继续下载?
             // 观察目标文件是否已经存在
             if (File.Exists(strTargetPath))
             {
                 DialogResult result = MessageBox.Show(this,
-    "目标文件 '" + strTargetPath + "' 已经存在。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃下载]",
+    "目标文件 '" + strTargetPath + "' 已经存在。\r\n\r\n是否重新下载并覆盖它?\r\n[是：下载并覆盖; 取消：放弃下载]",
+    "MainForm",
+    MessageBoxButtons.OKCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Cancel)
+                    return 0;
+                bAppend = false;
+                File.Delete(strTargetPath);
+            }
+
+            // 观察临时文件是否已经存在
+            if (File.Exists(strTargetTempPath))
+            {
+                DialogResult result = MessageBox.Show(this,
+    "目标文件 '" + strTargetPath + "' 先前曾经被下载过，但未能完成。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃下载]",
     "MainForm",
     MessageBoxButtons.YesNoCancel,
     MessageBoxIcon.Question,
@@ -113,6 +131,8 @@ namespace dp2Circulation
                     return 0;
                 if (result == DialogResult.Yes)
                     bAppend = true;
+                else
+                    File.Delete(strTargetTempPath);
             }
 
             LibraryChannel channel = null;

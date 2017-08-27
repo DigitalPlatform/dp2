@@ -12,6 +12,7 @@ using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.IO;
+using Ionic.Zip;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -338,7 +339,10 @@ namespace DigitalPlatform.LibraryServer
                 // TODO: 如果集合为空，需要删除断点信息文件
                 // 正常结束，复位断点
                 if (this.StartInfos.Count == 0)
-                    this.App.RemoveBatchTaskBreakPointFile(this.Name);
+                {
+                    // this.App.RemoveBatchTaskBreakPointFile(this.Name);
+                    this.ClearTask();
+                }
 
                 this.StartInfo.Start = "";
 
@@ -369,11 +373,13 @@ out strError);
                 }
 #endif
 
+                DoPendingCommands(strBackupFileName);
                 return;
             ERROR1:
                 this.ErrorInfo = strError;
                 this.AppendResultText(strError + "\r\n");
                 this.SetProgressText(strError);
+                DoPendingCommands(strBackupFileName);
                 return;
             }
             finally
@@ -381,6 +387,25 @@ out strError);
 
             }
 
+        }
+
+        void DoPendingCommands(string strBackupFileName)
+        {
+            if (string.IsNullOrEmpty(strBackupFileName))
+                return;
+
+            // 看看是否有延迟的命令需要执行
+            if (this._pendingCommands.Count > 0)
+            {
+                if (this._pendingCommands.IndexOf("abort") != -1)
+                {
+                    this.ClearTask();
+                    // 删除大备份文件
+                    DeleteDataFiles(strBackupFileName);
+
+                }
+                this._pendingCommands.Clear();
+            }
         }
 
         // 删除 .dp2bak 文件和 .dbdef.zip 文件。包括状态文件
@@ -394,8 +419,23 @@ out strError);
         // 删除一个数据文件和它的状态文件
         static void DeleteDataFile(string strFileName)
         {
-            File.Delete(strFileName);
-            File.Delete(strFileName + LibraryServerUtil.STATE_EXTENSION);
+            try
+            {
+                File.Delete(strFileName);
+            }
+            catch
+            {
+
+            }
+
+            try
+            {
+                File.Delete(strFileName + LibraryServerUtil.STATE_EXTENSION);
+            }
+            catch
+            {
+
+            }
         }
 
         // 根据备份文件名，构造数据库定义文件名
@@ -837,6 +877,103 @@ out strError);
             }
         }
 
+        // 压缩一批文件 .zip 文件
+        // parameters:
+        //      filenames   要压缩的源文件路径，数组
+        //      shortfilenames 在 .zip 文件中的文件路径，数组
+        static int CompressFiles(
+            List<string> filenames,
+            List<string> shortfilenames,
+            string strZipFileName,
+            Encoding encoding,
+            bool bAppend,
+            out string strError)
+        {
+            strError = "";
+
+            if (filenames.Count != shortfilenames.Count)
+            {
+                strError = "filenames.Count != shortfilenames.Count";
+                return -1;
+            }
+
+            if (bAppend == false)
+            {
+                if (File.Exists(strZipFileName) == true)
+                {
+                    try
+                    {
+                        File.Delete(strZipFileName);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                    }
+                    catch (DirectoryNotFoundException)
+                    {
+
+                    }
+                }
+            }
+
+            // string strHead = Path.GetDirectoryName(strDirectory);
+            // Console.WriteLine("head=["+strHead+"]");
+
+            using (ZipFile zip = new ZipFile(strZipFileName, encoding))
+            {
+                // http://stackoverflow.com/questions/15337186/dotnetzip-badreadexception-on-extract
+                // https://dotnetzip.codeplex.com/workitem/14087
+                // uncommenting the following line can be used as a work-around
+                zip.ParallelDeflateThreshold = -1;
+
+                for (int i = 0; i < filenames.Count; i++)
+                {
+                    string filename = filenames[i];
+                    string shortfilename = shortfilenames[i];
+                    string directoryPathInArchive = Path.GetDirectoryName(shortfilename);
+                    zip.AddFile(filename, directoryPathInArchive);
+                }
+
+                zip.UseZip64WhenSaving = Zip64Option.AsNecessary;
+                zip.Save(strZipFileName);
+            }
+
+            return filenames.Count;
+        }
+
+        int AppendLibraryDataFiles(string strOutputFileName,
+            out string strError)
+        {
+            strError = "";
+
+#if NO
+            string strFileName = Path.Combine(this.App.DataDir, "library.xml");
+            string strTargetPath = Path.Combine("_datadir", "library.xml");
+#endif
+
+            List<string> filenames = new List<string>();
+            filenames.Add(Path.Combine(this.App.DataDir, "library.xml"));
+
+            filenames.AddRange(PathUtil.GetFileNames(Path.Combine(this.App.DataDir, "cfgs"),
+    (fi) =>
+    {
+        return true;
+    }
+    ));
+            List<string> shortfilenames = new List<string>();
+            foreach (string filename in filenames)
+            {
+                shortfilenames.Add("_datadir" + filename.Substring(this.App.DataDir.Length));
+            }
+
+            return CompressFiles(
+                filenames,
+                shortfilenames,
+                strOutputFileName,
+                Encoding.UTF8,
+                true,
+                out strError);
+        }
+
         // 建立数据库定义文件
         // 注：调用前要确保 .~state 文件已经存在，内容为 creating。这样可以保证前端在下载过程中会一直等待内容文件创建
         int CreateDatabaseDefFile(RmsChannel channel,
@@ -849,6 +986,8 @@ out strError);
             File.Delete(strOutputFileName);
             File.Delete(strOutputFileName + LibraryServerUtil.STATE_EXTENSION);
              * */
+            if (AppendLibraryDataFiles(strOutputFileName, out strError) == -1)
+                return -1;
 
             List<string> dbnames = StringUtil.SplitList(strDbNameList);
 
@@ -886,6 +1025,11 @@ out strError);
             try
             {
                 string strTempFile = strOutputFileName + ".tmp";
+
+                // 复制原有文件到临时文件名，这样才能实现追加内容的效果
+                if (File.Exists(strOutputFileName))
+                    File.Copy(strOutputFileName, strTempFile, true);
+
                 try
                 {
                     int nRet = this.App.BackupDatabaseDefinition(

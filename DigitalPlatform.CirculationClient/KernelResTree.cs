@@ -484,13 +484,14 @@ namespace DigitalPlatform.CirculationClient
 
         void DisplayDownloaderErrorInfo(DynamicDownloader downloader)
         {
-            if (string.IsNullOrEmpty(downloader.ErrorInfo) == false)
+            if (string.IsNullOrEmpty(downloader.ErrorInfo) == false
+                && downloader.ErrorInfo.StartsWith("~") == false)
             {
                 this.Invoke((Action)(() =>
                 {
                     MessageBox.Show(this, "下载 " + downloader.ServerFilePath + "-->" + downloader.LocalFilePath + " 过程中出错: " + downloader.ErrorInfo);
                 }));
-                downloader.ErrorInfo = "";  // 只显示一次
+                downloader.ErrorInfo = "~" + downloader.ErrorInfo;  // 只显示一次
             }
         }
 

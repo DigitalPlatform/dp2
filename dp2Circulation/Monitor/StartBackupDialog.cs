@@ -194,5 +194,11 @@ namespace dp2Circulation
             }
         }
 
+        private void button_abort_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = System.Windows.Forms.DialogResult.Abort;
+            this.Close();
+        }
+
     }
 }

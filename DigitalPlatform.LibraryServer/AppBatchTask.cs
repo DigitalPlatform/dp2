@@ -352,6 +352,38 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
+        public int AbortBatchTask(string strName,
+    BatchTaskInfo param,
+    out BatchTaskInfo info,
+    out string strError)
+        {
+            strError = "";
+            info = null;
+
+            if (this.BatchTasks == null)
+            {
+                strError = "this.BatchTasks == null";
+                return -1;
+            }
+
+            BatchTask task = this.BatchTasks.GetBatchTask(strName);
+
+            // 任务本来就不存在
+            if (task == null)
+            {
+                strError = "任务 '" + strName + "' 不存在";
+                return -1;
+            }
+
+            task._pendingCommands.Add("abort");
+            task.Stop();
+
+            info = task.GetCurrentInfo(param.ResultOffset,
+                param.MaxResultBytes);
+
+            return 1;
+        }
+
         public int GetBatchTaskInfo(string strName,
             BatchTaskInfo param,
             out BatchTaskInfo info,

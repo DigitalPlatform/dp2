@@ -180,6 +180,7 @@ namespace dp2Circulation
         {
             string strError = "";
             int nRet = StopBatchTask(this.comboBox_taskName.Text,
+                "stop",
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
@@ -358,6 +359,14 @@ namespace dp2Circulation
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.StartInfo = startinfo;
                 dlg.ShowDialog(this);
+                if (dlg.DialogResult == System.Windows.Forms.DialogResult.Abort)
+                {
+                    if (StopBatchTask(strTaskName,
+            "abort",
+            out strError) == -1)
+                        return -1;
+                    return 1;
+                }
                 if (dlg.DialogResult != DialogResult.OK)
                 {
                     strError = "用户放弃启动";
@@ -453,10 +462,18 @@ namespace dp2Circulation
 
 
         // 停止批处理任务
+        // parameters:
+        //      strAction   "stop"或者"abort"
         int StopBatchTask(string strTaskName,
+            string strAction,
             out string strError)
         {
             strError = "";
+
+            if (string.IsNullOrEmpty(strAction))
+                strAction = "stop";
+
+            Debug.Assert(strAction == "stop" || strAction == "abort", "");
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
 
@@ -482,7 +499,7 @@ namespace dp2Circulation
                     long lRet = Channel.BatchTask(
                         stop,
                         strTaskName,
-                        "stop",
+                        strAction,  // "stop",
                         param,
                         out resultInfo,
                         out strError);

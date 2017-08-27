@@ -8780,6 +8780,14 @@ Stack:
                         out resultInfo,
                         out strError);
                 }
+                else if (strAction == "abort")
+                {
+                    // 2017/8/27
+                    nRet = app.AbortBatchTask(strName,
+                        info,
+                        out resultInfo,
+                        out strError);
+                }
                 else if (strAction == "continue")
                 {
                     nRet = app.StartBatchTask("!continue",

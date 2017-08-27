@@ -17,6 +17,8 @@ namespace DigitalPlatform.LibraryServer
     // 批处理任务
     public class BatchTask : IDisposable
     {
+        internal List<string> _pendingCommands = new List<string>();
+
         public bool ManualStart = false;    // 本轮是否为手动启动？
 
         public bool Loop = false;
@@ -472,12 +474,19 @@ namespace DigitalPlatform.LibraryServer
         public void Stop()
         {
             // this.eventStarted.Reset();
-          
+
             this.eventClose.Set();
             this.m_bClosed = true;
 
-            this.m_nPrevLoop = this.Loop == true ? 1: 0;   // 记忆前一次的Loop值
+            this.m_nPrevLoop = this.Loop == true ? 1 : 0;   // 记忆前一次的Loop值
             this.Loop = false;  // 防止过一会继续循环
+        }
+
+        // 清除断点信息，避免下次 dp2library 启动时候自动从断点位置开始处理
+        public virtual void ClearTask()
+        {
+            if (this.App != null && string.IsNullOrEmpty(this.Name) == false)
+                this.App.RemoveBatchTaskBreakPointFile(this.Name);
         }
 
         // 设置进度文本
@@ -696,7 +705,7 @@ namespace DigitalPlatform.LibraryServer
                     eventFinished.Set();
                     eventStarted.Set(); // 2017/8/23
                 }
-                catch(ObjectDisposedException)  // 2016/4/19
+                catch (ObjectDisposedException)  // 2016/4/19
                 {
 
                 }

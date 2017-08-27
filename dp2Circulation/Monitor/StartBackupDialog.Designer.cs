@@ -36,6 +36,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.comboBox_backupFileName = new System.Windows.Forms.ComboBox();
             this.checkBox_downloadFile = new System.Windows.Forms.CheckBox();
+            this.button_delete = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label2
@@ -128,6 +129,18 @@
             this.checkBox_downloadFile.Text = "同时启动下载文件(&D)";
             this.checkBox_downloadFile.UseVisualStyleBackColor = true;
             // 
+            // button_delete
+            // 
+            this.button_delete.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.button_delete.Location = new System.Drawing.Point(11, 260);
+            this.button_delete.Margin = new System.Windows.Forms.Padding(2);
+            this.button_delete.Name = "button_delete";
+            this.button_delete.Size = new System.Drawing.Size(96, 22);
+            this.button_delete.TabIndex = 8;
+            this.button_delete.Text = "停止并撤销";
+            this.button_delete.UseVisualStyleBackColor = true;
+            this.button_delete.Click += new System.EventHandler(this.button_abort_Click);
+            // 
             // StartBackupDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -135,6 +148,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(331, 293);
+            this.Controls.Add(this.button_delete);
             this.Controls.Add(this.checkBox_downloadFile);
             this.Controls.Add(this.comboBox_backupFileName);
             this.Controls.Add(this.label1);
@@ -163,5 +177,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox comboBox_backupFileName;
         private System.Windows.Forms.CheckBox checkBox_downloadFile;
+        private System.Windows.Forms.Button button_delete;
     }
 }

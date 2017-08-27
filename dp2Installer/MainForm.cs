@@ -3141,9 +3141,11 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-
         private void MenuItem_dp2kernel_installService_Click(object sender, EventArgs e)
         {
+            InstallOrUninstallService("dp2Kernel", true);
+
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -3192,10 +3194,14 @@ MessageBoxDefaultButton.Button1);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         private void MenuItem_dp2kernel_uninstallService_Click(object sender, EventArgs e)
         {
+            InstallOrUninstallService("dp2Kernel", false);
+
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -3236,6 +3242,7 @@ MessageBoxDefaultButton.Button1);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         private void MenuItem_dp2kernel_startService_Click(object sender, EventArgs e)
@@ -3547,6 +3554,8 @@ out string strError)
 
         private void MenuItem_dp2library_installService_Click(object sender, EventArgs e)
         {
+            InstallOrUninstallService("dp2Library", true);
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -3583,10 +3592,89 @@ out string strError)
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
+
+        // 2017/8/26
+        void InstallOrUninstallService(string strName, bool bInstall)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            if (bInstall)
+                AppendSectionTitle("注册 Windows Service 开始");
+            else
+                AppendSectionTitle("注销 Windows Service 开始");
+
+            Application.DoEvents();
+
+            string strServiceName = strName + "Service";
+            if (strName == "dp2ZServer")
+                strServiceName = "dp2ZService";
+
+            string strExePath = InstallHelper.GetPathOfService(strServiceName);
+            if (bInstall == true)
+            {
+                if (string.IsNullOrEmpty(strExePath) == false)
+                {
+                    strError = strName + " 已经注册为 Windows Service，无法重复进行注册";
+                    goto ERROR1;
+                }
+                // program files (x86)/digitalplatform/dp2capo
+                string strProgramDir = GetProductDirectory(strName);
+
+                strExePath = Path.Combine(strProgramDir, strName + ".exe");
+                if (File.Exists(strExePath) == false)
+                {
+                    strError = strName + ".exe 尚未复制到目标位置 '" + strExePath + "'，无法进行注册";
+                    goto ERROR1;
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(strExePath) == true)
+                {
+                    strError = strName + " 尚未安装和注册为 Windows Service，无法进行注销";
+                    goto ERROR1;
+                }
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
+
+                // 先停止 Service
+                nRet = InstallHelper.StopService(strServiceName,
+        out strError);
+                if (nRet == -1)
+                    MessageBox.Show(this, "停止 Service 时出错" + strError);
+            }
+
+            nRet = InstallService(strExePath,
+                bInstall,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            if (bInstall)
+                AppendSectionTitle("注册 Windows Service 结束");
+            else
+                AppendSectionTitle("注销 Windows Service 结束");
+
+            if (strName == "dp2Library")
+                this.Refresh_dp2library_MenuItems();
+            if (strName == "dp2Kernel")
+                this.Refresh_dp2kernel_MenuItems();
+            if (strName == "dp2ZServer")
+                this.Refresh_dp2ZServer_MenuItems();
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
 
         private void MenuItem_dp2library_uninstallService_Click(object sender, EventArgs e)
         {
+            InstallOrUninstallService("dp2Library", false);
+
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -3602,6 +3690,12 @@ out string strError)
             }
             strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
+            // testing
+            nRet = InstallHelper.StopService("dp2LibraryService",
+    out strError);
+            if (nRet == -1)
+                MessageBox.Show(this, "停止 Service 时出错" + strError);
+
             // 注销 Windows Service
             nRet = InstallService(strExePath,
     false,
@@ -3615,6 +3709,7 @@ out string strError)
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         // 卸载 dp2kernel
@@ -5169,6 +5264,8 @@ MessageBoxDefaultButton.Button2);
 
         private void MenuItem_dp2ZServer_installService_Click(object sender, EventArgs e)
         {
+            InstallOrUninstallService("dp2ZServer", true);
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -5205,10 +5302,14 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         private void MenuItem_dp2ZServer_uninstallService_Click(object sender, EventArgs e)
         {
+            InstallOrUninstallService("dp2ZServer", false);
+
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -5237,6 +5338,7 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         private void MenuItem_dp2ZServer_instanceManagement_Click(object sender, EventArgs e)

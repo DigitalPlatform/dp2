@@ -1119,7 +1119,7 @@ namespace dp2Circulation
 
                                 if (StringUtil.IsInList("auto_fit", text_style) == true)
                                 {
-                                    float old_height = this_font.Height;
+                                    float old_height = this_font.GetHeight(g);
                                     // 自动填充风格
                                     float auto_height = GetAutoFitTextHeight(
                 g,

@@ -90,16 +90,35 @@ namespace DigitalPlatform.LibraryClient
                 this.Closed(this, new EventArgs());
         }
 
+        string GetTempFileName()
+        {
+            return GetTempFileName(this.LocalFilePath);
+        }
+
+        public static string GetTempFileName(string strFileName)
+        {
+            return strFileName + ".tmp";
+        }
+
+        void RenameTempFile()
+        {
+            string strTempFileName = this.GetTempFileName();
+            if (File.Exists(strTempFileName))
+                File.Move(strTempFileName, this.LocalFilePath);
+        }
+
         public void StartDownload(bool bContinue)
         {
             // 创建输出文件
             this.Close();
 
+            string strTempFileName = this.GetTempFileName();
+
             if (bContinue == false)
-                _stream = File.Create(this.LocalFilePath);
+                _stream = File.Create(strTempFileName);
             else
             {
-                _stream = File.Open(this.LocalFilePath, FileMode.OpenOrCreate);
+                _stream = File.Open(strTempFileName, FileMode.OpenOrCreate);
                 _stream.Seek(0, SeekOrigin.End);
             }
 
@@ -109,6 +128,7 @@ namespace DigitalPlatform.LibraryClient
     TaskScheduler.Default);
         }
 
+        // TODO: 遇到出错，要删除已经下载的临时文件; 如果是中断，临时文件要保留
         void Download()
         {
             string strError = "";
@@ -341,6 +361,17 @@ namespace DigitalPlatform.LibraryClient
                 this.ErrorInfo = ExceptionUtil.GetDebugText(ex);
                 TriggerClosedEvent();
             }
+            finally
+            {
+                if (_stream != null)
+                {
+                    _stream.Close();
+                    _stream = null;
+                }
+
+                if (string.IsNullOrEmpty(this.ErrorInfo))
+                    RenameTempFile();
+            }
         }
 
         // 探测下载状态
@@ -386,7 +417,7 @@ namespace DigitalPlatform.LibraryClient
             return 1;
         }
 
-        long DetectFileLength(long lStart, 
+        long DetectFileLength(long lStart,
             out string strError)
         {
             byte[] baContent = null;
