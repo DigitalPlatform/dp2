@@ -41,7 +41,6 @@
             this.button_modifyInstance = new System.Windows.Forms.Button();
             this.button_deleteInstance = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
-            this.button_Cancel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBox_Comment
@@ -143,34 +142,20 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(337, 282);
+            this.button_OK.Location = new System.Drawing.Point(418, 282);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 12;
-            this.button_OK.Text = "确定";
+            this.button_OK.Text = "关闭";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
-            // 
-            // button_Cancel
-            // 
-            this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(418, 282);
-            this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(75, 23);
-            this.button_Cancel.TabIndex = 13;
-            this.button_Cancel.Text = "取消";
-            this.button_Cancel.UseVisualStyleBackColor = true;
-            this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // InstanceDialog
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(505, 317);
-            this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.button_deleteInstance);
             this.Controls.Add(this.button_modifyInstance);
@@ -200,7 +185,6 @@
         private System.Windows.Forms.Button button_modifyInstance;
         private System.Windows.Forms.Button button_deleteInstance;
         private System.Windows.Forms.Button button_OK;
-        private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.ColumnHeader columnHeader_errorInfo;
         private System.Windows.Forms.ImageList imageList1;
     }

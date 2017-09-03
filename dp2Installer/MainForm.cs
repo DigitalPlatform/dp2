@@ -793,8 +793,8 @@ MessageBoxDefaultButton.Button2);
                     dlg.StartPosition = FormStartPosition.CenterScreen;
                     dlg.ShowDialog(this);
 
-                    if (dlg.DialogResult == DialogResult.Cancel)
-                        return;
+                    //if (dlg.DialogResult == DialogResult.Cancel)
+                    //    return;
 
                     if (string.IsNullOrEmpty(dlg.DebugInfo) == false)
                         AppendString("创建实例时的调试信息:\r\n" + dlg.DebugInfo + "\r\n");
@@ -2902,8 +2902,8 @@ MessageBoxDefaultButton.Button1);
                     dlg.StartPosition = FormStartPosition.CenterScreen;
                     dlg.ShowDialog(this);
 
-                    if (dlg.DialogResult == DialogResult.Cancel)
-                        return;
+                    //if (dlg.DialogResult == DialogResult.Cancel)
+                    //    return;
 
                     if (string.IsNullOrEmpty(dlg.DebugInfo) == false)
                         AppendString("管理实例时的调试信息:\r\n" + dlg.DebugInfo + "\r\n");
@@ -3076,7 +3076,6 @@ MessageBoxDefaultButton.Button1);
 
                 try
                 {
-
                     DigitalPlatform.rms.InstanceDialog dlg = new DigitalPlatform.rms.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
 
@@ -3085,12 +3084,14 @@ MessageBoxDefaultButton.Button1);
                     dlg.StartPosition = FormStartPosition.CenterScreen;
                     dlg.ShowDialog(this);
 
+#if NO
                     // TODO: 是否必须要创建至少一个实例?
                     if (dlg.DialogResult == DialogResult.Cancel)
                     {
                         AppendSectionTitle("放弃创建实例 ...");
                         return;
                     }
+#endif
 
                     if (string.IsNullOrEmpty(dlg.DebugInfo) == false)
                         AppendString("创建实例时的调试信息:\r\n" + dlg.DebugInfo + "\r\n");
@@ -3398,7 +3399,6 @@ out string strError)
 
                 try
                 {
-
                     DigitalPlatform.LibraryServer.InstanceDialog dlg = new DigitalPlatform.LibraryServer.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
 
@@ -3407,12 +3407,14 @@ out string strError)
                     dlg.StartPosition = FormStartPosition.CenterScreen;
                     dlg.ShowDialog(this);   // ForegroundWindow.Instance
 
+#if NO
                     // TODO: 是否必须要创建至少一个实例?
                     if (dlg.DialogResult == DialogResult.Cancel)
                     {
                         AppendSectionTitle("放弃创建实例 ...");
                         return;
                     }
+#endif
 
                     if (string.IsNullOrEmpty(dlg.DebugInfo) == false)
                         AppendString("创建实例时的调试信息:\r\n" + dlg.DebugInfo + "\r\n");
@@ -3747,6 +3749,7 @@ out string strError)
                 }
                 strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
+#if NO
                 {
                     AppendString("正在停止 dp2kernel 服务 ...\r\n");
 
@@ -3757,6 +3760,7 @@ out string strError)
 
                     AppendString("dp2kernel 服务已经停止\r\n");
                 }
+#endif
 
 #if NO
             DialogResult result = MessageBox.Show(this,
@@ -3782,8 +3786,15 @@ MessageBoxDefaultButton.Button2);
 
                     if (dlg.DialogResult == DialogResult.Cancel)
                     {
+#if NO
                         MessageBox.Show(this,
                             "已放弃卸载全部实例和数据目录。仅仅卸载了执行程序。");
+
+#endif
+                        AppendString("放弃卸载\r\n");
+                        return;
+                        //strError = "放弃卸载";
+                        //goto ERROR1;
                     }
                     else
                     {
@@ -3791,8 +3802,18 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-
                 // 探测 .exe 是否为新版本。新版本中 Installer.Uninstall 动作不会删除数据目录
+
+                {
+                    AppendString("正在停止 dp2kernel 服务 ...\r\n");
+
+                    nRet = InstallHelper.StopService("dp2KernelService",
+            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    AppendString("dp2kernel 服务已经停止\r\n");
+                }
 
                 AppendString("注销 Windows Service\r\n");
 
@@ -4555,6 +4576,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 }
                 strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
+#if NO
                 {
                     AppendString("正在停止 dp2library 服务 ...\r\n");
 
@@ -4565,6 +4587,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                     AppendString("dp2library 服务已经停止\r\n");
                 }
+#endif
 
                 try
                 {
@@ -4591,6 +4614,17 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     {
                         // 兑现修改
 
+                    }
+
+                    {
+                        AppendString("正在停止 dp2library 服务 ...\r\n");
+
+                        nRet = InstallHelper.StopService("dp2LibraryService",
+                out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        AppendString("dp2library 服务已经停止\r\n");
                     }
 
                     AppendString("注销 Windows Service 开始\r\n");

@@ -11,6 +11,8 @@ using System.IO;
 using System.Diagnostics;
 using System.Configuration.Install;
 using System.Security.Cryptography.X509Certificates;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Remoting.Channels;
 
 using DigitalPlatform.Install;
 using DigitalPlatform.GUI;
@@ -18,8 +20,6 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client;
-using System.Runtime.Remoting.Channels.Ipc;
-using System.Runtime.Remoting.Channels;
 using DigitalPlatform.Interfaces;
 //using DigitalPlatform.CirculationClient;
 
@@ -198,7 +198,6 @@ namespace DigitalPlatform.LibraryServer
 
                 this.DialogResult = System.Windows.Forms.DialogResult.OK;
                 this.Close();
-
             }
             finally
             {
@@ -210,6 +209,7 @@ namespace DigitalPlatform.LibraryServer
             MessageBox.Show(this, strError);
         }
 
+#if NO
         private void button_Cancel_Click(object sender, EventArgs e)
         {
             // HideMessageTip();
@@ -217,6 +217,7 @@ namespace DigitalPlatform.LibraryServer
             this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.Close();
         }
+#endif
 
         public string Comment
         {
@@ -277,25 +278,34 @@ namespace DigitalPlatform.LibraryServer
             if (new_instance_dlg.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
-            ListViewItem item = new ListViewItem();
-            ListViewUtil.ChangeItemText(item, COLUMN_NAME, new_instance_dlg.InstanceName);
-            ListViewUtil.ChangeItemText(item, COLUMN_DATADIR, new_instance_dlg.DataDir);
-            ListViewUtil.ChangeItemText(item, COLUMN_BINDINGS, new_instance_dlg.Bindings.Replace("\r\n", ";"));
-            this.listView_instance.Items.Add(item);
+            this.Enabled = false;
+            try
+            {
 
-            new_instance_dlg.LineInfo.Changed = true;
-            item.Tag = new_instance_dlg.LineInfo;
+                ListViewItem item = new ListViewItem();
+                ListViewUtil.ChangeItemText(item, COLUMN_NAME, new_instance_dlg.InstanceName);
+                ListViewUtil.ChangeItemText(item, COLUMN_DATADIR, new_instance_dlg.DataDir);
+                ListViewUtil.ChangeItemText(item, COLUMN_BINDINGS, new_instance_dlg.Bindings.Replace("\r\n", ";"));
+                this.listView_instance.Items.Add(item);
 
-            ListViewUtil.SelectLine(item, true);
+                new_instance_dlg.LineInfo.Changed = true;
+                item.Tag = new_instance_dlg.LineInfo;
 
-            this.Changed = true;
-            // 不要忘记整理注册表事项
-            if (AfterChanged(out strError) == -1)
-                goto ERROR1;
+                ListViewUtil.SelectLine(item, true);
 
-            if (IsDp2libraryRunning())
-                StartOrStopOneInstance(new_instance_dlg.InstanceName, "start");
-            return;
+                this.Changed = true;
+                // 不要忘记整理注册表事项
+                if (AfterChanged(out strError) == -1)
+                    goto ERROR1;
+
+                if (IsDp2libraryRunning())
+                    StartOrStopOneInstance(new_instance_dlg.InstanceName, "start");
+                return;
+            }
+            finally
+            {
+                this.Enabled = true;
+            }
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -651,6 +661,9 @@ namespace DigitalPlatform.LibraryServer
                 return;
             }
 
+            // 删除操作中，被停止过的实例的实例名
+            List<string> stopped_instance_names = new List<string>();
+
             this.Enabled = false;
             try
             {
@@ -670,7 +683,10 @@ namespace DigitalPlatform.LibraryServer
 
                     // 停止即将被删除的实例
                     if (bRunning)
+                    {
                         StartOrStopOneInstance(strInstanceName, "stop");
+                        stopped_instance_names.Add(strInstanceName);
+                    }
 
                     // 要求操作者用 supervisor 账号登录一次。以便后续进行各种重要操作。
                     // 只需要 library.xml 即可，不需要 dp2library 在运行中。
@@ -714,7 +730,6 @@ namespace DigitalPlatform.LibraryServer
                             MessageBox.Show(this, strError);
                     }
 
-
                     // return:
                     //      -1  出错。包括出错后重试然后放弃
                     //      0   成功
@@ -724,6 +739,8 @@ namespace DigitalPlatform.LibraryServer
                         MessageBox.Show(this, strError);
 
                     // datadirs.Add(strDataDir);
+
+                    stopped_instance_names.Remove(strInstanceName);
                 }
 
                 ListViewUtil.DeleteSelectedItems(this.listView_instance);
@@ -732,36 +749,12 @@ namespace DigitalPlatform.LibraryServer
                 // 不要忘记整理注册表事项
                 if (AfterChanged(out strError) == -1)
                     goto ERROR1;
-#if NO
-            // 如果数据目录已经存在，提示是否连带删除数据目录
-            if (datadirs.Count > 0)
-            {
-                strError = "";
-                result = MessageBox.Show(this,
-    "所选定的实例信息已经删除。\r\n\r\n要删除它们所对应的下列数据目录么?\r\n" + StringUtil.MakePathList(datadirs, "\r\n"),
-    "dp2Library 实例管理",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Yes)
-                {
-                    foreach (string strDataDir in datadirs)
-                    {
-                        string strTempError = "";
 
-                        // return:
-                        //      -1  出错。包括出错后重试然后放弃
-                        //      0   成功
-                        int nRet = InstallHelper.DeleteDataDir(strDataDir,
-            out strTempError);
-                        if (nRet == -1)
-                            strError += strTempError + "\r\n";
-                    }
-                    if (String.IsNullOrEmpty(strError) == false)
-                        goto ERROR1;
+                // 重新启动那些被放弃删除的实例
+                foreach (string strInstanceName in stopped_instance_names)
+                {
+                    StartOrStopOneInstance(strInstanceName, "start");
                 }
-            }
-#endif
             }
             finally
             {
@@ -1836,6 +1829,7 @@ namespace DigitalPlatform.LibraryServer
             // TODO: 改进删除实例的功能，让删除的当时就自动整理注册表事项
             if (this.Changed == true)
             {
+#if NO
                 // 警告尚未保存
                 DialogResult result = MessageBox.Show(this,
                     "当前窗口内有修改尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
@@ -1847,6 +1841,15 @@ namespace DigitalPlatform.LibraryServer
                 {
                     e.Cancel = true;
                     return;
+                }
+#endif
+                if (this.Changed == true)
+                {
+                    string strError = "";
+                    if (AfterChanged(out strError) == -1)
+                        MessageBox.Show(this, strError);
+                    else
+                        this.Changed = false;
                 }
             }
         }
@@ -1915,7 +1918,7 @@ namespace DigitalPlatform.LibraryServer
                 return;
 
             this.listView_instance.Enabled = bEnable;
-            this.button_Cancel.Enabled = bEnable;
+            // this.button_Cancel.Enabled = bEnable;
             this.button_OK.Enabled = bEnable;
             this.button_newInstance.Enabled = bEnable;
             this.button_modifyInstance.Enabled = bEnable;
@@ -1939,6 +1942,7 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1)
                 return -1;
 
+            this.Changed = false;
             return 0;
         }
 

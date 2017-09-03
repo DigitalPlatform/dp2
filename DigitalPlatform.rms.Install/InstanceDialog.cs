@@ -181,6 +181,7 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
+#if NO
         private void button_Cancel_Click(object sender, EventArgs e)
         {
             try
@@ -194,6 +195,7 @@ MessageBoxDefaultButton.Button2);
             this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.Close();
         }
+#endif
 
         public string Comment
         {
@@ -1224,6 +1226,9 @@ out strError);
                 return;
             }
 
+            // 删除操作中，被停止过的实例的实例名
+            List<string> stopped_instance_names = new List<string>();
+
             this.Enabled = false;
             try
             {
@@ -1243,7 +1248,10 @@ out strError);
 
                     // 停止即将被删除的实例
                     if (bRunning)
+                    {
                         StartOrStopOneInstance(strInstanceName, "stop");
+                        stopped_instance_names.Add(strInstanceName);
+                    }
 
                     // return:
                     //      -1  出错
@@ -1277,6 +1285,8 @@ out strError);
 
                     // datadirs.Add(strDataDir);
                     this.Changed = true;
+
+                    stopped_instance_names.Remove(strInstanceName);
                 }
 
                 ListViewUtil.DeleteSelectedItems(this.listView_instance);
@@ -1286,35 +1296,11 @@ out strError);
                 if (AfterChanged(out strError) == -1)
                     goto ERROR1;
 
-#if NO
-            // 如果数据目录已经存在，提示是否连带删除数据目录
-            if (datadirs.Count > 0)
-            {
-                strError = "";
-                result = MessageBox.Show(this,
-    "所选定的实例信息已经删除。\r\n\r\n要删除它们所对应的下列数据目录么?\r\n" + StringUtil.MakePathList(datadirs, "\r\n"),
-    "InstanceDialog",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Yes)
+                // 重新启动那些被放弃删除的实例
+                foreach (string strInstanceName in stopped_instance_names)
                 {
-                    foreach (string strDataDir in datadirs)
-                    {
-                        string strTempError = "";
-                        // return:
-                        //      -1  出错。包括出错后重试然后放弃
-                        //      0   成功
-                        int nRet = DeleteDataDir(strDataDir,
-            out strTempError);
-                        if (nRet == -1)
-                            strError += strTempError + "\r\n";
-                    }
-                    if (String.IsNullOrEmpty(strError) == false)
-                        goto ERROR1;
+                    StartOrStopOneInstance(strInstanceName, "start");
                 }
-            }
-#endif
             }
             finally
             {
@@ -2224,6 +2210,7 @@ MessageBoxDefaultButton.Button1);
             // 如果删除了实例以后，点“取消”退出，则会忘记删除注册表事项
             if (this.Changed == true)
             {
+#if NO
                 // 警告尚未保存
                 DialogResult result = MessageBox.Show(this,
                     "当前窗口内有修改尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
@@ -2235,6 +2222,16 @@ MessageBoxDefaultButton.Button1);
                 {
                     e.Cancel = true;
                     return;
+                }
+#endif
+
+                if (this.Changed == true)
+                {
+                    string strError = "";
+                    if (AfterChanged(out strError) == -1)
+                        MessageBox.Show(this, strError);
+                    else
+                        this.Changed = false;
                 }
             }
 
@@ -2543,7 +2540,7 @@ MessageBoxDefaultButton.Button1);
                 return;
 
             this.listView_instance.Enabled = bEnable;
-            this.button_Cancel.Enabled = bEnable;
+            // this.button_Cancel.Enabled = bEnable;
             this.button_OK.Enabled = bEnable;
             this.button_newInstance.Enabled = bEnable;
             this.button_modifyInstance.Enabled = bEnable;
@@ -2567,6 +2564,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 return -1;
 
+            this.Changed = false;
             return 0;
         }
 
