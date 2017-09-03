@@ -9,13 +9,13 @@ using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
 using System.Collections;
+using System.Xml;
 
 using DigitalPlatform.Install;
 using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using System.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {

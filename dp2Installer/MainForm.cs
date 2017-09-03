@@ -13,6 +13,8 @@ using System.Deployment.Application;
 using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Remoting.Channels;
 
 using Microsoft.Win32;
 using Ionic.Zip;
@@ -30,6 +32,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Interfaces;
 
 namespace dp2Installer
 {
@@ -764,6 +767,7 @@ MessageBoxDefaultButton.Button2);
 
                 // MessageBox.Show(this, "为进行配置，将首先停止 dp2library 服务。配置完成后 dp2library 会重新启动");
 
+#if NO
                 if (bInstalled == true)
                 {
                     AppendString("正在停止 dp2library 服务 ...\r\n");
@@ -775,6 +779,7 @@ MessageBoxDefaultButton.Button2);
 
                     AppendString("dp2library 服务已经停止\r\n");
                 }
+#endif
 
                 List<string> new_instance_names = null;
 
@@ -804,6 +809,7 @@ MessageBoxDefaultButton.Button2);
                 }
                 finally
                 {
+#if NO
                     if (bInstalled == true)
                     {
                         string strError1 = "";
@@ -820,6 +826,7 @@ MessageBoxDefaultButton.Button2);
                             AppendString("dp2library 服务启动成功\r\n");
                         }
                     }
+#endif
 
                     AppendSectionTitle("配置实例结束");
                     this.Refresh_dp2library_MenuItems();
@@ -2871,6 +2878,7 @@ MessageBoxDefaultButton.Button1);
 
                 // MessageBox.Show(this, "为进行配置，将首先停止 dp2library 服务。配置完成后 dp2library 会重新启动");
 
+#if NO
                 if (bInstalled == true)
                 {
                     AppendString("正在停止 dp2kernel 服务 ...\r\n");
@@ -2882,6 +2890,7 @@ MessageBoxDefaultButton.Button1);
 
                     AppendString("dp2kernel 服务已经停止\r\n");
                 }
+#endif
 
                 try
                 {
@@ -2907,7 +2916,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 finally
                 {
-
+#if NO
                     if (bInstalled == true)
                     {
                         string strError1 = "";
@@ -2924,6 +2933,7 @@ MessageBoxDefaultButton.Button1);
                             AppendString("dp2kernel 服务启动成功\r\n");
                         }
                     }
+#endif
 
                     AppendSectionTitle("配置实例结束");
                     Refresh_dp2kernel_MenuItems();
@@ -5454,5 +5464,53 @@ MessageBoxDefaultButton.Button2);
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
+
+        #region Service Control 功能
+
+#if NO
+        IpcClientChannel m_dp2libraryScChannel = new IpcClientChannel();
+        IServiceControl m_dp2libraryScObj = null;
+
+        // "ipc://dp2library_ServiceControlChannel/dp2library_ServiceControlServer"
+        int StartDp2libraryScChannel(
+            string strUrl,
+            out string strError)
+        {
+            strError = "";
+
+            //Register the channel with ChannelServices.
+            if (this.m_dp2libraryScChannel == null)
+                this.m_dp2libraryScChannel = new IpcClientChannel();
+
+            ChannelServices.RegisterChannel(m_dp2libraryScChannel, true);
+
+            try
+            {
+                IServiceControl m_dp2libraryScObj = (IServiceControl)Activator.GetObject(typeof(IServiceControl),
+                    strUrl);
+                if (m_dp2libraryScObj == null)
+                {
+                    strError = "无法连接到 remoting 服务器 " + strUrl;
+                    return -1;
+                }
+            }
+            finally
+            {
+            }
+
+            return 0;
+        }
+
+        void EndDp2libraryScChannel()
+        {
+            if (this.m_dp2libraryScChannel != null)
+            {
+                ChannelServices.UnregisterChannel(m_dp2libraryScChannel);
+                this.m_dp2libraryScChannel = null;
+            }
+        }
+#endif
+
+        #endregion
     }
 }

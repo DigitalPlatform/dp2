@@ -3090,6 +3090,10 @@ namespace dp2Kernel
         public KernelApplication App = null;
         public string DataDir = ""; // 数据目录
 
+        // 2017/9/3
+        // 实例名
+        public string InstanceName { get; set; }
+
         void IExtension<ServiceHostBase>.Attach(ServiceHostBase owner)
         {
             this.owner = owner;

@@ -172,7 +172,10 @@ namespace dp2Circulation
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             else
-                MessageBox.Show(this, "任务 '" + this.comboBox_taskName.Text + "' 已成功启动");
+                MessageBox.Show(this, 
+                    strError
+                    //"任务 '" + this.comboBox_taskName.Text + "' 已成功启动"
+                    );
 
         }
 
@@ -226,6 +229,10 @@ namespace dp2Circulation
         }
 
         // 启动批处理任务
+        // parameters:
+        // return:
+        //      -1  出错
+        //      1   成功。strError 里面有提示成功的内容
         int StartBatchTask(string strTaskName,
             out string strError)
         {
@@ -365,6 +372,7 @@ namespace dp2Circulation
             "abort",
             out strError) == -1)
                         return -1;
+                    strError = "任务 '" + strTaskName + "' 已被撤销";
                     return 1;
                 }
                 if (dlg.DialogResult != DialogResult.OK)
@@ -450,6 +458,7 @@ namespace dp2Circulation
                     EnableControls(true);
                 }
 
+                strError = "任务 '" + strTaskName + "' 已成功启动";
                 return 1;
             ERROR1:
                 return -1;

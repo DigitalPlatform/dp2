@@ -14426,6 +14426,10 @@ true);
         public string Function = "";    // 许可的功能列表
         public string Protocol = "";    // 所绑定的协议。例如 http net.tcp 等
 
+        // 2017/8/30
+        // 实例名
+        public string InstanceName { get; set; }
+
         void IExtension<ServiceHostBase>.Attach(ServiceHostBase owner)
         {
             this.owner = owner;

@@ -402,7 +402,7 @@ out strError);
                     this.ClearTask();
                     // 删除大备份文件
                     DeleteDataFiles(strBackupFileName);
-
+                    this.AppendResultText("大备份文件 " + strBackupFileName + " 被清除\r\n");
                 }
                 this._pendingCommands.Clear();
             }

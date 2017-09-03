@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InstanceDialog));
             this.textBox_Comment = new System.Windows.Forms.TextBox();
             this.listView_instance = new System.Windows.Forms.ListView();
@@ -35,6 +36,7 @@
             this.columnHeader_errorInfo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_dataDir = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_bindings = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.button_newInstance = new System.Windows.Forms.Button();
             this.button_modifyInstance = new System.Windows.Forms.Button();
             this.button_deleteInstance = new System.Windows.Forms.Button();
@@ -67,15 +69,17 @@
             this.columnHeader_bindings});
             this.listView_instance.FullRowSelect = true;
             this.listView_instance.HideSelection = false;
+            this.listView_instance.LargeImageList = this.imageList1;
             this.listView_instance.Location = new System.Drawing.Point(12, 62);
-            this.listView_instance.MultiSelect = false;
             this.listView_instance.Name = "listView_instance";
             this.listView_instance.Size = new System.Drawing.Size(482, 184);
+            this.listView_instance.SmallImageList = this.imageList1;
             this.listView_instance.TabIndex = 8;
             this.listView_instance.UseCompatibleStateImageBehavior = false;
             this.listView_instance.View = System.Windows.Forms.View.Details;
             this.listView_instance.SelectedIndexChanged += new System.EventHandler(this.listView_instance_SelectedIndexChanged);
             this.listView_instance.DoubleClick += new System.EventHandler(this.listView_instance_DoubleClick);
+            this.listView_instance.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_instance_MouseUp);
             // 
             // columnHeader_name
             // 
@@ -95,6 +99,13 @@
             // 
             this.columnHeader_bindings.Text = "协议绑定";
             this.columnHeader_bindings.Width = 374;
+            // 
+            // imageList1
+            // 
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "StatusAnnotations_Play_16xLG_color.png");
+            this.imageList1.Images.SetKeyName(1, "StatusAnnotations_Stop_16xLG_color.png");
             // 
             // button_newInstance
             // 
@@ -191,5 +202,6 @@
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.ColumnHeader columnHeader_errorInfo;
+        private System.Windows.Forms.ImageList imageList1;
     }
 }

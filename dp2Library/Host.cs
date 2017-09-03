@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Xml;
 using System.Collections;
+using System.IO;
 
 using System.Security.Cryptography.X509Certificates;
 // using System.IdentityModel.Selectors;
@@ -18,6 +19,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.ServiceModel;
 using System.ServiceModel.Description;
 using System.IdentityModel.Selectors;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Remoting;
 
 using Microsoft.Win32;
 
@@ -25,7 +29,7 @@ using DigitalPlatform;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.IO;
+using System.Runtime.Serialization.Formatters;
 
 namespace dp2Library
 {
@@ -51,9 +55,13 @@ namespace dp2Library
 
         public static void Main(string[] args)
         {
+            // Debugger.Launch();
+
             if (args.Length == 1 && args[0].Equals("console"))
             {
-                new LibraryServiceHost().ConsoleRun();
+                ServerInfo.Host = new LibraryServiceHost();
+                ServerInfo.Host.ConsoleRun();
+                // new LibraryServiceHost().ConsoleRun();
             }
             else if (args.Length == 1 && args[0].Equals("cleartemp"))
             {
@@ -62,7 +70,10 @@ namespace dp2Library
             }
             else
             {
-                ServiceBase.Run(new LibraryServiceHost());
+                ServerInfo.Host = new LibraryServiceHost();
+                ServiceBase.Run(ServerInfo.Host);
+
+                // ServiceBase.Run(new LibraryServiceHost());
             }
         }
 
@@ -234,6 +245,48 @@ namespace dp2Library
             this.m_hosts.Clear();
         }
 
+        // 关闭一个指定的 host
+        // return:
+        //      true    成功关闭
+        //      false   没有找到指定的 host
+        public bool CloseHost(string strInstanceName)
+        {
+            foreach (ServiceHost host in this.m_hosts)
+            {
+                HostInfo info = host.Extensions.Find<HostInfo>();
+                if (info == null)
+                {
+                    Debug.Assert(false, "");
+                    continue;
+                }
+
+                if (info.InstanceName == strInstanceName)
+                {
+                    info.Dispose();
+                    host.Extensions.Remove(info);
+                    host.Close();
+                    this.m_hosts.Remove(host);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public ServiceHost FindHost(string strInstanceName)
+        {
+            foreach (ServiceHost host in this.m_hosts)
+            {
+                HostInfo info = host.Extensions.Find<HostInfo>();
+                if (info == null)
+                    continue;
+
+                if (info.InstanceName == strInstanceName)
+                    return host;
+            }
+
+            return null;
+        }
 #if NO
         static string GetEnvironmentString(string strSerialCode, string strInstanceName)
         {
@@ -341,10 +394,301 @@ namespace dp2Library
         }
 #endif
 
+        // 打开指定的 host
+        // parameters:
+        //      instance_names  要打开的实例的名字，数组。如果 == null，表示全部打开
+        public int OpenHosts(List<string> instance_names,
+            out List<string> errors)
+        {
+            // CloseHosts();
+
+            string strError = "";
+            errors = new List<string>();
+            int nCount = 0;
+
+            for (int i = 0; ; i++)
+            {
+                string strInstanceName = "";
+                string strDataDir = "";
+                string strCertSN = "";
+                string[] existing_urls = null;
+                string strSerialNumber = "";
+                bool bRet = GetInstanceInfo("dp2Library",
+                    i,
+                    out strInstanceName,
+                    out strDataDir,
+                    out existing_urls,
+                    out strCertSN,
+                    out strSerialNumber);
+                if (bRet == false)
+                    break;
+
+                if (instance_names != null && instance_names.IndexOf(strInstanceName) == -1)
+                    continue;
+
+                // 查重，看看 host 是否已经存在
+                if (FindHost(strInstanceName) != null)
+                {
+                    errors.Add("实例 '" + strInstanceName + "' 调用前已经是启动状态，不能重复启动");
+                    continue;
+                }
+
+                int nMaxClients = 0;
+                string strLicenseType = "";
+                string strFunction = "";
+
+#if SN
+                //string strLocalString = OneInstanceDialog.GetEnvironmentString(strSerialNumber, strInstanceName);
+                //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
+                if (String.IsNullOrEmpty(strSerialNumber) == true
+                    || strSerialNumber == "community")
+                {
+                    nMaxClients = SessionInfo.DEFAULT_MAX_CLIENTS;
+                }
+                else if (strSerialNumber == "*")
+                {
+                    nMaxClients = 255;
+                }
+                else
+                {
+                    string strDebugInfo = "";
+                    if (MatchLocalString(strSerialNumber, strInstanceName, out strDebugInfo) == false)
+                    //if (strSha1 != SerialCodeForm.GetCheckCode(strSerialNumber))
+                    {
+                        strError = "dp2Library 实例 '" + strInstanceName + "' 序列号不合法，无法启动。\r\n调试信息如下：\r\n" + strDebugInfo;
+                        this.Log.WriteEntry(strError,
+    EventLogEntryType.Error);
+                        errors.Add(strError);
+                        continue;
+                    }
+                    string strMaxClients = GetMaxClients(strSerialNumber);
+                    // 2015/1/7
+                    if (string.IsNullOrEmpty(strMaxClients) == true)
+                        nMaxClients = SessionInfo.DEFAULT_MAX_CLIENTS;
+                    else
+                    {
+                        if (Int32.TryParse(strMaxClients, out nMaxClients) == false)
+                        {
+                            strError = "dp2Library 实例 '" + strInstanceName + "' 序列号 '" + strSerialNumber + "' 中 clients 参数值 '" + strMaxClients + "' 不合法，无法启动";
+                            this.Log.WriteEntry(strError,
+    EventLogEntryType.Error);
+                            errors.Add(strError);
+                            continue;
+                        }
+                    }
+
+                    strLicenseType = GetLicenseType(strSerialNumber);
+                    strFunction = GetFunction(strSerialNumber);
+                }
+#else
+                nMaxClients = 100;
+                strLicenseType = "server";
+#endif
+
+                ServiceHost host = new ServiceHost(typeof(LibraryService));
+                this.m_hosts.Add(host);
+
+                nCount++;
+
+                HostInfo info = new HostInfo();
+                info.InstanceName = strInstanceName;
+                info.DataDir = strDataDir;
+                info.MaxClients = nMaxClients;
+                info.LicenseType = strLicenseType;
+                info.Function = strFunction;
+                host.Extensions.Add(info);
+                /// 
+
+                bool bHasWsHttp = false;
+                // 绑定协议
+                foreach (string url in existing_urls)
+                {
+                    if (string.IsNullOrEmpty(url) == true)
+                        continue;
+
+                    Uri uri = null;
+                    try
+                    {
+                        uri = new Uri(url);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "dp2Library OnStart() 警告：发现不正确的协议URL '" + url + "' (异常信息: " + ex.Message + ")。该URL已被放弃绑定。";
+                        this.Log.WriteEntry(strError,
+    EventLogEntryType.Error);
+                        errors.Add(strError);
+                        continue;
+                    }
+
+                    if (uri.Scheme.ToLower() == "http")
+                    {
+                        ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryService),
+    CreateWsHttpBinding1(),
+    url);
+                        bHasWsHttp = true;
+                    }
+                    else if (uri.Scheme.ToLower() == "rest.http")
+                    {
+                        ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryServiceREST),
+CreateWebHttpBinding1(),
+url.Substring(5));
+                        if (endpoint.Behaviors.Find<WebHttpBehavior>() == null)
+                        {
+                            WebHttpBehavior behavior = new WebHttpBehavior();
+                            behavior.DefaultBodyStyle = System.ServiceModel.Web.WebMessageBodyStyle.Wrapped;
+                            behavior.DefaultOutgoingResponseFormat = System.ServiceModel.Web.WebMessageFormat.Json;
+                            behavior.AutomaticFormatSelectionEnabled = true;
+                            behavior.HelpEnabled = true;
+                            endpoint.Behaviors.Add(behavior);
+                        }
+                    }
+                    else if (uri.Scheme.ToLower() == "basic.http")
+                    {
+                        ServiceEndpoint endpoint = host.AddServiceEndpoint(typeof(ILibraryServiceREST),
+CreateBasicHttpBinding1(),
+url.Substring(6));
+#if NO
+                        if (endpoint.Behaviors.Find<WebHttpBehavior>() == null)
+                        {
+                            WebHttpBehavior behavior = new WebHttpBehavior();
+                            behavior.DefaultBodyStyle = System.ServiceModel.Web.WebMessageBodyStyle.Wrapped;
+                            behavior.DefaultOutgoingResponseFormat = System.ServiceModel.Web.WebMessageFormat.Json;
+                            behavior.AutomaticFormatSelectionEnabled = true;
+                            behavior.HelpEnabled = true;
+                            endpoint.Behaviors.Add(behavior);
+                        }
+#endif
+                    }
+                    else if (uri.Scheme.ToLower() == "net.pipe")
+                    {
+                        host.AddServiceEndpoint(typeof(ILibraryService),
+                            CreateNamedpipeBinding0(),
+                            url);
+                    }
+                    else if (uri.Scheme.ToLower() == "net.tcp")
+                    {
+                        host.AddServiceEndpoint(typeof(ILibraryService),
+            CreateNetTcpBinding0(),
+            url);
+                    }
+                    else
+                    {
+                        // 警告不能支持的协议
+                        strError = "dp2Library OnStart() 警告：发现不能支持的协议类型 '" + url + "'";
+                        this.Log.WriteEntry(strError,
+                            EventLogEntryType.Information);
+                        errors.Add(strError);
+                    }
+
+                    info.Protocol = uri.Scheme.ToLower();
+                }
+
+                // 如果具有ws1/ws2 binding，才启用证书
+                if (bHasWsHttp == true)
+                {
+                    try
+                    {
+                        X509Certificate2 cert = GetCertificate(strCertSN,
+                            out strError);
+                        if (cert == null)
+                        {
+                            strError = "dp2Library OnStart() 准备证书 时发生错误: " + strError;
+                            this.Log.WriteEntry(strError,
+EventLogEntryType.Error);
+                            errors.Add(strError);
+                        }
+                        else
+                            host.Credentials.ServiceCertificate.Certificate = cert;
+
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "dp2Library OnStart() 获取证书时发生错误: " + ExceptionUtil.GetExceptionMessage(ex);
+                        this.Log.WriteEntry(strError,
+        EventLogEntryType.Error);
+                        errors.Add(strError);
+                        return nCount;
+                    }
+                }
+
+                // 只有第一个host才有metadata能力
+                if (// i == 0 
+                    m_hosts.Count == 1
+                    && host.Description.Behaviors.Find<ServiceMetadataBehavior>() == null)
+                {
+                    string strWsHostUrl = FindUrl("http", existing_urls);
+
+                    string strMetadataUrl = strWsHostUrl;
+                    if (String.IsNullOrEmpty(strMetadataUrl) == true)
+                        strMetadataUrl = "http://localhost:8001/dp2library/";
+                    if (strMetadataUrl[strMetadataUrl.Length - 1] != '/')
+                        strMetadataUrl += "/";
+                    strMetadataUrl += "metadata";
+
+                    ServiceMetadataBehavior behavior = new ServiceMetadataBehavior();
+                    behavior.HttpGetEnabled = true;
+                    behavior.HttpGetUrl = new Uri(strMetadataUrl);
+                    host.Description.Behaviors.Add(behavior);
+                }
+
+                if (host.Description.Behaviors.Find<ServiceThrottlingBehavior>() == null)
+                {
+                    ServiceThrottlingBehavior behavior = new ServiceThrottlingBehavior();
+                    behavior.MaxConcurrentCalls = 50;
+                    behavior.MaxConcurrentInstances = 1000;
+                    behavior.MaxConcurrentSessions = 1000;
+                    host.Description.Behaviors.Add(behavior);
+                }
+
+                // IncludeExceptionDetailInFaults
+                ServiceDebugBehavior debug_behavior = host.Description.Behaviors.Find<ServiceDebugBehavior>();
+                if (debug_behavior == null)
+                {
+                    host.Description.Behaviors.Add(new ServiceDebugBehavior() { IncludeExceptionDetailInFaults = true });
+                }
+                else
+                {
+                    if (debug_behavior.IncludeExceptionDetailInFaults == false)
+                        debug_behavior.IncludeExceptionDetailInFaults = true;
+                }
+
+#if NO
+                host.Credentials.UserNameAuthentication.UserNamePasswordValidationMode = System.ServiceModel.Security.UserNamePasswordValidationMode.Custom;
+                host.Credentials.UserNameAuthentication.CustomUserNamePasswordValidator = new MyValidator();
+#endif
+
+                host.Opening += new EventHandler(host_Opening);
+                host.Closing += new EventHandler(m_host_Closing);
+
+                try
+                {
+                    host.Open();
+                }
+                catch (Exception ex)
+                {
+                    // 让调试器能感觉到
+                    if (this.m_bConsoleRun == true)
+                        throw ex;
+
+                    strError = "dp2Library OnStart() host.Open() 时发生错误: instancename=[" + strInstanceName + "]:" + ExceptionUtil.GetExceptionMessage(ex);
+                    this.Log.WriteEntry(strError,
+    EventLogEntryType.Error);
+                    errors.Add(strError);
+                    return nCount;
+                }
+            }
+
+            return nCount;
+        }
+
         void ThreadMain()
         {
             CloseHosts();
 
+            List<string> errors = null;
+            OpenHosts(null, out errors);
+
+#if NO
             for (int i = 0; ; i++)
             {
                 string strInstanceName = "";
@@ -414,6 +758,7 @@ namespace dp2Library
                 this.m_hosts.Add(host);
 
                 HostInfo info = new HostInfo();
+                info.InstanceName = strInstanceName;
                 info.DataDir = strDataDir;
                 info.MaxClients = nMaxClients;
                 info.LicenseType = strLicenseType;
@@ -586,6 +931,8 @@ EventLogEntryType.Error);
                     return;
                 }
             }
+#endif
+
             this.Log.WriteEntry("dp2Library OnStart() end",
 EventLogEntryType.Information);
 
@@ -839,21 +1186,23 @@ strCertSN);
             this.Log.WriteEntry("dp2Library OnStart() begin",
     EventLogEntryType.Information);
 
+            try
+            {
+                StartRemotingServer();
+            }
+            catch (Exception ex)
+            {
+                this.Log.WriteEntry("dp2Library StartRemotingServer() exception: " + ExceptionUtil.GetDebugText(ex),
+EventLogEntryType.Error);
+            }
+
             this.m_thread.Start();
         }
 
         void m_host_Closing(object sender, EventArgs e)
         {
-            /*
-            lock (GlobalVars.LockObject)
-            {
-                if (GlobalVars.LibraryApplication != null)
-                {
-                    GlobalVars.LibraryApplication.Close();
-                }
-                GlobalVars.LibraryApplication = null;
-            }
-             * */
+            // 错误地移走了全部 HostInfo
+#if NO
             foreach (ServiceHost host in this.m_hosts)
             {
                 HostInfo info = host.Extensions.Find<HostInfo>();
@@ -863,6 +1212,7 @@ strCertSN);
                     host.Extensions.Remove(info);
                 }
             }
+#endif
         }
 
         // 设置各个 host 的最大前端数
@@ -998,6 +1348,8 @@ strCertSN);
                 this.m_thread.Abort();
                 this.m_thread = null;
             }
+
+            EndRemotingServer();
         }
 
         // 清除以前残留的临时文件
@@ -1009,8 +1361,8 @@ strCertSN);
 
             int nCount = 0;
             DirectoryInfo di = new DirectoryInfo(strTempDir);
-            FileInfo [] fis = di.GetFiles("*.tmp");
-            foreach(FileInfo fi in fis)
+            FileInfo[] fis = di.GetFiles("*.tmp");
+            foreach (FileInfo fi in fis)
             {
                 try
                 {
@@ -1018,13 +1370,57 @@ strCertSN);
                     File.Delete(fi.FullName);
                     nCount++;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine("删除出现异常: " + ex.Message);
                 }
             }
-            Console.WriteLine("共删除 "+nCount.ToString()+" 个临时文件");
+            Console.WriteLine("共删除 " + nCount.ToString() + " 个临时文件");
         }
+
+        #region Windows Service 控制命令设施
+
+        IpcServerChannel m_serverChannel = null;
+
+        void StartRemotingServer()
+        {
+            // http://www.cnblogs.com/gisser/archive/2011/12/31/2308989.html
+            // https://stackoverflow.com/questions/7126733/ipcserverchannel-properties-problem
+            // https://stackoverflow.com/questions/2400320/dealing-with-security-on-ipc-remoting-channel
+            BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
+            provider.TypeFilterLevel = TypeFilterLevel.Full;
+            Hashtable ht = new Hashtable();
+            ht["portName"] = "dp2library_ServiceControlChannel";
+            ht["name"] = "ipc";
+            ht["authorizedGroup"] = "Administrators"; // "Everyone";
+            m_serverChannel = new IpcServerChannel(ht, provider);
+
+#if NO
+            m_serverChannel = new IpcServerChannel(
+                "dp2library_ServiceControlChannel");
+#endif
+            //Register the server channel.
+            ChannelServices.RegisterChannel(m_serverChannel, false);
+
+            RemotingConfiguration.ApplicationName = "dp2library_ServiceControlServer";
+
+            //Register this service type.
+            RemotingConfiguration.RegisterWellKnownServiceType(
+                typeof(ServiceControlServer),
+                "dp2library_ServiceControlServer",
+                WellKnownObjectMode.Singleton);
+        }
+
+        void EndRemotingServer()
+        {
+            if (m_serverChannel != null)
+            {
+                ChannelServices.UnregisterChannel(m_serverChannel);
+                m_serverChannel = null;
+            }
+        }
+
+        #endregion
     }
 
     public class MyValidator : UserNamePasswordValidator

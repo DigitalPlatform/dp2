@@ -233,6 +233,7 @@
     <Compile Include="ChangeUsersRightsDlg.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DatabaseUtility.cs" />
     <Compile Include="DbNameMap\DbNameMap.cs" />
     <Compile Include="DbNameMap\DbNameMapItemDlg.cs">
       <SubType>Form</SubType>

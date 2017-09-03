@@ -14,11 +14,15 @@ using DigitalPlatform.Install;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms.Client;
+using DigitalPlatform.IO;
+
+using Ionic.Zip;
 
 namespace DigitalPlatform.LibraryServer
 {
     public class LibraryInstallHelper
     {
+        // TODO: 可考虑用另一个相同功能的函数替代
         // 删除所有用到的内核数据库
         // 专门开发给安装程序卸载时候使用
         public static int DeleteAllDatabase(
@@ -136,7 +140,6 @@ namespace DigitalPlatform.LibraryServer
                     {
                         strError += "删除预约到书库 '" + strArrivedDbName + "' 内数据时候发生错误：" + strTempError + "; ";
                     }
-
                 }
             }
 
@@ -305,13 +308,17 @@ namespace DigitalPlatform.LibraryServer
 
             DirectoryInfo di = new DirectoryInfo(strDataDir);
             if (di.Exists == false)
+            {
+                strError = "目录 '" + strDataDir + "' 不存在";
                 return 0;
+            }
 
             string strExistingLibraryFileName = Path.Combine(strDataDir,
                 "library.xml");
             if (File.Exists(strExistingLibraryFileName) == true)
                 return 2;
 
+            strError = "文件 '" + strExistingLibraryFileName + "' 不存在";
             return 1;
         }
 
@@ -486,6 +493,10 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
             }
 
+            return GetLibraryInstanceInfoFromXml(strFileName,
+            ref info,
+            out strError);
+#if NO
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -552,7 +563,930 @@ namespace DigitalPlatform.LibraryServer
             else
                 info.InitialDatabase = false;
             return 1;
+#endif
         }
+
+        const string EncryptKey = "dp2circulationpassword";
+
+        // 注意：本函数不会修改传入的 info 中的 InstanceName 成员
+        // return:
+        //      -1  出错
+        //      0   实例没有找到
+        //      1   成功
+        static int GetLibraryInstanceInfoFromXml(string strFileName,
+            ref LibraryInstanceInfo info,
+            out string strError)
+        {
+            strError = "";
+            if (info == null)
+                info = new LibraryInstanceInfo();
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strFileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "文件 '" + strFileName + "' 装载到 XMLDOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            if (dom.DocumentElement == null)
+            {
+                strError = "文件 '" + strFileName + "' 格式不正确，缺乏根元素";
+                return -1;
+            }
+
+            info.Dom = dom;
+
+            info.Version = LibraryServerUtil.GetLibraryXmlVersion(dom);
+
+            XmlElement rmsserver = dom.DocumentElement.SelectSingleNode("rmsserver") as XmlElement;
+            if (rmsserver != null)
+            {
+                info.KernelUrl = rmsserver.GetAttribute("url");
+                info.KernelUserName = rmsserver.GetAttribute("username");
+                info.KernelPassword = rmsserver.GetAttribute("password");
+
+                try
+                {
+                    info.KernelPassword = Cryptography.Decrypt(
+                        info.KernelPassword,
+                        EncryptKey);
+                }
+                catch
+                {
+                    strError = "<rmsserver> 元素 password 属性中的密码设置不正确";
+                    return -1;
+                }
+            }
+
+            // supervisor
+            // XmlElement nodeSupervisor = dom.DocumentElement.SelectSingleNode("accounts/account[@type='']") as XmlElement;
+
+            XmlElement nodeSupervisor = null;
+
+            // 找到第一个具备 managedatabase 权限用户
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("accounts/account[@type='']");
+            if (nodes.Count > 0)
+            {
+                foreach (XmlElement account in nodes)
+                {
+                    string strRights = account.GetAttribute("rights");
+                    if (StringUtil.IsInList("managedatabase", strRights) == true)
+                    {
+                        nodeSupervisor = account;
+                        break;
+                    }
+                }
+            }
+
+            if (nodeSupervisor != null)
+            {
+                info.SupervisorUserName = nodeSupervisor.GetAttribute("name");
+                info.SupervisorPassword = nodeSupervisor.GetAttribute("password");
+
+                if (info.Version <= 2.0)
+                {
+                    // library.xml 2.00 及以前的做法
+                    try
+                    {
+                        info.SupervisorPassword = Cryptography.Decrypt(info.SupervisorPassword, "dp2circulationpassword");
+                    }
+                    catch
+                    {
+                        strError = "<account password='???' /> 中的密码不正确";
+                        return -1;
+                    }
+                    // 得到 supervisor 密码的明文
+                }
+            }
+
+            string strValue = dom.DocumentElement.GetAttribute("_initialDatabase");
+            if (DomUtil.IsBooleanTrue(strValue, false) == true)
+                info.InitialDatabase = true;
+            else
+                info.InitialDatabase = false;
+            return 1;
+        }
+
+        // 在 dp2library 没有启动的情况下，用大备份文件恢复 dp2library 内全部配置和数据库
+        public static int RestoreLibrary(
+            string strDataDir,
+            string strBackupFileName,
+            string strTempDirRoot,
+            bool bFastMode,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // return:
+            //      -1  error
+            //      0   数据目录不存在
+            //      1   数据目录存在，但是xml文件不存在
+            //      2   xml文件已经存在
+            nRet = DetectDataDir(strDataDir,
+            out strError);
+            if (nRet != 2)
+            {
+                strError = "在探测现有 library.xml 文件过程中出现错误: " + strError;
+                return -1;
+            }
+
+            string strFileName = Path.Combine(strDataDir, "library.xml");
+
+            LibraryInstanceInfo info = null;
+
+            // 从现有 library.xml 中得到各种配置参数
+            nRet = GetLibraryInstanceInfoFromXml(strFileName,
+                ref info,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (string.IsNullOrEmpty(info.KernelUrl))
+            {
+                strError = "library.xml 中尚未配置 dp2Kernel Server URL";
+                return -1;
+            }
+
+            // 数据库定义文件名
+            string strDbDefFileName = Path.Combine(Path.GetDirectoryName(strBackupFileName),
+                Path.GetFileNameWithoutExtension(strBackupFileName)) + ".dbdef.zip";
+            if (File.Exists(strDbDefFileName) == false)
+            {
+                strError = "数据库定义文件 '" + strDbDefFileName + "' 不存在";
+                return -1;
+            }
+
+            // TODO: 删除 dp2library 数据目录中所有后台任务的断点信息，以避免克隆后旧的后台任务被从断点位置继续执行
+
+            XmlDocument new_library_dom = new XmlDocument();
+
+            using (RmsChannelCollection channels = new RmsChannelCollection())
+            {
+                channels.AskAccountInfo += new AskAccountInfoEventHandle((o, e) =>
+                {
+                    e.UserName = info.KernelUserName;
+                    e.Password = info.KernelPassword;
+
+                    e.Result = 1;
+                });
+
+                RmsChannel channel = channels.GetChannel(info.KernelUrl);
+                if (channel == null)
+                {
+                    strError = "channel == null";
+                    return -1;
+                }
+
+                // 先删除当前实例的全部数据库
+                nRet = DeleteAllDatabases(
+            channel,
+            info.Dom,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+
+                string strTempDir = Path.Combine(strTempDirRoot, "def");
+                PathUtil.CreateDirIfNeed(strTempDir);
+                try
+                {
+                    nRet = CreateDatabases(
+                channel,
+                strDbDefFileName,
+                strTempDir,
+                out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    // 装载 library.xml
+                    string strNewLibrarXmlFileName = Path.Combine(strTempDir, "_datadir\\library.xml");
+                    try
+                    {
+                        new_library_dom.Load(strNewLibrarXmlFileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "装载文件 " + strNewLibrarXmlFileName + " 到 XMLDOM 时出错: " + ex.Message;
+                        return -1;
+                    }
+                }
+                finally
+                {
+                    PathUtil.DeleteDirectory(strTempDir);
+                }
+
+
+                // 导入 .dp2bak 文件内的全部数据
+                nRet = ImportBackupData(
+            channel,
+            strBackupFileName,
+            bFastMode,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            // 用 .dbdef.zip 中的 library.xml 内容替换当前 library.xml 部分内容
+            XmlDocument target_dom = null;
+            nRet = MergeLibraryXml(info.Dom,
+            new_library_dom,
+            out target_dom,
+            out strError);
+            if (nRet == -1)
+                return -1;
+
+            // TODO: 备份操作前的 library.xml ?
+            target_dom.Save(strFileName);
+            return 0;
+        }
+
+        // 合并新旧两个 library.xml。
+        // 旧的 library.xml 指即将被替换的当前 library.xml
+        // 新的 library.xml 指从 .dbdef.zip 中提取出来的 library.xml
+        static int MergeLibraryXml(XmlDocument old_dom,
+            XmlDocument new_dom,
+            out XmlDocument target_dom,
+            out string strError)
+        {
+            strError = "";
+
+            // target_dom 以 new_dom 为基础内容，然后开始修改
+            target_dom = new XmlDocument();
+            target_dom.LoadXml(new_dom.OuterXml);
+
+            // old_dom:root uid --> target_dom
+            CopyAttr(old_dom,
+            target_dom,
+            ".",
+            "uid");
+
+            // old_dom:rmsserver 元素 --> target_dom
+            CopyElement(
+            old_dom,
+            target_dom,
+            "rmsserver");
+
+            // old_dom:mongoDB 元素 --> target_dom
+            CopyElement(
+            old_dom,
+            target_dom,
+            "mongoDB");
+
+            {
+                // TODO: message 元素的 dbname 属性要用新的值
+                string strMessageDbName = "";
+                XmlNode node = new_dom.DocumentElement.SelectSingleNode("message/@dbname");
+                if (node != null)
+                    strMessageDbName = node.Value;
+
+                // old_dom:message 元素 --> target_dom
+                CopyElement(
+                old_dom,
+                target_dom,
+                "message");
+
+
+                SetAttr(target_dom,
+    "message",
+    "dbname",
+            strMessageDbName);
+            }
+
+            // old_dom:opacServer 元素 --> target_dom
+            CopyElement(
+            old_dom,
+            target_dom,
+            "opacServer");
+
+            // 
+            // old_dom:externalMessageInterface 元素 --> target_dom
+            CopyElement(
+            old_dom,
+            target_dom,
+            "externalMessageInterface");
+
+            return 0;
+        }
+
+        static void SetAttr(XmlDocument target_dom,
+    string element_name,
+    string attr_name,
+            string attr_value)
+        {
+            XmlElement t = target_dom.DocumentElement.SelectSingleNode(element_name) as XmlElement;
+            if (t == null)
+            {
+                if (attr_value == null)
+                    return;
+                t = target_dom.CreateElement(element_name);
+                t.OwnerDocument.AppendChild(t);
+            }
+
+            t.SetAttribute(attr_name, attr_value);
+        }
+
+        static void CopyAttr(XmlDocument old_dom,
+            XmlDocument target_dom,
+            string element_name,
+            string attr_name)
+        {
+            string v = "";
+            XmlNode v_node = old_dom.DocumentElement.SelectSingleNode(element_name + "/@" + attr_name);
+            if (v_node != null)
+                v = v_node.Value;
+
+            XmlElement t = target_dom.DocumentElement.SelectSingleNode(element_name) as XmlElement;
+            if (t == null)
+            {
+                if (v_node == null)
+                    return;
+                t = target_dom.CreateElement(element_name);
+                t.OwnerDocument.AppendChild(t);
+            }
+
+            t.SetAttribute(attr_name, v);
+        }
+
+        static void CopyElement(
+            XmlDocument old_dom,
+            XmlDocument target_dom,
+            string element_name)
+        {
+            XmlElement t = target_dom.DocumentElement.SelectSingleNode(element_name) as XmlElement;
+            if (t == null)
+            {
+                t = target_dom.CreateElement(element_name);
+                t.OwnerDocument.AppendChild(t);
+            }
+
+            XmlElement s = old_dom.DocumentElement.SelectSingleNode(element_name) as XmlElement;
+            if (s == null)
+            {
+                t.ParentNode.RemoveChild(t);
+                return;
+            }
+
+            DomUtil.SetElementOuterXml(t, s.OuterXml);
+        }
+
+        // 删除全部数据库
+        public static int DeleteAllDatabases(
+            RmsChannel channel,
+            XmlDocument cfg_dom,
+            out string strError)
+        {
+            strError = "";
+
+            List<string> dbnames = new List<string>();
+
+            {
+                XmlNodeList nodes = cfg_dom.DocumentElement.SelectNodes("itemdbgroup/database");
+                foreach (XmlElement database in nodes)
+                {
+                    dbnames.Add(database.GetAttribute("name"));
+                    dbnames.Add(database.GetAttribute("biblioDbName"));
+                    dbnames.Add(database.GetAttribute("orderDbName"));
+                    dbnames.Add(database.GetAttribute("issueDbName"));
+                    dbnames.Add(database.GetAttribute("commentDbName"));
+                }
+            }
+
+            {
+                XmlNodeList nodes = cfg_dom.DocumentElement.SelectNodes("readerdbgroup/database/@name");
+                foreach (XmlElement name in nodes)
+                {
+                    if (string.IsNullOrEmpty(name.Value) == false)
+                        dbnames.Add(name.Value);
+                }
+            }
+
+            {
+                XmlNodeList nodes = cfg_dom.DocumentElement.SelectNodes("message/@dbname | arrived/@dbname | pinyin/@dbname | gcat/@dbname | word/@dbname | amerce/@dbname | invoice/@dbname | utilDb/database/@name");
+                foreach (XmlElement name in nodes)
+                {
+                    if (string.IsNullOrEmpty(name.Value) == false)
+                        dbnames.Add(name.Value);
+                }
+            }
+
+            StringUtil.RemoveBlank(ref dbnames);
+            StringUtil.RemoveDupNoSort(ref dbnames);
+
+            List<string> errors = new List<string>();
+            foreach (string dbname in dbnames)
+            {
+                long lRet = channel.DoDeleteDB(dbname,
+    out strError);
+                if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
+                {
+                    errors.Add("删除数据库 '" + dbname + "' 时发生错误：" + strError);
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors, "; ");
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 导入 .dp2bak 文件内的全部数据
+        static int ImportBackupData(
+            RmsChannel channel,
+            string strBackupFileName,
+            bool bFastMode,
+            out string strError)
+        {
+            strError = "";
+
+            int CHUNK_SIZE = 150 * 1024;    // 70
+
+            long lTotalCount = 0;
+
+            List<string> target_dburls = new List<string>();
+
+            ImportUtil import_util = new ImportUtil();
+            int nRet = import_util.Begin(null,
+                null,   // this.AppInfo,
+                strBackupFileName,
+                out strError);
+            if (nRet == -1 || nRet == 1)
+                return -1;
+
+            try // open import util
+            {
+                bool bDontPromptTimestampMismatchWhenOverwrite = false;
+                // DbNameMap map = new DbNameMap();
+                long lSaveOffs = -1;
+
+                //estimate.SetRange(0, import_util.Stream.Length);
+                //estimate.StartEstimate();
+
+                //stop.SetProgressRange(0, import_util.Stream.Length);
+
+                List<UploadRecord> records = new List<UploadRecord>();
+                int nBatchSize = 0;
+                for (int index = 0; ; index++)
+                {
+                    //Application.DoEvents();	// 出让界面控制权
+
+#if NO
+                        if (stop.State != 0)
+                        {
+                            DialogResult result = MessageBox.Show(this,
+                                "确实要中断当前批处理操作?",
+                                "导入数据",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxIcon.Question,
+                                MessageBoxDefaultButton.Button2);
+                            if (result == DialogResult.Yes)
+                            {
+                                strError = "用户中断";
+                                goto ERROR1;
+                            }
+                            else
+                            {
+                                stop.Continue();
+                            }
+                        }
+#endif
+
+                    UploadRecord record = null;
+
+                    {
+                        if (lSaveOffs != -1 && import_util.Stream.Position != lSaveOffs)
+                        {
+                            StreamUtil.FastSeek(import_util.Stream, lSaveOffs);
+                        }
+                    }
+
+                    // return:
+                    //		-1	出错
+                    //		0	正常
+                    //		1	结束。此次API不返回有效的记录
+                    nRet = import_util.ReadOneRecord(out record,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    {
+                        // 保存每次读取后的文件指针位置
+                        lSaveOffs = import_util.Stream.Position;
+                    }
+
+                    //if (nRet == 1)
+                    //    break;
+                    bool bNeedPush = false;
+
+                    if (nRet == 0)
+                    {
+
+                        Debug.Assert(record != null, "");
+
+                        // 准备目标路径
+                        {
+                            string strLongPath = channel.Url + "?" + record.RecordBody.Path;
+
+                            ResPath respath = new ResPath(strLongPath);
+                            record.Url = respath.Url;
+                            record.RecordBody.Path = respath.Path;
+
+                            // 记载每个数据库的 URL
+                            string strDbUrl = GetDbUrl(strLongPath);
+                            if (target_dburls.IndexOf(strDbUrl) == -1)
+                            {
+                                // 每个数据库要进行一次快速模式的准备操作
+                                if (bFastMode == true)
+                                {
+                                    nRet = ManageKeysIndex(
+                                        channel,
+                                        strDbUrl,
+                                        "beginfastappend",
+                                        "正在对数据库 " + strDbUrl + " 进行快速导入模式的准备工作 ...",
+                                        out strError);
+                                    if (nRet == -1)
+                                        return -1;
+                                }
+                                target_dburls.Add(strDbUrl);
+                            }
+                        }
+
+                        // 是否要把积累的记录推送出去进行写入?
+                        // 要进行以下检查：
+                        // 1) 当前记录和前一条记录之间，更换了服务器
+                        // 2) 累积的记录尺寸超过要求
+                        // 3) 当前记录是一条超大的记录 (这是因为要保持从文件中读出的顺序来写入(例如追加时候的号码增量顺序)，就必须在单条写入本条前，先写入积累的那些记录)
+                        if (records.Count > 0)
+                        {
+                            if (record.TooLarge() == true)
+                                bNeedPush = true;
+                            else if (nBatchSize + record.RecordBody.Xml.Length > CHUNK_SIZE)
+                                bNeedPush = true;
+                            else
+                            {
+                                if (LastUrl(records) != record.Url)
+                                    bNeedPush = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        record = null;
+                        bNeedPush = true;
+                    }
+
+                    if (bNeedPush == true)
+                    {
+                        List<UploadRecord> save_records = new List<UploadRecord>();
+                        save_records.AddRange(records);
+
+                        {
+                            while (records.Count > 0)
+                            {
+                                // 将 XML 记录成批写入数据库
+                                // return:
+                                //      -1  出错
+                                //      >=0 本次已经写入的记录个数。本函数返回时 records 集合的元素数没有变化(但元素的Path和Timestamp会有变化)，如果必要调主可截取records集合中后面未处理的部分再次调用本函数
+                                nRet = ImportUtil.WriteRecords(
+                                    null,
+                                    null,   // stop,
+                                    channel,
+                                    bFastMode,
+                                    false,  // dlg.InsertMissing,
+                                    records,
+                                    ref bDontPromptTimestampMismatchWhenOverwrite,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                                if (nRet == 0)
+                                {
+                                    // TODO: 或可以改为单条写入
+                                    strError = "WriteRecords() error :" + strError;
+                                    return -1;
+                                }
+                                Debug.Assert(nRet <= records.Count, "");
+                                records.RemoveRange(0, nRet);
+                                lTotalCount += nRet;
+                            }
+                        }
+
+                        // if (dlg.ImportObject)
+                        {
+                            // 上载对象
+                            // return:
+                            //      -1  出错
+                            //      0   成功
+                            nRet = import_util.UploadObjects(
+                                null,   // stop,
+                                channel,
+                                save_records,
+                                ref bDontPromptTimestampMismatchWhenOverwrite,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                        }
+
+                        nBatchSize = 0;
+#if NO
+                            stop.SetProgressValue(import_util.Stream.Position);
+
+                            stop.SetMessage("已经写入记录 " + lTotalCount.ToString() + " 条。"
+    + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(import_util.Stream.Position)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
+#endif
+                    }
+
+                    // 如果 记录的 XML 尺寸太大不便于成批上载，需要在单独直接上载
+                    if (record != null && record.TooLarge() == true)
+                    {
+                        // if (dlg.ImportDataRecord)
+                        {
+                            // 写入一条 XML 记录
+                            // return:
+                            //      -1  出错
+                            //      0   邀请中断整个处理
+                            //      1   成功
+                            //      2   跳过本条，继续处理后面的
+                            nRet = ImportUtil.WriteOneXmlRecord(
+                                null,
+                                null,   // stop,
+                                channel,
+                                record,
+                                ref bDontPromptTimestampMismatchWhenOverwrite,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                            if (nRet == 0)
+                                return -1;
+                        }
+
+                        // if (dlg.ImportObject)
+                        {
+                            List<UploadRecord> temp = new List<UploadRecord>();
+                            temp.Add(record);
+                            // 上载对象
+                            // return:
+                            //      -1  出错
+                            //      0   成功
+                            nRet = import_util.UploadObjects(
+                                null,   //stop,
+                                channel,
+                                temp,
+                                ref bDontPromptTimestampMismatchWhenOverwrite,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                        }
+
+                        lTotalCount += 1;
+                        continue;
+                    }
+
+                    if (record != null)
+                    {
+                        records.Add(record);
+                        if (record.RecordBody != null && record.RecordBody.Xml != null)
+                            nBatchSize += record.RecordBody.Xml.Length;
+                    }
+
+                    if (record == null)
+                        break;  // 延迟 break
+                }
+
+                Debug.Assert(records.Count == 0, "");
+#if NO
+                // 最后提交一次
+                if (records.Count > 0)
+                {
+                    List<UploadRecord> save_records = new List<UploadRecord>();
+                    save_records.AddRange(records);
+
+                    // if (dlg.ImportDataRecord)
+                    {
+                        while (records.Count > 0)
+                        {
+                            // 将 XML 记录成批写入数据库
+                            // return:
+                            //      -1  出错
+                            //      >=0 本次已经写入的记录个数。本函数返回时 records 集合的元素数没有变化(但元素的Path和Timestamp会有变化)，如果必要调主可截取records集合中后面未处理的部分再次调用本函数
+                            nRet = ImportUtil.WriteRecords(
+                                null,
+                                null,   // stop,
+                                channel,
+                                bFastMode,
+                                false,  // dlg.InsertMissing,
+                                records,
+                                ref bDontPromptTimestampMismatchWhenOverwrite,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet == 0)
+                            {
+                                strError = "WriteRecords() error :" + strError;
+                                goto ERROR1;
+                            }
+                            Debug.Assert(nRet <= records.Count, "");
+                            records.RemoveRange(0, nRet);
+                            lTotalCount += nRet;
+                        }
+                    }
+
+                    // if (dlg.ImportObject)
+                    {
+                        // 上载对象
+                        // return:
+                        //      -1  出错
+                        //      0   成功
+                        nRet = import_util.UploadObjects(
+                            null,   // stop,
+                            channel,
+                            save_records,
+                            ref bDontPromptTimestampMismatchWhenOverwrite,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                    }
+
+                    nBatchSize = 0;
+#if NO
+                        stop.SetProgressValue(import_util.Stream.Position);
+
+                        stop.SetMessage("已经写入记录 " + lTotalCount.ToString() + " 条。"
+    + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(import_util.Stream.Position)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
+#endif
+                    records.Clear();
+                    nBatchSize = 0;
+                }
+#endif
+
+                return 0;
+            }// close import util
+            finally
+            {
+                if (bFastMode == true)
+                {
+                    foreach (string url in target_dburls)
+                    {
+                        // string strQuickModeError = "";
+                        nRet = ManageKeysIndex(
+                            channel,
+                            url,
+                            "endfastappend",
+                            "正在对数据库 " + url + " 进行快速导入模式的收尾工作，请耐心等待 ...",
+                            out strError);
+                        if (nRet == -1)
+                            throw new Exception(strError);
+                    }
+                }
+
+                import_util.End();
+            }
+        }
+
+        // 根据数据库定义文件，创建若干数据库
+        // 注: 如果发现同名数据库已经存在，先删除再创建
+        // parameters:
+        //      strTempDir  临时目录路径。调用前要创建好这个临时目录。调用后需要删除这个临时目录
+        public static int CreateDatabases(
+            RmsChannel channel,
+            string strDbDefFileName,
+            string strTempDir,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // 展开压缩文件
+            try
+            {
+                using (ZipFile zip = ZipFile.Read(strDbDefFileName))
+                {
+                    foreach (ZipEntry e in zip)
+                    {
+                        e.Extract(strTempDir, ExtractExistingFileAction.OverwriteSilently);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "展开压缩文件 '" + strDbDefFileName + "' 到目录 '" + strTempDir + "' 时出现异常: " + ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+
+            DirectoryInfo di = new DirectoryInfo(strTempDir);
+
+            DirectoryInfo[] dis = di.GetDirectories();
+
+            foreach (DirectoryInfo info in dis)
+            {
+                // 跳过 '_datadir'
+                if (info.Name.StartsWith("_"))
+                    continue;
+
+                string strTemplateDir = info.FullName;
+                string strDatabaseName = info.Name;
+                // 数据库是否已经存在？
+                // return:
+                //      -1  error
+                //      0   not exist
+                //      1   exist
+                //      2   其他类型的同名对象已经存在
+                nRet = DatabaseUtility.IsDatabaseExist(
+                    channel,
+                    strDatabaseName,
+        out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                {
+                    // 如果发现同名数据库已经存在，先删除
+                    long lRet = channel.DoDeleteDB(strDatabaseName, out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode != ChannelErrorCode.NotFound)
+                            return -1;
+                    }
+                }
+
+
+                // 根据数据库模板的定义，创建一个数据库
+                // parameters:
+                //      strTempDir  将创建数据库过程中，用到的配置文件会自动汇集拷贝到此目录。如果 == null，则不拷贝
+                nRet = DatabaseUtility.CreateDatabase(channel,
+            strTemplateDir,
+            strDatabaseName,
+            null,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            return 0;
+        }
+
+        static string GetDbUrl(string strLongPath)
+        {
+            ResPath respath = new ResPath(strLongPath);
+            respath.MakeDbName();
+            return respath.FullPath;
+        }
+
+        // 集合中最后一个元素的 Url
+        static string LastUrl(List<UploadRecord> records)
+        {
+            Debug.Assert(records.Count > 0, "");
+            UploadRecord last_record = records[records.Count - 1];
+            return last_record.Url;
+        }
+
+        static int ManageKeysIndex(
+            RmsChannel channel,
+    string strDbUrl,
+    string strAction,
+    string strMessage,
+    out string strError)
+        {
+            strError = "";
+
+            ResPath respath = new ResPath(strDbUrl);
+
+            TimeSpan old_timeout = channel.Timeout;
+            if (strAction == "endfastappend")
+            {
+                // 收尾阶段可能要耗费很长的时间
+                channel.Timeout = new TimeSpan(3, 0, 0);
+            }
+
+            try
+            {
+                long lRet = channel.DoRefreshDB(
+                    strAction,
+                    respath.Path,
+                    false,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "管理数据库 '" + respath.Path + "' 时出错: " + strError;
+                    return -1;
+                }
+
+            }
+            finally
+            {
+                if (strAction == "endfastappend")
+                {
+                    channel.Timeout = old_timeout;
+                }
+
+            }
+            return 0;
+        }
+
     }
 
     /// <summary>
@@ -570,5 +1504,13 @@ namespace DigitalPlatform.LibraryServer
 
         // 2015/5/20
         public double Version = 2.0;    // library.xml 文件的版本
+
+        // 2017/8/27
+        public string KernelUrl { get; set; }
+        public string KernelUserName { get; set; }
+        public string KernelPassword { get; set; }
+
+        // 2017/8/29
+        public XmlDocument Dom { get; set; }
     }
 }

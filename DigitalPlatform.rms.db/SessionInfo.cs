@@ -436,7 +436,7 @@ namespace DigitalPlatform.rms
             // return:
             //		-1  出错
             //		0   成功
-            int nRet = ConvertUtil.GetRealLength((int)lStart,
+            int nRet = ConvertUtil.GetRealLengthNew((int)lStart,    // 2017/9/3 从 GetRealLength() 改为 GetRealLengthNew()
                 (int)lLength,
                 (int)resultSet.Count,
                 SessionInfo.MaxRecordsCountPerApi,//nMaxCount,

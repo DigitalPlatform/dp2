@@ -889,40 +889,57 @@ namespace DigitalPlatform.rms
                         using (SQLiteCommand command = new SQLiteCommand(strCommand,
                             connection))
                         {
-                            try
-                            {
-                                command.ExecuteNonQuery();
-                            }
-                            catch (Exception ex)
-                            {
-                                strError = "建表出错。\r\n"
-                                    + ex.Message + "\r\n"
-                                    + "SQL命令:\r\n"
-                                    + strCommand;
-                                return -1;
-                            }
+                            IDbTransaction trans = null;
 
-                            // 3.建索引
-                            nRet = this.GetCreateIndexString(
-                                "keys,records",
-                                this.container.SqlServerType,
-                                "create",
-                                out strCommand,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                            command.CommandText = strCommand;
+                            trans = connection.BeginTransaction();  // 2017/9/3
                             try
                             {
-                                command.ExecuteNonQuery();
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "建表出错。\r\n"
+                                        + ex.Message + "\r\n"
+                                        + "SQL命令:\r\n"
+                                        + strCommand;
+                                    return -1;
+                                }
+
+                                // 3.建索引
+                                nRet = this.GetCreateIndexString(
+                                    "keys,records",
+                                    this.container.SqlServerType,
+                                    "create",
+                                    out strCommand,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                                command.CommandText = strCommand;
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "建索引出错。\r\n"
+                                        + ex.Message + "\r\n"
+                                        + "SQL命令:\r\n"
+                                        + strCommand;
+                                    return -1;
+                                }
+
+                                if (trans != null)
+                                {
+                                    trans.Commit();
+                                    trans = null;
+                                }
                             }
-                            catch (Exception ex)
+                            finally
                             {
-                                strError = "建索引出错。\r\n"
-                                    + ex.Message + "\r\n"
-                                    + "SQL命令:\r\n"
-                                    + strCommand;
-                                return -1;
+                                if (trans != null)
+                                    trans.Rollback();
                             }
                         } // end of using command
 
