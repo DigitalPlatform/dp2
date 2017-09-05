@@ -636,6 +636,7 @@ namespace DigitalPlatform.rms
             return this.m_strSqlDbName;
         }
 
+#if NO
         // 删除一个目录内的所有文件和目录
         // parameters:
         //      strExcludeFileName  想要保留的文件名，全路径
@@ -677,6 +678,7 @@ namespace DigitalPlatform.rms
             }
 #endif
         }
+#endif
 
         // 初始化数据库，注意虚函数不能为private
         // parameter:
@@ -745,6 +747,7 @@ namespace DigitalPlatform.rms
                         {
                             if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                             {
+                                _streamCache.ClearAll();
                                 PathUtil.DeleteDirectory(this.m_strObjectDir);
                                 PathUtil.TryCreateDir(this.m_strObjectDir);
                             }
@@ -864,6 +867,7 @@ namespace DigitalPlatform.rms
                     {
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
+                            _streamCache.ClearAll();
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
 
                             PathUtil.TryCreateDir(this.m_strObjectDir);
@@ -1058,6 +1062,7 @@ namespace DigitalPlatform.rms
                     {
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
+                            _streamCache.ClearAll();
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
                             PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
@@ -1181,6 +1186,7 @@ namespace DigitalPlatform.rms
                     {
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
+                            _streamCache.ClearAll();
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
                             PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
@@ -2968,6 +2974,7 @@ namespace DigitalPlatform.rms
                         string strRealDir = this.container.DataDir + "\\" + strCfgsDir;
                         if (Directory.Exists(strRealDir) == true)
                         {
+                            _streamCache.ClearAll();
                             PathUtil.DeleteDirectory(strRealDir);
                         }
                     }
@@ -2984,6 +2991,7 @@ namespace DigitalPlatform.rms
                 {
                     if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                     {
+                        _streamCache.ClearAll();
                         PathUtil.DeleteDirectory(this.m_strObjectDir);
                     }
                 }
@@ -9482,7 +9490,7 @@ namespace DigitalPlatform.rms
                         // 删除残余的旧有对象文件
                         if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                         {
-                            File.Delete(GetObjectFileName(info.row_info.NewFileName));
+                            FileDelete(GetObjectFileName(info.row_info.NewFileName));
                             info.row_info.NewFileName = "";
                         }
 
@@ -9730,7 +9738,7 @@ SqlDbType.NVarChar);
                             // 删除残余的旧有对象文件
                             if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                             {
-                                File.Delete(GetObjectFileName(info.row_info.NewFileName));
+                                FileDelete(GetObjectFileName(info.row_info.NewFileName));
                                 info.row_info.NewFileName = "";
                             }
 
@@ -9943,7 +9951,7 @@ DbType.String);
                             // 删除残余的旧有对象文件
                             if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                             {
-                                File.Delete(GetObjectFileName(info.row_info.NewFileName));
+                                FileDelete(GetObjectFileName(info.row_info.NewFileName));
                                 info.row_info.NewFileName = "";
                             }
 
@@ -10132,7 +10140,7 @@ MySqlDbType.String);
                             // 删除残余的旧有对象文件
                             if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                             {
-                                File.Delete(GetObjectFileName(info.row_info.NewFileName));
+                                FileDelete(GetObjectFileName(info.row_info.NewFileName));
                                 info.row_info.NewFileName = "";
                             }
 
@@ -13171,12 +13179,12 @@ start_time,
                     // 转换存储方式时要及时删除原有的对象文件
                     if (string.IsNullOrEmpty(row_info.FileName) == false)
                     {
-                        File.Delete(GetObjectFileName(row_info.FileName));
+                        FileDelete(GetObjectFileName(row_info.FileName));
                         row_info.FileName = "";
                     }
                     if (string.IsNullOrEmpty(row_info.NewFileName) == false)
                     {
-                        File.Delete(GetObjectFileName(row_info.NewFileName));
+                        FileDelete(GetObjectFileName(row_info.NewFileName));
                         row_info.NewFileName = "";
                     }
                 }
@@ -13225,7 +13233,7 @@ start_time,
                     if (string.IsNullOrEmpty(row_info.FileName) == false)
                     {
                         strDeletedFilename = GetObjectFileName(row_info.FileName);
-                        File.Delete(strDeletedFilename);   // 删除原有的正式文件
+                        FileDelete(strDeletedFilename);   // 删除原有的正式文件
                     }
 
                     // 正式文件名重新命名
@@ -13271,10 +13279,13 @@ start_time,
                         string strSourceFilename = GetObjectFileName(row_info.NewFileName);
 
                         if (strDeletedFilename != strFileName)
-                            File.Delete(strFileName);   // 防备性删除已经存在的目标文件。TODO: 或者出错以后再重试?
+                        {
+                            FileDelete(strFileName);   // 防备性删除已经存在的目标文件。TODO: 或者出错以后再重试?
+                        }
 
                         try
                         {
+                            _streamCache.ClearItems(strSourceFilename);
                             File.Move(strSourceFilename, strFileName);    // 改名
                         }
                         catch (FileNotFoundException /* ex */)
@@ -13770,6 +13781,12 @@ start_time,
 
             // 注：如果是最后一次写入，函数返回时，newdata字段内容被清除
             return 0;
+        }
+
+        void FileDelete(string filename)
+        {
+            _streamCache.ClearItems(filename);
+            File.Delete(filename);
         }
 
         // parameters:
@@ -15937,7 +15954,9 @@ start_time,
                 try
                 {
                     if (string.IsNullOrEmpty(strFilename) == false)
-                        File.Delete(strFilename);
+                    {
+                        FileDelete(strFilename);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -19296,9 +19315,13 @@ bool bTempObject)
                     try
                     {
                         if (string.IsNullOrEmpty(strFilename1) == false)
-                            File.Delete(strFilename1);
+                        {
+                            FileDelete(strFilename1);
+                        }
                         if (string.IsNullOrEmpty(strFileName2) == false)
-                            File.Delete(strFileName2);
+                        {
+                            FileDelete(strFileName2);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -19318,7 +19341,9 @@ bool bTempObject)
                         try
                         {
                             if (string.IsNullOrEmpty(strFilename) == false)
-                                File.Delete(strFilename);
+                            {
+                                FileDelete(strFilename);
+                            }
                         }
                         catch (Exception ex)
                         {

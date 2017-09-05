@@ -17,6 +17,44 @@ namespace DigitalPlatform.IO
 
         List<StreamItem> _items = new List<StreamItem>();
 
+        public void ClearItems(string strFilePath)
+        {
+            List<StreamItem> items = new List<StreamItem>();
+            m_lock.EnterReadLock();
+            try
+            {
+                foreach (StreamItem item in _items)
+                {
+                    if (item.FilePath == strFilePath)
+                    {
+                        items.Add(item);
+                    }
+                }
+            }
+            finally
+            {
+                m_lock.ExitReadLock();
+            }
+
+            if (items.Count == 0)
+            {
+                m_lock.EnterWriteLock();
+                try
+                {
+                    foreach (StreamItem item in items)
+                    {
+                        _items.Remove(item);
+                        if (item.FileStream != null)
+                            item.FileStream.Close();
+                    }
+                }
+                finally
+                {
+                    m_lock.ExitWriteLock();
+                }
+            }
+        }
+
         public StreamItem FindItem(string strFilePath)
         {
             m_lock.EnterReadLock();
