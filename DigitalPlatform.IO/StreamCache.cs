@@ -13,6 +13,7 @@ namespace DigitalPlatform.IO
     /// </summary>
     public class StreamCache
     {
+        const int MAX_ITEMS = 100;
         internal ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
 
         List<StreamItem> _items = new List<StreamItem>();
@@ -36,7 +37,7 @@ namespace DigitalPlatform.IO
                 m_lock.ExitReadLock();
             }
 
-            if (items.Count == 0)
+            if (items.Count > 0)
             {
                 m_lock.EnterWriteLock();
                 try
@@ -84,6 +85,10 @@ namespace DigitalPlatform.IO
 
         public StreamItem NewItem(string strFilePath)
         {
+            // 防备尺寸过大
+            if (_items.Count > 100)
+                ClearAll();
+
             StreamItem item = new StreamItem();
             item.Touch();
             item.FilePath = strFilePath;
@@ -119,18 +124,29 @@ namespace DigitalPlatform.IO
 
         public void ReturnWriteStream(StreamItem item)
         {
+            if (item.FileStream != null)
+                item.FileStream.Flush();
+
             item.DecUse();
         }
 
         public void ClearAll()
         {
-            foreach (StreamItem item in _items)
+            m_lock.EnterWriteLock();
+            try
             {
-                item.FileStream.Close();
-                item.FileStream = null;
-            }
+                foreach (StreamItem item in _items)
+                {
+                    item.FileStream.Close();
+                    item.FileStream = null;
+                }
 
-            _items.Clear();
+                _items.Clear();
+            }
+            finally
+            {
+                m_lock.ExitWriteLock();
+            }
         }
 
         // 清除闲置时间过长的事项

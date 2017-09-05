@@ -13096,42 +13096,45 @@ start_time,
                 REDO:
                     try
                     {
-#if NO
-                        using (FileStream s = File.Open(
-        strFileName,
-        FileMode.OpenOrCreate,
-        FileAccess.Write,
-        FileShare.ReadWrite))
+                        if (lStartOfTarget < 10 * 1024)
                         {
-                            // 第一次写文件,并且文件长度大于对象总长度，则截断文件
-                            if (bFirst == true && s.Length > lTotalLength)
-                                s.SetLength(0);
+                            using (FileStream s = File.Open(
+            strFileName,
+            FileMode.OpenOrCreate,
+            FileAccess.Write,
+            FileShare.ReadWrite))
+                            {
+                                // 第一次写文件,并且文件长度大于对象总长度，则截断文件
+                                if (bFirst == true && s.Length > lTotalLength)
+                                    s.SetLength(0);
 
-                            // s.Seek(lStartOfTarget, SeekOrigin.Begin);
-                            s.FastSeek(lStartOfTarget); // 2017/9/5
-                            s.Write(baSource,
-                                nStartOfBuffer,
-                                nNeedReadLength);
+                                // s.Seek(lStartOfTarget, SeekOrigin.Begin);
+                                s.FastSeek(lStartOfTarget); // 2017/9/5
+                                s.Write(baSource,
+                                    nStartOfBuffer,
+                                    nNeedReadLength);
+                            }
                         }
-#endif
-                        StreamItem item = _streamCache.GetWriteStream(strFileName);
-                        try
+                        else
                         {
-                            // 第一次写文件,并且文件长度大于对象总长度，则截断文件
-                            if (bFirst == true && item.FileStream.Length > lTotalLength)
-                                item.FileStream.SetLength(0);
+                            StreamItem item = _streamCache.GetWriteStream(strFileName);
+                            try
+                            {
+                                // 第一次写文件,并且文件长度大于对象总长度，则截断文件
+                                if (bFirst == true && item.FileStream.Length > lTotalLength)
+                                    item.FileStream.SetLength(0);
 
-                            // s.Seek(lStartOfTarget, SeekOrigin.Begin);
-                            item.FileStream.FastSeek(lStartOfTarget); // 2017/9/5
-                            item.FileStream.Write(baSource,
-                                nStartOfBuffer,
-                                nNeedReadLength);
+                                // s.Seek(lStartOfTarget, SeekOrigin.Begin);
+                                item.FileStream.FastSeek(lStartOfTarget); // 2017/9/5
+                                item.FileStream.Write(baSource,
+                                    nStartOfBuffer,
+                                    nNeedReadLength);
+                            }
+                            finally
+                            {
+                                _streamCache.ReturnWriteStream(item);
+                            }
                         }
-                        finally
-                        {
-                            _streamCache.ReturnWriteStream(item);
-                        }
-                    
                     }
                     catch (DirectoryNotFoundException ex)
                     {
@@ -13286,6 +13289,7 @@ start_time,
                         try
                         {
                             _streamCache.ClearItems(strSourceFilename);
+                            _streamCache.ClearItems(strFileName);
                             File.Move(strSourceFilename, strFileName);    // 改名
                         }
                         catch (FileNotFoundException /* ex */)
