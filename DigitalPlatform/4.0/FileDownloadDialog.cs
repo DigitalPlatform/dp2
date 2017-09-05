@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace DigitalPlatform.CirculationClient
+namespace DigitalPlatform
 {
     public partial class FileDownloadDialog : Form
     {
@@ -17,6 +17,41 @@ namespace DigitalPlatform.CirculationClient
         public FileDownloadDialog()
         {
             InitializeComponent();
+        }
+
+        public void SetMessage(string strText)
+        {
+            if (this.IsDisposed)
+                return;
+
+            this.Invoke((Action)(() =>
+            {
+                this.label_message.Text = strText;
+            }));
+        }
+
+        public Button CancelButton
+        {
+            get
+            {
+                return this.button_cancel;
+            }
+        }
+
+        public ProgressBar ProgressBar
+        {
+            get
+            {
+                return this.progressBar1;
+            }
+        }
+
+        public Label MessageLabel
+        {
+            get
+            {
+                return this.label_message;
+            }
         }
 
         public void SetProgress(long bytesReceived, long totalBytesToReceive)

@@ -11,11 +11,22 @@ namespace DigitalPlatform.IO
     {
         public static void FastSeek(this Stream stream, long lOffset)
         {
+#if NO
+            // 2017/9/5
+            if (lOffset != 0 && lOffset == stream.Length)
+            {
+                stream.Seek(0, SeekOrigin.End);
+                return;
+            }
+#endif
+
             long delta1 = lOffset - stream.Position;
 #if NO
             if (delta1 < 0)
                 delta1 = -delta1;
 #endif
+
+
             if (Math.Abs(delta1) < lOffset)
             {
                 stream.Seek(delta1, SeekOrigin.Current);
@@ -125,6 +136,33 @@ namespace DigitalPlatform.IO
             return lLength;
         }
 
+        public static long LockingDumpStream(Stream streamSource,
+    Stream streamTarget,
+    bool bFlush)
+        {
+            int nChunkSize = 8192;
+            byte[] bytes = new byte[nChunkSize];
+            long lLength = 0;
+            while (true)
+            {
+                int n = streamSource.Read(bytes, 0, nChunkSize);
+
+                if (n != 0)
+                {
+                    streamTarget.LockingWrite(bytes, 0, n);
+
+                    if (bFlush == true)
+                        streamTarget.Flush();
+                }
+
+                if (n <= 0)
+                    break;
+
+                lLength += n;
+            }
+
+            return lLength;
+        }
 
         /// <summary>
         /// 将源流输入到目标流

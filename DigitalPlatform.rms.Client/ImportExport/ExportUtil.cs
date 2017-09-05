@@ -24,6 +24,9 @@ namespace DigitalPlatform.rms.Client
     {
         IWin32Window m_owner = null;
 
+        public bool SafeMode { get; set; }
+        public string TempDir { get; set; }
+
         public ExportFileType FileType = ExportFileType.XmlFile;
 
         public FileStream outputfile = null;	// Backup和Xml格式输出都需要这个
@@ -194,6 +197,7 @@ namespace DigitalPlatform.rms.Client
             out string strError)
         {
             strError = "";
+            int nRet = 0;
 
             if (this.FileType == ExportFileType.XmlFile)
             {
@@ -226,16 +230,31 @@ namespace DigitalPlatform.rms.Client
             {
                 Debug.Assert(channel != null, "");
                 // 将主记录和相关资源写入备份文件
-                int nRet = WriteRecordToBackupFile(
-                    this.m_owner,
-                    channel,
-                    stop,
-                    this.outputfile,
-                    strRecPath, // 记录路径
-                    strMetadata,
-                    strXmlBody,
-                    baTimestamp,
-                    out strError);
+                if (this.SafeMode)
+                {
+                    nRet = SafeWriteRecordToBackupFile(
+        this.m_owner,
+        channel,
+        stop,
+        this.outputfile,
+        strRecPath, // 记录路径
+        strMetadata,
+        strXmlBody,
+        baTimestamp,
+        this.TempDir,
+        out strError);
+                }
+                else
+                    nRet = WriteRecordToBackupFile(
+                        this.m_owner,
+                        channel,
+                        stop,
+                        this.outputfile,
+                        strRecPath, // 记录路径
+                        strMetadata,
+                        strXmlBody,
+                        baTimestamp,
+                        out strError);
                 if (nRet == -1)
                     return -1;
             }
@@ -278,6 +297,62 @@ namespace DigitalPlatform.rms.Client
 
         #region 写入 .dp2bak 文件
 
+        // 本函数是将新的记录完整创建好以后再追加到 outputfile 末尾。能确保另一个并发的顺序读操作读入正确的内容
+        static int SafeWriteRecordToBackupFile(
+            IWin32Window owner,
+            RmsChannel channel,
+            DigitalPlatform.Stop stop,
+            Stream outputfile,
+            string strPath, // 记录路径
+            string strMetaData,
+            string strXmlBody,
+            byte[] body_timestamp,
+            string strTempDir,
+            out string strError)
+        {
+            if (string.IsNullOrEmpty(strTempDir))
+            {
+                strError = "strTempDir 参数值不应为空";
+                return -1;
+            }
+            string strTempFileName = Path.Combine(strTempDir, "~" + Guid.NewGuid().ToString());
+            try
+            {
+                using (FileStream temp_stream = File.Open(
+                            strTempFileName,
+                            FileMode.Create,
+                            FileAccess.ReadWrite,
+                            FileShare.None))
+                {
+                    int nRet = WriteRecordToBackupFile(
+                    owner,
+                    channel,
+                    stop,
+                    temp_stream,
+                    strPath, // 记录路径
+                    strMetaData,
+                    strXmlBody,
+                    body_timestamp,
+                    out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    temp_stream.Seek(0, SeekOrigin.Begin);
+                    StreamUtil.LockingDumpStream(temp_stream, outputfile, false);
+                    return nRet;
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "SafeWriteRecordToBackupFile() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                return -1;
+            }
+            finally
+            {
+                File.Delete(strTempFileName);
+            }
+        }
+
         // 将主记录和相关资源写入备份文件
         // 本函数如果失败，会自动把本次写入的局部内容从文件末尾抹去
         // TODO: 测试磁盘空间耗尽的情况
@@ -304,7 +379,7 @@ namespace DigitalPlatform.rms.Client
             {
                 byte[] length = new byte[8];
 
-                outputfile.Write(length, 0, 8);	// 临时写点数据,占据记录总长度位置
+                outputfile.LockingWrite(length, 0, 8);	// 临时写点数据,占据记录总长度位置
 
                 ResPath respath = new ResPath();
                 respath.Url = channel.Url;
@@ -366,7 +441,7 @@ namespace DigitalPlatform.rms.Client
                 Debug.Assert(outputfile.Position == lStart, "");
 
                 // outputfile.Seek(lStart, SeekOrigin.Begin);   // 文件大了以后这句话的性能会很差
-                outputfile.Write(data, 0, 8);
+                outputfile.LockingWrite(data, 0, 8);
 
                 // 跳到记录末尾位置
                 outputfile.Seek(lTotalLength, SeekOrigin.Current);

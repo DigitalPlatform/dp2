@@ -517,6 +517,7 @@ namespace DigitalPlatform.rms.Client
             Stop stop,
             RmsChannel channel,
             List<UploadRecord> records,
+            bool bSetProgressValueByStreamPosition,
             ref bool bDontPromptTimestampMismatchWhenOverwrite,
             out string strError)
         {
@@ -564,14 +565,15 @@ namespace DigitalPlatform.rms.Client
                         res,
                         false,
                         "", //  strCount,
+                        bSetProgressValueByStreamPosition,
                         ref bDontPromptTimestampMismatchWhenOverwrite,
                         out strError);
-                if (nRet == -1)
-                {
-                    // 如果 channel.ErrorCode == ChannelErrorCode.NotFound
-                    // 表示元数据记录不存在，或者其中对应 id 的 <dprms:file> 元素不存在
-                    return -1;
-                }
+                    if (nRet == -1)
+                    {
+                        // 如果 channel.ErrorCode == ChannelErrorCode.NotFound
+                        // 表示元数据记录不存在，或者其中对应 id 的 <dprms:file> 元素不存在
+                        return -1;
+                    }
                     if (nRet == -2)
                     {
                         // TODO: 防止死循环
@@ -612,6 +614,7 @@ namespace DigitalPlatform.rms.Client
             // ref DbNameMap map,
             bool bIsFirstRes,
             string strCount,
+            bool bSetProgressValueByStreamPosition,
             ref bool bDontPromptTimestampMismatchWhenOverwrite,
             out string strError)
         {
@@ -687,9 +690,10 @@ namespace DigitalPlatform.rms.Client
             {
             REDOSINGLESAVE:
 
-                Application.DoEvents();	// 出让界面控制权
+                channel.DoIdle();
+                // Application.DoEvents();	// 出让界面控制权
 
-                if (stop.State != 0)
+                if (stop != null && stop.State != 0)
                 {
                     DialogResult result = MessageBox.Show(owner,
                         "确实要中断当前批处理操作?",
@@ -708,6 +712,8 @@ namespace DigitalPlatform.rms.Client
                     }
                 }
 
+                if (stop != null && bSetProgressValueByStreamPosition)
+                    stop.SetProgressValue(inputfile.Position);
 
                 string strWaiting = "";
                 if (j == ranges.Length - 1)
@@ -818,7 +824,6 @@ namespace DigitalPlatform.rms.Client
         ERROR1:
             return -1;
         }
-
 
         // 从 .dp2bak 文件中读出每个资源的主要信息
         // 本函数调用前，文件指针在整个记录的开始位置

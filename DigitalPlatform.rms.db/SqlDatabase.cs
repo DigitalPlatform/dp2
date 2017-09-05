@@ -33,6 +33,8 @@ namespace DigitalPlatform.rms
     // SQL库派生类
     public class SqlDatabase : Database
     {
+        internal StreamCache _streamCache = new StreamCache();
+
         const string KEY_COL_LIST = "(keystring, idstring)";
         const string KEYNUM_COL_LIST = "(keystringnum, idstring)";
 
@@ -6605,7 +6607,8 @@ namespace DigitalPlatform.rms
                                     // 带元素的信息后的总长度
                                     long nWithMetedataTotalLength = ms.Length;
 
-                                    ms.Seek(lStart, SeekOrigin.Begin);
+                                    // ms.Seek(lStart, SeekOrigin.Begin);
+                                    ms.FastSeek(lStart); // 2017/9/5
                                     ms.Read(destBuffer,
                                         0,
                                         destBuffer.Length);
@@ -7544,7 +7547,8 @@ namespace DigitalPlatform.rms
             FileAccess.Read,
             FileShare.ReadWrite))
                             {
-                                s.Seek(lStart, SeekOrigin.Begin);
+                                // s.Seek(lStart, SeekOrigin.Begin);
+                                s.FastSeek(lStart); // 2017/9/5
                                 s.Read(destBuffer,
                                     0,
                                     (int)lOutputLength);
@@ -7929,7 +7933,8 @@ namespace DigitalPlatform.rms
             FileAccess.Read,
             FileShare.ReadWrite))
                             {
-                                s.Seek(lStart, SeekOrigin.Begin);
+                                // s.Seek(lStart, SeekOrigin.Begin);
+                                s.FastSeek(lStart); // 2017/9/5
                                 s.Read(destBuffer,
                                     0,
                                     (int)lOutputLength);
@@ -8247,7 +8252,8 @@ namespace DigitalPlatform.rms
             FileAccess.Read,
             FileShare.ReadWrite))
                             {
-                                s.Seek(lStart, SeekOrigin.Begin);
+                                // s.Seek(lStart, SeekOrigin.Begin);
+                                s.FastSeek(lStart); // 2017/9/5
                                 s.Read(destBuffer,
                                     0,
                                     (int)lOutputLength);
@@ -8565,7 +8571,8 @@ namespace DigitalPlatform.rms
             FileAccess.Read,
             FileShare.ReadWrite))
                             {
-                                s.Seek(lStart, SeekOrigin.Begin);
+                                // s.Seek(lStart, SeekOrigin.Begin);
+                                s.FastSeek(lStart); // 2017/9/5
                                 s.Read(destBuffer,
                                     0,
                                     (int)lOutputLength);
@@ -13081,6 +13088,7 @@ start_time,
                 REDO:
                     try
                     {
+#if NO
                         using (FileStream s = File.Open(
         strFileName,
         FileMode.OpenOrCreate,
@@ -13091,11 +13099,31 @@ start_time,
                             if (bFirst == true && s.Length > lTotalLength)
                                 s.SetLength(0);
 
-                            s.Seek(lStartOfTarget, SeekOrigin.Begin);
+                            // s.Seek(lStartOfTarget, SeekOrigin.Begin);
+                            s.FastSeek(lStartOfTarget); // 2017/9/5
                             s.Write(baSource,
                                 nStartOfBuffer,
                                 nNeedReadLength);
                         }
+#endif
+                        StreamItem item = _streamCache.GetWriteStream(strFileName);
+                        try
+                        {
+                            // 第一次写文件,并且文件长度大于对象总长度，则截断文件
+                            if (bFirst == true && item.FileStream.Length > lTotalLength)
+                                item.FileStream.SetLength(0);
+
+                            // s.Seek(lStartOfTarget, SeekOrigin.Begin);
+                            item.FileStream.FastSeek(lStartOfTarget); // 2017/9/5
+                            item.FileStream.Write(baSource,
+                                nStartOfBuffer,
+                                nNeedReadLength);
+                        }
+                        finally
+                        {
+                            _streamCache.ReturnWriteStream(item);
+                        }
+                    
                     }
                     catch (DirectoryNotFoundException ex)
                     {

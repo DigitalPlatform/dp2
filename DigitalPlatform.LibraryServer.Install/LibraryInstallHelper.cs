@@ -673,6 +673,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 在 dp2library 没有启动的情况下，用大备份文件恢复 dp2library 内全部配置和数据库
         public static int RestoreLibrary(
+            Stop stop,
             string strDataDir,
             string strBackupFileName,
             string strTempDirRoot,
@@ -682,6 +683,8 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             int nRet = 0;
 
+            if (stop != null)
+                stop.SetMessage("正在检测数据目录 " + strDataDir);
             // return:
             //      -1  error
             //      0   数据目录不存在
@@ -698,6 +701,9 @@ namespace DigitalPlatform.LibraryServer
             string strFileName = Path.Combine(strDataDir, "library.xml");
 
             LibraryInstanceInfo info = null;
+
+            if (stop != null)
+                stop.SetMessage("正在从 " + strFileName + " 获得参数");
 
             // 从现有 library.xml 中得到各种配置参数
             nRet = GetLibraryInstanceInfoFromXml(strFileName,
@@ -742,11 +748,15 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
 
+                if (stop != null)
+                    stop.SetMessage("正在删除实例原有的全部数据库 ...");
+
                 // 先删除当前实例的全部数据库
                 nRet = DeleteAllDatabases(
-            channel,
-            info.Dom,
-            out strError);
+                    stop,
+                    channel,
+                    info.Dom,
+                    out strError);
                 if (nRet == -1)
                     return -1;
 
@@ -755,6 +765,7 @@ namespace DigitalPlatform.LibraryServer
                 try
                 {
                     nRet = CreateDatabases(
+                        stop,
                 channel,
                 strDbDefFileName,
                 strTempDir,
@@ -782,13 +793,17 @@ namespace DigitalPlatform.LibraryServer
 
                 // 导入 .dp2bak 文件内的全部数据
                 nRet = ImportBackupData(
-            channel,
-            strBackupFileName,
-            bFastMode,
-            out strError);
+                    stop,
+                    channel,
+                    strBackupFileName,
+                    bFastMode,
+                    out strError);
                 if (nRet == -1)
                     return -1;
             }
+
+            if (stop != null)
+                stop.SetMessage("正在修改 library.xml 文件");
 
             // 用 .dbdef.zip 中的 library.xml 内容替换当前 library.xml 部分内容
             XmlDocument target_dom = null;
@@ -935,6 +950,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 删除全部数据库
         public static int DeleteAllDatabases(
+            Stop stop,
             RmsChannel channel,
             XmlDocument cfg_dom,
             out string strError)
@@ -957,7 +973,7 @@ namespace DigitalPlatform.LibraryServer
 
             {
                 XmlNodeList nodes = cfg_dom.DocumentElement.SelectNodes("readerdbgroup/database/@name");
-                foreach (XmlElement name in nodes)
+                foreach (XmlNode name in nodes)
                 {
                     if (string.IsNullOrEmpty(name.Value) == false)
                         dbnames.Add(name.Value);
@@ -966,7 +982,7 @@ namespace DigitalPlatform.LibraryServer
 
             {
                 XmlNodeList nodes = cfg_dom.DocumentElement.SelectNodes("message/@dbname | arrived/@dbname | pinyin/@dbname | gcat/@dbname | word/@dbname | amerce/@dbname | invoice/@dbname | utilDb/database/@name");
-                foreach (XmlElement name in nodes)
+                foreach (XmlNode name in nodes)
                 {
                     if (string.IsNullOrEmpty(name.Value) == false)
                         dbnames.Add(name.Value);
@@ -976,15 +992,21 @@ namespace DigitalPlatform.LibraryServer
             StringUtil.RemoveBlank(ref dbnames);
             StringUtil.RemoveDupNoSort(ref dbnames);
 
+            int i = 0;
             List<string> errors = new List<string>();
             foreach (string dbname in dbnames)
             {
+                if (stop != null)
+                    stop.SetMessage("正在删除数据库 " + dbname + " " + (i + 1) + "/" + dbnames.Count);
+
                 long lRet = channel.DoDeleteDB(dbname,
     out strError);
                 if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
                 {
                     errors.Add("删除数据库 '" + dbname + "' 时发生错误：" + strError);
                 }
+
+                i++;
             }
 
             if (errors.Count > 0)
@@ -998,6 +1020,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 导入 .dp2bak 文件内的全部数据
         static int ImportBackupData(
+            Stop stop,
             RmsChannel channel,
             string strBackupFileName,
             bool bFastMode,
@@ -1019,23 +1042,32 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1 || nRet == 1)
                 return -1;
 
+            ProgressEstimate estimate = new ProgressEstimate();
+
             try // open import util
             {
                 bool bDontPromptTimestampMismatchWhenOverwrite = false;
                 // DbNameMap map = new DbNameMap();
                 long lSaveOffs = -1;
 
-                //estimate.SetRange(0, import_util.Stream.Length);
-                //estimate.StartEstimate();
+                estimate.SetRange(0, import_util.Stream.Length);
+                estimate.StartEstimate();
 
-                //stop.SetProgressRange(0, import_util.Stream.Length);
+                if (stop != null)
+                    stop.SetProgressRange(0, import_util.Stream.Length);
 
                 List<UploadRecord> records = new List<UploadRecord>();
                 int nBatchSize = 0;
                 for (int index = 0; ; index++)
                 {
                     //Application.DoEvents();	// 出让界面控制权
+                    channel.DoIdle();
 
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
 #if NO
                         if (stop.State != 0)
                         {
@@ -1086,7 +1118,6 @@ namespace DigitalPlatform.LibraryServer
 
                     if (nRet == 0)
                     {
-
                         Debug.Assert(record != null, "");
 
                         // 准备目标路径
@@ -1155,7 +1186,7 @@ namespace DigitalPlatform.LibraryServer
                                 //      >=0 本次已经写入的记录个数。本函数返回时 records 集合的元素数没有变化(但元素的Path和Timestamp会有变化)，如果必要调主可截取records集合中后面未处理的部分再次调用本函数
                                 nRet = ImportUtil.WriteRecords(
                                     null,
-                                    null,   // stop,
+                                    stop,
                                     channel,
                                     bFastMode,
                                     false,  // dlg.InsertMissing,
@@ -1183,9 +1214,10 @@ namespace DigitalPlatform.LibraryServer
                             //      -1  出错
                             //      0   成功
                             nRet = import_util.UploadObjects(
-                                null,   // stop,
+                                stop,
                                 channel,
                                 save_records,
+                                true,
                                 ref bDontPromptTimestampMismatchWhenOverwrite,
                                 out strError);
                             if (nRet == -1)
@@ -1193,12 +1225,10 @@ namespace DigitalPlatform.LibraryServer
                         }
 
                         nBatchSize = 0;
-#if NO
-                            stop.SetProgressValue(import_util.Stream.Position);
+                        stop.SetProgressValue(import_util.Stream.Position);
 
-                            stop.SetMessage("已经写入记录 " + lTotalCount.ToString() + " 条。"
-    + "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(import_util.Stream.Position)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
-#endif
+                        stop.SetMessage("已经写入记录 " + lTotalCount.ToString() + " 条。"
++ "剩余时间 " + ProgressEstimate.Format(estimate.Estimate(import_util.Stream.Position)) + " 已经过时间 " + ProgressEstimate.Format(estimate.delta_passed));
                     }
 
                     // 如果 记录的 XML 尺寸太大不便于成批上载，需要在单独直接上载
@@ -1214,7 +1244,7 @@ namespace DigitalPlatform.LibraryServer
                             //      2   跳过本条，继续处理后面的
                             nRet = ImportUtil.WriteOneXmlRecord(
                                 null,
-                                null,   // stop,
+                                stop,
                                 channel,
                                 record,
                                 ref bDontPromptTimestampMismatchWhenOverwrite,
@@ -1234,9 +1264,10 @@ namespace DigitalPlatform.LibraryServer
                             //      -1  出错
                             //      0   成功
                             nRet = import_util.UploadObjects(
-                                null,   //stop,
+                                stop,
                                 channel,
                                 temp,
+                                true,
                                 ref bDontPromptTimestampMismatchWhenOverwrite,
                                 out strError);
                             if (nRet == -1)
@@ -1332,16 +1363,20 @@ namespace DigitalPlatform.LibraryServer
                 {
                     foreach (string url in target_dburls)
                     {
-                        // string strQuickModeError = "";
+                        if (stop != null)
+                            stop.SetMessage("正在对数据库 " + url + " 进行快速导入模式的最后收尾工作，请耐心等待 ...");
+                        string strQuickModeError = "";
                         nRet = ManageKeysIndex(
                             channel,
                             url,
                             "endfastappend",
                             "正在对数据库 " + url + " 进行快速导入模式的收尾工作，请耐心等待 ...",
-                            out strError);
+                            out strQuickModeError);
                         if (nRet == -1)
-                            throw new Exception(strError);
+                            throw new Exception(strQuickModeError);
                     }
+                    if (stop != null)
+                        stop.SetMessage("");
                 }
 
                 import_util.End();
@@ -1353,6 +1388,7 @@ namespace DigitalPlatform.LibraryServer
         // parameters:
         //      strTempDir  临时目录路径。调用前要创建好这个临时目录。调用后需要删除这个临时目录
         public static int CreateDatabases(
+            Stop stop,
             RmsChannel channel,
             string strDbDefFileName,
             string strTempDir,
@@ -1362,12 +1398,15 @@ namespace DigitalPlatform.LibraryServer
             int nRet = 0;
 
             // 展开压缩文件
+            if (stop != null)
+                stop.SetMessage("正在展开压缩文件 " + strDbDefFileName);
             try
             {
                 using (ZipFile zip = ZipFile.Read(strDbDefFileName))
                 {
                     foreach (ZipEntry e in zip)
                     {
+                        Debug.WriteLine(e.ToString());
                         e.Extract(strTempDir, ExtractExistingFileAction.OverwriteSilently);
                     }
                 }
@@ -1382,13 +1421,14 @@ namespace DigitalPlatform.LibraryServer
 
             DirectoryInfo[] dis = di.GetDirectories();
 
+            int i = 0;
             foreach (DirectoryInfo info in dis)
             {
                 // 跳过 '_datadir'
                 if (info.Name.StartsWith("_"))
                     continue;
 
-                string strTemplateDir = info.FullName;
+                string strTemplateDir = Path.Combine(info.FullName, "cfgs");
                 string strDatabaseName = info.Name;
                 // 数据库是否已经存在？
                 // return:
@@ -1404,6 +1444,9 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 if (nRet == 1)
                 {
+                    if (stop != null)
+                        stop.SetMessage("正在删除数据库 " + strDatabaseName);
+
                     // 如果发现同名数据库已经存在，先删除
                     long lRet = channel.DoDeleteDB(strDatabaseName, out strError);
                     if (lRet == -1)
@@ -1413,6 +1456,8 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
+                if (stop != null)
+                    stop.SetMessage("正在创建数据库 " + strDatabaseName + " (" + (i + 1) + ")");
 
                 // 根据数据库模板的定义，创建一个数据库
                 // parameters:
@@ -1424,6 +1469,8 @@ namespace DigitalPlatform.LibraryServer
             out strError);
                 if (nRet == -1)
                     return -1;
+
+                i++;
             }
 
             return 0;

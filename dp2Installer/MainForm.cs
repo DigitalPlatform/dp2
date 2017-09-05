@@ -787,7 +787,7 @@ MessageBoxDefaultButton.Button2);
                 {
                     DigitalPlatform.LibraryServer.InstanceDialog dlg = new DigitalPlatform.LibraryServer.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
-
+                    dlg.TempDir = this.TempDir;
                     // dlg.SourceDir = strRootDir;
                     dlg.CopyFiles += dlg_dp2Library_CopyFiles;
                     dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -3401,7 +3401,7 @@ out string strError)
                 {
                     DigitalPlatform.LibraryServer.InstanceDialog dlg = new DigitalPlatform.LibraryServer.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
-
+                    dlg.TempDir = this.TempDir;
                     // dlg.DataZipFileName = Path.Combine(this.DataDir, "library_data.zip");
                     dlg.CopyFiles += dlg_dp2Library_CopyFiles;
                     dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -4593,7 +4593,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 {
                     DigitalPlatform.LibraryServer.InstanceDialog dlg = new DigitalPlatform.LibraryServer.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
-
+                    dlg.TempDir = this.TempDir;
                     dlg.Text = "dp2Library - 彻底卸载所有实例和数据目录";
                     dlg.Comment = "下列实例将被全部卸载。请仔细确认。一旦卸载，全部数据目录、数据库和实例信息将被删除，并且无法恢复。";
                     dlg.UninstallMode = true;

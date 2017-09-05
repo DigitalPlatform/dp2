@@ -655,7 +655,7 @@ namespace DigitalPlatform.rms.Client
             return strResult;
         }
 
-        void DoIdle()
+        public void DoIdle()
         {
 #if NO
             bool bDoEvents = true;
@@ -5670,7 +5670,6 @@ ref strNewStyle);	// 不要数据体和metadata
 
                 } // end try
 
-
                 catch (Exception ex)
                 {
                     /*
@@ -5881,7 +5880,6 @@ ref strNewStyle);	// 不要数据体和metadata
 
             if (file != null)
             {
-
                 if (file.Position + lTotalLength > file.Length)
                 {
                     strError = "文件从当前位置 " + Convert.ToString(file.Position) + " 开始到末尾长度不足 " + Convert.ToString(lTotalLength);

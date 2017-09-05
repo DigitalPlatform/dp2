@@ -128,6 +128,19 @@ namespace DigitalPlatform.rms
                             }
                         }
 
+                        if (this.Dbs != null)
+                        {
+                            // 定时保存一下databases.xml的修改
+                            try
+                            {
+                                this.Dbs.ClearStreamCache();
+                            }
+                            catch (Exception ex)
+                            {
+                                this.WriteErrorLog("管理线程 ClearStreamCache() 时遇到异常:" + ExceptionUtil.GetDebugText(ex));
+                            }
+                        }
+
                         TryVerifyTailNumber();
                     }
                     else if (index == 0)
@@ -228,8 +241,6 @@ namespace DigitalPlatform.rms
         #endregion
 
         #region 全局结果集管理
-
-
 
         // 全局结果集
         public ResultSetTable ResultSets = new ResultSetTable();

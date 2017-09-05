@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
+using System.Security.Cryptography;
 
 using DigitalPlatform.Text;
 
@@ -337,6 +338,31 @@ namespace DigitalPlatform.LibraryClient
 
                             if (strState != "finish" && nRet != 0)
                                 this.ErrorInfo = "下载文件 '" + this.ServerFilePath + "' 时遭遇状态出错: " + strState;
+                            else
+                            {
+                                // 检查 MD5
+                                byte[] server_md5 = null;
+                                // return:
+                                //      -1  出错
+                                //      0   文件没有找到
+                                //      1   文件找到
+                                nRet = DetectMD5(this.ServerFilePath,
+            out server_md5,
+            out strError);
+                                if (nRet != 1)
+                                {
+                                    strError = "探测服务器端文件 '" + this.ServerFilePath + "' MD5 时出错: " + strError;
+                                    goto ERROR1;
+                                }
+
+                                _stream.Seek(0, SeekOrigin.Begin);
+                                byte[] local_md5 = GetFileMd5(_stream);
+                                if (ByteArray.Compare(server_md5, local_md5) != 0)
+                                {
+                                    strError = "服务器端文件 '" + this.ServerFilePath + "' 和刚下载的本地文件 MD5 不匹配";
+                                    goto ERROR1;
+                                }
+                            }
                             this.State = "finish:" + strState;
                             TriggerClosedEvent();
                             return;
@@ -371,6 +397,14 @@ namespace DigitalPlatform.LibraryClient
 
                 if (string.IsNullOrEmpty(this.ErrorInfo))
                     RenameTempFile();
+            }
+        }
+
+        public static byte[] GetFileMd5(Stream stream)
+        {
+            using (var md5 = MD5.Create())
+            {
+                return md5.ComputeHash(stream);
             }
         }
 
@@ -443,6 +477,47 @@ namespace DigitalPlatform.LibraryClient
             return lRet;
         }
 
+        // 探测 MD5
+        // return:
+        //      -1  出错
+        //      0   文件没有找到
+        //      1   文件找到
+        int DetectMD5(string strServerPath,
+            out byte[] md5,
+            out string strError)
+        {
+            strError = "";
+            md5 = null;
+
+            string strStyle = "md5";
+            string strMetadata = "";
+            byte[] baContent = null;
+            string strOutputPath = "";
+
+            // return:
+            //		strStyle	一般设置为"content,data,metadata,timestamp,outputpath";
+            //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
+            //		0	成功
+            long lRet = this.Channel.GetRes(
+                this.Stop,
+                strServerPath,
+                0,
+                0,
+                strStyle,
+                out baContent,
+                out strMetadata,
+                out strOutputPath,
+                out md5,
+                out strError);
+            if (lRet == -1)
+            {
+                if (this.Channel.ErrorCode == localhost.ErrorCode.NotFound)
+                    return 0;
+                return -1;
+            }
+
+            return 1;
+        }
     }
 
     // 摘要: 

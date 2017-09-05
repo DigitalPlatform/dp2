@@ -21,12 +21,14 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Interfaces;
-//using DigitalPlatform.CirculationClient;
+using System.Threading.Tasks;
 
 namespace DigitalPlatform.LibraryServer
 {
     public partial class InstanceDialog : Form
     {
+        public string TempDir { get; set; } // 临时文件目录
+
         public event CopyFilesEventHandler CopyFiles = null;
 
         public bool UninstallMode = false;
@@ -1891,7 +1893,131 @@ namespace DigitalPlatform.LibraryServer
                 contextMenu.MenuItems.Add(menuItem);
             }
 
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            {
+                menuItem = new MenuItem("从大备份恢复(&S)");
+                menuItem.Click += new System.EventHandler(this.menu_restoreInstance_Click);
+                if (this.listView_instance.SelectedItems.Count == 0)
+                    menuItem.Enabled = false;
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
             contextMenu.Show(this.listView_instance, new Point(e.X, e.Y));
+        }
+
+        void menu_restoreInstance_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.listView_instance.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要恢复的实例";
+                goto ERROR1;
+            }
+
+            ListViewItem item = this.listView_instance.SelectedItems[0];
+
+            string strDataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
+
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Title = "请指定要导入的大备份文件名";
+            // dlg.FileName = this.textBox_filename.Text;
+
+            dlg.Filter = "大备份文件 (*.dp2bak)|*.dp2bak|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            string strBackupFileName = dlg.FileName;
+            string strTempRootDir = this.TempDir;
+            Task.Factory.StartNew(() => RestoreInstance(
+                this.Owner,
+                strDataDir,
+                strBackupFileName,
+                strTempRootDir,
+                true));
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        static void RestoreInstance(
+            Control owner,
+            string strDataDir,
+            string strBackupFileName,
+            string strTempDirRoot,
+            bool bFastMode)
+        {
+            string strError = "";
+
+            Stop stop = new Stop();
+
+            FileDownloadDialog dlg = null;
+            dlg = new FileDownloadDialog();
+            dlg.FormClosed += new FormClosedEventHandler(delegate(object o1, FormClosedEventArgs e1)
+            {
+                stop.DoStop();
+            });
+            owner.Invoke((Action)(() =>
+            {
+
+                dlg.Font = owner.Font;
+                dlg.Text = "正在恢复实例 " + strDataDir;
+                //dlg.SourceFilePath = strPath;
+                //dlg.TargetFilePath = strTargetPath;
+                dlg.Show(owner);
+            }));
+
+            StopManager stopManager = new StopManager();
+            stopManager.Initial(dlg.CancelButton, dlg.MessageLabel, dlg.ProgressBar);
+#if NO
+            stopManager.OnDisplayMessage += new DisplayMessageEventHandler((sender, e) => {
+                dlg.SetMessage(e.Message);
+            });
+#endif
+
+            stop.Style = StopStyle.EnableHalfStop;  // API的间隙才让中断。避免获取结果集的中途，因为中断而导致 Session 失效，结果集丢失，进而无法 Retry 获取
+            stop.Register(stopManager, true);
+            stop.BeginLoop();
+
+            try
+            {
+                // 在 dp2library 没有启动的情况下，用大备份文件恢复 dp2library 内全部配置和数据库
+                int nRet = LibraryInstallHelper.RestoreLibrary(
+                    stop,
+             strDataDir,
+             strBackupFileName,
+             strTempDirRoot,
+             bFastMode,
+             out strError);
+                if (nRet == -1)
+                {
+                    goto ERROR1;
+                }
+
+                strError = "恢复实例 '"+strDataDir+"' 完成";
+                goto ERROR1;
+            }
+            finally
+            {
+                owner.Invoke((Action)(() =>
+                {
+                    dlg.Close();
+                    stop.EndLoop();
+                    stop.Unregister();
+                }));
+            }
+
+        ERROR1:
+            owner.Invoke((Action)(() =>
+            {
+                MessageBox.Show(owner, strError);
+            }));
         }
 
         // 启动所选的实例

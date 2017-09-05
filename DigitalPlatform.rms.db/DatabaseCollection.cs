@@ -471,6 +471,34 @@ namespace DigitalPlatform.rms
                  strTime + " " + strText + "\r\n");
         }
 
+        public void ClearStreamCache()
+        {
+            //**********对库集合加读锁****************
+            m_container_lock.AcquireReaderLock(m_nContainerLockTimeOut);
+#if DEBUG_LOCK
+			this.WriteDebugInfo("ClearStreamCache()，对库集合加读锁。");
+#endif
+            try
+            {
+                foreach(Database db in this)
+                {
+                    if (db is SqlDatabase)
+                    {
+                        SqlDatabase sql_db = (SqlDatabase)db;
+                        sql_db._streamCache.ClearIdle(TimeSpan.FromSeconds(60));
+                    }
+                }
+            }
+            finally
+            {
+                //***********对库集合解读锁****************
+                m_container_lock.ReleaseReaderLock();
+#if DEBUG_LOCK
+				this.WriteDebugInfo("ClearStreamCache()，对库集合解读锁。");
+#endif
+            }
+        }
+
         // 检验各个数据库记录尾号
         // return:
         //      -1  出错
@@ -487,7 +515,7 @@ namespace DigitalPlatform.rms
             //**********对库集合加写锁****************
             m_container_lock.AcquireWriterLock(m_nContainerLockTimeOut);
 #if DEBUG_LOCK
-			this.WriteDebugInfo("Initial()，对库集合加写锁。");
+			this.WriteDebugInfo("CheckDbsTailNo()，对库集合加写锁。");
 #endif
             try
             {
@@ -538,7 +566,7 @@ namespace DigitalPlatform.rms
                 //***********对库集合解写锁****************
                 m_container_lock.ReleaseWriterLock();
 #if DEBUG_LOCK
-				this.WriteDebugInfo("Initial()，对库集合解写锁。");
+				this.WriteDebugInfo("CheckDbsTailNo()，对库集合解写锁。");
 #endif
             }
         }

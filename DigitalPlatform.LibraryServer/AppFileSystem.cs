@@ -650,12 +650,36 @@ namespace DigitalPlatform.LibraryServer
                         Debug.Assert(lStart >= 0, "");
 
                         s.Seek(lStart, SeekOrigin.Begin);
-                        s.Read(destBuffer,
+                        int readed = s.Read(destBuffer,
                             0,
                             (int)lOutputLength);
+                        if (readed < lOutputLength)
+                        {
+                            // 2017/9/4
+                            strError = "希望从文件偏移 " + lStart + " 开始读入 " + lOutputLength + " 字节，但只成功读入了 " + readed + " 字节";
+                            return -1;
+                        }
                     }
                 }
             }
+
+            // 取 MD5
+            if (StringUtil.IsInList("md5", strStyle) == true)
+            {
+#if NO
+                string strNewFileName = GetNewFileName(strFilePath);
+                if (File.Exists(strNewFileName) == true)
+                {
+                    outputTimestamp = FileUtil.GetFileMd5(strNewFileName);
+                }
+                else
+                {
+                    outputTimestamp = FileUtil.GetFileMd5(strFilePath);
+                }
+#endif
+                outputTimestamp = FileUtil.GetFileMd5(strFilePath);
+            }
+
             return lTotalLength;
         }
 

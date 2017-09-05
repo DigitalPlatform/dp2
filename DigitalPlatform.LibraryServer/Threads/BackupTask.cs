@@ -630,6 +630,8 @@ out strError);
             try
             {
                 ExportUtil export_util = new ExportUtil();
+                export_util.SafeMode = true;
+                export_util.TempDir = this.App.TempDir;
                 int nRet = export_util.Begin(null,
     strBackupFileName,
     out strError);
@@ -976,79 +978,67 @@ out strError);
 
         // 建立数据库定义文件
         // 注：调用前要确保 .~state 文件已经存在，内容为 creating。这样可以保证前端在下载过程中会一直等待内容文件创建
+        // 注：由于 Ionic 的库函数在追加写入 .zip 文件过程中，可能会随时修改已经写入的部分内容，所以需要在本函数的处理过程中，
+        // 先整体写入临时文件，最后再拷贝到目标文件。
         int CreateDatabaseDefFile(RmsChannel channel,
     string strDbNameList,
-    string strOutputFileName,
+    string strOutputFileNameParam,
     out string strError)
         {
             strError = "";
-            /*
-            File.Delete(strOutputFileName);
-            File.Delete(strOutputFileName + LibraryServerUtil.STATE_EXTENSION);
-             * */
-            if (AppendLibraryDataFiles(strOutputFileName, out strError) == -1)
-                return -1;
-
-            List<string> dbnames = StringUtil.SplitList(strDbNameList);
-
-            StringUtil.RemoveBlank(ref dbnames);
-            StringUtil.RemoveDupNoSort(ref dbnames);
-
-            if (dbnames.Count == 0)
-                dbnames.Add("*");
-
-            {
-                List<string> results = new List<string>();
-                foreach (string dbname in dbnames)
-                {
-                    if (string.IsNullOrEmpty(dbname) == true || dbname == "*")
-                    {
-                        // 如果数据库名为 *，表示希望获取所有的数据库
-                        List<string> temp = null;
-                        // 获得所有数据库名
-                        int nRet = GetAllDbNames(out temp,
-                out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-                        results.AddRange(temp);
-                    }
-                    else
-                        results.Add(dbname);
-                }
-
-                StringUtil.RemoveDupNoSort(ref results);
-                dbnames = results;
-            }
+            int nRet = 0;
 
             this.AppendResultText("正在准备数据库定义文件\r\n");
 
+            string strTempFilePath = strOutputFileNameParam + ".tmp";
+
             try
             {
-                string strTempFile = strOutputFileName + ".tmp";
+                if (AppendLibraryDataFiles(strTempFilePath, out strError) == -1)
+                    return -1;
 
-                // 复制原有文件到临时文件名，这样才能实现追加内容的效果
-                if (File.Exists(strOutputFileName))
-                    File.Copy(strOutputFileName, strTempFile, true);
+                List<string> dbnames = StringUtil.SplitList(strDbNameList);
 
-                try
+                StringUtil.RemoveBlank(ref dbnames);
+                StringUtil.RemoveDupNoSort(ref dbnames);
+
+                if (dbnames.Count == 0)
+                    dbnames.Add("*");
+
                 {
-                    int nRet = this.App.BackupDatabaseDefinition(
-                        channel,
-                        StringUtil.MakePathList(dbnames),
-                        strTempFile,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
+                    List<string> results = new List<string>();
+                    foreach (string dbname in dbnames)
+                    {
+                        if (string.IsNullOrEmpty(dbname) == true || dbname == "*")
+                        {
+                            // 如果数据库名为 *，表示希望获取所有的数据库
+                            List<string> temp = null;
+                            // 获得所有数据库名
+                            nRet = GetAllDbNames(out temp,
+                    out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            results.AddRange(temp);
+                        }
+                        else
+                            results.Add(dbname);
+                    }
 
-                    // File.Copy(strTempFile, strOutputFileName, true);
-                    CopyFile(strTempFile, strOutputFileName);
-                }
-                finally
-                {
-                    File.Delete(strTempFile);
+                    StringUtil.RemoveDupNoSort(ref results);
+                    dbnames = results;
                 }
 
-                WriteStateFile(strOutputFileName, "finish");  // 表示文件已经创建完成
+                nRet = this.App.BackupDatabaseDefinition(
+                    channel,
+                    StringUtil.MakePathList(dbnames),
+                    strTempFilePath,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                CopyFile(strTempFilePath, strOutputFileNameParam);
+
+                WriteStateFile(strOutputFileNameParam, "finish");  // 表示文件已经创建完成
                 return 0;
             }
             catch (Exception ex)
@@ -1058,11 +1048,12 @@ out strError);
             }
             finally
             {
+                File.Delete(strTempFilePath);
                 this.AppendResultText("结束准备数据库定义\r\n");
             }
 
         ERROR1:
-            WriteStateFile(strOutputFileName, "error");
+            WriteStateFile(strOutputFileNameParam, "error");
             return -1;
         }
 
@@ -1070,7 +1061,7 @@ out strError);
         static void CopyFile(string strSourceFileName,
             string strTargetFileName)
         {
-            using (Stream outputfile = File.Open(
+            using (FileStream outputfile = File.Open(
     strTargetFileName,
     FileMode.Create,
     FileAccess.Write,
@@ -1081,8 +1072,46 @@ out strError);
                 FileAccess.Read,
                 FileShare.ReadWrite))
             {
-                StreamUtil.DumpStream(fileSource, outputfile);
+                DumpStream(fileSource, outputfile, true);
             }
+        }
+
+        // 写入的时候对 FileStream 加了 Lock
+        public static long DumpStream(FileStream streamSource,
+    FileStream streamTarget,
+    bool bFlush)
+        {
+            int nChunkSize = 8192;
+            byte[] bytes = new byte[nChunkSize];
+            long lLength = 0;
+            while (true)
+            {
+                int n = streamSource.Read(bytes, 0, nChunkSize);
+
+                if (n != 0)
+                {
+                    long lock_start = streamTarget.Position;
+                    streamTarget.Lock(lock_start, n);
+                    try
+                    {
+                        streamTarget.Write(bytes, 0, n);
+                    }
+                    finally
+                    {
+                        streamTarget.Unlock(lock_start, n);
+                    }
+
+                    if (bFlush == true)
+                        streamTarget.Flush();
+                }
+
+                if (n <= 0)
+                    break;
+
+                lLength += n;
+            }
+
+            return lLength;
         }
 
         // TODO: 中途要显示进度信息

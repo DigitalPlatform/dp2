@@ -60,10 +60,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>44FF17A01D3420AB5B5F4AB265A90BDD62132068</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>98F7E7C23B16BBFA3C289E7494326DECC6312B54</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>ZkFingerprint_1_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>ZkFingerprint_2_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -128,6 +128,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <None Include="ZkFingerprint_1_TemporaryKey.pfx" />
+    <None Include="ZkFingerprint_2_TemporaryKey.pfx" />
     <None Include="ZkFingerprint_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
