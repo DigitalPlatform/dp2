@@ -33,7 +33,10 @@ namespace DigitalPlatform.rms
     // SQL库派生类
     public class SqlDatabase : Database
     {
-        internal StreamCache _streamCache = new StreamCache();
+        // 对物理文件开始缓存和加速的开始尺寸
+        const int CACHE_SIZE = -1;  // 10 * 1024;
+
+        internal StreamCache _streamCache = new StreamCache(100);
 
         const string KEY_COL_LIST = "(keystring, idstring)";
         const string KEYNUM_COL_LIST = "(keystringnum, idstring)";
@@ -7543,6 +7546,17 @@ namespace DigitalPlatform.rms
                     // 从对象文件读取
                     if (bObjectFile == true)
                     {
+                        // return:
+                        //      1   成功
+                        //      -100    文件不存在
+                        nRet = ReadObjectFile(strObjectFilename,
+            lStart,
+            lOutputLength,
+            out destBuffer,
+            out strError);
+                        if (nRet < 0)
+                            return nRet;
+#if NO
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
 
                         destBuffer = new Byte[lOutputLength];
@@ -7572,6 +7586,7 @@ namespace DigitalPlatform.rms
                         }
                         // return lTotalLength;
                         goto END1;
+#endif
                     }
 
                     if (textPtr == null)
@@ -7929,6 +7944,17 @@ namespace DigitalPlatform.rms
                     // 从对象文件读取
                     if (bObjectFile == true)
                     {
+                        // return:
+                        //      1   成功
+                        //      -100    文件不存在
+                        nRet = ReadObjectFile(strObjectFilename,
+            lStart,
+            lOutputLength,
+            out destBuffer,
+            out strError);
+                        if (nRet < 0)
+                            return nRet;
+#if NO
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
 
                         destBuffer = new Byte[lOutputLength];
@@ -7958,6 +7984,7 @@ namespace DigitalPlatform.rms
                         }
                         // return lTotalLength;
                         goto END1;
+#endif
                     }
 
                 }
@@ -8248,6 +8275,17 @@ namespace DigitalPlatform.rms
                     // 从对象文件读取
                     if (bObjectFile == true)
                     {
+                        // return:
+                        //      1   成功
+                        //      -100    文件不存在
+                        nRet = ReadObjectFile(strObjectFilename,
+            lStart,
+            lOutputLength,
+            out destBuffer,
+            out strError);
+                        if (nRet < 0)
+                            return nRet;
+#if NO
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
 
                         destBuffer = new Byte[lOutputLength];
@@ -8277,6 +8315,7 @@ namespace DigitalPlatform.rms
                         }
                         // return lTotalLength;
                         goto END1;
+#endif
                     }
 
                 }
@@ -8567,6 +8606,17 @@ namespace DigitalPlatform.rms
                     // 从对象文件读取
                     if (bObjectFile == true)
                     {
+                        // return:
+                        //      1   成功
+                        //      -100    文件不存在
+                        nRet = ReadObjectFile(strObjectFilename,
+            lStart,
+            lOutputLength,
+            out destBuffer,
+            out strError);
+                        if (nRet < 0)
+                            return nRet;
+#if NO
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
 
                         destBuffer = new Byte[lOutputLength];
@@ -8596,6 +8646,7 @@ namespace DigitalPlatform.rms
                         }
                         // return lTotalLength;
                         goto END1;
+#endif
                     }
 
                 }
@@ -9490,7 +9541,7 @@ namespace DigitalPlatform.rms
                         // 删除残余的旧有对象文件
                         if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                         {
-                            FileDelete(GetObjectFileName(info.row_info.NewFileName));
+                            this._streamCache.FileDelete(GetObjectFileName(info.row_info.NewFileName));
                             info.row_info.NewFileName = "";
                         }
 
@@ -9738,7 +9789,7 @@ SqlDbType.NVarChar);
                             // 删除残余的旧有对象文件
                             if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                             {
-                                FileDelete(GetObjectFileName(info.row_info.NewFileName));
+                                this._streamCache.FileDelete(GetObjectFileName(info.row_info.NewFileName));
                                 info.row_info.NewFileName = "";
                             }
 
@@ -9951,7 +10002,7 @@ DbType.String);
                             // 删除残余的旧有对象文件
                             if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                             {
-                                FileDelete(GetObjectFileName(info.row_info.NewFileName));
+                                this._streamCache.FileDelete(GetObjectFileName(info.row_info.NewFileName));
                                 info.row_info.NewFileName = "";
                             }
 
@@ -10140,7 +10191,7 @@ MySqlDbType.String);
                             // 删除残余的旧有对象文件
                             if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                             {
-                                FileDelete(GetObjectFileName(info.row_info.NewFileName));
+                                this._streamCache.FileDelete(GetObjectFileName(info.row_info.NewFileName));
                                 info.row_info.NewFileName = "";
                             }
 
@@ -10318,6 +10369,7 @@ OracleDbType.NVarchar2);
         REDO:
             try
             {
+                _streamCache.ClearItems(strFileName);
                 using (FileStream s = File.Open(
 strFileName,
 FileMode.OpenOrCreate,
@@ -10794,6 +10846,7 @@ out strError);
                 try
                 {
                     row_info.Data = null;
+                    // 一次性读入全部文件内容，可以不涉及到 Cache 使用
                     using (FileStream s = File.Open(
     strObjectFilename,
     FileMode.Open,
@@ -13096,7 +13149,7 @@ start_time,
                 REDO:
                     try
                     {
-                        if (lStartOfTarget < 10 * 1024)
+#if NO
                         {
                             using (FileStream s = File.Open(
             strFileName,
@@ -13115,9 +13168,9 @@ start_time,
                                     nNeedReadLength);
                             }
                         }
-                        else
+#endif
                         {
-                            StreamItem item = _streamCache.GetWriteStream(strFileName);
+                            StreamItem item = _streamCache.GetWriteStream(strFileName, lStartOfTarget > CACHE_SIZE);
                             try
                             {
                                 // 第一次写文件,并且文件长度大于对象总长度，则截断文件
@@ -13132,7 +13185,7 @@ start_time,
                             }
                             finally
                             {
-                                _streamCache.ReturnWriteStream(item);
+                                _streamCache.ReturnStream(item);
                             }
                         }
                     }
@@ -13182,12 +13235,12 @@ start_time,
                     // 转换存储方式时要及时删除原有的对象文件
                     if (string.IsNullOrEmpty(row_info.FileName) == false)
                     {
-                        FileDelete(GetObjectFileName(row_info.FileName));
+                        this._streamCache.FileDelete(GetObjectFileName(row_info.FileName));
                         row_info.FileName = "";
                     }
                     if (string.IsNullOrEmpty(row_info.NewFileName) == false)
                     {
-                        FileDelete(GetObjectFileName(row_info.NewFileName));
+                        this._streamCache.FileDelete(GetObjectFileName(row_info.NewFileName));
                         row_info.NewFileName = "";
                     }
                 }
@@ -13236,7 +13289,7 @@ start_time,
                     if (string.IsNullOrEmpty(row_info.FileName) == false)
                     {
                         strDeletedFilename = GetObjectFileName(row_info.FileName);
-                        FileDelete(strDeletedFilename);   // 删除原有的正式文件
+                        this._streamCache.FileDelete(strDeletedFilename);   // 删除原有的正式文件
                     }
 
                     // 正式文件名重新命名
@@ -13245,6 +13298,11 @@ start_time,
 
                     if (lTotalLength == 0)
                     {
+                        nRet = CreateZeroLengthFile(strFileName,
+            out strError);
+                        if (nRet == -1)
+                            return -1;
+#if NO
                         // 创建一个0bytes的文件
                         int nRedoCount = 0;
                     REDO:
@@ -13275,6 +13333,7 @@ start_time,
                             strError = "创建0字节的文件 '" + strFileName + "' 时出错：" + ex.Message;
                             return -1;
                         }
+#endif
                     }
                     else
                     {
@@ -13283,14 +13342,13 @@ start_time,
 
                         if (strDeletedFilename != strFileName)
                         {
-                            FileDelete(strFileName);   // 防备性删除已经存在的目标文件。TODO: 或者出错以后再重试?
+                            this._streamCache.FileDelete(strFileName);   // 防备性删除已经存在的目标文件。TODO: 或者出错以后再重试?
                         }
 
                         try
                         {
-                            _streamCache.ClearItems(strSourceFilename);
-                            _streamCache.ClearItems(strFileName);
-                            File.Move(strSourceFilename, strFileName);    // 改名
+                            // File.Move(strSourceFilename, strFileName);    // 改名
+                            _streamCache.FileMove(strSourceFilename, strFileName);
                         }
                         catch (FileNotFoundException /* ex */)
                         {
@@ -13787,14 +13845,100 @@ start_time,
             return 0;
         }
 
+#if NO
         void FileDelete(string filename)
         {
             _streamCache.ClearItems(filename);
             File.Delete(filename);
         }
+#endif
 
+        // return:
+        //      1   成功
+        //      -100    文件不存在
+        int ReadObjectFile(string strObjectFilename,
+            long lStart,
+            long lOutputLength,
+            out byte[] destBuffer,
+            out string strError)
+        {
+            strError = "";
+            Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
+
+            destBuffer = new Byte[lOutputLength];
+
+            try
+            {
+                StreamItem s = this._streamCache.GetStream(
+strObjectFilename,
+FileMode.Open,
+FileAccess.Read,
+lStart > CACHE_SIZE);
+                try
+                {
+                    s.FileStream.FastSeek(lStart);
+                    s.FileStream.Read(destBuffer,
+                        0,
+                        (int)lOutputLength);
+
+                    return 1;
+                }
+                finally
+                {
+                    _streamCache.ReturnStream(s);
+                }
+            }
+            catch (FileNotFoundException /* ex */)
+            {
+                // TODO: 不要直接汇报物理文件名
+                strError = "对象文件 '" + strObjectFilename + "' 不存在";
+                return -100;
+            }
+        }
+
+        // 创建一个0bytes的文件
+        int CreateZeroLengthFile(string strFileName,
+            out string strError)
+        {
+            strError = "";
+
+            int nRedoCount = 0;
+        REDO:
+            try
+            {
+                _streamCache.ClearItems(strFileName);
+                using (FileStream s = File.Open(
+strFileName,
+FileMode.OpenOrCreate,
+FileAccess.Write,
+FileShare.ReadWrite))
+                {
+                    s.SetLength(0);
+                    return 0;
+                }
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                if (nRedoCount == 0)
+                {
+                    // 创建中间子目录
+                    PathUtil.TryCreateDir(PathUtil.PathPart(strFileName));
+                    nRedoCount++;
+                    goto REDO;
+                }
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                strError = "创建0字节的文件 '" + strFileName + "' 时出错：" + ex.Message;
+                return -1;
+            }
+        }
+
+        // TODO: metadata 字符数较多，是否可以允许没有必要的时候不写入这个字段内容?
         // parameters:
         //      strPartList 要写入哪些部分？ full 表示全部。range filename newfilename metadata timestamp
+        //      bFull   是否为最后一次充满的写入。因为 metadata 字段是临时和正式共用的，所以在充满的这一次才修改写入
         int WriteLine(
             Connection connection,
             ref RecordRowInfo row_info,
@@ -15959,7 +16103,7 @@ start_time,
                 {
                     if (string.IsNullOrEmpty(strFilename) == false)
                     {
-                        FileDelete(strFilename);
+                        this._streamCache.FileDelete(strFilename);
                     }
                 }
                 catch (Exception ex)
@@ -19320,11 +19464,11 @@ bool bTempObject)
                     {
                         if (string.IsNullOrEmpty(strFilename1) == false)
                         {
-                            FileDelete(strFilename1);
+                            this._streamCache.FileDelete(strFilename1);
                         }
                         if (string.IsNullOrEmpty(strFileName2) == false)
                         {
-                            FileDelete(strFileName2);
+                            this._streamCache.FileDelete(strFileName2);
                         }
                     }
                     catch (Exception ex)
@@ -19346,7 +19490,7 @@ bool bTempObject)
                         {
                             if (string.IsNullOrEmpty(strFilename) == false)
                             {
-                                FileDelete(strFilename);
+                                this._streamCache.FileDelete(strFilename);
                             }
                         }
                         catch (Exception ex)

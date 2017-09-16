@@ -88,6 +88,20 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            // 清除文件 Stream
+            if (this.App._physicalFileCache != null)
+            {
+                try
+                {
+                    this.App._physicalFileCache.ClearIdle(TimeSpan.FromMinutes(5));
+                }
+                catch (Exception ex)
+                {
+                    string strErrorText = "DefaultTread中 this.App._physicalFileCache.ClearIdle() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.App.WriteErrorLog(strErrorText);
+                }
+            }
+
             // 及时保存library.xml的变化
             if (this.App.Changed == true)
             {

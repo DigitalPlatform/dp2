@@ -671,60 +671,87 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
+        public class RestoreLibraryParam
+        {
+            public Stop Stop { get; set; }
+            public string DataDir { get; set; }
+            public string BackupFileName {get;set;}
+            // 临时文件目录。临时文件目录的根目录。
+            public string TempDirRoot { get; set; }
+            // 是否为快速模式
+            public bool FastMode { get; set; }
+            // 错误日志文件名
+            public string LogFileName { get; set; }
+
+            // [out]
+            public string ErrorInfo { get; set; }
+        }
+
         // 在 dp2library 没有启动的情况下，用大备份文件恢复 dp2library 内全部配置和数据库
-        public static int RestoreLibrary(
+        // 本函数不会出现任何窗口，是静默运行的
+        public static bool RestoreLibrary(
+#if NO
             Stop stop,
             string strDataDir,
             string strBackupFileName,
             string strTempDirRoot,
             bool bFastMode,
-            out string strError)
+            out string strError
+#endif
+            RestoreLibraryParam param
+            )
         {
-            strError = "";
+            string strError = "";
             int nRet = 0;
 
-            if (stop != null)
-                stop.SetMessage("正在检测数据目录 " + strDataDir);
+            if (param.Stop != null)
+                param.Stop.SetMessage("正在检测数据目录 " + param.DataDir);
             // return:
             //      -1  error
             //      0   数据目录不存在
             //      1   数据目录存在，但是xml文件不存在
             //      2   xml文件已经存在
-            nRet = DetectDataDir(strDataDir,
+            nRet = DetectDataDir(param.DataDir,
             out strError);
             if (nRet != 2)
             {
                 strError = "在探测现有 library.xml 文件过程中出现错误: " + strError;
-                return -1;
+                param.ErrorInfo = strError;
+                return false;
             }
 
-            string strFileName = Path.Combine(strDataDir, "library.xml");
+            string strFileName = Path.Combine(param.DataDir, "library.xml");
 
             LibraryInstanceInfo info = null;
 
-            if (stop != null)
-                stop.SetMessage("正在从 " + strFileName + " 获得参数");
+            if (param.Stop != null)
+                param.Stop.SetMessage("正在从 " + strFileName + " 获得参数");
 
             // 从现有 library.xml 中得到各种配置参数
             nRet = GetLibraryInstanceInfoFromXml(strFileName,
                 ref info,
                 out strError);
             if (nRet == -1)
-                return -1;
+            {
+                param.ErrorInfo = strError;
+                return false;
+            }
 
             if (string.IsNullOrEmpty(info.KernelUrl))
             {
                 strError = "library.xml 中尚未配置 dp2Kernel Server URL";
-                return -1;
+                param.ErrorInfo = strError;
+                return false;
             }
 
             // 数据库定义文件名
-            string strDbDefFileName = Path.Combine(Path.GetDirectoryName(strBackupFileName),
-                Path.GetFileNameWithoutExtension(strBackupFileName)) + ".dbdef.zip";
+            string strDbDefFileName = Path.Combine(Path.GetDirectoryName(param.BackupFileName),
+                Path.GetFileNameWithoutExtension(param.BackupFileName)) + ".dbdef.zip";
             if (File.Exists(strDbDefFileName) == false)
             {
                 strError = "数据库定义文件 '" + strDbDefFileName + "' 不存在";
-                return -1;
+                param.ErrorInfo = strError;
+                return false;
             }
 
             // TODO: 删除 dp2library 数据目录中所有后台任务的断点信息，以避免克隆后旧的后台任务被从断点位置继续执行
@@ -745,33 +772,40 @@ namespace DigitalPlatform.LibraryServer
                 if (channel == null)
                 {
                     strError = "channel == null";
-                    return -1;
+                    param.ErrorInfo = strError;
+                    return false;
                 }
 
-                if (stop != null)
-                    stop.SetMessage("正在删除实例原有的全部数据库 ...");
+                if (param.Stop != null)
+                    param.Stop.SetMessage("正在删除实例原有的全部数据库 ...");
 
                 // 先删除当前实例的全部数据库
                 nRet = DeleteAllDatabases(
-                    stop,
+                    param.Stop,
                     channel,
                     info.Dom,
                     out strError);
                 if (nRet == -1)
-                    return -1;
+                {
+                    param.ErrorInfo = strError;
+                    return false;
+                }
 
-                string strTempDir = Path.Combine(strTempDirRoot, "def");
+                string strTempDir = Path.Combine(param.TempDirRoot, "def");
                 PathUtil.CreateDirIfNeed(strTempDir);
                 try
                 {
                     nRet = CreateDatabases(
-                        stop,
+                        param.Stop,
                 channel,
                 strDbDefFileName,
                 strTempDir,
                 out strError);
                     if (nRet == -1)
-                        return -1;
+                    {
+                        param.ErrorInfo = strError;
+                        return false;
+                    }
 
                     // 装载 library.xml
                     string strNewLibrarXmlFileName = Path.Combine(strTempDir, "_datadir\\library.xml");
@@ -782,7 +816,8 @@ namespace DigitalPlatform.LibraryServer
                     catch (Exception ex)
                     {
                         strError = "装载文件 " + strNewLibrarXmlFileName + " 到 XMLDOM 时出错: " + ex.Message;
-                        return -1;
+                        param.ErrorInfo = strError;
+                        return false;
                     }
                 }
                 finally
@@ -793,17 +828,20 @@ namespace DigitalPlatform.LibraryServer
 
                 // 导入 .dp2bak 文件内的全部数据
                 nRet = ImportBackupData(
-                    stop,
+                    param.Stop,
                     channel,
-                    strBackupFileName,
-                    bFastMode,
+                    param.BackupFileName,
+                    param.FastMode,
                     out strError);
                 if (nRet == -1)
-                    return -1;
+                {
+                    param.ErrorInfo = strError;
+                    return false;
+                }
             }
 
-            if (stop != null)
-                stop.SetMessage("正在修改 library.xml 文件");
+            if (param.Stop != null)
+                param.Stop.SetMessage("正在修改 library.xml 文件");
 
             // 用 .dbdef.zip 中的 library.xml 内容替换当前 library.xml 部分内容
             XmlDocument target_dom = null;
@@ -812,11 +850,14 @@ namespace DigitalPlatform.LibraryServer
             out target_dom,
             out strError);
             if (nRet == -1)
-                return -1;
+            {
+                param.ErrorInfo = strError;
+                return false;
+            }
 
             // TODO: 备份操作前的 library.xml ?
             target_dom.Save(strFileName);
-            return 0;
+            return true;
         }
 
         // 合并新旧两个 library.xml。

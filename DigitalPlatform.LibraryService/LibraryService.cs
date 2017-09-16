@@ -9653,7 +9653,7 @@ Stack:
                         // return:
                         //      -1  出错
                         //      其他  实际删除的文件和目录个数
-                        nRet = LibraryApplication.DeleteFile(
+                        nRet = app.DeleteFile(
                             strRoot,
                             strCurrentDirectory,
                             strFileName,
@@ -11816,7 +11816,7 @@ Stack:
                     //      -2      文件不存在
                     //		-1      出错
                     //		>= 0	成功，返回最大长度
-                    lRet = LibraryApplication.GetFile(
+                    lRet = app.GetFile(
                         strFilePath,
                         nStart,
                         nLength,
@@ -12352,6 +12352,7 @@ Stack:
                             }
                             lRet = channel.DoDeleteRes(strResPath,
                                 baInputTimestamp,
+                                strStyle,   // 2017/9/16 增加
                                 out baOutputTimestamp,
                                 out strError);
                         }

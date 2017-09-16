@@ -1920,6 +1920,9 @@ namespace DigitalPlatform.LibraryServer
 
             ListViewItem item = this.listView_instance.SelectedItems[0];
 
+            string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
+            StartOrStopOneInstance(strInstanceName, "stop");
+
             string strDataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
 
             OpenFileDialog dlg = new OpenFileDialog();
@@ -1946,6 +1949,7 @@ namespace DigitalPlatform.LibraryServer
             MessageBox.Show(this, strError);
         }
 
+        // 本函数会出现无模式对话框表示操作进程
         static void RestoreInstance(
             Control owner,
             string strDataDir,
@@ -1987,20 +1991,23 @@ namespace DigitalPlatform.LibraryServer
 
             try
             {
+                LibraryInstallHelper.RestoreLibraryParam param = new LibraryInstallHelper.RestoreLibraryParam();
+                param.Stop = stop;
+                param.DataDir = strDataDir;
+                param.BackupFileName = strBackupFileName;
+                param.TempDirRoot = strTempDirRoot;
+                param.FastMode = bFastMode;
+
+
                 // 在 dp2library 没有启动的情况下，用大备份文件恢复 dp2library 内全部配置和数据库
-                int nRet = LibraryInstallHelper.RestoreLibrary(
-                    stop,
-             strDataDir,
-             strBackupFileName,
-             strTempDirRoot,
-             bFastMode,
-             out strError);
-                if (nRet == -1)
+                bool bRet = LibraryInstallHelper.RestoreLibrary(param);
+                if (bRet == false)
                 {
+                    strError = param.ErrorInfo;
                     goto ERROR1;
                 }
 
-                strError = "恢复实例 '"+strDataDir+"' 完成";
+                strError = "恢复实例 '" + strDataDir + "' 完成";
                 goto ERROR1;
             }
             finally

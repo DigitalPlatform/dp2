@@ -466,7 +466,8 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.IsNullOrEmpty(this.ProgressFileName) == false)
             {
-                File.Delete(this.ProgressFileName);
+                // File.Delete(this.ProgressFileName);
+                this.App._physicalFileCache.FileDelete(this.ProgressFileName);
                 this.ProgressFileVersion++;
             }
         }
@@ -538,6 +539,7 @@ namespace DigitalPlatform.LibraryServer
                 byte[] buffer = Encoding.UTF8.GetBytes(strText);
 
                 m_stream.Write(buffer, 0, buffer.Length);
+                m_stream.Flush();   // 如果不用此句，则另一个 Stream 就感受不到增加的文件长度部分
             }
             finally
             {
@@ -588,6 +590,8 @@ namespace DigitalPlatform.LibraryServer
 
         }
 
+#if NO
+        // TODO: 这里要使用不同的文件指针
         // 获得输出结果文本
         // parameters:
         //      lEndOffset  本次获取的末尾偏移
@@ -627,6 +631,87 @@ namespace DigitalPlatform.LibraryServer
                 // 指针回到文件末尾
                 this.m_stream.Seek(0, SeekOrigin.End);
             }
+
+            return;
+        }
+#endif
+
+        // 获得输出结果文本
+        // parameters:
+        //      lEndOffset  本次获取的末尾偏移
+        //      lTotalLength    返回流的最大长度
+        public void GetResultText(long lStart,
+            int nMaxBytes,
+            out byte[] baResult,
+            out long lEndOffset,
+            out long lTotalLength)
+        {
+            baResult = null;
+            lEndOffset = 0;
+
+#if NO
+            lTotalLength = this.m_stream.Length;
+
+            long lLength = this.m_stream.Length - lStart;
+
+            if (lLength <= 0)
+            {
+                lEndOffset = this.m_stream.Length;
+                return;
+            }
+
+            baResult = new byte[Math.Min(nMaxBytes, (int)lLength)];
+#endif
+
+            // 2017/9/10 改造
+            StreamItem s = this.App._physicalFileCache.GetStream(this.ProgressFileName,
+                FileMode.Open, FileAccess.Read);
+            try
+            {
+                lTotalLength = s.FileStream.Length;
+
+                long lLength = lTotalLength - lStart;
+
+                if (lLength <= 0)
+                {
+                    lEndOffset = lTotalLength;
+                    return;
+                }
+
+                baResult = new byte[Math.Min(nMaxBytes, (int)lLength)];
+
+                s.FileStream.FastSeek(lStart);
+                int nByteReaded = s.FileStream.Read(baResult, 0, baResult.Length);
+
+                if (nByteReaded < baResult.Length)
+                {
+                    throw new Exception("希望读入 " + baResult.Length + " 字节，但仅仅读入了 " + nByteReaded + " 字节");
+                }
+                Debug.Assert(nByteReaded == baResult.Length);
+                lEndOffset = lStart + nByteReaded;
+            }
+            finally
+            {
+                this.App._physicalFileCache.ReturnStream(s);
+            }
+
+
+#if NO
+            this.m_stream.Seek(lStart, SeekOrigin.Begin);
+            try
+            {
+                int nByteReaded = this.m_stream.Read(baResult, 0, baResult.Length);
+
+                Debug.Assert(nByteReaded == baResult.Length);
+
+                lEndOffset = lStart + nByteReaded;
+            }
+            finally
+            {
+                // 指针回到文件末尾
+                this.m_stream.Seek(0, SeekOrigin.End);
+            }
+#endif
 
             return;
         }

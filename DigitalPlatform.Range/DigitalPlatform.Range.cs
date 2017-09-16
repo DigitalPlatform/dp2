@@ -903,6 +903,7 @@ namespace DigitalPlatform.Range
             }
         }
 
+        // 注意，本函数会改变文件当前指针位置，算法有缺陷
         // 将源文件中指定的片断内容复制到目标文件中
         // 当strContentRange的值为""时，表示复制整个文件
         // 返回值：-1 出错 其他 复制的总尺寸
@@ -972,6 +973,7 @@ namespace DigitalPlatform.Range
             {
                 RangeItem ri = (RangeItem)rl[i];
 
+                // TODO: 这里是性能瓶颈。应该是 SeekOrigin.Current 才好
                 fileSource.Seek(ri.lStart + lFileStart, SeekOrigin.Begin);
                 baResult = ByteArray.EnsureSize(baResult, nStart + (int)ri.lLength);
                 nStart += fileSource.Read(baResult, nStart, (int)ri.lLength);
@@ -983,5 +985,87 @@ namespace DigitalPlatform.Range
 
             return lTotalBytes;
         }
+
+        // 2017/9/16 修改后版本
+        // 将源文件中指定的片断内容复制到目标文件中
+        // 当strContentRange的值为""时，表示复制整个文件
+        // 返回值：-1 出错 其他 复制的总尺寸
+        public static long CopyFragmentNew(
+            Stream fileSource,
+            long lTotalLength,
+            string strContentRange,
+            out byte[] baResult,
+            out string strErrorInfo)
+        {
+            long lTotalBytes = 0;
+            strErrorInfo = "";
+            baResult = null;
+
+            // long lFileStart = fileSource.Position;
+
+            // 表示范围的字符串为空，恰恰表示要包含全部范围
+            if (string.IsNullOrEmpty(strContentRange) == true)
+            {
+                if (lTotalLength == 0)
+                {
+                    baResult = new byte[0];
+                    return 0;
+                }
+
+                strContentRange = "0-" + Convert.ToString(lTotalLength - 1);
+            }
+
+            // 创建RangeList，便于理解范围字符串
+            RangeList rl = new RangeList(strContentRange);
+
+            // 检查strContentRange指出的最大最小边界和源文件中实际情况是否矛盾
+            long lMax = rl.max();
+            if (lTotalLength <= lMax)
+            {
+                strErrorInfo = "文件尺寸比范围" + strContentRange + "中定义的最大边界"
+                    + Convert.ToString(lMax) + "小...";
+                return -1;
+            }
+
+            long lMin = rl.min();
+            if (lTotalLength <= lMin)
+            {
+                strErrorInfo = "文件尺寸比范围" + strContentRange + "中定义的最小边界"
+                    + Convert.ToString(lMax) + "小...";
+                return -1;
+            }
+
+            // 循环，复制每个连续片断
+            for (int i = 0, nStart = 0; i < rl.Count; i++)
+            {
+                RangeItem ri = (RangeItem)rl[i];
+
+                FastSeek(fileSource, ri.lStart);
+                baResult = ByteArray.EnsureSize(baResult, nStart + (int)ri.lLength);
+                nStart += fileSource.Read(baResult, nStart, (int)ri.lLength);
+
+                lTotalBytes += ri.lLength;
+            }
+
+            return lTotalBytes;
+        }
+
+        public static void FastSeek(Stream stream, long lOffset)
+        {
+            long delta1 = lOffset - stream.Position;
+#if NO
+            if (delta1 < 0)
+                delta1 = -delta1;
+#endif
+
+            if (Math.Abs(delta1) < lOffset)
+            {
+                stream.Seek(delta1, SeekOrigin.Current);
+                Debug.Assert(stream.Position == lOffset, "");
+            }
+            else
+                stream.Seek(lOffset, SeekOrigin.Begin);
+        }
+
     } // end of class RangeList
 }

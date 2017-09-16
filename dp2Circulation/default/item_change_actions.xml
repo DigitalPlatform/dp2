@@ -45,7 +45,9 @@
   <action element="accessNo" type="">
     <caption lang="zh">索取号</caption>
   </action>
-  <action element="intact" type="">
+  <action element="shelfNo" type="">
+    <caption lang="zh">架号</caption>
+  </action>  <action element="intact" type="">
     <caption lang="zh">完好率</caption>
   </action>
 </root>

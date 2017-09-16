@@ -7,12 +7,13 @@ using System.Text;
 using System.Xml;
 using System.IO;
 
+using Ionic.Zip;
+
 using DigitalPlatform.Text;
 using DigitalPlatform.LibraryServer.Common;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.IO;
-using Ionic.Zip;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -409,7 +410,7 @@ out strError);
         }
 
         // 删除 .dp2bak 文件和 .dbdef.zip 文件。包括状态文件
-        static void DeleteDataFiles(string strFileName)
+        void DeleteDataFiles(string strFileName)
         {
             DeleteDataFile(strFileName);
 
@@ -417,8 +418,9 @@ out strError);
         }
 
         // 删除一个数据文件和它的状态文件
-        static void DeleteDataFile(string strFileName)
+        void DeleteDataFile(string strFileName)
         {
+            this.App._physicalFileCache.ClearItems(strFileName);
             try
             {
                 File.Delete(strFileName);
@@ -428,9 +430,11 @@ out strError);
 
             }
 
+            string strStateFileName = strFileName + LibraryServerUtil.STATE_EXTENSION;
+            this.App._physicalFileCache.ClearItems(strStateFileName);
             try
             {
-                File.Delete(strFileName + LibraryServerUtil.STATE_EXTENSION);
+                File.Delete(strStateFileName);
             }
             catch
             {
@@ -496,9 +500,11 @@ out strError);
         // parameters:
         //      strState    finish/abort/error 表示文件写入完成
         //                  creating 表示文件正在创建中
-        static void WriteStateFile(string strBackupFileName, string strState)
+        void WriteStateFile(string strBackupFileName, string strState)
         {
             string strFileName = strBackupFileName + LibraryServerUtil.STATE_EXTENSION;
+            if (this.App._physicalFileCache != null)
+                this.App._physicalFileCache.ClearItems(strFileName);
             if (strState == null || strState == "finish")
                 File.Delete(strFileName);
             else

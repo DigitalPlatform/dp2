@@ -18,6 +18,8 @@ namespace DigitalPlatform.LibraryServer
     /// </summary>
     public partial class LibraryApplication
     {
+        internal StreamCache _physicalFileCache = new StreamCache(100);
+
         // 得到 newdata 字段对应的文件名
         public static string GetNewFileName(string strFilePath)
         {
@@ -124,6 +126,7 @@ namespace DigitalPlatform.LibraryServer
                     if (si is DirectoryInfo)
                     {
                         // 删除一个目录
+                        _physicalFileCache.ClearAll();
                         PathUtil.DeleteDirectory(si.FullName);
                         nDeleteCount++;
                         continue;
@@ -132,18 +135,21 @@ namespace DigitalPlatform.LibraryServer
                     if (si is FileInfo)
                     {
                         // 删除一个文件
-                        if (File.Exists(si.FullName) == true)
-                            File.Delete(si.FullName);
+                        //if (File.Exists(si.FullName) == true)
+                        //    File.Delete(si.FullName);
+                        _physicalFileCache.FileDeleteIfExists(si.FullName);
 
                         string strNewFilePath1 = GetNewFileName(si.FullName);
 
-                        if (File.Exists(strNewFilePath1) == true)
-                            File.Delete(strNewFilePath1);
+                        //if (File.Exists(strNewFilePath1) == true)
+                        //    File.Delete(strNewFilePath1);
+                        _physicalFileCache.FileDeleteIfExists(strNewFilePath1);
 
                         string strRangeFileName = GetRangeFileName(si.FullName);
 
-                        if (File.Exists(strRangeFileName) == true)
-                            File.Delete(strRangeFileName);
+                        //if (File.Exists(strRangeFileName) == true)
+                        //    File.Delete(strRangeFileName);
+                        _physicalFileCache.FileDeleteIfExists(strRangeFileName);
 
                         nDeleteCount++;
                     }
@@ -214,12 +220,14 @@ namespace DigitalPlatform.LibraryServer
                 {
                     string strRangeFileName = GetRangeFileName(strFilePath);
 
-                    if (File.Exists(strRangeFileName) == true)
-                        File.Delete(strRangeFileName);
+                    //if (File.Exists(strRangeFileName) == true)
+                    //    File.Delete(strRangeFileName);
+                    _physicalFileCache.FileDeleteIfExists(strRangeFileName);
 
                     return 0;
                 }
                 // 创建空文件
+                _physicalFileCache.ClearItems(strFilePath);
                 using (FileStream s = File.Create(strFilePath))
                 {
                 }
@@ -308,6 +316,7 @@ namespace DigitalPlatform.LibraryServer
 
             RangeList rangeList = new RangeList(strRealRanges);
 
+#if NO
             // 开始写数据
             Stream target = null;
             if (bIsComplete == true)
@@ -342,6 +351,41 @@ namespace DigitalPlatform.LibraryServer
             {
                 target.Close();
             }
+#endif
+
+            // 开始写数据
+            StreamItem target = null;
+            if (bIsComplete == true)
+                target = _physicalFileCache.GetStream(strFilePath, FileMode.Create, FileAccess.Write, false);  //一次性发完，直接写到文件
+            else
+                target = _physicalFileCache.GetStream(strNewFilePath, FileMode.OpenOrCreate, FileAccess.Write);
+            try
+            {
+                int nStartOfBuffer = 0;
+                for (int i = 0; i < rangeList.Count; i++)
+                {
+                    RangeItem range = (RangeItem)rangeList[i];
+                    // int nStartOfTarget = (int)range.lStart;
+                    int nLength = (int)range.lLength;
+                    if (nLength == 0)
+                        continue;
+
+                    Debug.Assert(range.lStart >= 0, "");
+
+                    // 移动目标流的指针到指定位置
+                    target.FileStream.FastSeek(range.lStart);
+
+                    target.FileStream.Write(baSource,
+                        nStartOfBuffer,
+                        nLength);
+
+                    nStartOfBuffer += nLength;
+                }
+            }
+            finally
+            {
+                _physicalFileCache.ReturnStream(target);
+            }
 
             {
                 string strRangeFileName = GetRangeFileName(strFilePath);
@@ -358,10 +402,13 @@ namespace DigitalPlatform.LibraryServer
                     lCurrentLength = lTotalLength;
 
                     // 删除辅助文件
-                    if (File.Exists(strNewFilePath) == true)
-                        File.Delete(strNewFilePath);
-                    if (File.Exists(strRangeFileName) == true)
-                        File.Delete(strRangeFileName);
+                    //if (File.Exists(strNewFilePath) == true)
+                    //    File.Delete(strNewFilePath);
+                    _physicalFileCache.FileDeleteIfExists(strNewFilePath);
+
+                    //if (File.Exists(strRangeFileName) == true)
+                    //    File.Delete(strRangeFileName);
+                    _physicalFileCache.FileDeleteIfExists(strRangeFileName);
 
                     goto END1;
                 }
@@ -420,6 +467,8 @@ namespace DigitalPlatform.LibraryServer
                 // 6. 设置目标文件的 LastWriteTime
                 if (bEndWrite == true)
                 {
+                    _physicalFileCache.ClearItems(strNewFilePath);
+
                     using (Stream s = new FileStream(strNewFilePath,
                         FileMode.OpenOrCreate))
                     {
@@ -428,19 +477,15 @@ namespace DigitalPlatform.LibraryServer
 
                     // TODO: Move 文件较好。改名
 
-                    File.Delete(strFilePath);
-                    File.Move(strNewFilePath, strFilePath);
-#if NO
-                    // 用 .new 临时文件替换直接文件
-                    File.Copy(strNewFilePath,
-                        strFilePath,
-                        true);
+                    //File.Delete(strFilePath);
+                    //File.Move(strNewFilePath, strFilePath);
+                    this._physicalFileCache.FileDelete(strFilePath);
+                    this._physicalFileCache.FileMove(strNewFilePath, strFilePath);
 
-                    File.Delete(strNewFilePath);
-#endif
+                    //if (File.Exists(strRangeFileName) == true)
+                    //    File.Delete(strRangeFileName);
+                    _physicalFileCache.FileDeleteIfExists(strRangeFileName);
 
-                    if (File.Exists(strRangeFileName) == true)
-                        File.Delete(strRangeFileName);
                     baOutputTimestamp = FileUtil.GetFileTimestamp(strFilePath);
 
                     lCurrentLength = lTotalLength;
@@ -479,6 +524,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         ReadOptions option = new ReadOptions();
                         option.Encoding = Encoding.UTF8;
+                        _physicalFileCache.ClearItems(strFilePath);
                         using (ZipFile zip = ZipFile.Read(strFilePath, option))
                         {
                             foreach (ZipEntry e in zip)
@@ -509,36 +555,6 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-#if NO
-            // 写metadata
-            if (strMetadata != "")
-            {
-                string strMetadataFileName = DatabaseUtil.GetMetadataFileName(strFilePath);
-
-                // 取出旧的数据进行合并
-                string strOldMetadata = "";
-                if (File.Exists(strMetadataFileName) == true)
-                    strOldMetadata = FileUtil.File2StringE(strMetadataFileName);
-                if (strOldMetadata == "")
-                    strOldMetadata = "<file/>";
-
-                string strResultMetadata;
-                // return:
-                //		-1	出错
-                //		0	成功
-                int nRet = DatabaseUtil.MergeMetadata(strOldMetadata,
-                    strMetadata,
-                    lCurrentLength,
-                    out strResultMetadata,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                // 把合并的新数据写到文件里
-                FileUtil.String2File(strResultMetadata,
-                    strMetadataFileName);
-            }
-#endif
             return 0;
         }
 
@@ -548,7 +564,7 @@ namespace DigitalPlatform.LibraryServer
         //      -2      文件不存在
         //		-1      出错
         //		>= 0	成功，返回最大长度
-        public static long GetFile(
+        public long GetFile(
             string strFilePath,
             long lStart,
             int nLength,
@@ -642,6 +658,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
+#if NO
                     using (FileStream s = new FileStream(strFilePath,
                         FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                     {
@@ -659,6 +676,30 @@ namespace DigitalPlatform.LibraryServer
                             strError = "希望从文件偏移 " + lStart + " 开始读入 " + lOutputLength + " 字节，但只成功读入了 " + readed + " 字节";
                             return -1;
                         }
+                    }
+#endif
+                    StreamItem s = this._physicalFileCache.GetStream(strFilePath,
+    FileMode.Open, FileAccess.Read, lStart > 10 * 1024);
+                    try
+                    {
+                        destBuffer = new byte[lOutputLength];
+
+                        Debug.Assert(lStart >= 0, "");
+                        Debug.Assert(s.FileStream != null, "");
+
+                        s.FileStream.FastSeek(lStart);
+                        int readed = s.FileStream.Read(destBuffer,
+                            0,
+                            (int)lOutputLength);
+                        if (readed < lOutputLength)
+                        {
+                            strError = "希望从文件偏移 " + lStart + " 开始读入 " + lOutputLength + " 字节，但只成功读入了 " + readed + " 字节";
+                            return -1;
+                        }
+                    }
+                    finally
+                    {
+                        _physicalFileCache.ReturnStream(s);
                     }
                 }
             }
@@ -821,7 +862,7 @@ namespace DigitalPlatform.LibraryServer
         // return:
         //      -1  出错
         //      其他  实际删除的文件和目录个数
-        public static int DeleteFile(
+        public int DeleteFile(
     string strRootPath,
     string strCurrentDirectory,
     string strPattern,
@@ -842,12 +883,14 @@ namespace DigitalPlatform.LibraryServer
 
                     if (si is DirectoryInfo)
                     {
+                        _physicalFileCache.ClearAll();
                         PathUtil.DeleteDirectory(si.FullName);
                     }
 
                     if (si is FileInfo)
                     {
-                        File.Delete(si.FullName);
+                        // File.Delete(si.FullName);
+                        _physicalFileCache.FileDelete(si.FullName);
                     }
 
                     count++;

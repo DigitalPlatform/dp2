@@ -3674,14 +3674,14 @@ out strError);
                     {
                         lRet = 0;
                         goto DELETE_AND_RETURN;
-                    } 
+                    }
                     // 没有附件
                     if (lAttachmentTotalLength == 0)
                     {
                         lRet = 0;
                         strError = "附件不存在";
                         goto DELETE_AND_RETURN;
-                    } 
+                    }
                     if (attachment_data == null || attachment_data.Length == 0)
                     {
                         lRet = -1;
@@ -7428,6 +7428,7 @@ out strError);
         }
 #endif
 
+        // TODO: timestamp 只需要获得第一次的，和最后一次的，然后比较即可。中间次数不需要获得它。这样可以提高下载速度
         // 获得资源。包装版本 -- 写入文件的版本。特别适用于获得资源，也可用于获得主记录体。
         // parameters:
         //		fileTarget	文件。注意在调用函数前适当设置文件指针位置。函数只会在当前位置开始向后写，写入前不会主动改变文件指针。
@@ -7699,7 +7700,6 @@ out strError);
                     return -1;
                 }
 
-
                 LibraryServerResult result = this.ws.EndWriteRes(
                     out strOutputResPath,
                     out baOutputTimestamp,
@@ -7842,7 +7842,7 @@ out strError);
         }
 
         // 2016/9/26 增加 if xxx != null 判断
-        static string BuildMetadata(string strMime,
+        public static string BuildMetadata(string strMime,
             string strLocalPath)
         {
             // string strMetadata = "<file mimetype='" + strMime + "' localpath='" + strLocalPath + "'/>";
@@ -7859,6 +7859,68 @@ out strError);
             return dom.DocumentElement.OuterXml;
         }
 
+        // 2017/9/15
+        // 保存资源记录
+        // parameters:
+        //		strPath	格式: 库名/记录号/object/对象xpath
+        //      file    文件 Stream。注意：本函数调用中，文件指针会被自然改变
+        public long SaveResObject(
+            DigitalPlatform.Stop stop,
+            string strPath,
+            Stream file,  // 该参数代表存放对象数据的本地文件
+            long length,
+#if NO
+            string strLocalPath,       // 该参数为拟放入 metadata 中的本地文件名
+            string strMime,
+#endif
+            string strMetadata,
+            string strRange,
+            byte[] timestamp,
+            string strStyle,
+            out byte[] output_timestamp,
+            out string strError)
+        {
+            strError = "";
+            output_timestamp = null;
+
+            if (length == -1)
+                length = file.Length;
+
+            byte[] baTotal = null;
+            long lRet = RangeList.CopyFragmentNew(
+                file,
+                length,
+                strRange,
+                out baTotal,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            string strOutputResPath = "";
+
+            // string strMetadata = BuildMetadata(strMime, strLocalPath);
+
+            // 写入资源
+            lRet = WriteRes(
+                stop,
+                strPath,
+                strRange,
+                length,	// 这是整个对象文件尺寸，不是本次chunk的尺寸。因为服务器显然可以从baChunk中看出其尺寸，不必再专门用一个参数表示这个尺寸了
+                baTotal,
+                strMetadata,
+                strStyle,
+                timestamp,
+                out strOutputResPath,
+                out output_timestamp,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            return 0;
+        }
+
+        // TODO: 需要淘汰本函数，改用 FileStream 的版本
+        // 注：本函数的缺点是，在反复调用的过程中，要多次打开文件和移动文件指针，效率不高
         // 2014/3/6
         // 保存资源记录
         // parameters:
@@ -7920,17 +7982,17 @@ out strError);
         }
 
         // 包装后的版本。少了一个 strStyle 参数
-                public long SaveResObject(
-    DigitalPlatform.Stop stop,
-    string strPath,
-    string strObjectFileName,  // 该参数代表存放对象数据的文件名
-    string strMetadata,
-    string strRange,
-    bool bTailHint,
-    byte[] timestamp,
+        public long SaveResObject(
+DigitalPlatform.Stop stop,
+string strPath,
+string strObjectFileName,  // 该参数代表存放对象数据的文件名
+string strMetadata,
+string strRange,
+bool bTailHint,
+byte[] timestamp,
             // string strStyle,
-    out byte[] output_timestamp,
-    out string strError)
+out byte[] output_timestamp,
+out string strError)
         {
             return SaveResObject(
         stop,
@@ -10369,16 +10431,26 @@ Stack:
             return ((IContextChannel)this.m_ws).OperationTimeout;
         }
 
+        long _uploadResChunkSize = 0;
+
         public long UploadResChunkSize
         {
             get
             {
-                if (this.m_ws is localhost.dp2libraryClient)
-                    return 500 * 1024;  // other
-                else if (this.m_ws is localhost.dp2libraryRESTClient)
-                    return 500 * 1024;  // basic.http
+                if (_uploadResChunkSize == 0)
+                {
+                    if (this.m_ws is localhost.dp2libraryClient)
+                        return 500 * 1024;  // other
+                    else if (this.m_ws is localhost.dp2libraryRESTClient)
+                        return 500 * 1024;  // basic.http
 
-                return 250 * 1024;  // restful
+                    return 250 * 1024;  // restful
+                }
+                return _uploadResChunkSize;
+            }
+            set
+            {
+                _uploadResChunkSize = value;    // 如果设置为 0，则表示软件自动决定 chunksize
             }
         }
 

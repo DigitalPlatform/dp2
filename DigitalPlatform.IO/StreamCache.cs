@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,10 +14,40 @@ namespace DigitalPlatform.IO
     /// </summary>
     public class StreamCache
     {
-        const int MAX_ITEMS = 100;
+        int MAX_ITEMS = 100;
+
         internal ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
 
         List<StreamItem> _items = new List<StreamItem>();
+
+        public StreamCache(int nMaxItems)
+        {
+            MAX_ITEMS = nMaxItems;
+        }
+
+
+        public void FileDelete(string filename)
+        {
+            this.ClearItems(filename);
+            File.Delete(filename);
+        }
+
+        public void FileDeleteIfExists(string filename)
+        {
+            if (File.Exists(filename))
+            {
+                this.ClearItems(filename);
+                File.Delete(filename);
+            }
+        }
+
+        // 改名
+        public void FileMove(string strSourceFileName, string strFileName)
+        {
+            this.ClearItems(strSourceFileName);
+            this.ClearItems(strFileName);
+            File.Move(strSourceFileName, strFileName);
+        }
 
         public void ClearItems(string strFilePath)
         {
@@ -56,14 +87,14 @@ namespace DigitalPlatform.IO
             }
         }
 
-        public StreamItem FindItem(string strFilePath)
+        public StreamItem FindItem(string strFilePath, FileAccess access)
         {
             m_lock.EnterReadLock();
             try
             {
                 foreach (StreamItem item in _items)
                 {
-                    if (item.FilePath == strFilePath)
+                    if (item.FilePath == strFilePath && item.FileAccess == access)
                     {
                         int v = item.IncUse();
                         if (v == 1)
@@ -83,47 +114,102 @@ namespace DigitalPlatform.IO
             return null;
         }
 
-        public StreamItem NewItem(string strFilePath)
+        public StreamItem NewItem(string strFilePath,
+            FileMode mode,
+            FileAccess access,
+            bool bAddToCollection = true)
         {
             // 防备尺寸过大
-            if (_items.Count > 100)
+            if (bAddToCollection && _items.Count > 100)
                 ClearAll();
 
             StreamItem item = new StreamItem();
+            item.Fly = !bAddToCollection;
+            item.FileAccess = access;
             item.Touch();
             item.FilePath = strFilePath;
             item.FileStream = File.Open(
     strFilePath,
-    FileMode.OpenOrCreate,
-    FileAccess.Write,
+    mode,   // FileMode.OpenOrCreate,
+    access, // FileAccess.Write,
     FileShare.ReadWrite);
             item.IncUse();
-            m_lock.EnterWriteLock();
-            try
+
+            if (bAddToCollection)
             {
-                _items.Add(item);
+                m_lock.EnterWriteLock();
+                try
+                {
+                    _items.Add(item);
+                }
+                finally
+                {
+                    m_lock.ExitWriteLock();
+                }
             }
-            finally
-            {
-                m_lock.ExitWriteLock();
-            }
+            Debug.Assert(item.FileStream != null, "");
             return item;
         }
 
+        public StreamItem GetStream(string strFilePath,
+            FileMode mode,
+            FileAccess access,
+            bool bAddToCollection = true)
+        {
+            if (bAddToCollection == false)
+            {
+                StreamItem item = NewItem(strFilePath, mode, access, false);
+                Debug.Assert(item.FileStream != null, "");
+                return item;
+            }
+
+            {
+                StreamItem item = this.FindItem(strFilePath, access);
+                if (item != null)
+                {
+                    item.Touch();
+                    Debug.Assert(item.FileStream != null, "");
+                    return item;
+                }
+
+                item = NewItem(strFilePath, mode, access);
+                Debug.Assert(item.FileStream != null, "");
+                return item;
+            }
+        }
+
+        public StreamItem GetWriteStream(string strFilePath, bool bAddToCollection = true)
+        {
+            return GetStream(strFilePath, FileMode.OpenOrCreate, FileAccess.Write, bAddToCollection);
+        }
+#if NO
         public StreamItem GetWriteStream(string strFilePath)
         {
-            StreamItem item = this.FindItem(strFilePath);
+            FileAccess access = FileAccess.Write;
+            StreamItem item = this.FindItem(strFilePath, access);
             if (item != null)
             {
                 item.Touch();
                 return item;
             }
 
-            return NewItem(strFilePath);
+            return NewItem(strFilePath, FileMode.OpenOrCreate, access);
         }
+#endif
 
-        public void ReturnWriteStream(StreamItem item)
+        public void ReturnStream(StreamItem item)
         {
+            if (item.Fly)
+            {
+                if (item.FileStream != null)
+                {
+                    item.FileStream.Close();
+                    item.FileStream = null;
+                }
+                item.DecUse();
+                return;
+            }
+
             if (item.FileStream != null)
                 item.FileStream.Flush();
 
@@ -205,8 +291,11 @@ namespace DigitalPlatform.IO
     public class StreamItem
     {
         public string FilePath { get; set; }
+        public FileAccess FileAccess { get; set; }
         public FileStream FileStream { get; set; }
         public DateTime LastTime { get; set; }
+
+        public bool Fly { get; set; }   // 是否为不属于集合管理的模式
 
         int _useCount = 0;
 
