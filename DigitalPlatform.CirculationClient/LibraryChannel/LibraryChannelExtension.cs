@@ -23,6 +23,7 @@ namespace DigitalPlatform.CirculationClient
             string strStyle,
             byte[] timestamp,
             bool bRetryOverwiteExisting,
+            out byte[] output_timestamp,
             out string strError)
         {
             string strMime = PathUtil.MimeTypeFrom(strClientFilePath);
@@ -36,6 +37,7 @@ namespace DigitalPlatform.CirculationClient
             strStyle,
             timestamp,
             bRetryOverwiteExisting,
+            out output_timestamp,
             out strError);
         }
 
@@ -55,9 +57,11 @@ namespace DigitalPlatform.CirculationClient
             string strStyle,
             byte[] timestamp,
             bool bRetryOverwiteExisting,
+            out byte [] output_timestamp,
             out string strError)
         {
             strError = "";
+            output_timestamp = null;
 
             string strResPath = strServerFilePath;
 
@@ -97,7 +101,7 @@ namespace DigitalPlatform.CirculationClient
             if (timestamp == null)
                 timestamp = FileUtil.GetFileTimestamp(strClientFilePath);
 
-            byte[] output_timestamp = null;
+            // byte[] output_timestamp = null;
 
             string strWarning = "";
 

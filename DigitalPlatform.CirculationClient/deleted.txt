@@ -1,0 +1,91 @@
+﻿        // 保存资源记录
+        // parameters:
+        //		strPath	格式: 库名/记录号/object/对象xpath
+        //      strObjectFileName   对象文件名。如果为空，表示本次调用仅根据 strLocalPath 和 strMime 修改 对象的 metadata 部分
+        //		bTailHint	是否为最后一次写入操作。这是一个暗示参数，本函数将根据此参数为最后一次写入操作设置特殊的超时时间。
+        //					假定有时整个资源尺寸很大，虽然每次局部写入耗时不多，但是最后一次写入因为服务器要执行整个资源转存
+        //					的操作后API才返回，所以可能会耗费类似20分钟这样的长时间，导致WebService API超时失败。
+        //					本参数是一个暗示操作(本函数也不担保一定要做什么操作)，如果调用者不清楚它的含义，可以使用false。
+        public long SaveResObject(
+            DigitalPlatform.Stop stop,
+            string strPath,
+            string strObjectFileName,  // 该参数代表存放对象数据的文件名
+            string strLocalPath,       // 该参数代表本地文件名,有时会与strObjectFileName不同
+            string strMime,
+            string strRange,
+            bool bTailHint,
+            byte[] timestamp,
+            out byte[] output_timestamp,
+            out string strError)
+        {
+            strError = "";
+            output_timestamp = null;
+            long lRet = 0;
+
+            byte[] baTotal = null;
+            long lTotalLength = 0;
+            if (string.IsNullOrEmpty(strObjectFileName) == false)
+            {
+                FileInfo fi = new FileInfo(strObjectFileName);
+                if (fi.Exists == false)
+                {
+                    strError = "文件 '" + strObjectFileName + "'不存在...";
+                    return -1;
+                }
+
+                lRet = RangeList.CopyFragment(
+                    strObjectFileName,
+                    strRange,
+                    out baTotal,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                lTotalLength = fi.Length;
+            }
+            else
+                lTotalLength = -1;
+
+            // string strOutputPath = "";
+
+            //int nOldTimeout = -1;
+            if (bTailHint == true)
+            {
+                /*
+                nOldTimeout = this.Timeout;
+                // TODO: 建议通过文件尺寸来估算
+                this.Timeout = 40 * 60 * 1000;  // 40分钟
+                 * */
+            }
+
+            // 
+            string strOutputResPath = "";
+
+            string strMetadata = BuildMetadata(strMime, strLocalPath);
+            // string strMetadata = "<file mimetype='" + strMime + "' localpath='" + strLocalPath + "'/>";
+
+            // 写入资源
+            lRet = WriteRes(
+                stop,
+                strPath,
+                strRange,
+                lTotalLength,   // fi.Length,	// 这是整个包尺寸，不是本次chunk的尺寸。因为服务器显然可以从baChunk中看出其尺寸，不必再专门用一个参数表示这个尺寸了
+                baTotal,
+                strMetadata,
+                "", // strStyle,
+                timestamp,
+                out strOutputResPath,
+                out output_timestamp,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            if (bTailHint == true)
+            {
+                /*
+                this.Timeout = nOldTimeout;
+                 * */
+            }
+
+            return 0;
+        }

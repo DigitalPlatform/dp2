@@ -5319,8 +5319,22 @@ namespace DigitalPlatform.rms
             {
                 int nRet = 0;
 
-                bool bRecordPath = IsRecordPath(strResPath);
-                if (bRecordPath == false)
+                PathInfo info = null;
+                // 解析资源路径
+                // return:
+                //      -1  一般性错误
+                //		-5	未找到数据库
+                //		-7	路径不合法
+                //      0   成功
+                nRet = ParsePath(strResPath,
+    out info,
+    out strError);
+                if (nRet < 0)
+                    return nRet;
+
+                //bool bRecordPath = IsRecordPath(strResPath);
+                //if (bRecordPath == false)
+                if (info.IsConfigFilePath)
                 {
                     // 也可能是数据库对象
 
@@ -5345,7 +5359,7 @@ namespace DigitalPlatform.rms
                 }
                 else
                 {
-
+#if NO
                     string strPath = strResPath;
                     string strDbName = StringUtil.GetFirstPartPath(ref strPath);
                     if (strPath == "")
@@ -5368,6 +5382,10 @@ namespace DigitalPlatform.rms
                     // strFirstPart可能是为cfg或记录号
 
                     string strRecordID = strFirstPart;
+#endif
+                    string strRecordID = info.RecordID;
+                    Database db = info.Database;
+                    string strDbName = info.DbName;
 
                     // 检查当前帐户是否有删除记录
                     string strExistRights = "";
@@ -5389,6 +5407,7 @@ namespace DigitalPlatform.rms
                         //      -4  未找到记录
                         //		0   成功
                         nRet = db.DeleteRecord(strRecordID,
+                            info.ObjectID,
                             baInputTimestamp,
                             strStyle,
                             out baOutputTimestamp,

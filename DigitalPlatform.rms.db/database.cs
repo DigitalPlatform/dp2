@@ -1662,6 +1662,7 @@ namespace DigitalPlatform.rms
         // 线: 安全的,加写锁,在派生类里加锁
         public virtual int DeleteRecord(
             string strID,
+            string strObjectID,
             byte[] timestamp,
             string strStyle,
             out byte[] outputTimestamp,

@@ -2018,6 +2018,7 @@ namespace DigitalPlatform.rms
         //为什么要加写锁：因为是删除记录以及相应的检索点，在这个时期，该记录即不能读也不写，所以加写锁
         public override int DeleteRecord(
             string strID,
+            string strObjectID,
             byte[] inputTimestamp,
             string strStyle,
             out byte[] outputTimestamp,
@@ -2144,7 +2145,6 @@ namespace DigitalPlatform.rms
 
                     // 4.比Sql库多,删除表示字段信息文件
                     this.DeleteFuZhuFiles(strXmlFilePath);
-
                 }
                 finally
                 {
@@ -2165,7 +2165,6 @@ namespace DigitalPlatform.rms
             }
             return 0;
         }
-
 
         // 根据记录号之间的关系,强制删除文件
         public void ForceDeleteFiles(string strRecordID)

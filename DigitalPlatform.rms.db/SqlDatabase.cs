@@ -12199,6 +12199,7 @@ start_time,
                 //		0   成功
                 nRet = DeleteRecord(
                     strID,
+                    "",
                     null,
                     "deletekeysbyid,ignorechecktimestamp",
                     out baOutputTimestamp,
@@ -17935,6 +17936,7 @@ bool bTempObject)
         // 线: 安全
         public override int DeleteRecord(
             string strRecordID,
+            string strObjectID,
             byte[] baInputTimestamp,
             string strStyle,
             out byte[] baOutputTimestamp,
@@ -17955,6 +17957,14 @@ bool bTempObject)
             bool bIgnoreCheckTimestamp = StringUtil.IsInList("ignorechecktimestamp", strStyle);
 
             strRecordID = DbPath.GetID10(strRecordID);
+
+            // 2017/9/17
+            bool bObject = false;
+            if (string.IsNullOrEmpty(strObjectID) == false)
+            {
+                strRecordID = strRecordID + "_" + strObjectID;
+                bObject = true;
+            }
 
             // 这里不再因为FastMode加写锁
 
@@ -18017,73 +18027,79 @@ bool bTempObject)
                         XmlDocument newDom = null;
                         XmlDocument oldDom = null;
 
-                        KeyCollection newKeys = null;
-                        KeyCollection oldKeys = null;
-
-                        if (bDeleteKeysByID == false)
+                        // 处理检索点
+                        if (bObject == false)
                         {
 
-                            string strXml = "";
-                            // return:
-                            //      -1  出错
-                            //      -4  记录不存在
-                            //      -100    对象文件不存在
-                            //      0   正确
-                            nRet = this.GetXmlString(connection,
-                                strRecordID,
-                                out strXml,
-                                out strError);
-                            if (nRet == -100)
-                                strXml = "";
-                            else if (nRet <= -1)
-                                return nRet;
+                            KeyCollection newKeys = null;
+                            KeyCollection oldKeys = null;
 
-                            // 1.删除检索点
-
-                            // return:
-                            //      -1  出错
-                            //      0   成功
-                            nRet = this.MergeKeys(strRecordID,
-                                "",
-                                strXml,
-                                true,
-                                out newKeys,
-                                out oldKeys,
-                                out newDom,
-                                out oldDom,
-                                out strError);
-                            if (nRet == -1)
+                            if (bDeleteKeysByID == false)
                             {
-                                strError = "删除中构造检索点阶段出错： " + strError;
-                                return -1;
+
+                                string strXml = "";
+                                // return:
+                                //      -1  出错
+                                //      -4  记录不存在
+                                //      -100    对象文件不存在
+                                //      0   正确
+                                nRet = this.GetXmlString(connection,
+                                    strRecordID,
+                                    out strXml,
+                                    out strError);
+                                if (nRet == -100)
+                                    strXml = "";
+                                else if (nRet <= -1)
+                                    return nRet;
+
+                                // 1.删除检索点
+
+                                // return:
+                                //      -1  出错
+                                //      0   成功
+                                nRet = this.MergeKeys(strRecordID,
+                                    "",
+                                    strXml,
+                                    true,
+                                    out newKeys,
+                                    out oldKeys,
+                                    out newDom,
+                                    out oldDom,
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    strError = "删除中构造检索点阶段出错： " + strError;
+                                    return -1;
+                                }
+                            }
+
+                            if (oldDom != null)
+                            {
+                                // return:
+                                //      -1  出错
+                                //      0   成功
+                                nRet = this.ModifyKeys(connection,
+                                    null,
+                                    oldKeys,
+                                    bFastMode,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                            }
+                            else
+                            {
+                                // return:
+                                //      -1  出错
+                                //      0   成功
+                                nRet = this.ForceDeleteKeys(connection,
+                                    strRecordID,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
                             }
                         }
 
-                        if (oldDom != null)
-                        {
-                            // return:
-                            //      -1  出错
-                            //      0   成功
-                            nRet = this.ModifyKeys(connection,
-                                null,
-                                oldKeys,
-                                bFastMode,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                        }
-                        else
-                        {
-                            // return:
-                            //      -1  出错
-                            //      0   成功
-                            nRet = this.ForceDeleteKeys(connection,
-                                strRecordID,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                        }
-
+                        // 删除记录
                         if (this.container.SqlServerType == SqlServerType.Oracle)
                         {
                             // 2.删除子记录
@@ -18108,7 +18124,7 @@ bool bTempObject)
                             nRet = DeleteRecordByID(connection,
                                 row_info,
                                 strRecordID,
-                                oldDom != null ? false : true,
+                                oldDom != null || bObject == true ? false : true,
                                 this.m_lObjectStartSize != -1,
                                 out strError);
                             if (nRet == -1)
@@ -18122,7 +18138,6 @@ bool bTempObject)
                         }
                         else
                         {
-
                             // 3.删除自己,返回删除的记录数
                             // return:
                             //      -1  出错
@@ -18130,7 +18145,7 @@ bool bTempObject)
                             nRet = DeleteRecordByID(connection,
                                 row_info,
                                 strRecordID,
-                                true,
+                                !bObject,    // true,
                                 this.m_lObjectStartSize != -1,
                                 out strError);
                             if (nRet == -1)
@@ -18193,7 +18208,6 @@ bool bTempObject)
 
             return 0;
         }
-
 
         // 重建记录的keys
         // parameter:
@@ -19046,7 +19060,12 @@ bool bTempObject)
                             else if (bDeleteSubrecord == true)
                             {
                                 // TODO: 需要获得全部filename和newfilename字段内容值
-                                Debug.Assert(strID.Length == 10, "");
+                                if (strID.Length != 10)
+                                {
+                                    strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                                    return -1;
+                                }
+                                Debug.Assert(strID.Length == 10, "DeleteRecordByID() 的 strID 必须是 10 字符");
 
                                 strCommand = "use " + this.m_strSqlDbName + " "
                                     + " SELECT filename, newfilename FROM records WHERE id like @id1 OR id = @id2";
@@ -19099,6 +19118,11 @@ bool bTempObject)
                         // 第二步：删除SQL行
                         if (bDeleteSubrecord == true)
                         {
+                            if (strID.Length != 10)
+                            {
+                                strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                                return -1;
+                            }
                             Debug.Assert(strID.Length == 10, "");
 
                             strCommand = "use " + this.m_strSqlDbName + " "
@@ -19162,6 +19186,11 @@ bool bTempObject)
                         else if (bDeleteSubrecord == true)
                         {
                             // TODO: 需要获得全部filename和newfilename字段内容值
+                            if (strID.Length != 10)
+                            {
+                                strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                                return -1;
+                            }
                             Debug.Assert(strID.Length == 10, "");
 
                             strCommand = " SELECT filename, newfilename FROM records WHERE id like @id1 OR id = @id2";
@@ -19208,6 +19237,11 @@ bool bTempObject)
                     // 第二步：删除SQL行
                     if (bDeleteSubrecord == true)
                     {
+                        if (strID.Length != 10)
+                        {
+                            strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                            return -1;
+                        }
                         Debug.Assert(strID.Length == 10, "");
 
                         strCommand = " DELETE FROM records WHERE id like @id1 OR id = @id2";
@@ -19259,6 +19293,11 @@ bool bTempObject)
                         else if (bDeleteSubrecord == true)
                         {
                             // TODO: 需要获得全部filename和newfilename字段内容值
+                            if (strID.Length != 10)
+                            {
+                                strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                                return -1;
+                            }
                             Debug.Assert(strID.Length == 10, "");
 
                             strCommand = " SELECT filename, newfilename FROM `" + this.m_strSqlDbName + "`.records WHERE id like @id1 OR id = @id2";
@@ -19305,6 +19344,11 @@ bool bTempObject)
                     // 第二步：删除SQL行
                     if (bDeleteSubrecord == true)
                     {
+                        if (strID.Length != 10)
+                        {
+                            strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                            return -1;
+                        }
                         Debug.Assert(strID.Length == 10, "");
 
                         strCommand = " DELETE FROM `" + this.m_strSqlDbName + "`.records WHERE id like @id1 OR id = @id2";
@@ -19357,6 +19401,11 @@ bool bTempObject)
                         else if (bDeleteSubrecord == true)
                         {
                             // TODO: 需要获得全部filename和newfilename字段内容值
+                            if (strID.Length != 10)
+                            {
+                                strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                                return -1;
+                            }
                             Debug.Assert(strID.Length == 10, "");
 
                             strCommand = " SELECT filename, newfilename FROM " + this.m_strSqlDbName + "_records WHERE id like :id1 OR id = :id2";
@@ -19408,6 +19457,11 @@ bool bTempObject)
                     // 第二步：删除SQL行
                     if (bDeleteSubrecord == true)
                     {
+                        if (strID.Length != 10)
+                        {
+                            strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                            return -1;
+                        }
                         Debug.Assert(strID.Length == 10, "");
 
                         strCommand = " DELETE FROM " + this.m_strSqlDbName + "_records WHERE id like :id1 OR id = :id2";

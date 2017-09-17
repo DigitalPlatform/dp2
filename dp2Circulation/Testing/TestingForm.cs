@@ -2025,13 +2025,29 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                         goto ERROR1;
                 }
 
+
+                {
+                    List<string> errors = TestWriteXmlRecords(
+stop,
+channel,
+strTestDbName,
+"delete", // "delete,fix",
+1,
+100);
+                    if (errors.Count > 0)
+                    {
+                        strError = "测试过程发生问题：" + StringUtil.MakePathList(errors);
+                        goto ERROR1;
+                    }
+                }
+
                 // 进行测试
                 {
                     List<string> errors = TestUploadObjectFiles(
                 stop,
                 channel,
                 strTestDbName,
-                "fix", // "delete,fix",
+                "delete,fix", // "delete,fix",
                 1,
                 1);
                     if (errors.Count > 0)
@@ -2046,7 +2062,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
     stop,
     channel,
     strTestDbName,
-    "", // "delete",
+    "delete", // "delete",
     100 * 1024,
     100);
                     if (errors.Count > 0)
@@ -2055,6 +2071,22 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                         goto ERROR1;
                     }
                 }
+
+                {
+                    List<string> errors = TestUploadObjectFiles(
+    stop,
+    channel,
+    strTestDbName,
+    "delete,reuse_id", // "delete",
+    100 * 1024,
+    100);
+                    if (errors.Count > 0)
+                    {
+                        strError = "测试过程发生问题：" + StringUtil.MakePathList(errors);
+                        goto ERROR1;
+                    }
+                }
+
 
                 ///
                 if (string.IsNullOrEmpty(strTestDbName) == false)
@@ -2096,6 +2128,10 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             this.ShowMessage(strError, "red", true);
         }
 
+        // parameters:
+        //      strStyle    fix 固定样例
+        //                  delete  创建的记录后面要自动删除
+        //                  reuse_id    重复使用记录 ID，这样可以测试覆盖重用 ID 写入记录的情况
         List<string> TestUploadObjectFiles(
             Stop stop,
             LibraryChannel channel,
@@ -2106,17 +2142,22 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
         {
             string strError = "";
 
+            Random random = new Random();
+
             // fix 表示固定样例。即不是随机的样例。便于跟踪调试排错
             bool bFix = StringUtil.IsInList("fix", strStyle);
+            bool bReuseID = StringUtil.IsInList("reuse_id", strStyle);
 
             List<string> errors = new List<string>();
 
             string strRecordPath = strDbName + "/?";
+            byte[] record_timestamp = null;
+
             // 先写入一条元数据记录
             {
-                string strXml = BuildXmlString(nObjectCount);
+                int length = random.Next(0, 100 * 1024);
+                string strXml = BuildXmlString(nObjectCount, length);
                 string strWriteStyle = "content,data";
-                byte[] output_timestamp = null;
                 string strOutputPath = "";
                 long lRet = channel.WriteRes(stop,
                     strRecordPath,
@@ -2124,7 +2165,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     false,
                     strWriteStyle,
                     null,   // timestamp,
-                    out output_timestamp,
+                    out record_timestamp,
                     out strOutputPath,
                     out strError);
                 if (lRet == -1)
@@ -2135,7 +2176,6 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 strRecordPath = strOutputPath;
             }
 
-            Random random = new Random();
 
             string strTempDir = Program.MainForm.UserTempDir;
 
@@ -2157,6 +2197,8 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 CreateObjectFile(strClientFilePath, i * 1024 + delta, strStyle);
 
                 string strObjectPath = strRecordPath + "/object/" + i;
+                if (bReuseID)
+                    strObjectPath = strRecordPath + "/object/0";
 
                 string strOutputFileName = Path.Combine(strTempDir, "~" + Guid.NewGuid().ToString());
 
@@ -2164,6 +2206,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 {
                     channel.UploadResChunkSize = nChunkSize;
 
+                    byte[] temp_timestamp = null;
                     int nRet = channel.UploadObject(
                 stop,
                 strClientFilePath,
@@ -2171,10 +2214,12 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 "", // strStyle,
                 null,   // timestamp,
                 true,
+                out temp_timestamp,
                 out strError);
                     if (nRet == -1)
                     {
                         errors.Add("上传对象 '" + strObjectPath + "' 时出错: " + strError);
+                        return errors;
                         continue;
                     }
 
@@ -2193,6 +2238,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                     if (lRet == -1)
                     {
                         errors.Add("下载对象 '" + strObjectPath + "' 时出错:" + strError);
+                        return errors;
                         continue;
                     }
 
@@ -2223,7 +2269,8 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                         continue;
                     }
 
-                    if (StringUtil.IsInList("delete", strStyle))
+                    if (StringUtil.IsInList("delete", strStyle)
+                        && bReuseID == false)
                     {
                         // 删除对象
                         byte[] output_timestamp = null;
@@ -2252,8 +2299,188 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 }
             }
 
+            // 删除元数据记录
+            if (StringUtil.IsInList("delete", strStyle))
+            {
+                // 删除对象
+                byte[] output_timestamp = null;
+                string strOutputPath = "";
+                long lRet = channel.WriteRes(stop,
+                    strRecordPath,
+                    "",
+                    0,
+                    null,
+                    "",
+                    "delete",
+                    record_timestamp,
+                    out strOutputPath,
+                    out output_timestamp,
+                    out strError);
+                if (lRet == -1)
+                {
+                    errors.Add("删除元数据记录 '" + strRecordPath + "' 时出错:" + strError);
+                    return errors;
+                }
+            }
+
             return errors;
         }
+
+        List<string> TestWriteXmlRecords(
+    Stop stop,
+    LibraryChannel channel,
+    string strDbName,
+    string strStyle,
+    int nChunkSize,
+    int nObjectCount)
+        {
+            string strError = "";
+
+            Random random = new Random();
+
+            // fix 表示固定样例。即不是随机的样例。便于跟踪调试排错
+            bool bFix = StringUtil.IsInList("fix", strStyle);
+            bool bReuseID = StringUtil.IsInList("reuse_id", strStyle);
+
+            List<string> errors = new List<string>();
+
+            byte[] timestamp = null;
+
+            // string strTempDir = Program.MainForm.UserTempDir;
+            string strRecordPath = strDbName + "/?";
+
+            for (int i = 0; i < nObjectCount; i++)
+            {
+                if (stop != null && stop.State == 1)
+                {
+                    errors.Add("用户中断");
+                    return errors;
+                }
+
+                int delta = random.Next(0, 1024);
+                if (bFix)
+                    delta = 10;    // 固定算法
+
+                //    channel.UploadResChunkSize = nChunkSize;
+
+                int length = i * 1024 + delta;
+                string strXml = BuildXmlString(0, length);
+                string strWriteStyle = "content,data";
+                string strOutputPath = "";
+                //if (bFix)
+                //    strRecordPath = strDbName + "/0";
+
+                byte[] output_timestamp = null;
+                long lRet = channel.WriteRes(stop,
+                    strRecordPath,
+                    strXml,
+                    false,
+                    strWriteStyle,
+                    timestamp,
+                    out output_timestamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    errors.Add("创建记录 '" + strRecordPath + "' 时出错: " + strError);
+                    return errors;
+                }
+
+                strRecordPath = strOutputPath;
+                timestamp = output_timestamp;
+
+                stop.SetMessage("正在测试写入 XML 记录 " + strRecordPath + " length=" + length);
+
+                // TODO: 要测试用多种不同尺寸的 chunksize 来下载
+                // 下载
+                string strGetStyle = "content,data,metadata,timestamp,outputpath";
+                string strMetadata = "";
+
+                string strResult = "";
+                lRet = channel.GetRes(stop,
+                    strRecordPath,
+                    strGetStyle,
+                    out strResult,
+                    out strMetadata,
+                    out output_timestamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    errors.Add("下载 XML 记录 '" + strRecordPath + "' 时出错:" + strError);
+                    return errors;
+                    continue;
+                }
+
+#if NO
+                    // 检查 metadata 中的 localfilepath 和 mime
+                    string strMime = PathUtil.MimeTypeFrom(strClientFilePath);
+                    List<string> temp_errors = VerifyMetadata(strMetadata,
+            Path.GetFileName(strClientFilePath),
+            strMime);
+                    if (temp_errors.Count > 0)
+                    {
+                        errors.AddRange(temp_errors);
+                        return errors;
+                    }
+#endif
+
+                if (strResult != strXml)
+                    errors.Add("返回的 XML 和预期的不一致");
+
+                if (StringUtil.IsInList("delete", strStyle)
+                    && bReuseID == false)
+                {
+                    // 删除对象
+                    // byte[] output_timestamp = null;
+                    lRet = channel.WriteRes(stop,
+                        strRecordPath,
+                        "",
+                        0,
+                        null,
+                        "",
+                        "delete",
+                        timestamp,
+                        out strOutputPath,
+                        out output_timestamp,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        errors.Add("删除 '" + strRecordPath + "' 时出错:" + strError);
+                        continue;
+                    }
+                }
+            }
+
+#if NO
+            // 删除元数据记录
+            if (StringUtil.IsInList("delete", strStyle))
+            {
+                // 删除对象
+                byte[] output_timestamp = null;
+                string strOutputPath = "";
+                long lRet = channel.WriteRes(stop,
+                    strRecordPath,
+                    "",
+                    0,
+                    null,
+                    "",
+                    "delete",
+                    timestamp,
+                    out strOutputPath,
+                    out output_timestamp,
+                    out strError);
+                if (lRet == -1)
+                {
+                    errors.Add("删除 XML 记录 '" + strRecordPath + "' 时出错:" + strError);
+                    return errors;
+                }
+            }
+#endif
+
+            return errors;
+        }
+
 
         static List<string> VerifyMetadata(string strMetadata,
             string strLocalFileName,
@@ -2280,8 +2507,23 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             return errors;
         }
 
+        static string MakeRandomText(int length)
+        {
+            Random random = new Random();
+            StringBuilder text = new StringBuilder();
+            for (int i = 0; i < length; i++)
+            {
+                char ch = (char)random.Next('A', 'z');
+                text.Append(ch);
+            }
+
+            return text.ToString();
+        }
+
         // 创造一个包含若干 dprms:file 元素的元数据记录
-        static string BuildXmlString(int object_count)
+        // parameters:
+        //      length  XML 记录的内容长度
+        static string BuildXmlString(int object_count, int length)
         {
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<root />");
@@ -2290,6 +2532,12 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
                 XmlElement new_file = dom.CreateElement("dprms", "file", DpNs.dprms);
                 dom.DocumentElement.AppendChild(new_file);
                 new_file.SetAttribute("id", i.ToString());
+            }
+
+            {
+                XmlElement text = dom.CreateElement("text");
+                dom.DocumentElement.AppendChild(text);
+                text.InnerText = MakeRandomText(length);
             }
 
             return dom.OuterXml;
