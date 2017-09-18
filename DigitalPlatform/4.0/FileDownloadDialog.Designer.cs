@@ -74,6 +74,7 @@
             this.Controls.Add(this.label_message);
             this.Controls.Add(this.button_cancel);
             this.Name = "FileDownloadDialog";
+            this.ShowIcon = false;
             this.Text = "FileDownloadDialog";
             this.ResumeLayout(false);
 

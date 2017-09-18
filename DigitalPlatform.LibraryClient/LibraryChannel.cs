@@ -7882,19 +7882,23 @@ out strError);
         {
             strError = "";
             output_timestamp = null;
+            long lRet = 0;
 
             if (length == -1)
                 length = file.Length;
 
             byte[] baTotal = null;
-            long lRet = RangeList.CopyFragmentNew(
-                file,
-                length,
-                strRange,
-                out baTotal,
-                out strError);
-            if (lRet == -1)
-                return -1;
+            if (file != null)
+            {
+                lRet = RangeList.CopyFragmentNew(
+                    file,
+                    length,
+                    strRange,
+                    out baTotal,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+            }
 
             string strOutputResPath = "";
 

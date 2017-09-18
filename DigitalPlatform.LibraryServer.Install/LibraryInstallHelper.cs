@@ -671,11 +671,13 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
-        public class RestoreLibraryParam
+        public class RestoreLibraryParamBase
         {
-            public Stop Stop { get; set; }
+            public string InstanceName { get; set; }
+            public bool StartInstanceOnFinish { get; set; } // 是否要在完成时重新启动实例?
+
             public string DataDir { get; set; }
-            public string BackupFileName {get;set;}
+            public string BackupFileName { get; set; }
             // 临时文件目录。临时文件目录的根目录。
             public string TempDirRoot { get; set; }
             // 是否为快速模式
@@ -683,6 +685,11 @@ namespace DigitalPlatform.LibraryServer
             // 错误日志文件名
             public string LogFileName { get; set; }
 
+        }
+
+        public class RestoreLibraryParam : RestoreLibraryParamBase
+        {
+            public Stop Stop { get; set; }
             // [out]
             public string ErrorInfo { get; set; }
         }
@@ -698,7 +705,7 @@ namespace DigitalPlatform.LibraryServer
             bool bFastMode,
             out string strError
 #endif
-            RestoreLibraryParam param
+RestoreLibraryParam param
             )
         {
             string strError = "";
@@ -819,12 +826,41 @@ namespace DigitalPlatform.LibraryServer
                         param.ErrorInfo = strError;
                         return false;
                     }
+
+                    {
+                        if (param.Stop != null)
+                            param.Stop.SetMessage("正在修改 library.xml 文件");
+
+                        // 用 .dbdef.zip 中的 library.xml 内容替换当前 library.xml 部分内容
+                        XmlDocument target_dom = null;
+                        nRet = MergeLibraryXml(info.Dom,
+                        new_library_dom,
+                        out target_dom,
+                        out strError);
+                        if (nRet == -1)
+                        {
+                            param.ErrorInfo = strError;
+                            return false;
+                        }
+
+                        // TODO: 备份操作前的 library.xml ?
+                        target_dom.Save(strFileName);
+                    }
+
+                    // 拷贝 数据目录下的 cfgs 子目录
+                    string strSourceCfgsDir = Path.Combine(strTempDir, "_datadir\\cfgs");
+                    string strTargetCfgsDir = Path.Combine(param.DataDir, "cfgs");
+                    nRet = PathUtil.CopyDirectory(strSourceCfgsDir, strTargetCfgsDir, true, out strError);
+                    if (nRet == -1)
+                    {
+                        param.ErrorInfo = "复制数据目录的 cfgs 子目录(" + strSourceCfgsDir + " --> " + strTargetCfgsDir + ")时出错: " + strError;
+                        return false;
+                    }
                 }
                 finally
                 {
                     PathUtil.DeleteDirectory(strTempDir);
                 }
-
 
                 // 导入 .dp2bak 文件内的全部数据
                 nRet = ImportBackupData(
@@ -840,23 +876,6 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-            if (param.Stop != null)
-                param.Stop.SetMessage("正在修改 library.xml 文件");
-
-            // 用 .dbdef.zip 中的 library.xml 内容替换当前 library.xml 部分内容
-            XmlDocument target_dom = null;
-            nRet = MergeLibraryXml(info.Dom,
-            new_library_dom,
-            out target_dom,
-            out strError);
-            if (nRet == -1)
-            {
-                param.ErrorInfo = strError;
-                return false;
-            }
-
-            // TODO: 备份操作前的 library.xml ?
-            target_dom.Save(strFileName);
             return true;
         }
 

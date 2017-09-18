@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Xml;
 using System.IO;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Configuration.Install;
 using System.Security.Cryptography.X509Certificates;
 using System.Runtime.Remoting.Channels.Ipc;
@@ -21,12 +22,16 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Interfaces;
-using System.Threading.Tasks;
 
 namespace DigitalPlatform.LibraryServer
 {
     public partial class InstanceDialog : Form
     {
+        // 被锁定的实例名数组
+        // 正在进行恢复操作的实例名，会进入本数组。以防中途被启动
+        // 引用外部值
+        public List<string> LockingInstances { get; set; }
+
         public string TempDir { get; set; } // 临时文件目录
 
         public event CopyFilesEventHandler CopyFiles = null;
@@ -377,6 +382,26 @@ namespace DigitalPlatform.LibraryServer
                 e.ErrorInfo = "实例名 '" + e.Value + "' 和已存在的其他实例发生了重复";
         }
 
+        bool IsLocking(string strInstanceName)
+        {
+            if (LockingInstances.IndexOf(strInstanceName) == -1)
+                return false;
+            return true;
+        }
+
+        void LockInstance(string strInstanceName, bool bLock)
+        {
+            if (bLock)
+            {
+                if (LockingInstances.IndexOf(strInstanceName) == -1)
+                    LockingInstances.Add(strInstanceName);
+            }
+            else
+            {
+                LockingInstances.Remove(strInstanceName);
+            }
+        }
+
         ListViewItem m_currentEditItem = null;
 
         private void button_modifyInstance_Click(object sender, EventArgs e)
@@ -392,10 +417,16 @@ namespace DigitalPlatform.LibraryServer
             }
 
             ListViewItem item = this.listView_instance.SelectedItems[0];
+            string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
+            if (IsLocking(strInstanceName))
+            {
+                strError = "实例 '" + strInstanceName + "' 当前处于被锁定状态，无法进行修改操作";
+                goto ERROR1;
+            }
+
             this.m_currentEditItem = item;
 
             bool bStopped = false;
-            string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
             if (item.ImageIndex == IMAGEINDEX_RUNNING)
             {
                 // 只对正在 running 状态的实例做停止处理
@@ -675,6 +706,12 @@ namespace DigitalPlatform.LibraryServer
                 foreach (ListViewItem item in this.listView_instance.SelectedItems)
                 {
                     string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
+
+                    if (IsLocking(strInstanceName))
+                    {
+                        strError = "实例 '" + strInstanceName + "' 当前处于被锁定状态，无法进行删除操作";
+                        goto ERROR1;
+                    }
 
                     string strDataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
                     if (String.IsNullOrEmpty(strDataDir) == true)
@@ -1921,7 +1958,28 @@ namespace DigitalPlatform.LibraryServer
             ListViewItem item = this.listView_instance.SelectedItems[0];
 
             string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
-            StartOrStopOneInstance(strInstanceName, "stop");
+
+            if (IsLocking(strInstanceName))
+            {
+                strError = "实例 '" + strInstanceName + "' 当前处于被锁定状态(这意味着它正在恢复操作中途)，无法对其重叠进行恢复操作";
+                goto ERROR1;
+            }
+
+            DialogResult result = MessageBox.Show(this,
+"确实要根据大备份文件恢复 dp2Library 实例 '" + strInstanceName + "'? \r\n\r\n(*** 警告：恢复操作会导致现有数据全部被来自大备份的数据覆盖，并无法撤回 ***)",
+"从大备份恢复 dp2Library 实例",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;   // cancelled
+
+            bool bRunningChanged = false;
+            if (item.ImageIndex == IMAGEINDEX_RUNNING)
+            {
+                StartOrStopOneInstance(strInstanceName, "stop");
+                bRunningChanged = true;
+            }
 
             string strDataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
 
@@ -1936,14 +1994,44 @@ namespace DigitalPlatform.LibraryServer
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
-            string strBackupFileName = dlg.FileName;
-            string strTempRootDir = this.TempDir;
+            LockInstance(strInstanceName, true);
+
+            LibraryInstallHelper.RestoreLibraryParam param_base = new LibraryInstallHelper.RestoreLibraryParam();
+            param_base.InstanceName = strInstanceName;
+            param_base.DataDir = strDataDir;
+            param_base.BackupFileName = dlg.FileName;
+            param_base.TempDirRoot = this.TempDir;
+            param_base.FastMode = true;
             Task.Factory.StartNew(() => RestoreInstance(
                 this.Owner,
+#if NO
                 strDataDir,
                 strBackupFileName,
                 strTempRootDir,
-                true));
+                true
+#endif
+ param_base
+                )).ContinueWith((antecendent) =>
+                {
+                    LockInstance(strInstanceName, false);
+
+                    if (antecendent.IsFaulted == true)
+                    {
+                        this.Invoke((Action)(() => MessageBox.Show(this, ExceptionUtil.GetDebugText(antecendent.Exception))));
+                        return;
+                    }
+                    if (bRunningChanged)
+                    {
+                        // 重新启动实例
+                        if (this.Visible)
+                            this.Invoke((Action)(() =>
+                            {
+                                StartOrStopOneInstance(strInstanceName, "start");
+                            }));
+                        else
+                            StartOrStopOneInstance(strInstanceName, "start");
+                    }
+                });
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1952,10 +2040,14 @@ namespace DigitalPlatform.LibraryServer
         // 本函数会出现无模式对话框表示操作进程
         static void RestoreInstance(
             Control owner,
+#if NO
             string strDataDir,
             string strBackupFileName,
             string strTempDirRoot,
-            bool bFastMode)
+            bool bFastMode
+#endif
+ LibraryInstallHelper.RestoreLibraryParam param_base
+            )
         {
             string strError = "";
 
@@ -1971,7 +2063,7 @@ namespace DigitalPlatform.LibraryServer
             {
 
                 dlg.Font = owner.Font;
-                dlg.Text = "正在恢复实例 " + strDataDir;
+                dlg.Text = "正在恢复实例 " + param_base.DataDir;
                 //dlg.SourceFilePath = strPath;
                 //dlg.TargetFilePath = strTargetPath;
                 dlg.Show(owner);
@@ -1993,11 +2085,10 @@ namespace DigitalPlatform.LibraryServer
             {
                 LibraryInstallHelper.RestoreLibraryParam param = new LibraryInstallHelper.RestoreLibraryParam();
                 param.Stop = stop;
-                param.DataDir = strDataDir;
-                param.BackupFileName = strBackupFileName;
-                param.TempDirRoot = strTempDirRoot;
-                param.FastMode = bFastMode;
-
+                param.DataDir = param_base.DataDir;
+                param.BackupFileName = param_base.BackupFileName;
+                param.TempDirRoot = param_base.TempDirRoot;
+                param.FastMode = param_base.FastMode;
 
                 // 在 dp2library 没有启动的情况下，用大备份文件恢复 dp2library 内全部配置和数据库
                 bool bRet = LibraryInstallHelper.RestoreLibrary(param);
@@ -2007,7 +2098,7 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
 
-                strError = "恢复实例 '" + strDataDir + "' 完成";
+                strError = "恢复实例 '" + param_base.DataDir + "' 完成";
                 goto ERROR1;
             }
             finally
@@ -2093,6 +2184,13 @@ namespace DigitalPlatform.LibraryServer
                 foreach (ListViewItem item in this.listView_instance.SelectedItems)
                 {
                     string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
+
+                    if (IsLocking(strInstanceName))
+                    {
+                        errors.Add("实例 '" + strInstanceName + "' 当前处于被锁定状态，无法进行 " + strAction + " 操作");
+                        continue;
+                    }
+
                     int nRet = dp2library_serviceControl(
         strAction,
         strInstanceName,
@@ -2116,11 +2214,15 @@ namespace DigitalPlatform.LibraryServer
         void StartOrStopOneInstance(string strInstanceName,
             string strAction)
         {
-            ListViewItem item = ListViewUtil.FindItem(this.listView_instance, strInstanceName, COLUMN_NAME);
-            if (item == null)
+            ListViewItem item = null;
+            if (this.Visible)
             {
-                MessageBox.Show(this, "名为 '" + strInstanceName + "' 实例在列表中没有找到");
-                return;
+                item = ListViewUtil.FindItem(this.listView_instance, strInstanceName, COLUMN_NAME);
+                if (item == null)
+                {
+                    MessageBox.Show(this, "名为 '" + strInstanceName + "' 实例在列表中没有找到");
+                    return;
+                }
             }
             List<string> errors = new List<string>();
             this.EnableControls(false);
@@ -2136,7 +2238,10 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                         errors.Add(strError);
                     else
-                        item.ImageIndex = strAction == "stop" ? IMAGEINDEX_STOPPED : IMAGEINDEX_RUNNING;
+                    {
+                        if (item != null)
+                            item.ImageIndex = strAction == "stop" ? IMAGEINDEX_STOPPED : IMAGEINDEX_RUNNING;
+                    }
                 }
             }
             finally

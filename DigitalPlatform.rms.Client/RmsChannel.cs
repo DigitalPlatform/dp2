@@ -6010,6 +6010,34 @@ ref strNewStyle);	// 不要数据体和metadata
             return 0;
         }
 
+        // TODO: 尽快废止这个函数
+        // 包装后的版本，兼容以前的调用方式。
+        public long DoSaveResObject(string strPath,
+    Stream file,
+    long lTotalLength,
+    string strStyle,
+    string strMetadata,
+    string strRange,
+    bool bTailHint,
+    byte[] timestamp,
+    out byte[] output_timestamp,
+    out string strOutputPath,
+    out string strError)
+        {
+            return DoSaveResObject(strPath,
+file,
+lTotalLength,
+strStyle,
+strMetadata,
+strRange,
+file.Position,
+bTailHint,
+timestamp,
+out output_timestamp,
+out strOutputPath,
+out strError);
+        }
+
         // 警告：如果用本函数一次调用写入一个很大的文件的话，可能会内存溢出
         // 保存资源记录
         // parameters:
@@ -6026,6 +6054,7 @@ ref strNewStyle);	// 不要数据体和metadata
             string strStyle,	// 2005/11/4
             string strMetadata,
             string strRange,
+            long lHead,
             bool bTailHint,
             byte[] timestamp,
             out byte[] output_timestamp,
@@ -6044,7 +6073,7 @@ ref strNewStyle);	// 不要数据体和metadata
 
             if (file != null)
             {
-                if (file.Position + lTotalLength > file.Length)
+                if (lHead/*file.Position*/ + lTotalLength > file.Length)
                 {
                     strError = "文件从当前位置 " + Convert.ToString(file.Position) + " 开始到末尾长度不足 " + Convert.ToString(lTotalLength);
                     return -1;
@@ -6054,6 +6083,7 @@ ref strNewStyle);	// 不要数据体和metadata
                     file,
                     lTotalLength,
                     strRange,
+                    lHead,
                     out baTotal,
                     out strError);
                 if (lRet == -1)
@@ -6141,9 +6171,6 @@ ref strNewStyle);	// 不要数据体和metadata
                     return -1;
                 }
             }
-
-
-
             catch (Exception ex)
             {
                 /*

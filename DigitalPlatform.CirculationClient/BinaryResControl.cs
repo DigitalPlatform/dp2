@@ -2129,8 +2129,14 @@ bool bChanged)
 
                     nUploadCount++;
 
+                    string strMetadata = LibraryChannel.BuildMetadata(strMime,
+                        // Path.GetFileName(strLocalFilename)
+                        strLocalFilename
+                        );
+
                     if (bOnlyChangeMetadata)
                     {
+#if NO
                         long lRet = channel.SaveResObject(
     Stop,
     strResPath,
@@ -2142,7 +2148,17 @@ bool bChanged)
     timestamp,
     out output_timestamp,
     out strError);
-
+#endif
+                        long lRet = channel.UploadFile(
+Stop,
+"", // strLocalFilename,
+strResPath,
+strMetadata,
+"", // strStyle,
+timestamp,   // timestamp,
+false,
+out output_timestamp,
+out strError);
                         timestamp = output_timestamp;
                         if (timestamp != null)
                             ListViewUtil.ChangeItemText(item,
@@ -2156,9 +2172,9 @@ bool bChanged)
                     else
                     {
                         // 检测文件尺寸
-                        FileInfo fi = new FileInfo(strLocalFilename);
+                        // FileInfo fi = new FileInfo(strLocalFilename);
 
-                        if (fi.Exists == false)
+                        if (File.Exists(strLocalFilename) == false)
                         {
                             strError = "文件 '" + strLocalFilename + "' 不存在...";
                             return -1;
@@ -2169,8 +2185,6 @@ bool bChanged)
                         channel.Timeout = new TimeSpan(0, 5, 0);
                         try
                         {
-                            string strMetadata = LibraryChannel.BuildMetadata(strMime, Path.GetFileName(strLocalFilename));
-
                             lRet = channel.UploadFile(
 Stop,
 strLocalFilename,

@@ -15,6 +15,7 @@ using DigitalPlatform.GUI;
 
 using DigitalPlatform.rms.Client.rmsws_localhost;
 using DigitalPlatform.Text;
+using DigitalPlatform.IO;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -679,6 +680,8 @@ namespace DigitalPlatform.rms.Client
                     );
             }
 
+            long lHead = res.StartOffs;
+
             byte[] timestamp = res.Timestamp;
             byte[] output_timestamp = null;
 
@@ -733,7 +736,10 @@ namespace DigitalPlatform.rms.Client
                         + " " + strPercent + " " + strRecordPath + strWarning + strWaiting + " " + strCount);
 
 
-                inputfile.Seek(res.StartOffs, SeekOrigin.Begin);
+#if NO
+                inputfile.FastSeek(res.StartOffs);
+                long lHead = inputfile.Position;
+#endif
 
                 long lRet = channel.DoSaveResObject(strRecordPath,
                     inputfile,
@@ -741,6 +747,7 @@ namespace DigitalPlatform.rms.Client
                     "",	// style
                     res.MetadataXml,
                     ranges[j],
+                    lHead,
                     j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
                     timestamp,
                     out output_timestamp,

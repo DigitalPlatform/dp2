@@ -38,6 +38,10 @@ namespace dp2Installer
 {
     public partial class MainForm : Form
     {
+        // 被锁定的实例名数组
+        // 正在进行恢复操作的实例名，会进入本数组。以防中途被启动
+        List<string> locking_instances = new List<string>();
+
         FloatingMessageForm _floatingMessage = null;
 
         /// <summary>
@@ -429,6 +433,12 @@ FormWindowState.Normal);
             string strError = "";
             int nRet = 0;
 
+            if (this.locking_instances.Count > 0)
+            {
+                strError = "目前有下列 dp2library 实例(" + StringUtil.MakePathList(this.locking_instances) + ")处于锁定状态，不允许此时升级 dp2library";
+                goto ERROR1;
+            }
+
             this._floatingMessage.Text = "正在升级 dp2library - 图书馆应用服务器 ...";
 
             try
@@ -787,6 +797,7 @@ MessageBoxDefaultButton.Button2);
                 {
                     DigitalPlatform.LibraryServer.InstanceDialog dlg = new DigitalPlatform.LibraryServer.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
+                    dlg.LockingInstances = this.locking_instances;
                     dlg.TempDir = this.TempDir;
                     // dlg.SourceDir = strRootDir;
                     dlg.CopyFiles += dlg_dp2Library_CopyFiles;
@@ -3401,6 +3412,7 @@ out string strError)
                 {
                     DigitalPlatform.LibraryServer.InstanceDialog dlg = new DigitalPlatform.LibraryServer.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
+                    dlg.LockingInstances = this.locking_instances;
                     dlg.TempDir = this.TempDir;
                     // dlg.DataZipFileName = Path.Combine(this.DataDir, "library_data.zip");
                     dlg.CopyFiles += dlg_dp2Library_CopyFiles;
@@ -3509,6 +3521,12 @@ out string strError)
             string strError = "";
             int nRet = 0;
 
+            if (this.locking_instances.Count > 0)
+            {
+                strError = "目前有下列 dp2library 实例(" + StringUtil.MakePathList(this.locking_instances) + ")处于锁定状态，不允许此时启动或者停止 dp2library";
+                goto ERROR1;
+            }
+
             AppendString("正在获得可执行文件目录 ...\r\n");
 
             Application.DoEvents();
@@ -3538,6 +3556,12 @@ out string strError)
         {
             string strError = "";
             int nRet = 0;
+
+            if (this.locking_instances.Count > 0)
+            {
+                strError = "目前有下列 dp2library 实例(" + StringUtil.MakePathList(this.locking_instances) + ")处于锁定状态，不允许此时启动或者停止 dp2library";
+                goto ERROR1;
+            }
 
             AppendString("正在获得可执行文件目录 ...\r\n");
 
@@ -3612,6 +3636,15 @@ out string strError)
         {
             string strError = "";
             int nRet = 0;
+
+            if (strName == "dp2Library")
+            {
+                if (this.locking_instances.Count > 0)
+                {
+                    strError = "目前有下列 dp2library 实例(" + StringUtil.MakePathList(this.locking_instances) + ")处于锁定状态，不允许此时启动或者停止 dp2library";
+                    goto ERROR1;
+                }
+            }
 
             if (bInstall)
                 AppendSectionTitle("注册 Windows Service 开始");
@@ -4559,6 +4592,12 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             string strError = "";
             int nRet = 0;
 
+            if (this.locking_instances.Count > 0)
+            {
+                strError = "目前有下列 dp2library 实例(" + StringUtil.MakePathList(this.locking_instances) + ")处于锁定状态，无法卸载 dp2library";
+                goto ERROR1;
+            }
+
             this._floatingMessage.Text = "正在卸载 dp2library - 图书馆应用服务器 ...";
             try
             {
@@ -4593,6 +4632,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 {
                     DigitalPlatform.LibraryServer.InstanceDialog dlg = new DigitalPlatform.LibraryServer.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
+                    dlg.LockingInstances = this.locking_instances;
                     dlg.TempDir = this.TempDir;
                     dlg.Text = "dp2Library - 彻底卸载所有实例和数据目录";
                     dlg.Comment = "下列实例将被全部卸载。请仔细确认。一旦卸载，全部数据目录、数据库和实例信息将被删除，并且无法恢复。";

@@ -903,14 +903,35 @@ namespace DigitalPlatform.Range
             }
         }
 
+        // 包装后的版本，兼容以前的代码
+        public static long CopyFragment(
+    Stream fileSource,
+    long lTotalLength,
+    string strContentRange,
+    out byte[] baResult,
+    out string strErrorInfo)
+        {
+            long lFileStart = fileSource.Position;
+            return CopyFragment(
+    fileSource,
+    lTotalLength,
+    strContentRange,
+    lFileStart,
+    out baResult,
+    out strErrorInfo);
+        }
+
         // 注意，本函数会改变文件当前指针位置，算法有缺陷
         // 将源文件中指定的片断内容复制到目标文件中
         // 当strContentRange的值为""时，表示复制整个文件
+        // parameters:
+        //      lFileStart  fileSource 中打算操作的片段的起始位置。strContentRange 中的数字，是从这个起始位置以后计算的
         // 返回值：-1 出错 其他 复制的总尺寸
         public static long CopyFragment(
             Stream fileSource,
             long lTotalLength,
             string strContentRange,
+            long lFileStart,
             out byte[] baResult,
             out string strErrorInfo)
         {
@@ -924,7 +945,7 @@ namespace DigitalPlatform.Range
                 return 0;
             */
 
-            long lFileStart = fileSource.Position;
+            // long lFileStart = fileSource.Position;
 
             // 表示范围的字符串为空，恰恰表示要包含全部范围
             if (strContentRange == "")
@@ -974,7 +995,9 @@ namespace DigitalPlatform.Range
                 RangeItem ri = (RangeItem)rl[i];
 
                 // TODO: 这里是性能瓶颈。应该是 SeekOrigin.Current 才好
-                fileSource.Seek(ri.lStart + lFileStart, SeekOrigin.Begin);
+                // fileSource.Seek(ri.lStart + lFileStart, SeekOrigin.Begin);
+                FastSeek(fileSource, ri.lStart + lFileStart);
+
                 baResult = ByteArray.EnsureSize(baResult, nStart + (int)ri.lLength);
                 nStart += fileSource.Read(baResult, nStart, (int)ri.lLength);
 

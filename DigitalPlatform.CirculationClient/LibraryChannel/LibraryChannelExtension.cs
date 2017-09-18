@@ -57,7 +57,7 @@ namespace DigitalPlatform.CirculationClient
             string strStyle,
             byte[] timestamp,
             bool bRetryOverwiteExisting,
-            out byte [] output_timestamp,
+            out byte[] output_timestamp,
             out string strError)
         {
             strError = "";
@@ -69,6 +69,27 @@ namespace DigitalPlatform.CirculationClient
             if (string.IsNullOrEmpty(strMime))
                 strMime = PathUtil.MimeTypeFrom(strClientFilePath);
 #endif
+
+            // 只修改 metadata
+            if (string.IsNullOrEmpty(strClientFilePath) == true)
+            {
+                long lRet = channel.SaveResObject(
+stop,
+strResPath,
+null, // strClientFilePath,
+0,
+strMetadata,
+"",
+timestamp,
+strStyle,
+out output_timestamp,
+out strError);
+                timestamp = output_timestamp;
+                if (lRet == -1)
+                    return -1;
+                return 0;
+            }
+
 
             // 检测文件尺寸
             FileInfo fi = new FileInfo(strClientFilePath);
