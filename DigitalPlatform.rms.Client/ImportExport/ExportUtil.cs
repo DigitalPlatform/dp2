@@ -186,6 +186,10 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
+        // return:
+        //      -1  出错
+        //      0   因 strXmlBody 为空，忽略此记录，并没有导出任何内容
+        //      1   导出了内容
         public int ExportOneRecord(
             RmsChannel channel,
             DigitalPlatform.Stop stop,
@@ -198,6 +202,10 @@ namespace DigitalPlatform.rms.Client
         {
             strError = "";
             int nRet = 0;
+
+            // 2017/9/19
+            if (string.IsNullOrEmpty(strXmlBody))
+                return 0;
 
             if (this.FileType == ExportFileType.XmlFile)
             {
@@ -232,6 +240,10 @@ namespace DigitalPlatform.rms.Client
                 // 将主记录和相关资源写入备份文件
                 if (this.SafeMode)
                 {
+                    // return:
+                    //      -1  出错
+                    //      0   因 strXmlBody 为空，忽略此记录，并没有导出任何内容
+                    //      1   导出了内容
                     nRet = SafeWriteRecordToBackupFile(
         this.m_owner,
         channel,
@@ -245,6 +257,11 @@ namespace DigitalPlatform.rms.Client
         out strError);
                 }
                 else
+                {
+                    // return:
+                    //      -1  出错
+                    //      0   因 strXmlBody 为空，忽略此记录，并没有导出任何内容
+                    //      1   导出了内容
                     nRet = WriteRecordToBackupFile(
                         this.m_owner,
                         channel,
@@ -255,10 +272,13 @@ namespace DigitalPlatform.rms.Client
                         strXmlBody,
                         baTimestamp,
                         out strError);
+                }
                 if (nRet == -1)
                     return -1;
+
+                return nRet;
             }
-            return 0;
+            return 1;
         }
 
         // 得到Xml记录中所有<file>元素的id属性值
@@ -298,6 +318,10 @@ namespace DigitalPlatform.rms.Client
         #region 写入 .dp2bak 文件
 
         // 本函数是将新的记录完整创建好以后再追加到 outputfile 末尾。能确保另一个并发的顺序读操作读入正确的内容
+        // return:
+        //      -1  出错
+        //      0   因 strXmlBody 为空，忽略此记录，并没有导出任何内容
+        //      1   导出了内容
         static int SafeWriteRecordToBackupFile(
             IWin32Window owner,
             RmsChannel channel,
@@ -324,6 +348,10 @@ namespace DigitalPlatform.rms.Client
                             FileAccess.ReadWrite,
                             FileShare.None))
                 {
+                    // return:
+                    //      -1  出错
+                    //      0   因 strXmlBody 为空，忽略此记录，并没有导出任何内容
+                    //      1   导出了内容
                     int nRet = WriteRecordToBackupFile(
                     owner,
                     channel,
@@ -337,8 +365,11 @@ namespace DigitalPlatform.rms.Client
                     if (nRet == -1)
                         return -1;
 
-                    temp_stream.Seek(0, SeekOrigin.Begin);
-                    StreamUtil.LockingDumpStream(temp_stream, outputfile, false);
+                    if (nRet == 1)
+                    {
+                        temp_stream.Seek(0, SeekOrigin.Begin);
+                        StreamUtil.LockingDumpStream(temp_stream, outputfile, false);
+                    }
                     return nRet;
                 }
             }
@@ -356,6 +387,10 @@ namespace DigitalPlatform.rms.Client
         // 将主记录和相关资源写入备份文件
         // 本函数如果失败，会自动把本次写入的局部内容从文件末尾抹去
         // TODO: 测试磁盘空间耗尽的情况
+        // return:
+        //      -1  出错
+        //      0   因 strXmlBody 为空，忽略此记录，并没有导出任何内容
+        //      1   导出了内容
         static int WriteRecordToBackupFile(
             IWin32Window owner,
             RmsChannel channel,
@@ -368,6 +403,13 @@ namespace DigitalPlatform.rms.Client
             out string strError)
         {
             strError = "";
+
+            if (string.IsNullOrEmpty(strXmlBody))
+            {
+                strError = "strXmlBody 为空，忽略此记录";
+                return 0;
+            }
+
             Debug.Assert(String.IsNullOrEmpty(strXmlBody) == false, "strXmlBody不能为空");
 
             Debug.Assert(channel != null, "");
@@ -456,7 +498,7 @@ namespace DigitalPlatform.rms.Client
                 }
             }
 
-            return 0;
+            return 1;
         ERROR1:
             return -1;
         }

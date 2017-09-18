@@ -34,7 +34,7 @@ namespace DigitalPlatform.rms
     public class SqlDatabase : Database
     {
         // 对物理文件开始缓存和加速的开始尺寸
-        const int CACHE_SIZE = -1;  // 10 * 1024;
+        const int CACHE_SIZE = 10 * 1024;   // -1;  // 10 * 1024;
 
         internal StreamCache _streamCache = new StreamCache(100);
 

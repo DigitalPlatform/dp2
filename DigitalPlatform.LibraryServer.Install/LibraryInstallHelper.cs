@@ -958,7 +958,7 @@ RestoreLibraryParam param
                 if (attr_value == null)
                     return;
                 t = target_dom.CreateElement(element_name);
-                t.OwnerDocument.AppendChild(t);
+                t.OwnerDocument.DocumentElement.AppendChild(t);
             }
 
             t.SetAttribute(attr_name, attr_value);
@@ -980,7 +980,7 @@ RestoreLibraryParam param
                 if (v_node == null)
                     return;
                 t = target_dom.CreateElement(element_name);
-                t.OwnerDocument.AppendChild(t);
+                t.OwnerDocument.DocumentElement.AppendChild(t);
             }
 
             t.SetAttribute(attr_name, v);
@@ -995,7 +995,7 @@ RestoreLibraryParam param
             if (t == null)
             {
                 t = target_dom.CreateElement(element_name);
-                t.OwnerDocument.AppendChild(t);
+                t.OwnerDocument.DocumentElement.AppendChild(t);
             }
 
             XmlElement s = old_dom.DocumentElement.SelectSingleNode(element_name) as XmlElement;
