@@ -9,6 +9,7 @@
 // 7) 2011/8/17 删除Main()函数，改用最新的动态菜单方式
 // 8) 2012/9/22 CreateMenu()函数增加了对BindingForm的处理
 // 9) 2015/12/2 注释掉和 905 字段有关的几个菜单项，以避免用户发生误会
+// 10) 2017/9/19 将 ISBN 10/13 转换功能删除，代之以 ISSN 13/8 转换功能
 
 // #define TESTING
 using System;
@@ -88,11 +89,11 @@ public class MyHost : DetailHost
             // 分割行
             actions.NewSeperator();
 
-            // 规整ISBN为13
-            actions.NewItem("规整为ISBN-13", "对010$a中ISBN进行规整", "HyphenISBN_13", false);
+            // 规整 ISSN 为13
+            actions.NewItem("规整为ISSN-13", "对011$a中ISSN进行规整", "HyphenISSN_13", false);
 
-            // 规整ISBN为10
-            actions.NewItem("规整为ISBN-10", "对010$a中ISBN进行规整", "HyphenISBN_10", false);
+            // 规整 ISSN 为 8
+            actions.NewItem("规整为ISSN-8", "对011$a中ISSN进行规整", "HyphenISSN_8", false);
 
             // 分割行
             actions.NewSeperator();
@@ -177,11 +178,11 @@ public class MyHost : DetailHost
     }
 #endif
 
-    // 设置菜单加亮状态 -- 规整ISBN为13
-    void HyphenISBN_13_setMenu(object sender, SetMenuEventArgs e)
+    // 设置菜单加亮状态 -- 规整ISSN为13
+    void HyphenISSN_13_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
-        if (curfield == null || curfield.Name != "010")
+        if (curfield == null || curfield.Name != "011")
         {
             e.Action.Active = false;
             return;
@@ -193,14 +194,14 @@ public class MyHost : DetailHost
             return;
         }
 
-        string strISBN = a.Value;
-        if (string.IsNullOrEmpty(strISBN) == true)
+        string strISSN = a.Value;
+        if (string.IsNullOrEmpty(strISSN) == true)
         {
             e.Action.Active = false;
             return;
         }
 
-        if (IsbnSplitter.IsIsbn13(strISBN) == true)
+        if (IsbnSplitter.IsIsbn13(strISSN) == true)
         {
             e.Action.Active = false;
             return;
@@ -209,11 +210,11 @@ public class MyHost : DetailHost
         e.Action.Active = true;
     }
 
-    // 设置菜单加亮状态 -- 规整ISBN为10
-    void HyphenISBN_10_setMenu(object sender, SetMenuEventArgs e)
+    // 设置菜单加亮状态 -- 规整ISSN为8
+    void HyphenISSN_8_setMenu(object sender, SetMenuEventArgs e)
     {
         Field curfield = this.DetailForm.MarcEditor.FocusedField;
-        if (curfield == null || curfield.Name != "010")
+        if (curfield == null || curfield.Name != "011")
         {
             e.Action.Active = false;
             return;
@@ -225,14 +226,14 @@ public class MyHost : DetailHost
             return;
         }
 
-        string strISBN = a.Value;
-        if (string.IsNullOrEmpty(strISBN) == true)
+        string strISSN = a.Value;
+        if (string.IsNullOrEmpty(strISSN) == true)
         {
             e.Action.Active = false;
             return;
         }
 
-        if (IsbnSplitter.IsIsbn13(strISBN) == true)
+        if (IsbnSplitter.IsIsbn13(strISSN) == true)
         {
             e.Action.Active = true;
             return;
@@ -753,38 +754,34 @@ public class MyHost : DetailHost
         MessageBox.Show(this.DetailForm, strError);
     }
 
-    void HyphenISBN_13()
+    void HyphenISSN_13()
     {
-        HyphenISBN(true);
+        HyphenISSN(true);
     }
 
-    void HyphenISBN_10()
+    void HyphenISSN_8()
     {
-        HyphenISBN(false);
+        HyphenISSN(false);
     }
 
-    void HyphenISBN(bool bForce13)
+    void HyphenISSN(bool bForce13)
     {
         string strError = "";
-        string strISBN = "";
+        string strISSN = "";
         int nRet = 0;
 
-        strISBN = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("010", "a");
+        strISSN = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("011", "a");
 
-        if (strISBN.Trim() == "")
+        if (strISSN.Trim() == "")
         {
-            MessageBox.Show(this.DetailForm, "记录中不存在010$a子字段,因此无法进行规整");
+            MessageBox.Show(this.DetailForm, "记录中不存在011$a子字段,因此无法进行规整");
             return;
         }
 
-        nRet = this.DetailForm.MainForm.LoadIsbnSplitter(true, out strError);
-        if (nRet == -1)
-            goto ERROR1;
-
         string strResult = "";
 
-        nRet = this.DetailForm.MainForm.IsbnSplitter.IsbnInsertHyphen(strISBN,
-            bForce13 == true ? "force13,strict" : "force10,strict",
+        nRet = IsbnSplitter.IssnInsertHyphen(strISSN,
+            bForce13 == true ? "force13,strict" : "force8,strict",
                     out strResult,
                     out strError);
         if (nRet == -1)
@@ -793,8 +790,8 @@ public class MyHost : DetailHost
         if (nRet == 1)
         {
             DialogResult result = MessageBox.Show(this.DetailForm,
-                "原ISBN '" + strISBN + "'加工成 '" + strResult + "' 后发现校验位有变化。\r\n\r\n是否接受修改?",
-                "规整ISBN",
+                "原ISSN '" + strISSN + "'加工成 '" + strResult + "' 后发现校验位有变化。\r\n\r\n是否接受修改?",
+                "规整ISSN",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
                 MessageBoxDefaultButton.Button2);
@@ -803,7 +800,7 @@ public class MyHost : DetailHost
 
         }
 
-        this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("010", "a", strResult);
+        this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("011", "a", strResult);
         return;
     ERROR1:
         MessageBox.Show(this.DetailForm, strError);

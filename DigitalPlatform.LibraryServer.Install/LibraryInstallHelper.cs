@@ -1485,7 +1485,7 @@ RestoreLibraryParam param
             foreach (DirectoryInfo info in dis)
             {
                 // 跳过 '_datadir'
-                if (info.Name.StartsWith("_"))
+                if (info.Name == "_datadir")
                     continue;
 
                 string strTemplateDir = Path.Combine(info.FullName, "cfgs");

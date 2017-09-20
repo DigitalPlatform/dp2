@@ -4252,15 +4252,24 @@ MessageBoxDefaultButton.Button1);
                 EndSearch();
             }
 
-            AppendString("为标记 library.xml 文件，正在停止 dp2library 服务 ...\r\n");
+            AppendString("为标记 library.xml 文件，正在停止实例 '" + strInstanceName + "' ...\r\n");
             Application.DoEvents();
 
+#if NO
             nRet = InstallHelper.StopService("dp2LibraryService",
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             else
                 AppendString("dp2library 服务已经停止\r\n");
+#endif
+            nRet = StartOrStopOneDp2libraryInstance(strInstanceName,
+            "stop",
+            out strError);
+            if (nRet == -1)
+                MessageBox.Show(this, strError);
+            else
+                AppendString("dp2library 实例 '" + strInstanceName + "' 已经停止\r\n");
 
             // 在 library.xml 中标记，已经创建过初始书目库了
             // return:
@@ -4273,17 +4282,43 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
-            AppendString("正在启动 dp2library 服务 ...\r\n");
+            AppendString("正在启动实例 '" + strInstanceName + "' ...\r\n");
             Application.DoEvents();
 
+#if NO
             nRet = InstallHelper.StartService("dp2LibraryService",
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             else
                 AppendString("dp2library 服务成功启动\r\n");
+#endif
+            nRet = StartOrStopOneDp2libraryInstance(strInstanceName,
+"start",
+out strError);
+            if (nRet == -1)
+                MessageBox.Show(this, strError);
+            else
+                AppendString("dp2library 实例 '" + strInstanceName + "' 成功启动\r\n");
+
 
             return 1;
+        }
+
+        int StartOrStopOneDp2libraryInstance(string strInstanceName,
+            string strAction,
+            out string strError)
+        {
+            strError = "";
+
+            int nRet = DigitalPlatform.LibraryServer.InstanceDialog.dp2library_serviceControl(
+strAction,
+strInstanceName,
+out strError);
+            if (nRet == -1)
+                return -1;
+
+            return 0;
         }
 
         void DoLibraryStop(object sender, StopEventArgs e)

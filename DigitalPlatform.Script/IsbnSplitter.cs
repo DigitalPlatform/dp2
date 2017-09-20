@@ -237,6 +237,34 @@ namespace DigitalPlatform.Script
         }
 
         /// <summary>
+        /// 计算出 ISSN-8 校验位
+        /// </summary>
+        /// <param name="strISSN">ISSN 字符串.8 字符</param>
+        /// <returns>校验位字符</returns>
+        public static char GetIssn8VerifyChar(string strISSN)
+        {
+            strISSN = strISSN.Trim();
+            strISSN = strISSN.Replace("-", "");
+            strISSN = strISSN.Replace(" ", "");
+
+            if (strISSN.Length < 7)
+                throw new ArgumentException("用于计算校验位的ISSN-8长度至少要在7位数字以上(不包括横杠在内)");
+
+            int sum = 0;
+            for (int i = 0; i < 7; i++)
+            {
+                sum += (strISSN[i] - '0') * (8 - i);
+            }
+            int v = 11 - (sum % 11);
+
+            if (v == 10)
+                return 'X';
+
+            return (char)('0' + v);
+        }
+
+
+        /// <summary>
         /// 计算出 ISBN-10 校验位
         /// </summary>
         /// <param name="strISBN">ISBN 字符串</param>
@@ -530,6 +558,166 @@ namespace DigitalPlatform.Script
 
             return 0;
         }
+
+        /// <summary>
+        /// 在 ISSN 字符串中适当的位置插入'-'符号
+        /// 如果提供的ISBN字符串本来就有978前缀，那么结果仍将保留前缀。如果本来就没有，结果里面也没有。
+        /// </summary>
+        /// <param name="strISSN">ISSN 字符串</param>
+        /// <param name="strStyle">处理风格。force8/force13/auto/remainverifychar/strict</param>
+        /// <param name="strTarget">返回处理结果</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1:出错; 0:未修改校验位; 1:修改了校验位</returns>
+        public static int IssnInsertHyphen(
+            string strISSN,
+            string strStyle,
+            out string strTarget,
+            out string strError)
+        {
+            strTarget = "";
+            strError = "";
+
+            string strSource;
+            int nSecondLen;
+
+            // Debug.Assert(false, "");
+
+            strSource = strISSN;
+            strSource = strSource.Trim();
+
+            bool bHasRemovePrefix977 = false; // 是否有977前缀
+
+            bool bForce8 = StringUtil.IsInList("force8", strStyle);
+            bool bForce13 = StringUtil.IsInList("force13", strStyle);
+            bool bAuto = StringUtil.IsInList("auto", strStyle);
+            bool bRemainVerifyChar = StringUtil.IsInList("remainverifychar", strStyle); // 是否不要重新计算校验位
+            bool bStrict = StringUtil.IsInList("strict", strStyle); // 是否严格要求strISBN输入参数为10或13位
+
+            int nCount = 0;
+            if (bForce8 == true)
+                nCount++;
+            if (bForce13 == true)
+                nCount++;
+            if (bAuto == true)
+                nCount++;
+
+            if (nCount > 1)
+            {
+                strError = "strStyle值 '" + strStyle + "' 中的force8/force13/auto 3种风格是互相排斥，不能同时具备。";
+                return -1;
+            }
+
+            strSource = strSource.Replace("-", "");
+            strSource = strSource.Replace(" ", "");
+
+            bool bAdjustLength = false; // 是否调整过输入的strISSN的长度
+
+            if (bStrict == false)
+            {
+                if (strSource.Length == 7)
+                {
+                    strSource += '0';
+                    bRemainVerifyChar = false;  // 必须要重新计算校验位了
+                    bAdjustLength = true;
+                }
+                else if (strSource.Length == 12)
+                {
+                    strSource += '0';
+                    bRemainVerifyChar = false;  // 必须要重新计算校验位了
+                    bAdjustLength = true;
+                }
+            }
+
+            string strPrefix = "977";
+
+            // 13位、无-、前缀为977
+            if (strSource.Length == 13
+                && strSource.IndexOf("-") == -1
+                && strSource.Substring(0, 3) == "977"
+                )
+            {
+                if (strSource.Length >= 3)
+                    strPrefix = strSource.Substring(0, 3);
+
+                strSource = strSource.Substring(3, 10); // 丢弃前3位，但不丢弃校验位
+
+                bHasRemovePrefix977 = true;
+            }
+
+            if (strSource.Length != 8
+                && strSource.Length != 10
+                && strSource.Length != 13)
+            {
+                strError = "ISSN中(除'-'以外)应为8位、10位或13位有效字符(" + strSource + " " + Convert.ToString(strSource.Length) + ")";
+                return -1;
+            }
+
+            // 2017/9/19
+            if (strSource.Length == 8)
+                strSource = strSource.Substring(0, 7);  // 丢掉原有 8 位的校验位
+            if (strSource.Length < 10)
+                strSource = strSource.PadRight(10, '0');
+
+            strTarget = strSource;
+
+            strTarget = strTarget.Insert(4, "-");
+            strTarget = strTarget.Insert(4 + 3 + 1, "-");
+            strTarget = strTarget.Insert(7 + 2 + 1 + 1, "-");
+
+            if (bForce13 == true)
+            {
+                if (strTarget.Length == 13)
+                    strTarget = strPrefix + "-" + strTarget;
+            }
+            else if (bAuto == true && bHasRemovePrefix977 == true)
+            {
+                strTarget = strPrefix + "-" + strTarget;
+            }
+
+            bool bVerifyChanged = false;
+
+            // 重新计算校验码
+            // 重新添加ISBN-10的校验位。因为条码号中ISBN-13校验位算法不同。
+            if (bRemainVerifyChar == false)
+            {
+                if (strTarget.Length == 13)
+                {
+                    char old_ver = strTarget[12];
+                    strTarget = strTarget.Substring(0, strTarget.Length - 1 - 4);
+                    char v = GetIssn8VerifyChar(strTarget);
+                    strTarget += new string(v, 1);
+
+                    if (old_ver != v)
+                        bVerifyChanged = true;
+                }
+                else if (strTarget.Length == 17)
+                {
+                    char old_ver = strTarget[16];
+
+                    strTarget = strTarget.Substring(0, strTarget.Length - 1);
+                    char v = GetIsbn13VerifyChar(strTarget);
+                    strTarget += new string(v, 1);
+
+                    if (old_ver != v)
+                        bVerifyChanged = true;
+                }
+            }
+
+            if (bHasRemovePrefix977 == true
+                && bForce8 == true)
+                return 0;   // 移走977后，校验位肯定要发生变化。因此不通知这种变化
+
+            if (bAdjustLength == false
+                && bForce13 == true
+                && strISSN.Trim().Replace("-", "").Length == 8)
+                return 0;   // 加入了前缀后，校验位肯定要发生变化，因此不通知这种变化
+
+            if (bVerifyChanged == true)
+                return 1;
+
+            return 0;
+        }
+
 
         class Range
         {

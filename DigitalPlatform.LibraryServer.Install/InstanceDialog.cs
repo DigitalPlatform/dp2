@@ -1141,7 +1141,6 @@ namespace DigitalPlatform.LibraryServer
                     this.NewInstanceNames.Add(strInstanceName);
                 }
 
-
                 // 兑现修改
                 if (info.Changed == true
                     || info.Upgrade == true)
@@ -1996,6 +1995,9 @@ MessageBoxDefaultButton.Button2);
 
             LockInstance(strInstanceName, true);
 
+            // 对这个实例就不要延迟创建初始书目库了
+            this.NewInstanceNames.Remove(strInstanceName);
+
             LibraryInstallHelper.RestoreLibraryParam param_base = new LibraryInstallHelper.RestoreLibraryParam();
             param_base.InstanceName = strInstanceName;
             param_base.DataDir = strDataDir;
@@ -2358,7 +2360,7 @@ MessageBoxDefaultButton.Button2);
         // return:
         //      -1  出错
         //      0/1 strCommand 为 "getState" 时分别表示实例 不在运行/在运行 状态
-        static int dp2library_serviceControl(
+        public static int dp2library_serviceControl(
     string strCommand,
     string strInstanceName,
     out string strError)
