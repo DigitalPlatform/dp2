@@ -1973,6 +1973,30 @@ MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;   // cancelled
 
+            {
+                // 要求操作者用 supervisor 账号登录一次。以便后续进行各种重要操作。
+                // 只需要 library.xml 即可，不需要 dp2library 在运行中。
+                // return:
+                //      -2  实例没有找到
+                //      -1  出错
+                //      0   放弃验证
+                //      1   成功
+                int nRet = LibraryInstallHelper.LibrarySupervisorLogin(this,
+                    strInstanceName,
+                    "恢复实例 '" + strInstanceName + "' 前，需要验证您的 dp2library 管理员身份",
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = strError + "\r\n\r\n已放弃恢复操作";
+                    goto ERROR1;
+                }
+                if (nRet == 0)
+                    return;
+
+                if (nRet == -2)
+                    goto ERROR1;
+            }
+
             bool bRunningChanged = false;
             if (item.ImageIndex == IMAGEINDEX_RUNNING)
             {

@@ -154,7 +154,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.111 (2017/6/7) WriteRes() API 的 strStyle 参数允许使用 simulate。此时不会产生操作日志
         //      2.112 (2017/6/14) SetEntities() API 增加了一种 Action 为 verify
         //      2.113 (2017/6/16) GetBiblioInfos() API 增加了一种格式 marc。也可以用作 marc:syntax
-        public static string Version = "2.113";
+        //      2.114 (2017/9/20) 批处理任务 大备份初步可用。对对象文件的文件指针用法进行了优化(StreamCache 类)
+        public static string Version = "2.114";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

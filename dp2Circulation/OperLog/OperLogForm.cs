@@ -208,6 +208,7 @@ namespace dp2Circulation
         {
             this.listView_records.Items.Clear();
             this.listView_records.Update();
+            Application.DoEvents();
 
             this.SortColumns_records.Clear();
             SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
@@ -244,16 +245,30 @@ namespace dp2Circulation
                 nLevel = 0;
 
             m_strFindOperations = dlg.Operations;
-            m_strFilters = dlg.Filters;
+            m_strFilters = CanonicalizeFilters(dlg.Filters);
             m_recPathList = dlg.RecPathList;
             return true;
         }
 
+        static string CanonicalizeFilters(string strFilters)
+        {
+            if (string.IsNullOrEmpty(strFilters))
+                return "<无>";
+
+            if (StringUtil.IsInList("<无>", strFilters)
+                || StringUtil.IsInList("<none>", strFilters))
+                return "<无>";
+
+            return strFilters;
+        }
+
         string GetFilterParamString()
         {
-            string strText = this.m_strFilters;
+            // string strText = this.m_strFilters;
+            string strText = this.m_strFindOperations;  // 2017/9/20
             if (string.IsNullOrEmpty(strText)
-                || StringUtil.IsInList("<all>", strText))
+                || StringUtil.IsInList("<all>", strText)
+                || StringUtil.IsInList("<全部>", strText))
                 return "";
             return strText;
         }
@@ -3514,7 +3529,7 @@ FileShare.ReadWrite))
                                 return -1;
                             }
                             if (stream.Position != lHint)
-                                stream.Seek(lHint, SeekOrigin.Begin);
+                                stream.FastSeek(lHint);
                         }
 
                         long lAttachmentTotalLength = 0;
@@ -7366,6 +7381,7 @@ MessageBoxDefaultButton.Button1);
     string strVersionFileName,
     string strLibraryCodeList,
     string strDp2LibraryServerUrl,
+            //string strFilter,   // 2017/9/20
     out string strError)
         {
             strError = "";
@@ -7385,11 +7401,14 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
-            string strCurrentLibraryCode = DomUtil.GetAttr(dom.DocumentElement, "libraryCodeList");
-            string strCurrentServerUrl = DomUtil.GetAttr(dom.DocumentElement, "libraryServerUrl");
+            string strCurrentLibraryCode = dom.DocumentElement.GetAttribute("libraryCodeList");
+            string strCurrentServerUrl = dom.DocumentElement.GetAttribute("libraryServerUrl");
+            //string strCurrentFilter = dom.DocumentElement.GetAttribute("filter");
 
             if (strLibraryCodeList != strCurrentLibraryCode
-                || strCurrentServerUrl != strDp2LibraryServerUrl)
+                || strCurrentServerUrl != strDp2LibraryServerUrl
+                // || strCurrentFilter != strFilter
+                )
                 return 1;
 
             return 0;
@@ -7402,6 +7421,7 @@ MessageBoxDefaultButton.Button1);
             string strVersionFileName,
             string strLibraryCodeList,
             string strDp2LibraryServerUrl,
+            //string strFilter,   // 2017/9/20
             out string strError)
         {
             strError = "";
@@ -7413,8 +7433,9 @@ MessageBoxDefaultButton.Button1);
 
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml("<root />");
-                DomUtil.SetAttr(dom.DocumentElement, "libraryCodeList", strLibraryCodeList);
-                DomUtil.SetAttr(dom.DocumentElement, "libraryServerUrl", strDp2LibraryServerUrl);
+                dom.DocumentElement.SetAttribute("libraryCodeList", strLibraryCodeList);
+                dom.DocumentElement.SetAttribute("libraryServerUrl", strDp2LibraryServerUrl);
+                // dom.DocumentElement.SetAttribute("filter", strFilter);
                 dom.Save(strVersionFilePath);
             }
             catch (Exception ex)
@@ -7426,11 +7447,13 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
-        // 创建日志文件的metadata文件，记载服务器端文件尺寸
+        // 创建日志文件的 metadata 文件，记载服务器端文件尺寸
         static int CreateCacheMetadataFile(
             string strCacheDir,
             string strLogFileName,
             long lServerFileSize,
+            string strLevel,    // 2017/9/20
+            string strFilter,   // 2017/9/20
             out string strError)
         {
             strError = "";
@@ -7443,6 +7466,8 @@ MessageBoxDefaultButton.Button1);
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml("<root />");
                 DomUtil.SetAttr(dom.DocumentElement, "serverFileSize", lServerFileSize.ToString());
+                dom.DocumentElement.SetAttribute("filter", strFilter);
+                dom.DocumentElement.SetAttribute("level", strLevel);
                 dom.Save(strCacheMetaDataFilename);
             }
             catch (Exception ex)
@@ -7478,10 +7503,13 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
+        // TODO: 请求较为简略级别的文件的时候，可以用详细级别的文件充当；请求具有内容的 filter 的时候，可以用空 filter 的文件充当
         static int PrepareCacheFile(
             string strCacheDir,
             string strLogFileName,
             long lServerFileSize,
+            string strLevel,    // 2017/9/20
+            string strFilter,   // 2017/9/20
             out bool bCacheFileExist,
             out Stream stream,
             out string strError)
@@ -7529,10 +7557,19 @@ MessageBoxDefaultButton.Button1);
                     return -1;
                 }
 
-                if (lTempFileSize != lServerFileSize)
+                string strCurrentFilter = "<not_found>";
+                if (metadata_dom.DocumentElement.HasAttribute("filter"))
+                    strCurrentFilter = metadata_dom.DocumentElement.GetAttribute("filter");
+
+                string strCurrentLevel = metadata_dom.DocumentElement.GetAttribute("level");
+
+                if (lTempFileSize != lServerFileSize
+                    || strFilter != strCurrentFilter
+                    || strLevel != strCurrentLevel)
                     bCacheFileExist = false;
 
             }
+
             // 如果文件存在，就打开，如果文件不存在，就创建一个新的
             stream = File.Open(
 strCacheFilename,
@@ -7898,15 +7935,23 @@ FileShare.ReadWrite);
 
             if (bAutoCache == true)
             {
+                string strPhysicalFileName = bAccessLog ? strLogFileName + ".a" : strLogFileName;
                 nRet = PrepareCacheFile(
                     strCacheDir,
-                    bAccessLog ? strLogFileName + ".a" : strLogFileName,
+                    strPhysicalFileName,
                     lServerFileSize,
+                    nLevel.ToString(),
+                    strFilter,
                     out bCacheFileExist,
                     out stream,
                     out strError);
                 if (nRet == -1)
                     return -1;
+
+                if (bCacheFileExist)
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(strPhysicalFileName + " 采用缓存").Replace("\r\n", "<br/>") + "</div>");
+                else
+                    Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(strPhysicalFileName + " 从服务器获取").Replace("\r\n", "<br/>") + "</div>");
 
                 if (bCacheFileExist == false && stream != null)
                     bRemoveCacheFile = true;
@@ -7939,13 +7984,10 @@ FileShare.ReadWrite);
                     {
                         Application.DoEvents();
 
-                        if (stop != null)
+                        if (stop != null && stop.State != 0)
                         {
-                            if (stop.State != 0)
-                            {
-                                strError = "用户中断1";
-                                goto ERROR1;
-                            }
+                            strError = "用户中断1";
+                            goto ERROR1;
                         }
 
                         if (lIndex == ri.lStart)
@@ -7979,7 +8021,7 @@ FileShare.ReadWrite);
                                     return -1;
                                 }
                                 if (stream.Position != lHint)
-                                    stream.Seek(lHint, SeekOrigin.Begin);
+                                    stream.FastSeek(lHint);
                             }
 
                             nRet = ReadCachedEnventLog(
@@ -8137,6 +8179,8 @@ MessageBoxDefaultButton.Button1);
                         strCacheDir,
                         bAccessLog ? strLogFileName + ".a" : strLogFileName,
                         lServerFileSize,
+                        nLevel.ToString(),
+                        strFilter,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;

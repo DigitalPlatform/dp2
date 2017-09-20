@@ -338,6 +338,7 @@ namespace DigitalPlatform.LibraryServer
 
             LibraryInstanceInfo info = null;
 
+            // 从注册表和 library.xml 文件中获得实例信息
             // return:
             //      -1  出错
             //      0   实例没有找到
@@ -856,6 +857,15 @@ RestoreLibraryParam param
                         param.ErrorInfo = "复制数据目录的 cfgs 子目录(" + strSourceCfgsDir + " --> " + strTargetCfgsDir + ")时出错: " + strError;
                         return false;
                     }
+
+                    // 2017/9/20
+                    nRet = DeleteLibraryTempFiles(param.DataDir,
+            out strError);
+                    if (nRet == -1)
+                    {
+                        param.ErrorInfo = "删除数据目录的临时文件时出错: " + strError;
+                        return false;
+                    }
                 }
                 finally
                 {
@@ -877,6 +887,86 @@ RestoreLibraryParam param
             }
 
             return true;
+        }
+
+        // 删除 dp2library 数据目录中的临时文件。一般用于恢复了一个实例以后，清除以前实例残留的临时文件
+        static int DeleteLibraryTempFiles(string strDataDir,
+            out string strError)
+        {
+            strError = "";
+
+            List<string> errors = new List<string>();
+
+            {
+                string strFileName = Path.Combine(strDataDir, "operlog\\spare_operlog.bin");
+                if (TryDelete(strFileName, out strError) == false)
+                    errors.Add(strError);
+            }
+
+            {
+                string strLogDir = Path.Combine(strDataDir, "log");
+                List<string> filenames = new List<string>();
+                DirectoryInfo di = new DirectoryInfo(strLogDir);
+                try
+                {
+                    FileInfo[] fis = di.GetFiles("*_lasttime.txt");
+                    foreach (FileInfo fi in fis)
+                    {
+                        filenames.Add(fi.FullName);
+                    }
+
+                    fis = di.GetFiles("*.breakpoint");
+                    foreach (FileInfo fi in fis)
+                    {
+                        filenames.Add(fi.FullName);
+                    }
+
+                    foreach (string strFileName in filenames)
+                    {
+                        if (TryDelete(strFileName, out strError) == false)
+                            errors.Add(strError);
+                    }
+                }
+                catch (DirectoryNotFoundException)
+                {
+
+                }
+                catch (Exception ex)
+                {
+                    errors.Add("删除目录 '" + strLogDir + "' 中的若干文件时出现异常: " + ExceptionUtil.GetExceptionText(ex));
+                }
+            }
+
+            if (errors.Count > 0)
+            {
+                strError = StringUtil.MakePathList(errors);
+                return -1;
+            }
+
+            return 0;
+        }
+
+        static bool TryDelete(string strFileName, out string strError)
+        {
+            strError = "";
+            try
+            {
+                File.Delete(strFileName);
+                return true;
+            }
+            catch (FileNotFoundException)
+            {
+                return true;
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return true;
+            }
+            catch (Exception ex)
+            {
+                strError = "删除文件 '" + strFileName + "' 时出现异常: " + ex.Message;
+                return false;
+            }
         }
 
         // 合并新旧两个 library.xml。

@@ -172,7 +172,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             else
-                MessageBox.Show(this, 
+                MessageBox.Show(this,
                     strError
                     //"任务 '" + this.comboBox_taskName.Text + "' 已成功启动"
                     );
@@ -362,6 +362,12 @@ namespace dp2Circulation
             }
             else if (strTaskName == "大备份")
             {
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.114") < 0)
+                {
+                    strError = "dp2library 应在 2.114 版以上才能使用“大备份”任务相关的功能";
+                    return -1;
+                }
+
                 StartBackupDialog dlg = new StartBackupDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.StartInfo = startinfo;
