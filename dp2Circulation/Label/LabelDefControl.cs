@@ -950,8 +950,11 @@ namespace dp2Circulation
             if (this.numericUpDown_lineSep.CurrentUnit != this._currentUnit)
                 return;
 
-            LabelParam param = this.LabelParam;
-            param.LineSep = (int)this.numericUpDown_lineSep.Value;
+            // 2017/8/23
+            this.labelDesignControl1.LabelParam = this.GetLabelParam();
+
+            // LabelParam param = this.LabelParam;
+            // param.LineSep = (int)this.numericUpDown_lineSep.Value;
             this.labelDesignControl1.Invalidate();
 
             _panelVersion++;

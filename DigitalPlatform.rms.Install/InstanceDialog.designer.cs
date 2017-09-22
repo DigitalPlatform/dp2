@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InstanceDialog));
             this.textBox_Comment = new System.Windows.Forms.TextBox();
             this.listView_instance = new System.Windows.Forms.ListView();
@@ -35,11 +36,11 @@
             this.columnHeader_errorInfo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_dataDir = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_bindings = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.button_newInstance = new System.Windows.Forms.Button();
             this.button_modifyInstance = new System.Windows.Forms.Button();
             this.button_deleteInstance = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
-            this.button_Cancel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBox_Comment
@@ -67,15 +68,17 @@
             this.columnHeader_bindings});
             this.listView_instance.FullRowSelect = true;
             this.listView_instance.HideSelection = false;
+            this.listView_instance.LargeImageList = this.imageList1;
             this.listView_instance.Location = new System.Drawing.Point(12, 62);
-            this.listView_instance.MultiSelect = false;
             this.listView_instance.Name = "listView_instance";
             this.listView_instance.Size = new System.Drawing.Size(481, 184);
+            this.listView_instance.SmallImageList = this.imageList1;
             this.listView_instance.TabIndex = 8;
             this.listView_instance.UseCompatibleStateImageBehavior = false;
             this.listView_instance.View = System.Windows.Forms.View.Details;
             this.listView_instance.SelectedIndexChanged += new System.EventHandler(this.listView_instance_SelectedIndexChanged);
             this.listView_instance.DoubleClick += new System.EventHandler(this.listView_instance_DoubleClick);
+            this.listView_instance.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_instance_MouseUp);
             // 
             // columnHeader_name
             // 
@@ -95,6 +98,13 @@
             // 
             this.columnHeader_bindings.Text = "协议绑定";
             this.columnHeader_bindings.Width = 374;
+            // 
+            // imageList1
+            // 
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "StatusAnnotations_Play_16xLG_color.png");
+            this.imageList1.Images.SetKeyName(1, "StatusAnnotations_Stop_16xLG_color.png");
             // 
             // button_newInstance
             // 
@@ -132,34 +142,20 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(337, 282);
+            this.button_OK.Location = new System.Drawing.Point(418, 282);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
             this.button_OK.TabIndex = 12;
-            this.button_OK.Text = "确定";
+            this.button_OK.Text = "关闭";
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
-            // 
-            // button_Cancel
-            // 
-            this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(418, 282);
-            this.button_Cancel.Name = "button_Cancel";
-            this.button_Cancel.Size = new System.Drawing.Size(75, 23);
-            this.button_Cancel.TabIndex = 13;
-            this.button_Cancel.Text = "取消";
-            this.button_Cancel.UseVisualStyleBackColor = true;
-            this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // InstanceDialog
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(505, 317);
-            this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.button_deleteInstance);
             this.Controls.Add(this.button_modifyInstance);
@@ -189,7 +185,7 @@
         private System.Windows.Forms.Button button_modifyInstance;
         private System.Windows.Forms.Button button_deleteInstance;
         private System.Windows.Forms.Button button_OK;
-        private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.ColumnHeader columnHeader_errorInfo;
+        private System.Windows.Forms.ImageList imageList1;
     }
 }

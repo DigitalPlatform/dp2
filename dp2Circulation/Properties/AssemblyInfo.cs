@@ -29,8 +29,8 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.28.*")]  // "2.4.*"
-[assembly: AssemblyFileVersion("2.28.0.0")]
+[assembly: AssemblyVersion("2.30.*")]  // "2.4.*"
+[assembly: AssemblyFileVersion("2.30.0.0")]
 
 // V2.6 2015/11/7 MainForm BiblioSearchForm ChannelForm 采用 ChannelPool。注意观察有无通讯通道方面的故障
 // V2.7 2015/11/30 EntityForm 大幅度改造，采用 ChannelPool。Stop 类的 BeginLoop() 不再允许嵌套，注意观察是否会抛出异常。固定面板区属性页的显示很多已经改造为 PropertyTaskList 实现
@@ -57,3 +57,5 @@ using System.Runtime.InteropServices;
 // 2.26 2016/12/9 报表窗本地存储 operlogamerce 表解决了 'undo' action 行的 price 为空的问题
 // 2.27 2017/1/14 client.cs 允许定义 TransformBarcode() 函数，对输入的条码号进行变换
 // 2.28 2017/2/23 MARC编辑器中Ctrl+V复制时候盲目去除空格 bug 消除，只去除 $a 以后的一个空格; 批订购窗在固定面板区显示即时订单信息的功能基本完成。读者窗、册窗 jquery 文件目录不对的 bug 得到修正。实体查询窗用 Shift 检索也有了 parent_id 列。
+// 2.29 2017/9/19 IsbnSplitter 类里面增加了处理 ISSN 的函数，中文期刊库的 dp2circulation_marc_autogen.cs 里面增加了 ISSN 13/8 转换的功能
+// 2.30 2017/9/20 修正日志文件本地缓存功能中的几个 bug

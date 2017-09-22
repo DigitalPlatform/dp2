@@ -17,6 +17,9 @@ namespace dp2Circulation
             {
                 components.Dispose();
             }
+
+            RemoveDownloader(null, true);
+
             if (this.PropertyTaskList != null)
                 this.PropertyTaskList.Dispose();
             if (this.OperHistory != null)

@@ -213,7 +213,7 @@ namespace DigitalPlatform.CirculationClient
                 restoreLoading = false;  // 防止 finally 复原
                 return 0;
             }
-            catch(ChannelException ex)
+            catch (ChannelException ex)
             {
                 strError = ex.Message;
                 return -1;
@@ -306,9 +306,26 @@ namespace DigitalPlatform.CirculationClient
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-
             menuItem = new MenuItem("编辑配置文件(&E)");
             menuItem.Click += new System.EventHandler(this.menu_editCfgFile);
+            if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("刷新(&R)");
+            menuItem.Click += new System.EventHandler(this.menu_refresh);
+            //if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
+            //    menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("下载文件(&W)");
+            menuItem.Click += new System.EventHandler(this.menu_downloadFile);
+            if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("下载动态文件(&Y)");
+            menuItem.Click += new System.EventHandler(this.menu_downloadDynamicFile);
             if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
@@ -431,6 +448,209 @@ namespace DigitalPlatform.CirculationClient
 
             if (contextMenu != null)
                 contextMenu.Show(this, new Point(e.X, e.Y));
+        }
+
+        private static readonly Object _syncRoot_downloaders = new Object();
+
+        List<DynamicDownloader> _downloaders = new List<DynamicDownloader>();
+
+        // parameters:
+        //      downloader  要清除的 DynamicDownloader 对象。如果为 null，表示全部清除
+        void RemoveDownloader(DynamicDownloader downloader,
+            bool bTriggerClose = false)
+        {
+            List<DynamicDownloader> list = new List<DynamicDownloader>();
+            lock (_syncRoot_downloaders)
+            {
+                if (downloader == null)
+                {
+                    list.AddRange(_downloaders);
+                    _downloaders.Clear();
+                }
+                else
+                {
+                    list.Add(downloader);
+                    // downloader.Close();
+                    _downloaders.Remove(downloader);
+                }
+            }
+
+            foreach (DynamicDownloader current in list)
+            {
+                current.Close();
+            }
+
+        }
+
+        void DisplayDownloaderErrorInfo(DynamicDownloader downloader)
+        {
+            if (string.IsNullOrEmpty(downloader.ErrorInfo) == false
+                && downloader.ErrorInfo.StartsWith("~") == false)
+            {
+                this.Invoke((Action)(() =>
+                {
+                    MessageBox.Show(this, "下载 " + downloader.ServerFilePath + "-->" + downloader.LocalFilePath + " 过程中出错: " + downloader.ErrorInfo);
+                }));
+                downloader.ErrorInfo = "~" + downloader.ErrorInfo;  // 只显示一次
+            }
+        }
+
+        string _usedDownloadFolder = "";
+
+        // 下载动态文件
+        // 动态文件就是一直在不断增长的文件。允许一边增长一边下载
+        void menu_downloadDynamicFile(object sender, System.EventArgs e)
+        {
+            string strError = "";
+
+            if (this.SelectedNode == null)
+            {
+                strError = "尚未选择要下载的配置文件节点";
+                goto ERROR1;
+            }
+
+            if (this.SelectedNode.ImageIndex != RESTYPE_FILE)
+            {
+                strError = "所选择的节点不是配置文件类型。请选择要下载的配置文件节点";
+                goto ERROR1;
+            }
+
+            string strPath = GetNodePath(this.SelectedNode);
+
+            string strExt = Path.GetExtension(strPath);
+            if (strExt == ".~state")
+            {
+                strError = "状态文件是一种临时文件，不支持直接下载";
+                goto ERROR1;
+            }
+
+            FolderBrowserDialog dir_dlg = new FolderBrowserDialog();
+
+            dir_dlg.Description = "请指定下载目标文件夹";
+            dir_dlg.RootFolder = Environment.SpecialFolder.MyComputer;
+            dir_dlg.ShowNewFolderButton = true;
+            dir_dlg.SelectedPath = _usedDownloadFolder;
+
+            if (dir_dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            _usedDownloadFolder = dir_dlg.SelectedPath;
+
+            string strTargetPath = Path.Combine(dir_dlg.SelectedPath, Path.GetFileName(strPath));
+
+            bool bAppend = false;   // 是否继续下载?
+            // 观察目标文件是否已经存在
+            if (File.Exists(strTargetPath))
+            {
+                DialogResult result = MessageBox.Show(this,
+    "目标文件 '" + strTargetPath + "' 已经存在。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃下载]",
+    "KernelResTree",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Cancel)
+                    return;
+                if (result == DialogResult.Yes)
+                    bAppend = true;
+            }
+
+            LibraryChannel channel = null;
+            TimeSpan old_timeout = new TimeSpan(0);
+
+            channel = this.CallGetChannel(true);
+
+            old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+
+            FileDownloadDialog dlg = new FileDownloadDialog();
+            dlg.Font = this.Font;
+            dlg.SourceFilePath = strPath;
+            dlg.TargetFilePath = strTargetPath;
+            // dlg.TopMost = true;
+            dlg.Show(this);
+
+            DynamicDownloader downloader = new DynamicDownloader(channel,
+                strPath,
+                strTargetPath);
+            downloader.Tag = dlg;
+
+            _downloaders.Add(downloader);
+
+            downloader.Closed += new EventHandler(delegate(object o1, EventArgs e1)
+                {
+                    if (channel != null)
+                    {
+                        channel.Timeout = old_timeout;
+                        this.CallReturnChannel(channel, true);
+                        channel = null;
+                    }
+                    DisplayDownloaderErrorInfo(downloader);
+                    RemoveDownloader(downloader);
+                    this.Invoke((Action)(() =>
+                    {
+                        dlg.Close();
+                    }));
+                });
+            downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate(object o1, DownloadProgressChangedEventArgs e1)
+            {
+                dlg.SetProgress(e1.BytesReceived, e1.TotalBytesToReceive);
+            });
+            dlg.FormClosed += new FormClosedEventHandler(delegate(object o1, FormClosedEventArgs e1)
+                {
+                    downloader.Cancel();
+
+                    if (channel != null)
+                    {
+                        channel.Timeout = old_timeout;
+                        this.CallReturnChannel(channel, true);
+                        channel = null;
+                    }
+                    DisplayDownloaderErrorInfo(downloader);
+                    RemoveDownloader(downloader);
+                });
+
+            downloader.StartDownload(bAppend);
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void menu_refresh(object sender, System.EventArgs e)
+        {
+#if NO
+            string strError = "";
+
+            string strPath = "";
+            if (this.SelectedNode != null)
+                strPath = GetNodePath(this.SelectedNode);
+#endif
+
+            this.Fill(this.SelectedNode);
+        }
+
+        // 下载文件
+        void menu_downloadFile(object sender, System.EventArgs e)
+        {
+            string strError = "";
+
+            if (this.SelectedNode == null)
+            {
+                strError = "尚未选择要下载的配置文件节点";
+                goto ERROR1;
+            }
+
+            if (this.SelectedNode.ImageIndex != RESTYPE_FILE)
+            {
+                strError = "所选择的节点不是配置文件类型。请选择要下载的配置文件节点";
+                goto ERROR1;
+            }
+
+            string strPath = GetNodePath(this.SelectedNode);
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         // 编辑配置文件

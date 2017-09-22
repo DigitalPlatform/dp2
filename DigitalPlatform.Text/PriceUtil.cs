@@ -957,19 +957,22 @@ namespace DigitalPlatform.Text
             }
 
             bool bInPrefix = true;
-
+            int nDotCount = 0;
             for (int i = 0; i < strString.Length; i++)
             {
-                if ((strString[i] >= '0' && strString[i] <= '9')
-                    || strString[i] == '.')
+                char ch = strString[i];
+                if ((ch >= '0' && ch <= '9')
+                    || ch == '.')
                 {
                     bInPrefix = false;
-                    strValue += strString[i];
+                    strValue += ch;
+                    if (ch == '.')  // 2017/9/15
+                        nDotCount++;
                 }
                 else
                 {
                     if (bInPrefix == true)
-                        strPrefix += strString[i];
+                        strPrefix += ch;
                     else
                     {
                         strPostfix = strString.Substring(i).Trim();
@@ -983,6 +986,12 @@ namespace DigitalPlatform.Text
             if (string.IsNullOrEmpty(strValue) == true)
             {
                 strError = "金额字符串 '" + strString + "' 缺乏数字部分";
+                return -1;
+            }
+
+            if (nDotCount > 1)
+            {
+                strError = "金额字符串 '" + strString + "' 中数值部分 '" + strValue + "' 小数点多于一个";
                 return -1;
             }
 

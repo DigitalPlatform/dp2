@@ -37,6 +37,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.checkedComboBox_filter = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.checkedComboBox_operations = new DigitalPlatform.CommonControl.CheckedComboBox();
+            this.button_dontFilter = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -117,6 +118,7 @@
             this.checkedComboBox_filter.TabIndex = 5;
             this.checkedComboBox_filter.DropDown += new System.EventHandler(this.checkedComboBox_filter_DropDown);
             this.checkedComboBox_filter.TextChanged += new System.EventHandler(this.checkedComboBox_filter_TextChanged);
+            this.checkedComboBox_filter.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.checkedComboBox_filter_ItemChecked);
             // 
             // checkedComboBox_operations
             // 
@@ -131,6 +133,19 @@
             this.checkedComboBox_operations.Size = new System.Drawing.Size(375, 22);
             this.checkedComboBox_operations.TabIndex = 1;
             this.checkedComboBox_operations.DropDown += new System.EventHandler(this.checkedComboBox_operations_DropDown);
+            this.checkedComboBox_operations.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.checkedComboBox_operations_ItemChecked);
+            // 
+            // button_dontFilter
+            // 
+            this.button_dontFilter.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_dontFilter.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.button_dontFilter.Location = new System.Drawing.Point(12, 229);
+            this.button_dontFilter.Name = "button_dontFilter";
+            this.button_dontFilter.Size = new System.Drawing.Size(75, 23);
+            this.button_dontFilter.TabIndex = 8;
+            this.button_dontFilter.Text = "不过滤";
+            this.button_dontFilter.UseVisualStyleBackColor = true;
+            this.button_dontFilter.Click += new System.EventHandler(this.button_dontFilter_Click);
             // 
             // OperLogFindDialog
             // 
@@ -139,6 +154,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(476, 264);
+            this.Controls.Add(this.button_dontFilter);
             this.Controls.Add(this.textBox_recPathList);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.checkedComboBox_filter);
@@ -166,5 +182,6 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox textBox_recPathList;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Button button_dontFilter;
     }
 }

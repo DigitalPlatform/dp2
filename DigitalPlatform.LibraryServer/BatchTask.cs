@@ -17,6 +17,8 @@ namespace DigitalPlatform.LibraryServer
     // 批处理任务
     public class BatchTask : IDisposable
     {
+        internal List<string> _pendingCommands = new List<string>();
+
         public bool ManualStart = false;    // 本轮是否为手动启动？
 
         public bool Loop = false;
@@ -43,6 +45,8 @@ namespace DigitalPlatform.LibraryServer
 
         internal bool m_bClosed = true;
 
+        public string ErrorInfo { get; set; }   // 线程结束的出错原因。如果为空，表示线程正常结束
+
         internal LibraryApplication App = null;
         internal RmsChannelCollection RmsChannels = new RmsChannelCollection();
 
@@ -55,6 +59,8 @@ namespace DigitalPlatform.LibraryServer
         internal AutoResetEvent eventActive = new AutoResetEvent(false);	// 激活信号
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 
+        internal AutoResetEvent eventStarted = new AutoResetEvent(false);	// 首次启动起来
+
         public int PerTime = 60 * 60 * 1000;	// 1小时
 
         public virtual void Dispose()
@@ -66,6 +72,7 @@ namespace DigitalPlatform.LibraryServer
             eventClose.Dispose();
             eventActive.Dispose();
             eventFinished.Dispose();
+            eventStarted.Dispose();
         }
 
         public void Activate()
@@ -361,13 +368,16 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.eventActive.Set();
                 this.eventClose.Reset();    // 2006/11/24
+                this.eventStarted.Reset();  // 2017/8/23
                 return;
             }
 
+            this.ErrorInfo = "";
             this.m_bClosed = false;
 
             this.eventActive.Set();
             this.eventClose.Reset();    // 2006/11/24
+            this.eventStarted.Reset();  // 2017/8/23
 
             this.threadWorker =
                 new Thread(new ThreadStart(this.ThreadMain));
@@ -456,18 +466,28 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.IsNullOrEmpty(this.ProgressFileName) == false)
             {
-                File.Delete(this.ProgressFileName);
+                // File.Delete(this.ProgressFileName);
+                this.App._physicalFileCache.FileDelete(this.ProgressFileName);
                 this.ProgressFileVersion++;
             }
         }
 
         public void Stop()
         {
+            // this.eventStarted.Reset();
+
             this.eventClose.Set();
             this.m_bClosed = true;
 
-            this.m_nPrevLoop = this.Loop == true ? 1: 0;   // 记忆前一次的Loop值
+            this.m_nPrevLoop = this.Loop == true ? 1 : 0;   // 记忆前一次的Loop值
             this.Loop = false;  // 防止过一会继续循环
+        }
+
+        // 清除断点信息，避免下次 dp2library 启动时候自动从断点位置开始处理
+        public virtual void ClearTask()
+        {
+            if (this.App != null && string.IsNullOrEmpty(this.Name) == false)
+                this.App.RemoveBatchTaskBreakPointFile(this.Name);
         }
 
         // 设置进度文本
@@ -519,6 +539,7 @@ namespace DigitalPlatform.LibraryServer
                 byte[] buffer = Encoding.UTF8.GetBytes(strText);
 
                 m_stream.Write(buffer, 0, buffer.Length);
+                m_stream.Flush();   // 如果不用此句，则另一个 Stream 就感受不到增加的文件长度部分
             }
             finally
             {
@@ -569,6 +590,8 @@ namespace DigitalPlatform.LibraryServer
 
         }
 
+#if NO
+        // TODO: 这里要使用不同的文件指针
         // 获得输出结果文本
         // parameters:
         //      lEndOffset  本次获取的末尾偏移
@@ -608,6 +631,87 @@ namespace DigitalPlatform.LibraryServer
                 // 指针回到文件末尾
                 this.m_stream.Seek(0, SeekOrigin.End);
             }
+
+            return;
+        }
+#endif
+
+        // 获得输出结果文本
+        // parameters:
+        //      lEndOffset  本次获取的末尾偏移
+        //      lTotalLength    返回流的最大长度
+        public void GetResultText(long lStart,
+            int nMaxBytes,
+            out byte[] baResult,
+            out long lEndOffset,
+            out long lTotalLength)
+        {
+            baResult = null;
+            lEndOffset = 0;
+
+#if NO
+            lTotalLength = this.m_stream.Length;
+
+            long lLength = this.m_stream.Length - lStart;
+
+            if (lLength <= 0)
+            {
+                lEndOffset = this.m_stream.Length;
+                return;
+            }
+
+            baResult = new byte[Math.Min(nMaxBytes, (int)lLength)];
+#endif
+
+            // 2017/9/10 改造
+            StreamItem s = this.App._physicalFileCache.GetStream(this.ProgressFileName,
+                FileMode.Open, FileAccess.Read);
+            try
+            {
+                lTotalLength = s.FileStream.Length;
+
+                long lLength = lTotalLength - lStart;
+
+                if (lLength <= 0)
+                {
+                    lEndOffset = lTotalLength;
+                    return;
+                }
+
+                baResult = new byte[Math.Min(nMaxBytes, (int)lLength)];
+
+                s.FileStream.FastSeek(lStart);
+                int nByteReaded = s.FileStream.Read(baResult, 0, baResult.Length);
+
+                if (nByteReaded < baResult.Length)
+                {
+                    throw new Exception("希望读入 " + baResult.Length + " 字节，但仅仅读入了 " + nByteReaded + " 字节");
+                }
+                Debug.Assert(nByteReaded == baResult.Length);
+                lEndOffset = lStart + nByteReaded;
+            }
+            finally
+            {
+                this.App._physicalFileCache.ReturnStream(s);
+            }
+
+
+#if NO
+            this.m_stream.Seek(lStart, SeekOrigin.Begin);
+            try
+            {
+                int nByteReaded = this.m_stream.Read(baResult, 0, baResult.Length);
+
+                Debug.Assert(nByteReaded == baResult.Length);
+
+                lEndOffset = lStart + nByteReaded;
+            }
+            finally
+            {
+                // 指针回到文件末尾
+                this.m_stream.Seek(0, SeekOrigin.End);
+            }
+#endif
 
             return;
         }
@@ -684,8 +788,9 @@ namespace DigitalPlatform.LibraryServer
                 try
                 {
                     eventFinished.Set();
+                    eventStarted.Set(); // 2017/8/23
                 }
-                catch(ObjectDisposedException)  // 2016/4/19
+                catch (ObjectDisposedException)  // 2016/4/19
                 {
 
                 }

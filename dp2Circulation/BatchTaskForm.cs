@@ -15,6 +15,9 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonControl;
+using System.IO;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -169,7 +172,10 @@ namespace dp2Circulation
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             else
-                MessageBox.Show(this, "任务 '" + this.comboBox_taskName.Text + "' 已成功启动");
+                MessageBox.Show(this,
+                    strError
+                    //"任务 '" + this.comboBox_taskName.Text + "' 已成功启动"
+                    );
 
         }
 
@@ -177,6 +183,7 @@ namespace dp2Circulation
         {
             string strError = "";
             int nRet = StopBatchTask(this.comboBox_taskName.Text,
+                "stop",
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
@@ -222,6 +229,10 @@ namespace dp2Circulation
         }
 
         // 启动批处理任务
+        // parameters:
+        // return:
+        //      -1  出错
+        //      1   成功。strError 里面有提示成功的内容
         int StartBatchTask(string strTaskName,
             out string strError)
         {
@@ -351,10 +362,25 @@ namespace dp2Circulation
             }
             else if (strTaskName == "大备份")
             {
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.114") < 0)
+                {
+                    strError = "dp2library 应在 2.114 版以上才能使用“大备份”任务相关的功能";
+                    return -1;
+                }
+
                 StartBackupDialog dlg = new StartBackupDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.StartInfo = startinfo;
                 dlg.ShowDialog(this);
+                if (dlg.DialogResult == System.Windows.Forms.DialogResult.Abort)
+                {
+                    if (StopBatchTask(strTaskName,
+            "abort",
+            out strError) == -1)
+                        return -1;
+                    strError = "任务 '" + strTaskName + "' 已被撤销";
+                    return 1;
+                }
                 if (dlg.DialogResult != DialogResult.OK)
                 {
                     strError = "用户放弃启动";
@@ -405,6 +431,29 @@ namespace dp2Circulation
                     }
 
                     this.label_progress.Text = resultInfo.ProgressText;
+
+                    if (strTaskName == "大备份"
+                        && resultInfo.StartInfo != null)
+                    {
+                        string strOutputFolder = "";
+                        List<string> paths = StringUtil.SplitList(resultInfo.StartInfo.OutputParam);
+                        foreach (string path in paths)
+                        {
+                            if (string.IsNullOrEmpty(path) == false)
+                            {
+                                // parameters:
+                                //      strOutputFolder 输出目录。
+                                //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
+                                //                      [out] 实际使用的目录
+                                int nRet = Program.MainForm.BeginDownloadFile(path,
+                                    ref strOutputFolder,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                            }
+
+                        }
+                    }
                 }
                 finally
                 {
@@ -415,6 +464,7 @@ namespace dp2Circulation
                     EnableControls(true);
                 }
 
+                strError = "任务 '" + strTaskName + "' 已成功启动";
                 return 1;
             ERROR1:
                 return -1;
@@ -425,11 +475,20 @@ namespace dp2Circulation
             }
         }
 
+
         // 停止批处理任务
+        // parameters:
+        //      strAction   "stop"或者"abort"
         int StopBatchTask(string strTaskName,
+            string strAction,
             out string strError)
         {
             strError = "";
+
+            if (string.IsNullOrEmpty(strAction))
+                strAction = "stop";
+
+            Debug.Assert(strAction == "stop" || strAction == "abort", "");
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
 
@@ -455,7 +514,7 @@ namespace dp2Circulation
                     long lRet = Channel.BatchTask(
                         stop,
                         strTaskName,
-                        "stop",
+                        strAction,  // "stop",
                         param,
                         out resultInfo,
                         out strError);

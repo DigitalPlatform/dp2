@@ -3705,7 +3705,6 @@ out string strError)
                 if (strSubfield.Length >= 1)
                 {
                     strReturnDate = strSubfield.Substring(1);
-
                 }
 
                 if (String.IsNullOrEmpty(strReturnDate) == false)
@@ -3738,7 +3737,6 @@ out string strError)
                     {
                         strReturnDate = strTarget;
                     }
-
                 }
 
                 if (String.IsNullOrEmpty(strReturnDate) == false
@@ -3772,7 +3770,6 @@ out string strError)
                         {
                             strWarning += "986$x子字段内容 '" + strRenewDate + "' 的长度不是8字符; ";
                         }
-
                     }
 
                     if (String.IsNullOrEmpty(strRenewDate) == false)
@@ -3790,7 +3787,6 @@ out string strError)
                         {
                             strRenewDate = strTarget;
                         }
-
                     }
 
                     if (String.IsNullOrEmpty(strRenewDate) == false)
@@ -3799,7 +3795,7 @@ out string strError)
                     }
 
                     if (String.IsNullOrEmpty(strRenewDate) == false
-    && String.IsNullOrEmpty(strBorrowDate) == false)
+    && String.IsNullOrEmpty(strReturnDate) == false)    // && String.IsNullOrEmpty(strBorrowDate) == false
                     {
                         // 重新计算差额天数
                         DateTime timestart = DateTimeUtil.FromRfc1123DateTimeString(strRenewDate);
@@ -3810,10 +3806,7 @@ out string strError)
                         string strBorrowPeriod = Convert.ToString(delta.TotalDays) + "day";
                         DomUtil.SetAttr(nodeBorrow, "borrowPeriod", strBorrowPeriod);
                     }
-
                 }
-
-
             }
 
             return 0;

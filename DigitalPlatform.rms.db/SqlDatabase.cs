@@ -33,6 +33,11 @@ namespace DigitalPlatform.rms
     // SQL库派生类
     public class SqlDatabase : Database
     {
+        // 对物理文件开始缓存和加速的开始尺寸
+        const int CACHE_SIZE = 10 * 1024;   // -1;  // 10 * 1024;
+
+        internal StreamCache _streamCache = new StreamCache(100);
+
         const string KEY_COL_LIST = "(keystring, idstring)";
         const string KEYNUM_COL_LIST = "(keystringnum, idstring)";
 
@@ -634,6 +639,7 @@ namespace DigitalPlatform.rms
             return this.m_strSqlDbName;
         }
 
+#if NO
         // 删除一个目录内的所有文件和目录
         // parameters:
         //      strExcludeFileName  想要保留的文件名，全路径
@@ -675,6 +681,7 @@ namespace DigitalPlatform.rms
             }
 #endif
         }
+#endif
 
         // 初始化数据库，注意虚函数不能为private
         // parameter:
@@ -743,6 +750,7 @@ namespace DigitalPlatform.rms
                         {
                             if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                             {
+                                _streamCache.ClearAll();
                                 PathUtil.DeleteDirectory(this.m_strObjectDir);
                                 PathUtil.TryCreateDir(this.m_strObjectDir);
                             }
@@ -862,6 +870,7 @@ namespace DigitalPlatform.rms
                     {
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
+                            _streamCache.ClearAll();
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
 
                             PathUtil.TryCreateDir(this.m_strObjectDir);
@@ -889,40 +898,57 @@ namespace DigitalPlatform.rms
                         using (SQLiteCommand command = new SQLiteCommand(strCommand,
                             connection))
                         {
-                            try
-                            {
-                                command.ExecuteNonQuery();
-                            }
-                            catch (Exception ex)
-                            {
-                                strError = "建表出错。\r\n"
-                                    + ex.Message + "\r\n"
-                                    + "SQL命令:\r\n"
-                                    + strCommand;
-                                return -1;
-                            }
+                            IDbTransaction trans = null;
 
-                            // 3.建索引
-                            nRet = this.GetCreateIndexString(
-                                "keys,records",
-                                this.container.SqlServerType,
-                                "create",
-                                out strCommand,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                            command.CommandText = strCommand;
+                            trans = connection.BeginTransaction();  // 2017/9/3
                             try
                             {
-                                command.ExecuteNonQuery();
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "建表出错。\r\n"
+                                        + ex.Message + "\r\n"
+                                        + "SQL命令:\r\n"
+                                        + strCommand;
+                                    return -1;
+                                }
+
+                                // 3.建索引
+                                nRet = this.GetCreateIndexString(
+                                    "keys,records",
+                                    this.container.SqlServerType,
+                                    "create",
+                                    out strCommand,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                                command.CommandText = strCommand;
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "建索引出错。\r\n"
+                                        + ex.Message + "\r\n"
+                                        + "SQL命令:\r\n"
+                                        + strCommand;
+                                    return -1;
+                                }
+
+                                if (trans != null)
+                                {
+                                    trans.Commit();
+                                    trans = null;
+                                }
                             }
-                            catch (Exception ex)
+                            finally
                             {
-                                strError = "建索引出错。\r\n"
-                                    + ex.Message + "\r\n"
-                                    + "SQL命令:\r\n"
-                                    + strCommand;
-                                return -1;
+                                if (trans != null)
+                                    trans.Rollback();
                             }
                         } // end of using command
 
@@ -949,61 +975,78 @@ namespace DigitalPlatform.rms
                         using (MySqlCommand command = new MySqlCommand(strCommand,
                             connection))
                         {
-                            try
-                            {
-                                command.ExecuteNonQuery();
-                            }
-                            catch (Exception ex)
-                            {
-                                strError = "建库出错。\r\n"
-                                    + ex.Message + "\r\n"
-                                    + "SQL命令:\r\n"
-                                    + strCommand;
-                                return -1;
-                            }
+                            IDbTransaction trans = null;
 
-                            // 2.建表
-                            int nRet = this.GetCreateTablesString(
-                                this.container.SqlServerType,
-                                out strCommand,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                            command.CommandText = strCommand;
+                            // trans = connection.BeginTransaction();  // 2017/9/3
                             try
                             {
-                                command.ExecuteNonQuery();
-                            }
-                            catch (Exception ex)
-                            {
-                                strError = "建表出错。\r\n"
-                                    + ex.Message + "\r\n"
-                                    + "SQL命令:\r\n"
-                                    + strCommand;
-                                return -1;
-                            }
 
-                            // 3.建索引
-                            nRet = this.GetCreateIndexString(
-                                "keys,records",
-                                this.container.SqlServerType,
-                                "create",
-                                out strCommand,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                            command.CommandText = strCommand;
-                            try
-                            {
-                                command.ExecuteNonQuery();
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "建库出错。\r\n"
+                                        + ex.Message + "\r\n"
+                                        + "SQL命令:\r\n"
+                                        + strCommand;
+                                    return -1;
+                                }
+
+                                // 2.建表
+                                int nRet = this.GetCreateTablesString(
+                                    this.container.SqlServerType,
+                                    out strCommand,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                                command.CommandText = strCommand;
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "建表出错。\r\n"
+                                        + ex.Message + "\r\n"
+                                        + "SQL命令:\r\n"
+                                        + strCommand;
+                                    return -1;
+                                }
+
+                                // 3.建索引
+                                nRet = this.GetCreateIndexString(
+                                    "keys,records",
+                                    this.container.SqlServerType,
+                                    "create",
+                                    out strCommand,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                                command.CommandText = strCommand;
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+                                    strError = "建索引出错。\r\n"
+                                        + ex.Message + "\r\n"
+                                        + "SQL命令:\r\n"
+                                        + strCommand;
+                                    return -1;
+                                }
+                                if (trans != null)
+                                {
+                                    trans.Commit();
+                                    trans = null;
+                                }
                             }
-                            catch (Exception ex)
+                            finally
                             {
-                                strError = "建索引出错。\r\n"
-                                    + ex.Message + "\r\n"
-                                    + "SQL命令:\r\n"
-                                    + strCommand;
-                                return -1;
+                                if (trans != null)
+                                    trans.Rollback();
                             }
                         } // end of using command
 
@@ -1022,6 +1065,7 @@ namespace DigitalPlatform.rms
                     {
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
+                            _streamCache.ClearAll();
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
                             PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
@@ -1145,6 +1189,7 @@ namespace DigitalPlatform.rms
                     {
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
+                            _streamCache.ClearAll();
                             PathUtil.DeleteDirectory(this.m_strObjectDir);
                             PathUtil.TryCreateDir(this.m_strObjectDir);
                         }
@@ -2008,7 +2053,6 @@ namespace DigitalPlatform.rms
 
                 if (keysCfg != null)
                 {
-
                     List<TableInfo> aTableInfo = null;
                     nRet = keysCfg.GetTableInfosRemoveDup(
                         out aTableInfo,
@@ -2933,6 +2977,7 @@ namespace DigitalPlatform.rms
                         string strRealDir = this.container.DataDir + "\\" + strCfgsDir;
                         if (Directory.Exists(strRealDir) == true)
                         {
+                            _streamCache.ClearAll();
                             PathUtil.DeleteDirectory(strRealDir);
                         }
                     }
@@ -2949,6 +2994,7 @@ namespace DigitalPlatform.rms
                 {
                     if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                     {
+                        _streamCache.ClearAll();
                         PathUtil.DeleteDirectory(this.m_strObjectDir);
                     }
                 }
@@ -6572,7 +6618,8 @@ namespace DigitalPlatform.rms
                                     // 带元素的信息后的总长度
                                     long nWithMetedataTotalLength = ms.Length;
 
-                                    ms.Seek(lStart, SeekOrigin.Begin);
+                                    // ms.Seek(lStart, SeekOrigin.Begin);
+                                    ms.FastSeek(lStart); // 2017/9/5
                                     ms.Read(destBuffer,
                                         0,
                                         destBuffer.Length);
@@ -7477,7 +7524,7 @@ namespace DigitalPlatform.rms
                     // return:
                     //		-1  出错
                     //		0   成功
-                    nRet = ConvertUtil.GetRealLength(lStart,
+                    nRet = ConvertUtil.GetRealLengthNew(lStart,
                         nReadLength,
                         lTotalLength,
                         nMaxLength,
@@ -7499,6 +7546,17 @@ namespace DigitalPlatform.rms
                     // 从对象文件读取
                     if (bObjectFile == true)
                     {
+                        // return:
+                        //      1   成功
+                        //      -100    文件不存在
+                        nRet = ReadObjectFile(strObjectFilename,
+            lStart,
+            lOutputLength,
+            out destBuffer,
+            out strError);
+                        if (nRet < 0)
+                            return nRet;
+#if NO
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
 
                         destBuffer = new Byte[lOutputLength];
@@ -7511,7 +7569,8 @@ namespace DigitalPlatform.rms
             FileAccess.Read,
             FileShare.ReadWrite))
                             {
-                                s.Seek(lStart, SeekOrigin.Begin);
+                                // s.Seek(lStart, SeekOrigin.Begin);
+                                s.FastSeek(lStart); // 2017/9/5
                                 s.Read(destBuffer,
                                     0,
                                     (int)lOutputLength);
@@ -7527,6 +7586,7 @@ namespace DigitalPlatform.rms
                         }
                         // return lTotalLength;
                         goto END1;
+#endif
                     }
 
                     if (textPtr == null)
@@ -7864,7 +7924,7 @@ namespace DigitalPlatform.rms
                     // return:
                     //		-1  出错
                     //		0   成功
-                    nRet = ConvertUtil.GetRealLength(lStart,
+                    nRet = ConvertUtil.GetRealLengthNew(lStart,
                         nReadLength,
                         lTotalLength,
                         nMaxLength,
@@ -7884,6 +7944,17 @@ namespace DigitalPlatform.rms
                     // 从对象文件读取
                     if (bObjectFile == true)
                     {
+                        // return:
+                        //      1   成功
+                        //      -100    文件不存在
+                        nRet = ReadObjectFile(strObjectFilename,
+            lStart,
+            lOutputLength,
+            out destBuffer,
+            out strError);
+                        if (nRet < 0)
+                            return nRet;
+#if NO
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
 
                         destBuffer = new Byte[lOutputLength];
@@ -7896,7 +7967,8 @@ namespace DigitalPlatform.rms
             FileAccess.Read,
             FileShare.ReadWrite))
                             {
-                                s.Seek(lStart, SeekOrigin.Begin);
+                                // s.Seek(lStart, SeekOrigin.Begin);
+                                s.FastSeek(lStart); // 2017/9/5
                                 s.Read(destBuffer,
                                     0,
                                     (int)lOutputLength);
@@ -7912,6 +7984,7 @@ namespace DigitalPlatform.rms
                         }
                         // return lTotalLength;
                         goto END1;
+#endif
                     }
 
                 }
@@ -8182,7 +8255,7 @@ namespace DigitalPlatform.rms
                     // return:
                     //		-1  出错
                     //		0   成功
-                    nRet = ConvertUtil.GetRealLength(lStart,
+                    nRet = ConvertUtil.GetRealLengthNew(lStart,
                         nReadLength,
                         lTotalLength,
                         nMaxLength,
@@ -8202,6 +8275,17 @@ namespace DigitalPlatform.rms
                     // 从对象文件读取
                     if (bObjectFile == true)
                     {
+                        // return:
+                        //      1   成功
+                        //      -100    文件不存在
+                        nRet = ReadObjectFile(strObjectFilename,
+            lStart,
+            lOutputLength,
+            out destBuffer,
+            out strError);
+                        if (nRet < 0)
+                            return nRet;
+#if NO
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
 
                         destBuffer = new Byte[lOutputLength];
@@ -8214,7 +8298,8 @@ namespace DigitalPlatform.rms
             FileAccess.Read,
             FileShare.ReadWrite))
                             {
-                                s.Seek(lStart, SeekOrigin.Begin);
+                                // s.Seek(lStart, SeekOrigin.Begin);
+                                s.FastSeek(lStart); // 2017/9/5
                                 s.Read(destBuffer,
                                     0,
                                     (int)lOutputLength);
@@ -8230,6 +8315,7 @@ namespace DigitalPlatform.rms
                         }
                         // return lTotalLength;
                         goto END1;
+#endif
                     }
 
                 }
@@ -8500,7 +8586,7 @@ namespace DigitalPlatform.rms
                     // return:
                     //		-1  出错
                     //		0   成功
-                    nRet = ConvertUtil.GetRealLength(lStart,
+                    nRet = ConvertUtil.GetRealLengthNew(lStart,
                         nReadLength,
                         lTotalLength,
                         nMaxLength,
@@ -8520,6 +8606,17 @@ namespace DigitalPlatform.rms
                     // 从对象文件读取
                     if (bObjectFile == true)
                     {
+                        // return:
+                        //      1   成功
+                        //      -100    文件不存在
+                        nRet = ReadObjectFile(strObjectFilename,
+            lStart,
+            lOutputLength,
+            out destBuffer,
+            out strError);
+                        if (nRet < 0)
+                            return nRet;
+#if NO
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
 
                         destBuffer = new Byte[lOutputLength];
@@ -8532,7 +8629,8 @@ namespace DigitalPlatform.rms
             FileAccess.Read,
             FileShare.ReadWrite))
                             {
-                                s.Seek(lStart, SeekOrigin.Begin);
+                                // s.Seek(lStart, SeekOrigin.Begin);
+                                s.FastSeek(lStart); // 2017/9/5
                                 s.Read(destBuffer,
                                     0,
                                     (int)lOutputLength);
@@ -8548,6 +8646,7 @@ namespace DigitalPlatform.rms
                         }
                         // return lTotalLength;
                         goto END1;
+#endif
                     }
 
                 }
@@ -9442,7 +9541,7 @@ namespace DigitalPlatform.rms
                         // 删除残余的旧有对象文件
                         if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                         {
-                            File.Delete(GetObjectFileName(info.row_info.NewFileName));
+                            this._streamCache.FileDelete(GetObjectFileName(info.row_info.NewFileName));
                             info.row_info.NewFileName = "";
                         }
 
@@ -9690,7 +9789,7 @@ SqlDbType.NVarChar);
                             // 删除残余的旧有对象文件
                             if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                             {
-                                File.Delete(GetObjectFileName(info.row_info.NewFileName));
+                                this._streamCache.FileDelete(GetObjectFileName(info.row_info.NewFileName));
                                 info.row_info.NewFileName = "";
                             }
 
@@ -9903,7 +10002,7 @@ DbType.String);
                             // 删除残余的旧有对象文件
                             if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                             {
-                                File.Delete(GetObjectFileName(info.row_info.NewFileName));
+                                this._streamCache.FileDelete(GetObjectFileName(info.row_info.NewFileName));
                                 info.row_info.NewFileName = "";
                             }
 
@@ -10092,7 +10191,7 @@ MySqlDbType.String);
                             // 删除残余的旧有对象文件
                             if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                             {
-                                File.Delete(GetObjectFileName(info.row_info.NewFileName));
+                                this._streamCache.FileDelete(GetObjectFileName(info.row_info.NewFileName));
                                 info.row_info.NewFileName = "";
                             }
 
@@ -10270,6 +10369,7 @@ OracleDbType.NVarchar2);
         REDO:
             try
             {
+                _streamCache.ClearItems(strFileName);
                 using (FileStream s = File.Open(
 strFileName,
 FileMode.OpenOrCreate,
@@ -10746,6 +10846,7 @@ out strError);
                 try
                 {
                     row_info.Data = null;
+                    // 一次性读入全部文件内容，可以不涉及到 Cache 使用
                     using (FileStream s = File.Open(
     strObjectFilename,
     FileMode.Open,
@@ -12098,6 +12199,7 @@ start_time,
                 //		0   成功
                 nRet = DeleteRecord(
                     strID,
+                    "",
                     null,
                     "deletekeysbyid,ignorechecktimestamp",
                     out baOutputTimestamp,
@@ -13048,20 +13150,44 @@ start_time,
                 REDO:
                     try
                     {
-                        using (FileStream s = File.Open(
-        strFileName,
-        FileMode.OpenOrCreate,
-        FileAccess.Write,
-        FileShare.ReadWrite))
+#if NO
                         {
-                            // 第一次写文件,并且文件长度大于对象总长度，则截断文件
-                            if (bFirst == true && s.Length > lTotalLength)
-                                s.SetLength(0);
+                            using (FileStream s = File.Open(
+            strFileName,
+            FileMode.OpenOrCreate,
+            FileAccess.Write,
+            FileShare.ReadWrite))
+                            {
+                                // 第一次写文件,并且文件长度大于对象总长度，则截断文件
+                                if (bFirst == true && s.Length > lTotalLength)
+                                    s.SetLength(0);
 
-                            s.Seek(lStartOfTarget, SeekOrigin.Begin);
-                            s.Write(baSource,
-                                nStartOfBuffer,
-                                nNeedReadLength);
+                                // s.Seek(lStartOfTarget, SeekOrigin.Begin);
+                                s.FastSeek(lStartOfTarget); // 2017/9/5
+                                s.Write(baSource,
+                                    nStartOfBuffer,
+                                    nNeedReadLength);
+                            }
+                        }
+#endif
+                        {
+                            StreamItem item = _streamCache.GetWriteStream(strFileName, lStartOfTarget > CACHE_SIZE);
+                            try
+                            {
+                                // 第一次写文件,并且文件长度大于对象总长度，则截断文件
+                                if (bFirst == true && item.FileStream.Length > lTotalLength)
+                                    item.FileStream.SetLength(0);
+
+                                // s.Seek(lStartOfTarget, SeekOrigin.Begin);
+                                item.FileStream.FastSeek(lStartOfTarget); // 2017/9/5
+                                item.FileStream.Write(baSource,
+                                    nStartOfBuffer,
+                                    nNeedReadLength);
+                            }
+                            finally
+                            {
+                                _streamCache.ReturnStream(item);
+                            }
                         }
                     }
                     catch (DirectoryNotFoundException ex)
@@ -13110,12 +13236,12 @@ start_time,
                     // 转换存储方式时要及时删除原有的对象文件
                     if (string.IsNullOrEmpty(row_info.FileName) == false)
                     {
-                        File.Delete(GetObjectFileName(row_info.FileName));
+                        this._streamCache.FileDelete(GetObjectFileName(row_info.FileName));
                         row_info.FileName = "";
                     }
                     if (string.IsNullOrEmpty(row_info.NewFileName) == false)
                     {
-                        File.Delete(GetObjectFileName(row_info.NewFileName));
+                        this._streamCache.FileDelete(GetObjectFileName(row_info.NewFileName));
                         row_info.NewFileName = "";
                     }
                 }
@@ -13164,7 +13290,7 @@ start_time,
                     if (string.IsNullOrEmpty(row_info.FileName) == false)
                     {
                         strDeletedFilename = GetObjectFileName(row_info.FileName);
-                        File.Delete(strDeletedFilename);   // 删除原有的正式文件
+                        this._streamCache.FileDelete(strDeletedFilename);   // 删除原有的正式文件
                     }
 
                     // 正式文件名重新命名
@@ -13173,6 +13299,11 @@ start_time,
 
                     if (lTotalLength == 0)
                     {
+                        nRet = CreateZeroLengthFile(strFileName,
+            out strError);
+                        if (nRet == -1)
+                            return -1;
+#if NO
                         // 创建一个0bytes的文件
                         int nRedoCount = 0;
                     REDO:
@@ -13203,6 +13334,7 @@ start_time,
                             strError = "创建0字节的文件 '" + strFileName + "' 时出错：" + ex.Message;
                             return -1;
                         }
+#endif
                     }
                     else
                     {
@@ -13210,11 +13342,14 @@ start_time,
                         string strSourceFilename = GetObjectFileName(row_info.NewFileName);
 
                         if (strDeletedFilename != strFileName)
-                            File.Delete(strFileName);   // 防备性删除已经存在的目标文件。TODO: 或者出错以后再重试?
+                        {
+                            this._streamCache.FileDelete(strFileName);   // 防备性删除已经存在的目标文件。TODO: 或者出错以后再重试?
+                        }
 
                         try
                         {
-                            File.Move(strSourceFilename, strFileName);    // 改名
+                            // File.Move(strSourceFilename, strFileName);    // 改名
+                            _streamCache.FileMove(strSourceFilename, strFileName);
                         }
                         catch (FileNotFoundException /* ex */)
                         {
@@ -13711,8 +13846,100 @@ start_time,
             return 0;
         }
 
+#if NO
+        void FileDelete(string filename)
+        {
+            _streamCache.ClearItems(filename);
+            File.Delete(filename);
+        }
+#endif
+
+        // return:
+        //      1   成功
+        //      -100    文件不存在
+        int ReadObjectFile(string strObjectFilename,
+            long lStart,
+            long lOutputLength,
+            out byte[] destBuffer,
+            out string strError)
+        {
+            strError = "";
+            Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
+
+            destBuffer = new Byte[lOutputLength];
+
+            try
+            {
+                StreamItem s = this._streamCache.GetStream(
+strObjectFilename,
+FileMode.Open,
+FileAccess.Read,
+lStart > CACHE_SIZE);
+                try
+                {
+                    s.FileStream.FastSeek(lStart);
+                    s.FileStream.Read(destBuffer,
+                        0,
+                        (int)lOutputLength);
+
+                    return 1;
+                }
+                finally
+                {
+                    _streamCache.ReturnStream(s);
+                }
+            }
+            catch (FileNotFoundException /* ex */)
+            {
+                // TODO: 不要直接汇报物理文件名
+                strError = "对象文件 '" + strObjectFilename + "' 不存在";
+                return -100;
+            }
+        }
+
+        // 创建一个0bytes的文件
+        int CreateZeroLengthFile(string strFileName,
+            out string strError)
+        {
+            strError = "";
+
+            int nRedoCount = 0;
+        REDO:
+            try
+            {
+                _streamCache.ClearItems(strFileName);
+                using (FileStream s = File.Open(
+strFileName,
+FileMode.OpenOrCreate,
+FileAccess.Write,
+FileShare.ReadWrite))
+                {
+                    s.SetLength(0);
+                    return 0;
+                }
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                if (nRedoCount == 0)
+                {
+                    // 创建中间子目录
+                    PathUtil.TryCreateDir(PathUtil.PathPart(strFileName));
+                    nRedoCount++;
+                    goto REDO;
+                }
+                throw ex;
+            }
+            catch (Exception ex)
+            {
+                strError = "创建0字节的文件 '" + strFileName + "' 时出错：" + ex.Message;
+                return -1;
+            }
+        }
+
+        // TODO: metadata 字符数较多，是否可以允许没有必要的时候不写入这个字段内容?
         // parameters:
         //      strPartList 要写入哪些部分？ full 表示全部。range filename newfilename metadata timestamp
+        //      bFull   是否为最后一次充满的写入。因为 metadata 字段是临时和正式共用的，所以在充满的这一次才修改写入
         int WriteLine(
             Connection connection,
             ref RecordRowInfo row_info,
@@ -15876,7 +16103,9 @@ start_time,
                 try
                 {
                     if (string.IsNullOrEmpty(strFilename) == false)
-                        File.Delete(strFilename);
+                    {
+                        this._streamCache.FileDelete(strFilename);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -17707,6 +17936,7 @@ bool bTempObject)
         // 线: 安全
         public override int DeleteRecord(
             string strRecordID,
+            string strObjectID,
             byte[] baInputTimestamp,
             string strStyle,
             out byte[] baOutputTimestamp,
@@ -17727,6 +17957,14 @@ bool bTempObject)
             bool bIgnoreCheckTimestamp = StringUtil.IsInList("ignorechecktimestamp", strStyle);
 
             strRecordID = DbPath.GetID10(strRecordID);
+
+            // 2017/9/17
+            bool bObject = false;
+            if (string.IsNullOrEmpty(strObjectID) == false)
+            {
+                strRecordID = strRecordID + "_" + strObjectID;
+                bObject = true;
+            }
 
             // 这里不再因为FastMode加写锁
 
@@ -17789,73 +18027,79 @@ bool bTempObject)
                         XmlDocument newDom = null;
                         XmlDocument oldDom = null;
 
-                        KeyCollection newKeys = null;
-                        KeyCollection oldKeys = null;
-
-                        if (bDeleteKeysByID == false)
+                        // 处理检索点
+                        if (bObject == false)
                         {
 
-                            string strXml = "";
-                            // return:
-                            //      -1  出错
-                            //      -4  记录不存在
-                            //      -100    对象文件不存在
-                            //      0   正确
-                            nRet = this.GetXmlString(connection,
-                                strRecordID,
-                                out strXml,
-                                out strError);
-                            if (nRet == -100)
-                                strXml = "";
-                            else if (nRet <= -1)
-                                return nRet;
+                            KeyCollection newKeys = null;
+                            KeyCollection oldKeys = null;
 
-                            // 1.删除检索点
-
-                            // return:
-                            //      -1  出错
-                            //      0   成功
-                            nRet = this.MergeKeys(strRecordID,
-                                "",
-                                strXml,
-                                true,
-                                out newKeys,
-                                out oldKeys,
-                                out newDom,
-                                out oldDom,
-                                out strError);
-                            if (nRet == -1)
+                            if (bDeleteKeysByID == false)
                             {
-                                strError = "删除中构造检索点阶段出错： " + strError;
-                                return -1;
+
+                                string strXml = "";
+                                // return:
+                                //      -1  出错
+                                //      -4  记录不存在
+                                //      -100    对象文件不存在
+                                //      0   正确
+                                nRet = this.GetXmlString(connection,
+                                    strRecordID,
+                                    out strXml,
+                                    out strError);
+                                if (nRet == -100)
+                                    strXml = "";
+                                else if (nRet <= -1)
+                                    return nRet;
+
+                                // 1.删除检索点
+
+                                // return:
+                                //      -1  出错
+                                //      0   成功
+                                nRet = this.MergeKeys(strRecordID,
+                                    "",
+                                    strXml,
+                                    true,
+                                    out newKeys,
+                                    out oldKeys,
+                                    out newDom,
+                                    out oldDom,
+                                    out strError);
+                                if (nRet == -1)
+                                {
+                                    strError = "删除中构造检索点阶段出错： " + strError;
+                                    return -1;
+                                }
+                            }
+
+                            if (oldDom != null)
+                            {
+                                // return:
+                                //      -1  出错
+                                //      0   成功
+                                nRet = this.ModifyKeys(connection,
+                                    null,
+                                    oldKeys,
+                                    bFastMode,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
+                            }
+                            else
+                            {
+                                // return:
+                                //      -1  出错
+                                //      0   成功
+                                nRet = this.ForceDeleteKeys(connection,
+                                    strRecordID,
+                                    out strError);
+                                if (nRet == -1)
+                                    return -1;
                             }
                         }
 
-                        if (oldDom != null)
-                        {
-                            // return:
-                            //      -1  出错
-                            //      0   成功
-                            nRet = this.ModifyKeys(connection,
-                                null,
-                                oldKeys,
-                                bFastMode,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                        }
-                        else
-                        {
-                            // return:
-                            //      -1  出错
-                            //      0   成功
-                            nRet = this.ForceDeleteKeys(connection,
-                                strRecordID,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                        }
-
+                        // 删除记录
                         if (this.container.SqlServerType == SqlServerType.Oracle)
                         {
                             // 2.删除子记录
@@ -17880,7 +18124,7 @@ bool bTempObject)
                             nRet = DeleteRecordByID(connection,
                                 row_info,
                                 strRecordID,
-                                oldDom != null ? false : true,
+                                oldDom != null || bObject == true ? false : true,
                                 this.m_lObjectStartSize != -1,
                                 out strError);
                             if (nRet == -1)
@@ -17894,7 +18138,6 @@ bool bTempObject)
                         }
                         else
                         {
-
                             // 3.删除自己,返回删除的记录数
                             // return:
                             //      -1  出错
@@ -17902,7 +18145,7 @@ bool bTempObject)
                             nRet = DeleteRecordByID(connection,
                                 row_info,
                                 strRecordID,
-                                true,
+                                !bObject,    // true,
                                 this.m_lObjectStartSize != -1,
                                 out strError);
                             if (nRet == -1)
@@ -17965,7 +18208,6 @@ bool bTempObject)
 
             return 0;
         }
-
 
         // 重建记录的keys
         // parameter:
@@ -18818,7 +19060,12 @@ bool bTempObject)
                             else if (bDeleteSubrecord == true)
                             {
                                 // TODO: 需要获得全部filename和newfilename字段内容值
-                                Debug.Assert(strID.Length == 10, "");
+                                if (strID.Length != 10)
+                                {
+                                    strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                                    return -1;
+                                }
+                                Debug.Assert(strID.Length == 10, "DeleteRecordByID() 的 strID 必须是 10 字符");
 
                                 strCommand = "use " + this.m_strSqlDbName + " "
                                     + " SELECT filename, newfilename FROM records WHERE id like @id1 OR id = @id2";
@@ -18871,6 +19118,11 @@ bool bTempObject)
                         // 第二步：删除SQL行
                         if (bDeleteSubrecord == true)
                         {
+                            if (strID.Length != 10)
+                            {
+                                strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                                return -1;
+                            }
                             Debug.Assert(strID.Length == 10, "");
 
                             strCommand = "use " + this.m_strSqlDbName + " "
@@ -18934,6 +19186,11 @@ bool bTempObject)
                         else if (bDeleteSubrecord == true)
                         {
                             // TODO: 需要获得全部filename和newfilename字段内容值
+                            if (strID.Length != 10)
+                            {
+                                strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                                return -1;
+                            }
                             Debug.Assert(strID.Length == 10, "");
 
                             strCommand = " SELECT filename, newfilename FROM records WHERE id like @id1 OR id = @id2";
@@ -18980,6 +19237,11 @@ bool bTempObject)
                     // 第二步：删除SQL行
                     if (bDeleteSubrecord == true)
                     {
+                        if (strID.Length != 10)
+                        {
+                            strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                            return -1;
+                        }
                         Debug.Assert(strID.Length == 10, "");
 
                         strCommand = " DELETE FROM records WHERE id like @id1 OR id = @id2";
@@ -19031,6 +19293,11 @@ bool bTempObject)
                         else if (bDeleteSubrecord == true)
                         {
                             // TODO: 需要获得全部filename和newfilename字段内容值
+                            if (strID.Length != 10)
+                            {
+                                strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                                return -1;
+                            }
                             Debug.Assert(strID.Length == 10, "");
 
                             strCommand = " SELECT filename, newfilename FROM `" + this.m_strSqlDbName + "`.records WHERE id like @id1 OR id = @id2";
@@ -19077,6 +19344,11 @@ bool bTempObject)
                     // 第二步：删除SQL行
                     if (bDeleteSubrecord == true)
                     {
+                        if (strID.Length != 10)
+                        {
+                            strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                            return -1;
+                        }
                         Debug.Assert(strID.Length == 10, "");
 
                         strCommand = " DELETE FROM `" + this.m_strSqlDbName + "`.records WHERE id like @id1 OR id = @id2";
@@ -19129,6 +19401,11 @@ bool bTempObject)
                         else if (bDeleteSubrecord == true)
                         {
                             // TODO: 需要获得全部filename和newfilename字段内容值
+                            if (strID.Length != 10)
+                            {
+                                strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                                return -1;
+                            }
                             Debug.Assert(strID.Length == 10, "");
 
                             strCommand = " SELECT filename, newfilename FROM " + this.m_strSqlDbName + "_records WHERE id like :id1 OR id = :id2";
@@ -19180,6 +19457,11 @@ bool bTempObject)
                     // 第二步：删除SQL行
                     if (bDeleteSubrecord == true)
                     {
+                        if (strID.Length != 10)
+                        {
+                            strError = "DeleteRecordByID() 的 strID 必须是 10 字符(当前 strID='" + strID + "')";
+                            return -1;
+                        }
                         Debug.Assert(strID.Length == 10, "");
 
                         strCommand = " DELETE FROM " + this.m_strSqlDbName + "_records WHERE id like :id1 OR id = :id2";
@@ -19235,9 +19517,13 @@ bool bTempObject)
                     try
                     {
                         if (string.IsNullOrEmpty(strFilename1) == false)
-                            File.Delete(strFilename1);
+                        {
+                            this._streamCache.FileDelete(strFilename1);
+                        }
                         if (string.IsNullOrEmpty(strFileName2) == false)
-                            File.Delete(strFileName2);
+                        {
+                            this._streamCache.FileDelete(strFileName2);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -19257,7 +19543,9 @@ bool bTempObject)
                         try
                         {
                             if (string.IsNullOrEmpty(strFilename) == false)
-                                File.Delete(strFilename);
+                            {
+                                this._streamCache.FileDelete(strFilename);
+                            }
                         }
                         catch (Exception ex)
                         {

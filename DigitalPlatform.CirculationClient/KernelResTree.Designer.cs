@@ -17,6 +17,9 @@
             {
                 components.Dispose();
             }
+
+            RemoveDownloader(null, true);
+
             base.Dispose(disposing);
         }
 

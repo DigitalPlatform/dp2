@@ -2129,8 +2129,14 @@ bool bChanged)
 
                     nUploadCount++;
 
+                    string strMetadata = LibraryChannel.BuildMetadata(strMime,
+                        // Path.GetFileName(strLocalFilename)
+                        strLocalFilename
+                        );
+
                     if (bOnlyChangeMetadata)
                     {
+#if NO
                         long lRet = channel.SaveResObject(
     Stop,
     strResPath,
@@ -2142,6 +2148,17 @@ bool bChanged)
     timestamp,
     out output_timestamp,
     out strError);
+#endif
+                        long lRet = channel.UploadFile(
+Stop,
+"", // strLocalFilename,
+strResPath,
+strMetadata,
+"", // strStyle,
+timestamp,   // timestamp,
+false,
+out output_timestamp,
+out strError);
                         timestamp = output_timestamp;
                         if (timestamp != null)
                             ListViewUtil.ChangeItemText(item,
@@ -2155,14 +2172,42 @@ bool bChanged)
                     else
                     {
                         // 检测文件尺寸
-                        FileInfo fi = new FileInfo(strLocalFilename);
+                        // FileInfo fi = new FileInfo(strLocalFilename);
 
-                        if (fi.Exists == false)
+                        if (File.Exists(strLocalFilename) == false)
                         {
                             strError = "文件 '" + strLocalFilename + "' 不存在...";
                             return -1;
                         }
 
+                        long lRet = 0;
+                        TimeSpan old_timeout = channel.Timeout;
+                        channel.Timeout = new TimeSpan(0, 5, 0);
+                        try
+                        {
+                            lRet = channel.UploadFile(
+Stop,
+strLocalFilename,
+strResPath,
+strMetadata,
+"", // strStyle,
+timestamp,   // timestamp,
+false,
+out output_timestamp,
+out strError);
+
+
+                        }
+                        finally
+                        {
+                            channel.Timeout = old_timeout;
+                        }
+                        timestamp = output_timestamp;
+
+                        if (lRet == -1)
+                            goto ERROR1;
+
+#if NO
                         string[] ranges = null;
 
                         if (fi.Length == 0)
@@ -2231,6 +2276,7 @@ bool bChanged)
                                     timestamp,
                                     out output_timestamp,
                                     out strError);
+
                             }
                             finally
                             {
@@ -2295,6 +2341,7 @@ bool bChanged)
                                 goto ERROR1;
                             }
                         }
+#endif
                     }
 
                     SetLineInfo(item,

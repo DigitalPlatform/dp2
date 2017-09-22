@@ -258,6 +258,12 @@
     </Compile>
     <Compile Include="ControlExtensions.cs" />
     <Compile Include="DpiUtil.cs" />
+    <Compile Include="FileDownloadDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FileDownloadDialog.Designer.cs">
+      <DependentUpon>FileDownloadDialog.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="..\AutoCloseMessageBox.resx">
       <DependentUpon>AutoCloseMessageBox.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -287,6 +293,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ConfirmSupervisorDialog.resx">
       <DependentUpon>ConfirmSupervisorDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FileDownloadDialog.resx">
+      <DependentUpon>FileDownloadDialog.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

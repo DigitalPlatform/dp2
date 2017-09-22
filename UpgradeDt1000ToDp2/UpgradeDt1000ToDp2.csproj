@@ -11,8 +11,8 @@
     <RootNamespace>UpgradeDt1000ToDp2</RootNamespace>
     <AssemblyName>UpgradeDt1000ToDp2</AssemblyName>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <ManifestCertificateThumbprint>17F13BCFE33B3C25109AA872FE01ABCA7CA0714F</ManifestCertificateThumbprint>
-    <ManifestKeyFile>UpgradeDt1000ToDp2_4_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestCertificateThumbprint>CCAF1854D7E7CEFA9219A682E316A0EB48C3B1C7</ManifestCertificateThumbprint>
+    <ManifestKeyFile>UpgradeDt1000ToDp2_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
@@ -39,7 +39,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>9</ApplicationRevision>
+    <ApplicationRevision>11</ApplicationRevision>
     <ApplicationVersion>2.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -164,6 +164,7 @@
     <Compile Include="XmlViewerForm.designer.cs">
       <DependentUpon>XmlViewerForm.cs</DependentUpon>
     </Compile>
+    <None Include="UpgradeDt1000ToDp2_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">

@@ -994,6 +994,12 @@ namespace dp2Circulation
 
                 long lHitCount = lRet;
 
+                if (lHitCount == 0)
+                {
+                    this.ShowMessage("没有命中", "yellow", true);
+                    return 0;
+                }
+
                 // return:
                 //      -1  出错
                 //      0   用户中断
@@ -1165,6 +1171,10 @@ namespace dp2Circulation
 
             //
             this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条";
+
+            if (lHitCount == 0)
+                return 0;
+
             stop.SetProgressRange(0, lHitCount);
             stop.Style = StopStyle.EnableHalfStop;
 
@@ -11472,13 +11482,19 @@ Keys keyData)
 
                 long lRet = channel.Search(stop,
                     strQueryXml,
-                    "default",
+                    strResultSetName,   // "default",
                     strOutputStyle,
                     out strError);
                 if (lRet == -1)
                     goto ERROR1;
 
                 long lHitCount = lRet;
+
+                if (lHitCount == 0)
+                {
+                    this.ShowMessage("没有命中", "yellow", true);
+                    return;
+                }
 
                 // return:
                 //      -1  出错

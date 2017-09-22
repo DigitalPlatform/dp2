@@ -68,6 +68,7 @@ namespace DigitalPlatform.rms.Client
         ApplicationStartError = 24,	//Application启动错误
 
         NotFoundSubRes = 25,    // 部分下级资源记录不存在
+        NotFoundObjectFile = 26,    // 对象文件没有找到
 
         // LoginFail = 26, // dp2library向dp2Kernel登录失败。这意味着library.xml中的代理帐户有问题
     }
@@ -527,6 +528,10 @@ namespace DigitalPlatform.rms.Client
             {
                 this.ErrorCode = ChannelErrorCode.RequestCanceled;
             }
+            else if (result.ErrorCode == ErrorCodeValue.NotFoundObjectFile)
+            {
+                this.ErrorCode = ChannelErrorCode.NotFoundObjectFile;
+            }
             else
             {
                 this.ErrorCode = ChannelErrorCode.OtherError;
@@ -650,7 +655,7 @@ namespace DigitalPlatform.rms.Client
             return strResult;
         }
 
-        void DoIdle()
+        public void DoIdle()
         {
 #if NO
             bool bDoEvents = true;
@@ -5665,7 +5670,6 @@ ref strNewStyle);	// 不要数据体和metadata
 
                 } // end try
 
-
                 catch (Exception ex)
                 {
                     /*
@@ -5842,7 +5846,199 @@ ref strNewStyle);	// 不要数据体和metadata
             return 0;
         }
 
+        // 包装后的版本
+        public static int UploadObjectFile(
+            Stop stop,
+            RmsChannel channel,
+            string strRecordPath,
+            string strLocalFilePath,
+            byte[] timestamp_param,
+            int nChunkSize,
+            out byte[] output_timestamp,
+            out string strError)
+        {
+            using (FileStream stream = File.OpenRead(strLocalFilePath))
+            {
+                return UploadObjectFile(
+ stop,
+ channel,
+ strRecordPath,
+ stream,
+ stream.Length,
+ timestamp_param,
+ nChunkSize,
+ out output_timestamp,
+ out strError);
+            }
+        }
 
+        // 上载一个res
+        // parameters:
+        //      strRecordPath   主记录的路径
+        //		inputfile:   源流。注意嗲用本函数以前，需要把文件指针放在想要上传的开始位置。并用 length 参数给出想要上传的总长度。这个长度可以小于文件流的最大长度，也就是说可以用本函数上传流中间的一部分作为对象内容
+        //		bIsFirstRes: 是否是第一个资源(xml)
+        //		strError:    error info
+        // return:
+        //		-2	片断中发现时间戳不匹配。本函数调主可重上载整个资源
+        //		-1	error
+        //		0	successed
+        public static int UploadObjectFile(
+            Stop stop,
+            RmsChannel channel,
+            string strRecordPath,
+            Stream inputfile,
+            long length,
+            byte[] timestamp_param,
+            int nChunkSize,
+            out byte[] output_timestamp,
+            out string strError)
+        {
+            strError = "";
+            output_timestamp = null;
+            long lRet = 0;
+
+            if (length == 0)
+            {
+                Debug.Assert(false, "");
+                return 0;	// 空包不需上载
+            }
+
+            long lStartOffs = inputfile.Position;
+
+            string strStyle = "";
+            string strMetadata = "";
+
+            // 3.将body文件拆分成片断进行上载
+            string[] ranges = null;
+
+            if (length == 0)
+            {
+                // 空文件
+                ranges = new string[1];
+                ranges[0] = "";
+            }
+            else
+            {
+                string strRange = "";
+                strRange = "0-" + Convert.ToString(length - 1);
+
+                // 切割为若干块
+                ranges = RangeList.ChunkRange(strRange,
+                    nChunkSize // 100 * 1024
+                    );
+            }
+
+            byte[] input_timestamp = timestamp_param;
+
+            string strOutputPath = "";
+
+            int loop = 0;
+            for (int j = 0; j < ranges.Length; j++)
+            {
+            REDO:
+
+                channel.DoIdle();
+
+                if (stop != null && stop.State != 0)
+                {
+                    strError = "用户中断";
+                    return -1;
+                }
+
+                // RangeList rl = new RangeList(ranges[j]);
+
+                byte[] baTotal = null;
+
+                if (inputfile != null)
+                {
+                    if (inputfile.Position + length > inputfile.Length)
+                    {
+                        strError = "文件从当前位置 " + Convert.ToString(inputfile.Position) + " 开始到末尾长度不足 " + Convert.ToString(length);
+                        return -1;
+                    }
+
+                    lRet = RangeList.CopyFragment(
+                        inputfile,
+                        length,
+                        ranges[j],
+                        out baTotal,
+                        out strError);
+                    if (lRet == -1)
+                        return -1;
+                }
+                else
+                {
+                    baTotal = new byte[0];	// 这是一个缺憾。应当许可为null
+                }
+
+                inputfile.FastSeek(lStartOffs);
+                lRet = channel.WriteRes(strRecordPath,
+                    ranges[j],
+                    length,
+                    baTotal,
+                    strMetadata,
+                    strStyle,
+                    input_timestamp,
+                    out strOutputPath,
+                    out output_timestamp,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
+                    {
+                        if (loop == 0 && timestamp_param == null)
+                        {
+                            if (output_timestamp != null)
+                            {
+                                input_timestamp = new byte[output_timestamp.Length];
+                                Array.Copy(output_timestamp, 0, input_timestamp, 0, output_timestamp.Length);
+                            }
+                            else
+                            {
+                                input_timestamp = output_timestamp;
+                            }
+                        }
+                        goto REDO;
+                    }
+
+                    return -1;
+                }
+
+                input_timestamp = output_timestamp;
+                loop++;
+            }
+            return 0;
+        }
+
+        // TODO: 尽快废止这个函数
+        // 包装后的版本，兼容以前的调用方式。
+        public long DoSaveResObject(string strPath,
+    Stream file,
+    long lTotalLength,
+    string strStyle,
+    string strMetadata,
+    string strRange,
+    bool bTailHint,
+    byte[] timestamp,
+    out byte[] output_timestamp,
+    out string strOutputPath,
+    out string strError)
+        {
+            return DoSaveResObject(strPath,
+file,
+lTotalLength,
+strStyle,
+strMetadata,
+strRange,
+file.Position,
+bTailHint,
+timestamp,
+out output_timestamp,
+out strOutputPath,
+out strError);
+        }
+
+        // 警告：如果用本函数一次调用写入一个很大的文件的话，可能会内存溢出
         // 保存资源记录
         // parameters:
         //		strPath	格式: 库名/记录号/object/对象xpath
@@ -5858,6 +6054,7 @@ ref strNewStyle);	// 不要数据体和metadata
             string strStyle,	// 2005/11/4
             string strMetadata,
             string strRange,
+            long lHead,
             bool bTailHint,
             byte[] timestamp,
             out byte[] output_timestamp,
@@ -5876,8 +6073,7 @@ ref strNewStyle);	// 不要数据体和metadata
 
             if (file != null)
             {
-
-                if (file.Position + lTotalLength > file.Length)
+                if (lHead/*file.Position*/ + lTotalLength > file.Length)
                 {
                     strError = "文件从当前位置 " + Convert.ToString(file.Position) + " 开始到末尾长度不足 " + Convert.ToString(lTotalLength);
                     return -1;
@@ -5887,6 +6083,7 @@ ref strNewStyle);	// 不要数据体和metadata
                     file,
                     lTotalLength,
                     strRange,
+                    lHead,
                     out baTotal,
                     out strError);
                 if (lRet == -1)
@@ -5974,9 +6171,6 @@ ref strNewStyle);	// 不要数据体和metadata
                     return -1;
                 }
             }
-
-
-
             catch (Exception ex)
             {
                 /*

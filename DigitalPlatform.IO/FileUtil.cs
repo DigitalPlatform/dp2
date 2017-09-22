@@ -2,15 +2,62 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace DigitalPlatform.IO
 {
+    public static class StreamExtension
+    {
+        // 带有 Lock/Unlock 的写入操作
+        public static void LockingWrite(this Stream stream, 
+            byte[] buffer, 
+            int offset, 
+            int length)
+        {
+            if (stream is FileStream)
+            {
+                FileStream file = stream as FileStream;
+                long lock_position = 0;
+                if (file != null)
+                {
+                    lock_position = file.Position;
+                    file.Lock(lock_position, length);
+                }
+                try
+                {
+                    stream.Write(buffer, offset, length);
+                }
+                finally
+                {
+                    if (file != null)
+                        file.Unlock(lock_position, length);
+                }
+            }
+            else
+                stream.Write(buffer, offset, length);
+        }
+    }
     /// <summary>
     /// File功能扩展函数
     /// </summary>
     public class FileUtil
     {
+        public static byte [] GetFileMd5(string filename)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.Open(
+                        filename,
+                        FileMode.Open,
+                        FileAccess.ReadWrite, // Read会造成无法打开
+                        FileShare.ReadWrite))
+                {
+                    return md5.ComputeHash(stream);
+                }
+            }
+        }
+
         // 检测字符串是否为纯数字(不包含'-','.'号)
         public static bool IsPureNumber(string s)
         {

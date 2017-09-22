@@ -128,6 +128,19 @@ namespace DigitalPlatform.rms
                             }
                         }
 
+                        if (this.Dbs != null)
+                        {
+                            // 定时保存一下databases.xml的修改
+                            try
+                            {
+                                this.Dbs.ClearStreamCache();
+                            }
+                            catch (Exception ex)
+                            {
+                                this.WriteErrorLog("管理线程 ClearStreamCache() 时遇到异常:" + ExceptionUtil.GetDebugText(ex));
+                            }
+                        }
+
                         TryVerifyTailNumber();
                     }
                     else if (index == 0)
@@ -228,8 +241,6 @@ namespace DigitalPlatform.rms
         #endregion
 
         #region 全局结果集管理
-
-
 
         // 全局结果集
         public ResultSetTable ResultSets = new ResultSetTable();
@@ -467,6 +478,8 @@ namespace DigitalPlatform.rms
                 return ErrorCodeValue.PartNotFound;
             else if (nRet == -11)
                 return ErrorCodeValue.ExistDbInfo;
+            else if (nRet == -100)
+                return ErrorCodeValue.NotFoundObjectFile; // 对象文件不存在
             else
                 return ErrorCodeValue.CommonError;
         }
@@ -757,6 +770,9 @@ namespace DigitalPlatform.rms
 
         [EnumMember]
         PartialDenied = 23,  // 部分被拒绝 2012/10/9 本来是为了dp2library准备的
+
+        [EnumMember]
+        NotFoundObjectFile = 24,  // 对象文件不存在 -100
 
         //
 

@@ -154,7 +154,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.111 (2017/6/7) WriteRes() API 的 strStyle 参数允许使用 simulate。此时不会产生操作日志
         //      2.112 (2017/6/14) SetEntities() API 增加了一种 Action 为 verify
         //      2.113 (2017/6/16) GetBiblioInfos() API 增加了一种格式 marc。也可以用作 marc:syntax
-        public static string Version = "2.113";
+        //      2.114 (2017/9/20) 批处理任务 大备份初步可用。对对象文件的文件指针用法进行了优化(StreamCache 类)
+        public static string Version = "2.114";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -324,6 +325,8 @@ namespace DigitalPlatform.LibraryServer
         public string SessionDir = "";  // session临时文件
 
         public string TempDir = "";  // 各种通用临时文件 2014/12/5
+
+        public string BackupDir = "";   // 大备份目录 2017/7/13
 
         public string WsUrl = "";	// dp2rms WebService URL
 
@@ -604,6 +607,7 @@ namespace DigitalPlatform.LibraryServer
                     string strSessionDir = PathUtil.MergePath(strDataDir, "session");
                     string strColumnDir = PathUtil.MergePath(strDataDir, "column");
                     string strTempDir = PathUtil.MergePath(strDataDir, "temp");
+                    string strBackupDir = Path.Combine(strDataDir, "backup");
 
                     app.m_strFileName = strFileName;
 
@@ -643,7 +647,11 @@ namespace DigitalPlatform.LibraryServer
 
                     // 各种临时文件
                     app.TempDir = strTempDir;
-                    PathUtil.TryCreateDir(app.TempDir);	// 确保目录创建
+                    PathUtil.TryCreateDir(app.TempDir);
+
+                    // 大备份目录
+                    app.BackupDir = strBackupDir;
+                    PathUtil.TryCreateDir(app.BackupDir);
 
                     if (bReload == false)
                     {
@@ -1700,6 +1708,54 @@ namespace DigitalPlatform.LibraryServer
                                 goto ERROR1;
                             }
                         }
+
+
+                        // 启动 BackupTask
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: BackupTask ReadBatchTaskBreakPointFile");
+#endif
+                        // 从断点记忆文件中读出信息
+                        // return:
+                        //      -1  error
+                        //      0   file not found
+                        //      1   found
+                        nRet = ReadBatchTaskBreakPointFile("大备份",
+                            out strBreakPoint,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            app.WriteErrorLog("ReadBatchTaskBreakPointFile() 时出错：" + strError);
+                        }
+                        // 如果nRet == 0，表示没有断点文件存在，也就不必自动启动这个任务
+
+                        // strBreakPoint 并未被使用。而是断点文件是否存在，这一信息有价值。
+
+                        if (nRet == 1)
+                        {
+#if LOG_INFO
+                            app.WriteErrorLog("INFO: BackupTask");
+#endif
+                            try
+                            {
+
+                                // 从断点文件中取出断点字符串
+                                BackupTask backup = new BackupTask(this, null);
+                                this.BatchTasks.Add(backup);
+
+                                if (backup.StartInfo == null)
+                                    backup.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
+                                backup.StartInfo.Start = "dbnamelist=continue";  // 从断点开始做
+                                backup.ClearProgressFile();   // 清除进度文件内容
+                                backup.StartWorkerThread();
+                            }
+                            catch (Exception ex)
+                            {
+                                app.WriteErrorLog("启动批处理任务时出错：" + ex.Message);
+                                goto ERROR1;
+                            }
+                        }
+
                     }
 
                     // 公共查询最大命中数
@@ -1777,7 +1833,7 @@ namespace DigitalPlatform.LibraryServer
 
                     if (this.MaxClients != 255) // 255 通道情况下不再检查版本失效日期 2016/11/3
                     {
-                        DateTime expire = new DateTime(2017, 9, 1); // 上一个版本是 2017/6/1 2017/3/1 2016/11/1
+                        DateTime expire = new DateTime(2017, 12, 1); // 上一个版本是 2017/9/1 2017/6/1 2017/3/1 2016/11/1
                         if (DateTime.Now > expire)
                         {
                             if (this.MaxClients == 255)

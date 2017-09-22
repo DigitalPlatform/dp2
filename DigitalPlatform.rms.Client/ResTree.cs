@@ -1502,6 +1502,7 @@ namespace DigitalPlatform.rms.Client
                                 stop,
                                 cur_channel,
                                 save_records,
+                                true,
                                 ref bDontPromptTimestampMismatchWhenOverwrite,
                                 out strError);
                             if (nRet == -1)
@@ -1559,6 +1560,7 @@ namespace DigitalPlatform.rms.Client
                                 stop,
                                 cur_channel,
                                 temp,
+                                true,
                                 ref bDontPromptTimestampMismatchWhenOverwrite,
                                 out strError);
                             if (nRet == -1)
@@ -1632,6 +1634,7 @@ namespace DigitalPlatform.rms.Client
                             stop,
                             cur_channel,
                             save_records,
+                            true,
                             ref bDontPromptTimestampMismatchWhenOverwrite,
                             out strError);
                         if (nRet == -1)

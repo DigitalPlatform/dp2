@@ -32,6 +32,7 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -5015,31 +5016,28 @@ MessageBoxDefaultButton.Button2);
         //      -1  error
         //      0   放弃输入
         //      1   成功输入
-        int ReadFingerprintString(
-            out string strFingerprint,
-            out string strVersion,
-            out string strError)
+        async Task<GetFingerprintStringResult> ReadFingerprintString()
         {
-            strError = "";
-            strFingerprint = "";
-            strVersion = "";
+            string strError = "";
+            GetFingerprintStringResult result = new GetFingerprintStringResult();
 
             if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == true)
             {
                 strError = "尚未配置 指纹阅读器URL 系统参数，无法读取指纹信息";
-                return -1;
+                goto ERROR1;
             }
 
             int nRet = StartFingerprintChannel(
                 Program.MainForm.FingerprintReaderUrl,
                 out strError);
             if (nRet == -1)
-                return -1;
+                goto ERROR1;
 
             try
             {
                 try
                 {
+#if NO
                     // 获得一个指纹特征字符串
                     // return:
                     //      -1  error
@@ -5052,12 +5050,13 @@ MessageBoxDefaultButton.Button2);
                         return -1;
 
                     return nRet;
-                    // Program.MainForm.StatusBarMessage = "";
+#endif
+                    return await GetFingerprintString();
                 }
                 catch (Exception ex)
                 {
                     strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 GetFingerprintString() 操作失败: " + ex.Message;
-                    return -1;
+                    goto ERROR1;
                 }
                 // Console.Beep(); // 表示读取成功
             }
@@ -5065,15 +5064,59 @@ MessageBoxDefaultButton.Button2);
             {
                 EndFingerprintChannel();
             }
+        ERROR1:
+            result.ErrorInfo = strError;
+            result.Value = -1;
+            return result;
+        }
+
+        class GetFingerprintStringResult
+        {
+            public string Fingerprint { get; set; }
+            public string Version { get; set; }
+
+            public int Value { get; set; }
+            public string ErrorInfo { get; set; }
+        }
+
+        Task<GetFingerprintStringResult> GetFingerprintString()
+        {
+            return Task.Factory.StartNew<GetFingerprintStringResult>(
+    () =>
+    {
+        return CallGetFingerprintString();
+    });
+        }
+
+        GetFingerprintStringResult CallGetFingerprintString()
+        {
+            GetFingerprintStringResult result = new GetFingerprintStringResult();
+            string strError = "";
+            string strFingerprint = "";
+            string strVersion = "";
+            // 获得一个指纹特征字符串
+            // return:
+            //      -1  error
+            //      0   放弃输入
+            //      1   成功输入
+            int nRet = m_fingerPrintObj.GetFingerprintString(out strFingerprint,
+                out strVersion,
+                out strError);
+
+            result.Fingerprint = strFingerprint;
+            result.Version = strVersion;
+            result.ErrorInfo = strError;
+            result.Value = nRet;
+            return result;
         }
 
         #endregion
 
-        private void toolStripButton_registerFingerprint_Click(object sender, EventArgs e)
+        private async void toolStripButton_registerFingerprint_Click(object sender, EventArgs e)
         {
             string strError = "";
-            string strFingerprint = "";
-            string strVersion = "";
+            //string strFingerprint = "";
+            //string strVersion = "";
 
             this.EnableControls(false);
             Program.MainForm.StatusBarMessage = "等待扫描指纹...";
@@ -5082,6 +5125,7 @@ MessageBoxDefaultButton.Button2);
             try
             {
             REDO:
+#if NO
                 // return:
                 //      -1  error
                 //      0   放弃输入
@@ -5104,14 +5148,33 @@ MessageBoxDefaultButton.Button1);
 
                 if (nRet == -1 || nRet == 0)
                     goto ERROR1;
+#endif
+                GetFingerprintStringResult result = await ReadFingerprintString();
+                if (result.Value == -1)
+                {
+                    DialogResult temp_result = MessageBox.Show(this,
+result.ErrorInfo + "\r\n\r\n是否重试?",
+"ReaderInfoForm",
+MessageBoxButtons.RetryCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                    if (temp_result == DialogResult.Retry)
+                        goto REDO;
+                }
+
+                if (result.Value == -1 || result.Value == 0)
+                {
+                    strError = result.ErrorInfo;
+                    goto ERROR1;
+                }
 
 #if NO
                 strFingerprint = "12345";   // test
                 strVersion = "test-version";
 #endif
 
-                this.readerEditControl1.Fingerprint = strFingerprint;
-                this.readerEditControl1.FingerprintVersion = strVersion;
+                this.readerEditControl1.Fingerprint = result.Fingerprint;   // strFingerprint;
+                this.readerEditControl1.FingerprintVersion = result.Version;    // strVersion;
                 this.readerEditControl1.Changed = true;
             }
             finally

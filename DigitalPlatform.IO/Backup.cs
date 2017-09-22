@@ -25,20 +25,20 @@ namespace DigitalPlatform.IO
 			byte[] data = Encoding.UTF8.GetBytes(strMetaData);
 			long lMetaDataLength = data.Length;
 
-			outputfile.Write(BitConverter.GetBytes(lMetaDataLength), 0, 8);
+			outputfile.LockingWrite(BitConverter.GetBytes(lMetaDataLength), 0, 8);
 
 			// 写入metadata内容
-			outputfile.Write(data, 0, data.Length);
+			outputfile.LockingWrite(data, 0, data.Length);
 
 			// 准备Body数据
 			data = Encoding.UTF8.GetBytes(strBody);
 
 			// 写入body的长度, 8bytes
 			long lBodyLength = data.Length;
-			outputfile.Write(BitConverter.GetBytes(lBodyLength), 0, 8);
+			outputfile.LockingWrite(BitConverter.GetBytes(lBodyLength), 0, 8);
 
 			// 写入body内容
-			outputfile.Write(data, 0 , data.Length);
+            outputfile.LockingWrite(data, 0, data.Length);
 
 			long lTotalLength = outputfile.Position - lStart - 8;	// 净长度
 
@@ -47,7 +47,7 @@ namespace DigitalPlatform.IO
             Debug.Assert(outputfile.Position == lStart, "");
 
             // outputfile.Seek(lStart, SeekOrigin.Begin);     // 文件大了以后这句话的性能会很差
-			outputfile.Write(BitConverter.GetBytes(lTotalLength), 0, 8);
+            outputfile.LockingWrite(BitConverter.GetBytes(lTotalLength), 0, 8);
 
 			// 收尾,为后面继续写设置好文件指针
 			outputfile.Seek(lTotalLength, SeekOrigin.Current);
@@ -69,10 +69,10 @@ namespace DigitalPlatform.IO
 			byte[] data = Encoding.UTF8.GetBytes(strMetaData);
 			long lMetaDataLength = data.Length;
 
-			outputfile.Write(BitConverter.GetBytes(lMetaDataLength), 0, 8);
+            outputfile.LockingWrite(BitConverter.GetBytes(lMetaDataLength), 0, 8);
 
 			// 写入metadata内容
-			outputfile.Write(data, 0, data.Length);
+            outputfile.LockingWrite(data, 0, data.Length);
 
             using (FileStream fileSource = File.Open(
                 strBodyFileName,
@@ -82,10 +82,10 @@ namespace DigitalPlatform.IO
             {
                 // body的长度, 8bytes
                 long lBodyLength = fileSource.Length;
-                outputfile.Write(BitConverter.GetBytes(lBodyLength), 0, 8);
+                outputfile.LockingWrite(BitConverter.GetBytes(lBodyLength), 0, 8);
 
                 // body内容
-                StreamUtil.DumpStream(fileSource, outputfile);
+                StreamUtil.LockingDumpStream(fileSource, outputfile, false);
             }
 
 			long lTotalLength = outputfile.Position - lStart - 8;	// 净长度
@@ -95,7 +95,7 @@ namespace DigitalPlatform.IO
             Debug.Assert(outputfile.Position == lStart, "");
 
 			// outputfile.Seek(lStart, SeekOrigin.Begin);   // 性能
-			outputfile.Write(BitConverter.GetBytes(lTotalLength), 0, 8);
+            outputfile.LockingWrite(BitConverter.GetBytes(lTotalLength), 0, 8);
 
 			// 收尾,为后面继续写设置好文件指针
 			outputfile.Seek(lTotalLength, SeekOrigin.Current);
@@ -113,7 +113,7 @@ namespace DigitalPlatform.IO
 		{
 			lStart = outputfile.Position;
 
-			outputfile.Write(BitConverter.GetBytes(lTotalLength), 0, 8);
+			outputfile.LockingWrite(BitConverter.GetBytes(lTotalLength), 0, 8);
 
 			return 0;
 		}
@@ -128,7 +128,7 @@ namespace DigitalPlatform.IO
             Debug.Assert(outputfile.Position == lStart, "");
 
 			// outputfile.Seek(lStart, SeekOrigin.Begin);   // 性能
-			outputfile.Write(BitConverter.GetBytes(lTotalLength), 0, 8);
+            outputfile.LockingWrite(BitConverter.GetBytes(lTotalLength), 0, 8);
 
 			// 收尾,为后面继续写设置好文件指针
 			outputfile.Seek(lTotalLength, SeekOrigin.Current);
@@ -143,10 +143,10 @@ namespace DigitalPlatform.IO
 			byte[] data = Encoding.UTF8.GetBytes(strMetaData);
 			long lMetaDataLength = data.Length;
 
-			outputfile.Write(BitConverter.GetBytes(lMetaDataLength), 0, 8);
+            outputfile.LockingWrite(BitConverter.GetBytes(lMetaDataLength), 0, 8);
 
 			// 写入metadata内容
-			outputfile.Write(data, 0, data.Length);
+            outputfile.LockingWrite(data, 0, data.Length);
 
 			return 0;
 		}
@@ -164,7 +164,7 @@ namespace DigitalPlatform.IO
 		{
 			lBodyStart = outputfile.Position;
 
-			outputfile.Write(BitConverter.GetBytes(lBodyLength), 0, 8);
+            outputfile.LockingWrite(BitConverter.GetBytes(lBodyLength), 0, 8);
 			return 0;
 		}
 
@@ -179,7 +179,7 @@ namespace DigitalPlatform.IO
             Debug.Assert(outputfile.Position == lBodyStart, "");
 
 			// outputfile.Seek(lBodyStart, SeekOrigin.Begin);  // 性能
-			outputfile.Write(BitConverter.GetBytes(lBodyLength), 0, 8);
+            outputfile.LockingWrite(BitConverter.GetBytes(lBodyLength), 0, 8);
 
 			// 收尾,为后面继续写设置好文件指针
 			outputfile.Seek(lBodyLength, SeekOrigin.Current);

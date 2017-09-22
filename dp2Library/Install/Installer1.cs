@@ -184,6 +184,7 @@ namespace dp2Library
             if (string.IsNullOrEmpty(strParameter) == true)
                 return;
 
+
 #if NO
             String strRootDir = UnQuote(strParameter);
 

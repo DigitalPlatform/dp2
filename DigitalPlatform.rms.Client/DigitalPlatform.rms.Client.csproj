@@ -233,6 +233,7 @@
     <Compile Include="ChangeUsersRightsDlg.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DatabaseUtility.cs" />
     <Compile Include="DbNameMap\DbNameMap.cs" />
     <Compile Include="DbNameMap\DbNameMapItemDlg.cs">
       <SubType>Form</SubType>
@@ -256,6 +257,7 @@
     <Compile Include="ImportExport\ExportUtil.cs" />
     <Compile Include="ImportExport\ImportUtil.cs" />
     <Compile Include="RecordLoader.cs" />
+    <Compile Include="RmsBrowseLoader.cs" />
     <Compile Include="RmsChannel.cs" />
     <Compile Include="RmsChannelCollection.cs">
       <SubType>Code</SubType>

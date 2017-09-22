@@ -239,5 +239,22 @@ namespace dp2Circulation
             }
         }
 
+        private void checkedComboBox_operations_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            CheckedComboBox.ProcessItemChecked(e, "<全部>,<all>".ToLower());
+        }
+
+        private void checkedComboBox_filter_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            CheckedComboBox.ProcessItemChecked(e, "<无>");
+        }
+
+        private void button_dontFilter_Click(object sender, EventArgs e)
+        {
+            this.checkedComboBox_filter.Text = "<无>";
+            this.checkedComboBox_operations.Text = "<all>";
+            this.textBox_recPathList.Text = "";
+        }
+
     }
 }

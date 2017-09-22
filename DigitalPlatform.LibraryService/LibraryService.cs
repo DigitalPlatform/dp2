@@ -8780,6 +8780,14 @@ Stack:
                         out resultInfo,
                         out strError);
                 }
+                else if (strAction == "abort")
+                {
+                    // 2017/8/27
+                    nRet = app.AbortBatchTask(strName,
+                        info,
+                        out resultInfo,
+                        out strError);
+                }
                 else if (strAction == "continue")
                 {
                     nRet = app.StartBatchTask("!continue",
@@ -9645,7 +9653,7 @@ Stack:
                         // return:
                         //      -1  出错
                         //      其他  实际删除的文件和目录个数
-                        nRet = LibraryApplication.DeleteFile(
+                        nRet = app.DeleteFile(
                             strRoot,
                             strCurrentDirectory,
                             strFileName,
@@ -11808,7 +11816,7 @@ Stack:
                     //      -2      文件不存在
                     //		-1      出错
                     //		>= 0	成功，返回最大长度
-                    lRet = LibraryApplication.GetFile(
+                    lRet = app.GetFile(
                         strFilePath,
                         nStart,
                         nLength,
@@ -12344,6 +12352,7 @@ Stack:
                             }
                             lRet = channel.DoDeleteRes(strResPath,
                                 baInputTimestamp,
+                                strStyle,   // 2017/9/16 增加
                                 out baOutputTimestamp,
                                 out strError);
                         }
@@ -14417,6 +14426,10 @@ true);
         public string LicenseType = ""; // 许可类型 server 表示服务器授权模式
         public string Function = "";    // 许可的功能列表
         public string Protocol = "";    // 所绑定的协议。例如 http net.tcp 等
+
+        // 2017/8/30
+        // 实例名
+        public string InstanceName { get; set; }
 
         void IExtension<ServiceHostBase>.Attach(ServiceHostBase owner)
         {

@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://dp2003.com/dp2kernel/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="KernelService" targetNamespace="http://dp2003.com/dp2kernel/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
-  <wsp:Policy wsu:Id="NetTcpBinding_KernelService_policy">
-    <wsp:ExactlyOne>
-      <wsp:All>
-        <msb:BinaryEncoding xmlns:msb="http://schemas.microsoft.com/ws/06/2004/mspolicy/netbinary1" />
-        <wsaw:UsingAddressing />
-      </wsp:All>
-    </wsp:ExactlyOne>
-  </wsp:Policy>
   <wsp:Policy wsu:Id="NetNamedPipeBinding_KernelService_policy">
     <wsp:ExactlyOne>
       <wsp:All>
@@ -1444,259 +1436,6 @@
       <wsdl:output wsaw:Action="http://dp2003.com/dp2kernel/KernelService/GetPropertyResponse" message="tns:KernelService_GetProperty_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
-  <wsdl:binding name="NetTcpBinding_KernelService" type="tns:KernelService">
-    <wsp:PolicyReference URI="#NetTcpBinding_KernelService_policy" />
-    <soap12:binding transport="http://schemas.microsoft.com/soap/tcp" />
-    <wsdl:operation name="DoTest">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/DoTest" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetVersion">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/GetVersion" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Login">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/Login" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Logout">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/Logout" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Search">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/Search" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SearchEx">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/SearchEx" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Stop">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/Stop" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-    </wsdl:operation>
-    <wsdl:operation name="ChangePassword">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/ChangePassword" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="ChangeOtherPassword">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/ChangeOtherPassword" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="Dir">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/Dir" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="InitializeDb">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/InitializeDb" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="RefreshDb">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/RefreshDb" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetRecords">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/GetRecords" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetBrowse">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/GetBrowse" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetRichRecords">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/GetRichRecords" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetRes">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/GetRes" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="WriteRes">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/WriteRes" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="WriteRecords">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/WriteRecords" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="DeleteRes">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/DeleteRes" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="RebuildResKeys">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/RebuildResKeys" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="SetDbInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/SetDbInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetDbInfo">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/GetDbInfo" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="CreateDb">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/CreateDb" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="DeleteDb">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/DeleteDb" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="CreateKeys">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/CreateKeys" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="CopyRecord">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/CopyRecord" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="BatchTask">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/BatchTask" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-    <wsdl:operation name="GetProperty">
-      <soap12:operation soapAction="http://dp2003.com/dp2kernel/KernelService/GetProperty" style="document" />
-      <wsdl:input>
-        <soap12:body use="literal" />
-      </wsdl:input>
-      <wsdl:output>
-        <soap12:body use="literal" />
-      </wsdl:output>
-    </wsdl:operation>
-  </wsdl:binding>
   <wsdl:binding name="NetNamedPipeBinding_KernelService" type="tns:KernelService">
     <wsp:PolicyReference URI="#NetNamedPipeBinding_KernelService_policy" />
     <soap12:binding transport="http://schemas.microsoft.com/soap/named-pipe" />
@@ -2259,12 +1998,6 @@
     </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="KernelService">
-    <wsdl:port name="NetTcpBinding_KernelService" binding="tns:NetTcpBinding_KernelService">
-      <soap12:address location="net.tcp://localhost:8002/dp2kernel/" />
-      <wsa10:EndpointReference>
-        <wsa10:Address>net.tcp://localhost:8002/dp2kernel/</wsa10:Address>
-      </wsa10:EndpointReference>
-    </wsdl:port>
     <wsdl:port name="NetNamedPipeBinding_KernelService" binding="tns:NetNamedPipeBinding_KernelService">
       <soap12:address location="net.pipe://localhost/dp2kernel/" />
       <wsa10:EndpointReference>
@@ -2272,9 +2005,9 @@
       </wsa10:EndpointReference>
     </wsdl:port>
     <wsdl:port name="WSHttpBinding_KernelService" binding="tns:WSHttpBinding_KernelService">
-      <soap12:address location="http://localhost:8001/dp2kernel/" />
+      <soap12:address location="http://localhost:8001/dp2kernel" />
       <wsa10:EndpointReference>
-        <wsa10:Address>http://localhost:8001/dp2kernel/</wsa10:Address>
+        <wsa10:Address>http://localhost:8001/dp2kernel</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
           <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
             <X509Data>

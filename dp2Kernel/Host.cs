@@ -25,6 +25,10 @@ using DigitalPlatform.rms;
 using DigitalPlatform.IO;
 using DigitalPlatform;
 using DigitalPlatform.Install;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Remoting.Channels;
+using System.Runtime.Serialization.Formatters;
+using System.Runtime.Remoting;
 
 namespace dp2Kernel
 {
@@ -52,11 +56,16 @@ namespace dp2Kernel
         {
             if (args.Length == 1 && args[0].Equals("console"))
             {
-                new KernelServiceHost().ConsoleRun();
+                ServerInfo.Host = new KernelServiceHost();
+                ServerInfo.Host.ConsoleRun();
+                // new KernelServiceHost().ConsoleRun();
             }
             else
             {
-                ServiceBase.Run(new KernelServiceHost());
+                ServerInfo.Host = new KernelServiceHost();
+                ServiceBase.Run(ServerInfo.Host);
+
+                // ServiceBase.Run(new KernelServiceHost());
             }
         }
 
@@ -212,6 +221,49 @@ namespace dp2Kernel
             this.m_hosts.Clear();
         }
 
+        // 关闭一个指定的 host
+        // return:
+        //      true    成功关闭
+        //      false   没有找到指定的 host
+        public bool CloseHost(string strInstanceName)
+        {
+            foreach (ServiceHost host in this.m_hosts)
+            {
+                HostInfo info = host.Extensions.Find<HostInfo>();
+                if (info == null)
+                {
+                    Debug.Assert(false, "");
+                    continue;
+                }
+
+                if (info.InstanceName == strInstanceName)
+                {
+                    info.Dispose();
+                    host.Extensions.Remove(info);
+                    host.Close();
+                    this.m_hosts.Remove(host);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public ServiceHost FindHost(string strInstanceName)
+        {
+            foreach (ServiceHost host in this.m_hosts)
+            {
+                HostInfo info = host.Extensions.Find<HostInfo>();
+                if (info == null)
+                    continue;
+
+                if (info.InstanceName == strInstanceName)
+                    return host;
+            }
+
+            return null;
+        }
+
         // 2017/2/9
         // 检查不同实例的 dp2kernel 中所用的 SQL 数据库名是否发生了重复和冲突
         // return:
@@ -320,11 +372,30 @@ namespace dp2Kernel
 
         void ThreadMain()
         {
-            // Debug.Assert(false, "");
             CloseHosts();
 
-            // 2017/2/9
+            List<string> errors = null;
+            OpenHosts(null, out errors);
+
+            this.Log.WriteEntry("dp2Kernel OnStart() end",
+EventLogEntryType.Information);
+
+            this.m_thread = null;
+        }
+
+        // 打开指定的 host
+        // parameters:
+        //      instance_names  要打开的实例的名字，数组。如果 == null，表示全部打开
+        public int OpenHosts(List<string> instance_names,
+            out List<string> errors)
+        {
+            // CloseHosts();
+
             string strError = "";
+            errors = new List<string>();
+            int nCount = 0;
+
+
             // 检查不同实例的 dp2kernel 中所用的 SQL 数据库名是否发生了重复和冲突
             // return:
             //      -1  检查过程出错
@@ -333,8 +404,10 @@ namespace dp2Kernel
             int nRet = CheckSqlDbNames(out strError);
             if (nRet != 0)
             {
-                this.Log.WriteEntry("dp2Kernel 实例启动阶段发生严重错误: " + strError, EventLogEntryType.Error);
-                return;
+                strError = "dp2Kernel 实例启动阶段发生严重错误: " + strError;
+                errors.Add(strError);
+                this.Log.WriteEntry(strError, EventLogEntryType.Error);
+                return 0;
             }
 
             for (int i = 0; ; i++)
@@ -352,6 +425,15 @@ namespace dp2Kernel
                 if (bRet == false)
                     break;
 
+                if (instance_names != null && instance_names.IndexOf(strInstanceName) == -1)
+                    continue;
+
+                // 查重，看看 host 是否已经存在
+                if (FindHost(strInstanceName) != null)
+                {
+                    errors.Add("实例 '" + strInstanceName + "' 调用前已经是启动状态，不能重复启动");
+                    continue;
+                }
 #if NO
                 string strWsHostUrl = FindUrl("http", existing_urls);
 
@@ -362,8 +444,11 @@ namespace dp2Kernel
                 ServiceHost host = new ServiceHost(typeof(KernelService));
                 this.m_hosts.Add(host);
 
+                nCount++;
+
                 HostInfo info = new HostInfo();
                 info.DataDir = strDataDir;
+                info.InstanceName = strInstanceName;
                 host.Extensions.Add(info);
                 /// 
 
@@ -381,8 +466,10 @@ namespace dp2Kernel
                     }
                     catch (Exception ex)
                     {
-                        this.Log.WriteEntry("dp2Kernel OnStart() 警告：发现不正确的协议URL '" + url + "' (异常信息: " + ex.Message + ")。该URL已被放弃绑定。",
+                        strError = "dp2Kernel OnStart() 警告：发现不正确的协议URL '" + url + "' (异常信息: " + ex.Message + ")。该URL已被放弃绑定。";
+                        this.Log.WriteEntry(strError,
     EventLogEntryType.Error);
+                        errors.Add(strError);
                         continue;
                     }
 
@@ -408,32 +495,12 @@ namespace dp2Kernel
                     else
                     {
                         // 警告不能支持的协议
-                        this.Log.WriteEntry("dp2Kernel OnStart() 警告：发现不能支持的协议类型 '" + url + "'",
+                        strError = "dp2Kernel OnStart() 警告：发现不能支持的协议类型 '" + url + "'";
+                        this.Log.WriteEntry(strError,
                             EventLogEntryType.Information);
+                        errors.Add(strError);
                     }
                 }
-
-#if NO
-                if (String.IsNullOrEmpty(strWsHostUrl) == false)
-                {
-                    host.AddServiceEndpoint(typeof(IKernelService),
-                        CreateWsHttpBinding1(),
-                        strWsHostUrl);
-                }
-
-                if (String.IsNullOrEmpty(strNamedpipeHostUrl) == false)
-                {
-                    host.AddServiceEndpoint(typeof(IKernelService),
-            CreateNamedpipeBinding0(),
-            strNamedpipeHostUrl);
-                }
-                if (String.IsNullOrEmpty(strNetTcpHostUrl) == false)
-                {
-                    host.AddServiceEndpoint(typeof(IKernelService),
-        CreateNetTcpBinding0(),
-        strNetTcpHostUrl);
-                }
-#endif
 
                 // 如果具有ws1/ws2 binding，才启用证书
                 if (bHasWsHttp == true/*String.IsNullOrEmpty(strWsHostUrl) == false*/)
@@ -444,44 +511,30 @@ namespace dp2Kernel
                         X509Certificate2 cert = GetCertificate(strCertSN,
                             out strError);
                         if (cert == null)
-                            this.Log.WriteEntry("dp2Kernel OnStart() 准备证书 时发生错误: " + strError,
+                        {
+                            strError = "dp2Kernel OnStart() 准备证书 时发生错误: " + strError;
+                            this.Log.WriteEntry(strError,
 EventLogEntryType.Error);
+                            errors.Add(strError);
+                        }
                         else
                             host.Credentials.ServiceCertificate.Certificate = cert;
 
                     }
                     catch (Exception ex)
                     {
-                        this.Log.WriteEntry("dp2Kernel OnStart() 获取证书时发生错误: " + ex.Message,
+                        strError = "dp2Kernel OnStart() 获取证书时发生错误: " + ex.Message;
+                        this.Log.WriteEntry(strError,
         EventLogEntryType.Error);
-                        return;
+                        errors.Add(strError);
+                        return nCount;
                     }
                 }
 
-                /*
-                 * 
-                 * ws2 才启用
-                m_host.Credentials.UserNameAuthentication.UserNamePasswordValidationMode = System.ServiceModel.Security.UserNamePasswordValidationMode.Custom;
-                m_host.Credentials.UserNameAuthentication.CustomUserNamePasswordValidator = new MyUserNamePasswordValidator();
-                */
-
-                /*
-                m_host.Credentials.ServiceCertificate.SetCertificate(
-                    StoreLocation.CurrentUser,
-                    StoreName.My,
-                    X509FindType.FindBySubjectName,
-                    "DigitalPlatform");
-                 * */
-
-                /*
-                m_host.Credentials.ClientCertificate.Authentication.CertificateValidationMode = 
-                    System.ServiceModel.Security.X509CertificateValidationMode.Custom;
-                m_host.Credentials.ClientCertificate.Authentication.CustomCertificateValidator =
-        new MyValidator();
-                 * */
-
                 // 只有第一个host才有metadata能力
-                if (i == 0 && host.Description.Behaviors.Find<ServiceMetadataBehavior>() == null)
+                if (// i == 0 
+                    m_hosts.Count == 1
+                    && host.Description.Behaviors.Find<ServiceMetadataBehavior>() == null)
                 {
                     string strWsHostUrl = FindUrl("http", existing_urls);
 
@@ -532,15 +585,15 @@ EventLogEntryType.Error);
                     if (this.m_bConsoleRun == true)
                         throw ex;
 
-                    this.Log.WriteEntry("dp2Kernel OnStart() host.Open() 时发生错误: instancename=[" + strInstanceName + "]:" + ex.Message,
+                    strError = "dp2Kernel OnStart() host.Open() 时发生错误: instancename=[" + strInstanceName + "]:" + ex.Message;
+                    this.Log.WriteEntry(strError,
     EventLogEntryType.Error);
-                    return;
+                    errors.Add(strError);
+                    return nCount;
                 }
             }
-            this.Log.WriteEntry("dp2Kernel OnStart() end",
-EventLogEntryType.Information);
 
-            this.m_thread = null;
+            return nCount;
         }
 
         TimeSpan DefaultSendTimeout = new TimeSpan(0, 20, 0);
@@ -748,23 +801,24 @@ strCertSN);
         {
             this.Log.WriteEntry("dp2Kernel OnStart() begin",
 EventLogEntryType.Information);
+            
+            try
+            {
+                StartRemotingServer();
+            }
+            catch (Exception ex)
+            {
+                this.Log.WriteEntry("dp2Kernel StartRemotingServer() exception: " + ExceptionUtil.GetDebugText(ex),
+EventLogEntryType.Error);
+            }
+
 
             this.m_thread.Start();
         }
 
         void m_host_Closing(object sender, EventArgs e)
         {
-            /*
-            lock (GlobalVars.LockObject)
-            {
-                if (GlobalVars.KernelApplication != null)
-                {
-                    GlobalVars.KernelApplication.Close();
-                }
-                GlobalVars.KernelApplication = null;
-            }
-             * */
-
+#if NO
             foreach (ServiceHost host in this.m_hosts)
             {
                 HostInfo info = host.Extensions.Find<HostInfo>();
@@ -774,7 +828,7 @@ EventLogEntryType.Information);
                     info.Dispose();
                 }
             }
-
+#endif
         }
 
         void host_Opening(object sender, EventArgs e)
@@ -791,7 +845,54 @@ EventLogEntryType.Information);
             }
 
             CloseHosts();
+
+            EndRemotingServer();
         }
+
+        #region Windows Service 控制命令设施
+
+        IpcServerChannel m_serverChannel = null;
+
+        void StartRemotingServer()
+        {
+            // http://www.cnblogs.com/gisser/archive/2011/12/31/2308989.html
+            // https://stackoverflow.com/questions/7126733/ipcserverchannel-properties-problem
+            // https://stackoverflow.com/questions/2400320/dealing-with-security-on-ipc-remoting-channel
+            BinaryServerFormatterSinkProvider provider = new BinaryServerFormatterSinkProvider();
+            provider.TypeFilterLevel = TypeFilterLevel.Full;
+            Hashtable ht = new Hashtable();
+            ht["portName"] = "dp2kernel_ServiceControlChannel";
+            ht["name"] = "ipc";
+            ht["authorizedGroup"] = "Administrators"; // "Everyone";
+            m_serverChannel = new IpcServerChannel(ht, provider);
+
+#if NO
+            m_serverChannel = new IpcServerChannel(
+                "dp2kernel_ServiceControlChannel");
+#endif
+            //Register the server channel.
+            ChannelServices.RegisterChannel(m_serverChannel, false);
+
+            RemotingConfiguration.ApplicationName = "dp2kernel_ServiceControlServer";
+
+            //Register this service type.
+            RemotingConfiguration.RegisterWellKnownServiceType(
+                typeof(ServiceControlServer),
+                "dp2kernel_ServiceControlServer",
+                WellKnownObjectMode.Singleton);
+        }
+
+        void EndRemotingServer()
+        {
+            if (m_serverChannel != null)
+            {
+                ChannelServices.UnregisterChannel(m_serverChannel);
+                m_serverChannel = null;
+            }
+        }
+
+        #endregion
+
     }
 
 #if NO

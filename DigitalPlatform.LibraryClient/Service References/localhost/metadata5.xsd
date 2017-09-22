@@ -1525,8 +1525,10 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="BreakPoint" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Count" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OutputParam" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Param" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Start" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="WaitForBegin" type="xs:boolean" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="BatchTaskStartInfo" nillable="true" type="tns:BatchTaskStartInfo" />

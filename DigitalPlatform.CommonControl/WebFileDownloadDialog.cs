@@ -263,10 +263,6 @@ namespace DigitalPlatform.CommonControl
 
             return 1;
         }
-
-
-
-
     }
 
     public class MyWebClient : WebClient

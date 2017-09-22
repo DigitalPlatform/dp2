@@ -14,6 +14,33 @@ namespace DigitalPlatform.CirculationClient
 {
     public static class LibraryChannelExtension
     {
+        // 上载对象。以对象文件方式。自动探测 MIME
+        public static int UploadObject(
+            this LibraryChannel channel,
+            Stop stop,
+            string strClientFilePath,
+            string strServerFilePath,
+            string strStyle,
+            byte[] timestamp,
+            bool bRetryOverwiteExisting,
+            out byte[] output_timestamp,
+            out string strError)
+        {
+            string strMime = PathUtil.MimeTypeFrom(strClientFilePath);
+            string strMetadata = LibraryChannel.BuildMetadata(strMime, Path.GetFileName(strClientFilePath));
+            return UploadFile(
+            channel,
+            stop,
+            strClientFilePath,
+            strServerFilePath,
+            strMetadata,
+            strStyle,
+            timestamp,
+            bRetryOverwiteExisting,
+            out output_timestamp,
+            out strError);
+        }
+
         // 上传文件到到 dp2lbrary 服务器
         // parameters:
         //      timestamp   时间戳。如果为 null，函数会自动根据文件信息得到一个时间戳
@@ -28,12 +55,13 @@ namespace DigitalPlatform.CirculationClient
             string strServerFilePath,
             string strMetadata,
             string strStyle,
-            //string strMime,
             byte[] timestamp,
             bool bRetryOverwiteExisting,
+            out byte[] output_timestamp,
             out string strError)
         {
             strError = "";
+            output_timestamp = null;
 
             string strResPath = strServerFilePath;
 
@@ -41,6 +69,27 @@ namespace DigitalPlatform.CirculationClient
             if (string.IsNullOrEmpty(strMime))
                 strMime = PathUtil.MimeTypeFrom(strClientFilePath);
 #endif
+
+            // 只修改 metadata
+            if (string.IsNullOrEmpty(strClientFilePath) == true)
+            {
+                long lRet = channel.SaveResObject(
+stop,
+strResPath,
+null, // strClientFilePath,
+0,
+strMetadata,
+"",
+timestamp,
+strStyle,
+out output_timestamp,
+out strError);
+                timestamp = output_timestamp;
+                if (lRet == -1)
+                    return -1;
+                return 0;
+            }
+
 
             // 检测文件尺寸
             FileInfo fi = new FileInfo(strClientFilePath);
@@ -73,90 +122,85 @@ namespace DigitalPlatform.CirculationClient
             if (timestamp == null)
                 timestamp = FileUtil.GetFileTimestamp(strClientFilePath);
 
-            byte[] output_timestamp = null;
+            // byte[] output_timestamp = null;
 
-            // REDOWHOLESAVE:
             string strWarning = "";
 
             TimeSpan old_timeout = channel.Timeout;
             try
             {
-                for (int j = 0; j < ranges.Length; j++)
+                using (FileStream stream = File.OpenRead(strClientFilePath))
                 {
-                    //if (Program.MainForm.InvokeRequired == false)
-                    //    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null && stop.State != 0)
+                    for (int j = 0; j < ranges.Length; j++)
                     {
-                        strError = "用户中断";
-                        return -1;
-                    }
+                        //if (Program.MainForm.InvokeRequired == false)
+                        //    Application.DoEvents();	// 出让界面控制权
 
-                    string strWaiting = "";
-                    if (j == ranges.Length - 1)
-                    {
-                        strWaiting = " 请耐心等待...";
-                        channel.Timeout = new TimeSpan(0, 40, 0);   // 40 分钟
-                    }
-
-                    string strPercent = "";
-                    RangeList rl = new RangeList(ranges[j]);
-                    if (rl.Count >= 1)
-                    {
-                        double ratio = (double)((RangeItem)rl[0]).lStart / (double)fi.Length;
-                        strPercent = String.Format("{0,3:N}", ratio * (double)100) + "%";
-                    }
-
-                    if (stop != null)
-                        stop.SetMessage( // strMessagePrefix + 
-                            "正在上载 " + ranges[j] + "/"
-                            + Convert.ToString(fi.Length)
-                            + " " + strPercent + " " + strClientFilePath + strWarning + strWaiting);
-                    int nRedoCount = 0;
-                REDO:
-#if NO
-                    long lRet = channel.SaveResObject(
-                        stop,
-                        strResPath,
-                        strClientFilePath,
-                        strClientFilePath,
-                        strMime,
-                        ranges[j],
-                        // j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
-                        timestamp,
-                        strStyle,
-                        out output_timestamp,
-                        out strError);
-#endif
-                    long lRet = channel.SaveResObject(
-    stop,
-    strResPath,
-    strClientFilePath,
-    strMetadata,
-    ranges[j],
-    j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
-    timestamp,
-    strStyle,
-    out output_timestamp,
-    out strError);
-                    timestamp = output_timestamp;
-
-                    strWarning = "";
-
-                    if (lRet == -1)
-                    {
-                        // 如果是第一个 chunk，自动用返回的时间戳重试一次覆盖
-                        if (bRetryOverwiteExisting == true
-                            && j == 0
-                            && channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch
-                            && nRedoCount == 0)
+                        if (stop != null && stop.State != 0)
                         {
-                            nRedoCount++;
-                            goto REDO;
+                            strError = "用户中断";
+                            return -1;
                         }
-                        return -1;
+
+                        string strWaiting = "";
+                        if (j == ranges.Length - 1)
+                        {
+                            strWaiting = " 请耐心等待...";
+                            channel.Timeout = new TimeSpan(0, 40, 0);   // 40 分钟
+                        }
+
+                        string strPercent = "";
+                        RangeList rl = new RangeList(ranges[j]);
+                        if (rl.Count >= 1)
+                        {
+                            double ratio = (double)((RangeItem)rl[0]).lStart / (double)fi.Length;
+                            strPercent = String.Format("{0,3:N}", ratio * (double)100) + "%";
+                        }
+
+                        if (stop != null)
+                            stop.SetMessage( // strMessagePrefix + 
+                                "正在上载 " + ranges[j] + "/"
+                                + Convert.ToString(fi.Length)
+                                + " " + strPercent + " " + strClientFilePath + strWarning + strWaiting);
+                        int nRedoCount = 0;
+                    REDO:
+                        long lRet = channel.SaveResObject(
+        stop,
+        strResPath,
+        stream, // strClientFilePath,
+        -1,
+        j == ranges.Length - 1 ? strMetadata : null,	// 最尾一次操作才写入 metadata
+        ranges[j],
+                            // j == ranges.Length - 1 ? true : false,	// 最尾一次操作，提醒底层注意设置特殊的WebService API超时时间
+        timestamp,
+        strStyle,
+        out output_timestamp,
+        out strError);
+                        timestamp = output_timestamp;
+
+                        strWarning = "";
+
+                        if (lRet == -1)
+                        {
+                            // 如果是第一个 chunk，自动用返回的时间戳重试一次覆盖
+                            if (bRetryOverwiteExisting == true
+                                && j == 0
+                                && channel.ErrorCode == DigitalPlatform.LibraryClient.localhost.ErrorCode.TimestampMismatch
+                                && nRedoCount == 0)
+                            {
+                                nRedoCount++;
+                                goto REDO;
+                            }
+                            return -1;
+                        }
+
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                strError = "UploadFile() 出现异常: " + ex.Message;
+                return -1;
             }
             finally
             {

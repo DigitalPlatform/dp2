@@ -2087,7 +2087,15 @@ namespace dp2Circulation
         // 刷新数据库名列表
         private void toolStripButton_refresh_Click(object sender, EventArgs e)
         {
-            RefreshDatabaseList();
+            this.toolStripButton_refresh.Enabled = false;
+            try
+            {
+                RefreshDatabaseList();
+            }
+            finally
+            {
+                this.toolStripButton_refresh.Enabled = true;
+            }
         }
 
         void RefreshDatabaseList()
@@ -3641,9 +3649,16 @@ namespace dp2Circulation
 
         private void toolStripButton_refreshOpacDatabaseList_Click(object sender, EventArgs e)
         {
-            RefreshOpacDatabaseList();
+            this.toolStripButton_refreshOpacDatabaseList.Enabled = false;
+            try
+            {
+                RefreshOpacDatabaseList();
+            }
+            finally
+            {
+                this.toolStripButton_refreshOpacDatabaseList.Enabled = true;
+            }
         }
-
 
         void RefreshOpacDatabaseList()
         {
@@ -4505,7 +4520,15 @@ namespace dp2Circulation
         // 刷新
         private void toolStripButton_opacBrowseFormats_refresh_Click(object sender, EventArgs e)
         {
-            RefreshOpacBrowseFormatTree();
+            this.toolStripButton_opacBrowseFormats_refresh.Enabled = false;
+            try
+            {
+                RefreshOpacBrowseFormatTree();
+            }
+            finally
+            {
+                this.toolStripButton_opacBrowseFormats_refresh.Enabled = true;
+            }
         }
 
         void RefreshOpacBrowseFormatTree()
@@ -5228,12 +5251,20 @@ namespace dp2Circulation
 
         private void toolStripButton_location_refresh_Click(object sender, EventArgs e)
         {
-            // 在listview中列出所有馆藏地
-            string strError = "";
-            int nRet = ListAllLocations(out strError);
-            if (nRet == -1)
+            this.toolStripButton_location_refresh.Enabled = false;  // 防止快速点按钮时候多重装入列表内容
+            try
             {
-                MessageBox.Show(this, strError);
+                // 在listview中列出所有馆藏地
+                string strError = "";
+                int nRet = ListAllLocations(out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
+            }
+            finally
+            {
+                this.toolStripButton_location_refresh.Enabled = true;
             }
         }
 
@@ -5916,12 +5947,19 @@ namespace dp2Circulation
 
         private void toolStripButton_valueTable_refresh_Click(object sender, EventArgs e)
         {
-            string strError = "";
-
-            int nRet = this.ListValueTables(out strError);
-            if (nRet == -1)
+            this.toolStripButton_valueTable_refresh.Enabled = false;
+            try
             {
-                MessageBox.Show(this, strError);
+                string strError = "";
+                int nRet = this.ListValueTables(out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
+            }
+            finally
+            {
+                this.toolStripButton_valueTable_refresh.Enabled = true;
             }
         }
 
@@ -6138,12 +6176,20 @@ namespace dp2Circulation
 
         private void toolStripButton_script_refresh_Click(object sender, EventArgs e)
         {
-            string strError = "";
-
-            int nRet = this.ListScript(out strError);
-            if (nRet == -1)
+            this.toolStripButton_script_refresh.Enabled = false;
+            try
             {
-                MessageBox.Show(this, strError);
+                string strError = "";
+
+                int nRet = this.ListScript(out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
+            }
+            finally
+            {
+                this.toolStripButton_script_refresh.Enabled = true;
             }
         }
 
@@ -7170,11 +7216,19 @@ namespace dp2Circulation
 
         private void toolStripButton_zhongcihao_refresh_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = this.ListZhongcihao(out strError);
-            if (nRet == -1)
+            this.toolStripButton_zhongcihao_refresh.Enabled = false;
+            try
             {
-                MessageBox.Show(this, strError);
+                string strError = "";
+                int nRet = this.ListZhongcihao(out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
+            }
+            finally
+            {
+                this.toolStripButton_zhongcihao_refresh.Enabled = true;
             }
         }
 
@@ -7264,11 +7318,19 @@ namespace dp2Circulation
 
         private void toolStripButton_arrangement_refresh_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = this.ListArrangement(out strError);
-            if (nRet == -1)
+            this.toolStripButton_arrangement_refresh.Enabled = false;
+            try
             {
-                MessageBox.Show(this, strError);
+                string strError = "";
+                int nRet = this.ListArrangement(out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
+            }
+            finally
+            {
+                this.toolStripButton_arrangement_refresh.Enabled = true;
             }
         }
 
@@ -8218,11 +8280,19 @@ namespace dp2Circulation
 
         private void toolStripButton_dup_refresh_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = this.ListDup(out strError);
-            if (nRet == -1)
+            this.toolStripButton_dup_refresh.Enabled = false;
+            try
             {
-                MessageBox.Show(this, strError);
+                string strError = "";
+                int nRet = this.ListDup(out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
+            }
+            finally
+            {
+                this.toolStripButton_dup_refresh.Enabled = true;
             }
         }
 
@@ -8431,12 +8501,20 @@ namespace dp2Circulation
 
         private void toolStripButton_newLoanPolicy_refresh_Click(object sender, EventArgs e)
         {
-            string strError = "";
-
-            int nRet = this.NewListRightsTables(out strError);
-            if (nRet == -1)
+            this.toolStripButton_newLoanPolicy_refresh.Enabled = false;
+            try
             {
-                MessageBox.Show(this, strError);
+                string strError = "";
+
+                int nRet = this.NewListRightsTables(out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                }
+            }
+            finally
+            {
+                this.toolStripButton_newLoanPolicy_refresh.Enabled = true;
             }
         }
 
@@ -8729,14 +8807,22 @@ namespace dp2Circulation
 
         private void toolStripButton_calendar_refresh_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            int nRet = ListCalendars(out strError);
-            if (nRet == -1)
-                goto ERROR1;
+            this.toolStripButton_calendar_refresh.Enabled = false;
+            try
+            {
+                string strError = "";
+                int nRet = ListCalendars(out strError);
+                if (nRet == -1)
+                    goto ERROR1;
 
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
+                return;
+            ERROR1:
+                MessageBox.Show(this, strError);
+            }
+            finally
+            {
+                this.toolStripButton_calendar_refresh.Enabled = true;
+            }
         }
 
         private void listView_calendar_DoubleClick(object sender, EventArgs e)
@@ -8844,9 +8930,12 @@ namespace dp2Circulation
             Program.MainForm.ReturnChannel(e.Channel);
             if (e.EndLoop == true)
             {
-                stop.EndLoop();
-                stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("");
+                if (stop != null)
+                {
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                }
                 this.ClearMessage();
             }
         }

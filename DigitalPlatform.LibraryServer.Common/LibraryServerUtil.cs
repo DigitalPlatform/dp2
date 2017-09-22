@@ -13,6 +13,8 @@ namespace DigitalPlatform.LibraryServer
 {
     public class LibraryServerUtil
     {
+        public static string STATE_EXTENSION = ".~state";
+
         // 本地文件目录的虚拟前缀字符串
         public static string LOCAL_PREFIX = "!";
 

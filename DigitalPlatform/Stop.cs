@@ -1258,7 +1258,6 @@ string strText)
             }
         }
 
-
         // 初始化一个按钮,在父窗口load时调
         // locks: 集合写锁
         public void Initial(object button,

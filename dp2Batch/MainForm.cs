@@ -5045,6 +5045,10 @@ this.checkBox_import_fastMode.Checked);
         }
 
         // 将主记录和相关资源写入备份文件
+        // return:
+        //      -1  出错
+        //      0   因 strXmlBody 为空，忽略此记录，并没有导出任何内容
+        //      1   导出了内容
         int WriteRecordToBackupFile(
             Stream outputfile,
             string strDbName,
@@ -5054,6 +5058,11 @@ this.checkBox_import_fastMode.Checked);
             byte[] body_timestamp,
             out string strError)
         {
+            strError = "";
+
+            // 2017/9/19
+            if (string.IsNullOrEmpty(strXmlBody))
+                return 0;
 
             Debug.Assert(String.IsNullOrEmpty(strXmlBody) == false, "strXmlBody不能为空");
 
@@ -5131,8 +5140,7 @@ this.checkBox_import_fastMode.Checked);
             outputfile.Write(data, 0, 8);
             outputfile.Seek(lTotalLength, SeekOrigin.Current);
 
-            return 0;
-
+            return 1;
         ERROR1:
             return -1;
         }

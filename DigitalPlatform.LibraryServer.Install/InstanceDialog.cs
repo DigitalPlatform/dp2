@@ -9,8 +9,11 @@ using System.Windows.Forms;
 using System.Xml;
 using System.IO;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Configuration.Install;
 using System.Security.Cryptography.X509Certificates;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Remoting.Channels;
 
 using DigitalPlatform.Install;
 using DigitalPlatform.GUI;
@@ -18,12 +21,19 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client;
-//using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Interfaces;
 
 namespace DigitalPlatform.LibraryServer
 {
     public partial class InstanceDialog : Form
     {
+        // 被锁定的实例名数组
+        // 正在进行恢复操作的实例名，会进入本数组。以防中途被启动
+        // 引用外部值
+        public List<string> LockingInstances { get; set; }
+
+        public string TempDir { get; set; } // 临时文件目录
+
         public event CopyFilesEventHandler CopyFiles = null;
 
         public bool UninstallMode = false;
@@ -69,7 +79,7 @@ namespace DigitalPlatform.LibraryServer
                 // this.button_certificate.Visible = false;
             }
 
-            
+
             string strError = "";
             int nRet = FillInstanceList(out strError);
             if (nRet == -1)
@@ -92,6 +102,8 @@ namespace DigitalPlatform.LibraryServer
              * */
 
             listView_instance_SelectedIndexChanged(null, null);
+
+            this.BeginInvoke(new Action(RefreshInstanceState));
         }
 
         void ShowMessageTip()
@@ -123,7 +135,6 @@ namespace DigitalPlatform.LibraryServer
             int nRet = 0;
 
             this.Enabled = false;
-
             try
             {
                 // HideMessageTip();
@@ -162,6 +173,7 @@ namespace DigitalPlatform.LibraryServer
                     return;
                 }
 
+#if NO
                 // 进行检查
                 // return:
                 //      -1  发现错误
@@ -174,7 +186,7 @@ namespace DigitalPlatform.LibraryServer
                 nRet = DoModify(out strError);
                 if (nRet == -1)
                     goto ERROR1;
-
+#endif
 
                 /*
                 InstallHelper.SetProductString(
@@ -183,11 +195,16 @@ namespace DigitalPlatform.LibraryServer
         this.strCertificatSN);
                  * */
 
-                this.Changed = false;
+                if (this.Changed == true)
+                {
+                    if (AfterChanged(out strError) == -1)
+                        goto ERROR1;
+
+                    this.Changed = false;
+                }
 
                 this.DialogResult = System.Windows.Forms.DialogResult.OK;
                 this.Close();
-
             }
             finally
             {
@@ -199,6 +216,7 @@ namespace DigitalPlatform.LibraryServer
             MessageBox.Show(this, strError);
         }
 
+#if NO
         private void button_Cancel_Click(object sender, EventArgs e)
         {
             // HideMessageTip();
@@ -206,6 +224,7 @@ namespace DigitalPlatform.LibraryServer
             this.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.Close();
         }
+#endif
 
         public string Comment
         {
@@ -222,7 +241,7 @@ namespace DigitalPlatform.LibraryServer
         // 获得一个目前尚未被使用过的instancename值
         string GetNewInstanceName(int nStart)
         {
-            REDO:
+        REDO:
             string strResult = "instance" + nStart.ToString();
             for (int i = 0; i < this.listView_instance.Items.Count; i++)
             {
@@ -241,8 +260,9 @@ namespace DigitalPlatform.LibraryServer
 
         private void button_newInstance_Click(object sender, EventArgs e)
         {
-            HideMessageTip();
+            string strError = "";
 
+            HideMessageTip();
 
             OneInstanceDialog new_instance_dlg = new OneInstanceDialog();
             GuiUtil.AutoSetDefaultFont(new_instance_dlg);
@@ -265,18 +285,36 @@ namespace DigitalPlatform.LibraryServer
             if (new_instance_dlg.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
-            ListViewItem item = new ListViewItem();
-            ListViewUtil.ChangeItemText(item, COLUMN_NAME, new_instance_dlg.InstanceName);
-            ListViewUtil.ChangeItemText(item, COLUMN_DATADIR, new_instance_dlg.DataDir);
-            ListViewUtil.ChangeItemText(item, COLUMN_BINDINGS, new_instance_dlg.Bindings.Replace("\r\n", ";"));
-            this.listView_instance.Items.Add(item);
+            this.Enabled = false;
+            try
+            {
 
-            new_instance_dlg.LineInfo.Changed = true;
-            item.Tag = new_instance_dlg.LineInfo;
+                ListViewItem item = new ListViewItem();
+                ListViewUtil.ChangeItemText(item, COLUMN_NAME, new_instance_dlg.InstanceName);
+                ListViewUtil.ChangeItemText(item, COLUMN_DATADIR, new_instance_dlg.DataDir);
+                ListViewUtil.ChangeItemText(item, COLUMN_BINDINGS, new_instance_dlg.Bindings.Replace("\r\n", ";"));
+                this.listView_instance.Items.Add(item);
 
-            ListViewUtil.SelectLine(item, true);
+                new_instance_dlg.LineInfo.Changed = true;
+                item.Tag = new_instance_dlg.LineInfo;
 
-            this.Changed = true;
+                ListViewUtil.SelectLine(item, true);
+
+                this.Changed = true;
+                // 不要忘记整理注册表事项
+                if (AfterChanged(out strError) == -1)
+                    goto ERROR1;
+
+                if (IsDp2libraryRunning())
+                    StartOrStopOneInstance(new_instance_dlg.InstanceName, "start");
+                return;
+            }
+            finally
+            {
+                this.Enabled = true;
+            }
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         void new_instance_dlg_LoadXmlFileInfo(object sender, LoadXmlFileInfoEventArgs e)
@@ -344,6 +382,26 @@ namespace DigitalPlatform.LibraryServer
                 e.ErrorInfo = "实例名 '" + e.Value + "' 和已存在的其他实例发生了重复";
         }
 
+        bool IsLocking(string strInstanceName)
+        {
+            if (LockingInstances.IndexOf(strInstanceName) == -1)
+                return false;
+            return true;
+        }
+
+        void LockInstance(string strInstanceName, bool bLock)
+        {
+            if (bLock)
+            {
+                if (LockingInstances.IndexOf(strInstanceName) == -1)
+                    LockingInstances.Add(strInstanceName);
+            }
+            else
+            {
+                LockingInstances.Remove(strInstanceName);
+            }
+        }
+
         ListViewItem m_currentEditItem = null;
 
         private void button_modifyInstance_Click(object sender, EventArgs e)
@@ -352,7 +410,6 @@ namespace DigitalPlatform.LibraryServer
 
             HideMessageTip();
 
-
             if (this.listView_instance.SelectedItems.Count == 0)
             {
                 strError = "尚未选择要修改的事项";
@@ -360,34 +417,62 @@ namespace DigitalPlatform.LibraryServer
             }
 
             ListViewItem item = this.listView_instance.SelectedItems[0];
+            string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
+            if (IsLocking(strInstanceName))
+            {
+                strError = "实例 '" + strInstanceName + "' 当前处于被锁定状态，无法进行修改操作";
+                goto ERROR1;
+            }
+
             this.m_currentEditItem = item;
 
-            OneInstanceDialog modify_instance_dlg = new OneInstanceDialog();
-            GuiUtil.AutoSetDefaultFont(modify_instance_dlg);
-            modify_instance_dlg.Text = "修改一个实例";
-            modify_instance_dlg.InstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
-            modify_instance_dlg.DataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
-            modify_instance_dlg.Bindings = ListViewUtil.GetItemText(item, COLUMN_BINDINGS).Replace(";", "\r\n");
-            modify_instance_dlg.LineInfo = (LineInfo)item.Tag;
+            bool bStopped = false;
+            if (item.ImageIndex == IMAGEINDEX_RUNNING)
+            {
+                // 只对正在 running 状态的实例做停止处理
+                StartOrStopOneInstance(strInstanceName,
+                "stop");
+                bStopped = true;
+            }
+            try
+            {
+                OneInstanceDialog modify_instance_dlg = new OneInstanceDialog();
+                GuiUtil.AutoSetDefaultFont(modify_instance_dlg);
+                modify_instance_dlg.Text = "修改一个实例";
+                modify_instance_dlg.InstanceName = strInstanceName;
+                modify_instance_dlg.DataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
+                modify_instance_dlg.Bindings = ListViewUtil.GetItemText(item, COLUMN_BINDINGS).Replace(";", "\r\n");
+                modify_instance_dlg.LineInfo = (LineInfo)item.Tag;
 
-            modify_instance_dlg.VerifyInstanceName += new VerifyEventHandler(modify_instance_dlg_VerifyInstanceName);
-            modify_instance_dlg.VerifyDataDir += new VerifyEventHandler(modify_instance_dlg_VerifyDataDir);
-            modify_instance_dlg.VerifyBindings += new VerifyEventHandler(modify_instance_dlg_VerifyBindings);
-            modify_instance_dlg.LoadXmlFileInfo += new LoadXmlFileInfoEventHandler(modify_instance_dlg_LoadXmlFileInfo);
+                modify_instance_dlg.VerifyInstanceName += new VerifyEventHandler(modify_instance_dlg_VerifyInstanceName);
+                modify_instance_dlg.VerifyDataDir += new VerifyEventHandler(modify_instance_dlg_VerifyDataDir);
+                modify_instance_dlg.VerifyBindings += new VerifyEventHandler(modify_instance_dlg_VerifyBindings);
+                modify_instance_dlg.LoadXmlFileInfo += new LoadXmlFileInfoEventHandler(modify_instance_dlg_LoadXmlFileInfo);
 
-            modify_instance_dlg.StartPosition = FormStartPosition.CenterScreen;
-            if (modify_instance_dlg.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
-                return;
+                modify_instance_dlg.StartPosition = FormStartPosition.CenterScreen;
+                if (modify_instance_dlg.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
+                    return;
 
-            ListViewUtil.ChangeItemText(item, COLUMN_NAME, modify_instance_dlg.InstanceName);
-            ListViewUtil.ChangeItemText(item, COLUMN_DATADIR, modify_instance_dlg.DataDir);
-            ListViewUtil.ChangeItemText(item, COLUMN_BINDINGS, modify_instance_dlg.Bindings.Replace("\r\n", ";"));
-            modify_instance_dlg.LineInfo.Changed = true;
-            item.Tag = modify_instance_dlg.LineInfo;
+                strInstanceName = modify_instance_dlg.InstanceName;
+                ListViewUtil.ChangeItemText(item, COLUMN_NAME, modify_instance_dlg.InstanceName);
+                ListViewUtil.ChangeItemText(item, COLUMN_DATADIR, modify_instance_dlg.DataDir);
+                ListViewUtil.ChangeItemText(item, COLUMN_BINDINGS, modify_instance_dlg.Bindings.Replace("\r\n", ";"));
+                modify_instance_dlg.LineInfo.Changed = true;
+                item.Tag = modify_instance_dlg.LineInfo;
 
-            ListViewUtil.SelectLine(item, true);
+                ListViewUtil.SelectLine(item, true);
 
-            this.Changed = true;
+                this.Changed = true;
+                // 不要忘记整理注册表事项
+                if (AfterChanged(out strError) == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                if (bStopped)
+                    StartOrStopOneInstance(strInstanceName,
+    "start");
+            }
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -456,7 +541,7 @@ namespace DigitalPlatform.LibraryServer
             bool bRet = IsInstanceNameDup(e.Value,
                 this.m_currentEditItem);
             if (bRet == true)
-                e.ErrorInfo = "实例名 '"+e.Value+"' 和已存在的其他实例发生了重复";
+                e.ErrorInfo = "实例名 '" + e.Value + "' 和已存在的其他实例发生了重复";
         }
 
         // return:
@@ -556,7 +641,7 @@ namespace DigitalPlatform.LibraryServer
 
                 string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
 
-                string [] current_bindings = strCurrentBindings.Split(new char []{';'});
+                string[] current_bindings = strCurrentBindings.Split(new char[] { ';' });
 
                 for (int i = 0; i < bindings.Length; i++)
                 {
@@ -574,7 +659,7 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     if (nRet >= 0)
                     {
-                        strError = "当前绑定集合和已存在的实例 '"+strInstanceName+"' 的绑定集合之间发生了冲突: " + strError;
+                        strError = "当前绑定集合和已存在的实例 '" + strInstanceName + "' 的绑定集合之间发生了冲突: " + strError;
                         return 1;
                     }
                 }
@@ -609,13 +694,24 @@ namespace DigitalPlatform.LibraryServer
                 return;
             }
 
+            // 删除操作中，被停止过的实例的实例名
+            List<string> stopped_instance_names = new List<string>();
+
             this.Enabled = false;
             try
             {
+                bool bRunning = IsDp2libraryRunning();
+
                 // List<string> datadirs = new List<string>();
                 foreach (ListViewItem item in this.listView_instance.SelectedItems)
                 {
                     string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
+
+                    if (IsLocking(strInstanceName))
+                    {
+                        strError = "实例 '" + strInstanceName + "' 当前处于被锁定状态，无法进行删除操作";
+                        goto ERROR1;
+                    }
 
                     string strDataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
                     if (String.IsNullOrEmpty(strDataDir) == true)
@@ -623,6 +719,13 @@ namespace DigitalPlatform.LibraryServer
 
                     if (Directory.Exists(strDataDir) == false)
                         continue;
+
+                    // 停止即将被删除的实例
+                    if (bRunning)
+                    {
+                        StartOrStopOneInstance(strInstanceName, "stop");
+                        stopped_instance_names.Add(strInstanceName);
+                    }
 
                     // 要求操作者用 supervisor 账号登录一次。以便后续进行各种重要操作。
                     // 只需要 library.xml 即可，不需要 dp2library 在运行中。
@@ -666,7 +769,6 @@ namespace DigitalPlatform.LibraryServer
                             MessageBox.Show(this, strError);
                     }
 
-
                     // return:
                     //      -1  出错。包括出错后重试然后放弃
                     //      0   成功
@@ -675,44 +777,23 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                         MessageBox.Show(this, strError);
 
-
                     // datadirs.Add(strDataDir);
+
+                    stopped_instance_names.Remove(strInstanceName);
                 }
 
                 ListViewUtil.DeleteSelectedItems(this.listView_instance);
 
                 this.Changed = true;
+                // 不要忘记整理注册表事项
+                if (AfterChanged(out strError) == -1)
+                    goto ERROR1;
 
-#if NO
-            // 如果数据目录已经存在，提示是否连带删除数据目录
-            if (datadirs.Count > 0)
-            {
-                strError = "";
-                result = MessageBox.Show(this,
-    "所选定的实例信息已经删除。\r\n\r\n要删除它们所对应的下列数据目录么?\r\n" + StringUtil.MakePathList(datadirs, "\r\n"),
-    "dp2Library 实例管理",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Yes)
+                // 重新启动那些被放弃删除的实例
+                foreach (string strInstanceName in stopped_instance_names)
                 {
-                    foreach (string strDataDir in datadirs)
-                    {
-                        string strTempError = "";
-
-                        // return:
-                        //      -1  出错。包括出错后重试然后放弃
-                        //      0   成功
-                        int nRet = InstallHelper.DeleteDataDir(strDataDir,
-            out strTempError);
-                        if (nRet == -1)
-                            strError += strTempError + "\r\n";
-                    }
-                    if (String.IsNullOrEmpty(strError) == false)
-                        goto ERROR1;
+                    StartOrStopOneInstance(strInstanceName, "start");
                 }
-            }
-#endif
             }
             finally
             {
@@ -819,7 +900,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (HasDataDirDup(strDataDir, data_dirs) == true)
                 {
-                    strError = "行 "+(i+1).ToString()+" 的数据目录 '"+strDataDir+"' 和前面某行的数据目录发生了重复";
+                    strError = "行 " + (i + 1).ToString() + " 的数据目录 '" + strDataDir + "' 和前面某行的数据目录发生了重复";
                     return -1;
                 }
 
@@ -862,7 +943,7 @@ namespace DigitalPlatform.LibraryServer
             out strError);
                 if (nRet != 0)
                 {
-                    strError = "实例名为 '"+strInstanceName+"' (第 " + (i + 1).ToString() + " 行)的协议绑定发生错误或者冲突: " + strError;
+                    strError = "实例名为 '" + strInstanceName + "' (第 " + (i + 1).ToString() + " 行)的协议绑定发生错误或者冲突: " + strError;
                     return -1;
                 }
 
@@ -885,7 +966,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (info.XmlFileNotFound == true)
                 {
-                    string strText = "实例 '"+item.Text+"' 的数据目录 '" + strDataDir + "' 中没有找到 library.xml 文件。\r\n\r\n要对这个数据目录进行全新安装么?\r\n\r\n(是)进行全新安装 (否)不进行任何修改和安装 (取消)放弃全部保存操作";
+                    string strText = "实例 '" + item.Text + "' 的数据目录 '" + strDataDir + "' 中没有找到 library.xml 文件。\r\n\r\n要对这个数据目录进行全新安装么?\r\n\r\n(是)进行全新安装 (否)不进行任何修改和安装 (取消)放弃全部保存操作";
                     DialogResult result = MessageBox.Show(
                         this,
         strText,
@@ -964,7 +1045,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (String.IsNullOrEmpty(strDataDir) == true)
                 {
-                    strError = "第 "+(i+1).ToString()+" 行的数据目录尚未设置";
+                    strError = "第 " + (i + 1).ToString() + " 行的数据目录尚未设置";
                     return -1;
                 }
 
@@ -1059,7 +1140,6 @@ namespace DigitalPlatform.LibraryServer
 
                     this.NewInstanceNames.Add(strInstanceName);
                 }
-
 
                 // 兑现修改
                 if (info.Changed == true
@@ -1238,7 +1318,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                CONTINUE:
+            CONTINUE:
                 // 在注册表中写入instance信息
                 // 因为可能插入或者删除任意实例，那么注册表事项需要全部重写
                 InstallHelper.SetInstanceInfo(
@@ -1320,10 +1400,6 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
-
-
-
-
 
         // 创建数据目录，并复制进基本内容
         int CreateNewDataDir(string strDataDir,
@@ -1419,7 +1495,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception)
             {
-                strError = "文件 " + strFilename + " 中<version>元素内容 '"+strVersion+"' 不合法";
+                strError = "文件 " + strFilename + " 中<version>元素内容 '" + strVersion + "' 不合法";
                 return -1;
             }
 
@@ -1659,7 +1735,7 @@ namespace DigitalPlatform.LibraryServer
                 //      1   成功
                 nRet = LibraryInstallHelper.LibrarySupervisorLogin(this,
                     strInstanceName,
-                    "删除实例 '"+strInstanceName+"' 前，需要验证您的 dp2library 管理员身份",
+                    "删除实例 '" + strInstanceName + "' 前，需要验证您的 dp2library 管理员身份",
                     out strError);
                 if (nRet == -1)
                 {
@@ -1675,12 +1751,17 @@ namespace DigitalPlatform.LibraryServer
                     continue;
             }
 
+            bool bRunning = IsDp2libraryRunning();
+
             for (int i = 0; i < this.listView_instance.Items.Count; i++)
             {
                 ListViewItem item = this.listView_instance.Items[i];
                 LineInfo info = (LineInfo)item.Tag;
                 string strDataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
                 string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
+
+                if (bRunning)
+                    StartOrStopOneInstance(strInstanceName, "start");
 
                 string strFilename = PathUtil.MergePath(strDataDir, "library.xml");
                 // XmlDocument dom = new XmlDocument();
@@ -1733,7 +1814,6 @@ namespace DigitalPlatform.LibraryServer
                         strTotalError += "删除实例 '" + strInstanceName + "' 的数据目录 '" + strDataDir + "' 时出错：" + ex.Message + "\r\n";
                     }
                 }
-
             }
 
             // 注意: 注册表中实例信息的编号是连续的。如果仅仅删除中间某些实例信息，需要把后面编号修改小才行。或者彻底顺序重新写入一次。因此下面采取全部删除注册表信息的做法
@@ -1784,8 +1864,10 @@ namespace DigitalPlatform.LibraryServer
         private void InstanceDialog_FormClosing(object sender, FormClosingEventArgs e)
         {
             // 如果删除了实例以后，点“取消”退出，则会忘记删除注册表事项
+            // TODO: 改进删除实例的功能，让删除的当时就自动整理注册表事项
             if (this.Changed == true)
             {
+#if NO
                 // 警告尚未保存
                 DialogResult result = MessageBox.Show(this,
                     "当前窗口内有修改尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
@@ -1798,26 +1880,646 @@ namespace DigitalPlatform.LibraryServer
                     e.Cancel = true;
                     return;
                 }
+#endif
+                if (this.Changed == true)
+                {
+                    string strError = "";
+                    if (AfterChanged(out strError) == -1)
+                        MessageBox.Show(this, strError);
+                    else
+                        this.Changed = false;
+                }
+            }
+        }
+
+        private void listView_instance_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            {
+                menuItem = new MenuItem("启动实例 [" + this.listView_instance.SelectedItems.Count + "] (&S)");
+                menuItem.Click += new System.EventHandler(this.menu_startInstance_Click);
+                if (this.listView_instance.SelectedItems.Count == 0)
+                    menuItem.Enabled = false;
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+
+            {
+                menuItem = new MenuItem("停止实例 [" + this.listView_instance.SelectedItems.Count + "] (&T)");
+                menuItem.Click += new System.EventHandler(this.menu_stopInstance_Click);
+                if (this.listView_instance.SelectedItems.Count == 0)
+                    menuItem.Enabled = false;
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            {
+                menuItem = new MenuItem("刷新状态(&R)");
+                menuItem.Click += new System.EventHandler(this.menu_refreshInstanceState_Click);
+                if (this.listView_instance.Items.Count == 0)
+                    menuItem.Enabled = false;
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            {
+                menuItem = new MenuItem("从大备份恢复(&S)");
+                menuItem.Click += new System.EventHandler(this.menu_restoreInstance_Click);
+                if (this.listView_instance.SelectedItems.Count == 0)
+                    menuItem.Enabled = false;
+                contextMenu.MenuItems.Add(menuItem);
+            }
+
+            contextMenu.Show(this.listView_instance, new Point(e.X, e.Y));
+        }
+
+        void menu_restoreInstance_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.listView_instance.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要恢复的实例";
+                goto ERROR1;
+            }
+
+            ListViewItem item = this.listView_instance.SelectedItems[0];
+
+            string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
+
+            if (IsLocking(strInstanceName))
+            {
+                strError = "实例 '" + strInstanceName + "' 当前处于被锁定状态(这意味着它正在恢复操作中途)，无法对其重叠进行恢复操作";
+                goto ERROR1;
+            }
+
+            DialogResult result = MessageBox.Show(this,
+"确实要根据大备份文件恢复 dp2Library 实例 '" + strInstanceName + "'? \r\n\r\n(*** 警告：恢复操作会导致现有数据全部被来自大备份的数据覆盖，并无法撤回 ***)",
+"从大备份恢复 dp2Library 实例",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;   // cancelled
+
+            {
+                // 要求操作者用 supervisor 账号登录一次。以便后续进行各种重要操作。
+                // 只需要 library.xml 即可，不需要 dp2library 在运行中。
+                // return:
+                //      -2  实例没有找到
+                //      -1  出错
+                //      0   放弃验证
+                //      1   成功
+                int nRet = LibraryInstallHelper.LibrarySupervisorLogin(this,
+                    strInstanceName,
+                    "恢复实例 '" + strInstanceName + "' 前，需要验证您的 dp2library 管理员身份",
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = strError + "\r\n\r\n已放弃恢复操作";
+                    goto ERROR1;
+                }
+                if (nRet == 0)
+                    return;
+
+                if (nRet == -2)
+                    goto ERROR1;
+            }
+
+            bool bRunningChanged = false;
+            if (item.ImageIndex == IMAGEINDEX_RUNNING)
+            {
+                StartOrStopOneInstance(strInstanceName, "stop");
+                bRunningChanged = true;
+            }
+
+            string strDataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
+
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Title = "请指定要导入的大备份文件名";
+            // dlg.FileName = this.textBox_filename.Text;
+
+            dlg.Filter = "大备份文件 (*.dp2bak)|*.dp2bak|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            LockInstance(strInstanceName, true);
+
+            // 对这个实例就不要延迟创建初始书目库了
+            this.NewInstanceNames.Remove(strInstanceName);
+
+            LibraryInstallHelper.RestoreLibraryParam param_base = new LibraryInstallHelper.RestoreLibraryParam();
+            param_base.InstanceName = strInstanceName;
+            param_base.DataDir = strDataDir;
+            param_base.BackupFileName = dlg.FileName;
+            param_base.TempDirRoot = this.TempDir;
+            param_base.FastMode = true;
+            Task.Factory.StartNew(() => RestoreInstance(
+                this.Owner,
+#if NO
+                strDataDir,
+                strBackupFileName,
+                strTempRootDir,
+                true
+#endif
+ param_base
+                )).ContinueWith((antecendent) =>
+                {
+                    LockInstance(strInstanceName, false);
+
+                    if (antecendent.IsFaulted == true)
+                    {
+                        this.Invoke((Action)(() => MessageBox.Show(this, ExceptionUtil.GetDebugText(antecendent.Exception))));
+                        return;
+                    }
+                    if (bRunningChanged)
+                    {
+                        // 重新启动实例
+                        if (this.Visible)
+                            this.Invoke((Action)(() =>
+                            {
+                                StartOrStopOneInstance(strInstanceName, "start");
+                            }));
+                        else
+                            StartOrStopOneInstance(strInstanceName, "start");
+                    }
+                });
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 本函数会出现无模式对话框表示操作进程
+        static void RestoreInstance(
+            Control owner,
+#if NO
+            string strDataDir,
+            string strBackupFileName,
+            string strTempDirRoot,
+            bool bFastMode
+#endif
+ LibraryInstallHelper.RestoreLibraryParam param_base
+            )
+        {
+            string strError = "";
+
+            Stop stop = new Stop();
+
+            FileDownloadDialog dlg = null;
+            dlg = new FileDownloadDialog();
+            dlg.FormClosed += new FormClosedEventHandler(delegate(object o1, FormClosedEventArgs e1)
+            {
+                stop.DoStop();
+            });
+            owner.Invoke((Action)(() =>
+            {
+
+                dlg.Font = owner.Font;
+                dlg.Text = "正在恢复实例 " + param_base.DataDir;
+                //dlg.SourceFilePath = strPath;
+                //dlg.TargetFilePath = strTargetPath;
+                dlg.Show(owner);
+            }));
+
+            StopManager stopManager = new StopManager();
+            stopManager.Initial(dlg.CancelButton, dlg.MessageLabel, dlg.ProgressBar);
+#if NO
+            stopManager.OnDisplayMessage += new DisplayMessageEventHandler((sender, e) => {
+                dlg.SetMessage(e.Message);
+            });
+#endif
+
+            stop.Style = StopStyle.EnableHalfStop;  // API的间隙才让中断。避免获取结果集的中途，因为中断而导致 Session 失效，结果集丢失，进而无法 Retry 获取
+            stop.Register(stopManager, true);
+            stop.BeginLoop();
+
+            try
+            {
+                LibraryInstallHelper.RestoreLibraryParam param = new LibraryInstallHelper.RestoreLibraryParam();
+                param.Stop = stop;
+                param.DataDir = param_base.DataDir;
+                param.BackupFileName = param_base.BackupFileName;
+                param.TempDirRoot = param_base.TempDirRoot;
+                param.FastMode = param_base.FastMode;
+
+                // 在 dp2library 没有启动的情况下，用大备份文件恢复 dp2library 内全部配置和数据库
+                bool bRet = LibraryInstallHelper.RestoreLibrary(param);
+                if (bRet == false)
+                {
+                    strError = param.ErrorInfo;
+                    goto ERROR1;
+                }
+
+                strError = "恢复实例 '" + param_base.DataDir + "' 完成";
+                goto ERROR1;
+            }
+            finally
+            {
+                owner.Invoke((Action)(() =>
+                {
+                    dlg.Close();
+                    stop.EndLoop();
+                    stop.Unregister();
+                }));
+            }
+
+        ERROR1:
+            owner.Invoke((Action)(() =>
+            {
+                MessageBox.Show(owner, strError);
+            }));
+        }
+
+        // 启动所选的实例
+        void menu_startInstance_Click(object sender, EventArgs e)
+        {
+            StartOrStopInstance("start");
+        }
+
+        // 停止所选的实例
+        void menu_stopInstance_Click(object sender, EventArgs e)
+        {
+            StartOrStopInstance("stop");
+        }
+
+        // 刷新全部事项的状态显示
+        void menu_refreshInstanceState_Click(object sender, EventArgs e)
+        {
+            RefreshInstanceState();
+        }
+
+        void EnableControls(bool bEnable)
+        {
+            if (this.Enabled == false)
+                return;
+
+            this.listView_instance.Enabled = bEnable;
+            // this.button_Cancel.Enabled = bEnable;
+            this.button_OK.Enabled = bEnable;
+            this.button_newInstance.Enabled = bEnable;
+            this.button_modifyInstance.Enabled = bEnable;
+            this.button_deleteInstance.Enabled = bEnable;
+        }
+
+        int AfterChanged(out string strError)
+        {
+            strError = "";
+
+            // 进行检查
+            // return:
+            //      -1  发现错误
+            //      0   放弃整个保存操作
+            //      1   一切顺利
+            int nRet = DoVerify(out strError);
+            if (nRet == -1 || nRet == 0)
+                return -1;
+
+            nRet = DoModify(out strError);
+            if (nRet == -1)
+                return -1;
+
+            this.Changed = false;
+            return 0;
+        }
+
+
+        #region 实例运行状态
+
+        void StartOrStopInstance(string strAction)
+        {
+            List<string> errors = new List<string>();
+            this.EnableControls(false);
+            try
+            {
+                string strError = "";
+
+                foreach (ListViewItem item in this.listView_instance.SelectedItems)
+                {
+                    string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
+
+                    if (IsLocking(strInstanceName))
+                    {
+                        errors.Add("实例 '" + strInstanceName + "' 当前处于被锁定状态，无法进行 " + strAction + " 操作");
+                        continue;
+                    }
+
+                    int nRet = dp2library_serviceControl(
+        strAction,
+        strInstanceName,
+        out strError);
+                    if (nRet == -1)
+                        errors.Add(strError);
+                    else
+                        item.ImageIndex = strAction == "stop" ? IMAGEINDEX_STOPPED : IMAGEINDEX_RUNNING;
+                }
+
+            }
+            finally
+            {
+                this.EnableControls(true);
+            }
+
+            if (errors.Count > 0)
+                MessageBox.Show(this, StringUtil.MakePathList(errors, "; "));
+        }
+
+        void StartOrStopOneInstance(string strInstanceName,
+            string strAction)
+        {
+            ListViewItem item = null;
+            if (this.Visible)
+            {
+                item = ListViewUtil.FindItem(this.listView_instance, strInstanceName, COLUMN_NAME);
+                if (item == null)
+                {
+                    MessageBox.Show(this, "名为 '" + strInstanceName + "' 实例在列表中没有找到");
+                    return;
+                }
+            }
+            List<string> errors = new List<string>();
+            this.EnableControls(false);
+            try
+            {
+                string strError = "";
+
+                {
+                    int nRet = dp2library_serviceControl(
+        strAction,
+        strInstanceName,
+        out strError);
+                    if (nRet == -1)
+                        errors.Add(strError);
+                    else
+                    {
+                        if (item != null)
+                            item.ImageIndex = strAction == "stop" ? IMAGEINDEX_STOPPED : IMAGEINDEX_RUNNING;
+                    }
+                }
+            }
+            finally
+            {
+                this.EnableControls(true);
+            }
+
+            if (errors.Count > 0)
+                MessageBox.Show(this, StringUtil.MakePathList(errors, "; "));
+        }
+
+        const int IMAGEINDEX_RUNNING = 0;
+        const int IMAGEINDEX_STOPPED = 1;
+
+        // 刷新实例状态显示
+        void RefreshInstanceState()
+        {
+            bool bError = false;
+            string strError = "";
+            foreach (ListViewItem item in this.listView_instance.Items)
+            {
+                if (bError)
+                {
+                    item.ImageIndex = IMAGEINDEX_STOPPED;
+                    continue;
+                }
+                string strInstanceName = ListViewUtil.GetItemText(item, COLUMN_NAME);
+                int nRet = dp2library_serviceControl(
+                    "getState",
+                    strInstanceName,
+                    out strError);
+                if (nRet == -1)
+                {
+                    // 只要出错一次，后面就不再调用 dp2library_serviceControl()
+                    bError = true;
+                    item.ImageIndex = IMAGEINDEX_STOPPED;
+                }
+                else if (nRet == 0 || strError == "stopped")
+                {
+                    item.ImageIndex = IMAGEINDEX_STOPPED;
+                }
+                else
+                {
+                    // nRet == 1
+                    item.ImageIndex = IMAGEINDEX_RUNNING;
+                }
+            }
+        }
+
+        class IpcInfo
+        {
+            public IpcClientChannel Channel { get; set; }
+            public IServiceControl Server { get; set; }
+        }
+
+        static IpcInfo BeginIpc()
+        {
+            IpcInfo info = new IpcInfo();
+
+            string strUrl = "ipc://dp2library_ServiceControlChannel/dp2library_ServiceControlServer";
+            info.Channel = new IpcClientChannel();
+
+            ChannelServices.RegisterChannel(info.Channel, false);
+
+            info.Server = (IServiceControl)Activator.GetObject(typeof(IServiceControl),
+                strUrl);
+            if (info.Server == null)
+            {
+                string strError = "无法连接到 remoting 服务器 " + strUrl;
+                throw new Exception(strError);
+            }
+
+            return info;
+        }
+
+        static void EndIpc(IpcInfo info)
+        {
+            ChannelServices.UnregisterChannel(info.Channel);
+        }
+
+        // 检测 dp2library.exe 是否在运行状态
+        static bool IsDp2libraryRunning()
+        {
+            try
+            {
+                IpcInfo ipc = BeginIpc();
+                try
+                {
+                    ServiceControlResult result = null;
+                    InstanceInfo info = null;
+                    // 获得一个实例的信息
+                    result = ipc.Server.GetInstanceInfo(".",
+        out info);
+                    if (result.Value == -1)
+                        return false;
+                    if (info != null)
+                        return info.State == "running";
+                    else
+                        return true;
+                }
+                finally
+                {
+                    EndIpc(ipc);
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        // parameters:
+        //      strCommand  start/stop/getState
+        // return:
+        //      -1  出错
+        //      0/1 strCommand 为 "getState" 时分别表示实例 不在运行/在运行 状态
+        public static int dp2library_serviceControl(
+    string strCommand,
+    string strInstanceName,
+    out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                IpcInfo ipc = BeginIpc();
+                try
+                {
+                    ServiceControlResult result = null;
+                    if (strCommand == "start")
+                        result = ipc.Server.StartInstance(strInstanceName);
+                    else if (strCommand == "stop")
+                        result = ipc.Server.StopInstance(strInstanceName);
+                    else if (strCommand == "getState")
+                    {
+                        InstanceInfo info = null;
+                        // 获得一个实例的信息
+                        result = ipc.Server.GetInstanceInfo(strInstanceName,
+            out info);
+                        if (result.Value == -1)
+                        {
+                            strError = result.ErrorInfo;
+                            return -1;
+                        }
+                        else
+                            strError = info.State;
+                        return result.Value;
+                    }
+                    else
+                    {
+                        strError = "未知的命令 '" + strCommand + "'";
+                        return -1;
+                    }
+                    if (result.Value == -1)
+                    {
+                        strError = result.ErrorInfo;
+                        return -1;
+                    }
+                    strError = result.ErrorInfo;
+                    return 0;
+
+                }
+                finally
+                {
+                    EndIpc(ipc);
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
             }
         }
 
 #if NO
-        // 选择证书
-        private void button_certificate_Click(object sender, EventArgs e)
+        // parameters:
+        //      strCommand  start/stop/getState
+        // return:
+        //      -1  出错
+        //      0/1 strCommand 为 "getState" 时分别表示实例 不在运行/在运行 状态
+        static int dp2library_serviceControl(
+    string strCommand,
+    string strInstanceName,
+    out string strError)
         {
-            CertificateDialog dlg = new CertificateDialog();
+            strError = "";
 
-            dlg.SN = this.strCertificatSN;
-            dlg.StartPosition = FormStartPosition.CenterScreen;
-            if (dlg.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
-                return;
+            string strUrl = "ipc://dp2library_ServiceControlChannel/dp2library_ServiceControlServer";
+            IpcClientChannel channel = new IpcClientChannel();
 
-            this.strCertificatSN = dlg.SN;
+            ChannelServices.RegisterChannel(channel, false);
+
+            try
+            {
+                IServiceControl server = (IServiceControl)Activator.GetObject(typeof(IServiceControl),
+                    strUrl);
+                if (server == null)
+                {
+                    strError = "无法连接到 remoting 服务器 " + strUrl;
+                    return -1;
+                }
+
+                try
+                {
+                    ServiceControlResult result = null;
+                    if (strCommand == "start")
+                        result = server.StartInstance(strInstanceName);
+                    else if (strCommand == "stop")
+                        result = server.StopInstance(strInstanceName);
+                    else if (strCommand == "getState")
+                    {
+                        InstanceInfo info = null;
+                        // 获得一个实例的信息
+                        result = server.GetInstanceInfo(strInstanceName,
+            out info);
+                        if (result.Value == -1)
+                        {
+                            strError = result.ErrorInfo;
+                            return -1;
+                        }
+                        else
+                            strError = info.State;
+                        return result.Value;
+                    }
+                    else
+                    {
+                        strError = "未知的命令 '" + strCommand + "'";
+                        return -1;
+                    }
+                    if (result.Value == -1)
+                    {
+                        strError = result.ErrorInfo;
+                        return -1;
+                    }
+                    strError = result.ErrorInfo;
+                    return 0;
+                }
+                catch (Exception ex)
+                {
+                    strError = ex.Message;
+                    return -1;
+                }
+            }
+            finally
+            {
+                ChannelServices.UnregisterChannel(channel);
+            }
         }
 
 #endif
 
-
+        #endregion
 
     }
 

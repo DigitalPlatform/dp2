@@ -9,6 +9,7 @@ using System.Threading;
 using System.Diagnostics;
 
 using DigitalPlatform.GUI;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.CommonControl
 {
@@ -564,5 +565,42 @@ namespace DigitalPlatform.CommonControl
             this.Margin = margin;
             this.Padding = Padding;
         }
+
+        // 处理“所有”事项和其他事项的排斥关系
+        public static void ProcessItemChecked(ItemCheckedEventArgs e, string strList)
+        {
+            ListView list = e.Item.ListView;
+
+            if (StringUtil.IsInList(e.Item.Text.ToLower(), strList))
+            {
+                if (e.Item.Checked == true)
+                {
+                    // 如果当前勾选了“全部”，则清除其余全部事项的勾选
+                    foreach (ListViewItem item in list.Items)
+                    {
+                        if (StringUtil.IsInList(item.Text.ToLower(), strList))
+                            continue;
+                        if (item.Checked != false)
+                            item.Checked = false;
+                    }
+                }
+            }
+            else
+            {
+                if (e.Item.Checked == true)
+                {
+                    // 如果勾选的不是“全部”，则要清除“全部”上可能的勾选
+                    foreach (ListViewItem item in list.Items)
+                    {
+                        if (StringUtil.IsInList(item.Text.ToLower(), strList))
+                        {
+                            if (item.Checked != false)
+                                item.Checked = false;
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

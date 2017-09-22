@@ -71,7 +71,7 @@ namespace UpgradeDt1000ToDp2
             //      1   登录成功
             long lRet = this.Channel.Login(this.textBox_dp2UserName.Text,
                 this.textBox_dp2Password.Text,
-                "location=#upgrade,type=worker",
+                "location=#upgrade,type=worker,client=upgradedt1000todp2|0.02",
                 out strError);
             if (lRet == -1)
             {

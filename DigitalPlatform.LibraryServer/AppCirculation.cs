@@ -3049,6 +3049,8 @@ start_time_1,
             // 检查册所属的馆藏地点是否合读者所在的馆藏地点吻合
             string strRoom = "";
             string strCode = "";
+
+            string strRoomOrigin = "";  // 尚未去除冒号后面部分的馆藏地字符串。例如 班级书架:一年级一班
             {
 
                 // 解析
@@ -3063,6 +3065,7 @@ start_time_1,
 
                 // 去除 strRoom 内容中横杠或者冒号以后的部分
                 {
+                    strRoomOrigin = strRoom;    // 2017/8/24
                     List<string> parts = StringUtil.ParseTwoPart(strRoom, new string[] { "-", ":" });
                     strRoom = parts[0];
                 }
@@ -3179,9 +3182,14 @@ start_time_1,
 
             if (string.IsNullOrEmpty(strPersonalLibrary) == false)
             {
-                if (strPersonalLibrary != "*" && StringUtil.IsInList(strRoom, strPersonalLibrary) == false)
+                if (strPersonalLibrary != "*"
+                    && StringUtil.IsInList(strRoom, strPersonalLibrary) == false && StringUtil.IsInList(strRoomOrigin, strPersonalLibrary) == false)
                 {
-                    strError = "当前用户 '" + account.Barcode + "' 只能操作馆代码 '" + strLibraryCode + "' 中地点为 '" + strPersonalLibrary + "' 的图书，不能操作地点为 '" + strRoom + "' 的图书";
+                    if (strRoom != strRoomOrigin)
+                        strError = "当前用户 '" + account.Barcode + "' 只能操作馆代码 '" + strLibraryCode + "' 中地点为 '" + strPersonalLibrary + "' 的图书，不能操作地点为 '" + strRoom + "' (和 '" + strRoomOrigin + "')的图书";
+                    else
+                        strError = "当前用户 '" + account.Barcode + "' 只能操作馆代码 '" + strLibraryCode + "' 中地点为 '" + strPersonalLibrary + "' 的图书，不能操作地点为 '" + strRoom + "' 的图书";
+
                     // text-level: 用户提示
                     strError = string.Format(this.GetString("s操作被拒绝，原因s"),  // "{0} 操作被拒绝，原因: {1}"
                         strOperName,
@@ -12983,6 +12991,8 @@ out string strError)
             // 检查册所属的馆藏地点是否合读者所在的馆藏地点吻合
             string strCode = "";
             string strRoom = "";
+
+            string strRoomOrigin = "";  // 尚未去除冒号后面部分的馆藏地字符串。例如 班级书架:一年级一班
             {
 
                 // 解析
@@ -12993,6 +13003,15 @@ out string strError)
                 {
                     strWarning += "册记录的馆藏地 '" + strLocation + "' 不属于读者所在馆代码 '" + strLibraryCode + "'，请注意后续处理。";
                 }
+
+                // 2017/8/24
+                // 去除 strRoom 内容中横杠或者冒号以后的部分
+                {
+                    strRoomOrigin = strRoom;
+                    List<string> parts = StringUtil.ParseTwoPart(strRoom, new string[] { "-", ":" });
+                    strRoom = parts[0];
+                }
+
             }
 
             // 检查存取定义馆藏地列表
@@ -13073,9 +13092,13 @@ out string strError)
 
             if (string.IsNullOrEmpty(strPersonalLibrary) == false)
             {
-                if (strPersonalLibrary != "*" && StringUtil.IsInList(strRoom, strPersonalLibrary) == false)
+                if (strPersonalLibrary != "*"
+                    && StringUtil.IsInList(strRoom, strPersonalLibrary) == false && StringUtil.IsInList(strRoomOrigin, strPersonalLibrary) == false)
                 {
-                    strError = "还书失败。当前用户 '" + sessioninfo.Account.Barcode + "' 只能操作馆代码 '" + strLibraryCode + "' 中地点为 '" + strPersonalLibrary + "' 的图书，不能操作地点为 '" + strRoom + "' 的图书";
+                    if (strRoom != strRoomOrigin)
+                        strError = "还书失败。当前用户 '" + sessioninfo.Account.Barcode + "' 只能操作馆代码 '" + strLibraryCode + "' 中地点为 '" + strPersonalLibrary + "' 的图书，不能操作地点为 '" + strRoom + "' (和 '" + strRoomOrigin + "')的图书";
+                    else
+                        strError = "还书失败。当前用户 '" + sessioninfo.Account.Barcode + "' 只能操作馆代码 '" + strLibraryCode + "' 中地点为 '" + strPersonalLibrary + "' 的图书，不能操作地点为 '" + strRoom + "' 的图书";
                     return -1;
                 }
             }

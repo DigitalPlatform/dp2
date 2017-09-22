@@ -13,6 +13,8 @@ using System.Deployment.Application;
 using System.Diagnostics;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Remoting.Channels;
 
 using Microsoft.Win32;
 using Ionic.Zip;
@@ -30,11 +32,16 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
+using DigitalPlatform.Interfaces;
 
 namespace dp2Installer
 {
     public partial class MainForm : Form
     {
+        // 被锁定的实例名数组
+        // 正在进行恢复操作的实例名，会进入本数组。以防中途被启动
+        List<string> locking_instances = new List<string>();
+
         FloatingMessageForm _floatingMessage = null;
 
         /// <summary>
@@ -426,6 +433,12 @@ FormWindowState.Normal);
             string strError = "";
             int nRet = 0;
 
+            if (this.locking_instances.Count > 0)
+            {
+                strError = "目前有下列 dp2library 实例(" + StringUtil.MakePathList(this.locking_instances) + ")处于锁定状态，不允许此时升级 dp2library";
+                goto ERROR1;
+            }
+
             this._floatingMessage.Text = "正在升级 dp2library - 图书馆应用服务器 ...";
 
             try
@@ -764,6 +777,7 @@ MessageBoxDefaultButton.Button2);
 
                 // MessageBox.Show(this, "为进行配置，将首先停止 dp2library 服务。配置完成后 dp2library 会重新启动");
 
+#if NO
                 if (bInstalled == true)
                 {
                     AppendString("正在停止 dp2library 服务 ...\r\n");
@@ -775,6 +789,7 @@ MessageBoxDefaultButton.Button2);
 
                     AppendString("dp2library 服务已经停止\r\n");
                 }
+#endif
 
                 List<string> new_instance_names = null;
 
@@ -782,14 +797,15 @@ MessageBoxDefaultButton.Button2);
                 {
                     DigitalPlatform.LibraryServer.InstanceDialog dlg = new DigitalPlatform.LibraryServer.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
-
+                    dlg.LockingInstances = this.locking_instances;
+                    dlg.TempDir = this.TempDir;
                     // dlg.SourceDir = strRootDir;
                     dlg.CopyFiles += dlg_dp2Library_CopyFiles;
                     dlg.StartPosition = FormStartPosition.CenterScreen;
                     dlg.ShowDialog(this);
 
-                    if (dlg.DialogResult == DialogResult.Cancel)
-                        return;
+                    //if (dlg.DialogResult == DialogResult.Cancel)
+                    //    return;
 
                     if (string.IsNullOrEmpty(dlg.DebugInfo) == false)
                         AppendString("创建实例时的调试信息:\r\n" + dlg.DebugInfo + "\r\n");
@@ -804,6 +820,7 @@ MessageBoxDefaultButton.Button2);
                 }
                 finally
                 {
+#if NO
                     if (bInstalled == true)
                     {
                         string strError1 = "";
@@ -820,6 +837,7 @@ MessageBoxDefaultButton.Button2);
                             AppendString("dp2library 服务启动成功\r\n");
                         }
                     }
+#endif
 
                     AppendSectionTitle("配置实例结束");
                     this.Refresh_dp2library_MenuItems();
@@ -2871,6 +2889,7 @@ MessageBoxDefaultButton.Button1);
 
                 // MessageBox.Show(this, "为进行配置，将首先停止 dp2library 服务。配置完成后 dp2library 会重新启动");
 
+#if NO
                 if (bInstalled == true)
                 {
                     AppendString("正在停止 dp2kernel 服务 ...\r\n");
@@ -2882,6 +2901,7 @@ MessageBoxDefaultButton.Button1);
 
                     AppendString("dp2kernel 服务已经停止\r\n");
                 }
+#endif
 
                 try
                 {
@@ -2893,8 +2913,8 @@ MessageBoxDefaultButton.Button1);
                     dlg.StartPosition = FormStartPosition.CenterScreen;
                     dlg.ShowDialog(this);
 
-                    if (dlg.DialogResult == DialogResult.Cancel)
-                        return;
+                    //if (dlg.DialogResult == DialogResult.Cancel)
+                    //    return;
 
                     if (string.IsNullOrEmpty(dlg.DebugInfo) == false)
                         AppendString("管理实例时的调试信息:\r\n" + dlg.DebugInfo + "\r\n");
@@ -2907,7 +2927,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 finally
                 {
-
+#if NO
                     if (bInstalled == true)
                     {
                         string strError1 = "";
@@ -2924,6 +2944,7 @@ MessageBoxDefaultButton.Button1);
                             AppendString("dp2kernel 服务启动成功\r\n");
                         }
                     }
+#endif
 
                     AppendSectionTitle("配置实例结束");
                     Refresh_dp2kernel_MenuItems();
@@ -3066,7 +3087,6 @@ MessageBoxDefaultButton.Button1);
 
                 try
                 {
-
                     DigitalPlatform.rms.InstanceDialog dlg = new DigitalPlatform.rms.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
 
@@ -3075,12 +3095,14 @@ MessageBoxDefaultButton.Button1);
                     dlg.StartPosition = FormStartPosition.CenterScreen;
                     dlg.ShowDialog(this);
 
+#if NO
                     // TODO: 是否必须要创建至少一个实例?
                     if (dlg.DialogResult == DialogResult.Cancel)
                     {
                         AppendSectionTitle("放弃创建实例 ...");
                         return;
                     }
+#endif
 
                     if (string.IsNullOrEmpty(dlg.DebugInfo) == false)
                         AppendString("创建实例时的调试信息:\r\n" + dlg.DebugInfo + "\r\n");
@@ -3141,9 +3163,11 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-
         private void MenuItem_dp2kernel_installService_Click(object sender, EventArgs e)
         {
+            InstallOrUninstallService("dp2Kernel", true);
+
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -3192,10 +3216,14 @@ MessageBoxDefaultButton.Button1);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         private void MenuItem_dp2kernel_uninstallService_Click(object sender, EventArgs e)
         {
+            InstallOrUninstallService("dp2Kernel", false);
+
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -3236,6 +3264,7 @@ MessageBoxDefaultButton.Button1);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         private void MenuItem_dp2kernel_startService_Click(object sender, EventArgs e)
@@ -3381,21 +3410,23 @@ out string strError)
 
                 try
                 {
-
                     DigitalPlatform.LibraryServer.InstanceDialog dlg = new DigitalPlatform.LibraryServer.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
-
+                    dlg.LockingInstances = this.locking_instances;
+                    dlg.TempDir = this.TempDir;
                     // dlg.DataZipFileName = Path.Combine(this.DataDir, "library_data.zip");
                     dlg.CopyFiles += dlg_dp2Library_CopyFiles;
                     dlg.StartPosition = FormStartPosition.CenterScreen;
                     dlg.ShowDialog(this);   // ForegroundWindow.Instance
 
+#if NO
                     // TODO: 是否必须要创建至少一个实例?
                     if (dlg.DialogResult == DialogResult.Cancel)
                     {
                         AppendSectionTitle("放弃创建实例 ...");
                         return;
                     }
+#endif
 
                     if (string.IsNullOrEmpty(dlg.DebugInfo) == false)
                         AppendString("创建实例时的调试信息:\r\n" + dlg.DebugInfo + "\r\n");
@@ -3490,6 +3521,12 @@ out string strError)
             string strError = "";
             int nRet = 0;
 
+            if (this.locking_instances.Count > 0)
+            {
+                strError = "目前有下列 dp2library 实例(" + StringUtil.MakePathList(this.locking_instances) + ")处于锁定状态，不允许此时启动或者停止 dp2library";
+                goto ERROR1;
+            }
+
             AppendString("正在获得可执行文件目录 ...\r\n");
 
             Application.DoEvents();
@@ -3520,6 +3557,12 @@ out string strError)
             string strError = "";
             int nRet = 0;
 
+            if (this.locking_instances.Count > 0)
+            {
+                strError = "目前有下列 dp2library 实例(" + StringUtil.MakePathList(this.locking_instances) + ")处于锁定状态，不允许此时启动或者停止 dp2library";
+                goto ERROR1;
+            }
+
             AppendString("正在获得可执行文件目录 ...\r\n");
 
             Application.DoEvents();
@@ -3547,6 +3590,8 @@ out string strError)
 
         private void MenuItem_dp2library_installService_Click(object sender, EventArgs e)
         {
+            InstallOrUninstallService("dp2Library", true);
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -3583,10 +3628,98 @@ out string strError)
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
+
+        // 2017/8/26
+        void InstallOrUninstallService(string strName, bool bInstall)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            if (strName == "dp2Library")
+            {
+                if (this.locking_instances.Count > 0)
+                {
+                    strError = "目前有下列 dp2library 实例(" + StringUtil.MakePathList(this.locking_instances) + ")处于锁定状态，不允许此时启动或者停止 dp2library";
+                    goto ERROR1;
+                }
+            }
+
+            if (bInstall)
+                AppendSectionTitle("注册 Windows Service 开始");
+            else
+                AppendSectionTitle("注销 Windows Service 开始");
+
+            Application.DoEvents();
+
+            string strServiceName = strName + "Service";
+            if (strName == "dp2ZServer")
+                strServiceName = "dp2ZService";
+
+            string strExePath = InstallHelper.GetPathOfService(strServiceName);
+            if (bInstall == true)
+            {
+                if (string.IsNullOrEmpty(strExePath) == false)
+                {
+                    strError = strName + " 已经注册为 Windows Service，无法重复进行注册";
+                    goto ERROR1;
+                }
+                // program files (x86)/digitalplatform/dp2capo
+                string strProgramDir = GetProductDirectory(strName);
+
+                strExePath = Path.Combine(strProgramDir, strName + ".exe");
+                if (File.Exists(strExePath) == false)
+                {
+                    strError = strName + ".exe 尚未复制到目标位置 '" + strExePath + "'，无法进行注册";
+                    goto ERROR1;
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(strExePath) == true)
+                {
+                    strError = strName + " 尚未安装和注册为 Windows Service，无法进行注销";
+                    goto ERROR1;
+                }
+                strExePath = StringUtil.Unquote(strExePath, "\"\"");
+
+                // 先停止 Service
+                nRet = InstallHelper.StopService(strServiceName,
+        out strError);
+                if (nRet == -1)
+                    MessageBox.Show(this, "停止 Service 时出错" + strError);
+            }
+
+            nRet = InstallService(strExePath,
+                bInstall,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            if (bInstall)
+                AppendSectionTitle("注册 Windows Service 结束");
+            else
+                AppendSectionTitle("注销 Windows Service 结束");
+
+            if (strName == "dp2Library")
+                this.Refresh_dp2library_MenuItems();
+            if (strName == "dp2Kernel")
+                this.Refresh_dp2kernel_MenuItems();
+            if (strName == "dp2ZServer")
+                this.Refresh_dp2ZServer_MenuItems();
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
 
         private void MenuItem_dp2library_uninstallService_Click(object sender, EventArgs e)
         {
+            InstallOrUninstallService("dp2Library", false);
+
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -3602,6 +3735,12 @@ out string strError)
             }
             strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
+            // testing
+            nRet = InstallHelper.StopService("dp2LibraryService",
+    out strError);
+            if (nRet == -1)
+                MessageBox.Show(this, "停止 Service 时出错" + strError);
+
             // 注销 Windows Service
             nRet = InstallService(strExePath,
     false,
@@ -3615,6 +3754,7 @@ out string strError)
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         // 卸载 dp2kernel
@@ -3642,6 +3782,7 @@ out string strError)
                 }
                 strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
+#if NO
                 {
                     AppendString("正在停止 dp2kernel 服务 ...\r\n");
 
@@ -3652,6 +3793,7 @@ out string strError)
 
                     AppendString("dp2kernel 服务已经停止\r\n");
                 }
+#endif
 
 #if NO
             DialogResult result = MessageBox.Show(this,
@@ -3677,8 +3819,15 @@ MessageBoxDefaultButton.Button2);
 
                     if (dlg.DialogResult == DialogResult.Cancel)
                     {
+#if NO
                         MessageBox.Show(this,
                             "已放弃卸载全部实例和数据目录。仅仅卸载了执行程序。");
+
+#endif
+                        AppendString("放弃卸载\r\n");
+                        return;
+                        //strError = "放弃卸载";
+                        //goto ERROR1;
                     }
                     else
                     {
@@ -3686,8 +3835,18 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-
                 // 探测 .exe 是否为新版本。新版本中 Installer.Uninstall 动作不会删除数据目录
+
+                {
+                    AppendString("正在停止 dp2kernel 服务 ...\r\n");
+
+                    nRet = InstallHelper.StopService("dp2KernelService",
+            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    AppendString("dp2kernel 服务已经停止\r\n");
+                }
 
                 AppendString("注销 Windows Service\r\n");
 
@@ -4093,15 +4252,24 @@ MessageBoxDefaultButton.Button1);
                 EndSearch();
             }
 
-            AppendString("为标记 library.xml 文件，正在停止 dp2library 服务 ...\r\n");
+            AppendString("为标记 library.xml 文件，正在停止实例 '" + strInstanceName + "' ...\r\n");
             Application.DoEvents();
 
+#if NO
             nRet = InstallHelper.StopService("dp2LibraryService",
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             else
                 AppendString("dp2library 服务已经停止\r\n");
+#endif
+            nRet = StartOrStopOneDp2libraryInstance(strInstanceName,
+            "stop",
+            out strError);
+            if (nRet == -1)
+                MessageBox.Show(this, strError);
+            else
+                AppendString("dp2library 实例 '" + strInstanceName + "' 已经停止\r\n");
 
             // 在 library.xml 中标记，已经创建过初始书目库了
             // return:
@@ -4114,17 +4282,43 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
-            AppendString("正在启动 dp2library 服务 ...\r\n");
+            AppendString("正在启动实例 '" + strInstanceName + "' ...\r\n");
             Application.DoEvents();
 
+#if NO
             nRet = InstallHelper.StartService("dp2LibraryService",
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             else
                 AppendString("dp2library 服务成功启动\r\n");
+#endif
+            nRet = StartOrStopOneDp2libraryInstance(strInstanceName,
+"start",
+out strError);
+            if (nRet == -1)
+                MessageBox.Show(this, strError);
+            else
+                AppendString("dp2library 实例 '" + strInstanceName + "' 成功启动\r\n");
+
 
             return 1;
+        }
+
+        int StartOrStopOneDp2libraryInstance(string strInstanceName,
+            string strAction,
+            out string strError)
+        {
+            strError = "";
+
+            int nRet = DigitalPlatform.LibraryServer.InstanceDialog.dp2library_serviceControl(
+strAction,
+strInstanceName,
+out strError);
+            if (nRet == -1)
+                return -1;
+
+            return 0;
         }
 
         void DoLibraryStop(object sender, StopEventArgs e)
@@ -4433,6 +4627,12 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
             string strError = "";
             int nRet = 0;
 
+            if (this.locking_instances.Count > 0)
+            {
+                strError = "目前有下列 dp2library 实例(" + StringUtil.MakePathList(this.locking_instances) + ")处于锁定状态，无法卸载 dp2library";
+                goto ERROR1;
+            }
+
             this._floatingMessage.Text = "正在卸载 dp2library - 图书馆应用服务器 ...";
             try
             {
@@ -4450,6 +4650,7 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                 }
                 strExePath = StringUtil.Unquote(strExePath, "\"\"");
 
+#if NO
                 {
                     AppendString("正在停止 dp2library 服务 ...\r\n");
 
@@ -4460,12 +4661,14 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
 
                     AppendString("dp2library 服务已经停止\r\n");
                 }
+#endif
 
                 try
                 {
                     DigitalPlatform.LibraryServer.InstanceDialog dlg = new DigitalPlatform.LibraryServer.InstanceDialog();
                     GuiUtil.AutoSetDefaultFont(dlg);
-
+                    dlg.LockingInstances = this.locking_instances;
+                    dlg.TempDir = this.TempDir;
                     dlg.Text = "dp2Library - 彻底卸载所有实例和数据目录";
                     dlg.Comment = "下列实例将被全部卸载。请仔细确认。一旦卸载，全部数据目录、数据库和实例信息将被删除，并且无法恢复。";
                     dlg.UninstallMode = true;
@@ -4486,6 +4689,17 @@ DigitalPlatform.LibraryClient.BeforeLoginEventArgs e)
                     {
                         // 兑现修改
 
+                    }
+
+                    {
+                        AppendString("正在停止 dp2library 服务 ...\r\n");
+
+                        nRet = InstallHelper.StopService("dp2LibraryService",
+                out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        AppendString("dp2library 服务已经停止\r\n");
                     }
 
                     AppendString("注销 Windows Service 开始\r\n");
@@ -5169,6 +5383,8 @@ MessageBoxDefaultButton.Button2);
 
         private void MenuItem_dp2ZServer_installService_Click(object sender, EventArgs e)
         {
+            InstallOrUninstallService("dp2ZServer", true);
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -5205,10 +5421,14 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         private void MenuItem_dp2ZServer_uninstallService_Click(object sender, EventArgs e)
         {
+            InstallOrUninstallService("dp2ZServer", false);
+
+#if NO
             string strError = "";
             int nRet = 0;
 
@@ -5237,6 +5457,7 @@ MessageBoxDefaultButton.Button2);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+#endif
         }
 
         private void MenuItem_dp2ZServer_instanceManagement_Click(object sender, EventArgs e)
@@ -5352,5 +5573,53 @@ MessageBoxDefaultButton.Button2);
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
+
+        #region Service Control 功能
+
+#if NO
+        IpcClientChannel m_dp2libraryScChannel = new IpcClientChannel();
+        IServiceControl m_dp2libraryScObj = null;
+
+        // "ipc://dp2library_ServiceControlChannel/dp2library_ServiceControlServer"
+        int StartDp2libraryScChannel(
+            string strUrl,
+            out string strError)
+        {
+            strError = "";
+
+            //Register the channel with ChannelServices.
+            if (this.m_dp2libraryScChannel == null)
+                this.m_dp2libraryScChannel = new IpcClientChannel();
+
+            ChannelServices.RegisterChannel(m_dp2libraryScChannel, true);
+
+            try
+            {
+                IServiceControl m_dp2libraryScObj = (IServiceControl)Activator.GetObject(typeof(IServiceControl),
+                    strUrl);
+                if (m_dp2libraryScObj == null)
+                {
+                    strError = "无法连接到 remoting 服务器 " + strUrl;
+                    return -1;
+                }
+            }
+            finally
+            {
+            }
+
+            return 0;
+        }
+
+        void EndDp2libraryScChannel()
+        {
+            if (this.m_dp2libraryScChannel != null)
+            {
+                ChannelServices.UnregisterChannel(m_dp2libraryScChannel);
+                this.m_dp2libraryScChannel = null;
+            }
+        }
+#endif
+
+        #endregion
     }
 }

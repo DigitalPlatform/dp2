@@ -279,8 +279,36 @@ namespace DigitalPlatform.LibraryServer
             task.eventActive.Set();
              * */
 
+            // 等待工作线程运行到启动点
+            if (task.StartInfo.WaitForBegin)
+            {
+                if (task.eventStarted.WaitOne(TimeSpan.FromSeconds(10)) == false)
+                {
+                    strError = "任务 " + task.Name + " 未能在 10 秒内启动成功";
+                    return 1;
+                }
+
+                // 2017/8/23
+                if (string.IsNullOrEmpty(task.ErrorInfo) == false)
+                {
+                    strError = "任务 " + task.Name + " 启动阶段出错: " + task.ErrorInfo;
+                    return 1;
+                }
+            }
+
             info = task.GetCurrentInfo(param.ResultOffset,
                 param.MaxResultBytes);
+
+            if (task.StartInfo.WaitForBegin)
+            {
+                if (info.StartInfo == null)
+                    info.StartInfo = new BatchTaskStartInfo();
+                if (strName == "大备份")
+                {
+                    BackupTask temp = task as BackupTask;
+                    info.StartInfo.OutputParam = temp.OutputFileNames;
+                }
+            }
 
             return 0;
         }
@@ -316,6 +344,38 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
+            task.Stop();
+
+            info = task.GetCurrentInfo(param.ResultOffset,
+                param.MaxResultBytes);
+
+            return 1;
+        }
+
+        public int AbortBatchTask(string strName,
+    BatchTaskInfo param,
+    out BatchTaskInfo info,
+    out string strError)
+        {
+            strError = "";
+            info = null;
+
+            if (this.BatchTasks == null)
+            {
+                strError = "this.BatchTasks == null";
+                return -1;
+            }
+
+            BatchTask task = this.BatchTasks.GetBatchTask(strName);
+
+            // 任务本来就不存在
+            if (task == null)
+            {
+                strError = "任务 '" + strName + "' 不存在";
+                return -1;
+            }
+
+            task._pendingCommands.Add("abort");
             task.Stop();
 
             info = task.GetCurrentInfo(param.ResultOffset,
@@ -370,6 +430,12 @@ namespace DigitalPlatform.LibraryServer
         [DataMember]
         public string Count = ""; // 个数 纯数字
 
+        // 207/8/19
+        [DataMember]
+        public bool WaitForBegin { get; set; }  // [in] 在启动的时候，是否等待到 Begin 阶段完成？
+        [DataMember]
+        public string OutputParam { get; set; }  // [out] 启动到 Begin 阶段完成后，返回给前端的信息。比如，实际使用的文件名
+
         public override string ToString()
         {
             Hashtable table = new Hashtable();
@@ -382,6 +448,11 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(this.Count) == false)
                 table["Count"] = this.Count;
 
+            if (this.WaitForBegin == true)
+                table["WaitForBegin"] = "true";
+            if (string.IsNullOrEmpty(this.OutputParam) == false)
+                table["OutputParam"] = this.OutputParam;
+
             return StringUtil.BuildParameterString(table, ',', ':');
         }
 
@@ -393,6 +464,9 @@ namespace DigitalPlatform.LibraryServer
             info.BreakPoint = (string)table["BreakPoint"];
             info.Start = (string)table["Start"];
             info.Count = (string)table["Count"];
+
+            info.WaitForBegin = DomUtil.IsBooleanTrue((string)table["WaitForBegin"]);
+            info.OutputParam = (string)table["OutputParam"];
             return info;
         }
     }

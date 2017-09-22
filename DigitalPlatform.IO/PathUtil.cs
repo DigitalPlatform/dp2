@@ -726,7 +726,47 @@ namespace DigitalPlatform.IO
             {
                 // 不存在就算了
             }
+            catch (IOException)
+            {
+                Thread.Sleep(0);
+                Directory.Delete(strDirPath, true);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Thread.Sleep(0);
+                Directory.Delete(strDirPath, true);
+            }
         }
+
+#if NO
+        // https://stackoverflow.com/questions/329355/cannot-delete-directory-with-directory-deletepath-true
+        public static void DeleteDirectory(string path)
+        {
+            foreach (string directory in Directory.GetDirectories(path))
+            {
+                DeleteDirectory(directory);
+            }
+
+            try
+            {
+                Directory.Delete(path, true);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // 不存在就算了
+            }
+            catch (IOException)
+            {
+                Thread.Sleep(0);
+                Directory.Delete(path, true);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Thread.Sleep(0);
+                Directory.Delete(path, true);
+            }
+        }
+#endif
 
         // 移除文件目录内所有文件的 ReadOnly 属性
         public static void RemoveReadOnlyAttr(string strSourceDir)
@@ -895,7 +935,7 @@ namespace DigitalPlatform.IO
                         continue;
                     }
                     // 复制文件
-                    File.Copy(subs[i].FullName, 
+                    File.Copy(subs[i].FullName,
                         Path.Combine(strTargetDir, subs[i].Name),
                         true);
                 }
