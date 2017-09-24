@@ -136,15 +136,29 @@ namespace DigitalPlatform.IO
             return lLength;
         }
 
+        // return:
+        //      true    需要中断
+        //      false   继续处理
+        public delegate bool Delegate_isStop();
+
+        // return:
+        //      -1  表示操作被中断
+        //      其它  实际 Dump 的字节数
         public static long LockingDumpStream(Stream streamSource,
     Stream streamTarget,
-    bool bFlush)
+    bool bFlush,
+            Delegate_isStop func_isStop)
         {
-            int nChunkSize = 8192;
+            int nChunkSize = 4096 * 10; // 8192;
             byte[] bytes = new byte[nChunkSize];
             long lLength = 0;
             while (true)
             {
+                if (func_isStop != null)
+                {
+                    if (func_isStop() == true)
+                        return -1;
+                }
                 int n = streamSource.Read(bytes, 0, nChunkSize);
 
                 if (n != 0)

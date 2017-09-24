@@ -9636,7 +9636,7 @@ Stack:
 
                 if (string.IsNullOrEmpty(strCategory) == false && strCategory[0] == '!')
                 {
-                    // TODO: 可否根据不同的权限限定不同的 root 起点?
+                    // TODO: 根据不同的权限限定不同的 root 起点
                     string strRoot = Path.Combine(app.DataDir, "upload");
                     if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == true)
                     {
@@ -9649,12 +9649,34 @@ Stack:
 
                     if (strAction == "delete")
                     {
+                        List<string> root_paths = new List<string>();
+                        // 根据不同的权限限定不同的 root 起点
+                        if (StringUtil.IsInList("backup", sessioninfo.RightsOrigin)
+        || StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin))
+                        {
+                            root_paths.Add(EnsureRootPath(Path.Combine(app.DataDir, "backup")));
+                        }
+                        if (StringUtil.IsInList("upload", sessioninfo.RightsOrigin)
+        || StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin))
+                        {
+                            root_paths.Add(EnsureRootPath(Path.Combine(app.DataDir, "upload")));
+                        }
+#if NO
+                        if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == true)
+                        {
+                            string strTemp = app.DataDir.Replace("/", "\\");  // 权力很大，能看到数据目录下的全部文件和目录了
+                            if (strTemp.EndsWith("\\") == false)
+                                strTemp += "\\";
+                            root_paths.Add(strTemp);
+                        }
+#endif
+
                         // 删除文件或者目录
                         // return:
                         //      -1  出错
                         //      其他  实际删除的文件和目录个数
                         nRet = app.DeleteFile(
-                            strRoot,
+                            root_paths,
                             strCurrentDirectory,
                             strFileName,
                             out strError);
@@ -9776,6 +9798,14 @@ Stack:
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        static string EnsureRootPath(string strTemp)
+        {
+            strTemp = strTemp.Replace("/", "\\");
+            if (strTemp.EndsWith("\\") == false)
+                strTemp += "\\";
+            return strTemp;
         }
 
         // 获得系统配置文件

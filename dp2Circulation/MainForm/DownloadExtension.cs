@@ -8,6 +8,8 @@ using System.IO;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -63,13 +65,136 @@ namespace dp2Circulation
             }
         }
 
+        // 询问是否覆盖已有的目标下载文件。整体询问
+        // return:
+        //      -1  出错
+        //      0   放弃下载
+        //      1   同意启动下载
+        public int AskOverwriteFiles(List<string> filenames,
+            ref string strOutputFolder,
+            out bool bAppend,
+            out string strError)
+        {
+            strError = "";
+            bAppend = false;
+            if (string.IsNullOrEmpty(strOutputFolder))
+            {
+                FolderBrowserDialog dir_dlg = new FolderBrowserDialog();
+
+                dir_dlg.Description = "请指定下载目标文件夹";
+                dir_dlg.RootFolder = Environment.SpecialFolder.MyComputer;
+                dir_dlg.ShowNewFolderButton = true;
+                dir_dlg.SelectedPath = _usedDownloadFolder;
+
+                if (dir_dlg.ShowDialog() != DialogResult.OK)
+                    return 0;
+
+                _usedDownloadFolder = dir_dlg.SelectedPath;
+
+                strOutputFolder = dir_dlg.SelectedPath;
+            }
+
+            List<string> states = new List<string>();
+            List<string> all_target_filenames = new List<string>();
+            List<string> temp_filenames = new List<string>();   // 对应临时文件存在的，正式目标文件名 数组
+
+            // 检查目标文件的存在情况
+            foreach (string filename in filenames)
+            {
+                string strTargetPath = Path.Combine(strOutputFolder, Path.GetFileName(filename));
+                all_target_filenames.Add(strTargetPath);
+
+                string strTargetTempPath = DynamicDownloader.GetTempFileName(strTargetPath);
+
+                // 观察目标文件是否已经存在
+                if (File.Exists(strTargetPath))
+                {
+                    states.Add("exists");
+                    File.Delete(strTargetTempPath); // 防范性地删除临时文件
+                    continue;
+                }
+
+
+                // 观察临时文件是否已经存在
+                if (File.Exists(strTargetTempPath))
+                {
+                    states.Add("temp_exists");
+                    temp_filenames.Add(strTargetPath);
+                }
+            }
+
+            // 没有任何目标文件和临时文件存在
+            if (states.Count == 0)
+            {
+                bAppend = false;
+                return 1;
+            }
+
+            // 观察是否有 .tmp 文件存在
+            if (states.IndexOf("temp_exists") != -1)
+            {
+                DialogResult result = MessageBox.Show(this,
+all_target_filenames.Count.ToString() + " 个目标文件中 '" + StringUtil.MakePathList(temp_filenames) + "' 先前曾经被下载过，但未能完成。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃全部下载]",
+"MainForm",
+MessageBoxButtons.YesNoCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Cancel)
+                    return 0;
+                if (result == DialogResult.Yes)
+                {
+                    bAppend = true;
+                    // 注意后续处理时候，将已经存在正式目标文件的事项从 filenames 中移走，不要下载这些文件
+                }
+                else
+                    bAppend = false;    // 这里并没有删除临时文件。等后面真正下载的时候再删除
+
+                return 1;
+            }
+
+            // 观察目标文件是否全部存在
+            if (IsAllExists(states))
+            {
+                DialogResult result = MessageBox.Show(this,
+all_target_filenames.Count.ToString() + " 个目标文件 '" + StringUtil.MakePathList(all_target_filenames) + "' 已经全部存在。\r\n\r\n是否重新下载并覆盖它?\r\n[是：下载并覆盖; 取消：放弃全部下载]",
+"MainForm",
+MessageBoxButtons.OKCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Cancel)
+                    return 0;
+                bAppend = false;
+                return 1;
+            }
+
+            // 理论上似乎走不到这里
+            return 1;
+        }
+
+        static bool IsAllExists(List<string> states)
+        {
+            foreach (string state in states)
+            {
+                if (state != "exists")
+                    return false;
+            }
+
+            return true;
+        }
+
         string _usedDownloadFolder = "";
 
         // parameters:
+        //      strAppendStyle  append/overwrite/ask 之一
         //      strOutputFolder 输出目录。
         //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
         //                      [out] 实际使用的目录
+        // return:
+        //      -1  出错
+        //      0   放弃下载
+        //      1   成功启动了下载
         public int BeginDownloadFile(string strPath,
+            string strAppendStyle,
             ref string strOutputFolder,
             out string strError)
         {
@@ -104,36 +229,71 @@ namespace dp2Circulation
             string strTargetTempPath = DynamicDownloader.GetTempFileName(strTargetPath);
 
             bool bAppend = false;   // 是否继续下载?
-            // 观察目标文件是否已经存在
-            if (File.Exists(strTargetPath))
-            {
-                DialogResult result = MessageBox.Show(this,
-    "目标文件 '" + strTargetPath + "' 已经存在。\r\n\r\n是否重新下载并覆盖它?\r\n[是：下载并覆盖; 取消：放弃下载]",
-    "MainForm",
-    MessageBoxButtons.OKCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Cancel)
-                    return 0;
-                bAppend = false;
-                File.Delete(strTargetPath);
-            }
 
-            // 观察临时文件是否已经存在
-            if (File.Exists(strTargetTempPath))
+            if (strAppendStyle == "append")
             {
-                DialogResult result = MessageBox.Show(this,
-    "目标文件 '" + strTargetPath + "' 先前曾经被下载过，但未能完成。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃下载]",
-    "MainForm",
-    MessageBoxButtons.YesNoCancel,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button1);
-                if (result == DialogResult.Cancel)
-                    return 0;
-                if (result == DialogResult.Yes)
-                    bAppend = true;
-                else
+                bAppend = true;
+                // 在 append 风格下，如果遇到正式目标文件已经存在，不再重新下载。
+                // 注: 如果想要重新下载，需要用 overwrite 风格来调用
+                if (File.Exists(strTargetPath))
+                {
+                    if (File.Exists(strTargetTempPath))
+                        File.Delete(strTargetTempPath); // 防范性地删除
+                    return 1;
+                }
+            }
+            else if (strAppendStyle == "overwrite")
+            {
+                bAppend = false;
+                if (File.Exists(strTargetPath))
+                    File.Delete(strTargetPath);
+                if (File.Exists(strTargetTempPath))
                     File.Delete(strTargetTempPath);
+            }
+            else if (strAppendStyle == "ask")
+            {
+                // 观察目标文件是否已经存在
+                if (File.Exists(strTargetPath))
+                {
+                    DialogResult result = MessageBox.Show(this,
+        "目标文件 '" + strTargetPath + "' 已经存在。\r\n\r\n是否重新下载并覆盖它?\r\n[是：下载并覆盖; 取消：放弃下载]",
+        "MainForm",
+        MessageBoxButtons.OKCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.Cancel)
+                        return 0;
+                    bAppend = false;
+                    File.Delete(strTargetPath);
+                    if (File.Exists(strTargetTempPath))
+                        File.Delete(strTargetTempPath); // 防范性地删除
+                }
+
+                // 观察临时文件是否已经存在
+                if (File.Exists(strTargetTempPath))
+                {
+                    DialogResult result = MessageBox.Show(this,
+        "目标文件 '" + strTargetPath + "' 先前曾经被下载过，但未能完成。\r\n\r\n是否继续下载未完成部分?\r\n[是：从断点继续下载; 否: 重新从头下载; 取消：放弃下载]",
+        "MainForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.Cancel)
+                        return 0;
+                    if (result == DialogResult.Yes)
+                        bAppend = true;
+                    else
+                    {
+                        File.Delete(strTargetTempPath);
+                        if (File.Exists(strTargetPath))
+                            File.Delete(strTargetPath); // 防范性地删除
+                    }
+                }
+            }
+            else
+            {
+                strError = "未知的 strAppendStyle 值 '" + strAppendStyle + "'";
+                return -1;
             }
 
             LibraryChannel channel = null;
@@ -175,7 +335,8 @@ namespace dp2Circulation
             });
             downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate(object o1, DownloadProgressChangedEventArgs e1)
             {
-                dlg.SetProgress(e1.BytesReceived, e1.TotalBytesToReceive);
+                if (dlg.IsDisposed == false)
+                    dlg.SetProgress(e1.BytesReceived, e1.TotalBytesToReceive);
             });
             dlg.FormClosed += new FormClosedEventHandler(delegate(object o1, FormClosedEventArgs e1)
             {

@@ -437,21 +437,45 @@ namespace dp2Circulation
                     {
                         string strOutputFolder = "";
                         List<string> paths = StringUtil.SplitList(resultInfo.StartInfo.OutputParam);
-                        foreach (string path in paths)
-                        {
-                            if (string.IsNullOrEmpty(path) == false)
-                            {
-                                // parameters:
-                                //      strOutputFolder 输出目录。
-                                //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
-                                //                      [out] 实际使用的目录
-                                int nRet = Program.MainForm.BeginDownloadFile(path,
-                                    ref strOutputFolder,
-                                    out strError);
-                                if (nRet == -1)
-                                    return -1;
-                            }
 
+                        StringUtil.RemoveBlank(ref paths);
+
+                        bool bAppend = false;
+                        // 询问是否覆盖已有的目标下载文件。整体询问
+                        // return:
+                        //      -1  出错
+                        //      0   放弃下载
+                        //      1   同意启动下载
+                        int nRet = Program.MainForm.AskOverwriteFiles(paths,
+            ref strOutputFolder,
+            out bAppend,
+            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        if (nRet == 1)
+                        {
+                            foreach (string path in paths)
+                            {
+                                if (string.IsNullOrEmpty(path) == false)
+                                {
+                                    // parameters:
+                                    //      strOutputFolder 输出目录。
+                                    //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
+                                    //                      [out] 实际使用的目录
+                                    // return:
+                                    //      -1  出错
+                                    //      0   放弃下载
+                                    //      1   成功启动了下载
+                                    nRet = Program.MainForm.BeginDownloadFile(path,
+                                        bAppend ? "append" : "overwrite",
+                                        ref strOutputFolder,
+                                        out strError);
+                                    if (nRet == -1)
+                                        return -1;
+                                    if (nRet == 0)
+                                        break;
+                                }
+                            }
                         }
                     }
                 }

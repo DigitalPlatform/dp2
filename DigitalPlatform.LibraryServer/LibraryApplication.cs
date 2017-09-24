@@ -155,7 +155,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.112 (2017/6/14) SetEntities() API 增加了一种 Action 为 verify
         //      2.113 (2017/6/16) GetBiblioInfos() API 增加了一种格式 marc。也可以用作 marc:syntax
         //      2.114 (2017/9/20) 批处理任务 大备份初步可用。对对象文件的文件指针用法进行了优化(StreamCache 类)
-        public static string Version = "2.114";
+        //      2.115 (2017/9/23) ListFile() API 中的删除文件功能，被限定在 dp2library 数据目录的 upload 和 backup 子目录。不再允许前一版本那样的 managedatabase 权限的用户删除数据目录下的任何文件
+        public static string Version = "2.115";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -14097,10 +14098,6 @@ strLibraryCode);    // 读者所在的馆代码
             strError = "";
             strLibraryCode = "";
 
-            // 2016/9/25
-            if (StringUtil.IsInList("managedatabase", strRights))
-                return 1;
-
             string strPath = strResPath;
 
             // 写入 dp2library 本地文件
@@ -14113,16 +14110,31 @@ strLibraryCode);    // 读者所在的馆代码
                 string strFilePath = Path.Combine(strTargetDir, strPath);
 
                 string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
-                if (string.Compare(strFirstLevel, "upload", true) != 0)
+
+                if (string.Compare(strFirstLevel, "backup", true) == 0)
                 {
-                    strError = "第一级目录名必须为 'upload'";
+                    if (StringUtil.IsInList("backup", strRights) == false
+                        && StringUtil.IsInList("managedatabase", strRights) == false)
+                    {
+                        strError = "写入文件 " + strResPath + " 被拒绝。不具备 backup 或 managedatabase 权限";
+                        return 0;
+                    }
+                }
+                else if (string.Compare(strFirstLevel, "upload", true) == 0)
+                {
+                    if (StringUtil.IsInList("upload", strRights) == false
+                        && StringUtil.IsInList("managedatabase", strRights))
+                    {
+                        strError = "写入文件 " + strResPath + " 被拒绝。不具备 upload 或 managedatabase 权限";
+                        return 0;
+                    }
+                }
+                else
+                {
+                    strError = "第一级目录名必须为 'upload' 或者 'backup'";
                     return -1;
                 }
-                if (StringUtil.IsInList("upload", strRights) == false)
-                {
-                    strError = "写入文件 " + strResPath + " 被拒绝。不具备 upload 权限";
-                    return 0;
-                }
+
                 // 用于限定的根目录
                 string strLimitDir = Path.Combine(strTargetDir, strFirstLevel);
                 if (PathUtil.IsChildOrEqual(strFilePath, strLimitDir) == false)
@@ -14132,6 +14144,9 @@ strLibraryCode);    // 读者所在的馆代码
                 }
                 return 1;
             }
+
+            if (StringUtil.IsInList("managedatabase", strRights))
+                return 1;
 
             string strDbName = StringUtil.GetFirstPartPath(ref strPath);
 

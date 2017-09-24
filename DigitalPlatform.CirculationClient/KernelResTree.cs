@@ -166,6 +166,10 @@ namespace DigitalPlatform.CirculationClient
 
                     foreach (ResInfoItem item in loader)
                     {
+                        // 2017/9/23
+                        if (string.IsNullOrEmpty(item.Name))
+                            continue;
+
                         TreeNode nodeNew = new TreeNode(item.Name, item.Type, item.Type);
 
                         nodeNew.Tag = item;
@@ -318,17 +322,23 @@ namespace DigitalPlatform.CirculationClient
             //    menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("下载文件(&W)");
-            menuItem.Click += new System.EventHandler(this.menu_downloadFile);
-            if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
-                menuItem.Enabled = false;
-            contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("下载动态文件(&Y)");
+            menuItem = new MenuItem("下载文件(&W)");
             menuItem.Click += new System.EventHandler(this.menu_downloadDynamicFile);
             if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("删除文件(&D)");
+            menuItem.Click += new System.EventHandler(this.menu_deleteFile);
+            if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
 
 #if NO
             menuItem = new MenuItem("刷新(&R)");
@@ -520,7 +530,7 @@ namespace DigitalPlatform.CirculationClient
             string strExt = Path.GetExtension(strPath);
             if (strExt == ".~state")
             {
-                strError = "状态文件是一种临时文件，不支持直接下载";
+                strError = "不允许下载扩展名为 .~state 的状态文件";
                 goto ERROR1;
             }
 
@@ -593,7 +603,8 @@ namespace DigitalPlatform.CirculationClient
                 });
             downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate(object o1, DownloadProgressChangedEventArgs e1)
             {
-                dlg.SetProgress(e1.BytesReceived, e1.TotalBytesToReceive);
+                if (dlg.IsDisposed == false)
+                    dlg.SetProgress(e1.BytesReceived, e1.TotalBytesToReceive);
             });
             dlg.FormClosed += new FormClosedEventHandler(delegate(object o1, FormClosedEventArgs e1)
                 {
@@ -610,7 +621,6 @@ namespace DigitalPlatform.CirculationClient
                 });
 
             downloader.StartDownload(bAppend);
-
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -618,36 +628,120 @@ namespace DigitalPlatform.CirculationClient
 
         void menu_refresh(object sender, System.EventArgs e)
         {
-#if NO
             string strError = "";
 
-            string strPath = "";
-            if (this.SelectedNode != null)
-                strPath = GetNodePath(this.SelectedNode);
-#endif
+            if (this.SelectedNode == null)
+            {
+                strError = "尚未选择要刷新的节点";
+                goto ERROR1;
+            }
 
-            this.Fill(this.SelectedNode);
+            TreeNode node = this.SelectedNode;
+            string strName = node.Text;
+            if (node.ImageIndex == RESTYPE_FILE)
+                node = node.Parent;
+
+            this.Fill(node);
+
+            // 复原选择
+            SelectNode(node, strName);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
-        // 下载文件
-        void menu_downloadFile(object sender, System.EventArgs e)
+        // 选择一个TreeNode 下的特定名字的节点
+        static bool SelectNode(TreeNode parent, string strNodeName)
+        {
+            foreach(TreeNode child in parent.Nodes)
+            {
+                if (child.Text == strNodeName)
+                {
+                    child.TreeView.SelectedNode = child;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // TODO: 如何限定 dp2library 2.115 以上才能使用此功能?
+        // 删除文件
+        void menu_deleteFile(object sender, System.EventArgs e)
         {
             string strError = "";
 
             if (this.SelectedNode == null)
             {
-                strError = "尚未选择要下载的配置文件节点";
+                strError = "尚未选择要删除的配置文件节点";
                 goto ERROR1;
             }
 
             if (this.SelectedNode.ImageIndex != RESTYPE_FILE)
             {
-                strError = "所选择的节点不是配置文件类型。请选择要下载的配置文件节点";
+                strError = "所选择的节点不是配置文件类型。请选择要删除的配置文件节点";
                 goto ERROR1;
             }
 
             string strPath = GetNodePath(this.SelectedNode);
 
+            string strExt = Path.GetExtension(strPath);
+            if (strExt == ".~state")
+            {
+                strError = "不允许删除扩展名为 .~state 的状态文件";
+                goto ERROR1;
+            }
+
+            DialogResult result = MessageBox.Show(this,
+"确实要删除文件 " + strPath + " ?",
+"KernelResTree",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            LibraryChannel channel = null;
+            TimeSpan old_timeout = new TimeSpan(0);
+
+            channel = this.CallGetChannel(true);
+
+            old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+            try
+            {
+                FileItemInfo[] infos = null;
+
+                string strCurrentDirectory = Path.GetDirectoryName(strPath);
+                string strFileName = Path.GetFileName(strPath);
+
+                long nRet = channel.ListFile(
+                    null,
+                    "delete",
+                    strCurrentDirectory,
+                    strFileName,
+                    0,
+                    -1,
+                    out infos,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (nRet == 1)
+                    this.SelectedNode.Remove(); // TODO: 删除任何文件后都要注意刷新去除相伴的 .~state 文件
+                else if (nRet > 1)
+                {
+                    this.Fill(this.SelectedNode.Parent);
+                }
+                else
+                    goto ERROR1;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+
+                this.CallReturnChannel(channel, true);
+            }
             return;
         ERROR1:
             MessageBox.Show(this, strError);

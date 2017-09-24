@@ -104,6 +104,11 @@ namespace DigitalPlatform.LibraryClient
         void RenameTempFile()
         {
             string strTempFileName = this.GetTempFileName();
+
+            // 2017/9/22
+            if (File.Exists(this.LocalFilePath))
+                File.Delete(this.LocalFilePath);
+
             if (File.Exists(strTempFileName))
                 File.Move(strTempFileName, this.LocalFilePath);
         }
@@ -134,6 +139,8 @@ namespace DigitalPlatform.LibraryClient
         {
             string strError = "";
 
+            TimeSpan old_timeout = this.Channel.Timeout;
+            this.Channel.Timeout = TimeSpan.FromSeconds(60);
             try
             {
                 bool bNotFound = false;
@@ -289,8 +296,15 @@ namespace DigitalPlatform.LibraryClient
                             var func = this.ProgressChanged;
                             if (func != null)
                             {
-                                DownloadProgressChangedEventArgs e = new DownloadProgressChangedEventArgs(lStart, lTotalLength);
-                                func(this, e);
+                                try
+                                {
+                                    DownloadProgressChangedEventArgs e = new DownloadProgressChangedEventArgs(lStart, lTotalLength);
+                                    func(this, e);
+                                }
+                                catch(ObjectDisposedException)
+                                {
+
+                                }
                             }
                         }
                     }
@@ -338,7 +352,7 @@ namespace DigitalPlatform.LibraryClient
 
                             if (strState != "finish" && nRet != 0)
                                 this.ErrorInfo = "下载文件 '" + this.ServerFilePath + "' 时遭遇状态出错: " + strState;
-                            else
+                            else if (this.ServerFilePath.StartsWith("!"))
                             {
                                 // 检查 MD5
                                 byte[] server_md5 = null;
@@ -389,6 +403,8 @@ namespace DigitalPlatform.LibraryClient
             }
             finally
             {
+                this.Channel.Timeout = old_timeout;
+
                 if (_stream != null)
                 {
                     _stream.Close();
@@ -494,29 +510,38 @@ namespace DigitalPlatform.LibraryClient
             byte[] baContent = null;
             string strOutputPath = "";
 
-            // return:
-            //		strStyle	一般设置为"content,data,metadata,timestamp,outputpath";
-            //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
-            //		0	成功
-            long lRet = this.Channel.GetRes(
-                this.Stop,
-                strServerPath,
-                0,
-                0,
-                strStyle,
-                out baContent,
-                out strMetadata,
-                out strOutputPath,
-                out md5,
-                out strError);
-            if (lRet == -1)
+            TimeSpan old_timeout = this.Channel.Timeout;
+            this.Channel.Timeout = TimeSpan.FromMinutes(5);
+            try
             {
-                if (this.Channel.ErrorCode == localhost.ErrorCode.NotFound)
-                    return 0;
-                return -1;
-            }
+                // return:
+                //		strStyle	一般设置为"content,data,metadata,timestamp,outputpath";
+                //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
+                //		0	成功
+                long lRet = this.Channel.GetRes(
+                    this.Stop,
+                    strServerPath,
+                    0,
+                    0,
+                    strStyle,
+                    out baContent,
+                    out strMetadata,
+                    out strOutputPath,
+                    out md5,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (this.Channel.ErrorCode == localhost.ErrorCode.NotFound)
+                        return 0;
+                    return -1;
+                }
 
-            return 1;
+                return 1;
+            }
+            finally
+            {
+                this.Channel.Timeout = old_timeout;
+            }
         }
     }
 

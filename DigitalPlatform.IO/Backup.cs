@@ -85,7 +85,7 @@ namespace DigitalPlatform.IO
                 outputfile.LockingWrite(BitConverter.GetBytes(lBodyLength), 0, 8);
 
                 // body内容
-                StreamUtil.LockingDumpStream(fileSource, outputfile, false);
+                StreamUtil.LockingDumpStream(fileSource, outputfile, false, null);
             }
 
 			long lTotalLength = outputfile.Position - lStart - 8;	// 净长度

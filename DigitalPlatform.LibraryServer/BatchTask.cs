@@ -17,6 +17,8 @@ namespace DigitalPlatform.LibraryServer
     // 批处理任务
     public class BatchTask : IDisposable
     {
+        public Stop _stop = new Stop();
+
         internal List<string> _pendingCommands = new List<string>();
 
         public bool ManualStart = false;    // 本轮是否为手动启动？
@@ -93,7 +95,20 @@ namespace DigitalPlatform.LibraryServer
 
                 if (this.App.PauseBatchTask == true)
                     return true;
+
                 return this.m_bClosed;
+            }
+            set
+            {
+                this.m_bClosed = value;
+
+                if (_stop != null)
+                {
+                    if (value == true)
+                        _stop.DoStop();
+                    else
+                        _stop.Continue();
+                }
             }
         }
 
@@ -477,7 +492,9 @@ namespace DigitalPlatform.LibraryServer
             // this.eventStarted.Reset();
 
             this.eventClose.Set();
-            this.m_bClosed = true;
+
+            //this.m_bClosed = true;
+            this.Stopped = true;
 
             this.m_nPrevLoop = this.Loop == true ? 1 : 0;   // 记忆前一次的Loop值
             this.Loop = false;  // 防止过一会继续循环
@@ -796,7 +813,8 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 2009/7/16 新增
-                this.m_bClosed = true;
+                // this.m_bClosed = true;
+                this.Stopped = true;
             }
 
         }

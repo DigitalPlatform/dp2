@@ -8853,9 +8853,9 @@ namespace dp2Circulation
             if (this.tabControl_main.SelectedTab == this.tabPage_kernel
                 && _kernelInitialized == false)
             {
-                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.84") < 0)
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.115") < 0)
                 {
-                    this.ShowMessage("内核管理功能要求当前连接的 dp2library 服务器版本为 2.84 或以上 (而现在是 " + Program.MainForm.ServerVersion + ")", "red", true);
+                    this.ShowMessage("内核管理功能要求当前连接的 dp2library 服务器版本为 2.115 或以上 (而现在是 " + Program.MainForm.ServerVersion + ")", "red", true);
                     return;
                 }
 

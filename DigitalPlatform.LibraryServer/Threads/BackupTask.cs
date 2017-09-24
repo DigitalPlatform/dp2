@@ -633,6 +633,7 @@ out strError);
             breakpoint = new BreakPointInfo();
             breakpoint.BackupFileName = strBackupFileName;
 
+            this._stop.BeginLoop();
             try
             {
                 ExportUtil export_util = new ExportUtil();
@@ -712,7 +713,7 @@ out strError);
                                     // TODO: 检查 RecordBody 是否为 null
                                     nRet = export_util.ExportOneRecord(
         channel,
-        null,
+        this._stop,
         this.App.WsUrl,
         record.Path,
         record.RecordBody.Xml,
@@ -763,6 +764,10 @@ out strError);
                 strError = "BackupDatabase() 出现异常: " + ExceptionUtil.GetDebugText(ex);
                 WriteStateFile(strBackupFileName, "error");  // 表示文件创建过程出错
                 return -1;
+            }
+            finally
+            {
+                this._stop.EndLoop();
             }
         }
 
@@ -996,7 +1001,9 @@ out strError);
 
             this.AppendResultText("正在准备数据库定义文件\r\n");
 
-            string strTempFilePath = strOutputFileNameParam + ".tmp";
+            // string strTempFilePath = strOutputFileNameParam + ".tmp";
+            // 这个文件放在临时文件目录里，可以避免被前端无意下载到。如果允许下载，是容易造成(写入和下载)两边读写冲突的
+            string strTempFilePath = Path.Combine(this.App.TempDir, "~" + Guid.NewGuid().ToString());
 
             try
             {
