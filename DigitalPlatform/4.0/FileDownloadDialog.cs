@@ -54,7 +54,18 @@ namespace DigitalPlatform
             }
         }
 
-        public void SetProgress(long bytesReceived, long totalBytesToReceive)
+#if NO
+        string _text = "";
+
+        public void SetText(string strTitle, string strText)
+        {
+            this.Text = strTitle;
+            this._text = strText;
+        }
+#endif
+
+        public void SetProgress(long bytesReceived, 
+            long totalBytesToReceive)
         {
             if (this.IsDisposed)
                 return;

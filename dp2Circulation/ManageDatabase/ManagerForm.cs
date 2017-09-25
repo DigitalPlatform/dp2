@@ -129,6 +129,23 @@ namespace dp2Circulation
 
             this.kernelResTree1.AppInfo = Program.MainForm.AppInfo;
             this.kernelResTree1.HideIndices = new int[] { KernelResTree.RESTYPE_FROM };
+            this.kernelResTree1.DownloadFiles += kernelResTree1_DownloadFiles;
+        }
+
+        void kernelResTree1_DownloadFiles(object sender, DownloadFilesEventArgs e)
+        {
+            string strError = "";
+            string strOutputFolder = "";
+            // return:
+            //      -1  出错
+            //      0   放弃下载
+            //      1   成功启动了下载
+            int nRet = Program.MainForm.BeginDownloadFiles(e.FileNames,
+                "ask",
+                ref strOutputFolder,
+                out strError);
+            if (nRet == -1)
+                e.ErrorInfo = strError;
         }
 
         void prop_CompareColumn(object sender, CompareEventArgs e)

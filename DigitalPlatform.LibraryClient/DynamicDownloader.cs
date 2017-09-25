@@ -74,6 +74,14 @@ namespace DigitalPlatform.LibraryClient
             this._cancel.Cancel();
         }
 
+        public bool IsCancellationRequested
+        {
+            get
+            {
+                return (_cancel.IsCancellationRequested);
+            }
+        }
+
         public void Close()
         {
             if (_stream != null)
@@ -113,7 +121,7 @@ namespace DigitalPlatform.LibraryClient
                 File.Move(strTempFileName, this.LocalFilePath);
         }
 
-        public void StartDownload(bool bContinue)
+        public Task StartDownload(bool bContinue)
         {
             // 创建输出文件
             this.Close();
@@ -128,7 +136,7 @@ namespace DigitalPlatform.LibraryClient
                 _stream.Seek(0, SeekOrigin.End);
             }
 
-            Task.Factory.StartNew(() => Download(),
+            return Task.Factory.StartNew(() => Download(),
     CancellationToken.None,
     TaskCreationOptions.LongRunning,
     TaskScheduler.Default);
@@ -561,6 +569,8 @@ namespace DigitalPlatform.LibraryClient
     //     为 System.Net.WebClient 的 System.Net.WebClient.DownloadProgressChanged 事件提供数据。
     public class DownloadProgressChangedEventArgs
     {
+        public string Title { get; set; }
+        public string Text { get; set; }
 
         public DownloadProgressChangedEventArgs(long recieved, long total)
         {

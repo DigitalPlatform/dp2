@@ -50,6 +50,7 @@
             // KernelResTree
             // 
             this.LineColor = System.Drawing.Color.Black;
+            this.AfterCheck += new System.Windows.Forms.TreeViewEventHandler(this.KernelResTree_AfterCheck);
             this.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.KernelResTree_AfterExpand);
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.KernelResTree_MouseUp);
             this.ResumeLayout(false);
