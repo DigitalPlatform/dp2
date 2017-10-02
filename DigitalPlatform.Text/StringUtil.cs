@@ -16,6 +16,24 @@ namespace DigitalPlatform.Text
     public class StringUtil
     {
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
+        
+        
+        public static string[] units = new string[] { "K", "M", "G", "T" };
+        public static string GetLengthText(long length)
+        {
+            decimal v = length;
+            int i = 0;
+            foreach (string strUnit in units)
+            {
+                v = decimal.Round(v / 1024, 2);
+                if (v < 1024 || i >= units.Length - 1)
+                    return v.ToString() + strUnit;
+
+                i++;
+            }
+
+            return length.ToString();
+        }
 
         // 获得一个字符串的 UTF-8 字节数
         public static int GetUtf8Bytes(string text)

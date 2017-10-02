@@ -21,10 +21,12 @@ namespace dp2Circulation
     /// </summary>
     internal partial class PrintOptionDlg : Form
     {
+        /*
         /// <summary>
         /// 本窗口从属的框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 打印参数

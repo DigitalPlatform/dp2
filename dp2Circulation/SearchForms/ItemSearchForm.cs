@@ -3327,7 +3327,7 @@ out strError);
                 if (nRet == -1)
                 {
                     MessagePromptEventArgs e = new MessagePromptEventArgs();
-                    e.MessageText = "册条码号查重时发生错误： " + strError;
+                    e.MessageText = "校验册记录(服务器端)时发生错误： " + strError;
                     e.Actions = "yes,no,cancel";
                     loader_Prompt(this, e);
                     if (e.ResultAction == "cancel")

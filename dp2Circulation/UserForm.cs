@@ -595,6 +595,7 @@ namespace dp2Circulation
         // 保存用户信息
         int SaveUserInfo(
             UserInfo info,
+            string strAction,
             out string strError)
         {
             strError = "";
@@ -612,7 +613,7 @@ namespace dp2Circulation
             {
                 long lRet = Channel.SetUser(
                     stop,
-                    "change",
+                    strAction,  // "change",
                     info,
                     out strError);
                 if (lRet == -1)
@@ -779,12 +780,35 @@ namespace dp2Circulation
             // 保存用户信息
             nRet = SaveUserInfo(
                 info,
+                "change",
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             this.EditChanged = false;
             MessageBox.Show(this, "用户信息保存成功");
+
+
+            if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.116") >= 0
+                && info.UserName == Program.MainForm._currentUserName)
+            {
+                DialogResult result = MessageBox.Show(this,
+    "您刚修改和保存了当前正在使用的账户 " + info.UserName + "，请问是否需要关闭此账户的所有活跃通道，以迫使刚才修改的账户权限尽快兑现?\r\n\r\n(警告：关闭通道会中断正在使用该通道的长操作)",
+    "UserForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result == System.Windows.Forms.DialogResult.Yes)
+                {
+                    nRet = SaveUserInfo(
+    info,
+    "closechannel",
+    out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    // TODO: 如何迫使重新登录，避免下一次操作时出现通道被关闭过的报错?
+                }
+            }
             return;
         ERROR1:
             MessageBox.Show(this, strError);

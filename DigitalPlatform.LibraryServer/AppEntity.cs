@@ -2211,7 +2211,6 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-
                 // 从数据库中读出记录
                 byte[] exist_timestamp = null;
                 string strOutputPath = "";
@@ -2254,6 +2253,7 @@ namespace DigitalPlatform.LibraryServer
             if (nRet != 0)
                 errors.Add(strError);
 
+#if NO
             string strBarcode = DomUtil.GetElementText(domExist.DocumentElement, "barcode");
             if (string.IsNullOrEmpty(strBarcode) == false)
             {
@@ -2297,6 +2297,36 @@ namespace DigitalPlatform.LibraryServer
                 if (bDup == true)
                     errors.Add("册条码号 '" + strBarcode + "' 已经被下列册记录使用了: " + StringUtil.MakePathList(aPath));
             }
+#endif
+            nRet = SearchDup(channel,
+            domExist,
+            strRecPath,
+            "barcode",
+            "册条码号",
+            ref errors,
+            out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            nRet = SearchDup(channel,
+domExist,
+strRecPath,
+"refID",
+"参考ID",
+ref errors,
+out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            nRet = SearchDup(channel,
+domExist,
+strRecPath,
+"registerNo",
+"登录号",
+ref errors,
+out strError);
+            if (nRet == -1)
+                goto ERROR1;
 
             if (errors.Count > 0)
             {
@@ -2309,6 +2339,64 @@ namespace DigitalPlatform.LibraryServer
         ERROR1:
             result.ErrorInfo = strError;
             return -1;
+        }
+
+        int SearchDup(RmsChannel channel,
+            XmlDocument domExist,
+            string strRecPath,
+            string strElementName,
+            string strFrom,
+            ref List<string> errors,
+            out string strError)
+        {
+            strError = "";
+
+            string strContent = DomUtil.GetElementText(domExist.DocumentElement, strElementName);
+            if (string.IsNullOrEmpty(strContent) == false)
+            {
+                // 查重
+                List<string> aPath = null;
+                // 对实体库进行查重
+                // 本函数只负责查重, 并不获得记录体
+                // return:
+                //      -1  error
+                //      其他    命中记录条数(不超过nMax规定的极限)
+                int nRet = SearchItemRecDup(
+                    channel,
+                    strContent,
+                    strFrom,
+                    100,
+                    out aPath,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                bool bDup = false;
+                if (nRet == 0)
+                {
+                    bDup = false;
+                }
+                else if (nRet == 1) // 命中一条
+                {
+                    Debug.Assert(aPath.Count == 1, "");
+
+                    if (aPath[0] == strRecPath) // 正好是自己
+                        bDup = false;
+                    else
+                        bDup = true;// 别的记录中已经使用了这个条码号
+                } // end of if (nRet == 1)
+                else
+                {
+                    Debug.Assert(nRet > 1, "");
+                    bDup = true;
+                }
+
+                // 报错
+                if (bDup == true)
+                    errors.Add(strFrom + " '" + strContent + "' 已经被下列册记录使用了: " + StringUtil.MakePathList(aPath));
+            }
+
+            return 0;
         }
 
         // 设置/保存册信息
@@ -2839,51 +2927,9 @@ namespace DigitalPlatform.LibraryServer
                             // && bSimulate == false    // 要想跳过查重，可以使用 nocheckdup
                             )
                         {
+
+
 #if NO
-                            // 验证条码号
-                            if (this.VerifyBarcode == true)
-                            {
-                                // return:
-                                //	0	invalid barcode
-                                //	1	is valid reader barcode
-                                //	2	is valid item barcode
-                                int nResultValue = 0;
-
-                                // return:
-                                //      -2  not found script
-                                //      -1  出错
-                                //      0   成功
-                                nRet = this.DoVerifyBarcodeScriptFunction(
-                                    sessioninfo.LibraryCodeList,
-                                    strNewBarcode,
-                                    out nResultValue,
-                                    out strError);
-                                if (nRet == -2 || nRet == -1 || nResultValue != 2)
-                                {
-                                    if (nRet == -2)
-                                        strError = "library.xml 中没有配置条码号验证函数，无法进行条码号验证";
-                                    else if (nRet == -1)
-                                    {
-                                        strError = "验证册条码号的过程中出错"
-                                           + (string.IsNullOrEmpty(strError) == true ? "" : ": " + strError);
-                                    }
-                                    else if (nResultValue != 2)
-                                    {
-                                        strError = "条码号 '" + strNewBarcode + "' 经验证发现不是一个合法的册条码号"
-                                           + (string.IsNullOrEmpty(strError) == true ? "" : "(" + strError + ")");
-                                    }
-
-                                    EntityInfo error = new EntityInfo(info);
-                                    error.ErrorInfo = strError;
-                                    error.ErrorCode = ErrorCodeValue.CommonError;
-                                    ErrorInfos.Add(error);
-                                    continue;
-                                }
-
-                            }
-#endif
-
-
                             List<string> aPath = null;
                             // 根据册条码号对实体库进行查重
                             // 本函数只负责查重, 并不获得记录体
@@ -2915,7 +2961,6 @@ namespace DigitalPlatform.LibraryServer
                                         bDup = false;
                                     else
                                         bDup = true;// 别的记录中已经使用了这个条码号
-
                                 }
                                 else if (info.Action == "change")
                                 {
@@ -2934,7 +2979,7 @@ namespace DigitalPlatform.LibraryServer
                                     if (aPath[0] == info.OldRecPath) // 正好是自己
                                         bDup = false;
                                     else
-                                        bDup = true;// 别的记录中已经使用了这个条码号
+                                        bDup = true;    // 别的记录中已经使用了这个条码号
                                 }
                                 else if (info.Action == "move")
                                 {
@@ -2965,6 +3010,58 @@ namespace DigitalPlatform.LibraryServer
                                 error.ErrorCode = ErrorCodeValue.CommonError;
                                 ErrorInfos.Add(error);
                                 continue;
+                            }
+
+#endif
+
+                            // return:
+                            //      -1  出错
+                            //      0   正常
+                            //      1   出现问题，需要立即 continue 处理下一个 item
+                            nRet = SearchDup(
+            channel,
+            info,
+            strNewBarcode,
+            "册条码号",
+            ref ErrorInfos,
+            out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                            if (nRet == 1)
+                                continue;
+
+                            // 2017/9/29
+                            string strNewRefID = DomUtil.GetElementText(domNewRec.DocumentElement, "refID");
+                            if (string.IsNullOrEmpty(strNewRefID) == false)
+                            {
+                                nRet = SearchDup(
+    channel,
+    info,
+    strNewRefID,
+    "参考ID",
+    ref ErrorInfos,
+    out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                                if (nRet == 1)
+                                    continue;
+                            }
+
+                            // 2017/9/29
+                            string strRegisterNo = DomUtil.GetElementText(domNewRec.DocumentElement, "registerNo");
+                            if (string.IsNullOrEmpty(strRegisterNo) == false)
+                            {
+                                nRet = SearchDup(
+    channel,
+    info,
+    strRegisterNo,
+    "登录号",
+    ref ErrorInfos,
+    out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
+                                if (nRet == 1)
+                                    continue;
                             }
                         }
                     }
@@ -3325,6 +3422,106 @@ namespace DigitalPlatform.LibraryServer
         }
 
         #region SetEntities() 下级函数
+
+        // return:
+        //      -1  出错
+        //      0   正常
+        //      1   出现问题，需要立即 continue 处理下一个 item
+        int SearchDup(
+            RmsChannel channel,
+            EntityInfo info,
+            string strNewBarcode,
+            string strCaption,
+            ref List<EntityInfo> ErrorInfos,
+            out string strError)
+        {
+            strError = "";
+
+            List<string> aPath = null;
+            // 根据册条码号对实体库进行查重
+            // 本函数只负责查重, 并不获得记录体
+            // return:
+            //      -1  error
+            //      其他    命中记录条数(不超过nMax规定的极限)
+            int nRet = SearchItemRecDup(
+                // sessioninfo.Channels,
+                channel,
+                strNewBarcode,
+                strCaption,
+                100,
+                out aPath,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            bool bDup = false;
+            if (nRet == 0)
+            {
+                bDup = false;
+            }
+            else if (nRet == 1) // 命中一条
+            {
+                Debug.Assert(aPath.Count == 1, "");
+
+                if (info.Action == "new")
+                {
+                    if (aPath[0] == info.NewRecPath) // 正好是自己
+                        bDup = false;
+                    else
+                        bDup = true;// 别的记录中已经使用了这个条码号
+                }
+                else if (info.Action == "change")
+                {
+                    if (info.NewRecPath != info.OldRecPath)
+                    {
+                        strError = "参数不正确。SetEntities() 当操作类型为 change 时，info.NewRecPath('" + info.NewRecPath + "') 应当和 info.OldRecPath('" + info.OldRecPath + "') 值相同";
+
+                        EntityInfo error = new EntityInfo(info);
+                        error.ErrorInfo = strError;
+                        error.ErrorCode = ErrorCodeValue.CommonError;
+                        ErrorInfos.Add(error);
+                        return 1;   // continue
+                    }
+
+                    Debug.Assert(info.NewRecPath == info.OldRecPath, "当操作类型为change时，info.NewRecPath应当和info.OldRecPath相同");
+                    if (aPath[0] == info.OldRecPath) // 正好是自己
+                        bDup = false;
+                    else
+                        bDup = true;    // 别的记录中已经使用了这个条码号
+                }
+                else if (info.Action == "move")
+                {
+                    if (aPath[0] == info.OldRecPath) // 正好是源记录
+                        bDup = false;
+                    else
+                        bDup = true;// 别的记录中已经使用了这个条码号
+                }
+                else
+                {
+                    Debug.Assert(false, "这里不可能出现的info.Action值 '" + info.Action + "'");
+                }
+            } // end of if (nRet == 1)
+            else
+            {
+                Debug.Assert(nRet > 1, "");
+                bDup = true;
+
+                // 因为move操作不允许目标位置存在记录，所以这里就不再费力考虑了
+                // 如果将来move操作允许目标位置存在记录，则这里需要判断：无论源还是目标位置发现条码号重，都不算重。
+            }
+
+            // 报错
+            if (bDup == true)
+            {
+                EntityInfo error = new EntityInfo(info);
+                error.ErrorInfo = strCaption + " '" + strNewBarcode + "' 已经被下列册记录使用了: " + StringUtil.MakePathList(aPath);
+                error.ErrorCode = ErrorCodeValue.CommonError;
+                ErrorInfos.Add(error);
+                return 1;   // continue
+            }
+
+            return 0;
+        }
 
         // 包装后版本
         // return:
@@ -3871,6 +4068,7 @@ namespace DigitalPlatform.LibraryServer
                     // sessioninfo.Channels,
                     channel,
                     strOldBarcode,
+                    "册条码",
                     100,
                     out aPath,
                     out strError);

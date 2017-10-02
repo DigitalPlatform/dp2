@@ -13,10 +13,12 @@ namespace dp2Circulation
     /// </summary>
     public partial class ChargingPrintManageForm : Form
     {
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+        */
 
         /// <summary>
         /// 构造函数

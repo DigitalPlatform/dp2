@@ -5179,6 +5179,7 @@ namespace dp2Library
                         // sessioninfo.Channels,
                         channel,
                         strBarcode,
+                        "册条码",
                         nMax,
                         out aPath,
                         out strError);
@@ -9095,6 +9096,20 @@ Stack:
                     return result;
                 }
 
+                if (strAction == "closechannel")
+                {
+                    if (StringUtil.IsInList("changeuser", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "关闭用户账户相关通道的操作被拒绝。不具备changeuser权限。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+
+                    result.Value = app.SessionTable.CloseSessionByUserID(info.UserName);
+                    return result;
+                }
+
                 // 权限字符串
                 if (strAction == "new")
                 {
@@ -9116,7 +9131,7 @@ Stack:
                         return result;
                     }
                 }
-                if (strAction == "change")
+                if (strAction == "change" || strAction == "changeandclose")
                 {
                     if (StringUtil.IsInList("changeuser", sessioninfo.RightsOrigin) == false)
                     {
@@ -9151,6 +9166,10 @@ Stack:
                     }
                 }
 
+                bool bClose = strAction == "changeandclose";
+                if (strAction == "changeandclose")
+                    strAction = "change";
+
                 int nRet = app.SetUser(
                     sessioninfo.LibraryCodeList,
                     strAction,
@@ -9165,6 +9184,9 @@ Stack:
                 // 促使立即写入 library.xml
                 if (app.Changed == true)
                     app.ActivateManagerThread();
+
+                if (bClose)
+                    app.SessionTable.CloseSessionByUserID(info.UserName);
 
                 result.Value = nRet;
                 return result;

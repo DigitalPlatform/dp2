@@ -156,7 +156,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.113 (2017/6/16) GetBiblioInfos() API 增加了一种格式 marc。也可以用作 marc:syntax
         //      2.114 (2017/9/20) 批处理任务 大备份初步可用。对对象文件的文件指针用法进行了优化(StreamCache 类)
         //      2.115 (2017/9/23) ListFile() API 中的删除文件功能，被限定在 dp2library 数据目录的 upload 和 backup 子目录。不再允许前一版本那样的 managedatabase 权限的用户删除数据目录下的任何文件
-        public static string Version = "2.115";
+        //      2.116 (2017/9/30) SerUser() API 增加了 closechannel 动作
+        public static string Version = "2.116";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -8492,15 +8493,18 @@ out strError);
         //      -1  error
         //      其他    命中记录条数(不超过nMax规定的极限)
         public int SearchItemRecDup(
-            // RmsChannelCollection channels,
             RmsChannel channel,
             string strBarcode,
+            string strFrom,
             int nMax,
             out List<string> aPath,
             out string strError)
         {
             strError = "";
             aPath = null;
+
+            if (strFrom == "册条码号")
+                strFrom = "册条码";    // 兼容最老的 keys 定义。可考虑在适当时候全部修改为 "册条码号"
 
             LibraryApplication app = this;
 
@@ -8527,7 +8531,8 @@ out strError);
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "册条码")       // 2007/9/14 
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" 
+                    + strFrom/*"册条码"*/)       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
@@ -8571,7 +8576,7 @@ out strError);
             // not found
             if (lRet == 0)
             {
-                strError = "册条码号 '" + strBarcode + "' 没有找到";
+                strError = strFrom + " '" + strBarcode + "' 没有找到";
                 return 0;
             }
 

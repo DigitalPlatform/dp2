@@ -136,12 +136,32 @@ namespace dp2Circulation
         {
             string strError = "";
             string strOutputFolder = "";
+
+            List<dp2Circulation.MainForm.DownloadFileInfo> infos = MainForm.BuildDownloadInfoList(e.FileNames);
+
+            bool bAppend = false;
+            // 询问是否覆盖已有的目标下载文件。整体询问
+            // return:
+            //      -1  出错
+            //      0   放弃下载
+            //      1   同意启动下载
+            int nRet = Program.MainForm.AskOverwriteFiles(infos,    // e.FileNames,
+ref strOutputFolder,
+out bAppend,
+out strError);
+            if (nRet == -1)
+            {
+                e.ErrorInfo = strError;
+                return;
+            }
+
             // return:
             //      -1  出错
             //      0   放弃下载
             //      1   成功启动了下载
-            int nRet = Program.MainForm.BeginDownloadFiles(e.FileNames,
-                "ask",
+            nRet = Program.MainForm.BeginDownloadFiles(infos,   // e.FileNames,
+                bAppend ? "append" : "overwrite",
+                null,
                 ref strOutputFolder,
                 out strError);
             if (nRet == -1)

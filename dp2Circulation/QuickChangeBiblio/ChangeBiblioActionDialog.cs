@@ -17,10 +17,12 @@ namespace dp2Circulation
     /// </summary>
     internal partial class ChangeBiblioActionDialog : Form
     {
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 获得值列表

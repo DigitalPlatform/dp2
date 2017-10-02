@@ -79,7 +79,8 @@ namespace dp2Circulation
             "dp2Library 同步",
             "重建检索点",
             "创建 MongoDB 日志库",
-            "大备份"});
+            "大备份",
+            "<日志备份>"});
             this.comboBox_taskName.Location = new System.Drawing.Point(98, 10);
             this.comboBox_taskName.Margin = new System.Windows.Forms.Padding(2);
             this.comboBox_taskName.Name = "comboBox_taskName";
