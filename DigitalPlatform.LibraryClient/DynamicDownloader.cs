@@ -59,6 +59,8 @@ namespace DigitalPlatform.LibraryClient
 
         FileStream _stream = null;
 
+        byte[] _timestamp = null;   // 下载完成后的 timestamp
+
         public DynamicDownloader(
             LibraryChannel channel,
             string strServerFilePath,
@@ -72,6 +74,14 @@ namespace DigitalPlatform.LibraryClient
         public void Cancel()
         {
             this._cancel.Cancel();
+        }
+
+        public bool IsCancellationRequested
+        {
+            get
+            {
+                return (_cancel.IsCancellationRequested);
+            }
         }
 
         public void Close()
@@ -104,11 +114,23 @@ namespace DigitalPlatform.LibraryClient
         void RenameTempFile()
         {
             string strTempFileName = this.GetTempFileName();
+
+            // 2017/9/22
+            if (File.Exists(this.LocalFilePath))
+                File.Delete(this.LocalFilePath);
+
             if (File.Exists(strTempFileName))
                 File.Move(strTempFileName, this.LocalFilePath);
+
+            if (this._timestamp != null
+                && this.ServerFilePath.StartsWith("!"))
+            {
+                // 根据返回的时间戳设置文件最后修改时间
+                SetFileLastWriteTimeByTimestamp(this.LocalFilePath, this._timestamp);
+            }
         }
 
-        public void StartDownload(bool bContinue)
+        public Task StartDownload(bool bContinue)
         {
             // 创建输出文件
             this.Close();
@@ -123,7 +145,7 @@ namespace DigitalPlatform.LibraryClient
                 _stream.Seek(0, SeekOrigin.End);
             }
 
-            Task.Factory.StartNew(() => Download(),
+            return Task.Factory.StartNew(() => Download(),
     CancellationToken.None,
     TaskCreationOptions.LongRunning,
     TaskScheduler.Default);
@@ -134,6 +156,8 @@ namespace DigitalPlatform.LibraryClient
         {
             string strError = "";
 
+            TimeSpan old_timeout = this.Channel.Timeout;
+            this.Channel.Timeout = TimeSpan.FromSeconds(60);
             try
             {
                 bool bNotFound = false;
@@ -289,8 +313,15 @@ namespace DigitalPlatform.LibraryClient
                             var func = this.ProgressChanged;
                             if (func != null)
                             {
-                                DownloadProgressChangedEventArgs e = new DownloadProgressChangedEventArgs(lStart, lTotalLength);
-                                func(this, e);
+                                try
+                                {
+                                    DownloadProgressChangedEventArgs e = new DownloadProgressChangedEventArgs(lStart, lTotalLength);
+                                    func(this, e);
+                                }
+                                catch(ObjectDisposedException)
+                                {
+
+                                }
                             }
                         }
                     }
@@ -338,15 +369,19 @@ namespace DigitalPlatform.LibraryClient
 
                             if (strState != "finish" && nRet != 0)
                                 this.ErrorInfo = "下载文件 '" + this.ServerFilePath + "' 时遭遇状态出错: " + strState;
-                            else
+                            else if (this.ServerFilePath.StartsWith("!"))
                             {
+                                DisplayMessage("正在获得服务器文件 " + this.ServerFilePath + " 的 MD5 ...");
                                 // 检查 MD5
                                 byte[] server_md5 = null;
                                 // return:
                                 //      -1  出错
                                 //      0   文件没有找到
                                 //      1   文件找到
-                                nRet = DetectMD5(this.ServerFilePath,
+                                nRet = GetServerFileMD5(
+                                    this.Channel,
+                                    this.Stop,
+                                    this.ServerFilePath,
             out server_md5,
             out strError);
                                 if (nRet != 1)
@@ -354,6 +389,8 @@ namespace DigitalPlatform.LibraryClient
                                     strError = "探测服务器端文件 '" + this.ServerFilePath + "' MD5 时出错: " + strError;
                                     goto ERROR1;
                                 }
+
+                                DisplayMessage("正在获得本地文件 " + this.LocalFilePath + " 的 MD5 ...");
 
                                 _stream.Seek(0, SeekOrigin.Begin);
                                 byte[] local_md5 = GetFileMd5(_stream);
@@ -365,6 +402,7 @@ namespace DigitalPlatform.LibraryClient
                             }
                             this.State = "finish:" + strState;
                             TriggerClosedEvent();
+                            this._timestamp = timestamp;
                             return;
                         }
 
@@ -389,6 +427,8 @@ namespace DigitalPlatform.LibraryClient
             }
             finally
             {
+                this.Channel.Timeout = old_timeout;
+
                 if (_stream != null)
                 {
                     _stream.Close();
@@ -399,6 +439,20 @@ namespace DigitalPlatform.LibraryClient
                     RenameTempFile();
             }
         }
+
+        public static void SetFileLastWriteTimeByTimestamp(string strFilePath,
+    byte[] baTimeStamp)
+        {
+            if (baTimeStamp == null || baTimeStamp.Length < 8)
+                return;
+            long lTicks = BitConverter.ToInt64(baTimeStamp, 0);
+
+            FileInfo fileInfo = new FileInfo(strFilePath);
+            if (fileInfo.Exists == false)
+                return;
+            fileInfo.LastWriteTimeUtc = new DateTime(lTicks);
+        }
+
 
         public static byte[] GetFileMd5(Stream stream)
         {
@@ -477,6 +531,78 @@ namespace DigitalPlatform.LibraryClient
             return lRet;
         }
 
+        void DisplayMessage(string strText)
+        {
+            var func = this.ProgressChanged;
+            if (func != null)
+            {
+                try
+                {
+                    DownloadProgressChangedEventArgs e = new DownloadProgressChangedEventArgs(strText);
+                    func(this, e);
+                }
+                catch (ObjectDisposedException)
+                {
+
+                }
+            }
+        }
+
+        // 探测 MD5
+        // return:
+        //      -1  出错
+        //      0   文件没有找到
+        //      1   文件找到
+        public static int GetServerFileMD5(
+            LibraryChannel channel,
+            Stop stop,
+            string strServerPath,
+            out byte[] md5,
+            out string strError)
+        {
+            strError = "";
+            md5 = null;
+
+            string strStyle = "md5";
+            string strMetadata = "";
+            byte[] baContent = null;
+            string strOutputPath = "";
+
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(5);
+            try
+            {
+                // return:
+                //		strStyle	一般设置为"content,data,metadata,timestamp,outputpath";
+                //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
+                //		0	成功
+                long lRet = channel.GetRes(
+                    stop,
+                    strServerPath,
+                    0,
+                    0,
+                    strStyle,
+                    out baContent,
+                    out strMetadata,
+                    out strOutputPath,
+                    out md5,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode == localhost.ErrorCode.NotFound)
+                        return 0;
+                    return -1;
+                }
+
+                return 1;
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+            }
+        }
+
+#if NO
         // 探测 MD5
         // return:
         //      -1  出错
@@ -494,30 +620,40 @@ namespace DigitalPlatform.LibraryClient
             byte[] baContent = null;
             string strOutputPath = "";
 
-            // return:
-            //		strStyle	一般设置为"content,data,metadata,timestamp,outputpath";
-            //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
-            //		0	成功
-            long lRet = this.Channel.GetRes(
-                this.Stop,
-                strServerPath,
-                0,
-                0,
-                strStyle,
-                out baContent,
-                out strMetadata,
-                out strOutputPath,
-                out md5,
-                out strError);
-            if (lRet == -1)
+            TimeSpan old_timeout = this.Channel.Timeout;
+            this.Channel.Timeout = TimeSpan.FromMinutes(5);
+            try
             {
-                if (this.Channel.ErrorCode == localhost.ErrorCode.NotFound)
-                    return 0;
-                return -1;
-            }
+                // return:
+                //		strStyle	一般设置为"content,data,metadata,timestamp,outputpath";
+                //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
+                //		0	成功
+                long lRet = this.Channel.GetRes(
+                    this.Stop,
+                    strServerPath,
+                    0,
+                    0,
+                    strStyle,
+                    out baContent,
+                    out strMetadata,
+                    out strOutputPath,
+                    out md5,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (this.Channel.ErrorCode == localhost.ErrorCode.NotFound)
+                        return 0;
+                    return -1;
+                }
 
-            return 1;
+                return 1;
+            }
+            finally
+            {
+                this.Channel.Timeout = old_timeout;
+            }
         }
+#endif
     }
 
     // 摘要: 
@@ -536,6 +672,12 @@ namespace DigitalPlatform.LibraryClient
     //     为 System.Net.WebClient 的 System.Net.WebClient.DownloadProgressChanged 事件提供数据。
     public class DownloadProgressChangedEventArgs
     {
+        public string Text { get; set; }
+
+        public DownloadProgressChangedEventArgs(string strText)
+        {
+            this.Text = strText;
+        }
 
         public DownloadProgressChangedEventArgs(long recieved, long total)
         {

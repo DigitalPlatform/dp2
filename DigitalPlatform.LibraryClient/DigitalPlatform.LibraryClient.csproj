@@ -50,6 +50,7 @@
     <Compile Include="ChargingHistoryLoader.cs" />
     <Compile Include="DirItemLoader.cs" />
     <Compile Include="DynamicDownloader.cs" />
+    <Compile Include="FileItemLoader.cs" />
     <Compile Include="IChannelManager.cs" />
     <Compile Include="ItemBarcodeLoader.cs" />
     <Compile Include="LibraryChannel.cs" />

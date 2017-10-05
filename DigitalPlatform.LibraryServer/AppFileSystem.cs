@@ -856,19 +856,35 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        // 检查文件或目录必须在根以下。防止漏洞
+        static bool IsChildOrEqual(string strPath, List<string> root_paths)
+        {
+            foreach (string root_path in root_paths)
+            {
+                if (PathUtil.IsChildOrEqual(strPath, root_path))
+                    return true;
+            }
+
+            return false;
+        }
+
         // 删除文件或者目录
         // parameters:
+        //      root_paths  可用的根目录列表。只要在其中之一以下，就允许删除。否则不允许删除
         //      strCurrentDirectory 当前路径，注意这是物理路径
         // return:
         //      -1  出错
         //      其他  实际删除的文件和目录个数
         public int DeleteFile(
-    string strRootPath,
-    string strCurrentDirectory,
-    string strPattern,
-    out string strError)
+            // string strRootPath,
+            List<string> root_paths,
+            string strCurrentDirectory,
+            string strPattern,
+            out string strError)
         {
             strError = "";
+
+            List<string> errors = new List<string>();
 
             try
             {
@@ -878,8 +894,13 @@ namespace DigitalPlatform.LibraryServer
                 foreach (FileSystemInfo si in loader)
                 {
                     // 检查文件或目录必须在根以下。防止漏洞
-                    if (PathUtil.IsChildOrEqual(si.FullName, strRootPath) == false)
+                    //if (PathUtil.IsChildOrEqual(si.FullName, strRootPath) == false)
+                    //    continue;
+                    if (IsChildOrEqual(si.FullName, root_paths) == false)
+                    {
+                        errors.Add("文件 " + si.Name + " 越过了限制目录，删除操作被拒绝");
                         continue;
+                    }
 
                     if (si is DirectoryInfo)
                     {
@@ -891,10 +912,22 @@ namespace DigitalPlatform.LibraryServer
                     {
                         // File.Delete(si.FullName);
                         _physicalFileCache.FileDelete(si.FullName);
+
+                        // 2017/9/24
+                        // 顺带删除同名的 .~state 文件
+                        string strTempFileName = si.FullName + ".~state";
+                        if (File.Exists(strTempFileName))
+                        {
+                            File.Delete(strTempFileName);
+                            count++;
+                        }
                     }
 
                     count++;
                 }
+
+                if (errors.Count > 0)
+                    strError = StringUtil.MakePathList(errors, "; ");
 
                 return count;
             }

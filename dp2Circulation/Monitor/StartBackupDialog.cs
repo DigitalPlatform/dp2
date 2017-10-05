@@ -200,5 +200,13 @@ namespace dp2Circulation
             this.Close();
         }
 
+
+        public bool DownloadFiles
+        {
+            get
+            {
+                return this.checkBox_downloadFile.Checked;
+            }
+        }
     }
 }

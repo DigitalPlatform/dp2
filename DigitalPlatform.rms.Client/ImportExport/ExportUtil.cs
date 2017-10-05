@@ -365,10 +365,48 @@ namespace DigitalPlatform.rms.Client
                     if (nRet == -1)
                         return -1;
 
+#if NO
+                    if (nRet == 1)
+                    {
+                        // 记忆 dump 前 outputfile 的当前位置
+                        long lSavePosition = outputfile.Position;
+                        bool bDone = false;
+                        try
+                        {
+                            temp_stream.Seek(0, SeekOrigin.Begin);
+                            // TODO: Dump 中途是否允许灵敏中断？要注意中断以后截断目标文件
+                            long lRet = StreamUtil.LockingDumpStream(temp_stream,
+                                outputfile,
+                                false,
+                                () =>
+                                {
+                                    if (stop != null && stop.State != 0)
+                                        return true;
+                                    return false;
+                                });
+                            if (lRet == -1)
+                            {
+                                strError = "Dump 中途被用户中断";
+                                return -1;
+                            }
+                            else
+                                bDone = true;
+                        }
+                        finally
+                        {
+                            if (bDone == false)
+                                outputfile.SetLength(lSavePosition);
+                        }
+                    }
+#endif
+
                     if (nRet == 1)
                     {
                         temp_stream.Seek(0, SeekOrigin.Begin);
-                        StreamUtil.LockingDumpStream(temp_stream, outputfile, false);
+                        StreamUtil.LockingDumpStream(temp_stream,
+                            outputfile,
+                            false,
+                            null);
                     }
                     return nRet;
                 }
@@ -551,7 +589,7 @@ namespace DigitalPlatform.rms.Client
 
                 string strID = res_ids[i].Trim();
 
-                if (strID == "")
+                if (string.IsNullOrEmpty(strID))
                     continue;
 
                 string strResPath = strXmlRecPath + "/object/" + strID;

@@ -26,6 +26,8 @@ namespace DigitalPlatform.CirculationClient
     {
         public ApplicationInfo AppInfo = null;
 
+        public event DownloadFilesEventHandler DownloadFiles = null;
+
         public event GuiAppendMenuEventHandle OnSetMenu = null;
 
         public event GetChannelEventHandler GetChannel = null;
@@ -166,6 +168,10 @@ namespace DigitalPlatform.CirculationClient
 
                     foreach (ResInfoItem item in loader)
                     {
+                        // 2017/9/23
+                        if (string.IsNullOrEmpty(item.Name))
+                            continue;
+
                         TreeNode nodeNew = new TreeNode(item.Name, item.Type, item.Type);
 
                         nodeNew.Tag = item;
@@ -312,23 +318,60 @@ namespace DigitalPlatform.CirculationClient
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
             menuItem = new MenuItem("刷新(&R)");
             menuItem.Click += new System.EventHandler(this.menu_refresh);
             //if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
             //    menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("下载文件(&W)");
-            menuItem.Click += new System.EventHandler(this.menu_downloadFile);
-            if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
+            // 
+            menuItem = new MenuItem("允许复选(&M)");
+            menuItem.Click += new System.EventHandler(this.menu_toggleCheckBoxes);
+            if (this.CheckBoxes == true)
+                menuItem.Checked = true;
+            else
+                menuItem.Checked = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("清除全部复选(&C)");
+            menuItem.Click += new System.EventHandler(this.menu_clearCheckBoxes);
+            if (this.CheckBoxes == true)
+                menuItem.Enabled = true;
+            else
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("下载动态文件(&Y)");
+            menuItem = new MenuItem("全选下级节点(&A)");
+            menuItem.Click += new System.EventHandler(this.menu_checkAllSubNodes);
+            // menuItem.Enabled = this.CheckBoxes;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            List<TreeNode> selected_file_nodes = GetCheckedFileNodes();
+
+            menuItem = new MenuItem("下载文件 [" + selected_file_nodes.Count + "] (&W)");
             menuItem.Click += new System.EventHandler(this.menu_downloadDynamicFile);
-            if (this.SelectedNode == null || this.SelectedNode.ImageIndex != RESTYPE_FILE)
+            if (selected_file_nodes.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("删除文件 [" + selected_file_nodes.Count + "] (&D)");
+            menuItem.Click += new System.EventHandler(this.menu_deleteFile);
+            if (selected_file_nodes.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
 
 #if NO
             menuItem = new MenuItem("刷新(&R)");
@@ -450,6 +493,118 @@ namespace DigitalPlatform.CirculationClient
                 contextMenu.Show(this, new Point(e.X, e.Y));
         }
 
+        void menu_clearCheckBoxes(object sender, System.EventArgs e)
+        {
+            this.ClearChildrenCheck(null);
+        }
+
+        // 清除下级所有的选中的项(不包括自己)
+        // parameters:
+        //      nodeStart   起点node。如果为null, 表示从根层开始，清除全部
+        public void ClearChildrenCheck(TreeNode nodeStart)
+        {
+            if (this.CheckBoxes == false)
+                return;
+
+            TreeNodeCollection nodes = null;
+            if (nodeStart == null)
+            {
+                nodes = this.Nodes;
+            }
+            else
+                nodes = nodeStart.Nodes;
+
+            foreach (TreeNode node in nodes)
+            {
+                node.Checked = false;
+                ClearChildrenCheck(node);	// 递归
+            }
+        }
+
+
+        // 全选下级节点
+        void menu_checkAllSubNodes(object sender, EventArgs e)
+        {
+            TreeNode node = this.SelectedNode;
+            if (node == null)
+                return;
+
+            if (this.CheckBoxes == false)
+                this.CheckBoxes = true;
+
+            foreach (TreeNode current in node.Nodes)
+            {
+                current.Checked = true;
+            }
+
+            node.Expand();
+        }
+
+        void menu_toggleCheckBoxes(object sender, System.EventArgs e)
+        {
+            if (this.CheckBoxes == true)
+                this.CheckBoxes = false;
+            else
+                this.CheckBoxes = true;
+        }
+
+        // return:
+        //      true    留存节点
+        //      false   不留存节点
+        public delegate bool Delegate_filter(TreeNode node);
+
+        public List<TreeNode> GetCheckedFileNodes(TreeNode parent = null)
+        {
+            return GetCheckedNodes(parent,
+                (node) =>
+                {
+                    if (node.ImageIndex == RESTYPE_FILE)
+                        return true;
+                    return false;
+                }
+            );
+        }
+
+        // TODO: 当选择了一个目录节点，其下全部文件节点都被选中了
+        public List<TreeNode> GetCheckedNodes(TreeNode parent = null,
+            Delegate_filter filter_func = null)
+        {
+            List<TreeNode> results = new List<TreeNode>();
+
+            if (this.CheckBoxes == false)
+            {
+                if (this.SelectedNode != null)
+                {
+                    if (filter_func == null
+    || filter_func(this.SelectedNode) == true)
+                        results.Add(this.SelectedNode);
+                }
+
+                return results;
+            }
+
+            TreeNodeCollection collection = null;
+
+            if (parent == null)
+                collection = this.Nodes;
+            else
+                collection = parent.Nodes;
+
+            if (parent != null && parent.Checked)
+            {
+                if (filter_func == null
+                    || filter_func(parent) == true)
+                    results.Add(parent);
+            }
+
+            foreach (TreeNode child in collection)
+            {
+                results.AddRange(GetCheckedNodes(child, filter_func));
+            }
+
+            return results;
+        }
+
         private static readonly Object _syncRoot_downloaders = new Object();
 
         List<DynamicDownloader> _downloaders = new List<DynamicDownloader>();
@@ -503,27 +658,47 @@ namespace DigitalPlatform.CirculationClient
         {
             string strError = "";
 
-            if (this.SelectedNode == null)
+            if (this.DownloadFiles == null)
+            {
+                strError = "尚未绑定 DownloadFiles 事件";
+                goto ERROR1;
+            }
+
+            List<TreeNode> nodes = this.GetCheckedFileNodes();
+
+            if (nodes.Count == 0)
             {
                 strError = "尚未选择要下载的配置文件节点";
                 goto ERROR1;
             }
 
+#if NO
             if (this.SelectedNode.ImageIndex != RESTYPE_FILE)
             {
                 strError = "所选择的节点不是配置文件类型。请选择要下载的配置文件节点";
                 goto ERROR1;
             }
-
-            string strPath = GetNodePath(this.SelectedNode);
-
-            string strExt = Path.GetExtension(strPath);
-            if (strExt == ".~state")
+#endif
+            List<string> paths = new List<string>();
+            foreach (TreeNode node in nodes)
             {
-                strError = "状态文件是一种临时文件，不支持直接下载";
-                goto ERROR1;
+                string strPath = GetNodePath(node);
+
+                string strExt = Path.GetExtension(strPath);
+                if (strExt == ".~state")
+                {
+                    strError = "不允许下载扩展名为 .~state 的状态文件 (" + strPath + ")";
+                    goto ERROR1;
+                }
+                paths.Add(strPath);
             }
 
+            DownloadFilesEventArgs e1 = new DownloadFilesEventArgs();
+            e1.FileNames = paths;
+            this.DownloadFiles(this, e1);
+            if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                goto ERROR1;
+#if NO
             FolderBrowserDialog dir_dlg = new FolderBrowserDialog();
 
             dir_dlg.Description = "请指定下载目标文件夹";
@@ -593,7 +768,8 @@ namespace DigitalPlatform.CirculationClient
                 });
             downloader.ProgressChanged += new DownloadProgressChangedEventHandler(delegate(object o1, DownloadProgressChangedEventArgs e1)
             {
-                dlg.SetProgress(e1.BytesReceived, e1.TotalBytesToReceive);
+                if (dlg.IsDisposed == false)
+                    dlg.SetProgress(e1.BytesReceived, e1.TotalBytesToReceive);
             });
             dlg.FormClosed += new FormClosedEventHandler(delegate(object o1, FormClosedEventArgs e1)
                 {
@@ -610,7 +786,7 @@ namespace DigitalPlatform.CirculationClient
                 });
 
             downloader.StartDownload(bAppend);
-
+#endif
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -618,39 +794,164 @@ namespace DigitalPlatform.CirculationClient
 
         void menu_refresh(object sender, System.EventArgs e)
         {
-#if NO
-            string strError = "";
-
-            string strPath = "";
-            if (this.SelectedNode != null)
-                strPath = GetNodePath(this.SelectedNode);
-#endif
-
-            this.Fill(this.SelectedNode);
-        }
-
-        // 下载文件
-        void menu_downloadFile(object sender, System.EventArgs e)
-        {
             string strError = "";
 
             if (this.SelectedNode == null)
             {
-                strError = "尚未选择要下载的配置文件节点";
+                strError = "尚未选择要刷新的节点";
                 goto ERROR1;
             }
 
-            if (this.SelectedNode.ImageIndex != RESTYPE_FILE)
-            {
-                strError = "所选择的节点不是配置文件类型。请选择要下载的配置文件节点";
-                goto ERROR1;
-            }
+            TreeNode node = this.SelectedNode;
+            string strName = node.Text;
+            if (node.ImageIndex == RESTYPE_FILE)
+                node = node.Parent;
 
-            string strPath = GetNodePath(this.SelectedNode);
+            this.Fill(node);
 
+            // 复原选择
+            SelectNode(node, strName);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 选择一个TreeNode 下的特定名字的节点
+        static bool SelectNode(TreeNode parent, string strNodeName)
+        {
+            foreach (TreeNode child in parent.Nodes)
+            {
+                if (child.Text == strNodeName)
+                {
+                    child.TreeView.SelectedNode = child;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // TODO: 如何限定 dp2library 2.115 以上才能使用此功能?
+        // 删除文件
+        void menu_deleteFile(object sender, System.EventArgs e)
+        {
+            string strError = "";
+
+            List<TreeNode> selected_file_nodes = GetCheckedFileNodes();
+
+            if (selected_file_nodes.Count == 0)
+            {
+                strError = "尚未选择要删除的文件节点";
+                goto ERROR1;
+            }
+
+#if NO
+            if (this.SelectedNode.ImageIndex != RESTYPE_FILE)
+            {
+                strError = "所选择的节点不是配置文件类型。请选择要删除的配置文件节点";
+                goto ERROR1;
+            }
+#endif
+            List<string> paths = new List<string>();
+            foreach (TreeNode node in selected_file_nodes)
+            {
+                string strPath = GetNodePath(node);
+
+                string strExt = Path.GetExtension(strPath);
+                if (strExt == ".~state")
+                {
+                    strError = "不允许删除扩展名为 .~state 的状态文件";
+                    goto ERROR1;
+                }
+
+                paths.Add(strPath);
+            }
+
+
+            string strNameList = StringUtil.MakePathList(paths);
+            if (strNameList.Length > 1000)
+                strNameList = strNameList.Substring(0, 1000) + " ... 等 " + selected_file_nodes.Count + " 个文件";
+
+            DialogResult result = MessageBox.Show(this,
+"确实要删除文件 " + strNameList + " ?",
+"KernelResTree",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;
+
+            LibraryChannel channel = null;
+            TimeSpan old_timeout = new TimeSpan(0);
+
+            channel = this.CallGetChannel(true);
+
+            old_timeout = channel.Timeout;
+            channel.Timeout = new TimeSpan(0, 5, 0);
+            try
+            {
+                foreach (string strPath in paths)
+                {
+                    FileItemInfo[] infos = null;
+
+                    string strCurrentDirectory = Path.GetDirectoryName(strPath);
+                    string strFileName = Path.GetFileName(strPath);
+
+                    long nRet = channel.ListFile(
+                        null,
+                        "delete",
+                        strCurrentDirectory,
+                        strFileName,
+                        0,
+                        -1,
+                        out infos,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+#if NO
+                    if (nRet == 1)
+                        this.SelectedNode.Remove(); // TODO: 删除任何文件后都要注意刷新去除相伴的 .~state 文件
+                    else if (nRet > 1)
+                    {
+                        this.Fill(this.SelectedNode.Parent);
+                    }
+                    else
+                        goto ERROR1;
+#endif
+                }
+            }
+            finally
+            {
+                channel.Timeout = old_timeout;
+
+                this.CallReturnChannel(channel, true);
+            }
+
+            // 刷新显示
+            List<TreeNode> parents = FindParentNodes(selected_file_nodes);
+            foreach (TreeNode node in parents)
+            {
+                this.Fill(node);
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 获得共同的 parent fold nodes
+        List<TreeNode> FindParentNodes(List<TreeNode> nodes)
+        {
+            List<TreeNode> results = new List<TreeNode>();
+            foreach (TreeNode node in nodes)
+            {
+                TreeNode parent = node.Parent;
+                if (results.IndexOf(parent) == -1)
+                    results.Add(parent);
+            }
+
+            // TODO: 有父子关系的，只保留父节点
+            return results;
         }
 
         // 编辑配置文件
@@ -991,5 +1292,65 @@ out strError);
             return false;
         }
 
+        private void KernelResTree_AfterCheck(object sender, TreeViewEventArgs e)
+        {
+            TreeNode node = e.Node;
+            if (node == null)
+                return;
+
+            // 2008/11/17
+            if (node.Checked == true)
+            {
+                node.ForeColor = SystemColors.InfoText;
+                node.BackColor = SystemColors.Info;
+            }
+            else
+            {
+                node.ForeColor = SystemColors.WindowText;
+                node.BackColor = SystemColors.Window;
+            }
+
+            if (node.Checked == false)
+            {
+                ClearOneLevelChildrenCheck(node);
+            }
+            else
+            {
+                if (node.Parent != null)
+                    node.Parent.Checked = true;
+            }
+
+            // 注：事件自己会递归
+
+        }
+
+        // 清除下级所有的选中的项(不包括自己)
+        public void ClearOneLevelChildrenCheck(TreeNode nodeStart)
+        {
+            if (nodeStart == null)
+                return;
+            foreach (TreeNode node in nodeStart.Nodes)
+            {
+                node.Checked = false;
+                // ClearChildrenCheck(node);	// 暂时不递归
+            }
+        }
+    }
+
+    /// <summary>
+    /// 下载文件的事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void DownloadFilesEventHandler(object sender,
+    DownloadFilesEventArgs e);
+
+    /// <summary>
+    /// 下载文件事件的参数
+    /// </summary>
+    public class DownloadFilesEventArgs : EventArgs
+    {
+        public List<string> FileNames { get; set; }  // [in]
+        public string ErrorInfo { get; set; }  // [out]
     }
 }

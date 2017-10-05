@@ -129,6 +129,43 @@ namespace dp2Circulation
 
             this.kernelResTree1.AppInfo = Program.MainForm.AppInfo;
             this.kernelResTree1.HideIndices = new int[] { KernelResTree.RESTYPE_FROM };
+            this.kernelResTree1.DownloadFiles += kernelResTree1_DownloadFiles;
+        }
+
+        void kernelResTree1_DownloadFiles(object sender, DownloadFilesEventArgs e)
+        {
+            string strError = "";
+            string strOutputFolder = "";
+
+            List<dp2Circulation.MainForm.DownloadFileInfo> infos = MainForm.BuildDownloadInfoList(e.FileNames);
+
+            bool bAppend = false;
+            // 询问是否覆盖已有的目标下载文件。整体询问
+            // return:
+            //      -1  出错
+            //      0   放弃下载
+            //      1   同意启动下载
+            int nRet = Program.MainForm.AskOverwriteFiles(infos,    // e.FileNames,
+ref strOutputFolder,
+out bAppend,
+out strError);
+            if (nRet == -1)
+            {
+                e.ErrorInfo = strError;
+                return;
+            }
+
+            // return:
+            //      -1  出错
+            //      0   放弃下载
+            //      1   成功启动了下载
+            nRet = Program.MainForm.BeginDownloadFiles(infos,   // e.FileNames,
+                bAppend ? "append" : "overwrite",
+                null,
+                ref strOutputFolder,
+                out strError);
+            if (nRet == -1)
+                e.ErrorInfo = strError;
         }
 
         void prop_CompareColumn(object sender, CompareEventArgs e)
@@ -8853,9 +8890,9 @@ namespace dp2Circulation
             if (this.tabControl_main.SelectedTab == this.tabPage_kernel
                 && _kernelInitialized == false)
             {
-                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.84") < 0)
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.115") < 0)
                 {
-                    this.ShowMessage("内核管理功能要求当前连接的 dp2library 服务器版本为 2.84 或以上 (而现在是 " + Program.MainForm.ServerVersion + ")", "red", true);
+                    this.ShowMessage("内核管理功能要求当前连接的 dp2library 服务器版本为 2.115 或以上 (而现在是 " + Program.MainForm.ServerVersion + ")", "red", true);
                     return;
                 }
 

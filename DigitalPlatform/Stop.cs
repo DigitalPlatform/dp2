@@ -325,6 +325,7 @@ namespace DigitalPlatform
             }
         }
 
+        // TODO: 处理中是否要加锁?
         public virtual void Continue()
         {
             nStop = 0;

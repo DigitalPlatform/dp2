@@ -26,10 +26,12 @@ namespace dp2Circulation
     {
         WebExternalHost m_webExternalHost_biblio = new WebExternalHost();
 
+        /*
         /// <summary>
         /// 框架窗口
         /// </summary>
         // public MainForm MainForm = null;
+         * */
 
         /// <summary>
         /// 通讯通道

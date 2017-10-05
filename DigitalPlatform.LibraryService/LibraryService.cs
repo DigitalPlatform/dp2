@@ -5179,6 +5179,7 @@ namespace dp2Library
                         // sessioninfo.Channels,
                         channel,
                         strBarcode,
+                        "册条码",
                         nMax,
                         out aPath,
                         out strError);
@@ -9095,6 +9096,20 @@ Stack:
                     return result;
                 }
 
+                if (strAction == "closechannel")
+                {
+                    if (StringUtil.IsInList("changeuser", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "关闭用户账户相关通道的操作被拒绝。不具备changeuser权限。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+
+                    result.Value = app.SessionTable.CloseSessionByUserID(info.UserName);
+                    return result;
+                }
+
                 // 权限字符串
                 if (strAction == "new")
                 {
@@ -9116,7 +9131,7 @@ Stack:
                         return result;
                     }
                 }
-                if (strAction == "change")
+                if (strAction == "change" || strAction == "changeandclose")
                 {
                     if (StringUtil.IsInList("changeuser", sessioninfo.RightsOrigin) == false)
                     {
@@ -9151,6 +9166,10 @@ Stack:
                     }
                 }
 
+                bool bClose = strAction == "changeandclose";
+                if (strAction == "changeandclose")
+                    strAction = "change";
+
                 int nRet = app.SetUser(
                     sessioninfo.LibraryCodeList,
                     strAction,
@@ -9165,6 +9184,9 @@ Stack:
                 // 促使立即写入 library.xml
                 if (app.Changed == true)
                     app.ActivateManagerThread();
+
+                if (bClose)
+                    app.SessionTable.CloseSessionByUserID(info.UserName);
 
                 result.Value = nRet;
                 return result;
@@ -9636,7 +9658,7 @@ Stack:
 
                 if (string.IsNullOrEmpty(strCategory) == false && strCategory[0] == '!')
                 {
-                    // TODO: 可否根据不同的权限限定不同的 root 起点?
+                    // TODO: 根据不同的权限限定不同的 root 起点
                     string strRoot = Path.Combine(app.DataDir, "upload");
                     if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == true)
                     {
@@ -9649,12 +9671,34 @@ Stack:
 
                     if (strAction == "delete")
                     {
+                        List<string> root_paths = new List<string>();
+                        // 根据不同的权限限定不同的 root 起点
+                        if (StringUtil.IsInList("backup", sessioninfo.RightsOrigin)
+        || StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin))
+                        {
+                            root_paths.Add(EnsureRootPath(Path.Combine(app.DataDir, "backup")));
+                        }
+                        if (StringUtil.IsInList("upload", sessioninfo.RightsOrigin)
+        || StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin))
+                        {
+                            root_paths.Add(EnsureRootPath(Path.Combine(app.DataDir, "upload")));
+                        }
+#if NO
+                        if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == true)
+                        {
+                            string strTemp = app.DataDir.Replace("/", "\\");  // 权力很大，能看到数据目录下的全部文件和目录了
+                            if (strTemp.EndsWith("\\") == false)
+                                strTemp += "\\";
+                            root_paths.Add(strTemp);
+                        }
+#endif
+
                         // 删除文件或者目录
                         // return:
                         //      -1  出错
                         //      其他  实际删除的文件和目录个数
                         nRet = app.DeleteFile(
-                            strRoot,
+                            root_paths,
                             strCurrentDirectory,
                             strFileName,
                             out strError);
@@ -9776,6 +9820,14 @@ Stack:
             result.Value = -1;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        static string EnsureRootPath(string strTemp)
+        {
+            strTemp = strTemp.Replace("/", "\\");
+            if (strTemp.EndsWith("\\") == false)
+                strTemp += "\\";
+            return strTemp;
         }
 
         // 获得系统配置文件

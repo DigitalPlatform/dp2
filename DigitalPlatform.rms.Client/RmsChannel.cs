@@ -5447,7 +5447,6 @@ ref strNewStyle);	// 不要数据体和metadata
                 Debug.Assert(false, "attachment style暂时不能使用");
             }
 
-
             // 检查参数
             if (StringUtil.IsInList("data", strStyle) == false)
             {
@@ -5595,9 +5594,7 @@ ref strNewStyle);	// 不要数据体和metadata
                         bHasMetadataStyle = false;
                     }
 
-
                     lTotalLength = result.Value;
-
 
                     if (StringUtil.IsInList("timestamp", strStyle) == true
                         /*

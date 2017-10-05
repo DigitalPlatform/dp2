@@ -170,12 +170,15 @@ namespace dp2Circulation
             int nRet = StartBatchTask(this.comboBox_taskName.Text,
                 out strError);
             if (nRet == -1)
+            {
+                this.ShowMessage(strError, "red", true);
                 MessageBox.Show(this, strError);
+            }
             else
-                MessageBox.Show(this,
-                    strError
-                    //"任务 '" + this.comboBox_taskName.Text + "' 已成功启动"
-                    );
+            {
+                this.ShowMessage(strError, "green", true);
+                // MessageBox.Show(this,strError);
+            }
 
         }
 
@@ -386,6 +389,36 @@ namespace dp2Circulation
                     strError = "用户放弃启动";
                     return -1;
                 }
+
+                // 2017/9/30
+                if (dlg.DownloadFiles)
+                {
+                    if (StringUtil.IsInList("download", MainForm._currentUserRights) == false)
+                    {
+                        strError = "启动“大备份”任务被拒绝。当前用户并不具备 download 权限，所以无法在大备份同时下载文件。请先为当前用户添加这个权限，再重新启动大备份任务";
+                        return -1;
+                    }
+                }
+            }
+            else if (strTaskName == "<日志备份>")
+            {
+                string strOutputFolder = "";
+
+                // 备份日志文件。即，把日志文件从服务器拷贝到本地目录。要处理好增量复制的问题。
+                // return:
+                //      -1  出错
+                //      0   放弃下载，或者没有必要下载。提示信息在 strError 中
+                //      1   成功启动了下载
+                int nRet = Program.MainForm.BackupOperLogFiles(ref strOutputFolder,
+            out strError);
+                if (nRet != 1)
+                {
+                    if (nRet == 0 && string.IsNullOrEmpty(strError))
+                        strError = "用户放弃启动";
+                    return -1;
+                }
+                strError = "本地任务 '<日志备份> 成功启动'";
+                return 1;
             }
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
@@ -437,21 +470,51 @@ namespace dp2Circulation
                     {
                         string strOutputFolder = "";
                         List<string> paths = StringUtil.SplitList(resultInfo.StartInfo.OutputParam);
-                        foreach (string path in paths)
-                        {
-                            if (string.IsNullOrEmpty(path) == false)
-                            {
-                                // parameters:
-                                //      strOutputFolder 输出目录。
-                                //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
-                                //                      [out] 实际使用的目录
-                                int nRet = Program.MainForm.BeginDownloadFile(path,
-                                    ref strOutputFolder,
-                                    out strError);
-                                if (nRet == -1)
-                                    return -1;
-                            }
 
+                        StringUtil.RemoveBlank(ref paths);
+
+                        List<dp2Circulation.MainForm.DownloadFileInfo> infos = MainForm.BuildDownloadInfoList(paths);
+
+                        bool bAppend = false;
+                        // 询问是否覆盖已有的目标下载文件。整体询问
+                        // return:
+                        //      -1  出错
+                        //      0   放弃下载
+                        //      1   同意启动下载
+                        int nRet = Program.MainForm.AskOverwriteFiles(infos,    // paths,
+            ref strOutputFolder,
+            out bAppend,
+            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        if (nRet == 1)
+                        {
+                            paths = MainForm.GetFileNames(infos, (info) =>
+                            {
+                                return info.ServerPath;
+                            });
+                            foreach (string path in paths)
+                            {
+                                if (string.IsNullOrEmpty(path) == false)
+                                {
+                                    // parameters:
+                                    //      strOutputFolder 输出目录。
+                                    //                      [in] 如果为 null，表示要弹出对话框询问目录。如果不为 null，则直接使用这个目录路径
+                                    //                      [out] 实际使用的目录
+                                    // return:
+                                    //      -1  出错
+                                    //      0   放弃下载
+                                    //      1   成功启动了下载
+                                    nRet = Program.MainForm.BeginDownloadFile(path,
+                                        bAppend ? "append" : "overwrite",
+                                        ref strOutputFolder,
+                                        out strError);
+                                    if (nRet == -1)
+                                        return -1;
+                                    if (nRet == 0)
+                                        break;
+                                }
+                            }
                         }
                     }
                 }

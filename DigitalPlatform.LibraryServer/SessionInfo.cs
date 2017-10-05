@@ -1257,6 +1257,99 @@ SetStartEventArgs e);
             }
         }
 
+        // 过滤 SessionInfo
+        // return:
+        //      true    命中
+        //      false   未命中
+        public delegate bool Delegate_filterSession(SessionInfo info);
+
+        // 通用的选择性关闭 Session 函数
+        public int CloseSessionBy(Delegate_filterSession filter_func)
+        {
+            List<string> remove_keys = new List<string>();
+
+            if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
+                throw new ApplicationException("锁定尝试中超时");
+            try
+            {
+                foreach (string key in this.Keys)
+                {
+                    SessionInfo info = (SessionInfo)this[key];
+
+                    if (info == null)
+                        continue;
+
+                    if (filter_func(info))
+                    {
+                        remove_keys.Add(key);   // 这里不能删除，因为 foreach 还要用枚举器
+                    }
+                }
+            }
+            finally
+            {
+                this.m_lock.ExitReadLock();
+            }
+
+            if (remove_keys.Count == 0)
+                return 0;   // 没有找到
+
+            int nCount = 0;
+            List<SessionInfo> delete_sessions = new List<SessionInfo>();
+            if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
+                throw new ApplicationException("锁定尝试中超时");
+            try
+            {
+                foreach (string key in remove_keys)
+                {
+                    SessionInfo sessioninfo = (SessionInfo)this[key];
+                    if (sessioninfo == null)
+                        continue;
+
+                    // DeleteSession(sessioninfo, false);
+
+                    // 和 sessionid 的 hashtable 脱离关系
+                    this.Remove(key);
+
+                    delete_sessions.Add(sessioninfo);
+
+                    if (string.IsNullOrEmpty(sessioninfo.ClientIP) == false)
+                    {
+                        _incIpCount(sessioninfo.ClientIP, -1);
+                        sessioninfo.ClientIP = "";
+                    }
+
+                    nCount++;
+                }
+            }
+            finally
+            {
+                this.m_lock.ExitWriteLock();
+            }
+
+            // 把 CloseSession 放在锁定范围外面，主要是想尽量减少锁定的时间
+            foreach (SessionInfo info in delete_sessions)
+            {
+                info.CloseSession();
+            }
+            return nCount;
+        }
+
+        public int CloseSessionByUserID(string strUserID)
+        {
+            return CloseSessionBy((info) =>
+            {
+                return (info.UserID == strUserID);
+            });
+        }
+
+        public int CloseSessionByClientIP(string strClientIP)
+        {
+            return CloseSessionBy((info) =>
+            {
+                return (info.ClientIP == strClientIP);
+            });
+        }
+#if NO
         public int CloseSessionByClientIP(string strClientIP)
         {
             List<string> remove_keys = new List<string>();
@@ -1326,7 +1419,7 @@ SetStartEventArgs e);
             }
             return nCount;
         }
-
+#endif
         public bool CloseSessionBySessionID(string strSessionID)
         {
             SessionInfo sessioninfo = null;
@@ -1350,6 +1443,18 @@ SetStartEventArgs e);
             return true;
         }
 
+        public int CloseSessionByReaderBarcode(string strReaderBarcode)
+        {
+            return CloseSessionBy((info) =>
+            {
+                if (info.Account.Barcode == strReaderBarcode
+                    && info.Account.Barcode == info.Account.UserID)
+                    return true;
+                return false;
+            });
+        }
+
+#if NO
         // 读者记录发生修改后，要把和该读者登录的 Session 给清除，这样就避免后面用到旧的读者权限
         public int CloseSessionByReaderBarcode(string strReaderBarcode)
         {
@@ -1420,6 +1525,7 @@ SetStartEventArgs e);
             }
             return nCount;
         }
+#endif
 
         public void DeleteSession(SessionInfo sessioninfo,
             bool bLock = true)
