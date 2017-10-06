@@ -1079,7 +1079,7 @@ MessageBoxDefaultButton.Button1);
                     current_downloaders.Add(downloader);
                 }
 
-                Task.Factory.StartNew(() => DownloadFiles(current_downloaders,
+                Task.Factory.StartNew(() => SequenceDownloadFiles(current_downloaders,
                     bAppend,
                     (bError) =>
                     {
@@ -1133,7 +1133,7 @@ MessageBoxDefaultButton.Button1);
         public delegate void Delegate_end(bool bError);
 
         // 顺序执行每个 DynamicDownloader
-        void DownloadFiles(List<DynamicDownloader> downloaders,
+        void SequenceDownloadFiles(List<DynamicDownloader> downloaders,
             bool bAppend,
             Delegate_end func_end)
         {
@@ -1255,7 +1255,9 @@ MessageBoxDefaultButton.Button1);
                     (bError) =>
                     {
                         // 写入记忆文件，然后提示结束
-                        WriteOperLogMemoryFile(strFolder, now);
+                        if (bError == false)
+                            WriteOperLogMemoryFile(strFolder, now);
+
                         // this.ShowMessageBox("备份日志文件完成");
                         try
                         {
