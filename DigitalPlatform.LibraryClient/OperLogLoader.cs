@@ -4,21 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 using System.IO;
-using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
 
 using DigitalPlatform;
-using DigitalPlatform.IO;
-using DigitalPlatform.Xml;
-using DigitalPlatform.CirculationClient;
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 
-namespace dp2Circulation
+namespace DigitalPlatform.LibraryClient
 {
-#if NO
     public class OperLogLoader : IEnumerable
     {
         /// <summary>
@@ -69,14 +63,6 @@ namespace dp2Circulation
             set;
         }
 
-#if NO
-        public IWin32Window owner
-        {
-            get;
-            set;
-        }
-#endif
-
         /// <summary>
         /// 进度条开始位置。-1 表示从一半开始，0 表示从头开始。缺省为 0
         /// </summary>
@@ -86,7 +72,7 @@ namespace dp2Circulation
             set;
         }
 
-        public ProgressEstimate estimate
+        public ProgressEstimate Estimate
         {
             get;
             set;
@@ -156,7 +142,7 @@ namespace dp2Circulation
             lServerFileSize = 0;
             lCacheFileSize = 0;
 
-            string strCacheFilename = PathUtil.MergePath(strCacheDir, strLogFileName);
+            string strCacheFilename = Path.Combine(strCacheDir, strLogFileName);
 
             FileInfo fi = new FileInfo(strCacheFilename);
             if (fi.Exists == true)
@@ -223,7 +209,7 @@ namespace dp2Circulation
         {
             strError = "";
 
-            string strVersionFilePath = PathUtil.MergePath(strCacheDir, strVersionFileName);
+            string strVersionFilePath = Path.Combine(strCacheDir, strVersionFileName);
             if (File.Exists(strVersionFilePath) == false)
                 return 1;
 
@@ -238,8 +224,8 @@ namespace dp2Circulation
                 return -1;
             }
 
-            string strCurrentLibraryCode = DomUtil.GetAttr(dom.DocumentElement, "libraryCodeList");
-            string strCurrentServerUrl = DomUtil.GetAttr(dom.DocumentElement, "libraryServerUrl");
+            string strCurrentLibraryCode = dom.DocumentElement.GetAttribute("libraryCodeList");
+            string strCurrentServerUrl = dom.DocumentElement.GetAttribute("libraryServerUrl");
 
             if (strLibraryCodeList != strCurrentLibraryCode
                 || strCurrentServerUrl != strDp2LibraryServerUrl)
@@ -259,15 +245,15 @@ namespace dp2Circulation
         {
             strError = "";
 
-            string strVersionFilePath = PathUtil.MergePath(strCacheDir, strVersionFileName);
+            string strVersionFilePath = Path.Combine(strCacheDir, strVersionFileName);
             try
             {
                 File.Delete(strVersionFilePath);
 
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml("<root />");
-                DomUtil.SetAttr(dom.DocumentElement, "libraryCodeList", strLibraryCodeList);
-                DomUtil.SetAttr(dom.DocumentElement, "libraryServerUrl", strDp2LibraryServerUrl);
+                dom.DocumentElement.SetAttribute("libraryCodeList", strLibraryCodeList);
+                dom.DocumentElement.SetAttribute("libraryServerUrl", strDp2LibraryServerUrl);
                 dom.Save(strVersionFilePath);
             }
             catch (Exception ex)
@@ -284,12 +270,12 @@ namespace dp2Circulation
             string strError = "";
             int nRet = 0;
 
-            if ((this.LogType & dp2Circulation.LogType.AccessLog) != 0
-    && (this.LogType & dp2Circulation.LogType.OperLog) != 0)
+            if ((this.LogType & LogType.AccessLog) != 0
+    && (this.LogType & LogType.OperLog) != 0)
                 throw new ArgumentException("OperLogLoader 的 LogType 只能使用一种类型");
 
             if (string.IsNullOrEmpty(this.CacheDir) == false)
-                PathUtil.TryCreateDir(this.CacheDir);
+                TryCreateDir(this.CacheDir);
 
             // ProgressEstimate estimate = new ProgressEstimate();
             bool bAutoCache = this.AutoCache;
@@ -314,7 +300,7 @@ namespace dp2Circulation
                     out lCacheFileSize,
                     out strError);
                 if (nRet == -1)
-                    throw new Exception(strError);
+                    throw new ChannelException(this.Channel.ErrorCode, strError);
                 // 2015/11/25
                 if (nRet == -2)
                     yield break;    // 此类型的日志尚未启用
@@ -336,8 +322,7 @@ namespace dp2Circulation
                 {
                 REDO:
                     // 清空当前缓存目录
-                    nRet = Global.DeleteDataDir(
-                        null, // owner,
+                    nRet = DeleteDataDir(
                         this.CacheDir,
                         out strError);
                     if (nRet == -1)
@@ -349,7 +334,7 @@ namespace dp2Circulation
                             e.Actions = "yes,no,cancel";
                             this.Prompt(this, e);
                             if (e.ResultAction == "cancel")
-                                throw new Exception(strError);
+                                throw new InterruptException(strError);
                             else if (e.ResultAction == "yes")
                                 goto REDO;
                             else
@@ -364,7 +349,7 @@ namespace dp2Circulation
                         throw new Exception(strError);
 #endif
 
-                    PathUtil.TryCreateDir(this.CacheDir);  // 重新创建目录
+                    TryCreateDir(this.CacheDir);  // 重新创建目录
 
                     // 创建版本文件
                     nRet = CreateCacheVersionFile(
@@ -386,12 +371,12 @@ namespace dp2Circulation
             this.Stop.SetMessage("正在准备获得日志文件尺寸 ...");
             foreach (string strLine in this.FileNames)
             {
-                Application.DoEvents();
+                // Application.DoEvents();
 
                 if (this.Stop != null && this.Stop.State != 0)
                 {
                     strError = "用户中断";
-                    throw new Exception(strError);
+                    throw new InterruptException(strError);
                     // yield break; ?
                 }
 
@@ -452,7 +437,7 @@ namespace dp2Circulation
                         e.Actions = "yes,no,cancel";
                         this.Prompt(this, e);
                         if (e.ResultAction == "cancel")
-                            throw new Exception(strError);
+                            throw new InterruptException(strError);
                         else if (e.ResultAction == "yes")
                         {
                             if (this.Stop != null)
@@ -466,7 +451,7 @@ namespace dp2Circulation
                         }
                     }
                     else
-                        throw new Exception(strError);
+                        throw new ChannelException(this.Channel.ErrorCode, strError);
                 }
 
                 if (nRet == 0)
@@ -514,17 +499,20 @@ namespace dp2Circulation
                 this.Stop.SetProgressRange(0, lTotalSize);
             }
 
-            estimate.SetRange(lDoneSize, lTotalSize);
-            estimate.StartEstimate();
+            if (Estimate != null)
+            {
+                Estimate.SetRange(lDoneSize, lTotalSize);
+                Estimate.StartEstimate();
+            }
 
             for (int i = 0; i < lines.Count; i++)
             {
-                Application.DoEvents();
+                // Application.DoEvents();
 
                 if (this.Stop != null && this.Stop.State != 0)
                 {
                     strError = "用户中断";
-                    throw new Exception(strError);
+                    throw new InterruptException(strError);
                     // yield break; ?
                 }
 
@@ -554,7 +542,7 @@ namespace dp2Circulation
                     loader.Stop = this.Stop;
                     loader.Channel = this.Channel;
                     // loader.owner = this.owner;
-                    loader.estimate = this.estimate;
+                    loader.Estimate = this.Estimate;
                     loader.FileName = strLogFilename;
                     loader.Level = this.Level;
                     loader.lServerFileSize = sizes[i];
@@ -594,7 +582,7 @@ namespace dp2Circulation
             OperLogItemLoader loader = new OperLogItemLoader();
             loader.Stop = this.Stop;
             loader.Channel = this.Channel;
-            loader.estimate = null;//
+            loader.Estimate = null;//
             loader.FileName = item.Date + ".log";
             loader.Level = nLevel;
             loader.lServerFileSize = -1;
@@ -616,6 +604,280 @@ namespace dp2Circulation
 
             return null;
         }
+
+        // 如果目录不存在则创建之
+        // return:
+        //      false   已经存在
+        //      true    刚刚新创建
+        public static bool TryCreateDir(string strDir)
+        {
+            DirectoryInfo di = new DirectoryInfo(strDir);
+            if (di.Exists == false)
+            {
+                di.Create();
+                return true;
+            }
+
+            return false;
+        }
+
+        public static int DeleteDataDir(
+    string strDataDir,
+    out string strError)
+        {
+            strError = "";
+            try
+            {
+                Directory.Delete(strDataDir, true);
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = "删除目录 '" + strDataDir + "' 时出错: " + ex.Message;
+                return -1;
+            }
+        }
+
+        // 根据日期范围，发生日志文件名
+        // parameters:
+        //      strStartDate    起始日期。8字符
+        //      strEndDate  结束日期。8字符
+        // return:
+        //      -1  错误
+        //      0   成功
+        /// <summary>
+        /// 根据日期范围，发生日志文件名
+        /// </summary>
+        /// <param name="strStartDate">起始日期。8字符</param>
+        /// <param name="strEndDate">结束日期。8字符</param>
+        /// <param name="bOutputExt">输出的 LogFileNames 元素中是否包含扩展名 ".log"</param>
+        /// <param name="LogFileNames">返回创建的文件名</param>
+        /// <param name="strWarning">返回警告信息</param>
+        /// <param name="strError">返回错误信息</param>
+        /// <returns>-1: 出错; 0: 成功</returns>
+        public static int MakeLogFileNames(string strStartDate,
+            string strEndDate,
+            bool bOutputExt,  // 是否包含扩展名 ".log"
+            out List<string> LogFileNames,
+            out string strWarning,
+            out string strError)
+        {
+            LogFileNames = new List<string>();
+            strError = "";
+            strWarning = "";
+            int nRet = 0;
+
+            // 2017/10/5
+            if (strStartDate.IndexOf(".") != -1)
+            {
+                strError = "strStartDate 参数值中不能包含 . 或 .log";
+                return -1;
+            }
+            if (strEndDate.IndexOf(".") != -1)
+            {
+                strError = "strEndDate 参数值中不能包含 . 或 .log";
+                return -1;
+            }
+
+            if (String.Compare(strStartDate, strEndDate) > 0)
+            {
+                strError = "起始日期 '" + strStartDate + "' 不应大于结束日期 '" + strEndDate + "'。";
+                return -1;
+            }
+
+            string strLogFileName = strStartDate;
+
+            for (; ; )
+            {
+                LogFileNames.Add(strLogFileName + (bOutputExt == true ? ".log" : ""));
+
+                string strNextLogFileName = "";
+                // 获得（理论上）下一个日志文件名
+                // return:
+                //      -1  error
+                //      0   正确
+                //      1   正确，并且strLogFileName已经是今天的日子了
+                nRet = NextLogFileName(strLogFileName,
+                    out strNextLogFileName,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (nRet == 1)
+                {
+                    if (String.Compare(strLogFileName, strEndDate) < 0)
+                    {
+                        strWarning = "因日期范围的尾部 " + strEndDate + " 超过今天(" + DateTime.Now.ToLongDateString() + ")，部分日期被略去...";
+                        break;
+                    }
+                }
+
+                strLogFileName = strNextLogFileName;
+                if (String.Compare(strLogFileName, strEndDate) > 0)
+                    break;
+            }
+
+            return 0;
+        }
+
+        // 获得（理论上）下一个日志文件名
+        // return:
+        //      -1  error
+        //      0   正确
+        //      1   正确，并且strLogFileName已经是今天的日子了
+        static int NextLogFileName(string strLogFileName,
+            out string strNextLogFileName,
+            out string strError)
+        {
+            strError = "";
+            strNextLogFileName = "";
+            int nRet = 0;
+
+            if (string.IsNullOrEmpty(strLogFileName)
+                || strLogFileName.Length < 8)
+            {
+                strError = "日期 '" + strLogFileName + "' 字符串格式错误，应为 8 个数字字符";
+                return -1;
+            }
+
+            string strYear = strLogFileName.Substring(0, 4);
+            string strMonth = strLogFileName.Substring(4, 2);
+            string strDay = strLogFileName.Substring(6, 2);
+
+            int nYear = 0;
+            int nMonth = 0;
+            int nDay = 0;
+
+            try
+            {
+                nYear = Convert.ToInt32(strYear);
+            }
+            catch
+            {
+                strError = "日志文件名 '" + strLogFileName + "' 中的 '"
+                    + strYear + "' 部分格式错误";
+                return -1;
+            }
+
+            try
+            {
+                nMonth = Convert.ToInt32(strMonth);
+            }
+            catch
+            {
+                strError = "日志文件名 '" + strLogFileName + "' 中的 '"
+                    + strMonth + "' 部分格式错误";
+                return -1;
+            }
+
+            try
+            {
+                nDay = Convert.ToInt32(strDay);
+            }
+            catch
+            {
+                strError = "日志文件名 '" + strLogFileName + "' 中的 '"
+                    + strDay + "' 部分格式错误";
+                return -1;
+            }
+
+            DateTime time = DateTime.Now;
+            try
+            {
+                time = new DateTime(nYear, nMonth, nDay);
+            }
+            catch (Exception ex)
+            {
+                strError = "日期 " + strLogFileName + " 格式错误: " + ex.Message;
+                return -1;
+            }
+
+            DateTime now = DateTime.Now;
+
+            // 正规化时间
+            nRet = RoundTime("day",
+                ref now,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            nRet = RoundTime("day",
+                ref time,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            bool bNow = false;
+            if (time >= now)
+                bNow = true;
+
+            time = time + new TimeSpan(1, 0, 0, 0); // 后面一天
+
+            strNextLogFileName = time.Year.ToString().PadLeft(4, '0')
+            + time.Month.ToString().PadLeft(2, '0')
+            + time.Day.ToString().PadLeft(2, '0');
+
+            if (bNow == true)
+                return 1;
+
+            return 0;
+        }
+
+        // 按照时间单位,把时间值零头去除,正规化,便于后面计算差额
+        /*public*/
+        static int RoundTime(string strUnit,
+            ref DateTime time,
+            out string strError)
+        {
+            strError = "";
+
+            time = time.ToLocalTime();
+            if (strUnit == "day")
+            {
+                time = new DateTime(time.Year, time.Month, time.Day,
+                    12, 0, 0, 0);
+            }
+            else if (strUnit == "hour")
+            {
+                time = new DateTime(time.Year, time.Month, time.Day,
+                    time.Hour, 0, 0, 0);
+            }
+            else
+            {
+                strError = "未知的时间单位 '" + strUnit + "'";
+                return -1;
+            }
+            time = time.ToUniversalTime();
+
+            return 0;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   没有找到日志记录
+        //      >0  附件总长度
+        public long DownloadAttachment(OperLogItem item, 
+            string strCurrentFileName,
+            out string strError)
+        {
+            long lHintNext = 0;
+            // return:
+            //      -1  出错
+            //      0   没有找到日志记录
+            //      >0  附件总长度
+            long lRet = this.Channel.DownloadOperlogAttachment(
+                this.Stop,   // stop,
+                item.Date,
+                item.Index,
+                -1, // lHint,
+                strCurrentFileName,
+                out lHintNext,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            return lRet;
+        }
     }
 
     /// <summary>
@@ -627,18 +889,28 @@ namespace dp2Circulation
         /// 日期
         /// </summary>
         public string Date = "";
+
         /// <summary>
         /// 日志记录内容
         /// </summary>
         public string Xml = "";
+
         /// <summary>
         /// 日志记录在文件中的序号
         /// </summary>
         public long Index = -1;
+
+        // 2017/10/6
+        /// <summary>
+        /// 附件内容长度
+        /// </summary>
+        public long AttachmentLength = 0;
+
         /// <summary>
         /// 错误码
         /// </summary>
         public ErrorCode ErrorCode = ErrorCode.NoError;
+
         /// <summary>
         /// 错误信息字符串
         /// </summary>
@@ -651,6 +923,4 @@ namespace dp2Circulation
         OperLog = 0x01,     // 操作日志
         AccessLog = 0x02,   // 只读日志
     }
-
-#endif
 }

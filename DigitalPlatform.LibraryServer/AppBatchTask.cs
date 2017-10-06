@@ -216,6 +216,8 @@ namespace DigitalPlatform.LibraryServer
                     task = new MessageMonitor(this, strName);
                 else if (strName == "创建 MongoDB 日志库")
                     task = new BuildMongoOperDatabase(this, strName);
+                else if (strName == "服务器同步")
+                    task = new ServerReplication(this, strName);
                 else if (strName == "大备份")
                     task = new BackupTask(this, strName);
                 else

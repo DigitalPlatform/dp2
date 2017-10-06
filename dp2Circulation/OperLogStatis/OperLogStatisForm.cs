@@ -16,6 +16,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Script;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
+using DigitalPlatform.LibraryClient;
 
 namespace dp2Circulation
 {
@@ -517,7 +518,7 @@ namespace dp2Circulation
             // return:
             //      -1  错误
             //      0   成功
-            nRet = MakeLogFileNames(strStartDate,
+            nRet = OperLogLoader.MakeLogFileNames(strStartDate,
                 strEndDate,
                 true,
                 out LogFileNames,
@@ -750,208 +751,6 @@ out strError);
             return 0;
         ERROR1:
             return -1;
-        }
-
-        // 根据日期范围，发生日志文件名
-        // parameters:
-        //      strStartDate    起始日期。8字符
-        //      strEndDate  结束日期。8字符
-        // return:
-        //      -1  错误
-        //      0   成功
-        /// <summary>
-        /// 根据日期范围，发生日志文件名
-        /// </summary>
-        /// <param name="strStartDate">起始日期。8字符</param>
-        /// <param name="strEndDate">结束日期。8字符</param>
-        /// <param name="bExt">是否包含扩展名 ".log"</param>
-        /// <param name="LogFileNames">返回创建的文件名</param>
-        /// <param name="strWarning">返回警告信息</param>
-        /// <param name="strError">返回错误信息</param>
-        /// <returns>-1: 出错; 0: 成功</returns>
-        public static int MakeLogFileNames(string strStartDate,
-            string strEndDate,
-            bool bExt,  // 是否包含扩展名 ".log"
-            out List<string> LogFileNames,
-            out string strWarning,
-            out string strError)
-        {
-            LogFileNames = new List<string>();
-            strError = "";
-            strWarning = "";
-            int nRet = 0;
-
-            if (String.Compare(strStartDate, strEndDate) > 0)
-            {
-                strError = "起始日期 '" + strStartDate + "' 不应大于结束日期 '" + strEndDate + "'。";
-                return -1;
-            }
-
-            string strLogFileName = strStartDate;
-
-            for (; ; )
-            {
-                LogFileNames.Add(strLogFileName + (bExt == true ? ".log" : ""));
-
-                string strNextLogFileName = "";
-                // 获得（理论上）下一个日志文件名
-                // return:
-                //      -1  error
-                //      0   正确
-                //      1   正确，并且strLogFileName已经是今天的日子了
-                nRet = NextLogFileName(strLogFileName,
-                    out strNextLogFileName,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-
-                if (nRet == 1)
-                {
-                    if (String.Compare(strLogFileName, strEndDate) < 0)
-                    {
-                        strWarning = "因日期范围的尾部 " + strEndDate + " 超过今天(" + DateTime.Now.ToLongDateString() + ")，部分日期被略去...";
-                        break;
-                    }
-                }
-
-                strLogFileName = strNextLogFileName;
-                if (String.Compare(strLogFileName, strEndDate) > 0)
-                    break;
-            }
-
-            return 0;
-        }
-
-        // 获得（理论上）下一个日志文件名
-        // return:
-        //      -1  error
-        //      0   正确
-        //      1   正确，并且strLogFileName已经是今天的日子了
-        static int NextLogFileName(string strLogFileName,
-            out string strNextLogFileName,
-            out string strError)
-        {
-            strError = "";
-            strNextLogFileName = "";
-            int nRet = 0;
-
-            if (string.IsNullOrEmpty(strLogFileName)
-                || strLogFileName.Length < 8)
-            {
-                strError = "日期 '" + strLogFileName + "' 字符串格式错误，应为 8 个数字字符";
-                return -1;
-            }
-
-            string strYear = strLogFileName.Substring(0, 4);
-            string strMonth = strLogFileName.Substring(4, 2);
-            string strDay = strLogFileName.Substring(6, 2);
-
-            int nYear = 0;
-            int nMonth = 0;
-            int nDay = 0;
-
-            try
-            {
-                nYear = Convert.ToInt32(strYear);
-            }
-            catch
-            {
-                strError = "日志文件名 '" + strLogFileName + "' 中的 '"
-                    + strYear + "' 部分格式错误";
-                return -1;
-            }
-
-            try
-            {
-                nMonth = Convert.ToInt32(strMonth);
-            }
-            catch
-            {
-                strError = "日志文件名 '" + strLogFileName + "' 中的 '"
-                    + strMonth + "' 部分格式错误";
-                return -1;
-            }
-
-            try
-            {
-                nDay = Convert.ToInt32(strDay);
-            }
-            catch
-            {
-                strError = "日志文件名 '" + strLogFileName + "' 中的 '"
-                    + strDay + "' 部分格式错误";
-                return -1;
-            }
-
-            DateTime time = DateTime.Now;
-            try
-            {
-                time = new DateTime(nYear, nMonth, nDay);
-            }
-            catch (Exception ex)
-            {
-                strError = "日期 " + strLogFileName + " 格式错误: " + ex.Message;
-                return -1;
-            }
-
-            DateTime now = DateTime.Now;
-
-            // 正规化时间
-            nRet = RoundTime("day",
-                ref now,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            nRet = RoundTime("day",
-                ref time,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            bool bNow = false;
-            if (time >= now)
-                bNow = true;
-
-            time = time + new TimeSpan(1, 0, 0, 0); // 后面一天
-
-            strNextLogFileName = time.Year.ToString().PadLeft(4, '0')
-            + time.Month.ToString().PadLeft(2, '0')
-            + time.Day.ToString().PadLeft(2, '0');
-
-            if (bNow == true)
-                return 1;
-
-            return 0;
-        }
-
-        // 按照时间单位,把时间值零头去除,正规化,便于后面计算差额
-        /*public*/
-        static int RoundTime(string strUnit,
-            ref DateTime time,
-            out string strError)
-        {
-            strError = "";
-
-            time = time.ToLocalTime();
-            if (strUnit == "day")
-            {
-                time = new DateTime(time.Year, time.Month, time.Day,
-                    12, 0, 0, 0);
-            }
-            else if (strUnit == "hour")
-            {
-                time = new DateTime(time.Year, time.Month, time.Day,
-                    time.Hour, 0, 0, 0);
-            }
-            else
-            {
-                strError = "未知的时间单位 '" + strUnit + "'";
-                return -1;
-            }
-            time = time.ToUniversalTime();
-
-            return 0;
         }
 
         // 下一步 按钮

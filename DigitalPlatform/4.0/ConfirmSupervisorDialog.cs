@@ -102,6 +102,19 @@ namespace DigitalPlatform
             }
         }
 
+        // 2017/10/5
+        public bool ServerUrlReadOnly
+        {
+            get
+            {
+                return this.textBox_serverAddr.ReadOnly;
+            }
+            set
+            {
+                this.textBox_serverAddr.ReadOnly = value;
+            }
+        }
+
         public string Comment
         {
             get
@@ -124,6 +137,19 @@ namespace DigitalPlatform
             set
             {
                 this.textBox_phoneNumber.Text = value;
+            }
+        }
+
+        public bool PhoneNumberVisible
+        {
+            get
+            {
+                return this.textBox_phoneNumber.Visible;
+            }
+            set
+            {
+                this.textBox_phoneNumber.Visible = value;
+                this.label_phoneNumber.Visible = value;
             }
         }
 

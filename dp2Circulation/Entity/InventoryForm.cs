@@ -2705,7 +2705,7 @@ null);
 
             string strWarning = "";
             List<string> dates = null;
-            int nRet = OperLogStatisForm.MakeLogFileNames(strStart,
+            int nRet = OperLogLoader.MakeLogFileNames(strStart,
                 strEnd,
                 false,  // 是否包含扩展名 ".log"
                 out dates,
@@ -2769,7 +2769,7 @@ null);
                 OperLogLoader loader = new OperLogLoader();
                 loader.Channel = channel;
                 loader.Stop = this.Progress;
-                loader.estimate = estimate;
+                loader.Estimate = estimate;
                 loader.FileNames = dates;
                 loader.Level = 2;  // Program.MainForm.OperLogLevel;
                 loader.AutoCache = false;

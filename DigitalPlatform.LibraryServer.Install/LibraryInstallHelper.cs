@@ -728,15 +728,15 @@ RestoreLibraryParam param
                 return false;
             }
 
-            string strFileName = Path.Combine(param.DataDir, "library.xml");
+            string strLibraryXmlFileName = Path.Combine(param.DataDir, "library.xml");
 
             LibraryInstanceInfo info = null;
 
             if (param.Stop != null)
-                param.Stop.SetMessage("正在从 " + strFileName + " 获得参数");
+                param.Stop.SetMessage("正在从 " + strLibraryXmlFileName + " 获得参数");
 
             // 从现有 library.xml 中得到各种配置参数
-            nRet = GetLibraryInstanceInfoFromXml(strFileName,
+            nRet = GetLibraryInstanceInfoFromXml(strLibraryXmlFileName,
                 ref info,
                 out strError);
             if (nRet == -1)
@@ -752,13 +752,34 @@ RestoreLibraryParam param
                 return false;
             }
 
+            string strMode = "full";
+            string strExt = Path.GetExtension(param.BackupFileName);
+            if (strExt == ".dp2bak")
+                strMode = "full";
+            else
+                strMode = "blank";
+
+            string strBackupFileName = param.BackupFileName;
+            if (strBackupFileName.ToLower().EndsWith(".dbdef.zip"))
+                strBackupFileName = strBackupFileName.Substring(0, strBackupFileName.Length - ".dbdef.zip".Length);
+            else
+                strBackupFileName = Path.Combine(Path.GetDirectoryName(param.BackupFileName),
+                Path.GetFileNameWithoutExtension(param.BackupFileName));
+
             // 数据库定义文件名
-            string strDbDefFileName = Path.Combine(Path.GetDirectoryName(param.BackupFileName),
-                Path.GetFileNameWithoutExtension(param.BackupFileName)) + ".dbdef.zip";
+            string strDbDefFileName = strBackupFileName + ".dbdef.zip";
             if (File.Exists(strDbDefFileName) == false)
             {
                 strError = "数据库定义文件 '" + strDbDefFileName + "' 不存在";
                 param.ErrorInfo = strError;
+                return false;
+            }
+
+            string strDataFileName = strBackupFileName + ".dp2bak";
+
+            if (strMode == "full" && File.Exists(strDataFileName) == false)
+            {
+                param.ErrorInfo = "全部恢复 方式下，大备份数据文件 '" + strDataFileName + "' 不存在，无法进行恢复";
                 return false;
             }
 
@@ -845,7 +866,7 @@ RestoreLibraryParam param
                         }
 
                         // TODO: 备份操作前的 library.xml ?
-                        target_dom.Save(strFileName);
+                        target_dom.Save(strLibraryXmlFileName);
                     }
 
                     // 拷贝 数据目录下的 cfgs 子目录
@@ -872,17 +893,21 @@ RestoreLibraryParam param
                     PathUtil.DeleteDirectory(strTempDir);
                 }
 
-                // 导入 .dp2bak 文件内的全部数据
-                nRet = ImportBackupData(
-                    param.Stop,
-                    channel,
-                    param.BackupFileName,
-                    param.FastMode,
-                    out strError);
-                if (nRet == -1)
+                if (strMode == "full"
+                    && File.Exists(strDataFileName))
                 {
-                    param.ErrorInfo = strError;
-                    return false;
+                    // 导入 .dp2bak 文件内的全部数据
+                    nRet = ImportBackupData(
+                        param.Stop,
+                        channel,
+                        strDataFileName,
+                        param.FastMode,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        param.ErrorInfo = strError;
+                        return false;
+                    }
                 }
             }
 

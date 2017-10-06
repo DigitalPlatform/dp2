@@ -11,6 +11,7 @@ using System.Xml;
 
 namespace DigitalPlatform.LibraryServer
 {
+    // TODO: 中断了以后，再次启动如何自动从断点位置开始?
     /// <summary>
     /// 根据日志文件创建 mongodb 日志库的批处理任务
     /// </summary>

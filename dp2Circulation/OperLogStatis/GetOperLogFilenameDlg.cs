@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
+using DigitalPlatform.LibraryClient;
 
 // 2013/3/16 添加 XML 注释
 
@@ -103,7 +104,7 @@ namespace dp2Circulation
             // return:
             //      -1  错误
             //      0   成功
-            int nRet = OperLogStatisForm.MakeLogFileNames(strStartDate,
+            int nRet = OperLogLoader.MakeLogFileNames(strStartDate,
                 strEndDate,
                 true,
                 out LogFileNames,

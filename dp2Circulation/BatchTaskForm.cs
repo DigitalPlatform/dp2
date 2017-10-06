@@ -111,6 +111,17 @@ namespace dp2Circulation
             // 使得菜单显示正确
             this.MessageStyle = this.MessageStyle;
 
+            // 删除一些不需要的任务名
+            for (int i = 0; i < this.comboBox_taskName.Items.Count; i++)
+            {
+                string strTaskName = this.comboBox_taskName.Items[i] as string;
+                if (strTaskName.StartsWith("~"))
+                {
+                    this.comboBox_taskName.Items.RemoveAt(i);
+                    i--;
+                }
+            }
+
             // 
             API.PostMessage(this.Handle, WM_INITIAL, 0, 0);
         }
@@ -304,6 +315,7 @@ namespace dp2Circulation
             }
         }
              * */
+                /*
             else if (strTaskName == "正元一卡通读者信息同步")
             {
                 StartZhengyuanReplicationDlg dlg = new StartZhengyuanReplicationDlg();
@@ -329,6 +341,7 @@ namespace dp2Circulation
                     return -1;
                 }
             }
+                 * */
             else if (strTaskName == "读者信息同步")
             {
 #if NO
@@ -355,6 +368,20 @@ namespace dp2Circulation
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.Text = "启动 创建 MongoDB 日志库 任务";
                 dlg.TaskName = "创建 MongoDB 日志库";
+                dlg.StartInfo = startinfo;
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult != DialogResult.OK)
+                {
+                    strError = "用户放弃启动";
+                    return -1;
+                }
+            }
+            else if (strTaskName == "服务器同步")
+            {
+                StartLogRecoverDlg dlg = new StartLogRecoverDlg();
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.Text = "启动 服务器同步 任务";
+                dlg.TaskName = "服务器同步";
                 dlg.StartInfo = startinfo;
                 dlg.ShowDialog(this);
                 if (dlg.DialogResult != DialogResult.OK)

@@ -3394,9 +3394,46 @@ namespace DigitalPlatform.LibraryServer
 
                     WriteItemDbGroupParam(writer);
 
+                    // TODO: 把这些语句都写入一个函数
                     // 没有进入内存属性的其他XML片断
                     if (this.LibraryCfgDom != null)
                     {
+                        string[] elements = new string[]{
+                            "//rightsTable",       // 0.02以前为rightstable
+                            "//locationTypes",  // 0.02以前为locationtypes
+                            "//accounts",
+                            "//browseformats",
+                            "//foregift",
+                            "//virtualDatabases",
+                            "//valueTables",
+                            "//calendars",
+                            "//traceDTLP",
+                            "//zhengyuan",
+                            "//dkyw",
+                            "//patronReplication",
+                            "//clientFineInterface",
+                            "//yczb",
+                            "script",
+                            "mailTemplates",
+                            "smtpServer",
+                            "externalMessageInterface",
+                            "zhongcihao",
+                            "callNumber",
+                            "monitors",
+                            "dup",
+                            "unique",
+                            "utilDb",
+                            "libraryInfo",
+                            "login",
+                            "circulation",
+                            "channel",
+                            "cataloging",
+                            "serverReplication",
+                        };
+
+                        RestoreElements(writer, elements);
+
+#if NO
                         // <rightsTable>
                         XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//rightsTable");    // 0.02以前为rightstable
                         if (node != null)
@@ -3443,7 +3480,6 @@ namespace DigitalPlatform.LibraryServer
                         {
                             node.WriteTo(writer);
                         }
-
 
                         // <foregift>
                         node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//foregift");
@@ -3638,6 +3674,14 @@ namespace DigitalPlatform.LibraryServer
                         {
                             node.WriteTo(writer);
                         }
+
+                        // <serverReplication>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("serverReplication");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+#endif
                     }
 
                     // 时钟
@@ -3665,7 +3709,16 @@ namespace DigitalPlatform.LibraryServer
                 // this.m_lock.ReleaseWriterLock();
                 this.UnlockForWrite();
             }
+        }
 
+        void RestoreElements(XmlTextWriter writer, string[] elements)
+        {
+            foreach (string element in elements)
+            {
+                XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode(element);
+                if (node != null)
+                    node.WriteTo(writer);
+            }
         }
 
         public void StopAll()
@@ -8531,7 +8584,7 @@ out strError);
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" 
+                    + StringUtil.GetXmlStringSimple(strDbName + ":"
                     + strFrom/*"册条码"*/)       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
