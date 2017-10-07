@@ -783,14 +783,6 @@ RestoreLibraryParam param
                 return false;
             }
 
-            // 在只导出定义的模式下，为了避免误会，自动删除已经存在的同名数据文件
-            if (strMode == "blank" && File.Exists(strDataFileName))
-            {
-                File.Delete(strDataFileName);
-            }
-
-            // TODO: 删除 dp2library 数据目录中所有后台任务的断点信息，以避免克隆后旧的后台任务被从断点位置继续执行
-
             XmlDocument new_library_dom = new XmlDocument();
 
             using (RmsChannelCollection channels = new RmsChannelCollection())
@@ -885,6 +877,7 @@ RestoreLibraryParam param
                         return false;
                     }
 
+                    // 删除 dp2library 数据目录中所有后台任务的断点信息，以避免克隆后旧的后台任务被从断点位置继续执行
                     // 2017/9/20
                     nRet = DeleteLibraryTempFiles(param.DataDir,
             out strError);
