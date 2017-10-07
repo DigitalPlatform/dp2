@@ -157,7 +157,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.114 (2017/9/20) 批处理任务 大备份初步可用。对对象文件的文件指针用法进行了优化(StreamCache 类)
         //      2.115 (2017/9/23) ListFile() API 中的删除文件功能，被限定在 dp2library 数据目录的 upload 和 backup 子目录。不再允许前一版本那样的 managedatabase 权限的用户删除数据目录下的任何文件
         //      2.116 (2017/9/30) SerUser() API 增加了 closechannel 动作
-        public static string Version = "2.116";
+        //      2.117 (2017/10/6) dp2kernel 的 GetRes() API 的 strStyle 增加了 gzip 选项
+        public static string Version = "2.117";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -1947,7 +1948,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 Version version = new Version(strVersion);
-                Version base_version = new Version("2.68");
+                Version base_version = new Version("2.69");
                 if (version.CompareTo(base_version) < 0)
                 {
                     strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + version + ")。请立即升级 dp2Kernel 到最新版本。";
@@ -14962,6 +14963,7 @@ strLibraryCode);    // 读者所在的馆代码
         RequestError = 111,
         RequestTimeOut = 112,
         TimestampMismatch = 113,
+        Compressed = 114,   // 2017/10/7
     }
 
     // API函数结果

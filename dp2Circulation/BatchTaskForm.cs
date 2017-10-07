@@ -392,9 +392,9 @@ namespace dp2Circulation
             }
             else if (strTaskName == "大备份")
             {
-                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.114") < 0)
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.117") < 0)
                 {
-                    strError = "dp2library 应在 2.114 版以上才能使用“大备份”任务相关的功能";
+                    strError = "dp2library 应在 2.117 版以上才能使用“大备份”任务相关的功能";
                     return -1;
                 }
 

@@ -3207,6 +3207,7 @@ Culture=neutral, PublicKeyToken=null
         strFileName,
         -1, // lStart,
         0,  // lLength,
+        "gzip",
         out baContent,
         out strLastTime,
         out strError);
@@ -3251,6 +3252,7 @@ Culture=neutral, PublicKeyToken=null
                         strFileName,
                         lStart,
                         lLength,
+                        "gzip",
                         out baContent,
                         out strFileTime,
                         out strError);

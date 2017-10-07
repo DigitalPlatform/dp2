@@ -16,6 +16,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.ResultSet;
+using System.IO.Compression;
 
 namespace dp2Kernel
 {
@@ -331,11 +332,12 @@ namespace dp2Kernel
         //                      ->cv:表示转换方法。以前的方法，这样定义也是可以的 xxxx->cccc 其中 xxxx 是 XPath 部分，cccc 是 convert method 部分。新用法老用法都兼容
         //                      '->' 分隔的第一个部分默认就是 XPath。
         //      2.68 2017/6/7 为 WriteRes() API 的 strStyle 参数增加 simulate 用法 (当写入对象资源时)
+        //      2.69 2017/10/6 为 GetRes() API 的 strStyle 参数增加 gzip 用法
         public Result GetVersion()
         {
             Result result = new Result();
             result.Value = 0;
-            result.ErrorString = "2.68";
+            result.ErrorString = "2.69";
             return result;
         }
 
@@ -1717,6 +1719,15 @@ namespace dp2Kernel
                 }
 
                 result.Value = nRet;   // 总长度
+
+                // 压缩内容
+                // 2017/10/6
+                if (StringUtil.IsInList("gzip", strStyle)
+                    && baContent != null && baContent.Length > 0)
+                {
+                    baContent = ByteArray.CompressGzip(baContent);
+                    result.ErrorCode = ErrorCodeValue.Compressed;
+                }
 
                 if (nAdditionError == -50)
                 {

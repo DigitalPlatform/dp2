@@ -1021,7 +1021,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6325.27243, Culture=neutral,
                 string strMetaData = "";
                 string strOutputPath = "";
 
-                string strStyle = "content,data,metadata,timestamp,outputpath";
+                string strStyle = "content,data,metadata,timestamp,outputpath,gzip";
 
                 long lRet = channel.GetRes(Progress,
                     MainForm.cfgCache,

@@ -5381,6 +5381,7 @@ out strError);
             string strFileName,
             long lStart,
             long lLength,
+            string strStyle,
             out byte[] baContent,
             out string strFileTime,
             out string strError)
@@ -5397,6 +5398,7 @@ out strError);
                     strFileName,
                     lStart,
                     lLength,
+                    strStyle,
                     null,
                     null);
 
@@ -5424,6 +5426,15 @@ out strError);
                         goto REDO;
                     return -1;
                 }
+
+                // 2017/10/7
+                if (StringUtil.IsInList("gzip", strStyle)
+                    && result.ErrorCode == localhost.ErrorCode.Compressed
+                    && baContent != null && baContent.Length > 0)
+                {
+                    baContent = ByteArray.DecompressGzip(baContent);
+                }
+
                 strError = result.ErrorInfo;
                 this.ErrorCode = result.ErrorCode;
                 this.ClearRedoCount();
@@ -7046,6 +7057,15 @@ out strError);
                         goto REDO;
                     return -1;
                 }
+
+                // 2017/10/7
+                if (StringUtil.IsInList("gzip", strStyle)
+                    && result.ErrorCode == localhost.ErrorCode.Compressed
+                    && baContent != null && baContent.Length > 0)
+                {
+                    baContent = ByteArray.DecompressGzip(baContent);
+                }
+
                 strError = result.ErrorInfo;
                 this.ErrorCode = result.ErrorCode;
                 this.ClearRedoCount();

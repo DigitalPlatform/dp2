@@ -9835,6 +9835,7 @@ Stack:
         //      strCategory 文件分类。目前只能使用 cfgs
         //      lStart  需要获得文件内容的起点。如果为-1，表示(baContent中)不返回文件内容
         //      lLength 需要获得的从lStart开始算起的byte数。如果为-1，表示希望尽可能多地取得(但是不能保证一定到尾)
+        //      strStyle    风格。gzip 表示希望获得压缩后的结果。如果确实返回了压缩后的结果，LibraryServerResult 中 ErrorCode 会返回 Compressed
         // rights:
         //      需要 getsystemparameter 权限
         // return:
@@ -9844,6 +9845,7 @@ Stack:
             string strFileName,
             long lStart,
             long lLength,
+            string strStyle,    // 2017/10/7
             out byte[] baContent,
             out string strFileTime)
         {
@@ -9909,6 +9911,15 @@ Stack:
                                 stream.Seek(lStart, SeekOrigin.Begin);
                                 stream.Read(baContent, 0, (int)lLength);
                                 result.Value = stream.Length;
+
+                                // 压缩内容
+                                // 2017/10/7
+                                if (StringUtil.IsInList("gzip", strStyle)
+                                    && baContent != null && baContent.Length > 0)
+                                {
+                                    baContent = ByteArray.CompressGzip(baContent);
+                                    result.ErrorCode = ErrorCode.Compressed;
+                                }
                             }
                         }
                         catch (FileNotFoundException)
@@ -11890,6 +11901,15 @@ Stack:
                     else
                         result.Value = lRet;
 
+                    // 压缩内容
+                    // 2017/10/6
+                    if (StringUtil.IsInList("gzip", strStyle)
+                        && baContent != null && baContent.Length > 0)
+                    {
+                        baContent = ByteArray.CompressGzip(baContent);
+                        result.ErrorCode = ErrorCode.Compressed;
+                    }
+
                     result.ErrorInfo = strError;
                     strOutputResPath = strResPath;
                     return result;
@@ -12227,6 +12247,13 @@ Stack:
             if (origin == ChannelErrorCode.TimestampMismatch)
             {
                 result.ErrorCode = ErrorCode.TimestampMismatch;
+                return;
+            }
+
+            // TODO: 其实可以用 Parse() 来翻译值
+            if (origin == ChannelErrorCode.Compressed)
+            {
+                result.ErrorCode = ErrorCode.Compressed;
                 return;
             }
 

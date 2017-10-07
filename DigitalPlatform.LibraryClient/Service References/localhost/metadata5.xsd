@@ -250,6 +250,7 @@
         <xs:element minOccurs="0" name="strFileName" nillable="true" type="xs:string" />
         <xs:element minOccurs="0" name="lStart" type="xs:long" />
         <xs:element minOccurs="0" name="lLength" type="xs:long" />
+        <xs:element minOccurs="0" name="strStyle" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

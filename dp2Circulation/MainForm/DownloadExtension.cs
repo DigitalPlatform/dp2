@@ -69,15 +69,36 @@ namespace dp2Circulation
             }
         }
 
-        // return:
+        class NormalResult
+        {
+            public int Value { get; set; }
+            public string ErrorInfo { get; set; }
+
+            public NormalResult(int value, string error)
+            {
+                this.Value = value;
+                this.ErrorInfo = error;
+            }
+        }
+
+        Task<NormalResult> BeginCheckMD5(string strServerFilePath,
+            string strLocalFilePath)
+        {
+            return Task.Factory.StartNew<NormalResult>(
+    () =>
+    {
+        return _checkMD5(strServerFilePath, strLocalFilePath);
+    });
+        }
+
+        // result.Value:
         //      -1  出错
         //      0   不匹配
         //      1   匹配
-        int CheckMD5(string strServerFilePath,
-            string strLocalFilePath,
-            out string strError)
+        NormalResult _checkMD5(string strServerFilePath,
+            string strLocalFilePath)
         {
-            strError = "";
+            string strError = "";
 
             LibraryChannel channel = this.GetChannel();
 
@@ -87,7 +108,7 @@ namespace dp2Circulation
 
             stopManager.Active(Stop);   // testing
 
-            Application.DoEvents();
+            // Application.DoEvents();
 
             try
             {
@@ -106,7 +127,7 @@ namespace dp2Circulation
                 if (nRet != 1)
                 {
                     strError = "探测服务器端文件 '" + strServerFilePath + "' MD5 时出错: " + strError;
-                    return -1;
+                    return new NormalResult(-1, strError);
                 }
 
                 using (FileStream stream = File.OpenRead(strLocalFilePath))
@@ -116,11 +137,20 @@ namespace dp2Circulation
                     if (ByteArray.Compare(server_md5, local_md5) != 0)
                     {
                         strError = "服务器端文件 '" + strServerFilePath + "' 和本地文件 '" + strLocalFilePath + "' MD5 不匹配";
-                        return 0;
+                        return new NormalResult(0, strError);
                     }
                 }
 
-                return 1;
+#if NO
+                byte[] local_md5 = BeginGetLocalMD5(strLocalFilePath);
+                if (ByteArray.Compare(server_md5, local_md5) != 0)
+                {
+                    strError = "服务器端文件 '" + strServerFilePath + "' 和本地文件 '" + strLocalFilePath + "' MD5 不匹配";
+                    return 0;
+                }
+#endif
+
+                return new NormalResult(1, null);
             }
             finally
             {
@@ -130,6 +160,15 @@ namespace dp2Circulation
                 Stop.Initial("");
 
                 this.ReturnChannel(channel);
+            }
+        }
+
+        static byte[] BeginGetLocalMD5(string strLocalFilePath)
+        {
+            using (FileStream stream = File.OpenRead(strLocalFilePath))
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                return DynamicDownloader.GetFileMd5(stream);
             }
         }
 
@@ -349,6 +388,15 @@ namespace dp2Circulation
         }
 #endif
 
+        // 一边等待，一边允许界面活动
+        static void GuiWait(Task task, int timeout = 100)
+        {
+            while (task.Wait(timeout) == false)
+            {
+                Application.DoEvents();
+            }
+        }
+
         // TODO: 将中途打算删除的文件留到函数返回前一刹那再删除
         // 询问是否覆盖已有的目标下载文件。整体询问
         // return:
@@ -431,6 +479,21 @@ namespace dp2Circulation
 
                         if (md5_result == System.Windows.Forms.DialogResult.Yes)
                         {
+                            Task<NormalResult> task = BeginCheckMD5(filename, strTargetPath);
+                            GuiWait(task);
+                            if (task.Result.Value == -1)
+                            {
+                                strError = task.Result.ErrorInfo;
+                                return -1;
+                            }
+                            if (task.Result.Value == 0)
+                            {
+                                info.MD5Matched = "no";
+                                continue;
+                            }
+                            else if (task.Result.Value == 1)
+                                info.MD5Matched = "yes";
+#if NO
                             // 检查 MD5 是否匹配
                             // return:
                             //      -1  出错
@@ -455,6 +518,7 @@ namespace dp2Circulation
                             }
                             else if (nRet == 1)
                                 info.MD5Matched = "yes";
+#endif
                         }
                     }
 
@@ -895,6 +959,36 @@ MessageBoxDefaultButton.Button1);
                 if (dlg.IsDisposed == false)
                     dlg.SetProgress(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive);
             });
+            // 2017/10/7
+            downloader.Prompt += new MessagePromptEventHandler(delegate(object o1, MessagePromptEventArgs e1)
+            {
+                if (dlg.IsDisposed == true)
+                {
+                    e1.ResultAction = "cancel";
+                    return;
+                }
+
+                {
+                    if (e1.Actions == "yes,no,cancel")
+                    {
+                        bool bHideMessageBox = true;
+                        DialogResult result = MessageDialog.Show(this,
+                            e1.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxDefaultButton.Button1,
+            null,
+            ref bHideMessageBox,
+            new string[] { "重试", "跳过", "放弃" },
+            20);
+                        if (result == DialogResult.Cancel)
+                            e1.ResultAction = "cancel";
+                        else if (result == System.Windows.Forms.DialogResult.No)
+                            e1.ResultAction = "no";
+                        else
+                            e1.ResultAction = "yes";
+                    }
+                }
+            });
             dlg.FormClosed += new FormClosedEventHandler(delegate(object o1, FormClosedEventArgs e1)
             {
                 downloader.Cancel();
@@ -1074,6 +1168,36 @@ MessageBoxDefaultButton.Button1);
                     {
                         if (dlg.IsDisposed == false)
                             dlg.SetProgress(e1.Text, e1.BytesReceived, e1.TotalBytesToReceive);
+                    });
+                    // 2017/10/7
+                    downloader.Prompt += new MessagePromptEventHandler(delegate(object o1, MessagePromptEventArgs e1)
+                    {
+                        if (dlg.IsDisposed == true)
+                        {
+                            e1.ResultAction = "cancel";
+                            return;
+                        }
+
+                        {
+                            if (e1.Actions == "yes,no,cancel")
+                            {
+                                bool bHideMessageBox = true;
+                                DialogResult result = MessageDialog.Show(this,
+                                    e1.MessageText + "\r\n\r\n将自动重试操作\r\n\r\n(点右上角关闭按钮可以中断批处理)",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxDefaultButton.Button1,
+                    null,
+                    ref bHideMessageBox,
+                    new string[] { "重试", "跳过", "放弃" },
+                    20);
+                                if (result == DialogResult.Cancel)
+                                    e1.ResultAction = "cancel";
+                                else if (result == System.Windows.Forms.DialogResult.No)
+                                    e1.ResultAction = "no";
+                                else
+                                    e1.ResultAction = "yes";
+                            }
+                        }
                     });
 
                     current_downloaders.Add(downloader);

@@ -325,6 +325,16 @@ namespace DigitalPlatform
             }
         }
 
+        public virtual bool IsStopped
+        {
+            get
+            {
+                if (this.State != 0)
+                    return true;
+                return false;
+            }
+        }
+
         // TODO: 处理中是否要加锁?
         public virtual void Continue()
         {

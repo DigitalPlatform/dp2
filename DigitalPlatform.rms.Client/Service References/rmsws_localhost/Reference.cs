@@ -158,6 +158,9 @@ namespace DigitalPlatform.rms.Client.rmsws_localhost {
         NotFoundObjectFile = 24,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        Compressed = 25,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         RequestError = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]

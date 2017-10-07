@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Net;
 using System.Security.Cryptography;
+using System.IO.Compression;
 
 using DigitalPlatform.Text;
 
@@ -18,6 +19,11 @@ namespace DigitalPlatform.LibraryClient
     /// </summary>
     public class DynamicDownloader
     {
+        /// <summary>
+        /// 提示框事件
+        /// </summary>
+        public event MessagePromptEventHandler Prompt = null;
+
         // 附加的数据
         public object Tag { get; set; }
 
@@ -162,7 +168,7 @@ namespace DigitalPlatform.LibraryClient
             {
                 bool bNotFound = false;
                 string strPath = this.ServerFilePath;
-                string strStyle = "content,data,metadata,timestamp,outputpath";
+                string strStyle = "content,data,metadata,timestamp,outputpath,gzip";
 
                 byte[] baContent = null;
 
@@ -216,6 +222,7 @@ namespace DigitalPlatform.LibraryClient
                         this.Stop.SetMessage(strMessage);
                     }
 
+                REDO:
                     string strMetadata = "";
                     string strOutputPath = "";
                     long lRet = this.Channel.GetRes(
@@ -236,7 +243,23 @@ namespace DigitalPlatform.LibraryClient
                             bNotFound = true;
                             goto DETECT_STATE;
                         }
-                        goto ERROR1;
+
+                        if (this.Prompt != null
+                            && !(this.Stop != null && this.Stop.IsStopped == true))
+                        {
+                            MessagePromptEventArgs e = new MessagePromptEventArgs();
+                            e.MessageText = "获得服务器文件 '" + this.ServerFilePath + "' 时发生错误： " + strError + "\r\nstart=" + lStart + ", length=" + nPerLength + ")";
+                            e.Actions = "yes,no,cancel";
+                            this.Prompt(this, e);
+                            if (e.ResultAction == "cancel")
+                                goto ERROR1;
+                            else if (e.ResultAction == "yes")
+                                goto REDO;
+                            else
+                                goto ERROR1;
+                        }
+                        else
+                            goto ERROR1;
                     }
 
                     bNotFound = false;
@@ -318,7 +341,7 @@ namespace DigitalPlatform.LibraryClient
                                     DownloadProgressChangedEventArgs e = new DownloadProgressChangedEventArgs(lStart, lTotalLength);
                                     func(this, e);
                                 }
-                                catch(ObjectDisposedException)
+                                catch (ObjectDisposedException)
                                 {
 
                                 }
@@ -374,6 +397,7 @@ namespace DigitalPlatform.LibraryClient
                                 DisplayMessage("正在获得服务器文件 " + this.ServerFilePath + " 的 MD5 ...");
                                 // 检查 MD5
                                 byte[] server_md5 = null;
+                            REDO_MD5:
                                 // return:
                                 //      -1  出错
                                 //      0   文件没有找到
@@ -386,6 +410,25 @@ namespace DigitalPlatform.LibraryClient
             out strError);
                                 if (nRet != 1)
                                 {
+                                    if (nRet == -1)
+                                    {
+                                        if (this.Prompt != null
+                                            && !(this.Stop != null && this.Stop.IsStopped == true))
+                                        {
+                                            MessagePromptEventArgs e = new MessagePromptEventArgs();
+                                            e.MessageText = "获得服务器文件 '" + this.ServerFilePath + "' 的 MD5 时发生错误： " + strError;
+                                            e.Actions = "yes,no,cancel";
+                                            this.Prompt(this, e);
+                                            if (e.ResultAction == "cancel")
+                                                goto ERROR1;
+                                            else if (e.ResultAction == "yes")
+                                                goto REDO_MD5;
+                                            else
+                                                goto ERROR1;
+                                        }
+                                        else
+                                            goto ERROR1;
+                                    }
                                     strError = "探测服务器端文件 '" + this.ServerFilePath + "' MD5 时出错: " + strError;
                                     goto ERROR1;
                                 }
@@ -481,6 +524,7 @@ namespace DigitalPlatform.LibraryClient
             byte[] baOutputTimestamp = null;
             string strOutputPath = "";
 
+        REDO:
             // 获得资源。包装版本 -- 返回字符串版本。
             // return:
             //		strStyle	一般设置为"content,data,metadata,timestamp,outputpath";
@@ -499,7 +543,23 @@ namespace DigitalPlatform.LibraryClient
             {
                 if (this.Channel.ErrorCode == localhost.ErrorCode.NotFound)
                     return 0;
-                return -1;
+
+                if (this.Prompt != null
+                    && !(this.Stop != null && this.Stop.IsStopped == true))
+                {
+                    MessagePromptEventArgs e = new MessagePromptEventArgs();
+                    e.MessageText = "获得服务器文件 '" + strPath + "' 时发生错误： " + strError;
+                    e.Actions = "yes,no,cancel";
+                    this.Prompt(this, e);
+                    if (e.ResultAction == "cancel")
+                        return -1;
+                    else if (e.ResultAction == "yes")
+                        goto REDO;
+                    else
+                        return -1;
+                }
+                else
+                    return -1;
             }
 
             return 1;
@@ -514,6 +574,7 @@ namespace DigitalPlatform.LibraryClient
             string strStyle = "content,data";
             byte[] timestamp = null;
 
+        REDO:
             long lRet = this.Channel.GetRes(
                 this.Stop,
                 this.ServerFilePath,
@@ -526,7 +587,24 @@ namespace DigitalPlatform.LibraryClient
                 out timestamp,
                 out strError);
             if (lRet == -1)
-                return -1;
+            {
+                if (this.Prompt != null
+                    && !(this.Stop != null && this.Stop.IsStopped == true))
+                {
+                    MessagePromptEventArgs e = new MessagePromptEventArgs();
+                    e.MessageText = "探测服务器文件 '" + this.ServerFilePath + "' 长度时发生错误： " + strError;
+                    e.Actions = "yes,no,cancel";
+                    this.Prompt(this, e);
+                    if (e.ResultAction == "cancel")
+                        return -1;
+                    else if (e.ResultAction == "yes")
+                        goto REDO;
+                    else
+                        return -1;
+                }
+                else
+                    return -1;
+            }
 
             return lRet;
         }
@@ -591,6 +669,7 @@ namespace DigitalPlatform.LibraryClient
                 {
                     if (channel.ErrorCode == localhost.ErrorCode.NotFound)
                         return 0;
+
                     return -1;
                 }
 
