@@ -160,7 +160,7 @@ out strError);
                         if (stop != null)
                             stop.SetMessage( // strMessagePrefix + 
                                 "正在上载 " + ranges[j] + "/"
-                                + Convert.ToString(fi.Length)
+                                + StringUtil.GetLengthText(fi.Length)
                                 + " " + strPercent + " " + strClientFilePath + strWarning + strWaiting);
                         int nRedoCount = 0;
                     REDO:

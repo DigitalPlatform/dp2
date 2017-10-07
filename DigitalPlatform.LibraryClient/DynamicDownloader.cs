@@ -215,8 +215,8 @@ namespace DigitalPlatform.LibraryClient
 
                     if (this.Stop != null)
                     {
-                        strMessage = "正在下载 " + Convert.ToString(lStart) + "-"
-                            + (lTotalLength == -1 ? "?" : Convert.ToString(lTotalLength))
+                        strMessage = "正在下载 " + StringUtil.GetLengthText(lStart) + " / "
+                            + (lTotalLength == -1 ? "?" : StringUtil.GetLengthText(lTotalLength))
                             + " " + strPercent + " "
                             + strPath;
                         this.Stop.SetMessage(strMessage);

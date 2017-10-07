@@ -968,6 +968,7 @@ MessageBoxDefaultButton.Button1);
                     return;
                 }
 
+                this.Invoke((Action)(() =>
                 {
                     if (e1.Actions == "yes,no,cancel")
                     {
@@ -987,7 +988,7 @@ MessageBoxDefaultButton.Button1);
                         else
                             e1.ResultAction = "yes";
                     }
-                }
+                }));
             });
             dlg.FormClosed += new FormClosedEventHandler(delegate(object o1, FormClosedEventArgs e1)
             {
@@ -1178,6 +1179,7 @@ MessageBoxDefaultButton.Button1);
                             return;
                         }
 
+                        this.Invoke((Action)(() =>
                         {
                             if (e1.Actions == "yes,no,cancel")
                             {
@@ -1197,7 +1199,7 @@ MessageBoxDefaultButton.Button1);
                                 else
                                     e1.ResultAction = "yes";
                             }
-                        }
+                        }));
                     });
 
                     current_downloaders.Add(downloader);

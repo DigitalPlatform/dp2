@@ -973,6 +973,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.28.6282.24093, Culture=neutral,
                         stop,
                         strResPath,
                         strTempFilePath,
+                        "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
                         out strMetaData,
                         out baOutputTimeStamp,
                         out strTempOutputPath,
