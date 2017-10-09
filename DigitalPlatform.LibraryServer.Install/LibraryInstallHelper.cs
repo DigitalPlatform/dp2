@@ -628,6 +628,7 @@ namespace DigitalPlatform.LibraryServer
 
             XmlElement nodeSupervisor = null;
 
+            // TODO: 找到所有具备 managedatabase 权限的用户信息返回
             // 找到第一个具备 managedatabase 权限用户
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("accounts/account[@type='']");
             if (nodes.Count > 0)

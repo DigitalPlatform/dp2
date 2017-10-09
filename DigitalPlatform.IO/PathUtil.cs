@@ -720,7 +720,6 @@ namespace DigitalPlatform.IO
         {
             try
             {
-                File.SetAttributes
                 Directory.Delete(strDirPath, true);
             }
             catch (DirectoryNotFoundException)
@@ -922,13 +921,17 @@ namespace DigitalPlatform.IO
 
                 FileSystemInfo[] subs = di.GetFileSystemInfos();
 
-                for (int i = 0; i < subs.Length; i++)
+                foreach (FileSystemInfo sub in subs)
                 {
+                    // 2017/10/9
+                    if ((sub.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden)
+                        continue;
+
                     // 复制目录
-                    if ((subs[i].Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+                    if ((sub.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
                     {
-                        int nRet = CopyDirectory(subs[i].FullName,
-                            Path.Combine(strTargetDir, subs[i].Name),
+                        int nRet = CopyDirectory(sub.FullName,
+                            Path.Combine(strTargetDir, sub.Name),
                             bDeleteTargetBeforeCopy,
                             out strError);
                         if (nRet == -1)
@@ -936,8 +939,8 @@ namespace DigitalPlatform.IO
                         continue;
                     }
                     // 复制文件
-                    File.Copy(subs[i].FullName,
-                        Path.Combine(strTargetDir, subs[i].Name),
+                    File.Copy(sub.FullName,
+                        Path.Combine(strTargetDir, sub.Name),
                         true);
                 }
             }
