@@ -8246,6 +8246,10 @@ namespace dp2Library
         // 成批获得日志记录
         // parameters:
         //      nCount  本次希望获取的记录数。如果==-1，表示希望尽可能多地获取
+        //      strStyle    level-0/level-1/level-2 表示详略级别
+        //                  level-0   全部
+        //                  level-1   删除 读者记录和册记录
+        //                  level-2   删除 读者记录和册记录中的 <borrowHistory>
         // return:
         //      result.Value
         //      -1  error
@@ -8280,12 +8284,12 @@ namespace dp2Library
                     return result;
                 }
 
-
                 // 权限字符串
-                if (sessioninfo.RightsOriginList.IsInList("getoperlog") == false)
+                if (sessioninfo.RightsOriginList.IsInList("getoperlog") == false
+                    && sessioninfo.RightsOriginList.IsInList("replication") == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得日志记录被拒绝。不具备getoperlog权限。";
+                    result.ErrorInfo = "获得日志记录被拒绝。不具备 getoperlog 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -8317,7 +8321,15 @@ namespace dp2Library
                 else
                 {
                     // 从 strStyle 里移走 supervisor，避免前端通过本 API 看到日志记录中读者记录的 password 元素
-                    StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
+                    // if (sessioninfo.RightsOriginList.IsInList("replication") == false)
+                    //    StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
+                    if (StringUtil.IsInList("supervisor", strStyle) && sessioninfo.RightsOriginList.IsInList("replication") == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "以敏感信息方式获得日志记录被拒绝。不具备 replication 权限。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
 
                     // return:
                     //      -1  error
@@ -8365,6 +8377,10 @@ namespace dp2Library
         //      lIndex  记录序号。从0开始计数。lIndex为-1时调用本函数，表示希望获得整个文件尺寸值，将返回在lHintNext中。
         //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
         //              目前的含义是记录起始位置。
+        //      strStyle    level-0/level-1/level-2 表示详略级别
+        //                  level-0   全部
+        //                  level-1   删除 读者记录和册记录
+        //                  level-2   删除 读者记录和册记录中的 <borrowHistory>
         // 权限：需要getoperlog权限
         // return:
         // result.Value
@@ -8409,7 +8425,8 @@ namespace dp2Library
                 }
 
                 // 权限字符串
-                if (sessioninfo.RightsOriginList.IsInList("getoperlog") == false)
+                if (sessioninfo.RightsOriginList.IsInList("getoperlog") == false
+                    && sessioninfo.RightsOriginList.IsInList("replication") == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "获得日志记录被拒绝。不具备getoperlog权限。";
@@ -8443,7 +8460,14 @@ namespace dp2Library
                     }
 
                     // 从 strStyle 里移走 supervisor，避免前端通过本 API 看到日志记录中读者记录的 password 元素
-                    StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
+                    // StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
+                    if (StringUtil.IsInList("supervisor", strStyle) && sessioninfo.RightsOriginList.IsInList("replication") == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "以敏感信息方式获得日志记录被拒绝。不具备 replication 权限。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
 
                     OperLogInfo[] records = null;
                     nRet = app.AccessLogDatabase.GetOperLogs(

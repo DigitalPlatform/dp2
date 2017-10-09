@@ -64,6 +64,12 @@ namespace DigitalPlatform.LibraryClient
             set;
         }
 
+        public bool ReplicationLevel
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// 进度条开始位置。-1 表示从一半开始，0 表示从头开始。缺省为 0
         /// </summary>
@@ -628,6 +634,7 @@ namespace DigitalPlatform.LibraryClient
                     loader.Estimate = this.Estimate;
                     loader.FileName = strLogFilename;
                     loader.Level = this.Level;
+                    loader.ReplicationLevel = this.ReplicationLevel;
                     loader.lServerFileSize = sizes[i];
                     loader.Range = strRange;
                     loader.AutoCache = this.AutoCache;

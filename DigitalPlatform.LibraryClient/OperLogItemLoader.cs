@@ -111,6 +111,14 @@ namespace DigitalPlatform.LibraryClient
             set;
         }
 
+        // 是否为同步级别？同步级别可以获得日志记录中的密码字段内容
+        // 注：当前账户中还应该包含 replicatoin 权限才能真正获得日志记录中的密码字段
+        public bool ReplicationLevel
+        {
+            get;
+            set;
+        }
+
         public string Range
         {
             get;
@@ -723,6 +731,10 @@ FileShare.ReadWrite);
                                 string strStyle = "level-" + Level.ToString();
                                 if ((this.LogType & LogType.AccessLog) != 0)
                                     strStyle += ",accessLog";
+
+                                // 2017/10/9
+                                if (this.ReplicationLevel == true)
+                                    strStyle += ",supervisor";  // 注：当前账户中还应该包含 replicatoin 权限才能真正获得日志记录中的密码字段
                             REDO:
                                 // 获得日志
                                 // return:

@@ -534,7 +534,8 @@ namespace DigitalPlatform.LibraryServer
                 loader.Stop = this._stop;
                 // loader.estimate = estimate;
                 loader.FileNames = filenames;
-                loader.Level = 2;  //  Program.MainForm.OperLogLevel;
+                loader.Level = 0;  //  0 完整级别
+                loader.ReplicationLevel = true;
                 loader.AutoCache = false;
                 loader.CacheDir = "";
                 // loader.Filter = "borrow,return,setReaderInfo,setBiblioInfo,setEntity,setOrder,setIssue,setComment,amerce,passgate,getRes";

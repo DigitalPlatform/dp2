@@ -914,7 +914,11 @@ namespace DigitalPlatform.IO
                 if (bDeleteTargetBeforeCopy == true)
                 {
                     if (Directory.Exists(strTargetDir) == true)
+                    {
+                        RemoveReadOnlyAttr(strTargetDir);   // 怕即将删除的目录中有隐藏文件妨碍删除
+
                         Directory.Delete(strTargetDir, true);
+                    }
                 }
 
                 TryCreateDir(strTargetDir);
@@ -923,10 +927,6 @@ namespace DigitalPlatform.IO
 
                 foreach (FileSystemInfo sub in subs)
                 {
-                    // 2017/10/9
-                    if ((sub.Attributes & FileAttributes.Hidden) == FileAttributes.Hidden)
-                        continue;
-
                     // 复制目录
                     if ((sub.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
                     {
