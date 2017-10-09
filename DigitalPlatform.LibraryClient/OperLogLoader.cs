@@ -10,6 +10,7 @@ using System.Xml;
 using DigitalPlatform;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryClient
 {
@@ -365,9 +366,10 @@ namespace DigitalPlatform.LibraryClient
 
             long lTotalSize = 0;
             List<string> lines = new List<string>();    // 经过处理后排除了不存在的文件名
-            List<string> ranges = new List<string>();
-            List<long> sizes = new List<long>();
+            List<string> ranges = new List<string>();   // 日期后面的偏移部分
+            List<long> sizes = new List<long>();    // 服务器日志文件的尺寸
 
+#if NO
             this.Stop.SetMessage("正在准备获得日志文件尺寸 ...");
             foreach (string strLine in this.FileNames)
             {
@@ -484,6 +486,79 @@ namespace DigitalPlatform.LibraryClient
                 // 记忆每个文件的尺寸，后面就不用获取了?
                 sizes.Add(lServerFileSize);
             }
+#endif
+            // 预先处理一下文件名
+            List<string> filenames = new List<string>();
+            foreach (string strLine in this.FileNames)
+            {
+                if (this.Stop != null && this.Stop.State != 0)
+                {
+                    strError = "用户中断";
+                    throw new InterruptException(strError);
+                }
+
+                if (String.IsNullOrEmpty(strLine) == true)
+                    continue;
+
+                string strFilename = strLine.Trim();
+                // 去掉注释
+                nRet = strFilename.IndexOf("#");
+                if (nRet != -1)
+                    strFilename = strFilename.Substring(0, nRet).Trim();
+
+                if (String.IsNullOrEmpty(strFilename) == true)
+                    continue;
+
+#if NO
+                List<string> parts = StringUtil.ParseTwoPart(strFilename, ":");
+                string strRange = parts[1];
+
+                strFilename = parts[0].Substring(0, 8);
+
+                if (string.IsNullOrEmpty(strRange) == false)
+                    range_table[strFilename] = strRange;    // TODO: 如何防范文件名重复?
+#endif
+                filenames.Add(strFilename);
+                Debug.Assert(strFilename.Length >= 12, "");
+            }
+
+            // 准备查找表
+            Hashtable length_table = new Hashtable();
+            {
+                List<FileSize> size_pairs = GetFilesLength(filenames);
+                foreach (FileSize size_pair in size_pairs)
+                {
+                    length_table[size_pair.Date] = size_pair;
+                }
+            }
+
+            foreach (string filename in filenames)
+            {
+                FileSize size_pair = length_table[filename.Substring(0, 8)] as FileSize;
+                if (size_pair == null)
+                    continue;
+                Debug.Assert(size_pair != null, "");
+
+                lines.Add(filename);
+                sizes.Add(size_pair.ServerFileSize);
+
+                if (size_pair.ServerFileSize == -1)
+                    yield break;    // 此类型的日志尚未启用
+
+                Debug.Assert(size_pair.ServerFileSize >= 0, "");
+
+                if (bAutoCache == true)
+                {
+                    if (size_pair.CacheFileSize > 0)
+                        lTotalSize += size_pair.CacheFileSize;
+                    else
+                        lTotalSize += size_pair.ServerFileSize;
+                }
+                else
+                {
+                    lTotalSize += size_pair.ServerFileSize;
+                }
+            }
 
             long lDoneSize = 0;
 
@@ -517,7 +592,15 @@ namespace DigitalPlatform.LibraryClient
                 }
 
                 string strLine = lines[i];
-                string strRange = ranges[i];
+                Debug.Assert(strLine.Length >= 12, "");
+
+                // string strRange = ranges[i];
+
+                // 2017/10/9
+                List<string> parts = StringUtil.ParseTwoPart(strLine, ":");
+                string strRange = parts[1];
+
+                strLine = parts[0];
 
                 string strLogFilename = strLine;
 #if NO
@@ -553,12 +636,19 @@ namespace DigitalPlatform.LibraryClient
                     loader.Filter = this.Filter;
                     loader.LogType = this.LogType;
 
-                    loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
-                    loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
-
-                    foreach (OperLogItem item in loader)
+                    if (this.Prompt != null)
+                        loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+                    try
                     {
-                        yield return item;
+                        foreach (OperLogItem item in loader)
+                        {
+                            yield return item;
+                        }
+                    }
+                    finally
+                    {
+                        if (this.Prompt != null)
+                            loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
                     }
 
                     lDoneSize = loader.lProgressValue;
@@ -593,10 +683,6 @@ namespace DigitalPlatform.LibraryClient
             loader.Filter = this.Filter;
             loader.LogType = this.LogType;
 
-#if NO
-                    loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
-                    loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
-#endif
             foreach (OperLogItem new_item in loader)
             {
                 return new_item;
@@ -856,7 +942,7 @@ namespace DigitalPlatform.LibraryClient
         //      -1  出错
         //      0   没有找到日志记录
         //      >0  附件总长度
-        public long DownloadAttachment(OperLogItem item, 
+        public long DownloadAttachment(OperLogItem item,
             string strCurrentFileName,
             out string strError)
         {
@@ -867,7 +953,7 @@ namespace DigitalPlatform.LibraryClient
             //      >0  附件总长度
             long lRet = this.Channel.DownloadOperlogAttachment(
                 this.Stop,   // stop,
-                item.Date,
+                item.Date + ".log",
                 item.Index,
                 -1, // lHint,
                 strCurrentFileName,
@@ -877,6 +963,54 @@ namespace DigitalPlatform.LibraryClient
                 return -1;
 
             return lRet;
+        }
+
+        class FileSize
+        {
+            public string Date { get; set; }
+            public long ServerFileSize { get; set; }
+            public long CacheFileSize { get; set; }
+        }
+
+        List<FileSize> GetFilesLength(List<string> filenames)
+        {
+            List<FileSize> results = new List<FileSize>();
+
+            OperLogDatesLoader loader = new OperLogDatesLoader();
+            loader.Channel = this.Channel;
+            loader.Stop = this.Stop;
+            loader.LogType = this.LogType;
+            if (this.FileNames != null && this.FileNames.Count > 0)
+                loader.FilterDates = this.FileNames;
+
+            if (this.Prompt != null)
+                loader.Prompt += loader_Prompt;
+            try
+            {
+                foreach (OperLogDateItem item in loader)
+                {
+                    FileSize size = new FileSize();
+                    size.Date = item.Date;
+                    size.ServerFileSize = item.Length;
+                    results.Add(size);
+
+                    if (this.AutoCache == true && string.IsNullOrEmpty(this.CacheDir) == false)
+                    {
+                        string strCacheFilename = Path.Combine(this.CacheDir, item.Date + ".log");
+
+                        FileInfo fi = new FileInfo(strCacheFilename);
+                        if (fi.Exists == true)
+                            size.CacheFileSize = fi.Length;
+                    }
+                }
+
+                return results;
+            }
+            finally
+            {
+                if (this.Prompt != null)
+                    loader.Prompt -= loader_Prompt;
+            }
         }
     }
 

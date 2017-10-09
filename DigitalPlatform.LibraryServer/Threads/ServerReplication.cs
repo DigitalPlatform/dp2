@@ -589,8 +589,8 @@ namespace DigitalPlatform.LibraryServer
                             // 2007/6/25
                             // 如果为纯逻辑恢复(并且 bContinueWhenError 为 false)，遇到错误就停下来。这便于进行测试。
                             // 若不想停下来，可以选择“逻辑+快照”型，或者设置 bContinueWhenError 为 true
-                            if (this.RecoverLevel == RecoverLevel.Logic
-                                && bContinueWhenError == false)
+                            if (// this.RecoverLevel == RecoverLevel.Logic &&
+                                bContinueWhenError == false)
                                 return -1;
                         }
                     }

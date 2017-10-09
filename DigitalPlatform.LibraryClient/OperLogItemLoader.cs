@@ -159,6 +159,12 @@ namespace DigitalPlatform.LibraryClient
             bCacheFileExist = false;
             XmlDocument metadata_dom = new XmlDocument();
 
+            if (strLogFileName.Length != 8 + 4)
+            {
+                strError = "strLogFileName 参数值的长度应该是 12 字符";
+                return -1;
+            }
+
             string strCacheFilename = Path.Combine(strCacheDir, strLogFileName);
             string strCacheMetaDataFilename = Path.Combine(strCacheDir, strLogFileName + ".meta");
 
@@ -421,6 +427,12 @@ FileShare.ReadWrite);
         {
             strError = "";
 
+            if (strLogFileName.Length != 8 + 4)
+            {
+                strError = "strLogFileName 参数值的长度应该是 12 字符";
+                return -1;
+            }
+
             string strCacheMetaDataFilename = Path.Combine(strCacheDir, strLogFileName + ".meta");
             try
             {
@@ -447,6 +459,12 @@ FileShare.ReadWrite);
     out string strError)
         {
             strError = "";
+
+            if (strLogFileName.Length != 8 + 4)
+            {
+                strError = "strLogFileName 参数值的长度应该是 12 字符";
+                return -1;
+            }
 
             string strCacheFilename = Path.Combine(strCacheDir, strLogFileName);
             string strCacheMetaDataFilename = Path.Combine(strCacheDir, strLogFileName + ".meta");
@@ -532,6 +550,9 @@ FileShare.ReadWrite);
             int nRet = 0;
 
             long lRet = 0;
+
+            if (this.FileName.Length != 8 + 4)
+                throw new ArgumentException("FileName 成员值的长度应该是 12 字符");
 
             if ((this.LogType & LogType.AccessLog) != 0
                 && (this.LogType & LogType.OperLog) != 0)
