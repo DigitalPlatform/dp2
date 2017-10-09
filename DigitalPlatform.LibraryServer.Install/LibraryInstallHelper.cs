@@ -889,6 +889,8 @@ RestoreLibraryParam param
                 }
                 finally
                 {
+                    PathUtil.RemoveReadOnlyAttr(strTempDir);    // 避免 .zip 文件中有有只读文件妨碍删除
+
                     PathUtil.DeleteDirectory(strTempDir);
                 }
 

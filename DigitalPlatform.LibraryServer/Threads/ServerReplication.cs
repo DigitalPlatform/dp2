@@ -569,10 +569,10 @@ namespace DigitalPlatform.LibraryServer
                             {
                                 this.AppendResultText("*** 做日志记录 " + item.Date + " " + (item.Index).ToString() + " 时，下载附件部分发生错误：" + strError + "\r\n");
 
-                                if (this.RecoverLevel == RecoverLevel.Logic
-                                    && bContinueWhenError == false)
+                                if (// this.RecoverLevel == RecoverLevel.Logic &&
+                                    bContinueWhenError == false)
                                     return -1;
-                                continue;
+                                goto CONTINUE;
                             }
                             attachment = File.Open(strTempFileName, FileMode.Open);
                         }
@@ -597,12 +597,13 @@ namespace DigitalPlatform.LibraryServer
                     finally
                     {
                         if (attachment != null)
-                        { 
+                        {
                             attachment.Close();
                             attachment = null;
                         }
                     }
 
+                CONTINUE:
                     breakpoint.Date = date;
                     breakpoint.Offset = item.Index;
                 }

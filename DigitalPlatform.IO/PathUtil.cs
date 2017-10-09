@@ -720,6 +720,7 @@ namespace DigitalPlatform.IO
         {
             try
             {
+                File.SetAttributes
                 Directory.Delete(strDirPath, true);
             }
             catch (DirectoryNotFoundException)
@@ -771,7 +772,7 @@ namespace DigitalPlatform.IO
         // 移除文件目录内所有文件的 ReadOnly 属性
         public static void RemoveReadOnlyAttr(string strSourceDir)
         {
-            string strCurrentDir = Directory.GetCurrentDirectory();
+            // string strCurrentDir = Directory.GetCurrentDirectory();
 
             DirectoryInfo di = new DirectoryInfo(strSourceDir);
 
