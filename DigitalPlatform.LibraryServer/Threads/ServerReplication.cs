@@ -312,7 +312,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 保存断点文件
                 SaveBreakPoint(breakpoint, false);
-                this.StartInfo = null;  // 迫使后面循环处理的时候，从断点位置继续
+                this.StartInfo = GetContinueStartInfo(bContinueWhenError);  // 迫使后面循环处理的时候，从断点位置继续
                 goto ERROR1;
             }
 #if NO
@@ -373,11 +373,22 @@ namespace DigitalPlatform.LibraryServer
 
             // 保存断点文件
             SaveBreakPoint(breakpoint, false);
-            this.StartInfo = null;  // 迫使后面循环处理的时候，从断点位置继续
+            this.StartInfo = GetContinueStartInfo(bContinueWhenError);  // 迫使后面循环处理的时候，从断点位置继续
             return;
         ERROR1:
-            this.AppendResultText(strError + "\r\n");
+            this.AppendResultText(strError + "\r\n任务因出错而中断。\r\n");
             return;
+        }
+
+        BatchTaskStartInfo GetContinueStartInfo(bool bContinueWhenError)
+        {
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml("<root continueWhenError=\"" + (bContinueWhenError ? "true" : "false") + "\" />");
+
+            BatchTaskStartInfo info = new BatchTaskStartInfo();
+            info.Param = dom.DocumentElement.OuterXml;
+
+            return info;
         }
 
         // 获得源 dp2library 服务器配置信息
@@ -721,10 +732,13 @@ namespace DigitalPlatform.LibraryServer
 
             // 可能会抛出异常
             breakpoint = BreakPointInfo.Build(strBreakPoint);
+
+#if NO
             start_infos = FromString(strStartInfos);
 
             if (start_infos != null)
                 this.StartInfos = start_infos;
+#endif
 
             return 1;
         }
