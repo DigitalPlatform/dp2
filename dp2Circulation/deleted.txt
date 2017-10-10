@@ -2920,3 +2920,277 @@ merge_dlg.UiState);
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+
+
+		~~~~~~~~~~~~~~~~
+		biblioitemshost.cs:
+
+		        /// <summary>
+        /// 获得种次号以外的其他区分号，主要是著者号
+        /// </summary>
+        /// <param name="strQufenhaoTypes">区分号类型。可以是一个区分号类型，也可以是逗号间隔的若干个区分号类型</param>
+        /// <param name="strQufenhao">返回区分号</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1: 出错; 0: 没有找到(注意此时 strError 中也返回了内容); 1: 找到</returns>
+        public virtual int GetAuthorNumber(string strQufenhaoTypes,
+            out string strQufenhao,
+            out string strError)
+        {
+            strError = "";
+            strQufenhao = "";
+            int nRet = 0;
+
+            List<string> types = StringUtil.SplitList(strQufenhaoTypes);
+
+            List<AuthorLevel> authors = new List<AuthorLevel>();
+
+            // *** 第一阶段，遍历获取每个区分号类型的著者字符串
+            foreach (string type in types)
+            {
+                string strAuthor = "";
+                float fLevel = 0;
+
+                AuthorLevel author = new AuthorLevel();
+                author.Type = type;
+                if (type == "GCAT"
+                    || type == "四角号码"
+                    || type == "Cutter-Sanborn Three-Figure"
+#if SHITOUTANG
+
+ || type == "石头汤著者号"
+                    || type == "石头汤"
+#endif
+)
+                {
+                    // 根据区分号类型从MARC记录中获得作者字符串
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   found
+                    nRet = GetAuthor(type,
+                        out strAuthor,
+                        out fLevel,
+                        out strError);
+
+#if DEBUG
+                    if (nRet == 0)
+                    {
+                        Debug.Assert(String.IsNullOrEmpty(strAuthor) == true, "");
+                    }
+
+                    if (nRet == 1)
+                    {
+                        Debug.Assert(String.IsNullOrEmpty(strAuthor) == false, "");
+                    }
+#endif
+
+                    if (nRet == -1 || nRet == 0)
+                        author.Level = nRet;
+                    else
+                        author.Level = fLevel;
+                    if (nRet == 1)
+                        author.Author = strAuthor;
+                    else
+                        author.Author = strError;
+                    authors.Add(author);
+                    continue;
+                }
+                else if (type == "手动")
+                {
+                    author.Level = 1;
+                    author.Author = "?";
+                    authors.Add(author);
+                    continue;
+                }
+                else if (type == "<无>")
+                {
+                    author.Level = 1;
+                    author.Author = "";
+                    authors.Add(author);
+                    continue;
+                }
+                else
+                {
+                    strError = "未知的区分号类型 '" + type + "'";
+                    goto ERROR1;
+                }
+            }
+
+            // *** 第二阶段，选择一个 level 最高的著者信息
+            AuthorLevel one = null;
+            if (authors.Count == 0)
+            {
+                strError = "没有指定任何区分号类型，无法获得著者字符串";
+                return 0;
+            }
+            else if (authors.Count == 1)
+            {
+                one = authors[0];
+            }
+            if (authors.Count > 1)
+            {
+                // TODO: 同 level 的排序，就需要一些暗示信息。例如记录来自某个数据库。UNIMARC 格式的库，可以让中文的字符串稍微级别高一点
+                authors.Sort(new AuthorLevelComparer());
+
+                one = authors[0];
+                if (one.Level <= 0)
+                {
+                    string strWarning = "";
+                    string strErrorText = "";
+                    foreach (AuthorLevel author in authors)
+                    {
+                        if (author.Level == -1)
+                        {
+                            if (string.IsNullOrEmpty(strErrorText) == false)
+                                strErrorText += "; ";
+                            strErrorText += author.Author;
+                        }
+                        if (author.Level == 0)
+                        {
+                            if (string.IsNullOrEmpty(strWarning) == false)
+                                strWarning += "; ";
+                            strWarning += author.Author;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(strErrorText) == false)
+                    {
+                        strError = strErrorText;
+                        return -1;
+                    }
+
+                    strError = strWarning;
+                    return 0;
+                }
+            }
+
+            if (one.Level == -1)
+            {
+                strError = one.Author;
+                return -1;
+            }
+            if (one.Level == 0)
+            {
+                strError = one.Author;
+                return 0;
+            }
+
+            // 2014/4/15
+            if (one.Type == "<无>"
+                || one.Type == "手动")
+            {
+                strQufenhao = one.Author;
+                return 1;
+            }
+
+            // *** 第三阶段，从著者字符串创建著者号
+            {
+                string type = one.Type;
+                string strAuthor = one.Author;
+                Debug.Assert(String.IsNullOrEmpty(strAuthor) == false, "");
+
+            REDO:
+                if (type == "GCAT")
+                {
+                    // 获得著者号
+                    string strGcatWebServiceUrl = Program.MainForm.GcatServerUrl;   // "http://dp2003.com/dp2libraryws/gcat.asmx";
+
+                    // 获得著者号
+                    // return:
+                    //      -4  ??
+                    //      -1  error
+                    //      0   canceled
+                    //      1   succeed
+                    nRet = GetGcatAuthorNumber(strGcatWebServiceUrl,
+                        strAuthor,
+                        out strQufenhao,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    // 放弃回答问题
+                    if (nRet == 0)
+                    {
+                        if (string.IsNullOrEmpty(strError) == true)
+                            strError = "放弃从 GCAT 取号";
+                        return 0;
+                    }
+
+                    return 1;
+                }
+                else if (type == "四角号码")
+                {
+                    // 获得著者号
+                    // return:
+                    //      -1  error
+                    //      0   canceled
+                    //      1   succeed
+                    nRet = GetSjhmAuthorNumber(
+                        strAuthor,
+                        out strQufenhao,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    // 放弃回答问题
+                    if (nRet == 0)
+                    {
+                        if (string.IsNullOrEmpty(strError) == true)
+                            strError = "放弃从四角号码取号";
+                        return 0;
+                    }
+                    return 1;
+                }
+                else if (type == "Cutter-Sanborn Three-Figure")
+                {
+                    // 获得著者号
+                    // return:
+                    //      -1  error
+                    //      0   canceled
+                    //      1   succeed
+                    nRet = GetCutterAuthorNumber(
+                        strAuthor,
+                        out strQufenhao,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    // 放弃回答问题
+                    if (nRet == 0)
+                    {
+                        if (string.IsNullOrEmpty(strError) == true)
+                            strError = "放弃从卡特表取号";
+                        return 0;
+                    }
+
+                    return 1;
+                }
+#if SHITOUTANG
+                else if (type == "石头汤著者号"
+                    || type == "石头汤")
+                {
+                    strQufenhao = strAuthor;
+                    return 1;
+                }
+#endif
+                else if (type == "手动")
+                {
+                    strQufenhao = "?";
+                    return 1;
+                }
+                else if (type == "<无>")
+                {
+                    strQufenhao = "";
+                    return 1;
+                }
+                else
+                {
+                    strError = "未知的区分号类型 '" + type + "'";
+                    goto ERROR1;
+                }
+            }
+        //return 0;
+        ERROR1:
+            return -1;
+        }

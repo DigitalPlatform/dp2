@@ -4,14 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-
-using DigitalPlatform.LibraryClient;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.Text;
 using System.Threading.Tasks;
 using System.Threading;
+
+using DigitalPlatform;
+using DigitalPlatform.LibraryClient;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.Text;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.IO;
 

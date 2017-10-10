@@ -5,12 +5,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.IO;
 
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using System.IO;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -20,7 +20,7 @@ namespace DigitalPlatform.LibraryServer
     public class ServerReplication : BatchTask
     {
         // 日志恢复级别
-        public RecoverLevel RecoverLevel = RecoverLevel.Robust;
+        public RecoverLevel RecoverLevel = RecoverLevel.LogicAndSnapshot;
 
         string m_strUrl = "";
         string m_strUserName = "";
@@ -521,14 +521,18 @@ namespace DigitalPlatform.LibraryServer
             string strTempFileName = "";
             strTempFileName = this.App.GetTempFileName("attach");
 
+#if NO
             LibraryChannel channel = new LibraryChannel();
+            channel.Timeout = TimeSpan.FromSeconds(30);
             channel.Url = this.m_strUrl;
-
             channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
+#endif
+            LibraryChannel channel = this.GetChannel();
+
+            _stop.OnStop += _stop_OnStop;
             _stop.BeginLoop();
             try
             {
-
                 OperLogLoader loader = new OperLogLoader();
                 loader.Channel = channel;
                 loader.Stop = this._stop;
@@ -546,7 +550,7 @@ namespace DigitalPlatform.LibraryServer
                     if (this.Stopped)
                     {
                         strError = "用户中断";
-                        return -1;
+                        return 0;
                     }
                     string date = item.Date;
 
@@ -568,7 +572,8 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
                             if (lRet == -1 || lRet == 0)
                             {
-                                this.AppendResultText("*** 做日志记录 " + item.Date + " " + (item.Index).ToString() + " 时，下载附件部分发生错误：" + strError + "\r\n");
+                                strError = "做日志记录 " + item.Date + " " + (item.Index).ToString() + " 时，下载附件部分发生错误：" + strError;
+                                this.AppendResultText("*** " + strError + "\r\n");
 
                                 if (// this.RecoverLevel == RecoverLevel.Logic &&
                                     bContinueWhenError == false)
@@ -585,7 +590,8 @@ namespace DigitalPlatform.LibraryServer
         out strError);
                         if (nRet == -1)
                         {
-                            this.AppendResultText("*** 做日志记录 " + item.Date + " " + (item.Index).ToString() + " 时发生错误：" + strError + "\r\n");
+                            strError = "做日志记录 " + item.Date + " " + (item.Index).ToString() + " 时发生错误：" + strError;
+                            this.AppendResultText("*** " + strError + "\r\n");
 
                             // 2007/6/25
                             // 如果为纯逻辑恢复(并且 bContinueWhenError 为 false)，遇到错误就停下来。这便于进行测试。
@@ -616,15 +622,48 @@ namespace DigitalPlatform.LibraryServer
                 strError = "用户中断";
                 return 0;
             }
+            catch (Exception ex)
+            {
+                strError = "ProcessOperLogs() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                return -1;
+            }
             finally
             {
                 if (File.Exists(strTempFileName))
                     File.Delete(strTempFileName);
 
                 _stop.EndLoop();
+                _stop.OnStop -= _stop_OnStop;
+#if NO
                 channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 channel.Close();
+#endif
+                this.ReturnChannel(channel);
             }
+        }
+
+        LibraryChannel _channel = null;
+
+        LibraryChannel GetChannel()
+        {
+            _channel = new LibraryChannel();
+            _channel.Timeout = TimeSpan.FromSeconds(30);
+            _channel.Url = this.m_strUrl;
+            _channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
+            return _channel;
+        }
+
+        void ReturnChannel(LibraryChannel channel)
+        {
+            channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
+            channel.Close();
+            _channel = null;
+        }
+
+        void _stop_OnStop(object sender, StopEventArgs e)
+        {
+            if (_channel != null)
+                _channel.Abort();
         }
 
         void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)

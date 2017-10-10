@@ -22,7 +22,8 @@ using DigitalPlatform.LibraryClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// 种册 Host 类
+    /// 种册 Host 类。
+    /// 注：比 DetailHost 更加通用。因 DetailHost 的 DetailForm 和 MarcEditor 捆绑太深，无法用于册登记窗
     /// 对 MARC 记录的访问尽量用 MarcQuery 的 MarcRecord 实现，以增强适应性
     /// </summary>
     public class BiblioItemsHost : IDetailHost
@@ -740,7 +741,12 @@ namespace dp2Circulation
             }
         }
 
-
+        // 注意：此函数和 DetailHost.cs 中的同名函数重复内容。请尽量保持同步修改
+        // 获得种次号以外的其他区分号，主要是著者号
+        // return:
+        //      -1  error
+        //      0   not found。注意此时也要设置strError值
+        //      1   found
         /// <summary>
         /// 获得种次号以外的其他区分号，主要是著者号
         /// </summary>
@@ -904,14 +910,21 @@ namespace dp2Circulation
                 string type = one.Type;
                 string strAuthor = one.Author;
                 Debug.Assert(String.IsNullOrEmpty(strAuthor) == false, "");
+            REDO:
 
                 if (type == "GCAT")
                 {
+                    string strPinyin = "";
+                    List<string> two = StringUtil.ParseTwoPart(strAuthor, "|");
+                    strAuthor = two[0];
+                    strPinyin = two[1];
+
                     // 获得著者号
                     string strGcatWebServiceUrl = Program.MainForm.GcatServerUrl;   // "http://dp2003.com/dp2libraryws/gcat.asmx";
 
                     // 获得著者号
                     // return:
+                    //      -4  著者字符串没有检索命中
                     //      -1  error
                     //      0   canceled
                     //      1   succeed
@@ -928,6 +941,33 @@ namespace dp2Circulation
                         if (string.IsNullOrEmpty(strError) == true)
                             strError = "放弃从 GCAT 取号";
                         return 0;
+                    }
+
+                    if (nRet == -4)
+                    {
+                        string strHanzi = strAuthor;
+                        string strLastError = strError;
+                        // 临时取汉字的拼音
+                        if (string.IsNullOrEmpty(strPinyin))
+                        {
+                            strPinyin = strAuthor;
+                            // 取拼音
+                            nRet = HanziToPinyin(ref strPinyin,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+                        if (string.IsNullOrEmpty(strPinyin))
+                            goto ERROR1;
+                        string strMessage = "字符串 '" + strHanzi + "' 取汉语著者号码时出现意外状况: " + strLastError + "\r\n\r\n后面软件会自动尝试用卡特表方式为拼音字符串 '" + strPinyin + "' 取号。";
+                        strAuthor = strPinyin;
+                        type = "Cutter-Sanborn Three-Figure";
+                        MessageBox.Show(this.Form, strMessage);
+
+                        // 尝试把信息发给 dp2003.com
+                        Program.MainForm.ReportError("dp2circulation 创建索取号", "(安静汇报)" + strMessage);
+
+                        goto REDO;
                     }
 
                     return 1;
@@ -1835,7 +1875,7 @@ namespace dp2Circulation
         /// <param name="strAuthor">著者字符串</param>
         /// <param name="strAuthorNumber">返回著者号</param>
         /// <param name="strError">返回出错信息</param>
-        /// <returns>-1: 出错; 0: 放弃; 1: 成功</returns>
+        /// <returns>-1: 出错; 0: 放弃; 1: 成功; -4: ??</returns>
         public int GetGcatAuthorNumber(string strGcatWebServiceUrl,
             string strAuthor,
             out string strAuthorNumber,
@@ -1858,6 +1898,7 @@ namespace dp2Circulation
                 try
                 {
                     // return:
+                    //      -4  ??
                     //      -1  error
                     //      0   canceled
                     //      1   succeed
@@ -1976,6 +2017,8 @@ namespace dp2Circulation
                 try
                 {
                     // return:
+                    //      -4  著者字符串没有检索命中
+                    //      -2  strID验证失败
                     //      -1  error
                     //      0   canceled
                     //      1   succeed

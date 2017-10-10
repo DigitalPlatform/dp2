@@ -3242,7 +3242,6 @@ strElementName);
                         }
                     }
 
-
                     // 把两个记录装入DOM
                     XmlDocument domExist = new XmlDocument();
                     XmlDocument domNew = new XmlDocument();
@@ -3270,9 +3269,6 @@ strElementName);
                         strError = "strRecord装载进入DOM时发生错误: " + ex.Message;
                         goto ERROR1;
                     }
-
-
-
 
                     // 合并新旧记录
                     string strNewXml = "";
