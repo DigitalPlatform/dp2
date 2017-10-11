@@ -378,7 +378,7 @@ namespace dp2Circulation
             }
             else if (strTaskName == "服务器同步")
             {
-                StartLogRecoverDlg dlg = new StartLogRecoverDlg();
+                StartServerReplicationDlg dlg = new StartServerReplicationDlg();
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.Text = "启动 服务器同步 任务";
                 dlg.TaskName = "服务器同步";

@@ -11,6 +11,7 @@ using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
+using DigitalPlatform.LibraryServer.Common;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -53,8 +54,9 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+#if NO
         // 解析 开始 参数
-        static int ParseLogRecorverStart(string strStart,
+        static int ParseReplicationStart(string strStart,
             out long index,
             out string strFileName,
             out string strError)
@@ -112,7 +114,7 @@ namespace DigitalPlatform.LibraryServer
          * clearFirst 缺省为 false
          * continueWhenError 缺省值为 false
          * */
-        public static int ParseLogRecoverParam(string strParam,
+        public static int ParseReplicationParam(string strParam,
             out string strRecoverLevel,
             out bool bClearFirst,
             out bool bContinueWhenError,
@@ -159,6 +161,7 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
+#endif
 
         // 一次操作循环
         public override void Worker()
@@ -170,27 +173,19 @@ namespace DigitalPlatform.LibraryServer
             if (this.App.PauseBatchTask == true)
                 return;
 
-            string strError = "";
-            int nRet = 0;
-
-            // 获得源 dp2library 服务器配置信息
-            {
-                nRet = GetSourceServerCfg(out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                nRet = CheckUID(out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-            }
-
             BatchTaskStartInfo startinfo = this.StartInfo;
             if (startinfo == null)
                 startinfo = new BatchTaskStartInfo();   // 按照缺省值来
 
+            string strError = "";
+            int nRet = 0;
+
+            ServerReplicationStart start = ServerReplicationStart.FromString(startinfo.Start);
+            ServerReplicationParam param = ServerReplicationParam.FromString(startinfo.Param);
+#if NO
             long lStartIndex = 0;// 开始位置
             string strStartFileName = "";// 开始文件名
-            nRet = ParseLogRecorverStart(startinfo.Start,
+            nRet = ParseReplicationStart(startinfo.Start,
                 out lStartIndex,
                 out strStartFileName,
                 out strError);
@@ -205,7 +200,7 @@ namespace DigitalPlatform.LibraryServer
             bool bClearFirst = false;
             bool bContinueWhenError = false;
 
-            nRet = ParseLogRecoverParam(startinfo.Param,
+            nRet = ParseReplicationParam(startinfo.Param,
                 out strRecoverLevel,
                 out bClearFirst,
                 out bContinueWhenError,
@@ -215,8 +210,20 @@ namespace DigitalPlatform.LibraryServer
                 this.AppendResultText("启动失败: " + strError + "\r\n");
                 return;
             }
+#endif
 
             this.App.WriteErrorLog(this.Name + " 任务启动。");
+
+            // 获得源 dp2library 服务器配置信息
+            {
+                nRet = GetSourceServerCfg(out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                nRet = CheckUID(out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
 
 #if NO
             // 当为容错恢复级别时，检查当前全部读者库的检索点是否符合要求
@@ -258,15 +265,18 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
             // 进行处理
-            BreakPointInfo breakpoint = null;
+            // BreakPointInfo breakpoint = null;
 
-            if (string.IsNullOrEmpty(strStartFileName) == false
-                && strStartFileName != "continue")
-                breakpoint = new BreakPointInfo(strStartFileName.Substring(0, 8), lStartIndex);
+#if NO
+            if (string.IsNullOrEmpty(start.StartFileName) == false
+                && start.StartFileName != "continue")
+                breakpoint = new BreakPointInfo(start.StartFileName.Substring(0, 8), start.StartIndex);
+#endif
 
             this.AppendResultText("*********\r\n");
 
-            if (strStartFileName == "continue" || string.IsNullOrEmpty(strStartFileName))
+            if (start.Date == "continue"
+                || string.IsNullOrEmpty(start.Date))
             {
                 // 按照断点信息处理
                 this.AppendResultText("从上次断点位置继续\r\n");
@@ -275,8 +285,9 @@ namespace DigitalPlatform.LibraryServer
                 //      -1  出错
                 //      0   没有发现断点信息
                 //      1   成功
-                nRet = ReadBreakPoint(out breakpoint,
-        out strError);
+                nRet = ReadBreakPoint(out start,
+                    out param,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
                 if (nRet == 0)
@@ -284,6 +295,8 @@ namespace DigitalPlatform.LibraryServer
                     // return;
                     goto ERROR1;
                 }
+
+                // 此后返回前可以用 start 写入断点文件了
             }
             else
             {
@@ -293,27 +306,23 @@ namespace DigitalPlatform.LibraryServer
                 // 采纳先前创建好的复制并继续的断点信息
             }
 
-            Debug.Assert(breakpoint != null, "");
+            Debug.Assert(start != null, "");
 
-            this.AppendResultText("计划进行的处理：\r\n---\r\n" + breakpoint.GetSummary() + "\r\n---\r\n\r\n");
-            //if (this.StartInfos.Count > 0)
-            //    this.AppendResultText("等待队列：\r\n---\r\n" + GetSummary(this.StartInfos) + "\r\n---\r\n\r\n");
+            this.AppendResultText("计划进行的处理：\r\n---\r\n" + start.GetSummary() + "\r\n---\r\n\r\n");
 
-            // m_nRecordCount = 0;
-
+            // TODO: 处理中途可以定期保存断点文件，这样可以在掉电等情况下也能尽量保证后续从断点位置附近开始处理
             // return:
             //      -1  出错
             //      0   中断
             //      1   完成
-            nRet = ProcessOperLogs(breakpoint,
-                bContinueWhenError,
+            nRet = ProcessOperLogs(start,
+                param.ContinueWhenError,
                 out strError);
             if (nRet == -1 || nRet == 0)
             {
                 // 保存断点文件
-                SaveBreakPoint(breakpoint, false);
-                this.StartInfo = GetContinueStartInfo(bContinueWhenError);  // 迫使后面循环处理的时候，从断点位置继续
-                goto ERROR1;
+                // 迫使后面循环处理的时候，从断点位置继续
+                goto ERROR2;
             }
 #if NO
             bool bStart = false;
@@ -372,14 +381,21 @@ namespace DigitalPlatform.LibraryServer
             this.App.WriteErrorLog("日志恢复 任务结束。");
 
             // 保存断点文件
-            SaveBreakPoint(breakpoint, false);
-            this.StartInfo = GetContinueStartInfo(bContinueWhenError);  // 迫使后面循环处理的时候，从断点位置继续
+            SaveBreakPoint(start, param);
+            this.StartInfo = BuildStartInfo(null, param);  // 迫使后面循环处理的时候，从断点位置继续
             return;
         ERROR1:
             this.AppendResultText(strError + "\r\n任务因出错而中断。\r\n");
             return;
+        ERROR2:
+            // 保存断点文件
+            SaveBreakPoint(start, param);
+            this.StartInfo = BuildStartInfo(null, param);  // 迫使后面循环处理的时候，从断点位置继续
+            this.AppendResultText(strError + "\r\n任务因出错而中断。\r\n");
+            return;
         }
 
+#if NO
         BatchTaskStartInfo GetContinueStartInfo(bool bContinueWhenError)
         {
             XmlDocument dom = new XmlDocument();
@@ -388,6 +404,17 @@ namespace DigitalPlatform.LibraryServer
             BatchTaskStartInfo info = new BatchTaskStartInfo();
             info.Param = dom.DocumentElement.OuterXml;
 
+            return info;
+        }
+#endif
+        BatchTaskStartInfo BuildStartInfo(ServerReplicationStart start,
+            ServerReplicationParam param)
+        {
+            BatchTaskStartInfo info = new BatchTaskStartInfo();
+            if (start != null)
+                info.Start = start.ToString();
+            if (param != null)
+                info.Param = param.ToString();
             return info;
         }
 
@@ -444,10 +471,9 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
-            LibraryChannel channel = new LibraryChannel();
-            channel.Url = this.m_strUrl;
+            LibraryChannel channel = this.GetChannel();
 
-            channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
+            _stop.OnStop += _stop_OnStop;
             _stop.BeginLoop();
             try
             {
@@ -473,9 +499,9 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
+                _stop.OnStop -= _stop_OnStop;
                 _stop.EndLoop();
-                channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-                channel.Close();
+                this.ReturnChannel(channel);
             }
         }
 
@@ -483,7 +509,7 @@ namespace DigitalPlatform.LibraryServer
         //      -1  出错
         //      0   中断
         //      1   完成
-        int ProcessOperLogs(BreakPointInfo breakpoint,
+        int ProcessOperLogs(ServerReplicationStart breakpoint,
             bool bContinueWhenError,
             out string strError)
         {
@@ -526,8 +552,8 @@ namespace DigitalPlatform.LibraryServer
                 filenames[0] = filenames[0] + ":" + strStartRange;
             }
 #endif
-            if (filenames.Count > 0 && breakpoint.Offset > 0)
-                filenames[0] = filenames[0] + ":" + breakpoint.Offset.ToString();
+            if (filenames.Count > 0 && breakpoint.Index > 0)
+                filenames[0] = filenames[0] + ":" + breakpoint.Index.ToString();
 
             string strTempFileName = "";
             strTempFileName = this.App.GetTempFileName("attach");
@@ -623,7 +649,7 @@ namespace DigitalPlatform.LibraryServer
 
                 CONTINUE:
                     breakpoint.Date = date;
-                    breakpoint.Offset = item.Index;
+                    breakpoint.Index = item.Index + 1;
                 }
 
                 return 1;
@@ -699,12 +725,77 @@ namespace DigitalPlatform.LibraryServer
         //      -1  出错
         //      0   没有发现断点信息
         //      1   成功
+        int ReadBreakPoint(
+            out ServerReplicationStart start,
+            out ServerReplicationParam param,
+            out string strError)
+        {
+            strError = "";
+            start = null;
+            param = null;
+
+            string strText = "";
+            // 从断点记忆文件中读出信息
+            // return:
+            //      -1  error
+            //      0   file not found
+            //      1   found
+            int nRet = this.App.ReadBatchTaskBreakPointFile(this.DefaultName,
+                out strText,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "启动失败。因当前还没有断点信息，请指定为其他方式运行";
+                return 0;
+            }
+
+            string strStart = "";
+            string strParam = "";
+            StringUtil.ParseTwoPart(strText,
+                "|||",
+                out strParam,
+                out strStart);
+
+            // 可能会抛出异常
+            start = ServerReplicationStart.FromString(strParam);
+            if (string.IsNullOrEmpty(start.Date) == true
+                || start.Date.Length != 8)
+            {
+                strError = "start 字符串格式不正确 '"+strParam+"'。文件名部分应为 8 字符";
+                return -1;
+            }
+
+            param = ServerReplicationParam.FromString(strStart);
+            return 1;
+        }
+
+        // 保存断点信息，并保存 this.StartInfos
+        void SaveBreakPoint(ServerReplicationStart start,
+            ServerReplicationParam param)
+        {
+            // 写入断点文件
+            this.App.WriteBatchTaskBreakPointFile(this.Name,
+                start.ToString() + "|||" + param.ToString());
+        }
+
+        void ClearBreakPoint()
+        {
+            this.App.RemoveBatchTaskBreakPointFile(this.Name);
+        }
+#if NO
+        // 读出断点信息，和恢复 this.StartInfos
+        // return:
+        //      -1  出错
+        //      0   没有发现断点信息
+        //      1   成功
         int ReadBreakPoint(out BreakPointInfo breakpoint,
             out string strError)
         {
             strError = "";
             breakpoint = null;
-            List<BatchTaskStartInfo> start_infos = null;
+            // List<BatchTaskStartInfo> start_infos = null;
 
             string strText = "";
             // 从断点记忆文件中读出信息
@@ -780,8 +871,10 @@ namespace DigitalPlatform.LibraryServer
 
             return text.ToString();
         }
+#endif
 
 
+#if NO
         // 一个服务器的断点信息
         class BreakPointInfo
         {
@@ -834,5 +927,7 @@ namespace DigitalPlatform.LibraryServer
                 return strResult;
             }
         }
+
+#endif
     }
 }

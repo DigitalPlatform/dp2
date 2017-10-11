@@ -540,6 +540,12 @@
     <Compile Include="Monitor\StartBackupDialog.Designer.cs">
       <DependentUpon>StartBackupDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Monitor\StartServerReplicationDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Monitor\StartServerReplicationDlg.Designer.cs">
+      <DependentUpon>StartServerReplicationDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="Monitor\StartReplicationDlg.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1694,6 +1700,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Monitor\StartBackupDialog.resx">
       <DependentUpon>StartBackupDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitor\StartServerReplicationDlg.resx">
+      <DependentUpon>StartServerReplicationDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Monitor\StartReplicationDlg.resx">
       <DependentUpon>StartReplicationDlg.cs</DependentUpon>

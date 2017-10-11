@@ -11,6 +11,7 @@ using System.Collections;
 using DigitalPlatform.Xml;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Text;
+using DigitalPlatform.LibraryServer.Common;
 
 // 2013/3/16 添加 XML 注释
 
