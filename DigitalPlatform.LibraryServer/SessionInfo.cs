@@ -516,6 +516,9 @@ namespace DigitalPlatform.LibraryServer
                 && strUserID != "reader" && strUserID != "public" && strUserID != "opac")
                 strRights += ",checkclientversion";
 
+            // 2017/10/13
+            if (string.IsNullOrEmpty(this.App.GlobalAddRights) == false)
+                strRights += "," + this.App.GlobalAddRights;
             return 1;
         }
 

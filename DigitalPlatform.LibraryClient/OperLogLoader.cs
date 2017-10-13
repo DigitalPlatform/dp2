@@ -22,21 +22,36 @@ namespace DigitalPlatform.LibraryClient
         public event MessagePromptEventHandler Prompt = null;
 
 
-        List<string> m_filenames = new List<string>();
+        List<string> m_dates = new List<string>();
 
         /// <summary>
-        /// 文件名集合。
-        /// 每个文件名可能为特殊形态 20130101:0-100 表示从 0 开始到 100
+        /// 日期集合。
+        /// 每个日期为 8 字符数字形态
+        /// 每个日期可能为特殊形态 20130101:0-100 表示从 0 开始到 100
         /// </summary>
-        public List<string> FileNames
+        public List<string> Dates
         {
             get
             {
-                return this.m_filenames;
+                return this.m_dates;
             }
             set
             {
-                this.m_filenames = value;
+#if NO
+                // 检查值
+                if (value != null)
+                {
+                    foreach (string s in value)
+                    {
+                        if (s.IndexOf(".") != -1)
+                            throw new ArgumentException("日期字符串 '" + s + "' 中不应该出现 '.' 字符。应为 8 字符数字");
+                    }
+                }
+#endif
+                if (value == null)
+                    this.m_dates = null;
+                else
+                    this.m_dates = CannonicalizeDateString(value);
             }
         }
 
@@ -495,7 +510,7 @@ namespace DigitalPlatform.LibraryClient
 #endif
             // 预先处理一下文件名
             List<string> filenames = new List<string>();
-            foreach (string strLine in this.FileNames)
+            foreach (string strLine in this.Dates)
             {
                 if (this.Stop != null && this.Stop.State != 0)
                 {
@@ -525,7 +540,7 @@ namespace DigitalPlatform.LibraryClient
                     range_table[strFilename] = strRange;    // TODO: 如何防范文件名重复?
 #endif
                 filenames.Add(strFilename);
-                Debug.Assert(strFilename.Length >= 12, "");
+                Debug.Assert(strFilename.Length >= 8, "");
             }
 
             // 准备查找表
@@ -598,7 +613,7 @@ namespace DigitalPlatform.LibraryClient
                 }
 
                 string strLine = lines[i];
-                Debug.Assert(strLine.Length >= 12, "");
+                Debug.Assert(strLine.Length >= 8, "");
 
                 // string strRange = ranges[i];
 
@@ -632,7 +647,7 @@ namespace DigitalPlatform.LibraryClient
                     loader.Channel = this.Channel;
                     // loader.owner = this.owner;
                     loader.Estimate = this.Estimate;
-                    loader.FileName = strLogFilename;
+                    loader.Date = strLogFilename;
                     loader.Level = this.Level;
                     loader.ReplicationLevel = this.ReplicationLevel;
                     loader.lServerFileSize = sizes[i];
@@ -680,7 +695,7 @@ namespace DigitalPlatform.LibraryClient
             loader.Stop = this.Stop;
             loader.Channel = this.Channel;
             loader.Estimate = null;//
-            loader.FileName = item.Date + ".log";
+            loader.Date = item.Date + ".log";
             loader.Level = nLevel;
             loader.lServerFileSize = -1;
             loader.Range = item.Index.ToString() + "-" + item.Index.ToString();
@@ -987,8 +1002,8 @@ namespace DigitalPlatform.LibraryClient
             loader.Channel = this.Channel;
             loader.Stop = this.Stop;
             loader.LogType = this.LogType;
-            if (this.FileNames != null && this.FileNames.Count > 0)
-                loader.FilterDates = this.FileNames;
+            if (this.Dates != null && this.Dates.Count > 0)
+                loader.FilterDates = this.Dates;
 
             if (this.Prompt != null)
                 loader.Prompt += loader_Prompt;
@@ -1018,6 +1033,31 @@ namespace DigitalPlatform.LibraryClient
                 if (this.Prompt != null)
                     loader.Prompt -= loader_Prompt;
             }
+        }
+
+        List<string> CannonicalizeDateString(List<string> lines)
+        {
+            List<string> results = new List<string>();
+            foreach(string line in lines)
+            {
+                if (line.IndexOf(".") == -1)
+                {
+                    results.Add(line);
+                    continue;
+                }
+                List<string> parts = StringUtil.ParseTwoPart(line, ":");
+                string left = parts[0];
+                string right = parts[1];
+
+                List<string> temp = StringUtil.ParseTwoPart(left, ".");
+                left = temp[0]; // 丢弃 '.log' 部分
+                if (string.IsNullOrEmpty(right) == false)
+                    results.Add(left + ":" + right);
+                else
+                    results.Add(left);
+            }
+
+            return results;
         }
     }
 

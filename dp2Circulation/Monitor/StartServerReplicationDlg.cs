@@ -61,7 +61,7 @@ namespace dp2Circulation
                 // 起始位置参数
                 ServerReplicationStart start = ServerReplicationStart.FromString(this.StartInfo.Start);
 
-                this.textBox_startFileName.Text = start.Date;
+                this.textBox_startDate.Text = start.Date;
                 this.textBox_startIndex.Text = start.Index.ToString();
 
                 // 通用启动参数
@@ -97,15 +97,15 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
-            if (string.IsNullOrEmpty(this.textBox_startFileName.Text) == false
-                && this.textBox_startFileName.Text.Length != 8)
+            if (string.IsNullOrEmpty(this.textBox_startDate.Text) == false
+                && this.textBox_startDate.Text.Length != 8)
             {
                 strError = "起始日期 应为 8 字符形态";
                 goto ERROR1;
             }
 
             ServerReplicationStart start = new ServerReplicationStart();
-            start.Date = this.textBox_startFileName.Text.Substring(0, 8);
+            start.Date = this.textBox_startDate.Text;
             {
                 long index = 0;
                 if (this.textBox_startIndex.Text != "")

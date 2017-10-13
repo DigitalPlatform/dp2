@@ -196,6 +196,11 @@ namespace DigitalPlatform.LibraryServer
         /// </summary>
         public bool CheckClientVersion = false;
 
+        /// <summary>
+        /// 在登录阶段要给所有账户都添加的权限列表。用逗号分隔的字符串
+        /// </summary>
+        public string GlobalAddRights { get; set; }
+
         string _outgoingQueue = "";
 
         /// <summary>
@@ -908,10 +913,13 @@ namespace DigitalPlatform.LibraryServer
                         this.CheckClientVersion = DomUtil.GetBooleanParam(node,
                             "checkClientVersion",
                             false);
+                        // 2017/10/13
+                        this.GlobalAddRights = node.GetAttribute("globalAddRights");
                     }
                     else
                     {
                         this.CheckClientVersion = false;
+                        this.GlobalAddRights = "";
                     }
 
                     // <circulation>

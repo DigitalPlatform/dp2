@@ -29,6 +29,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.Drawing;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -1228,7 +1229,6 @@ MessageBoxDefaultButton.Button1);
                 // 启动时在日志中记载当前 dp2circulation 版本号
                 this.WriteErrorLog(Assembly.GetAssembly(this.GetType()).FullName);
 
-#if NO
                 // 检查 KB????
                 /*
     操作类型 crashReport -- 异常报告 
@@ -1309,8 +1309,6 @@ MessageBoxDefaultButton.Button1);
                         return;
                     }
                 }
-
-#endif
 
                 // 删除一些以前的目录
                 string strDir = PathUtil.MergePath(this.DataDir, "operlogcache");
@@ -2078,6 +2076,43 @@ MessageBoxDefaultButton.Button1);
 
             return false;
         }
+
+        bool DetectGuanjia()
+        {
+#if NO
+            ServiceController[] devices = ServiceController.GetDevices();
+
+            // 先检测驱动
+            foreach (ServiceController controller in devices)
+            {
+                if (controller.DisplayName.StartsWith("360netmon", StringComparison.OrdinalIgnoreCase)
+                    || controller.DisplayName.StartsWith("360SelfProtection", StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+#endif
+
+            // 再检测系统进程
+            System.Diagnostics.Process[] process_list = System.Diagnostics.Process.GetProcesses();
+
+            foreach (Process process in process_list)
+            {
+                string ModuleName = "";
+                try
+                {
+                    ModuleName = process.MainModule.ModuleName;
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+                if (ModuleName.StartsWith("qqpctray.exe", StringComparison.OrdinalIgnoreCase)
+                    || ModuleName.StartsWith("qqpcrtp.exe", StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }
+
 
         // 判断两个文件的版本号是否一致
         static bool VersionChanged(string filename1, string filename2)

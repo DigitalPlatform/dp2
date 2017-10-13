@@ -315,7 +315,7 @@ namespace dp2Circulation
                 loader.Stop = this.Progress;
                 // loader.owner = this;
                 loader.Estimate = estimate;
-                loader.FileNames = filenames;
+                loader.Dates = filenames;
                 loader.Level = 2;  //  Program.MainForm.OperLogLevel;
                 loader.AutoCache = false;
                 loader.CacheDir = "";
@@ -7353,7 +7353,7 @@ MessageBoxDefaultButton.Button2);
                 List<string> dates = null;
                 nRet = OperLogLoader.MakeLogFileNames(strStartDate,
                     strEndDate,
-                    false,  // 是否包含扩展名 ".log"
+                    true,  // 是否包含扩展名 ".log"
                     out dates,
                     out strWarning,
                     out strError);
@@ -7380,7 +7380,7 @@ MessageBoxDefaultButton.Button2);
                     loader.Stop = this.Progress;
                     // loader.owner = this;
                     loader.Estimate = estimate;
-                    loader.FileNames = dates;
+                    loader.Dates = dates;
                     loader.Level = 2;  // Program.MainForm.OperLogLevel;
                     loader.AutoCache = false;
                     loader.CacheDir = "";

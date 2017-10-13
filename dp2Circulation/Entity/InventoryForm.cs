@@ -2770,7 +2770,7 @@ null);
                 loader.Channel = channel;
                 loader.Stop = this.Progress;
                 loader.Estimate = estimate;
-                loader.FileNames = dates;
+                loader.Dates = dates;
                 loader.Level = 2;  // Program.MainForm.OperLogLevel;
                 loader.AutoCache = false;
                 loader.CacheDir = "";

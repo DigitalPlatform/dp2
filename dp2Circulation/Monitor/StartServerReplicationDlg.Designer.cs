@@ -34,7 +34,7 @@ namespace dp2Circulation
             this.label4 = new System.Windows.Forms.Label();
             this.textBox_startIndex = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.textBox_startFileName = new System.Windows.Forms.TextBox();
+            this.textBox_startDate = new System.Windows.Forms.TextBox();
             this.label_recoverLevel = new System.Windows.Forms.Label();
             this.comboBox_recoverLevel = new System.Windows.Forms.ComboBox();
             this.checkBox_clearBefore = new System.Windows.Forms.CheckBox();
@@ -63,7 +63,7 @@ namespace dp2Circulation
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.textBox_startIndex);
             this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.textBox_startFileName);
+            this.groupBox1.Controls.Add(this.textBox_startDate);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(9, 10);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(2);
@@ -108,13 +108,13 @@ namespace dp2Circulation
             // 
             // textBox_startFileName
             // 
-            this.textBox_startFileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.textBox_startDate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_startFileName.Location = new System.Drawing.Point(102, 22);
-            this.textBox_startFileName.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox_startFileName.Name = "textBox_startFileName";
-            this.textBox_startFileName.Size = new System.Drawing.Size(148, 21);
-            this.textBox_startFileName.TabIndex = 1;
+            this.textBox_startDate.Location = new System.Drawing.Point(102, 22);
+            this.textBox_startDate.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_startDate.Name = "textBox_startFileName";
+            this.textBox_startDate.Size = new System.Drawing.Size(148, 21);
+            this.textBox_startDate.TabIndex = 1;
             // 
             // label_recoverLevel
             // 
@@ -234,7 +234,7 @@ namespace dp2Circulation
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.TextBox textBox_startFileName;
+        private System.Windows.Forms.TextBox textBox_startDate;
         private System.Windows.Forms.TextBox textBox_startIndex;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label_recoverLevel;

@@ -473,7 +473,6 @@ namespace DigitalPlatform.LibraryServer
 
             LibraryChannel channel = this.GetChannel();
 
-            _stop.OnStop += _stop_OnStop;
             _stop.BeginLoop();
             try
             {
@@ -499,7 +498,6 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                _stop.OnStop -= _stop_OnStop;
                 _stop.EndLoop();
                 this.ReturnChannel(channel);
             }
@@ -566,7 +564,6 @@ namespace DigitalPlatform.LibraryServer
 #endif
             LibraryChannel channel = this.GetChannel();
 
-            _stop.OnStop += _stop_OnStop;
             _stop.BeginLoop();
             try
             {
@@ -574,7 +571,7 @@ namespace DigitalPlatform.LibraryServer
                 loader.Channel = channel;
                 loader.Stop = this._stop;
                 // loader.estimate = estimate;
-                loader.FileNames = filenames;
+                loader.Dates = filenames;
                 loader.Level = 0;  //  0 完整级别
                 loader.ReplicationLevel = true;
                 loader.AutoCache = false;
@@ -659,6 +656,11 @@ namespace DigitalPlatform.LibraryServer
                 strError = "用户中断";
                 return 0;
             }
+            catch (ChannelException ex)
+            {
+                strError = "处理过程出错: " + ex.Message;
+                return -1;
+            }
             catch (Exception ex)
             {
                 strError = "ProcessOperLogs() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
@@ -670,7 +672,6 @@ namespace DigitalPlatform.LibraryServer
                     File.Delete(strTempFileName);
 
                 _stop.EndLoop();
-                _stop.OnStop -= _stop_OnStop;
 #if NO
                 channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 channel.Close();
@@ -687,11 +688,13 @@ namespace DigitalPlatform.LibraryServer
             _channel.Timeout = TimeSpan.FromSeconds(30);
             _channel.Url = this.m_strUrl;
             _channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
+            _stop.OnStop += _stop_OnStop;
             return _channel;
         }
 
         void ReturnChannel(LibraryChannel channel)
         {
+            _stop.OnStop -= _stop_OnStop;
             channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
             channel.Close();
             _channel = null;
@@ -763,7 +766,7 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(start.Date) == true
                 || start.Date.Length != 8)
             {
-                strError = "start 字符串格式不正确 '"+strParam+"'。文件名部分应为 8 字符";
+                strError = "start 字符串格式不正确 '" + strParam + "'。文件名部分应为 8 字符";
                 return -1;
             }
 

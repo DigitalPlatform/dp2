@@ -46,10 +46,10 @@ namespace DigitalPlatform.LibraryClient
         }
 
         /// <summary>
-        /// 日志文件名。
-        /// 这是纯粹的文件名，没有冒号后面的范围部分。范围部分要放入 Range 中
+        /// 日志日期。
+        /// 这是纯粹的日期，没有冒号后面的范围部分。范围部分要放入 Range 中
         /// </summary>
-        public string FileName
+        public string Date
         {
             get;
             set;
@@ -155,7 +155,7 @@ namespace DigitalPlatform.LibraryClient
 
         static int PrepareCacheFile(
     string strCacheDir,
-    string strLogFileName,
+    string strDate,
     long lServerFileSize,
     out bool bCacheFileExist,
     out Stream stream,
@@ -167,11 +167,13 @@ namespace DigitalPlatform.LibraryClient
             bCacheFileExist = false;
             XmlDocument metadata_dom = new XmlDocument();
 
-            if (strLogFileName.Length != 8 + 4)
+            if (strDate.Length != 8)
             {
-                strError = "strLogFileName 参数值的长度应该是 12 字符";
+                strError = "strDate 参数值的长度应该是 8 字符";
                 return -1;
             }
+
+            string strLogFileName = strDate + ".log";
 
             string strCacheFilename = Path.Combine(strCacheDir, strLogFileName);
             string strCacheMetaDataFilename = Path.Combine(strCacheDir, strLogFileName + ".meta");
@@ -429,17 +431,20 @@ FileShare.ReadWrite);
         // 创建日志文件的metadata文件，记载服务器端文件尺寸
         static int CreateCacheMetadataFile(
             string strCacheDir,
-            string strLogFileName,
+            string strDate,
             long lServerFileSize,
             out string strError)
         {
             strError = "";
 
-            if (strLogFileName.Length != 8 + 4)
+            if (strDate.Length != 8)
             {
-                strError = "strLogFileName 参数值的长度应该是 12 字符";
+                strError = "strDate 参数值的长度应该是 8 字符";
                 return -1;
             }
+
+            string strLogFileName = strDate + ".log";
+
 
             string strCacheMetaDataFilename = Path.Combine(strCacheDir, strLogFileName + ".meta");
             try
@@ -463,16 +468,18 @@ FileShare.ReadWrite);
         // 删除一个日志文件的本地缓存文件
         static int DeleteCacheFile(
     string strCacheDir,
-    string strLogFileName,
+    string strDate,
     out string strError)
         {
             strError = "";
 
-            if (strLogFileName.Length != 8 + 4)
+            if (strDate.Length != 8)
             {
-                strError = "strLogFileName 参数值的长度应该是 12 字符";
+                strError = "strDate 参数值的长度应该是 8 字符";
                 return -1;
             }
+
+            string strLogFileName = strDate + ".log";
 
             string strCacheFilename = Path.Combine(strCacheDir, strLogFileName);
             string strCacheMetaDataFilename = Path.Combine(strCacheDir, strLogFileName + ".meta");
@@ -559,15 +566,15 @@ FileShare.ReadWrite);
 
             long lRet = 0;
 
-            if (this.FileName.Length != 8 + 4)
-                throw new ArgumentException("FileName 成员值的长度应该是 12 字符");
+            if (this.Date.Length != 8)
+                throw new ArgumentException("FileName 成员值的长度应该是 8 字符");
 
             if ((this.LogType & LogType.AccessLog) != 0
                 && (this.LogType & LogType.OperLog) != 0)
                 throw new ArgumentException("OperLogItemLoader 的 LogType 只能使用一种类型");
 
             if (this.Stop != null && this.Estimate != null)
-                this.Stop.SetMessage("正在装入日志文件 " + this.FileName + " 中的记录。"
+                this.Stop.SetMessage("正在装入日志文件 " + this.Date + " 中的记录。"
                     + "剩余时间 " + ProgressEstimate.Format(Estimate.Estimate(lProgressValue)) + " 已经过时间 " + ProgressEstimate.Format(Estimate.delta_passed));
 
             string strXml = "";
@@ -586,7 +593,7 @@ FileShare.ReadWrite);
                 // 获得服务器端日志文件尺寸
                 lRet = this.Channel.GetOperLog(
                     this.Stop,
-                    this.FileName,
+                    this.Date,
                     -1,    // lIndex,
                     -1, // lHint,
                     strStyle,
@@ -619,9 +626,9 @@ FileShare.ReadWrite);
 
             if (bAutoCache == true)
             {
-                string strFileName = this.FileName;
+                string strFileName = this.Date;
                 if ((this.LogType & LogType.AccessLog) != 0)
-                    strFileName = this.FileName + ".a";
+                    strFileName = this.Date + ".a";
 
                 nRet = PrepareCacheFile(
                     this.CacheDir,
@@ -744,7 +751,7 @@ FileShare.ReadWrite);
                                 //      2   超过范围，本次调用无效
                                 lRet = this.Channel.GetOperLogs(
                                     this.Stop,
-                                    this.FileName,
+                                    this.Date,
                                     lIndex,
                                     lHint,
                                     nCount,
@@ -775,7 +782,7 @@ FileShare.ReadWrite);
                                     if (this.Prompt != null)
                                     {
                                         MessagePromptEventArgs e = new MessagePromptEventArgs();
-                                        e.MessageText = "获取 " + this._logType.ToString() + " 日志信息 (" + this.FileName + " " + lIndex.ToString() + ") 的操作发生错误： " + strError;
+                                        e.MessageText = "获取 " + this._logType.ToString() + " 日志信息 (" + this.Date + " " + lIndex.ToString() + ") 的操作发生错误： " + strError;
                                         e.Actions = "yes,no,cancel";
                                         this.Prompt(this, e);
                                         if (e.ResultAction == "cancel")
@@ -793,7 +800,7 @@ FileShare.ReadWrite);
                                         }
                                     }
                                     else
-                                        throw new Exception(strError);
+                                        throw new ChannelException(this.Channel.ErrorCode, strError);
                                 }
                                 if (lRet == 0)
                                     yield break;
@@ -861,7 +868,7 @@ FileShare.ReadWrite);
                             if (this.Stop != null && this.Estimate != null)
                             {
                                 Estimate.Text = "剩余时间 " + ProgressEstimate.Format(Estimate.Estimate(lProgressValue + lHintNext)) + " 已经过时间 " + ProgressEstimate.Format(Estimate.delta_passed);
-                                this.Stop.SetMessage("正在装入日志文件 " + this.FileName + " 中的记录 " + lIndex.ToString() + " 。"
+                                this.Stop.SetMessage("正在装入日志文件 " + this.Date + " 中的记录 " + lIndex.ToString() + " 。"
                                     + Estimate.Text);
                             }
                         }
@@ -870,7 +877,7 @@ FileShare.ReadWrite);
                             OperLogItem item = new OperLogItem();
                             item.Xml = strXml;
                             item.Index = lIndex;
-                            item.Date = this.FileName.Substring(0, 8);
+                            item.Date = this.Date.Substring(0, 8);
                             item.AttachmentLength = lAttachmentTotalLength;
                             yield return item;
                         }
@@ -881,9 +888,9 @@ FileShare.ReadWrite);
                 // 创建本地缓存的日志文件的 metadata 文件
                 if (bCacheFileExist == false && stream != null)
                 {
-                    string strFileName = this.FileName;
+                    string strFileName = this.Date;
                     if ((this.LogType & LogType.AccessLog) != 0)
-                        strFileName = this.FileName + ".a";
+                        strFileName = this.Date + ".a";
 
                     nRet = CreateCacheMetadataFile(
                         this.CacheDir,
@@ -903,9 +910,9 @@ FileShare.ReadWrite);
 
                 if (bRemoveCacheFile == true)
                 {
-                    string strFileName = this.FileName;
+                    string strFileName = this.Date;
                     if ((this.LogType & LogType.AccessLog) != 0)
-                        strFileName = this.FileName + ".a";
+                        strFileName = this.Date + ".a";
 
                     string strError1 = "";
                     nRet = DeleteCacheFile(
