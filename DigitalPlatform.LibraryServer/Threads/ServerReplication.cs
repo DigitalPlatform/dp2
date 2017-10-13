@@ -41,7 +41,7 @@ namespace DigitalPlatform.LibraryServer
             string strName)
             : base(app, strName)
         {
-            this.PerTime = 10 * 60 * 1000;	// 10 分钟
+            this.PerTime = 5 * 60 * 1000;	// 5 分钟
 
             this.Loop = true;
         }
@@ -317,6 +317,10 @@ namespace DigitalPlatform.LibraryServer
             //      1   完成
             nRet = ProcessOperLogs(start,
                 param.ContinueWhenError,
+                (s)=>
+                    {
+                        SaveBreakPoint(s, param);
+                    },
                 out strError);
             if (nRet == -1 || nRet == 0)
             {
@@ -503,12 +507,15 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
+        delegate void Delegate_saveBreakPoint(ServerReplicationStart breakpoint);
+
         // return:
         //      -1  出错
         //      0   中断
         //      1   完成
         int ProcessOperLogs(ServerReplicationStart breakpoint,
             bool bContinueWhenError,
+            Delegate_saveBreakPoint func_saveBreakPoint,
             out string strError)
         {
             strError = "";
@@ -551,7 +558,7 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
             if (filenames.Count > 0 && breakpoint.Index > 0)
-                filenames[0] = filenames[0] + ":" + breakpoint.Index.ToString();
+                filenames[0] = filenames[0] + ":" + breakpoint.Index.ToString() + "-";
 
             string strTempFileName = "";
             strTempFileName = this.App.GetTempFileName("attach");
@@ -579,6 +586,7 @@ namespace DigitalPlatform.LibraryServer
                 // loader.Filter = "borrow,return,setReaderInfo,setBiblioInfo,setEntity,setOrder,setIssue,setComment,amerce,passgate,getRes";
                 loader.LogType = LogType.OperLog;
 
+                long i = 0;
                 foreach (OperLogItem item in loader)
                 {
                     if (this.Stopped)
@@ -647,6 +655,15 @@ namespace DigitalPlatform.LibraryServer
                 CONTINUE:
                     breakpoint.Date = date;
                     breakpoint.Index = item.Index + 1;
+
+                    // 中途记忆断点
+                    if ((i % 1000) == 0)
+                    {
+                        if (func_saveBreakPoint != null)
+                            func_saveBreakPoint(breakpoint);
+                    }
+
+                    i++;
                 }
 
                 return 1;

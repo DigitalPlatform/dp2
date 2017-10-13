@@ -751,7 +751,7 @@ FileShare.ReadWrite);
                                 //      2   超过范围，本次调用无效
                                 lRet = this.Channel.GetOperLogs(
                                     this.Stop,
-                                    this.Date,
+                                    this.Date + ".log",
                                     lIndex,
                                     lHint,
                                     nCount,
