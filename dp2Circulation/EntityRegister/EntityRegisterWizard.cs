@@ -3114,7 +3114,7 @@ int nCount)
                     }
 
                     bool bTemp = false;
-                    // TODO: 如果保持窗口修改后的尺寸位置?
+                    // TODO: 如何保持窗口修改后的尺寸位置?
                     MessageDialog.Show(this,
                         "书目记录格式不正确",
                         BiblioError.GetListString(errors, "\r\n"),

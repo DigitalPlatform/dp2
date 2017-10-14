@@ -35,6 +35,7 @@ using DigitalPlatform.AmazonInterface;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Drawing;
+using System.ServiceProcess;
 
 namespace dp2Circulation
 {
@@ -1901,5 +1902,38 @@ dlg.UiState);
             }
         }
 
+        private void button_testListProcess_Click(object sender, EventArgs e)
+        {
+            List<string> names = ProcessUtil.GetProcessNameList();
+            bool bTemp = false;
+
+            MessageDialog.Show(this,
+                "当前所有进程",
+                StringUtil.MakePathList(names, "\r\n"),
+                null,
+                ref bTemp);
+
+            names = GetDevicesList();
+            MessageDialog.Show(this,
+    "当前所有设备",
+    StringUtil.MakePathList(names, "\r\n"),
+    null,
+    ref bTemp);
+
+        }
+
+        public static List<string> GetDevicesList()
+        {
+            List<string> results = new List<string>();
+            ServiceController[] devices = ServiceController.GetDevices();
+
+            // 先检测驱动
+            foreach (ServiceController controller in devices)
+            {
+                results.Add(controller.DisplayName);
+            }
+
+            return results;
+        }
     }
 }
