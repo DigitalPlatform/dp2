@@ -233,7 +233,7 @@ namespace dp2Circulation
                     // 每隔 5 分钟才允许使用一次 AbortIt()
                     if (this._lastAbortTime - now > new TimeSpan(0, 5, 0))
                     {
-                        this.Channel.AbortIt();
+                        this.Channel.TryAbortIt();
                         this._lastAbortTime = now;
                     }
                     else

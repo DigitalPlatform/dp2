@@ -110,6 +110,7 @@ Stack:
    at System.Threading.ExecutionContext.Run(System.Threading.ExecutionContext, System.Threading.ContextCallback, System.Object)
    at System.Threading.ThreadHelper.ThreadStart()
          * */
+        // 这个函数的缺点是不能处理 InnerException 显示
         public static string GetExceptionText(Exception ex)
         {
             if (ex is AggregateException)

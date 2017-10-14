@@ -2060,6 +2060,7 @@ MessageBoxDefaultButton.Button1);
 
             foreach (Process process in process_list)
             {
+#if NO
                 string ModuleName = "";
                 try
                 {
@@ -2069,9 +2070,19 @@ MessageBoxDefaultButton.Button1);
                 {
                     continue;
                 }
-                if (ModuleName.StartsWith("360Tray.exe", StringComparison.OrdinalIgnoreCase)
-                    || ModuleName.StartsWith("zhudongfangyu.exe", StringComparison.OrdinalIgnoreCase))
-                    return true;
+#endif
+                try
+                {
+                    string ModuleName = Path.GetFileName(ProcessUtil.GetExecutablePath(process));
+
+                    if (ModuleName.StartsWith("360Tray.exe", StringComparison.OrdinalIgnoreCase)
+                        || ModuleName.StartsWith("zhudongfangyu.exe", StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+                catch(Win32Exception)
+                {
+
+                }
             }
 
             return false;
@@ -2096,6 +2107,7 @@ MessageBoxDefaultButton.Button1);
 
             foreach (Process process in process_list)
             {
+#if NO
                 string ModuleName = "";
                 try
                 {
@@ -2105,9 +2117,19 @@ MessageBoxDefaultButton.Button1);
                 {
                     continue;
                 }
-                if (ModuleName.StartsWith("qqpctray.exe", StringComparison.OrdinalIgnoreCase)
-                    || ModuleName.StartsWith("qqpcrtp.exe", StringComparison.OrdinalIgnoreCase))
-                    return true;
+#endif
+                try
+                {
+                    string ModuleName = Path.GetFileName(ProcessUtil.GetExecutablePath(process));
+
+                    if (ModuleName.StartsWith("qqpctray.exe", StringComparison.OrdinalIgnoreCase)
+                        || ModuleName.StartsWith("qqpcrtp.exe", StringComparison.OrdinalIgnoreCase))
+                        return true;
+                }
+                catch(Win32Exception)
+                {
+
+                }
             }
 
             return false;
