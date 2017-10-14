@@ -29,7 +29,7 @@ namespace dp2Circulation
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle1 = new DigitalPlatform.CirculationClient.PatronCardStyle();
+            DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle3 = new DigitalPlatform.CirculationClient.PatronCardStyle();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_diskSpace = new System.Windows.Forms.TabPage();
             this.button_test = new System.Windows.Forms.Button();
@@ -226,6 +226,7 @@ namespace dp2Circulation
             this.label36 = new System.Windows.Forms.Label();
             this.textBox_login_userName = new System.Windows.Forms.TextBox();
             this.label35 = new System.Windows.Forms.Label();
+            this.button_testListProcess = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_diskSpace.SuspendLayout();
             this.tabPage_windowsEventLog.SuspendLayout();
@@ -1953,7 +1954,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.patronCardControl1.Location = new System.Drawing.Point(4, 45);
             this.patronCardControl1.Name = "patronCardControl1";
-            this.patronCardControl1.PatronCardStyle = patronCardStyle1;
+            this.patronCardControl1.PatronCardStyle = patronCardStyle3;
             this.patronCardControl1.Size = new System.Drawing.Size(156, 119);
             this.patronCardControl1.TabIndex = 0;
             this.patronCardControl1.Text = "patronCardControl1";
@@ -2198,6 +2199,7 @@ namespace dp2Circulation
             // 
             // tabPage_test
             // 
+            this.tabPage_test.Controls.Add(this.button_testListProcess);
             this.tabPage_test.Controls.Add(this.button_testRelationDialog);
             this.tabPage_test.Controls.Add(this.button_openWindowsUpdateDialog);
             this.tabPage_test.Controls.Add(this.button_testGetMergeStyleDialog);
@@ -2466,6 +2468,16 @@ namespace dp2Circulation
             this.label35.Size = new System.Drawing.Size(59, 12);
             this.label35.TabIndex = 0;
             this.label35.Text = "user name";
+            // 
+            // button_testListProcess
+            // 
+            this.button_testListProcess.Location = new System.Drawing.Point(4, 166);
+            this.button_testListProcess.Name = "button_testListProcess";
+            this.button_testListProcess.Size = new System.Drawing.Size(220, 23);
+            this.button_testListProcess.TabIndex = 4;
+            this.button_testListProcess.Text = "≤‚ ‘ GetProcessNameList ...";
+            this.button_testListProcess.UseVisualStyleBackColor = true;
+            this.button_testListProcess.Click += new System.EventHandler(this.button_testListProcess_Click);
             // 
             // TestForm
             // 
@@ -2736,5 +2748,6 @@ namespace dp2Circulation
         private System.Windows.Forms.TextBox textBox_login_userName;
         private System.Windows.Forms.Label label35;
         private System.Windows.Forms.Button button_login_login;
+        private System.Windows.Forms.Button button_testListProcess;
     }
 }

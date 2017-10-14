@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -11,6 +12,29 @@ namespace DigitalPlatform.IO
     // http://www.aboutmycode.com/net-framework/how-to-get-elevated-process-path-in-net/
     public class ProcessUtil
     {
+        public static List<string> GetProcessNameList()
+        {
+            List<string> results = new List<string>();
+
+            System.Diagnostics.Process[] process_list = System.Diagnostics.Process.GetProcesses();
+
+            foreach (Process process in process_list)
+            {
+                try
+                {
+                    string ModuleName = Path.GetFileName(ProcessUtil.GetExecutablePath(process));
+
+                    results.Add(ModuleName);
+                }
+                catch (Win32Exception)
+                {
+
+                }
+            }
+
+            return results;
+        }
+
         public static string GetExecutablePath(Process Process)
         {
             //If running on Vista or later use the new function
