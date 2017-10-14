@@ -1230,7 +1230,7 @@ out strError);
             if (ex0 is System.TimeoutException)
             {
                 this.ErrorCode = ErrorCode.RequestTimeOut;
-                this.AbortIt();
+                this.TryAbortIt();
                 strError = GetExceptionMessage(ex0);
                 return 0;
             }
@@ -1239,7 +1239,7 @@ out strError);
             {
                 System.ServiceModel.Security.MessageSecurityException ex = (System.ServiceModel.Security.MessageSecurityException)ex0;
                 this.ErrorCode = ErrorCode.RequestError;	// 一般错误
-                this.AbortIt();
+                this.TryAbortIt();
                 // return ex.Message + (ex.InnerException != null ? " InnerException: " + ex.InnerException.Message : "") ;
                 strError = GetExceptionMessage(ex);
                 if (this.m_nRedoCount == 0)
@@ -1254,7 +1254,7 @@ out strError);
             {
                 CommunicationObjectFaultedException ex = (CommunicationObjectFaultedException)ex0;
                 this.ErrorCode = ErrorCode.RequestError;	// 一般错误
-                this.AbortIt();
+                this.TryAbortIt();
                 strError = GetExceptionMessage(ex);
                 // 2011/7/2
                 if (this.m_nRedoCount == 0)
@@ -1269,7 +1269,7 @@ out strError);
             {
                 EndpointNotFoundException ex = (EndpointNotFoundException)ex0;
                 this.ErrorCode = ErrorCode.RequestError;	// 一般错误
-                this.AbortIt();
+                this.TryAbortIt();
                 strError = "服务器 " + this.Url + " 没有响应";
                 return 0;
             }
@@ -1279,7 +1279,7 @@ out strError);
             {
                 this.ErrorCode = ErrorCode.RequestError;	// 一般错误
                 this.MaxReceivedMessageSize *= 2;    // 下次扩大一倍
-                this.AbortIt();
+                this.TryAbortIt();
                 strError = GetExceptionMessage(ex0);
                 if (this.m_nRedoCount == 0
                     && this.MaxReceivedMessageSize < 1024 * 1024 * 10)
@@ -1295,7 +1295,7 @@ out strError);
     && ex0.InnerException is System.IO.PipeException)
             {
                 this.ErrorCode = ErrorCode.RequestError;	// 一般错误
-                this.AbortIt();
+                this.TryAbortIt();
                 strError = GetExceptionMessage(ex0);
                 if (this.m_nRedoCount == 0)
                 {
@@ -1316,7 +1316,7 @@ out strError);
             this.ErrorCode = ErrorCode.RequestError;	// 一般错误
             if (this.m_ws != null)
             {
-                this.AbortIt();
+                this.TryAbortIt();
                 // 一般来说异常都需要重新分配Client()。如果有例外，可以在前面分支
             }
             strError = GetExceptionMessage(ex0);
@@ -10396,7 +10396,7 @@ Stack:
         /// <summary>
         /// 立即放弃通讯。而 Abort() 要文雅一些
         /// </summary>
-        public void AbortIt()
+        public void TryAbortIt()
         {
             lock (syncRoot)
             {
@@ -10411,10 +10411,17 @@ Stack:
 
         void WsAbort()
         {
-            if (this.m_ws is IClientChannel)
-                ((IClientChannel)this.m_ws).Abort();
-            else
-                this.m_ws.Abort();
+            try // 2017/10/14
+            {
+                if (this.m_ws is IClientChannel)
+                    ((IClientChannel)this.m_ws).Abort();
+                else
+                    this.m_ws.Abort();
+            }
+            catch
+            {
+
+            }
         }
 
         void WsClose()

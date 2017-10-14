@@ -680,7 +680,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "ProcessOperLogs() 出现异常: " + ExceptionUtil.GetExceptionText(ex);
+                strError = "ProcessOperLogs() 出现异常: " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
             finally

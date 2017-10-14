@@ -7464,6 +7464,8 @@ out strError);
         {
             get
             {
+                if (this.AppInfo == null)
+                    return true;
                 return this.AppInfo.GetBoolean(
     "global",
     "upper_input_barcode",
@@ -7471,10 +7473,11 @@ out strError);
             }
             set
             {
-                this.AppInfo.SetBoolean(
-    "global",
-    "upper_input_barcode",
-    value);
+                if (this.AppInfo != null)
+                    this.AppInfo.SetBoolean(
+        "global",
+        "upper_input_barcode",
+        value);
             }
         }
 
