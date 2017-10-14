@@ -276,7 +276,7 @@ namespace dp2Circulation
             // return:
             //      -1  错误
             //      0   成功
-            nRet = OperLogStatisForm.MakeLogFileNames(strStartDate,
+            nRet = OperLogLoader.MakeLogFileNames(strStartDate,
                 strEndDate,
                 true,  // true,
                 out filenames,
@@ -314,8 +314,8 @@ namespace dp2Circulation
                 loader.Channel = this.Channel;
                 loader.Stop = this.Progress;
                 // loader.owner = this;
-                loader.estimate = estimate;
-                loader.FileNames = filenames;
+                loader.Estimate = estimate;
+                loader.Dates = filenames;
                 loader.Level = 2;  //  Program.MainForm.OperLogLevel;
                 loader.AutoCache = false;
                 loader.CacheDir = "";
@@ -7351,9 +7351,9 @@ MessageBoxDefaultButton.Button2);
 
                 string strWarning = "";
                 List<string> dates = null;
-                nRet = OperLogStatisForm.MakeLogFileNames(strStartDate,
+                nRet = OperLogLoader.MakeLogFileNames(strStartDate,
                     strEndDate,
-                    false,  // 是否包含扩展名 ".log"
+                    true,  // 是否包含扩展名 ".log"
                     out dates,
                     out strWarning,
                     out strError);
@@ -7379,8 +7379,8 @@ MessageBoxDefaultButton.Button2);
                     loader.Channel = this.Channel;
                     loader.Stop = this.Progress;
                     // loader.owner = this;
-                    loader.estimate = estimate;
-                    loader.FileNames = dates;
+                    loader.Estimate = estimate;
+                    loader.Dates = dates;
                     loader.Level = 2;  // Program.MainForm.OperLogLevel;
                     loader.AutoCache = false;
                     loader.CacheDir = "";

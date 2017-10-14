@@ -5381,6 +5381,7 @@ out strError);
             string strFileName,
             long lStart,
             long lLength,
+            string strStyle,
             out byte[] baContent,
             out string strFileTime,
             out string strError)
@@ -5397,6 +5398,7 @@ out strError);
                     strFileName,
                     lStart,
                     lLength,
+                    strStyle,
                     null,
                     null);
 
@@ -5424,6 +5426,15 @@ out strError);
                         goto REDO;
                     return -1;
                 }
+
+                // 2017/10/7
+                if (StringUtil.IsInList("gzip", strStyle)
+                    && result.ErrorCode == localhost.ErrorCode.Compressed
+                    && baContent != null && baContent.Length > 0)
+                {
+                    baContent = ByteArray.DecompressGzip(baContent);
+                }
+
                 strError = result.ErrorInfo;
                 this.ErrorCode = result.ErrorCode;
                 this.ClearRedoCount();
@@ -7046,6 +7057,15 @@ out strError);
                         goto REDO;
                     return -1;
                 }
+
+                // 2017/10/7
+                if (StringUtil.IsInList("gzip", strStyle)
+                    && result.ErrorCode == localhost.ErrorCode.Compressed
+                    && baContent != null && baContent.Length > 0)
+                {
+                    baContent = ByteArray.DecompressGzip(baContent);
+                }
+
                 strError = result.ErrorInfo;
                 this.ErrorCode = result.ErrorCode;
                 this.ClearRedoCount();
@@ -7519,8 +7539,8 @@ out strError);
 
                 if (stop != null)
                 {
-                    strMessage = "正在下载 " + Convert.ToString(lStart) + "-"
-                        + (lTotalLength == -1 ? "?" : Convert.ToString(lTotalLength))
+                    strMessage = "正在下载 " + StringUtil.GetLengthText(lStart) + " / "
+                        + (lTotalLength == -1 ? "?" : StringUtil.GetLengthText(lTotalLength))
                         + " " + strPercent + " "
                         + strPath;
                     stop.SetMessage(strMessage);
@@ -7550,6 +7570,7 @@ out strError);
 
                 lTotalLength = lRet;
 
+                // TODO: 似乎也没有必要每轮都检查 timestamp。首尾各获得一次并对比即可
                 if (StringUtil.IsInList("timestamp", strStyle) == true)
                 {
                     if (input_timestamp != null)
@@ -7611,6 +7632,7 @@ out strError);
         // 获得资源。包装版本 -- 写入文件的版本。特别适用于获得资源，也可用于获得主记录体。
         // parameters:
         //		strOutputFileName	输出文件名。可以为null。如果调用前文件已经存在, 会被覆盖。
+        //      strStyle    风格。如果为空，函数会自动设置一个默认值
         // return:
         //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
         //		0	成功
@@ -7618,6 +7640,7 @@ out strError);
             DigitalPlatform.Stop stop,
             string strPath,
             string strOutputFileName,
+            string strStyle,    // 2017/10/7
             out string strMetaData,
             out byte[] baOutputTimeStamp,
             out string strOutputPath,
@@ -7625,7 +7648,8 @@ out strError);
         {
             FileStream fileTarget = null;
 
-            string strStyle = "content,data,metadata,timestamp,outputpath";
+            if (string.IsNullOrEmpty(strStyle))
+                strStyle = "content,data,metadata,timestamp,outputpath";
 
             if (String.IsNullOrEmpty(strOutputFileName) == false)
                 fileTarget = File.Create(strOutputFileName);
@@ -7671,6 +7695,13 @@ out strError);
             strError = "";
             strOutputResPath = "";
             baOutputTimestamp = null;
+
+            // 2017/10/7
+            if (StringUtil.IsInList("gzip", strStyle)
+                && baContent != null && baContent.Length > 0)
+            {
+                baContent = ByteArray.CompressGzip(baContent);
+            }
 
         REDO:
             try
@@ -7873,7 +7904,7 @@ out strError);
             string strLocalPath,       // 该参数为拟放入 metadata 中的本地文件名
             string strMime,
 #endif
-            string strMetadata,
+ string strMetadata,
             string strRange,
             byte[] timestamp,
             string strStyle,

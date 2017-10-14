@@ -792,12 +792,13 @@ SessionMode = SessionMode.NotAllowed)]
 
         [OperationContract]
         LibraryServerResult GetFile(
-    string strCategory,
-    string strFileName,
-    long lStart,
-    long lLength,
-    out byte[] baContent,
-    out string strFileTime);
+            string strCategory,
+            string strFileName,
+            long lStart,
+            long lLength,
+            string strStyle,
+            out byte[] baContent,
+            out string strFileTime);
 
         [OperationContract]
         LibraryServerResult ListFile(

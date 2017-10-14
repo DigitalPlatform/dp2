@@ -7,6 +7,8 @@ using System.Diagnostics;
 
 using System.Windows.Forms;
 using System.Drawing;
+using System.IO;
+using System.IO.Compression;
 
 
 namespace DigitalPlatform
@@ -29,6 +31,46 @@ namespace DigitalPlatform
 
             return result;
         }*/
+
+#if NO
+        public static byte[] CompressGzip(byte[] baContent)
+        {
+            using (var out_stream = new MemoryStream())
+            {
+                using (var tiny_stream = new GZipStream(out_stream, CompressionMode.Compress))
+                {
+                    tiny_stream.Write(baContent, 0, baContent.Length);
+                }
+
+                return out_stream.ToArray();
+            }
+        }
+#endif
+
+        public static byte[] DecompressGzip(byte[] baContent)
+        {
+            using (var in_stream = new MemoryStream(baContent))
+            using (var tiny_stream = new GZipStream(in_stream, CompressionMode.Decompress))
+            using (var out_stream = new MemoryStream())
+            {
+                tiny_stream.CopyTo(out_stream);
+                return out_stream.ToArray();
+            }
+        }
+
+        public static byte[] CompressGzip(byte[] baContent)
+        {
+            using (var out_stream = new MemoryStream())
+            {
+                using (var tiny_stream = new GZipStream(out_stream, CompressionMode.Compress))
+                using (var in_stream = new MemoryStream(baContent))
+                {
+                    in_stream.CopyTo(tiny_stream);
+                }
+
+                return out_stream.ToArray();
+            }
+        }
 
         // 克隆一个字符数组
         public static byte[] GetCopy(byte[] baContent)

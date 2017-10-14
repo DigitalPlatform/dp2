@@ -73,14 +73,15 @@ namespace dp2Circulation
             "预约到书管理",
             "超期通知",
             "日志恢复",
-            "正元一卡通读者信息同步",
-            "迪科远望一卡通读者信息同步",
+            "~正元一卡通读者信息同步",
+            "~迪科远望一卡通读者信息同步",
             "读者信息同步",
             "dp2Library 同步",
             "重建检索点",
             "创建 MongoDB 日志库",
             "大备份",
-            "<日志备份>"});
+            "<日志备份>",
+            "服务器同步"});
             this.comboBox_taskName.Location = new System.Drawing.Point(98, 10);
             this.comboBox_taskName.Margin = new System.Windows.Forms.Padding(2);
             this.comboBox_taskName.Name = "comboBox_taskName";

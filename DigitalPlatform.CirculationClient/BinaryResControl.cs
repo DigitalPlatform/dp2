@@ -862,7 +862,7 @@ bool bChanged)
 
             menuItem = new MenuItem("查看(&V)");
             menuItem.Click += new System.EventHandler(this.menu_view_Click);
-            if (this.ListView.SelectedItems.Count == 0 
+            if (this.ListView.SelectedItems.Count == 0
                 || (StringUtil.MatchMIME(strMime, "image") == false /*&& strMime != "application/pdf"*/))
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
@@ -1824,6 +1824,7 @@ bool bChanged)
                     Stop,
                     strResPath,
                     dlg.FileName,
+                    "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
                     out strMetaData,
                     out baOutputTimeStamp,
                     out strOutputPath,
@@ -2149,12 +2150,13 @@ bool bChanged)
     out output_timestamp,
     out strError);
 #endif
+
                         long lRet = channel.UploadFile(
 Stop,
 "", // strLocalFilename,
 strResPath,
 strMetadata,
-"", // strStyle,
+(StringUtil.CompareVersion(dp2library_version, "2.117") >= 0) ? "gzip" : "",
 timestamp,   // timestamp,
 false,
 out output_timestamp,
@@ -2190,7 +2192,7 @@ Stop,
 strLocalFilename,
 strResPath,
 strMetadata,
-"", // strStyle,
+(StringUtil.CompareVersion(dp2library_version, "2.117") >= 0) ? "gzip" : "",
 timestamp,   // timestamp,
 false,
 out output_timestamp,

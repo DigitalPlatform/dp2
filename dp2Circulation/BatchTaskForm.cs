@@ -111,6 +111,17 @@ namespace dp2Circulation
             // 使得菜单显示正确
             this.MessageStyle = this.MessageStyle;
 
+            // 删除一些不需要的任务名
+            for (int i = 0; i < this.comboBox_taskName.Items.Count; i++)
+            {
+                string strTaskName = this.comboBox_taskName.Items[i] as string;
+                if (strTaskName.StartsWith("~"))
+                {
+                    this.comboBox_taskName.Items.RemoveAt(i);
+                    i--;
+                }
+            }
+
             // 
             API.PostMessage(this.Handle, WM_INITIAL, 0, 0);
         }
@@ -304,6 +315,7 @@ namespace dp2Circulation
             }
         }
              * */
+                /*
             else if (strTaskName == "正元一卡通读者信息同步")
             {
                 StartZhengyuanReplicationDlg dlg = new StartZhengyuanReplicationDlg();
@@ -329,6 +341,7 @@ namespace dp2Circulation
                     return -1;
                 }
             }
+                 * */
             else if (strTaskName == "读者信息同步")
             {
 #if NO
@@ -363,11 +376,25 @@ namespace dp2Circulation
                     return -1;
                 }
             }
+            else if (strTaskName == "服务器同步")
+            {
+                StartServerReplicationDlg dlg = new StartServerReplicationDlg();
+                MainForm.SetControlFont(dlg, this.Font, false);
+                dlg.Text = "启动 服务器同步 任务";
+                dlg.TaskName = "服务器同步";
+                dlg.StartInfo = startinfo;
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult != DialogResult.OK)
+                {
+                    strError = "用户放弃启动";
+                    return -1;
+                }
+            }
             else if (strTaskName == "大备份")
             {
-                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.114") < 0)
+                if (StringUtil.CompareVersion(Program.MainForm.ServerVersion, "2.117") < 0)
                 {
-                    strError = "dp2library 应在 2.114 版以上才能使用“大备份”任务相关的功能";
+                    strError = "dp2library 应在 2.117 版以上才能使用“大备份”任务相关的功能";
                     return -1;
                 }
 

@@ -286,6 +286,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         NotFoundObjectFile = 24,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
+        Compressed = 25,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
         RequestError = 100,
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
@@ -516,6 +519,9 @@ namespace DigitalPlatform.LibraryClient.localhost {
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
         TimestampMismatch = 113,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Compressed = 114,
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
@@ -3587,10 +3593,10 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndExistStatisInfo(out DigitalPlatform.LibraryClient.localhost.DateExist[] dates, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetFile", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetFileResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetFile", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetFileResponse")]
-        System.IAsyncResult BeginGetFile(string strCategory, string strFileName, long lStart, long lLength, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginGetFile(string strCategory, string strFileName, long lStart, long lLength, string strStyle, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetFile(out byte[] baContent, out string strFileTime, System.IAsyncResult result);
         
@@ -8647,13 +8653,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strDateRangeString}, this.onEndExistStatisInfoDelegate, this.onExistStatisInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength) {
-            return base.Channel.GetFile(out baContent, out strFileTime, strCategory, strFileName, lStart, lLength);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength, string strStyle) {
+            return base.Channel.GetFile(out baContent, out strFileTime, strCategory, strFileName, lStart, lLength, strStyle);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetFile(string strCategory, string strFileName, long lStart, long lLength, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetFile(strCategory, strFileName, lStart, lLength, callback, asyncState);
+        public System.IAsyncResult BeginGetFile(string strCategory, string strFileName, long lStart, long lLength, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetFile(strCategory, strFileName, lStart, lLength, strStyle, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -8666,7 +8672,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             string strFileName = ((string)(inValues[1]));
             long lStart = ((long)(inValues[2]));
             long lLength = ((long)(inValues[3]));
-            return this.BeginGetFile(strCategory, strFileName, lStart, lLength, callback, asyncState);
+            string strStyle = ((string)(inValues[4]));
+            return this.BeginGetFile(strCategory, strFileName, lStart, lLength, strStyle, callback, asyncState);
         }
         
         private object[] OnEndGetFile(System.IAsyncResult result) {
@@ -8686,11 +8693,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void GetFileAsync(string strCategory, string strFileName, long lStart, long lLength) {
-            this.GetFileAsync(strCategory, strFileName, lStart, lLength, null);
+        public void GetFileAsync(string strCategory, string strFileName, long lStart, long lLength, string strStyle) {
+            this.GetFileAsync(strCategory, strFileName, lStart, lLength, strStyle, null);
         }
         
-        public void GetFileAsync(string strCategory, string strFileName, long lStart, long lLength, object userState) {
+        public void GetFileAsync(string strCategory, string strFileName, long lStart, long lLength, string strStyle, object userState) {
             if ((this.onBeginGetFileDelegate == null)) {
                 this.onBeginGetFileDelegate = new BeginOperationDelegate(this.OnBeginGetFile);
             }
@@ -8704,7 +8711,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strCategory,
                         strFileName,
                         lStart,
-                        lLength}, this.onEndGetFileDelegate, this.onGetFileCompletedDelegate, userState);
+                        lLength,
+                        strStyle}, this.onEndGetFileDelegate, this.onGetFileCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListFile(out DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos, string strAction, string strCategory, string strFileName, long lStart, long lLength) {
@@ -14210,10 +14218,10 @@ namespace DigitalPlatform.LibraryClient.localhost {
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndExistStatisInfo(out DigitalPlatform.LibraryClient.localhost.DateExist[] dates, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetFile", ReplyAction="http://dp2003.com/dp2library/dp2library/GetFileResponse")]
-        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength);
+        DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength, string strStyle);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetFile", ReplyAction="http://dp2003.com/dp2library/dp2library/GetFileResponse")]
-        System.IAsyncResult BeginGetFile(string strCategory, string strFileName, long lStart, long lLength, System.AsyncCallback callback, object asyncState);
+        System.IAsyncResult BeginGetFile(string strCategory, string strFileName, long lStart, long lLength, string strStyle, System.AsyncCallback callback, object asyncState);
         
         DigitalPlatform.LibraryClient.localhost.LibraryServerResult EndGetFile(out byte[] baContent, out string strFileTime, System.IAsyncResult result);
         
@@ -19264,13 +19272,13 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strDateRangeString}, this.onEndExistStatisInfoDelegate, this.onExistStatisInfoCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength) {
-            return base.Channel.GetFile(out baContent, out strFileTime, strCategory, strFileName, lStart, lLength);
+        public DigitalPlatform.LibraryClient.localhost.LibraryServerResult GetFile(out byte[] baContent, out string strFileTime, string strCategory, string strFileName, long lStart, long lLength, string strStyle) {
+            return base.Channel.GetFile(out baContent, out strFileTime, strCategory, strFileName, lStart, lLength, strStyle);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public System.IAsyncResult BeginGetFile(string strCategory, string strFileName, long lStart, long lLength, System.AsyncCallback callback, object asyncState) {
-            return base.Channel.BeginGetFile(strCategory, strFileName, lStart, lLength, callback, asyncState);
+        public System.IAsyncResult BeginGetFile(string strCategory, string strFileName, long lStart, long lLength, string strStyle, System.AsyncCallback callback, object asyncState) {
+            return base.Channel.BeginGetFile(strCategory, strFileName, lStart, lLength, strStyle, callback, asyncState);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -19283,7 +19291,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
             string strFileName = ((string)(inValues[1]));
             long lStart = ((long)(inValues[2]));
             long lLength = ((long)(inValues[3]));
-            return this.BeginGetFile(strCategory, strFileName, lStart, lLength, callback, asyncState);
+            string strStyle = ((string)(inValues[4]));
+            return this.BeginGetFile(strCategory, strFileName, lStart, lLength, strStyle, callback, asyncState);
         }
         
         private object[] OnEndGetFile(System.IAsyncResult result) {
@@ -19303,11 +19312,11 @@ namespace DigitalPlatform.LibraryClient.localhost {
             }
         }
         
-        public void GetFileAsync(string strCategory, string strFileName, long lStart, long lLength) {
-            this.GetFileAsync(strCategory, strFileName, lStart, lLength, null);
+        public void GetFileAsync(string strCategory, string strFileName, long lStart, long lLength, string strStyle) {
+            this.GetFileAsync(strCategory, strFileName, lStart, lLength, strStyle, null);
         }
         
-        public void GetFileAsync(string strCategory, string strFileName, long lStart, long lLength, object userState) {
+        public void GetFileAsync(string strCategory, string strFileName, long lStart, long lLength, string strStyle, object userState) {
             if ((this.onBeginGetFileDelegate == null)) {
                 this.onBeginGetFileDelegate = new BeginOperationDelegate(this.OnBeginGetFile);
             }
@@ -19321,7 +19330,8 @@ namespace DigitalPlatform.LibraryClient.localhost {
                         strCategory,
                         strFileName,
                         lStart,
-                        lLength}, this.onEndGetFileDelegate, this.onGetFileCompletedDelegate, userState);
+                        lLength,
+                        strStyle}, this.onEndGetFileDelegate, this.onGetFileCompletedDelegate, userState);
         }
         
         public DigitalPlatform.LibraryClient.localhost.LibraryServerResult ListFile(out DigitalPlatform.LibraryClient.localhost.FileItemInfo[] infos, string strAction, string strCategory, string strFileName, long lStart, long lLength) {

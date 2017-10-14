@@ -89,6 +89,7 @@ namespace DigitalPlatform.OPAC.Server
                     null,
             strPath,
             strLocalPath,
+            "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
             out strMetaData,
             out baOutputTimestamp,
             out strOutputPath,

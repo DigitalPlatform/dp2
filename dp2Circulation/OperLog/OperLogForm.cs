@@ -5403,7 +5403,7 @@ FileShare.ReadWrite))
             // return:
             //      -1  错误
             //      0   成功
-            int nRet = OperLogStatisForm.MakeLogFileNames(strStartDate,
+            int nRet = OperLogLoader.MakeLogFileNames(strStartDate,
                 strEndDate,
                 true,  // 是否包含扩展名 ".log"
         out LogFileNames,
@@ -9128,8 +9128,8 @@ MessageBoxDefaultButton.Button1);
                 OperLogLoader loader = new OperLogLoader();
                 loader.Channel = channel;
                 loader.Stop = this.Progress;
-                loader.estimate = estimate;
-                loader.FileNames = dates;
+                loader.Estimate = estimate;
+                loader.Dates = dates;
                 loader.Level = 0;   // 2;  // Program.MainForm.OperLogLevel;
                 loader.AutoCache = false;
                 loader.CacheDir = "";

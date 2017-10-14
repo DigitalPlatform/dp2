@@ -2760,7 +2760,7 @@ Stack:
             {
                 if (StringUtil.IsInList("clientscanvirus", channel.Rights) == true)
                 {
-                    if (Detect360() == true)
+                    if (Detect360() == true || DetectGuanjia() == true)
                     {
                         channel.Close();
                         Program.PromptAndExit(this, "dp2Circulation 被木马软件干扰，无法启动。");

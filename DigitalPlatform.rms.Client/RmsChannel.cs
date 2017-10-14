@@ -69,6 +69,7 @@ namespace DigitalPlatform.rms.Client
 
         NotFoundSubRes = 25,    // 部分下级资源记录不存在
         NotFoundObjectFile = 26,    // 对象文件没有找到
+        Compressed = 27,    // 返回的内容是压缩的 2017/10/7
 
         // LoginFail = 26, // dp2library向dp2Kernel登录失败。这意味着library.xml中的代理帐户有问题
     }
@@ -531,6 +532,10 @@ namespace DigitalPlatform.rms.Client
             else if (result.ErrorCode == ErrorCodeValue.NotFoundObjectFile)
             {
                 this.ErrorCode = ChannelErrorCode.NotFoundObjectFile;
+            }
+            else if (result.ErrorCode == ErrorCodeValue.Compressed)
+            {
+                this.ErrorCode = ChannelErrorCode.Compressed;
             }
             else
             {

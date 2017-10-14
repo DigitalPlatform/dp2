@@ -3036,7 +3036,6 @@ strElementName);
                     if (node != null)
                         strOldRecPath = DomUtil.GetAttr(node, "recPath");
 
-
                     // 从日志记录中记载的旧记录体中，获得旧记录册条码号
                     if (String.IsNullOrEmpty(strOldRecord) == false)
                     {
@@ -3060,7 +3059,6 @@ strElementName);
 
                         strOldItemBarcode = strNewItemBarcode;
                     }
-
 
                     // 如果有旧记录的册条码号，则需要从数据库中提取最新鲜的旧记录
                     // (如果没有旧记录的册条码号，则依日志记录中的旧记录)
@@ -3244,7 +3242,6 @@ strElementName);
                         }
                     }
 
-
                     // 把两个记录装入DOM
                     XmlDocument domExist = new XmlDocument();
                     XmlDocument domNew = new XmlDocument();
@@ -3272,9 +3269,6 @@ strElementName);
                         strError = "strRecord装载进入DOM时发生错误: " + ex.Message;
                         goto ERROR1;
                     }
-
-
-
 
                     // 合并新旧记录
                     string strNewXml = "";

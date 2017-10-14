@@ -8246,6 +8246,10 @@ namespace dp2Library
         // 成批获得日志记录
         // parameters:
         //      nCount  本次希望获取的记录数。如果==-1，表示希望尽可能多地获取
+        //      strStyle    level-0/level-1/level-2 表示详略级别
+        //                  level-0   全部
+        //                  level-1   删除 读者记录和册记录
+        //                  level-2   删除 读者记录和册记录中的 <borrowHistory>
         // return:
         //      result.Value
         //      -1  error
@@ -8280,12 +8284,12 @@ namespace dp2Library
                     return result;
                 }
 
-
                 // 权限字符串
-                if (sessioninfo.RightsOriginList.IsInList("getoperlog") == false)
+                if (sessioninfo.RightsOriginList.IsInList("getoperlog") == false
+                    && sessioninfo.RightsOriginList.IsInList("replication") == false)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "获得日志记录被拒绝。不具备getoperlog权限。";
+                    result.ErrorInfo = "获得日志记录被拒绝。不具备 getoperlog 权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -8317,7 +8321,15 @@ namespace dp2Library
                 else
                 {
                     // 从 strStyle 里移走 supervisor，避免前端通过本 API 看到日志记录中读者记录的 password 元素
-                    StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
+                    // if (sessioninfo.RightsOriginList.IsInList("replication") == false)
+                    //    StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
+                    if (StringUtil.IsInList("supervisor", strStyle) && sessioninfo.RightsOriginList.IsInList("replication") == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "以敏感信息方式获得日志记录被拒绝。不具备 replication 权限。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
 
                     // return:
                     //      -1  error
@@ -8365,6 +8377,10 @@ namespace dp2Library
         //      lIndex  记录序号。从0开始计数。lIndex为-1时调用本函数，表示希望获得整个文件尺寸值，将返回在lHintNext中。
         //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
         //              目前的含义是记录起始位置。
+        //      strStyle    level-0/level-1/level-2 表示详略级别
+        //                  level-0   全部
+        //                  level-1   删除 读者记录和册记录
+        //                  level-2   删除 读者记录和册记录中的 <borrowHistory>
         // 权限：需要getoperlog权限
         // return:
         // result.Value
@@ -8409,7 +8425,8 @@ namespace dp2Library
                 }
 
                 // 权限字符串
-                if (sessioninfo.RightsOriginList.IsInList("getoperlog") == false)
+                if (sessioninfo.RightsOriginList.IsInList("getoperlog") == false
+                    && sessioninfo.RightsOriginList.IsInList("replication") == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "获得日志记录被拒绝。不具备getoperlog权限。";
@@ -8443,7 +8460,14 @@ namespace dp2Library
                     }
 
                     // 从 strStyle 里移走 supervisor，避免前端通过本 API 看到日志记录中读者记录的 password 元素
-                    StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
+                    // StringUtil.RemoveFromInList("supervisor", true, ref strStyle);
+                    if (StringUtil.IsInList("supervisor", strStyle) && sessioninfo.RightsOriginList.IsInList("replication") == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "以敏感信息方式获得日志记录被拒绝。不具备 replication 权限。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
 
                     OperLogInfo[] records = null;
                     nRet = app.AccessLogDatabase.GetOperLogs(
@@ -9835,6 +9859,7 @@ Stack:
         //      strCategory 文件分类。目前只能使用 cfgs
         //      lStart  需要获得文件内容的起点。如果为-1，表示(baContent中)不返回文件内容
         //      lLength 需要获得的从lStart开始算起的byte数。如果为-1，表示希望尽可能多地取得(但是不能保证一定到尾)
+        //      strStyle    风格。gzip 表示希望获得压缩后的结果。如果确实返回了压缩后的结果，LibraryServerResult 中 ErrorCode 会返回 Compressed
         // rights:
         //      需要 getsystemparameter 权限
         // return:
@@ -9844,6 +9869,7 @@ Stack:
             string strFileName,
             long lStart,
             long lLength,
+            string strStyle,    // 2017/10/7
             out byte[] baContent,
             out string strFileTime)
         {
@@ -9909,6 +9935,15 @@ Stack:
                                 stream.Seek(lStart, SeekOrigin.Begin);
                                 stream.Read(baContent, 0, (int)lLength);
                                 result.Value = stream.Length;
+
+                                // 压缩内容
+                                // 2017/10/7
+                                if (StringUtil.IsInList("gzip", strStyle)
+                                    && baContent != null && baContent.Length > 0)
+                                {
+                                    baContent = ByteArray.CompressGzip(baContent);
+                                    result.ErrorCode = ErrorCode.Compressed;
+                                }
                             }
                         }
                         catch (FileNotFoundException)
@@ -11890,6 +11925,15 @@ Stack:
                     else
                         result.Value = lRet;
 
+                    // 压缩内容
+                    // 2017/10/6
+                    if (StringUtil.IsInList("gzip", strStyle)
+                        && baContent != null && baContent.Length > 0)
+                    {
+                        baContent = ByteArray.CompressGzip(baContent);
+                        result.ErrorCode = ErrorCode.Compressed;
+                    }
+
                     result.ErrorInfo = strError;
                     strOutputResPath = strResPath;
                     return result;
@@ -12227,6 +12271,13 @@ Stack:
             if (origin == ChannelErrorCode.TimestampMismatch)
             {
                 result.ErrorCode = ErrorCode.TimestampMismatch;
+                return;
+            }
+
+            // TODO: 其实可以用 Parse() 来翻译值
+            if (origin == ChannelErrorCode.Compressed)
+            {
+                result.ErrorCode = ErrorCode.Compressed;
                 return;
             }
 

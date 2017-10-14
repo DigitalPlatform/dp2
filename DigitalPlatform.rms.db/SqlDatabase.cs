@@ -7556,6 +7556,8 @@ namespace DigitalPlatform.rms
             out strError);
                         if (nRet < 0)
                             return nRet;
+                        goto END1;
+
 #if NO
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
 

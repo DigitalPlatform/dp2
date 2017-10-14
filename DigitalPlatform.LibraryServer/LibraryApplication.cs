@@ -157,7 +157,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.114 (2017/9/20) 批处理任务 大备份初步可用。对对象文件的文件指针用法进行了优化(StreamCache 类)
         //      2.115 (2017/9/23) ListFile() API 中的删除文件功能，被限定在 dp2library 数据目录的 upload 和 backup 子目录。不再允许前一版本那样的 managedatabase 权限的用户删除数据目录下的任何文件
         //      2.116 (2017/9/30) SerUser() API 增加了 closechannel 动作
-        public static string Version = "2.116";
+        //      2.117 (2017/10/6) dp2kernel 的 GetRes() 和 WriteRes() API 的 strStyle 增加了 gzip 选项
+        public static string Version = "2.117";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -194,6 +195,11 @@ namespace DigitalPlatform.LibraryServer
         /// 在登录阶段是否强制检查前端的版本号？(对几个特殊的代理账户不做此项检查)
         /// </summary>
         public bool CheckClientVersion = false;
+
+        /// <summary>
+        /// 在登录阶段要给所有账户都添加的权限列表。用逗号分隔的字符串
+        /// </summary>
+        public string GlobalAddRights { get; set; }
 
         string _outgoingQueue = "";
 
@@ -907,10 +913,13 @@ namespace DigitalPlatform.LibraryServer
                         this.CheckClientVersion = DomUtil.GetBooleanParam(node,
                             "checkClientVersion",
                             false);
+                        // 2017/10/13
+                        this.GlobalAddRights = node.GetAttribute("globalAddRights");
                     }
                     else
                     {
                         this.CheckClientVersion = false;
+                        this.GlobalAddRights = "";
                     }
 
                     // <circulation>
@@ -1947,7 +1956,7 @@ namespace DigitalPlatform.LibraryServer
             try
             {
                 Version version = new Version(strVersion);
-                Version base_version = new Version("2.68");
+                Version base_version = new Version("2.69");
                 if (version.CompareTo(base_version) < 0)
                 {
                     strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 " + version + ")。请立即升级 dp2Kernel 到最新版本。";
@@ -3394,9 +3403,46 @@ namespace DigitalPlatform.LibraryServer
 
                     WriteItemDbGroupParam(writer);
 
+                    // TODO: 把这些语句都写入一个函数
                     // 没有进入内存属性的其他XML片断
                     if (this.LibraryCfgDom != null)
                     {
+                        string[] elements = new string[]{
+                            "//rightsTable",       // 0.02以前为rightstable
+                            "//locationTypes",  // 0.02以前为locationtypes
+                            "//accounts",
+                            "//browseformats",
+                            "//foregift",
+                            "//virtualDatabases",
+                            "//valueTables",
+                            "//calendars",
+                            "//traceDTLP",
+                            "//zhengyuan",
+                            "//dkyw",
+                            "//patronReplication",
+                            "//clientFineInterface",
+                            "//yczb",
+                            "script",
+                            "mailTemplates",
+                            "smtpServer",
+                            "externalMessageInterface",
+                            "zhongcihao",
+                            "callNumber",
+                            "monitors",
+                            "dup",
+                            "unique",
+                            "utilDb",
+                            "libraryInfo",
+                            "login",
+                            "circulation",
+                            "channel",
+                            "cataloging",
+                            "serverReplication",
+                        };
+
+                        RestoreElements(writer, elements);
+
+#if NO
                         // <rightsTable>
                         XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//rightsTable");    // 0.02以前为rightstable
                         if (node != null)
@@ -3443,7 +3489,6 @@ namespace DigitalPlatform.LibraryServer
                         {
                             node.WriteTo(writer);
                         }
-
 
                         // <foregift>
                         node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//foregift");
@@ -3638,6 +3683,14 @@ namespace DigitalPlatform.LibraryServer
                         {
                             node.WriteTo(writer);
                         }
+
+                        // <serverReplication>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("serverReplication");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+#endif
                     }
 
                     // 时钟
@@ -3665,7 +3718,16 @@ namespace DigitalPlatform.LibraryServer
                 // this.m_lock.ReleaseWriterLock();
                 this.UnlockForWrite();
             }
+        }
 
+        void RestoreElements(XmlTextWriter writer, string[] elements)
+        {
+            foreach (string element in elements)
+            {
+                XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode(element);
+                if (node != null)
+                    node.WriteTo(writer);
+            }
         }
 
         public void StopAll()
@@ -8531,7 +8593,7 @@ out strError);
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" 
+                    + StringUtil.GetXmlStringSimple(strDbName + ":"
                     + strFrom/*"册条码"*/)       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
@@ -14909,6 +14971,7 @@ strLibraryCode);    // 读者所在的馆代码
         RequestError = 111,
         RequestTimeOut = 112,
         TimestampMismatch = 113,
+        Compressed = 114,   // 2017/10/7
     }
 
     // API函数结果

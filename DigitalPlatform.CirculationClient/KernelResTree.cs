@@ -1222,6 +1222,7 @@ out strError);
                 long lRet = channel.GetRes(null,
                 strPath,
                 strOutputFileName,
+                "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
                 out strMetadata,
                 out baOutputTimestamp,
                 out strOutputPath,

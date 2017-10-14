@@ -16,6 +16,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.ResultSet;
+using System.IO.Compression;
 
 namespace dp2Kernel
 {
@@ -331,11 +332,12 @@ namespace dp2Kernel
         //                      ->cv:表示转换方法。以前的方法，这样定义也是可以的 xxxx->cccc 其中 xxxx 是 XPath 部分，cccc 是 convert method 部分。新用法老用法都兼容
         //                      '->' 分隔的第一个部分默认就是 XPath。
         //      2.68 2017/6/7 为 WriteRes() API 的 strStyle 参数增加 simulate 用法 (当写入对象资源时)
+        //      2.69 2017/10/7 为 GetRes() 和 WriteRes() API 的 strStyle 参数增加 gzip 用法
         public Result GetVersion()
         {
             Result result = new Result();
             result.Value = 0;
-            result.ErrorString = "2.68";
+            result.ErrorString = "2.69";
             return result;
         }
 
@@ -1718,6 +1720,15 @@ namespace dp2Kernel
 
                 result.Value = nRet;   // 总长度
 
+                // 压缩内容
+                // 2017/10/6
+                if (StringUtil.IsInList("gzip", strStyle)
+                    && baContent != null && baContent.Length > 0)
+                {
+                    baContent = ByteArray.CompressGzip(baContent);
+                    result.ErrorCode = ErrorCodeValue.Compressed;
+                }
+
                 if (nAdditionError == -50)
                 {
                     result.ErrorCode = ErrorCodeValue.NotFoundSubRes;    // 2006/7/3
@@ -1929,7 +1940,7 @@ namespace dp2Kernel
             }
             catch (Exception ex)
             {
-                string strErrorText = "BulkWriteRes() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "WriteRecords() API出现异常: " + ExceptionUtil.GetDebugText(ex);
                 app.WriteErrorLog(strErrorText);
 
                 // result依然返回错误
@@ -2182,6 +2193,13 @@ namespace dp2Kernel
                 if (PrepareUser(ref result) == -1)
                     return result;
 
+                // 2017/10/7
+                if (StringUtil.IsInList("gzip", strStyle)
+                    && baContent != null && baContent.Length > 0)
+                {
+                    baContent = ByteArray.DecompressGzip(baContent);
+                }
+
                 // 调数据库集合的WriteRes();
                 int nRet = 0;
                 string strError = "";
@@ -2234,7 +2252,6 @@ namespace dp2Kernel
                 result.ErrorString = strErrorText;
                 return result;
             }
-
         }
 
         // 删除资源，可以是记录 或 配置事项，不支持对象资源或部分记录体

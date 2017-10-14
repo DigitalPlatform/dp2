@@ -20,6 +20,7 @@ using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
+#if NO
     /// <summary>
     /// 在一个日志文件中，枚举每个日志记录事项的枚举器
     /// </summary>
@@ -897,4 +898,6 @@ FileShare.ReadWrite);
             lProgressValue += lFileSize;
         }
     }
+
+#endif
 }

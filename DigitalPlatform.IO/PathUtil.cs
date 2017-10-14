@@ -771,7 +771,7 @@ namespace DigitalPlatform.IO
         // 移除文件目录内所有文件的 ReadOnly 属性
         public static void RemoveReadOnlyAttr(string strSourceDir)
         {
-            string strCurrentDir = Directory.GetCurrentDirectory();
+            // string strCurrentDir = Directory.GetCurrentDirectory();
 
             DirectoryInfo di = new DirectoryInfo(strSourceDir);
 
@@ -914,20 +914,24 @@ namespace DigitalPlatform.IO
                 if (bDeleteTargetBeforeCopy == true)
                 {
                     if (Directory.Exists(strTargetDir) == true)
+                    {
+                        RemoveReadOnlyAttr(strTargetDir);   // 怕即将删除的目录中有隐藏文件妨碍删除
+
                         Directory.Delete(strTargetDir, true);
+                    }
                 }
 
                 TryCreateDir(strTargetDir);
 
                 FileSystemInfo[] subs = di.GetFileSystemInfos();
 
-                for (int i = 0; i < subs.Length; i++)
+                foreach (FileSystemInfo sub in subs)
                 {
                     // 复制目录
-                    if ((subs[i].Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+                    if ((sub.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
                     {
-                        int nRet = CopyDirectory(subs[i].FullName,
-                            Path.Combine(strTargetDir, subs[i].Name),
+                        int nRet = CopyDirectory(sub.FullName,
+                            Path.Combine(strTargetDir, sub.Name),
                             bDeleteTargetBeforeCopy,
                             out strError);
                         if (nRet == -1)
@@ -935,8 +939,8 @@ namespace DigitalPlatform.IO
                         continue;
                     }
                     // 复制文件
-                    File.Copy(subs[i].FullName,
-                        Path.Combine(strTargetDir, subs[i].Name),
+                    File.Copy(sub.FullName,
+                        Path.Combine(strTargetDir, sub.Name),
                         true);
                 }
             }

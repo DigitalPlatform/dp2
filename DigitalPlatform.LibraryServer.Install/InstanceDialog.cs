@@ -1973,6 +1973,19 @@ MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;   // cancelled
 
+            string strRestoreMode = "";
+            {
+                SelectRestoreModeDialog dlg = new SelectRestoreModeDialog();
+                GuiUtil.SetControlFont(dlg, this.Font);
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+                if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                    return;
+
+                strRestoreMode = dlg.Action;
+                Debug.Assert(strRestoreMode == "full" || strRestoreMode == "blank", "");
+            }
+
             {
                 // 要求操作者用 supervisor 账号登录一次。以便后续进行各种重要操作。
                 // 只需要 library.xml 即可，不需要 dp2library 在运行中。
@@ -2006,16 +2019,36 @@ MessageBoxDefaultButton.Button2);
 
             string strDataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
 
-            OpenFileDialog dlg = new OpenFileDialog();
+            string strBackupFileName = "";
 
-            dlg.Title = "请指定要导入的大备份文件名";
-            // dlg.FileName = this.textBox_filename.Text;
+            if (strRestoreMode == "full")
+            {
+                OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Filter = "大备份文件 (*.dp2bak)|*.dp2bak|All files (*.*)|*.*";
-            dlg.RestoreDirectory = true;
+                dlg.Title = "请指定要导入的大备份文件名";
+                // dlg.FileName = this.textBox_filename.Text;
 
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
+                dlg.Filter = "大备份文件 (*.dp2bak)|*.dp2bak|All files (*.*)|*.*";
+                dlg.RestoreDirectory = true;
+
+                if (dlg.ShowDialog() != DialogResult.OK)
+                    return;
+
+                strBackupFileName = dlg.FileName;
+            }
+            else
+            {
+                OpenFileDialog dlg = new OpenFileDialog();
+
+                dlg.Title = "请指定要使用的数据库定义文件名";
+                dlg.Filter = "数据库定义文件 (*.dbdef.zip)|*.dbdef.zip|All files (*.*)|*.*";
+                dlg.RestoreDirectory = true;
+
+                if (dlg.ShowDialog() != DialogResult.OK)
+                    return;
+
+                strBackupFileName = dlg.FileName;
+            }
 
             LockInstance(strInstanceName, true);
 
@@ -2025,7 +2058,7 @@ MessageBoxDefaultButton.Button2);
             LibraryInstallHelper.RestoreLibraryParam param_base = new LibraryInstallHelper.RestoreLibraryParam();
             param_base.InstanceName = strInstanceName;
             param_base.DataDir = strDataDir;
-            param_base.BackupFileName = dlg.FileName;
+            param_base.BackupFileName = strBackupFileName;
             param_base.TempDirRoot = this.TempDir;
             param_base.FastMode = true;
             Task.Factory.StartNew(() => RestoreInstance(

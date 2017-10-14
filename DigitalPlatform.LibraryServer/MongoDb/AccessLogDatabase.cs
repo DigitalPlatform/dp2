@@ -441,8 +441,9 @@ return { None : '' };
             if (StringUtil.IsInList("getfilenames", strStyle) == true)
             {
                 int hit_count = 0;
-                List<ValueCount> dates = ListDates(0, MAX_FILENAME_COUNT, out hit_count);
                 int nStart = (int)lIndex;
+                List<ValueCount> dates = ListDates(nStart,   // bug???
+                    MAX_FILENAME_COUNT, out hit_count);
                 int nEnd = dates.Count;
                 if (nCount == -1)
                     nEnd = dates.Count;

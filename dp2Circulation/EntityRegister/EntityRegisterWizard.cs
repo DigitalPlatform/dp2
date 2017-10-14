@@ -306,7 +306,7 @@ namespace dp2Circulation
             SetControlsColor(this._colorStyle);
 
             this._genData = new GenerateData(this, this);
-            this._genData.ScriptFileName = "dp2circulation_marc_autogen_2.cs";
+            this._genData.ScriptFileName = "dp2circulation_marc_autogen_2.cs";  // 故意制造一个找不到的文件名。这样会自动用到默认 BiblioItemsHost 对象
             this._genData.DetailHostType = typeof(BiblioItemsHost);
 
             // 刚打开窗口，设定输入焦点

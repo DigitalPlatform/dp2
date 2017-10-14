@@ -1,4 +1,5 @@
 ﻿using DigitalPlatform.CommonControl;
+using DigitalPlatform.LibraryClient;
 using DigitalPlatform.Text;
 using System;
 using System.Collections.Generic;
@@ -42,7 +43,7 @@ namespace dp2Circulation
 
             string strWarning = "";
             List<string> dates = null;
-            int nRet = OperLogStatisForm.MakeLogFileNames(strStart,
+            int nRet = OperLogLoader.MakeLogFileNames(strStart,
                 strEnd,
                 false,  // 是否包含扩展名 ".log"
                 out dates,

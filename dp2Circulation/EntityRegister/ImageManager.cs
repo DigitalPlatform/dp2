@@ -181,6 +181,7 @@ namespace dp2Circulation
                         null,
                         info.ObjectPath,
                         info.FileName,
+                        "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
                         out strMetaData,
                         out baOutputTimeStamp,
                         out strTempOutputPath,

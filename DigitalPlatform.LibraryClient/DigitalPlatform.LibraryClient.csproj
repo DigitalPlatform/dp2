@@ -55,6 +55,9 @@
     <Compile Include="ItemBarcodeLoader.cs" />
     <Compile Include="LibraryChannel.cs" />
     <Compile Include="LibraryChannelPool.cs" />
+    <Compile Include="OperLogDatesLoader.cs" />
+    <Compile Include="OperLogItemLoader.cs" />
+    <Compile Include="OperLogLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResultSetLoader.cs" />
     <Compile Include="Service References\localhost\Reference.cs">

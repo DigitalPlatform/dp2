@@ -774,6 +774,10 @@ namespace DigitalPlatform.rms
         [EnumMember]
         NotFoundObjectFile = 24,  // 对象文件不存在 -100
 
+        [EnumMember]
+        Compressed = 25,  // 返回的内容是压缩过的
+
+
         //
 
         [EnumMember]

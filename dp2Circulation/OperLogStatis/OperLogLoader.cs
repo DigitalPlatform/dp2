@@ -18,6 +18,7 @@ using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
+#if NO
     public class OperLogLoader : IEnumerable
     {
         /// <summary>
@@ -650,4 +651,6 @@ namespace dp2Circulation
         OperLog = 0x01,     // 操作日志
         AccessLog = 0x02,   // 只读日志
     }
+
+#endif
 }

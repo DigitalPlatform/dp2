@@ -19,7 +19,7 @@ namespace dp2Circulation
     /// </summary>
     internal partial class StartLogRecoverDlg : Form
     {
-        string _taskName = "日志恢复";  // 日志恢复/创建 MongoDB 日志库
+        string _taskName = "日志恢复";  // 日志恢复/创建 MongoDB 日志库/服务器同步
         public string TaskName
         {
             get
@@ -33,6 +33,13 @@ namespace dp2Circulation
                 {
                     this.comboBox_recoverLevel.Visible = false;
                     this.label_recoverLevel.Visible = false;
+                }
+                if (value == "服务器同步")
+                {
+                    this.comboBox_recoverLevel.Visible = false;
+                    this.label_recoverLevel.Visible = false;
+
+                    this.checkBox_clearBefore.Visible = false;
                 }
             }
         }

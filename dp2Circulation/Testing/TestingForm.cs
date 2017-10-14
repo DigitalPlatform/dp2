@@ -2231,6 +2231,7 @@ strTestDbName,
                     long lRet = channel.GetRes(stop,
                         strObjectPath,
                         strOutputFileName,
+                        "content,data,metadata,timestamp,outputpath,gzip",  // 2017/10/7 增加 gzip
                         out strMetadata,
                         out timestamp,
                         out strOutputPath,
