@@ -22,11 +22,9 @@ namespace DigitalPlatform.IO
             {
                 try
                 {
-                    string ModuleName = Path.GetFileName(ProcessUtil.GetExecutablePath(process));
-
-                    results.Add(ModuleName);
+                    results.Add(process.ProcessName);
                 }
-                catch (Win32Exception)
+                catch
                 {
 
                 }
