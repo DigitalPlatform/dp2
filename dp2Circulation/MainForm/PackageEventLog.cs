@@ -260,6 +260,7 @@ namespace dp2Circulation
 
             // 系统进程
             {
+#if NO
                 System.Diagnostics.Process[] process_list = System.Diagnostics.Process.GetProcesses();
                 text.Append("--- System process:\r\n");
                 int i = 0;
@@ -277,6 +278,9 @@ namespace dp2Circulation
                     text.Append((i + 1).ToString() + ") " + ModuleName + "\r\n");
                     i++;
                 }
+#endif
+                text.Append("--- System process:\r\n" + StringUtil.MakePathList(ProcessUtil.GetProcessNameList(), "\r\n"));
+
             }
 
             return text.ToString();

@@ -2056,33 +2056,13 @@ MessageBoxDefaultButton.Button1);
             }
 
             // 再检测系统进程
-            System.Diagnostics.Process[] process_list = System.Diagnostics.Process.GetProcesses();
+            List<string> names = ProcessUtil.GetProcessNameList();
 
-            foreach (Process process in process_list)
+            foreach (string name in names)
             {
-#if NO
-                string ModuleName = "";
-                try
-                {
-                    ModuleName = process.MainModule.ModuleName;
-                }
-                catch (Exception)
-                {
-                    continue;
-                }
-#endif
-                try
-                {
-                    string ModuleName = Path.GetFileName(ProcessUtil.GetExecutablePath(process));
-
-                    if (ModuleName.StartsWith("360Tray.exe", StringComparison.OrdinalIgnoreCase)
-                        || ModuleName.StartsWith("zhudongfangyu.exe", StringComparison.OrdinalIgnoreCase))
-                        return true;
-                }
-                catch(Win32Exception)
-                {
-
-                }
+                if (name.StartsWith("360Tray", StringComparison.OrdinalIgnoreCase)
+                    || name.StartsWith("zhudongfangyu", StringComparison.OrdinalIgnoreCase))
+                    return true;
             }
 
             return false;
@@ -2103,38 +2083,17 @@ MessageBoxDefaultButton.Button1);
 #endif
 
             // 再检测系统进程
-            System.Diagnostics.Process[] process_list = System.Diagnostics.Process.GetProcesses();
+            List<string> names = ProcessUtil.GetProcessNameList();
 
-            foreach (Process process in process_list)
+            foreach (string name in names)
             {
-#if NO
-                string ModuleName = "";
-                try
-                {
-                    ModuleName = process.MainModule.ModuleName;
-                }
-                catch (Exception)
-                {
-                    continue;
-                }
-#endif
-                try
-                {
-                    string ModuleName = Path.GetFileName(ProcessUtil.GetExecutablePath(process));
-
-                    if (ModuleName.StartsWith("qqpctray.exe", StringComparison.OrdinalIgnoreCase)
-                        || ModuleName.StartsWith("qqpcrtp.exe", StringComparison.OrdinalIgnoreCase))
-                        return true;
-                }
-                catch(Win32Exception)
-                {
-
-                }
+                if (name.StartsWith("qqpctray", StringComparison.OrdinalIgnoreCase)
+                    || name.StartsWith("qqpcrtp", StringComparison.OrdinalIgnoreCase))
+                    return true;
             }
 
             return false;
         }
-
 
         // 判断两个文件的版本号是否一致
         static bool VersionChanged(string filename1, string filename2)
