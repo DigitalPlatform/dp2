@@ -1295,7 +1295,6 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             MessageBox.Show(this, "OK");
 
             this.Enabled = true;
-
         }
 
         private void comboBox_ui_fixedPanelDock_SelectedIndexChanged(object sender, EventArgs e)

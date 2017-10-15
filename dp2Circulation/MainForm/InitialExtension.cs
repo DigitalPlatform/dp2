@@ -2532,6 +2532,10 @@ AppInfo.GetString("config",
 
                     this.BeginInvoke(new Action(FillLibraryCodeListMenu));
                 }
+                catch (Exception)
+                {
+                    return false;
+                }
                 finally
                 {
                     // EndSearch();
@@ -3165,6 +3169,8 @@ Culture=neutral, PublicKeyToken=null
 
             return 0;
         ERROR1:
+            if (this.Visible == false || this.IsDisposed)
+                return -1;
             DialogResult result = MessageBox.Show(this,
                 strError + "\r\n\r\n是否重试?",
                 "dp2Circulation",

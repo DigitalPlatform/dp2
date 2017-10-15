@@ -2764,7 +2764,7 @@ Stack:
                     {
                         channel.Close();
                         Program.PromptAndExit(this, "dp2Circulation 被木马软件干扰，无法启动。");
-                        return;
+                        throw new InterruptException("dp2Circulation 被木马软件干扰，无法启动。");
                     }
                 }
                 _virusScanned = true;
@@ -2802,6 +2802,8 @@ Stack:
         {
             get
             {
+                if (this.AppInfo == null)
+                    return null;
                 return AppInfo.GetString(
                 "default_account",
                 "username",
