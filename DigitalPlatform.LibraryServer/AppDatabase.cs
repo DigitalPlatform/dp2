@@ -5597,8 +5597,7 @@ out strError);
     "action",
     "createDatabase");
 
-                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases",
-"");
+                XmlNode new_node = DomUtil.SetElementText(domOperLog.DocumentElement, "databases", "");
                 StringBuilder text = new StringBuilder();
                 foreach (XmlElement node in database_nodes)
                 {

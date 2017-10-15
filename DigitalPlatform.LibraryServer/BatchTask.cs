@@ -1000,6 +1000,12 @@ namespace DigitalPlatform.LibraryServer
             else if (strOperation == "manageDatabase")
             {
                 // 管理数据库 2017/5/23
+                // 2017/10/15
+                nRet = this.App.RecoverManageDatabase(this.RmsChannels,
+                    level,
+                    dom,
+                    attachment,
+                    out strError);
             }
             else
             {

@@ -2618,7 +2618,7 @@ strElementName);
                 return -1;
             }
 
-            bool bReuse = false;    // 是否能够不顾RecorverLevel状态而重用部分代码
+            bool bReuse = false;    // 是否能够不顾 RecoverLevel 状态而重用部分代码
 
         DO_SNAPSHOT:
 
@@ -3587,7 +3587,7 @@ strElementName);
                 return -1;
             }
 
-            bool bReuse = false;    // 是否能够不顾RecorverLevel状态而重用部分代码
+            bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
         DO_SNAPSHOT:
 
@@ -3973,7 +3973,7 @@ strElementName);
                 return -1;
             }
 
-            bool bReuse = false;    // 是否能够不顾RecorverLevel状态而重用部分代码
+            bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
         DO_SNAPSHOT:
 
@@ -4358,7 +4358,7 @@ strElementName);
                 return -1;
             }
 
-            bool bReuse = false;    // 是否能够不顾RecorverLevel状态而重用部分代码
+            bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
         DO_SNAPSHOT:
 
@@ -4932,7 +4932,7 @@ strElementName);
                 return -1;
             }
 
-            bool bReuse = false;    // 是否能够不顾RecorverLevel状态而重用部分代码
+            bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
             DO_SNAPSHOT:
 
@@ -6380,7 +6380,7 @@ strElementName);
                 return -1;
             }
 
-            bool bReuse = false;    // 是否能够不顾RecorverLevel状态而重用部分代码
+            bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
         DO_SNAPSHOT:
 
@@ -7692,7 +7692,7 @@ API: Settlement()
                 return -1;
             }
 
-            bool bReuse = false;    // 是否能够不顾RecorverLevel状态而重用部分代码
+            bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
         DO_SNAPSHOT:
 
@@ -7845,7 +7845,7 @@ domLog.DocumentElement,
                 return -1;
             }
 
-            bool bReuse = false;    // 是否能够不顾RecorverLevel状态而重用部分代码
+            bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
 
 DO_SNAPSHOT:
 
@@ -8125,6 +8125,83 @@ DO_SNAPSHOT:
                         out strError);
                     if (lRet == -1)
                         goto ERROR1;
+                }
+                else
+                {
+                    strError = "不可识别的strAction值 '" + strAction + "'";
+                    goto ERROR1;
+                }
+
+                return 0;
+            }
+
+            // 逻辑恢复或者混合恢复
+            if (level == RecoverLevel.Logic
+                || level == RecoverLevel.LogicAndSnapshot)
+            {
+                // 和SnapShot方式相同
+                bReuse = true;
+                goto DO_SNAPSHOT;
+            }
+            return 0;
+        ERROR1:
+            if (level == RecoverLevel.LogicAndSnapshot)
+            {
+                level = RecoverLevel.Snapshot;
+                goto DO_SNAPSHOT;
+            }
+            return -1;
+        }
+
+        // 2017/10/15
+        public int RecoverManageDatabase(
+RmsChannelCollection Channels,
+RecoverLevel level,
+XmlDocument domLog,
+Stream attachmentLog,
+out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+            long lRet = 0;
+
+            // 暂时把Robust当作Logic处理
+            if (level == RecoverLevel.Robust)
+                level = RecoverLevel.Logic;
+
+
+            RmsChannel channel = Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            bool bReuse = false;    // 是否能够不顾RecoverLevel状态而重用部分代码
+
+DO_SNAPSHOT:
+
+            // 快照恢复
+            if (level == RecoverLevel.Snapshot
+                || bReuse == true)
+            {
+                string strAction = DomUtil.GetElementText(domLog.DocumentElement,
+                    "action");
+                if (strAction == "createDatabase")
+                {
+
+                }
+                if (strAction == "initializeDatabase")
+                {
+
+                }
+                if (strAction == "refreshDatabase")
+                {
+
+                }
+                if (strAction == "deleteDatabase")
+                {
+
                 }
                 else
                 {

@@ -1226,6 +1226,12 @@ out strError);
 
             this.WcfException = ex0;
 
+            // 2017/10/15
+            if (ex0 is InterruptException)
+            {
+                throw ex0;
+            }
+
             // System.TimeoutException
             if (ex0 is System.TimeoutException)
             {

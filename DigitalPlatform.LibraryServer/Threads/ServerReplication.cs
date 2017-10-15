@@ -574,6 +574,9 @@ namespace DigitalPlatform.LibraryServer
             _stop.BeginLoop();
             try
             {
+                DateTime lastSaveTime = DateTime.Now;
+                TimeSpan delta = TimeSpan.FromMinutes(1);
+
                 OperLogLoader loader = new OperLogLoader();
                 loader.Channel = channel;
                 loader.Stop = this._stop;
@@ -586,7 +589,6 @@ namespace DigitalPlatform.LibraryServer
                 // loader.Filter = "borrow,return,setReaderInfo,setBiblioInfo,setEntity,setOrder,setIssue,setComment,amerce,passgate,getRes";
                 loader.LogType = LogType.OperLog;
 
-                long i = 0;
                 foreach (OperLogItem item in loader)
                 {
                     if (this.Stopped)
@@ -657,13 +659,13 @@ namespace DigitalPlatform.LibraryServer
                     breakpoint.Index = item.Index + 1;
 
                     // 中途记忆断点
-                    if ((i % 1000) == 0)
+                    if (DateTime.Now - lastSaveTime >= delta)
                     {
                         if (func_saveBreakPoint != null)
                             func_saveBreakPoint(breakpoint);
+                        lastSaveTime = DateTime.Now;
                     }
 
-                    i++;
                 }
 
                 return 1;

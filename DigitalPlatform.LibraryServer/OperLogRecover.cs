@@ -43,7 +43,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 解析 开始 参数
-        static int ParseLogRecorverStart(string strStart,
+        static int ParseLogRecoverStart(string strStart,
             out long index,
             out string strFileName,
             out string strError)
@@ -169,7 +169,7 @@ namespace DigitalPlatform.LibraryServer
 
                 long lStartIndex = 0;// 开始位置
                 string strStartFileName = "";// 开始文件名
-                int nRet = ParseLogRecorverStart(startinfo.Start,
+                int nRet = ParseLogRecoverStart(startinfo.Start,
                     out lStartIndex,
                     out strStartFileName,
                     out strError);
