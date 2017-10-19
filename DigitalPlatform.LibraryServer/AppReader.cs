@@ -1479,9 +1479,12 @@ strLibraryCode);    // 读者所在的馆代码
             }
             catch (Exception ex)
             {
+                string strErrorText = "SetReaderInfo() 抛出异常:" + ExceptionUtil.GetDebugText(ex);
+                this.WriteErrorLog(strErrorText);
+
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
-                result.ErrorInfo = "抛出异常:" + ex.Message;
+                result.ErrorInfo = strErrorText;
                 return result;
             }
             finally
@@ -4692,9 +4695,12 @@ out strError);
             }
             catch (Exception ex)
             {
+                string strErrorText = "MoveReaderInfo() 抛出异常:" + ExceptionUtil.GetDebugText(ex);
+                this.WriteErrorLog(strErrorText);
+
                 result.Value = -1;
                 result.ErrorCode = ErrorCode.SystemError;
-                result.ErrorInfo = "抛出异常:" + ex.Message;
+                result.ErrorInfo = strErrorText;
                 return result;
             }
             finally

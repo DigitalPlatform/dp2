@@ -4829,9 +4829,8 @@ out strFingerprint);
         {
             strError = "";
 
-            //Register the channel with ChannelServices.
             if (this.m_fingerPrintChannel == null)
-                this.m_fingerPrintChannel = new IpcClientChannel();
+                this.m_fingerPrintChannel = new IpcClientChannel(Guid.NewGuid().ToString(), new BinaryClientFormatterSinkProvider());
 
             ChannelServices.RegisterChannel(m_fingerPrintChannel, false);
 
@@ -4845,8 +4844,12 @@ out strFingerprint);
                     return -1;
                 }
             }
-            finally
+            catch (Exception ex)
             {
+                EndFingerprintChannel();
+
+                strError = "StartFingerprintChannel() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                return -1;
             }
 
             return 0;

@@ -318,7 +318,8 @@ namespace dp2Circulation
                 if (t != null)
                 {
                     font.Dispose();
-                    return new Font(t, font.Size, font.Style);
+                    // return new Font(t, font.Size, font.Style, unit);    // unit 2017/10/19
+                    return new Font(t, height, unit);
                 }
             }
             return font;
