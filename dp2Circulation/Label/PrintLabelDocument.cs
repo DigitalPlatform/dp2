@@ -1010,17 +1010,21 @@ namespace dp2Circulation
                             float picture_ratio = Math.Max(2, g.DpiX / 100);
 
                             // 应该是 1/100 inch 单位
-                            float textHeight = 0;
+                            float textFontHeight = 0;   // 创建字体用的高度
+                            float textRectHeight = 0;   // 绘制字体实际占据的矩形的高度，值一般比 textFontHeight 要大
                             if (barcode_text_style == null || StringUtil.IsInList("none", barcode_text_style) == false)
-                                textHeight = MeasureOcrTextHeight(
+                            {
+                                textFontHeight = MeasureOcrTextHeight(
              g,
              rect,
-             strText);
-                            RectangleF target = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height - textHeight);
+             strText,
+             out textRectHeight);
+                            }
+                            RectangleF target = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height - textRectHeight);
                             RectangleF rectText = new RectangleF(target.X,
     target.Y + target.Height,
     target.Width,
-    textHeight);
+    textRectHeight);
 
 #if NO
                             // target 区域边界
@@ -1066,9 +1070,10 @@ namespace dp2Circulation
                                 g.DrawImage(image, target, source, GraphicsUnit.Pixel);
                             }
 
-                            if (textHeight > 0)
+                            if (textFontHeight > 0)
                                 PaintOcrFont(
                                     g,
+                                    textFontHeight,
                                     rectText,
                                     strText);
                         }
@@ -1121,12 +1126,14 @@ namespace dp2Circulation
                                 {
                                     float old_height = this_font.GetHeight(g);
                                     // 自动填充风格
-                                    float auto_height = GetAutoFitTextHeight(
+                                    float auto_rect_height = 0;
+                                    float auto_font_height = GetAutoFitTextHeight(
                 g,
                 this_font,
                 rect,
-                strText);
-                                    if (auto_height == 0)
+                strText,
+                out auto_rect_height);
+                                    if (auto_font_height == 0)
                                     {
                                         // 普通风格
                                         g.DrawString(strText,
@@ -1137,14 +1144,14 @@ namespace dp2Circulation
                                     }
                                     else
                                     {
-                                        float delta = old_height - auto_height;
+                                        float delta = old_height - auto_rect_height;
                                         RectangleF temp_rect = rect;
                                         // 调整 rect
                                         // temp_rect.Inflate(0, -delta);
                                         temp_rect.Offset(0, delta / 2);
 
                                         using (Font font = new Font(this_font.FontFamily,
-            auto_height,
+            auto_font_height,   // auto_height,
             this_font.Style,
             GraphicsUnit.Pixel))
                                         {
@@ -1291,6 +1298,120 @@ namespace dp2Circulation
         }
 #endif
 
+        // 获得 rect 能容纳的字体高度
+        // parameters:
+        //      textRectHeight  返回字体矩形实际的高度
+        // return:
+        //      返回创建字体用的高度
+        static float GetAutoFitTextHeight(
+            Graphics g,
+            string strFontName,
+            RectangleF rect,
+            string strText,
+            out float textRectHeight)
+        {
+            float start_height = rect.Height;
+            float ratio = 0F;
+            float height = start_height;
+            for (; ; )
+            {
+                using (Font font = Global.BuildFont(
+                    strFontName,
+                    height,
+                    GraphicsUnit.Pixel))
+                {
+                    SizeF size = g.MeasureString(strText, font);
+                    float next_ratio = GetRatio(size,
+            rect,
+            start_height);
+                    if (next_ratio == 0)
+                    {
+                        textRectHeight = size.Height;
+                        return height;
+                    }
+
+                    height = height * next_ratio;
+                }
+
+                if (height <= 1)
+                {
+                    textRectHeight = Math.Max(1, height);
+                    return textRectHeight;
+                }
+            }
+        }
+
+        // parameters:
+        //      rect    注意这是 Graphics 当前单位的值
+        // parameters:
+        //      textRectHeight  返回字体矩形实际的高度
+        // return:
+        //      返回创建字体用的高度
+        static float GetAutoFitTextHeight(
+            Graphics g,
+            Font ref_font,
+            RectangleF rect,
+            string strText,
+            out float textRectHeight)
+        {
+            // GraphicsUnit unit = g.PageUnit;
+            float height = ref_font.GetHeight(g);    //  GetFontSizeInPixels(g, ref_font); // 初始的文字高度
+            // float ratio = 1F;
+            float start_height = height;
+            for (; ; )
+            {
+                using (Font font = new Font(ref_font.FontFamily,
+                    height,
+                    ref_font.Style,
+                    GraphicsUnit.Pixel))
+                {
+                    SizeF size = g.MeasureString(strText, font);
+
+                    float next_ratio = GetRatio(size,
+            rect,
+            start_height);
+                    if (next_ratio == 0)
+                    {
+                        textRectHeight = size.Height;
+                        return height;
+                    }
+
+                    height = height * next_ratio;
+                }
+
+
+                if (height <= 1)
+                {
+                    textRectHeight = Math.Max(1, height);
+                    return textRectHeight;
+                }
+            }
+        }
+
+        // parameters:
+        //      size    文字实际外围矩形
+        //      rect    限定的矩形
+        //      start_height    字体起始创建高度 (一般第一次用这个高度创建的字体，其 Height 大于这个 start_height)
+        static float GetRatio(SizeF size,
+            RectangleF rect,
+            float start_height)
+        {
+            if (size.Width <= rect.Width
+    && Convert.ToDecimal(size.Height) <= Convert.ToDecimal(start_height))
+                return 0;
+
+            if (size.Width > rect.Width)
+                return rect.Width / size.Width; // (size.Width - rect.Width) / size.Width;
+            else if (size.Height > start_height)
+                return 1 - (size.Height - start_height) / size.Height;
+            else
+            {
+                Debug.Assert(false, "");
+                return 0.95F;  // 理论上应该走不到这里
+            }
+        }
+
+#if NO
         // parameters:
         //      rect    注意这是 Graphics 当前单位的值
         static float GetAutoFitTextHeight(
@@ -1335,8 +1456,61 @@ namespace dp2Circulation
                     return Math.Max(1, height);
             }
         }
+#endif
+        static float MeasureOcrTextHeight(
+Graphics g,
+RectangleF rect,
+string strText,
+            out float textRectHeight)
+        {
+            rect.Height = rect.Height / 3; // 预计的文字高度
+            return GetAutoFitTextHeight(
+                g,
+                OCRB_FONTNAME,
+                rect,
+                strText,
+                out textRectHeight);
+#if NO
+            float start_height = rect.Height / 3; // 预计的文字高度
+            float ratio = 0F;
+            float height = start_height;
+            for (; ; )
+            {
+                using (Font font = Global.BuildFont(
+                    OCRB_FONTNAME,  // "OCR-B 10 BT",
+                    height,
+                    GraphicsUnit.Pixel))
+                {
+                    SizeF size = g.MeasureString(strText, font);
+                    if (size.Width <= rect.Width
+                        && size.Height <= start_height)
+                        return height;
+
+                    if (ratio != 0)
+                        ratio *= 0.9F;
+                    else
+                    {
+                        if (size.Width > rect.Width)
+                            ratio = (size.Width - rect.Width) / size.Width;
+                        else if (size.Height > start_height)
+                            ratio = 1 - (size.Height - start_height) / size.Height;
+                        else
+                            ratio = 1;  // 理论上应该走不到这里
+                    }
+                        // ratio = size.Height / size.Width;
+                    // ratio = ((size.Width - rect.Width) / rect.Width) + 0.04F; // 超过的百分比
+                }
+
+                height = height * ratio;
+
+                if (height <= 1)
+                    return Math.Max(1, height);
+            }
+#endif
+        }
 
 
+#if NO
         static float MeasureOcrTextHeight(
     Graphics g,
     RectangleF rect,
@@ -1347,12 +1521,13 @@ namespace dp2Circulation
             for (; ; )
             {
                 using (Font font = Global.BuildFont(
-                    "OCR-B 10 BT",
+                    OCRB_FONTNAME,  // "OCR-B 10 BT",
                     height,
                     GraphicsUnit.Pixel))
                 {
                     SizeF size = g.MeasureString(strText, font);
-                    if (size.Width <= rect.Width)
+                    if (size.Width <= rect.Width
+                        && size.Height <= height)
                         return height;
                     // 宽高比例
                     if (ratio != 0)
@@ -1373,14 +1548,19 @@ namespace dp2Circulation
             }
         }
 
+#endif
+
+        static string OCRB_FONTNAME = "OCR-B 10 BT";
+
         static void PaintOcrFont(
             Graphics g,
+            float font_height,
             RectangleF rect,
             string strText)
         {
             using (Font font = Global.BuildFont(
-                "OCR-B 10 BT",
-                rect.Height,
+                OCRB_FONTNAME,  // "OCR-B 10 BT",
+                font_height,
                 GraphicsUnit.Pixel))
             {
                 StringFormat s_format = new StringFormat();
