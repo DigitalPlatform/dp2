@@ -319,7 +319,7 @@ namespace dp2Circulation
                 {
                     font.Dispose();
                     // return new Font(t, font.Size, font.Style, unit);    // unit 2017/10/19
-                    return new Font(t, height, unit);
+                    return new Font(t, height, unit);   // 修改成这样观察一下效果 2017/10/19
                 }
             }
             return font;

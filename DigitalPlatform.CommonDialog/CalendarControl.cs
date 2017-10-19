@@ -265,7 +265,7 @@ namespace DigitalPlatform.CommonDialog
         {
             if (m_bRectSelecting == true)
             {
-                Debug.Assert(false, "");
+                // Debug.Assert(false, "");
                 DoEndRectSelecting();
             }
 

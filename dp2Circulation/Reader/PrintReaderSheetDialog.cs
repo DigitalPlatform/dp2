@@ -93,6 +93,10 @@ namespace dp2Circulation
 
             string strLibraryName = DomUtil.GetElementText(dom.DocumentElement, "libraryCode");
 
+            // 2017/10/19
+            if (string.IsNullOrEmpty(strLibraryName))
+                strLibraryName = Program.MainForm.LibraryName;
+
             string strBarcode = DomUtil.GetElementText(dom.DocumentElement, "barcode");
             string strDepartment = DomUtil.GetElementText(dom.DocumentElement, "department");
             string strName = DomUtil.GetElementText(dom.DocumentElement, "name");
