@@ -1021,13 +1021,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1422,13 +1417,8 @@ out strError);
                         strOutputStyle,
                         null,
                         null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -1496,13 +1486,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -1557,13 +1542,8 @@ out strError);
                 IAsyncResult soapresult = this.ws.BeginGetVersion(
                         null,
                         null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -1625,13 +1605,8 @@ out strError);
                     strLang,
                         null,
                         null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -1738,13 +1713,8 @@ out strError);
                     strOutputStyle,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -1911,13 +1881,9 @@ out strError);
                     "zh",
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -2005,13 +1971,9 @@ out strError);
                     strLang,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -2084,13 +2046,8 @@ out strError);
                     strBrowseInfoStyle,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -2160,13 +2117,8 @@ out strError);
                     strPath,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -2255,13 +2207,7 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -2374,13 +2320,7 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -2631,13 +2571,7 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -2745,13 +2679,7 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -2863,13 +2791,7 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -2949,13 +2871,7 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
-
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -3033,13 +2949,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -3105,13 +3016,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -3184,13 +3090,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -3292,13 +3193,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -3370,13 +3266,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -3430,13 +3321,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -3504,13 +3390,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -3538,6 +3419,22 @@ out strError);
                 if (nRet == 0)
                     return -1;
                 goto REDO;
+            }
+        }
+
+        void WaitComplete(IAsyncResult soapresult)
+        {
+            TimeSpan timeout = this.SendTimeout + this.Timeout;
+            DateTime start = DateTime.Now;
+            for (; ; )
+            {
+                DoIdle(); // 出让控制权，避免CPU资源耗费过度
+
+                if (soapresult.IsCompleted)
+                    break;
+
+                if (DateTime.Now - start > timeout)
+                    throw new TimeoutException("通道超时 " + timeout.ToString());
             }
         }
 
@@ -3591,6 +3488,9 @@ out strError);
                     null,
                     null);
 
+                WaitComplete(soapresult);
+
+#if NO
                 for (; ; )
                 {
                     DoIdle(); // 出让控制权，避免CPU资源耗费过度
@@ -3598,6 +3498,8 @@ out strError);
                     if (soapresult.IsCompleted)
                         break;
                 }
+#endif
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -3771,13 +3673,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -3853,13 +3750,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -3919,13 +3811,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -3989,13 +3876,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4060,13 +3942,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4149,13 +4026,8 @@ out strError);
                             null,
                             null);
 
-                        for (; ; )
-                        {
-                            DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                        WaitComplete(soapresult);
 
-                            if (soapresult.IsCompleted)
-                                break;
-                        }
                         if (this.m_ws == null)
                         {
                             strError = "用户中断";
@@ -4228,13 +4100,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4289,13 +4156,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4355,13 +4217,9 @@ out strError);
                     strReaderPassword,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4423,13 +4281,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4491,13 +4344,9 @@ out strError);
                     strMessageTemplate,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4553,13 +4402,9 @@ out strError);
                     strResultTypeList,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4613,13 +4458,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4683,13 +4523,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4758,13 +4593,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4824,13 +4654,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4894,13 +4719,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -4966,13 +4786,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5038,13 +4853,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5106,13 +4916,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5173,13 +4978,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5258,13 +5058,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5320,13 +5115,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5408,13 +5198,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5486,13 +5271,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5553,13 +5333,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5604,13 +5379,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5672,13 +5442,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5750,13 +5515,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5847,13 +5607,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5921,13 +5676,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -5982,13 +5732,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6045,13 +5790,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6104,13 +5844,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6158,13 +5893,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6215,13 +5945,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6281,13 +6006,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6337,13 +6057,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6398,13 +6113,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6457,13 +6167,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6521,13 +6226,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6577,13 +6277,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6638,13 +6333,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6702,13 +6392,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6761,13 +6446,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6820,13 +6500,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6882,13 +6557,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -6948,13 +6618,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -7037,13 +6702,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -7723,13 +7383,8 @@ out strError);
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -8253,13 +7908,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -8313,13 +7963,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -8375,13 +8020,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -8511,13 +8151,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -8602,13 +8237,9 @@ out string strError)
                     strOutputStyle,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -8672,13 +8303,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -8733,13 +8359,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -8794,13 +8415,9 @@ out string strError)
                     nMax,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                        WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -8943,13 +8560,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9034,13 +8646,9 @@ out string strError)
                     strOutputStyle,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9103,13 +8711,9 @@ out string strError)
                     strLang,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9163,13 +8767,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9306,13 +8905,9 @@ out string strError)
                     strBiblioType,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9371,13 +8966,9 @@ out string strError)
                     nMax,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                        WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9436,13 +9027,9 @@ out string strError)
                     strItemBarcodeList,
                     null,
                     null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
+
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9519,13 +9106,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9577,13 +9159,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9642,13 +9219,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9723,13 +9295,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9780,13 +9347,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9833,13 +9395,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9889,13 +9446,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -9953,13 +9505,8 @@ out string strError)
                         count,
                         null,
                         null);
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
+                WaitComplete(soapresult);
 
                 if (this.m_ws == null)
                 {
@@ -10090,13 +9637,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -10155,13 +9697,8 @@ out string strError)
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -10210,13 +9747,8 @@ out string strPinyinXml,
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";
@@ -10261,13 +9793,8 @@ string strPinyinXml,
                     null,
                     null);
 
-                for (; ; )
-                {
-                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+                WaitComplete(soapresult);
 
-                    if (soapresult.IsCompleted)
-                        break;
-                }
                 if (this.m_ws == null)
                 {
                     strError = "用户中断";

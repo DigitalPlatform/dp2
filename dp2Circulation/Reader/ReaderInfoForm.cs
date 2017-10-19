@@ -4899,7 +4899,7 @@ MessageBoxDefaultButton.Button2);
 
             //Register the channel with ChannelServices.
             if (this.m_fingerPrintChannel == null)
-                this.m_fingerPrintChannel = new IpcClientChannel();
+                this.m_fingerPrintChannel = new IpcClientChannel(Guid.NewGuid().ToString(), new BinaryClientFormatterSinkProvider());
 
             ChannelServices.RegisterChannel(m_fingerPrintChannel, true);
 

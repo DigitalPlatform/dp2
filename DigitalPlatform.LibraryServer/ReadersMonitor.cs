@@ -541,7 +541,7 @@ namespace DigitalPlatform.LibraryServer
                     // 发送邮件
 
                     // 2016/4/10
-                    if (strBodyType == "mq")
+                    if (strBodyType == "mq" && this._queue != null)
                     {
                         // 向 MSMQ 消息队列发送消息
                         nRet = SendToQueue(this._queue,
@@ -892,6 +892,12 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
+
+            if (myQueue == null)
+            {
+                strError = "SendToQueue() 的 myQueue 参数值不能为 null";
+                return -1;
+            }
 
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<root />");

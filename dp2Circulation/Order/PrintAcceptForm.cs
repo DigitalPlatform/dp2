@@ -450,7 +450,11 @@ namespace dp2Circulation
 
             // print page
             this.button_print_Option.Enabled = bEnable;
+            this.button_print_originOption.Enabled = bEnable;
             this.button_print_printAcceptList.Enabled = bEnable;
+            this.button_print_printOriginList.Enabled = bEnable;
+            this.button_print_exchangeRateStatis.Enabled = bEnable;
+            this.button_print_exchangeRateOption.Enabled = bEnable;
         }
 
         void SetNextButtonEnable()
@@ -4618,6 +4622,8 @@ out strError);
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
+            bool in_loop = this.stop != null ? this.stop.IsInLoop : false;
+
             string strItemRecPath = "";
             if (this.listView_origin.SelectedItems.Count > 0)
             {
@@ -4651,12 +4657,15 @@ out strError);
             menuItem = new MenuItem("刷新选定的行(&S)");
             menuItem.Tag = this.listView_origin;
             menuItem.Click += new System.EventHandler(this.menu_refreshSelected_Click);
-            if (this.listView_origin.SelectedItems.Count == 0)
+            if (this.listView_origin.SelectedItems.Count == 0
+                || in_loop == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
             menuItem = new MenuItem("刷新全部行(&R)");
             menuItem.Tag = this.listView_origin;
+            if (in_loop == true)
+                menuItem.Enabled = false;
             menuItem.Click += new System.EventHandler(this.menu_refreshAll_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -4670,7 +4679,6 @@ out strError);
             if (this.listView_origin.Items.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
-
 
             // ---
             menuItem = new MenuItem("-");
@@ -4687,14 +4695,12 @@ out strError);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-
             menuItem = new MenuItem("移除(&D)");
             menuItem.Tag = this.listView_origin;
             menuItem.Click += new System.EventHandler(this.menu_deleteSelected_Click);
             if (this.listView_origin.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
-
 
             contextMenu.Show(this.listView_origin, new Point(e.X, e.Y));
         }
@@ -7411,7 +7417,6 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
 
             try
             {
-
                 List<ListViewItem> items = new List<ListViewItem>();
                 for (int i = 0; i < this.listView_origin.Items.Count; i++)
                 {

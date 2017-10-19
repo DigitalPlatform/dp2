@@ -173,6 +173,8 @@ namespace DigitalPlatform.LibraryServer
             if (this.App.PauseBatchTask == true)
                 return;
 
+            this.Loop = true;   // 2017/10/16
+
             BatchTaskStartInfo startinfo = this.StartInfo;
             if (startinfo == null)
                 startinfo = new BatchTaskStartInfo();   // 按照缺省值来

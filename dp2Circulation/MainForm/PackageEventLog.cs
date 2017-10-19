@@ -279,7 +279,7 @@ namespace dp2Circulation
                     i++;
                 }
 #endif
-                text.Append("--- System process:\r\n" + StringUtil.MakePathList(ProcessUtil.GetProcessNameList(), "\r\n"));
+                text.Append("--- System process:\r\n" + StringUtil.MakePathList(ProcessUtil.GetProcessNameList(), "\r\n") + "\r\n");
 
             }
 

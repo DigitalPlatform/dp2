@@ -1341,6 +1341,8 @@ SetStartEventArgs e);
         {
             return CloseSessionBy((info) =>
             {
+                if (info == null)
+                    return false;
                 return (info.UserID == strUserID);
             });
         }
@@ -1349,6 +1351,8 @@ SetStartEventArgs e);
         {
             return CloseSessionBy((info) =>
             {
+                if (info == null)
+                    return false;
                 return (info.ClientIP == strClientIP);
             });
         }
@@ -1450,7 +1454,8 @@ SetStartEventArgs e);
         {
             return CloseSessionBy((info) =>
             {
-                if (info.Account.Barcode == strReaderBarcode
+                if (info != null && info.Account != null
+                    && info.Account.Barcode == strReaderBarcode
                     && info.Account.Barcode == info.Account.UserID)
                     return true;
                 return false;

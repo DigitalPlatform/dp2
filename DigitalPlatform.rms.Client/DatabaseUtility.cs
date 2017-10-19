@@ -1,11 +1,14 @@
-﻿using DigitalPlatform.IO;
-using DigitalPlatform.rms.Client.rmsws_localhost;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+
+using Ionic.Zip;
+
+using DigitalPlatform.IO;
+using DigitalPlatform.rms.Client.rmsws_localhost;
 
 namespace DigitalPlatform.rms.Client
 {
@@ -65,6 +68,99 @@ namespace DigitalPlatform.rms.Client
             string strTarget = Path.Combine(strTempDir, strDatabaseName + "\\cfgs", Path.GetFileName(strSourcePath));
             PathUtil.TryCreateDir(Path.GetDirectoryName(strTarget));
             File.Copy(strSourcePath, strTarget);
+        }
+
+        // 根据数据库定义文件，创建若干数据库
+        // 注: 如果发现同名数据库已经存在，先删除再创建
+        // parameters:
+        //      strTempDir  临时目录路径。调用前要创建好这个临时目录。调用后需要删除这个临时目录
+        public static int CreateDatabases(
+            Stop stop,
+            RmsChannel channel,
+            string strDbDefFileName,
+            string strTempDir,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            // 展开压缩文件
+            if (stop != null)
+                stop.SetMessage("正在展开压缩文件 " + strDbDefFileName);
+            try
+            {
+                using (ZipFile zip = ZipFile.Read(strDbDefFileName))
+                {
+                    foreach (ZipEntry e in zip)
+                    {
+                        Debug.WriteLine(e.ToString());
+                        e.Extract(strTempDir, ExtractExistingFileAction.OverwriteSilently);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "展开压缩文件 '" + strDbDefFileName + "' 到目录 '" + strTempDir + "' 时出现异常: " + ExceptionUtil.GetAutoText(ex);
+                return -1;
+            }
+
+            DirectoryInfo di = new DirectoryInfo(strTempDir);
+
+            DirectoryInfo[] dis = di.GetDirectories();
+
+            int i = 0;
+            foreach (DirectoryInfo info in dis)
+            {
+                // 跳过 '_datadir'
+                if (info.Name == "_datadir")
+                    continue;
+
+                string strTemplateDir = Path.Combine(info.FullName, "cfgs");
+                string strDatabaseName = info.Name;
+                // 数据库是否已经存在？
+                // return:
+                //      -1  error
+                //      0   not exist
+                //      1   exist
+                //      2   其他类型的同名对象已经存在
+                nRet = DatabaseUtility.IsDatabaseExist(
+                    channel,
+                    strDatabaseName,
+        out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                {
+                    if (stop != null)
+                        stop.SetMessage("正在删除数据库 " + strDatabaseName);
+
+                    // 如果发现同名数据库已经存在，先删除
+                    long lRet = channel.DoDeleteDB(strDatabaseName, out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode != ChannelErrorCode.NotFound)
+                            return -1;
+                    }
+                }
+
+                if (stop != null)
+                    stop.SetMessage("正在创建数据库 " + strDatabaseName + " (" + (i + 1) + ")");
+
+                // 根据数据库模板的定义，创建一个数据库
+                // parameters:
+                //      strTempDir  将创建数据库过程中，用到的配置文件会自动汇集拷贝到此目录。如果 == null，则不拷贝
+                nRet = DatabaseUtility.CreateDatabase(channel,
+            strTemplateDir,
+            strDatabaseName,
+            null,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+
+                i++;
+            }
+
+            return 0;
         }
 
         // 根据数据库模板的定义，创建一个数据库

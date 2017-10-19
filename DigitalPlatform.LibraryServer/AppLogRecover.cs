@@ -8185,31 +8185,66 @@ DO_SNAPSHOT:
             if (level == RecoverLevel.Snapshot
                 || bReuse == true)
             {
-                string strAction = DomUtil.GetElementText(domLog.DocumentElement,
-                    "action");
-                if (strAction == "createDatabase")
+                string strTempFileName = "";
+                if (attachmentLog != null)
                 {
-
-                }
-                if (strAction == "initializeDatabase")
-                {
-
-                }
-                if (strAction == "refreshDatabase")
-                {
-
-                }
-                if (strAction == "deleteDatabase")
-                {
-
-                }
-                else
-                {
-                    strError = "不可识别的strAction值 '" + strAction + "'";
-                    goto ERROR1;
+                    strTempFileName = this.GetTempFileName("db");
+                    using (Stream target = File.Create(strTempFileName))
+                    {
+                        attachmentLog.CopyTo(target);
+                    }
                 }
 
-                return 0;
+                string strTempDir = Path.Combine(this.TempDir, "~rcvdb");
+                PathUtil.CreateDirIfNeed(strTempDir);
+
+                try
+                {
+                    string strAction = DomUtil.GetElementText(domLog.DocumentElement,
+                        "action");
+                    if (strAction == "createDatabase")
+                    {
+                        nRet = DatabaseUtility.CreateDatabases(
+    null,   // stop
+    channel,
+    strTempFileName,
+    strTempDir,
+    out strError);
+                        if (nRet == -1)
+                            return -1;
+
+                        // 更新 library.xml 内容
+                    }
+                    else if (strAction == "initializeDatabase")
+                    {
+
+                    }
+                    else if (strAction == "refreshDatabase")
+                    {
+
+                    }
+                    else if (strAction == "deleteDatabase")
+                    {
+
+                    }
+                    else
+                    {
+                        strError = "不可识别的strAction值 '" + strAction + "'";
+                        goto ERROR1;
+                    }
+
+                    return 0;
+                }
+                finally
+                {
+                    if (string.IsNullOrEmpty(strTempDir) == false)
+                    {
+                        PathUtil.RemoveReadOnlyAttr(strTempDir);    // 避免 .zip 文件中有有只读文件妨碍删除
+                        PathUtil.DeleteDirectory(strTempDir);
+                    }
+                    if (string.IsNullOrEmpty(strTempFileName) == false)
+                        File.Delete(strTempFileName);
+                }
             }
 
             // 逻辑恢复或者混合恢复
