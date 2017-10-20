@@ -9,6 +9,6 @@
         <line font="微软雅黑, 28pt, style=Bold" align="left" style="" />
         <line font="微软雅黑, 12pt" align="left" style="" offset="20,0" foreColor="Gray" />
         <line font="微软雅黑, 12pt" align="left" style="" offset="20,0" foreColor="Gray" />
-        <line align="center" style="barcode" offset="0,5" start="0," size=",50" />
+        <line align="center" style="barcode" offset="0,5" start="0," size=",47" />
     </lineFormats>
 </root>

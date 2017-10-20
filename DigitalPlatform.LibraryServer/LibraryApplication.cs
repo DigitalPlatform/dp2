@@ -1032,6 +1032,11 @@ namespace DigitalPlatform.LibraryServer
                             app.WriteErrorLog(strError);
                         if (this.SessionTable != null)
                             this.SessionTable.MaxSessionsLocalHost = v;
+
+                        string strList = DomUtil.GetStringParam(node,
+                            "privilegedIpList",
+                            "");
+                        this.SessionTable.SpecialIpList = StringUtil.SplitList(strList, ',');
                     }
                     else
                     {
@@ -1039,6 +1044,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             this.SessionTable.MaxSessionsPerIp = 50;
                             this.SessionTable.MaxSessionsLocalHost = 150;
+                            this.SessionTable.SpecialIpList = null;
                         }
                     }
 
