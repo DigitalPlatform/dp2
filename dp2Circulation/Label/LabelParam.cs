@@ -27,7 +27,6 @@ namespace dp2Circulation
         // 行间距 2014/2/23
         public double LineSep = 0;
 
-
         // 标签内文字区的边距
         public DecimalPadding LabelPaddings = new DecimalPadding(0, 0, 0, 0);
 
@@ -564,6 +563,25 @@ namespace dp2Circulation
         public string BackColor = "";   // 缺省为透明
 
         public string Style = "";   // 风格
+
+        public override string ToString()
+        {
+            StringBuilder text = new StringBuilder();
+            text.Append("Font=" + (this.Font != null ? this.Font.ToString() : "{null}") + "\r\n");
+            text.Append("Align=" + this.Align + "\r\n");
+            text.Append("IsBarcodeFont=" + this.IsBarcodeFont + "\r\n");
+            text.Append("StartX=" + this.StartX + "\r\n");
+            text.Append("StartY=" + this.StartY + "\r\n");
+            text.Append("OffsetX=" + this.OffsetX + "\r\n");
+            text.Append("OffsetY=" + this.OffsetY + "\r\n");
+            text.Append("Width=" + this.Width + "\r\n");
+            text.Append("Height=" + this.Height + "\r\n");
+            text.Append("ForeColor=" + this.ForeColor + "\r\n");
+            text.Append("BackColor=" + this.BackColor + "\r\n");
+            text.Append("Style=" + this.Style + "\r\n");
+
+            return text.ToString();
+        }
     }
 
 }

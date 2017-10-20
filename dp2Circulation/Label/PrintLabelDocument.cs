@@ -16,6 +16,9 @@ using ZXing.QrCode;
 using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.Drawing;
+using System.Web;
+using System.Xml;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
@@ -672,160 +675,173 @@ namespace dp2Circulation
                 }
             }
 
-            bool bEOF = false;
+            StringBuilder debug_info = new StringBuilder();
 
-            float y = (float)PageMargins.Top;
-            // 每一行的循环
-            for (int i = 0; i < nYCount; i++)
+            try
             {
-                bool bDisplay = true;
-                if (this.IsDesignMode == true)
-                {
-                    RectangleF rectLine = new RectangleF(
-    (float)0 - nXDelta,
-    (float)y - nYDelta,
-    (float)label_param.LabelWidth * nXCount,
-    (float)label_param.LabelHeight);
-                    if (rectLine.Top > e.Graphics.ClipBounds.Bottom)
-                    {
-                        // Debug.WriteLine("break line loop at " + i.ToString());
-                        break;  // 当前行在剪裁区域的下方，可以中断循环了
-                    }
-                    if (rectLine.IntersectsWith(e.Graphics.ClipBounds) == false)
-                    {
-                        // Debug.WriteLine("skip line " + i.ToString());
-                        bDisplay = false;
-                    }
-                }
-                float x = (float)PageMargins.Left;
-                // 每一列的循环
-                for (int j = 0; j < nXCount; j++)
-                {
-                    List<string> lines = null;
-                    nRet = this.GetLabelLines(out lines,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
 
-                    if (nRet == 1)
-                        bEOF = true;
+                bool bEOF = false;
 
-                    if (lines.Count > 0 && lines[0] == "{newPage}")
+                float y = (float)PageMargins.Top;
+                // 每一行的循环
+                for (int i = 0; i < nYCount; i++)
+                {
+                    bool bDisplay = true;
+                    if (this.IsDesignMode == true)
                     {
-                        if (i == 0 && j == 0)
+                        RectangleF rectLine = new RectangleF(
+        (float)0 - nXDelta,
+        (float)y - nYDelta,
+        (float)label_param.LabelWidth * nXCount,
+        (float)label_param.LabelHeight);
+                        if (rectLine.Top > e.Graphics.ClipBounds.Bottom)
                         {
-                            // 当前为第一个标签尚未打印，此处{newPage}命令无效
-                            j--;
-                            continue;
+                            // Debug.WriteLine("break line loop at " + i.ToString());
+                            break;  // 当前行在剪裁区域的下方，可以中断循环了
                         }
-                        else
-                            goto NEXT_PAGE;
-                    }
-
-                    if (bOutput == true && bDisplay == true)
-                    {
-                        // 标签
-                        RectangleF rectLabel = new RectangleF(
-    (float)x - nXDelta,
-    (float)y - nYDelta,
-    (float)label_param.LabelWidth,
-    (float)label_param.LabelHeight);
-
-                        if (rectLabel.Left > e.Graphics.ClipBounds.Right)
+                        if (rectLine.IntersectsWith(e.Graphics.ClipBounds) == false)
                         {
-                            // Debug.WriteLine("break label loop at i=" + i.ToString() + " j=" + j.ToString());
-                            // 当前标签在剪裁区域的右方，可以不要显示后面的标签了
+                            // Debug.WriteLine("skip line " + i.ToString());
                             bDisplay = false;
                         }
+                    }
+                    float x = (float)PageMargins.Left;
+                    // 每一列的循环
+                    for (int j = 0; j < nXCount; j++)
+                    {
+                        List<string> lines = null;
+                        nRet = this.GetLabelLines(out lines,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
 
-                        if (this.IsDesignMode == false
-                            || rectLabel.IntersectsWith(e.Graphics.ClipBounds) == true)
+                        if (nRet == 1)
+                            bEOF = true;
+
+                        if (lines.Count > 0 && lines[0] == "{newPage}")
                         {
-                            // Debug.WriteLine("i="+i.ToString()+" j="+j.ToString()+" rectLabel = "+rectLabel.ToString()+", clipbounds " + e.Graphics.ClipBounds.ToString());
-                            // 标签内容区域
-                            RectangleF rectContent = new RectangleF(
-                                    (float)x + (float)label_param.LabelPaddings.Left - nXDelta,
-                                    (float)y + (float)label_param.LabelPaddings.Top - nYDelta,
-                                    (float)label_param.LabelWidth - (float)label_param.LabelPaddings.Left - (float)label_param.LabelPaddings.Right - 1,
-                                    (float)label_param.LabelHeight - (float)label_param.LabelPaddings.Top - (float)label_param.LabelPaddings.Bottom - 1);
-
-                            // 绘制标签边界
-                            // 灰色
-                            if (bTestingGrid == true)
+                            if (i == 0 && j == 0)
                             {
-                                // 标签白色背景
-                                if (this.IsDesignMode == true)
+                                // 当前为第一个标签尚未打印，此处{newPage}命令无效
+                                j--;
+                                continue;
+                            }
+                            else
+                                goto NEXT_PAGE;
+                        }
+
+                        if (bOutput == true && bDisplay == true)
+                        {
+                            // 标签
+                            RectangleF rectLabel = new RectangleF(
+        (float)x - nXDelta,
+        (float)y - nYDelta,
+        (float)label_param.LabelWidth,
+        (float)label_param.LabelHeight);
+
+                            if (rectLabel.Left > e.Graphics.ClipBounds.Right)
+                            {
+                                // Debug.WriteLine("break label loop at i=" + i.ToString() + " j=" + j.ToString());
+                                // 当前标签在剪裁区域的右方，可以不要显示后面的标签了
+                                bDisplay = false;
+                            }
+
+                            if (this.IsDesignMode == false
+                                || rectLabel.IntersectsWith(e.Graphics.ClipBounds) == true)
+                            {
+                                // Debug.WriteLine("i="+i.ToString()+" j="+j.ToString()+" rectLabel = "+rectLabel.ToString()+", clipbounds " + e.Graphics.ClipBounds.ToString());
+                                // 标签内容区域
+                                RectangleF rectContent = new RectangleF(
+                                        (float)x + (float)label_param.LabelPaddings.Left - nXDelta,
+                                        (float)y + (float)label_param.LabelPaddings.Top - nYDelta,
+                                        (float)label_param.LabelWidth - (float)label_param.LabelPaddings.Left - (float)label_param.LabelPaddings.Right - 1,
+                                        (float)label_param.LabelHeight - (float)label_param.LabelPaddings.Top - (float)label_param.LabelPaddings.Bottom - 1);
+
+                                // 绘制标签边界
+                                // 灰色
+                                if (bTestingGrid == true)
                                 {
-                                    using (Brush brushBack = new SolidBrush(Color.FromArgb(200, Color.White)))
+                                    // 标签白色背景
+                                    if (this.IsDesignMode == true)
                                     {
-                                        e.Graphics.FillRectangle(brushBack, rectLabel);
+                                        using (Brush brushBack = new SolidBrush(Color.FromArgb(200, Color.White)))
+                                        {
+                                            e.Graphics.FillRectangle(brushBack, rectLabel);
+                                        }
+                                    }
+
+                                    // 标签边界
+                                    using (Pen pen = new Pen(Color.FromArgb(200, 200, 200), this.IsDesignMode ? (float)0.5 : (float)1))
+                                    {
+                                        e.Graphics.DrawRectangle(pen,
+                                            rectLabel.X,
+                                            rectLabel.Y,
+                                            rectLabel.Width,
+                                            rectLabel.Height);
+                                    }
+
+                                    // 绘制标签内部文字区域边界
+                                    // 淡红色
+
+                                    using (Pen pen = new Pen(Color.FromArgb(255, 200, 200), this.IsDesignMode ? (float)0.5 : (float)1))
+                                    {
+                                        e.Graphics.DrawRectangle(pen,
+                                            rectContent.X,
+                                            rectContent.Y,
+                                            rectContent.Width,
+                                            rectContent.Height);
+
                                     }
                                 }
 
-                                // 标签边界
-                                using (Pen pen = new Pen(Color.FromArgb(200, 200, 200), this.IsDesignMode ? (float)0.5 : (float)1))
-                                {
-                                    e.Graphics.DrawRectangle(pen,
-                                        rectLabel.X,
-                                        rectLabel.Y,
-                                        rectLabel.Width,
-                                        rectLabel.Height);
-                                }
+                                // 绘制一个标签的全部文字
+                                PaintLabelContent(e.Graphics,
+                                    rectContent,
+                                    lines,
+                                    label_param,
+                                    x,
+                                    y,
+                                    nXDelta,
+                                    nYDelta,
+                                    bTestingGrid,
+                                    ref debug_info);
 
-                                // 绘制标签内部文字区域边界
-                                // 淡红色
+                            } // end if IntersectsWith
 
-                                using (Pen pen = new Pen(Color.FromArgb(255, 200, 200), this.IsDesignMode ? (float)0.5 : (float)1))
-                                {
-                                    e.Graphics.DrawRectangle(pen,
-                                        rectContent.X,
-                                        rectContent.Y,
-                                        rectContent.Width,
-                                        rectContent.Height);
+                        } // end if bOutput == true
 
-                                }
-                            }
+                        x += (float)label_param.LabelWidth;
+                    }
 
-                            // 绘制一个标签的全部文字
-                            PaintLabelContent(e.Graphics,
-                                rectContent,
-                                lines,
-                                label_param,
-                                x,
-                                y,
-                                nXDelta,
-                                nYDelta,
-                                bTestingGrid);
-
-                        } // end if IntersectsWith
-
-                    } // end if bOutput == true
-
-                    x += (float)label_param.LabelWidth;
+                    //CONTINUE_LINE:
+                    y += (float)label_param.LabelHeight;
                 }
 
-                //CONTINUE_LINE:
-                y += (float)label_param.LabelHeight;
-            }
+            NEXT_PAGE:
 
-        NEXT_PAGE:
-
-            // If more lines exist, print another page.
-            if (bEOF == false)
-            {
-                if (e.PageSettings.PrinterSettings.PrintRange == PrintRange.SomePages)
+                // If more lines exist, print another page.
+                if (bEOF == false)
                 {
-                    if (this.m_nPageNo >= to)
+                    if (e.PageSettings.PrinterSettings.PrintRange == PrintRange.SomePages)
                     {
-                        e.HasMorePages = false;
-                        return;
+                        if (this.m_nPageNo >= to)
+                        {
+                            e.HasMorePages = false;
+                            return;
+                        }
                     }
                 }
+                else
+                {
+                    e.HasMorePages = false;
+                    return;
+                }
             }
-            else
+            finally
             {
-                e.HasMorePages = false;
-                return;
+                // 显示调试信息
+                DisplayLabelParamDebugInfo(label_param);
+                DisplayDebugInfo(debug_info);
             }
 
             this.m_nPageNo++;
@@ -833,6 +849,24 @@ namespace dp2Circulation
             return;
         ERROR1:
             MessageBox.Show(owner, strError);
+        }
+
+        void DisplayDebugInfo(StringBuilder text)
+        {
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 开始绘制标签页面</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(text.ToString()).Replace("\r\n", "<br/>") + "</div>");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " 结束绘制标签页面</div>");
+        }
+
+        void DisplayLabelParamDebugInfo(LabelParam label_param)
+        {
+            StringBuilder debug_info = new StringBuilder();
+
+            XmlDocument dom = null;
+            string strError = "";
+            label_param.ToXmlDocument(out dom, out strError);
+            debug_info.Append("=== label_param ===\r\n" + DomUtil.GetIndentInnerXml(dom.DocumentElement) + "\r\n\r\n");
+            Program.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(debug_info.ToString()).Replace("\r\n", "<br/>") + "</div>");
         }
 
         // 绘制一个标签的全部文字
@@ -844,27 +878,45 @@ namespace dp2Circulation
             LabelParam label_param,
             float x,
             float y,
-            float nXDelta,
-            float nYDelta,
-            bool bTestingGrid)
+            float x_delta,
+            float y_delta,
+            bool bTestingGrid,
+            ref StringBuilder debug_info)
         {
+            if (debug_info != null)
+            {
+                debug_info.Append("\r\n===\r\nPaintLabelContent() ===\r\nrectContent=" + rectContent.ToString() + "\r\n");
+                debug_info.Append("lines=" + StringUtil.MakePathList(lines, ";") + "\r\n");
+
+                debug_info.Append("x=" + x + ", y=" + y + "\r\n");
+                debug_info.Append("x_delta=" + x_delta + ", y_delta=" + y_delta + "\r\n");
+            }
+
             using (Region old_clip = g.Clip)
             {
                 g.IntersectClip(rectContent);
 
+
                 float y0 = 0;
 
                 // 卡片内容左上角原点。已经考虑了标签内容边距。
-                float origin_x = (float)x + (float)label_param.LabelPaddings.Left - nXDelta;
-                float origin_y = (float)y + (float)label_param.LabelPaddings.Top - nYDelta;
+                float origin_x = (float)x + (float)label_param.LabelPaddings.Left - x_delta;
+                float origin_y = (float)y + (float)label_param.LabelPaddings.Top - y_delta;
 
                 for (int k = 0; k < lines.Count; k++)
                 {
                     string strText = lines[k];
 
+                    if (debug_info != null)
+                        debug_info.Append("\r\n*** 处理行 " + k + ", strText='" + strText + "'\r\n");
+
                     LineFormat format = null;
                     if (k < label_param.LineFormats.Count)
+                    {
                         format = label_param.LineFormats[k];
+                        if (debug_info != null)
+                            debug_info.Append("format=" + format.ToString() + "\r\n");
+                    }
 
                     Font this_font = null;
                     bool bIsBarcodeFont = false;
@@ -893,10 +945,16 @@ namespace dp2Circulation
                     {
                         float nLineHeight = this_font.GetHeight(g);
 
-                        RectangleF rect = new RectangleF((float)x + (float)label_param.LabelPaddings.Left - nXDelta,
-                            (float)y + (float)label_param.LabelPaddings.Top + y0 - nYDelta,
+                        if (debug_info != null)
+                            debug_info.Append("nLineHeight=" + nLineHeight.ToString() + ", from font=" + this_font.ToString() + "\r\n");
+
+                        RectangleF rect = new RectangleF((float)x + (float)label_param.LabelPaddings.Left - x_delta,
+                            (float)y + (float)label_param.LabelPaddings.Top + y0 - y_delta,
                             (float)label_param.LabelWidth - (float)label_param.LabelPaddings.Left - (float)label_param.LabelPaddings.Right,
                             nLineHeight);
+
+                        if (debug_info != null)
+                            debug_info.Append("最初的 rect=" + rect.ToString() + "\r\n");
 
                         string strAlignment = "left";
                         if (format != null)
@@ -941,6 +999,9 @@ namespace dp2Circulation
                             rect.Offset((float)format.OffsetX, (float)format.OffsetY);
 
                             y0 += (float)format.OffsetY;    // Y 偏移后，累计值也跟着调整
+
+                            if (debug_info != null)
+                                debug_info.Append("xy调整后的 rect=" + rect.ToString() + "\r\n");
                         }
 
                         StringFormat s_format = new StringFormat();
@@ -956,6 +1017,9 @@ namespace dp2Circulation
                             // TODO: 可否做成可以配置的
                             s_format.Trimming = StringTrimming.EllipsisCharacter;
                             // s_format.LineAlignment = StringAlignment.Center;
+
+                            if (debug_info != null)
+                                debug_info.Append("s_format=" + s_format.ToString() + "\r\n");
                         }
 
                         if (format != null && string.IsNullOrEmpty(format.BackColor) == false)
@@ -974,15 +1038,22 @@ namespace dp2Circulation
                                 "picture",
                                 ":");
 
+                        if (debug_info != null)
+                            debug_info.Append("picture_type=" + ToString(picture_type) + "\r\n");
+
                         // 文字的风格
                         string text_style = StringUtil.GetParameterByPrefix(strLineStyle,
         "text_style",
         ":");
+                        if (debug_info != null)
+                            debug_info.Append("text_style=" + ToString(text_style) + "\r\n");
 
                         // 条码下方文字的风格
                         string barcode_text_style = StringUtil.GetParameterByPrefix(strLineStyle,
         "barcode_text_style",
         ":");
+                        if (debug_info != null)
+                            debug_info.Append("barcode_text_style=" + ToString(barcode_text_style) + "\r\n");
 
                         // return:
                         //      null    没有找到前缀
@@ -991,6 +1062,10 @@ namespace dp2Circulation
                         string barcode_type = StringUtil.GetParameterByPrefix(strLineStyle,
                                 "barcode",
                                 ":");
+
+                        if (debug_info != null)
+                            debug_info.Append("barcode_type=" + ToString(barcode_type) + "\r\n");
+
                         if (barcode_type != null)
                         {
                             // strText = strText.Trim(new char[] { '*' });
@@ -1019,12 +1094,21 @@ namespace dp2Circulation
              rect,
              strText,
              out textRectHeight);
+                                if (debug_info != null)
+                                {
+                                    debug_info.Append("textFontHeight=" + textFontHeight + ", textRectHeight=" + textRectHeight + "\r\n");
+                                }
                             }
                             RectangleF target = new RectangleF(rect.X, rect.Y, rect.Width, rect.Height - textRectHeight);
                             RectangleF rectText = new RectangleF(target.X,
     target.Y + target.Height,
     target.Width,
     textRectHeight);
+
+                            if (debug_info != null)
+                            {
+                                debug_info.Append("target=" + target.ToString() + ", rectText=" + rectText.ToString() + "\r\n");
+                            }
 
 #if NO
                             // target 区域边界
@@ -1053,6 +1137,10 @@ namespace dp2Circulation
                                     float delta = target.Height - min;
                                     target.Inflate(0, -delta / 2);
                                     //target.Offset(0, delta / 2);
+                                }
+                                if (debug_info != null)
+                                {
+                                    debug_info.Append("修正为正方形以后的 target=" + target.ToString() + "\r\n");
                                 }
                             }
 
@@ -1199,8 +1287,18 @@ namespace dp2Circulation
                         }
 
                         if (bVertAbsLocation == false)
+                        {
                             y0 += // nLineHeight
                                 rect.Height + (float)label_param.LineSep;
+                            if (debug_info != null)
+                                debug_info.Append("y0 步进至 " + y0 + "。rect.Height=" + rect.Height + ", label_param.LineSep=" + label_param.LineSep + "\r\n");
+
+                        }
+                        else
+                        {
+                            if (debug_info != null)
+                                debug_info.Append("y0 没有步进，依然是 " + y0 + "。\r\n");
+                        }
 
                     }
                     finally
@@ -1215,7 +1313,14 @@ namespace dp2Circulation
 
         }
 
-        // 将 picture 纵横等比例缩放，放入 rect 中央
+        static string ToString(string text)
+        {
+            if (text == null)
+                return "{null}";
+            return text;
+        }
+
+        // 将 picture 纵横等比例缩放，放入 area 中央
         static RectangleF GetPictureRect(RectangleF picture,
             RectangleF area,
             StringFormat format)
@@ -1341,7 +1446,9 @@ namespace dp2Circulation
             }
         }
 
+        // 计算一段文字自动匹配指定矩形的字体高度
         // parameters:
+        //      ref_font    参考的字体
         //      rect    注意这是 Graphics 当前单位的值
         // parameters:
         //      textRectHeight  返回字体矩形实际的高度
@@ -1388,6 +1495,7 @@ namespace dp2Circulation
             }
         }
 
+        // 计算缩小率
         // parameters:
         //      size    文字实际外围矩形
         //      rect    限定的矩形
