@@ -1160,6 +1160,8 @@ namespace dp2Circulation
                                 {
                                     debug_info.Append("修正为正方形以后的 target=" + target.ToString() + "\r\n");
                                 }
+
+                                rectText.Y = (float)Math.Round(rectText.Y); // 2017/10/20
                             }
 
 
@@ -1700,6 +1702,7 @@ string strText,
                 GraphicsUnit.Pixel))
             {
                 StringFormat s_format = new StringFormat();
+                s_format.FormatFlags |= StringFormatFlags.NoClip;
                 s_format.Alignment = StringAlignment.Center;
                 Brush brushText = System.Drawing.Brushes.Black;
 
