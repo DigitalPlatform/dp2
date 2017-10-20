@@ -675,7 +675,7 @@ namespace dp2Circulation
                 }
             }
 
-            StringBuilder debug_info = new StringBuilder();
+            StringBuilder debug_info = null;    //  new StringBuilder();
 
             try
             {
@@ -753,7 +753,7 @@ namespace dp2Circulation
                                 // 标签内容区域
                                 RectangleF rectContent = new RectangleF(
                                         (float)x + (float)label_param.LabelPaddings.Left - nXDelta,
-                                        (float)y + (float)label_param.LabelPaddings.Top - nYDelta,
+                                        (float)Math.Round((float)y + (float)label_param.LabelPaddings.Top - nYDelta),
                                         (float)label_param.LabelWidth - (float)label_param.LabelPaddings.Left - (float)label_param.LabelPaddings.Right - 1,
                                         (float)label_param.LabelHeight - (float)label_param.LabelPaddings.Top - (float)label_param.LabelPaddings.Bottom - 1);
 
@@ -804,7 +804,7 @@ namespace dp2Circulation
                                     nXDelta,
                                     nYDelta,
                                     bTestingGrid,
-                                    ref debug_info);
+                                    debug_info);
 
                             } // end if IntersectsWith
 
@@ -840,8 +840,11 @@ namespace dp2Circulation
             finally
             {
                 // 显示调试信息
-                DisplayLabelParamDebugInfo(label_param);
-                DisplayDebugInfo(debug_info);
+                if (debug_info != null)
+                {
+                    DisplayLabelParamDebugInfo(label_param);
+                    DisplayDebugInfo(debug_info);
+                }
             }
 
             this.m_nPageNo++;
@@ -881,7 +884,7 @@ namespace dp2Circulation
             float x_delta,
             float y_delta,
             bool bTestingGrid,
-            ref StringBuilder debug_info)
+            StringBuilder debug_info)
         {
             if (debug_info != null)
             {
@@ -892,9 +895,24 @@ namespace dp2Circulation
                 debug_info.Append("x_delta=" + x_delta + ", y_delta=" + y_delta + "\r\n");
             }
 
+#if NO
+            RectangleF r0 = rectContent;
+            r0.Inflate(100, 100);
+#endif
+
             using (Region old_clip = g.Clip)
             {
                 g.IntersectClip(rectContent);
+
+#if NO
+                // 帮助判定剪裁区域
+                using (Brush b = new SolidBrush(Color.Green))
+                {
+                    RectangleF r = rectContent;
+                    r.Inflate(1000, 1000);
+                    g.FillRectangle(b, r);
+                }
+#endif
 
 
                 float y0 = 0;
@@ -1159,11 +1177,21 @@ namespace dp2Circulation
                             }
 
                             if (textFontHeight > 0)
+                            {
+#if NO
+                                // 帮助判定OCR文字区域
+                                using (Brush b = new SolidBrush(Color.Green))
+                                {
+                                    g.FillRectangle(b, rectText);
+                                }
+#endif
+
                                 PaintOcrFont(
                                     g,
                                     textFontHeight,
                                     rectText,
                                     strText);
+                            }
                         }
                         else if (picture_type != null)
                         {

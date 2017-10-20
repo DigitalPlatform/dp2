@@ -1179,6 +1179,10 @@ SetStartEventArgs e);
         public int MaxSessionsPerIp = 50;
         public int MaxSessionsLocalHost = 150;
 
+        // 2017/10/20
+        // 特殊的，需要放开通道数限制到 150 个的那些 IP 地址
+        public List<string> SpecialIpList { get; set; }
+
         public SessionInfo PrepareSession(LibraryApplication app,
             string strSessionID,
             List<RemoteAddress> address_list
@@ -1240,6 +1244,8 @@ SetStartEventArgs e);
                 int nMax = this.MaxSessionsPerIp;
                 // if (strIP == "::1" || strIP == "127.0.0.1" || strIP == "localhost")
                 if (IsLocalhost(strIP) == true)
+                    nMax = this.MaxSessionsLocalHost;
+                else if (IsSpecialIp(strIP) == true)
                     nMax = this.MaxSessionsLocalHost;
 
                 if (v >= nMax)
@@ -1672,6 +1678,15 @@ SetStartEventArgs e);
         public static bool IsLocalhost(string strIP)
         {
             if (strIP == "::1" || strIP == "127.0.0.1" || strIP == "localhost")
+                return true;
+            return false;
+        }
+
+        public bool IsSpecialIp(string strIP)
+        {
+            if (this.SpecialIpList == null && this.SpecialIpList.Count == 0)
+                return false;
+            if (this.SpecialIpList.IndexOf(strIP) != -1)
                 return true;
             return false;
         }
