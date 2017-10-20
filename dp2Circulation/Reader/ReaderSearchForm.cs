@@ -4830,7 +4830,8 @@ out strFingerprint);
             strError = "";
 
             if (this.m_fingerPrintChannel == null)
-                this.m_fingerPrintChannel = new IpcClientChannel(Guid.NewGuid().ToString(), new BinaryClientFormatterSinkProvider());
+                this.m_fingerPrintChannel = new IpcClientChannel(Guid.NewGuid().ToString(), // 随机的名字，令多个 Channel 对象可以并存 
+                    new BinaryClientFormatterSinkProvider());
 
             ChannelServices.RegisterChannel(m_fingerPrintChannel, false);
 
