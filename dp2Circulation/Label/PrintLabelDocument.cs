@@ -1161,7 +1161,7 @@ namespace dp2Circulation
                                     debug_info.Append("修正为正方形以后的 target=" + target.ToString() + "\r\n");
                                 }
 
-                                rectText.Y = (float)Math.Round(rectText.Y); // 2017/10/20
+                                // rectText.Y = (float)Math.Round(rectText.Y); // 2017/10/20 把矩形的数值变为整数，以避免有些打印驱动程序把字体上部截掉一部分
                             }
 
 
