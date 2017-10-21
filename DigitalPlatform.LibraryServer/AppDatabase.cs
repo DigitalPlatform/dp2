@@ -5683,6 +5683,120 @@ out strError);
             return -1;
         }
 
+        // 为 library.xml itemdbgroup 下删除 database 元素
+        // 注：来自日志记录中的 database 元素，其 name 属性表明了要删除的数据库名。这个名字可能是书目库名字(代表了若干下属库)，也可能是一个实体库名字(这时就只删除这一个数据库即可)
+        // parameters:
+        //      elements    日志记录中的 database 元素节点数组
+        // return:
+        //      -1  出错
+        //      0   没有发生修改
+        //      1   发生了修改
+        public static int DeleteDatabaseElement(XmlDocument cfg_dom,
+            XmlNodeList elements,
+            out string strError)
+        {
+            strError = "";
+
+            if (cfg_dom.DocumentElement == null)
+            {
+                strError = "cfg_dom 缺乏根元素";
+                return -1;
+            }
+
+            XmlElement container = cfg_dom.DocumentElement.SelectSingleNode("itemdbgroup") as XmlElement;
+            if (container == null)
+                return 0;
+
+            bool bChanged = false;
+            foreach (XmlElement source in elements)
+            {
+                string name = source.GetAttribute("name");
+                if (string.IsNullOrEmpty(name))
+                    continue;
+
+                // 看看是不是书目库名
+                XmlElement database = container.SelectSingleNode("database[@biblioDbName='" + name + "']") as XmlElement;
+                if (database != null)
+                {
+                    database.ParentNode.RemoveChild(database);
+                    bChanged = true;
+                    continue;
+                }
+
+                // 是实体库、订购库、期库、评注库名么?
+                XmlAttribute attr = container.SelectSingleNode("database[@name='" + name + "' OR @orderDbName='" + name + "' OR @issueDbName='" + name + "' OR @commentDbName='" + name + "']") as XmlAttribute;
+                if (attr != null)
+                {
+                    attr.ParentNode.RemoveChild(attr);
+                    bChanged = true;
+                    continue;
+                }
+
+                // 是其他类型的数据库
+
+            }
+
+            if (bChanged)
+                return 1;
+            return 0;
+        }
+
+        // 为 library.xml itemdbgroup 下追加 database 元素
+        // parameters:
+        //      elements    日志记录中的 database 元素节点数组
+        // return:
+        //      -1  出错
+        //      0   没有发生修改
+        //      1   发生了修改
+        public static int AppendDatabaseElement(XmlDocument cfg_dom,
+            XmlNodeList elements,
+            out string strError)
+        {
+            strError = "";
+
+            if (cfg_dom.DocumentElement == null)
+            {
+                strError = "cfg_dom 缺乏根元素";
+                return -1;
+            }
+
+            bool bChanged = false;
+
+            XmlElement container = cfg_dom.DocumentElement.SelectSingleNode("itemdbgroup") as XmlElement;
+            if (container == null)
+            {
+                container = cfg_dom.CreateElement("itemdbgroup");
+                cfg_dom.DocumentElement.AppendChild(container);
+                bChanged = true;
+            }
+
+            // type == ?
+
+            foreach (XmlElement source in elements)
+            {
+                XmlElement database = cfg_dom.CreateElement("database");
+                container.AppendChild(database);
+                database = DomUtil.SetElementOuterXml(database, source.OuterXml);
+
+                // name 属性改为 biblioDbName 属性
+                database.SetAttribute("biblioDbname", database.GetAttribute("name"));
+
+                // entityDbName 属性改为 name 属性
+                database.SetAttribute("name", database.GetAttribute("entityDbName"));
+
+                // 删除 usage 和 type 属性
+                database.RemoveAttribute("usage");
+                database.RemoveAttribute("type");
+                bChanged = true;
+            }
+
+            // 其他类型的数据库
+
+            if (bChanged)
+                return 1;
+            return 0;
+        }
+
         // 2016/11/20
         int CreateDatabase(
             RmsChannel channel,
@@ -6141,7 +6255,7 @@ out strError);
             }
 
             try
-            {        
+            {
                 nRet = DatabaseUtility.CreateDatabase(channel,
     strTemplateDir,
     strDatabaseName,

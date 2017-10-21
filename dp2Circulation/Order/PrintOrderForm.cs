@@ -8311,7 +8311,6 @@ MessageBoxDefaultButton.Button2);
 
         List<OutputProjectData> formats = new List<OutputProjectData>();
 
-
         int PrepareFormats(List<OutputItem> OutputItems,
             out string strError)
         {
@@ -8882,7 +8881,7 @@ MessageBoxDefaultButton.Button2);
                 format.OutputOrder.OutputDir = strOutputDir;
                 format.OutputOrder.PubType = this.comboBox_load_type.Text;
 
-                // 执行脚本的Output()
+                // 执行脚本的 Output()
                 format.OutputOrder.Output();
             }
             catch (Exception ex)

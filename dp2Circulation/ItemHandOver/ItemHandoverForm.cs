@@ -5416,7 +5416,7 @@ MessageBoxDefaultButton.Button2);
                 if (source_node.NamespaceURI != strNamespaceURI)
                     continue;
 
-                XmlNode new_node = source.CreateElement(strPrefix,
+                XmlElement new_node = source.CreateElement(strPrefix,
                     source_node.LocalName,
                     strNamespaceURI);
                 source.DocumentElement.AppendChild(new_node);

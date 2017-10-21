@@ -491,7 +491,7 @@ MessageBoxDefaultButton.Button1);
 
             for (int i = 0; i < nodes.Count; i++)
             {
-                XmlNode new_node = domMarc.CreateElement("dprms",
+                XmlElement new_node = domMarc.CreateElement("dprms",
                     "file",
                     DpNs.dprms);
                 domMarc.DocumentElement.AppendChild(new_node);

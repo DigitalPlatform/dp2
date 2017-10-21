@@ -454,7 +454,7 @@ namespace DigitalPlatform.LibraryServer
             // 写入日志
             {
                 XmlDocument domOperLog = PrepareOperlogDom("new", strOperator);
-                XmlNode node = domOperLog.CreateElement("account");
+                XmlElement node = domOperLog.CreateElement("account");
                 domOperLog.DocumentElement.AppendChild(node);
 
                 DomUtil.SetElementOuterXml(node, nodeAccount.OuterXml);
@@ -1125,7 +1125,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (string.IsNullOrEmpty(strOldOuterXml) == false)
                 {
-                    XmlNode node_old = domOperLog.CreateElement("oldAccount");
+                    XmlElement node_old = domOperLog.CreateElement("oldAccount");
                     domOperLog.DocumentElement.AppendChild(node_old);
                     node_old = DomUtil.SetElementOuterXml(node_old, strOldOuterXml);
                     DomUtil.RenameNode(node_old,
@@ -1133,7 +1133,7 @@ namespace DigitalPlatform.LibraryServer
                         "oldAccount");
                 }
 
-                XmlNode node = domOperLog.CreateElement("account");
+                XmlElement node = domOperLog.CreateElement("account");
                 domOperLog.DocumentElement.AppendChild(node);
 
                 DomUtil.SetElementOuterXml(node, nodeAccount.OuterXml);
@@ -1351,7 +1351,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (string.IsNullOrEmpty(strOldOuterXml) == false)
                 {
-                    XmlNode node_old = domOperLog.CreateElement("oldAccount");
+                    XmlElement node_old = domOperLog.CreateElement("oldAccount");
                     domOperLog.DocumentElement.AppendChild(node_old);
                     node_old = DomUtil.SetElementOuterXml(node_old, strOldOuterXml);
                     DomUtil.RenameNode(node_old,

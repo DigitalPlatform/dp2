@@ -1788,7 +1788,7 @@ UiTest_moveBiblioRecord_1(strBiblioDbName, "reserve_target")
             types.Add(typeof(OrderStatisForm));
             types.Add(typeof(BiblioStatisForm));
             types.Add(typeof(XmlStatisForm));
-            types.Add(typeof(PrintOrderForm));
+            // types.Add(typeof(PrintOrderForm));
 
             foreach (Type type in types)
             {

@@ -156,9 +156,10 @@ namespace DigitalPlatform.LibraryServer
         //      2.113 (2017/6/16) GetBiblioInfos() API 增加了一种格式 marc。也可以用作 marc:syntax
         //      2.114 (2017/9/20) 批处理任务 大备份初步可用。对对象文件的文件指针用法进行了优化(StreamCache 类)
         //      2.115 (2017/9/23) ListFile() API 中的删除文件功能，被限定在 dp2library 数据目录的 upload 和 backup 子目录。不再允许前一版本那样的 managedatabase 权限的用户删除数据目录下的任何文件
-        //      2.116 (2017/9/30) SerUser() API 增加了 closechannel 动作
+        //      2.116 (2017/9/30) SetUser() API 增加了 closechannel 动作
         //      2.117 (2017/10/6) dp2kernel 的 GetRes() 和 WriteRes() API 的 strStyle 增加了 gzip 选项
-        public static string Version = "2.117";
+        //      2.118 (2017/10/21) library.xml 中 channel 元素增加了 privilegedIpList 属性，可以定义特权前端 IP，这些前端可以创建 maxChannelsLocalhost 属性定义的那么多个并发通道
+        public static string Version = "2.118";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -14149,6 +14150,7 @@ strLibraryCode);    // 读者所在的馆代码
         }
 
         // 检查用户使用 WriteRes API 的权限
+        // TODO: 需要把写入和删除的权限分开处理
         // 注： 
         //      writetemplate 写入模板配置文件 template 所需要的权限; 
         //      writeobject 写入对象所需要的权限; 
@@ -14186,8 +14188,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 if (string.Compare(strFirstLevel, "backup", true) == 0)
                 {
-                    if (StringUtil.IsInList("backup", strRights) == false
-                        && StringUtil.IsInList("managedatabase", strRights) == false)
+                    if (StringUtil.IsInList("backup,managedatabase", strRights) == false)
                     {
                         strError = "写入文件 " + strResPath + " 被拒绝。不具备 backup 或 managedatabase 权限";
                         return 0;
@@ -14195,10 +14196,18 @@ strLibraryCode);    // 读者所在的馆代码
                 }
                 else if (string.Compare(strFirstLevel, "upload", true) == 0)
                 {
-                    if (StringUtil.IsInList("upload", strRights) == false
-                        && StringUtil.IsInList("managedatabase", strRights))
+                    if (StringUtil.IsInList("upload,managedatabase", strRights) == false)
                     {
                         strError = "写入文件 " + strResPath + " 被拒绝。不具备 upload 或 managedatabase 权限";
+                        return 0;
+                    }
+                }
+                else if (string.Compare(strFirstLevel, "library.xml", true) == 0
+                    && string.IsNullOrEmpty(strPath))
+                {
+                    if (StringUtil.IsInList("managedatabase", strRights) == false)
+                    {
+                        strError = "写入文件 " + strResPath + " 被拒绝。不具备 managedatabase 权限";
                         return 0;
                     }
                 }
