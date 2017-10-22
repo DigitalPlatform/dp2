@@ -1684,7 +1684,7 @@ SetStartEventArgs e);
 
         public bool IsSpecialIp(string strIP)
         {
-            if (this.SpecialIpList == null && this.SpecialIpList.Count == 0)
+            if (this.SpecialIpList == null || this.SpecialIpList.Count == 0)
                 return false;
             if (this.SpecialIpList.IndexOf(strIP) != -1)
                 return true;

@@ -1571,26 +1571,26 @@ namespace DigitalPlatform.Xml
         //      可能会因为 strOuterXml 格式不正确而抛出异常
         // return:
         //      返回变动后该元素的 XmlNode
-        public static XmlNode SetElementOuterXml(XmlNode node,
+        public static XmlElement SetElementOuterXml(XmlElement element,
             string strOuterXml)
         {
-            if (node == null)
+            if (element == null)
             {
                 throw new ArgumentException("node 参数值不应为空", "node");
             }
 
-            XmlNode new_node = null;
+            XmlElement new_element = null;
             if (string.IsNullOrEmpty(strOuterXml) == false)
             {
-                XmlDocumentFragment fragment = node.OwnerDocument.CreateDocumentFragment();
+                XmlDocumentFragment fragment = element.OwnerDocument.CreateDocumentFragment();
                 fragment.InnerXml = strOuterXml;
 
-                node.ParentNode.InsertAfter(fragment, node);
+                element.ParentNode.InsertAfter(fragment, element);
 
-                new_node = node.NextSibling;    // 2012/12/12 新增加
+                new_element = element.NextSibling as XmlElement;    // 2012/12/12 新增加
             }
-            node.ParentNode.RemoveChild(node);
-            return new_node;
+            element.ParentNode.RemoveChild(element);
+            return new_element;
         }
 
         // 插入新对象到儿子们的最前面

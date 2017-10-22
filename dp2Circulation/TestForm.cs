@@ -1385,7 +1385,9 @@ ref bHideMessageBox);
                     if (_stop != null && _stop.State != 0)
                         break;
 
-                    using (LibraryChannel channel = new LibraryChannel())
+                    // using (LibraryChannel channel = new LibraryChannel())
+                    LibraryChannel channel = new LibraryChannel();
+
                     {
                         channel.Url = Program.MainForm.LibraryServerUrl;
 

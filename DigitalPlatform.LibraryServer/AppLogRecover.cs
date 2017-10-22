@@ -8214,6 +8214,13 @@ DO_SNAPSHOT:
                             return -1;
 
                         // 更新 library.xml 内容
+                        XmlNodeList nodes = domLog.DocumentElement.SelectNodes("databases/database");
+                        nRet = LibraryApplication.AppendDatabaseElement(this.LibraryCfgDom,
+            nodes,
+            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        this.Changed = true;
                     }
                     else if (strAction == "initializeDatabase")
                     {
@@ -8233,6 +8240,8 @@ DO_SNAPSHOT:
                         goto ERROR1;
                     }
 
+                    if (this.Changed == true)
+                        this.ActivateManagerThread();
                     return 0;
                 }
                 finally

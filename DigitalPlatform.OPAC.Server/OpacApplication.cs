@@ -1384,7 +1384,7 @@ namespace DigitalPlatform.OPAC.Server
                     if (bOuputDebugInfo == true)
                         strDebugInfo += "*** virtual/def:\r\n" + strXml + "\r\n";
 
-                    XmlNode node_virtual = this.OpacCfgDom.DocumentElement.SelectSingleNode("virtualDatabases");
+                    XmlElement node_virtual = this.OpacCfgDom.DocumentElement.SelectSingleNode("virtualDatabases") as XmlElement;
                     if (node_virtual == null)
                     {
                         node_virtual = this.OpacCfgDom.CreateElement("virtualDatabases");
@@ -1412,7 +1412,7 @@ namespace DigitalPlatform.OPAC.Server
                     if (bOuputDebugInfo == true)
                         strDebugInfo += "*** system/arrived:\r\n" + strXml + "\r\n";
 
-                    XmlNode node_arrived = this.OpacCfgDom.DocumentElement.SelectSingleNode("arrived");
+                    XmlElement node_arrived = this.OpacCfgDom.DocumentElement.SelectSingleNode("arrived") as XmlElement;
                     if (node_arrived == null)
                     {
                         node_arrived = this.OpacCfgDom.CreateElement("arrived");
