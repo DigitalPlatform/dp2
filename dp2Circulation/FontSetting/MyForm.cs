@@ -21,6 +21,9 @@ using DigitalPlatform.MarcDom;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
+using System.Runtime.Remoting.Channels.Ipc;
+using System.Runtime.Remoting.Channels;
+using DigitalPlatform.Interfaces;
 
 // 2013/3/16 添加 XML 注释
 
@@ -1696,6 +1699,105 @@ out string strError)
             e.ErrorInfo = strError;
         }
 
+        public void ShowMessageBox(string strText)
+        {
+            try
+            {
+                MessageBox.Show(this, strText);
+            }
+            catch(ObjectDisposedException)
+            {
+
+            }
+        }
+
+        #region 指纹有关功能
+
+        public class FingerprintChannel
+        {
+            public IpcClientChannel Channel { get; set; }
+            public IFingerprint Object { get; set; }
+        }
+
+        // IpcClientChannel m_fingerPrintChannel = new IpcClientChannel();
+        // IFingerprint m_fingerPrintObj = null;
+        internal int _inFingerprintCall = 0; // >0 表示正在调用指纹 API 尚未返回
+
+        public FingerprintChannel StartFingerprintChannel(
+            string strUrl,
+            out string strError)
+        {
+            strError = "";
+
+            FingerprintChannel result = new FingerprintChannel();
+
+            result.Channel = new IpcClientChannel(Guid.NewGuid().ToString(), // 随机的名字，令多个 Channel 对象可以并存 
+                    new BinaryClientFormatterSinkProvider());
+
+            ChannelServices.RegisterChannel(result.Channel, true);
+            bool bDone = false;
+            try
+            {
+                result.Object = (IFingerprint)Activator.GetObject(typeof(IFingerprint),
+                    strUrl);
+                if (result.Object == null)
+                {
+                    strError = "无法连接到服务器 " + strUrl;
+                    return null;
+                }
+                bDone = true;
+                return result;
+            }
+            finally
+            {
+                if (bDone == false)
+                    EndFingerprintChannel(result);
+            }
+        }
+
+        public void EndFingerprintChannel(FingerprintChannel channel)
+        {
+            if (channel != null && channel.Channel != null)
+            {
+                ChannelServices.UnregisterChannel(channel.Channel);
+                channel.Channel = null;
+            }
+        }
+
+        // return:
+        //      -2  remoting服务器连接失败。驱动程序尚未启动
+        //      -1  出错
+        //      0   成功
+        public int AddItems(
+            FingerprintChannel channel,
+            List<FingerprintItem> items,
+            out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                int nRet = channel.Object.AddItems(items,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+            // [System.Runtime.Remoting.RemotingException] = {"连接到 IPC 端口失败: 系统找不到指定的文件。\r\n "}
+            catch (System.Runtime.Remoting.RemotingException ex)
+            {
+                strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 AddItems() 操作失败: " + ex.Message;
+                return -2;
+            }
+            catch (Exception ex)
+            {
+                strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 AddItems() 操作失败: " + ex.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+
+        #endregion
     }
 
     public class FilterHost

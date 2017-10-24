@@ -13,6 +13,7 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Web;
+using System.Threading.Tasks;
 
 using ZXing;
 using ZXing.QrCode;
@@ -32,7 +33,6 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using System.Threading.Tasks;
 
 namespace dp2Circulation
 {
@@ -336,7 +336,7 @@ namespace dp2Circulation
             e.values = values;
         }
 
-        private void ReaderInfoForm_FormClosing(object sender, FormClosingEventArgs e)
+        async private void ReaderInfoForm_FormClosing(object sender, FormClosingEventArgs e)
         {
 #if NO
             if (stop != null)
@@ -349,6 +349,21 @@ namespace dp2Circulation
                 }
             }
 #endif
+            if (_inFingerprintCall > 0)
+            {
+                try
+                {
+                    GetFingerprintStringResult result = await CancelReadFingerprintString();
+                    if (result.Value == -1)
+                    {
+                        ShowMessageBox(result.ErrorInfo);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ShowMessageBox(ex.Message);
+                }
+            }
 
             if (this.ReaderXmlChanged == true
                 || this.ObjectChanged == true)
@@ -4888,48 +4903,6 @@ MessageBoxDefaultButton.Button2);
 
         #region 指纹登记功能
 
-        IpcClientChannel m_fingerPrintChannel = new IpcClientChannel();
-        IFingerprint m_fingerPrintObj = null;
-
-        int StartFingerprintChannel(
-            string strUrl,
-            out string strError)
-        {
-            strError = "";
-
-            //Register the channel with ChannelServices.
-            if (this.m_fingerPrintChannel == null)
-                this.m_fingerPrintChannel = new IpcClientChannel(Guid.NewGuid().ToString(), // 随机的名字，令多个 Channel 对象可以并存 
-                    new BinaryClientFormatterSinkProvider());
-
-            ChannelServices.RegisterChannel(m_fingerPrintChannel, true);
-
-            try
-            {
-                m_fingerPrintObj = (IFingerprint)Activator.GetObject(typeof(IFingerprint),
-                    strUrl);
-                if (m_fingerPrintObj == null)
-                {
-                    strError = "无法连接到服务器 " + strUrl;
-                    return -1;
-                }
-            }
-            finally
-            {
-            }
-
-            return 0;
-        }
-
-        void EndFingerprintChannel()
-        {
-            if (this.m_fingerPrintChannel != null)
-            {
-                ChannelServices.UnregisterChannel(m_fingerPrintChannel);
-                this.m_fingerPrintChannel = null;
-            }
-        }
-
         // 局部更新指纹信息高速缓存
         // return:
         //      -2  remoting服务器连接失败。驱动程序尚未启动
@@ -4948,12 +4921,12 @@ MessageBoxDefaultButton.Button2);
                 return -1;
             }
 
-            int nRet = StartFingerprintChannel(
+            FingerprintChannel channel = StartFingerprintChannel(
                 Program.MainForm.FingerprintReaderUrl,
                 out strError);
-            if (nRet == -1)
+            if (channel == null)
                 return -1;
-
+            _inFingerprintCall++;
             try
             {
                 List<FingerprintItem> items = new List<FingerprintItem>();
@@ -4967,8 +4940,10 @@ MessageBoxDefaultButton.Button2);
                 //      -2  remoting服务器连接失败。驱动程序尚未启动
                 //      -1  出错
                 //      0   成功
-                nRet = AddItems(items,
-    out strError);
+                int nRet = AddItems(
+                    channel,
+                    items,
+                    out strError);
                 if (nRet == -1)
                     return -1;
                 if (nRet == -2)
@@ -4976,41 +4951,75 @@ MessageBoxDefaultButton.Button2);
             }
             finally
             {
-                EndFingerprintChannel();
+                _inFingerprintCall--;
+                EndFingerprintChannel(channel);
             }
 
             return 0;
         }
 
-        // return:
-        //      -2  remoting服务器连接失败。驱动程序尚未启动
-        //      -1  出错
-        //      0   成功
-        int AddItems(List<FingerprintItem> items,
-    out string strError)
+        async Task<GetFingerprintStringResult> CancelReadFingerprintString()
         {
-            strError = "";
+            string strError = "";
+            GetFingerprintStringResult result = new GetFingerprintStringResult();
 
+            if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == true)
+            {
+                strError = "尚未配置 指纹阅读器URL 系统参数，无法读取指纹信息";
+                goto ERROR1;
+            }
+
+            FingerprintChannel channel = StartFingerprintChannel(
+                Program.MainForm.FingerprintReaderUrl,
+                out strError);
+            if (channel == null)
+                goto ERROR1;
+
+            _inFingerprintCall++;
             try
             {
-                int nRet = m_fingerPrintObj.AddItems(items,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
+                try
+                {
+                    return await Task.Factory.StartNew<GetFingerprintStringResult>(
+() =>
+{
+    GetFingerprintStringResult temp_result = new GetFingerprintStringResult();
+    try
+    {
+        temp_result.Value = channel.Object.CancelGetFingerprintString();
+        if (temp_result.Value == -1)
+            temp_result.ErrorInfo = "API cancel return error";
+        return temp_result;
+    }
+    catch (RemotingException ex)
+    {
+        temp_result.ErrorInfo = ex.Message;
+        temp_result.Value = 0;  // 让调主认为没有出错
+        return temp_result;
+    }
+    catch (Exception ex)
+    {
+        temp_result.ErrorInfo = ex.Message;
+        temp_result.Value = -1;
+        return temp_result;
+    }
+});
+                }
+                catch (Exception ex)
+                {
+                    strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 GetFingerprintString() 操作失败: " + ex.Message;
+                    goto ERROR1;
+                }
             }
-            // [System.Runtime.Remoting.RemotingException] = {"连接到 IPC 端口失败: 系统找不到指定的文件。\r\n "}
-            catch (System.Runtime.Remoting.RemotingException ex)
+            finally
             {
-                strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 AddItems() 操作失败: " + ex.Message;
-                return -2;
+                _inFingerprintCall--;
+                EndFingerprintChannel(channel);
             }
-            catch (Exception ex)
-            {
-                strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 AddItems() 操作失败: " + ex.Message;
-                return -1;
-            }
-
-            return 0;
+        ERROR1:
+            result.ErrorInfo = strError;
+            result.Value = -1;
+            return result;
         }
 
         // return:
@@ -5028,16 +5037,15 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
-            int nRet = StartFingerprintChannel(
+            FingerprintChannel channel = StartFingerprintChannel(
                 Program.MainForm.FingerprintReaderUrl,
                 out strError);
-            if (nRet == -1)
+            if (channel == null)
                 goto ERROR1;
 
+            _inFingerprintCall++;
             try
             {
-                try
-                {
 #if NO
                     // 获得一个指纹特征字符串
                     // return:
@@ -5052,18 +5060,17 @@ MessageBoxDefaultButton.Button2);
 
                     return nRet;
 #endif
-                    return await GetFingerprintString();
-                }
-                catch (Exception ex)
-                {
-                    strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 GetFingerprintString() 操作失败: " + ex.Message;
-                    goto ERROR1;
-                }
-                // Console.Beep(); // 表示读取成功
+                return await GetFingerprintString(channel);
+            }
+            catch (Exception ex)
+            {
+                strError = "针对 " + Program.MainForm.FingerprintReaderUrl + " 的 GetFingerprintString() 操作失败: " + ex.Message;
+                goto ERROR1;
             }
             finally
             {
-                EndFingerprintChannel();
+                _inFingerprintCall--;
+                EndFingerprintChannel(channel);
             }
         ERROR1:
             result.ErrorInfo = strError;
@@ -5080,35 +5087,44 @@ MessageBoxDefaultButton.Button2);
             public string ErrorInfo { get; set; }
         }
 
-        Task<GetFingerprintStringResult> GetFingerprintString()
+        Task<GetFingerprintStringResult> GetFingerprintString(FingerprintChannel channel)
         {
             return Task.Factory.StartNew<GetFingerprintStringResult>(
     () =>
     {
-        return CallGetFingerprintString();
+        return CallGetFingerprintString(channel);
     });
         }
 
-        GetFingerprintStringResult CallGetFingerprintString()
+        GetFingerprintStringResult CallGetFingerprintString(FingerprintChannel channel)
         {
             GetFingerprintStringResult result = new GetFingerprintStringResult();
-            string strError = "";
-            string strFingerprint = "";
-            string strVersion = "";
-            // 获得一个指纹特征字符串
-            // return:
-            //      -1  error
-            //      0   放弃输入
-            //      1   成功输入
-            int nRet = m_fingerPrintObj.GetFingerprintString(out strFingerprint,
-                out strVersion,
-                out strError);
+            try
+            {
+                string strError = "";
+                string strFingerprint = "";
+                string strVersion = "";
+                // 获得一个指纹特征字符串
+                // return:
+                //      -1  error
+                //      0   放弃输入
+                //      1   成功输入
+                int nRet = channel.Object.GetFingerprintString(out strFingerprint,
+                    out strVersion,
+                    out strError);
 
-            result.Fingerprint = strFingerprint;
-            result.Version = strVersion;
-            result.ErrorInfo = strError;
-            result.Value = nRet;
-            return result;
+                result.Fingerprint = strFingerprint;
+                result.Version = strVersion;
+                result.ErrorInfo = strError;
+                result.Value = nRet;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.ErrorInfo = "GetFingerprintString() 异常: " + ex.Message;
+                result.Value = -1;
+                return result;
+            }
         }
 
         #endregion
@@ -5119,10 +5135,14 @@ MessageBoxDefaultButton.Button2);
             //string strFingerprint = "";
             //string strVersion = "";
 
+#if NO
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("等待扫描指纹 ...");
+            stop.BeginLoop();
+#endif
+            this.ShowMessage("等待扫描指纹 ...");
             this.EnableControls(false);
-            Program.MainForm.StatusBarMessage = "等待扫描指纹...";
-            this.Update();
-            Application.DoEvents();
+            // Program.MainForm.StatusBarMessage = "等待扫描指纹...";
             try
             {
             REDO:
@@ -5181,6 +5201,15 @@ MessageBoxDefaultButton.Button1);
             finally
             {
                 this.EnableControls(true);
+                this.ClearMessage();
+#if NO
+                if (stop != null)
+                {
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                }
+#endif
             }
 
             // MessageBox.Show(this, strFingerprint);
@@ -5188,7 +5217,7 @@ MessageBoxDefaultButton.Button1);
             return;
         ERROR1:
             Program.MainForm.StatusBarMessage = strError;
-            MessageBox.Show(this, strError);
+            ShowMessageBox(strError);
         }
 
         private void toolStripMenuItem_clearFingerprint_Click(object sender, EventArgs e)

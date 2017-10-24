@@ -4694,6 +4694,7 @@ out strError);
             out string strError)
         {
             strError = "";
+            int nRet = 0;
 
             if (string.IsNullOrEmpty(Program.MainForm.FingerprintReaderUrl) == true)
             {
@@ -4701,10 +4702,10 @@ out strError);
                 return -1;
             }
 
-            int nRet = StartFingerprintChannel(
+            FingerprintChannel channel = StartFingerprintChannel(
                 Program.MainForm.FingerprintReaderUrl,
                 out strError);
-            if (nRet == -1)
+            if (channel == null)
                 return -1;
 
             try
@@ -4716,8 +4717,10 @@ out strError);
                     //      -2  remoting服务器连接失败。驱动程序尚未启动
                     //      -1  出错
                     //      0   成功
-                    nRet = AddItems(null,
-    out strError);
+                    nRet = AddItems(
+                        channel,
+                        null,
+                        out strError);
                     if (nRet == -1)
                         return -1;
                     if (nRet == -2)
@@ -4754,8 +4757,10 @@ out strFingerprint);
                         //      -2  remoting服务器连接失败。驱动程序尚未启动
                         //      -1  出错
                         //      0   成功
-                        nRet = AddItems(items,
-            out strError);
+                        nRet = AddItems(
+                            channel,
+                            items,
+                            out strError);
                         if (nRet == -1)
                             return -1;
                         if (nRet == -2)
@@ -4771,7 +4776,9 @@ out strFingerprint);
                     //      -2  remoting服务器连接失败。驱动程序尚未启动
                     //      -1  出错
                     //      0   成功
-                    nRet = AddItems(items,
+                    nRet = AddItems(
+                        channel,
+                        items,
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -4785,10 +4792,11 @@ out strFingerprint);
             }
             finally
             {
-                EndFingerprintChannel();
+                EndFingerprintChannel(channel);
             }
         }
 
+#if NO
         // return:
         //      -2  remoting服务器连接失败。驱动程序尚未启动
         //      -1  出错
@@ -4864,6 +4872,8 @@ out strFingerprint);
                 this.m_fingerPrintChannel = null;
             }
         }
+
+#endif
 
         #endregion
 

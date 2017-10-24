@@ -8215,7 +8215,7 @@ DO_SNAPSHOT:
 
                         // 更新 library.xml 内容
                         XmlNodeList nodes = domLog.DocumentElement.SelectNodes("databases/database");
-                        nRet = LibraryApplication.AppendDatabaseElement(this.LibraryCfgDom,
+                        nRet = AppendDatabaseElement(this.LibraryCfgDom,
             nodes,
             out strError);
                         if (nRet == -1)

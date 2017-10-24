@@ -3226,9 +3226,7 @@ namespace dp2Library
                 // 权限判断
 
                 // 权限字符串
-                if (StringUtil.IsInList("listbibliodbfroms", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("listdbfroms", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("listbibliodbfroms,listdbfroms,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "列出书目库检索途径 被拒绝。不具备order或listbibliodbfroms或listdbfroms权限。";
@@ -3330,8 +3328,7 @@ namespace dp2Library
                 // 权限判断
 
                 // 权限字符串
-                if (StringUtil.IsInList("searchbiblio", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("searchbiblio,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "检索书目信息被拒绝。不具备order或searchbiblio权限。";
@@ -3641,8 +3638,7 @@ namespace dp2Library
                 if (strAction == "notifynewbook")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("setbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "通知读者新书到达被拒绝。不具备order或setbiblioinfo权限。";
@@ -3719,8 +3715,7 @@ namespace dp2Library
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setbiblioinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "复制书目信息被拒绝。不具备 order 或 setbiblioinfo 权限。";
@@ -4196,8 +4191,7 @@ namespace dp2Library
                 // 权限判断
 
                 // 权限字符串
-                if (StringUtil.IsInList("searchitem", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("searchitem,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "检索实体信息被拒绝。不具备order、searchitem权限。";
@@ -4517,9 +4511,7 @@ namespace dp2Library
                 if (strItemDbType == "item")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("getiteminfo", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("getentities", sessioninfo.RightsOrigin) == false   // 2009/10/18 
-                        && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("getiteminfo,getentities,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取实体信息被拒绝。不具备order、getiteminfo或getentities权限。";
@@ -4530,8 +4522,7 @@ namespace dp2Library
                 else if (strItemDbType == "order")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("getorderinfo", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("getorderinfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取订购信息被拒绝。不具备order或getorderinfo权限。";
@@ -4542,8 +4533,7 @@ namespace dp2Library
                 else if (strItemDbType == "issue")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("getissueinfo", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("getissueinfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取期信息被拒绝。不具备order或getissueinfo权限。";
@@ -4554,8 +4544,7 @@ namespace dp2Library
                 else if (strItemDbType == "comment")
                 {
                     // 权限字符串
-                    if (StringUtil.IsInList("getcommentinfo", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                    if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "用户 '" + sessioninfo.UserID + "' 获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
@@ -5144,8 +5133,7 @@ namespace dp2Library
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("searchitem", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("searchitem,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "册条码号查重被拒绝。不具备order或searchitem权限。";
@@ -5580,9 +5568,7 @@ namespace dp2Library
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("getissues", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("getissueinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("getissues,getissueinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "获得期信息 操作被拒绝。不具备order、getissueinfo或getissues权限。";
@@ -5640,8 +5626,7 @@ namespace dp2Library
                 }
 
                 // 权限字符串
-                if (StringUtil.IsInList("setissues", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("setissueinfo", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setissues,setissueinfo", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "保存期信息 操作被拒绝。不具备setissueinfo或setissues权限。";
@@ -6094,8 +6079,7 @@ namespace dp2Library
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("getissueinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("getissueinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "获取期信息被拒绝。不具备order或getissueinfo权限。";
@@ -6632,8 +6616,7 @@ namespace dp2Library
             {
 
                 // 权限字符串
-                if (StringUtil.IsInList("searchissue", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("searchissue,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "对期记录的参考ID查重被拒绝。不具备order或searchissue权限。";
@@ -7005,9 +6988,7 @@ namespace dp2Library
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("getorders", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("getorderinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("getorders,getorderinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "获得订购信息 操作被拒绝。不具备order、getorderinfo或getorders权限。";
@@ -7065,9 +7046,7 @@ namespace dp2Library
                 }
 
                 // 权限字符串
-                if (StringUtil.IsInList("setorders", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("setorderinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("setorders,setorderinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "保存订购信息 操作被拒绝。不具备order、setorderinfo或setorders权限。";
@@ -7131,8 +7110,7 @@ namespace dp2Library
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("getorderinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("getorderinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "获取订购信息被拒绝。不具备order或getorderinfo权限。";
@@ -7736,8 +7714,7 @@ namespace dp2Library
                 // 权限判断
 
                 // 权限字符串
-                if (StringUtil.IsInList("searchorder", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("searchorder,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "检索订购信息被拒绝。不具备order、searchorder权限。";
@@ -8947,9 +8924,7 @@ Stack:
                 // getinfo 动作 权限单独判断 2013/1/27
                 if (strAction == "getinfo")
                 {
-                    if (StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("getsystemparameter", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false) // 2013/10/13
+                    if (StringUtil.IsInList("managedatabase,getsystemparameter,order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
                         result.ErrorInfo = "管理数据库的操作 '" + strAction + "' 被拒绝。不具备 getsystemparameter 或 order 或 managedatabase 权限。";
@@ -9697,13 +9672,11 @@ Stack:
                     {
                         List<string> root_paths = new List<string>();
                         // 根据不同的权限限定不同的 root 起点
-                        if (StringUtil.IsInList("backup", sessioninfo.RightsOrigin)
-        || StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin))
+                        if (StringUtil.IsInList("backup,managedatabase", sessioninfo.RightsOrigin))
                         {
                             root_paths.Add(EnsureRootPath(Path.Combine(app.DataDir, "backup")));
                         }
-                        if (StringUtil.IsInList("upload", sessioninfo.RightsOrigin)
-        || StringUtil.IsInList("managedatabase", sessioninfo.RightsOrigin))
+                        if (StringUtil.IsInList("upload,managedatabase", sessioninfo.RightsOrigin))
                         {
                             root_paths.Add(EnsureRootPath(Path.Combine(app.DataDir, "upload")));
                         }
@@ -9884,8 +9857,7 @@ Stack:
             try
             {
                 // 权限判断
-                if (StringUtil.IsInList("getsystemparameter", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("getsystemparameter,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "获得系统文件的操作被拒绝。不具备order或getsystemparameter权限。";
@@ -10029,8 +10001,7 @@ Stack:
             try
             {
                 // 权限判断
-                if (StringUtil.IsInList("getsystemparameter", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("getsystemparameter,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "获得系统参数的操作被拒绝。不具备 order 或 getsystemparameter 权限。";
@@ -12610,8 +12581,7 @@ Stack:
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("getcommentinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "获得评注信息 操作被拒绝。不具备 getcommentinfo 或 order 权限。";
@@ -12777,8 +12747,7 @@ Stack:
             try
             {
                 // 权限字符串
-                if (StringUtil.IsInList("getcommentinfo", sessioninfo.RightsOrigin) == false
-                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                if (StringUtil.IsInList("getcommentinfo,order", sessioninfo.RightsOrigin) == false)
                 {
                     result.Value = -1;
                     result.ErrorInfo = "获取评注信息被拒绝。不具备 getcommentinfo 或 order 权限。";
