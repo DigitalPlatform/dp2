@@ -7556,6 +7556,7 @@ out strError);
         // parameters:
         //		strPath	格式: 库名/记录号/object/对象xpath
         //      file    文件 Stream。注意：本函数调用中，文件指针会被自然改变
+        //      length  要保存部分的长度。如果为 -1，在函数内会用 file.Length 代替
         public long SaveResObject(
             DigitalPlatform.Stop stop,
             string strPath,

@@ -33,6 +33,7 @@ namespace DigitalPlatform.LibraryServer
         /* 日志记录格式如下
 <root>
   <operation>borrow</operation> 操作类型
+  <action>borrow</action>  动作 borrow/renew
   <readerBarcode>R0000002</readerBarcode> 读者证条码号
   <itemBarcode>0000001</itemBarcode>  册条码号
   <borrowDate>Fri, 08 Dec 2006 04:17:31 GMT</borrowDate> 借阅日期
@@ -331,7 +332,6 @@ out strError);
                 // 写回读者、册记录
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
-
 
                 // 写回读者记录
                 lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -638,7 +638,6 @@ out strError);
                 // 写回读者、册记录
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
-
 
                 // 写回读者记录
                 lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -1236,6 +1235,7 @@ strElementName);
         /* 日志记录格式
 <root>
   <operation>return</operation> 操作类型
+  <action>return</action> 动作。有 return/lost/inventory/read/boxing 几种。恢复动作目前仅恢复 return 和 lost 两种，其余会忽略
   <itemBarcode>0000001</itemBarcode> 册条码号
   <readerBarcode>R0000002</readerBarcode> 读者证条码号
   <operator>test</operator> 操作者
@@ -1281,6 +1281,15 @@ strElementName);
             // 快照恢复
             if (level == RecoverLevel.Snapshot)
             {
+                string strAction = DomUtil.GetElementText(domLog.DocumentElement,
+    "action");
+
+                if (strAction != "return" && strAction != "lost")
+                {
+                    // 忽略其余动作
+                    return 0;
+                }
+
                 XmlNode node = null;
                 string strReaderXml = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerRecord",
@@ -1345,10 +1354,8 @@ strElementName);
                     return -1;
                 }
 
-
                 return 0;
             }
-
 
             // 逻辑恢复或者混合恢复
             if (level == RecoverLevel.Logic
@@ -1358,6 +1365,12 @@ strElementName);
 
                 string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                     "action");
+
+                if (strAction != "return" && strAction != "lost")
+                {
+                    // 忽略其余动作
+                    return 0;
+                }
 
                 string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerBarcode");
@@ -1652,6 +1665,12 @@ strElementName);
 
                 string strAction = DomUtil.GetElementText(domLog.DocumentElement,
                     "action");
+
+                if (strAction != "return" && strAction != "lost")
+                {
+                    // 忽略其余动作
+                    return 0;
+                }
 
                 string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerBarcode");
@@ -2181,6 +2200,13 @@ strElementName);
         {
             strError = "";
             int nRet = 0;
+
+            // 2017/10/24
+            if (strAction != "return" && strAction != "lost")
+            {
+                strError = "ReturnChangeReaderAndItemRecord() 只能处理 strAction 为 'return' 和 'lost' 的情况，不能处理 '" + strAction + "'";
+                return -1;
+            }
 
             string strReturnOperator = DomUtil.GetElementText(domLog.DocumentElement,
     "operator");
@@ -7661,7 +7687,7 @@ API: Settlement()
 <requestResPath>...</requestResPath> 资源路径参数。也就是请求API是的strResPath参数值。可能在路径中的记录ID部分包含问号，表示要追加创建新的记录
 <resPath>...</resPath> 资源路径。资源的确定路径。
 <ranges>...</ranges> 字节范围
-<totalLength>...</totalLength> 总长度
+<totalLength>...</totalLength> 总长度。如果为 -1，表示仅修改 metadata
 <metadata>...</metadata> 此元素的文本即是记录体，但注意为不透明的字符串（HtmlEncoding后的记录字符串）。
 <style>...</style> 当 style 中包含 delete 子串时表示要删除这个资源 
 <operator>test</operator> 
@@ -7709,14 +7735,6 @@ API: Settlement()
                     return -1;
                 }
 
-                string strRanges = DomUtil.GetElementText(
-    domLog.DocumentElement,
-    "ranges");
-                if (string.IsNullOrEmpty(strRanges) == true)
-                {
-                    strError = "日志记录中缺<ranges>元素";
-                    return -1;
-                }
 
                 string strTotalLength = DomUtil.GetElementText(
 domLog.DocumentElement,
@@ -7737,6 +7755,18 @@ domLog.DocumentElement,
                     strError = "lTotalLength值 '" + strTotalLength + "' 格式不正确";
                     return -1;
                 }
+
+                string strRanges = DomUtil.GetElementText(
+domLog.DocumentElement,
+"ranges");
+                if (lTotalLength != -1 && string.IsNullOrEmpty(strRanges) == true)
+                {
+                    // 2017/10/26 注: 当 totalLength 为 -1 时，表示仅修改 metadata。此时 ranges 为空
+                    // 而当 totalLength 为非 -1 值时，ranges 就不允许为空
+                    strError = "日志记录中缺 <ranges> 元素(当 <totalLength> 元素内容为非 -1 时)";
+                    return -1;
+                }
+
                 string strMetadata = DomUtil.GetElementText(
 domLog.DocumentElement,
 "metadata");

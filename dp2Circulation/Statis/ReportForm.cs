@@ -8231,6 +8231,7 @@ out strError);
         /*
 <root>
   <operation>return</operation> 操作类型
+  <action>return</action> 动作。有 return/lost/inventory/read/boxing 几种。恢复动作目前仅恢复 return 和 lost 两种，其余会忽略
   <itemBarcode>0000001</itemBarcode> 册条码号
   <readerBarcode>R0000002</readerBarcode> 读者证条码号
   <operator>test</operator> 操作者
@@ -8254,8 +8255,8 @@ out string strError)
 
             string strAction = DomUtil.GetElementText(domLog.DocumentElement,
     "action");
-            if (strAction == "read")
-                return 0;   // read 动作并不会改变任何册记录，所以这里返回了
+            if (strAction != "return" && strAction != "lost")
+                return 0;   // 其余 inventory/read/boxing 动作并不会改变任何册记录，所以这里返回了
 
             //long lRet = 0;
             int nRet = 0;

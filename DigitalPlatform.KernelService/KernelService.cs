@@ -2090,7 +2090,7 @@ namespace dp2Kernel
         //						对象资源: 库名/记录号/object/资源ID
         //						部分记录体: 库名/记录/xpath/<locate>hitcount</locate><action>AddInteger</action> 或者 库名/记录/xpath/@hitcount
         //		strRanges		目标的位置,多个range用逗号分隔,null认为是空字符串，空字符串认为是0-(lTotalLength-1)
-        //		lTotalLength	资源总长度,可以为0
+        //		lTotalLength	资源总长度,可以为 0。如果为 -1，表示仅修改 metadata
         //		baContent		用byte[]数据传送的资源内容，如果为null则表示是0字节的数组
         //		strAttachmentID	用附件传送的资源内容,null认为是空字符串
         //		strMetadata		元数据内容，null认为是空字符串，注:有些元数据虽然传过来，但服务器不认，比如长度

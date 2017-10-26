@@ -1038,10 +1038,10 @@ namespace DigitalPlatform.Range
                 strContentRange = "0-" + Convert.ToString(lTotalLength - 1);
             }
 
-            // 创建RangeList，便于理解范围字符串
+            // 创建 RangeList，便于理解范围字符串
             RangeList rl = new RangeList(strContentRange);
 
-            // 检查strContentRange指出的最大最小边界和源文件中实际情况是否矛盾
+            // 检查 strContentRange 指出的最大最小边界和源文件中实际情况是否矛盾
             long lMax = rl.max();
             if (lTotalLength <= lMax)
             {

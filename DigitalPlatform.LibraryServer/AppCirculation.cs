@@ -3847,7 +3847,8 @@ start_time_1,
         // API: 还书
         // 权限：  工作人员需要return权限，如果是丢失处理需要lost权限；所有读者均不具备还书操作权限。盘点需要 inventory 权限
         // parameters:
-        //      strAction   return/lost/inventory/read/boxing
+        //      strAction   return/lost/inventory/read/boxing 分别是 还书/丢失/盘点/读过/配书
+        //                  配书，是指图书馆员为读者预先准备好被预约的图书，从书库取出放到特定的书架或者盒子中，等读者来了立刻可以取走
         //      strReaderBarcodeParam   读者证条码号。当 strAction 为 "inventory" 时，这里是批次号
         // return:
         //      Result.Value    -1  出错 0 操作成功 1 操作成功，但有值得操作人员留意的情况：如有超期情况；发现条码号重复；需要放入预约架
