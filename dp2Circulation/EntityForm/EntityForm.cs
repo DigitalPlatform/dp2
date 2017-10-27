@@ -6878,6 +6878,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             dbname_dlg.DbName = strSelectedDbName;
             // dbname_dlg.MainForm = Program.MainForm;
 
+            bool bForceAsk = false; // 2017/10/27
+
+        REDO_SELECTDBNAME:
             dbname_dlg.Text = "装载书目模板 -- 请选择目标编目库名";
             //  dbname_dlg.StartPosition = FormStartPosition.CenterScreen;
 
@@ -6914,10 +6917,20 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 out strContent,
                 out baCfgOutputTimestamp,
                 out strError);
-            if (nRet == -1 || nRet == 0)
+            if (nRet == -1)
             {
                 this.BiblioTimestamp = null;
                 goto ERROR1;
+            }
+
+            if (nRet == 0)
+            {
+                // 一般是因为书目库名没有找到
+                dbname_dlg.EnableNotAsk = true;
+                dbname_dlg.DbName = "";
+                dbname_dlg.AutoClose = false;
+                bForceAsk = true;
+                goto REDO_SELECTDBNAME;
             }
 
             // MessageBox.Show(this, strContent);
@@ -6936,7 +6949,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
 
             select_temp_dlg.SelectedName = strSelectedTemplateName;
             select_temp_dlg.AutoClose = (bShift == true ? false : bNotAskTemplateName);
-            select_temp_dlg.NotAsk = bNotAskTemplateName;
+            select_temp_dlg.NotAsk = bForceAsk == false ? bNotAskTemplateName : false;
             select_temp_dlg.EnableNotAsk = true;    // 2015/5/11
 
             nRet = select_temp_dlg.Initial(
@@ -10094,7 +10107,7 @@ MessageBoxDefaultButton.Button1);
                     // 输入的条码号格式不合法
                     if (nRet == 0)
                     {
-                        strError = "您输入的条码号 " + this.textBox_itemBarcode.Text + " 格式不正确(" + strError + ")。请重新输入。";
+                        strError = "您输入的条码号 " + this.textBox_itemBarcode.Text + " 格式不正确(" + strError + ")。请重新输入。\r\n\r\n请注意内务当前图书馆代码为 '" + Program.MainForm.FocusLibraryCode + "'，馆代码选择不当也会造成格式不正确的报错";
                         goto ERROR1;
                     }
 

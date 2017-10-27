@@ -135,7 +135,8 @@ ref sessioninfo) == false)
 #endif
 
             if (strFileName == "title_logo.gif"
-                && string.IsNullOrEmpty(strLibraryCode) == false)
+                // && string.IsNullOrEmpty(strLibraryCode) == false
+                )
             {
                 // 1) 看看 logoText 属性
                 string strLogoText = "";

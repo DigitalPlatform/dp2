@@ -19,7 +19,6 @@ using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 
-
 namespace DigitalPlatform.OPAC.Web
 {
     /// <summary>
@@ -181,6 +180,13 @@ namespace DigitalPlatform.OPAC.Web
             strText = strText.Replace("%readername%", env.ReaderName);
             // 替换 %name% 宏
             strText = strText.Replace("%name%", env.ReaderName);
+
+            // 2017/10/27
+            // 面板上选择的馆代码
+            string strSelectedLibraryCode = (string)this.Page.Session["librarycode"];
+            // 替换 %librarycode% 宏
+            strText = strText.Replace("%librarycode%", strSelectedLibraryCode);
+
 
             return strText;
         }

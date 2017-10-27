@@ -2763,7 +2763,7 @@ strSavedXml);
                         strError = "虽然读者记录已经删除成功，但更新指纹缓存时发生了错误: " + strError;
                         goto ERROR1;
                     }
-                    // -2 故意不报错。因为用户可能配置了URL，但是当前驱动程序并没有启动
+                    // -2 故意不报错。因为用户可能配置了URL，但是当前接口程序(zkfingerprint.exe)并没有启动
                 }
             }
             finally

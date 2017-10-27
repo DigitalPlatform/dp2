@@ -1329,7 +1329,7 @@ namespace DigitalPlatform.OPAC.Server
                             return -2;
                         }
 #endif
-                        
+
                         string base_version = "2.86";
                         if (StringUtil.CompareVersion(strVersion, base_version) < 0)
                         {
@@ -2056,34 +2056,59 @@ System.Text.Encoding.UTF8))
                 this.defaultManagerThread.Activate();
         }
 
+        // 当遇到 System.IO.IOException 的时候会自动重试几次
         int LoadWebuiCfgDom(out string strError)
         {
             strError = "";
 
-            if (String.IsNullOrEmpty(this.m_strWebuiFileName) == true)
-            {
-                strError = "m_strWebuiFileName尚未初始化，因此无法装载webui.xml配置文件到DOM";
-                return -1;
-            }
-
-            XmlDocument webuidom = new XmlDocument();
+            this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
-                webuidom.Load(this.m_strWebuiFileName);
-            }
-            catch (FileNotFoundException)
-            {
-                webuidom.LoadXml("<root/>");
-            }
-            catch (Exception ex)
-            {
-                strError = "装载配置文件-- '" + this.m_strWebuiFileName + "'时发生错误，原因：" + ex.Message;
-                // app.WriteErrorLog(strError);
-                return -1;
-            }
+                if (String.IsNullOrEmpty(this.m_strWebuiFileName) == true)
+                {
+                    strError = "m_strWebuiFileName尚未初始化，因此无法装载webui.xml配置文件到DOM";
+                    return -1;
+                }
 
-            this.WebUiDom = webuidom;
-            return 0;
+                int nRedoCount = 0;
+            REDO:
+                XmlDocument webuidom = new XmlDocument();
+                try
+                {
+                    webuidom.Load(this.m_strWebuiFileName);
+                }
+                catch (FileNotFoundException)
+                {
+                    webuidom.LoadXml("<root/>");
+                }
+                catch (System.IO.IOException ex)
+                {
+                    if (nRedoCount < 5)
+                    {
+                        Thread.Sleep(500);
+                        nRedoCount++;
+                        goto REDO;
+                    }
+                    else
+                    {
+                        strError = "装载配置文件-- '" + this.m_strWebuiFileName + "' 时出现异常(重试 5 次以后依然遇到异常)：" + ExceptionUtil.GetDebugText(ex);
+                        return -1;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    strError = "装载配置文件-- '" + this.m_strWebuiFileName + "' 时出现异常：" + ExceptionUtil.GetDebugText(ex);
+                    // this.WriteErrorLog(strError);
+                    return -1;
+                }
+
+                this.WebUiDom = webuidom;
+                return 0;
+            }
+            finally
+            {
+                this.m_lock.ReleaseWriterLock();
+            }
         }
 
 #if NO
@@ -2186,7 +2211,7 @@ System.Text.Encoding.UTF8))
             {
                 string strError = "";
 
-                // 稍微延时一下，避免很快地重装、正好和尚在改写opac.xml文件的的进程发生冲突
+                // 稍微延时一下，避免很快地重装、正好和尚在改写 opac.xml 文件的的进程发生冲突
                 Thread.Sleep(500);
 
                 nRet = this.Load(
@@ -2210,6 +2235,10 @@ System.Text.Encoding.UTF8))
             if (PathUtil.IsEqual(this.m_strWebuiFileName, e.FullPath) == true)
             {
                 string strError = "";
+
+                // 稍微延时一下，避免很快地重装、正好和尚在改写 webui.xml 文件的的进程发生冲突
+                Thread.Sleep(500);
+
                 nRet = this.LoadWebuiCfgDom(out strError);
                 if (nRet == -1)
                 {
@@ -4240,7 +4269,7 @@ Value data: HEX 0x1
                 Page.Response.AddHeader("Expires", "0");
 
                 // FlushOutput flushdelegate = new FlushOutput(MyFlushOutput);
-                
+
                 Page.Response.BufferOutput = false; // 2016/8/31
 
                 image.Seek(0, SeekOrigin.Begin);
