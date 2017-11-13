@@ -4771,15 +4771,29 @@ out strError);
                     }
 
                     // 获得相关配置小节
-                    XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+                    XmlElement nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']") as XmlElement;
                     if (nodeDatabase == null)
                     {
                         strError = "配置 DOM 中名字为 '" + strBiblioDbName + "' 的书目库(biblioDbName属性)相关<database>元素没有找到，无法在其下创建实体库 " + strName;
                         return 0;
                     }
 
-                    string strOldEntityDbName = DomUtil.GetAttr(nodeDatabase,
-                        "name");
+                    string strOldEntityDbName = "";
+
+                    if (strType == "entity")
+                        strOldEntityDbName = nodeDatabase.GetAttribute("name");
+                    else if (strType == "order")
+                        strOldEntityDbName = nodeDatabase.GetAttribute("orderDbName");
+                    else if (strType == "issue")
+                        strOldEntityDbName = nodeDatabase.GetAttribute("issueDbName");
+                    else if (strType == "comment")
+                        strOldEntityDbName = nodeDatabase.GetAttribute("commentDbName");
+                    else
+                    {
+                        strError = "无法识别的 strType '" + strType + "'";
+                        goto ERROR1;
+                    }
+
                     if (strOldEntityDbName == strName)
                     {
                         strError = "从属于书目库 '" + strBiblioDbName + "' 的" + strTypeCaption + "库 '" + strName + "' 定义已经存在，不能重复创建";
@@ -6094,6 +6108,14 @@ out strError);
                     return "词";
                 case "biblio":
                     return "书目";
+                case "entity":
+                    return "实体";
+                case "order":
+                    return "订购";
+                case "issue":
+                    return "期";
+                case "comment":
+                    return "评注";
                 default:
                     throw new ArgumentException("未知的 strType 值 '" + strType + "'", "strType");
             }

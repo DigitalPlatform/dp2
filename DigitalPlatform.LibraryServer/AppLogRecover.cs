@@ -8199,7 +8199,6 @@ out string strError)
             if (level == RecoverLevel.Robust)
                 level = RecoverLevel.Logic;
 
-
             RmsChannel channel = Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {

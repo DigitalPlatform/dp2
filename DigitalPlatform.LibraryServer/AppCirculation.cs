@@ -50,6 +50,8 @@ namespace DigitalPlatform.LibraryServer
 
         public bool VerifyBarcode = false;  // 创建和修改读者记录、册记录的时候是否验证条码号
 
+        public bool VerifyRegisterNoDup = true; // 创建和修改册记录的时候，是否验证登录号重复 2017/11/13
+
         public bool AcceptBlankItemBarcode = true;
         public bool AcceptBlankReaderBarcode = true;
 

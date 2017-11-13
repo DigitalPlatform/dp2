@@ -8351,13 +8351,17 @@ namespace dp2Library
         // 获得日志记录
         // parameters:
         //      strFileName 纯文件名,不含路径部分。但要包括".log"部分。
-        //      lIndex  记录序号。从0开始计数。lIndex为-1时调用本函数，表示希望获得整个文件尺寸值，将返回在lHintNext中。
+        //      lIndex  记录序号。从0开始计数。
+        //              lIndex 为 -1 调用本函数：
+        //              1) 若 strStyle 中不包含 "getcount" 时，表示希望获得整个文件尺寸值，将返回在 lHintNext 中；
+        //              2) 若 strStyle 中包含 "getcount"，表示希望获得整个文件中包含的日志记录数，将返回在 lHintNext 中。
         //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
         //              目前的含义是记录起始位置。
         //      strStyle    level-0/level-1/level-2 表示详略级别
         //                  level-0   全部
         //                  level-1   删除 读者记录和册记录
         //                  level-2   删除 读者记录和册记录中的 <borrowHistory>
+        //                  getcount    表示希望获得指定日志文件中的记录总数。返回在 lHintNext 参数中
         // 权限：需要getoperlog权限
         // return:
         // result.Value

@@ -144,6 +144,75 @@ namespace DigitalPlatform.LibraryClient
             }
         }
 
+        // 获得日志文件中记录的总数
+        // parameters:
+        //      strDate 日志文件的日期，8 字符
+        // return:
+        //      -2  此类型的日志在 dp2library 端尚未启用
+        //      -1  出错
+        //      0   日志文件不存在，或者记录数为 0
+        //      >0  记录数
+        public static long GetOperLogCount(
+            Stop stop,
+            LibraryChannel channel,
+            string strDate,
+            LogType logType,
+            out string strError)
+        {
+            strError = "";
+
+            if (strDate.Length != 8)
+            {
+                strError = "strDate 参数值应该是 8 字符 (当前为 '" + strDate + "')";
+                return -1;
+            }
+
+            string strXml = "";
+            long lAttachmentTotalLength = 0;
+            byte[] attachment_data = null;
+
+            long lRecCount = 0;
+
+            string strStyle = "getcount";
+            if ((logType & LogType.AccessLog) != 0)
+                strStyle += ",accessLog";
+
+            // 获得日志文件尺寸
+            // return:
+            //      -1  error
+            //      0   file not found
+            //      1   succeed
+            //      2   超过范围
+            long lRet = channel.GetOperLog(
+                stop,
+                strDate + ".log",
+                -1,    // lIndex,
+                -1, // lHint,
+                strStyle,
+                "", // strFilter
+                out strXml,
+                out lRecCount,
+                0,  // lAttachmentFragmentStart,
+                0,  // nAttachmentFramengLength,
+                out attachment_data,
+                out lAttachmentTotalLength,
+                out strError);
+            if (lRet == 0)
+            {
+                lRecCount = 0;
+                return 0;
+            }
+            if (lRet != 1)
+                return -1;
+            if (lRecCount == -1)
+            {
+                strError = logType.ToString() + " 型的日志在 dp2library 中尚未启用";
+                return -2;
+            }
+            Debug.Assert(lRecCount >= 0, "");
+            return lRecCount;
+        }
+
         // 获得一个日志文件的尺寸
         // return:
         //      -2  此类型的日志尚未启用
@@ -1038,7 +1107,7 @@ namespace DigitalPlatform.LibraryClient
         List<string> CannonicalizeDateString(List<string> lines)
         {
             List<string> results = new List<string>();
-            foreach(string line in lines)
+            foreach (string line in lines)
             {
                 if (line.IndexOf(".") == -1)
                 {

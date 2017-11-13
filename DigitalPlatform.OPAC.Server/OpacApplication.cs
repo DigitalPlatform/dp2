@@ -906,7 +906,10 @@ namespace DigitalPlatform.OPAC.Server
 
             XmlElement root = this.WebUiDom.DocumentElement.SelectSingleNode("libraries") as XmlElement;
             if (root == null)
+            {
+                strFilePath = Path.Combine(this.DataDir, "style/" + strStyle + "/" + strFileName);  // 2017/11/13
                 return 0;
+            }
 
             XmlElement library = root.SelectSingleNode("library[@code='" + strLibraryCode + "']") as XmlElement;
             if (library == null)

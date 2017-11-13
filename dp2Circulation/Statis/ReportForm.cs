@@ -6236,7 +6236,10 @@ MessageBoxDefaultButton.Button2);
                     //      -1  出错
                     //      0   日志文件不存在，或者记录数为 0
                     //      >0  记录数
-                    long lCount = GetOperLogCount(strEndDate,
+                    long lCount = OperLogLoader.GetOperLogCount(
+                        stop,
+                        this.Channel,
+                        strEndDate,
                         LogType.OperLog,
                         out strError);
                     if (lCount < 0)
@@ -6291,7 +6294,10 @@ MessageBoxDefaultButton.Button2);
                     //      -1  出错
                     //      0   日志文件不存在，或者记录数为 0
                     //      >0  记录数
-                    long lCount = GetOperLogCount(strEndDate,
+                    long lCount = OperLogLoader.GetOperLogCount(
+                        stop,
+                        this.Channel,
+                        strEndDate,
                         LogType.AccessLog,
                         out strError);
                     if (lCount == -1)
@@ -9247,6 +9253,7 @@ out strError);
 
         #endregion
 
+#if NO
         // 获得日志文件中记录的总数
         // parameters:
         //      strDate 日志文件的日期，8 字符
@@ -9306,6 +9313,7 @@ out strError);
             Debug.Assert(lRecCount >= 0, "");
             return lRecCount;
         }
+#endif
 
         // 执行每日同步任务
         // 从上次记忆的断点位置，开始同步

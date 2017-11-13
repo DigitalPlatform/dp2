@@ -32,7 +32,9 @@ namespace dp2Circulation
 
         public List<LineFormat> LineFormats = new List<LineFormat>();
 
+        // TODO: Dispose Font
         public Font Font = new Font("Arial", 10, FontStyle.Regular, GraphicsUnit.Point);
+
         public bool IsBarcodeFont = false;  // 是否为条码字体？ 如果是条码字体，则要在文字左右加上 *
 
         public double PageWidth = 0;

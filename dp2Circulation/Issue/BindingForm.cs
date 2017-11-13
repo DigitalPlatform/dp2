@@ -9,7 +9,6 @@ using System.Drawing.Drawing2D;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
-using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -918,6 +917,7 @@ MessageBoxDefaultButton.Button2);
 
             if (m_bEditAreaVisible == bVisible)
                 return;
+
             if (bVisible == false)
             {
                 // 隐藏编辑区域。相当于把装订控件直接放到顶层
@@ -930,7 +930,8 @@ MessageBoxDefaultButton.Button2);
                 this.bindingControl1.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
                 this.bindingControl1.Location = this.splitContainer_main.Location;
                 this.bindingControl1.Size = this.splitContainer_main.Size;
-                this.Controls.Add(this.bindingControl1);
+                if (this.Controls.IndexOf(this.bindingControl1) == -1)
+                    this.Controls.Add(this.bindingControl1);
 
                 this.Controls.Remove(this.splitContainer_main);
                 ControlExtention.AddFreeControl(_freeControls, this.splitContainer_main);

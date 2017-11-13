@@ -90,7 +90,7 @@ ref sessioninfo) == false)
             // return:
             //      -1  出错
             //      0   在 webui.xml 中没有找到映射关系
-            //      1   找到了映射关系，并获得了温家内容在 strContent 中
+            //      1   找到了映射关系，并获得了文件内容在 strContent 中
             //      2   .css 文件已经存在。 strContent 中返回这个 .css 文件的物理路径
             nRet = app.BuildCssContent(strLibraryCode,
                 strStyle,
@@ -155,7 +155,8 @@ ref sessioninfo) == false)
                     app.WriteErrorLog("2 info.StyleName [" + info.StyleName + "]");
 #endif
                 // 2) 看看 style/haidian 目录中的 title_logo.gif 文件是否已经存在
-                if (string.IsNullOrEmpty(info.StyleName) == false)
+                if (info != null
+                    && string.IsNullOrEmpty(info.StyleName) == false)
                 {
                     string strPhysicalPath = Path.Combine(app.DataDir, "style/" + info.StyleName + "/title_logo.gif");
                     if (File.Exists(strPhysicalPath) == true)
@@ -172,7 +173,8 @@ ref sessioninfo) == false)
                 // 3) 把 code 属性当作文字显示
                 if (string.IsNullOrEmpty(strLogoText) == true)
                 {
-                    strLogoText = info.LibraryCode;
+                    if (info != null)
+                        strLogoText = info.LibraryCode;
                     if (string.IsNullOrEmpty(strLogoText) == false)
                     {
                         OutputLogo(strFilePath,
@@ -319,6 +321,11 @@ ref sessioninfo) == false)
     {
         strError = "";
 
+        if (string.IsNullOrEmpty(strFilename))
+        {
+            strError = "DumpFile() strFilename 参数不应为空";
+            return -1;
+        }
 #if NO
         // 不让浏览器缓存页面
         this.Response.AddHeader("Pragma", "no-cache");

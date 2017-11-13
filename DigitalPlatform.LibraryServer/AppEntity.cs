@@ -2316,15 +2316,18 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            nRet = SearchDup(channel,
-domExist,
-strRecPath,
-"registerNo",
-"登录号",
-ref errors,
-out strError);
-            if (nRet == -1)
-                goto ERROR1;
+            if (this.VerifyRegisterNoDup)
+            {
+                nRet = SearchDup(channel,
+    domExist,
+    strRecPath,
+    "registerNo",
+    "登录号",
+    ref errors,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
 
             if (errors.Count > 0)
             {
@@ -3043,21 +3046,24 @@ out strError);
                                     continue;
                             }
 
-                            // 2017/9/29
-                            string strRegisterNo = DomUtil.GetElementText(domNewRec.DocumentElement, "registerNo");
-                            if (string.IsNullOrEmpty(strRegisterNo) == false)
+                            if (this.VerifyRegisterNoDup)
                             {
-                                nRet = SearchDup(
-    channel,
-    info,
-    strRegisterNo,
-    "登录号",
-    ref ErrorInfos,
-    out strError);
-                                if (nRet == -1)
-                                    goto ERROR1;
-                                if (nRet == 1)
-                                    continue;
+                                // 2017/9/29
+                                string strRegisterNo = DomUtil.GetElementText(domNewRec.DocumentElement, "registerNo");
+                                if (string.IsNullOrEmpty(strRegisterNo) == false)
+                                {
+                                    nRet = SearchDup(
+        channel,
+        info,
+        strRegisterNo,
+        "登录号",
+        ref ErrorInfos,
+        out strError);
+                                    if (nRet == -1)
+                                        goto ERROR1;
+                                    if (nRet == 1)
+                                        continue;
+                                }
                             }
                         }
                     }

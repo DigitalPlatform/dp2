@@ -11,7 +11,6 @@ using System.Diagnostics;
 using System.Xml;
 
 using System.Runtime.InteropServices;
-using System.IO;
 using System.Net;
 
 using DigitalPlatform;
@@ -19,10 +18,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.Script;
 using DigitalPlatform.Drawing;
-using DigitalPlatform.LibraryClient;
 using DigitalPlatform.DataMining;
 using DigitalPlatform.Marc;
 
@@ -37,7 +33,7 @@ namespace dp2Circulation
         public event GetBiblioEventHandler GetBiblio = null;
 
         // 封面图像 图像管理器
-        public ImageManager ImageManager { get; set; }
+        // public ImageManager ImageManager { get; set; }
 
         public string Operator = "";    // 当前操作者帐户名
         public string LibraryCodeList = "";     // 当前用户管辖的馆代码列表
@@ -442,6 +438,34 @@ namespace dp2Circulation
                 GraphicsUnit.Pixel);
 
             Program.MainForm._imageManager.GetObjectComplete += _imageManager_GetObjectComplete;
+        }
+
+        void DisposeFonts()
+        {
+            if (this.m_fontLine != null)
+            {
+                this.m_fontLine.Dispose();
+                this.m_fontLine = null;
+            }
+
+            if (this.m_fontTitleSmall != null)
+            {
+                this.m_fontTitleSmall.Dispose();
+                this.m_fontTitleSmall = null;
+            }
+
+            if (this.m_fontTitleLarge != null)
+            {
+                this.m_fontTitleLarge.Dispose();
+                this.m_fontTitleLarge = null;
+            }
+
+            if (this.trackTip != null)
+            {
+                this.trackTip.Dispose();
+                this.trackTip = null;
+            }
+
         }
 
         void _imageManager_GetObjectComplete(object sender, GetObjectCompleteEventArgs e)
@@ -5382,7 +5406,6 @@ namespace dp2Circulation
             if (bHasMemberCell == false)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
-
         }
 
         void BuildAcceptingMeneItems(ContextMenuStrip contextMenu)
@@ -15285,6 +15308,7 @@ Color.FromArgb(100, color)
                 {
                     Pen penBorder = null;
                     Brush brushInner = null;
+                    Brush brush = null;
                     try
                     {
                         if (CheckProcessingState(parent_item) == false)
@@ -15292,15 +15316,21 @@ Color.FromArgb(100, color)
                             colorBorder = this.FixedBorderColor;
                             penBorder = new Pen(Color.FromArgb(150, colorBorder),
                                 (float)4);  // 固化
+
+                            Debug.Assert(brushInner == null, "");   // 2017/11/10
+
                             brushInner = new SolidBrush(Color.FromArgb(30, Color.Green));
                         }
                         else
                         {
                             colorBorder = this.NewlyBorderColor;
-                            Brush brush = new HatchBrush(HatchStyle.WideDownwardDiagonal,
+                            Debug.Assert(brush == null, "");  // 2017/11/10
+                            brush = new HatchBrush(HatchStyle.WideDownwardDiagonal,
                                 Color.FromArgb(0, 255, 255, 255),
                                 Color.FromArgb(255, colorBorder)
                                 );    // back
+                            // Dispose() penBorder 时是否也会 Dispose() brush?
+                            Debug.Assert(penBorder == null, "");  // 2017/11/10
                             penBorder = new Pen(brush,
                                 (float)4);  // 可修改
                             // penBorder.Alignment = PenAlignment.
@@ -15364,6 +15394,8 @@ Color.FromArgb(100, color)
                             penBorder.Dispose();
                         if (brushInner != null)
                             brushInner.Dispose();
+                        if (brush == null)
+                            brush.Dispose();
                     }
                 }
 

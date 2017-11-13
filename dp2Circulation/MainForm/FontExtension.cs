@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 using DigitalPlatform.GUI;
 
@@ -80,7 +81,17 @@ namespace dp2Circulation
                 && font.SizeInPoints == control.Font.SizeInPoints)
             { }
             else
+            {
+                Debug.Assert(font != control.Font, "");
+                Font old_font = control.Font;
                 control.Font = font;
+
+#if DISPOSE_FONT
+                // 2017/11/10
+                if (old_font != null)
+                    old_font.Dispose();
+#endif
+            }
 
             ChangeDifferentFaceFont(control, font);
         }
@@ -91,7 +102,7 @@ namespace dp2Circulation
             // 修改所有下级控件的字体，如果字体名不一样的话
             foreach (Control sub in parent.Controls)
             {
-                Font subfont = sub.Font;
+                // Font subfont = sub.Font;
 
 #if NO
                 float ratio = subfont.SizeInPoints / font.SizeInPoints;
@@ -125,7 +136,7 @@ namespace dp2Circulation
         {
             ChangeFont(font, container.Panel1);
 
-            foreach(Control control in container.Panel1.Controls)
+            foreach (Control control in container.Panel1.Controls)
             {
                 ChangeDifferentFaceFont(control, font);
             }
@@ -164,7 +175,7 @@ namespace dp2Circulation
 
             // 修改所有事项的字体，如果字体名不一样的话
             foreach (ToolStripItem item in tool.Items)
-            { 
+            {
                 item.ImageScaling = ToolStripItemImageScaling.SizeToFit;
 
                 Font subfont = item.Font;
@@ -175,6 +186,13 @@ namespace dp2Circulation
 
                     // item.Font = new Font(font, subfont.Style);
                     item.Font = new Font(font.FontFamily, ratio * font.SizeInPoints, subfont.Style, GraphicsUnit.Point);
+#if DISPOSE_FONT
+                    if (subfont != null)
+                    {
+                        subfont.Dispose();
+                        subfont = null;
+                    }
+#endif
                 }
 
                 if (item is ToolStripMenuItem)
@@ -199,6 +217,13 @@ namespace dp2Circulation
 
                     // item.Font = new Font(font, subfont.Style);
                     item.Font = new Font(font.FontFamily, ratio * font.SizeInPoints, subfont.Style, GraphicsUnit.Point);
+#if DISPOSE_FONT
+                    if (subfont != null)
+                    {
+                        subfont.Dispose();
+                        subfont = null;
+                    }
+#endif
                 }
 
                 if (item is ToolStripMenuItem)
@@ -219,7 +244,16 @@ namespace dp2Circulation
             {
                 // item.Font = new Font(font, subfont.Style);
                 item.Font = new Font(font.FontFamily, ratio * font.SizeInPoints, subfont.Style, GraphicsUnit.Point);
+#if DISPOSE_FONT
+                // 2017/11/10
+                if (subfont != null)
+                {
+                    subfont.Dispose();
+                    subfont = null;
+                }
+#endif
             }
+
         }
 
 #if NO

@@ -159,7 +159,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.116 (2017/9/30) SetUser() API 增加了 closechannel 动作
         //      2.117 (2017/10/6) dp2kernel 的 GetRes() 和 WriteRes() API 的 strStyle 增加了 gzip 选项
         //      2.118 (2017/10/21) library.xml 中 channel 元素增加了 privilegedIpList 属性，可以定义特权前端 IP，这些前端可以创建 maxChannelsLocalhost 属性定义的那么多个并发通道
-        public static string Version = "2.118";
+        //      2.119 (2017/11/13) library.xml 中 circulation 元素增加了 verifyRegisterNoDup 属性，用于定义是否校验册记录登录号的重复情况
+        public static string Version = "2.119";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -987,6 +988,8 @@ namespace DigitalPlatform.LibraryServer
                         this.CirculationNotifyTypes = node.GetAttribute("notifyTypes");
 
                         this.AcceptBlankRoomName = DomUtil.GetBooleanParam(node, "acceptBlankRoomName", false);
+
+                        this.VerifyRegisterNoDup = DomUtil.GetBooleanParam(node, "verifyRegisterNoDup", true);
                     }
                     else
                     {
@@ -1007,6 +1010,8 @@ namespace DigitalPlatform.LibraryServer
                         this.BorrowCheckOverdue = true;
                         this.CirculationNotifyTypes = "";
                         this.AcceptBlankRoomName = false;
+
+                        this.VerifyRegisterNoDup = true;
                     }
 
                     // <channel>

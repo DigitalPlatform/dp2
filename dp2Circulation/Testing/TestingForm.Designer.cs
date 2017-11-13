@@ -34,11 +34,12 @@
             this.ToolStripMenuItem_moveBiblioRecord = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_compileAllProjects = new System.Windows.Forms.ToolStripMenuItem();
             this.ToolStripMenuItem_parsePriceUnit = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_objectWriteRead = new System.Windows.Forms.ToolStripMenuItem();
             this.button1 = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.menuStrip2 = new System.Windows.Forms.MenuStrip();
-            this.ToolStripMenuItem_objectWriteRead = new System.Windows.Forms.ToolStripMenuItem();
+            this.ToolStripMenuItem_logAndRecover = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -60,7 +61,8 @@
             this.ToolStripMenuItem_moveBiblioRecord,
             this.ToolStripMenuItem_compileAllProjects,
             this.ToolStripMenuItem_parsePriceUnit,
-            this.ToolStripMenuItem_objectWriteRead});
+            this.ToolStripMenuItem_objectWriteRead,
+            this.ToolStripMenuItem_logAndRecover});
             this.ToolStripMenuItem_test.Name = "ToolStripMenuItem_test";
             this.ToolStripMenuItem_test.Size = new System.Drawing.Size(44, 21);
             this.ToolStripMenuItem_test.Text = "测试";
@@ -92,6 +94,13 @@
             this.ToolStripMenuItem_parsePriceUnit.Size = new System.Drawing.Size(220, 22);
             this.ToolStripMenuItem_parsePriceUnit.Text = "ParsePriceUnit()";
             this.ToolStripMenuItem_parsePriceUnit.Click += new System.EventHandler(this.ToolStripMenuItem_parsePriceUnit_Click);
+            // 
+            // ToolStripMenuItem_objectWriteRead
+            // 
+            this.ToolStripMenuItem_objectWriteRead.Name = "ToolStripMenuItem_objectWriteRead";
+            this.ToolStripMenuItem_objectWriteRead.Size = new System.Drawing.Size(220, 22);
+            this.ToolStripMenuItem_objectWriteRead.Text = "元数据和对象的写入和读出";
+            this.ToolStripMenuItem_objectWriteRead.Click += new System.EventHandler(this.ToolStripMenuItem_objectWriteRead_Click);
             // 
             // button1
             // 
@@ -127,12 +136,12 @@
             this.menuStrip2.Text = "menuStrip2";
             this.menuStrip2.Visible = false;
             // 
-            // ToolStripMenuItem_objectWriteRead
+            // ToolStripMenuItem_logAndRecover
             // 
-            this.ToolStripMenuItem_objectWriteRead.Name = "ToolStripMenuItem_objectWriteRead";
-            this.ToolStripMenuItem_objectWriteRead.Size = new System.Drawing.Size(220, 22);
-            this.ToolStripMenuItem_objectWriteRead.Text = "元数据和对象的写入和读出";
-            this.ToolStripMenuItem_objectWriteRead.Click += new System.EventHandler(this.ToolStripMenuItem_objectWriteRead_Click);
+            this.ToolStripMenuItem_logAndRecover.Name = "ToolStripMenuItem_logAndRecover";
+            this.ToolStripMenuItem_logAndRecover.Size = new System.Drawing.Size(220, 22);
+            this.ToolStripMenuItem_logAndRecover.Text = "测试日志和恢复";
+            this.ToolStripMenuItem_logAndRecover.Click += new System.EventHandler(this.ToolStripMenuItem_logAndRecover_Click);
             // 
             // TestingForm
             // 
@@ -170,6 +179,7 @@
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_compileAllProjects;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_parsePriceUnit;
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_objectWriteRead;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_logAndRecover;
 
     }
 }

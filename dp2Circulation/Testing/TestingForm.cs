@@ -21,6 +21,7 @@ using System.Xml;
 using DigitalPlatform.Xml;
 using System.Collections;
 using DigitalPlatform.IO;
+using DigitalPlatform.LibraryClient.localhost;
 
 namespace dp2Circulation
 {
@@ -2612,6 +2613,187 @@ strTestDbName,
                 }
             }
         }
+
+        private void ToolStripMenuItem_logAndRecover_Click(object sender, EventArgs e)
+        {
+            Task.Factory.StartNew(() =>
+            {
+                LogAndRecord("");
+            });
+        }
+
+        #region 日志和恢复
+
+        void LogAndRecord(string strStyle)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            LibraryChannel channel = this.GetChannel();
+            TimeSpan old_timeout = channel.Timeout;
+            channel.Timeout = TimeSpan.FromMinutes(10);
+
+            Progress.Style = StopStyle.EnableHalfStop;
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在进行测试 ...");
+            Progress.BeginLoop();
+
+            this.Invoke((Action)(() =>
+                EnableControls(false)
+                ));
+            try
+            {
+                // 创建测试所需的书目库
+
+                string strBiblioDbName = "_测试用中文图书";
+
+                // 如果测试用的书目库以前就存在，要先删除。删除前最好警告一下
+                Progress.SetMessage("正在删除测试用书目库 ...");
+                string strOutputInfo = "";
+                long lRet = channel.ManageDatabase(
+    stop,
+    "delete",
+    strBiblioDbName,    // strDatabaseNames,
+    "",
+    out strOutputInfo,
+    out strError);
+                if (lRet == -1)
+                {
+                    if (channel.ErrorCode != DigitalPlatform.LibraryClient.localhost.ErrorCode.NotFound)
+                        goto ERROR1;
+                }
+
+                // TODO: 记载当前操作日志偏移
+                DateTime now = DateTime.Now;
+                string strDate = DateTimeUtil.DateTimeToString8(now);
+
+                // return:
+                //      -2  此类型的日志在 dp2library 端尚未启用
+                //      -1  出错
+                //      0   日志文件不存在，或者记录数为 0
+                //      >0  记录数
+                lRet = OperLogLoader.GetOperLogCount(
+                    stop,
+                    channel,
+                    strDate,
+                    LogType.OperLog,
+                    out strError);
+                if (lRet <= -1)
+                {
+                    goto ERROR1;
+                }
+
+                long lStartOffs = lRet; // 日志起点偏移
+
+                Progress.SetMessage("正在创建测试用书目库 ...");
+                // 创建一个书目库
+                // parameters:
+                // return:
+                //      -1  出错
+                //      0   没有必要创建，或者操作者放弃创建。原因在 strError 中
+                //      1   成功创建
+                nRet = ManageHelper.CreateBiblioDatabase(
+                    channel,
+                    this.Progress,
+                    strBiblioDbName,
+                    "book",
+                    "unimarc",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 重新获得各种库名、列表
+                ReloadDatabaseCfg();
+
+                // *** 恢复测试
+                // 从指定偏移位置启动 dp2library 日志恢复后台任务
+
+                nRet = StartBatchTask(
+                    stop,
+                    channel,
+                    "日志恢复",
+                    strDate,
+                    lStartOffs,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 删除测试用的书目库、排架体系、馆藏地定义
+                Progress.SetMessage("正在删除测试用书目库 ...");
+                lRet = channel.ManageDatabase(
+    stop,
+    "delete",
+    strBiblioDbName,    // strDatabaseNames,
+    "",
+    out strOutputInfo,
+    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                // 重新获得各种库名、列表
+                ReloadDatabaseCfg();
+                return;
+            }
+            catch (Exception ex)
+            {
+                strError = "LogAndRecord() Exception: " + ExceptionUtil.GetExceptionText(ex);
+                goto ERROR1;
+            }
+            finally
+            {
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+                Progress.HideProgress();
+
+                this.Invoke((Action)(() =>
+                    EnableControls(true)
+                    ));
+
+                channel.Timeout = old_timeout;
+                this.ReturnChannel(channel);
+            }
+        ERROR1:
+            this.Invoke((Action)(() => MessageBox.Show(this, strError)));
+            this.ShowMessage(strError, "red", true);
+        }
+
+        static int StartBatchTask(
+            Stop stop,
+            LibraryChannel channel,
+            string strTaskName,
+            string strDate,
+            long lStartOffs,
+            out string strError)
+        {
+            strError = "";
+
+            BatchTaskInfo param = new BatchTaskInfo();
+            if (param.StartInfo == null)
+                param.StartInfo = new BatchTaskStartInfo();
+            param.StartInfo.Start = lStartOffs.ToString() + "@" + strDate;
+
+            BatchTaskInfo resultInfo = null;
+
+            // return:
+            //      -1  出错
+            //      0   启动成功
+            //      1   调用前任务已经处于执行状态，本次调用激活了这个任务
+            long lRet = channel.BatchTask(
+                stop,
+                strTaskName,
+                "start",
+                param,
+                out resultInfo,
+                out strError);
+            if (lRet == -1 || lRet == 1)
+                return -1;
+
+            return 0;
+        }
+
+        #endregion
+
     }
 
     // 验证异常
