@@ -302,12 +302,18 @@ namespace DigitalPlatform.LibraryServer
                 return;
 
             ERROR1:
+                this.ErrorInfo = strError;
                 return;
             }
             finally
             {
                 // this.App.HangupReason = HangupReason.None;
                 this.App.ClearHangup("LogRecover");
+
+                string strFinish = "批处理任务结束";
+                if (string.IsNullOrEmpty(this.ErrorInfo) == false)
+                    strFinish += ":" + this.ErrorInfo;
+                SetProgressText(strFinish); 
             }
         }
 
@@ -369,6 +375,8 @@ namespace DigitalPlatform.LibraryServer
                         //      strFileName 纯文件名,不含路径部分
                         //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
                         //              目前的含义是记录起始位置。
+                        //      attachment  承载输出的附件部分的 Stream 对象。如果为 null，表示不输出附件部分
+                        //                  本函数返回后，attachment 的文件指针在文件末尾。调用时需引起注意
                         // return:
                         //      -1  error
                         //      0   file not found

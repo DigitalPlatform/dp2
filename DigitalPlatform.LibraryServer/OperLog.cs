@@ -1207,6 +1207,7 @@ namespace DigitalPlatform.LibraryServer
         //              目前的含义是记录起始位置。
         //      strStyle    如果不包含 supervisor，则本函数会自动过滤掉日志记录中读者记录的 password 字段
         //      attachment  承载输出的附件部分的 Stream 对象。如果为 null，表示不输出附件部分
+        //                  本函数返回后，attachment 的文件指针在文件末尾。调用时需引起注意
         // return:
         //      -1  error
         //      0   file not found
@@ -2750,6 +2751,7 @@ out strTargetLibraryCode);
         // 要读出附件
         // parameters:
         //      attachment  承载输出的附件部分的 Stream 对象。如果为 null，表示不输出附件部分
+        //                  本函数返回后，attachment 的文件指针在文件末尾。调用时需引起注意
         // return:
         //      1   出错
         //      0   成功
@@ -3112,6 +3114,7 @@ out strTargetLibraryCode);
         // 读出一个事项(Stream类型)
         // parameters:
         //      streamBody  承载输出的 body 部分的 Stream 对象。如果为 null，表示不输出这部分
+        //                  本函数返回后，streamBody 的文件指针在文件末尾。调用时需引起注意
         public static int ReadEntry(
             Stream stream,
             out string strMetaData,

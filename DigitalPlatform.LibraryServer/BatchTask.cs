@@ -679,7 +679,6 @@ namespace DigitalPlatform.LibraryServer
 
             baResult = new byte[Math.Min(nMaxBytes, (int)lLength)];
 #endif
-
             // 2017/9/10 改造
             StreamItem s = this.App._physicalFileCache.GetStream(this.ProgressFileName,
                 FileMode.Open, FileAccess.Read);
@@ -689,7 +688,8 @@ namespace DigitalPlatform.LibraryServer
 
                 long lLength = lTotalLength - lStart;
 
-                if (lLength <= 0)
+                if (lLength <= 0 
+                    || lStart == -1)   //2017/11/14
                 {
                     lEndOffset = lTotalLength;
                     return;
@@ -827,6 +827,8 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 执行一个日志记录的恢复动作
+        // parameters:
+        //      attachment  附件流对象。注意文件指针在流的尾部
         public int DoOperLogRecord(
             RecoverLevel level,
             string strXml,
@@ -1000,14 +1002,12 @@ namespace DigitalPlatform.LibraryServer
             else if (strOperation == "manageDatabase")
             {
                 // 管理数据库 2017/5/23
-#if NO
                 // 2017/10/15
                 nRet = this.App.RecoverManageDatabase(this.RmsChannels,
                     level,
                     dom,
                     attachment,
                     out strError);
-#endif
             }
             else
             {

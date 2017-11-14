@@ -2618,13 +2618,13 @@ strTestDbName,
         {
             Task.Factory.StartNew(() =>
             {
-                LogAndRecord("");
+                LogAndRecover("");
             });
         }
 
         #region 日志和恢复
 
-        void LogAndRecord(string strStyle)
+        void LogAndRecover(string strStyle)
         {
             string strError = "";
             int nRet = 0;
@@ -2707,16 +2707,32 @@ strTestDbName,
 
                 // *** 恢复测试
                 // 从指定偏移位置启动 dp2library 日志恢复后台任务
-
+                string strTaskName = "日志恢复";
                 nRet = StartBatchTask(
                     stop,
                     channel,
-                    "日志恢复",
+                    strTaskName,
                     strDate,
                     lStartOffs,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                // 等待，直到 dp2library 后台任务结束
+                string strErrorInfo = "";
+                nRet = WaitBatchTaskFinish(
+            stop,
+            channel,
+            strTaskName,
+            out strErrorInfo,
+            out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (string.IsNullOrEmpty(strErrorInfo) == false)
+                {
+                    strError = "在等待后台任务 '" + strTaskName + "' 结束的过程中发生错误: " + strErrorInfo;
+                    goto ERROR1;
+                }
 
                 // 删除测试用的书目库、排架体系、馆藏地定义
                 Progress.SetMessage("正在删除测试用书目库 ...");
@@ -2788,6 +2804,47 @@ strTestDbName,
                 out strError);
             if (lRet == -1 || lRet == 1)
                 return -1;
+
+            return 0;
+        }
+
+        static int WaitBatchTaskFinish(
+            Stop stop,
+            LibraryChannel channel,
+            string strTaskName,
+            out string strErrorInfo,
+            out string strError)
+        {
+            strError = "";
+            strErrorInfo = "";
+
+            BatchTaskInfo param = new BatchTaskInfo();
+            BatchTaskInfo resultInfo = null;
+
+            param.MaxResultBytes = 0;
+            param.ResultOffset = -1;
+
+            while (true)
+            {
+                long lRet = channel.BatchTask(
+        stop,
+        strTaskName,
+        "getinfo",
+        param,
+        out resultInfo,
+        out strError);
+                if (lRet == -1)
+                    return -1;
+
+                List<string> parts = StringUtil.ParseTwoPart(resultInfo.ProgressText, ":");
+                if (parts[0] == "批处理任务结束")
+                {
+                    strErrorInfo = parts[1];
+                    return 1;
+                }
+
+                Thread.Sleep(1000);
+            }
 
             return 0;
         }

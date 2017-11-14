@@ -7530,14 +7530,50 @@ out strError);
             }
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 xxx
+媒体类型 text 
+内容 发生未捕获的异常: 
+Type: System.InvalidCastException
+Message: 无法将类型为“System.__ComObject”的 COM 对象强制转换为接口类型“System.Speech.Internal.SapiInterop.ISpDataKey”。此操作失败的原因是对 IID 为“{14056581-E16C-11D2-BB90-00C04F8EE6C0}”的接口的 COM 组件调用 QueryInterface 因以下错误而失败: 不支持此接口 (异常来自 HRESULT:0x80004002 (E_NOINTERFACE))。
+Stack:
+在 System.Windows.Forms.Control.MarshaledInvoke(Control caller, Delegate method, Object[] args, Boolean synchronous)
+在 System.Windows.Forms.Control.Invoke(Delegate method, Object[] args)
+在 dp2Circulation.QuickChargingForm.DisplayTask(String strAction, ChargingTask task)
+在 dp2Circulation.TaskList.Return(ChargingTask task)
+在 dp2Circulation.TaskList.Worker()
+在 DigitalPlatform.ThreadBase.ThreadMain()
+在 System.Threading.ThreadHelper.ThreadStart_Context(Object state)
+在 System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
+在 System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean preserveSyncCtx)
+在 System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
+在 System.Threading.ThreadHelper.ThreadStart()
+
+
+dp2Circulation 版本: dp2Circulation, Version=2.30.6509.21065, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1
+本机 MAC 地址: xxx 
+操作时间 2017/11/13 16:16:00 (Mon, 13 Nov 2017 16:16:00 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+
+         * */
         /// <summary>
         /// 朗读
         /// </summary>
         /// <param name="strText">要朗读的文本</param>
         public void Speak(string strText)
         {
-            this.m_speech.SpeakAsyncCancelAll();
-            this.m_speech.SpeakAsync(strText);
+            try
+            {
+                this.m_speech.SpeakAsyncCancelAll();
+                this.m_speech.SpeakAsync(strText);
+            }
+            catch(InvalidCastException ex)
+            {
+                // 如何显示出错信息?
+            }
             // MessageBox.Show(this, strText);
         }
 

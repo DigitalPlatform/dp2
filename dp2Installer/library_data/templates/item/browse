@@ -27,6 +27,9 @@
   <col title="册类型">
     <xpath>*/bookType</xpath>
   </col>
+  <col title="登录号" type="register_number">
+    <xpath>*/registerNo</xpath>
+  </col>
   <col title="注释">
     <xpath>*/comment</xpath>
   </col>

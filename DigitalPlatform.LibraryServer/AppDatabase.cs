@@ -5909,14 +5909,19 @@ out strError);
                 {
                     XmlElement itemdbgroup = EnsureElement(cfg_dom.DocumentElement, "itemdbgroup", ref bChanged);
 
-                    // TODO: 以前可能存在 database 元素，需要覆盖
-                    XmlElement database = cfg_dom.CreateElement("database");
-                    itemdbgroup.AppendChild(database);
+                    // 以前可能存在 database 元素，需要覆盖
+                    XmlElement database = itemdbgroup.SelectSingleNode("database[@biblioDbName='" + info.Name + "']") as XmlElement;
+
+                    if (database == null)
+                    {
+                        database = cfg_dom.CreateElement("database");
+                        itemdbgroup.AppendChild(database);
+                    }
 
                     info.WriteBiblioCfgNode(database);
 
                     // <itemdbgroup>内容更新，刷新配套的内存结构
-                    nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
+                    nRet = this.LoadItemDbGroupParam(cfg_dom,
                         out strError);
                     if (nRet == -1)
                         return -1;

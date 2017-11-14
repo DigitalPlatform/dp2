@@ -8184,6 +8184,7 @@ DO_SNAPSHOT:
         }
 
         // 2017/10/15
+        //      attachment  附件流对象。注意文件指针在流的尾部
         public int RecoverManageDatabase(
 RmsChannelCollection Channels,
 RecoverLevel level,
@@ -8220,6 +8221,7 @@ DO_SNAPSHOT:
                     strTempFileName = this.GetTempFileName("db");
                     using (Stream target = File.Create(strTempFileName))
                     {
+                        attachmentLog.Seek(0, SeekOrigin.Begin);
                         attachmentLog.CopyTo(target);
                     }
                 }

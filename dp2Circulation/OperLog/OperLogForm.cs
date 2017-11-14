@@ -15,6 +15,8 @@ using System.Threading;
 using System.IO;
 using System.Web;
 
+using ClosedXML.Excel;
+
 using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
@@ -23,13 +25,10 @@ using DigitalPlatform.Range;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
-
-// using DigitalPlatform.LibraryClient.localhost;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.LibraryClient;
 using DigitalPlatform.LibraryClient.localhost;
-using ClosedXML.Excel;
 
 namespace dp2Circulation
 {
@@ -3930,6 +3929,11 @@ FileShare.ReadWrite))
                 }
             }
 
+            if (strOperation == "crashReport")
+            {
+                string strSubject = DomUtil.GetElementText(dom.DocumentElement, "subject");
+                param.Comment = strSubject;
+            }
             return true;
 
         ERROR1:
